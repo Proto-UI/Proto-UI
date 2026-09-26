@@ -281,5 +281,50 @@ export function focusCatalogAdapterConformance(
         }
       }
     });
+
+    it('T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER: roving follows document order, not registration order', async () => {
+      let roving!: ReturnType<typeof asFocusRoving>;
+      const members: Array<ReturnType<typeof asFocusable>> = [];
+      const parent = definePrototype({
+        name: `focus-order-${name}-catalog`,
+        setup() {
+          roving = asFocusRoving();
+          roving.configure({ loop: false, orientation: 'horizontal' });
+          return (r) => r.slot();
+        },
+      });
+      const children = [0, 1].map((index) =>
+        definePrototype({
+          name: `focus-order-item-${name}-catalog-${index}`,
+          setup() {
+            members[index] = asFocusable();
+            return (r) => r.el('span', String(index));
+          },
+        })
+      );
+      const mounted = await mount([
+        { proto: parent, children: children.map((proto) => ({ proto })) },
+      ]);
+      try {
+        await mounted.flush();
+        const [, first, second] = mounted.host.querySelectorAll<HTMLElement>('[data-pui-root]');
+        // The second member now comes first in the document; it registered second.
+        first.before(second);
+        await mounted.flush();
+        roving.focusFirst();
+        await mounted.flush();
+        expect(document.activeElement).toBe(second);
+        expect(members[1].focused.get()).toBe(true);
+        roving.focusNext();
+        await mounted.flush();
+        expect(document.activeElement).toBe(first);
+        expect(members[0].focused.get()).toBe(true);
+        roving.focusLast();
+        await mounted.flush();
+        expect(document.activeElement).toBe(first);
+      } finally {
+        await mounted.unmount();
+      }
+    });
   });
 }

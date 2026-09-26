@@ -1,4 +1,4 @@
-import { resolveWebFocusEntryTarget } from '@proto.ui/adapter-base';
+import { orderFocusTargetsByDocument, resolveWebFocusEntryTarget } from '@proto.ui/adapter-base';
 import {
   cancelWebEventDefaultAction,
   createCapsWiring,
@@ -50,6 +50,7 @@ import {
   FOCUS_BLUR_CAP,
   FOCUS_INSTANCE_TOKEN_CAP,
   FOCUS_IS_NATIVELY_FOCUSABLE_CAP,
+  FOCUS_ORDER_CAP,
   FOCUS_PARENT_CAP,
   FOCUS_RESOLVE_ENTRY_TARGET_CAP,
   FOCUS_REQUEST_FOCUS_CAP,
@@ -394,6 +395,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [FOCUS_TARGET_READY_CAP, subscribeFocusTarget],
       [FOCUS_ROOT_TARGET_CAP, () => physicalControl() ?? getTriggerSurface()],
       [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, (target: HTMLElement) => isNativelyFocusable(target)],
+      [FOCUS_ORDER_CAP, orderFocusTargetsByDocument],
       [
         FOCUS_SET_FOCUSABLE_CAP,
         (target: HTMLElement, enabled: boolean, options?: { programmatic?: boolean }) => {

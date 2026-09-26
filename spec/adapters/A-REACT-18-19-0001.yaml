@@ -35,8 +35,8 @@ criteria:
       zh-CN: Adapter 为 Boundary 接入当前 host boundary 与 Web classification bridge，Event 传输 pointer sample。分离 regions 与未解析证据保留三态分类；top layer 关闭不将同一 sample 传给较低 active boundary。
   - id: A-REACT-18-19-0001-FOCUS
     text:
-      en: The Adapter translates the bounded Focus Module with logical target identity, current host focus requests/readiness, sequential versus programmatic eligibility, and descendant-first entry delegation. Real Adapter evidence covers roving membership and entry fallback; Runtime evidence owns scope and retained-request arbitration.
-      zh-CN: Adapter 翻译有界 Focus Module，提供 logical target identity、当前 host focus request/readiness、顺序与程序化资格区分、descendant-first entry delegation。真实 Adapter 证据覆盖 roving membership 与 entry fallback；Runtime 证据负责 scope 与 retained-request 仲裁。
+      en: The Adapter translates the bounded Focus Module with logical target identity, current host focus requests/readiness, sequential versus programmatic eligibility, and descendant-first entry delegation. Real Adapter evidence covers roving membership, document order and entry fallback; Runtime evidence owns scope and retained-request arbitration.
+      zh-CN: Adapter 翻译有界 Focus Module，提供 logical target identity、当前 host focus request/readiness、顺序与程序化资格区分、descendant-first entry delegation。真实 Adapter 证据覆盖 roving membership、文档顺序与 entry fallback；Runtime 证据负责 scope 与 retained-request 仲裁。
   - id: A-REACT-18-19-0001-TRIGGER
     text:
       en: The Adapter installs the bounded Trigger Module and translates logical chains through the shared host group owner. Three nested members share one semantic activation route, host-local events stay local, and sibling Trigger branches are rejected by the host owner.
@@ -266,6 +266,10 @@ provides:
     - id: HC-FOCUS-ENTRY-0001
       since: 0.3.0-alpha.0
       role: translated-capability
+    - id: HC-FOCUS-ORDER-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Document order when all targets share one tree; a set spanning trees is reported unorderable, and Focus keeps registration order for it.
     - id: HC-TRIGGER-GROUP-0001
       since: 0.3.0-alpha.0
       role: translated-capability
@@ -345,6 +349,8 @@ verifies:
       since: 0.3.0-alpha.0
     - id: T-FOCUS-0002
       since: 0.3.0-alpha.0
+    - id: T-FOCUS-ORDER-0001
+      since: 0.3.0-alpha.1
     - id: T-AS-TRIGGER-0002
       since: 0.3.0-alpha.0
     - id: T-RULE-EXPOSE-STATE-WEB-0001
@@ -495,4 +501,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: extended
     summary: Cataloged bounded draft Rule Meta wiring and the conditional default colorScheme source, separating token evidence from browser painting.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Provides the draft Focus navigation order through document order within one tree, with roving evidence where document and registration order differ.
 tags: [adapter, react, web, props, event, lifecycle, state, expose, official]

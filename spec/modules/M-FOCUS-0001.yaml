@@ -25,6 +25,10 @@ criteria:
     text:
       en: 'Repeatable view detachment retains pending logical focus and deferred roving entry while removing the live view participation. New readiness retries the current intent. Terminal disposal removes the FocusCenter entry, clears pending requests and releases readiness subscription.'
       zh-CN: '重复 view detach 保留 pending logical focus 与 deferred roving entry，同时移除 live view participation。新 readiness 重试当前 intent。terminal disposal 移除 FocusCenter entry、清除 pending request 并释放 readiness subscription。'
+  - id: M-FOCUS-0001-F
+    text:
+      en: 'Each scope or roving navigation takes one total order of its members from the host of the entry that owns it (HC-FOCUS-ORDER-0001). When the host cannot order the set, the whole navigation keeps stable registration order; host answers and registration order are never mixed pair by pair. Collection and Anatomy order do not supply Focus order.'
+      zh-CN: '每次 scope 或 roving 导航都从拥有它的 entry 所在宿主取得成员的一个全序（HC-FOCUS-ORDER-0001）。宿主无法排列该集合时，整次导航保持稳定注册顺序；宿主答案与注册顺序从不逐对混用。Collection 与 Anatomy 的顺序不提供 Focus 顺序。'
 satisfies:
   contracts:
     [
@@ -40,7 +44,12 @@ dependsOn:
   modules: [M-EVENT-0001, M-STATE-0001]
   contracts: [C-LIFECYCLE-0006, C-LIFECYCLE-0007]
 requires:
-  hostCaps: [HC-FOCUS-TARGET-0001, HC-FOCUS-ENTRY-0001, HC-DEFAULT-ACTION-0001]
+  hostCaps:
+    - HC-FOCUS-TARGET-0001
+    - HC-FOCUS-ENTRY-0001
+    - HC-DEFAULT-ACTION-0001
+    - id: HC-FOCUS-ORDER-0001
+      since: 0.3.0-alpha.1
 relates:
   decisions:
     [
@@ -50,7 +59,13 @@ relates:
       D-TRIGGER-GROUP-SURFACE-0001,
     ]
 verifies:
-  tests: [T-FOCUS-0001, T-FOCUS-ROVING-0001, T-FOCUS-SCOPE-0001, T-FOCUS-0002]
+  tests:
+    - T-FOCUS-0001
+    - T-FOCUS-ROVING-0001
+    - T-FOCUS-SCOPE-0001
+    - T-FOCUS-0002
+    - id: T-FOCUS-ORDER-0001
+      since: 0.3.0-alpha.1
 sources:
   - path: packages/modules/focus/src/create.ts
   - path: packages/modules/focus/src/center.ts
@@ -62,12 +77,15 @@ sources:
 openQuestions:
   - id: M-FOCUS-0001-Q-PORTABILITY
     question:
-      en: How should non-Web ordering and multiple host focus domains be represented?
-      zh-CN: 非 Web order 与多个宿主 focus domain 应如何表达？
+      en: How should multiple host focus domains be represented?
+      zh-CN: 多个宿主 focus domain 应如何表达？
     context:
-      en: Current center ordering uses host HTMLElement document order and the implementation exports one shared center. This bounded Web catalog does not admit an independent non-Web ordering protocol or cross-document focus-domain policy.
-      zh-CN: 当前 center order 使用宿主 HTMLElement document order，且实现导出一个共享 center。本有界 Web 编目不接纳独立非 Web order protocol 或跨 document focus-domain policy。
+      en: The implementation exports one shared center, and this bounded Web catalog does not admit a cross-document focus-domain policy. The ordering half of this question moved to HC-FOCUS-ORDER-0001 and criterion M-FOCUS-0001-F in 0.3.0-alpha.1.
+      zh-CN: 实现导出一个共享 center，本有界 Web 编目不接纳跨 document 的 focus-domain policy。本问题的排序部分已在 0.3.0-alpha.1 移至 HC-FOCUS-ORDER-0001 与 criterion M-FOCUS-0001-F。
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged bounded Focus ownership and executable evidence.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Navigation order now comes from the host through HC-FOCUS-ORDER-0001, with whole-navigation registration fallback (criterion F); Q-PORTABILITY keeps only the focus-domain half.

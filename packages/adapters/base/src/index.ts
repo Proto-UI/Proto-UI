@@ -18,3 +18,4 @@ export * from './platform/web-color-scheme-source';
 export * from './public-types';
 export * from './types';
 export * from './platform/focus-entry';
+export * from './platform/focus-order';
