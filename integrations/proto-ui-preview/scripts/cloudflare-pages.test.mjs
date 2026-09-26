@@ -22,6 +22,7 @@ function runWithPreload(source) {
         ...process.env,
         CLOUDFLARE_ACCOUNT_ID: 'account',
         CLOUDFLARE_API_TOKEN: 'token',
+        POPPY_CLOUDFLARE_MUTATIONS_ENABLED: 'true',
       },
     }
   );
@@ -78,4 +79,19 @@ test('request-level deadline: script fails when retry deadline is exhausted by e
   // before any second fetch can start.
   assert.notEqual(result.status, 0, 'script should fail when deadline is exhausted');
   assert.match(result.stderr + result.stdout, /deadline exhausted/i);
+});
+
+test('mutation commands fail closed while the Cloudflare kill switch is disabled', () => {
+  const result = spawnSync(process.execPath, [scriptPath, 'ensure', 'poppy-proto-ui-pr-42'], {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      CLOUDFLARE_ACCOUNT_ID: 'account',
+      CLOUDFLARE_API_TOKEN: 'token',
+      POPPY_CLOUDFLARE_MUTATIONS_ENABLED: 'false',
+    },
+  });
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr + result.stdout, /Cloudflare mutations are disabled/);
 });

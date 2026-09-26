@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "repository": "Proto-UI/dcbot",
+  "revision": "3f60a2b41832a0b02e64a0f4b8bf237355b59806",
+  "endpoint": {
+    "method": "POST",
+    "path": "/api/preview/deployments",
+    "artifactContentType": "application/gzip"
+  },
+  "artifactHeaders": [
+    "X-Poppy-Signature-256",
+    "X-Poppy-Preview-PR",
+    "X-Poppy-Preview-Head-SHA",
+    "X-Poppy-Preview-Run-ID",
+    "X-Poppy-Preview-Run-Attempt"
+  ],
+  "limits": {
+    "compressedBytes": 52428800,
+    "expandedBytes": 104857600,
+    "fileBytes": 26214400,
+    "files": 20000
+  },
+  "ready": {
+    "requiresNonemptyDeploymentId": true
+  },
+  "sourceDigests": {
+    "internal/preview/server.go": "sha256:a5f4b9c35cc69636c2be827dd031e6f45434c07c7b6c1b8fab790615e5f7d13b",
+    "internal/preview/artifact_store.go": "sha256:e2351f2481c1a2d840db47fddd607191cf890e05411aabf1aa1bcf7606e2ca71"
+  }
+}
