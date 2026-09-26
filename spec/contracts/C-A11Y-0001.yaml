@@ -3,7 +3,7 @@ type: contract
 title: Accessibility exposes projectable semantic objects
 status: draft
 since: 0.1.0
-summary: The a11y domain records projectable semantic object facts, stable opaque object identity, and string or ordered-reference relationships without exposing protocol keys as host ids.
+summary: The a11y domain records semantic object facts, opaque logical identity, and string, direct-reference or same-domain part relationships without exposing protocol keys as host ids.
 statement:
   zh-CN: >-
     Accessibility 是一个可由宿主投影的 semantic object domain。原型通过 a11y API 声明当前交互对象的 identity、role、name、description、state、action、relation 与 semantic tree behavior；runtime 将这些声明保存为稳定 IR，adapter 负责把 IR 投影到宿主的无障碍表达。a11y IR 可以引用 state/focus/event/anatomy 等其它域事实，但 a11y 不重新拥有这些域。
@@ -56,8 +56,8 @@ criteria:
       en: Adapters may choose native identity/role/name/state/action/relation projection, degraded projection, or diagnostic-only IR based on host capabilities.
   - id: C-A11Y-0001-H
     text:
-      zh-CN: a11y relation 可以引用字符串目标、state handle、单个 opaque semantic-object ref 或有序 ref list；ref 与 protocol match key / host id 相互独立，宿主 adapter 负责投影为宿主可表达的关系机制。
-      en: An A11y relation may reference a string target, state handle, one opaque semantic-object ref, or an ordered ref list; refs remain independent of protocol match keys and host ids, and host adapters project them to host-expressible relationship mechanisms.
+      zh-CN: a11y relation 可以引用字符串目标、state handle、单个 opaque semantic-object ref、有序 ref list 或 C-A11Y-PART-RELATIONSHIP-0001 定义的 structured part target；ref 与 protocol match key / host id 相互独立，宿主 adapter 负责投影为宿主可表达的关系机制。
+      en: An A11y relation may reference a string target, state handle, one opaque semantic-object ref, an ordered ref list, or a structured part target governed by C-A11Y-PART-RELATIONSHIP-0001; refs remain independent of protocol match keys and host ids, and host adapters project them to host-expressible relationship mechanisms.
   - id: C-A11Y-0001-I
     text:
       zh-CN: a11y name 与 description 可以引用字符串或 state handle；当引用 state handle 时，adapter 投射必须随 state 值变化更新。
@@ -118,6 +118,9 @@ dependsOn:
     - C-STATE-0008
     - C-EXPOSE-EVENT-0001
 relates:
+  contracts:
+    - id: C-A11Y-PART-RELATIONSHIP-0001
+      since: 0.3.0-alpha.1
   decisions:
     - D-A11Y-SEMANTIC-DOMAIN-0001
   prototypes:
@@ -126,6 +129,9 @@ verifies:
   tests:
     - T-A11Y-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Linked structured same-domain part declarations to their accepted dedicated contract while preserving string and direct-reference transport.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Replaced def.a11y with the setup-only instance-scoped asAccessible handle without a compatibility alias; preserved domain ownership and existing declaration composition.

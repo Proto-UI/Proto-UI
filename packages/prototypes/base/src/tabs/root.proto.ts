@@ -1,6 +1,6 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
 import { asCollection } from '@proto.ui/hooks';
-import { createTabsRootId, TABS_CONTEXT, TABS_FAMILY } from './shared';
+import { TABS_CONTEXT, TABS_FAMILY } from './shared';
 import type { TabsRootAsHookContract, TabsRootExposes, TabsRootProps } from './types';
 
 type TriggerSnapshot = {
@@ -63,7 +63,6 @@ function setupTabsRoot(def: DefHandle<TabsRootProps, TabsRootExposes>): void {
 
   // P-BASE-TABS-CONTEXT-VALUE
   def.context.provide(TABS_CONTEXT, {
-    rootId: '',
     value: '',
     activeValue: '',
     orientation: 'horizontal',
@@ -74,7 +73,6 @@ function setupTabsRoot(def: DefHandle<TabsRootProps, TabsRootExposes>): void {
     validationVersion: 0,
   });
   const value = def.state.string('value', '');
-  const rootId = createTabsRootId();
   let currentOrientation: 'horizontal' | 'vertical' = 'horizontal';
   let currentActivationMode: 'automatic' | 'manual' = 'automatic';
   let controlled = false;
@@ -96,7 +94,6 @@ function setupTabsRoot(def: DefHandle<TabsRootProps, TabsRootExposes>): void {
   const publishContext = (run: RunHandle<TabsRootProps>) => {
     // P-BASE-TABS-CONTEXT-SYNC, P-BASE-TABS-ACTIVE-VALUE
     const next = {
-      rootId,
       value: value.get(),
       activeValue,
       orientation: currentOrientation,
@@ -108,7 +105,6 @@ function setupTabsRoot(def: DefHandle<TabsRootProps, TabsRootExposes>): void {
     };
     const current = run.context.read(TABS_CONTEXT);
     if (
-      current.rootId === next.rootId &&
       current.value === next.value &&
       current.activeValue === next.activeValue &&
       current.orientation === next.orientation &&

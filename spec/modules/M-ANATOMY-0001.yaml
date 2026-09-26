@@ -30,8 +30,8 @@ criteria:
       zh-CN: mixed ownership 跨 repeatable view detach/remount 保留 claim 与作者订阅声明，宿主顺序观察在 detach 停止、mount 恢复。terminal disposal 删除 owner claim 并释放自身 listener 与 shared observer 参与关系。view detach 本身不删除 logical claim。
   - id: M-ANATOMY-0001-F
     text:
-      en: Standard Runtime installs Anatomy with Expose as a required semantic dependency. Internal domain/descendant/target ports serve downstream modules without expanding public PartView or turning Anatomy into an arbitrary instance registry.
-      zh-CN: standard Runtime 安装 Anatomy，以 Expose 为必需语义依赖。内部 domain/descendant/target port 服务下游 Module，不扩大公开 PartView，也不使 Anatomy 成为任意 instance registry。
+      en: Standard Runtime installs Anatomy with Expose as a required semantic dependency. Internal own-role/domain/descendant/target ports serve downstream modules without expanding public PartView or turning Anatomy into an arbitrary instance registry.
+      zh-CN: standard Runtime 安装 Anatomy，以 Expose 为必需语义依赖。内部 own-role/domain/descendant/target port 服务下游 Module，不扩大公开 PartView，也不使 Anatomy 成为任意 instance registry。
 satisfies:
   contracts:
     - C-ANATOMY-0001
@@ -96,6 +96,9 @@ openQuestions:
       en: The current implementation uses compareDocumentPosition and a root-subtree observer. This slice verifies ordinary Web order, missing-target fallback and lifecycle cleanup, not a universal cross-tree order or all host-view transitions.
       zh-CN: 当前实现使用 compareDocumentPosition 和 root subtree observer。本 slice 验证普通 Web 顺序、missing-target fallback 与 lifecycle cleanup，不保证通用跨树顺序或全部 host view transition。
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Exposed the current structural claim role to the A11y part service without moving relationship ownership or expanding author PartView.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged existing Anatomy ownership, host boundaries and executable evidence without lifecycle promotion.

@@ -209,7 +209,12 @@
       "path": "packages/modules/a11y",
       "releaseRole": "internal-or-dependency-directed",
       "publishOrder": 22,
-      "internalDependencies": ["@proto.ui/core", "@proto.ui/module-base", "@proto.ui/module-state"]
+      "internalDependencies": [
+        "@proto.ui/core",
+        "@proto.ui/module-anatomy",
+        "@proto.ui/module-base",
+        "@proto.ui/module-state"
+      ]
     },
     {
       "name": "@proto.ui/module-expose-state",

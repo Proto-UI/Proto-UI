@@ -29,7 +29,7 @@ test('release lifecycle CLI distinguishes scoped review from full-inventory comp
   assert.equal(scoped.status, 0, scoped.stderr);
   const data = JSON.parse(scoped.stdout);
   assert.equal(data.basis, 'current-catalog');
-  assert.equal(data.summary.reviewedDrafts, 2);
+  assert.equal(data.summary.reviewedDrafts, 11);
   assert.ok(data.unreviewedEntities.length > 0);
   assert.equal(
     data.rows
@@ -209,10 +209,21 @@ test('authoring preserves identities across deletion, replacement, and file move
         ],
       })
     );
+    const relationshipTestPath = path.join(
+      fixture,
+      'spec/tests/T-A11Y-PART-RELATIONSHIP-0001.yaml'
+    );
+    const relationshipTestSource = readFileSync(relationshipTestPath, 'utf8');
+    const incompleteEvidence = parse(relationshipTestSource);
+    incompleteEvidence.implementations.find(
+      (implementation) => implementation.id === 'runtime-a11y-part-relationship-contract'
+    ).status = 'planned';
+    writeFileSync(relationshipTestPath, JSON.stringify(incompleteEvidence));
     const incompletePromotion = check();
     assert.equal(incompletePromotion.status, 1);
     assert.match(incompletePromotion.stderr, /admission activation-blocked/);
     assert.match(incompletePromotion.stderr, /admission criterion-needs-evidence/);
+    writeFileSync(relationshipTestPath, relationshipTestSource);
     rmSync(movedPath);
     const deleted = check();
     assert.equal(deleted.status, 1);

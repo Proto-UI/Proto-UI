@@ -10,7 +10,23 @@ An explicit id replaces generated-ID ownership on its physical target before sca
 
 Changes to a shared explicit-id contribution re-resolve surviving generated-reference dependents against the current binding and reservation. This includes writer updates and a detached writer's terminal disposal; generated identity is not retained as a host baseline.
 
-This lower-level transport does not implement the separate anatomy family/domain/role/key matcher or Tabs migration tracked by #549 and PR #553.
+Same-domain part relationships add an A11y-owned matcher over Anatomy facts. Declare the current part's protocol key and the counterpart role during setup:
+
+```ts
+const accessible = asAccessible();
+def.anatomy.claim(family, { role: 'trigger' });
+const value = def.state.string('value', 'account');
+accessible.part(family, { key: value });
+accessible.relation('controls', {
+  target: { kind: 'part', family, role: 'content', key: value },
+});
+```
+
+The Content declares its own part key and a reciprocal `labelledBy` target with role `trigger`. Each instance must already claim its role in the same Anatomy family. The `key` can be a string or State; matching uses exact equality, so `a+b` and `a b` remain distinct. A11y supplies the opaque domain, logical identity and view epochs internally. Authors receive no registry, host target or generated ID. A missing key, missing counterpart, duplicate counterpart or unavailable endpoint leaves the relationship unprojected. Internal diagnostics retain the current failure rather than accumulating a log.
+
+Part relationships append their owned IDREF tokens and reject `mode: 'replace'`. An identical token already supplied by the host or another owner survives lease release. Either endpoint's L1 detach withdraws the relationship before host removal while retaining its logical reservation. Rematerialization transfers that reservation only after the successor has a physical binding. Same-epoch target notifications synchronously rebind ownership, and Web ID observation rechecks live authored IDs and collisions before the next paint. A conflicting authored ID is preserved; generated IDs restore each view's exact previous value only if that value is still owned.
+
+Base Tabs uses this service for reciprocal Trigger/Content relations; it no longer creates IDs by escaping `value` or carries a root ID through Context. Selection, roving focus and presence remain with their existing owners. The dedicated [part relationship contract](../../../spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml) and [test map](../../../spec/tests/T-A11Y-PART-RELATIONSHIP-0001.yaml) remain draft; the implementation does not imply stable admission or complete accessibility certification.
 
 This package is intentionally not a Web ARIA wrapper. Adapters decide how to map the semantic object snapshot to their host accessibility surface.
 

@@ -353,11 +353,11 @@ export function createVueAdapter(runtime: VueRuntime) {
             await runtime.nextTick();
             viewReady = true;
             focusTargetRetryCount = 0;
-            rootRef.value?.removeAttribute(PUI_VIEW_PENDING_ATTR);
-            eventGateRef.value?.enable();
             notifyFocusTargetReady();
             pendingSignal?.done?.();
             pendingSignal = null;
+            rootRef.value?.removeAttribute(PUI_VIEW_PENDING_ATTR);
+            eventGateRef.value?.enable();
           },
           { flush: 'post' }
         );

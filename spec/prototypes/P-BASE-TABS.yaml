@@ -325,10 +325,12 @@ criteria:
       decisions:
         - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
       contracts:
+        - id: C-A11Y-PART-RELATIONSHIP-0001
+          since: 0.3.0-alpha.1
         - C-A11Y-0001
     note:
-      zh-CN: 第一阶段由 a11y identity/relation IR 与 Web adapter 投射支持；跨宿主自动 ID 生成与更复杂的动态 part 关系仍可继续演进。
-      en: The first phase is supported by a11y identity/relation IR and Web adapter projection; cross-host automatic ID generation and more complex dynamic part relationships may continue to evolve.
+      zh-CN: Trigger/Content 使用同 domain 的 structured part target 按精确 value 配对；Web 保留宿主 ID 与 lease ownership，缺失或重复匹配时 fail closed，L1 detach 不将宿主 identity 写入 Context/State。
+      en: Trigger and Content use structured same-domain part targets matched by exact value. Web retains host ID and lease ownership, fails closed on missing or duplicate matches, and never writes host identity into Context or State across L1 detach.
   - id: P-BASE-TABS-DEFAULT-L1-DETACH
     text:
       zh-CN: 非 current content 默认必须执行 L1 detach；宿主 owner 与 Proto instance 保持存活。
@@ -396,6 +398,9 @@ verifies:
   tests:
     - T-BASE-TABS-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Migrated reciprocal Tabs accessibility relationships to the exact-key same-domain service without changing selection, Context or focus ownership.
   - version: 0.1.0
     change: introduced
     summary: Added the first Base Tabs root/compound protocol catalog with anatomy, context, selection, a11y, indicator, and presence boundaries.

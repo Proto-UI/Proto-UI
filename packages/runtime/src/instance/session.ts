@@ -10,6 +10,7 @@ import type { PropsFacade, PropsPort } from '@proto.ui/module-props';
 import type { RulePort } from '@proto.ui/module-rule';
 import type { EventPort } from '@proto.ui/module-event';
 import type { PresencePort } from '@proto.ui/module-presence';
+import type { A11yPort } from '@proto.ui/module-a11y';
 
 import { __RT_EVENT_CALLBACKS } from '../kernel/event';
 import { projectLegacyCheckpoint, type RuntimeLifecycleEvent } from '../kernel/lifecycle-events';
@@ -277,6 +278,11 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   emit({ type: 'instance.setup.exit' });
   propsPort.applyRaw({ ...(host.getRawProps?.() ?? {}) });
+  // Register before hosts subscribe: revoke relationship leases before a
+  // ViewIntent can hide or remove its physical view. Terminal lock clears it.
+  kernel.viewIntent.subscribe(({ present }) => {
+    moduleHub.getPort<A11yPort>('a11y')?.prepareViewPresence(present);
+  });
   setInstancePhase('alive');
   callbackScope.run(run, () => {
     for (const cb of lifecycle.created) cb(run);

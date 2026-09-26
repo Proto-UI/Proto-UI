@@ -292,9 +292,11 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
-        createWebA11yProjector(getTriggerSurface, (listener) =>
-          subscribeLogicalTriggerSurface(instanceToken, listener)
-        ),
+        createWebA11yProjector(() => {
+          const surface = getLogicalTriggerSurfaceRoot(instanceToken);
+          const target = surface === el ? args.getCurrentElement() : surface;
+          return args.isViewReady() && target?.isConnected ? target : null;
+        }, subscribeFocusTarget),
       ],
     ])
     .use('event', [

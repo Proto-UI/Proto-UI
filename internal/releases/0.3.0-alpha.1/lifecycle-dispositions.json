@@ -14,6 +14,36 @@
         "packages/adapters/vue2/test/image-view.integration.test.ts",
         "internal/releases/0.3.0-alpha.1/release-notes.md"
       ]
+    },
+    {
+      "id": "a11y-part-relationship-implementation",
+      "entities": [
+        "C-A11Y-0001",
+        "C-A11Y-PART-RELATIONSHIP-0001",
+        "M-A11Y-0001",
+        "M-ANATOMY-0001",
+        "HC-A11Y-0001",
+        "P-BASE-TABS",
+        "P-BASE-TABS-TRIGGER",
+        "P-BASE-TABS-CONTENT",
+        "T-A11Y-PART-RELATIONSHIP-0001"
+      ],
+      "disposition": "remain-draft",
+      "rationale": "The accepted #549 slice now has structured transport, exact-tuple matching, epoch and host ownership integration, and executable Tabs migration mappings. Independent maintainer admission of these semantics as stable remains pending; passing test mappings do not promote the contracts, modules, capability or prototypes. This is a current alpha.1 implementation review and does not revise the earlier alpha.0 disposition or either immutable release snapshot.",
+      "evidence": [
+        "spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml",
+        "spec/tests/T-A11Y-PART-RELATIONSHIP-0001.yaml",
+        "spec/modules/M-A11Y-0001.yaml",
+        "spec/host-caps/HC-A11Y-0001.yaml",
+        "packages/runtime/test/contract/a11y.v0.contract.test.ts",
+        "packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts",
+        "packages/prototypes/base/test/tabs.test.ts",
+        "packages/adapters/react/test/tabs.test.ts",
+        "packages/adapters/vue/test/tabs.test.ts",
+        "packages/adapters/vue2/test/tabs.test.ts",
+        "https://github.com/Proto-UI/Proto-UI/issues/549#issuecomment-5546535682",
+        "https://github.com/Proto-UI/Proto-UI/pull/553#pullrequestreview-5120524917"
+      ]
     }
   ]
 }

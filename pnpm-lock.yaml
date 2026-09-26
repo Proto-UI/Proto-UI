@@ -654,6 +654,9 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../anatomy
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base

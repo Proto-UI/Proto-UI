@@ -224,9 +224,12 @@ criteria:
     dependsOn:
       decisions:
         - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
+      contracts:
+        - id: C-A11Y-PART-RELATIONSHIP-0001
+          since: 0.3.0-alpha.1
     note:
-      zh-CN: 第一阶段通过 a11y relation target 投射为 Web `aria-controls`；后续仍可演进 adapter 生成目标 identity 的方式。
-      en: The first phase projects the a11y relation target to Web `aria-controls`; later work may still evolve how adapters generate target identity.
+      zh-CN: controls 使用 C-A11Y-PART-RELATIONSHIP-0001 的同 domain、content role 与精确 value key；不在原型中拼接或保存目标宿主 ID。
+      en: controls uses the same domain, content role and exact value key governed by C-A11Y-PART-RELATIONSHIP-0001; the prototype neither constructs nor stores a target host ID.
   - id: P-BASE-TABS-TRIGGER-ACCESSIBLE-NAME
     text:
       zh-CN: Tabs Trigger 必须允许从内容或宿主 projection 获得 accessible name。
@@ -258,6 +261,9 @@ verifies:
   tests:
     - T-BASE-TABS-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Migrated reciprocal Tabs accessibility relationships to the exact-key same-domain service without changing selection, Context or focus ownership.
   - version: 0.1.0
     change: introduced
     summary: Added the first Base Tabs Trigger protocol catalog.
