@@ -7,10 +7,12 @@
 //! reported rather than approximated, and `parses_every_colour_in_the_fixtures`
 //! fails if a new form appears.
 //!
-//! Conversion follows CSS Color 4: `lab()` is D50-referred, so it goes through
-//! XYZ with a Bradford adaptation to D65 before the sRGB matrix. This is
-//! ordinary colour science, not Proto UI semantics, which is why it lives here
-//! and not in the generator that records the values.
+//! Conversion follows CSS Color 4: `lab()` is D50-referred, so coordinates
+//! pass through XYZ and Bradford adaptation to D65, then the selected CSS
+//! local-MINDE gamut mapper targets sRGB. Parsed RGB/alpha and Lab-lightness
+//! values are clamped; Lab `a`/`b` percentages use their CSS reference range.
+//! These are ordinary colour-science rules, not Proto UI semantics, so they
+//! live here rather than in the fixture generator.
 
 /// Non-premultiplied sRGB with components in `0.0..=1.0`.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -147,14 +149,16 @@ fn parse_hex(hex: &str, original: &str) -> Result<Rgba, ColorError> {
     }
 }
 
-/// Reads one channel, accepting `0..255`, a percentage, or a bare alpha.
+/// Parses an RGB channel or alpha and clamps CSS-valid out-of-range values.
 fn channel(raw: &str, scale: f32, original: &str) -> Result<f32, ColorError> {
     let text = raw.trim();
     let malformed = || ColorError::Malformed(original.to_string());
-    if let Some(percent) = text.strip_suffix('%') {
-        return Ok(percent.trim().parse::<f32>().map_err(|_| malformed())? / 100.0);
-    }
-    Ok(text.parse::<f32>().map_err(|_| malformed())? / scale)
+    let value = if let Some(percent) = text.strip_suffix('%') {
+        percent.trim().parse::<f32>().map_err(|_| malformed())? / 100.0
+    } else {
+        text.parse::<f32>().map_err(|_| malformed())? / scale
+    };
+    Ok(value.clamp(0.0, 1.0))
 }
 
 fn parse_rgb(rest: &str, original: &str) -> Result<Rgba, ColorError> {
@@ -195,20 +199,30 @@ fn parse_lab(rest: &str, original: &str) -> Result<Rgba, ColorError> {
     if parts.len() != 3 {
         return Err(malformed());
     }
-    // In `lab()` the lightness is on a 0..100 scale and the `%` is notation,
-    // not a fraction: `lab(100% 0 0)` is L=100, not L=1.
+    // CSS Color 4 maps L's percentage to [0, 100] and clamps out-of-range
+    // values at parse time. Percent a/b values use -100%= -125 and 100%=125.
     let lightness = parts[0]
         .trim()
         .trim_end_matches('%')
         .parse::<f32>()
-        .map_err(|_| malformed())?;
-    let a = parts[1].parse::<f32>().map_err(|_| malformed())?;
-    let b = parts[2].parse::<f32>().map_err(|_| malformed())?;
+        .map_err(|_| malformed())?
+        .clamp(0.0, 100.0);
+    let a = parse_lab_axis(parts[1], original)?;
+    let b = parse_lab_axis(parts[2], original)?;
     let mut color = lab_to_srgb(lightness, a, b);
     if let Some(alpha) = alpha {
         color.a = channel(alpha, 1.0, original)?;
     }
     Ok(color)
+}
+
+fn parse_lab_axis(raw: &str, original: &str) -> Result<f32, ColorError> {
+    let text = raw.trim();
+    let malformed = || ColorError::Malformed(original.to_string());
+    if let Some(percent) = text.strip_suffix('%') {
+        return Ok(percent.trim().parse::<f32>().map_err(|_| malformed())? * 1.25);
+    }
+    text.parse::<f32>().map_err(|_| malformed())
 }
 
 /// `color-mix(in oklab, <colour> <percent>, transparent)`.
@@ -277,6 +291,14 @@ fn multiply(matrix: [[f32; 3]; 3], vector: [f32; 3]) -> [f32; 3] {
 }
 
 fn lab_to_srgb(lightness: f32, a: f32, b: f32) -> Rgba {
+    // CSS Color 4 maps Lab lightness endpoints to destination black/white
+    // regardless of the remaining chromatic coordinates.
+    if lightness <= 0.0 {
+        return Rgba::new(0.0, 0.0, 0.0, 1.0);
+    }
+    if lightness >= 100.0 {
+        return Rgba::new(1.0, 1.0, 1.0, 1.0);
+    }
     let f1 = (lightness + 16.0) / 116.0;
     let f0 = a / 500.0 + f1;
     let f2 = f1 - b / 200.0;
@@ -301,13 +323,125 @@ fn lab_to_srgb(lightness: f32, a: f32, b: f32) -> Rgba {
         cube(f2) * D50_WHITE[2],
     ];
     let linear = multiply(XYZ_D65_TO_LINEAR_SRGB, multiply(D50_TO_D65, xyz_d50));
+    let mapped = gamut_map_srgb(linear);
     let encode = |c: f32| {
-        let c = c.clamp(0.0, 1.0);
         if c <= 0.003_130_8 {
             12.92 * c
         } else {
             1.055 * c.powf(1.0 / 2.4) - 0.055
         }
     };
-    Rgba::new(encode(linear[0]), encode(linear[1]), encode(linear[2]), 1.0)
+    Rgba::new(encode(mapped[0]), encode(mapped[1]), encode(mapped[2]), 1.0)
+}
+
+/// Converts linear-light sRGB to Oklab, including extended RGB coordinates.
+fn linear_srgb_to_oklab(rgb: [f32; 3]) -> [f32; 3] {
+    let l = (0.412_221_46 * rgb[0] + 0.536_332_55 * rgb[1] + 0.051_445_995 * rgb[2]).cbrt();
+    let m = (0.211_903_5 * rgb[0] + 0.680_699_5 * rgb[1] + 0.107_396_96 * rgb[2]).cbrt();
+    let s = (0.088_302_46 * rgb[0] + 0.281_718_85 * rgb[1] + 0.629_978_7 * rgb[2]).cbrt();
+    [
+        0.210_454_26 * l + 0.793_617_8 * m - 0.004_072_047 * s,
+        1.977_998_5 * l - 2.428_592_2 * m + 0.450_593_7 * s,
+        0.025_904_037 * l + 0.782_771_77 * m - 0.808_675_77 * s,
+    ]
+}
+
+/// Converts Oklab to linear-light sRGB before destination gamut mapping.
+fn oklab_to_linear_srgb(lab: [f32; 3]) -> [f32; 3] {
+    let l = lab[0] + 0.396_337_78 * lab[1] + 0.215_803_76 * lab[2];
+    let m = lab[0] - 0.105_561_35 * lab[1] - 0.063_854_17 * lab[2];
+    let s = lab[0] - 0.089_484_18 * lab[1] - 1.291_485_5 * lab[2];
+    let l = l * l * l;
+    let m = m * m * m;
+    let s = s * s * s;
+    [
+        4.076_741_7 * l - 3.307_711_6 * m + 0.230_969_93 * s,
+        -1.268_438 * l + 2.609_757_4 * m - 0.341_319_4 * s,
+        -0.004_196_086_3 * l - 0.703_418_6 * m + 1.707_614_7 * s,
+    ]
+}
+
+fn oklch_to_oklab(lch: [f32; 3]) -> [f32; 3] {
+    [lch[0], lch[1] * lch[2].cos(), lch[1] * lch[2].sin()]
+}
+
+fn in_srgb_gamut(rgb: [f32; 3]) -> bool {
+    rgb.iter().all(|channel| (0.0..=1.0).contains(channel))
+}
+
+fn clip_srgb(rgb: [f32; 3]) -> [f32; 3] {
+    [
+        rgb[0].clamp(0.0, 1.0),
+        rgb[1].clamp(0.0, 1.0),
+        rgb[2].clamp(0.0, 1.0),
+    ]
+}
+
+fn delta_e_ok(left: [f32; 3], right: [f32; 3]) -> f32 {
+    let dl = left[0] - right[0];
+    let da = left[1] - right[1];
+    let db = left[2] - right[2];
+    (dl * dl + da * da + db * db).sqrt()
+}
+
+/// CSS Color 4 §14.2.1 binary-search gamut mapping with local MINDE.
+///
+/// Clip-only conversion creates hue shifts for out-of-gamut Lab colors. This
+/// maps along a constant-lightness, constant-hue Oklch path and permits local
+/// clipping only below the specified one-JND threshold.
+fn gamut_map_srgb(origin_rgb: [f32; 3]) -> [f32; 3] {
+    const JND: f32 = 0.02;
+    const EPSILON: f32 = 0.0001;
+
+    if in_srgb_gamut(origin_rgb) {
+        return origin_rgb;
+    }
+
+    let origin_oklab = linear_srgb_to_oklab(origin_rgb);
+    let lightness = origin_oklab[0];
+    if lightness >= 1.0 {
+        return [1.0; 3];
+    }
+    if lightness <= 0.0 {
+        return [0.0; 3];
+    }
+
+    let a = origin_oklab[1];
+    let b = origin_oklab[2];
+    let origin_lch = [lightness, a.hypot(b), b.atan2(a)];
+    let mut clipped = clip_srgb(oklab_to_linear_srgb(oklch_to_oklab(origin_lch)));
+    let clipped_oklab = linear_srgb_to_oklab(clipped);
+    let mut delta = delta_e_ok(origin_oklab, clipped_oklab);
+    if delta < JND {
+        return clipped;
+    }
+
+    let mut min = 0.0;
+    let mut max = origin_lch[1];
+    let mut min_in_gamut = true;
+    while max - min > EPSILON {
+        let chroma = (min + max) / 2.0;
+        let candidate_lch = [origin_lch[0], chroma, origin_lch[2]];
+        let candidate_oklab = oklch_to_oklab(candidate_lch);
+        let candidate_rgb = oklab_to_linear_srgb(candidate_oklab);
+
+        if min_in_gamut && in_srgb_gamut(candidate_rgb) {
+            min = chroma;
+            continue;
+        }
+
+        clipped = clip_srgb(candidate_rgb);
+        delta = delta_e_ok(candidate_oklab, linear_srgb_to_oklab(clipped));
+        if delta < JND {
+            if JND - delta < EPSILON {
+                return clipped;
+            }
+            min_in_gamut = false;
+            min = chroma;
+        } else {
+            max = chroma;
+        }
+    }
+
+    clipped
 }
