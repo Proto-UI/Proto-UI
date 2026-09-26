@@ -7,10 +7,9 @@
 //! reported rather than approximated, and `parses_every_colour_in_the_fixtures`
 //! fails if a new form appears.
 //!
-//! Conversion follows CSS Color 4: `lab()` is D50-referred, so it goes through
-//! XYZ with a Bradford adaptation to D65 before the sRGB matrix. This is
-//! ordinary colour science, not Proto UI semantics, which is why it lives here
-//! and not in the generator that records the values.
+//! Lab input lightness is clamped to CSS Color 4's 0..100 range. For intermediate
+//! Lab lightness that converts outside sRGB, this parser uses CSS Color 4
+//! §14.2.1 Binary Search Gamut Mapping with Local MINDE, targeting sRGB.
 
 /// Non-premultiplied sRGB with components in `0.0..=1.0`.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -151,34 +150,53 @@ fn parse_hex(hex: &str, original: &str) -> Result<Rgba, ColorError> {
 fn channel(raw: &str, scale: f32, original: &str) -> Result<f32, ColorError> {
     let text = raw.trim();
     let malformed = || ColorError::Malformed(original.to_string());
-    if let Some(percent) = text.strip_suffix('%') {
-        return Ok(percent.trim().parse::<f32>().map_err(|_| malformed())? / 100.0);
+    let value = if let Some(percent) = text.strip_suffix('%') {
+        percent.trim().parse::<f32>().map_err(|_| malformed())? / 100.0
+    } else {
+        text.parse::<f32>().map_err(|_| malformed())? / scale
+    };
+    if !value.is_finite() {
+        return Err(malformed());
     }
-    Ok(text.parse::<f32>().map_err(|_| malformed())? / scale)
+    // This API returns concrete sRGB components, so CSS's out-of-range
+    // encoded values are clamped to the representable destination range.
+    Ok(value.clamp(0.0, 1.0))
 }
 
 fn parse_rgb(rest: &str, original: &str) -> Result<Rgba, ColorError> {
-    // Both `r, g, b, a` and `r g b / a` occur in the recorded values.
-    let (body, alpha) = match rest.split_once('/') {
+    // CSS has a legacy comma grammar and a modern space-plus-slash grammar.
+    let (body, slash_alpha) = match rest.split_once('/') {
         Some((body, alpha)) => (body, Some(alpha)),
         None => (rest, None),
     };
-    let parts: Vec<&str> = if body.contains(',') {
+    let malformed = || ColorError::Malformed(original.to_string());
+    let comma_syntax = body.contains(',');
+    if comma_syntax && slash_alpha.is_some() {
+        return Err(malformed());
+    }
+    let parts: Vec<&str> = if comma_syntax {
         body.split(',').collect()
     } else {
         body.split_whitespace().collect()
     };
-    let malformed = || ColorError::Malformed(original.to_string());
-    if parts.len() < 3 || parts.len() > 4 {
+    if comma_syntax {
+        if !(3..=4).contains(&parts.len()) {
+            return Err(malformed());
+        }
+    } else if parts.len() != 3 {
         return Err(malformed());
     }
     let r = channel(parts[0], 255.0, original)?;
     let g = channel(parts[1], 255.0, original)?;
     let b = channel(parts[2], 255.0, original)?;
-    let a = match (parts.get(3), alpha) {
-        (Some(value), _) => channel(value, 1.0, original)?,
-        (None, Some(value)) => channel(value, 1.0, original)?,
-        (None, None) => 1.0,
+    let alpha = if comma_syntax {
+        parts.get(3).copied()
+    } else {
+        slash_alpha
+    };
+    let a = match alpha {
+        Some(value) => channel(value, 1.0, original)?,
+        None => 1.0,
     };
     Ok(Rgba::new(r, g, b, a))
 }
@@ -195,20 +213,33 @@ fn parse_lab(rest: &str, original: &str) -> Result<Rgba, ColorError> {
     if parts.len() != 3 {
         return Err(malformed());
     }
-    // In `lab()` the lightness is on a 0..100 scale and the `%` is notation,
-    // not a fraction: `lab(100% 0 0)` is L=100, not L=1.
+    // CSS Color 4 maps L percentages to [0, 100] and a/b percentages to ±125.
     let lightness = parts[0]
         .trim()
         .trim_end_matches('%')
         .parse::<f32>()
         .map_err(|_| malformed())?;
-    let a = parts[1].parse::<f32>().map_err(|_| malformed())?;
-    let b = parts[2].parse::<f32>().map_err(|_| malformed())?;
-    let mut color = lab_to_srgb(lightness, a, b);
+    let a = parse_lab_axis(parts[1], original)?;
+    let b = parse_lab_axis(parts[2], original)?;
+    if !lightness.is_finite() || !a.is_finite() || !b.is_finite() {
+        return Err(malformed());
+    }
+    let mut color = lab_to_srgb(lightness, a, b, original)?;
     if let Some(alpha) = alpha {
         color.a = channel(alpha, 1.0, original)?;
     }
     Ok(color)
+}
+
+fn parse_lab_axis(raw: &str, original: &str) -> Result<f32, ColorError> {
+    let text = raw.trim();
+    let malformed = || ColorError::Malformed(original.to_string());
+    let value = if let Some(percent) = text.strip_suffix('%') {
+        percent.trim().parse::<f32>().map_err(|_| malformed())? * 1.25
+    } else {
+        text.parse::<f32>().map_err(|_| malformed())?
+    };
+    Ok(value)
 }
 
 /// `color-mix(in oklab, <colour> <percent>, transparent)`.
@@ -236,6 +267,9 @@ fn parse_color_mix(rest: &str, original: &str) -> Result<Rgba, ColorError> {
         .ok_or_else(malformed)?
         .parse::<f32>()
         .map_err(|_| malformed())?;
+    if !percent.is_finite() || !(0.0..=100.0).contains(&percent) {
+        return Err(malformed());
+    }
     let color = parse_rgba(color_text.trim())?;
     Ok(Rgba::new(
         color.r,
@@ -276,7 +310,11 @@ fn multiply(matrix: [[f32; 3]; 3], vector: [f32; 3]) -> [f32; 3] {
     out
 }
 
-fn lab_to_srgb(lightness: f32, a: f32, b: f32) -> Rgba {
+fn lab_to_srgb(lightness: f32, a: f32, b: f32, original: &str) -> Result<Rgba, ColorError> {
+    // CSS Color 4 clamps source Lab L before conversion; destination endpoints
+    // are determined from converted Oklab lightness during display mapping.
+    let lightness = lightness.clamp(0.0, 100.0);
+
     let f1 = (lightness + 16.0) / 116.0;
     let f0 = a / 500.0 + f1;
     let f2 = f1 - b / 200.0;
@@ -294,20 +332,124 @@ fn lab_to_srgb(lightness: f32, a: f32, b: f32) -> Rgba {
     } else {
         lightness / KAPPA
     };
-
     let xyz_d50 = [
         cube(f0) * D50_WHITE[0],
         y * D50_WHITE[1],
         cube(f2) * D50_WHITE[2],
     ];
     let linear = multiply(XYZ_D65_TO_LINEAR_SRGB, multiply(D50_TO_D65, xyz_d50));
-    let encode = |c: f32| {
-        let c = c.clamp(0.0, 1.0);
-        if c <= 0.003_130_8 {
-            12.92 * c
+    if linear.iter().any(|component| !component.is_finite()) {
+        return Err(ColorError::Unsupported(original.to_string()));
+    }
+    if in_srgb_gamut(linear) {
+        return Ok(encode_linear_srgb(linear));
+    }
+    gamut_map_srgb(linear).map_err(|()| ColorError::Unsupported(original.to_string()))
+}
+
+/// CSS Color 4 §14.2.1 binary-search gamut mapping with local MINDE.
+fn gamut_map_srgb(origin: [f32; 3]) -> Result<Rgba, ()> {
+    const JND: f32 = 0.02;
+    const EPSILON: f32 = 0.0001;
+
+    let origin_lab = linear_srgb_to_oklab(origin);
+    if origin_lab.iter().any(|component| !component.is_finite()) {
+        return Err(());
+    }
+
+    // This is destination Oklab L (the corresponding OkLCh lightness), not source Lab L.
+    if origin_lab[0] >= 1.0 {
+        return Ok(Rgba::new(1.0, 1.0, 1.0, 1.0));
+    }
+    if origin_lab[0] <= 0.0 {
+        return Ok(Rgba::new(0.0, 0.0, 0.0, 1.0));
+    }
+    let chroma = origin_lab[1].hypot(origin_lab[2]);
+    let hue = origin_lab[2].atan2(origin_lab[1]);
+    let mut clipped = clip_srgb(origin);
+    if delta_e_ok(origin_lab, linear_srgb_to_oklab(clipped)) < JND {
+        return Ok(encode_linear_srgb(clipped));
+    }
+
+    let mut minimum = 0.0;
+    let mut maximum = chroma;
+    let mut minimum_is_in_gamut = true;
+    while maximum - minimum > EPSILON {
+        let candidate_chroma = (minimum + maximum) / 2.0;
+        let candidate_lab = [
+            origin_lab[0],
+            candidate_chroma * hue.cos(),
+            candidate_chroma * hue.sin(),
+        ];
+        let candidate_rgb = oklab_to_linear_srgb(candidate_lab);
+        if minimum_is_in_gamut && in_srgb_gamut(candidate_rgb) {
+            minimum = candidate_chroma;
+            continue;
+        }
+
+        let candidate_clipped = clip_srgb(candidate_rgb);
+        let difference = delta_e_ok(candidate_lab, linear_srgb_to_oklab(candidate_clipped));
+        clipped = candidate_clipped;
+        if difference < JND {
+            if JND - difference < EPSILON {
+                return Ok(encode_linear_srgb(candidate_clipped));
+            }
+            minimum_is_in_gamut = false;
+            minimum = candidate_chroma;
         } else {
-            1.055 * c.powf(1.0 / 2.4) - 0.055
+            maximum = candidate_chroma;
+        }
+    }
+
+    Ok(encode_linear_srgb(clipped))
+}
+
+fn in_srgb_gamut(rgb: [f32; 3]) -> bool {
+    rgb.iter()
+        .all(|component| component.is_finite() && (0.0..=1.0).contains(component))
+}
+
+fn clip_srgb(rgb: [f32; 3]) -> [f32; 3] {
+    rgb.map(|component| component.clamp(0.0, 1.0))
+}
+
+fn encode_linear_srgb(rgb: [f32; 3]) -> Rgba {
+    let encode = |component: f32| {
+        if component <= 0.003_130_8 {
+            12.92 * component
+        } else {
+            1.055 * component.powf(1.0 / 2.4) - 0.055
         }
     };
-    Rgba::new(encode(linear[0]), encode(linear[1]), encode(linear[2]), 1.0)
+    Rgba::new(encode(rgb[0]), encode(rgb[1]), encode(rgb[2]), 1.0)
+}
+
+fn linear_srgb_to_oklab(rgb: [f32; 3]) -> [f32; 3] {
+    let l = (0.412_221_46 * rgb[0] + 0.536_332_55 * rgb[1] + 0.051_445_995 * rgb[2]).cbrt();
+    let m = (0.211_903_5 * rgb[0] + 0.680_699_5 * rgb[1] + 0.107_396_96 * rgb[2]).cbrt();
+    let s = (0.088_302_46 * rgb[0] + 0.281_718_85 * rgb[1] + 0.629_978_7 * rgb[2]).cbrt();
+    [
+        0.210_454_26 * l + 0.793_617_8 * m - 0.004_072_047 * s,
+        1.977_998_5 * l - 2.428_592_2 * m + 0.450_593_7 * s,
+        0.025_904_037 * l + 0.782_771_77 * m - 0.808_675_77 * s,
+    ]
+}
+
+fn oklab_to_linear_srgb(lab: [f32; 3]) -> [f32; 3] {
+    let l = lab[0] + 0.396_337_78 * lab[1] + 0.215_803_76 * lab[2];
+    let m = lab[0] - 0.105_561_346 * lab[1] - 0.063_854_17 * lab[2];
+    let s = lab[0] - 0.089_484_18 * lab[1] - 1.291_485_5 * lab[2];
+    let l = l * l * l;
+    let m = m * m * m;
+    let s = s * s * s;
+    [
+        4.076_741_7 * l - 3.307_711_6 * m + 0.230_969_94 * s,
+        -1.268_438 * l + 2.609_757_4 * m - 0.341_319_38 * s,
+        -0.004_196_086_3 * l - 0.703_418_6 * m + 1.707_614_7 * s,
+    ]
+}
+
+fn delta_e_ok(left: [f32; 3], right: [f32; 3]) -> f32 {
+    ((left[0] - right[0]).powi(2) + (left[1] - right[1]).powi(2) + (left[2] - right[2]).powi(2))
+        .sqrt()
 }

@@ -12,6 +12,7 @@ const COLOR_PROPERTIES: [&str; 6] = [
     "stroke",
     "outline-color",
 ];
+const COLOR_CUSTOM_PROPERTIES: [&str; 2] = ["--pui-ring-color", "--pui-ring-offset-color"];
 
 fn rgba8(value: &str) -> [u8; 4] {
     parse_rgba(value)
@@ -35,6 +36,47 @@ fn parses_both_rgb_syntaxes() {
     assert_eq!(rgba8("rgba(0, 0, 0, 0.75)"), [0, 0, 0, 191]);
     assert_eq!(rgba8("rgb(0 0 0 / 0.5)"), [0, 0, 0, 128]);
     assert_eq!(rgba8("rgb(255, 128, 0)"), [255, 128, 0, 255]);
+}
+
+#[test]
+fn clamps_rgb_and_alpha_to_the_concrete_rgba_range() {
+    let over = parse_rgba("rgb(300 0 0 / 120%)").unwrap();
+    assert_eq!(over, Rgba::new(1.0, 0.0, 0.0, 1.0));
+
+    let under = parse_rgba("rgb(-30 0 0 / -0.5)").unwrap();
+    assert_eq!(under, Rgba::new(0.0, 0.0, 0.0, 0.0));
+
+    for value in ["rgb(NaN 0 0)", "rgba(0, 0, 0, inf)"] {
+        assert!(
+            matches!(parse_rgba(value), Err(ColorError::Malformed(_))),
+            "{value}"
+        );
+    }
+}
+
+#[test]
+fn rejects_invalid_color_mix_weights_and_duplicate_alpha_forms() {
+    for value in [
+        "color-mix(in oklab, #3366ff -1%, transparent)",
+        "color-mix(in oklab, #3366ff 120%, transparent)",
+        "color-mix(in oklab, #3366ff NaN%, transparent)",
+        "rgb(1, 2, 3, 0.25 / 0.9)",
+    ] {
+        assert!(
+            matches!(parse_rgba(value), Err(ColorError::Malformed(_))),
+            "{value}"
+        );
+    }
+}
+
+#[test]
+fn rejects_mixed_rgb_separator_grammars() {
+    let whitespace_alpha = parse_rgba("rgb(1 2 3 0.5)").is_err();
+    let comma_slash_alpha = parse_rgba("rgb(1, 2, 3 / 0.5)").is_err();
+    assert!(
+        whitespace_alpha && comma_slash_alpha,
+        "invalid mixed RGB grammars accepted: whitespace alpha={whitespace_alpha}, comma/slash alpha={comma_slash_alpha}"
+    );
 }
 
 #[test]
@@ -65,6 +107,38 @@ fn converts_lab_through_the_css_color_4_path() {
         chromatic[0] > chromatic[1] && chromatic[2] > chromatic[1],
         "expected a magenta-ish cast, got {chromatic:?}"
     );
+}
+
+#[test]
+fn clamps_lab_lightness_endpoints_and_gamut_maps_intermediate_values() {
+    assert_eq!(rgba8("lab(100% 40 0)"), [255, 255, 255, 255]);
+    // CSSWG #8794 places this endpoint at display gamut mapping, after Lab-to-destination conversion.
+    assert_ne!(rgba8("lab(0 104.3 -50.9)"), [0, 0, 0, 255]);
+    // Source Lab L=100 is not a white shortcut when converted destination Oklab L is below 1.
+    assert_ne!(rgba8("lab(100% -300 -300)"), [255, 255, 255, 255]);
+    assert_eq!(rgba8("lab(120% 0 0)"), [255, 255, 255, 255]);
+    assert_eq!(rgba8("lab(-5% 0 0)"), [0, 0, 0, 255]);
+
+    // This recorded Shadcn destructive color is outside sRGB. CSS Color 4's
+    // Oklch chroma-reduction mapping keeps its hue instead of clipping RGB
+    // channels independently (which produces a different, over-saturated red).
+    assert_eq!(rgba8("lab(48.4493% 77.4328 61.5452)"), [231, 0, 11, 255]);
+    assert_eq!(rgba8("lab(30 160 -160)"), [130, 0, 255, 255]);
+
+    let mapped = parse_rgba("lab(50% 160 0)").unwrap();
+    for component in [mapped.r, mapped.g, mapped.b, mapped.a] {
+        assert!((0.0..=1.0).contains(&component));
+    }
+}
+
+#[test]
+fn maps_converted_lightness_endpoint_to_white() {
+    assert_eq!(rgba8("lab(99% 25 -25)"), [255, 255, 255, 255]);
+}
+
+#[test]
+fn parses_lab_axis_percentages_using_css_reference_range() {
+    assert_eq!(rgba8("lab(29.69% 44.888% -29.04%)"), [128, 0, 128, 255]);
 }
 
 #[test]
@@ -122,6 +196,7 @@ fn reports_rather_than_approximates_what_it_cannot_do() {
 #[test]
 fn parses_every_colour_a_theme_can_produce() {
     let mut checked = 0usize;
+    let mut custom_properties_checked = std::collections::BTreeSet::new();
     let mut unresolved = 0usize;
 
     for language in themes().names() {
@@ -130,10 +205,13 @@ fn parses_every_colour_a_theme_can_produce() {
 
             for (token, _) in vocabulary().tokens_with_declarations() {
                 let resolved = vocabulary().resolve_all([token.as_str()]);
-                for property in COLOR_PROPERTIES {
+                for property in COLOR_PROPERTIES.into_iter().chain(COLOR_CUSTOM_PROPERTIES) {
                     let Some(raw) = resolved.get(property) else {
                         continue;
                     };
+                    if COLOR_CUSTOM_PROPERTIES.contains(&property) {
+                        custom_properties_checked.insert(property);
+                    }
                     match theme.substitute(raw) {
                         Substitution::Resolved(value) => {
                             parse(&value).unwrap_or_else(|error| {
@@ -161,6 +239,11 @@ fn parses_every_colour_a_theme_can_produce() {
     // whole test vacuous.
     assert!(checked > 200, "only checked {checked} colours");
     assert!(unresolved > 0, "the cross-language case disappeared");
+    assert_eq!(
+        custom_properties_checked,
+        COLOR_CUSTOM_PROPERTIES.into_iter().collect(),
+        "theme color completeness must retain both ring custom properties"
+    );
 }
 
 /// The vocabulary spans every design language; a theme does not.
