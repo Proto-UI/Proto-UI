@@ -11,6 +11,7 @@ type MatrixFacts = {
   previewers: number;
   initialized: number;
   errors: number;
+  errorDetails: string[];
   overflow: number;
   adapterColumns: string;
   adapterColumnCount: number;
@@ -90,13 +91,18 @@ async function readMatrixFacts(page: Page): Promise<MatrixFacts> {
         (adapter) => Math.round(adapter.getBoundingClientRect().left)
       )
     );
+    const errorPreviewers = [...document.querySelectorAll('[data-previewer-id]')].filter(
+      (previewer) => previewer.textContent?.includes('[Preview Error]')
+    );
     return {
       demos: document.querySelectorAll('.demo-matrix__item').length,
       previewers: document.querySelectorAll('[data-previewer-id]').length,
       initialized: document.querySelectorAll('[data-previewer-id][data-inited="1"]').length,
-      errors: [...document.querySelectorAll('[data-previewer-id]')].filter((previewer) =>
-        previewer.textContent?.includes('[Preview Error]')
-      ).length,
+      errors: errorPreviewers.length,
+      errorDetails: errorPreviewers.map(
+        (previewer) =>
+          `${previewer.closest('.demo-matrix__adapter')?.getAttribute('aria-label')} (${previewer.getAttribute('data-previewer-id')}): ${previewer.textContent}`
+      ),
       overflow: root.scrollWidth - root.clientWidth,
       adapterColumns: firstGrid ? getComputedStyle(firstGrid).gridTemplateColumns : '',
       adapterColumnCount: firstColumns.size,
@@ -217,7 +223,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       expect(facts.unavailable).toEqual([]);
       expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
       expect(facts.initialized).toBe(facts.previewers);
-      expect(facts.errors).toBe(0);
+      expect(facts.errors, facts.errorDetails.join('\n\n')).toBe(0);
       expect(facts.overflow).toBeLessThanOrEqual(0);
       expect(facts.adapterColumnCount).toBe(RUNTIMES.length);
       for (const runtime of RUNTIMES) {
@@ -269,7 +275,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       try {
         await waitForMatrix(page);
         const facts = await readMatrixFacts(page);
-        expect(facts.errors).toBe(0);
+        expect(facts.errors, facts.errorDetails.join('\n\n')).toBe(0);
         expect(facts.overflow).toBeLessThanOrEqual(0);
         expect(facts.adapterColumnCount).toBe(1);
         expect(facts.unavailable).toEqual([]);

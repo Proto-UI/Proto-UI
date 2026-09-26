@@ -259,11 +259,16 @@ function selectChangedPackages(packages, base) {
       .filter(Boolean)
       .forEach((file) => files.add(file));
   }
-  const changedFiles = [...files];
-  const globalChange = changedFiles.some((file) =>
-    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|\.github\/)/.test(
-      file
-    )
+  return selectAffectedPackages(packages, [...files]);
+}
+
+export function selectAffectedPackages(packages, changedFiles) {
+  const globalChange = changedFiles.some(
+    (file) =>
+      file === 'scripts/analysis/package-budgets.mjs' ||
+      /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|\.github\/)/.test(
+        file
+      )
   );
   if (globalChange) return new Set(packages.map((pkg) => pkg.name));
 
