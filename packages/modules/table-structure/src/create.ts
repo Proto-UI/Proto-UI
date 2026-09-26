@@ -228,7 +228,7 @@ export class TableStructureModuleImpl extends ModuleBase {
     if (!next.valid) return;
 
     const byRef = new Map(records.map(({ impl }) => [impl.a11y.getObjectRef(), impl]));
-    if (next.caption) byRef.get(next.caption)?.applyCaption();
+    if (next.caption) byRef.get(next.caption)?.applyCaption(true);
     for (const row of next.rows) {
       byRef.get(row.ref)?.applyRow(row.index);
       for (const cell of row.cells) byRef.get(cell.ref)?.applyCell(cell);
@@ -236,9 +236,10 @@ export class TableStructureModuleImpl extends ModuleBase {
   }
 
   private clearProjection(): void {
-    this.applyRow(null);
-    this.applyCell(null);
     if (this.role === 'root') this.applyTable(null);
+    else if (this.role === 'caption') this.applyCaption(false);
+    else if (this.role === 'row') this.applyRow(null);
+    else if (this.role === 'headerCell' || this.role === 'cell') this.applyCell(null);
   }
 
   private applyTable(snapshot: TableStructureSnapshot | null): void {
@@ -254,8 +255,8 @@ export class TableStructureModuleImpl extends ModuleBase {
     });
   }
 
-  private applyCaption(): void {
-    this.state.set(this.states.a11yRole, 'caption', 'table.structure');
+  private applyCaption(active: boolean): void {
+    this.state.set(this.states.a11yRole, active ? 'caption' : '', 'table.structure');
   }
 
   private applyRow(index: number | null): void {

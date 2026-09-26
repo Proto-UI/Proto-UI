@@ -18,6 +18,14 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 npm install @proto.ui/module-focus@0.3.0-alpha.1
 ```
 
+## Adapter integration
+
+Adapters may supply the optional internal `FOCUS_SAMPLE_SCOPE_TARGETS_CAP` for live sequential traversal within an active scope. The host returns ordered eligible targets and native focus; Focus keeps top-scope gating, direction, looping and default-action prevention. It does not synthesize logical focus facts from that sample. Without the capability, the logical-member path remains available and respects `navParticipation`. See draft `C-AS-FOCUS-SCOPE-0002` J; this is not a new author-facing hook or configuration option.
+
+Focus passes its current traversal direction to the optional sampler so native direction-dependent eligibility (such as entry into an unchecked radio group) can be observed. The host does not choose the direction or apply scope policy.
+
+When native focus is inside the scope but not a sequential stop, the sample may report its insertion position separately. Focus uses that position for next/previous traversal without adding a programmatic-only target to the Tab stops.
+
 ## Internal Structure
 
 - `src/caps.ts`

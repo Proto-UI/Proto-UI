@@ -1,0 +1,229 @@
+---
+const zh = Astro.url.pathname.startsWith('/zh-cn/');
+---
+
+<section id="shadow-split-s1" class="s1" aria-label="Shadow split S1" data-shadow-s1>
+  <h2>Shadow split · S1</h2>
+  <p>
+    {
+      zh
+        ? '实验性 WC profile：正式 Adapter + CLI artifact。Light 与 split 使用同一原型；Checkbox 包括 Root + Indicator。'
+        : 'Experimental WC profile: production Adapter + CLI artifact. Both columns use the same prototypes; Checkbox includes Root + Indicator.'
+    }
+  </p>
+  <div class="s1-controls">
+    <button data-action="theme"
+      >{zh ? '切换主题变量（两列）' : 'Theme variables (both columns)'}</button
+    >
+    <button data-action="scheme-badge"
+      >{zh ? 'Badge light / dark（仅 split）' : 'Badge light / dark (split only)'}</button
+    >
+    <button data-action="scheme-checkbox"
+      >{zh ? 'Checkbox light / dark（仅 split）' : 'Checkbox light / dark (split only)'}</button
+    >
+    <button data-action="tone">Badge tone: <span data-tone>accent</span></button>
+    <button data-action="disabled">Checkbox disabled</button>
+    <button data-action="mixed">Checkbox mixed</button>
+    <button data-action="constraint">{zh ? '宽度约束' : 'Constrain width'}</button>
+    <button data-action="disturb">{zh ? 'Document CSS 干扰' : 'Document CSS disturbance'}</button>
+    <button data-action="reset"
+      >{zh ? '取消 host reset 豁免' : 'Disable host reset exemption'}</button
+    >
+    <button data-action="part">::part(surface)</button>
+    <button data-action="inline">surfaceStyle</button>
+    <button data-action="class">surfaceClassName</button>
+    <button data-action="slot">{zh ? '替换 slot' : 'Replace slot'}</button>
+    <button data-action="move">{zh ? '同步移动' : 'Synchronous move'}</button>
+    <button data-action="disconnect">{zh ? '移除 / 重新连接' : 'Remove / reconnect'}</button>
+  </div>
+  <p>
+    {
+      zh
+        ? 'tone 循环：accent（黄）→ info（蓝）→ danger（红）。light / dark 开关只控制 split 的独立颜色来源，Light DOM 仍跟随 document；“主题变量”则同时更新两列的配色。'
+        : 'Tone cycle: accent (yellow) → info (blue) → danger (red). The light / dark controls affect only the split sources; Light DOM still follows the document. Theme variables update the palette in both columns.'
+    }
+  </p>
+  <div class="s1-pairs">
+    {
+      ['light', 'split'].map((profile) => (
+        <article data-profile={profile}>
+          <h3>{profile === 'light' ? 'Light DOM' : 'Shadow split'}</h3>
+          <div class="s1-demo-layout">
+            <p class="s1-badge-row">
+              <>
+                <span data-baseline>Baseline </span>
+                <span data-badge-mount />
+                <span> end</span>
+              </>
+            </p>
+            <div class="s1-check-row">
+              <>
+                <span data-checkbox-mount />
+                <span>Accept terms</span>
+              </>
+            </div>
+          </div>
+          <div data-move-target />
+          <output data-stats aria-live="polite" />
+        </article>
+      ))
+    }
+  </div>
+  <p class="s1-limits">
+    {
+      zh
+        ? 'Tab / Space / 鼠标检查交互。CSS 干扰仅作用于本检测区：预期 Light 的背景变色，而 split 内部 surface 背景不变；两列的 Badge 文本都会变红，因为 slot 中的 span 仍归消费者的 Light DOM 所有。host、继承、slotted 内容不完全隔离；类投递不等于自动导入 document CSS。part / raw CSS 修改布局、字体、边框或 padding 后，不保证自动尺寸等价。'
+        : 'Check Tab / Space / pointer input. CSS disturbance is scoped here: Light backgrounds should change while split inner surface backgrounds stay unchanged. Badge text turns red in both columns because the slotted span still belongs to the consumer’s Light DOM. Host, inheritance and slotted content are not fully isolated; forwarding classes does not import document CSS. Part/raw CSS layout, font, border or padding overrides can invalidate sizing parity.'
+    }
+  </p>
+  <details>
+    <summary>{zh ? '验收清单与接入边界' : 'Acceptance checklist and boundaries'}</summary>
+    <ol>
+      <li>
+        {
+          zh
+            ? '对比 baseline、尺寸、受限换行和首次显示。'
+            : 'Compare baseline, geometry, constrained wrapping and first display.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '切换主题、tone、checked、mixed、disabled；观察 Indicator 和通知数。'
+            : 'Switch theme, tone, checked, mixed and disabled; observe Indicator and notification counts.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '逐一开启 CSS 干扰、part、surfaceStyle、surfaceClassName，再复原。'
+            : 'Toggle disturbance, part, surfaceStyle and surfaceClassName individually, then reset.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '替换 slot、同步移动（generation 不变）、移除再连接（generation 增加）。'
+            : 'Replace slots, move synchronously (same generation), remove/reconnect (new generation).'
+        }
+      </li>
+    </ol>
+    <p>
+      {
+        zh
+          ? 'Chrome 基线；不代表完整跨浏览器、screen reader、严格 CSP、native text/image 或 Dialog/portal 支持。'
+          : 'Chrome baseline; not full cross-browser, screen-reader, strict CSP, native text/image or Dialog/portal support.'
+      }
+    </p>
+  </details>
+</section>
+
+<script>
+  import { mountShadowSplitAcceptance } from './shadow-split-acceptance';
+  const initialize = () =>
+    document.querySelectorAll<HTMLElement>('[data-shadow-s1]').forEach(mountShadowSplitAcceptance);
+  initialize();
+  document.addEventListener('astro:page-load', initialize);
+</script>
+
+<style is:global>
+  .s1 {
+    margin-block: 2rem;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    min-width: 0;
+  }
+  .s1-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-block: 1rem;
+  }
+  .s1-controls button {
+    font: inherit;
+    font-size: 0.8rem;
+    border: 1px solid currentColor;
+    border-radius: 0.35rem;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+  }
+  .s1-controls button[aria-pressed='true'] {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+  .s1-pairs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .s1-pairs article {
+    min-width: 0;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    overflow-wrap: anywhere;
+  }
+  .s1-demo-layout {
+    font:
+      16px/normal Arial,
+      sans-serif;
+    width: 100%;
+  }
+  .s1[data-constrained] .s1-demo-layout {
+    max-width: 140px;
+  }
+  .s1-badge-row {
+    margin-block: 1rem;
+  }
+  .s1-check-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2rem;
+  }
+  .s1 [data-checkbox-mount] {
+    display: block;
+  }
+  .s1 [data-stats] {
+    display: block;
+    white-space: pre-line;
+    font: 12px/1.6 monospace;
+    margin-block: 1rem;
+  }
+  .s1 .s1-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .s1 .s1-consumer-paint {
+    background-color: rgb(255, 0, 180) !important;
+  }
+  /* The site's own Tailwind preflight otherwise overwrites Shadow host metrics.
+     Roll back only this reset layer, leaving generated recipes responsible for values. */
+  @layer base {
+    .s1:not([data-reset-interference]) [data-profile='split'] [data-s1-component] {
+      padding: revert-layer;
+      border: revert-layer;
+    }
+  }
+  .s1[data-disturb] [data-pui-style] {
+    background-color: rgb(255, 0, 180) !important;
+  }
+  .s1[data-disturb] .s1-slot-text {
+    color: rgb(220, 20, 40) !important;
+  }
+  .s1[data-part] [data-s1-component]::part(surface) {
+    background-color: rgb(0, 180, 140);
+  }
+  @media (max-width: 640px) {
+    .s1-pairs {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -55,7 +55,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             });
           }
 
-          const unUse = this.recorder.use(...handles);
+          const unUse = this.recorder.useRuntime(...handles);
           this.dirty = true;
           this.flushIfPossible();
 
@@ -76,7 +76,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           }
 
           previous?.({ flush: false });
-          const next = handles.length > 0 ? this.recorder.use(...handles) : null;
+          const next = handles.length > 0 ? this.recorder.useRuntime(...handles) : null;
           this.dirty = true;
           this.flushIfPossible();
           return next ? this.createRuntimeStyleDisposer(next) : null;
@@ -161,7 +161,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           }
 
           const effects = this.caps.get(EFFECTS_CAP);
-          const merged = this.exportMerged();
+          const merged = this.recorder.exportRootEffect();
 
           // mark clean before calling host
           this.dirty = false;
@@ -182,8 +182,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             return;
           }
           const effects = this.caps.get(EFFECTS_CAP);
-          const merged = this.recorder.exportWithAdditional(handle);
-          effects.queueStyle({ kind: 'tw', tokens: merged.tokens });
+          const merged = this.recorder.exportRootEffect(handle);
+          effects.queueStyle(merged);
           effects.requestFlush();
           this.flushRequested = true;
         }
@@ -193,7 +193,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           // A structural commit may replace the current materialized root.
           if (!this.caps.has(EFFECTS_CAP)) return;
           const effects = this.caps.get(EFFECTS_CAP);
-          const merged = this.exportMerged();
+          const merged = this.recorder.exportRootEffect();
           effects.queueStyle(merged);
           effects.requestFlush();
           this.flushRequested = true;
@@ -206,7 +206,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           // so replay must not use flushIfPossible's setup-phase guard.
           if (!this.caps.has(EFFECTS_CAP)) return;
           const effects = this.caps.get(EFFECTS_CAP);
-          effects.queueStyle(this.exportMerged());
+          effects.queueStyle(this.recorder.exportRootEffect());
           effects.requestFlush();
           this.flushRequested = true;
         }

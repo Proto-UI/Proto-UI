@@ -1,0 +1,72 @@
+---
+import './shadow-split-s3.css';
+import './shadow-split-s4.css';
+const zh = Astro.url.pathname.startsWith('/zh-cn/');
+---
+
+<section
+  id="shadow-split-s4"
+  class="s4"
+  data-shadow-s4
+  data-lang={zh ? 'zh' : 'en'}
+  aria-label="Shadow split S4"
+>
+  <h2>Shadow split · S4</h2>
+  <p>
+    {
+      zh
+        ? '完整 Shadcn Dialog 承载 Tabs 设置。Light / split / mixed；一次打开一个普通弹窗，仍为 draft。'
+        : 'Complete Shadcn Dialog containing Tabs settings. Light / split / mixed; one ordinary modal at a time, still draft.'
+    }
+  </p>
+  <div data-s4-app></div>
+  <details>
+    <summary>{zh ? '人工验收目标与边界' : 'Manual targets and boundaries'}</summary>
+    <ol>
+      <li>
+        {
+          zh
+            ? '用鼠标与键盘打开；检查居中、遮罩、淡入缩放与关闭动画。缩窄窗口后检查布局；文字与设置控件随整个弹窗一起运动。'
+            : 'Open with pointer and keyboard; check centering, mask, fade/zoom and exit. Resize the window; text and controls move with the whole Dialog.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? 'Tab / Shift+Tab 留在弹窗中并循环；Tabs 方向键跳过禁用项。Escape、关闭按钮、右上角图标、点击遮罩均请求关闭，随后焦点回到 Trigger。'
+            : 'Tab / Shift+Tab stay inside and loop; Tabs arrows skip Disabled. Escape, Close, the corner icon and mask press request closing, then restore Trigger focus.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '勾选“拒绝关闭请求”，上述关闭操作只增加请求计数，不关闭；取消勾选后恢复。切换设置、主题、tone、slot 后关闭再打开，检查消费者模型保留。'
+            : 'Enable Decline close requests: dismissal increases requests without closing. Disable it to accept again. Change settings, theme, tone and slots; close/reopen preserves the consumer model.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '打开时同步移动 Root 应保持实例；移除 Root 应同时清除弹窗、遮罩与滚动锁。在原卡片重连后可重新打开，通知不重复。'
+            : 'Move an open Root synchronously without replacing instances. Remove Root to clear the Dialog, mask and scroll lock. Reconnect from its card and reopen without duplicate notifications.'
+        }
+      </li>
+    </ol>
+    <p>
+      {
+        zh
+          ? 'Portal 使用物理目的地的 document 主题；不搬运来源祖先的局部变量。Slot 归 Maker。此阶段不承诺嵌套弹窗、跨 document、任意 portal target 或任意 transform/动画；K1 仅扩展已记录的居中与淡入缩放配方。'
+          : 'Portals use the physical document destination theme, without transporting origin ancestor variables. Slots remain Maker-owned. Nested modals, cross-document or arbitrary portal targets/transforms/animations are excluded; K1 admits only the recorded centering and fade/zoom recipe.'
+      }
+    </p>
+  </details>
+</section>
+<script>
+  import { mountShadowSplitS4 } from './shadow-split-s4';
+  const initialize = () =>
+    document
+      .querySelectorAll<HTMLElement>('[data-shadow-s4]')
+      .forEach((el) => mountShadowSplitS4(el));
+  initialize();
+  document.addEventListener('astro:page-load', initialize);
+</script>

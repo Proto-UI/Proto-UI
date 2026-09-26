@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createA11ySemanticObjectRef, type AnatomyPartView } from '@proto.ui/core';
 import type { A11yPort } from '@proto.ui/module-a11y';
 import type { AnatomyPort } from '@proto.ui/module-anatomy';
@@ -9,6 +9,27 @@ import { projectTableStructure } from '../src/projection';
 const ref = () => createA11ySemanticObjectRef();
 
 describe('M-TABLE-STRUCTURE-0001', () => {
+  it('does not clear A11y facts on instances without a Table role', () => {
+    const setRelation = vi.fn();
+    const setState = vi.fn();
+    const module = new TableStructureModuleImpl(
+      { onChange: () => () => {} } as any,
+      {} as AnatomyPort,
+      { setRelation } as unknown as A11yPort,
+      { set: setState } as unknown as StatePort,
+      {
+        string: () => ({}),
+        numberDiscrete: () => ({}),
+      } as unknown as StateFacade
+    );
+
+    module.onMountPhase('unmounting', 1);
+    module.onMountPhase('detached', 1);
+
+    expect(setRelation).not.toHaveBeenCalled();
+    expect(setState).not.toHaveBeenCalled();
+  });
+
   it('projects monotonic range-based topology and ordered opaque headers', () => {
     const group = ref();
     const column = ref();

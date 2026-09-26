@@ -91,6 +91,8 @@ implementations:
     required: true
     consumesCases:
       - T-STATE-0004-CASE-CALLBACK-SCOPE
+    notes:
+      - Includes successful and throwing synchronous nested renders; the enclosing callback phase must resume and idle must not acquire callback authority.
 verifies:
   contracts:
     - id: C-CORE-SYNTAX-0002

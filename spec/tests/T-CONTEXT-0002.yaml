@@ -5,6 +5,10 @@ status: draft
 since: 0.1.0
 summary: Module, runtime, and adapter tests for required and optional context subscription intent, read surfaces, runtime update APIs, callback delivery, render-read access, rebinding, and cleanup.
 cases:
+  - id: T-CONTEXT-0002-CASE-REENTRANCY
+    title: Same-channel reentrant transitions retain commit order, current reads and lifetime-safe exception draining
+    covers: [C-CONTEXT-0010-F, C-CONTEXT-0010-G, C-CONTEXT-0010-H]
+    expectation: ordered-transition-delivery-with-current-provider-state
   - id: T-CONTEXT-0002-CASE-REQUIRED-SUBSCRIBE
     title: Required subscribe declares a required context dependency and gates required reads
     covers:
@@ -63,6 +67,28 @@ cases:
       - C-CONTEXT-0012-E
     expectation: scope-rebind-and-cleanup
 implementations:
+  - id: context-reentrancy
+    kind: module-test
+    status: passing
+    path: packages/modules/context/test/reentrancy.test.ts
+    required: true
+    consumesCases: [T-CONTEXT-0002-CASE-REENTRANCY]
+  - id: context-reentrancy-framework-consumers
+    kind: fixture
+    status: passing
+    path: packages/adapters/base/test/fixtures/context-reentrancy.ts
+    required: true
+    consumesCases: [T-CONTEXT-0002-CASE-REENTRANCY]
+    notes:
+      - Driven by context-reentrancy.test.ts in React, Vue, Vue2 and Web Component; real Runtime callback scope, derived-state DOM output and terminal/new-generation cleanup. Not a four-framework native Tabs keyboard claim.
+  - id: j1-native-controlled-tabs
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s3-controlled-audit.mjs
+    required: true
+    consumesCases: [T-CONTEXT-0002-CASE-REENTRANCY]
+    notes:
+      - Twelve Chrome public-dist Light/full-split, L1/keepMounted and uncontrolled/sync/microtask-echo native keyboard combinations; complete S3 remains separate.
   - id: context-runtime-surface-fixture
     kind: fixture
     status: active
@@ -149,6 +175,9 @@ verifies:
         - C-CONTEXT-0010-C
         - C-CONTEXT-0010-D
         - C-CONTEXT-0010-E
+        - C-CONTEXT-0010-F
+        - C-CONTEXT-0010-G
+        - C-CONTEXT-0010-H
     - id: C-CONTEXT-0011
       anchors:
         - C-CONTEXT-0011-A
@@ -164,6 +193,9 @@ verifies:
         - C-CONTEXT-0012-D
         - C-CONTEXT-0012-E
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound passing J1 module reentrancy, four-framework derived-state and native controlled Tabs evidence.
   - version: 0.1.0
     change: introduced
     summary: Added context subscription, read, update, callback, render-read, and cleanup test mapping.

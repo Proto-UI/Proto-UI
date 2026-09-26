@@ -5,6 +5,14 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Content transition presence, focus containment, dismissal requests, controlled ownership, and accessible modal semantics.
 cases:
+  - id: T-BASE-DIALOG-CONTENT-0001-CASE-CLOSED-PAINT
+    title: Closed Dialog stays visually absent after settings changes and leave completion
+    covers: [P-BASE-DIALOG-CONTENT-PRESENCE]
+    expectation: no-closed-content-paint-in-bounded-chrome-screenshot-samples
+  - id: T-BASE-DIALOG-CONTENT-0001-CASE-CONTROLLED-REENTRANCY
+    title: Synchronous owner acceptance supersedes the pre-dismissal snapshot
+    covers: [P-BASE-DIALOG-CONTENT-CONTROLLED, P-BASE-DIALOG-CONTENT-PRESENCE]
+    expectation: accepted-close-leaves-and-detaches-without-stale-reopen
   - id: T-BASE-DIALOG-CONTENT-0001-CASE-SURFACE
     title: Content coordinates presence, focus, and dismissal through Root
     covers:
@@ -27,6 +35,46 @@ cases:
       - P-BASE-DIALOG-CONTENT-DISMISS
     expectation: mask-rematerialization-does-not-steal-content-outside-owner
 implementations:
+  - id: s4-closed-paint-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-CLOSED-PAINT]
+    notes:
+      - Twenty-four Light/split/mixed settings paths use screenshot sampling after dismissal; bounded Chrome evidence, not exhaustive GPU presentation telemetry or the separate rapid-reopen mask issue.
+  - id: s4-complete-dialog-public-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s4-public-browser.mjs
+    required: true
+    consumesCases:
+      [
+        T-BASE-DIALOG-CONTENT-0001-CASE-SURFACE,
+        T-BASE-DIALOG-CONTENT-0001-CASE-A11Y,
+        T-BASE-DIALOG-CONTENT-0001-CASE-CONTROLLED-REENTRANCY,
+      ]
+    notes:
+      - Real CLI companion and public dist only; complete Shadcn Dialog contains S3 Tabs/settings in Light/split/mixed. Native keyboard/pointer, CDP AX name/description and closed exclusion, accepted/declined dismissal, consumer-model retention and no duplicate events after owner reconnect.
+  - id: s4-complete-dialog-website-browser
+    kind: workspace-check
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-DIALOG-CONTENT-0001-CASE-SURFACE,
+        T-BASE-DIALOG-CONTENT-0001-CASE-A11Y,
+        T-BASE-DIALOG-CONTENT-0001-CASE-CONTROLLED-REENTRANCY,
+      ]
+    notes:
+      - Both locales share scripts/analysis/shadow-s4-journey.mjs with the isolated public consumer and verify the real demo-matrix after all framework previews are ready.
+  - id: controlled-dismissal-reentrancy
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/dialog-controlled-dismissal.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-CONTROLLED-REENTRANCY]
   - id: prototypes-base-dialog-content-contract
     kind: module-test
     status: passing
@@ -61,10 +109,20 @@ verifies:
         - P-BASE-DIALOG-CONTENT-PRESENCE
         - P-BASE-DIALOG-CONTENT-DISMISS
         - P-BASE-DIALOG-CONTENT-CONTROLLED
+        - P-BASE-DIALOG-CONTENT-FOCUS
         - P-BASE-DIALOG-CONTENT-A11Y-ROLE
         - P-BASE-DIALOG-CONTENT-A11Y-RELATIONS
 exercises: { prototypes: [P-BASE-DIALOG-CONTENT] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Mapped the S4 post-dismissal paint regression separately from semantic dismissal and accessibility evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added complete Dialog-with-settings native public/website evidence for focus, actual AX, controlled dismissal and owner reconnection.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added sync, deferred and declined controlled dismissal regression coverage for authoritative owner input and retained leave presence.
   - { version: 0.2.0-rc.0, change: introduced, summary: Added Dialog Content protocol coverage. }
   - version: 0.2.0-rc.0
     change: refined

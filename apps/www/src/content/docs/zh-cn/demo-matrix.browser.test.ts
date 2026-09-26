@@ -51,14 +51,26 @@ async function waitForMatrix(page: Page): Promise<void> {
     { timeout: 60_000 }
   );
 
-  // Framework loaders settle after the preview roots are marked initialized;
-  // wait for the final host content so a slow import cannot be reported as a
-  // false matrix failure.
+  // data-inited is set before the async runtime loader starts, and a framework
+  // can append its first host child before the complete nested demo commits.
+  // Wait for the previewer's mount receipt as well as final host content so a
+  // slow import or commit cannot be sampled as a cross-runtime difference.
   await page.waitForFunction(
     () =>
-      [...document.querySelectorAll<HTMLElement>('[data-previewer-id] .host')].every(
-        (host) => host.childElementCount > 0 || host.textContent?.includes('[Preview Error]')
-      ),
+      [...document.querySelectorAll<HTMLElement>('[data-previewer-id]')].every((previewer) => {
+        const host = previewer.querySelector<HTMLElement>('.host');
+        const api = (
+          previewer as HTMLElement & {
+            __previewer__?: { getCurrentRuntime(): string | null };
+          }
+        ).__previewer__;
+        return (
+          api?.getCurrentRuntime() === previewer.dataset.initialRuntime &&
+          Boolean(
+            host && (host.childElementCount > 0 || host.textContent?.includes('[Preview Error]'))
+          )
+        );
+      }),
     undefined,
     { timeout: 60_000 }
   );
@@ -235,7 +247,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
         ).toBe(true);
         expect(
           new Set(signatures.map((signature) => JSON.stringify(signature))).size,
-          `${demoId} accessible controls differ across runtimes`
+          `${demoId} accessible controls differ across runtimes: ${JSON.stringify(signatures)}`
         ).toBeLessThanOrEqual(1);
       }
 

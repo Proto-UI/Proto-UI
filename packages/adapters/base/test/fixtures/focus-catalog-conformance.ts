@@ -210,7 +210,12 @@ export function focusCatalogAdapterConformance(
             target.setAttribute('shape', 'rect');
             target.setAttribute('coords', '0,0,20,20');
           }
-          if (tag === 'audio' || tag === 'video') target.setAttribute('controls', '');
+          if (tag === 'audio' || tag === 'video') {
+            target.setAttribute('controls', '');
+            // Keep the shared rendered-candidate fixture independent of
+            // Happy DOM's display:none media UA default.
+            target.style.display = 'inline';
+          }
           if (tag === 'area') {
             const map = document.createElement('map');
             map.name = `focus-map-${name}`;

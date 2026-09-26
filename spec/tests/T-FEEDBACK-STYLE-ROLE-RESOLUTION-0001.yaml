@@ -1,0 +1,419 @@
+id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+type: test
+title: Root feedback style application-role classification and transport tests
+status: draft
+lifecycleRationale:
+  zh-CN: 仅验证 draft role 与已列出的 recipe、宿主和中间帧采样；不把局部浏览器证据提升为任意布局/动画或稳定性保证。
+  en: Evidence covers draft roles and listed recipes, hosts and sampled intermediate frames only; local browser results do not admit arbitrary layout, animation or stable guarantees.
+since: 0.3.0-alpha.0
+summary: Canonical classification plus Root-only provenance through semantic merge, Rule lowering, runtime patches, replay, and unchanged collapsed output.
+cases:
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-ONLY-CSS
+    title: Proven Template-only occurrences receive ordinary Shadow CSS without Root decomposition
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F]
+    expectation: template-css-generation-does-not-enroll-template-tokens-in-root-transport
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-NOT-ROOT-ADMISSION
+    title: Template membership does not admit unverified Root projection or weaken conservative flat-input checks
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K]
+    expectation: shared-root-and-unclassified-tokens-retain-fail-closed-root-recipes
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-K1-CLASSIFICATION
+    title: Exact half translations retain independent Root geometry provenance without broadening variants
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-S]
+    expectation: canonical-exact-k1-transport
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-K1-RECIPE
+    title: K1 requires same-source geometry and paint recipes and rejects stale companions before mutation
+    covers: [D-WEB-COMPONENT-SHADOW-STYLE-0001-Q, D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K]
+    expectation: complete-k1-recipe-or-unchanged-projection
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-K1
+    title: Exact half translations and synchronized Dialog fade/zoom preserve complete Root geometry
+    covers:
+      [
+        D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-S,
+        D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-T,
+        D-WEB-COMPONENT-SHADOW-STYLE-0001-Q,
+      ]
+    expectation: bounded-k1-provenance-atomicity-and-native-motion
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-CLASSIFICATION
+    title: Exact hidden and relative domains retain provenance and existing author/merge behavior
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-P]
+    expectation: bounded-i1-provenance
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-RECIPE
+    title: I1 same-source recipes preserve atomic rejection of old companions
+    covers: [D-WEB-COMPONENT-SHADOW-STYLE-0001-P]
+    expectation: complete-i1-recipe-or-unchanged-targets
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-BROWSER
+    title: Whole Root hiding and positioning preserve geometry, native input, AX and independent view presence
+    covers:
+      [
+        D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q,
+        D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-R,
+        C-HOST-SURFACE-PROJECTION-0001-I,
+      ]
+    expectation: boundary-participation-and-coordinate-parity
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-TABS
+    title: Complete public Tabs admits I1 with real companion and both retention policies
+    covers: [D-WEB-COMPONENT-SHADOW-STYLE-0001-P]
+    expectation: complete-tabs-basic-switch-and-cleanup
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-CLASSIFICATION
+    title: Exact S2 tokens retain distinct geometry and hit-testing provenance without widening families
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-L]
+    expectation: canonical-bounded-h1-transport
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-GEOMETRY
+    title: Whole Root motion preserves layout allocation, percentage reference and nested geometry
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-M, C-HOST-SURFACE-PROJECTION-0001-H]
+    expectation: single-boundary-transform-with-collapsed-reference
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-HIT
+    title: Boundary hit control preserves descendant override and keyboard semantics
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-N, C-HOST-SURFACE-PROJECTION-0001-H]
+    expectation: independent-boundary-pointer-control
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-ANIMATION
+    title: Same-source sizing and painting remain aligned through intermediate frames and reversal
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-O, D-WEB-COMPONENT-SHADOW-STYLE-0001-O]
+    expectation: synchronized-motion-and-decoration-contributions
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SURFACE
+    title: Canonical appearance and internal-formatting token families classify as surface
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-A
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-B
+    expectation: canonical-surface-role
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-PLACEMENT
+    title: Canonical external-layout token families classify as placement
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-A
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-B
+    expectation: canonical-placement-role
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-COMPOSITE
+    title: Display tokens that combine outer participation and inner formatting classify as composite
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-A
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-B
+    expectation: canonical-composite-role
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-UNRESOLVED
+    title: Known high-ambiguity token families remain unresolved
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-C
+    expectation: ambiguous-role-not-guessed
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-FALLBACK
+    title: Unknown tokens fall back to surface with explicit fallback provenance
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-D
+    expectation: unknown-token-surface-fallback
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-NON-INTEGRATED
+    title: Classification preserves raw tokens without parsing public role qualifiers
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F
+    expectation: unchanged-raw-token-classification
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TRANSPORT
+    title: Winning entries retain original tokens and provenance through merge and patch layers
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-G
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-H
+    expectation: root-entry-provenance-retained
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-LOWERING
+    title: Rule lowering carries canonical roles rather than reclassifying physical variants
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-G
+    expectation: pre-lowering-role-retained
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-REPLAY
+    title: Rule transitions and view replay retain the current Root effect with its origin
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-H
+    expectation: retained-effect-replayed
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-COMPATIBILITY
+    title: Public handles and snapshots and collapsed Adapter outputs remain unchanged
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-E
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F
+    expectation: no-author-or-collapsed-output-change
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SIZING
+    title: Split host sizing and inner painting preserve decoration and relative-size contributions synchronously
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-I
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-J
+    expectation: same-source-non-paint-sizing-contribution
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SPLIT-ATOMIC
+    title: Split recipes fail before target mutation and clean only owned contributions
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K
+    expectation: complete-projection-or-synchronous-rejection
+implementations:
+  - id: cli-template-root-separation
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/shadow-template-style.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-ONLY-CSS
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-NOT-ROOT-ADMISSION
+    notes:
+      - Covers source CLI generation, shared and lowered Root tokens, runtime rejection of Template-only membership and unchanged preset delivery; unresolved source usage remains conservative.
+  - id: native-template-css-consumer
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-ONLY-CSS]
+    notes:
+      - Chrome measures percentage padding using an explicit data-pui-style binding on a Template child; this is generated stylesheet evidence, not automatic WC Template-handle projection.
+      - Native computed-style transitions also compare document and ordinary Shadow precedence between dark and data conditions.
+  - id: k1-classification-and-transport
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/k1-root-geometry.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-K1-CLASSIFICATION]
+  - id: k1-recipe-and-atomic-projection
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/k1-root-projection.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-K1-RECIPE]
+  - id: k1-public-dialog-motion
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s4-admission-browser.mjs
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-K1]
+    notes:
+      - Complete public Shadcn Dialog with generated CLI in Light/split/mixed; 42 natural entering/leaving/reversing frames verify centering, scale/opacity coordination, surface alignment and native center hit, then dynamic wrapping/viewport and live document theme. No full S4 AX/focus/settings conformance claim. Synchronous controlled dismissal is also exercised after its separate owner-snapshot repair.
+  - id: intrinsic-nowrap-recipe
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-intrinsic-recipe.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SPLIT-ATOMIC]
+    notes:
+      - Static inline-flex/flex-1/whitespace-nowrap requires a current companion; conditional bases and explicit width constraints fail before mutation.
+  - id: intrinsic-nowrap-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-intrinsic-browser.mjs
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SIZING]
+    notes:
+      - Twelve native row/column, narrow/wide and unequal-text comparisons exercise generated CSS with Maker slots. Not arbitrary intrinsic layout support or complete Tabs interaction evidence.
+  - id: i1-classification-and-transport
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/i1-root-domains.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-CLASSIFICATION]
+  - id: i1-recipe-and-atomic-projection
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/i1-root-projection.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-RECIPE]
+  - id: i1-native-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-i1-browser.mjs
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-BROWSER]
+    notes:
+      - Public dist runtime with source-generated CLI recipe; scoped diagnostic, not arbitrary CSS or full Tabs keyboard conformance.
+  - id: s3-complete-tabs-admission-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s3-admission-browser.mjs
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-I1-TABS
+    notes:
+      - Fourteen Chrome public-dist and real CLI-companion combinations switch complete Tabs A-B-A under both keepMounted policies, including full split. Separate probes distinguish semantic-tree hiding, legacy state projection and L1 detach. This supersedes the historical negative-admission audit after I1; it is not full S3 keyboard/layout conformance.
+  - id: h1-classification-and-transport
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/h1-root-domains.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-CLASSIFICATION]
+  - id: h1-geometry-hit-animation-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s2-motion-browser.mjs
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-GEOMETRY
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-HIT
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-H1-ANIMATION
+    notes:
+      - Chrome public-dist Button and Switch plus bounded diagnostics compare 204 frames, reversals, all Button sizes, nested scale/percentage travel, native hit rounding, descendant override/native focus and will-change containing block/pixel paint. Fixed borders only; not arbitrary CSS or full S2 composition/input coverage.
+  - id: shadow-split-sizing-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-sizing-browser.mjs
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SIZING
+    notes:
+      - Seven Chromium geometry pairs cover decoration-aware flex peer allocation, percentage max-width and font-relative sizing; not universal CSS layout equivalence.
+  - id: shadow-split-runtime-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-runtime-browser.mjs
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SIZING
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SPLIT-ATOMIC
+    notes:
+      - Fourteen Chromium pairs exercise actual Runtime state/meta lowering, patch/clear, remount and parent allocation. First-commit parity does not mean Rule projection is complete at that callback; both paths finish it later in the same mount turn.
+  - id: shadow-split-prototypes-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-split-prototypes-browser.mjs
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SIZING
+    notes:
+      - Eight Chromium pairs cover complete Brutalist Badge tone/inline baseline/slot and Shadcn Checkbox Root props/paint/ARIA snapshots. This is not Indicator composition, input-router, screen-reader or full profile evidence.
+  - id: shadow-split-root-effects
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-effects.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SPLIT-ATOMIC
+  - id: shadow-split-runtime-views
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-runtime.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-REPLAY
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SPLIT-ATOMIC
+  - id: shadow-split-composed-negative-admission
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/shadow-split-prototype-admission.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SPLIT-ATOMIC
+    notes:
+      - Actual Dialog Mask with a real Dialog context provider rejects an old companion missing the I1 hidden recipe. This is backward-artifact refusal evidence, not complete Mask support.
+  - id: core-feedback-style-application-role-classifier
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/application-role.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-SURFACE
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-PLACEMENT
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-COMPOSITE
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-UNRESOLVED
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-FALLBACK
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-NON-INTEGRATED
+  - id: root-role-transport
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/root-effect.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TRANSPORT
+  - id: root-role-rule-lowering
+    kind: module-test
+    status: passing
+    path: packages/modules/rule-expose-state-web/test/root-role.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-LOWERING
+  - id: root-role-runtime-replay
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/root-style-role.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-REPLAY
+  - id: root-role-collapsed-compatibility
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/root-role-compatibility.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-COMPATIBILITY
+verifies:
+  decisions:
+    - id: D-WEB-COMPONENT-SHADOW-STYLE-0001
+      anchors:
+        [
+          D-WEB-COMPONENT-SHADOW-STYLE-0001-O,
+          D-WEB-COMPONENT-SHADOW-STYLE-0001-P,
+          D-WEB-COMPONENT-SHADOW-STYLE-0001-Q,
+        ]
+    - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+      anchors:
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-A
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-B
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-C
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-D
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-E
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-G
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-H
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-I
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-J
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-L
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-M
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-N
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-O
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-P
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-R
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-S
+        - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-T
+  contracts:
+    - id: C-HOST-SURFACE-PROJECTION-0001
+      since: 0.3.0-alpha.0
+      anchors: [C-HOST-SURFACE-PROJECTION-0001-H, C-HOST-SURFACE-PROJECTION-0001-I]
+exercises:
+  contracts:
+    - C-FEEDBACK-STYLE-0003
+    - C-FEEDBACK-STYLE-0004
+sources:
+  - path: packages/core/src/spec/feedback/application-role.ts
+  - path: packages/core/test/feedback/application-role.test.ts
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded Template-only CSS generation and Root admission separation evidence; public author APIs and draft lifecycle unchanged.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound K1 exact classification, atomic recipe refusal and 42-frame public Dialog geometry evidence; synchronous controlled dismissal and full S4 remain separate.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Planned K1 exact classification, atomic recipe admission and native Dialog motion evidence; no passing claim.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded intrinsic-nowrap recipe rejection and native sizing evidence while preserving automatic minima and zero flex basis.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added I1 classification/recipe/native evidence and superseded the historical Tabs refusal with current complete basic admission; full S3 remains separate.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound S3 complete public Tabs negative-admission audit to unresolved-token evidence; no hidden/relative admission or full split Tabs support claim.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound passing H1 classification and 204-frame public-dist motion evidence, with fixed-border and native-hit rounding limits; complete S2 composition remains separate.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Planned H1 exact classification/transport and distinct browser geometry, hit-testing, and intermediate animation evidence; no passing S2 claim.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound E1 private sizing, atomic effects, Runtime replay and scoped Chromium prototype evidence; public activation and generalized layout support remain unclaimed.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Planned E1 real-browser sizing and atomic split projection evidence without expanding existing passing claims.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound passing transport evidence to actual RuntimeSession Rule transitions and replay, Web state/meta lowering, four collapsed EffectsPorts, and WC boolean-profile DOM output. This is not split layout evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added planned D1 transport, lowering, replay, and collapsed compatibility evidence; classifier coverage alone does not prove integration.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Added executable classification evidence for the non-integrated Root style role slice.
+tags:
+  - feedback
+  - style
+  - application-role
+  - test

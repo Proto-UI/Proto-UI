@@ -3,8 +3,21 @@ import { resolveWebColorScheme } from './web-preferences';
 const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
 const documentSources = new WeakMap<Document, ReturnType<typeof createDocumentSource>>();
 
+export function notifyColorSchemeListeners(listeners: Set<() => void>): void {
+  for (const listener of [...listeners]) {
+    if (!listeners.has(listener)) continue;
+    try {
+      listener();
+    } catch (error) {
+      queueMicrotask(() => {
+        throw error;
+      });
+    }
+  }
+}
+
 function createDocumentSource(doc: Document) {
-  const listeners = new Set<{ invalidate: () => void }>();
+  const listeners = new Set<() => void>();
   let observer: MutationObserver | undefined;
   let media: MediaQueryList | undefined;
   let onChange: (() => void) | undefined;
@@ -14,40 +27,33 @@ function createDocumentSource(doc: Document) {
 
   return {
     subscribe(invalidate: () => void) {
-      const listener = { invalidate };
+      const listener = () => invalidate();
       listeners.add(listener);
 
       if (listeners.size === 1) {
         const current = ++generation;
-        lastValue = resolveWebColorScheme();
+        lastValue = resolveWebColorScheme(doc);
         onChange = () => {
           if (current !== generation || pending) return;
           pending = true;
           queueMicrotask(() => {
             if (current !== generation) return;
             pending = false;
-            const nextValue = resolveWebColorScheme();
+            const nextValue = resolveWebColorScheme(doc);
             if (nextValue === lastValue) return;
             lastValue = nextValue;
-            for (const entry of [...listeners]) {
-              if (!listeners.has(entry)) continue;
-              try {
-                entry.invalidate();
-              } catch (error) {
-                queueMicrotask(() => {
-                  throw error;
-                });
-              }
-            }
+            notifyColorSchemeListeners(listeners);
           });
         };
-        observer = new MutationObserver(onChange);
+        const Observer = doc.defaultView?.MutationObserver ?? MutationObserver;
+        observer = new Observer(onChange);
         observer.observe(doc.documentElement, {
           attributes: true,
           attributeFilter: ['class', 'data-theme'],
         });
-        if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-          media = window.matchMedia(DARK_MEDIA_QUERY);
+        const view = doc.defaultView;
+        if (typeof view?.matchMedia === 'function') {
+          media = view.matchMedia(DARK_MEDIA_QUERY);
           media.addEventListener('change', onChange);
         }
       }
@@ -67,13 +73,17 @@ function createDocumentSource(doc: Document) {
 }
 
 /** Pairs the default reader with a lazy, shared document-theme notification source. */
-export function createDefaultWebColorSchemeSource(getter: (key: string) => unknown) {
-  if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') return undefined;
+export function createDefaultWebColorSchemeSource(
+  getter: (key: string) => unknown,
+  doc: Document | undefined = typeof document === 'undefined' ? undefined : document
+) {
+  if (!doc || (!doc.defaultView?.MutationObserver && typeof MutationObserver === 'undefined'))
+    return undefined;
 
-  let source = documentSources.get(document);
+  let source = documentSources.get(doc);
   if (!source) {
-    source = createDocumentSource(document);
-    documentSources.set(document, source);
+    source = createDocumentSource(doc);
+    documentSources.set(doc, source);
   }
   return { getter, subscribe: source.subscribe };
 }
