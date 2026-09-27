@@ -1,6 +1,7 @@
 /**
- * One-sided generated Button smoke in an isolated packed consumer (React 19 / happy-dom).
- * No Adapter baseline runs here: this is NOT differential, native-browser or layout evidence.
+ * Paired Adapter/generated Button smoke in an isolated packed consumer (React 19 / happy-dom).
+ * Both paths run independent contract checks and a trace comparison. This is synthetic input,
+ * not native-browser, retained-owner, layout, or full compiler/Adapter parity evidence.
  * Run with node --import tsx; PACKED_DIR points to the release pack's tarballs/ directory.
  * Command output and closure.json are retained on every run. Failed consumers are retained;
  * KEEP_PACKED_CONSUMER=1 also retains successful installs for independent inspection.
@@ -28,7 +29,7 @@ const releaseDir = path.dirname(packedDir);
 const workDir = mkdtempSync(path.join(tmpdir(), 'proto-compiler-packed-generated-'));
 const consumerDir = path.join(workDir, 'consumer');
 let succeeded = false;
-console.log(`GENERATED_SMOKE_EVIDENCE: ${workDir}`);
+console.log(`PACKED_CONSUMER_EVIDENCE: ${workDir}`);
 
 function run(name, command, args) {
   const result = spawnSync(command, args, {
@@ -93,7 +94,12 @@ try {
   const manifest = JSON.parse(readFileSync(path.join(releaseDir, 'pack-manifest.json'), 'utf8'));
   const packageByName = new Map(manifest.packages.map((pkg) => [pkg.name, pkg]));
   const closure = new Set();
-  const queue = ['@proto.ui/core', '@proto.ui/hooks', '@proto.ui/adapter-react'];
+  const queue = [
+    '@proto.ui/core',
+    '@proto.ui/hooks',
+    '@proto.ui/adapter-react',
+    '@proto.ui/prototypes-base',
+  ];
   while (queue.length) {
     const name = queue.shift();
     if (closure.has(name)) continue;
@@ -176,50 +182,100 @@ GlobalRegistrator.register();
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const React = await import('react');
 const ReactDOMClient = await import('react-dom/client');
+const { writeFileSync } = await import('node:fs');
+const { button } = await import('@proto.ui/prototypes-base');
+const { createReactAdapter } = await import('@proto.ui/adapter-react');
 const { createComponent } = await import('./src/GeneratedButton.tsx');
-const component = createComponent({ schedule: (task) => task() });
-let clicks = 0;
-const onClick = () => { clicks += 1; };
-const ref = React.createRef();
-const container = document.createElement('div');
-document.body.appendChild(container);
-const root = ReactDOMClient.createRoot(container);
-const render = async (props) => React.act(async () => { root.render(React.createElement(component, { children: 'Activate', onClick, ref, ...props })); });
-const target = () => {
-  const element = container.querySelector('[data-pui-root]');
-  if (!element) throw new Error('no root element');
-  return element;
+const schedule = { schedule: (task) => task() };
+const paths = {
+  reference: createReactAdapter(React)(button, schedule),
+  candidate: createComponent(schedule),
 };
-const click = async () => React.act(async () => { target().dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); });
-try {
-  await render({ disabled: false });
-  if (target().getAttribute('role') !== 'button') throw new Error('missing button role');
-  await click();
-  if (clicks !== 1) throw new Error('expected exactly one click, got ' + clicks);
-  await render({ disabled: true });
-  await click();
-  if (clicks !== 1) throw new Error('disabled click leaked through: ' + clicks);
-  if (ref.current?.getExposes?.().disabled?.get() !== true) throw new Error('disabled state not exposed');
-  await render({});
-  if (ref.current?.getExposes?.().disabled?.get() !== false) throw new Error('omission did not restore enabled default');
-  await click();
-  if (clicks !== 2) throw new Error('activation after omission failed: ' + clicks);
-} finally {
-  await React.act(async () => { root.unmount(); });
-  container.remove();
+const expected = [
+  { step: 'mount', disabled: false, clicks: 0 },
+  { step: 'enabled-click', disabled: false, clicks: 1 },
+  { step: 'disable', disabled: true, clicks: 1 },
+  { step: 'disabled-click', disabled: true, clicks: 1 },
+  { step: 'omit-disabled', disabled: false, clicks: 1 },
+  { step: 'restored-click', disabled: false, clicks: 2 },
+];
+const traces = {};
+for (const [name, component] of Object.entries(paths)) {
+  let clicks = 0;
+  const onClick = () => { clicks += 1; };
+  const ref = React.createRef();
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = ReactDOMClient.createRoot(container);
+  const trace = [];
+  const render = async (props) => React.act(async () => {
+    root.render(React.createElement(component, { children: 'Activate', onClick, ref, ...props }));
+  });
+  const target = () => {
+    const element = container.querySelector('[data-pui-root]');
+    if (!element) throw new Error(name + ': no root element');
+    return element;
+  };
+  const click = async () => React.act(async () => {
+    target().dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+  });
+  const observe = (step) => {
+    const element = target();
+    const exposes = ref.current?.getExposes?.();
+    const entry = {
+      step,
+      disabled: exposes?.disabled?.get() ?? null,
+      clicks,
+      role: element.getAttribute('role'),
+      ariaDisabled: element.getAttribute('aria-disabled'),
+      label: element.textContent,
+    };
+    trace.push(entry);
+    const oracle = expected[trace.length - 1];
+    if (entry.step !== oracle?.step || entry.disabled !== oracle.disabled || entry.clicks !== oracle.clicks ||
+        entry.role !== 'button' || entry.label !== 'Activate' ||
+        entry.ariaDisabled !== (oracle.disabled ? 'true' : 'false')) {
+      throw new Error(name + ': independent Button contract failed at ' + step + ': ' + JSON.stringify(entry));
+    }
+  };
+  try {
+    await render({ disabled: false }); observe('mount');
+    await click(); observe('enabled-click');
+    await render({ disabled: true }); observe('disable');
+    await click(); observe('disabled-click');
+    await render({}); observe('omit-disabled');
+    await click(); observe('restored-click');
+    traces[name] = trace;
+  } finally {
+    await React.act(async () => { root.unmount(); });
+    container.remove();
+  }
 }
-console.log('GENERATED_BEHAVIOR_OK role/click/disabled/exposes/omission; happy-dom synthetic input');
+for (let index = 0; index < expected.length; index++) {
+  for (const key of ['step', 'disabled', 'clicks', 'role', 'ariaDisabled', 'label']) {
+    if (traces.reference[index][key] !== traces.candidate[index][key])
+      throw new Error('paired first difference at ' + expected[index].step + '.' + key +
+        ': ' + JSON.stringify([traces.reference[index][key], traces.candidate[index][key]]));
+  }
+}
+writeFileSync('paired-traces.json', JSON.stringify({ expected, traces }, null, 2) + '\\n');
+console.log('PACKED_PAIRED_TRACES:', JSON.stringify(traces));
+console.log('PACKED_PAIRED_OK six Button checkpoints; happy-dom synthetic input');
 `;
   writeFileSync(path.join(consumerDir, 'smoke.mjs'), smoke);
-  const result = run('generated-runtime', process.execPath, ['--import', 'tsx', 'smoke.mjs']);
+  const result = run('paired-runtime', process.execPath, ['--import', 'tsx', 'smoke.mjs']);
+  writeFileSync(
+    path.join(workDir, 'paired-traces.json'),
+    readFileSync(path.join(consumerDir, 'paired-traces.json'))
+  );
   // React warnings are emitted to stderr; do not treat a zero exit with warnings as success.
   if (result.stderr.trim())
-    throw new Error('generated runtime emitted warnings/errors; see generated-runtime.stderr.log');
+    throw new Error('paired runtime emitted warnings/errors; see paired-runtime.stderr.log');
   succeeded = true;
-  console.log('PACKED_GENERATED_SMOKE_PASS (one-sided; not Adapter/generated differential parity)');
+  console.log('PACKED_PAIRED_SMOKE_PASS (bounded React Button; not native-browser/full parity)');
 } catch (error) {
   writeFileSync(path.join(workDir, 'failure.txt'), error.stack ?? String(error));
-  console.error(`GENERATED_SMOKE_FAILED: consumer and exact output retained at ${workDir}`);
+  console.error(`PACKED_CONSUMER_FAILED: consumer and exact output retained at ${workDir}`);
   throw error;
 } finally {
   if (succeeded && process.env.KEEP_PACKED_CONSUMER !== '1')
