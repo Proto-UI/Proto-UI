@@ -423,7 +423,11 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 );
               span(callback.span);
               fn(callback.function, scope, rule.callback.phase);
-            } else expression(arg, scope, phase);
+            } else {
+              const argumentType = expression(arg, scope, phase);
+              if (operation === 'lifecycle.setPresent' && argumentType !== 'boolean')
+                reject('PUI2002', 'View presence requires a boolean.', location, 'invalid-ir');
+            }
           });
           type = operation === 'state.get' ? receiver.slice('state:'.length) : rule.result;
           break;

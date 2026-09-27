@@ -150,6 +150,14 @@ export const OPERATION_RULES: Record<Operation, OperationRule> = {
     min: 1,
     max: 1,
   },
+  'lifecycle.setPresent': {
+    receiver: 'run',
+    path: 'lifecycle.setPresent',
+    phases: ['callback'],
+    result: 'void',
+    min: 1,
+    max: 1,
+  },
   'lifecycle.onCreated': {
     receiver: 'def',
     path: 'lifecycle.onCreated',

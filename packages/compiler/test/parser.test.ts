@@ -157,14 +157,6 @@ export default definePrototype({name:'x',setup(def){
       parsePrototype(
         simple.replace(
           'setup(def) {}',
-          'setup(def) { def.lifecycle.onCreated((run)=>run.lifecycle.setPresent(false)); }'
-        )
-      )
-    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
-    expect(
-      parsePrototype(
-        simple.replace(
-          'setup(def) {}',
           "setup(def) { const state=def.state.bool('flag',false); state.set(true); }"
         )
       )
@@ -193,5 +185,17 @@ export default prototype({name:'counter',setup(def){
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     expect(result.value.exposes).toMatchObject([{ name: 'count', kind: 'state', type: 'number' }]);
     expect(result.value.name).toBe('counter');
+  });
+  it('rejects non-boolean, wrong-arity and setup-time view-presence requests', () => {
+    for (const [body, code] of [
+      ["def.lifecycle.onCreated((run)=>run.lifecycle.setPresent('false'));", 'PUI1006'],
+      ['def.lifecycle.onCreated((run)=>run.lifecycle.setPresent());', 'PUI1006'],
+      ['def.lifecycle.setPresent(false);', 'PUI1004'],
+      ['def.lifecycle.onCreated((run)=>run.lifecycle.dispose());', 'PUI1004'],
+    ]) {
+      expect(
+        parsePrototype(simple.replace('setup(def) {}', `setup(def) { ${body} }`))
+      ).toMatchObject({ ok: false, diagnostics: [{ code }] });
+    }
   });
 });
