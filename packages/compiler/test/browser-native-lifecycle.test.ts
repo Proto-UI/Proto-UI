@@ -308,7 +308,7 @@ describe.sequential('bounded native and lifecycle Adapter/generated cases', () =
     await collectPath('candidate', definition, unchanged);
     const control = evaluateButtonCase(definition.id, reference, unchanged, identities);
     expect(control.status, JSON.stringify(control.reasons)).toBe('PASS');
-    for (const variant of ['reset-state', 'recreate-owner']) {
+    for (const variant of ['reset-state', 'recreate-owner', 'reattach-state-loss']) {
       const mutant: SemanticCheckpoint[] = [];
       await collectPath('candidate', definition, mutant, variant);
       const result = evaluateButtonCase(definition.id, reference, mutant, identities);
@@ -316,10 +316,21 @@ describe.sequential('bounded native and lifecycle Adapter/generated cases', () =
         referenceIdentity: identities.reference,
         candidateIdentity: identities.candidate,
       });
+      const expectedStep =
+        variant === 'reset-state' ? 'detach' : variant === 'recreate-owner' ? 'attach' : 'reattach';
+      const expectedCheckpoint = reference.findIndex((point) => point.step === expectedStep);
+      const prefixComparison = compareTraces(
+        reference.slice(0, expectedCheckpoint),
+        mutant.slice(0, expectedCheckpoint),
+        {
+          referenceIdentity: identities.reference,
+          candidateIdentity: identities.candidate,
+        }
+      );
       await writeFile(
         path.join(fixture.evidenceDir, `mutant-${variant}.json`),
         JSON.stringify(
-          { variant, control, result, comparison, reference, unchanged, mutant },
+          { variant, control, result, comparison, prefixComparison, reference, unchanged, mutant },
           null,
           2
         )
@@ -331,9 +342,10 @@ describe.sequential('bounded native and lifecycle Adapter/generated cases', () =
       );
       expect(comparison.equal).toBe(false);
       if (comparison.equal) throw new Error('Mutant incorrectly matched');
-      expect(reference[comparison.firstDifference.checkpoint].step).toBe(
-        variant === 'reset-state' ? 'detach' : 'attach'
-      );
+      expect(expectedCheckpoint).toBeGreaterThanOrEqual(0);
+      expect(prefixComparison).toEqual({ equal: true });
+      expect(comparison.firstDifference.checkpoint).toBe(expectedCheckpoint);
+      expect(reference[comparison.firstDifference.checkpoint].step).toBe(expectedStep);
       if (variant === 'reset-state') {
         expect(comparison.firstDifference.path).toEqual([
           comparison.firstDifference.checkpoint,
@@ -346,7 +358,7 @@ describe.sequential('bounded native and lifecycle Adapter/generated cases', () =
           handlesValid: true,
           disposeCount: 0,
         });
-      } else {
+      } else if (variant === 'recreate-owner') {
         const attach = mutant.find((point) => point.step === 'attach')!;
         const reattach = mutant.find((point) => point.step === 'reattach')!;
         expect(reattach.ownerId).not.toBe(attach.ownerId);
@@ -355,6 +367,30 @@ describe.sequential('bounded native and lifecycle Adapter/generated cases', () =
           sameHandles: false,
           handlesValid: false,
         });
+      } else {
+        expect(reference[expectedCheckpoint].viewEpoch).toBe(2);
+        expect(mutant[expectedCheckpoint].viewEpoch).toBe(2);
+        expect(comparison).toEqual({
+          equal: false,
+          firstDifference: {
+            checkpoint: expectedCheckpoint,
+            path: [expectedCheckpoint, 'data', 'count'],
+            reference: { present: true, value: 1 },
+            candidate: { present: true, value: 0 },
+          },
+        });
+        expect(mutant[expectedCheckpoint].data).toMatchObject({
+          sameOwner: true,
+          sameHandles: true,
+          handlesValid: true,
+          setupCount: 1,
+          createdCount: 1,
+          disposeCount: 0,
+        });
+        expect(
+          result.oracleCoverage?.candidate.find((entry) => entry.criterion === 'C-LIFECYCLE-0008-E')
+            ?.outcome
+        ).toBe('FAIL');
       }
     }
   }, 120_000);

@@ -28,7 +28,9 @@ if (side === 'reference') {
       ? await import('virtual:retained-owner-reset-state')
       : variant === 'recreate-owner'
         ? await import('virtual:retained-owner-recreate-owner')
-        : await import('virtual:retained-owner');
+        : variant === 'reattach-state-loss'
+          ? await import('virtual:retained-owner-reattach-state-loss')
+          : await import('virtual:retained-owner');
   component = emitted.createComponent(options);
 } else throw new Error('Choose reference or candidate');
 
