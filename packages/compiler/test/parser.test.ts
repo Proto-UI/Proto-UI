@@ -199,6 +199,39 @@ export default definePrototype({name:'x',setup(def){
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
   });
 
+  it('rejects effectful direct default calls even when another export is selected', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+export const selected = definePrototype({name:'selected',setup(def){}});
+export default globalThis.sideEffect();`;
+    expect(parsePrototype(source, { exportName: 'selected' })).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1002' }],
+    });
+  });
+
+  it('accepts a valid static direct default when another export is selected', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+export const selected = definePrototype({name:'selected',setup(def){}});
+export default definePrototype({name:'unused',setup(def){}});`;
+    expect(parsePrototype(source, { exportName: 'selected' })).toMatchObject({
+      ok: true,
+      value: { name: 'selected' },
+    });
+  });
+
+  it('validates unselected direct default calls reached through a re-export', () => {
+    const source = `${simple}\nexport { unused } from './dependency';`;
+    const dependency = `import {definePrototype} from '@proto.ui/core';
+export const unused = definePrototype({name:'unused',setup(def){}});
+export default definePrototype(globalThis.sideEffect());`;
+    expect(
+      parsePrototype(source, {
+        fileName: 'entry.proto.ts',
+        files: { 'dependency.ts': dependency },
+      })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
+  });
+
   it('rejects a missing binding from an otherwise present unused local import', () => {
     const source = `import {definePrototype} from '@proto.ui/core';
 import {missing} from './dependency';
