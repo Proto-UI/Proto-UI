@@ -4,7 +4,7 @@ import { mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { button } from '@proto.ui/prototypes-base';
 import { createReactAdapter } from '@proto.ui/adapter-react';
 import { compilePrototype } from '../src/compile';
@@ -55,6 +55,12 @@ interface LoadedEmittedModule {
   createComponent: (options?: Record<string, unknown>) => unknown;
 }
 
+const generatedDirectories: string[] = [];
+afterEach(async () => {
+  for (const directory of generatedDirectories.splice(0))
+    await rm(directory, { recursive: true, force: true });
+});
+
 /**
  * Candidate code is runtime-selected content, so a static import cannot exist.
  * Distinct per-identity directories under the test folder keep Vite resolution
@@ -68,6 +74,7 @@ async function loadEmittedModule(code: string, identity: string): Promise<Loaded
   );
   await rm(directory, { recursive: true, force: true }).catch(() => undefined);
   await mkdir(directory, { recursive: true });
+  generatedDirectories.push(directory);
   await writeFile(path.join(directory, 'Component.tsx'), code, 'utf8');
   return (await import(
     /* @vite-ignore */ path.join(directory, 'Component.tsx')

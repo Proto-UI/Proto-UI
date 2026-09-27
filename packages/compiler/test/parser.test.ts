@@ -181,6 +181,56 @@ export default definePrototype({name:'x',setup(def){
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
   });
 
+  it('rejects a missing module reached only through an unselected re-export', () => {
+    const source = `${simple}\nexport { unused } from './missing';`;
+    expect(parsePrototype(source, { fileName: 'entry.proto.ts' })).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1003', category: 'unsupported-input' }],
+    });
+  });
+
+  it('rejects unsupported effects in an unselected re-export dependency', () => {
+    const source = `${simple}\nexport { unused } from './dependency';`;
+    expect(
+      parsePrototype(source, {
+        fileName: 'entry.proto.ts',
+        files: { 'dependency.ts': 'globalThis.changed = true;' },
+      })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
+  });
+
+  it('rejects a missing binding from an otherwise present unused local import', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+import {missing} from './dependency';
+export default definePrototype({name:'entry',setup(def){}});`;
+    expect(
+      parsePrototype(source, {
+        fileName: 'entry.proto.ts',
+        files: { 'dependency.ts': 'export interface OnlyAType {}' },
+      })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1002' }] });
+  });
+
+  it('includes a valid unselected re-export in provenance and validates its target name', () => {
+    const source = `${simple}\nexport { unused } from './dependency';`;
+    const dependency = (name: string) =>
+      `import {definePrototype} from '@proto.ui/core'; export const unused = definePrototype({name:'${name}',setup(def){}});`;
+    const options = (text: string) => ({
+      fileName: 'entry.proto.ts',
+      files: { 'dependency.ts': text },
+    });
+    const first = parsePrototype(source, options(dependency('first')));
+    const second = parsePrototype(source, options(dependency('second')));
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    if (!first.ok || !second.ok) throw new Error('Expected both static source graphs to compile');
+    expect(first.value.source.sha256).not.toBe(second.value.source.sha256);
+    expect(parsePrototype(source, options('export interface OnlyAType {}'))).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1002' }],
+    });
+  });
+
   it('accepts independent primitive/control-flow prototypes without matching Button identity', () => {
     const source = `import {definePrototype as prototype} from '@proto.ui/core';
 export default prototype({name:'counter',setup(def){
