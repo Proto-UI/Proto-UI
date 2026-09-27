@@ -14,8 +14,6 @@ export interface SemanticCheckpoint {
   parentId: string | null;
   viewEpoch: number;
   kind: string;
-  /** Driver input provenance, not an event-trust override. */
-  inputSources?: readonly ('host-api' | 'synthetic-dispatch' | 'browser-automation')[];
   data: TraceValue;
 }
 

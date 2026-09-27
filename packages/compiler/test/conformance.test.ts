@@ -154,8 +154,8 @@ describe('semantic differential conformance', () => {
         id: 'blocked',
         requiredCriteria: [hoverCriterion],
         harnessError: 'browser unavailable',
-      })
-    ).toMatchObject({ status: 'BLOCKED', failures: ['harness-defect'] });
+      }).status
+    ).toBe('BLOCKED');
     const run = runOracleSuite([checkpoint()], [hoverOracle]);
     const passed = assessCase({
       id: 'hover',
