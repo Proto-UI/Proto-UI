@@ -21,6 +21,13 @@ describe('cli: proto-style-css spinner surface', () => {
     expect(baseBlock).not.toContain('animation: none;');
   });
 
+  it('targets the spinning surface itself in the generated reduced-motion block', () => {
+    const css = renderProtoStyleTokenCss(['animate-spin']);
+    expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+    expect(css).toContain(`[data-pui-style~="animate-spin"]`);
+    expect(css).toContain('animation: none;');
+  });
+
   it('resolves the currentColor border token', () => {
     const css = renderProtoStyleTokenCss(['border-current']);
     expect(css).toContain('border-color: currentColor;');

@@ -399,9 +399,20 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
   }
 
   const motionReduceRules = rules.filter((rule) => hasMotionReduceVariant(rule.token));
-  if (motionReduceRules.length > 0) {
+  const spinRules = rules.filter((rule) => splitVariants(rule.token).at(-1) === 'animate-spin');
+  const reducedMotionBlocks: CssRule[] = [...motionReduceRules];
+  // P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION: whenever animate-spin projects,
+  // a generated @media (prefers-reduced-motion: reduce) rule removes the
+  // animation on the spinning surface itself while the open edge stays as a
+  // non-color orientation cue.
+  if (spinRules.length > 0) {
+    for (const rule of spinRules) {
+      reducedMotionBlocks.push({ token: rule.token, css: ['animation: none;'] });
+    }
+  }
+  if (reducedMotionBlocks.length > 0) {
     lines.push(`  @media ${SYSTEM_REDUCED_MOTION_MEDIA_QUERY} {`);
-    for (const rule of motionReduceRules) {
+    for (const rule of reducedMotionBlocks) {
       const selectors = buildSelectors(rule.token);
       if (selectors.length === 0 || rule.css.length === 0) continue;
       lines.push(`    ${selectors.join(',\n    ')} {`);

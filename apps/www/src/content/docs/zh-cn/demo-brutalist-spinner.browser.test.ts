@@ -64,7 +64,6 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
           const allFacts = await spinners.evaluateAll((elements) =>
             elements.map((element) => {
               const style = getComputedStyle(element);
-              const box = element.getBoundingClientRect();
               return {
                 role: element.getAttribute('role'),
                 ariaHidden: element.getAttribute('aria-hidden'),
@@ -93,8 +92,8 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
                 backgroundColor: style.backgroundColor,
                 backgroundImage: style.backgroundImage,
                 boxShadow: style.boxShadow,
-                width: box.width,
-                height: box.height,
+                layoutWidth: style.width,
+                layoutHeight: style.height,
               };
             })
           );
@@ -104,7 +103,6 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
             `${runtime}/spinner-content`
           ).toBe(0);
 
-          const expectedSizes = [16, 24, 32, 24];
           expect(allFacts.length, `${runtime}/count`).toBe(4);
           for (const [index, surface] of allFacts.entries()) {
             const label = `${runtime}/spinner-${index}`;
@@ -118,8 +116,12 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
               false
             );
             // Square geometry from the size prop (sm/md/lg/default md).
-            expect(surface.width, `${label}/width`).toBe(expectedSizes[index]);
-            expect(surface.height, `${label}/height`).toBe(expectedSizes[index]);
+            expect(surface.layoutWidth, `${label}/width`).toBe(
+              ['16px', '24px', '32px', '24px'][index]
+            );
+            expect(surface.layoutHeight, `${label}/height`).toBe(
+              ['16px', '24px', '32px', '24px'][index]
+            );
             // Open-edge ring: three solid 2px edges, one transparent.
             expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
             const transparentEdges = surface.borderColors.filter(
@@ -155,7 +157,7 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
         };
       });
       expect(motionFacts.animationName, 'wc/rotation').toBe('pui-spin');
-      expect(motionFacts.animationDuration, 'wc/duration').toBe('1000ms');
+      expect(motionFacts.animationDuration, 'wc/duration').toBe('1s');
       expect(motionFacts.animationTimingFunction, 'wc/timing').toBe('linear');
       expect(motionFacts.animationIterationCount, 'wc/iteration').toBe('infinite');
 

@@ -41,6 +41,9 @@ export const BrutalistSpinnerRoot = definePrototype<
     // loading/busy/announcement semantics stay parent-owned.
     // D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-VISUAL
     def.feedback.style.use(tw(SPINNER_VISUAL_TOKENS));
+    // P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION: the reduced-motion fallback
+    // is a generated @media (prefers-reduced-motion: reduce) rule emitted by
+    // the CLI renderer whenever animate-spin projects; the open edge stays.
     // D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-API
     (Object.keys(SPINNER_SIZE_TOKENS) as BrutalistSpinnerSize[]).forEach((size) => {
       def.rule({
