@@ -22,6 +22,7 @@ const requiredCases = [
   'button.keyboard-focus',
   'button.native-mixing',
   'button.terminal-cleanup',
+  'button.retained-owner',
 ];
 const definitions = buttonCases();
 const knownCases = new Map(definitions.map((definition) => [definition.id, definition]));
@@ -42,7 +43,7 @@ function collect(dir) {
           throw new Error('unknown/malformed case identity');
         if (runs.has(id)) throw new Error(`duplicate case ${id}`);
         if (
-          evidence.source !== 'packages/prototypes/base/src/button/button.proto.ts' ||
+          evidence.source !== knownCases.get(id).source ||
           evidence.profile !== knownCases.get(id).profile ||
           evidence.styleFamily !== knownCases.get(id).styleFamily
         )
@@ -122,6 +123,7 @@ const authorityPaths = [
   'spec/prototypes/P-BASE-BUTTON.yaml',
   'spec/contracts/C-EXPOSE-STATE-0001.yaml',
   'spec/contracts/C-LIFECYCLE-0002.yaml',
+  'spec/contracts/C-LIFECYCLE-0008.yaml',
 ];
 const criteria = new Map();
 for (const source of authorityPaths) {
@@ -166,6 +168,7 @@ const cases = definitions.map((definition) => {
     id: definition.id,
     feature: definition.feature,
     profile: definition.profile,
+    source: definition.source,
     styleFamily: definition.styleFamily,
     environment: run?.environment ?? null,
     inputs: run?.inputs ?? [],
@@ -189,7 +192,7 @@ const matrix = {
   collectionStatus: collectionErrors.length ? 'BLOCKED' : 'PASS',
   collectionErrors,
   scope:
-    'Bounded direct Base Button React 19 case observations. PASS is per case expectation, never a declaration that the whole criterion or Button protocol is complete.',
+    'Bounded Base Button direct-entry and retained-owner asButton composition on React 19. PASS is per case expectation, never a declaration that the whole criterion or protocol is complete.',
   inputScope:
     'Only browser-automation checkpoints are native-input evidence. Simulated-host dispatch, host API calls and detached-target synthetic dispatch are explicitly separate.',
   boundaries: [
@@ -200,16 +203,16 @@ const matrix = {
         'Coordinator-owned independent probe; exact head/evidence not integrated into this collection.',
     },
     {
-      id: 'retained-owner-view-epochs',
+      id: 'retained-owner-generalization',
       status: 'UNTESTED',
       reason:
-        'Fresh React-root recreation ends the instance; external counters do not establish repeated view epochs on one retained logical owner.',
+        'Retained-owner PASS is limited to the single-owner property-driven fixture. Native child-state survival, arbitrary bindings and nested owners are not established by it.',
     },
     {
-      id: 'prototype-driven-view-presence',
+      id: 'host-lifecycle-control-from-prototype',
       status: 'UNSUPPORTED',
       reason:
-        'run.lifecycle.setPresent is rejected with PUI1004 by the admitted operation subset; parser.test.ts exercises this rejection. It cannot be used to claim retained-owner view epochs here.',
+        'Only boolean callback-time run.lifecycle.setPresent is admitted. Direct mount/unmount/dispose and host bridge access remain outside the operation set.',
     },
     {
       id: 'nested-trigger-routing',
@@ -217,9 +220,22 @@ const matrix = {
       reason: 'No nested trigger journey is collected by this bounded direct-entry profile.',
     },
     {
-      id: 'asButton-authored-entry',
+      id: 'authored-entry-generalization',
       status: 'UNTESTED',
-      reason: 'This collection exercises the direct Base Button entry, not asButton composition.',
+      reason:
+        'One asButton composition now runs through retained view epochs; other authored compositions and complete entry equivalence remain untested.',
+    },
+    {
+      id: 'overlay-retained-subtree-projection',
+      status: 'UNTESTED',
+      reason:
+        'This case exercises direct ViewIntent removal under active C-LIFECYCLE-0008, not the draft C-HOST-VIEW-ATTACHMENT-0001 overlay retained-host/children projection.',
+    },
+    {
+      id: 'rapid-intent-reversal',
+      status: 'UNTESTED',
+      reason:
+        'Sequential detach/rebind is exercised; superseded asynchronous completions and rapid intent reversals need separate cases.',
     },
     {
       id: 'react-18',
