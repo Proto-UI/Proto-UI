@@ -189,10 +189,47 @@ describe('same-source Adapter/generated differential journey', () => {
       candidateClicks,
       () => candidateClicks.mock.calls.length
     );
-    const comparison = compareTraces(reference, candidate);
-    expect(comparison.equal).toBe(false);
-    const evaluation = evaluateButtonCase('button.pointer-props', reference, candidate);
+
+    // Prove the reference path itself still passes its oracles: the mutant
+    // must fail through candidate divergence, not through a broken reference.
+    const referenceAlone = evaluateButtonCase('button.state-events', reference, reference, {
+      reference: { reason: 'Self comparison', aliases: {} },
+      candidate: { reason: 'Self comparison', aliases: {} },
+    });
+    expect(referenceAlone.status).toBe('PASS');
+    expect(referenceAlone.failures).toEqual([]);
+
+    // With justified identity normalization in place, the mutant must
+    // diverge specifically on the click count at the routed commit step.
+    const comparison = compareTraces(reference, candidate, {
+      referenceIdentity: ownerIdentities.reference,
+      candidateIdentity: {
+        reason: 'Per-target opaque instance IDs; both journeys bind one owner',
+        aliases: { 'compiled-mutant-0': 'journey-button' },
+      },
+    });
+    expect(comparison).toMatchObject({
+      equal: false,
+      firstDifference: { path: expect.arrayContaining(['data', 'clicks']) },
+    });
+
+    const evaluation = evaluateButtonCase('button.state-events', reference, candidate, {
+      reference: ownerIdentities.reference,
+      candidate: {
+        reason: 'Per-target opaque instance IDs; both journeys bind one owner',
+        aliases: { 'compiled-mutant-0': 'journey-button' },
+      },
+    });
     expect(evaluation.status).toBe('FAIL');
     expect(evaluation.failures).toContain('compiler-mismatch');
+    // The click-carrying criteria must be the specific violated contracts.
+    const mutantClickFailures = evaluation.oracleCoverage?.candidate.filter(
+      (entry) =>
+        entry.criterion === 'P-BASE-BUTTON-ROLE-COMMAND' ||
+        entry.criterion === 'P-BASE-BUTTON-CLICK-PROTOCOL-NAME'
+    );
+    expect(mutantClickFailures).toBeDefined();
+    expect(mutantClickFailures?.length).toBeGreaterThan(0);
+    expect(mutantClickFailures?.every((entry) => entry.outcome === 'FAIL')).toBe(true);
   });
 });

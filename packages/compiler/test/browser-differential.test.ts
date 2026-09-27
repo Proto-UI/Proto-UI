@@ -5,15 +5,12 @@ import { mkdtemp } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { Browser, Page } from '/workspace/worktrees/proto-ui-compiler/compiler-implementation/apps/www/node_modules/playwright-core/types/types';
+import type { Browser, Page } from '../../../apps/www/node_modules/playwright-core/types/types';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-// Runtime-selected workspace paths that package exports cannot map; the
-// repository runs this suite through Vitest, whose pipeline resolves them.
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-import {
-  createServer as createViteServer,
-} from '/workspace/worktrees/proto-ui-compiler/compiler-implementation/apps/workspace/node_modules/vite/dist/node/index.js';
-import { launchBrowser } from '/workspace/worktrees/proto-ui-compiler/compiler-implementation/apps/www/src/content/docs/zh-cn/browser-harness';
+// Workspace-sibling paths resolve relative to this file inside the monorepo,
+// keeping the suite portable across host checkouts.
+import { createServer as createViteServer } from '../../../apps/workspace/node_modules/vite/dist/node/index.js';
+import { launchBrowser } from '../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import { compareTraces, type SemanticCheckpoint, type TraceValue } from '../src/conformance/trace';
 
 type ViteDevServer = Awaited<ReturnType<typeof createViteServer>>;

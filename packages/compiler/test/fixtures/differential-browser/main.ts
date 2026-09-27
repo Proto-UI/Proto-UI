@@ -21,7 +21,11 @@ function mount(
   adapted: Adapted,
   displayName: string,
   onClick: () => void
-): { read(): Record<string, unknown>; setProps(next: Record<string, unknown>): void } {
+): {
+  read(): Record<string, unknown>;
+  setProps(next: Record<string, unknown>): void;
+  remount(): void;
+} {
   let currentProps: Record<string, unknown> = { disabled: false, children: 'Activate', onClick };
   const root = createRoot(container);
   let handle: { getExposes?: () => Record<string, Exposes> } | null = null;
@@ -53,6 +57,10 @@ function mount(
     }),
     setProps(next) {
       currentProps = { ...currentProps, ...next };
+      render();
+    },
+    remount() {
+      root.unmount();
       render();
     },
   };
@@ -116,6 +124,15 @@ const candidate = mount(
   async setDisabled(next: boolean) {
     reference.setProps({ disabled: next });
     candidate.setProps({ disabled: next });
+    const { promise, resolve } = Promise.withResolvers<void>();
+    setTimeout(resolve, 30);
+    await promise;
+    await new Promise<void>((settle) => requestAnimationFrame(() => settle()));
+    return this.read();
+  },
+  async remount() {
+    reference.remount();
+    candidate.remount();
     const { promise, resolve } = Promise.withResolvers<void>();
     setTimeout(resolve, 30);
     await promise;
