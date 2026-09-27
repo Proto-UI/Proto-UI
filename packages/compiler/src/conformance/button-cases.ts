@@ -11,6 +11,8 @@ export type ButtonAction =
         | 'click'
         | 'tab'
         | 'focus'
+        | 'blur'
+        | 'native-child-click'
         | 'rerender'
         | 'dispose'
         | 'stale-click'
@@ -18,7 +20,7 @@ export type ButtonAction =
     }
   | { kind: 'key-down' | 'key-up'; key: string }
   | { kind: 'props'; disabled: boolean | null }
-  | { kind: 'label'; value: string }
+  | { kind: 'label' | 'context'; value: string }
   | { kind: 'style'; background: string | null };
 export interface JourneyStep {
   id: string;
@@ -29,7 +31,7 @@ export interface JourneyStep {
 export interface ButtonCase {
   id: string;
   feature: string;
-  styleFamily: 'base-unstyled-with-consumer-css';
+  styleFamily: 'base-unstyled' | 'base-unstyled-with-consumer-css';
   profile: 'react-runtime-v1';
   steps: readonly JourneyStep[];
   requiredCriteria: readonly string[];
@@ -190,6 +192,8 @@ const definitions: { id: string; feature: string; steps: JourneyStep[] }[] = [
           active: true,
           role: 'button',
           label: 'Activate',
+          axRole: 'button',
+          axName: 'Activate',
           clicks: 0,
         },
         criteria: [P + 'FOCUSABLE', P + 'ACCESSIBLE-ROLE', P + 'ACCESSIBLE-NAME'],
@@ -219,9 +223,15 @@ const definitions: { id: string; feature: string; steps: JourneyStep[] }[] = [
         criteria: [P + 'KEYBOARD-ACTIVATION'],
       },
       {
+        id: 'blur-before-disabled',
+        action: { kind: 'blur' },
+        expected: { focused: false, active: false, clicks: 2 },
+        criteria: [P + 'FOCUSABLE'],
+      },
+      {
         id: 'disable-focus',
         action: { kind: 'props', disabled: true },
-        expected: { disabled: true, focused: false },
+        expected: { disabled: true, focused: false, axDisabled: true },
         criteria: [P + 'DISABLED-REJECT-FOCUS'],
       },
       {
@@ -293,13 +303,70 @@ const definitions: { id: string; feature: string; steps: JourneyStep[] }[] = [
     ],
   },
   {
+    id: 'button.native-mixing',
+    feature:
+      'native React children/context, accessible content and event isolation; no paint/layout claim',
+    steps: [
+      {
+        id: 'native-content',
+        action: { kind: 'rerender' },
+        expected: {
+          nativeContext: 'host-value',
+          nativeIcon: true,
+          label: 'Activate',
+          axName: 'Activate',
+          sameHandles: true,
+          clicks: 0,
+        },
+        criteria: [P + 'ICON-CONTENT', P + 'CONTENT-LABEL-SOURCE', 'C-EXPOSE-STATE-0001-I'],
+      },
+      {
+        id: 'native-label',
+        action: { kind: 'label', value: 'Updated' },
+        expected: { label: 'Updated', axName: 'Updated', sameHandles: true },
+        criteria: [P + 'CONTENT-LABEL-SOURCE', P + 'ACCESSIBLE-NAME'],
+      },
+      {
+        id: 'native-context',
+        action: { kind: 'context', value: 'changed-host' },
+        expected: { nativeContext: 'changed-host', nativeIcon: true, sameHandles: true },
+        criteria: [P + 'ICON-CONTENT'],
+      },
+      {
+        id: 'native-child-click',
+        action: { kind: 'native-child-click' },
+        expected: { clicks: 1, nativeChildClicks: 1, outsideClicks: 0 },
+        criteria: [P + 'CLICK-SIGNAL', P + 'CLICK-PROTOCOL-NAME'],
+      },
+      {
+        id: 'outside-native-click',
+        action: { kind: 'outside-click' },
+        expected: { clicks: 1, nativeChildClicks: 1, outsideClicks: 1 },
+        criteria: [P + 'CLICK-SIGNAL'],
+      },
+      {
+        id: 'rerender',
+        action: { kind: 'rerender' },
+        expected: {
+          sameHandles: true,
+          disabled: false,
+          label: 'Updated',
+          nativeContext: 'changed-host',
+          clicks: 1,
+          outsideClicks: 1,
+        },
+        criteria: ['C-EXPOSE-STATE-0001-I'],
+      },
+    ],
+  },
+  {
     id: 'button.terminal-cleanup',
     feature: 'terminal cleanup and stale target rejection',
     steps: [
       {
         id: 'hover',
         action: { kind: 'hover' },
-        expected: { hovered: true, disposed: false },
+        expected: { hovered: true, present: true },
         criteria: [P + 'POINTER-HOVER'],
       },
       {
@@ -311,14 +378,26 @@ const definitions: { id: string; feature: string; steps: JourneyStep[] }[] = [
       {
         id: 'dispose',
         action: { kind: 'dispose' },
-        expected: { disposed: true, staleHandleInvalid: true, clicks: 0, present: false },
+        expected: {
+          refCleared: true,
+          staleHandleInvalid: true,
+          clicks: 0,
+          present: false,
+          staleTargetConnected: false,
+        },
         criteria: ['C-EXPOSE-STATE-0001-I', 'C-LIFECYCLE-0002-G'],
       },
       {
         id: 'stale-click',
         action: { kind: 'stale-click' },
-        expected: { disposed: true, clicks: 0, present: false },
-        criteria: [P + 'DISABLED-SUPPRESS-ACTIVATION', 'C-LIFECYCLE-0002-G'],
+        expected: {
+          refCleared: true,
+          staleHandleInvalid: true,
+          clicks: 0,
+          present: false,
+          staleTargetConnected: false,
+        },
+        criteria: ['C-LIFECYCLE-0002-G'],
       },
     ],
   },
@@ -337,7 +416,10 @@ for (const definition of definitions) {
     Object.freeze({
       ...definition,
       profile: 'react-runtime-v1' as const,
-      styleFamily: 'base-unstyled-with-consumer-css' as const,
+      styleFamily:
+        definition.id === 'button.pointer-props' || definition.id === 'button.native-presentation'
+          ? ('base-unstyled-with-consumer-css' as const)
+          : ('base-unstyled' as const),
       steps: Object.freeze(definition.steps),
       requiredCriteria: Object.freeze([
         ...new Set(definition.steps.flatMap((step) => step.criteria)),

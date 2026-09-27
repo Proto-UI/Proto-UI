@@ -1,58 +1,23 @@
 // @vitest-environment node
 
-import { createServer, type Server } from 'node:http';
-import { mkdtemp } from 'node:fs/promises';
-import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { Browser, Page } from '../../../apps/www/node_modules/playwright-core/types/types';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-// Workspace-sibling paths resolve relative to this file inside the monorepo,
-// keeping the suite portable across host checkouts.
-import { createServer as createViteServer } from '../../../apps/workspace/node_modules/vite/dist/node/index.js';
-import { launchBrowser } from '../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import { compareTraces, type SemanticCheckpoint, type TraceValue } from '../src/conformance/trace';
+import { startBrowserFixture, type BrowserFixture } from './browser-fixture';
 
-type ViteDevServer = Awaited<ReturnType<typeof createViteServer>>;
-
-let server: Server;
-let vite: ViteDevServer;
+let fixture: BrowserFixture;
 let browser: Browser;
 let baseUrl = '';
 let evidenceDir = '';
 
 beforeAll(async () => {
-  evidenceDir = await mkdtemp(path.join(tmpdir(), 'proto-compiler-differential-'));
-  vite = await createViteServer({
-    cacheDir: path.join(evidenceDir, 'vite-cache'),
-    configFile: fileURLToPath(
-      new URL('./fixtures/differential-browser/vite.config.ts', import.meta.url)
-    ),
-    server: { middlewareMode: true, hmr: false },
-  });
-  server = createServer(vite.middlewares);
-  await new Promise<void>((resolve, reject) => {
-    server.once('error', reject);
-    server.listen(0, '127.0.0.1', resolve);
-  });
-  const address = server.address();
-  if (!address || typeof address === 'string')
-    throw new Error('Compiler differential fixture has no TCP address.');
-  baseUrl = `http://127.0.0.1:${address.port}`;
-  browser = await launchBrowser();
-  console.log(`Compiler differential browser evidence: ${evidenceDir}`);
+  fixture = await startBrowserFixture('differential');
+  ({ browser, baseUrl, evidenceDir } = fixture);
 }, 120_000);
 
 afterAll(async () => {
-  try {
-    await browser?.close();
-  } finally {
-    try {
-      await vite?.close();
-    } finally {
-      if (server?.listening) await new Promise<void>((resolve) => server.close(() => resolve()));
-    }
-  }
+  await fixture?.close();
 }, 60_000);
 
 interface PathSnapshot {
@@ -238,7 +203,7 @@ describe.sequential('real-browser Adapter/generated differential', () => {
     }
   }, 120_000);
 
-  it('preserves semantic facts through disabled omission and view remount with real input', async () => {
+  it('restores enabled defaults on omission and supports fresh React-root recreation', async () => {
     const context = await browser.newContext({ viewport: { width: 1000, height: 650 } });
     const page = await context.newPage();
     const errors: string[] = [];
@@ -292,7 +257,8 @@ describe.sequential('real-browser Adapter/generated differential', () => {
       expect(afterOmissionClicks.reference.clicks).toBe(clicksBeforeOmission.reference.clicks + 1);
       expect(afterOmissionClicks.candidate.clicks).toBe(clicksBeforeOmission.candidate.clicks + 1);
 
-      // 3. Remount the host view: logical state and click counts survive.
+      // 3. Fresh React roots create new instances. Only the external click sinks
+      // survive; this does not establish retained-owner view lifetime.
       await page.evaluate(() =>
         (
           window as unknown as {

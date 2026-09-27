@@ -6,11 +6,9 @@ import type { Prototype } from '@proto.ui/core';
 import { TraceRecorder, type SemanticCheckpoint, type TraceValue } from './trace';
 
 /**
- * One semantic journey across one target implementation. The driver owns only
- * orchestration: identical props, input sequence, DOM environment, and
- * observation recording. Both target constructors must be independent
- * implementations of the same component surface; nothing here reads source or
- * compiler internals.
+ * Simulated-host journey only: dispatchEvent creates synthetic input, never
+ * browser-trusted native input. The driver supplies identical props and events
+ * and records observations; actual native behavior is exercised by browser automation.
  */
 export interface TargetComponent {
   (props: Record<string, unknown>): React.ReactElement;
@@ -19,7 +17,7 @@ export interface TargetComponent {
 
 export type JourneyAction =
   | { kind: 'pointer-enter' | 'pointer-leave' | 'pointer-down' | 'pointer-up' | 'pointer-cancel' }
-  | { kind: 'native-click'; trusted: boolean }
+  | { kind: 'simulated-click' }
   | { kind: 'key-down' | 'key-up'; key: string }
   | { kind: 'focus' }
   | { kind: 'tab' }
@@ -132,7 +130,7 @@ export async function runJourney(
   };
   const exposesFor = () => handle?.getExposes?.() ?? null;
 
-  const observe = (step: string) => {
+  const observe = (step: string, inputSources: SemanticCheckpoint['inputSources']) => {
     const data = options.observe(exposesFor(), host, context);
     recorder.record({
       step,
@@ -141,6 +139,7 @@ export async function runJourney(
       parentId: null,
       viewEpoch: remounts,
       kind: 'snapshot',
+      inputSources,
       data,
     });
   };
@@ -157,7 +156,7 @@ export async function runJourney(
       root!.render(render(options.mountProps));
     });
     mounted = true;
-    observe('mount');
+    observe('mount', ['host-api']);
 
     for (const step of options.steps) {
       const action = step.action;
@@ -187,10 +186,9 @@ export async function runJourney(
             rootElement().dispatchEvent(new MouseEvent('pointercancel', { bubbles: true }));
           });
           break;
-        case 'native-click':
+        case 'simulated-click':
           await act(async () => {
             const event = new MouseEvent('click', { bubbles: true, detail: 1 });
-            if (!action.trusted) Object.defineProperty(event, 'isTrusted', { get: () => false });
             rootElement().dispatchEvent(event);
           });
           break;
@@ -203,7 +201,6 @@ export async function runJourney(
               cancelable: true,
             };
             const event = new KeyboardEvent(action.kind === 'key-down' ? 'keydown' : 'keyup', init);
-            if (action.key === ' ') Object.defineProperty(event, 'isTrusted', { get: () => true });
             rootElement().dispatchEvent(event);
           });
           break;
@@ -241,7 +238,14 @@ export async function runJourney(
           mounted = true;
           break;
       }
-      observe(step.id);
+      observe(
+        step.id,
+        action.kind === 'tab'
+          ? ['synthetic-dispatch', 'host-api']
+          : ['focus', 'rerender', 'unmount', 'remount'].includes(action.kind)
+            ? ['host-api']
+            : ['synthetic-dispatch']
+      );
     }
   } finally {
     if (root) {

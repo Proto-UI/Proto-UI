@@ -76,6 +76,7 @@ export function assessCase(input: {
   candidate?: ObservedRun;
   unsupported?: string;
   authorityBlocker?: string;
+  harnessError?: string;
   identities?: {
     reference?: IdentityNormalization;
     candidate?: IdentityNormalization;
@@ -89,6 +90,13 @@ export function assessCase(input: {
     reasons: [],
     failures: [],
   };
+  if (input.harnessError)
+    return {
+      ...result,
+      status: 'BLOCKED',
+      reasons: [input.harnessError],
+      failures: ['harness-defect'],
+    };
   if (input.authorityBlocker)
     return {
       ...result,

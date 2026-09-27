@@ -21,6 +21,7 @@ import {
   type JourneyStep,
   type TargetComponent,
 } from '../src/conformance/journey';
+import { writeCaseEvidence } from './case-evidence';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
@@ -35,12 +36,12 @@ const source = readFileSync(
 const journeySteps: readonly JourneyStep[] = Object.freeze([
   { id: 'hover', action: { kind: 'pointer-enter' } },
   { id: 'down', action: { kind: 'pointer-down' } },
-  { id: 'up', action: { kind: 'native-click', trusted: true } },
+  { id: 'up', action: { kind: 'simulated-click' } },
   { id: 'disable', action: { kind: 'rerender', props: { disabled: true } } },
   { id: 'disabled-click', action: { kind: 'key-down', key: 'Enter' } },
   { id: 'omit-disabled', action: { kind: 'rerender', props: {}, omitKeys: ['disabled'] } },
   { id: 'focus', action: { kind: 'focus' } },
-  { id: 'enabled-click', action: { kind: 'native-click', trusted: true } },
+  { id: 'enabled-click', action: { kind: 'simulated-click' } },
   { id: 'leave', action: { kind: 'pointer-leave' } },
 ]);
 
@@ -129,7 +130,7 @@ const ownerIdentities: Record<'reference' | 'candidate', IdentityNormalization> 
   },
 };
 
-describe('same-source Adapter/generated differential journey', () => {
+describe('simulated-host same-source Adapter/generated differential journey', () => {
   it('executes the unchanged prototype and emitted module with equal semantic traces and passing oracles', async () => {
     const compilation = compilePrototype(source, { fileName: 'button.proto.ts' });
     if (!compilation.ok) throw new Error(JSON.stringify(compilation.diagnostics));
@@ -157,6 +158,16 @@ describe('same-source Adapter/generated differential journey', () => {
       candidate,
       ownerIdentities
     );
+    if (process.env.COMPILER_EVIDENCE_DIR) {
+      await writeCaseEvidence(
+        path.join(process.env.COMPILER_EVIDENCE_DIR, 'simulated'),
+        evaluation,
+        reference,
+        candidate,
+        ownerIdentities,
+        null
+      );
+    }
     expect(evaluation.failures).toEqual([]);
     for (const coverage of [
       evaluation.oracleCoverage?.reference,

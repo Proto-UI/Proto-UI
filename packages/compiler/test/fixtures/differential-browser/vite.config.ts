@@ -1,31 +1,35 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sourceConfig from '../../../../../vitest.config';
-import type { Plugin } from '../../workspace/node_modules/vite';
+import {
+  transformWithEsbuild,
+  type Plugin,
+} from '../../../../../apps/workspace/node_modules/vite/dist/node/index.js';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
 const repository = path.resolve(root, '../../../../..');
 
 /**
- * The emitted differential module is generated at test time and written here
- * as a real on-disk source file, mirroring the compileFile writeCompilation
- * destination contract. This virtual plugin keeps that file out of the
- * committed tree while letting Vite serve it like any other module.
+ * Compile the unchanged source into a virtual TSX module. The null-prefixed
+ * module identity keeps dependency scanning from treating it as an on-disk file.
  */
 const emitted: Plugin = {
   name: 'compiler-differential-emitted',
   resolveId(id) {
-    return id === 'virtual:emitted-button' ? '/virtual:emitted-button.tsx' : null;
+    return id === 'virtual:emitted-button' ? '\0virtual:emitted-button.tsx' : null;
   },
   async load(id) {
-    if (id !== '/virtual:emitted-button.tsx') return null;
+    if (id !== '\0virtual:emitted-button.tsx') return null;
     const { compileFile } = await import('../../../../../packages/compiler/src/index');
     const result = await compileFile(
       path.join(repository, 'packages/prototypes/base/src/button/button.proto.ts'),
       { root: repository, componentName: 'GeneratedButton' }
     );
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
-    return result.value.output.code;
+    return transformWithEsbuild(result.value.output.code, 'GeneratedButton.tsx', {
+      loader: 'tsx',
+      sourcemap: true,
+    });
   },
 };
 
