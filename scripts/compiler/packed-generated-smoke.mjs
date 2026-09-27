@@ -7,6 +7,7 @@
  * KEEP_PACKED_CONSUMER=1 also retains successful installs for independent inspection.
  */
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdtempSync,
@@ -61,15 +62,12 @@ function run(name, command, args) {
 function runNpm(name, args) {
   if (process.platform !== 'win32') return run(name, 'npm', args);
   // Windows npm is a .cmd shim, which spawnSync cannot execute without a shell.
-  // Invoke its CLI through the current Node instead of shell-interpreting arguments.
-  const npmCli = path.join(
-    path.dirname(process.execPath),
-    'node_modules',
-    'npm',
-    'bin',
-    'npm-cli.js'
-  );
-  if (!existsSync(npmCli)) throw new Error(`npm CLI missing beside Node: ${npmCli}`);
+  // Find its CLI beside Node or in a PATH installation without shell expansion.
+  const npmCli = [path.dirname(process.execPath), ...(process.env.PATH ?? '').split(path.delimiter)]
+    .filter(Boolean)
+    .map((directory) => path.join(directory, 'node_modules', 'npm', 'bin', 'npm-cli.js'))
+    .find((candidate) => existsSync(candidate));
+  if (!npmCli) throw new Error('npm CLI not found beside Node or on PATH');
   return run(name, process.execPath, [npmCli, ...args]);
 }
 
@@ -115,10 +113,18 @@ try {
       }
     }
   }
+  const expectedTarballs = new Map();
   const internalDependencies = Object.fromEntries(
     [...closure].sort().map((name) => {
-      const tarball = path.join(packedDir, path.basename(packageByName.get(name).tarball));
+      const record = packageByName.get(name);
+      const tarball = path.resolve(releaseDir, record.tarball);
       if (!existsSync(tarball)) throw new Error(`missing packed tarball: ${tarball}`);
+      if (path.dirname(realpathSync(tarball)) !== realpathSync(packedDir))
+        throw new Error(`packed tarball outside selected directory: ${name}`);
+      const integrity = `sha512-${createHash('sha512').update(readFileSync(tarball)).digest('base64')}`;
+      if (integrity !== record.integrity)
+        throw new Error(`staged tarball integrity mismatch: ${name}`);
+      expectedTarballs.set(name, { path: realpathSync(tarball), integrity });
       return [name, `file:${tarball}`];
     })
   );
@@ -139,6 +145,20 @@ try {
   // Lockfile entries alone may include uninstalled platform-specific optionals. Report only
   // actual on-disk packages; verify real paths and tarball resolution, not merely URL text.
   const lock = JSON.parse(readFileSync(path.join(consumerDir, 'package-lock.json'), 'utf8'));
+  const verifyInternal = (entry, pkg, location) => {
+    if (!pkg.name.startsWith('@proto.ui/')) return;
+    const expected = expectedTarballs.get(pkg.name);
+    if (
+      !closure.has(pkg.name) ||
+      pkg.version !== manifest.releaseVersion ||
+      !entry.resolved?.startsWith('file:') ||
+      realpathSync(path.resolve(consumerDir, entry.resolved.slice('file:'.length))) !==
+        expected?.path ||
+      entry.integrity !== expected?.integrity
+    ) {
+      throw new Error(`unexpected internal resolution or integrity at ${location}`);
+    }
+  };
   const installed = { internal: [], external: [] };
   for (const [location, entry] of Object.entries(lock.packages)) {
     if (!location) continue;
@@ -151,15 +171,7 @@ try {
     const pkg = JSON.parse(readFileSync(path.join(directory, 'package.json'), 'utf8'));
     if (entry.version !== pkg.version) throw new Error(`installed version mismatch at ${location}`);
     const internal = pkg.name.startsWith('@proto.ui/');
-    if (
-      internal &&
-      (!closure.has(pkg.name) ||
-        pkg.version !== manifest.releaseVersion ||
-        !entry.resolved?.startsWith('file:') ||
-        !entry.resolved.endsWith('.tgz'))
-    ) {
-      throw new Error(`unexpected internal resolution at ${location}: ${entry.resolved}`);
-    }
+    verifyInternal(entry, pkg, location);
     installed[internal ? 'internal' : 'external'].push({
       name: pkg.name,
       version: pkg.version,
@@ -171,6 +183,23 @@ try {
   const installedNames = [...new Set(installed.internal.map((entry) => entry.name))].sort();
   if (JSON.stringify(installedNames) !== JSON.stringify([...closure].sort()))
     throw new Error('installed internal package set differs from declared closure');
+  const control = installed.internal[0];
+  const other = installed.internal.find((entry) => entry.name !== control?.name);
+  if (!control || !other) throw new Error('too few internal packages for resolution control');
+  const controlEntry = lock.packages[control.location];
+  const controlPackage = JSON.parse(
+    readFileSync(path.join(consumerDir, control.location, 'package.json'), 'utf8')
+  );
+  for (const mutation of [{ resolved: other.resolved }, { integrity: other.integrity }]) {
+    let rejected = false;
+    try {
+      verifyInternal({ ...controlEntry, ...mutation }, controlPackage, control.location);
+    } catch {
+      rejected = true;
+    }
+    if (!rejected) throw new Error('internal tarball provenance negative control was accepted');
+  }
+  console.log('PACKED_CLOSURE_MUTANTS_REJECTED: wrong tarball and wrong integrity');
   writeFileSync(path.join(workDir, 'closure.json'), JSON.stringify(installed, null, 2) + '\n');
   console.log('INSTALLED_INTERNAL:', installed.internal.length, installedNames.join(', '));
   console.log('INSTALLED_EXTERNAL (including smoke tooling):', installed.external.length);
