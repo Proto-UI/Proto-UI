@@ -22,7 +22,7 @@ export async function writeCaseEvidence(
     JSON.stringify(
       {
         schemaVersion: 1,
-        source: 'packages/prototypes/base/src/button/button.proto.ts',
+        source: definition.source,
         profile: definition.profile,
         styleFamily: definition.styleFamily,
         runId: process.env.COMPILER_EVIDENCE_RUN_ID ?? null,
