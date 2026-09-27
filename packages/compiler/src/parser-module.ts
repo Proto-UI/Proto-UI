@@ -295,7 +295,11 @@ export class SourceGraph {
       const exported = module.exports.get(name);
       if (!exported) rejectNode(module.file, 'PUI1002', `No static ${name} export.`);
       if (typeof exported !== 'string') {
-        if ('expression' in exported) return;
+        if ('expression' in exported) {
+          const definition = this.definition(module, name);
+          this.descriptor(definition.module, definition.node);
+          return;
+        }
         visiting.add(key);
         try {
           resolve(this.importedModule(module, exported), exported.exported, visiting);
