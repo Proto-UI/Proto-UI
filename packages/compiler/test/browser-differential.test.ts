@@ -103,6 +103,7 @@ async function readPresentation(
           'fontFamily',
           'fontSize',
           'lineHeight',
+          'boxShadow',
         ].map((key) => [
           key,
           style.getPropertyValue(key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)),
@@ -152,14 +153,16 @@ describe.sequential('real-browser Adapter/generated differential', () => {
       await page.waitForSelector('body[data-ready="true"]');
       const reference = page.locator('#reference-root [data-pui-root]');
       const candidate = page.locator('#candidate-root [data-pui-root]');
+      const referencePanel = page.locator('#reference-root');
+      const candidatePanel = page.locator('#candidate-root');
       await expect.poll(() => reference.count()).toBe(1);
       await expect.poll(() => candidate.count()).toBe(1);
       // Button has no prescribed visual theme. Apply one identical consumer style
       // and compare two real browser renderings, not compiler-generated CSS text.
       await page.addStyleTag({
         content: `
-        #reference-root, #candidate-root { display: inline-block; width: 220px; height: 80px;
-          padding: 8px; box-sizing: border-box; vertical-align: top; }
+        #reference-root, #candidate-root { display: inline-block; width: 240px; height: 100px;
+          padding: 20px; box-sizing: border-box; vertical-align: top; }
         [data-pui-root] { box-sizing: border-box; display: flex; align-items: center;
           justify-content: center; width: 176px; height: 44px; border: 2px solid #172c42;
           background: #e7f1ed; color: #172c42; font: 600 16px/20px Arial;
@@ -177,6 +180,24 @@ describe.sequential('real-browser Adapter/generated differential', () => {
       const referencePixels = await reference.screenshot();
       const candidatePixels = await candidate.screenshot();
       expect(candidatePixels.equals(referencePixels)).toBe(true);
+      // The panel crop includes the reserved overflow margin. An element-only
+      // crop misses shadows or pseudo-elements painted outside its border box.
+      const referencePanelPixels = await referencePanel.screenshot();
+      const candidatePanelPixels = await candidatePanel.screenshot();
+      expect(candidatePanelPixels.equals(referencePanelPixels)).toBe(true);
+
+      await candidate.evaluate((element: HTMLElement) => {
+        element.style.boxShadow = '0 0 0 12px rgb(215, 0, 0)';
+      });
+      const shadowMutant = await readPresentation(page, 'candidate');
+      const shadowElementPixels = await candidate.screenshot();
+      const shadowPanelPixels = await candidatePanel.screenshot();
+      expect(shadowMutant.style.boxShadow).not.toBe(referencePresentation.style.boxShadow);
+      expect(shadowElementPixels.equals(referencePixels)).toBe(true);
+      expect(shadowPanelPixels.equals(referencePanelPixels)).toBe(false);
+      await candidate.evaluate((element: HTMLElement) => {
+        element.style.boxShadow = '';
+      });
 
       // Unknown-to-the-comparator negative control: an altered candidate must
       // fail the computed presentation, screenshot and hit oracles.
@@ -189,8 +210,22 @@ describe.sequential('real-browser Adapter/generated differential', () => {
       expect(mutant.centerHit).toBe(false);
       const mutantPixels = await candidate.screenshot();
       expect(mutantPixels.equals(referencePixels)).toBe(false);
+      const mutantPanelPixels = await candidatePanel.screenshot();
+      expect(mutantPanelPixels.equals(referencePanelPixels)).toBe(false);
       expect(errors).toEqual([]);
       const { writeFile } = await import('node:fs/promises');
+      const screenshots = {
+        'reference-element': referencePixels,
+        'candidate-element': candidatePixels,
+        'reference-panel': referencePanelPixels,
+        'candidate-panel': candidatePanelPixels,
+        'shadow-element': shadowElementPixels,
+        'shadow-panel': shadowPanelPixels,
+        'opacity-element': mutantPixels,
+        'opacity-panel': mutantPanelPixels,
+      };
+      for (const [name, pixels] of Object.entries(screenshots))
+        await writeFile(path.join(evidenceDir, `${name}.png`), pixels);
       await writeFile(
         path.join(evidenceDir, 'browser-presentation.json'),
         JSON.stringify(
@@ -200,13 +235,13 @@ describe.sequential('real-browser Adapter/generated differential', () => {
             reference: referencePresentation,
             candidate: candidatePresentation,
             mutant,
+            shadowMutant,
             accessibility: { reference: referenceA11y, candidate: candidateA11y },
             sha256: Object.fromEntries(
-              [
-                ['reference', referencePixels],
-                ['candidate', candidatePixels],
-                ['mutant', mutantPixels],
-              ].map(([name, pixels]) => [name, createHash('sha256').update(pixels).digest('hex')])
+              Object.entries(screenshots).map(([name, pixels]) => [
+                name,
+                createHash('sha256').update(pixels).digest('hex'),
+              ])
             ),
           },
           null,
