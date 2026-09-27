@@ -61,7 +61,14 @@ export async function compileFile(
               statement.importClause.namedBindings.elements.every((item) => item.isTypeOnly)))
         )
           continue;
-        if (ts.isExportDeclaration(statement) && statement.isTypeOnly) continue;
+        if (
+          ts.isExportDeclaration(statement) &&
+          (statement.isTypeOnly ||
+            (statement.exportClause &&
+              ts.isNamedExports(statement.exportClause) &&
+              statement.exportClause.elements.every((element) => element.isTypeOnly)))
+        )
+          continue;
         const specifier = statement.moduleSpecifier;
         if (!specifier || !ts.isStringLiteral(specifier) || !specifier.text.startsWith('.'))
           continue;

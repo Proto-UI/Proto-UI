@@ -540,6 +540,7 @@ class Frontend {
   compile(): PrototypeIR {
     const fileName = sourceName(this.options.fileName ?? 'input.proto.ts');
     const module = this.graph.load(fileName);
+    this.graph.validateExports();
     const exportName = this.options.exportName ?? 'default';
     const definition = this.graph.definition(module, exportName);
     if (definition.factory !== 'definePrototype')
