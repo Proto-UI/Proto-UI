@@ -2,7 +2,7 @@
 
 ## 提案范围与治理边界
 
-本记录作为独立 PR 提议调整五个 whole-entry gzip 上限，以容纳 PR #652 已实现的共享 core/runtime 增长，以及 Web Component Shadow Split、组合树 Focus 和相关 correctness 修复。此 PR 只调整测量阈值和记录证据：保留 whole-entry blocking anti-regression gate、九个入口、esbuild bundle/minify/tree-shaking 配置、external 边界和 gzip level 9；不改变产品实现、公共 API、运行时语义、coverage 或 CI timeout。
+本记录作为独立 PR 提议调整五个 whole-entry gzip 上限，以容纳 PR #652 已实现的共享 core/runtime 增长，以及 Web Component Shadow Split、组合树 Focus 和相关 correctness 修复。此 PR 只调整测量阈值、确保预算脚本改动会触发 package CI gate，并记录证据：保留 whole-entry blocking anti-regression gate、九个入口、esbuild bundle/minify/tree-shaking 配置、external 边界和 gzip level 9；不改变产品实现、公共 API、运行时语义、coverage 或 CI timeout。
 
 这是供独立评审的额度申请，不代表 #654 决定已批准具体数字，也不代表已接受后续能力的任意增长。PR #652 当前仍是独立 open PR；必须在本提案审查通过、合入后，由 #652 的新 exact head 重新运行 package gate 和完整 CI。评审者可以要求缩减阈值、先做额外优化或拒绝本提案。
 
@@ -37,6 +37,6 @@
 
 ## 验证与剩余门禁
 
-本提案本身的验证是：当前 main 上执行 `corepack pnpm@10.32.1 check:package-budgets`，确认所有当前入口仍符合提议的 ceiling；并由此 PR 的 GitHub-hosted Linux CI 重新执行相同 gate。macOS 本地 gzip 只作辅助，不替代 canonical Linux CI。提案获批并合入后，PR #652 必须在更新后的 head 取得完整新 CI；本提案不会替该 PR 的测试、review thread 处置、`CHANGES_REQUESTED` 或 merge gate 提供任何豁免。
+本提案本身的验证是：当前 main 上执行 `corepack pnpm@10.32.1 check:package-budgets`，确认所有当前入口仍符合提议的 ceiling；`scripts/build/public-packages.mjs --changed-from <main> --plan --json` 因预算策略文件变化应选中全部公开包，使 PR CI 不再跳过 package build / budget job；并由此 PR 的 GitHub-hosted Linux CI 重新执行相同 gate。macOS 本地 gzip 只作辅助，不替代 canonical Linux CI。提案获批并合入后，PR #652 必须在更新后的 head 取得完整新 CI；本提案不会替该 PR 的测试、review thread 处置、`CHANGES_REQUESTED` 或 merge gate 提供任何豁免。
 
 没有降低测试覆盖、关闭或改为非阻断的 whole-entry gate、调低 timeout、迁移 self-hosted runner，或改变 #652 的测试集合。组织成员对数值和余量的独立评议仍是待完成的人类决定。

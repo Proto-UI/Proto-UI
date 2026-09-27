@@ -260,8 +260,10 @@ function selectChangedPackages(packages, base) {
       .forEach((file) => files.add(file));
   }
   const changedFiles = [...files];
+  // A change to the package-budget gate itself must execute that gate in CI;
+  // otherwise its non-package path produces an empty plan and skips the job.
   const globalChange = changedFiles.some((file) =>
-    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|\.github\/)/.test(
+    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|scripts\/analysis\/package-budgets\.mjs$|\.github\/)/.test(
       file
     )
   );
