@@ -23,11 +23,11 @@ function mount(
   onClick: () => void
 ): {
   read(): Record<string, unknown>;
-  setProps(next: Record<string, unknown>): void;
+  setProps(next: Record<string, unknown>, options?: { omitDisabled?: boolean }): void;
   remount(): void;
 } {
   let currentProps: Record<string, unknown> = { disabled: false, children: 'Activate', onClick };
-  const root = createRoot(container);
+  let root = createRoot(container);
   let handle: { getExposes?: () => Record<string, Exposes> } | null = null;
   const ref = (value: unknown) => {
     handle = value as { getExposes?: () => Record<string, Exposes> } | null;
@@ -55,12 +55,20 @@ function mount(
       focusVisible: read('focusVisible'),
       clicks: onClick.mockCount,
     }),
-    setProps(next) {
-      currentProps = { ...currentProps, ...next };
+    setProps(next, options) {
+      if (options?.omitDisabled) {
+        const { disabled: _omitted, ...rest } = currentProps;
+        currentProps = rest;
+      } else {
+        currentProps = { ...currentProps, ...next };
+      }
       render();
     },
     remount() {
+      // React 19 roots are single-use: create a fresh root for the new
+      // host view epoch rather than rendering into an unmounted root.
       root.unmount();
+      root = createRoot(container);
       render();
     },
   };
@@ -133,6 +141,15 @@ const candidate = mount(
   async remount() {
     reference.remount();
     candidate.remount();
+    const { promise, resolve } = Promise.withResolvers<void>();
+    setTimeout(resolve, 30);
+    await promise;
+    await new Promise<void>((settle) => requestAnimationFrame(() => settle()));
+    return this.read();
+  },
+  async omitDisabled() {
+    reference.setProps({}, { omitDisabled: true });
+    candidate.setProps({}, { omitDisabled: true });
     const { promise, resolve } = Promise.withResolvers<void>();
     setTimeout(resolve, 30);
     await promise;

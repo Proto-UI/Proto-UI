@@ -237,4 +237,122 @@ describe.sequential('real-browser Adapter/generated differential', () => {
       await context.close();
     }
   }, 120_000);
+
+  it('preserves semantic facts through disabled omission and view remount with real input', async () => {
+    const context = await browser.newContext({ viewport: { width: 1000, height: 650 } });
+    const page = await context.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.goto(baseUrl);
+      await page.waitForSelector('body[data-ready="true"]');
+      const referenceButton = page.locator('#reference-root [data-pui-root]');
+      const candidateButton = page.locator('#candidate-root [data-pui-root]');
+      await expect.poll(() => referenceButton.count()).toBe(1);
+      await expect.poll(() => candidateButton.count()).toBe(1);
+
+      // 1. Disable, then omit the disabled prop entirely (key removed).
+      await page.evaluate(() =>
+        (
+          window as unknown as {
+            differential: { setDisabled(next: boolean): Promise<BoardSnapshot> };
+          }
+        ).differential.setDisabled(true)
+      );
+      await expect
+        .poll(() => readBoard(page))
+        .toMatchObject({
+          reference: { disabled: true },
+          candidate: { disabled: true },
+        });
+      await page.evaluate(() =>
+        (
+          window as unknown as {
+            differential: { omitDisabled(): Promise<BoardSnapshot> };
+          }
+        ).differential.omitDisabled()
+      );
+      await expect
+        .poll(() => readBoard(page))
+        .toMatchObject({
+          reference: { disabled: false },
+          candidate: { disabled: false },
+        });
+
+      // 2. Real clicks after omission: both targets emit exactly one click.
+      const clicksBeforeOmission = await readBoard(page);
+      for (const locator of [referenceButton, candidateButton]) {
+        const box = await locator.boundingBox();
+        expect(box).not.toBeNull();
+        await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+        await page.mouse.down();
+        await page.mouse.up();
+      }
+      const afterOmissionClicks = await readBoard(page);
+      expect(afterOmissionClicks.reference.clicks).toBe(clicksBeforeOmission.reference.clicks + 1);
+      expect(afterOmissionClicks.candidate.clicks).toBe(clicksBeforeOmission.candidate.clicks + 1);
+
+      // 3. Remount the host view: logical state and click counts survive.
+      await page.evaluate(() =>
+        (
+          window as unknown as {
+            differential: { remount(): Promise<BoardSnapshot> };
+          }
+        ).differential.remount()
+      );
+      await expect.poll(() => referenceButton.count()).toBe(1);
+      await expect.poll(() => candidateButton.count()).toBe(1);
+      const afterRemount = await readBoard(page);
+      expect(afterRemount.reference.disabled).toBe(false);
+      expect(afterRemount.candidate.disabled).toBe(false);
+      expect(afterRemount.reference.clicks).toBe(afterOmissionClicks.reference.clicks);
+      expect(afterRemount.candidate.clicks).toBe(afterOmissionClicks.candidate.clicks);
+
+      // 4. Real interaction still works after remount on both targets.
+      for (const locator of [referenceButton, candidateButton]) {
+        const box = await locator.boundingBox();
+        expect(box).not.toBeNull();
+        await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+        await page.mouse.down();
+        await page.mouse.up();
+      }
+      const afterRemountClicks = await readBoard(page);
+      expect(afterRemountClicks.reference.clicks).toBe(afterRemount.reference.clicks + 1);
+      expect(afterRemountClicks.candidate.clicks).toBe(afterRemount.candidate.clicks + 1);
+      // A real mouse click moves host focus to the clicked target, so the
+      // second click leaves it focused while the first is not. Blur both
+      // targets and move the pointer away before the final comparison so
+      // both paths are in observationally equivalent input positions.
+      await page.mouse.move(0, 0);
+      await referenceButton.evaluate((element: HTMLElement) => element.blur());
+      await candidateButton.evaluate((element: HTMLElement) => element.blur());
+      await expect
+        .poll(() => readBoard(page))
+        .toMatchObject({
+          reference: { focused: false },
+          candidate: { focused: false },
+        });
+
+      // 5. Equal final semantic state under justified identity aliases.
+      const finalBoard = await readBoard(page);
+      const comparison = compareTraces(
+        semantic(finalBoard, 'reference'),
+        semantic(finalBoard, 'candidate'),
+        {
+          referenceIdentity: {
+            reason: 'Per-root opaque instance IDs',
+            aliases: { reference: 'browser-button' },
+          },
+          candidateIdentity: {
+            reason: 'Per-root opaque instance IDs',
+            aliases: { candidate: 'browser-button' },
+          },
+        }
+      );
+      expect(comparison).toEqual({ equal: true });
+      expect(errors).toEqual([]);
+    } finally {
+      await context.close();
+    }
+  }, 120_000);
 });
