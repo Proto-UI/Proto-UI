@@ -19,6 +19,7 @@ export type ProjectionComponentId =
   | 'badge'
   | 'card'
   | 'skeleton'
+  | 'spinner'
   | 'scroll-area'
   | 'tooltip';
 export type ProjectionFamilyId = 'shadcn' | 'brutalist';
@@ -76,6 +77,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   badge: ['root'],
   card: ['root', 'header', 'content', 'footer'],
   skeleton: ['root'],
+  spinner: ['root'],
   'scroll-area': ['root', 'viewport', 'scrollbar', 'thumb'],
   tooltip: ['group', 'root', 'trigger', 'content'],
 };
@@ -572,6 +574,14 @@ const BRUTALIST_MANIFEST = {
       recipePrototypeIds: ['brutalist-skeleton-root'],
       parts: {
         root: { basePrototypeId: null, prototypeId: 'brutalist-skeleton-root' },
+      },
+    },
+    spinner: {
+      baseFamilyId: null,
+      recipeId: 'demo-brutalist-spinner',
+      recipePrototypeIds: ['brutalist-spinner-root'],
+      parts: {
+        root: { basePrototypeId: null, prototypeId: 'brutalist-spinner-root' },
       },
     },
     'scroll-area': {

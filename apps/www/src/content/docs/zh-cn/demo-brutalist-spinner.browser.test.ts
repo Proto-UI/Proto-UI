@@ -1,0 +1,188 @@
+// @vitest-environment node
+
+import type { Browser, Locator, Page } from 'playwright-core';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import {
+  COLOR_SCHEMES,
+  applyColorScheme,
+  RUNTIMES,
+  launchBrowser,
+  openRoute,
+  selectRuntime,
+  startServer,
+  stopServer,
+} from './browser-harness';
+
+const SPINNER_ROUTE = '/en/ui-libraries/brutalist/components/spinner/';
+const NARROW_VIEWPORT = { width: 320, height: 844 } as const;
+const requestedRuntime = process.env.PROTO_UI_SPINNER_BROWSER_RUNTIME;
+const TEST_RUNTIMES = requestedRuntime
+  ? RUNTIMES.filter((runtime) => runtime === requestedRuntime)
+  : RUNTIMES;
+
+if (requestedRuntime && TEST_RUNTIMES.length === 0) {
+  throw new Error(
+    `PROTO_UI_SPINNER_BROWSER_RUNTIME must be one of ${RUNTIMES.join(', ')}; received ${requestedRuntime}.`
+  );
+}
+
+let browser: Browser;
+let baseUrl = '';
+
+function roots(previewer: Locator): Locator {
+  return previewer.locator('[data-projection-content] [data-pui-root]');
+}
+
+async function expectPassiveFocus(locator: Locator, label: string): Promise<void> {
+  await locator.focus();
+  const active = await locator.evaluate((element) => {
+    const root = element.shadowRoot ?? element;
+    return root.contains(document.activeElement) || document.activeElement === element;
+  });
+  expect(active, `${label}/focus`).toBe(false);
+}
+
+beforeAll(async () => {
+  browser = await launchBrowser();
+  baseUrl = await startServer(SPINNER_ROUTE);
+}, 150_000);
+
+afterAll(async () => {
+  await stopServer();
+  await browser.close();
+}, 60_000);
+
+describe.sequential('Brutalist Spinner documentation browser regressions', () => {
+  it('keeps Spinner contentless, hidden, square, and open-edged across runtimes and themes', async () => {
+    const opened = await openRoute(browser, baseUrl, SPINNER_ROUTE, NARROW_VIEWPORT);
+    try {
+      for (const runtime of TEST_RUNTIMES) {
+        await selectRuntime(opened.page, opened.previewer, runtime, '[data-pui-root]', 4);
+        for (const colorScheme of COLOR_SCHEMES) {
+          await applyColorScheme(opened.page, colorScheme);
+          const spinners = roots(opened.previewer);
+          const allFacts = await spinners.evaluateAll((elements) =>
+            elements.map((element) => {
+              const style = getComputedStyle(element);
+              const box = element.getBoundingClientRect();
+              return {
+                role: element.getAttribute('role'),
+                ariaHidden: element.getAttribute('aria-hidden'),
+                ariaLive: element.getAttribute('aria-live'),
+                ariaBusy: element.getAttribute('aria-busy'),
+                tabIndex: (element as HTMLElement).tabIndex,
+                textContent: (element.shadowRoot ?? element).textContent?.trim() ?? '',
+                borderWidths: [
+                  style.borderTopWidth,
+                  style.borderRightWidth,
+                  style.borderBottomWidth,
+                  style.borderLeftWidth,
+                ],
+                borderColors: [
+                  style.borderTopColor,
+                  style.borderRightColor,
+                  style.borderBottomColor,
+                  style.borderLeftColor,
+                ],
+                borderRadii: [
+                  style.borderTopLeftRadius,
+                  style.borderTopRightRadius,
+                  style.borderBottomRightRadius,
+                  style.borderBottomLeftRadius,
+                ],
+                backgroundColor: style.backgroundColor,
+                backgroundImage: style.backgroundImage,
+                boxShadow: style.boxShadow,
+                width: box.width,
+                height: box.height,
+              };
+            })
+          );
+
+          expect(
+            await opened.previewer.locator('[data-demo-ref="spinner-canary"]').count(),
+            `${runtime}/spinner-content`
+          ).toBe(0);
+
+          const expectedSizes = [16, 24, 32, 24];
+          expect(allFacts.length, `${runtime}/count`).toBe(4);
+          for (const [index, surface] of allFacts.entries()) {
+            const label = `${runtime}/spinner-${index}`;
+            expect(surface.role, `${label}/role`).toBeNull();
+            expect(surface.ariaHidden, `${label}/hidden`).toBe('true');
+            expect(surface.ariaLive, `${label}/live`).toBeNull();
+            expect(surface.ariaBusy, `${label}/busy`).toBeNull();
+            expect(surface.tabIndex, `${label}/tabindex`).toBe(-1);
+            await expectPassiveFocus(spinners.nth(index), label);
+            expect(surface.textContent.includes('SPINNER-CANARY'), `${label}/contentless`).toBe(
+              false
+            );
+            // Square geometry from the size prop (sm/md/lg/default md).
+            expect(surface.width, `${label}/width`).toBe(expectedSizes[index]);
+            expect(surface.height, `${label}/height`).toBe(expectedSizes[index]);
+            // Open-edge ring: three solid 2px edges, one transparent.
+            expect(surface.borderWidths, `${label}/border-widths`).toEqual(Array(4).fill('2px'));
+            const transparentEdges = surface.borderColors.filter(
+              (color) => color === 'rgba(0, 0, 0, 0)'
+            ).length;
+            expect(transparentEdges, `${label}/open-edge`).toBe(1);
+            // No radius, fill, or soft effects.
+            expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('0px'));
+            expect(surface.backgroundImage, `${label}/no-fill-image`).toBe('none');
+            expect(surface.boxShadow, `${label}/no-shadow`).toBe('none');
+          }
+        }
+      }
+    } finally {
+      await opened.context.close();
+    }
+  }, 240_000);
+
+  it('rotates 1000ms linear infinite by default and stays open-edged under reduced motion', async () => {
+    const opened = await openRoute(browser, baseUrl, SPINNER_ROUTE, NARROW_VIEWPORT);
+    try {
+      await selectRuntime(opened.page, opened.previewer, 'wc', '[data-pui-root]', 4);
+
+      const spinners = roots(opened.previewer);
+      const first = spinners.first();
+      const motionFacts = await first.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          animationName: style.animationName,
+          animationDuration: style.animationDuration,
+          animationTimingFunction: style.animationTimingFunction,
+          animationIterationCount: style.animationIterationCount,
+        };
+      });
+      expect(motionFacts.animationName, 'wc/rotation').toBe('pui-spin');
+      expect(motionFacts.animationDuration, 'wc/duration').toBe('1000ms');
+      expect(motionFacts.animationTimingFunction, 'wc/timing').toBe('linear');
+      expect(motionFacts.animationIterationCount, 'wc/iteration').toBe('infinite');
+
+      // Reduced motion removes the animation; the open edge stays as a
+      // non-color orientation cue.
+      await opened.page.emulateMedia({ reducedMotion: 'reduce' });
+      const reducedFacts = await first.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          animationName: style.animationName,
+          borderTopColors: [
+            style.borderTopColor,
+            style.borderRightColor,
+            style.borderBottomColor,
+            style.borderLeftColor,
+          ],
+        };
+      });
+      expect(reducedFacts.animationName, 'wc/reduced-animation').toBe('none');
+      expect(
+        reducedFacts.borderTopColors.filter((color) => color === 'rgba(0, 0, 0, 0)').length,
+        'wc/reduced-open-edge'
+      ).toBe(1);
+
+      await opened.page.emulateMedia({ reducedMotion: null });
+    } finally {
+      await opened.context.close();
+    }
+  }, 120_000);
+});

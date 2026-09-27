@@ -32,6 +32,7 @@ const EXPECTED_COMPONENT_IDS = {
     'badge',
     'card',
     'skeleton',
+    'spinner',
     'scroll-area',
     'tooltip',
   ],

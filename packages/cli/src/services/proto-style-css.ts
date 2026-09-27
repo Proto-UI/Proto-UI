@@ -1,5 +1,6 @@
 const PUI_STYLE_ATTR = 'data-pui-style';
 const SYSTEM_DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+const SYSTEM_REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 const SYSTEM_THEME_FALLBACK_ROOT =
   ":root:not(.dark):not(.light):not([data-theme='dark']):not([data-theme='light'])";
 
@@ -128,6 +129,13 @@ const staticUtilities: Record<string, string[]> = {
     'animation-timing-function: ease;',
     'animation-fill-mode: both;',
   ],
+  'animate-spin': [
+    'animation-name: pui-spin;',
+    'animation-duration: 1000ms;',
+    'animation-timing-function: linear;',
+    'animation-iteration-count: infinite;',
+  ],
+  'animate-none': ['animation: none;'],
   'fade-in-0': ['--pui-enter-opacity: 0;'],
   'fade-out-0': ['--pui-exit-opacity: 0;'],
   'zoom-in-95': ['--pui-enter-scale: 0.95;'],
@@ -189,6 +197,7 @@ const staticUtilities: Record<string, string[]> = {
   'border-b': ['border-bottom-width: 1px;', 'border-bottom-style: solid;'],
   'border-l-2': ['border-left-width: 2px;', 'border-left-style: solid;'],
   'border-ink': ['border-color: var(--pui-foreground);'],
+  'border-current': ['border-color: currentColor;'],
   'border-black': ['border-color: #000;'],
   'border-foreground': ['border-color: var(--pui-foreground);'],
   'border-transparent': ['border-color: transparent;'],
@@ -346,7 +355,24 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
     );
   }
 
+  if (
+    rules.some((rule) => {
+      const utility = splitVariants(rule.token).at(-1);
+      return utility === 'animate-spin';
+    })
+  ) {
+    lines.push(
+      '  @keyframes pui-spin {',
+      '    to {',
+      '      transform: rotate(360deg);',
+      '    }',
+      '  }',
+      ''
+    );
+  }
+
   for (const rule of rules) {
+    if (hasMotionReduceVariant(rule.token)) continue;
     const selectors = buildSelectors(rule.token);
     if (selectors.length === 0 || rule.css.length === 0) continue;
     lines.push(`  ${selectors.join(',\n  ')} {`);
@@ -360,6 +386,21 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
     lines.push(`  @media ${SYSTEM_DARK_MEDIA_QUERY} {`);
     for (const rule of systemDarkRules) {
       const selectors = buildSelectors(rule.token, { systemPreferenceFallback: true });
+      if (selectors.length === 0 || rule.css.length === 0) continue;
+      lines.push(`    ${selectors.join(',\n    ')} {`);
+      for (const decl of rule.css) lines.push(`      ${decl}`);
+      lines.push('    }');
+      lines.push('');
+    }
+    lines.push('  }');
+    lines.push('');
+  }
+
+  const motionReduceRules = rules.filter((rule) => hasMotionReduceVariant(rule.token));
+  if (motionReduceRules.length > 0) {
+    lines.push(`  @media ${SYSTEM_REDUCED_MOTION_MEDIA_QUERY} {`);
+    for (const rule of motionReduceRules) {
+      const selectors = buildSelectors(rule.token);
       if (selectors.length === 0 || rule.css.length === 0) continue;
       lines.push(`    ${selectors.join(',\n    ')} {`);
       for (const decl of rule.css) lines.push(`      ${decl}`);
@@ -584,13 +625,23 @@ function buildSelectors(
   const variants = parts.slice(0, -1);
   let selectors = [`:where([${PUI_STYLE_ATTR}~="${escapeCssString(token)}"])`];
   let dark = false;
+  let motionReduce = false;
 
   for (const variant of variants) {
     if (variant === 'dark') {
       dark = true;
       continue;
     }
+    if (variant === 'motion-reduce') {
+      motionReduce = true;
+      continue;
+    }
     selectors = selectors.flatMap((selector) => applyVariant(selector, variant));
+  }
+
+  if (motionReduce && !dark) {
+    // Reduced-motion variants are emitted in a dedicated @media block by
+    // renderProtoStyleTokenCss; plain selectors keep the base surface valid.
   }
 
   if (dark) {
@@ -611,6 +662,10 @@ function buildSelectors(
 
 function hasDarkVariant(token: string): boolean {
   return splitVariants(token).slice(0, -1).includes('dark');
+}
+
+function hasMotionReduceVariant(token: string): boolean {
+  return splitVariants(token).slice(0, -1).includes('motion-reduce');
 }
 
 function applyVariant(selector: string, variant: string): string[] {

@@ -1,0 +1,55 @@
+id: T-BRUTALIST-SPINNER-0001
+type: test
+title: Brutalist Spinner direct-ownership and visual contract tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: New draft test entity delivering the admitted Spinner carrier's executable evidence; module-test coverage proves direct ownership, semantic absence, size mapping, ring grammar, and reduced-motion retention without promoting any entity to active.
+summary: Covers direct ownership without a Base Spinner hook, semantic absence, size mapping and default restoration, open-edge ring grammar, and reduced-motion fallback retention.
+cases:
+  - id: T-BRUTALIST-SPINNER-0001-CASE-DIRECT-OWNERSHIP
+    title: Spinner owns the visual-only prototype directly without a Base Spinner hook
+    covers: [P-BRUTALIST-SPINNER-DIRECT-OWNERSHIP]
+    expectation: spinner-owns-direct-visual-only-prototype
+  - id: T-BRUTALIST-SPINNER-0001-CASE-SEMANTIC-ABSENCE
+    title: Spinner is aria-hidden, roleless, non-focusable, and contentless
+    covers: [P-BRUTALIST-SPINNER-DIRECT-OWNERSHIP]
+    expectation: spinner-semantic-absence
+  - id: T-BRUTALIST-SPINNER-0001-CASE-SIZE
+    title: Every size maps to its square Root dimensions and md restores after prop removal
+    covers: [P-BRUTALIST-SPINNER-SIZE-PROP]
+    expectation: spinner-size-mapping-and-default-restoration
+  - id: T-BRUTALIST-SPINNER-0001-CASE-VISUAL
+    title: Root projects the open-edge ring grammar without fill or soft effects
+    covers: [P-BRUTALIST-SPINNER-VISUAL-GRAMMAR]
+    expectation: spinner-open-edge-ring-grammar
+  - id: T-BRUTALIST-SPINNER-0001-CASE-REDUCED-MOTION
+    title: The open edge stays the reduced-motion fallback while rotation is on by default
+    covers: [P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION]
+    expectation: spinner-reduced-motion-fallback-retention
+implementations:
+  - id: prototypes-brutalist-spinner-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/spinner.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SPINNER-0001-CASE-DIRECT-OWNERSHIP
+      - T-BRUTALIST-SPINNER-0001-CASE-SEMANTIC-ABSENCE
+      - T-BRUTALIST-SPINNER-0001-CASE-SIZE
+      - T-BRUTALIST-SPINNER-0001-CASE-VISUAL
+      - T-BRUTALIST-SPINNER-0001-CASE-REDUCED-MOTION
+    exercises: [P-BRUTALIST-SPINNER]
+verifies:
+  prototypes:
+    - id: P-BRUTALIST-SPINNER
+      anchors:
+        - P-BRUTALIST-SPINNER-DIRECT-OWNERSHIP
+        - P-BRUTALIST-SPINNER-SIZE-PROP
+        - P-BRUTALIST-SPINNER-VISUAL-GRAMMAR
+        - P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION
+exercises: { prototypes: [P-BRUTALIST-SPINNER] }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added Brutalist Spinner direct-ownership, semantic-absence, size, visual, and reduced-motion coverage.
+tags: [prototype, brutalist, spinner, test, styled-only, reduced-motion]

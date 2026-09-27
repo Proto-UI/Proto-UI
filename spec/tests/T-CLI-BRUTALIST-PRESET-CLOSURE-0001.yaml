@@ -46,22 +46,22 @@ verifies:
   decisions: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001]
 exercises:
   prototypes:
-    [
-      P-BRUTALIST-BUTTON,
-      P-BRUTALIST-BADGE,
-      P-BRUTALIST-CARD,
-      P-BRUTALIST-TOGGLE,
-      P-BRUTALIST-SWITCH,
-      P-BRUTALIST-TABS,
-      P-BRUTALIST-HOVER-CARD,
-      P-BRUTALIST-DROPDOWN-MENU,
-      P-BRUTALIST-SELECT,
-      P-BRUTALIST-DIALOG,
-      P-BRUTALIST-SCROLL-AREA,
-      P-BRUTALIST-SEPARATOR,
-      P-BRUTALIST-SKELETON,
-      P-BRUTALIST-TEXTAREA,
-    ]
+    - P-BRUTALIST-BUTTON
+    - P-BRUTALIST-BADGE
+    - P-BRUTALIST-CARD
+    - P-BRUTALIST-TOGGLE
+    - P-BRUTALIST-SWITCH
+    - P-BRUTALIST-TABS
+    - P-BRUTALIST-HOVER-CARD
+    - P-BRUTALIST-DROPDOWN-MENU
+    - P-BRUTALIST-SELECT
+    - P-BRUTALIST-DIALOG
+    - P-BRUTALIST-SCROLL-AREA
+    - P-BRUTALIST-SEPARATOR
+    - P-BRUTALIST-SKELETON
+    - id: P-BRUTALIST-SPINNER
+      since: 0.3.0-alpha.1
+    - P-BRUTALIST-TEXTAREA
 revisions:
   - version: 0.2.0-rc.7
     change: introduced
@@ -72,3 +72,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: revised
     summary: Added package theme key/pair coverage and generated semantic-theme projection freshness to the Brutalist preset closure.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added P-BRUTALIST-SPINNER to the exercised prototype surface with animate-spin and reduced-motion CLI closure evidence.
+lifecycleRationale: The exercised prototype surface expands with the admitted Spinner carrier; the closure test entity remains draft on the current 0.3.0-alpha.1 train and gains one executable relation plus the new CLI closure evidence.
