@@ -13,23 +13,49 @@ const repository = path.resolve(root, '../../../../..');
  * Compile the unchanged source into a virtual TSX module. The null-prefixed
  * module identity keeps dependency scanning from treating it as an on-disk file.
  */
+const sources: Record<string, string> = {
+  'virtual:emitted-button': path.join(
+    repository,
+    'packages/prototypes/base/src/button/button.proto.ts'
+  ),
+  'virtual:retained-owner': path.join(root, 'retained-owner.proto.ts'),
+  'virtual:retained-owner-reset-state': path.join(root, 'retained-owner.proto.ts'),
+  'virtual:retained-owner-recreate-owner': path.join(root, 'retained-owner.proto.ts'),
+};
 const emitted: Plugin = {
   name: 'compiler-differential-emitted',
   resolveId(id) {
-    return id === 'virtual:emitted-button' ? '\0virtual:emitted-button.tsx' : null;
+    return Object.hasOwn(sources, id) ? `\0${id}.tsx` : null;
   },
   async load(id) {
-    if (id !== '\0virtual:emitted-button.tsx') return null;
+    if (!id.startsWith('\0') || !id.endsWith('.tsx')) return null;
+    const specifier = id.slice(1, -4);
+    if (!Object.hasOwn(sources, specifier)) return null;
     const { compileFile } = await import('../../../../../packages/compiler/src/index');
-    const result = await compileFile(
-      path.join(repository, 'packages/prototypes/base/src/button/button.proto.ts'),
-      { root: repository, componentName: 'GeneratedButton' }
-    );
-    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
-    return transformWithEsbuild(result.value.output.code, 'GeneratedButton.tsx', {
-      loader: 'tsx',
-      sourcemap: true,
+    const result = await compileFile(sources[specifier], {
+      root: repository,
+      componentName: 'GeneratedButton',
     });
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    let code = result.value.output.code;
+    if (specifier === 'virtual:retained-owner-reset-state') {
+      code = code.replace(
+        'run.expose.emit("viewEnded");',
+        'count.set(0); run.expose.emit("viewEnded");'
+      );
+    } else if (specifier === 'virtual:retained-owner-recreate-owner') {
+      code = code.replace(
+        'return __puiAdapt(prototype, options);',
+        'const Inner = __puiAdapt(prototype, options); return (props: any) => __puiReact.createElement(Inner, { ...props, key: String(props.present) });'
+      );
+    }
+    if (
+      specifier !== 'virtual:emitted-button' &&
+      specifier !== 'virtual:retained-owner' &&
+      code === result.value.output.code
+    )
+      throw new Error(`Mutation was not injected: ${specifier}`);
+    return transformWithEsbuild(code, 'GeneratedButton.tsx', { loader: 'tsx', sourcemap: true });
   },
 };
 
