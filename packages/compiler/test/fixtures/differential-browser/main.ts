@@ -21,13 +21,9 @@ function mount(
   adapted: Adapted,
   displayName: string,
   onClick: () => void
-): {
-  read(): Record<string, unknown>;
-  setProps(next: Record<string, unknown>, options?: { omitDisabled?: boolean }): void;
-  remount(): void;
-} {
+): { read(): Record<string, unknown>; setProps(next: Record<string, unknown>): void } {
   let currentProps: Record<string, unknown> = { disabled: false, children: 'Activate', onClick };
-  let root = createRoot(container);
+  const root = createRoot(container);
   let handle: { getExposes?: () => Record<string, Exposes> } | null = null;
   const ref = (value: unknown) => {
     handle = value as { getExposes?: () => Record<string, Exposes> } | null;
@@ -55,20 +51,8 @@ function mount(
       focusVisible: read('focusVisible'),
       clicks: onClick.mockCount,
     }),
-    setProps(next, options) {
-      if (options?.omitDisabled) {
-        const { disabled: _omitted, ...rest } = currentProps;
-        currentProps = rest;
-      } else {
-        currentProps = { ...currentProps, ...next };
-      }
-      render();
-    },
-    remount() {
-      // A fresh React root creates a new component instance, not a repeatable
-      // view epoch on the old logical owner. Only the external sink is retained.
-      root.unmount();
-      root = createRoot(container);
+    setProps(next) {
+      currentProps = { ...currentProps, ...next };
       render();
     },
   };
@@ -132,24 +116,6 @@ const candidate = mount(
   async setDisabled(next: boolean) {
     reference.setProps({ disabled: next });
     candidate.setProps({ disabled: next });
-    const { promise, resolve } = Promise.withResolvers<void>();
-    setTimeout(resolve, 30);
-    await promise;
-    await new Promise<void>((settle) => requestAnimationFrame(() => settle()));
-    return this.read();
-  },
-  async remount() {
-    reference.remount();
-    candidate.remount();
-    const { promise, resolve } = Promise.withResolvers<void>();
-    setTimeout(resolve, 30);
-    await promise;
-    await new Promise<void>((settle) => requestAnimationFrame(() => settle()));
-    return this.read();
-  },
-  async omitDisabled() {
-    reference.setProps({}, { omitDisabled: true });
-    candidate.setProps({}, { omitDisabled: true });
     const { promise, resolve } = Promise.withResolvers<void>();
     setTimeout(resolve, 30);
     await promise;
