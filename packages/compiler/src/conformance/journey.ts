@@ -23,7 +23,7 @@ export type JourneyAction =
   | { kind: 'key-down' | 'key-up'; key: string }
   | { kind: 'focus' }
   | { kind: 'tab' }
-  | { kind: 'rerender'; props: Record<string, unknown> }
+  | { kind: 'rerender'; props: Record<string, unknown>; omitKeys?: readonly string[] }
   | { kind: 'unmount' }
   | { kind: 'remount'; props: Record<string, unknown> };
 
@@ -55,6 +55,7 @@ export interface JourneyRunOptions {
 export interface JourneyContext {
   mounted: boolean;
   remounts: number;
+  hasProp(name: string): boolean;
 }
 
 interface StateLike {
@@ -114,6 +115,7 @@ export async function runJourney(
     get remounts() {
       return remounts;
     },
+    hasProp: (name) => Object.hasOwn(currentProps, name),
   };
 
   let handle: { getExposes?: () => Record<string, unknown> } | null = null;
@@ -218,7 +220,9 @@ export async function runJourney(
           break;
         case 'rerender':
           await act(async () => {
-            root!.render(render({ ...currentProps, ...action.props }));
+            const props = { ...currentProps, ...action.props };
+            for (const key of action.omitKeys ?? []) delete props[key];
+            root!.render(render(props));
           });
           break;
         case 'unmount':
