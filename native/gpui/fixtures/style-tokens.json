@@ -3,8 +3,8 @@
   "source": "packages/cli/src/services/proto-style-css.ts",
   "counts": {
     "tokens": 277,
-    "compiled": 269,
-    "noDeclarations": 8
+    "compiled": 271,
+    "noDeclarations": 6
   },
   "tokens": {
     "-translate-x-1/2": {
@@ -208,6 +208,9 @@
       "border-top-width": "2px",
       "border-top-style": "solid"
     },
+    "border-t-transparent": {
+      "border-top-color": "transparent"
+    },
     "border-transparent": {
       "border-color": "transparent"
     },
@@ -332,6 +335,9 @@
     },
     "hidden": {
       "display": "none"
+    },
+    "inline-block": {
+      "display": "inline-block"
     },
     "inline-flex": {
       "display": "inline-flex"
@@ -959,6 +965,7 @@
     "border-primary",
     "border-ring",
     "border-t-2",
+    "border-t-transparent",
     "border-transparent",
     "bottom-0",
     "cursor-default",
@@ -997,6 +1004,7 @@
     "h-full",
     "h-px",
     "hidden",
+    "inline-block",
     "inline-flex",
     "inset-0",
     "items-center",
@@ -1169,13 +1177,11 @@
     "leading-none"
   ],
   "noDeclarations": [
-    "border-t-transparent",
     "group/brutalist-button",
     "group/brutalist-dialog-trigger",
     "group/brutalist-toggle",
     "group/button",
     "group/toggle",
-    "inline-block",
     "peer"
   ]
 }
