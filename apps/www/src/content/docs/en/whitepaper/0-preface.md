@@ -34,7 +34,7 @@ It is no exaggeration to say that foundational UI component work is full of repe
 
 This work is about far more than rewriting the same colors and border radii a few times.
 
----
+## The Same Concerns, Every Time
 
 Button is the most familiar shorthand for this repetition. To see more clearly what keeps recurring, consider a Switch with persistent state.
 
@@ -51,7 +51,7 @@ Once these interaction requirements are implemented in a concrete technology, ho
 
 What is interesting is that, despite these radically different implementations, the same interaction requirements keep returning to our task lists.
 
----
+## Reuse Stops at the Ecosystem Boundary
 
 Within a sufficiently mature single-technology ecosystem, existing component libraries—especially headless component libraries—can often reduce this repetition. Radix UI, for example, centralizes a great deal of interaction logic and accessibility handling within the React ecosystem. It demonstrates at least one thing: within a single ecosystem, there is value in extracting some interaction knowledge from individual products and maintaining it collectively.
 
@@ -69,7 +69,7 @@ Maintaining an agreed visual presentation, interaction detail, and level of acce
 
 But must all of this work really begin again with every technological transition?
 
----
+## A Hypothesis, Not a Conclusion
 
 The recurrence of these responsibilities does not by itself prove that they can form a shared abstraction across technologies. Differences between platforms may simply move complexity that was once scattered across implementations into a new intermediate layer. Adding an abstraction layer does not automatically produce consistency or reliable accessibility support either.
 
