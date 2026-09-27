@@ -21,6 +21,7 @@ const sources: Record<string, string> = {
   'virtual:retained-owner': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-reset-state': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-recreate-owner': path.join(root, 'retained-owner.proto.ts'),
+  'virtual:retained-owner-reattach-state-loss': path.join(root, 'retained-owner.proto.ts'),
 };
 const emitted: Plugin = {
   name: 'compiler-differential-emitted',
@@ -47,6 +48,11 @@ const emitted: Plugin = {
       code = code.replace(
         'return __puiAdapt(prototype, options);',
         'const Inner = __puiAdapt(prototype, options); return (props: any) => __puiReact.createElement(Inner, { ...props, key: String(props.present) });'
+      );
+    } else if (specifier === 'virtual:retained-owner-reattach-state-loss') {
+      code = code.replace(
+        'def.expose.state("count", count);',
+        'def.expose.state("count", count); let __epochMounts = 0; def.lifecycle.onMounted(() => { __epochMounts += 1; if (__epochMounts === 2) count.set(0); });'
       );
     }
     if (
