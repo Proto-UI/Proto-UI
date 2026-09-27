@@ -132,7 +132,13 @@ const definitions: { id: string; feature: string; steps: JourneyStep[] }[] = [
       {
         id: 'disable',
         action: { kind: 'props', disabled: true },
-        expected: { disabled: true, hovered: false, pressed: false, clicks: 1 },
+        expected: {
+          disabled: true,
+          hasDisabledProp: true,
+          hovered: false,
+          pressed: false,
+          clicks: 1,
+        },
         criteria: [
           P + 'PROP-DISABLED-CONTROLLED',
           P + 'DISABLED-CLEAR-TRANSIENT',
@@ -147,8 +153,8 @@ const definitions: { id: string; feature: string; steps: JourneyStep[] }[] = [
       },
       {
         id: 'omit-disabled',
-        action: { kind: 'props', disabled: false },
-        expected: { disabled: false, clicks: 1 },
+        action: { kind: 'props', disabled: null },
+        expected: { disabled: false, hasDisabledProp: false, clicks: 1 },
         criteria: [P + 'PROP-DISABLED-CONTROLLED'],
       },
       {
