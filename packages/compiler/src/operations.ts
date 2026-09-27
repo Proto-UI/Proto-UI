@@ -293,12 +293,4 @@ export const OPERATION_RULES: Record<Operation, OperationRule> = {
     min: 0,
     max: 0,
   },
-  'render.fragment': {
-    receiver: 'render',
-    path: 'fragment',
-    phases: ['render'],
-    result: 'template',
-    min: 1,
-    max: 1,
-  },
 };

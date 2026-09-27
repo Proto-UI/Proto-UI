@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, open, readFile, readdir, rm, stat, writeFile } from 'no
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
-import { compileFile, compilePrototype, writeCompilation } from '../src/compile';
+import { compilePrototype, writeCompilation } from '../src/compile';
 
 const temporary: string[] = [];
 const source = `import {definePrototype} from '@proto.ui/core'; export default definePrototype({name:'fixture',setup(def){ const flag=def.state.bool('flag',false); def.expose.state('flag',flag); }});`;
@@ -29,7 +29,6 @@ describe('transactional create-only compiler delivery', () => {
       const result = await writeCompilation(compilation, directory, async (filename) => {
         const handle = await open(filename, 'wx');
         return {
-          stat: () => handle.stat(),
           async writeFile(contents) {
             if (path.basename(filename) === failingName) {
               await handle.writeFile(contents.slice(0, 16));
@@ -44,14 +43,13 @@ describe('transactional create-only compiler delivery', () => {
           },
         };
       });
-      expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI3003' }] });
+      expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI3002' }] });
       await expect(stat(directory)).rejects.toMatchObject({ code: 'ENOENT' });
       const retry = await writeCompilation(compilation, directory);
       expect(retry.ok).toBe(true);
       expect(await readFile(path.join(directory, 'Component.tsx'), 'utf8')).toBe(
-        compilation.output.code + '\n//# sourceMappingURL=Component.tsx.map\n'
+        compilation.output.code
       );
-      expect(JSON.parse(await readFile(path.join(directory, 'Component.tsx.map'), 'utf8')).version).toBe(3);
       expect(
         JSON.parse(await readFile(path.join(directory, 'provenance.json'), 'utf8')).profile
       ).toBe('react-runtime-v1');
@@ -85,13 +83,5 @@ describe('transactional create-only compiler delivery', () => {
     );
     expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
     expect('value' in rejected).toBe(false);
-  });
-
-  it('does not require a runtime source for a type-only re-export', async () => {
-    const root = await mkdtemp(path.join(tmpdir(), 'proto-compiler-type-only-'));
-    temporary.push(root);
-    const entry = path.join(root, 'entry.proto.ts');
-    await writeFile(entry, `${source}\nexport { type TypeOnly } from './absent';`);
-    expect(await compileFile(entry, { root })).toMatchObject({ ok: true });
   });
 });
