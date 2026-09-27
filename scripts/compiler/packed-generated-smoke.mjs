@@ -46,12 +46,30 @@ function run(name, command, args) {
       2
     )
   );
-  process.stdout.write(result.stdout ?? '');
-  process.stderr.write(result.stderr ?? '');
+  // The complete npm tree is kept in the evidence directory, not dumped into CI logs.
+  if (name !== 'installed-tree') {
+    process.stdout.write(result.stdout ?? '');
+    process.stderr.write(result.stderr ?? '');
+  }
   if (result.error) throw result.error;
   if (result.status !== 0)
     throw new Error(`${name} exited with ${result.status}; output retained in ${workDir}`);
   return result;
+}
+
+function runNpm(name, args) {
+  if (process.platform !== 'win32') return run(name, 'npm', args);
+  // Windows npm is a .cmd shim, which spawnSync cannot execute without a shell.
+  // Invoke its CLI through the current Node instead of shell-interpreting arguments.
+  const npmCli = path.join(
+    path.dirname(process.execPath),
+    'node_modules',
+    'npm',
+    'bin',
+    'npm-cli.js'
+  );
+  if (!existsSync(npmCli)) throw new Error(`npm CLI missing beside Node: ${npmCli}`);
+  return run(name, process.execPath, [npmCli, ...args]);
 }
 
 try {
@@ -109,8 +127,8 @@ try {
     path.join(consumerDir, 'package.json'),
     JSON.stringify(packageJson, null, 2) + '\n'
   );
-  run('install', 'npm', ['install', '--no-audit', '--no-fund']);
-  run('installed-tree', 'npm', ['ls', '--all', '--json']);
+  runNpm('install', ['install', '--no-audit', '--no-fund']);
+  runNpm('installed-tree', ['ls', '--all', '--json']);
 
   // Lockfile entries alone may include uninstalled platform-specific optionals. Report only
   // actual on-disk packages; verify real paths and tarball resolution, not merely URL text.
@@ -148,8 +166,8 @@ try {
   if (JSON.stringify(installedNames) !== JSON.stringify([...closure].sort()))
     throw new Error('installed internal package set differs from declared closure');
   writeFileSync(path.join(workDir, 'closure.json'), JSON.stringify(installed, null, 2) + '\n');
-  console.log('INSTALLED_INTERNAL:', JSON.stringify(installed.internal));
-  console.log('INSTALLED_EXTERNAL (including smoke tooling):', JSON.stringify(installed.external));
+  console.log('INSTALLED_INTERNAL:', installed.internal.length, installedNames.join(', '));
+  console.log('INSTALLED_EXTERNAL (including smoke tooling):', installed.external.length);
   console.log('CLOSURE_OK: actual internal packages use packed tarballs, no escaping links');
 
   const smoke = `
