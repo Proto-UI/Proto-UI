@@ -98,6 +98,28 @@ AnchorRequests:
 
 No extent, pixel, offset, rectangle, DOM element, controller, observer or framework key enters portable facts. The host-local captured offset lives only inside the lease.
 
+### Complete transition and result table (bounded, test-ready)
+
+States: `idle → captured → (settling) → terminal`. Exactly one terminal status+reason per request; the terminal row wins over every in-flight event; after a terminal result the lease is closed and every later callback is a no-op that is logged, never a state change. Timeout boundary: the settling window is bounded by the existing `HC-SCROLL-SURFACE-0001` lease timeout — the same bound that governs end-follow; when it expires un-settled, the result is `rejected: layout-unsettled`.
+
+| # | Event in state `captured` | Result (status: reason) | Movement |
+| --- | --- | --- | --- |
+| T1 | App commits update; expected post-commit generation settles | `applied` | minimum correction once |
+| T2 | Second `captureAnchor` on the same surface | prior: `superseded: re-captured`; new capture proceeds | none |
+| T3 | Active user scroll begins | `rejected: user-scroll-active` | none |
+| T4 | Viewport resize/zoom/reflow arrives | `rejected: viewport-changed` | none |
+| T5 | End-follow lease is `following` | `rejected: end-follow-following` | none |
+| T6 | Anchor removed; transition oracle resolves a successor | `degraded: successor-applied` | successor placed at captured offset |
+| T7 | Anchor removed; oracle unresolved or ambiguous | `degraded: successor-unresolved` | none |
+| T8 | Anchor dematerialized after valid capture (windowing) | wait bounded rematerialization window → `applied`, else `degraded: anchor-unmaterialized` | correction only on rematerialization |
+| T9 | Target replaced / detached-remounted / disposed | `superseded: target-replaced` | none; late callbacks never mutate the replacement lease |
+| T10 | Callback from any generation except captured and its expected post-commit successor | `superseded: stale-generation` | none |
+| T11 | Settling window exceeds the lease timeout | `rejected: layout-unsettled` | none |
+| T12 | `releaseAnchor` before terminal | `superseded: released` | none |
+| T13 | Capability absent at capture or during settling | `rejected: capability-absent` | none |
+
+Outcome precedence when competing events co-occur in one settling window: terminal states already reached win (T2/T9/T12/T3/T5 are terminal at the moment they are observed); if two competing events are observed in the same callback, the safety order is `user-scroll-active > viewport-changed > target-replaced > end-follow-following > stale-generation > layout-unsettled` — the earliest observed event in that order fixes the single terminal result. `applied` never competes with a rejection: if any rejection event is observed before the settled measurement is applied, the rejection wins. This table is the bounded, observable contract a later C/M/HC/T proposal and its T-\* mapping must encode; fake-host matrix additions must cover each row exactly once.
+
 ## Transaction rules
 
 1. Capture is valid only while the surface view epoch and target are current; capture on a disposed/unresolved surface yields terminal `rejected: capability-absent`.
@@ -122,7 +144,7 @@ A no-tool Luna run received only the recommendation and returned these HYPOTHESI
 2. **Anchor at the very start/end and clamping:** valid. Minimum correction is clamped by host rules; at the top, correction is zero and the result is `applied` with zero correction. At the end with end-follow paused, the correction may move away from end — that is the intended away-from-end behavior and must not resume follow.
 3. **Two anchors / nested updates:** out of the first slice. One capture per surface; a second capture supersedes the first (terminal `superseded`).
 4. **RTL/reversed axes:** the first slice supports vertical ordinary axes only. Horizontal, RTL, writing-mode, and reversed-axis semantics are **unavailable and ungoverned** in the first slice — `C-SCROLL-0001-Q-DIRECTION` is an open question that explicitly blocks horizontal-scroll-conformance, so this packet does not normalize against it or claim it as authority. When that question resolves, a bounded follow-up may extend "extent before anchor" to the configured axis direction of the resolved semantics; no second semantics is introduced here.
-5. **Zoom/reflow without structural update:** not a preservation trigger. Browser reflow correction remains host/browser behavior; the governed transaction is requested only around app-committed structural updates. This keeps the capability bounded and testable.
+5. **Viewport resize/zoom/reflow (Issue #520 required case 10):** **not a first-slice preservation trigger, and this packet explicitly requests narrowing #520's acceptance surface accordingly.** The governed transaction is requested only around app-committed structural updates (case 1–9, 11); reflow caused by viewport resize, zoom, or non-app reflow is host/browser behavior outside this lease, exactly as native scroll anchoring already handles it without a portable anchor concept. Concretely: a resize/zoom event that arrives while a preservation transaction is open takes the same precedence as active user input — the transaction terminates `rejected: viewport-changed` (no correction, no guessing), and the App must re-capture. The responsive-resize and 200% zoom real-Web evidence items in #520 remain **open #520 acceptance items, deferred to a separately governed follow-up slice** (they exercise scroll-clamping and end-follow composition, not anchor identity), not silently dropped: this packet proposes amending #520 to mark case 10, the responsive-resize/200%-zoom evidence rows, and the zoom/reflow-evidence boundary row as `deferred to a follow-up anchor-viewport slice`, keeping them visible rather than removed. This deferral itself is the human decision recorded in Residual risks; nothing here narrows #520 unilaterally.
 6. **Screen-reader virtual cursor:** investigate, do not infer (per #520). Web evidence: native scroll anchoring does not move the focus/AT anchor. Non-Web hosts: capability absence is terminal, not degraded.
 
 The pass changes no owner and no recommendation. It adds the layout-settle timeout, supersede-on-recapture, and explicit "no re-open after terminal" rules.
