@@ -45,7 +45,17 @@ COMPILER_EVIDENCE_RUN_ID=pointer-props-verified node --import tsx scripts/compil
 corepack pnpm@10.32.1 -s check:types:workspace
 ```
 
-The recorded local pre-commit runs set `GITHUB_SHA` to the unchanged compiler/dependency revision `c74b698d…`; harness hashes identify the new working-tree test code. Publication and exact-head CI are recorded separately, rather than attributing those runs to an unknown future commit.
+**Provenance correction:** the committed `green-replay.json` (`sourceRevision`) and `green-case.json` (`revision`) contain `c74b698d…` because `GITHUB_SHA` was manually supplied during a dirty working-tree run. This value is a dependency/base tag, **not the exact executed tree**. The pointer test did not exist at c74. These retained artifacts must not be described as exact-c74 execution evidence. Their original contents and checksums are preserved, not relabeled.
+
+The recorded source, lockfile, CSS, fixture and harness hashes identify consumed file contents only. The harness hash matches the test later introduced in implementation commit `7e5205bba2f96e0ee40cdb8d48245211263ab124` and present at `4f6ee4d5948684912c9131a2ee2d004b2eac65d9`; that match does not establish an exact commit or clean-tree execution retroactively. See [the separate correction receipt](evidence/2026-09-27-compiler-pointer-props-provenance-correction.json).
+
+Separate committed-head evidence exists for 4f6ee4d5: the producer's post-commit command receipts and raw reports under `.cache/compiler-pointer-props/exact-4f6ee4d5`; main CI [36323808604](https://github.com/Proto-UI/Proto-UI/actions/runs/36323808604), SUCCESS; and the coordinator's independently reported replay of the exact tree (8 files/49 tests, full typecheck 232 Astro files/0 diagnostics, 6 PASS/1 UNTESTED). The coordinator additionally reported generated-only payload and prop-omission mutants rejected with reference contracts passing. Those are independent review results, not extra producer tests or an enlarged finite claim.
+
+## Separate inherited RepoSteward shadow failure
+
+The main `CI` workflow above passed. Separately, RepoSteward shadow run [36323728419](https://github.com/Proto-UI/Proto-UI/actions/runs/36323728419) failed before jobs at 4f6ee4d5: the API reports zero jobs and zero check runs. The same workflow failed at #742/c74 (`36317062624`), #739/ab8031e2 (`36316254048`) and #736/8e782e0f (`36313565533`). All four heads contain identical workflow blob `ba71b4328b6560dcb84c16eef2110856a8af0126`.
+
+Static diagnosis: `.github/workflows/reposteward-portfolio-shadow.yml:31-35` uses `${{ runner.temp }}` in job-level `env`; [GitHub context availability](https://docs.github.com/en/actions/reference/workflows-and-actions/contexts#context-availability) excludes `runner` there while allowing it at step level. This is an inherited configuration defect consistent with startup validation failure. No annotation/job log was exposed by the inspected API, so this is not presented as a server-supplied diagnosis or a RepoSteward program failure. The workflow is not changed by this pointer/props task. Main CI success does not waive this separate failed workflow or author-owned DCO/review gates.
 
 ## Preserved inherited fixture issue
 
