@@ -1,0 +1,25 @@
+import { chromium } from '../../apps/www/node_modules/playwright-core/index.mjs';
+import { writeFile } from 'node:fs/promises';
+const browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, headless: true, args: ['--disable-dev-shm-usage', '--no-sandbox'] });
+try {
+  const page = await browser.newPage({ viewport: { width: 1000, height: 650 }, deviceScaleFactor: 1 });
+  await page.goto('http://127.0.0.1:5199/');
+  await page.waitForSelector('body[data-ready="true"]');
+  await page.addStyleTag({ content: '#reference-root, #candidate-root { display: inline-block; width: 240px; height: 100px; padding: 20px; box-sizing: border-box; vertical-align: top; } [data-pui-root] { box-sizing: border-box; display: flex; align-items: center; justify-content: center; width: 176px; height: 44px; border: 2px solid #172c42; background: #e7f1ed; color: #172c42; font: 600 16px/20px Arial; cursor: pointer; }' });
+  await page.evaluate(() => document.fonts.ready);
+  const facts = [];
+  for (const side of ['reference', 'candidate']) {
+    const element = page.locator(`#${side}-root [data-pui-root]`);
+    facts.push({ side, box: await element.boundingBox(), dom: await element.evaluate(el => ({ html: el.outerHTML, color: getComputedStyle(el).color, background: getComputedStyle(el).backgroundColor, opacity: getComputedStyle(el).opacity, font: getComputedStyle(el).font })) });
+    await element.screenshot({ path: `.cache/compiler-pointer-props/inherited-${side}.png` });
+  }
+  const beforeA = await page.locator('#reference-root [data-pui-root]').screenshot();
+  const beforeB = await page.locator('#candidate-root [data-pui-root]').screenshot();
+  await page.addStyleTag({ content: 'body { display: flex; }' });
+  const alignedA = await page.locator('#reference-root [data-pui-root]').screenshot({ path: '.cache/compiler-pointer-props/aligned-reference.png' });
+  const alignedB = await page.locator('#candidate-root [data-pui-root]').screenshot({ path: '.cache/compiler-pointer-props/aligned-candidate.png' });
+  const alignedBoxes = [await page.locator('#reference-root [data-pui-root]').boundingBox(), await page.locator('#candidate-root [data-pui-root]').boundingBox()];
+  const result = { browser: browser.version(), facts, beforeEqual: beforeA.equals(beforeB), alignedEqual: alignedA.equals(alignedB), alignedBoxes };
+  await writeFile('.cache/compiler-pointer-props/inherited-visual-diagnostic.json', JSON.stringify(result, null, 2));
+  console.log(JSON.stringify(result, null, 2));
+} finally { await browser.close(); }

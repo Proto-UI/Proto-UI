@@ -1,0 +1,8 @@
+COMPILER_CASE_COLLECTION_BLOCKED: /workspace/worktrees/proto-ui-compiler/pointer-props-implementation/.cache/compiler-pointer-props/missing-case/criterion-case-run-matrix.json
+button.pointer-props: UNTESTED
+button.state-events: PASS
+button.keyboard-focus: PASS
+button.native-presentation: UNTESTED
+button.native-mixing: PASS
+button.terminal-cleanup: PASS
+button.retained-owner: PASS

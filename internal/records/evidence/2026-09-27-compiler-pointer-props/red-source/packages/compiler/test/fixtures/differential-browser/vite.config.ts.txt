@@ -10,18 +10,16 @@ const root = fileURLToPath(new URL('.', import.meta.url));
 const repository = path.resolve(root, '../../../../..');
 
 /**
- * Compile the unchanged source into a virtual TSX module. The null-prefixed
- * module identity keeps dependency scanning from treating it as an on-disk file.
+ * Compile unchanged source into a virtual TSX module without writing it to the
+ * tree. The null-prefixed identity avoids treating it as an on-disk dependency;
+ * a separate packed consumer checks the actual written output contract.
  */
 const sources: Record<string, string> = {
   'virtual:emitted-button': path.join(
     repository,
     'packages/prototypes/base/src/button/button.proto.ts'
   ),
-  'virtual:pointer-props-duplicate-click': path.join(
-    repository,
-    'packages/prototypes/base/src/button/button.proto.ts'
-  ),
+  'virtual:pointer-props-duplicate-click': path.join(repository, 'packages/prototypes/base/src/button/button.proto.ts'),
   'virtual:retained-owner': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-reset-state': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-recreate-owner': path.join(root, 'retained-owner.proto.ts'),
@@ -44,10 +42,7 @@ const emitted: Plugin = {
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     let code = result.value.output.code;
     if (specifier === 'virtual:pointer-props-duplicate-click') {
-      code = code.replace(
-        'run.expose.emit("click");',
-        'run.expose.emit("click"); run.expose.emit("click");'
-      );
+      code = code.replace('run.expose.emit("click");', 'run.expose.emit("click"); run.expose.emit("click");');
     }
     if (specifier === 'virtual:retained-owner-reset-state') {
       code = code.replace(
@@ -84,6 +79,6 @@ export default {
       'react-dom': path.join(repository, 'packages/adapters/react/node_modules/react-dom'),
     },
   },
-  optimizeDeps: { include: ['react', 'react-dom/client', 'react-dom'] },
+  optimizeDeps: { noDiscovery: true, include: ['react', 'react-dom/client', 'react-dom'] },
   server: { host: '127.0.0.1', fs: { allow: [repository] } },
 };

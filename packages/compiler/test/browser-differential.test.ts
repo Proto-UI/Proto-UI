@@ -1,5 +1,6 @@
 // @vitest-environment node
 
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import type { Browser, Page } from '../../../apps/www/node_modules/playwright-core/types/types';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -35,6 +36,49 @@ interface BoardSnapshot {
   candidate: PathSnapshot;
 }
 
+interface PresentationSnapshot {
+  box: { x: number; y: number; width: number; height: number };
+  style: Record<string, string>;
+  centerHit: boolean;
+}
+
+async function readPresentation(
+  page: Page,
+  side: 'reference' | 'candidate'
+): Promise<PresentationSnapshot> {
+  return page.evaluate((which) => {
+    const container = document.getElementById(`${which}-root`)!;
+    const element = container.querySelector<HTMLElement>('[data-pui-root]')!;
+    const parent = container.getBoundingClientRect();
+    const box = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const center = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+    return {
+      box: { x: box.x - parent.x, y: box.y - parent.y, width: box.width, height: box.height },
+      style: Object.fromEntries(
+        [
+          'display',
+          'visibility',
+          'opacity',
+          'pointerEvents',
+          'backgroundColor',
+          'color',
+          'borderTopColor',
+          'borderTopWidth',
+          'fontFamily',
+          'fontSize',
+          'lineHeight',
+          'boxShadow',
+        ].map((key) => [
+          key,
+          style.getPropertyValue(key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)),
+        ])
+      ),
+      centerHit: center === element || element.contains(center),
+    };
+  }, side);
+}
+
 async function readBoard(page: Page): Promise<BoardSnapshot> {
   return page.evaluate(() =>
     (window as unknown as { differential: { read(): BoardSnapshot } }).differential.read()
@@ -61,6 +105,121 @@ function semantic(board: BoardSnapshot, side: 'reference' | 'candidate'): Semant
 }
 
 describe.sequential('real-browser Adapter/generated differential', () => {
+  it('compares layout, paint, center hit and accessibility under the same consumer CSS', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 1000, height: 650 },
+      deviceScaleFactor: 1,
+    });
+    const page = await context.newPage();
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    try {
+      await page.goto(baseUrl);
+      await page.waitForSelector('body[data-ready="true"]');
+      const reference = page.locator('#reference-root [data-pui-root]');
+      const candidate = page.locator('#candidate-root [data-pui-root]');
+      const referencePanel = page.locator('#reference-root');
+      const candidatePanel = page.locator('#candidate-root');
+      await expect.poll(() => reference.count()).toBe(1);
+      await expect.poll(() => candidate.count()).toBe(1);
+      // Button has no prescribed visual theme. Apply one identical consumer style
+      // and compare two real browser renderings, not compiler-generated CSS text.
+      // Avoid font-dependent inline whitespace placing one panel on fractional pixels.
+      await page.addStyleTag({
+        content: `
+        body { display: flex; }
+        #reference-root, #candidate-root { display: inline-block; width: 240px; height: 100px;
+          padding: 20px; box-sizing: border-box; vertical-align: top; }
+        [data-pui-root] { box-sizing: border-box; display: flex; align-items: center;
+          justify-content: center; width: 176px; height: 44px; border: 2px solid #172c42;
+          background: #e7f1ed; color: #172c42; font: 600 16px/20px Arial;
+          cursor: pointer; }
+      `,
+      });
+      await page.evaluate(() => document.fonts.ready);
+      const referencePresentation = await readPresentation(page, 'reference');
+      const candidatePresentation = await readPresentation(page, 'candidate');
+      expect(referencePresentation.centerHit).toBe(true);
+      expect(candidatePresentation).toEqual(referencePresentation);
+      const referenceA11y = await reference.ariaSnapshot();
+      const candidateA11y = await candidate.ariaSnapshot();
+      expect(candidateA11y).toBe(referenceA11y);
+      const referencePixels = await reference.screenshot();
+      const candidatePixels = await candidate.screenshot();
+      expect(candidatePixels.equals(referencePixels)).toBe(true);
+      // The panel crop includes the reserved overflow margin. An element-only
+      // crop misses shadows or pseudo-elements painted outside its border box.
+      const referencePanelPixels = await referencePanel.screenshot();
+      const candidatePanelPixels = await candidatePanel.screenshot();
+      expect(candidatePanelPixels.equals(referencePanelPixels)).toBe(true);
+
+      await candidate.evaluate((element: HTMLElement) => {
+        element.style.boxShadow = '0 0 0 12px rgb(215, 0, 0)';
+      });
+      const shadowMutant = await readPresentation(page, 'candidate');
+      const shadowElementPixels = await candidate.screenshot();
+      const shadowPanelPixels = await candidatePanel.screenshot();
+      expect(shadowMutant.style.boxShadow).not.toBe(referencePresentation.style.boxShadow);
+      expect(shadowElementPixels.equals(referencePixels)).toBe(true);
+      expect(shadowPanelPixels.equals(referencePanelPixels)).toBe(false);
+      await candidate.evaluate((element: HTMLElement) => {
+        element.style.boxShadow = '';
+      });
+
+      // Unknown-to-the-comparator negative control: an altered candidate must
+      // fail the computed presentation, screenshot and hit oracles.
+      await candidate.evaluate((element: HTMLElement) => {
+        element.style.opacity = '0';
+        element.style.pointerEvents = 'none';
+      });
+      const mutant = await readPresentation(page, 'candidate');
+      expect(mutant).not.toEqual(referencePresentation);
+      expect(mutant.centerHit).toBe(false);
+      const mutantPixels = await candidate.screenshot();
+      expect(mutantPixels.equals(referencePixels)).toBe(false);
+      const mutantPanelPixels = await candidatePanel.screenshot();
+      expect(mutantPanelPixels.equals(referencePanelPixels)).toBe(false);
+      expect(errors).toEqual([]);
+      const { writeFile } = await import('node:fs/promises');
+      const screenshots = {
+        'reference-element': referencePixels,
+        'candidate-element': candidatePixels,
+        'reference-panel': referencePanelPixels,
+        'candidate-panel': candidatePanelPixels,
+        'shadow-element': shadowElementPixels,
+        'shadow-panel': shadowPanelPixels,
+        'opacity-element': mutantPixels,
+        'opacity-panel': mutantPanelPixels,
+      };
+      for (const [name, pixels] of Object.entries(screenshots))
+        await writeFile(path.join(evidenceDir, `${name}.png`), pixels);
+      await writeFile(
+        path.join(evidenceDir, 'browser-presentation.json'),
+        JSON.stringify(
+          {
+            browser: browser.version(),
+            styleFamily: 'shared-consumer-css',
+            reference: referencePresentation,
+            candidate: candidatePresentation,
+            mutant,
+            shadowMutant,
+            accessibility: { reference: referenceA11y, candidate: candidateA11y },
+            sha256: Object.fromEntries(
+              Object.entries(screenshots).map(([name, pixels]) => [
+                name,
+                createHash('sha256').update(pixels).digest('hex'),
+              ])
+            ),
+          },
+          null,
+          2
+        )
+      );
+    } finally {
+      await context.close();
+    }
+  }, 120_000);
+
   it('executes real pointer, focus, keyboard and accessibility input with equal semantic facts', async () => {
     const context = await browser.newContext({ viewport: { width: 1000, height: 650 } });
     const page = await context.newPage();

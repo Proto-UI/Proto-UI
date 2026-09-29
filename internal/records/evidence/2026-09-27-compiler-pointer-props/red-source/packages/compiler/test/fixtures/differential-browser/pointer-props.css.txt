@@ -1,0 +1,18 @@
+/* Consumer-owned CSS for this finite base-unstyled-with-consumer-css case only. */
+body { margin: 20px; }
+#pointer-root [data-pui-root] {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 40px;
+  border: 2px solid #172c42;
+  background: #e7f1ed;
+  color: #172c42;
+  font: 600 16px/20px Arial;
+  opacity: 1;
+  cursor: pointer;
+}
+#pointer-root [data-pui-root]:hover:not([aria-disabled='true']) { background: rgb(207, 232, 207); }
+#pointer-root [data-pui-root][aria-disabled='true'] { opacity: 0.4; }
