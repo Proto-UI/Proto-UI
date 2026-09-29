@@ -6,6 +6,8 @@ Human-assisted work, explicitly requested by the current coordinator. This is a 
 
 - Worktree: `pointer-props-implementation` (separate from the preserved implementation checkout).
 - Branch: `feat/compiler-pointer-props-evidence`.
+- Implementation commit: `7e5205bba2f96e0ee40cdb8d48245211263ab124`. This record's follow-up changes checkpoint metadata only; the PR head may therefore be a later documentation-only commit.
+- Publication labels: `enhancement`, `area: adapters`, `area: core`, `advanced contribution`. Final PR/head/CI identifiers and exact-head command receipts are recorded in the project-local `.cache/compiler-pointer-props/publication.json` and the draft PR body, avoiding a self-referential commit hash in this tracked file.
 - Pinned dependency: draft #742, `c74b698dc651d11aea842336218de745287deeba`, branch `codex/compiler-layout-hit-browser`.
 - Dependency CI: [run 36317065052](https://github.com/Proto-UI/Proto-UI/actions/runs/36317065052), completed SUCCESS at that source head; `test` and `type-check` passed. Public-package release jobs were SKIPPED, not counted as executed evidence. DCO remains author-owned.
 - Stack observed before editing: #736 `8e782e0f29b45dc8d517aad054df497b9d284a8a`; #739 `ab8031e2b62809170848035dc015c1efcb22a8a0`; #742 as above. No existing branch was modified.
