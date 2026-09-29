@@ -1,0 +1,53 @@
+{
+  "browser": "145.0.7632.6",
+  "facts": [
+    {
+      "side": "reference",
+      "box": {
+        "x": 28,
+        "y": 28,
+        "width": 176,
+        "height": 44
+      },
+      "dom": {
+        "html": "<div data-pui-root=\"\" tabindex=\"0\" role=\"button\" aria-disabled=\"false\" data-pui-a11y-actions=\"activate\">Activate</div>",
+        "color": "rgb(23, 44, 66)",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "1",
+        "font": "600 16px / 20px Arial"
+      }
+    },
+    {
+      "side": "candidate",
+      "box": {
+        "x": 273.09375,
+        "y": 28,
+        "width": 176,
+        "height": 44
+      },
+      "dom": {
+        "html": "<div data-pui-root=\"\" tabindex=\"0\" role=\"button\" aria-disabled=\"false\" data-pui-a11y-actions=\"activate\">Activate</div>",
+        "color": "rgb(23, 44, 66)",
+        "background": "rgb(231, 241, 237)",
+        "opacity": "1",
+        "font": "600 16px / 20px Arial"
+      }
+    }
+  ],
+  "beforeEqual": false,
+  "alignedEqual": true,
+  "alignedBoxes": [
+    {
+      "x": 28,
+      "y": 28,
+      "width": 176,
+      "height": 44
+    },
+    {
+      "x": 268,
+      "y": 28,
+      "width": 176,
+      "height": 44
+    }
+  ]
+}
