@@ -466,6 +466,8 @@ class Frontend {
       args[0].type !== receiver.type.slice('state:'.length)
     )
       rejectNode(node.arguments[0], 'PUI1006', 'State write type does not match its handle.');
+    if (operation === 'lifecycle.setPresent' && args[0].type !== 'boolean')
+      rejectNode(node.arguments[0], 'PUI1006', 'View presence requires a boolean.');
     if (operation === 'props.define') {
       if (args[0].kind !== 'record')
         rejectNode(node, 'PUI1006', 'Props declarations must be literal records.');
@@ -540,6 +542,7 @@ class Frontend {
   compile(): PrototypeIR {
     const fileName = sourceName(this.options.fileName ?? 'input.proto.ts');
     const module = this.graph.load(fileName);
+    this.graph.validateExports();
     const exportName = this.options.exportName ?? 'default';
     const definition = this.graph.definition(module, exportName);
     if (definition.factory !== 'definePrototype')

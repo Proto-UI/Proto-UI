@@ -65,8 +65,8 @@ function mount(
       render();
     },
     remount() {
-      // React 19 roots are single-use: create a fresh root for the new
-      // host view epoch rather than rendering into an unmounted root.
+      // A fresh React root creates a new component instance, not a repeatable
+      // view epoch on the old logical owner. Only the external sink is retained.
       root.unmount();
       root = createRoot(container);
       render();

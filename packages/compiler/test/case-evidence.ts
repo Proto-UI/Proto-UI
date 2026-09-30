@@ -12,12 +12,10 @@ export async function writeCaseEvidence(
   candidate: readonly SemanticCheckpoint[],
   identities: { reference?: IdentityNormalization; candidate?: IdentityNormalization } | undefined,
   browser: string | null,
-  harnessError?: string,
-  registeredCase?: { id: string; source: string; profile: string; styleFamily: string }
+  harnessError?: string
 ): Promise<void> {
-  const definition = registeredCase ?? buttonCases().find((entry) => entry.id === result.id);
+  const definition = buttonCases().find((entry) => entry.id === result.id);
   if (!definition) throw new Error(`Cannot record unregistered case ${result.id}`);
-  if (definition.id !== result.id) throw new Error(`Case evidence registration mismatch for ${result.id}`);
   await mkdir(directory, { recursive: true });
   await writeFile(
     path.join(directory, `${result.id}.json`),

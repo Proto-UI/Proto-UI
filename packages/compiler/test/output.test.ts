@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, open, readFile, readdir, rm, stat, writeFile } from 'no
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
-import { compilePrototype, writeCompilation } from '../src/compile';
+import { compileFile, compilePrototype, writeCompilation } from '../src/compile';
 
 const temporary: string[] = [];
 const source = `import {definePrototype} from '@proto.ui/core'; export default definePrototype({name:'fixture',setup(def){ const flag=def.state.bool('flag',false); def.expose.state('flag',flag); }});`;
@@ -83,5 +83,13 @@ describe('transactional create-only compiler delivery', () => {
     );
     expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
     expect('value' in rejected).toBe(false);
+  });
+
+  it('does not require a runtime source for a type-only re-export', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'proto-compiler-type-only-'));
+    temporary.push(root);
+    const entry = path.join(root, 'entry.proto.ts');
+    await writeFile(entry, `${source}\nexport { type TypeOnly } from './absent';`);
+    expect(await compileFile(entry, { root })).toMatchObject({ ok: true });
   });
 });

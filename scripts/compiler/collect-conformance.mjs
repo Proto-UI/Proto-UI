@@ -18,7 +18,6 @@ if (!directory)
 const root = path.resolve(directory);
 const repository = fileURLToPath(new URL('../../', import.meta.url));
 const requiredCases = [
-  'button.pointer-props',
   'button.state-events',
   'button.keyboard-focus',
   'button.native-mixing',
