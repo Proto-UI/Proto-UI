@@ -14,10 +14,10 @@
 
 use std::collections::HashMap;
 
-use gpui::{Context, FocusHandle, StyleRefinement, Window};
+use gpui::{Context, EventEmitter, FocusHandle, StyleRefinement, Window};
 use proto_ui_host_protocol::messages::{
-    FocusResult, HostToPeerMessage, InputSampleMessage, OpenStatus, PeerToHostMessage,
-    ProjectionAckMessage, SessionOpen, WireRecord,
+    ExposeCall, FocusResult, HostToPeerMessage, InputSampleMessage, OpenStatus, PeerToHostMessage,
+    ProjectionAckMessage, PropsSet, SessionDispose, SessionOpen, WireRecord,
 };
 use proto_ui_host_protocol::model::{
     ActivationStatus, DeliveryResult, HostSessionModel, InstallOptions,
@@ -27,7 +27,7 @@ use proto_ui_host_protocol::wire::{
     ProjectionTransaction, SessionId,
 };
 use proto_ui_style::Theme;
-use serde_json::json;
+use serde_json::{json, Value};
 
 use crate::host::{ProtoHostView, SurfaceChild, SurfaceNode};
 use crate::input::{SessionRoute, SurfaceId};
@@ -60,6 +60,20 @@ struct HubSession {
     /// The Expose states as the peer last reported them.
     states: WireRecord,
 }
+
+/// A signal an instance emitted outward, for the host application.
+///
+/// The view emits it as it arrives, to whoever subscribes at that moment;
+/// with no subscriber it goes nowhere. A signal is an event, not a record:
+/// the host neither keeps nor replays it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct ExposedSignal {
+    pub session_id: SessionId,
+    pub name: String,
+    pub payload: Value,
+}
+
+impl EventEmitter<ExposedSignal> for ProtoHostView {}
 
 /// Something the hub noticed that is not a message to send.
 #[derive(Debug, Clone, PartialEq)]
@@ -105,6 +119,7 @@ pub struct HostHub {
     sessions: Vec<(SessionId, HubSession)>,
     outbox: Vec<HostToPeerMessage>,
     notes: Vec<HubNote>,
+    next_call: u64,
 }
 
 impl HostHub {
@@ -213,6 +228,41 @@ impl ProtoHostView {
                 states: WireRecord::new(),
             },
         ));
+    }
+
+    /// Replaces a session's props. The peer re-renders, which arrives as a
+    /// new commit in the current view.
+    pub fn set_props(&mut self, session_id: &str, props: WireRecord) {
+        self.hub.outbox.push(HostToPeerMessage::PropsSet(PropsSet {
+            session_id: session_id.to_string(),
+            props,
+        }));
+    }
+
+    /// Calls a method the instance exposes, returning the call's identifier;
+    /// the peer answers with an `expose.result` carrying it.
+    pub fn call_exposed(&mut self, session_id: &str, name: &str, args: Vec<Value>) -> String {
+        self.hub.next_call += 1;
+        let call_id = format!("{session_id}:call:{}", self.hub.next_call);
+        self.hub
+            .outbox
+            .push(HostToPeerMessage::ExposeCall(ExposeCall {
+                session_id: session_id.to_string(),
+                call_id: call_id.clone(),
+                name: name.to_string(),
+                args,
+            }));
+        call_id
+    }
+
+    /// Asks the peer to end a session. Its surfaces stay until the peer
+    /// reports `session.disposed`, which is when the host tears them down.
+    pub fn dispose_session(&mut self, session_id: &str) {
+        self.hub
+            .outbox
+            .push(HostToPeerMessage::SessionDispose(SessionDispose {
+                session_id: session_id.to_string(),
+            }));
     }
 
     /// Handles one message from the peer.
@@ -351,11 +401,21 @@ impl ProtoHostView {
                     diagnostic: message.diagnostic,
                 });
             }
-            // Handshake, lifecycle, signals and call results are the peer's
-            // own record; nothing on the host depends on them yet.
+            PeerToHostMessage::ExposeSignal(signal) => {
+                if self.hub.session(&signal.session_id).is_none() {
+                    self.note_unknown(&signal.session_id, "expose.signal");
+                    return;
+                }
+                cx.emit(ExposedSignal {
+                    session_id: signal.session_id,
+                    name: signal.name,
+                    payload: signal.payload,
+                });
+            }
+            // Handshake, lifecycle and call results are the peer's own record;
+            // nothing on the host depends on them yet.
             PeerToHostMessage::PeerHello(_)
             | PeerToHostMessage::Lifecycle(_)
-            | PeerToHostMessage::ExposeSignal(_)
             | PeerToHostMessage::ExposeResult(_) => {}
         }
     }

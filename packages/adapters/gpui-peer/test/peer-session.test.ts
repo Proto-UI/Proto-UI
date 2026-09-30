@@ -85,6 +85,17 @@ describe('gpui peer: projection cycle', () => {
 });
 
 describe('gpui peer: interaction', () => {
+  it('declares its click event as a signal, not as something unsupported', async () => {
+    // Base Button declares `click` with `def.expose.event`. The declaration
+    // is recognised by the Expose module's predicate; it carries no `kind`.
+    const { host, peer } = createHarness();
+    await peer.mount();
+    const exposes = host.last('expose.descriptor');
+    expect(exposes?.signals).toEqual(['click']);
+    expect(exposes?.unsupported).toEqual([]);
+    await peer.dispose();
+  });
+
   it('tracks pointer state and emits one click per press commit', async () => {
     const { host, peer } = createHarness();
     await peer.mount();

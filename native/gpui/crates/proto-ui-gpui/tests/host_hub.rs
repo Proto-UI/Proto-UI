@@ -16,7 +16,7 @@ use gpui::{
     VisualTestContext, WindowHandle,
 };
 use proto_ui_gpui::host::{FocusResultStatus, InputBridge, ProtoHostView, SurfaceChild};
-use proto_ui_gpui::hub::{HubNote, SessionConfig};
+use proto_ui_gpui::hub::{ExposedSignal, HubNote, SessionConfig};
 use proto_ui_host_protocol::messages::{HostToPeerMessage, PeerToHostMessage, WireRecord};
 use proto_ui_host_protocol::wire::{ProjectionAckStatus, ProjectionTransaction};
 use serde_json::{json, Value};
@@ -131,6 +131,21 @@ impl Hub {
         self.window
             .update(&mut self.cx, |view, _, _| view.take_notes())
             .expect("the view drains")
+    }
+
+    /// Subscribes the way a host application would, collecting every signal
+    /// the view emits from now on.
+    fn listen(&mut self) -> Rc<RefCell<Vec<ExposedSignal>>> {
+        let heard = Rc::new(RefCell::new(Vec::new()));
+        let view = self.window.entity(&self.cx).expect("the view");
+        let sink = heard.clone();
+        self.cx.update(|_, cx| {
+            cx.subscribe(&view, move |_, signal: &ExposedSignal, _| {
+                sink.borrow_mut().push(signal.clone())
+            })
+            .detach();
+        });
+        heard
     }
 
     fn click(&mut self) {
@@ -411,6 +426,77 @@ fn exposed_states_and_the_snapshot_follow_the_peer(cx: &mut TestAppContext) {
     assert_eq!(states.get("pressed"), Some(&json!(false)));
     assert_eq!(states.get("disabled"), Some(&json!(false)));
     assert_eq!(role.as_deref(), Some("button"));
+}
+
+#[gpui::test]
+fn a_signal_is_emitted_as_it_arrives_and_never_kept(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded());
+    let signal = |session: &str, payload: Value| {
+        peer(json!({
+            "kind": "expose.signal",
+            "sessionId": session,
+            "name": "click",
+            "payload": payload,
+        }))
+    };
+
+    // Nobody is listening yet: the signal goes nowhere, and is not held back
+    // for a listener that subscribes later.
+    hub.receive([signal(SESSION, json!({ "detail": 1 }))]);
+    let heard = hub.listen();
+    assert!(heard.borrow().is_empty());
+
+    hub.receive([
+        signal(SESSION, Value::Null),
+        signal(SESSION, json!({ "detail": 2 })),
+        signal("ghost", Value::Null),
+    ]);
+    let click = |payload: Value| ExposedSignal {
+        session_id: SESSION.into(),
+        name: "click".into(),
+        payload,
+    };
+    assert_eq!(
+        *heard.borrow(),
+        [click(Value::Null), click(json!({ "detail": 2 }))]
+    );
+    // A signal for a session the host never opened is noted, not emitted.
+    assert!(hub.notes().contains(&HubNote::UnknownSession {
+        session_id: "ghost".into(),
+        kind: "expose.signal".into(),
+    }));
+}
+
+#[gpui::test]
+fn a_signal_after_its_session_ended_is_noted_and_reaches_no_listener(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded());
+    let heard = hub.listen();
+    let click = peer(json!({
+        "kind": "expose.signal",
+        "sessionId": SESSION,
+        "name": "click",
+        "payload": null,
+    }));
+    hub.receive([click.clone()]);
+    assert_eq!(heard.borrow().len(), 1);
+
+    hub.receive([peer(
+        json!({ "kind": "session.disposed", "sessionId": SESSION }),
+    )]);
+    hub.notes();
+    // A late signal under the ended session's id is not the instance's any
+    // more.
+    hub.receive([click]);
+    assert_eq!(heard.borrow().len(), 1);
+    assert_eq!(
+        hub.notes(),
+        [HubNote::UnknownSession {
+            session_id: SESSION.into(),
+            kind: "expose.signal".into(),
+        }]
+    );
 }
 
 #[gpui::test]
