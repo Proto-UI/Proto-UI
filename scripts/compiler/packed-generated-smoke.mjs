@@ -1,11 +1,13 @@
 /**
- * One-sided generated Button smoke in an isolated packed consumer (React 19 / happy-dom).
- * No Adapter baseline runs here: this is NOT differential, native-browser or layout evidence.
+ * Paired Adapter/generated Button smoke in an isolated packed consumer (React 19 / happy-dom).
+ * Both paths run independent contract checks and a trace comparison. This is synthetic input,
+ * not native-browser, retained-owner, layout, or full compiler/Adapter parity evidence.
  * Run with node --import tsx; PACKED_DIR points to the release pack's tarballs/ directory.
  * Command output and closure.json are retained on every run. Failed consumers are retained;
  * KEEP_PACKED_CONSUMER=1 also retains successful installs for independent inspection.
  */
 import { spawnSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   existsSync,
   mkdtempSync,
@@ -28,7 +30,7 @@ const releaseDir = path.dirname(packedDir);
 const workDir = mkdtempSync(path.join(tmpdir(), 'proto-compiler-packed-generated-'));
 const consumerDir = path.join(workDir, 'consumer');
 let succeeded = false;
-console.log(`GENERATED_SMOKE_EVIDENCE: ${workDir}`);
+console.log(`PACKED_CONSUMER_EVIDENCE: ${workDir}`);
 
 function run(name, command, args) {
   const result = spawnSync(command, args, {
@@ -46,12 +48,27 @@ function run(name, command, args) {
       2
     )
   );
-  process.stdout.write(result.stdout ?? '');
-  process.stderr.write(result.stderr ?? '');
+  // The complete npm tree is kept in the evidence directory, not dumped into CI logs.
+  if (name !== 'installed-tree') {
+    process.stdout.write(result.stdout ?? '');
+    process.stderr.write(result.stderr ?? '');
+  }
   if (result.error) throw result.error;
   if (result.status !== 0)
     throw new Error(`${name} exited with ${result.status}; output retained in ${workDir}`);
   return result;
+}
+
+function runNpm(name, args) {
+  if (process.platform !== 'win32') return run(name, 'npm', args);
+  // Windows npm is a .cmd shim, which spawnSync cannot execute without a shell.
+  // Find its CLI beside Node or in a PATH installation without shell expansion.
+  const npmCli = [path.dirname(process.execPath), ...(process.env.PATH ?? '').split(path.delimiter)]
+    .filter(Boolean)
+    .map((directory) => path.join(directory, 'node_modules', 'npm', 'bin', 'npm-cli.js'))
+    .find((candidate) => existsSync(candidate));
+  if (!npmCli) throw new Error('npm CLI not found beside Node or on PATH');
+  return run(name, process.execPath, [npmCli, ...args]);
 }
 
 try {
@@ -75,7 +92,12 @@ try {
   const manifest = JSON.parse(readFileSync(path.join(releaseDir, 'pack-manifest.json'), 'utf8'));
   const packageByName = new Map(manifest.packages.map((pkg) => [pkg.name, pkg]));
   const closure = new Set();
-  const queue = ['@proto.ui/core', '@proto.ui/hooks', '@proto.ui/adapter-react'];
+  const queue = [
+    '@proto.ui/core',
+    '@proto.ui/hooks',
+    '@proto.ui/adapter-react',
+    '@proto.ui/prototypes-base',
+  ];
   while (queue.length) {
     const name = queue.shift();
     if (closure.has(name)) continue;
@@ -91,10 +113,18 @@ try {
       }
     }
   }
+  const expectedTarballs = new Map();
   const internalDependencies = Object.fromEntries(
     [...closure].sort().map((name) => {
-      const tarball = path.join(packedDir, path.basename(packageByName.get(name).tarball));
+      const record = packageByName.get(name);
+      const tarball = path.resolve(releaseDir, record.tarball);
       if (!existsSync(tarball)) throw new Error(`missing packed tarball: ${tarball}`);
+      if (path.dirname(realpathSync(tarball)) !== realpathSync(packedDir))
+        throw new Error(`packed tarball outside selected directory: ${name}`);
+      const integrity = `sha512-${createHash('sha512').update(readFileSync(tarball)).digest('base64')}`;
+      if (integrity !== record.integrity)
+        throw new Error(`staged tarball integrity mismatch: ${name}`);
+      expectedTarballs.set(name, { path: realpathSync(tarball), integrity });
       return [name, `file:${tarball}`];
     })
   );
@@ -109,12 +139,26 @@ try {
     path.join(consumerDir, 'package.json'),
     JSON.stringify(packageJson, null, 2) + '\n'
   );
-  run('install', 'npm', ['install', '--no-audit', '--no-fund']);
-  run('installed-tree', 'npm', ['ls', '--all', '--json']);
+  runNpm('install', ['install', '--no-audit', '--no-fund']);
+  runNpm('installed-tree', ['ls', '--all', '--json']);
 
   // Lockfile entries alone may include uninstalled platform-specific optionals. Report only
   // actual on-disk packages; verify real paths and tarball resolution, not merely URL text.
   const lock = JSON.parse(readFileSync(path.join(consumerDir, 'package-lock.json'), 'utf8'));
+  const verifyInternal = (entry, pkg, location) => {
+    if (!pkg.name.startsWith('@proto.ui/')) return;
+    const expected = expectedTarballs.get(pkg.name);
+    if (
+      !closure.has(pkg.name) ||
+      pkg.version !== manifest.releaseVersion ||
+      !entry.resolved?.startsWith('file:') ||
+      realpathSync(path.resolve(consumerDir, entry.resolved.slice('file:'.length))) !==
+        expected?.path ||
+      entry.integrity !== expected?.integrity
+    ) {
+      throw new Error(`unexpected internal resolution or integrity at ${location}`);
+    }
+  };
   const installed = { internal: [], external: [] };
   for (const [location, entry] of Object.entries(lock.packages)) {
     if (!location) continue;
@@ -127,15 +171,7 @@ try {
     const pkg = JSON.parse(readFileSync(path.join(directory, 'package.json'), 'utf8'));
     if (entry.version !== pkg.version) throw new Error(`installed version mismatch at ${location}`);
     const internal = pkg.name.startsWith('@proto.ui/');
-    if (
-      internal &&
-      (!closure.has(pkg.name) ||
-        pkg.version !== manifest.releaseVersion ||
-        !entry.resolved?.startsWith('file:') ||
-        !entry.resolved.endsWith('.tgz'))
-    ) {
-      throw new Error(`unexpected internal resolution at ${location}: ${entry.resolved}`);
-    }
+    verifyInternal(entry, pkg, location);
     installed[internal ? 'internal' : 'external'].push({
       name: pkg.name,
       version: pkg.version,
@@ -147,9 +183,26 @@ try {
   const installedNames = [...new Set(installed.internal.map((entry) => entry.name))].sort();
   if (JSON.stringify(installedNames) !== JSON.stringify([...closure].sort()))
     throw new Error('installed internal package set differs from declared closure');
+  const control = installed.internal[0];
+  const other = installed.internal.find((entry) => entry.name !== control?.name);
+  if (!control || !other) throw new Error('too few internal packages for resolution control');
+  const controlEntry = lock.packages[control.location];
+  const controlPackage = JSON.parse(
+    readFileSync(path.join(consumerDir, control.location, 'package.json'), 'utf8')
+  );
+  for (const mutation of [{ resolved: other.resolved }, { integrity: other.integrity }]) {
+    let rejected = false;
+    try {
+      verifyInternal({ ...controlEntry, ...mutation }, controlPackage, control.location);
+    } catch {
+      rejected = true;
+    }
+    if (!rejected) throw new Error('internal tarball provenance negative control was accepted');
+  }
+  console.log('PACKED_CLOSURE_MUTANTS_REJECTED: wrong tarball and wrong integrity');
   writeFileSync(path.join(workDir, 'closure.json'), JSON.stringify(installed, null, 2) + '\n');
-  console.log('INSTALLED_INTERNAL:', JSON.stringify(installed.internal));
-  console.log('INSTALLED_EXTERNAL (including smoke tooling):', JSON.stringify(installed.external));
+  console.log('INSTALLED_INTERNAL:', installed.internal.length, installedNames.join(', '));
+  console.log('INSTALLED_EXTERNAL (including smoke tooling):', installed.external.length);
   console.log('CLOSURE_OK: actual internal packages use packed tarballs, no escaping links');
 
   const smoke = `
@@ -158,50 +211,100 @@ GlobalRegistrator.register();
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const React = await import('react');
 const ReactDOMClient = await import('react-dom/client');
+const { writeFileSync } = await import('node:fs');
+const { button } = await import('@proto.ui/prototypes-base');
+const { createReactAdapter } = await import('@proto.ui/adapter-react');
 const { createComponent } = await import('./src/GeneratedButton.tsx');
-const component = createComponent({ schedule: (task) => task() });
-let clicks = 0;
-const onClick = () => { clicks += 1; };
-const ref = React.createRef();
-const container = document.createElement('div');
-document.body.appendChild(container);
-const root = ReactDOMClient.createRoot(container);
-const render = async (props) => React.act(async () => { root.render(React.createElement(component, { children: 'Activate', onClick, ref, ...props })); });
-const target = () => {
-  const element = container.querySelector('[data-pui-root]');
-  if (!element) throw new Error('no root element');
-  return element;
+const schedule = { schedule: (task) => task() };
+const paths = {
+  reference: createReactAdapter(React)(button, schedule),
+  candidate: createComponent(schedule),
 };
-const click = async () => React.act(async () => { target().dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); });
-try {
-  await render({ disabled: false });
-  if (target().getAttribute('role') !== 'button') throw new Error('missing button role');
-  await click();
-  if (clicks !== 1) throw new Error('expected exactly one click, got ' + clicks);
-  await render({ disabled: true });
-  await click();
-  if (clicks !== 1) throw new Error('disabled click leaked through: ' + clicks);
-  if (ref.current?.getExposes?.().disabled?.get() !== true) throw new Error('disabled state not exposed');
-  await render({});
-  if (ref.current?.getExposes?.().disabled?.get() !== false) throw new Error('omission did not restore enabled default');
-  await click();
-  if (clicks !== 2) throw new Error('activation after omission failed: ' + clicks);
-} finally {
-  await React.act(async () => { root.unmount(); });
-  container.remove();
+const expected = [
+  { step: 'mount', disabled: false, clicks: 0 },
+  { step: 'enabled-click', disabled: false, clicks: 1 },
+  { step: 'disable', disabled: true, clicks: 1 },
+  { step: 'disabled-click', disabled: true, clicks: 1 },
+  { step: 'omit-disabled', disabled: false, clicks: 1 },
+  { step: 'restored-click', disabled: false, clicks: 2 },
+];
+const traces = {};
+for (const [name, component] of Object.entries(paths)) {
+  let clicks = 0;
+  const onClick = () => { clicks += 1; };
+  const ref = React.createRef();
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = ReactDOMClient.createRoot(container);
+  const trace = [];
+  const render = async (props) => React.act(async () => {
+    root.render(React.createElement(component, { children: 'Activate', onClick, ref, ...props }));
+  });
+  const target = () => {
+    const element = container.querySelector('[data-pui-root]');
+    if (!element) throw new Error(name + ': no root element');
+    return element;
+  };
+  const click = async () => React.act(async () => {
+    target().dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+  });
+  const observe = (step) => {
+    const element = target();
+    const exposes = ref.current?.getExposes?.();
+    const entry = {
+      step,
+      disabled: exposes?.disabled?.get() ?? null,
+      clicks,
+      role: element.getAttribute('role'),
+      ariaDisabled: element.getAttribute('aria-disabled'),
+      label: element.textContent,
+    };
+    trace.push(entry);
+    const oracle = expected[trace.length - 1];
+    if (entry.step !== oracle?.step || entry.disabled !== oracle.disabled || entry.clicks !== oracle.clicks ||
+        entry.role !== 'button' || entry.label !== 'Activate' ||
+        entry.ariaDisabled !== (oracle.disabled ? 'true' : 'false')) {
+      throw new Error(name + ': independent Button contract failed at ' + step + ': ' + JSON.stringify(entry));
+    }
+  };
+  try {
+    await render({ disabled: false }); observe('mount');
+    await click(); observe('enabled-click');
+    await render({ disabled: true }); observe('disable');
+    await click(); observe('disabled-click');
+    await render({}); observe('omit-disabled');
+    await click(); observe('restored-click');
+    traces[name] = trace;
+  } finally {
+    await React.act(async () => { root.unmount(); });
+    container.remove();
+  }
 }
-console.log('GENERATED_BEHAVIOR_OK role/click/disabled/exposes/omission; happy-dom synthetic input');
+for (let index = 0; index < expected.length; index++) {
+  for (const key of ['step', 'disabled', 'clicks', 'role', 'ariaDisabled', 'label']) {
+    if (traces.reference[index][key] !== traces.candidate[index][key])
+      throw new Error('paired first difference at ' + expected[index].step + '.' + key +
+        ': ' + JSON.stringify([traces.reference[index][key], traces.candidate[index][key]]));
+  }
+}
+writeFileSync('paired-traces.json', JSON.stringify({ expected, traces }, null, 2) + '\\n');
+console.log('PACKED_PAIRED_TRACES:', JSON.stringify(traces));
+console.log('PACKED_PAIRED_OK six Button checkpoints; happy-dom synthetic input');
 `;
   writeFileSync(path.join(consumerDir, 'smoke.mjs'), smoke);
-  const result = run('generated-runtime', process.execPath, ['--import', 'tsx', 'smoke.mjs']);
+  const result = run('paired-runtime', process.execPath, ['--import', 'tsx', 'smoke.mjs']);
+  writeFileSync(
+    path.join(workDir, 'paired-traces.json'),
+    readFileSync(path.join(consumerDir, 'paired-traces.json'))
+  );
   // React warnings are emitted to stderr; do not treat a zero exit with warnings as success.
   if (result.stderr.trim())
-    throw new Error('generated runtime emitted warnings/errors; see generated-runtime.stderr.log');
+    throw new Error('paired runtime emitted warnings/errors; see paired-runtime.stderr.log');
   succeeded = true;
-  console.log('PACKED_GENERATED_SMOKE_PASS (one-sided; not Adapter/generated differential parity)');
+  console.log('PACKED_PAIRED_SMOKE_PASS (bounded React Button; not native-browser/full parity)');
 } catch (error) {
   writeFileSync(path.join(workDir, 'failure.txt'), error.stack ?? String(error));
-  console.error(`GENERATED_SMOKE_FAILED: consumer and exact output retained at ${workDir}`);
+  console.error(`PACKED_CONSUMER_FAILED: consumer and exact output retained at ${workDir}`);
   throw error;
 } finally {
   if (succeeded && process.env.KEEP_PACKED_CONSUMER !== '1')
