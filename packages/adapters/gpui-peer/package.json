@@ -22,6 +22,7 @@
     "@proto.ui/module-as-trigger": "workspace:*",
     "@proto.ui/module-context": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose": "workspace:*",
     "@proto.ui/module-expose-event": "workspace:*",
     "@proto.ui/module-expose-state": "workspace:*",
     "@proto.ui/module-focus": "workspace:*",
