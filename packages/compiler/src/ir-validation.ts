@@ -6,14 +6,18 @@ import {
 } from './ir';
 import {
   OPERATION_RULES, operationCallbackRule, operationResultType,
-  validateOperationArguments, validateOperationPhase,
+  validateOperationArguments, validateOperationPhase, isTemplateChildType,
   type CallbackContext, type OperationBindings, type OperationRule, type SemanticOperation,
 } from './operations';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
 import { inferBinaryType, inferUnaryType, memberDataType } from './expression-types';
 import { sourceName } from './source-resolution';
+import { lowerRulePlan } from './rule-plan';
+import { assertTwTokenV0 } from '../../core/src/spec/feedback/tokens';
+import { acceptsValue } from './data-types';
+import type { RuleCondition, RuleDeclarationIR } from './rule-declarations';
 
-const CAPABILITIES = new Set(['unknown','def','run','render','event','props','focus-options','focus','accessible','context-key','function','record','array','template','state:boolean','state:number','state:string']);
+const CAPABILITIES = new Set(['unknown','def','run','render','event','host-event','props','focus','accessible','context-key','style-handle','style-disposer','template-props','rule-handle','function','record','array','template','state:boolean','observed:boolean','state:number','state:string']);
 const CONTEXTS = new Set(['setup','render','helper','event','props-watch','context-watch','context-update','created','mounted','updated','unmounted','before-dispose','expose-method']);
 const RESERVED = new Set('await break case catch class const continue debugger default delete do else enum export extends false finally for function if import in instanceof let new null return super switch this throw true try typeof var void while with yield'.split(' '));
 const FALLBACK: SourceSpan = { file: '<ir>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 };
@@ -74,7 +78,7 @@ function assignable(a: ValueType, b: ValueType): boolean {
 function dataAction(location: SourceSpan, action: () => DataType): DataType {
   try { return action(); } catch (error) { if (error instanceof TypeError) bad(error.message, location); throw error; }
 }
-const EXPRESSION_FIELDS = ['kind','type','span','value','name','object','property','optional','operator','operand','left','right','elements','entries','operation','receiver','arguments','hookId','keyId','function'];
+const EXPRESSION_FIELDS = ['kind','type','span','value','name','object','property','optional','operator','operand','left','right','elements','entries','operation','receiver','arguments','hookId','keyId','function','handle','declaration','states'];
 interface Parameter { name: string; type: ValueType; optional?: boolean }
 interface Binding { type: ValueType; helper?: FunctionIR; keyId?: string }
 type Scope = Map<string, Binding>;
@@ -196,24 +200,63 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'context-key':
             if (!keys.has(text(node.keyId))) bad('Unknown context declaration identity.',location);
             type = 'context-key'; break;
+          case 'style-handle': {
+            const handle = object(node.handle,['kind','tokens']);
+            if (handle.kind !== 'tw') bad('Only checked portable token handles are admitted.',location);
+            for (const token of array(handle.tokens)) {
+              if (typeof token !== 'string') bad('Style token must be a string.',location);
+              try { assertTwTokenV0(token,'compiler IR'); }
+              catch (error) { bad(error instanceof Error ? error.message:String(error),location); }
+            }
+            type = 'style-handle'; break;
+          }
+          case 'rule': {
+            if (phase !== 'setup' || expression(node.receiver,scope,phase,context) !== 'def') bad('Rule declarations are setup-only.',location);
+            const declaration = node.declaration as RuleDeclarationIR;
+            const plan = lowerRulePlan([declaration],location);
+            if (!plan.ok) bad(plan.diagnostics[0].message,location);
+            const stateTypes = new Map<string,DataType>();
+            for (const item of array(node.states)) {
+              const state = object(item,['id','value']), id = text(state.id);
+              const handleType = expression(state.value,scope,phase,context);
+              if (stateTypes.has(id) || typeof handleType !== 'string' || !(handleType.startsWith('state:') || handleType === 'observed:boolean')) bad('Invalid Rule state reference.',location);
+              stateTypes.set(id,handleType === 'observed:boolean' ? 'boolean' : handleType.slice(6) as DataType);
+            }
+            for (const dependency of declaration.deps) {
+              if (dependency.kind === 'prop' ? !props.has(dependency.key) : !stateTypes.has(dependency.id)) bad('Rule dependency does not resolve to a declared source.',dependency.span);
+            }
+            const check = (condition:RuleCondition):void => {
+              if (condition.type === 'eq') {
+                const valueType = condition.left.type === 'prop' ? props.get(condition.left.key) : stateTypes.get(condition.left.id);
+                if (!valueType || !acceptsValue(valueType,condition.right)) bad('Rule literal does not match its source type.',condition.span);
+              } else if (condition.type === 'not') check(condition.expr);
+              else if (condition.type === 'all' || condition.type === 'any') condition.exprs.forEach(check);
+            };
+            check(declaration.when);
+            type = 'rule-handle'; break;
+          }
           case 'array': {
             const types = array(node.elements).map((item) => expression(item,scope,phase,context));
             if (types.every(isDataValueType)) type = {kind:'array',element:parseDataType({kind:'union',members:types})};
-            else if (types.every((item) => item === 'template' || isDataValueType(item))) type = 'array';
+            else if (types.every(isTemplateChildType)) type = 'array';
             else bad('Data arrays cannot contain semantic handles.',location);
             break;
           }
           case 'record': {
             const fields: {name:string;type:DataType}[] = [], names = new Set<string>();
+            let templateProps = false;
             for (const item of array(node.entries)) {
               const entry = object(item,['key','value']), name = text(entry.key);
               if (names.has(name)) bad('Duplicate IR record key.',location);
               names.add(name);
               const field = expression(entry.value,scope,phase,context);
-              if (!isDataValueType(field)) bad('Records cannot leak semantic handles.',location);
-              fields.push({name,type:field});
+              if (!isDataValueType(field)) {
+                if (phase !== 'render' || name !== 'style' || field !== 'style-handle') bad('Records cannot leak semantic handles.',location);
+                templateProps = true;
+              } else fields.push({name,type:field});
             }
-            type = {kind:'record',fields}; break;
+            if (templateProps && names.size !== 1) bad('TemplateProps supports only one style handle.',location);
+            type = templateProps ? 'template-props' : {kind:'record',fields}; break;
           }
           case 'unary': {
             const operand = expression(node.operand,scope,phase,context);
@@ -228,11 +271,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'member': {
             const owner = expression(node.object,scope,phase,context), key = text(node.property);
             if (typeof node.optional !== 'boolean') bad('IR member optionality must be explicit.',location);
-            if (owner === 'focus' && ['focused','focusVisible','focusable'].includes(key)) type = 'state:boolean';
+            if (owner === 'focus' && ['focused','focusVisible','focusable'].includes(key)) type = 'observed:boolean';
             else if (owner === 'props' && props.has(key)) type = props.get(key)!;
-            else if (owner === 'event' && ['key','type','control'].includes(key)) type = key === 'control' ? 'event':'string';
-            else if (owner === 'event' && ['shiftKey','ctrlKey','altKey','metaKey','repeat'].includes(key)) type = 'boolean';
-            else if (owner === 'focus-options' && ['reason','preventScroll'].includes(key)) type = key === 'reason' ? 'string':'boolean';
+            else if (owner === 'event' && ['key','type','control'].includes(key)) type = key === 'control' ? 'event' : key === 'type' ? 'string' : parseDataType({kind:'union',members:['string','void']});
+            else if (owner === 'event' && ['shiftKey','ctrlKey','altKey','metaKey','repeat'].includes(key)) type = parseDataType({kind:'union',members:['boolean','void']});
             else if (isDataValueType(owner)) type = dataAction(location,() => memberDataType(owner,key,{optional:node.optional as boolean}));
             else bad('Unsupported IR property access.',location);
             break;
@@ -263,6 +305,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const args = array(node.arguments), bindings: OperationBindings = {propNames:new Set(props.keys()), ...(phase === 'callback' ? {callbackContext:context as CallbackContext}: {})};
             const first = args[0] ? object(args[0],EXPRESSION_FIELDS):undefined;
             if (first?.kind === 'context-key') bindings.contextValueType = keys.get(text(first.keyId));
+            if (operation === 'event.on' || operation === 'event.onGlobal') {
+              if (first?.kind !== 'literal' || typeof first.value !== 'string') bad('Input registrations require static types.',location);
+              bindings.inputPayloadType = first.value.startsWith('host:') ? 'host-event' : 'event';
+            }
             if (operation === 'expose.emit' || operation === 'expose.method') {
               if (first?.kind !== 'literal' || typeof first.value !== 'string') bad('Exposure operations require static declared keys.',location);
               const exposure = exposures.get(first.value);
@@ -290,7 +336,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             if (operation === 'expose.state') {
               const exposure = first?.kind === 'literal' ? exposures.get(String(first.value)):undefined;
               const handle = args[1] ? object(args[1],EXPRESSION_FIELDS):undefined;
-              if (!exposure || exposure.kind !== 'state' || handle?.type !== `state:${String(exposure.type)}`) bad('Exposed state metadata does not match declared source.',location);
+              if (!exposure || exposure.kind !== 'state' || !(handle?.type === `state:${String(exposure.type)}` || exposure.type === 'boolean' && handle?.type === 'observed:boolean')) bad('Exposed state metadata does not match declared source.',location);
             }
             type = operationResultType(operation,receiver,bindings)!;
             if (type === undefined) bad('Semantic operation has unresolved result type.',location);

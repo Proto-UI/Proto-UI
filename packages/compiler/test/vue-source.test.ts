@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { posix } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import ts from 'typescript';
 import * as Vue from 'vue';
@@ -17,6 +18,46 @@ interface CounterExposes {
   bump(delta: number): number;
 }
 interface CounterHandle { update(): void; getExposes(): CounterExposes }
+interface InteractionExposes {
+  count: PublicState<number>;
+  focused: PublicState<boolean>;
+  focusVisible: PublicState<boolean>;
+  focusable: PublicState<boolean>;
+  disable(next: boolean): void;
+  focus(options?: { reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean }): void;
+}
+interface InteractionHandle { update(): void; getExposes(): InteractionExposes }
+
+const interactionSource = `import {definePrototype} from '@proto.ui/core';
+import {asTrigger,asFocusable,asAccessible} from '@proto.ui/hooks';
+export default definePrototype({name:'native-input-owner',setup(def){
+  def.props.define({visible:{type:'boolean',default:true},disabled:{type:'boolean',default:false}});
+  const count=def.state.numberDiscrete('count',0);
+  const disabled=def.state.bool('disabled',false);
+  const checked=def.state.bool('checked',false);
+  asTrigger();
+  const focus=asFocusable();focus.configure({navParticipation:'auto'});
+  const a11y=asAccessible();a11y.role('button');a11y.nameFromContent();
+  a11y.state('disabled',disabled);a11y.state('checked',checked);a11y.state('busy',focus.focused);
+  a11y.action('activate',{event:'action'});
+  def.expose.state('count',count);def.expose.state('focused',focus.focused);
+  def.expose.state('focusVisible',focus.focusVisible);def.expose.state('focusable',focus.focusable);
+  def.expose.method('disable',(next:boolean)=>{disabled.set(next);focus.setDisabled(next);});
+  def.expose.method('focus',(options?:{reason?:'programmatic'|'keyboard'|'pointer';preventScroll?:boolean})=>{focus.focusSelf(options);});
+  def.expose.event('action',{payload:'json'});def.expose.event('phase',{payload:'json'});
+  def.event.on('key.down',(run,event)=>{if(event.key===' ')event.control.requestDefaultActionPrevention();});
+  def.event.on('press.commit',(run)=>{count.set(count.get()+1);checked.set(!checked.get());run.expose.emit('action',count.get());});
+  def.event.on('host:ping',(run)=>{count.set(count.get()+10);run.expose.emit('action',count.get());});
+  def.event.onGlobal('host:ping',(run)=>{count.set(count.get()+100);run.expose.emit('action',count.get());});
+  def.props.watch(['visible'],(run,next)=>{run.lifecycle.setPresent(next.visible);});
+  def.props.watch(['disabled'],(run,next)=>{disabled.set(next.disabled);focus.setDisabled(next.disabled);});
+  def.lifecycle.onCreated((run)=>{disabled.set(run.props.get().disabled);focus.setDisabled(run.props.get().disabled);run.lifecycle.setPresent(run.props.get().visible);});
+  def.lifecycle.onMounted((run)=>{run.expose.emit('phase','mounted');});
+  def.lifecycle.onUpdated((run)=>{run.expose.emit('phase','updated');});
+  def.lifecycle.onUnmounted((run)=>{run.expose.emit('phase','unmounted');});
+  def.lifecycle.onBeforeDispose((run)=>{run.expose.emit('phase','disposed');});
+  return r=>r.el('output',count.get());
+}});`;
 
 const counterSource = `import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'numeric-panel',setup(def){
@@ -46,15 +87,28 @@ function component(source: string, files?: Record<string, string>): Vue.Componen
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitVueSource(parsed.value);
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-  const javascript = ts.transpileModule(emitted.value.code, {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
-  }).outputText;
-  const exports: Record<string, unknown> = {};
-  // Execute the generated artifact, never the authored Proto source. Any hidden bridge fails here.
-  new Function('require', 'exports', javascript)((specifier: string) => {
-    if (specifier !== 'vue') throw new Error(`Unexpected generated dependency: ${specifier}`);
-    return Vue;
-  }, exports);
+  const filesByPath = new Map((emitted.value.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents]));
+  filesByPath.set('component.ts', emitted.value.code);
+  const cache = new Map<string, Record<string, unknown>>();
+  function load(path: string): Record<string, unknown> {
+    const prior = cache.get(path);
+    if (prior) return prior;
+    const text = filesByPath.get(path);
+    if (text === undefined) throw new Error(`Missing generated module ${path}`);
+    const exports: Record<string, unknown> = {};
+    cache.set(path, exports);
+    const javascript = ts.transpileModule(text, {
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+    }).outputText;
+    // Execute only emitted native modules. Any hidden Proto bridge fails here.
+    new Function('require', 'exports', javascript)((specifier: string) => {
+      if (specifier === 'vue') return Vue;
+      if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency: ${specifier}`);
+      return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
+    }, exports);
+    return exports;
+  }
+  const exports = load('component.ts');
   if (!exports.default || typeof exports.default !== 'object') throw new Error('No generated Vue component');
   // The object came from the generated defineComponent call, not an external input.
   const generated = exports.default as Vue.Component;
@@ -69,6 +123,187 @@ async function settle(): Promise<void> {
 }
 
 describe('Vue 3 native source', () => {
+  it('projects focus facts and A11y without updating templates, and retires stale presence Roots', async () => {
+    const Generated = component(interactionSource), handle = Vue.shallowRef<InteractionHandle>();
+    const input = Vue.shallowRef({ visible: true, disabled: false });
+    const actions: number[] = [], phase: string[] = [], focused: boolean[] = [];
+    const host = document.createElement('div'); document.body.append(host);
+    const app = Vue.createApp({ setup() { return () => Vue.h(Generated, {
+      ...input.value, ref: handle, onAction: (value: number) => actions.push(value), onPhase: (value: string) => phase.push(value),
+    }); } });
+    app.mount(host);
+    try {
+      await settle();
+      const owner = handle.value!, exposed = owner.getExposes(), root = host.querySelector<HTMLElement>('[data-pui-root]')!;
+      const off = exposed.focused.subscribe((event) => focused.push(event.next));
+      expect(exposed.focusable.get()).toBe(true);
+      expect('set' in exposed.focused).toBe(false);
+      expect(root.getAttribute('tabindex')).toBe('0');
+      expect(root.getAttribute('role')).toBe('button');
+      expect(root.getAttribute('aria-busy')).toBe('false');
+      exposed.focus({ reason: 'keyboard', preventScroll: true });
+      expect(document.activeElement).toBe(root);
+      expect(exposed.focused.get()).toBe(true);
+      expect(exposed.focusVisible.get()).toBe(true);
+      expect(root.getAttribute('aria-busy')).toBe('true');
+      const key = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true });
+      root.dispatchEvent(key);
+      expect(key.defaultPrevented).toBe(true);
+      expect(exposed.count.get()).toBe(1);
+      expect(root.getAttribute('aria-checked')).toBe('true');
+      await settle();
+      expect(root.textContent).toBe('0');
+      expect(phase).toEqual(['mounted']);
+
+      input.value = { visible: true, disabled: true };
+      await settle();
+      expect(exposed.focusable.get()).toBe(false);
+      expect(exposed.focused.get()).toBe(false);
+      expect(exposed.focusVisible.get()).toBe(false);
+      expect(root.getAttribute('tabindex')).toBe('-1');
+      expect(root.getAttribute('aria-disabled')).toBe('true');
+      expect(root.textContent).toBe('0');
+      expect(phase).toEqual(['mounted']);
+      exposed.focus(); root.click();
+      expect(exposed.count.get()).toBe(1);
+
+      exposed.disable(false);
+      root.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+      root.dispatchEvent(new MouseEvent('click', { detail: 1, button: 0, bubbles: true }));
+      expect(exposed.count.get()).toBe(2);
+      expect(root.getAttribute('aria-checked')).toBe('false');
+      expect(root.textContent).toBe('0');
+      input.value = { visible: false, disabled: true };
+      await settle();
+      root.dispatchEvent(new Event('ping'));
+      window.dispatchEvent(new Event('ping'));
+      expect(exposed.count.get()).toBe(2);
+      exposed.focus();
+      input.value = { visible: true, disabled: false };
+      await settle();
+      const nextRoot = host.querySelector<HTMLElement>('[data-pui-root]')!;
+      expect(nextRoot).not.toBe(root);
+      expect(owner.getExposes().focused).toBe(exposed.focused);
+      expect(nextRoot.textContent).toBe('2');
+      expect(document.activeElement).toBe(nextRoot);
+      expect(nextRoot.getAttribute('aria-busy')).toBe('true');
+      root.dispatchEvent(new Event('ping'));
+      expect(exposed.count.get()).toBe(2);
+      nextRoot.dispatchEvent(new Event('ping'));
+      expect(actions).toEqual([1, 2, 12]);
+      expect(focused).toEqual([true, false, true]);
+
+      app.unmount();
+      nextRoot.dispatchEvent(new Event('ping')); window.dispatchEvent(new Event('ping'));
+      expect(actions).toEqual([1, 2, 12]);
+      expect(() => exposed.focused.get()).toThrow(/disposed/);
+      expect(() => exposed.focused.subscribe(() => {})).toThrow(/disposed/);
+      expect(() => exposed.focused.unsubscribe(off)).toThrow(/disposed/);
+      expect(() => off()).toThrow(/disposed/);
+      expect(() => exposed.focus()).toThrow(/disposed/);
+      expect(phase.at(-1)).toBe('disposed');
+    } finally { app.unmount(); host.remove(); }
+  });
+
+  it('parks input bindings under KeepAlive and reactivates the same owner without duplicate listeners', async () => {
+    const Generated = component(interactionSource), handle = Vue.shallowRef<InteractionHandle>(), visible = Vue.ref(true);
+    const actions: number[] = [], phase: string[] = [], host = document.createElement('div'); document.body.append(host);
+    const app = Vue.createApp({ setup() { return () => Vue.h(Vue.KeepAlive, null, { default: () => visible.value
+      ? Vue.h(Generated, { key: 'owner', ref: handle, onAction: (value: number) => actions.push(value), onPhase: (value: string) => phase.push(value) })
+      : Vue.h('aside', { key: 'parked' }, 'parked') }); } });
+    app.mount(host);
+    try {
+      await settle();
+      const owner = handle.value!, exposed = owner.getExposes(), root = host.querySelector<HTMLElement>('[data-pui-root]')!;
+      root.click(); window.dispatchEvent(new Event('ping'));
+      expect(exposed.count.get()).toBe(101);
+      visible.value = false;
+      await settle();
+      root.click(); root.dispatchEvent(new Event('ping')); window.dispatchEvent(new Event('ping'));
+      expect(exposed.count.get()).toBe(101);
+      exposed.disable(true);
+      expect(exposed.focusable.get()).toBe(false);
+      visible.value = true;
+      await settle();
+      expect(handle.value).toBe(owner);
+      expect(host.querySelector('[data-pui-root]')).toBe(root);
+      expect(root.getAttribute('tabindex')).toBe('-1');
+      expect(root.getAttribute('aria-disabled')).toBe('true');
+      root.click();
+      expect(exposed.count.get()).toBe(101);
+      exposed.disable(false);
+      root.click(); window.dispatchEvent(new Event('ping'));
+      expect(exposed.count.get()).toBe(202);
+      expect(actions).toEqual([1, 101, 102, 202]);
+      expect(phase).toEqual(['mounted', 'unmounted', 'mounted']);
+    } finally { app.unmount(); host.remove(); }
+  });
+
+  it('refreshes style Rules subscribed to helper-owned focus facts without requesting a template update', async () => {
+    const Generated = component(`import {definePrototype,tw} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
+      export default definePrototype({name:'focus-style-owner',setup(def){
+        const focus=asFocusable();const focused=focus.focused;
+        def.expose.state('focused',focused);
+        def.expose.method('focus',()=>{focus.focusSelf({reason:'keyboard'});});
+        def.expose.method('disable',()=>{focus.setDisabled(true);});
+        def.rule({when:w=>w.state(focused).eq(true),intent:i=>i.feedback.style.use(tw('ring-2'))});
+        return r=>{if(focused.get())return r.el('span','focused');return r.el('span','idle');};
+      }});`);
+    const host = document.createElement('div'); document.body.append(host);
+    const app = Vue.createApp(Generated);
+    const owner = app.mount(host) as unknown as { getExposes(): { focused: PublicState<boolean>; focus(): void; disable(): void } };
+    try {
+      await settle();
+      const root = host.querySelector('[data-pui-root]')!, exposed = owner.getExposes();
+      exposed.focus();
+      expect(exposed.focused.get()).toBe(true);
+      expect(root.getAttribute('data-pui-style')).toBe('ring-2');
+      await settle();
+      expect(root.textContent).toBe('idle');
+      exposed.disable();
+      expect(exposed.focused.get()).toBe(false);
+      expect(root.hasAttribute('data-pui-style')).toBe(false);
+      await settle();
+      expect(root.textContent).toBe('idle');
+    } finally { app.unmount(); host.remove(); }
+  });
+
+  it('distinguishes omitted and explicitly undefined host keys in runtime and frame reads', async () => {
+    const Generated = component(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'raw-presence-owner',setup(def){
+        def.props.define({label:{type:'string',default:'fallback'}});
+        const provided=def.state.bool('provided',false);def.expose.state('provided',provided);
+        def.lifecycle.onCreated(run=>{provided.set(run.props.isProvided('label'));});
+        def.event.on('host:probe',run=>{provided.set(run.props.isProvided('label'));});
+        return r=>{if(r.read.props.isProvided('label'))return r.el('output','provided');return r.el('output','missing');};
+      }});`);
+    const input = Vue.shallowRef<Record<string, unknown>>({}), handle = Vue.shallowRef<{ update(): void; getExposes(): { provided: PublicState<boolean> } }>();
+    const host = document.createElement('div');
+    const app = Vue.createApp({ setup() { return () => Vue.h(Generated, { ...input.value, ref: handle }); } });
+    app.mount(host);
+    try {
+      await settle();
+      const owner = handle.value!, exposed = owner.getExposes(), root = host.querySelector('[data-pui-root]')!;
+      expect(exposed.provided.get()).toBe(false);
+      expect(host.textContent).toBe('missing');
+      input.value = { label: undefined };
+      await settle();
+      root.dispatchEvent(new Event('probe'));
+      expect(exposed.provided.get()).toBe(true);
+      expect(host.textContent).toBe('missing');
+      owner.update();
+      await settle();
+      expect(host.textContent).toBe('provided');
+      input.value = {};
+      await settle();
+      root.dispatchEvent(new Event('probe'));
+      expect(exposed.provided.get()).toBe(false);
+      owner.update();
+      await settle();
+      expect(host.textContent).toBe('missing');
+    } finally { app.unmount(); }
+  });
+
   it('retains a numeric owner across presence epochs and commits lifecycle after the DOM', async () => {
     const Generated = component(counterSource);
     const input = Vue.shallowRef({ seed: 4, visible: false });
@@ -239,12 +474,12 @@ describe('Vue 3 native source', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';import {install} from './hook';
       export default definePrototype({name:'unsupported',setup(){install();}});`, {
       fileName: 'fixture.proto.ts',
-      files: { 'hook.ts': `import {defineAsHook} from '@proto.ui/core';import {asAccessible} from '@proto.ui/hooks';
-        export const install=defineAsHook({name:'install',setup(){asAccessible();}});` },
+      files: { 'hook.ts': `import {defineAsHook} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
+        export const install=defineAsHook({name:'install',setup(){const focus=asFocusable();focus.configure({focusScope:true});}});` },
     });
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
     const rejected = emitVueSource(parsed.value);
-    expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4003', span: { file: 'hook.ts', line: 2 } }] });
+    expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED', span: { file: 'hook.ts', line: 2 } }] });
   });
 
   it('clamps range defaults only and preserves string/discrete option constraints', async () => {

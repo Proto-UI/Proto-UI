@@ -3,7 +3,7 @@ import { createHash } from 'node:crypto';
 import { CompilerRejection } from './diagnostics';
 import {
   OPERATION_RULES, operationCallbackRule, operationResultType,
-  validateOperationArguments, validateOperationPhase,
+  validateOperationArguments, validateOperationPhase, isTemplateChildType, FOCUS_OPTIONS_TYPE,
   type CallbackContext, type OperationBindings, type OperationRule, type SemanticOperation,
 } from './operations';
 import {
@@ -14,6 +14,9 @@ import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './dat
 import { inferBinaryType, inferUnaryType, memberDataType } from './expression-types';
 import { extractContextKeyDeclaration, type ContextKeyIR } from './context-declarations';
 import { parseSourceDataType } from './source-types';
+import { extractRuleDeclaration, extractRuleStyleHandle } from './rule-declarations';
+import { lowerRulePlan } from './rule-plan';
+import type { StyleTokenHandle } from './style-plan';
 import {
   IR_VERSION, isDataValueType,
   type AuthoredHookIR, type CompileResult, type ExposureIR, type ExpressionIR,
@@ -22,7 +25,7 @@ import {
   type PrototypeIR, type StatementIR, type ValueType,
 } from './ir';
 
-interface Binding { type: ValueType; helper?: FunctionIR; phase?: Phase; keyId?: string }
+interface Binding { type: ValueType; helper?: FunctionIR; phase?: Phase; keyId?: string; stateId?: string; style?: StyleTokenHandle }
 type Scope = Map<string, Binding>;
 const HOOKS: Readonly<Record<string, Operation>> = {
   asTrigger: 'hook.asTrigger', asFocusable: 'hook.asFocusable', asAccessible: 'hook.asAccessible',
@@ -57,6 +60,7 @@ class Frontend {
   readonly eventKinds = new Map<string, 'void' | 'json' | 'any'>();
   readonly eventPayloads = new Map<string, DataType[]>();
   private context: FunctionContext = 'setup';
+  private ruleSequence = 0;
 
   constructor(input: string, readonly options: ParseOptions) { this.graph = new SourceGraph(input, options); }
 
@@ -96,7 +100,7 @@ class Frontend {
     if (parameter.type) {
       if (ts.isTypeReferenceNode(parameter.type) && ts.isIdentifier(parameter.type.typeName)) {
         const name = parameter.type.typeName.text;
-        if (name === 'FocusRequestOptions') return 'focus-options';
+        if (name === 'FocusRequestOptions') return FOCUS_OPTIONS_TYPE;
         if (expected && typeof expected === 'string' && CAPABILITY_ANNOTATIONS[expected] === name) return expected;
       }
       return parseSourceDataType(module, parameter.type);
@@ -111,7 +115,7 @@ class Frontend {
       ts.forEachChild(node, inspect);
     };
     if (body) inspect(body);
-    if (focusOptions) return 'focus-options';
+    if (focusOptions) return FOCUS_OPTIONS_TYPE;
     rejectNode(parameter, 'PUI1006', 'A data parameter needs an explicit serializable type annotation.');
   }
 
@@ -132,7 +136,7 @@ class Frontend {
         if (names.has(name)) rejectNode(parameter, 'PUI1005', `Duplicate parameter ${name}.`);
         names.add(name);
         const type = this.parameterType(module, parameter, expected[index], node.body);
-        const optional = !!parameter.questionToken || type === 'focus-options';
+        const optional = !!parameter.questionToken || !parameter.type && isDataValueType(type) && dataTypeEqual(type, FOCUS_OPTIONS_TYPE);
         scope.set(name, { type: optional && isDataValueType(type) ? union([type, 'void'], parameter) : type });
         return { name, type, ...(optional ? { optional: true } : {}) };
       });
@@ -184,7 +188,13 @@ class Frontend {
           } else {
             value = this.expression(module, init, scope, phase);
             const alias = value.kind === 'reference' ? scope.get(value.name) : undefined;
-            scope.set(name, { ...alias, type: value.type, ...(value.kind === 'context-key' ? { keyId: value.keyId } : {}) });
+            const stateId = value.kind === 'operation' && value.operation.startsWith('state.') &&
+              OPERATION_RULES[value.operation].receiver === 'def' && value.arguments[0]?.kind === 'literal'
+              ? String(value.arguments[0].value) : value.type === 'observed:boolean' && value.kind === 'member'
+                ? `#observed:${value.span.file}:${value.span.start}` : alias?.stateId;
+            scope.set(name, { ...alias, type: value.type, stateId,
+              ...(value.kind === 'context-key' ? { keyId: value.keyId } : {}),
+              ...(value.kind === 'style-handle' ? {style:value.handle} : {}) });
           }
           output.push({ kind: 'const', name, value, span: sourceSpan(declaration) });
         }
@@ -226,14 +236,20 @@ class Frontend {
     if (ts.isIdentifier(node)) {
       const binding = scope.get(node.text);
       if (binding) return binding.keyId ? { kind: 'context-key', keyId: binding.keyId, type: 'context-key', span } : { kind: 'reference', name: node.text, type: binding.type, span };
-      if (module.declarations.has(node.text) || module.imports.has(node.text)) return this.key(module, node.text, node);
+      if (module.declarations.has(node.text) || module.imports.has(node.text)) {
+        const resolved = this.graph.resolveBinding(module,node.text);
+        if (resolved.module && ts.isCallExpression(resolved.node) && ts.isIdentifier(resolved.node.expression) &&
+            this.graph.resolveCoreImport(resolved.module,resolved.node.expression.text) === 'tw')
+          return {kind:'style-handle',handle:extractRuleStyleHandle(module,node),type:'style-handle',span};
+        return this.key(module, node.text, node);
+      }
       rejectNode(node, 'PUI1005', `Unresolved capture ${node.text}; only declared lexical values and semantic handles are admitted.`);
     }
     if (ts.isArrayLiteralExpression(node)) {
       const elements = node.elements.map((element) => this.expression(module, element, scope, phase));
       const elementTypes = elements.map((element) => element.type);
       if (!elementTypes.every(isDataValueType)) {
-        if (elementTypes.every((type) => type === 'template' || isDataValueType(type))) return { kind: 'array', type: 'array', elements, span };
+        if (elementTypes.every(isTemplateChildType)) return { kind: 'array', type: 'array', elements, span };
         rejectNode(node, 'PUI1006', 'Arrays cannot leak semantic handles into data.');
       }
       return { kind: 'array', type: { kind: 'array', element: parseDataType({ kind: 'union', members: elementTypes }) }, elements, span };
@@ -247,7 +263,11 @@ class Frontend {
         keys.add(key);
         return { key, value: this.expression(module, ts.isPropertyAssignment(property) ? property.initializer : property.name, scope, phase) };
       });
-      if (entries.some((entry) => !isDataValueType(entry.value.type))) rejectNode(node, 'PUI1006', 'Records cannot leak semantic handles into data.');
+      if (entries.some((entry) => !isDataValueType(entry.value.type))) {
+        if (phase === 'render' && entries.length === 1 && entries[0].key === 'style' && entries[0].value.type === 'style-handle')
+          return {kind:'record',type:'template-props',entries,span};
+        rejectNode(node, 'PUI1006', 'Records cannot leak semantic handles into data.');
+      }
       return { kind: 'record', type: { kind: 'record', fields: entries.map((entry) => ({ name: entry.key, type: entry.value.type as DataType })) }, entries, span };
     }
     if (ts.isPrefixUnaryExpression(node)) {
@@ -268,14 +288,13 @@ class Frontend {
     if (ts.isPropertyAccessExpression(node)) {
       const object = this.expression(module, node.expression, scope, phase), property = node.name.text;
       let type: ValueType;
-      if (object.type === 'focus' && ['focused', 'focusVisible', 'focusable'].includes(property)) type = 'state:boolean';
+      if (object.type === 'focus' && ['focused', 'focusVisible', 'focusable'].includes(property)) type = 'observed:boolean';
       else if (object.type === 'props') {
         const prop = this.props.get(property);
         if (!prop) rejectNode(node, 'PUI1006', `Read of undeclared prop ${property}.`);
         type = prop.type;
-      } else if (object.type === 'event' && ['key', 'type', 'control'].includes(property)) type = property === 'control' ? 'event' : 'string';
-      else if (object.type === 'event' && ['shiftKey', 'ctrlKey', 'altKey', 'metaKey', 'repeat'].includes(property)) type = 'boolean';
-      else if (object.type === 'focus-options' && ['reason', 'preventScroll'].includes(property)) type = property === 'reason' ? 'string' : 'boolean';
+      } else if (object.type === 'event' && ['key', 'type', 'control'].includes(property)) type = property === 'control' ? 'event' : property === 'type' ? 'string' : parseDataType({kind:'union',members:['string','void']});
+      else if (object.type === 'event' && ['shiftKey', 'ctrlKey', 'altKey', 'metaKey', 'repeat'].includes(property)) type = parseDataType({kind:'union',members:['boolean','void']});
       else if (isDataValueType(object.type)) type = this.checkedData(node, () => memberDataType(object.type as DataType, property, { optional: !!node.questionDotToken }));
       else rejectNode(node, 'PUI1004', `Unsupported member ${property} on ${String(object.type)}.`);
       return { kind: 'member', object, property, optional: !!node.questionDotToken, type, span };
@@ -310,6 +329,16 @@ class Frontend {
     if (ts.isIdentifier(node.expression)) {
       const name = node.expression.text, binding = scope.get(name);
       if (binding) {
+        if (binding.type === 'style-disposer') {
+          const arguments_ = node.arguments.map((argument) => this.expression(module, argument, scope, phase));
+          const issues = [
+            ...validateOperationPhase('feedback.style.release', phase, phase === 'callback' ? this.context as CallbackContext : undefined),
+            ...validateOperationArguments('feedback.style.release', arguments_, binding.type),
+          ];
+          if (issues.length) rejectNode(node, 'PUI1007', issues[0].message);
+          this.requirements.add('feedback');
+          return { kind: 'operation', operation: 'feedback.style.release', receiver: this.expression(module,node.expression,scope,phase), arguments: arguments_, type:'void', span };
+        }
         if (this.activeHelpers.has(name)) rejectNode(node, 'PUI1008', `Recursive helper ${name} is unsupported.`);
         if (!binding.helper || binding.type !== 'function') rejectNode(node, 'PUI1004', `Calling ${name} is not an admitted static helper.`);
         const args = node.arguments.map((argument) => this.expression(module, argument, scope, phase));
@@ -322,6 +351,8 @@ class Frontend {
       if (!module.imports.has(name) && !module.declarations.has(name))
         rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
       const resolved = this.graph.resolveBinding(module, name);
+      if (resolved.module === null && resolved.imported.module === '@proto.ui/core' && resolved.name === 'tw')
+        return {kind:'style-handle',handle:extractRuleStyleHandle(module,node),type:'style-handle',span};
       if (resolved.module === null && resolved.imported.module === '@proto.ui/hooks') operation = HOOKS[resolved.name] as SemanticOperation;
       else if (resolved.module !== null && ts.isCallExpression(resolved.node)) {
         if (phase !== 'setup' || node.arguments.length) rejectNode(node, 'PUI1007', 'Authored hooks require a static no-argument setup call.');
@@ -349,13 +380,13 @@ class Frontend {
       if (ts.isIdentifier(root) && scope.has(root.text)) {
         const value = scope.get(root.text)!;
         const fullPath = paths.join('.');
-        const family = typeof value.type === 'string' && value.type.startsWith('state:') ? 'state:boolean' : value.type;
+        const family = value.type === 'observed:boolean' || typeof value.type === 'string' && value.type.startsWith('state:') ? 'state:boolean' : value.type;
         const match = Object.entries(OPERATION_RULES).find(([, rule]) => rule.path === fullPath && sameType(rule.receiver, family));
         if (match) { operation = match[0] as SemanticOperation; receiver = this.expression(module, root, scope, phase); }
       }
       if (!operation) {
         receiver = this.expression(module, node.expression.expression, scope, phase);
-        const family = typeof receiver.type === 'string' && receiver.type.startsWith('state:') ? 'state' : receiver.type;
+        const family = receiver.type === 'observed:boolean' || typeof receiver.type === 'string' && receiver.type.startsWith('state:') ? 'state' : receiver.type;
         const candidate = `${String(family)}.${node.expression.name.text}`;
         if (Object.hasOwn(OPERATION_RULES, candidate)) operation = candidate as SemanticOperation;
       }
@@ -366,6 +397,28 @@ class Frontend {
     if (phaseIssues.length && !(this.context === 'helper' && phaseIssues.every((issue) => issue.code === 'context'))) rejectNode(node, 'PUI1007', phaseIssues[0].message);
     if (node.arguments.length < rule.min || node.arguments.length > rule.max) rejectNode(node, 'PUI1006', `Invalid argument count for ${operation}.`);
     this.requirements.add(operation.split('.')[0]);
+    if (operation === 'rule.declare') {
+      if (node.arguments.length !== 1 || !ts.isObjectLiteralExpression(node.arguments[0]))
+        rejectNode(node,'PUI1024','Rules require one statically checked declaration.');
+      const states = new Map<string,ExpressionIR>();
+      const declaration = extractRuleDeclaration(node.arguments[0],{
+        id:++this.ruleSequence,order:this.ruleSequence-1,
+        props:new Map([...this.props].map(([key,value]) => [key,value.type])),
+        resolveState:(expression) => {
+          if (!ts.isIdentifier(expression)) return undefined;
+          const binding = scope.get(expression.text);
+          if (!binding?.stateId || typeof binding.type !== 'string' || !(binding.type.startsWith('state:') || binding.type === 'observed:boolean')) return undefined;
+          const value = this.expression(module,expression,scope,phase);
+          states.set(binding.stateId,value);
+          return {id:binding.stateId,type:binding.type === 'observed:boolean' ? 'boolean' : binding.type.slice(6) as DataType};
+        },
+        resolveStyle:(expression) => ts.isIdentifier(expression) && scope.get(expression.text)?.style
+          ? scope.get(expression.text)!.style : extractRuleStyleHandle(module,expression),
+      });
+      const plan = lowerRulePlan([declaration],span);
+      if (!plan.ok) throw new CompilerRejection(plan.diagnostics[0]);
+      return {kind:'rule',declaration,receiver:receiver!,states:[...states].map(([id,value]) => ({id,value})),type:'rule-handle',span};
+    }
     const bindings: OperationBindings = { propNames: new Set(this.props.keys()), ...(phase === 'callback' ? { callbackContext: this.context as CallbackContext } : {}) };
     const args: ExpressionIR[] = [];
     for (const [index, argument] of node.arguments.entries()) {
@@ -379,6 +432,7 @@ class Frontend {
           const item = callback.parameterPolicy === 'nullable-context-value' ? union([value, 'null'], argument) : value;
           expected = ['run', item, item];
         } else if (callback.parameterPolicy === 'context-updater') expected = [bindings.contextValueType!];
+        else if (callback.parameterPolicy === 'input-payload') expected = ['run',bindings.inputPayloadType!];
         const context = callback.contextFrom === 'caller' ? this.context : callback.context;
         const fn = this.function(module, argument, scope, callback.phase, expected, context);
         if (callback.parameterPolicy === 'declared-method') { bindings.methodParameters = fn.parameters; bindings.methodReturnType = fn.returnType; }
@@ -386,6 +440,10 @@ class Frontend {
       } else args.push(this.expression(module, argument, scope, phase));
       if (index === 0) {
         bindings.contextValueType = this.contextType(args[0]);
+        if (operation === 'event.on' || operation === 'event.onGlobal') {
+          const type = this.literalString(args[0],argument);
+          bindings.inputPayloadType = type.startsWith('host:') ? 'host-event' : 'event';
+        }
         if (operation === 'expose.emit') {
           const name = this.literalString(args[0], argument);
           const exposure = this.exposes.get(name);
@@ -428,8 +486,8 @@ class Frontend {
       const name = this.literalString(args[0], node.arguments[0]);
       let exposure: ExposureIR;
       if (operation === 'expose.state') {
-        if (typeof args[1].type !== 'string' || !args[1].type.startsWith('state:')) rejectNode(node.arguments[1], 'PUI1006', 'Expose state requires a state handle.');
-        exposure = { name, kind: 'state', type: args[1].type.slice(6) as PrimitiveType, span };
+        if (typeof args[1].type !== 'string' || !(args[1].type.startsWith('state:') || args[1].type === 'observed:boolean')) rejectNode(node.arguments[1], 'PUI1006', 'Expose state requires a state handle.');
+        exposure = { name, kind: 'state', type: args[1].type === 'observed:boolean' ? 'boolean' : args[1].type.slice(6) as PrimitiveType, span };
       } else if (operation === 'expose.event') {
         if (args[1] && args[1].kind !== 'record') rejectNode(node, 'PUI1006', 'Outward event declaration must be a literal spec.');
         const payload = args[1]?.kind === 'record' ? args[1].entries.find((item) => item.key === 'payload')?.value : undefined;
@@ -468,6 +526,8 @@ class Frontend {
       if (ts.isCallExpression(declaration)) {
         if (ts.isIdentifier(declaration.expression) && this.graph.resolveCoreImport(loaded, declaration.expression.text) === 'createContextKey') {
           const key = extractContextKeyDeclaration(loaded, name); this.contextKeys.set(key.id, key);
+        } else if (ts.isIdentifier(declaration.expression) && this.graph.resolveCoreImport(loaded,declaration.expression.text) === 'tw') {
+          extractRuleStyleHandle(loaded,declaration);
         } else this.graph.descriptor(loaded, declaration);
       } else if (ts.isFunctionDeclaration(declaration) && !this.usedFunctions.has(declaration)) rejectNode(declaration, 'PUI1004', 'Unreachable runtime function is outside this admitted source unit.');
     }

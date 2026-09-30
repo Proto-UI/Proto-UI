@@ -2,9 +2,11 @@ import type { DataType } from './data-types';
 import type { CallbackContext, SemanticOperation } from './operations';
 import type { ContextKeyIR } from './context-declarations';
 import type { SourceMapV3 } from './source-map';
+import type { RuleDeclarationIR } from './rule-declarations';
+import type { StyleTokenHandle } from './style-plan';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
-export const IR_VERSION = 3 as const;
+export const IR_VERSION = 4 as const;
 
 export interface SourceSpan {
   file: string;
@@ -25,16 +27,21 @@ export type ValueType =
   | 'run'
   | 'render'
   | 'event'
+  | 'host-event'
   | 'props'
-  | 'focus-options'
   | 'focus'
   | 'accessible'
   | 'context-key'
+  | 'style-handle'
+  | 'style-disposer'
+  | 'template-props'
+  | 'rule-handle'
   | 'function'
   | 'record'
   | 'array'
   | 'template'
   | 'state:boolean'
+  | 'observed:boolean'
   | 'state:number'
   | 'state:string';
 export type Phase = 'setup' | 'callback' | 'render';
@@ -74,6 +81,8 @@ export type ExpressionIR = ExpressionBase &
     | { kind: 'literal'; value: Primitive }
     | { kind: 'reference'; name: string }
     | { kind: 'context-key'; keyId: string }
+    | { kind: 'style-handle'; handle: StyleTokenHandle }
+    | { kind: 'rule'; declaration: RuleDeclarationIR; receiver: ExpressionIR; states: readonly { id: string; value: ExpressionIR }[] }
     | { kind: 'member'; object: ExpressionIR; property: string; optional: boolean }
     | { kind: 'unary'; operator: '!' | '-' | '+'; operand: ExpressionIR }
     | {

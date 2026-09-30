@@ -10,19 +10,25 @@ export function generatedSourcePath(profile: GeneratedModule['profile']): string
 /** Emitted origins annotate actual statement starts, not compiler-created boilerplate. */
 export function attachEmitterMap(output: GeneratedModule, ir: PrototypeIR): GeneratedModule {
   const mappings: SourceMapMapping[] = [];
-  const sources = new Map(ir.sourceFiles.map((file) => [file.file, file.content]));
+  const sources = new Map(ir.sourceFiles.map((file) => {
+    const starts = [0];
+    const breaks = /\r\n|[\r\n\u2028\u2029]/g;
+    let match: RegExpExecArray | null;
+    while ((match = breaks.exec(file.content))) starts.push(match.index + match[0].length);
+    return [file.file, { content: file.content, starts }] as const;
+  }));
   const lines = output.code.split('\n');
   for (let index = 0; index < lines.length; index++) {
     const marker = /^\s*\/\/ Source ("(?:[^"\\]|\\.)+"):(\d+):(\d+)\s*$/.exec(lines[index]);
     if (!marker) continue;
     const file = JSON.parse(marker[1]) as string;
     const line = Number(marker[2]), column = Number(marker[3]);
-    const content = sources.get(file);
-    if (content === undefined) throw new TypeError(`Emitter origin is outside the source graph: ${file}`);
-    const originalLines = content.split('\n');
-    let offset = 0;
-    for (let original = 0; original < line - 1; original++) offset += originalLines[original].length + 1;
-    offset += column - 1;
+    const sourceFile = sources.get(file);
+    if (!sourceFile) throw new TypeError(`Emitter origin is outside the source graph: ${file}`);
+    const start = sourceFile.starts[line - 1];
+    if (start === undefined || start + column - 1 > sourceFile.content.length)
+      throw new TypeError(`Emitter origin is outside author text: ${file}:${line}:${column}`);
+    const offset = start + column - 1;
     const source: SourceSpan = { file, start: offset, end: offset, line, column, endLine: line, endColumn: column };
     const generated = index + 1;
     if (generated >= lines.length || !lines[generated].trim()) continue;

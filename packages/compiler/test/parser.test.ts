@@ -163,6 +163,19 @@ export default definePrototype({name:'x',setup(def){
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1007' }] });
   });
 
+  it('rejects callbacks retaining setup style withdrawal authority', () => {
+    const source = `import {definePrototype,tw} from '@proto.ui/core';
+export default definePrototype({name:'style-phase',setup(def){
+  const release=def.feedback.style.use(tw('opacity-40'));
+  def.lifecycle.onMounted(()=>{release();});
+  return r=>r.el('div','phase');
+}});`;
+    expect(parsePrototype(source, { fileName: 'style-phase.proto.ts' })).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1007', span: { file: 'style-phase.proto.ts', line: 4 } }],
+    });
+  });
+
   it('rejects effects in unused imported modules and unsupported module requirements', () => {
     const source = `import {definePrototype} from '@proto.ui/core';\nimport {unused} from './effect';\nexport default definePrototype({name:'x',setup(def){}});`;
     expect(

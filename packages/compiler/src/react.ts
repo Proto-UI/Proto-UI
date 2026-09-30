@@ -4,6 +4,7 @@ import { OPERATION_RULES } from './operations';
 import { formatDataType } from './data-types';
 import { isDataValueType } from './ir';
 import type { CompileResult, ExpressionIR, FunctionIR, GeneratedModule, ParameterIR, PrototypeIR, StatementIR, ValueType } from './ir';
+import type { RuleCondition } from './rule-declarations';
 
 /** Direct checked semantic calls; never input-source evaluation or an IR interpreter. */
 export function emitReact(input: PrototypeIR, options: {componentName?:string} = {}): CompileResult<GeneratedModule> {
@@ -31,8 +32,10 @@ export function emitReact(input: PrototypeIR, options: {componentName?:string} =
     if (type === 'render') return `${core}.RendererHandle<GeneratedProps>`;
     if (type === 'props') return `${core}.PropsSnapshot<GeneratedProps>`;
     if (type === 'event') return `Parameters<${core}.ProtoEventCallback<GeneratedProps>>[1]`;
-    if (type === 'focus-options') return `${core}.FocusRequestOptions`;
+    if (type === 'style-handle') return `${core}.StyleHandle`;
+    if (type === 'rule-handle') return `${core}.RuleHandle`;
     if (typeof type === 'string' && type.startsWith('state:')) return `${core}.State<${type.slice(6)}>`;
+    if (type === 'observed:boolean') return `${core}.ObservedStateHandle<boolean, GeneratedProps>`;
     if (type === 'record') return 'Record<string, unknown>';
     if (type === 'array') return 'readonly unknown[]';
     return 'unknown';
@@ -48,6 +51,26 @@ export function emitReact(input: PrototypeIR, options: {componentName?:string} =
       case 'literal': return JSON.stringify(value.value);
       case 'reference': return value.name;
       case 'context-key': return keys.get(value.keyId)!.name;
+      case 'style-handle': return `${core}.tw(${JSON.stringify(value.handle.tokens.join(' '))})`;
+      case 'rule': {
+        const declaration = value.declaration;
+        const states = new Map(value.states.map((state) => [state.id,state.value]));
+        const builder = `${p}When`, intent = `${p}Intent`;
+        const condition = (node:RuleCondition):string => {
+          if (node.type === 'true' || node.type === 'false') return `${builder}.${node.type === 'true' ? 't':'f'}()`;
+          if (node.type === 'eq') {
+            const signal = node.left.type === 'prop' ? `${builder}.prop(${JSON.stringify(node.left.key)})`
+              : `${builder}.state(${expression(states.get(node.left.id)!,depth)})`;
+            return `${signal}.eq(${JSON.stringify(node.right)})`;
+          }
+          if (node.type === 'not') return `${builder}.not(${condition(node.expr)})`;
+          return `${builder}.${node.type}(${node.exprs.map(condition).join(', ')})`;
+        };
+        const operations = declaration.intent.ops.map((operation) =>
+          `${intent}.feedback.style.use(${operation.handles.map((handle) => `${core}.tw(${JSON.stringify(handle.tokens.join(' '))})`).join(', ')});`).join(' ');
+        const metadata = `${declaration.label === undefined ? '':`label: ${JSON.stringify(declaration.label)}, `}${declaration.note === undefined ? '':`note: ${JSON.stringify(declaration.note)}, `}`;
+        return `${expression(value.receiver,depth)}.rule({ ${metadata}when: (${builder}) => ${condition(declaration.when)}, intent: (${intent}) => { ${operations} } })`;
+      }
       case 'member': return `(${expression(value.object,depth)})${value.optional ? '?.':''}[${JSON.stringify(value.property)}]`;
       case 'unary': return `(${value.operator}${expression(value.operand,depth)})`;
       case 'binary': return `(${expression(value.left,depth)} ${value.operator} ${expression(value.right,depth)})`;
