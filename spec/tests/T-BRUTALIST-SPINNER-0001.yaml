@@ -26,6 +26,18 @@ cases:
     title: The open edge stays the reduced-motion fallback while rotation is on by default
     covers: [P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION]
     expectation: spinner-reduced-motion-fallback-retention
+  - id: T-BRUTALIST-SPINNER-0001-CASE-CROSS-RUNTIME-BROWSER
+    title: Both parent compositions preserve Spinner's visual and semantic boundary across runtimes and themes
+    covers:
+      - P-BRUTALIST-SPINNER-DIRECT-OWNERSHIP
+      - P-BRUTALIST-SPINNER-SIZE-PROP
+      - P-BRUTALIST-SPINNER-VISUAL-GRAMMAR
+      - D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-COMPOSITIONS
+    expectation: spinner-cross-runtime-browser-baseline
+  - id: T-BRUTALIST-SPINNER-0001-CASE-BROWSER-MOTION
+    title: Browser computed style removes rotation under reduced motion and retains the open edge
+    covers: [P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION]
+    expectation: spinner-rendered-motion-and-static-open-edge
 implementations:
   - id: prototypes-brutalist-spinner-contract
     kind: module-test
@@ -39,6 +51,15 @@ implementations:
       - T-BRUTALIST-SPINNER-0001-CASE-VISUAL
       - T-BRUTALIST-SPINNER-0001-CASE-REDUCED-MOTION
     exercises: [P-BRUTALIST-SPINNER]
+  - id: prototypes-brutalist-spinner-browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BRUTALIST-SPINNER-0001-CASE-CROSS-RUNTIME-BROWSER
+      - T-BRUTALIST-SPINNER-0001-CASE-BROWSER-MOTION
+    exercises: [P-BRUTALIST-SPINNER]
 verifies:
   prototypes:
     - id: P-BRUTALIST-SPINNER
@@ -47,9 +68,14 @@ verifies:
         - P-BRUTALIST-SPINNER-SIZE-PROP
         - P-BRUTALIST-SPINNER-VISUAL-GRAMMAR
         - P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION
-exercises: { prototypes: [P-BRUTALIST-SPINNER] }
+exercises:
+  prototypes: [P-BRUTALIST-SPINNER]
+  decisions: [D-BRUTALIST-STYLED-ONLY-ADMISSION-0001]
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added Brutalist Spinner direct-ownership, semantic-absence, size, visual, and reduced-motion coverage.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Mapped four-runtime parent-composition browser evidence and rendered reduced-motion coverage without lifecycle promotion.
 tags: [prototype, brutalist, spinner, test, styled-only, reduced-motion]

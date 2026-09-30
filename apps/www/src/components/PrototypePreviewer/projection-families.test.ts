@@ -636,6 +636,10 @@ describe('Website projection-family manifests', () => {
       'shadcn/dialog': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
       'brutalist/card': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
       'brutalist/dialog': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      'brutalist/spinner': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' },
+        { basePrototypeId: 'P-BASE-ASYNC-REGION', prototypeId: 'base-async-region-root' },
+      ],
     } as const;
 
     for (const [projectionFamilyId, manifest] of Object.entries(PROJECTION_FAMILY_MANIFESTS)) {

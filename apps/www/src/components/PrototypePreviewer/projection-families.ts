@@ -579,10 +579,14 @@ const BRUTALIST_MANIFEST = {
     spinner: {
       baseFamilyId: null,
       recipeId: 'demo-brutalist-spinner',
-      recipePrototypeIds: ['brutalist-spinner-root'],
+      recipePrototypeIds: ['brutalist-spinner-root', 'brutalist-button', 'base-async-region-root'],
       parts: {
         root: { basePrototypeId: null, prototypeId: 'brutalist-spinner-root' },
       },
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' },
+        { basePrototypeId: 'P-BASE-ASYNC-REGION', prototypeId: 'base-async-region-root' },
+      ],
     },
     'scroll-area': {
       baseFamilyId: 'P-BASE-SCROLL-AREA',

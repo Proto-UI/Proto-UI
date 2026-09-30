@@ -383,7 +383,10 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
     lines.push('');
   }
 
-  const systemDarkRules = rules.filter((rule) => hasDarkVariant(rule.token));
+  // Reduced-motion variants must not apply under the dark preference alone.
+  const systemDarkRules = rules.filter(
+    (rule) => hasDarkVariant(rule.token) && !hasMotionReduceVariant(rule.token)
+  );
   if (systemDarkRules.length > 0) {
     lines.push(`  @media ${SYSTEM_DARK_MEDIA_QUERY} {`);
     for (const rule of systemDarkRules) {
@@ -419,6 +422,18 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
       for (const decl of rule.css) lines.push(`      ${decl}`);
       lines.push('    }');
       lines.push('');
+    }
+    const systemDarkMotionRules = reducedMotionBlocks.filter((rule) => hasDarkVariant(rule.token));
+    if (systemDarkMotionRules.length > 0) {
+      lines.push(`    @media ${SYSTEM_DARK_MEDIA_QUERY} {`);
+      for (const rule of systemDarkMotionRules) {
+        const selectors = buildSelectors(rule.token, { systemPreferenceFallback: true });
+        if (selectors.length === 0 || rule.css.length === 0) continue;
+        lines.push(`      ${selectors.join(',\n      ')} {`);
+        for (const decl of rule.css) lines.push(`        ${decl}`);
+        lines.push('      }');
+      }
+      lines.push('    }');
     }
     lines.push('  }');
     lines.push('');
@@ -638,7 +653,6 @@ function buildSelectors(
   const variants = parts.slice(0, -1);
   let selectors = [`:where([${PUI_STYLE_ATTR}~="${escapeCssString(token)}"])`];
   let dark = false;
-  let motionReduce = false;
 
   for (const variant of variants) {
     if (variant === 'dark') {
@@ -646,15 +660,9 @@ function buildSelectors(
       continue;
     }
     if (variant === 'motion-reduce') {
-      motionReduce = true;
       continue;
     }
     selectors = selectors.flatMap((selector) => applyVariant(selector, variant));
-  }
-
-  if (motionReduce && !dark) {
-    // Reduced-motion variants are emitted in a dedicated @media block by
-    // renderProtoStyleTokenCss; plain selectors keep the base surface valid.
   }
 
   if (dark) {

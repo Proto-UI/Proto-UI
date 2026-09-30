@@ -21,6 +21,14 @@ cases:
     title: init with Brutalist writes prefixed light/dark theme and token CSS
     covers: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B, D-CLI-BRUTALIST-PRESET-CLOSURE-0001-C]
     expectation: brutalist-init-writes-theme-and-token-css
+  - id: T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-SPINNER-CSS
+    title: the generated token CSS renders the Spinner's rotation and reduced-motion rules
+    covers: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B]
+    expectation: brutalist-spinner-css-rotation-and-reduced-motion
+  - id: T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-MOTION-CASCADE
+    title: Dark reduced-motion targets respect both media conditions and explicit theme overrides
+    covers: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001-B]
+    expectation: dark-reduced-motion-rendered-cascade
 implementations:
   - id: prototypes-brutalist-theme-manifest-test
     kind: module-test
@@ -42,6 +50,20 @@ implementations:
     required: true
     consumesCases:
       - T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-INIT-PRESET
+  - id: cli-brutalist-spinner-css-test
+    kind: module-test
+    status: passing
+    path: packages/cli/test/spinner-css.test.ts
+    required: true
+    consumesCases:
+      - T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-SPINNER-CSS
+  - id: cli-brutalist-spinner-cascade-browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts
+    required: true
+    consumesCases:
+      - T-CLI-BRUTALIST-PRESET-CLOSURE-0001-CASE-MOTION-CASCADE
 verifies:
   decisions: [D-CLI-BRUTALIST-PRESET-CLOSURE-0001]
 exercises:
