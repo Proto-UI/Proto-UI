@@ -1,5 +1,10 @@
-/** Private experimental semantic IR. No TypeScript nodes, source snippets, functions or live handles. */
-export const IR_VERSION = 2 as const;
+import type { DataType } from './data-types';
+import type { CallbackContext, SemanticOperation } from './operations';
+import type { ContextKeyIR } from './context-declarations';
+import type { SourceMapV3 } from './source-map';
+
+/** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
+export const IR_VERSION = 3 as const;
 
 export interface SourceSpan {
   file: string;
@@ -14,9 +19,7 @@ export interface SourceSpan {
 export type Primitive = string | number | boolean | null;
 export type PrimitiveType = 'boolean' | 'number' | 'string';
 export type ValueType =
-  | PrimitiveType
-  | 'null'
-  | 'void'
+  | DataType
   | 'unknown'
   | 'def'
   | 'run'
@@ -26,6 +29,7 @@ export type ValueType =
   | 'focus-options'
   | 'focus'
   | 'accessible'
+  | 'context-key'
   | 'function'
   | 'record'
   | 'array'
@@ -34,43 +38,19 @@ export type ValueType =
   | 'state:number'
   | 'state:string';
 export type Phase = 'setup' | 'callback' | 'render';
+export type FunctionContext = 'setup' | 'render' | CallbackContext;
+export type CompilerProfile =
+  | 'react-runtime-v1'
+  | 'react-dom-source-v1'
+  | 'vue-source-v1'
+  | 'vue2-source-v1'
+  | 'web-component-source-v1';
 
-export type Operation =
-  | 'hook.asTrigger'
-  | 'hook.asFocusable'
-  | 'hook.asAccessible'
-  | 'props.define'
-  | 'props.setDefaults'
-  | 'props.watch'
-  | 'props.get'
-  | 'state.bool'
-  | 'state.string'
-  | 'state.numberDiscrete'
-  | 'state.numberRange'
-  | 'state.get'
-  | 'state.set'
-  | 'expose.state'
-  | 'expose.event'
-  | 'expose.method'
-  | 'expose.emit'
-  | 'lifecycle.setPresent'
-  | 'lifecycle.onCreated'
-  | 'lifecycle.onMounted'
-  | 'lifecycle.onUpdated'
-  | 'lifecycle.onUnmounted'
-  | 'lifecycle.onBeforeDispose'
-  | 'event.on'
-  | 'event.onGlobal'
-  | 'event.requestDefaultActionPrevention'
-  | 'focus.configure'
-  | 'focus.setDisabled'
-  | 'focus.focusSelf'
-  | 'accessible.state'
-  | 'accessible.action'
-  | 'accessible.role'
-  | 'accessible.nameFromContent'
-  | 'render.el'
-  | 'render.slot';
+export function isDataValueType(type: ValueType): type is DataType {
+  return typeof type !== 'string' || ['boolean', 'number', 'string', 'null', 'void'].includes(type);
+}
+
+export type Operation = SemanticOperation;
 
 export interface ParameterIR {
   name: string;
@@ -81,6 +61,8 @@ export interface FunctionIR {
   parameters: ParameterIR[];
   body: StatementIR[];
   phase: Phase;
+  context: FunctionContext;
+  returnType: ValueType;
   span: SourceSpan;
 }
 interface ExpressionBase {
@@ -91,6 +73,7 @@ export type ExpressionIR = ExpressionBase &
   (
     | { kind: 'literal'; value: Primitive }
     | { kind: 'reference'; name: string }
+    | { kind: 'context-key'; keyId: string }
     | { kind: 'member'; object: ExpressionIR; property: string; optional: boolean }
     | { kind: 'unary'; operator: '!' | '-' | '+'; operand: ExpressionIR }
     | {
@@ -140,13 +123,13 @@ export type StatementIR =
 
 export interface PropIR {
   name: string;
-  type: PrimitiveType;
+  type: DataType;
   span: SourceSpan;
 }
 export type ExposureIR =
   | { name: string; kind: 'state'; type: PrimitiveType; span: SourceSpan }
-  | { name: string; kind: 'event'; payload: 'void'; span: SourceSpan }
-  | { name: string; kind: 'method'; parameters: ParameterIR[]; span: SourceSpan };
+  | { name: string; kind: 'event'; payload: DataType; span: SourceSpan }
+  | { name: string; kind: 'method'; parameters: ParameterIR[]; returnType: ValueType; span: SourceSpan };
 
 export interface AuthoredHookIR {
   id: string;
@@ -159,8 +142,10 @@ export interface PrototypeIR {
   schemaVersion: typeof IR_VERSION;
   name: string;
   source: { file: string; exportName: string; sha256: string };
+  sourceFiles: readonly { file: string; content: string; sha256: string }[];
   setup: FunctionIR;
   hooks: AuthoredHookIR[];
+  contextKeys: ContextKeyIR[];
   props: PropIR[];
   exposes: ExposureIR[];
   /** Required semantic operation families, not an inferred full Adapter support matrix. */
@@ -174,7 +159,8 @@ export interface CompilerDiagnostic {
     | 'unsupported-input'
     | 'invalid-ir'
     | 'compiler-defect'
-    | 'output-conflict';
+    | 'output-conflict'
+    | 'output-write';
   message: string;
   span: SourceSpan;
 }
@@ -191,7 +177,9 @@ export interface ParseOptions {
 
 export interface GeneratedModule {
   code: string;
-  profile: 'react-runtime-v1';
+  profile: CompilerProfile;
+  sourceMap?: SourceMapV3;
+  supportingFiles?: readonly { path: string; contents: string; kind: 'source' | 'style' | 'declaration' }[];
   dependencies: {
     name: string;
     version: string;
@@ -200,6 +188,6 @@ export interface GeneratedModule {
   provenance: {
     source: PrototypeIR['source'];
     irVersion: typeof IR_VERSION;
-    backend: 'react-runtime-v1';
+    backend: CompilerProfile;
   };
 }

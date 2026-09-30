@@ -26,6 +26,9 @@ const sources: Record<string, string> = {
   'virtual:retained-owner-reset-state': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-recreate-owner': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-reattach-state-loss': path.join(root, 'retained-owner.proto.ts'),
+  'virtual:update-intent': path.join(root, 'update-intent.proto.ts'),
+  'virtual:update-intent-source': path.join(root, 'update-intent.proto.ts'),
+  'virtual:update-intent-without-update': path.join(root, 'update-intent.proto.ts'),
 };
 const emitted: Plugin = {
   name: 'compiler-differential-emitted',
@@ -40,9 +43,13 @@ const emitted: Plugin = {
     const result = await compileFile(sources[specifier], {
       root: repository,
       componentName: 'GeneratedButton',
+      profile: specifier === 'virtual:update-intent-source' ? 'react-dom-source-v1' : 'react-runtime-v1',
     });
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     let code = result.value.output.code;
+    if (specifier === 'virtual:update-intent-without-update') {
+      code = code.replace('run.update();', '/* injected missing explicit update */');
+    }
     if (specifier === 'virtual:pointer-props-duplicate-click') {
       code = code.replace(
         'run.expose.emit("click");',
@@ -68,6 +75,8 @@ const emitted: Plugin = {
     if (
       specifier !== 'virtual:emitted-button' &&
       specifier !== 'virtual:retained-owner' &&
+      specifier !== 'virtual:update-intent' &&
+      specifier !== 'virtual:update-intent-source' &&
       code === result.value.output.code
     )
       throw new Error(`Mutation was not injected: ${specifier}`);
