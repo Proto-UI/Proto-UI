@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import { assessCase, runOracleSuite, type CaseResult, type ContractOracle } from './result';
 import type { IdentityNormalization, SemanticCheckpoint, TraceValue } from './trace';
 
@@ -40,10 +41,13 @@ export interface ButtonCase {
   requiredCriteria: readonly string[];
 }
 const P = 'P-BASE-BUTTON-';
+const POINTER_UP_SIGNAL = { name: 'click', payload: { kind: 'void' }, step: 'up' };
+const POINTER_ENABLED_SIGNAL = { name: 'click', payload: { kind: 'void' }, step: 'enabled-click' };
 const definitions: { id: string; feature: string; source?: string; steps: JourneyStep[] }[] = [
   {
     id: 'button.pointer-props',
-    feature: 'pointer, disabled props and semantic click',
+    feature:
+      'trusted pointer input, controlled prop deletion, ordered outward signals and terminal cleanup',
     steps: [
       {
         id: 'hover',
@@ -52,6 +56,11 @@ const definitions: { id: string; feature: string; source?: string; steps: Journe
           hovered: true,
           disabled: false,
           clicks: 0,
+          outwardEvents: [],
+          hasDisabledProp: true,
+          sameOwner: true,
+          sameHandles: true,
+          setupCount: 1,
           background: 'rgb(207, 232, 207)',
           hit: true,
         },
@@ -60,14 +69,20 @@ const definitions: { id: string; feature: string; source?: string; steps: Journe
       {
         id: 'down',
         action: { kind: 'down' },
-        expected: { pressed: true, clicks: 0 },
+        expected: { pressed: true, clicks: 0, outwardEvents: [] },
         criteria: [P + 'PRESS-LIFECYCLE'],
       },
       {
         id: 'up',
         action: { kind: 'up' },
-        expected: { pressed: false, clicks: 1 },
+        expected: { pressed: false, clicks: 1, outwardEvents: [POINTER_UP_SIGNAL] },
         criteria: [P + 'CLICK-SIGNAL', P + 'ROLE-COMMAND'],
+      },
+      {
+        id: 'down-before-disable',
+        action: { kind: 'down' },
+        expected: { pressed: true, hovered: true, clicks: 1, outwardEvents: [POINTER_UP_SIGNAL] },
+        criteria: [P + 'PRESS-LIFECYCLE'],
       },
       {
         id: 'disable',
@@ -77,6 +92,10 @@ const definitions: { id: string; feature: string; source?: string; steps: Journe
           hovered: false,
           pressed: false,
           clicks: 1,
+          hasDisabledProp: true,
+          sameOwner: true,
+          sameHandles: true,
+          outwardEvents: [POINTER_UP_SIGNAL],
           ariaDisabled: 'true',
           opacity: '0.4',
         },
@@ -87,28 +106,74 @@ const definitions: { id: string; feature: string; source?: string; steps: Journe
         ],
       },
       {
+        id: 'release-disabled',
+        action: { kind: 'up' },
+        expected: { clicks: 1, pressed: false, hovered: false, outwardEvents: [POINTER_UP_SIGNAL] },
+        criteria: [P + 'DISABLED-SUPPRESS-ACTIVATION'],
+      },
+      {
         id: 'disabled-click',
         action: { kind: 'click' },
-        expected: { clicks: 1, pressed: false, hovered: false },
+        expected: { clicks: 1, pressed: false, hovered: false, outwardEvents: [POINTER_UP_SIGNAL] },
         criteria: [P + 'DISABLED-SUPPRESS-ACTIVATION'],
       },
       {
         id: 'omit-disabled',
         action: { kind: 'props', disabled: null },
-        expected: { disabled: false, clicks: 1, opacity: '1' },
+        expected: {
+          disabled: false,
+          hasDisabledProp: false,
+          sameOwner: true,
+          sameHandles: true,
+          clicks: 1,
+          outwardEvents: [POINTER_UP_SIGNAL],
+          opacity: '1',
+        },
         criteria: [P + 'PROP-DISABLED-CONTROLLED'],
       },
       {
         id: 'enabled-click',
         action: { kind: 'click' },
-        expected: { clicks: 2 },
+        expected: { clicks: 2, outwardEvents: [POINTER_UP_SIGNAL, POINTER_ENABLED_SIGNAL] },
         criteria: [P + 'CLICK-SIGNAL', P + 'CLICK-PROTOCOL-NAME'],
       },
       {
         id: 'leave',
         action: { kind: 'leave' },
-        expected: { hovered: false, pressed: false },
+        expected: {
+          hovered: false,
+          pressed: false,
+          sameOwner: true,
+          sameHandles: true,
+          setupCount: 1,
+          outwardEvents: [POINTER_UP_SIGNAL, POINTER_ENABLED_SIGNAL],
+        },
         criteria: [P + 'POINTER-HOVER', P + 'PRESS-LIFECYCLE'],
+      },
+      {
+        id: 'dispose',
+        action: { kind: 'dispose' },
+        expected: {
+          present: false,
+          refCleared: true,
+          staleHandleInvalid: true,
+          disposeCount: 1,
+          setupCount: 1,
+          clicks: 2,
+          outwardEvents: [POINTER_UP_SIGNAL, POINTER_ENABLED_SIGNAL],
+        },
+        criteria: ['C-LIFECYCLE-0002-G', 'C-EXPOSE-STATE-0001-I'],
+      },
+      {
+        id: 'stale-after-dispose',
+        action: { kind: 'stale-click' },
+        expected: {
+          present: false,
+          staleHandleInvalid: true,
+          clicks: 2,
+          outwardEvents: [POINTER_UP_SIGNAL, POINTER_ENABLED_SIGNAL],
+        },
+        criteria: ['C-LIFECYCLE-0002-G'],
       },
     ],
   },
@@ -642,7 +707,9 @@ export function evaluateButtonCase(
           if (snapshots.length !== 1) return false;
           const data = snapshots[0].data;
           if (data === null || typeof data !== 'object' || Array.isArray(data)) return false;
-          return Object.entries(step.expected).every(([key, value]) => Object.is(data[key], value));
+          return Object.entries(step.expected).every(([key, value]) =>
+            isDeepStrictEqual(data[key], value)
+          );
         });
     },
   }));

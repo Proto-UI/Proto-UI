@@ -124,8 +124,10 @@ describe.sequential('real-browser Adapter/generated differential', () => {
       await expect.poll(() => candidate.count()).toBe(1);
       // Button has no prescribed visual theme. Apply one identical consumer style
       // and compare two real browser renderings, not compiler-generated CSS text.
+      // Avoid font-dependent inline whitespace placing one panel on fractional pixels.
       await page.addStyleTag({
         content: `
+        body { display: flex; }
         #reference-root, #candidate-root { display: inline-block; width: 240px; height: 100px;
           padding: 20px; box-sizing: border-box; vertical-align: top; }
         [data-pui-root] { box-sizing: border-box; display: flex; align-items: center;

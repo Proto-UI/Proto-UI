@@ -19,6 +19,10 @@ const sources: Record<string, string> = {
     repository,
     'packages/prototypes/base/src/button/button.proto.ts'
   ),
+  'virtual:pointer-props-duplicate-click': path.join(
+    repository,
+    'packages/prototypes/base/src/button/button.proto.ts'
+  ),
   'virtual:retained-owner': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-reset-state': path.join(root, 'retained-owner.proto.ts'),
   'virtual:retained-owner-recreate-owner': path.join(root, 'retained-owner.proto.ts'),
@@ -40,6 +44,12 @@ const emitted: Plugin = {
     });
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     let code = result.value.output.code;
+    if (specifier === 'virtual:pointer-props-duplicate-click') {
+      code = code.replace(
+        'run.expose.emit("click");',
+        'run.expose.emit("click"); run.expose.emit("click");'
+      );
+    }
     if (specifier === 'virtual:retained-owner-reset-state') {
       code = code.replace(
         'run.expose.emit("viewEnded");',
