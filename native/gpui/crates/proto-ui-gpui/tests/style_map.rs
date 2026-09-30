@@ -287,7 +287,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 31] = [
+const EXPECTED_UNMAPPED: [&str; 30] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -308,7 +308,6 @@ const EXPECTED_UNMAPPED: [&str; 31] = [
     "will-change",
     "background-clip",
     // The animation driver is its own slice.
-    "animation",
     "animation-duration",
     "animation-fill-mode",
     "animation-iteration-count",

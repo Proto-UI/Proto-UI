@@ -42,8 +42,7 @@
       "animation-name": "pui-spin",
       "animation-duration": "1000ms",
       "animation-timing-function": "linear",
-      "animation-iteration-count": "infinite",
-      "animation": "none"
+      "animation-iteration-count": "infinite"
     },
     "aspect-square": {
       "aspect-ratio": "1 / 1"

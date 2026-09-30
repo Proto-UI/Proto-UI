@@ -88,8 +88,22 @@ type TokenRule = { token: string; declarations: Record<string, string> };
 function extractRules(css: string, tokens: string[]): { rules: TokenRule[]; order: string[] } {
   const wanted = new Map(tokens.map((token) => [token, [] as string[]]));
   const order: string[] = [];
+  // A rule inside `@media` holds only under its condition, which a token's
+  // entry cannot carry, so only the unconditional rules are recorded.
+  const conditional: Array<[number, number]> = [];
+  for (const media of css.matchAll(/@media[^{]*\{/g)) {
+    let depth = 1;
+    let end = media.index! + media[0].length;
+    while (depth > 0 && end < css.length) {
+      if (css[end] === '{') depth += 1;
+      else if (css[end] === '}') depth -= 1;
+      end += 1;
+    }
+    conditional.push([media.index!, end]);
+  }
   const rulePattern = /:where\(\[data-pui-style~="((?:[^"\\]|\\.)*)"\]\)\s*\{([^}]*)\}/g;
   for (const match of css.matchAll(rulePattern)) {
+    if (conditional.some(([start, end]) => match.index! > start && match.index! < end)) continue;
     const token = match[1]!.replace(/\\(.)/g, '$1');
     const body = match[2]!;
     if (!wanted.has(token)) continue;
