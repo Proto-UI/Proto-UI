@@ -1,3 +1,4 @@
+import { isExposeEventDeclaration } from '@proto.ui/module-expose';
 import {
   createAdapterHost,
   createScopedExposesReader,
@@ -335,7 +336,9 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
         methods.set(key, projected as (...callArgs: unknown[]) => unknown);
         continue;
       }
-      if (value && typeof value === 'object' && (value as { kind?: string }).kind === 'event') {
+      // An exposed event is a declaration object, recognised by the Expose
+      // module's own predicate; it has no `kind` field to test.
+      if (isExposeEventDeclaration(value)) {
         signals.push(key);
         continue;
       }

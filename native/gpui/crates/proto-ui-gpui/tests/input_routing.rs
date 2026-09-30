@@ -5,9 +5,15 @@
 //! last case feeds routed samples to the real `HostSessionModel`, so the
 //! router's output is checked against the model that will receive it rather
 //! than against expectations written next to the router.
+//!
+//! The cases about the follow-up click run on a router told that the platform
+//! clicks after a key, as a browser does, because that click is what the Web
+//! router suppresses. GPUI sends no such click; the case that says so runs on
+//! the default router.
 
 use proto_ui_gpui::input::{
-    HostInput, InputRouter, PointerPhase, RouteOwner, Routed, RoutedLease, SessionRoute, Target,
+    HostInput, InputRouter, KeyboardClick, PointerPhase, RouteOwner, Routed, RoutedLease,
+    SessionRoute, Target,
 };
 use proto_ui_gpui::key::{PortableKeyFields, PortableModifiers};
 use proto_ui_host_protocol::event_type::EventType;
@@ -21,6 +27,11 @@ fn lease(id: &str, scope: EventScope, event: &str) -> RoutedLease {
         scope,
         event: EventType::parse(event).expect("a valid event type"),
     }
+}
+
+/// A router on a platform that clicks after a key, as a browser does.
+fn web_router() -> InputRouter {
+    InputRouter::with_keyboard_click(KeyboardClick::Synthesized)
 }
 
 fn session(id: &str, root: &str, leases: Vec<RoutedLease>) -> SessionRoute {
@@ -166,7 +177,7 @@ fn a_root_key_event_reaches_only_the_owner_while_the_global_one_reaches_everyone
 
 #[test]
 fn enter_commits_before_its_key_down_and_the_synthetic_click_is_suppressed_once() {
-    let mut router = InputRouter::new();
+    let mut router = web_router();
     router.upsert_session(session(
         "a",
         "a",
@@ -202,7 +213,7 @@ fn enter_commits_before_its_key_down_and_the_synthetic_click_is_suppressed_once(
 
 #[test]
 fn a_real_click_after_a_keyboard_commit_spends_the_suppression_and_commits() {
-    let mut router = InputRouter::new();
+    let mut router = web_router();
     router.upsert_session(session(
         "a",
         "a",
@@ -219,7 +230,7 @@ fn a_real_click_after_a_keyboard_commit_spends_the_suppression_and_commits() {
 
 #[test]
 fn any_other_key_disarms_suppression_in_every_session() {
-    let mut router = InputRouter::new();
+    let mut router = web_router();
     router.upsert_session(session(
         "a",
         "a",
@@ -237,6 +248,24 @@ fn any_other_key_disarms_suppression_in_every_session() {
         summary(&routed),
         vec![entry("a", "press.commit", &["a-commit"])]
     );
+}
+
+#[test]
+fn where_nothing_clicks_after_a_key_a_zero_detail_click_is_its_own_activation() {
+    // GPUI sends no click for a key the host routes. A zero-detail click after
+    // a keyboard commit is then a second activation, such as an assistive
+    // technology's press, and suppressing it would lose that activation.
+    let mut router = InputRouter::new();
+    router.upsert_session(session(
+        "a",
+        "a",
+        vec![lease("commit", EventScope::Root, "press.commit")],
+    ));
+    let inside = || at(&["a"], owned_by("a"));
+    let commit = vec![entry("a", "press.commit", &["commit"])];
+
+    assert_eq!(summary(&router.route(&key_down(inside(), "Enter"))), commit);
+    assert_eq!(summary(&router.route(&click(inside(), 0))), commit);
 }
 
 #[test]
@@ -496,7 +525,7 @@ fn samples_carry_the_fields_a_web_payload_would() {
 fn nothing_is_sampled_without_a_lease_but_the_suppression_still_arms() {
     // The Web router arms suppression inside `emitPressCommitOnce`, whether or
     // not anyone listens for the commit.
-    let mut router = InputRouter::new();
+    let mut router = web_router();
     router.upsert_session(session("a", "a", vec![]));
     let inside = || at(&["a"], owned_by("a"));
     assert!(router.route(&key_down(inside(), "Enter")).is_empty());

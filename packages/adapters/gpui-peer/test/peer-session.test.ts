@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { WireRecord } from '@proto.ui/host-protocol';
 import button from '@proto.ui/prototypes-base/button';
+import toggle from '@proto.ui/prototypes-base/toggle';
 
 import { createPeerSession, type PeerSession } from '../src/session';
 import { ScriptedHost } from './scripted-host';
@@ -85,6 +86,17 @@ describe('gpui peer: projection cycle', () => {
 });
 
 describe('gpui peer: interaction', () => {
+  it('declares its click event as a signal, not as something unsupported', async () => {
+    // Base Button declares `click` with `def.expose.event`. The declaration
+    // is recognised by the Expose module's predicate; it carries no `kind`.
+    const { host, peer } = createHarness();
+    await peer.mount();
+    const exposes = host.last('expose.descriptor');
+    expect(exposes?.signals).toEqual(['click']);
+    expect(exposes?.unsupported).toEqual([]);
+    await peer.dispose();
+  });
+
   it('tracks pointer state and emits one click per press commit', async () => {
     const { host, peer } = createHarness();
     await peer.mount();
@@ -298,6 +310,37 @@ describe('gpui peer: readiness follows the current projection', () => {
     // Each commit is activated for its own commit id, never a previous one.
     expect(host.of('projection.activate').map((message) => message.commitId)).toEqual([1, 2, 3]);
 
+    await peer.dispose();
+  });
+});
+
+describe('gpui peer: Base Toggle', () => {
+  it('flips active on every commit, announces the new value and projects it as pressed', async () => {
+    const host = new ScriptedHost(SESSION);
+    const peer = createPeerSession({
+      sessionId: SESSION,
+      instanceId: INSTANCE,
+      prototype: toggle,
+      props: {},
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+    });
+    host.bind((message) => peer.handle(message));
+    await peer.mount();
+    expect(host.last('expose.descriptor')?.signals).toEqual(['activeChange']);
+
+    host.input('press.commit');
+    expect(host.exposeState('active')).toBe(true);
+    expect(host.last('a11y.snapshot')?.snapshot?.states.pressed).toBe(true);
+
+    host.input('press.commit');
+    expect(host.exposeState('active')).toBe(false);
+    expect(host.last('a11y.snapshot')?.snapshot?.states.pressed).toBe(false);
+
+    expect(host.of('expose.signal').map((signal) => [signal.name, signal.payload])).toEqual([
+      ['activeChange', { active: true }],
+      ['activeChange', { active: false }],
+    ]);
     await peer.dispose();
   });
 });
