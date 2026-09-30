@@ -6,7 +6,7 @@ export type CallbackContext =
   | 'created' | 'mounted' | 'updated' | 'unmounted' | 'before-dispose' | 'expose-method';
 export type SemanticResource =
   | 'props-schema' | 'props' | 'raw-props' | 'state' | 'expose' | 'context'
-  | 'view-intent' | 'view' | 'event-route' | 'focus' | 'accessibility' | 'update-queue';
+  | 'view-intent' | 'view' | 'event-route' | 'focus' | 'accessibility' | 'update-queue' | 'style';
 export interface OperationEffect {
   kind: 'read' | 'write' | 'declare' | 'subscribe' | 'signal' | 'request-update';
   resource: SemanticResource;
@@ -23,7 +23,7 @@ export interface CallbackRule {
   /** Synchronous value updaters retain their caller's origin; they cannot launder disposal authority. */
   contextFrom?: 'caller';
   /** A declared method signature, or parameterized context-key data, overrides coarse legacy types. */
-  parameterPolicy?: 'declared-method' | 'context-value' | 'nullable-context-value' | 'context-updater';
+  parameterPolicy?: 'declared-method' | 'context-value' | 'nullable-context-value' | 'context-updater' | 'input-payload';
   acceptsValue?: boolean;
 }
 export type ArgumentRole =
@@ -110,9 +110,20 @@ function rule(receiver: ValueType, path: string, phases: readonly Phase[], resul
     ...(callbackAt < 0 ? {} : { callback: { at: callbackAt, ...args[callbackAt].callback! } }),
   };
 }
+function styleRule(receiver: ValueType, path: string, phases: readonly Phase[], result: ValueType): OperationRule {
+  const contract = rule(receiver,path,phases,result,[{role:'value',types:['style-handle'],optional:true}],
+    [effect(phases === setup ? 'declare':'write','style')],{requiredCapabilities:['style-projection']});
+  return {...contract,max:Number.MAX_SAFE_INTEGER};
+}
 const watchParameters: readonly ValueType[] = ['run', 'props', 'props', 'record'];
 const rawWatchParameters: readonly ValueType[] = ['run', 'record', 'record', 'record'];
 const optionalRecord: ArgumentRule = { ...record, optional: true };
+export const FOCUS_OPTIONS_TYPE: DataType = { kind: 'record', fields: [
+  { name: 'reason', optional: true, type: { kind: 'union', members: [
+    { kind: 'literal', value: 'programmatic' }, { kind: 'literal', value: 'keyboard' }, { kind: 'literal', value: 'pointer' },
+  ] } },
+  { name: 'preventScroll', optional: true, type: 'boolean' },
+] };
 const contextNext: ArgumentRule = { role: 'context-next', callback: {
   phase: 'callback', context: 'context-update', parameters: ['record'],
   minParameters: 0, maxParameters: 1, returnType: 'record',
@@ -121,6 +132,14 @@ const contextNext: ArgumentRule = { role: 'context-next', callback: {
 
 /** The single admission/emission vocabulary. Paths are exact public handle names. */
 export const OPERATION_RULES = {
+  'style.tw': rule('void', 'tw', ['setup', 'callback', 'render'], 'style-handle', [{role:'value',types:['string']}], [effect('declare','style')]),
+  'rule.declare': rule('def', 'rule', setup, 'rule-handle', [record], [effect('declare','style')], {requiredCapabilities:['style-projection']}),
+  'rule.dispose': rule('rule-handle', 'dispose', setup, 'void', [], [effect('write','style')], {requiredCapabilities:['style-projection']}),
+  'feedback.style.use': styleRule('def','feedback.style.use',setup,'style-disposer'),
+  'feedback.style.release': rule('style-disposer', 'call', setup, 'void', [], [effect('write','style')], {requiredCapabilities:['style-projection']}),
+  'feedback.style.patch': styleRule('run','feedback.style.patch',callbackPhase,'void'),
+  'feedback.style.suppress': styleRule('run','feedback.style.suppress',callbackPhase,'void'),
+  'feedback.style.clearPatch': rule('run', 'feedback.style.clearPatch', callbackPhase, 'void', [], [effect('write','style')], {requiredCapabilities:['style-projection']}),
   'hook.asTrigger': rule('void', 'asTrigger', setup, 'void', [], [effect('declare', 'event-route')], { requiredCapabilities: ['input-events'] }),
   'hook.asFocusable': rule('void', 'asFocusable', setup, 'focus', [], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
   'hook.asAccessible': rule('void', 'asAccessible', setup, 'accessible', [], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
@@ -153,14 +172,14 @@ export const OPERATION_RULES = {
   'lifecycle.onUpdated': rule('def', 'lifecycle.onUpdated', setup, 'void', [cb('updated', ['run'])], [effect('subscribe', 'view')]),
   'lifecycle.onUnmounted': rule('def', 'lifecycle.onUnmounted', setup, 'void', [cb('unmounted', ['run'])], [effect('subscribe', 'view')]),
   'lifecycle.onBeforeDispose': rule('def', 'lifecycle.onBeforeDispose', setup, 'void', [cb('before-dispose', ['run'])], [effect('subscribe', 'view-intent')]),
-  'event.on': rule('def', 'event.on', setup, 'unknown', [key, cb('event', ['run', 'event']), hostEventOptions], [effect('subscribe', 'event-route', 'subscription')], { requiredCapabilities: ['input-events'] }),
-  'event.onGlobal': rule('def', 'event.onGlobal', setup, 'unknown', [key, cb('event', ['run', 'event']), hostEventOptions], [effect('subscribe', 'event-route', 'subscription')], { requiredCapabilities: ['input-events'] }),
+  'event.on': rule('def', 'event.on', setup, 'unknown', [key, cb('event', ['run', 'event'], {parameterPolicy:'input-payload'}), hostEventOptions], [effect('subscribe', 'event-route', 'subscription')], { requiredCapabilities: ['input-events'] }),
+  'event.onGlobal': rule('def', 'event.onGlobal', setup, 'unknown', [key, cb('event', ['run', 'event'], {parameterPolicy:'input-payload'}), hostEventOptions], [effect('subscribe', 'event-route', 'subscription')], { requiredCapabilities: ['input-events'] }),
   'event.requestDefaultActionPrevention': rule('event', 'control.requestDefaultActionPrevention', callbackPhase, 'void', [{ ...optionalRecord, schema: { kind: 'record', fields: [
     { name: 'reason', type: 'string', optional: true }, { name: 'source', type: 'string', optional: true },
   ] } }], [effect('write', 'event-route', 'view')], { contexts: ['event'], requiredCapabilities: ['input-events'] }),
   'focus.configure': rule('focus', 'configure', setup, 'void', [record], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
   'focus.setDisabled': rule('focus', 'setDisabled', callbackPhase, 'void', [boolean], [effect('write', 'focus')], { requiredCapabilities: ['focus-target'] }),
-  'focus.focusSelf': rule('focus', 'focusSelf', callbackPhase, 'void', [{ role: 'value', types: ['record', 'focus-options'], optional: true }], [effect('signal', 'focus', 'view')], { requiredCapabilities: ['focus-target'] }),
+  'focus.focusSelf': rule('focus', 'focusSelf', callbackPhase, 'void', [{ role: 'value', schema: FOCUS_OPTIONS_TYPE, optional: true }], [effect('signal', 'focus', 'view')], { requiredCapabilities: ['focus-target'] }),
   'accessible.state': rule('accessible', 'state', setup, 'void', [key, { role: 'state-handle' }], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
   'accessible.action': rule('accessible', 'action', setup, 'void', [key, optionalRecord], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
   'accessible.role': rule('accessible', 'role', setup, 'void', [{ role: 'value', types: ['string', 'state:string'] }], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
@@ -191,6 +210,7 @@ export interface OperationBindings {
   propNames?: ReadonlySet<string>;
   contextValueType?: DataType;
   eventPayloadType?: DataType;
+  inputPayloadType?: 'event' | 'host-event';
   methodParameters?: readonly { type: ValueType; optional?: boolean }[];
   methodReturnType?: ValueType;
 }
@@ -225,12 +245,24 @@ function assignable(actual: ValueType, expected: ValueType): boolean {
   const a = data(actual);
   const e = data(expected);
   if (a && e) return isAssignable(a, e);
-  return expected === 'record' ? actual === 'props' || actual === 'focus-options' || (typeof a === 'object' && a.kind === 'record')
+  return expected === 'record' ? actual === 'props' || (typeof a === 'object' && a.kind === 'record')
     : expected === 'array' ? typeof a === 'object' && a.kind === 'array'
     : false;
 }
+export function isTemplateChildType(type: ValueType): boolean {
+  if (typeof type === 'string') return ['array','template','string','number','null'].includes(type);
+  switch (type.kind) {
+    case 'union': return type.members.every(isTemplateChildType);
+    case 'array': return isTemplateChildType(type.element);
+    case 'literal': return type.value === null || typeof type.value === 'string' || typeof type.value === 'number';
+    default: return false;
+  }
+}
+function templateProps(type: ValueType): boolean {
+  return type === 'template-props' || typeof type !== 'string' && type.kind === 'record' && type.fields.length === 0;
+}
 function stateValue(receiver?: ValueType): ValueType | undefined {
-  if (receiver === 'state:boolean') return 'boolean';
+  if (receiver === 'state:boolean' || receiver === 'observed:boolean') return 'boolean';
   if (receiver === 'state:number') return 'number';
   if (receiver === 'state:string') return 'string';
   return undefined;
@@ -275,6 +307,9 @@ export function validateOperationCallback(callback: OperationCallback, signature
     parameters = bindings.methodParameters;
     result = bindings.methodReturnType;
     max = parameters.length;
+  } else if (signature.parameterPolicy === 'input-payload') {
+    if (!bindings.inputPayloadType) return [{code:'missing-signature',message:'Input callbacks require a resolved portable or raw-host payload boundary.'}];
+    parameters = [{type:'run'},{type:bindings.inputPayloadType}];
   } else if (signature.parameterPolicy) {
     if (!bindings.contextValueType)
       return [{ code: 'missing-signature', message: 'Context callbacks require a resolved key value type.' }];
@@ -337,20 +372,24 @@ export function validateOperationArguments(operation: string, args: readonly Ope
   const issues: OperationContractIssue[] = [];
   if (contract.receiver === 'state:boolean' ? !stateValue(receiver) : (receiver ?? 'void') !== contract.receiver)
     issues.push({ code: 'receiver', message: `${operation} has an incompatible receiver.` });
+  if (operation === 'state.set' && receiver === 'observed:boolean')
+    issues.push({ code: 'receiver', message: 'Observed focus facts have no write authority.' });
   if (args.length < contract.min || args.length > contract.max)
     issues.push({ code: 'arity', message: `${operation} requires ${contract.min}..${contract.max} arguments.` });
   if ((operation === 'event.on' || operation === 'event.onGlobal') && args.length > 2 &&
       (!staticKey(args[0]) || !args[0].value.startsWith('host:')))
     issues.push({ code: 'argument-type', message: 'Listener options are only admitted for explicit host:* extension events.', argument: 2 });
   args.forEach((argument, index) => {
-    const requirement = contract.arguments[index];
+    const requirement = contract.arguments[index] ??
+      (['feedback.style.use','feedback.style.patch','feedback.style.suppress'].includes(operation) ? contract.arguments[0] : undefined);
     if (!requirement) return;
     const reject = (code: OperationContractIssue['code'], message: string) => issues.push({ code, message, argument: index });
     if (requirement.types && !requirement.types.some((type) => assignable(argument.type, type)))
       reject('argument-type', `Argument ${index + 1} has an incompatible type.`);
     if (requirement.schema) {
       const actual = argumentData(argument);
-      if (!actual || !isAssignable(actual, requirement.schema)) reject('argument-type', `Argument ${index + 1} does not satisfy its data schema.`);
+      const expected: DataType = requirement.optional ? { kind:'union', members:[requirement.schema,'void'] } : requirement.schema;
+      if (!actual || !isAssignable(actual, expected)) reject('argument-type', `Argument ${index + 1} does not satisfy its data schema.`);
     }
     switch (requirement.role) {
       case 'static-key':
@@ -389,8 +428,10 @@ export function validateOperationArguments(operation: string, args: readonly Ope
         else if (!assignable(argument.type, bindings.eventPayloadType)) reject('argument-type', 'Event payload does not match the declared signature.');
         break;
       case 'template-argument':
-        if (!['record', 'array', 'template', 'string', 'number', 'boolean', 'null'].some((type) => assignable(argument.type, type as ValueType)))
-          reject('argument-type', 'Element arguments must be template props or children.');
+        if (args.length === 3
+          ? index === 1 ? !templateProps(argument.type) : !isTemplateChildType(argument.type)
+          : !templateProps(argument.type) && !isTemplateChildType(argument.type))
+          reject('argument-type', 'Element props accept only one style handle; children must be template nodes, text, finite numbers, arrays or null.');
         break;
     }
     if (requirement.callback && (!requirement.callback.acceptsValue || argument.kind === 'function')) {

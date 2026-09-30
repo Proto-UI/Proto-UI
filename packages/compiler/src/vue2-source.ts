@@ -1,5 +1,8 @@
 import { formatDataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
+import { buildNativeContextArtifacts } from './native-context';
+import { nativeInteractionArtifact } from './native-interaction';
+import { emitNativeRule, emitNativeStyleHandle, nativeStyleArtifact } from './native-style';
 import { OPERATION_RULES } from './operations';
 import { checkTargetOperations, resolveTargetProfile } from './targets';
 import type {
@@ -32,9 +35,22 @@ export function emitVue2Source(
     diagnostics.push({ code: 'PUI4102', category: 'unsupported-input', message, span });
   };
   const implemented: Readonly<Record<string, true>> = {
+    'style.tw': true, 'rule.declare': true, 'rule.dispose': true,
+    'feedback.style.use': true, 'feedback.style.patch': true,
+    'feedback.style.suppress': true, 'feedback.style.clearPatch': true, 'feedback.style.release': true,
     'run.update': true,
     'props.define': true, 'props.setDefaults': true, 'props.watch': true, 'props.get': true,
+    'props.getRaw': true, 'props.isProvided': true,
     'render.read.props.get': true,
+    'render.read.props.getRaw': true, 'render.read.props.isProvided': true,
+    'hook.asTrigger': true, 'hook.asFocusable': true, 'hook.asAccessible': true,
+    'event.on': true, 'event.onGlobal': true, 'event.requestDefaultActionPrevention': true,
+    'focus.configure': true, 'focus.setDisabled': true, 'focus.focusSelf': true,
+    'accessible.state': true, 'accessible.action': true, 'accessible.role': true,
+    'accessible.nameFromContent': true,
+    'context.provide': true, 'context.subscribe': true, 'context.trySubscribe': true,
+    'context.read': true, 'context.tryRead': true, 'context.update': true, 'context.tryUpdate': true,
+    'render.read.context.read': true, 'render.read.context.tryRead': true,
     'state.bool': true, 'state.string': true, 'state.numberDiscrete': true,
     'state.numberRange': true, 'state.get': true, 'state.set': true,
     'expose.state': true, 'expose.event': true, 'expose.method': true, 'expose.emit': true,
@@ -47,6 +63,10 @@ export function emitVue2Source(
       reject(`Operation ${site.operation} has no Vue2 native lowering.`, site.span);
     }
   }
+  const usesStyle = admitted.value.sites.some((site) =>
+    site.operation.startsWith('style.') || site.operation.startsWith('rule.') || site.operation.startsWith('feedback.'));
+  const usesInteraction = admitted.value.sites.some((site) =>
+    /^(hook\.|event\.|focus\.|accessible\.)/.test(site.operation));
   if (!validIdentifier(componentName) || ['GeneratedProps', 'GeneratedExposes'].includes(componentName)) {
     return { ok: false, diagnostics: [{ code: 'PUI3001', category: 'invalid-input',
       message: 'Choose a valid, non-reserved generated component identifier.', span: ir.setup.span }] };
@@ -69,9 +89,10 @@ export function emitVue2Source(
     if (node.kind === 'operation') {
       if (node.operation === 'render.el') {
         const props = node.arguments[1];
-        const record = props && (props.type === 'record' || typeof props.type === 'object' && props.type.kind === 'record');
-        if (record && (props.kind !== 'record' || props.entries.length)) {
-          reject('vue2-source-v1 does not yet lower template style descriptors. Remove the style descriptor; no Runtime fallback is emitted.', props.span);
+        const record = props && (props.kind === 'record' || props.type === 'template-props' || props.type === 'record' || typeof props.type === 'object' && props.type.kind === 'record');
+        if (record && (props.kind !== 'record' || props.entries.length > 1
+          || props.entries.some((entry) => entry.key !== 'style' || entry.value.type !== 'style-handle'))) {
+          reject('vue2-source-v1 TemplateProps supports only one static tw handle under style.', props.span);
         }
       }
       if (node.operation === 'props.define' && node.arguments[0]?.kind === 'record') {
@@ -86,8 +107,6 @@ export function emitVue2Source(
       }
       if (node.receiver) inspect(node.receiver);
       node.arguments.forEach(inspect);
-    } else if (node.kind === 'context-key') {
-      reject('vue2-source-v1 does not implement Context keys or propagation.', node.span);
     } else if (node.kind === 'function') inspectBody(node.function.body);
     else if (node.kind === 'member') inspect(node.object);
     else if (node.kind === 'unary') inspect(node.operand);
@@ -123,11 +142,18 @@ export function emitVue2Source(
   collect(ir);
   let prefix = '__pui';
   while ([...names].some((name) => name.startsWith(prefix))) prefix += '_';
+  const contextArtifacts = ir.contextKeys.length ? buildNativeContextArtifacts(ir) : undefined;
+  const contextNames = new Map(ir.contextKeys.map((key, index) => [key.id, `${prefix}ContextKey${index}`]));
   const aliases = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
     if (typeof type === 'object') return formatDataType(type);
     if (['boolean', 'number', 'string', 'null', 'void', 'unknown'].includes(type)) return type;
     if (type === 'props') return 'GeneratedProps';
+    if (type === 'focus') return `${prefix}NativeFocus`;
+    if (type === 'accessible') return `${prefix}NativeAccessible`;
+    if (type === 'event') return `${prefix}NativeInput`;
+    if (type === 'host-event') return 'Event';
+    if (type === 'observed:boolean') return `${prefix}NativeObservedState<boolean>`;
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
@@ -140,7 +166,9 @@ export function emitVue2Source(
     switch (value.kind) {
       case 'literal': return JSON.stringify(value.value);
       case 'reference': return value.name;
-      case 'context-key': throw new Error('A Context key reached Vue2 emission after capability admission.');
+      case 'context-key': return contextNames.get(value.keyId)!;
+      case 'style-handle': return emitNativeStyleHandle(value.handle, false);
+      case 'rule': return emitNativeRule(value, (item) => expression(item, depth), `${prefix}Owner.def.feedback.style`, `${prefix}Owner.resolvedProps`, false);
       case 'member': return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
       case 'unary': return `(${value.operator}${expression(value.operand, depth)})`;
       case 'binary': return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
@@ -149,13 +177,19 @@ export function emitVue2Source(
       case 'function': return fn(value.function, depth);
       case 'helper-call': return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
       case 'authored-hook': return `${aliases.get(value.hookId)}()`;
-      case 'operation': return `${expression(value.receiver!, depth)}.${OPERATION_RULES[value.operation].path}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+      case 'operation': {
+        const argumentsCode = value.arguments.map((item) => expression(item, depth)).join(', ');
+        if (value.operation.startsWith('hook.')) {
+          return `${prefix}Owner.interaction.${OPERATION_RULES[value.operation].path}(${argumentsCode})`;
+        }
+        return `${expression(value.receiver!, depth)}.${OPERATION_RULES[value.operation].path}(${argumentsCode})`;
+      }
     }
   }
   function body(statements: readonly StatementIR[], depth: number): string {
     const indent = '  '.repeat(depth);
     return statements.map((statement) => {
-      const origin = `${indent}// Source ${statement.span.line}:${statement.span.column}\n`;
+      const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
       switch (statement.kind) {
         case 'const': return `${origin}${indent}const ${statement.name} = ${expression(statement.value, depth)};\n`;
         case 'effect': return `${origin}${indent}${expression(statement.expression, depth)};\n`;
@@ -172,13 +206,44 @@ export function emitVue2Source(
   }).join('\n').replace(/\*\//g, '*\\/');
   const propTypes = Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type]));
   const hooks = ir.hooks.map((hook) => `  const ${aliases.get(hook.id)} = () => (${fn(hook.setup, 1)})(${prefix}Owner.def);`).join('\n');
-  const helpers = NATIVE_HELPERS.replace(/\bPUI/g, prefix);
+  const styleImport = usesStyle ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n` : '';
+  const interactionImport = usesInteraction ? `import { createNativeInteraction as ${prefix}CreateNativeInteraction } from './.proto-ui/interaction/native-v1';
+/** @template Run @typedef {import('./.proto-ui/interaction/native-v1').NativeInteraction<Run>} ${prefix}NativeInteraction */
+/** @typedef {import('./.proto-ui/interaction/native-v1').NativeFocus} ${prefix}NativeFocus */
+/** @typedef {import('./.proto-ui/interaction/native-v1').NativeAccessible} ${prefix}NativeAccessible */
+/** @template T @typedef {import('./.proto-ui/interaction/native-v1').NativeObservedState<T>} ${prefix}NativeObservedState */
+/** @typedef {import('./.proto-ui/interaction/native-v1').NativeInput} ${prefix}NativeInput */
+/** @typedef {import('./.proto-ui/interaction/native-v1').NativeFocusOptions} ${prefix}NativeFocusOptions */
+` : '';
+  const contextImports = styleImport + interactionImport + (contextArtifacts ? `import { createContextScope as ${prefix}CreateContextScope, scopeKey as ${prefix}ScopeKey, acceptsContextValue as ${prefix}AcceptsContextValue } from '${contextArtifacts.scopeFile.replace(/\.ts$/, '')}';\n${ir.contextKeys.map((key) => `import { key as ${contextNames.get(key.id)} } from '${contextArtifacts.keys.get(key.id)!.file.replace(/\.ts$/, '')}';`).join('\n')}` : '');
+  const contextCode = contextArtifacts ? `
+  const contextChecks = new Map([
+${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${prefix}AcceptsContextValue(${JSON.stringify(key.type)}, value)],`).join('\n')}
+  ]);
+  const contextScope = ${prefix}CreateContextScope({
+    getParent: () => vm[${JSON.stringify(`${prefix}ParentScope`)}] || null,
+    isAlive: () => !disposed,
+    invoke: (fn) => invoke(fn, false),
+    validate: (key, value) => contextChecks.get(key)?.(value) === true,
+  });
+  const contextRead = Object.freeze({ read: (key) => { alive(); return contextScope.read(key); }, tryRead: (key) => { alive(); return contextScope.tryRead(key); } });
+` : '';
+  const helpers = nativeHelpers({
+    owner: contextCode,
+    run: contextArtifacts ? `context: { ...contextRead, update: (key, value) => { callback(); contextScope.update(key, value); }, tryUpdate: (key, value) => { callback(); return contextScope.tryUpdate(key, value); } },` : '',
+    read: contextArtifacts ? ', context: contextRead' : '',
+    def: contextArtifacts ? `context: { provide: (key, value) => { setupOnly(); contextScope.provide(key, value); }, subscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'required', fn ? (next, prev) => fn(run, next, prev) : undefined); }, trySubscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'optional', fn ? (next, prev) => fn(run, next, prev) : undefined); } },` : '',
+    handle: contextArtifacts ? 'contextScope,' : '',
+    dispose: contextArtifacts ? 'try { contextScope.dispose(); } catch (error) { failure ??= error; }' : '',
+    setupFailure: contextArtifacts ? 'contextScope.dispose();' : '',
+  }, usesStyle, usesInteraction).replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
   const propDeclarations = ir.props.map((prop) => `[${JSON.stringify(prop.name)}]: {}`).join(', ');
   const code = `// Editable generated Vue 2.6.14 component options. Profile: vue2-source-v1.
 // Inline native-lowering helpers: logical owner, prop resolution, state, semantic templates.
-// No Proto-UI Core, Runtime, Hooks or Adapter dependency; helper cost is retained inline.
+// No Proto-UI Core, Runtime, Hooks or Adapter dependency; optional native helpers are emitted artifacts.
 // Source graph SHA-256: ${ir.source.sha256}
+${contextImports}
 
 /** @typedef {{
 ${propsType}
@@ -197,6 +262,8 @@ export const ${componentName} = {
   name: ${JSON.stringify(ir.name)},
   inheritAttrs: false,
   props: { ${propDeclarations} },
+  ${contextArtifacts ? `inject: { [${JSON.stringify(`${prefix}ParentScope`)}]: { from: ${prefix}ScopeKey, default: null } },
+  provide() { return { [${prefix}ScopeKey]: this[${ownerKey}].contextScope }; },` : ''}
   beforeCreate() {
     Object.defineProperty(this, ${ownerKey}, { value: ${prefix}CreateOwner(this, ${prefix}Setup, ${JSON.stringify(propTypes)}, ${JSON.stringify(rootTag)}, ${options.autoUpdateOnPropsChange !== false}) });
   },
@@ -216,12 +283,15 @@ export const ${componentName} = {
 export default ${componentName};
 `;
   return { ok: true, value: { code, profile: 'vue2-source-v1',
+    supportingFiles: [...(contextArtifacts?.files ?? []), ...(usesStyle ? [nativeStyleArtifact] : []), ...(usesInteraction ? [nativeInteractionArtifact] : [])],
     dependencies: [{ name: 'vue', version: '2.6.14', role: 'target' }],
     provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: 'vue2-source-v1' } } };
 }
 
 // This is target-specific generated host code, never a shared IR interpreter.
-const NATIVE_HELPERS = String.raw`
+function nativeHelpers(context: { owner: string; run: string; read: string; def: string; handle: string; dispose: string; setupFailure: string }, styled: boolean, interactive: boolean): string {
+  const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
+  return String.raw`
 /**
  * @template T
  * @typedef {{ get: () => T, subscribe: (callback: (event: { type: 'next', prev: T, next: T, reason?: unknown } | { type: 'disconnect', reason: 'unmount' }) => void) => (() => void), unsubscribe: (off: () => void) => void, spec: Readonly<Record<string, unknown>> }} PUIExternalState
@@ -250,7 +320,8 @@ function PUIJson(value, seen = new Set()) {
 function PUIElement(tag, a, b) {
   const props = a !== null && typeof a === 'object' && !Array.isArray(a) && !PUIOwn(a, 'tag') && !PUIOwn(a, 'slot');
   const children = arguments.length > 2 ? b : props ? null : a;
-  return Object.freeze({ tag, children });
+  ${styled ? "const tokens = props && PUIOwn(a, 'style') ? PUITemplateStyleTokens(a.style) : undefined;" : ''}
+  return Object.freeze({ tag, children${styled ? ', tokens' : ''} });
 }
 function PUIChildren(value, h, vm, slots) {
   if (value === null || value === undefined) return [];
@@ -266,7 +337,7 @@ function PUIChildren(value, h, vm, slots) {
   }
   if (typeof value.tag !== 'string') throw new TypeError('[Vue2 native] invalid semantic element.');
   // Vue2's pre flag prevents a registered component from hijacking a semantic DOM tag.
-  return [h(value.tag, { pre: true }, PUIChildren(value.children, h, vm, slots))];
+  return [h(value.tag, { pre: true${styled ? ", attrs: value.tokens === undefined ? {} : { 'data-pui-style': value.tokens }" : ''} }, PUIChildren(value.children, h, vm, slots))];
 }
 function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   let phase = 'setup';
@@ -283,6 +354,8 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   let queued = false;
   let pending = null;
   let renderedCommit = null;
+  ${styled || interactive ? 'let activeRoot = null;' : ''}
+  ${interactive ? 'let activeEpoch = -1;' : ''}
   let template = null;
   let renderFunction;
   let unwatch;
@@ -297,12 +370,23 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   const eventDeclarations = Object.create(null);
   const lifecycle = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };
   const notifications = [];
+  ${interactive ? 'const observedExternals = new WeakMap();' : ''}
   let notifying = false;
   let dispatchingProps = false;
   const alive = () => { if (disposed) throw new Error('[Vue2 native] logical instance has been disposed.'); };
   const publicAlive = () => { if (terminal) throw new Error('[Vue2 native] exposed target has been terminally invalidated.'); };
   const callback = () => { alive(); if (phase !== 'callback') throw new Error('[Vue2 native] mutation requires callback scope.'); };
   const setupOnly = () => { alive(); if (phase !== 'setup') throw new Error('[Vue2 native] declaration requires setup scope.'); };
+${styled ? `  const style = PUICreateNativeStyle({
+    ensureSetup: setupOnly,
+    ensureRuntime: callback,
+    isAlive: () => !terminal && !disposed,
+    project: (tokens) => {
+      if (!activeRoot) return;
+      if (tokens.length) activeRoot.setAttribute('data-pui-style', tokens.join(' '));
+      else activeRoot.removeAttribute('data-pui-style');
+    },
+  });` : ''}
   const hostRaw = () => {
     // Full snapshots preserve omission and explicit undefined. Vue Boolean casting and
     // default materialization never participate in the semantic prop contract.
@@ -311,9 +395,11 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
     const provided = (vm.$options && vm.$options.propsData) || {};
     for (const key of Object.keys(types)) {
       const hostKey = key.replace(/-(\w)/g, (_match, letter) => letter.toUpperCase());
+      // Track native prop notifications, but keep values/presence from the raw snapshot.
+      if (vm.$props) void vm.$props[hostKey];
       if (PUIOwn(provided, hostKey)) input[key] = provided[hostKey];
     }
-    for (const key of Object.keys(input)) out[key] = input[key] === undefined ? null : input[key];
+    for (const key of Object.keys(input)) out[key] = input[key];
     return Object.freeze(out);
   };
   const same = (a, b) => {
@@ -333,7 +419,7 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
     for (const key of Object.keys(specs)) {
       const spec = specs[key];
       const provided = PUIOwn(input, key);
-      const value = input[key];
+      const value = input[key] === undefined ? null : input[key];
       const empty = spec.empty ?? 'fallback';
       if (provided) meta.providedKeys.push(key);
       if (provided && value !== null && validValue(key, value)) {
@@ -376,8 +462,9 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
     const previous = resolved;
     const next = resolveProps(nextRaw, true);
     raw = nextRaw; resolved = next.snapshot;
-    if (!hydrated) { hydrated = true; return; }
+    if (!hydrated) { hydrated = true; ${refresh} return; }
     const changedKeys = Object.keys(specs).filter((key) => !Object.is(previous[key], resolved[key]));
+    ${refresh ? `if (changedKeys.length) { ${refresh} }` : ''}
     if (changedKeys.length && !dispatchingProps) {
       dispatchingProps = true;
       try {
@@ -412,14 +499,22 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
     if (terminal) throw new Error('[Vue2 native] presence is locked for terminal disposal.');
     if (present === next) return;
     present = next; ++epoch; pending = null; renderedCommit = null; queued = false;
+    ${interactive ? 'if (!next) interaction.unmount();' : ''}
     // A fresh mount always re-renders retained logical state. A canceled detach is
     // still a presence request, not a React-style reactive state write.
     if (next && nativeMounted && hostActive && viewActive) renderSemantic();
     force();
   };
+${context.owner}
   const run = {
+    ${context.run}
+    ${styled ? 'feedback: { style },' : ''}
     update: () => { callback(); update(); },
-    props: { get: () => { alive(); return resolved; } },
+    props: {
+      get: () => { alive(); return resolved; },
+      getRaw: () => { alive(); return raw; },
+      isProvided: (key) => { alive(); return PUIOwn(raw, key); },
+    },
     lifecycle: { setPresent },
     expose: { emit: (key, payload, options) => {
       callback();
@@ -430,8 +525,43 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
       try { vm.$emit(key, payload, options); } catch {}
     } },
   };
+  ${interactive ? `/** @type {PUINativeInteraction<typeof run>} */
+  const interaction = PUICreateNativeInteraction({
+    ensureSetup: setupOnly,
+    ensureRuntime: callback,
+    ensureEvent: callback,
+    isAlive: () => !terminal && !disposed,
+    isReady: () => phase !== 'setup',
+    invoke: (fn) => invoke(fn),
+    getRun: () => run,
+    getResolvedProps: () => resolved,
+    getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
+    registerObservedState: (handle) => {
+      const subscribers = new Set();
+      const off = handle.subscribe((event) => {
+        ${refresh}
+        notifications.push(() => { for (const subscriber of Array.from(subscribers)) if (subscribers.has(subscriber)) subscriber(event); });
+        if (notifying) return;
+        notifying = true;
+        try { while (notifications.length) notifications.shift()(); }
+        finally { notifying = false; }
+      });
+      const external = Object.freeze({
+        get: () => { publicAlive(); return handle.get(); },
+        subscribe: (fn) => { publicAlive(); subscribers.add(fn); return () => subscribers.delete(fn); },
+        unsubscribe: (unsubscribe) => { publicAlive(); if (typeof unsubscribe === 'function') unsubscribe(); },
+        spec: Object.freeze({ kind: 'bool', observed: true }),
+      });
+      observedExternals.set(handle, external);
+      states.push({ dispose: () => {
+        off();
+        try { for (const fn of Array.from(subscribers)) fn({ type: 'disconnect', reason: 'unmount' }); }
+        finally { subscribers.clear(); }
+      } });
+    },
+  });` : ''}
   const renderer = { el: PUIElement, slot: () => Object.freeze({ slot: true }),
-    read: { props: { get: () => { alive(); return resolved; } } } };
+    read: Object.freeze({ props: Object.freeze({ get: () => { alive(); return resolved; }, getRaw: () => { alive(); return raw; }, isProvided: (key) => { alive(); return PUIOwn(raw, key); } }) ${context.read} }) };
   const createState = (kind, key, initial, configuration = {}) => {
     setupOnly();
     const spec = Object.freeze({ ...configuration, kind });
@@ -453,6 +583,7 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
         next = check(next);
         if (Object.is(value, next)) return;
         const previous = value; value = next;
+        ${refresh}
         const event = { type: 'next', prev: previous, next, reason };
         notifications.push(() => { for (const subscriber of Array.from(subscribers)) if (subscribers.has(subscriber)) subscriber(event); });
         if (notifying) return;
@@ -497,6 +628,9 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
     specs = next; resolved = resolveProps(raw, false).snapshot;
   };
   const def = {
+    ${context.def}
+    ${styled ? 'feedback: { style },' : ''}
+    ${interactive ? 'event: interaction.event,' : ''}
     props: {
       define: defineProps,
       setDefaults: (layer) => {
@@ -518,7 +652,7 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
       numberRange: (key, value, spec) => createState('number.range', key, value, spec),
     },
     expose: {
-      state: (key, handle) => { setupOnly(); exposed[key] = handle.external; },
+      state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'observedExternals.get(handle) ?? ' : ''}handle.external; },
       method: (key, fn) => { setupOnly(); exposed[key] = (...args) => { publicAlive(); return invoke(() => fn(...args)); }; },
       event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
     },
@@ -528,6 +662,9 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   const detach = () => {
     if (!viewActive) return;
     viewActive = false; pending = null; queued = false;
+    ${interactive ? 'interaction.unmount();' : ''}
+    ${styled ? "style.unmount();\n    if (activeRoot) activeRoot.removeAttribute('data-pui-style');" : ''}
+    ${styled || interactive ? 'activeRoot = null;' : ''}
     fire('unmounted');
   };
   const afterCommit = () => {
@@ -546,8 +683,18 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
       const kind = commit.kind;
       if (kind === 'mount' && !viewActive) {
         viewActive = true;
+        ${styled || interactive ? 'activeRoot = target;' : ''}
+        ${interactive ? 'activeEpoch = epoch;\n        interaction.mount();' : ''}
+        ${interactive ? 'if (terminal || commit.epoch !== epoch || !present || !hostActive) return;' : ''}
+        ${styled ? 'style.mount();' : ''}
         fire('mounted');
-      } else if (kind === 'update' && viewActive && pending && pending.revision === commit.revision) {
+      } else if (viewActive) {
+        ${interactive ? `if (activeRoot !== target || activeEpoch !== epoch) {
+          activeRoot = target; activeEpoch = epoch;
+          interaction.mount();
+        }
+        if (terminal || commit.epoch !== epoch || !present || !hostActive) return;` : ''}
+        if (kind !== 'update' || !pending || pending.revision !== commit.revision) return;
         pending = null;
         const again = queued; queued = false;
         fire('updated');
@@ -556,14 +703,27 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
     });
   };
   const owner = {
+    ${context.handle}
+    ${interactive ? 'interaction,' : ''}
     def,
+    get resolvedProps() { return resolved; },
     initialize() {
-      renderFunction = setup(owner);
-      if (typeof renderFunction !== 'function') renderFunction = (renderer) => renderer.slot();
-      phase = 'idle';
-      syncHost(false);
-      fire('created');
-      unwatch = vm.$watch(() => hostRaw(), () => syncHost(true), { deep: true });
+      try {
+        renderFunction = setup(owner);
+        if (typeof renderFunction !== 'function') renderFunction = (renderer) => renderer.slot();
+        phase = 'idle';
+        syncHost(false);
+        fire('created');
+        unwatch = vm.$watch(() => hostRaw(), () => syncHost(true), { deep: true });
+      } catch (error) {
+        terminal = true;
+        ${interactive ? 'try { interaction.dispose(); } catch {}\n        for (const state of states) { try { state.dispose(); } catch {} }' : ''}
+        ${styled ? 'try { style.dispose(); } catch {}' : ''}
+        ${context.setupFailure ? `try { ${context.setupFailure} } catch {}` : ''}
+        disposed = true;
+        phase = 'idle';
+        throw error;
+      }
     },
     hostMounted() { nativeMounted = true; afterCommit(); },
     afterCommit,
@@ -601,6 +761,11 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
       for (const state of states) {
         try { state.dispose(); } catch (error) { failure ??= error; }
       }
+      ${context.dispose}
+      ${interactive ? 'try { interaction.dispose(); } catch (error) { failure ??= error; }' : ''}
+      ${styled ? `try { style.dispose(); } catch (error) { failure ??= error; }
+      const target = vm.$el;
+      if (target && target.nodeType === 1 && target.hasAttribute('data-pui-root')) target.removeAttribute('data-pui-style');` : ''}
       disposed = true; phase = 'idle';
       watchers.length = 0; notifications.length = 0; states.length = 0; defaults.length = 0;
       for (const key of Object.keys(lifecycle)) lifecycle[key].length = 0;
@@ -613,3 +778,4 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   return owner;
 }
 `;
+}

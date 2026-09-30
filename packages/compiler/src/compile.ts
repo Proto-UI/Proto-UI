@@ -9,7 +9,7 @@ import { emitVueSource } from './vue-source';
 import { emitVue2Source } from './vue2-source';
 import { emitWebComponentSource } from './web-component-source';
 import { resolveTargetProfile, checkTargetOperations, type TargetSelection } from './targets';
-import { writeArtifactSet, type ExclusiveOutputFile, type OutputArtifact } from './artifact-output';
+import { diffArtifactSet, writeArtifactSet, type ArtifactDiff, type ExclusiveOutputFile, type OutputArtifact } from './artifact-output';
 import { isLocalSourceSpecifier, resolveLocalSource, runtimeSourceEdges, sourceName } from './source-resolution';
 import { CompilerRejection } from './diagnostics';
 import { attachEmitterMap, generatedSourcePath } from './emitter-map';
@@ -90,20 +90,28 @@ export async function compileFile(entry: string, options: FileCompileOptions = {
   }
 }
 
-/** Create-only artifact publication; never overwrite user source or mutate consumer manifests. */
-export async function writeCompilation(compilation: Compilation, directory: string,
-  openExclusive: (filename:string) => Promise<ExclusiveOutputFile> = (filename) => open(filename,'wx')): Promise<CompileResult<{directory:string;files:string[]}>> {
+export function compilationArtifacts(compilation: Compilation, options: { sourcePath?: string; manifestPath?: string } = {}): OutputArtifact[] {
   const output = compilation.output;
-  const sourceFile = generatedSourcePath(output.profile);
+  const sourceFile = options.sourcePath ?? generatedSourcePath(output.profile);
   const sourceContents = output.sourceMap ? output.code + `\n//# sourceMappingURL=${sourceFile}.map\n` : output.code;
   const artifacts: OutputArtifact[] = [{path:sourceFile,contents:sourceContents,kind:'source'}];
   for (const file of output.supportingFiles ?? []) artifacts.push(file);
-  if (output.sourceMap) artifacts.push({path:`${sourceFile}.map`,contents:JSON.stringify(output.sourceMap)+'\n',kind:'source-map'});
-  artifacts.push({path:'provenance.json',kind:'manifest',contents:JSON.stringify({
+  if (output.sourceMap) artifacts.push({path:`${sourceFile}.map`,contents:JSON.stringify({...output.sourceMap,file:sourceFile})+'\n',kind:'source-map'});
+  artifacts.push({path:options.manifestPath ?? 'provenance.json',kind:'manifest',contents:JSON.stringify({
     ...output.provenance,profile:output.profile,dependencies:output.dependencies,
     sourceFiles:compilation.ir.sourceFiles.map((file) => ({file:file.file,sha256:file.sha256})),
     generatedSha256:createHash('sha256').update(sourceContents).digest('hex'),
     artifacts:artifacts.map((file) => ({path:file.path,kind:file.kind,sha256:createHash('sha256').update(file.contents).digest('hex')})),
   },null,2)+'\n'});
-  return writeArtifactSet(artifacts,directory,openExclusive);
+  return artifacts;
+}
+
+/** Create-only artifact publication; never overwrite user source or mutate consumer manifests. */
+export async function writeCompilation(compilation: Compilation, directory: string,
+  openExclusive: (filename:string) => Promise<ExclusiveOutputFile> = (filename) => open(filename,'wx')): Promise<CompileResult<{directory:string;files:string[]}>> {
+  return writeArtifactSet(compilationArtifacts(compilation),directory,openExclusive);
+}
+
+export async function diffCompilation(compilation: Compilation, directory: string): Promise<CompileResult<ArtifactDiff>> {
+  return diffArtifactSet(compilationArtifacts(compilation), directory);
 }

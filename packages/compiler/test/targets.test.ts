@@ -35,7 +35,6 @@ describe('explicit target capability admission', () => {
     expect(result.value.operations).toContain('state.set');
     expect(result.value.operations).toContain('run.update');
     expect(result.value.operations).toContain('render.slot');
-    expect(result.value.profile.helpers.every((helper) => helper.classification === 'native-lowering' && helper.delivery === 'inline')).toBe(true);
   });
 
   it('rejects unknown and unimplemented profiles instead of substituting a bridge', () => {
@@ -58,8 +57,10 @@ export const inner=defineAsHook({name:'inner',setup(){asTrigger();}});`,
     });
     // Requirements are descriptive metadata, not an admission authority.
     ir.requirements = [];
-    const native = checkTargetOperations(ir, profile('react-dom-source-v1'));
-    expect(native).toMatchObject({ok:false,diagnostics:[{code:'PUI4003',span:{file:'inner.ts',line:3}}]});
+    const restricted = resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:['view-render']});
+    if (!restricted.ok) throw new Error(JSON.stringify(restricted.diagnostics));
+    const native = checkTargetOperations(ir, restricted.value);
+    expect(native).toMatchObject({ok:false,diagnostics:[{code:'PUI4004',span:{file:'inner.ts',line:3}}]});
     const runtime = checkTargetOperations(ir, profile('react-runtime-v1'));
     expect(runtime.ok).toBe(true);
     if (!runtime.ok) throw new Error(JSON.stringify(runtime.diagnostics));
@@ -82,9 +83,11 @@ export default definePrototype({name:'helper',setup(def){
     if (!unused.ok || !reached.ok) throw new Error('Runtime capability admission failed');
     expect(unused.value.operations).not.toContain('focus.focusSelf');
     expect(reached.value.operations).toContain('focus.focusSelf');
-    const native = checkTargetOperations(helperIR(true), profile('react-dom-source-v1'));
-    if (native.ok) throw new Error('Native output admitted focus');
-    expect(native.diagnostics).toContainEqual(expect.objectContaining({code:'PUI4003',span:expect.objectContaining({file:'entry.proto.ts',line:5,column:22})}));
+    const restricted = resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:['view-render']});
+    if (!restricted.ok) throw new Error(JSON.stringify(restricted.diagnostics));
+    const native = checkTargetOperations(helperIR(true), restricted.value);
+    if (native.ok) throw new Error('Capability-restricted output admitted focus');
+    expect(native.diagnostics).toContainEqual(expect.objectContaining({code:'PUI4004',span:expect.objectContaining({file:'entry.proto.ts',line:5,column:22})}));
   });
 
   it('checks actual host capabilities and cannot enable unsupported lowering through a manifest label', () => {
@@ -92,10 +95,10 @@ export default definePrototype({name:'helper',setup(def){
     if (!selected.ok) throw new Error(JSON.stringify(selected.diagnostics));
     const result = checkTargetOperations(parse(basicSource), selected.value);
     expect(result).toMatchObject({ok:false,diagnostics:[{code:'PUI4004',span:{file:'entry.proto.ts',line:8}},{code:'PUI4004',span:{file:'entry.proto.ts',line:8}}]});
-    expect(resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:['focus-target']})).toMatchObject({ok:false,diagnostics:[{code:'PUI4004'}]});
+    expect(resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:['focus-target']}).ok).toBe(true);
   });
 
-  it('rejects a native context key reference even without a context operation', () => {
+  it('requires a logical Context capability even for a key reference without an operation', () => {
     const ir = parse(`import {definePrototype} from '@proto.ui/core';
 import {Shared} from './keys';
 export default definePrototype({name:'key',setup(){
@@ -105,7 +108,10 @@ export default definePrototype({name:'key',setup(){
 export const Shared=createContextKey<{label:string}>('shared');`,
     });
     expect(checkTargetOperations(ir, profile('react-runtime-v1')).ok).toBe(true);
-    expect(checkTargetOperations(ir, profile('react-dom-source-v1'))).toMatchObject({
+    expect(checkTargetOperations(ir, profile('react-dom-source-v1')).ok).toBe(true);
+    const withoutContext = resolveTargetProfile({ profile:'react-dom-source-v1', hostCapabilities:['view-render'] });
+    if (!withoutContext.ok) throw new Error(JSON.stringify(withoutContext.diagnostics));
+    expect(checkTargetOperations(ir, withoutContext.value)).toMatchObject({
       ok:false,diagnostics:[{code:'PUI4007',span:{file:'entry.proto.ts',line:4,column:20}}],
     });
   });

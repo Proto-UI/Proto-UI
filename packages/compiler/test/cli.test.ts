@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -28,6 +28,26 @@ async function invoke(cwd: string, args: string[]) {
     stderr: (text) => { stderr += text; },
   });
   return { code, stdout, stderr };
+}
+
+interface WatchEvent {
+  ok: boolean;
+  revision: number;
+  result?: { directory: string; files: string[] };
+  lastSuccessful?: { revision: number; directory: string; files: string[] } | null;
+  diagnostics: { category: string }[];
+}
+
+function watchInvocation(cwd: string, args = ['watch', 'entry.proto.ts', '--output', 'versions', '--json']) {
+  const cancellation = new AbortController();
+  const events: WatchEvent[] = [];
+  const finished = runCompilerCli(args, {
+    cwd,
+    signal: cancellation.signal,
+    stdout: (text) => { events.push(JSON.parse(text)); },
+    stderr: () => { throw new Error('JSON watch unexpectedly wrote stderr'); },
+  });
+  return { cancellation, events, finished };
 }
 
 afterEach(async () => {
@@ -122,6 +142,8 @@ describe('private compiler CLI', () => {
     ['compile', 'entry.proto.ts'],
     ['watch', 'entry.proto.ts'],
     ['diff', 'entry.proto.ts'],
+    ['watch', 'entry.proto.ts', '--output', 'versions', '--debounce', '1'],
+    ['diff', 'entry.proto.ts', '--output', 'generated', '--force'],
   ])('rejects ambiguous or unsupported invocation %j before writing', async (...args) => {
     const cwd = await fixture();
     const result = await invoke(cwd, [...args, '--json']);
@@ -172,5 +194,99 @@ describe('private compiler CLI', () => {
     expect(inspected.code).toBe(0);
     expect(inspected.stderr).toBe('');
     expect(JSON.parse(inspected.stdout)).toMatchObject({ name: 'cli-fixture' });
+  });
+
+  it('diffs consumer-modified owned artifacts without replacing them or writing proposed output', async () => {
+    const cwd = await fixture();
+    expect((await invoke(cwd, ['compile', 'entry.proto.ts', '--output', 'generated', '--json'])).code).toBe(0);
+    const identical = await invoke(cwd, ['diff', 'entry.proto.ts', '--output', 'generated', '--json']);
+    expect(identical.code).toBe(0);
+    await writeFile(path.join(cwd, 'generated', 'Component.tsx'), 'consumer edits');
+    await writeFile(path.join(cwd, 'entry.proto.ts'), source.replace('cli-fixture', 'next-fixture'));
+    const changed = await invoke(cwd, ['diff', 'entry.proto.ts', '--output', 'generated', '--json']);
+    expect(changed.code).toBe(1);
+    expect(JSON.parse(changed.stdout)).toMatchObject({ ok: true, command: 'diff', result: {
+      changes: expect.arrayContaining([{ path: 'Component.tsx', status: 'modified', consumerModified: true,
+        currentSha256: expect.any(String), generatedSha256: expect.any(String), recordedSha256: expect.any(String) }]),
+    } });
+    expect(await readFile(path.join(cwd, 'generated', 'Component.tsx'), 'utf8')).toBe('consumer edits');
+    expect(await readdir(cwd)).toEqual(['entry.proto.ts', 'generated']);
+  });
+
+  it('refuses to diff an unowned destination and preserves its files', async () => {
+    const cwd = await fixture();
+    await mkdir(path.join(cwd, 'consumer'));
+    await writeFile(path.join(cwd, 'consumer', 'Component.tsx'), 'owned by consumer');
+    const result = await invoke(cwd, ['diff', 'entry.proto.ts', '--output', 'consumer', '--json']);
+    expect(result.code).toBe(1);
+    expect(JSON.parse(result.stdout).ok).toBe(false);
+    expect(await readdir(path.join(cwd, 'consumer'))).toEqual(['Component.tsx']);
+    expect(await readFile(path.join(cwd, 'consumer', 'Component.tsx'), 'utf8')).toBe('owned by consumer');
+  });
+
+  it('retains immutable output across entry deletion, recovers, and settles on cancellation', async () => {
+    const cwd = await fixture();
+    const watching = watchInvocation(cwd);
+    try {
+      await expect.poll(() => watching.events.find((event) => event.ok)?.result).toBeDefined();
+      const initial = watching.events.find((event) => event.ok)!;
+      const bytes = await readFile(path.join(initial.result!.directory, 'Component.tsx'), 'utf8');
+      await rm(path.join(cwd, 'entry.proto.ts'));
+      await expect.poll(() => watching.events.find((event) => !event.ok && event.lastSuccessful)).toMatchObject({
+        lastSuccessful: { revision: initial.revision, directory: initial.result!.directory },
+      });
+      await writeFile(path.join(cwd, 'entry.proto.ts'), source.replace('cli-fixture', 'recovered'));
+      await expect.poll(() => watching.events.filter((event) => event.ok).length).toBe(2);
+      const recovered = watching.events.filter((event) => event.ok)[1];
+      expect(recovered.result!.directory).not.toBe(initial.result!.directory);
+      expect(await readFile(path.join(initial.result!.directory, 'Component.tsx'), 'utf8')).toBe(bytes);
+      const manifest = JSON.parse(await readFile(path.join(recovered.result!.directory, 'provenance.json'), 'utf8'));
+      expect(manifest.source).toMatchObject({ file: 'entry.proto.ts' });
+    } finally {
+      watching.cancellation.abort();
+      expect(await watching.finished).toBe(0);
+    }
+  });
+
+  it('propagates config rename/parse failures and reloads the selected entry before a new success', async () => {
+    const cwd = await fixture();
+    await writeFile(path.join(cwd, 'selected.proto.ts'), source.replace('cli-fixture', 'selected'));
+    const config = path.join(cwd, 'compiler.json');
+    await writeFile(config, JSON.stringify({ entry: 'entry.proto.ts', output: 'versions', json: true }));
+    const watching = watchInvocation(cwd, ['watch', '--config', 'compiler.json']);
+    try {
+      await expect.poll(() => watching.events.find((event) => event.ok)).toBeDefined();
+      const initial = watching.events.find((event) => event.ok)!;
+      await rename(config, path.join(cwd, 'saved.json'));
+      await expect.poll(() => watching.events.find((event) => !event.ok)).toMatchObject({
+        lastSuccessful: { directory: initial.result!.directory }, diagnostics: [{ category: 'invalid-input' }],
+      });
+      await writeFile(config, '{');
+      await expect.poll(() => watching.events.filter((event) => !event.ok).length).toBeGreaterThanOrEqual(2);
+      expect(watching.events.filter((event) => event.ok)).toHaveLength(1);
+      await writeFile(config, JSON.stringify({ entry: 'selected.proto.ts', output: 'versions', json: true }));
+      await expect.poll(() => watching.events.filter((event) => event.ok).length).toBe(2);
+      const delivered = watching.events.filter((event) => event.ok)[1];
+      const manifest = JSON.parse(await readFile(path.join(delivered.result!.directory, 'provenance.json'), 'utf8'));
+      expect(manifest.source.file).toBe('selected.proto.ts');
+    } finally {
+      watching.cancellation.abort();
+      expect(await watching.finished).toBe(0);
+    }
+  });
+
+  it('terminates watch on publication conflict without replacing consumer-owned paths', async () => {
+    const cwd = await fixture();
+    await writeFile(path.join(cwd, 'versions'), 'consumer file');
+    const watching = watchInvocation(cwd);
+    try {
+      await expect.poll(() => watching.events.find((event) => !event.ok)).toBeDefined();
+      expect(await watching.finished).toBe(1);
+      expect(await readFile(path.join(cwd, 'versions'), 'utf8')).toBe('consumer file');
+      expect(watching.events.some((event) => event.ok)).toBe(false);
+    } finally {
+      watching.cancellation.abort();
+      await watching.finished;
+    }
   });
 });

@@ -1,12 +1,12 @@
 ---
 title: 'Compiler 指南'
-desp: '当前 Compiler 边界：0.2 已交付什么、catalog 已约束什么、哪些仍属未来工作'
-description: '当前 Compiler 边界：0.2 已交付什么、catalog 已约束什么、哪些仍属未来工作'
+desp: '0.2 release 边界与分别验证的私有 Compiler 实验'
+description: '0.2 release 边界与分别验证的私有 Compiler 实验'
 ---
 
 Proto UI 0.2 **没有**交付 Compiler 实现或 Compiler authoring workflow。0.2 release 中不存在 `@proto.ui/compiler` package、compiler entity type、official compiler profile、CLI compile command 或受支持的 compiler input/output artifact。
 
-本文的作用是避免把未来方向误解成已交付行为。它整理未来 Compiler 已经需要服从的边界，并把贡献者带回今天实际可用的 Runtime Adapter 路径。
+Release support 与仓库实验分开。下文的私有实验不改变 0.2 package、catalog、CLI 或 official-support 边界。
 
 ## 前置阅读
 
@@ -27,7 +27,7 @@ Proto UI 0.2 **没有**交付 Compiler 实现或 Compiler authoring workflow。0
 Prototype TypeScript → Runtime execution → official Adapter → Web host
 ```
 
-可能的未来路径目前只是一项设计方向：
+0.2 没有交付 Compiler 路径：
 
 ```text
 portable analyzable input → [future Compiler] → host artifacts
@@ -53,7 +53,7 @@ portable analyzable input → [future Compiler] → host artifacts
 
 当 declarative form 能准确表达行为时应优先使用，但不要围绕想象中的 Compiler 改写已经成立的 0.2 semantics。`internal/contracts/integration/portability-and-integration.md` 对长期方向有更多解释，但它属于 non-normative material。
 
-## 当前没有受支持的 Compiler input/output
+## 0.2 没有受支持的 Compiler input/output
 
 | 问题 | 0.2 回答 |
 | --- | --- |
@@ -65,6 +65,57 @@ portable analyzable input → [future Compiler] → host artifacts
 | 是否有 Compiler conformance matrix？ | 没有 Compiler entity/profile |
 
 如果未来 proposal 要改变这些回答，必须显式新增 catalog 与 API 工作，不能从文档推断。
+
+## 仓库内的私有 Compiler 实验
+
+`packages/compiler` 是已实现的**私有实验**，不是 official Compiler distribution。Manifest 保持 `private: true` 与 `protoUi.release.scan: false`。私有 Compiler CLI 与已发布的 `proto-ui` CLI 分开；publication、catalog admission 和长期 compatibility 需要各自的批准。
+
+### 已实现 profile 与 compatibility
+
+| 私有 profile | 实际运行的 target | Output dependency 边界 |
+| --- | --- | --- |
+| `react-runtime-v1` | React / React DOM 19.2.6 | 保留 Proto UI Core、Hooks 与 React Adapter；不独立于 Runtime |
+| `react-dom-source-v1` | React / React DOM 19.2.6 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
+| `vue-source-v1` | Vue 3.5.31 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
+| `vue2-source-v1` | Vue 2.6.14 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
+| `web-component-source-v1` | Custom Elements v1 | 生成的 native helper；不依赖 framework 或 Proto UI Runtime/Adapter |
+
+GPUI、Qt、Flutter profile identity **尚未实现**，选择它们会拒绝编译。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **4**、target profile identity 与生成 helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+
+Frontend 读取限定 root 内的完整 TypeScript source graph，不 import 或 evaluate 作者程序。准入范围包括 checked data、primitive/control-flow callback、static helper 和 authored hook、显式 update、named State 与 typed expose、Props/Context read/watch、单 Root template、serializable Rule condition/style intent，以及已声明的 native event/focus/accessibility 切片。Unsupported syntax、phase/capture authority、operation、target version 和缺失 host capability 会生成 diagnostic，不会静默 bridge。
+
+Native template 将 child style 与 Root feedback 分开，并支持 singular anonymous slot。任意 attribute、`PrototypeRef`、multiple/named slot、native interaction group/portal，以及准入 vocabulary 之外的 interaction operation 仍不支持。Raw host event 是 opaque；可读取 raw Props snapshot，但任意 raw member 不会冒充 typed portable data。Setup style 的 `unUse` 与 Rule declaration disposer 仍是 setup-only；runtime 变化使用 Rule 和 `run.feedback.style.patch/suppress/clearPatch`。
+
+State write 与 feedback projection 本身不会请求 template render。作者显式 update intent 与 host policy 分开：React/Vue 3 consumer 执行 authored update；Vue 2 的默认 props policy 与 Custom Element `setProps` 可以显式请求 semantic update。View detach 保留 instance state、exposed handle、Context 与 pending intent；terminal disposal 才关闭它们。Framework wrapper 使用 native ownership 组合 component，而不是在 template 内嵌入 Prototype node。
+
+### 本地命令与 consumer ownership
+
+在安装了 development dependencies 的仓库 root 执行，并选择未使用的 output directory：
+
+```sh
+node --import tsx packages/compiler/src/cli-entry.ts check packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1
+node --import tsx packages/compiler/src/cli-entry.ts compile packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button
+node --import tsx packages/compiler/src/cli-entry.ts diff packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button --json
+node --import tsx packages/compiler/src/cli-entry.ts watch packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-watch --json
+```
+
+`inspect` 输出 checked IR；`explain` 输出 profile、requirements 与 dependencies。`--config` 显式选择 JSON，字段限于 `entry`、`root`、`export`、`output`、`profile`、`json`；配置路径相对配置文件，命令行路径相对 working directory。命令行覆盖配置；unknown/repeated flag 或 field 会失败。
+
+Compilation 先规划 source、supporting helper、standard source map 与 hash/provenance manifest，再 create-only 发布。现有 consumer file 从不被覆盖。`diff` 只读，通过记录的 hash 识别 consumer modification。`watch` 发布 immutable `<output>/<session UUID>/revision-<N>`，输入被拒绝时保留最后成功 generation，不维护可变 latest pointer。Consumer edit 使用普通 target rebuild；原 compiler map 是历史证据，编辑后可能 stale，rebuild 才生成当前 executable-to-edited-source map。
+
+### 已执行证据与成本测量
+
+私有验证在四个 native profile 的独立物理 consumer 中编译、挂载三 component/Context assembly，type-check 生成的 TypeScript/helper，重建并执行 consumer-owned template edit，拒绝引入的 syntax error，并验证物理 dependency tree 与 artifact hash。Vue 2 的 JavaScript component body 不执行 `checkJs`。另有 offline private-package rehearsal，在普通 Node 中执行打包 Compiler 的 JavaScript API，并记录 tarball integrity、实际 bundled compile-time input、dependency、BOM 和 license；这不等于 official package 或 public declaration-file release。
+
+真实 Chromium 分别核对原 React Adapter、runtime-backed output 与 native React output 的 explicit update/detach/reattach，以及有限 Rule/style/AX/input 程序。Missing-update 与 duplicate-activation mutant 被实际观察拒绝。独立的生成 callback 真实错误堆栈通过 standard executable-to-generated、generated-to-author 两段 map 精确定位；不宣称自动 map composition。
+
+重放独立 native consumer 测量：
+
+```sh
+node --import tsx scripts/compiler/native-consumer-smoke.mjs
+```
+
+每次执行在输出的 evidence directory 中保留 `summary.json`、`timing.json`、`costs.json`、runtime trace、diagnostic 与 dependency integrity。测量包括 cold/hot/changed compilation、whole-process peak RSS 与 coarse memory snapshot、生成/supporting source 和 dependency payload byte、真实 framework initialization/update/teardown、retained handle identity，以及观察到的 instance/view-epoch/Root count。**没有**测量 exact allocation、garbage collection、native-browser layout latency 或相对 Adapter 的速度。Happy DOM consumer 是单边证据；有限 Chromium 程序不构成普遍等价、SSR/hydration 支持或编译产物必然更快/更小的承诺。
 
 ## 贡献边界
 

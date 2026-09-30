@@ -1,4 +1,5 @@
 import { OPERATION_RULES } from './operations';
+import { validateNativeInteraction } from './native-interaction';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -21,7 +22,7 @@ export type TargetProfileId =
   | 'gpui-source-v1'
   | 'qt-source-v1'
   | 'flutter-source-v1';
-export type HostCapability = 'view-render' | 'input-events' | 'focus-target' | 'accessibility-tree';
+export type HostCapability = 'view-render' | 'input-events' | 'focus-target' | 'accessibility-tree' | 'style-projection' | 'context-scope';
 
 export interface TargetDependency {
   readonly name: string;
@@ -32,7 +33,7 @@ export interface TargetHelper {
   readonly name: string;
   readonly version: string;
   readonly classification: 'semantic-runtime' | 'host-bridge' | 'native-lowering';
-  readonly delivery: 'dependency' | 'inline';
+  readonly delivery: 'dependency' | 'inline' | 'supporting-file';
 }
 export interface TargetProfile {
   readonly id: TargetProfileId;
@@ -58,16 +59,34 @@ export interface TargetSelection {
 
 const nativeOperations: readonly Operation[] = Object.freeze([
   'run.update',
-  'props.define', 'props.setDefaults', 'props.watch', 'props.get',
+  'style.tw', 'rule.declare', 'rule.dispose',
+  'feedback.style.use', 'feedback.style.release', 'feedback.style.patch', 'feedback.style.suppress', 'feedback.style.clearPatch',
+  'props.define', 'props.setDefaults', 'props.watch', 'props.get', 'props.getRaw', 'props.isProvided',
+  'hook.asTrigger', 'hook.asFocusable', 'hook.asAccessible',
+  'event.on', 'event.onGlobal', 'event.requestDefaultActionPrevention',
+  'focus.configure', 'focus.setDisabled', 'focus.focusSelf',
+  'accessible.state', 'accessible.action', 'accessible.role', 'accessible.nameFromContent',
   'state.bool', 'state.string', 'state.numberDiscrete', 'state.numberRange', 'state.get', 'state.set',
   'expose.state', 'expose.event', 'expose.method', 'expose.emit',
   'lifecycle.setPresent', 'lifecycle.onCreated', 'lifecycle.onMounted', 'lifecycle.onUpdated',
   'lifecycle.onUnmounted', 'lifecycle.onBeforeDispose',
   'render.el', 'render.slot',
+  'render.read.props.get', 'render.read.props.getRaw', 'render.read.props.isProvided',
+  'context.provide', 'context.subscribe', 'context.trySubscribe',
+  'context.read', 'context.tryRead', 'context.update', 'context.tryUpdate',
+  'render.read.context.read', 'render.read.context.tryRead',
 ]);
 const reactDependencies: readonly TargetDependency[] = Object.freeze([
   Object.freeze({ name: 'react', version: '19.2.6', role: 'target' as const }),
   Object.freeze({ name: 'react-dom', version: '19.2.6', role: 'target' as const }),
+]);
+const nativeSharedHelpers: readonly TargetHelper[] = Object.freeze([
+  { name: '.proto-ui/context/scope-v1.ts', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
+  { name: '.proto-ui/style/native-v1.ts', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
+  { name: '.proto-ui/interaction/native-v1.ts', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
+]);
+const nativeHostCapabilities: readonly HostCapability[] = Object.freeze([
+  'view-render', 'context-scope', 'style-projection', 'input-events', 'focus-target', 'accessibility-tree',
 ]);
 function freezeProfile(profile: TargetProfile): TargetProfile {
   return Object.freeze({
@@ -90,7 +109,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   'react-runtime-v1': freezeProfile({
     id: 'react-runtime-v1', framework: 'react', version: '19.2.6', mode: 'runtime-backed',
     implemented: true, operations: Object.keys(OPERATION_RULES) as Operation[],
-    hostCapabilities: ['view-render', 'input-events', 'focus-target', 'accessibility-tree'],
+    hostCapabilities: ['view-render', 'input-events', 'focus-target', 'accessibility-tree', 'style-projection','context-scope'],
     dependencies: [
       ...reactDependencies,
       { name: '@proto.ui/core', version: '0.3.0-alpha.1', role: 'semantic-runtime' },
@@ -105,32 +124,33 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   }),
   'react-dom-source-v1': freezeProfile({
     id: 'react-dom-source-v1', framework: 'react', version: '19.2.6', mode: 'source',
-    implemented: true, operations: nativeOperations, hostCapabilities: ['view-render'],
+    implemented: true, operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: reactDependencies,
     helpers: [
       { name: 'createOwner', version: '1', classification: 'native-lowering', delivery: 'inline' },
       { name: 'resolveProps', version: '1', classification: 'native-lowering', delivery: 'inline' },
       { name: 'createState', version: '1', classification: 'native-lowering', delivery: 'inline' },
       { name: 'element', version: '1', classification: 'native-lowering', delivery: 'inline' },
+      ...nativeSharedHelpers,
     ],
   }),
   'vue-source-v1': freezeProfile({
     id: 'vue-source-v1', framework: 'vue', version: '3.5.31', mode: 'source', implemented: true,
-    operations: nativeOperations, hostCapabilities: ['view-render'],
+    operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: [{name:'vue',version:'3.5.31',role:'target'}],
-    helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}],
+    helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
   'vue2-source-v1': freezeProfile({
     id: 'vue2-source-v1', framework: 'vue2', version: '2.6.14', mode: 'source', implemented: true,
-    operations: [...nativeOperations, 'render.read.props.get'], hostCapabilities: ['view-render'],
+    operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: [{name:'vue',version:'2.6.14',role:'target'}],
-    helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}],
+    helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
   'web-component-source-v1': freezeProfile({
     id: 'web-component-source-v1', framework: 'web-component', version: 'custom-elements-v1', mode: 'source', implemented: true,
-    operations: [...nativeOperations, 'render.read.props.get'], hostCapabilities: ['view-render'],
+    operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: [],
-    helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}],
+    helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
   'gpui-source-v1': unimplemented('gpui'),
   'qt-source-v1': unimplemented('qt'),
@@ -154,7 +174,7 @@ export function resolveTargetProfile(
     ? options.mode === 'source' ? 'react-dom-source-v1' : 'react-runtime-v1'
     : `${framework}-source-v1`);
   const profile = Object.hasOwn(TARGET_PROFILES, id) ? TARGET_PROFILES[id as TargetProfileId] : undefined;
-  if (!profile) return unsupported('PUI4001', `Unknown target profile ${JSON.stringify(id)}. Choose react-runtime-v1 or react-dom-source-v1; no implicit fallback is available.`, span);
+  if (!profile) return unsupported('PUI4001', `Unknown target profile ${JSON.stringify(id)}. Choose an implemented profile explicitly; no implicit fallback is available.`, span);
   if (!profile.implemented) return unsupported('PUI4001', `Target profile ${id} identifies ${profile.framework}, but no working emitter is implemented. Choose an implemented profile explicitly.`, span);
   if ((options.framework && options.framework !== profile.framework) || (options.mode && options.mode !== profile.mode)) {
     return unsupported('PUI4001', `Profile ${id} targets ${profile.framework} in ${profile.mode} mode; select a matching framework/mode instead of requesting an implicit bridge.`, span);
@@ -229,8 +249,19 @@ export function checkTargetOperations(
   function expression(value: ExpressionIR, scope: Scope): void {
     switch (value.kind) {
       case 'literal': return;
+      case 'style-handle':
+        operations.add('style.tw'); sites.push({operation:'style.tw',span:value.span});
+        if (!allowed.has('style.tw')) diagnostic('PUI4003',`Static style handles are not implemented by ${selected.id}.`,value.span);
+        return;
+      case 'rule':
+        operations.add('rule.declare'); sites.push({operation:'rule.declare',span:value.span});
+        if (!allowed.has('rule.declare')) diagnostic('PUI4003',`Declarative Rule projection is not implemented by ${selected.id}.`,value.span);
+        else if (!capabilities.has('style-projection')) diagnostic('PUI4004',`Rule projection requires host capability style-projection, which is unavailable in ${selected.id}.`,value.span);
+        expression(value.receiver,scope);
+        for (const state of value.states) expression(state.value,scope);
+        return;
       case 'context-key':
-        if (selected.mode === 'source') diagnostic('PUI4007', `Context key ${JSON.stringify(value.keyId)} is an opaque semantic capability not implemented by ${selected.id}. Remove the key reference or explicitly choose react-runtime-v1; native output cannot silently retain a Runtime context handle.`, value.span);
+        if (!capabilities.has('context-scope')) diagnostic('PUI4007', `Context key ${JSON.stringify(value.keyId)} requires a declared logical Context scope in ${selected.id}.`, value.span);
         return;
       case 'reference': {
         const binding = scope.get(value.name);
@@ -241,7 +272,11 @@ export function checkTargetOperations(
       case 'unary': expression(value.operand, scope); return;
       case 'binary': expression(value.left, scope); expression(value.right, scope); return;
       case 'array': for (const element of value.elements) expression(element, scope); return;
-      case 'record': for (const entry of value.entries) expression(entry.value, scope); return;
+      case 'record':
+        if (value.type === 'template-props' && !capabilities.has('style-projection'))
+          diagnostic('PUI4004', `TemplateStyleHandle requires host capability style-projection, which is unavailable in ${selected.id}.`, value.span);
+        for (const entry of value.entries) expression(entry.value, scope);
+        return;
       case 'function': fn(value.function, scope); return;
       case 'helper-call': {
         for (const argument of value.arguments) expression(argument, scope);
@@ -307,6 +342,7 @@ export function checkTargetOperations(
     }
   }
   fn(ir.setup, new Map());
+  if (selected.mode === 'source') diagnostics.push(...validateNativeInteraction(ir, reachedFunctions));
   return diagnostics.length
     ? { ok: false, diagnostics }
     : { ok: true, value: { profile: selected, operations: [...operations], sites, authoredHooks: [...reachedHooks], functions: [...reachedFunctions] } };

@@ -1,12 +1,12 @@
 ---
 title: 'Compiler Guide'
-desp: 'The current Compiler boundary: what 0.2 ships, what the catalog constrains, and what remains future work'
-description: 'The current Compiler boundary: what 0.2 ships, what the catalog constrains, and what remains future work'
+desp: 'The 0.2 release boundary and the separately verified private compiler experiment'
+description: 'The 0.2 release boundary and the separately verified private compiler experiment'
 ---
 
 Proto UI 0.2 does **not** ship a Compiler implementation or a Compiler authoring workflow. There is no `@proto.ui/compiler` package, compiler entity type, official compiler profile, CLI compile command, or supported compiler input/output artifact in the 0.2 release.
 
-This guide exists to stop future direction from being mistaken for shipped behavior. It records the boundaries a future Compiler would already have to respect and points contributors back to the runtime Adapter path that works today.
+Release support and repository experiments are separate. The private experiment described below does not change the 0.2 package, catalog, CLI, or official-support boundary.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ The current production route is therefore:
 Prototype TypeScript → Runtime execution → official Adapter → Web host
 ```
 
-A possible future route is only a design direction:
+A Compiler route was not shipped in 0.2:
 
 ```text
 portable analyzable input → [future Compiler] → host artifacts
@@ -53,7 +53,7 @@ Some authoring forms preserve more analyzable intent than callbacks. Rule is the
 
 Use declarative forms when they accurately express behavior, but do not rewrite working 0.2 semantics around an imagined compiler. `internal/contracts/integration/portability-and-integration.md` discusses this longer-term direction as explanatory, non-normative material.
 
-## No supported Compiler inputs or outputs yet
+## No supported Compiler inputs or outputs in 0.2
 
 | Question | 0.2 answer |
 | --- | --- |
@@ -65,6 +65,57 @@ Use declarative forms when they accurately express behavior, but do not rewrite 
 | Is there a Compiler conformance matrix? | No Compiler entity/profile exists |
 
 If a future proposal needs one of these answers to change, it requires explicit catalog and API work rather than documentation inference.
+
+## Private repository compiler experiment
+
+`packages/compiler` is an implemented **private experiment**, not an official Compiler distribution. Its manifest retains `private: true` and `protoUi.release.scan: false`. The private compiler CLI is separate from the published `proto-ui` CLI; publication, catalog admission and maintained compatibility require their own approval.
+
+### Implemented profiles and compatibility
+
+| Private profile | Exercised target | Output dependency boundary |
+| --- | --- | --- |
+| `react-runtime-v1` | React / React DOM 19.2.6 | Retains Proto UI Core, Hooks and React Adapter; not Runtime-independent |
+| `react-dom-source-v1` | React / React DOM 19.2.6 | Target framework plus emitted native helpers; no Proto UI Runtime/Adapter |
+| `vue-source-v1` | Vue 3.5.31 | Target framework plus emitted native helpers; no Proto UI Runtime/Adapter |
+| `vue2-source-v1` | Vue 2.6.14 | Target framework plus emitted native helpers; no Proto UI Runtime/Adapter |
+| `web-component-source-v1` | Custom Elements v1 | Emitted native helpers; no framework or Proto UI Runtime/Adapter dependency |
+
+GPUI, Qt and Flutter profile identities are **unimplemented** and reject compilation. A profile's concrete tested target version is not a compatibility promise for other versions. Restricted source admission, semantic IR version **4**, target profile identity and emitted helper ABI **1** are separate private compatibility dimensions; neither IR nor helper files are a public plugin SPI.
+
+The frontend reads a closed, root-contained TypeScript source graph without importing or evaluating the author program. It admits checked data, primitive/control-flow callbacks, static helpers and authored hooks, explicit updates, named State and typed exposes, Props and Context reads/watchers, one-Root templates, serializable Rule conditions and style intent, and the declared native event/focus/accessibility slice. Unsupported syntax, phase/capture authority, operations, target versions and missing host capabilities are diagnostics, not silent bridges.
+
+Native templates keep child style separate from Root feedback and support the singular anonymous slot. Arbitrary attributes, `PrototypeRef`, multiple/named slots, native interaction groups/portals and operations outside the admitted interaction vocabulary remain unsupported. Raw host events are opaque; raw Props snapshots are available, but arbitrary raw-member access is not treated as typed portable data. The setup style `unUse` and Rule declaration disposer stay setup-only; runtime changes use Rules and `run.feedback.style.patch/suppress/clearPatch`.
+
+State writes and feedback projection do not themselves request a template render. Explicit authored update intent remains separate from host policy: React/Vue 3 consumers exercise authored updates; the default Vue 2 props policy and Custom Element `setProps` can explicitly request semantic updates. View detach retains instance state, exposed handles, Context and pending intent; terminal disposal closes them. Framework wrappers compose components through their native ownership mechanisms, not Prototype nodes inside templates.
+
+### Local commands and consumer ownership
+
+Run from the repository root with its development dependencies installed. Choose a fresh output directory:
+
+```sh
+node --import tsx packages/compiler/src/cli-entry.ts check packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1
+node --import tsx packages/compiler/src/cli-entry.ts compile packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button
+node --import tsx packages/compiler/src/cli-entry.ts diff packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-button --json
+node --import tsx packages/compiler/src/cli-entry.ts watch packages/prototypes/base/src/button/button.proto.ts --root . --profile react-dom-source-v1 --output .cache/compiler-guide-watch --json
+```
+
+`inspect` prints checked IR; `explain` reports the profile, requirements and dependencies. `--config` explicitly selects JSON with `entry`, `root`, `export`, `output`, `profile` and `json`; configuration paths are relative to that file, command-line paths to the working directory. Command-line values override configuration, and unknown/repeated flags or fields fail.
+
+Compilation plans source, supporting helpers, standard source maps and hash/provenance manifests before create-only publication. Existing consumer files are never overwritten. `diff` is read-only and identifies consumer modifications against recorded hashes. `watch` publishes immutable `<output>/<session UUID>/revision-<N>` generations, retaining the last successful generation on rejected input; it does not maintain a mutable latest pointer. Consumer edits require a normal target rebuild. The original compiler map remains historical and can be stale after an edit; a rebuild supplies the current executable-to-edited-source map.
+
+### Executed evidence and measured costs
+
+The private verification runs compile and mount three-component/Context assemblies in physically isolated consumers for all four native profiles, type-check generated TypeScript and helpers, rebuild and execute a consumer-owned template edit, reject an introduced syntax error, and verify the physical dependency tree and artifact hashes. Vue 2 JavaScript component bodies are not `checkJs`-validated. A separate offline private-package rehearsal executes the bundled compiler JavaScript API in plain Node and records tarball integrity, bundled compile-time inputs, dependencies, BOM and licenses; this is not an official package or public declaration-file release.
+
+Real Chromium evidence independently checks the original React Adapter, runtime-backed output and native React output for explicit update/detach/reattach contracts and a finite Rule/style/AX/input program. Missing-update and duplicate-activation mutants fail those observations. Separate real failing generated callback stacks resolve through standard executable-to-generated and generated-to-author maps; automatic map composition is not claimed.
+
+Replay the isolated native consumer measurement with:
+
+```sh
+node --import tsx scripts/compiler/native-consumer-smoke.mjs
+```
+
+Each run retains `summary.json`, `timing.json`, `costs.json`, runtime traces, diagnostics and dependency integrity in its printed evidence directory. Measurements cover cold/hot/changed compilation, whole-process peak RSS and coarse memory snapshots, emitted/supporting source and dependency payload bytes, real framework initialization/update/teardown, retained handle identity and observed instance/view-epoch/Root counts. They do **not** measure exact allocation counts, garbage collection, native-browser layout latency or Adapter-relative speed. Happy DOM consumers are one-sided evidence; the finite Chromium program is not general equivalence, SSR/hydration support or a claim that compiled output is universally faster or smaller.
 
 ## Contribution boundary
 

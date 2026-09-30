@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
 import { createRequire } from 'node:module';
+import { posix } from 'node:path';
 import { fileURLToPath, URL as NodeURL } from 'node:url';
 import ts from 'typescript';
 import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitVue2Source } from './vue2-source';
+import type { GeneratedModule } from './ir';
 import type { Vue2SourceOptions } from './vue2-source';
 
 interface StateEvent<T> {
@@ -23,6 +25,13 @@ interface CounterExposes {
   count: ExternalState<number>;
   add(amount: number): void;
   read(): number;
+}
+interface InteractionExposes {
+  count: ExternalState<number>;
+  globalCount: ExternalState<number>;
+  focused: ExternalState<boolean>;
+  focusable: ExternalState<boolean>;
+  focus(): void;
 }
 interface Vue2Instance {
   $el: Node;
@@ -63,14 +72,32 @@ function loadNative(source: string, options?: Vue2SourceOptions, files?: Readonl
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitVue2Source(parsed.value, options);
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-  const program = ts.transpileModule(emitted.value.code, {
-    fileName: 'generated-vue2.js',
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, allowJs: true },
-  }).outputText;
-  const exports: Record<string, unknown> = {};
-  // Only checked compiler output executes here; authored source is parsed, never imported/evaluated.
-  new Function('exports', program)(exports);
-  return exports.CompiledComponent;
+  return loadGenerated(emitted.value);
+}
+
+function loadGenerated(module: GeneratedModule): unknown {
+  const sources = new Map((module.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents]));
+  sources.set('generated-vue2.js', module.code);
+  const cache = new Map<string, Record<string, unknown>>();
+  function load(path: string): Record<string, unknown> {
+    const previous = cache.get(path);
+    if (previous) return previous;
+    const source = sources.get(path);
+    if (source === undefined) throw new Error(`Missing generated dependency ${path}`);
+    const exports: Record<string, unknown> = {};
+    cache.set(path, exports);
+    const program = ts.transpileModule(source, {
+      fileName: path,
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, allowJs: true },
+    }).outputText;
+    // Only checked output and its emitted artifacts execute; authored modules remain parsed data.
+    new Function('require', 'exports', program)((specifier: string) => {
+      if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency ${specifier}`);
+      return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
+    }, exports);
+    return exports;
+  }
+  return load('generated-vue2.js').CompiledComponent;
 }
 
 function mountNative(component: unknown, raw: Record<string, unknown> = {}, scopedSlot = false) {
@@ -213,6 +240,35 @@ describe('Vue2 native source consumer', () => {
     expect(mounted.host.querySelector('output')?.textContent).toBe('7replacement');
   });
 
+  it('distinguishes explicit undefined from omission in callback and render prop-presence reads', async () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'vue2-raw-read-boundary',setup(def){
+        def.props.define({label:{type:'string',default:'fallback'}});
+        const provided=def.state.bool('provided',false);
+        def.expose.state('provided',provided);
+        def.lifecycle.onCreated((run)=>{
+          provided.set(run.props.isProvided('label'));
+        });
+        return (r)=>{
+          if(r.read.props.isProvided('label')){
+            return r.el('output','provided');
+          }
+          return r.el('output','omitted');
+        };
+      }});`;
+    const mounted = mountNative(loadNative(source), { label: undefined });
+    await flushVue2();
+    // This prototype's checked Expose schema records callback observations of the raw boundary.
+    const api = mounted.instance.getExposes() as unknown as {
+      provided: ExternalState<boolean>;
+    };
+    expect(api.provided.get()).toBe(true);
+    expect(mounted.host.querySelector('output')?.textContent).toBe('provided');
+    mounted.vm.input = {};
+    await flushVue2();
+    expect(mounted.host.querySelector('output')?.textContent).toBe('omitted');
+  });
+
   it('captures render state at run.update before later writes in the same callback', async () => {
     const source = `import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'vue2-update-order',setup(def){
@@ -301,10 +357,152 @@ describe('Vue2 native source consumer', () => {
     expect(mounted.instance.getExposes().read()).toBe(5);
     expect(mounted.host.textContent).toBe('slot');
     const unsupported = parsePrototype(`import {definePrototype} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
-      export default definePrototype({name:'unsupported',setup(){asFocusable();}});`);
+      export default definePrototype({name:'unsupported',setup(){const focus=asFocusable();focus.configure({scopeKey:'unsupported'});}});`);
     if (!unsupported.ok) throw new Error(JSON.stringify(unsupported.diagnostics));
     const result = emitVue2Source(unsupported.value);
     expect(result).toMatchObject({ ok: false, diagnostics: [{ category: 'unsupported-input' }] });
+  });
+
+  it('binds input, focus and accessibility to the active Root and releases them across view epochs', async () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+      import {asTrigger,asFocusable,asAccessible} from '@proto.ui/hooks';
+      export default definePrototype({name:'vue2-native-interaction',setup(def){
+        def.props.define({present:{type:'boolean',default:true},disabled:{type:'boolean',default:false},step:{type:'number',default:1}});
+        asTrigger();
+        const focus=asFocusable();
+        focus.configure({autoFocus:false,navParticipation:'auto'});
+        const accessible=asAccessible();
+        const count=def.state.numberDiscrete('count',0);
+        const globalCount=def.state.numberDiscrete('globalCount',0);
+        const pressed=def.state.bool('pressed',false);
+        def.expose.state('count',count);
+        def.expose.state('globalCount',globalCount);
+        def.expose.state('focused',focus.focused);
+        def.expose.state('focusable',focus.focusable);
+        def.expose.method('focus',()=>{focus.focusSelf({reason:'keyboard',preventScroll:true});});
+        accessible.role('button');
+        accessible.state('pressed',pressed);
+        accessible.state('selected',focus.focused);
+        accessible.action('activate',{event:'activated'});
+        accessible.nameFromContent();
+        def.expose.event('activated',{payload:'void'});
+        def.expose.event('mounted',{payload:'void'});
+        def.expose.event('unmounted',{payload:'void'});
+        def.event.on('press.commit',(run)=>{
+          count.set(count.get()+(run.props.get().step ?? 0));
+          pressed.set(!pressed.get());
+          run.expose.emit('activated');
+        });
+        def.event.on('key.down',(run,event)=>{event.control.requestDefaultActionPrevention({reason:'handled'});});
+        def.event.onGlobal('host:vue2-global-input',()=>{globalCount.set(globalCount.get()+1);});
+        def.props.watch(['disabled'],(run,next)=>{focus.setDisabled(next.disabled ?? false);});
+        def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present ?? false);});
+        def.lifecycle.onMounted((run)=>{focus.focusSelf({reason:'keyboard'});run.expose.emit('mounted');});
+        def.lifecycle.onUnmounted((run)=>{run.expose.emit('unmounted');});
+        return (r)=>r.el('output',count.get());
+      }});`;
+    const mounted = mountNative(loadNative(source, { autoUpdateOnPropsChange: false }));
+    await flushVue2();
+    // This checked prototype has a different Expose schema from the counter mount helper.
+    const api = mounted.instance.getExposes() as unknown as InteractionExposes;
+    const root = mounted.host.querySelector<HTMLElement>('[data-pui-root]');
+    if (!root) throw new Error('Missing native Vue2 Root.');
+    expect(document.activeElement).toBe(root);
+    expect(api.focused.get()).toBe(true);
+    expect(api.focusable.get()).toBe(true);
+    expect(root.getAttribute('role')).toBe('button');
+    expect(root.getAttribute('aria-selected')).toBe('true');
+    expect(root.getAttribute('data-pui-a11y-actions')).toBe('activate');
+    expect(root.getAttribute('tabindex')).toBe('0');
+    const focusedEvents: StateEvent<boolean>[] = [];
+    api.focused.subscribe((event) => focusedEvents.push(event));
+
+    mounted.vm.input = { step: 3 };
+    await flushVue2();
+    root.querySelector('output')!.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    window.dispatchEvent(new Event('vue2-global-input'));
+    expect(api.count.get()).toBe(3);
+    expect(api.globalCount.get()).toBe(1);
+    expect(root.getAttribute('aria-pressed')).toBe('true');
+    expect(root.querySelector('output')?.textContent).toBe('0');
+    expect(root.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true, cancelable: true }))).toBe(false);
+
+    mounted.vm.input = { step: 3, disabled: true };
+    await flushVue2();
+    expect(api.focusable.get()).toBe(false);
+    expect(api.focused.get()).toBe(false);
+    expect(root.getAttribute('aria-selected')).toBe('false');
+    expect(root.getAttribute('tabindex')).toBe('-1');
+    root.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    expect(api.count.get()).toBe(3);
+
+    mounted.vm.input = { step: 3, present: false };
+    await flushVue2();
+    expect(mounted.host.querySelector('[data-pui-root]')).toBeNull();
+    expect(root.hasAttribute('role')).toBe(false);
+    expect(root.hasAttribute('aria-pressed')).toBe(false);
+    expect(root.hasAttribute('tabindex')).toBe(false);
+    root.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    root.dispatchEvent(new FocusEvent('focus'));
+    window.dispatchEvent(new Event('vue2-global-input'));
+    expect(api.count.get()).toBe(3);
+    expect(api.globalCount.get()).toBe(1);
+    expect(api.focused.get()).toBe(false);
+
+    mounted.vm.input = { step: 3, present: true };
+    await flushVue2();
+    const nextRoot = mounted.host.querySelector<HTMLElement>('[data-pui-root]');
+    if (!nextRoot) throw new Error('Missing rematerialized native Vue2 Root.');
+    expect(nextRoot).not.toBe(root);
+    const remountedApi = mounted.instance.getExposes() as unknown as InteractionExposes;
+    expect(remountedApi.focused).toBe(api.focused);
+    expect(nextRoot.getAttribute('aria-pressed')).toBe('true');
+    expect(api.focused.get()).toBe(true);
+    nextRoot.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    window.dispatchEvent(new Event('vue2-global-input'));
+    expect(api.count.get()).toBe(6);
+    expect(api.globalCount.get()).toBe(2);
+    expect(mounted.events).toEqual(['mounted', 'unmounted', 'mounted']);
+
+    mounted.vm.$destroy();
+    nextRoot.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    window.dispatchEvent(new Event('vue2-global-input'));
+    expect(focusedEvents).toEqual([
+      { type: 'next', prev: true, next: false, reason: 'native-focus' },
+      { type: 'next', prev: false, next: true, reason: 'native-focus' },
+      { type: 'disconnect', reason: 'unmount' },
+    ]);
+    expect(nextRoot.hasAttribute('role')).toBe(false);
+    expect(() => api.focused.get()).toThrow(/terminal/);
+    expect(() => api.focus()).toThrow(/terminal/);
+  });
+
+  it('refreshes style rules from readonly native focus facts without committing a template update', async () => {
+    const source = `import {definePrototype,tw} from '@proto.ui/core';
+      import {asFocusable} from '@proto.ui/hooks';
+      export default definePrototype({name:'vue2-observed-focus-style',setup(def){
+        const focus=asFocusable();
+        const focused=focus.focused;
+        def.expose.method('focus',()=>{focus.focusSelf({reason:'programmatic'});});
+        def.rule({when:w=>w.state(focused).eq(true),intent:i=>i.feedback.style.use(tw('bg-blue'))});
+        return (r)=>{
+          if(focused.get()){return r.el('output','focused');}
+          return r.el('output','blurred');
+        };
+      }});`;
+    const mounted = mountNative(loadNative(source));
+    await flushVue2();
+    const root = mounted.host.querySelector<HTMLElement>('[data-pui-root]');
+    if (!root) throw new Error('Missing native Vue2 focus-style Root.');
+    // The checked generated Expose schema is known despite the shared counter helper type.
+    const api = mounted.instance.getExposes() as unknown as { focus(): void };
+    api.focus();
+    expect(root.getAttribute('data-pui-style')).toBe('bg-blue');
+    await flushVue2();
+    expect(root.querySelector('output')?.textContent).toBe('blurred');
+    root.blur();
+    expect(root.hasAttribute('data-pui-style')).toBe(false);
+    expect(root.querySelector('output')?.textContent).toBe('blurred');
   });
 
   it('treats checked-IR property names as data in source and public JSDoc', async () => {
@@ -329,13 +527,7 @@ describe('Vue2 native source consumer', () => {
     rename(parsed.value);
     const emitted = emitVue2Source(parsed.value);
     if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-    const exports: Record<string, unknown> = {};
-    const program = ts.transpileModule(emitted.value.code, {
-      fileName: 'safe-key.js',
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, allowJs: true },
-    }).outputText;
-    new Function('exports', program)(exports);
-    const mounted = mountNative(exports.CompiledComponent, { [hostileKey]: 'provided' });
+    const mounted = mountNative(loadGenerated(emitted.value), { [hostileKey]: 'provided' });
     await flushVue2();
     expect(mounted.host.querySelector('output')?.textContent).toBe('provided');
     mounted.vm.input = {};

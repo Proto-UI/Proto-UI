@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import path from 'node:path';
 import ts from 'typescript';
 import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
@@ -19,7 +20,11 @@ interface NativeElement extends HTMLElement {
     count?: StateProjection<number>;
     mounts?: StateProjection<number>;
     unmounts?: StateProjection<number>;
+    inputs?: StateProjection<number>;
+    focused?: StateProjection<boolean>;
+    focusable?: StateProjection<boolean>;
     bump?: (next: number) => void;
+    disable?: (next: boolean) => void;
   };
   dispose(): void;
 }
@@ -35,14 +40,32 @@ function create(source: string): NativeElement {
   const emitted = emitWebComponentSource(parsed.value);
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
   // Execute the generated consumer, not authored input and not an IR interpreter.
-  const program = ts.transpileModule(emitted.value.code, {
-    compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
-  }).outputText;
-  const exports: { register?: (name: string) => CustomElementConstructor } = {};
-  new Function('exports', program)(exports);
+  const sources = new Map((emitted.value.supportingFiles ?? []).map((file) => [file.path, file.contents]));
+  sources.set('component.ts', emitted.value.code);
+  const modules = new Map<string, Record<string, unknown>>();
+  function load(file: string): Record<string, unknown> {
+    const name = path.posix.normalize(file);
+    const existing = modules.get(name);
+    if (existing) return existing;
+    const source = sources.get(name);
+    if (source === undefined) throw new Error(`Missing generated module: ${name}`);
+    const exports: Record<string, unknown> = {};
+    modules.set(name, exports);
+    const program = ts.transpileModule(source, {
+      fileName: name,
+      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
+    }).outputText;
+    new Function('exports', 'require', program)(exports, (specifier: string) => {
+      if (!specifier.startsWith('.')) throw new Error(`Unexpected native dependency: ${specifier}`);
+      const target = path.posix.join(path.posix.dirname(name), specifier);
+      return load(target.endsWith('.ts') ? target : `${target}.ts`);
+    });
+    return exports;
+  }
+  const register = load('component.ts').register as (name: string) => CustomElementConstructor;
   const tag = `x-native-compiler-${++nextTag}`;
-  if (!exports.register) throw new Error('Registration API missing');
-  exports.register(tag);
+  if (!register) throw new Error('Registration API missing');
+  register(tag);
   const element = document.createElement(tag) as NativeElement;
   mounted.push(element);
   return element;
@@ -226,7 +249,94 @@ describe('native Web Component semantic source', () => {
     expect(element.getExposes()).toEqual({});
   });
 
-  it('rejects input and default-action capabilities before producing native output', () => {
+  it('does not route outward click/input signals back into raw or semantic input handlers', () => {
+    const element = create(`import {definePrototype} from '@proto.ui/core';
+      import {asTrigger} from '@proto.ui/hooks';
+      export default definePrototype({name:'input-loopback',setup(def){
+        asTrigger();
+        const count=def.state.numberDiscrete('input.count',0);
+        const inputs=def.state.numberDiscrete('input.inputs',0);
+        def.expose.state('count',count);def.expose.state('inputs',inputs);
+        def.expose.event('click');def.expose.event('input');
+        def.event.on('host:click',()=>{count.set(count.get()+10);});
+        def.event.on('input',()=>{inputs.set(inputs.get()+1);});
+        def.event.on('press.commit',(run,event)=>{
+          count.set(count.get()+1);
+          run.expose.emit('click');run.expose.emit('input');
+          event.control.requestDefaultActionPrevention();
+        });
+        return (r)=>r.el('output',count.get());
+      }});`);
+    document.body.appendChild(element);
+    const outward: string[] = [];
+    for (const type of ['click', 'input']) element.addEventListener(type, (event) => {
+      if (event instanceof CustomEvent) outward.push(event.type);
+    });
+    expect(element.dispatchEvent(new MouseEvent('click', {button: 0, detail: 1, bubbles: true, cancelable: true}))).toBe(false);
+    expect(outward).toEqual(['click', 'input']);
+    expect(element.getExposes().count?.get()).toBe(11);
+    expect(element.getExposes().inputs?.get()).toBe(0);
+    element.dispatchEvent(new Event('input', {bubbles: true}));
+    expect(element.getExposes().inputs?.get()).toBe(1);
+    expect(element.shadowRoot?.textContent).toBe('0');
+  });
+
+  it('publishes readonly focus facts, refreshes Root projections without rendering, and releases detached listeners', async () => {
+    const element = create(`import {definePrototype,tw} from '@proto.ui/core';
+      import {asTrigger,asFocusable,asAccessible} from '@proto.ui/hooks';
+      export default definePrototype({name:'focus-view',setup(def){
+        def.props.define({visible:{type:'boolean',default:true}});
+        asTrigger();const focus=asFocusable();const focused=focus.focused;
+        focus.configure({disabled:true});
+        const accessible=asAccessible();accessible.role('button');accessible.state('selected',focused);
+        def.feedback.style.use(tw('bg-white'));
+        def.rule({when:(w)=>w.state(focused).eq(true),intent:(i)=>i.feedback.style.use(tw('bg-black'))});
+        const count=def.state.numberDiscrete('focus.count',0);
+        def.expose.state('count',count);def.expose.state('focused',focused);def.expose.state('focusable',focus.focusable);
+        def.expose.method('disable',(next:boolean)=>{focus.setDisabled(next);});
+        def.props.watch(['visible'],(run,next)=>{run.lifecycle.setPresent(next.visible);});
+        def.event.on('press.commit',()=>{count.set(count.get()+1);});
+        return (r)=>r.el('output',count.get());
+      }});`);
+    document.body.appendChild(element);
+    const exposes = element.getExposes();
+    const child = element.shadowRoot?.querySelector('output');
+    const identity = element.logicalOwner;
+    const facts: boolean[] = [];
+    exposes.focused?.subscribe(({next}) => facts.push(next));
+    expect(exposes.focusable?.get()).toBe(false);
+    expect(element.getAttribute('tabindex')).toBe('-1');
+    expect(element.getAttribute('role')).toBe('button');
+    exposes.disable?.(false);
+    expect(exposes.focusable?.get()).toBe(true);
+    element.dispatchEvent(new FocusEvent('focus'));
+    expect(exposes.focused?.get()).toBe(true);
+    expect(element.getAttribute('aria-selected')).toBe('true');
+    expect(element.getAttribute('data-pui-style')).toBe('bg-black');
+    await Promise.resolve();
+    expect(element.shadowRoot?.querySelector('output')).toBe(child);
+    expect(element.shadowRoot?.textContent).toBe('0');
+    element.setProps({visible:false});
+    await Promise.resolve();
+    expect(exposes.focused?.get()).toBe(false);
+    expect(facts).toEqual([true, false]);
+    expect(element.getAttribute('role')).toBeNull();
+    element.dispatchEvent(new MouseEvent('click', {button: 0, detail: 1}));
+    expect(exposes.count?.get()).toBe(0);
+    element.setProps({visible:true});
+    await Promise.resolve();
+    element.remove();document.body.appendChild(element);
+    await Promise.resolve();
+    expect(element.logicalOwner).toBe(identity);
+    element.dispatchEvent(new MouseEvent('click', {button: 0, detail: 1}));
+    expect(exposes.count?.get()).toBe(1);
+    element.remove();
+    await Promise.resolve();
+    expect(() => exposes.focused?.get()).toThrow(/dispos/);
+    expect(() => exposes.focused?.subscribe(() => {})).toThrow(/dispos/);
+  });
+
+  it('rejects an illegal portable semantic input type before producing native output', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'unsupported-input',setup(def){
         def.event.on('click', (run,event)=>{event.control.requestDefaultActionPrevention();});
@@ -234,8 +344,7 @@ describe('native Web Component semantic source', () => {
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
     const rejected = emitWebComponentSource(parsed.value);
     expect(rejected).toMatchObject({ok: false, diagnostics: [
-      {code: 'PUI3302', category: 'unsupported-input'},
-      {code: 'PUI3302', category: 'unsupported-input'},
+      {code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED', category: 'unsupported-input'},
     ]});
     expect(emitWebComponentSource(parsed.value)).toEqual(rejected);
   });

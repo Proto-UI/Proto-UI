@@ -1,5 +1,6 @@
 import { lstat, mkdir, open, rmdir, unlink } from 'node:fs/promises';
-import type { Stats } from 'node:fs';
+import { constants, type Stats } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import type { CompileResult, CompilerDiagnostic } from './ir';
 
@@ -7,6 +8,18 @@ export interface OutputArtifact {
   path: string;
   contents: string;
   kind: 'source' | 'style' | 'declaration' | 'source-map' | 'manifest';
+}
+
+export interface ArtifactDiff {
+  directory: string;
+  changes: {
+    path: string;
+    status: 'added' | 'removed' | 'modified' | 'unchanged';
+    consumerModified: boolean;
+    currentSha256: string | null;
+    generatedSha256: string | null;
+    recordedSha256: string | null;
+  }[];
 }
 
 export interface ExclusiveOutputFile {
@@ -122,6 +135,88 @@ function validateArtifacts(artifacts: readonly OutputArtifact[]): string | undef
     }
   }
   return undefined;
+}
+
+/** Compare generated candidates with owned files; never mutate or follow artifact symlinks. */
+export async function diffArtifactSet(artifacts: readonly OutputArtifact[], directory: string): Promise<CompileResult<ArtifactDiff>> {
+  const absolute = path.resolve(directory);
+  const location = (filename: string) => ({ file: filename, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 });
+  const reject = (message: string, filename = absolute): CompileResult<ArtifactDiff> => ({ ok: false, diagnostics: [
+    { code: 'PUI5001', category: 'output-conflict', message, span: location(filename) },
+  ] });
+  const problem = validateArtifacts(artifacts);
+  if (problem) return reject(problem);
+  try {
+    const rootStat = await lstat(absolute);
+    if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) return reject('Diff requires an existing real compiler output directory.');
+    async function contents(filename: string): Promise<Buffer | null> {
+      let current = absolute;
+      const directories = [{ filename: absolute, identity: rootStat }];
+      const parts = filename.split('/');
+      for (const part of parts.slice(0, -1)) {
+        current = path.join(current, part);
+        let stat: Stats;
+        try { stat = await lstat(current); }
+        catch (error) { if (errorCode(error) === 'ENOENT') return null; throw error; }
+        if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error(`Diff refuses a non-directory or symbolic-link artifact parent: ${current}`);
+        directories.push({ filename: current, identity: stat });
+      }
+      const target = path.join(current, parts[parts.length - 1]);
+      let before: Stats;
+      try { before = await lstat(target); }
+      catch (error) { if (errorCode(error) === 'ENOENT') return null; throw error; }
+      if (!before.isFile() || before.isSymbolicLink()) throw new Error(`Diff refuses a non-regular or symbolic-link artifact: ${target}`);
+      const file = await open(target, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
+      try {
+        if (!sameIdentity(await file.stat(), before)) throw new Error(`Artifact changed during diff: ${target}`);
+        const data = await file.readFile();
+        for (const parent of directories) if (!sameIdentity(await lstat(parent.filename), parent.identity))
+          throw new Error(`Artifact parent changed during diff: ${parent.filename}`);
+        const after = await file.stat();
+        if (!sameIdentity(await lstat(target), before) || after.size !== before.size || after.mtimeMs !== before.mtimeMs)
+          throw new Error(`Artifact changed during diff: ${target}`);
+        return data;
+      } finally { await file.close(); }
+    }
+    const manifestBytes = await contents('provenance.json');
+    if (!manifestBytes) return reject('Diff requires the compiler-owned provenance.json; arbitrary consumer directories are not baselines.');
+    const manifest: unknown = JSON.parse(manifestBytes.toString('utf8'));
+    if (!manifest || typeof manifest !== 'object' || !('artifacts' in manifest) || !Array.isArray(manifest.artifacts)
+      || !('irVersion' in manifest) || !Number.isSafeInteger(manifest.irVersion) || Number(manifest.irVersion) < 1
+      || !('backend' in manifest) || typeof manifest.backend !== 'string'
+      || !('profile' in manifest) || manifest.profile !== manifest.backend)
+      return reject('Existing provenance is not a compiler artifact ownership manifest.');
+    const recorded = new Map<string, string>();
+    const recordedArtifacts: OutputArtifact[] = [];
+    for (const record of manifest.artifacts) {
+      if (!record || typeof record !== 'object' || typeof record.path !== 'string'
+        || typeof record.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(record.sha256)
+        || typeof record.kind !== 'string' || record.path === 'provenance.json')
+        return reject('Existing provenance contains an invalid artifact ownership record.');
+      recordedArtifacts.push({ path: record.path, contents: '', kind: record.kind as OutputArtifact['kind'] });
+      recorded.set(record.path, record.sha256);
+    }
+    const recordedProblem = validateArtifacts(recordedArtifacts);
+    if (recordedProblem) return reject(recordedProblem);
+    const generated = new Map(artifacts.map((artifact) => [artifact.path, createHash('sha256').update(artifact.contents).digest('hex')]));
+    const names = [...new Set([...recorded.keys(), ...generated.keys()])].sort();
+    const changes: ArtifactDiff['changes'] = [];
+    for (const filename of names) {
+      const data = filename === 'provenance.json' ? manifestBytes : await contents(filename);
+      const currentSha256 = data === null ? null : createHash('sha256').update(data).digest('hex');
+      const generatedSha256 = generated.get(filename) ?? null;
+      const recordedSha256 = recorded.get(filename) ?? null;
+      changes.push({ path: filename,
+        status: currentSha256 === generatedSha256 ? 'unchanged' : currentSha256 === null ? 'added' : generatedSha256 === null ? 'removed' : 'modified',
+        consumerModified: filename !== 'provenance.json' && currentSha256 !== recordedSha256,
+        currentSha256, generatedSha256, recordedSha256,
+      });
+    }
+    if (!sameIdentity(await lstat(absolute), rootStat)) return reject('Output directory changed during diff.');
+    return { ok: true, value: { directory: absolute, changes } };
+  } catch (error) {
+    return reject(`Cannot compare compiler-owned output: ${errorMessage(error)}`);
+  }
 }
 
 async function directoryProblem(directory: OwnedDirectory): Promise<PublicationFailure | undefined> {

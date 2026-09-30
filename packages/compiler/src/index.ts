@@ -1,5 +1,5 @@
 export { parsePrototype } from './parser';
-export { compilePrototype, compileFile, writeCompilation } from './compile';
+export { compilePrototype, compileFile, compilationArtifacts, writeCompilation, diffCompilation } from './compile';
 export type { Compilation, CompileOptions, FileCompileOptions, ExclusiveOutputFile } from './compile';
 export { emitReact } from './react';
 export { emitReactSource } from './react-source';
@@ -18,7 +18,7 @@ export type * from './project';
 export { watchProject } from './watch';
 export type * from './watch';
 export { writeArtifactSet } from './artifact-output';
-export type { OutputArtifact } from './artifact-output';
+export type { OutputArtifact, ArtifactDiff } from './artifact-output';
 export { buildSourceMap } from './source-map';
 export type * from './source-map';
 export { runCompilerCli } from './cli';
