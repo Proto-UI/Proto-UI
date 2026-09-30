@@ -190,7 +190,7 @@ describe('simulated-host same-source Adapter/generated differential journey', ()
     if (!compilation.ok) throw new Error(JSON.stringify(compilation.diagnostics));
     const original = compilation.value.output.code;
     const mutant = original.replace(
-      'if (disabled.get()) {\n        // Source 127:25\n        return;\n      }\n      // Source 128:5\n      run.expose.emit("click");',
+      'run.expose.emit("click");',
       'run.expose.emit("click");\n      run.expose.emit("click");'
     );
     expect(mutant).not.toBe(original);
