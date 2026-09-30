@@ -7,3 +7,5 @@ DCO.md
 # Written by scripts/gpui/generate-*-fixture.mts and verified byte-for-byte by
 # their --check mode, so a formatter rewrite would make the check fail.
 native/gpui/fixtures/
+# Captured conformance evidence is retained with byte-level checksums.
+internal/records/evidence/2026-09-27-compiler-pointer-props/

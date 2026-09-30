@@ -1,0 +1,151 @@
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
+import { button } from '@proto.ui/prototypes-base';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import type { RuntimeLifecycleEvent } from '@proto.ui/runtime';
+import { getLogicalEventRouteSurfaceForTarget } from '../../../../adapters/react/src/platform/instance-tree';
+
+const params = new URL(location.href).searchParams;
+const side = params.get('target');
+if (side !== 'reference' && side !== 'candidate') throw new Error('Choose a target');
+const lifecycle: RuntimeLifecycleEvent[] = [];
+const options = {
+  schedule: (task: () => void) => task(),
+  diagnostics: { onLifecycleEvent: (event: RuntimeLifecycleEvent) => lifecycle.push(event) },
+};
+const component =
+  side === 'reference'
+    ? createReactAdapter(React)(button, options)
+    : (params.get('variant') === 'duplicate-click'
+        ? await import('virtual:pointer-props-duplicate-click')
+        : await import('virtual:emitted-button')
+      ).createComponent(options);
+const stateKeys = ['disabled', 'hovered', 'pressed', 'focused', 'focusVisible'] as const;
+type StateHandle = { get(): boolean };
+type Exposes = Record<(typeof stateKeys)[number], StateHandle>;
+const ref = React.createRef<{ getExposes(): Exposes }>();
+let held: Exposes | null = null;
+let firstOwner: object | null = null;
+let ownerCount = 0;
+const ownerIds = new WeakMap<object, string>();
+let ownerId = 'not-yet-observed';
+let currentStep = 'mount';
+let props: Record<string, unknown> = { disabled: false };
+let stale: HTMLElement | null = null;
+let clicks = 0;
+const outwardEvents: Array<{ name: string; payload: unknown; step: string }> = [];
+const inputs: Array<{ step: string; type: string; trusted: boolean }> = [];
+const host = document.getElementById('pointer-root')!;
+const root = createRoot(host);
+const target = () => host.querySelector<HTMLElement>('[data-pui-root]');
+function render() {
+  flushSync(() =>
+    root.render(
+      React.createElement(
+        component,
+        {
+          ...props,
+          ref,
+          onClick: (payload: unknown) => {
+            clicks += 1;
+            // Preserve void versus non-void payloads instead of dropping undefined in JSON.
+            outwardEvents.push({
+              name: 'click',
+              payload: payload === undefined ? { kind: 'void' } : { kind: 'value', value: payload },
+              step: currentStep,
+            });
+          },
+        },
+        'Activate'
+      )
+    )
+  );
+}
+render();
+(window as unknown as Record<string, unknown>).pointerProbe = {
+  ready() {
+    const exposes = ref.current?.getExposes();
+    const element = target();
+    if (!element || !exposes || stateKeys.some((key) => !exposes[key])) return false;
+    if (!held) {
+      held = Object.fromEntries(stateKeys.map((key) => [key, exposes[key]])) as Exposes;
+      firstOwner = getLogicalEventRouteSurfaceForTarget(element);
+      if (!firstOwner) throw new Error('No actual logical owner token');
+      ownerIds.set(firstOwner, `${side}-owner-${++ownerCount}`);
+      for (const type of ['pointerenter', 'pointerdown', 'pointerup', 'pointerleave', 'click']) {
+        element.addEventListener(type, (event) =>
+          inputs.push({ step: currentStep, type, trusted: event.isTrusted })
+        );
+      }
+    }
+    return true;
+  },
+  step(id: string) {
+    currentStep = id;
+  },
+  setDisabled(value: boolean) {
+    props = { ...props, disabled: value };
+    render();
+  },
+  omitDisabled() {
+    const { disabled: _withdrawn, ...rest } = props;
+    props = rest;
+    render();
+  },
+  dispose() {
+    stale = target();
+    flushSync(() => root.unmount());
+  },
+  staleClick() {
+    if (!stale || stale.isConnected) throw new Error('Expected detached target');
+    stale.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+  },
+  read() {
+    if (!held) throw new Error('Initial handles not captured');
+    const element = target();
+    const exposes = ref.current?.getExposes();
+    const token = element ? getLogicalEventRouteSurfaceForTarget(element) : firstOwner;
+    if (token) {
+      if (!ownerIds.has(token)) ownerIds.set(token, `${side}-owner-${++ownerCount}`);
+      ownerId = ownerIds.get(token)!;
+    }
+    const values = Object.fromEntries(
+      stateKeys.map((key) => {
+        try {
+          return [key, held![key].get()];
+        } catch {
+          return [key, null];
+        }
+      })
+    );
+    const style = element ? getComputedStyle(element) : null;
+    const box = element?.getBoundingClientRect();
+    const hit =
+      box && element
+        ? element.contains(document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2))
+        : false;
+    return {
+      ownerId,
+      data: {
+        ...values,
+        clicks,
+        outwardEvents,
+        inputs,
+        sameOwner: token === firstOwner,
+        sameHandles: Boolean(exposes && stateKeys.every((key) => exposes[key] === held![key])),
+        hasDisabledProp: Object.hasOwn(props, 'disabled'),
+        present: element !== null,
+        ariaDisabled: element?.getAttribute('aria-disabled') ?? null,
+        background: style?.backgroundColor ?? null,
+        opacity: style?.opacity ?? null,
+        hit,
+        refCleared: ref.current === null,
+        staleHandleInvalid: !element && stateKeys.every((key) => values[key] === null),
+        setupCount: lifecycle.filter((event) => event.type === 'instance.setup.exit').length,
+        disposeCount: lifecycle.filter((event) => event.type === 'instance.dispose.done').length,
+        lifecycle: lifecycle.map((event) => ({ ...event })),
+      },
+    };
+  },
+};
