@@ -1,5 +1,5 @@
 /** Private experimental semantic IR. No TypeScript nodes, source snippets, functions or live handles. */
-export const IR_VERSION = 1 as const;
+export const IR_VERSION = 2 as const;
 
 export interface SourceSpan {
   file: string;
@@ -53,6 +53,7 @@ export type Operation =
   | 'expose.event'
   | 'expose.method'
   | 'expose.emit'
+  | 'lifecycle.setPresent'
   | 'lifecycle.onCreated'
   | 'lifecycle.onMounted'
   | 'lifecycle.onUpdated'

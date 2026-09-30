@@ -212,6 +212,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      COMPILER_EVIDENCE_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -252,6 +254,7 @@ jobs:
           # spawning bare `pnpm` see the activated version.
           echo "COREPACK_ENABLE_PROJECT_SPEC=0" >> "$GITHUB_ENV"
           corepack pnpm@"${PNPM_VERSION}" --version
+          echo "COMPILER_EVIDENCE_DIR=${RUNNER_TEMP}/compiler-conformance" >> "$GITHUB_ENV"
 
       - name: Install
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
@@ -266,6 +269,20 @@ jobs:
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test
+
+      - name: Collect bounded compiler criterion case evidence
+        if: ${{ always() }}
+        run: node --import tsx scripts/compiler/collect-conformance.mjs
+
+      - name: Retain compiler traces and browser evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-conformance-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/compiler-conformance
+            !${{ runner.temp }}/compiler-conformance/**/vite-cache/**
+          if-no-files-found: error
 
   release-scan:
     runs-on: ubuntu-latest

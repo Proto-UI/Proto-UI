@@ -70,7 +70,7 @@ describe('checked IR to React runtime-backed source', () => {
 
   it('rejects unknown operations, malformed versions, unbound references and identifier injection', () => {
     const version = buttonIR();
-    Object.assign(version, { schemaVersion: 999 });
+    Object.assign(version, { schemaVersion: 1 });
     expect(validateIR(version)).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI2001' }] });
     const operation = buttonIR();
     const first = operation.setup.body[0];
@@ -113,5 +113,30 @@ describe('checked IR to React runtime-backed source', () => {
       );
     expect(imports.every((specifier) => !specifier.startsWith('.'))).toBe(true);
     expect(parsed.value.hooks).toHaveLength(1);
+  });
+  it('rejects a non-boolean presence argument in caller-supplied IR before emission', () => {
+    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'presence',setup(def){
+        def.lifecycle.onCreated((run)=>{ run.lifecycle.setPresent(false); });
+      }});`);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const registration = parsed.value.setup.body[0];
+    if (registration.kind !== 'effect' || registration.expression.kind !== 'operation')
+      throw new Error('Expected registration');
+    const callback = registration.expression.arguments[0];
+    if (callback.kind !== 'function') throw new Error('Expected callback');
+    const statement = callback.function.body[0];
+    if (statement.kind !== 'effect' || statement.expression.kind !== 'operation')
+      throw new Error('Expected presence effect');
+    statement.expression.arguments[0] = {
+      kind: 'literal',
+      type: 'string',
+      value: 'false',
+      span: statement.span,
+    };
+    expect(emitReact(parsed.value)).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI2002' }],
+    });
   });
 });

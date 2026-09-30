@@ -277,7 +277,55 @@ export class SourceGraph {
     for (const imported of result.imports.values()) {
       if (imported.module.startsWith('.')) this.importedModule(result, imported);
     }
+    // Re-exports participate in ESM linking even when they are not the selected
+    // compiler entry. Load them so diagnostics and source identity cover the
+    // complete runtime module graph rather than only the chosen definition.
+    for (const exported of result.exports.values()) {
+      if (typeof exported !== 'string' && 'module' in exported)
+        this.importedModule(result, exported);
+    }
     return result;
+  }
+
+  /** Reject unresolved static exports, including those outside the selected entry. */
+  validateExports(): void {
+    const resolve = (module: SourceModule, name: string, visiting: Set<string>): void => {
+      const key = `${module.file.fileName}#${name}`;
+      if (visiting.has(key)) rejectNode(module.file, 'PUI1008', 'Cyclic source export.');
+      const exported = module.exports.get(name);
+      if (!exported) rejectNode(module.file, 'PUI1002', `No static ${name} export.`);
+      if (typeof exported !== 'string') {
+        if ('expression' in exported) {
+          const definition = this.definition(module, name);
+          this.descriptor(definition.module, definition.node);
+          return;
+        }
+        visiting.add(key);
+        try {
+          resolve(this.importedModule(module, exported), exported.exported, visiting);
+        } finally {
+          visiting.delete(key);
+        }
+        return;
+      }
+      if (module.declarations.has(exported)) return;
+      const imported = module.imports.get(exported);
+      if (!imported) rejectNode(module.file, 'PUI1002', `No local ${exported} binding.`);
+      if (!imported.module.startsWith('.')) return;
+      visiting.add(key);
+      try {
+        resolve(this.importedModule(module, imported), imported.exported, visiting);
+      } finally {
+        visiting.delete(key);
+      }
+    };
+    for (const module of this.modules.values()) {
+      for (const name of module.exports.keys()) resolve(module, name, new Set());
+      for (const imported of module.imports.values()) {
+        if (imported.module.startsWith('.'))
+          resolve(this.importedModule(module, imported), imported.exported, new Set());
+      }
+    }
   }
 
   private add(

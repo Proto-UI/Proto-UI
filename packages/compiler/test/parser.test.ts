@@ -157,14 +157,6 @@ export default definePrototype({name:'x',setup(def){
       parsePrototype(
         simple.replace(
           'setup(def) {}',
-          'setup(def) { def.lifecycle.onCreated((run)=>run.lifecycle.setPresent(false)); }'
-        )
-      )
-    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
-    expect(
-      parsePrototype(
-        simple.replace(
-          'setup(def) {}',
           "setup(def) { const state=def.state.bool('flag',false); state.set(true); }"
         )
       )
@@ -181,6 +173,89 @@ export default definePrototype({name:'x',setup(def){
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
   });
 
+  it('rejects a missing module reached only through an unselected re-export', () => {
+    const source = `${simple}\nexport { unused } from './missing';`;
+    expect(parsePrototype(source, { fileName: 'entry.proto.ts' })).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1003', category: 'unsupported-input' }],
+    });
+  });
+
+  it('rejects unsupported effects in an unselected re-export dependency', () => {
+    const source = `${simple}\nexport { unused } from './dependency';`;
+    expect(
+      parsePrototype(source, {
+        fileName: 'entry.proto.ts',
+        files: { 'dependency.ts': 'globalThis.changed = true;' },
+      })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
+  });
+
+  it('rejects effectful direct default calls even when another export is selected', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+export const selected = definePrototype({name:'selected',setup(def){}});
+export default globalThis.sideEffect();`;
+    expect(parsePrototype(source, { exportName: 'selected' })).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1002' }],
+    });
+  });
+
+  it('accepts a valid static direct default when another export is selected', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+export const selected = definePrototype({name:'selected',setup(def){}});
+export default definePrototype({name:'unused',setup(def){}});`;
+    expect(parsePrototype(source, { exportName: 'selected' })).toMatchObject({
+      ok: true,
+      value: { name: 'selected' },
+    });
+  });
+
+  it('validates unselected direct default calls reached through a re-export', () => {
+    const source = `${simple}\nexport { unused } from './dependency';`;
+    const dependency = `import {definePrototype} from '@proto.ui/core';
+export const unused = definePrototype({name:'unused',setup(def){}});
+export default definePrototype(globalThis.sideEffect());`;
+    expect(
+      parsePrototype(source, {
+        fileName: 'entry.proto.ts',
+        files: { 'dependency.ts': dependency },
+      })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
+  });
+
+  it('rejects a missing binding from an otherwise present unused local import', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+import {missing} from './dependency';
+export default definePrototype({name:'entry',setup(def){}});`;
+    expect(
+      parsePrototype(source, {
+        fileName: 'entry.proto.ts',
+        files: { 'dependency.ts': 'export interface OnlyAType {}' },
+      })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1002' }] });
+  });
+
+  it('includes a valid unselected re-export in provenance and validates its target name', () => {
+    const source = `${simple}\nexport { unused } from './dependency';`;
+    const dependency = (name: string) =>
+      `import {definePrototype} from '@proto.ui/core'; export const unused = definePrototype({name:'${name}',setup(def){}});`;
+    const options = (text: string) => ({
+      fileName: 'entry.proto.ts',
+      files: { 'dependency.ts': text },
+    });
+    const first = parsePrototype(source, options(dependency('first')));
+    const second = parsePrototype(source, options(dependency('second')));
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    if (!first.ok || !second.ok) throw new Error('Expected both static source graphs to compile');
+    expect(first.value.source.sha256).not.toBe(second.value.source.sha256);
+    expect(parsePrototype(source, options('export interface OnlyAType {}'))).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1002' }],
+    });
+  });
+
   it('accepts independent primitive/control-flow prototypes without matching Button identity', () => {
     const source = `import {definePrototype as prototype} from '@proto.ui/core';
 export default prototype({name:'counter',setup(def){
@@ -193,5 +268,17 @@ export default prototype({name:'counter',setup(def){
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     expect(result.value.exposes).toMatchObject([{ name: 'count', kind: 'state', type: 'number' }]);
     expect(result.value.name).toBe('counter');
+  });
+  it('rejects non-boolean, wrong-arity and setup-time view-presence requests', () => {
+    for (const [body, code] of [
+      ["def.lifecycle.onCreated((run)=>run.lifecycle.setPresent('false'));", 'PUI1006'],
+      ['def.lifecycle.onCreated((run)=>run.lifecycle.setPresent());', 'PUI1006'],
+      ['def.lifecycle.setPresent(false);', 'PUI1004'],
+      ['def.lifecycle.onCreated((run)=>run.lifecycle.dispose());', 'PUI1004'],
+    ]) {
+      expect(
+        parsePrototype(simple.replace('setup(def) {}', `setup(def) { ${body} }`))
+      ).toMatchObject({ ok: false, diagnostics: [{ code }] });
+    }
   });
 });
