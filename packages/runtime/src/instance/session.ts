@@ -63,6 +63,10 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   if (!propsPort) throw new Error('props port not found');
 
+  // Register after author setup watches so Rule styles observe accepted,
+  // net-changed resolved Props at the same callback-safe delivery point.
+  if (rulePort) propsFacade.watchAll(() => rulePort.requestStyleReevaluation());
+
   let instancePhase: InstancePhase = 'setup';
   let mountPhase: MountPhase = 'detached';
   let mountEpoch = 0;
