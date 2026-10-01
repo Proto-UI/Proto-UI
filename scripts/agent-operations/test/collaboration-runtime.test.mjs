@@ -15,7 +15,7 @@ import {
   validateCollaborationRequest,
 } from '../collaboration-runtime.mjs';
 import {
-  applyGitHubCollaborationMutation,
+  applyGitHubCollaborationMutation as applyMutationWithContext,
   collectLiveCollaborationState,
 } from '../collect-live-collaboration-state.mjs';
 import { parseCollaborationCli, runCollaborationCli } from '../collaboration-packet.mjs';
@@ -68,6 +68,18 @@ const assessment = {
     eligibleTaskClasses: ['maintain-collaboration-state'],
   },
 };
+
+function applyGitHubCollaborationMutation(request, preState, options = {}) {
+  return applyMutationWithContext(request, preState, {
+    authorizationContext: {
+      executionMode: 'autonomous',
+      executionModeSource: 'schedule',
+      policy,
+      selfAssessment: assessment,
+    },
+    ...options,
+  });
+}
 
 function seal(request) {
   const value = structuredClone(request);
@@ -563,6 +575,7 @@ test('thread resolution refuses a verified receipt when a new reply races the mu
     expected: { isResolved: false },
     desired: { isResolved: true },
     evidence: [
+      ...base.evidence,
       {
         type: 'review-thread-resolution',
         reference: 'The exact finding is fixed on the target head.',
@@ -625,6 +638,7 @@ test('a thread reply racing the resolution stays at one write and reports the ra
     expected: { isResolved: false },
     desired: { isResolved: true },
     evidence: [
+      ...base.evidence,
       {
         type: 'review-thread-resolution',
         reference: 'The exact finding is fixed on the target head.',
@@ -1080,6 +1094,7 @@ test('a bounded comment can reconcile an unknown outcome through its unique requ
       throw new Error('socket closed');
     },
     collectState() {
+      if (writes === 0) return preState;
       reconciliations += 1;
       return postState;
     },
@@ -1220,6 +1235,7 @@ test('update-branch polls until both the new head and its ancestry are visible',
   };
   const preState = { ...metadataLive(), action: request.action, current };
   const states = [
+    preState, // Final authorization read precedes bounded post-write polling.
     preState,
     {
       ...preState,
@@ -1256,7 +1272,7 @@ test('update-branch polls until both the new head and its ancestry are visible',
     },
   });
 
-  assert.equal(reads, 3);
+  assert.equal(reads, 4);
   assert.deepEqual(waits, [25, 25]);
   assert.equal(result.mutationCount, 1);
   assert.equal(result.reconciliationCount, 0);
@@ -1305,6 +1321,7 @@ test('update-branch stops bounded polling when base or pull-request state change
           },
           collectState() {
             reads += 1;
+            if (reads === 1) return preState;
             return { ...preState, current: { ...current, ...drift } };
           },
           asyncVerificationAttempts: 3,
@@ -1315,7 +1332,7 @@ test('update-branch stops bounded polling when base or pull-request state change
         }),
       /bounded post-write verification polling.*do not retry blindly/
     );
-    assert.equal(reads, 1);
+    assert.equal(reads, 2);
     assert.equal(waits, 0);
   }
 });
@@ -1374,7 +1391,7 @@ test('update-branch polling stops at the configured maximum without another writ
     /bounded post-write verification polling.*do not retry blindly/
   );
   assert.equal(writes, 1);
-  assert.equal(reads, 3);
+  assert.equal(reads, 4);
   assert.equal(waits, 2);
 });
 
@@ -1448,72 +1465,145 @@ test('collaboration CLI is strict and can seal a request without touching GitHub
   }
 });
 
-test('collaboration CLI emits a validated zero-write receipt for an idempotent human-assisted request', () => {
-  const request = seal({
-    ...metadataRequest(),
-    authorizationId: 'explicit-current-user',
-    evidence: [
-      {
-        type: 'current-user-instruction',
-        reference: 'conversation://current-request',
-      },
+for (const scenario of [
+  {
+    name: 'an idempotent human-assisted request',
+    kind: 'no-op',
+    states: [metadataLive({ title: 'New title', updatedAt: '2026-08-27T01:00:09.000Z' })],
+  },
+  {
+    name: 'initial authorization rejection',
+    kind: 'rejected',
+    states: [metadataLive({ state: 'CLOSED' })],
+  },
+  {
+    name: 'final authorization rejection',
+    kind: 'rejected',
+    states: [
+      metadataLive(),
+      metadataLive({ state: 'CLOSED', updatedAt: '2026-08-27T01:00:09.000Z' }),
     ],
-  });
-  const handoff = {
-    schemaVersion: 1,
-    kind: 'proto-ui.skill-handoff',
-    entrypoint: 'development',
-    executionMode: 'human-assisted',
-    executionModeSource: 'current-user',
-    fromId: 'pui-pr',
-    nextSkillId: 'pui-collaborate',
-    artifacts: [
-      { type: 'pull-request-report', reference: 'artifact://pr/509/report' },
-      { type: 'review-input', reference: 'artifact://pr/509/review-input' },
-      { type: 'capability-envelope', reference: 'artifact://capability/current' },
-      { type: 'github-snapshot', reference: 'artifact://github/pr-509' },
-      { type: 'mutation-authorization', reference: 'explicit-current-user' },
-      {
-        type: 'collaboration-request',
-        reference: 'artifact://collaboration/pr-509',
-        digest: `sha256:${request.requestDigest}`,
-      },
-    ],
-    humanGates: [],
-    notes: [],
-  };
-  const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-'));
-  try {
-    const requestPath = join(directory, 'request.json');
-    const handoffPath = join(directory, 'handoff.json');
-    writeFileSync(requestPath, JSON.stringify(request));
-    writeFileSync(handoffPath, JSON.stringify(handoff));
-    const output = runCollaborationCli(
-      ['apply', '--request', requestPath, '--handoff', handoffPath],
-      {
-        collectState() {
-          return metadataLive({
-            title: 'New title',
-            updatedAt: '2026-08-27T01:00:09.000Z',
-          });
+  },
+]) {
+  test(`collaboration CLI emits a validated zero-write receipt for ${scenario.name}`, () => {
+    const request = seal({
+      ...metadataRequest(),
+      authorizationId: 'explicit-current-user',
+      evidence: [{ type: 'current-user-instruction', reference: 'conversation://current-request' }],
+    });
+    const handoff = {
+      schemaVersion: 1,
+      kind: 'proto-ui.skill-handoff',
+      entrypoint: 'development',
+      executionMode: 'human-assisted',
+      executionModeSource: 'current-user',
+      fromId: 'pui-pr',
+      nextSkillId: 'pui-collaborate',
+      artifacts: [
+        { type: 'pull-request-report', reference: 'artifact://pr/509/report' },
+        { type: 'review-input', reference: 'artifact://pr/509/review-input' },
+        { type: 'capability-envelope', reference: 'artifact://capability/current' },
+        { type: 'github-snapshot', reference: 'artifact://github/pr-509' },
+        { type: 'mutation-authorization', reference: 'explicit-current-user' },
+        {
+          type: 'collaboration-request',
+          reference: 'artifact://collaboration/pr-509',
+          digest: `sha256:${request.requestDigest}`,
         },
-        applyMutation() {
-          throw new Error('idempotent CLI path must not invoke the mutation adapter');
-        },
+      ],
+      humanGates: [],
+      notes: [],
+    };
+    const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-'));
+    try {
+      const requestPath = join(directory, 'request.json');
+      const handoffPath = join(directory, 'handoff.json');
+      writeFileSync(requestPath, JSON.stringify(request));
+      writeFileSync(handoffPath, JSON.stringify(handoff));
+      let reads = 0;
+      let writes = 0;
+      const output = runCollaborationCli(
+        ['apply', '--request', requestPath, '--handoff', handoffPath],
+        {
+          collectState() {
+            return scenario.states[Math.min(reads++, scenario.states.length - 1)];
+          },
+          runner() {
+            writes += 1;
+            throw new Error('zero-write path must not invoke the mutation runner');
+          },
+        }
+      );
+      validateCollaborationReceipt(output, request);
+      assert.equal(output.kind, 'proto-ui.collaboration-receipt');
+      assert.equal(output.outcome, scenario.kind);
+      assert.equal(output.mutationCount, 0);
+      assert.equal(writes, 0);
+      assert.equal(output.requestDigest, request.requestDigest);
+      if (scenario.states.length > 1)
+        assert.notEqual(output.preStateDigest, output.postStateDigest);
+      if (scenario.kind === 'rejected') {
+        assert.throws(
+          () => validateCollaborationReceipt({ ...output, mutationCount: 1 }, request),
+          /no-write/
+        );
+        assert.throws(
+          () =>
+            validateCollaborationReceipt(
+              { ...output, verification: 'live-state-matches-desired' },
+              request
+            ),
+          /rejected verification/
+        );
       }
-    );
-    assert.equal(output.kind, 'proto-ui.collaboration-receipt');
-    assert.equal(output.outcome, 'no-op');
-    assert.equal(output.mutationCount, 0);
-    assert.equal(output.requestDigest, request.requestDigest);
-  } finally {
-    rmSync(directory, { recursive: true, force: true });
-  }
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+}
+
+test('the mutation adapter requires execution authorization as well as matching live metadata', () => {
+  const request = metadataRequest();
+  const preState = metadataLive();
+  let writes = 0;
+  const options = {
+    runner() {
+      writes += 1;
+      return '{}';
+    },
+    collectState() {
+      return preState;
+    },
+  };
+  assert.throws(
+    () => applyMutationWithContext(request, preState, options),
+    /execution authorization context/
+  );
+  assert.throws(
+    () =>
+      applyMutationWithContext(request, preState, {
+        ...options,
+        authorizationContext: {
+          executionMode: 'human-assisted',
+          executionModeSource: 'repository-issue',
+          policy,
+        },
+      }),
+    /authorization|source/
+  );
+  assert.equal(writes, 0);
 });
 
-test('each non-metadata collaboration action maps to one exact GitHub mutation primitive', () => {
+function nonMetadataMutationCases() {
   const base = metadataRequest();
-  const cases = [
+  const commentRequest = seal({
+    ...base,
+    action: 'post-bounded-reconciliation-comment',
+    expected: { markerAbsent: true },
+    desired: { body: 'Exact reviewed revision and its remaining gate.' },
+    rationale: 'Publish the authorized bounded reconciliation.',
+  });
+  return [
     {
       name: 'update branch',
       request: seal({
@@ -1702,8 +1792,38 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
       endpoint: 'repos/Proto-UI/Proto-UI/actions/runs/1234/rerun-failed-jobs',
       method: 'POST',
     },
+    {
+      name: 'post comment',
+      request: commentRequest,
+      before: {
+        kind: 'pull-request',
+        number: 509,
+        nodeId: 'PR_node',
+        url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+        state: 'OPEN',
+        authorLogin: 'contributor',
+        updatedAt: UPDATED_AT,
+        headSha: HEAD,
+        markerComment: null,
+      },
+      after: {
+        markerComment: {
+          id: '271',
+          nodeId: 'IC_271',
+          url: 'https://github.com/Proto-UI/Proto-UI/pull/509#issuecomment-271',
+          body: `${commentRequest.desired.body}\n\n${collaborationMarker(commentRequest)}`,
+        },
+      },
+      response: JSON.stringify({ id: 271, node_id: 'IC_271' }),
+      endpoint: 'repos/Proto-UI/Proto-UI/issues/509/comments',
+      method: 'POST',
+      input: { body: `${commentRequest.desired.body}\n\n${collaborationMarker(commentRequest)}` },
+    },
   ];
+}
 
+test('each non-metadata collaboration action maps to one exact GitHub mutation primitive', () => {
+  const cases = nonMetadataMutationCases();
   for (const fixture of cases) {
     const preState = {
       ...metadataLive(),
@@ -1728,13 +1848,7 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
       },
       collectState() {
         collectionCount += 1;
-        return [
-          'resolve-fixed-review-thread',
-          'mark-exact-head-ready-for-review',
-          'request-independent-review',
-        ].includes(fixture.request.action) && collectionCount === 1
-          ? preState
-          : postState;
+        return collectionCount === 1 ? preState : postState;
       },
     });
     assert.equal(calls.length, 1, `${fixture.name} must perform one mutation call`);
@@ -1752,6 +1866,69 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
     assert.equal(result.mutationCount, 1, `${fixture.name} receipt count`);
   }
 });
+
+for (const fixture of nonMetadataMutationCases()) {
+  const changes = [
+    ['viewer identity', (s) => (s.viewerLogin = 'another-actor')],
+    ['permission', (s) => (s.viewerPermission = 'READ')],
+    ['head', (s) => (s.current.headSha = NEXT_HEAD)],
+    ['revision timestamp', (s) => (s.current.updatedAt = '2026-08-27T01:01:00.000Z')],
+  ];
+  if (fixture.name === 'update branch')
+    changes.push(
+      ['base', (s) => (s.current.baseSha = 'd'.repeat(40))],
+      ['maintainer edit permission', (s) => (s.current.maintainerCanModify = false)],
+      ['closed target', (s) => (s.current.state = 'CLOSED')]
+    );
+  if (fixture.name === 'ready for review')
+    changes.push(['closed target', (s) => (s.current.state = 'CLOSED')]);
+  if (fixture.name === 'request reviewer')
+    changes.push(
+      ['incomplete contributors', (s) => (s.current.commitContributorIdentityComplete = false)],
+      ['new contributor', (s) => s.current.commitContributorLogins.push('reviewer')],
+      ['closed target', (s) => (s.current.state = 'CLOSED')]
+    );
+  if (fixture.name === 'resolve thread')
+    changes.push(
+      ['thread identity', (s) => (s.current.threadId = 'PRRT_other')],
+      ['closed target', (s) => (s.current.state = 'CLOSED')]
+    );
+  if (fixture.name === 'post comment')
+    changes.push(['closed target', (s) => (s.current.state = 'CLOSED')]);
+  if (fixture.name === 'rerun failed jobs')
+    changes.push(
+      ['attempt', (s) => (s.current.attempt = 2)],
+      ['successful result', (s) => (s.current.conclusion = 'success')],
+      ['running status', (s) => (s.current.status = 'in_progress')],
+      ['workflow identity', (s) => (s.current.workflowName = 'Untrusted workflow')],
+      ['head repository', (s) => (s.current.headRepositoryId = 'github.com:Other/Repo')]
+    );
+  for (const [name, change] of changes) {
+    test(`${fixture.name} revalidates ${name} immediately before its single write`, () => {
+      const preState = {
+        ...metadataLive(),
+        action: fixture.request.action,
+        current: structuredClone(fixture.before),
+      };
+      const latest = structuredClone(preState);
+      change(latest);
+      let writes = 0;
+      assert.throws(() =>
+        applyGitHubCollaborationMutation(fixture.request, preState, {
+          runner() {
+            writes += 1;
+            return fixture.response;
+          },
+          collectState() {
+            return latest;
+          },
+          asyncVerificationAttempts: 1,
+        })
+      );
+      assert.equal(writes, 0, 'raced authorization must fail before any mutation');
+    });
+  }
+}
 
 test('workflow rerun verification polls until GitHub exposes the advanced attempt', () => {
   const base = metadataRequest();
@@ -1804,7 +1981,7 @@ test('workflow rerun verification polls until GitHub exposes the advanced attemp
     },
     collectState() {
       collections += 1;
-      return collections < 3 ? preState : postState;
+      return collections < 4 ? preState : postState;
     },
     wait() {
       waits += 1;
@@ -1812,9 +1989,40 @@ test('workflow rerun verification polls until GitHub exposes the advanced attemp
   });
 
   assert.equal(result.mutationCount, 1);
-  assert.equal(collections, 3);
+  assert.equal(collections, 4);
   assert.equal(waits, 2);
   assert.equal(result.postState.current.attempt, 2);
+});
+
+test('rerun receipts do not attribute an attempt jump to the single authorized POST', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'rerun failed jobs');
+  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+  let writes = 0;
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(fixture.request, preState, {
+        runner() {
+          writes += 1;
+          return '';
+        },
+        collectState() {
+          return writes === 0
+            ? preState
+            : {
+                ...preState,
+                current: {
+                  ...preState.current,
+                  attempt: 3,
+                  status: 'completed',
+                  conclusion: 'success',
+                },
+              };
+        },
+        asyncVerificationAttempts: 1,
+      }),
+    /attributable next attempt/
+  );
+  assert.equal(writes, 1);
 });
 
 test('live metadata preflight derives credential permission and the exact pull-request state', () => {

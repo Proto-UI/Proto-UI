@@ -31,7 +31,7 @@
     "action": { "$ref": "#/$defs/action" },
     "requestDigest": { "$ref": "#/$defs/hex64" },
     "target": { "$ref": "#/$defs/target" },
-    "outcome": { "enum": ["applied", "no-op"] },
+    "outcome": { "enum": ["applied", "no-op", "rejected"] },
     "mutationCount": { "enum": [0, 1] },
     "reconciliationCount": { "enum": [0, 1] },
     "preStateDigest": { "$ref": "#/$defs/hex64" },
@@ -42,13 +42,17 @@
     },
     "verifiedAt": { "type": "string", "format": "date-time" },
     "verification": {
-      "enum": ["live-state-matches-desired", "idempotency-marker-present"]
+      "enum": [
+        "live-state-matches-desired",
+        "idempotency-marker-present",
+        "live-authorization-rejected"
+      ]
     },
     "note": { "type": "string", "minLength": 1, "maxLength": 2000 }
   },
   "allOf": [
     {
-      "if": { "properties": { "outcome": { "const": "no-op" } } },
+      "if": { "properties": { "outcome": { "enum": ["no-op", "rejected"] } } },
       "then": {
         "properties": {
           "mutationCount": { "const": 0 },
@@ -63,6 +67,15 @@
         "properties": {
           "mutationCount": { "const": 1 },
           "platformObject": { "$ref": "#/$defs/platformObject" }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "outcome": { "const": "rejected" } } },
+      "then": { "properties": { "verification": { "const": "live-authorization-rejected" } } },
+      "else": {
+        "properties": {
+          "verification": { "enum": ["live-state-matches-desired", "idempotency-marker-present"] }
         }
       }
     }

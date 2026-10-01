@@ -19,6 +19,7 @@ import {
 } from './collaboration-runtime.mjs';
 import {
   applyGitHubCollaborationMutation,
+  CollaborationPreWriteRejection,
   collectLiveCollaborationState,
 } from './collect-live-collaboration-state.mjs';
 import {
@@ -127,6 +128,22 @@ function validateExecution(request, args, policy) {
   return { handoff: routed.handoff, selfAssessment, eligibility };
 }
 
+function rejectedReceipt(request, preState, postState, reason) {
+  return buildCollaborationReceipt({
+    request,
+    preState,
+    postState,
+    actor: postState.viewerLogin,
+    outcome: 'rejected',
+    mutationCount: 0,
+    reconciliationCount: 0,
+    platformObject: null,
+    verifiedAt: postState.observedAt,
+    verification: 'live-authorization-rejected',
+    note: reason,
+  });
+}
+
 export function runCollaborationCli(argv, dependencies = {}) {
   const { command, args } = parseCollaborationCli(argv);
   if (command === 'request-digest') {
@@ -162,7 +179,7 @@ export function runCollaborationCli(argv, dependencies = {}) {
     policy,
     selfAssessment: execution.selfAssessment,
   });
-  if (!decision.allowed) return decision;
+  if (!decision.allowed) return rejectedReceipt(request, preState, preState, decision.reason);
 
   if (decision.outcome === 'no-op') {
     return buildCollaborationReceipt({
@@ -184,10 +201,22 @@ export function runCollaborationCli(argv, dependencies = {}) {
   }
 
   const applyMutation = dependencies.applyMutation ?? applyGitHubCollaborationMutation;
-  const applied = applyMutation(request, preState, {
-    collectState,
-    runner: dependencies.runner,
-  });
+  let applied;
+  try {
+    applied = applyMutation(request, preState, {
+      collectState,
+      runner: dependencies.runner,
+      authorizationContext: {
+        executionMode: execution.handoff.executionMode,
+        executionModeSource: execution.handoff.executionModeSource,
+        policy,
+        selfAssessment: execution.selfAssessment,
+      },
+    });
+  } catch (error) {
+    if (!(error instanceof CollaborationPreWriteRejection)) throw error;
+    return rejectedReceipt(request, preState, error.liveState, error.message);
+  }
   return buildCollaborationReceipt({
     request,
     preState,

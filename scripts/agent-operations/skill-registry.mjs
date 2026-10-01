@@ -116,6 +116,7 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
         'mutation',
         'requires',
         'produces',
+        ...(Object.hasOwn(skill, 'conditionalProduces') ? ['conditionalProduces'] : []),
       ],
       label
     );
@@ -169,6 +170,32 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
     );
     assertStringList(skill.requires, `${label}.requires`, { nonempty: true });
     assertStringList(skill.produces, `${label}.produces`, { nonempty: true });
+    if (Object.hasOwn(skill, 'conditionalProduces')) {
+      assert(
+        Array.isArray(skill.conditionalProduces) && skill.conditionalProduces.length > 0,
+        `${label}.conditionalProduces must be a non-empty array`
+      );
+      const conditions = new Set();
+      for (const condition of skill.conditionalProduces) {
+        assertExactKeys(
+          condition,
+          ['whenHumanGate', 'artifact'],
+          `${label}.conditionalProduces item`
+        );
+        assert(
+          policy.attendedDecisionClasses.includes(condition.whenHumanGate),
+          `${label}.conditionalProduces names an unknown attended decision`
+        );
+        assertStringList([condition.artifact], `${label}.conditionalProduces artifact`);
+        const key = `${condition.whenHumanGate}:${condition.artifact}`;
+        assert(!conditions.has(key), `${label}.conditionalProduces duplicates a condition`);
+        assert(
+          !skill.produces.includes(condition.artifact),
+          `${label}.conditionalProduces duplicates an unconditional output`
+        );
+        conditions.add(key);
+      }
+    }
   }
 
   return {
@@ -270,6 +297,14 @@ export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
     );
     assert(!gates.has(gate), `handoff.humanGates duplicates ${gate}`);
     gates.add(gate);
+  }
+  for (const condition of fromLeaf?.conditionalProduces ?? []) {
+    if (gates.has(condition.whenHumanGate)) {
+      assert(
+        artifactTypes.has(condition.artifact),
+        `handoff is missing conditional artifact produced by ${fromLeaf.id}: ${condition.artifact}`
+      );
+    }
   }
   assert(Array.isArray(handoff.notes), 'handoff.notes must be an array');
   for (const note of handoff.notes)

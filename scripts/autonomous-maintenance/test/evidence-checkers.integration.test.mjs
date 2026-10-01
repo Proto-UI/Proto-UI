@@ -64,7 +64,33 @@ test('review packet canonicalization preserves historical review digests', () =>
 
   assert.notEqual(canonicalizeReviewPacket(packet), canonicalizeReviewPacket(historicalMutation));
   assert.equal(canonicalizeReviewPacket(packet), canonicalizeReviewPacket(currentMutation));
-  assert.equal(canonicalizeReviewPacket(packet), canonicalizeReviewPacket(closureMutation));
+  assert.notEqual(canonicalizeReviewPacket(packet), canonicalizeReviewPacket(closureMutation));
+});
+
+test('reviewed content retains every integration eligibility fact and its evidence', () => {
+  const eligibility = {
+    status: 'pending',
+    exactHead: 'pending',
+    trustedCi: 'pending',
+    independentReview: 'satisfied',
+    livePermission: 'pending',
+    dcoOrProvenance: 'pending',
+    repositoryRules: 'pending',
+    idempotency: 'pending',
+    evidence: ['Original inspected evidence'],
+  };
+  const packet = markdownMetadata('Eligibility binding', { integrationEligibility: eligibility });
+  for (const key of Object.keys(eligibility)) {
+    const changed = structuredClone(eligibility);
+    changed[key] = key === 'evidence' ? ['Unreviewed replacement evidence'] : 'changed';
+    assert.notEqual(
+      canonicalizeReviewPacket(packet),
+      canonicalizeReviewPacket(
+        markdownMetadata('Eligibility binding', { integrationEligibility: changed })
+      ),
+      `${key} must remain bound to the independent review`
+    );
+  }
 });
 
 function createFixture(t, { remediation = 'modify', reuseRole = null } = {}) {
@@ -650,6 +676,22 @@ test('review checker recomputes completed packet digests before integration elig
     markdownMetadata('AM-P0-004-F1 remediation review packet', fixture.review, fixture.sections)
   );
 
+  const result = spawnSync(process.execPath, [reviewChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /reviewed-content digest does not match/);
+});
+
+test('an adequate packet cannot replace integration evidence while retaining its reviewed digest', (t) => {
+  const fixture = createFixture(t);
+  fixture.review.integrationEligibility.evidence = ['Unreviewed replacement integration evidence'];
+  writeFile(
+    fixture.root,
+    fixture.reviewPath,
+    markdownMetadata('AM-P0-004-F1 remediation review packet', fixture.review, fixture.sections)
+  );
   const result = spawnSync(process.execPath, [reviewChecker], {
     cwd: fixture.root,
     encoding: 'utf8',

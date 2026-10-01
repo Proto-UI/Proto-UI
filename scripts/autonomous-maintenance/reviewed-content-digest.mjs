@@ -25,9 +25,6 @@ function canonicalizeDigestFields(value) {
   if (Array.isArray(canonical.independentReview?.history)) {
     sentinelDigest(canonical.independentReview.history.at(-1));
   }
-  if (Object.hasOwn(canonical, 'integrationEligibility')) {
-    canonical.integrationEligibility = { status: digestSentinel };
-  }
   return canonical;
 }
 

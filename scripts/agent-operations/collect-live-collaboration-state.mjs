@@ -5,7 +5,7 @@ import {
   parseRepositoryId,
 } from './collect-live-review-input.mjs';
 import {
-  authorizeMetadataCollaborationState,
+  authorizeCollaborationMutation,
   collaborationMarker,
   desiredCollaborationStateSatisfied,
   validateCollaborationRequest,
@@ -512,7 +512,13 @@ function collectVerifiedPostWriteState(request, runner, collectState, options) {
 
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     postState = collectState(request, { runner });
-    if (desiredCollaborationStateSatisfied(request, postState)) return postState;
+    if (desiredCollaborationStateSatisfied(request, postState)) {
+      if (isAsynchronousWorkflowRerun && postState.current.attempt !== request.target.attempt + 1)
+        throw new Error(
+          'workflow rerun advanced beyond the attributable next attempt; do not retry blindly'
+        );
+      return postState;
+    }
     const current = postState.current;
     const canStillConverge = isAsynchronousBranchUpdate
       ? current.state === 'OPEN' && current.baseSha === request.target.baseSha
@@ -535,6 +541,14 @@ function collectVerifiedPostWriteState(request, runner, collectState, options) {
   );
 }
 
+export class CollaborationPreWriteRejection extends Error {
+  constructor(reason, liveState) {
+    super(`desired state was not verified before mutation; do not retry blindly (${reason})`);
+    this.name = 'CollaborationPreWriteRejection';
+    this.liveState = structuredClone(liveState);
+  }
+}
+
 export function applyGitHubCollaborationMutation(request, preState, options = {}) {
   validateCollaborationRequest(request);
   if (desiredCollaborationStateSatisfied(request, preState)) {
@@ -550,59 +564,46 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
   const runner = options.runner ?? execFileSync;
   const collectState = options.collectState ?? collectLiveCollaborationState;
   let rawResponse;
-  // Revalidate the exact authorized state at the mutation boundary: a target
-  // that drifted after the preflight must fail closed before any write.
+  // Every admitted action reuses the complete authorization gate on the last
+  // live read. GitHub does not provide atomic preconditions for every endpoint;
+  // the remaining read-to-write interval is not a server-side CAS guarantee.
+  const context = options.authorizationContext;
+  if (!context || typeof context !== 'object')
+    throw new Error('mutation-boundary execution authorization context is required');
+  const authorizeState = (liveState) =>
+    authorizeCollaborationMutation({
+      request,
+      liveState,
+      executionMode: context.executionMode,
+      executionModeSource: context.executionModeSource,
+      policy: context.policy,
+      selfAssessment: context.selfAssessment ?? null,
+    });
+  const beforeDecision = authorizeState(preState);
+  if (!beforeDecision.allowed || beforeDecision.outcome !== 'mutate')
+    throw new CollaborationPreWriteRejection(beforeDecision.reason, preState);
+  const latestState = collectState(request, { runner });
+  const current = latestState.current ?? {};
+  const preCurrent = preState.current ?? {};
+  const decision = authorizeState(latestState);
+  if (!decision.allowed || decision.outcome !== 'mutate')
+    throw new CollaborationPreWriteRejection(decision.reason, latestState);
   if (
-    [
-      'resolve-fixed-review-thread',
-      'mark-exact-head-ready-for-review',
-      'request-independent-review',
-    ].includes(request.action) ||
-    request.action === 'update-governed-issue-or-pull-request-metadata'
+    latestState.viewerLogin.toLowerCase() !== preState.viewerLogin.toLowerCase() ||
+    latestState.viewerPermission !== preState.viewerPermission ||
+    (current.nodeId ?? null) !== (preCurrent.nodeId ?? null) ||
+    (current.authorLogin?.toLowerCase() ?? null) !==
+      (preCurrent.authorLogin?.toLowerCase() ?? null) ||
+    (request.action === 'request-independent-review' &&
+      JSON.stringify(current.commitContributorLogins) !==
+        JSON.stringify(preCurrent.commitContributorLogins))
   ) {
-    const latestState = collectState(request, { runner });
-    const current = latestState.current ?? {};
-    const preCurrent = preState.current ?? {};
-    if (request.action === 'update-governed-issue-or-pull-request-metadata') {
-      const metadataDecision = authorizeMetadataCollaborationState(request, latestState);
-      if (
-        !metadataDecision.allowed ||
-        metadataDecision.outcome !== 'mutate' ||
-        current.nodeId !== preCurrent.nodeId ||
-        latestState.viewerLogin.toLowerCase() !== preState.viewerLogin.toLowerCase() ||
-        latestState.viewerPermission !== preState.viewerPermission
-      ) {
-        throw new Error(
-          `${request.action} desired state was not verified before mutation; do not retry blindly`
-        );
-      }
-    }
-    const drift =
-      current.updatedAt !== request.target.updatedAt ||
-      (request.action === 'resolve-fixed-review-thread' &&
-        (current.threadUpdatedAt !== request.target.threadUpdatedAt ||
-          current.headSha !== request.target.headSha ||
-          current.isResolved !== request.expected.isResolved)) ||
-      (request.action === 'mark-exact-head-ready-for-review' &&
-        (current.headSha !== request.target.headSha ||
-          current.isDraft !== request.expected.isDraft)) ||
-      (request.action === 'request-independent-review' &&
-        (current.headSha !== request.target.headSha ||
-          JSON.stringify(current.requestedReviewerLogins) !==
-            JSON.stringify(request.expected.requestedReviewerLogins) ||
-          current.commitContributorIdentityComplete !== true ||
-          preCurrent.commitContributorIdentityComplete !== true ||
-          JSON.stringify(current.commitContributorLogins) !==
-            JSON.stringify(preCurrent.commitContributorLogins) ||
-          current.authorLogin?.toLowerCase() !== preCurrent.authorLogin?.toLowerCase() ||
-          latestState.viewerLogin?.toLowerCase() !== preState.viewerLogin?.toLowerCase() ||
-          latestState.viewerPermission !== preState.viewerPermission));
-    if (drift) {
-      throw new Error(
-        `${request.action} desired state was not verified before mutation; do not retry blindly`
-      );
-    }
+    throw new CollaborationPreWriteRejection(
+      'live actor, permission, target or contributor identity changed',
+      latestState
+    );
   }
+
   try {
     const mutationRequest =
       request.action === 'mark-exact-head-ready-for-review'

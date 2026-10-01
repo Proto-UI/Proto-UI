@@ -893,7 +893,7 @@ export function validateCollaborationReceipt(receipt, request = null) {
   string(receipt.authorizationId, 'receipt.authorizationId', { max: 200 });
   assert(COLLABORATION_ACTIONS.includes(receipt.action), 'receipt.action is invalid');
   assert(HEX64.test(receipt.requestDigest), 'receipt.requestDigest is invalid');
-  assert(['applied', 'no-op'].includes(receipt.outcome), 'receipt.outcome is invalid');
+  assert(['applied', 'no-op', 'rejected'].includes(receipt.outcome), 'receipt.outcome is invalid');
   assert([0, 1].includes(receipt.mutationCount), 'receipt.mutationCount is invalid');
   assert([0, 1].includes(receipt.reconciliationCount), 'receipt.reconciliationCount is invalid');
   assert(HEX64.test(receipt.preStateDigest), 'receipt.preStateDigest is invalid');
@@ -901,16 +901,24 @@ export function validateCollaborationReceipt(receipt, request = null) {
   string(receipt.actor, 'receipt.actor', { max: 100 });
   timestamp(receipt.verifiedAt, 'receipt.verifiedAt');
   assert(
-    ['live-state-matches-desired', 'idempotency-marker-present'].includes(receipt.verification),
+    [
+      'live-state-matches-desired',
+      'idempotency-marker-present',
+      'live-authorization-rejected',
+    ].includes(receipt.verification),
     'receipt.verification is invalid'
   );
   string(receipt.note, 'receipt.note', { max: 2_000 });
-  if (receipt.outcome === 'no-op') {
+  assert(
+    (receipt.outcome === 'rejected') === (receipt.verification === 'live-authorization-rejected'),
+    'rejected verification must match a rejected receipt'
+  );
+  if (['no-op', 'rejected'].includes(receipt.outcome)) {
     assert(
       receipt.mutationCount === 0 && receipt.reconciliationCount === 0,
-      'no-op receipt cannot record a mutation or reconciliation'
+      'no-write receipt cannot record a mutation or reconciliation'
     );
-    assert(receipt.platformObject === null, 'no-op receipt platformObject must be null');
+    assert(receipt.platformObject === null, 'no-write receipt platformObject must be null');
   } else {
     assert(receipt.mutationCount === 1, 'applied receipt must record exactly one mutation');
     assert(isObject(receipt.platformObject), 'applied receipt requires a platformObject');

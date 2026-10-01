@@ -14,6 +14,8 @@ description: Independently attempt to falsify one Proto UI autonomous-maintenanc
 
 Route a rejected finding to `pui-record`. Route a confirmed implementation, test, or projection drift whose expected result is already governed to `pui-remediate`. Produce one concentrated `unresolved-product-direction` packet only when available authority leaves materially different semantic or compatibility outcomes open.
 
+The registry always requires `verification-report` and `maintenance-outcome`. It additionally requires `decision-packet` when the handoff declares `unresolved-product-direction`; it does not require a fabricated decision for a governed remediation. The remediation route still requires its separate semantic and mutation authorization artifacts, and an autonomous handoff with an unresolved decision remains terminal.
+
 ## Explicit handoff
 
 Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.

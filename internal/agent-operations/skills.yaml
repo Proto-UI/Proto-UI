@@ -319,7 +319,10 @@ skills:
     taskClass: verify
     mutation: none
     requires: [maintenance-mission, observation-report]
-    produces: [verification-report, decision-packet, maintenance-outcome]
+    produces: [verification-report, maintenance-outcome]
+    conditionalProduces:
+      - whenHumanGate: unresolved-product-direction
+        artifact: decision-packet
   - id: pui-remediate
     entrypoints: [maintenance]
     loadPath: .agents/skills/pui-remediate/SKILL.md
