@@ -59,6 +59,7 @@ fn the_real_peer_runs_a_base_button_over_stdio() {
         instance_id: format!("{SESSION}:instance"),
         prototype_key: "base-button".into(),
         props: Default::default(),
+        parent_session_id: None,
     }))
     .expect("session.open is sent");
 

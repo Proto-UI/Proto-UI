@@ -37,6 +37,7 @@
             }
           ]
         },
+        "style": [],
         "a11y": null
       },
       "expect": {
@@ -86,6 +87,7 @@
             }
           ]
         },
+        "style": [],
         "a11y": null
       },
       "expect": {

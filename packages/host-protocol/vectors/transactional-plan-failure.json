@@ -32,6 +32,7 @@
             }
           ]
         },
+        "style": [],
         "a11y": null
       },
       "expect": {
@@ -81,6 +82,7 @@
             }
           ]
         },
+        "style": [],
         "a11y": null
       },
       "failAllocation": ["l-d"],
@@ -151,6 +153,7 @@
             }
           ]
         },
+        "style": [],
         "a11y": null
       },
       "expect": {

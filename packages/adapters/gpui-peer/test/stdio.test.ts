@@ -34,7 +34,14 @@ describe('gpui peer: stdio process', () => {
     expect(hello.kind).toBe('peer.hello');
     if (hello.kind !== 'peer.hello') return;
     expect(hello.peer.name).toBe(PEER_NAME);
-    expect(hello.bundle.entries).toEqual(['base-button']);
+    expect(hello.bundle.entries).toEqual([
+      'base-button',
+      'base-toggle',
+      'base-switch-root',
+      'base-switch-thumb',
+      'base-tabs-root',
+      'base-tabs-content',
+    ]);
   });
 
   it('opens a session by bundle key and mounts it', async () => {
@@ -115,6 +122,87 @@ describe('gpui peer: stdio process', () => {
     expect(received.at(-1)).toMatchObject({
       kind: 'diagnostic',
       diagnostic: { code: 'unknown-session' },
+    });
+  });
+
+  it('opens a part inside the instance it belongs to, and refuses one whose parent is not open', async () => {
+    const { peer, send, received } = harness();
+    const part = (sessionId: string, parentSessionId: string): HostToPeerMessage => ({
+      kind: 'session.open',
+      sessionId,
+      instanceId: `${sessionId}:instance`,
+      prototypeKey: 'base-switch-thumb',
+      props: {},
+      parentSessionId,
+    });
+    send(part('orphan', 'nobody'));
+    await peer.idle();
+    expect(
+      received.find((m) => m.kind === 'session.opened' && m.sessionId === 'orphan')
+    ).toMatchObject({
+      status: 'failed',
+      diagnostics: [{ code: 'unknown-parent' }],
+    });
+
+    // Inside an instance that provides nothing the thumb needs, its setup fails.
+    send(OPEN);
+    await peer.idle();
+    send(part('stray', 's-1'));
+    await peer.idle();
+    expect(
+      received.find((m) => m.kind === 'session.opened' && m.sessionId === 'stray')
+    ).toMatchObject({
+      status: 'failed',
+      diagnostics: [{ code: 'setup-failed' }],
+    });
+
+    send({ ...OPEN, sessionId: 'root', prototypeKey: 'base-switch-root' });
+    await peer.idle();
+    send(part('thumb', 'root'));
+    await peer.idle();
+    expect(
+      received.find((m) => m.kind === 'session.opened' && m.sessionId === 'thumb')
+    ).toMatchObject({
+      status: 'ok',
+    });
+  });
+
+  it('ends the parts opened inside a session with it, innermost first', async () => {
+    const { peer, send, received } = harness();
+    const open = (sessionId: string, prototypeKey: string, parentSessionId?: string) =>
+      send({
+        kind: 'session.open',
+        sessionId,
+        instanceId: `${sessionId}:instance`,
+        prototypeKey,
+        props: {},
+        ...(parentSessionId ? { parentSessionId } : {}),
+      });
+    open('root', 'base-switch-root');
+    open('thumb', 'base-switch-thumb', 'root');
+    send({ kind: 'session.dispose', sessionId: 'root' });
+    await peer.idle();
+    expect(
+      received.flatMap((message) =>
+        message.kind === 'session.disposed' ? [message.sessionId] : []
+      )
+    ).toEqual(['thumb', 'root']);
+
+    // Neither is open any more, so nothing reaches or opens inside them.
+    send({ kind: 'props.set', sessionId: 'thumb', props: {} });
+    await peer.idle();
+    expect(received.at(-1)).toMatchObject({
+      kind: 'diagnostic',
+      sessionId: 'thumb',
+      diagnostic: { code: 'unknown-session' },
+    });
+    open('thumb-2', 'base-switch-thumb', 'root');
+    await peer.idle();
+    expect(
+      received.find((m) => m.kind === 'session.opened' && m.sessionId === 'thumb-2')
+    ).toMatchObject({
+      status: 'failed',
+      diagnostics: [{ code: 'unknown-parent' }],
     });
   });
 });
