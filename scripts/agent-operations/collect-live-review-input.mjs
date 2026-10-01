@@ -875,7 +875,13 @@ export function submitGitHubMerge(
         throw new Error('post-merge state is inconsistent');
       lastObservation = 'merged state is not yet visible';
     } catch (error) {
-      if (error instanceof MergeHttpReadError && error.status === 429) {
+      if (
+        error instanceof MergeHttpReadError &&
+        (error.status === 429 ||
+          (error.status === 403 &&
+            (Object.hasOwn(error.headers, 'retry-after') ||
+              error.headers['x-ratelimit-remaining'] === '0')))
+      ) {
         try {
           nextDelayMs = Math.max(delayMs, mergeRateLimitDelay(error, ++rateLimitAttempts, now));
           if (!Number.isSafeInteger(nextDelayMs) || nextDelayMs + rateLimitWaitMs > 120_000)

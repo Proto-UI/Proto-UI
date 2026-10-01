@@ -943,7 +943,8 @@ for (const headers of [
 test('rate-limit status comes from HTTP headers, never body or stderr wording', () => {
   for (const error of [
     Object.assign(new Error('HTTP 429'), {
-      stdout: 'HTTP/2.0 403 Forbidden\nRetry-After: 1\r\n\r\n{"message":"HTTP 429"}',
+      stdout:
+        'HTTP/2.0 403 Forbidden\nContent-Type: application/json\r\n\r\n{"message":"HTTP 429"}',
     }),
     Object.assign(new Error('HTTP 502'), {
       stdout: 'HTTP/2.0 200 OK\nContent-Type: application/json\r\n\r\nHTTP 429 unexpected EOF',
@@ -972,7 +973,7 @@ test('rate-limit status comes from HTTP headers, never body or stderr wording', 
 });
 
 for (const code of ['EACCES', 'EPERM', 'ENOBUFS', 'SyntaxError']) {
-  for (const status of [429, 502]) {
+  for (const status of [403, 429, 502]) {
     test(`buffered HTTP ${status} cannot override terminal ${code}`, () => {
       const error =
         code === 'SyntaxError'
@@ -996,6 +997,71 @@ for (const code of ['EACCES', 'EPERM', 'ENOBUFS', 'SyntaxError']) {
       assert.equal(fixture.writes, 1);
     });
   }
+}
+
+for (const [name, headers, expectedWait] of [
+  ['Retry-After', { 'Retry-After': '2' }, 2000],
+  ['primary exhaustion', { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '120' }, 21000],
+]) {
+  for (const endpoint of ['pulls/487', `git/commits/${sha('c')}`]) {
+    test(`header-confirmed 403 ${name} retries only the ${endpoint} verification read`, () => {
+      const fixture = mergeFixture();
+      let limited = false;
+      const waits = [];
+      const runner = (command, args, options) => {
+        if (fixture.writes > 0 && args[1] === `repos/Proto-UI/Proto-UI/${endpoint}` && !limited) {
+          limited = true;
+          throw mergeReadLimit(headers, 403);
+        }
+        return fixture.runner(command, args, options);
+      };
+      const result = submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, runner, {
+        ...fastVerification,
+        now: () => 100000,
+        wait(ms) {
+          waits.push(ms);
+        },
+      });
+      assert.equal(result.merged, true);
+      assert.deepEqual(waits, [expectedWait]);
+      assert.equal(fixture.writes, 1);
+    });
+  }
+}
+
+for (const [status, headers] of [
+  [403, {}],
+  [403, { 'X-RateLimit-Remaining': '10', 'X-RateLimit-Reset': '120' }],
+  [403, { 'X-RateLimit-Reset': '120' }],
+  [403, { 'Retry-After': 'invalid' }],
+  [403, { 'Retry-After': '121' }],
+  [403, { 'X-RateLimit-Remaining': '0' }],
+  [401, { 'Retry-After': '1' }],
+  [404, { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '120' }],
+]) {
+  test(`a denied or unverified HTTP ${status} does not retry: ${JSON.stringify(headers)}`, () => {
+    const error = mergeReadLimit(headers, status);
+    error.stdout = error.stdout.replace(
+      'rate limit',
+      'API rate limit exceeded; Retry-After: 1; X-RateLimit-Remaining: 0'
+    );
+    const fixture = mergeFixture({ after: [error] });
+    const waits = [];
+    assert.throws(
+      () =>
+        submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, fixture.runner, {
+          ...fastVerification,
+          now: () => 100000,
+          wait(ms) {
+            waits.push(ms);
+          },
+        }),
+      /PUT succeeded.*do not repeat the PUT/
+    );
+    assert.deepEqual(waits, []);
+    assert.equal(fixture.postReads, 1);
+    assert.equal(fixture.writes, 1);
+  });
 }
 
 test('an unknown PUT never gains the successful-PUT polling path', () => {
