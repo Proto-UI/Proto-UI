@@ -119,6 +119,29 @@ function normalize(options = {}) {
   return normalizeGithubWebhook({ ...signedDelivery(options), secret, trust });
 }
 
+test('a header-only relabel of the documented review-edited shape is rejected', () => {
+  // The official edited schema has review + pull_request, but no top-level number:
+  // https://github.com/octokit/webhooks/blob/main/payload-schemas/api.github.com/pull_request_review/edited.schema.json
+  // This is a handcrafted field-shape projection signed only with the fixture key,
+  // not a captured production GitHub delivery or a claim about its real signature.
+  const payload = pullRequestPayload({ action: 'edited' });
+  delete payload.number;
+  payload.review = { id: 100, body: 'updated review' };
+  payload.changes = { body: { from: 'previous review' } };
+  const delivery = signedDelivery({ payload, event: 'pull_request_review' });
+  const relabeled = {
+    ...delivery,
+    headers: { ...delivery.headers, 'x-github-event': 'pull_request' },
+  };
+  assert.equal(relabeled.rawBody, delivery.rawBody);
+  assert.equal(relabeled.headers['x-hub-signature-256'], delivery.headers['x-hub-signature-256']);
+  assert.throws(
+    () => normalizeGithubWebhook({ ...relabeled, secret, trust }),
+    /authenticated payload does not identify/
+  );
+  assert.doesNotThrow(() => normalize({ payload: pullRequestPayload({ action: 'edited' }) }));
+});
+
 function emptyState() {
   return {
     schemaVersion: 1,
