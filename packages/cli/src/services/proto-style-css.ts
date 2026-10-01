@@ -200,6 +200,11 @@ const staticUtilities: Record<string, string[]> = {
   'border-ink': ['border-color: var(--pui-foreground);'],
   'border-current': ['border-color: currentColor;'],
   'border-t-transparent': ['border-top-color: transparent;'],
+  // One v0 border-color intent, lowered to the existing declaration vocabulary.
+  'border-[transparent_currentColor_currentColor_currentColor]': [
+    'border-color: currentColor;',
+    'border-top-color: transparent;',
+  ],
   'border-black': ['border-color: #000;'],
   'border-foreground': ['border-color: var(--pui-foreground);'],
   'border-transparent': ['border-color: transparent;'],

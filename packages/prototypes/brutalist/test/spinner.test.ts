@@ -90,8 +90,9 @@ describe('prototypes/brutalist: spinner', () => {
 
     expect(styleContains(element, 'rounded-none')).toBe(true);
     expect(styleContains(element, 'border-2')).toBe(true);
-    expect(styleContains(element, 'border-current')).toBe(true);
-    expect(styleContains(element, 'border-t-transparent')).toBe(true);
+    expect(
+      styleContains(element, 'border-[transparent_currentColor_currentColor_currentColor]')
+    ).toBe(true);
     expect(styleContains(element, 'bg-transparent')).toBe(true);
     expect(styleContains(element, 'animate-spin')).toBe(true);
     expect(styleContains(element, 'rounded-full')).toBe(false);
@@ -109,7 +110,9 @@ describe('prototypes/brutalist: spinner', () => {
 
     // Rotation stays on by default; the open edge is structural, not conditional.
     expect(styleContains(element, 'animate-spin')).toBe(true);
-    expect(styleContains(element, 'border-t-transparent')).toBe(true);
+    expect(
+      styleContains(element, 'border-[transparent_currentColor_currentColor_currentColor]')
+    ).toBe(true);
 
     element.remove();
   });

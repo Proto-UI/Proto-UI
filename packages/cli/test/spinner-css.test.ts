@@ -33,6 +33,19 @@ describe('cli: proto-style-css spinner surface', () => {
     expect(css).toContain('border-color: currentColor;');
   });
 
+  it('projects one four-side color token to the existing currentColor and open-edge declarations', () => {
+    const token = 'border-[transparent_currentColor_currentColor_currentColor]';
+    const css = renderProtoStyleTokenCss([token]);
+    const selector = `:where([data-pui-style~="${token}"])`;
+    expect(css).toContain(selector);
+    const element = document.createElement('span');
+    element.setAttribute('data-pui-style', `border-2 ${token} animate-spin`);
+    expect(element.matches(selector)).toBe(true);
+    expect(css).toContain('border-color: currentColor;');
+    expect(css).toContain('border-top-color: transparent;');
+    expect(css).not.toContain('border-color: transparent currentColor');
+  });
+
   it('keeps pui-enter emission independent of pui-spin', () => {
     const css = renderProtoStyleTokenCss(['animate-spin']);
     expect(css).not.toContain('@keyframes pui-enter');

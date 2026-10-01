@@ -37,6 +37,17 @@ test('a declaration that holds only under a media condition is not recorded', ()
   assert.equal(tokens['animate-spin'].animation, undefined);
 });
 
+test('the Spinner single border-color intent retains the existing native declaration gaps', () => {
+  const tokens = JSON.parse(readFileSync(FIXTURE, 'utf8')).tokens;
+  // Same declarations as the former border-current + border-t-transparent pair.
+  // GPUI still reports currentColor / border-top-color through its explicit
+  // gap inventory; changing token grouping must not invent native support.
+  assert.deepEqual(tokens['border-[transparent_currentColor_currentColor_currentColor]'], {
+    'border-color': 'currentColor',
+    'border-top-color': 'transparent',
+  });
+});
+
 test('a stale fixture fails the check', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'proto-ui-style-fixture-'));
   const copy = path.join(dir, 'style-tokens.json');
