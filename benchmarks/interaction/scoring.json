@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "version": "calibration-v1",
+  "frozen": false,
+  "dimensions": ["behavior", "keyboard", "focus", "accessibility", "lifecycle", "host", "cleanup"],
+  "statuses": ["pass", "fail", "untested", "unsupported", "blocked", "disputed", "ambiguous"],
+  "aggregation": "No composite score. Report each check and dimension separately. A dimension is pass only when every declared check passes; untested checks remain untested.",
+  "severity": {
+    "status": "not-calibrated",
+    "policy": "Do not invent severity or tune it after seeing results; freeze before formal runs."
+  },
+  "oracleConflictPolicy": "Preserve platform, independent journey, and Proto judgments separately. Any applicable conflict is disputed/ambiguous/unsupported and requires independent adjudication; Proto never wins automatically.",
+  "discoveryCategories": [
+    "both",
+    "agent-only-valid",
+    "proto-only",
+    "semantically-equivalent",
+    "missing-from-proto",
+    "ambiguous-disputed",
+    "unsupported-false"
+  ],
+  "repairPolicy": {
+    "calibrationMaxCycles": 0,
+    "formal": "Predeclare the same budget per comparison cell; first-pass and final outcomes remain separate."
+  },
+  "claims": "Handwritten public fixture smoke test only. Passing is not model, Proto conformance, hidden-isolation, screen-reader, generated-target, or full P0 acceptance evidence."
+}

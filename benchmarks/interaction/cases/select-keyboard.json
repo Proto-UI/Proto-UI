@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "select-keyboard",
+  "datasetId": "interaction-benchmark-v0",
+  "split": "development",
+  "origin": "public-calibration",
+  "taskClass": "implementation",
+  "semanticDomain": "html-native-select",
+  "title": "Native reference choice",
+  "requirements": "Build a native HTML select labelled Reference choice, with Alpha (value alpha), Unavailable Beta (value beta, disabled), Gamma (value gamma) and Delta (value delta). Start with Alpha selected and display alpha in an output. Keyboard changes commit enabled options, skip disabled Beta, retain one selected option and synchronize the output. Repeated keyboard round trips keep focus on the control; clicking its visible label restores focus from an outside button. Include a Remove reference fixture button followed by an After fixture button; removing the fixture leaves keyboard navigation to the latter available. This task is limited to native Chromium HTML select semantics, not a custom popup or Proto navigation/commit separation.",
+  "source": {
+    "repository": "https://github.com/Proto-UI/Proto-UI",
+    "sha": "f5bae261491368b586959f1d8b353cf372775221"
+  },
+  "oracleRef": "public-calibration-select-keyboard-v1",
+  "visibility": {
+    "ordinary": [],
+    "knowledge": [
+      {
+        "path": "benchmarks/interaction/materials/select-keyboard-knowledge.txt",
+        "sha256": "be08c48e335b6da3926390ac01fb5b048aaaf3b52ed6c3cef1d526a5fd0325f5"
+      }
+    ],
+    "withheld": [
+      "Evaluator code, check identifiers and expected observations are excluded from the participant packet.",
+      "Final fixture implementations, compiled output and raw evaluator artifacts are excluded.",
+      "Packet filtering is not a secure filesystem, git or network boundary."
+    ]
+  },
+  "oracleLayers": [
+    {
+      "kind": "platform",
+      "status": "calibration-only",
+      "references": [
+        "https://html.spec.whatwg.org/multipage/form-elements.html#the-select-element"
+      ],
+      "note": "Public platform/authoring references for this bounded HTML journey; no independent formal review yet."
+    },
+    {
+      "kind": "independent-journey",
+      "status": "unreviewed",
+      "references": ["scripts/benchmark/browser-calibration.mjs"],
+      "note": "Public black-box calibration journey authored for harness checks; not an independently reviewed hidden oracle."
+    },
+    {
+      "kind": "proto",
+      "status": "unsupported",
+      "references": [
+        "https://github.com/Proto-UI/Proto-UI/blob/f5bae261491368b586959f1d8b353cf372775221/spec/prototypes/P-BASE-SELECT.yaml"
+      ],
+      "note": "Draft source context only. Handwritten HTML calibration does not execute or establish Proto UI conformance. Do not transfer native-select keyboard commit semantics to Proto popup navigation."
+    }
+  ],
+  "evidenceRequirements": [
+    "artifact",
+    "prompt",
+    "manifest",
+    "events",
+    "checks",
+    "screenshot",
+    "trace",
+    "dom",
+    "accessibility"
+  ],
+  "exclusions": [
+    "All compiler/generated-consumer claims",
+    "All model capability or knowledge-value conclusions"
+  ],
+  "limitations": [
+    "Public case has known answers and cannot be promoted to strict blind held-out.",
+    "The coordinator and fixture authors have seen source criteria; they are not blind measured participants.",
+    "Single Chromium host; accessibility snapshot is not assistive-technology testing."
+  ]
+}

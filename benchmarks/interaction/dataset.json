@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "interaction-benchmark-v0",
+  "version": "0.0.0-calibration.1",
+  "status": "draft",
+  "source": {
+    "repository": "https://github.com/Proto-UI/Proto-UI",
+    "sha": "f5bae261491368b586959f1d8b353cf372775221"
+  },
+  "cases": [
+    "benchmarks/interaction/cases/dialog-open-close.json",
+    "benchmarks/interaction/cases/tabs-manual-activation.json",
+    "benchmarks/interaction/cases/select-keyboard.json"
+  ],
+  "scoringPath": "benchmarks/interaction/scoring.json",
+  "formalPolicy": {
+    "minimumIndependentRepeats": 3,
+    "frontierFirst": true,
+    "freezeBeforeEvaluation": true,
+    "requireIndependentOracleReview": true
+  },
+  "limitations": [
+    "P0 development/calibration only. interaction-benchmark-v0 is not frozen.",
+    "No real model participant, strict hidden oracle, compiler output, real Proto consumer, or strategic conclusion.",
+    "Formal execution is disabled until a reviewed external isolation implementation exists."
+  ]
+}

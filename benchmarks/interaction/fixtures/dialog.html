@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Public harness calibration: native dialog</title>
+    <style>
+      body {
+        font: 16px system-ui;
+        margin: 32px;
+      }
+      button,
+      input {
+        font: inherit;
+        margin: 8px;
+        padding: 8px;
+      }
+      :focus-visible {
+        outline: 3px solid #0754c9;
+        outline-offset: 3px;
+      }
+      dialog {
+        border: 2px solid #333;
+        border-radius: 8px;
+        padding: 24px;
+      }
+      dialog::backdrop {
+        background: #0006;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Native dialog calibration</h1>
+    <p>Public, hand-authored browser reference. No Proto component or conformance claim.</p>
+    <main id="fixture" data-calibration-domain="html-native-dialog">
+      <button id="open-dialog" type="button">Open reference dialog</button>
+      <dialog
+        id="reference-dialog"
+        aria-labelledby="dialog-title"
+        aria-describedby="dialog-description"
+      >
+        <h2 id="dialog-title">Reference settings</h2>
+        <p id="dialog-description">A public harness fixture for a modal keyboard journey.</p>
+        <label for="display-name">Display name</label>
+        <input id="display-name" autofocus value="Example" />
+        <button id="cancel-dialog" type="button">Cancel</button>
+        <button id="save-dialog" type="button">Save</button>
+      </dialog>
+    </main>
+    <button id="remove-fixture" type="button">Remove reference fixture</button>
+    <button id="after-fixture" type="button">After fixture</button>
+    <script>
+      // Deliberately small, hand-authored public calibration code, not Proto output.
+      const root = document.querySelector('#fixture');
+      const dialog = document.querySelector('#reference-dialog');
+      document.querySelector('#open-dialog').addEventListener('click', () => dialog.showModal());
+      for (const id of ['cancel-dialog', 'save-dialog']) {
+        document.getElementById(id).addEventListener('click', () => dialog.close());
+      }
+      dialog.addEventListener('keydown', (event) => {
+        if (event.key !== 'Tab') return;
+        const first = document.querySelector('#display-name');
+        const last = document.querySelector('#save-dialog');
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      });
+      document.querySelector('#remove-fixture').addEventListener('click', () => root.remove());
+    </script>
+  </body>
+</html>
