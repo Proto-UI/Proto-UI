@@ -53,6 +53,7 @@ type Step =
       withinWindow: boolean;
       expect: { status: string };
     }
+  | { op: 'detach'; viewEpoch: number; expect: { status: string; releasedLeaseIds: LeaseId[] } }
   | { op: 'dispose'; expect: { status: string; releasedLeaseIds: LeaseId[] } }
   | { op: 'snapshot'; expect: SnapshotExpectation };
 
@@ -127,6 +128,14 @@ function applyStep(model: HostSessionModel, step: Step, label: string): void {
         label
       ).toEqual({ status: step.expect.status });
       return;
+    case 'detach': {
+      const result = model.detachView(step.viewEpoch);
+      expect(
+        { status: result.status, releasedLeaseIds: [...result.releasedLeaseIds] },
+        label
+      ).toEqual(step.expect);
+      return;
+    }
     case 'dispose': {
       const result = model.dispose();
       expect(

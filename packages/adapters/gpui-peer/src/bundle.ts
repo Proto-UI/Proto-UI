@@ -18,6 +18,19 @@ export function createBaseBundle(): PrototypeBundle {
     digest: 'catalog:0.3.0-alpha.1',
     entries: {
       'base-button': () => import('@proto.ui/prototypes-base/button').then((m) => m.default),
+      'base-toggle': () => import('@proto.ui/prototypes-base/toggle').then((m) => m.default),
+      'base-switch-root': () =>
+        import('@proto.ui/prototypes-base/switch').then((m) => m.switchRoot),
+      'base-switch-thumb': () =>
+        import('@proto.ui/prototypes-base/switch').then((m) => m.switchThumb),
+      'base-tabs-root': () => import('@proto.ui/prototypes-base/tabs').then((m) => m.tabsRoot),
+      'base-tabs-list': () => import('@proto.ui/prototypes-base/tabs').then((m) => m.tabsList),
+      'base-tabs-trigger': () =>
+        import('@proto.ui/prototypes-base/tabs').then((m) => m.tabsTrigger),
+      'base-tabs-content': () =>
+        import('@proto.ui/prototypes-base/tabs').then((m) => m.tabsContent),
+      'base-tabs-indicator': () =>
+        import('@proto.ui/prototypes-base/tabs').then((m) => m.tabsIndicator),
     },
   };
 }
