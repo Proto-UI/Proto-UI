@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
+import YAML from 'yaml';
 import { spawnSync } from 'node:child_process';
 import {
   root,
@@ -178,4 +179,27 @@ test('invalid selections and excessive repetition fail before executing', async 
   await assert.rejects(() => dryRun({ output, repeats: 0 }), /integer/);
   await assert.rejects(() => dryRun({ output, repeats: 11 }), /integer/);
   await assert.rejects(() => dryRun({ output, arms: ['blind', 'blind'] }), /Invalid arms/);
+});
+
+// Upload defaults must not silently omit the snapshotted .github workflow.
+test('CI publishes the complete allowlisted archive, including its hidden source path', () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(root, '.github/workflows/interaction-benchmark-calibration.yml'),
+      'utf8'
+    )
+  );
+  const steps = workflow.jobs['public-calibration'].steps;
+  const upload = steps.find((step) => step.uses === 'actions/upload-artifact@v4');
+  assert.equal(upload.with['include-hidden-files'], true);
+  assert.equal(upload.if, 'always()');
+  assert.deepEqual(upload.with.path.trim().split('\n'), [
+    '${{ runner.temp }}/interaction-calibration',
+    '${{ runner.temp }}/interaction-controls',
+  ]);
+  assert.equal(
+    steps.find((step) => step.name === 'Public dry run with repeated packet arms').if,
+    'always()'
+  );
+  assert.equal(workflow.permissions.contents, 'read');
 });

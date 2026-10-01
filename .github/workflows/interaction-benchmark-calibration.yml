@@ -68,5 +68,9 @@ jobs:
           path: |
             ${{ runner.temp }}/interaction-calibration
             ${{ runner.temp }}/interaction-controls
+          # Only the two public calibration directories above are uploaded.
+          # The allowlisted source snapshot includes .github/workflows; dropping
+          # dot-directories would invalidate its sealed inventory after download.
+          include-hidden-files: true
           if-no-files-found: warn
           retention-days: 30
