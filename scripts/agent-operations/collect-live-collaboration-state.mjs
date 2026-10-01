@@ -1,7 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import {
   commitActorIdentity,
-  latestThreadUpdate,
   MAX_LIVE_RESPONSE_BYTES,
   parseRepositoryId,
 } from './collect-live-review-input.mjs';
@@ -11,6 +10,7 @@ import {
   desiredCollaborationStateSatisfied,
   validateCollaborationRequest,
 } from './collaboration-runtime.mjs';
+import { collectThreadRevision } from './thread-revision.mjs';
 
 const VIEWER_QUERY = `
 query ProtoUiCollaborationViewer($owner: String!, $name: String!) {
@@ -53,7 +53,7 @@ query ProtoUiCollaborationThread($threadId: ID!) {
         repository { nameWithOwner }
       }
       comments(first: 100) {
-        nodes { databaseId updatedAt }
+        nodes { databaseId author { login } body updatedAt }
         pageInfo { hasNextPage }
       }
     }
@@ -318,6 +318,89 @@ function normalizeWorkflowPath(value) {
   return value.startsWith('/') ? value.slice(1) : value;
 }
 
+function collectThreadCurrent(repositoryId, target, runner) {
+  const payload = graphql(runner, THREAD_QUERY, { threadId: target.threadId });
+  if (payload?.errors !== undefined && (!Array.isArray(payload.errors) || payload.errors.length)) {
+    throw new Error(
+      'live review thread collection returned GraphQL errors; re-collect before resolution'
+    );
+  }
+  const thread = payload?.data?.node;
+  const pull = thread?.pullRequest;
+  if (!thread || !pull) {
+    throw new Error('live review thread response is missing its thread or pull-request node');
+  }
+  if (thread.id !== target.threadId) {
+    throw new Error('live review thread response does not match the exact thread target');
+  }
+  if (
+    pull.number !== target.number ||
+    repositoryIdFromNameWithOwner(pull.repository?.nameWithOwner) !== repositoryId
+  ) {
+    throw new Error('live review thread response does not bind to the exact pull request');
+  }
+  if (
+    typeof thread.isResolved !== 'boolean' ||
+    typeof thread.isOutdated !== 'boolean' ||
+    !['OPEN', 'CLOSED', 'MERGED'].includes(pull.state) ||
+    typeof pull.headRefOid !== 'string' ||
+    !/^[a-f0-9]{40,64}$/.test(pull.headRefOid) ||
+    typeof pull.updatedAt !== 'string' ||
+    !/^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$/.test(
+      pull.updatedAt
+    ) ||
+    !Number.isFinite(Date.parse(pull.updatedAt))
+  ) {
+    throw new Error('live review thread response carries malformed thread or pull-request state');
+  }
+  return {
+    kind: 'review-thread',
+    number: pull.number,
+    nodeId: null,
+    url: null,
+    state: asUpperState(pull.state),
+    authorLogin: pull.author?.login ?? null,
+    updatedAt: pull.updatedAt,
+    headSha: pull.headRefOid,
+    threadId: thread.id,
+    ...collectThreadRevision(thread),
+    isResolved: thread.isResolved,
+    isOutdated: thread.isOutdated,
+  };
+}
+
+// Read-only authoring entry point: collect a target before request-digest exists.
+// It never upgrades, seals, or overwrites an existing request.
+export function collectLiveThreadRevisionTarget({ repositoryId, number, threadId }, options = {}) {
+  if (
+    typeof repositoryId !== 'string' ||
+    !/^github\.com:[^/\s]+\/[^/\s]+$/.test(repositoryId) ||
+    !Number.isSafeInteger(number) ||
+    number <= 0 ||
+    typeof threadId !== 'string' ||
+    !threadId.trim() ||
+    threadId.length > 200
+  ) {
+    throw new Error(
+      'thread-revision requires an exact repository, positive pull-request number, and thread ID'
+    );
+  }
+  const observedAt = (options.now ?? (() => new Date()))().toISOString();
+  const current = collectThreadCurrent(
+    repositoryId,
+    { number, threadId },
+    options.runner ?? execFileSync
+  );
+  const { kind, updatedAt, headSha, threadUpdatedAt, threadRevisionDigest } = current;
+  return {
+    repositoryId,
+    observedAt,
+    target: { kind, number, updatedAt, headSha, threadId, threadUpdatedAt, threadRevisionDigest },
+    isResolved: current.isResolved,
+    isOutdated: current.isOutdated,
+  };
+}
+
 export function collectLiveCollaborationState(request, options = {}) {
   validateCollaborationRequest(request);
   const runner = options.runner ?? execFileSync;
@@ -381,36 +464,7 @@ export function collectLiveCollaborationState(request, options = {}) {
       ...contributors,
     };
   } else if (action === 'resolve-fixed-review-thread') {
-    const payload = graphql(runner, THREAD_QUERY, { threadId: request.target.threadId });
-    const thread = payload?.data?.node;
-    const pull = thread?.pullRequest;
-    if (!thread || !pull) {
-      throw new Error('live review thread response is missing its thread or pull-request node');
-    }
-    if (thread.id !== request.target.threadId) {
-      throw new Error('live review thread response does not match the exact thread target');
-    }
-    if (
-      pull.number !== request.target.number ||
-      repositoryIdFromNameWithOwner(pull.repository?.nameWithOwner) !== request.repositoryId
-    ) {
-      throw new Error('live review thread response does not bind to the exact pull request');
-    }
-    const threadUpdatedAt = latestThreadUpdate(thread);
-    current = {
-      kind: 'review-thread',
-      number: pull.number,
-      nodeId: null,
-      url: null,
-      state: asUpperState(pull.state),
-      authorLogin: pull.author?.login ?? null,
-      updatedAt: pull.updatedAt,
-      headSha: pull.headRefOid,
-      threadId: thread.id,
-      threadUpdatedAt,
-      isResolved: thread.isResolved === true,
-      isOutdated: thread.isOutdated === true,
-    };
+    current = collectThreadCurrent(request.repositoryId, request.target, runner);
   } else if (action === 'rerun-exact-trusted-workflow') {
     const { owner, name } = parseRepositoryId(request.repositoryId);
     const workflow = rest(runner, `repos/${owner}/${name}/actions/runs/${request.target.runId}`);

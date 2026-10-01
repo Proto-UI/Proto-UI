@@ -24,7 +24,13 @@ function fixture(action) {
     number: 509,
     updatedAt: UPDATED_AT,
     headSha: HEAD,
-    ...(ready ? {} : { threadId: nodeId, threadUpdatedAt: UPDATED_AT }),
+    ...(ready
+      ? {}
+      : {
+          threadId: nodeId,
+          threadUpdatedAt: UPDATED_AT,
+          threadRevisionDigest: `sha256:${'d'.repeat(64)}`,
+        }),
   };
   const request = {
     schemaVersion: 1,

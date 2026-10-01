@@ -21,6 +21,7 @@ import {
   applyGitHubCollaborationMutation,
   CollaborationPreWriteRejection,
   collectLiveCollaborationState,
+  collectLiveThreadRevisionTarget,
 } from './collect-live-collaboration-state.mjs';
 import {
   evaluateSkillEligibility,
@@ -37,6 +38,7 @@ const POLICY_PATH = new URL(
 function usage() {
   return [
     'Usage:',
+    '  pnpm agent:collaborate -- thread-revision --repository <github.com:owner/repo> --pull-request <number> --thread <thread-id>',
     '  pnpm agent:collaborate -- request-digest --request <request.json>',
     '  pnpm agent:collaborate -- validate --request <request.json> --handoff <handoff.json> [--assessment <result.json>]',
     '  pnpm agent:collaborate -- apply --request <request.json> --handoff <handoff.json> [--assessment <result.json>]',
@@ -46,6 +48,7 @@ function usage() {
 }
 
 const OPTIONS = new Map([
+  ['thread-revision', new Set(['--repository', '--pull-request', '--thread'])],
   ['request-digest', new Set(['--request'])],
   ['validate', new Set(['--request', '--handoff', '--assessment'])],
   ['apply', new Set(['--request', '--handoff', '--assessment'])],
@@ -146,6 +149,19 @@ function rejectedReceipt(request, preState, postState, reason) {
 
 export function runCollaborationCli(argv, dependencies = {}) {
   const { command, args } = parseCollaborationCli(argv);
+  if (command === 'thread-revision') {
+    const number = args.get('--pull-request');
+    if (!/^[1-9]\d*$/.test(number ?? ''))
+      throw new Error('--pull-request must be a positive integer');
+    return collectLiveThreadRevisionTarget(
+      {
+        repositoryId: args.get('--repository'),
+        number: Number(number),
+        threadId: args.get('--thread'),
+      },
+      { runner: dependencies.runner, now: dependencies.now }
+    );
+  }
   if (command === 'request-digest') {
     const draft = readJson(args.get('--request'), '--request');
     const request = {

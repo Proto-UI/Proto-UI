@@ -57,5 +57,20 @@
     "rationale": { "type": "string", "minLength": 1, "maxLength": 2000 },
     "humanGates": { "const": [] }
   },
-  "description": "Action-specific target, expected, and desired shapes are validated by scripts/agent-operations/collaboration-runtime.mjs before any live collection or mutation. requestDigest is the SHA-256 of the canonical request with requestDigest omitted."
+  "allOf": [
+    {
+      "if": { "properties": { "action": { "const": "resolve-fixed-review-thread" } } },
+      "then": {
+        "properties": {
+          "target": {
+            "required": ["threadRevisionDigest"],
+            "properties": {
+              "threadRevisionDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "description": "Action-specific target, expected, and desired shapes are validated by scripts/agent-operations/collaboration-runtime.mjs before any live collection or mutation. requestDigest is the SHA-256 of the canonical request with requestDigest omitted. Thread targets require a freshly collected threadRevisionDigest; older requests must be re-collected and authored anew, never silently upgraded."
 }

@@ -52,6 +52,10 @@
   },
   "allOf": [
     {
+      "if": { "properties": { "action": { "const": "resolve-fixed-review-thread" } } },
+      "then": { "properties": { "target": { "$ref": "#/$defs/threadTarget" } } }
+    },
+    {
       "if": { "properties": { "outcome": { "enum": ["no-op", "rejected"] } } },
       "then": {
         "properties": {
@@ -120,14 +124,23 @@
     "threadTarget": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["kind", "number", "updatedAt", "headSha", "threadId", "threadUpdatedAt"],
+      "required": [
+        "kind",
+        "number",
+        "updatedAt",
+        "headSha",
+        "threadId",
+        "threadUpdatedAt",
+        "threadRevisionDigest"
+      ],
       "properties": {
         "kind": { "const": "review-thread" },
         "number": { "type": "integer", "minimum": 1 },
         "updatedAt": { "type": "string", "format": "date-time" },
         "headSha": { "$ref": "#/$defs/sha" },
         "threadId": { "type": "string", "minLength": 1, "maxLength": 200 },
-        "threadUpdatedAt": { "type": "string", "format": "date-time" }
+        "threadUpdatedAt": { "type": "string", "format": "date-time" },
+        "threadRevisionDigest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
       }
     },
     "workflowTarget": {

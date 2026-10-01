@@ -19,12 +19,20 @@ import {
   collectLiveCollaborationState,
 } from '../collect-live-collaboration-state.mjs';
 import { parseCollaborationCli, runCollaborationCli } from '../collaboration-packet.mjs';
+import { collectThreadRevision } from '../thread-revision.mjs';
 
 const HEAD = 'a'.repeat(40);
 const NEXT_HEAD = 'b'.repeat(40);
 const BASE = 'c'.repeat(40);
 const REQUESTED_AT = '2026-08-27T01:00:00.000Z';
 const UPDATED_AT = '2026-08-27T00:59:00.000Z';
+const THREAD_COMMENTS = [
+  { databaseId: 1, author: { login: 'reviewer' }, body: 'Finding', updatedAt: UPDATED_AT },
+];
+const THREAD_REVISION = collectThreadRevision({
+  id: 'PRRT_thread',
+  comments: { nodes: THREAD_COMMENTS, pageInfo: { hasNextPage: false } },
+}).threadRevisionDigest;
 
 const policy = {
   bands: {
@@ -587,6 +595,7 @@ test('thread resolution requires evidence and the exact unresolved thread revisi
       headSha: HEAD,
       threadId: 'PRRT_thread',
       threadUpdatedAt: UPDATED_AT,
+      threadRevisionDigest: THREAD_REVISION,
     },
     expected: { isResolved: false },
     desired: { isResolved: true },
@@ -607,6 +616,7 @@ test('thread collection binds the GraphQL node to the exact pull request', () =>
       headSha: HEAD,
       threadId: 'PRRT_thread',
       threadUpdatedAt: UPDATED_AT,
+      threadRevisionDigest: THREAD_REVISION,
     },
     expected: { isResolved: false },
     desired: { isResolved: true },
@@ -628,7 +638,7 @@ test('thread collection binds the GraphQL node to the exact pull request', () =>
           repository: { nameWithOwner: repository },
         },
         comments: {
-          nodes: [{ updatedAt: UPDATED_AT }],
+          nodes: THREAD_COMMENTS,
           pageInfo: { hasNextPage: false },
         },
       },
@@ -655,6 +665,7 @@ test('thread collection binds the GraphQL node to the exact pull request', () =>
     headSha: HEAD,
     threadId: 'PRRT_thread',
     threadUpdatedAt: UPDATED_AT,
+    threadRevisionDigest: THREAD_REVISION,
     isResolved: false,
     isOutdated: false,
   });
@@ -683,6 +694,7 @@ test('thread resolution refuses a verified receipt when a new reply races the mu
       headSha: HEAD,
       threadId: 'PRRT_thread',
       threadUpdatedAt: UPDATED_AT,
+      threadRevisionDigest: THREAD_REVISION,
     },
     expected: { isResolved: false },
     desired: { isResolved: true },
@@ -706,6 +718,7 @@ test('thread resolution refuses a verified receipt when a new reply races the mu
     headSha: HEAD,
     threadId: 'PRRT_thread',
     threadUpdatedAt: UPDATED_AT,
+    threadRevisionDigest: THREAD_REVISION,
     isResolved: false,
     isOutdated: false,
   };
@@ -746,6 +759,7 @@ test('a thread reply racing the resolution stays at one write and reports the ra
       headSha: HEAD,
       threadId: 'PRRT_thread',
       threadUpdatedAt: UPDATED_AT,
+      threadRevisionDigest: THREAD_REVISION,
     },
     expected: { isResolved: false },
     desired: { isResolved: true },
@@ -769,6 +783,7 @@ test('a thread reply racing the resolution stays at one write and reports the ra
     headSha: HEAD,
     threadId: 'PRRT_thread',
     threadUpdatedAt: UPDATED_AT,
+    threadRevisionDigest: THREAD_REVISION,
     isResolved: false,
     isOutdated: false,
   };
@@ -1871,6 +1886,7 @@ function nonMetadataMutationCases() {
           headSha: HEAD,
           threadId: 'PRRT_thread',
           threadUpdatedAt: UPDATED_AT,
+          threadRevisionDigest: THREAD_REVISION,
         },
         expected: { isResolved: false },
         desired: { isResolved: true },
@@ -1893,6 +1909,7 @@ function nonMetadataMutationCases() {
         headSha: HEAD,
         threadId: 'PRRT_thread',
         threadUpdatedAt: UPDATED_AT,
+        threadRevisionDigest: THREAD_REVISION,
         isResolved: false,
         isOutdated: false,
       },

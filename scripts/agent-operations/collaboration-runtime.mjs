@@ -209,9 +209,21 @@ function validateRequestAction(request) {
       'reviewer is already present in the expected state'
     );
   } else if (action === 'resolve-fixed-review-thread') {
+    assert(
+      target?.threadRevisionDigest !== undefined,
+      'request.target.threadRevisionDigest is required; re-collect the thread revision before sealing a new request'
+    );
     exactKeys(
       target,
-      ['kind', 'number', 'updatedAt', 'headSha', 'threadId', 'threadUpdatedAt'],
+      [
+        'kind',
+        'number',
+        'updatedAt',
+        'headSha',
+        'threadId',
+        'threadUpdatedAt',
+        'threadRevisionDigest',
+      ],
       'request.target'
     );
     assert(target.kind === 'review-thread', 'thread-resolution target kind is invalid');
@@ -221,6 +233,10 @@ function validateRequestAction(request) {
     );
     timestamp(target.updatedAt, 'request.target.updatedAt');
     timestamp(target.threadUpdatedAt, 'request.target.threadUpdatedAt');
+    assert(
+      typeof target.threadRevisionDigest === 'string' && DIGEST.test(target.threadRevisionDigest),
+      'request.target.threadRevisionDigest is invalid'
+    );
     sha(target.headSha, 'request.target.headSha');
     string(target.threadId, 'request.target.threadId', { max: 200 });
     exactKeys(expected, ['isResolved'], 'request.expected');
@@ -589,6 +605,7 @@ export function desiredCollaborationStateSatisfied(request, liveState) {
       current.headSha === request.target.headSha &&
       current.threadId === request.target.threadId &&
       current.threadUpdatedAt === request.target.threadUpdatedAt &&
+      current.threadRevisionDigest === request.target.threadRevisionDigest &&
       current.isResolved === true
     );
   }
@@ -781,6 +798,12 @@ export function authorizeCollaborationMutation({
     if (current.threadUpdatedAt !== request.target.threadUpdatedAt) {
       return rejected(request, 'live review-thread revision is stale');
     }
+    if (current.threadRevisionDigest !== request.target.threadRevisionDigest) {
+      return rejected(
+        request,
+        'live review-thread comment revision is stale or missing; re-collect before resolution'
+      );
+    }
     if (current.isResolved === true)
       return noOp(request, 'exact review thread is already resolved');
     if (current.updatedAt !== request.target.updatedAt) {
@@ -901,6 +924,13 @@ export function validateCollaborationReceipt(receipt, request = null) {
   assert(REPOSITORY_ID.test(receipt.repositoryId), 'receipt.repositoryId is invalid');
   string(receipt.authorizationId, 'receipt.authorizationId', { max: 200 });
   assert(COLLABORATION_ACTIONS.includes(receipt.action), 'receipt.action is invalid');
+  if (receipt.action === 'resolve-fixed-review-thread') {
+    assert(
+      typeof receipt.target?.threadRevisionDigest === 'string' &&
+        DIGEST.test(receipt.target.threadRevisionDigest),
+      'receipt.target.threadRevisionDigest is required and must be valid'
+    );
+  }
   assert(HEX64.test(receipt.requestDigest), 'receipt.requestDigest is invalid');
   assert(['applied', 'no-op', 'rejected'].includes(receipt.outcome), 'receipt.outcome is invalid');
   assert([0, 1].includes(receipt.mutationCount), 'receipt.mutationCount is invalid');
