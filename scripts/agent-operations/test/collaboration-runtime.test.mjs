@@ -780,6 +780,42 @@ test('metadata PATCH fails closed when the target drifts at the mutation boundar
   assert.equal(writes, 0);
 });
 
+for (const [name, change] of [
+  ['head', (live) => (live.current.headSha = NEXT_HEAD)],
+  ['title', (live) => (live.current.title = 'Concurrent title')],
+  ['body', (live) => (live.current.body = 'Concurrent body')],
+  ['labels', (live) => (live.current.labels = ['concurrent-label'])],
+  ['assignees', (live) => (live.current.assignees = ['another-maintainer'])],
+  ['milestone', (live) => (live.current.milestoneNumber = 2)],
+  ['closed target', (live) => (live.current.state = 'CLOSED')],
+  ['target node', (live) => (live.current.nodeId = 'PR_replacement')],
+  ['target number', (live) => (live.current.number = 510)],
+  ['viewer identity', (live) => (live.viewerLogin = 'another-maintainer')],
+  ['viewer permission', (live) => (live.viewerPermission = 'READ')],
+  ['desired label availability', (live) => (live.current.desiredLabelsExist = false)],
+]) {
+  test(`metadata PATCH rejects ${name} drift even when updatedAt is unchanged`, () => {
+    const request = metadataRequest();
+    const preState = metadataLive();
+    const latestState = structuredClone(preState);
+    change(latestState);
+    assert.equal(latestState.current.updatedAt, preState.current.updatedAt);
+    let writes = 0;
+    assert.throws(() =>
+      applyGitHubCollaborationMutation(request, preState, {
+        runner() {
+          writes += 1;
+          return JSON.stringify({});
+        },
+        collectState() {
+          return latestState;
+        },
+      })
+    );
+    assert.equal(writes, 0, 'changed live state must be rejected before the mutation runner');
+  });
+}
+
 test('review requests revalidate identity and exact-head state before writing', () => {
   const base = metadataRequest();
   const request = seal({

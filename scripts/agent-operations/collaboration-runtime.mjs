@@ -603,6 +603,48 @@ export function desiredCollaborationStateSatisfied(request, liveState) {
   );
 }
 
+// Shared live-state gate; execution authorization is checked separately by the
+// caller before entering the mutation workflow.
+export function authorizeMetadataCollaborationState(request, liveState) {
+  validateLiveCommon(liveState, request);
+  assert(
+    request.action === 'update-governed-issue-or-pull-request-metadata',
+    'metadata state gate requires a metadata request'
+  );
+  const current = liveState.current;
+  const changesGovernedProse =
+    request.desired.title !== request.expected.title ||
+    request.desired.body !== request.expected.body;
+  const allowedPermissions = changesGovernedProse
+    ? ['WRITE', 'MAINTAIN', 'ADMIN']
+    : ['TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'];
+  if (!allowedPermissions.includes(liveState.viewerPermission)) {
+    return rejected(
+      request,
+      changesGovernedProse
+        ? 'live credential lacks write permission for title or body changes'
+        : 'live credential lacks triage permission for reversible metadata changes'
+    );
+  }
+  validateCurrentIdentity(current, request.target);
+  const closed = requireOpen(request, current);
+  if (closed) return closed;
+  if (!targetHeadMatches(request, current)) return rejected(request, 'live head SHA is stale');
+  if (current.desiredLabelsExist !== true) {
+    return rejected(request, 'desired metadata contains a label that does not exist');
+  }
+  if (equalMetadata(current, request.desired)) {
+    return noOp(request, 'desired metadata state is already live');
+  }
+  if (current.updatedAt !== request.target.updatedAt) {
+    return rejected(request, 'live target updatedAt is stale');
+  }
+  if (!equalMetadata(current, request.expected)) {
+    return rejected(request, 'live metadata does not match the exact expected state');
+  }
+  return mutate(request);
+}
+
 export function authorizeCollaborationMutation({
   request,
   liveState,
@@ -625,37 +667,7 @@ export function authorizeCollaborationMutation({
   const current = liveState.current;
   const action = request.action;
   if (action === 'update-governed-issue-or-pull-request-metadata') {
-    const changesGovernedProse =
-      request.desired.title !== request.expected.title ||
-      request.desired.body !== request.expected.body;
-    const allowedPermissions = changesGovernedProse
-      ? ['WRITE', 'MAINTAIN', 'ADMIN']
-      : ['TRIAGE', 'WRITE', 'MAINTAIN', 'ADMIN'];
-    if (!allowedPermissions.includes(liveState.viewerPermission)) {
-      return rejected(
-        request,
-        changesGovernedProse
-          ? 'live credential lacks write permission for title or body changes'
-          : 'live credential lacks triage permission for reversible metadata changes'
-      );
-    }
-    validateCurrentIdentity(current, request.target);
-    const closed = requireOpen(request, current);
-    if (closed) return closed;
-    if (!targetHeadMatches(request, current)) return rejected(request, 'live head SHA is stale');
-    if (current.desiredLabelsExist !== true) {
-      return rejected(request, 'desired metadata contains a label that does not exist');
-    }
-    if (equalMetadata(current, request.desired)) {
-      return noOp(request, 'desired metadata state is already live');
-    }
-    if (current.updatedAt !== request.target.updatedAt) {
-      return rejected(request, 'live target updatedAt is stale');
-    }
-    if (!equalMetadata(current, request.expected)) {
-      return rejected(request, 'live metadata does not match the exact expected state');
-    }
-    return mutate(request);
+    return authorizeMetadataCollaborationState(request, liveState);
   }
 
   if (!['WRITE', 'MAINTAIN', 'ADMIN'].includes(liveState.viewerPermission)) {

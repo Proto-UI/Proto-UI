@@ -5,6 +5,7 @@ import {
   parseRepositoryId,
 } from './collect-live-review-input.mjs';
 import {
+  authorizeMetadataCollaborationState,
   collaborationMarker,
   desiredCollaborationStateSatisfied,
   validateCollaborationRequest,
@@ -562,6 +563,20 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     const latestState = collectState(request, { runner });
     const current = latestState.current ?? {};
     const preCurrent = preState.current ?? {};
+    if (request.action === 'update-governed-issue-or-pull-request-metadata') {
+      const metadataDecision = authorizeMetadataCollaborationState(request, latestState);
+      if (
+        !metadataDecision.allowed ||
+        metadataDecision.outcome !== 'mutate' ||
+        current.nodeId !== preCurrent.nodeId ||
+        latestState.viewerLogin.toLowerCase() !== preState.viewerLogin.toLowerCase() ||
+        latestState.viewerPermission !== preState.viewerPermission
+      ) {
+        throw new Error(
+          `${request.action} desired state was not verified before mutation; do not retry blindly`
+        );
+      }
+    }
     const drift =
       current.updatedAt !== request.target.updatedAt ||
       (request.action === 'resolve-fixed-review-thread' &&
