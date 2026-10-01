@@ -8,7 +8,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
-> Availability: `@proto.ui/prototypes-brutalist@0.3.0-alpha.1` is unpublished. Lifecycle: [P-BRUTALIST-SPINNER](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SPINNER.yaml) remains `draft`; this page describes the currently implemented 0.3.0-alpha.1 surface, not an active protocol guarantee.
+> Availability: Spinner is a workspace-only draft. The published `@proto.ui/prototypes-brutalist@0.2.0` and `@proto.ui/prototypes-brutalist@0.3.0-alpha.1` packages do not export `./spinner`. Lifecycle: [P-BRUTALIST-SPINNER](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-SPINNER.yaml) remains `draft`; this page describes the in-repository implementation, not an active protocol guarantee.
 
 Brutalist Spinner is a direct styled-only visual indicator: a 2px `currentColor` square ring with one open leading edge, no fill, radius, or soft shadow. It rotates linearly once per 1000ms only when reduced motion is not requested; `prefers-reduced-motion: reduce` removes the animation and retains the open edge as a non-color orientation cue.
 

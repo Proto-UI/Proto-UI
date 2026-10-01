@@ -76,3 +76,29 @@ describe('PrototypeLibraryOverview Brutalist theme projection', () => {
     }
   );
 });
+
+it('labels the workspace-only Spinner without calling a published package unpublished', () => {
+  const spinner = source.match(/id: 'spinner',[\s\S]*?href: '[^']*'/)?.[0];
+  expect(spinner).toBeDefined();
+  expect(spinner).toContain(
+    '仅工作区可用的 Spinner draft；已发布的 0.2.0 和 0.3.0-alpha.1 均不含此组件'
+  );
+  expect(spinner).toContain(
+    'Workspace-only Spinner draft; not shipped in published 0.2.0 or 0.3.0-alpha.1'
+  );
+  expect(source).toContain('<p>{entry.description}</p>');
+  for (const locale of ['en', 'zh-cn']) {
+    const page = readFileSync(
+      resolve(
+        process.cwd(),
+        `apps/www/src/content/docs/${locale}/ui-libraries/brutalist/components/spinner.mdx`
+      ),
+      'utf8'
+    );
+    expect(page).toContain('`./spinner`');
+    expect(page).toContain(locale === 'en' ? 'packages do not export' : '均不导出');
+    expect(page).not.toContain(
+      locale === 'en' ? '@0.3.0-alpha.1` is unpublished' : '@0.3.0-alpha.1` 尚未发布'
+    );
+  }
+});
