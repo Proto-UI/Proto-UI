@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 3,
+  "kind": "proto-ui.review-input",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "pullRequest": 487,
+  "pullRequestState": "OPEN",
+  "isDraft": false,
+  "baseRefName": "main",
+  "baseSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "headSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "pullRequestBody": "Bounded review target",
+  "changedFiles": [
+    {
+      "path": "packages/core/src/index.ts",
+      "previousPath": null,
+      "status": "modified"
+    }
+  ],
+  "commits": [
+    {
+      "sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "message": "Bounded change"
+    }
+  ],
+  "reviews": [],
+  "comments": [],
+  "replies": [],
+  "threads": [],
+  "checks": [
+    {
+      "name": "test",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "completedAt": "2026-08-23T00:00:00.000Z",
+      "detailsUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/1",
+      "source": "github-actions",
+      "repository": "Proto-UI/Proto-UI",
+      "workflowName": "CI",
+      "workflowPath": ".github/workflows/ci.yml"
+    }
+  ],
+  "externalEvidence": []
+}

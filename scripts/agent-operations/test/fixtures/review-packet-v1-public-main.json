@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.review-packet",
+  "repositoryId": "github.com:Proto-UI/Proto-UI",
+  "pullRequest": 487,
+  "baseSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "headSha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "reviewInputDigest": "41608b635ae1e121bfda0a871af2ce10e07c131aedd260a6c06c7bbf118e5ba4",
+  "observedAt": "2026-08-23T00:00:00.000Z",
+  "reviewClass": "review-governed-implementation-slice",
+  "scope": ["agent operations"],
+  "affectedEntities": ["governance:contributor-agent"],
+  "affectedSurfaces": ["scripts", "docs"],
+  "findings": [],
+  "validation": {
+    "commands": [
+      {
+        "command": "pnpm check:agent-operations",
+        "exitCode": 0,
+        "result": "26 tests passed"
+      }
+    ],
+    "checksNotRun": []
+  },
+  "reconciliation": {
+    "priorReviewedHeadSha": null,
+    "priorPacketDigest": null,
+    "resolvedFindingIds": [],
+    "openFindingIds": [],
+    "newFindingIds": []
+  },
+  "limitations": ["Review depth is limited without a fresh local assessment"],
+  "unknowns": [],
+  "humanGates": [],
+  "recommendedAction": "COMMENT"
+}

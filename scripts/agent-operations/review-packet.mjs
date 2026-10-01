@@ -10,6 +10,7 @@ import {
   authorizePullRequestMerge,
   authorizeReviewSubmission,
   computeReviewInputDigest,
+  computeReviewIngestionInputDigest,
   computeReviewPacketDigest,
   evaluateReviewEligibility,
   inspectReviewRevision,
@@ -17,6 +18,7 @@ import {
   renderReviewBody,
   reviewPacketKey,
   validateReviewInputSnapshot,
+  validateReviewInputForIngestion,
   validateReviewPacket,
   validateReviewPacketEligibility,
   verifyReconciliation,
@@ -44,6 +46,8 @@ function usage() {
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
     '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
     '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
+    '',
+    'input-digest, validate, and inspect preserve canonical v3 input for read-only legacy schema v1 COMMENT ingestion. v3 inputs cannot enter submit-review or merge-pull-request; those commands require a freshly collected v5 snapshot. v4 must also be re-collected.',
     '',
     'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge additionally fails closed unless the live input already contains a valid exact-head independent APPROVED review carrying the complete packet evidence receipt marker (proto-ui:agent-evidence:sha256=...), so publish the evidence first, then re-collect and rebuild the merge packet. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
     '',
@@ -120,9 +124,16 @@ function parse(argv) {
   return { command, args };
 }
 
-function readInput(path) {
+function readInput(path, { readOnly = false } = {}) {
   if (!path) throw new Error('--input is required');
-  return validateReviewInputSnapshot(JSON.parse(fs.readFileSync(path, 'utf8')));
+  const input = JSON.parse(fs.readFileSync(path, 'utf8'));
+  if (readOnly) return validateReviewInputForIngestion(input);
+  if (input?.schemaVersion === 3) {
+    throw new Error(
+      'legacy review input v3 is read-only; re-collect v5 before a review submission or merge'
+    );
+  }
+  return validateReviewInputSnapshot(input);
 }
 
 function readPacket(path, input) {
@@ -248,10 +259,10 @@ try {
   const { command, args } = parse(process.argv.slice(2));
   let output;
   if (command === 'input-digest') {
-    const input = readInput(args.get('--input'));
-    output = { valid: true, reviewInputDigest: computeReviewInputDigest(input) };
+    const input = readInput(args.get('--input'), { readOnly: true });
+    output = { valid: true, reviewInputDigest: computeReviewIngestionInputDigest(input) };
   } else if (command === 'validate') {
-    const input = readInput(args.get('--input'));
+    const input = readInput(args.get('--input'), { readOnly: true });
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
@@ -264,7 +275,7 @@ try {
       eligibility: execution.eligibility,
     };
   } else if (command === 'inspect') {
-    const input = readInput(args.get('--input'));
+    const input = readInput(args.get('--input'), { readOnly: true });
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)

@@ -129,9 +129,9 @@ function validateInputItems(items, fields, label, validator) {
   }
 }
 
-export function validateReviewInputSnapshot(input) {
+function validateReviewInputVersion(input, legacy) {
   assert(
-    input?.schemaVersion === 5,
+    input?.schemaVersion === (legacy ? 3 : 5),
     input?.schemaVersion === 4
       ? 'legacy review input v4 must be re-collected as v5 with current reviewer permission observations'
       : 'review input schemaVersion is invalid'
@@ -144,7 +144,7 @@ export function validateReviewInputSnapshot(input) {
       'repositoryId',
       'pullRequest',
       'pullRequestState',
-      'pullRequestAuthor',
+      ...(legacy ? [] : ['pullRequestAuthor']),
       'isDraft',
       'baseRefName',
       'baseSha',
@@ -153,7 +153,7 @@ export function validateReviewInputSnapshot(input) {
       'changedFiles',
       'commits',
       'reviews',
-      'reviewerPermissions',
+      ...(legacy ? [] : ['reviewerPermissions']),
       'comments',
       'replies',
       'threads',
@@ -172,10 +172,12 @@ export function validateReviewInputSnapshot(input) {
     'review input PR is invalid'
   );
   assert(PULL_REQUEST_STATES.has(input.pullRequestState), 'review input PR state is invalid');
-  assert(
-    typeof input.pullRequestAuthor === 'string' && input.pullRequestAuthor.length > 0,
-    'review input pull-request author identity is invalid'
-  );
+  if (!legacy) {
+    assert(
+      typeof input.pullRequestAuthor === 'string' && input.pullRequestAuthor.length > 0,
+      'review input pull-request author identity is invalid'
+    );
+  }
   assert(typeof input.isDraft === 'boolean', 'review input draft state is invalid');
   assert(
     typeof input.baseRefName === 'string' && input.baseRefName.length > 0,
@@ -208,11 +210,12 @@ export function validateReviewInputSnapshot(input) {
   assert(input.changedFiles.length > 0, 'review input changedFiles must not be empty');
   validateInputItems(
     input.commits,
-    ['sha', 'message', 'author', 'committer'],
+    legacy ? ['sha', 'message'] : ['sha', 'message', 'author', 'committer'],
     'review input commits',
     (item) => {
       assert(SHA.test(item.sha), 'review input commit SHA is invalid');
       assert(typeof item.message === 'string', 'review input commit message is invalid');
+      if (legacy) return;
       for (const role of ['author', 'committer']) {
         exactKeys(
           item[role],
@@ -260,7 +263,8 @@ export function validateReviewInputSnapshot(input) {
         );
       }
       assert(
-        item.author === null || (typeof item.author === 'string' && item.author.length > 0),
+        (!legacy && item.author === null) ||
+          (typeof item.author === 'string' && item.author.length > 0),
         'review author is invalid'
       );
       assert(item.commitSha === null || SHA.test(item.commitSha), 'review commitSha is invalid');
@@ -268,46 +272,47 @@ export function validateReviewInputSnapshot(input) {
       assert(typeof item.body === 'string', 'review body is invalid');
     }
   );
-  validateInputItems(
-    input.reviewerPermissions,
-    ['login', 'permission', 'source', 'endpoint', 'repositoryId', 'headSha'],
-    'review input reviewerPermissions',
-    (item) => {
-      assert(
-        typeof item.login === 'string' &&
-          item.login.length > 0 &&
-          item.login === item.login.toLowerCase(),
-        'reviewer permission login is invalid'
-      );
-      assert(
-        ['admin', 'write', 'read', 'none'].includes(item.permission),
-        'reviewer permission is invalid'
-      );
-      assert(
-        item.source === 'github-rest-collaborator-permission',
-        'reviewer permission source is invalid'
-      );
-      assert(
-        item.repositoryId === input.repositoryId && item.headSha === input.headSha,
-        'reviewer permission target binding is invalid'
-      );
-      const repository = input.repositoryId.replace(/^github\.com:/, '');
-      assert(
-        item.endpoint ===
-          `repos/${repository}/collaborators/${encodeURIComponent(item.login)}/permission`,
-        'reviewer permission endpoint is invalid'
-      );
-      assert(
-        input.reviews.some(
-          (review) =>
-            review.author?.toLowerCase() === item.login &&
-            review.state === 'APPROVED' &&
-            review.commitSha === input.headSha
-        ),
-        'reviewer permission has no exact-head approval subject'
-      );
-    }
-  );
+  if (!legacy)
+    validateInputItems(
+      input.reviewerPermissions,
+      ['login', 'permission', 'source', 'endpoint', 'repositoryId', 'headSha'],
+      'review input reviewerPermissions',
+      (item) => {
+        assert(
+          typeof item.login === 'string' &&
+            item.login.length > 0 &&
+            item.login === item.login.toLowerCase(),
+          'reviewer permission login is invalid'
+        );
+        assert(
+          ['admin', 'write', 'read', 'none'].includes(item.permission),
+          'reviewer permission is invalid'
+        );
+        assert(
+          item.source === 'github-rest-collaborator-permission',
+          'reviewer permission source is invalid'
+        );
+        assert(
+          item.repositoryId === input.repositoryId && item.headSha === input.headSha,
+          'reviewer permission target binding is invalid'
+        );
+        const repository = input.repositoryId.replace(/^github\.com:/, '');
+        assert(
+          item.endpoint ===
+            `repos/${repository}/collaborators/${encodeURIComponent(item.login)}/permission`,
+          'reviewer permission endpoint is invalid'
+        );
+        assert(
+          input.reviews.some(
+            (review) =>
+              review.author?.toLowerCase() === item.login &&
+              review.state === 'APPROVED' &&
+              review.commitSha === input.headSha
+          ),
+          'reviewer permission has no exact-head approval subject'
+        );
+      }
+    );
   validateInputItems(
     input.comments,
     ['id', 'author', 'body', 'updatedAt'],
@@ -357,7 +362,7 @@ export function validateReviewInputSnapshot(input) {
       'completedAt',
       'detailsUrl',
       'source',
-      'providerId',
+      ...(legacy ? [] : ['providerId']),
       'repository',
       'workflowName',
       'workflowPath',
@@ -383,11 +388,12 @@ export function validateReviewInputSnapshot(input) {
         'check conclusion is invalid'
       );
       assert(typeof item.source === 'string' && item.source.length > 0, 'check source is invalid');
-      assert(
-        item.providerId === null ||
-          (typeof item.providerId === 'string' && item.providerId.length > 0),
-        'check providerId is invalid'
-      );
+      if (!legacy)
+        assert(
+          item.providerId === null ||
+            (typeof item.providerId === 'string' && item.providerId.length > 0),
+          'check providerId is invalid'
+        );
       for (const field of ['repository', 'workflowName', 'workflowPath']) {
         assert(
           item[field] === null || (typeof item[field] === 'string' && item[field].length > 0),
@@ -414,7 +420,9 @@ export function validateReviewInputSnapshot(input) {
   for (const [items, key, label] of [
     [input.commits, (item) => item.sha, 'commit SHA'],
     [input.reviews, (item) => item.id, 'review id'],
-    [input.reviewerPermissions, (item) => item.login, 'reviewer permission login'],
+    ...(legacy
+      ? []
+      : [[input.reviewerPermissions, (item) => item.login, 'reviewer permission login']]),
     [input.comments, (item) => item.id, 'comment id'],
     [input.replies, (item) => item.id, 'reply id'],
     [input.threads, (item) => item.id, 'thread id'],
@@ -425,8 +433,18 @@ export function validateReviewInputSnapshot(input) {
   return input;
 }
 
-function canonicalReviewInput(input) {
-  validateReviewInputSnapshot(input);
+// Current collection and every mutation remain v5-only. Legacy parsing is a
+// separate read-only surface; it never supplies missing identity/permission facts.
+export function validateReviewInputSnapshot(input) {
+  return validateReviewInputVersion(input, false);
+}
+
+export function validateReviewInputForIngestion(input) {
+  return validateReviewInputVersion(input, input?.schemaVersion === 3);
+}
+
+function canonicalReviewInput(input, validate = validateReviewInputSnapshot) {
+  validate(input);
   const clone = structuredClone(input);
   const compareCanonical = (left, right) => {
     const leftKey = JSON.stringify(canonicalJson(left));
@@ -437,7 +455,7 @@ function canonicalReviewInput(input) {
     'changedFiles',
     'commits',
     'reviews',
-    'reviewerPermissions',
+    ...(input.schemaVersion === 5 ? ['reviewerPermissions'] : []),
     'comments',
     'replies',
     'threads',
@@ -451,6 +469,10 @@ function canonicalReviewInput(input) {
 
 export function computeReviewInputDigest(input) {
   return digest(canonicalReviewInput(input));
+}
+
+export function computeReviewIngestionInputDigest(input) {
+  return digest(canonicalReviewInput(input, validateReviewInputForIngestion));
 }
 
 export function reviewChangesSpecEntities(input) {
@@ -772,7 +794,13 @@ export function validateReviewPacket(packet, input) {
   assert(Number.isInteger(packet.pullRequest) && packet.pullRequest > 0, 'pullRequest is invalid');
   assert(SHA.test(packet.baseSha) && SHA.test(packet.headSha), 'review SHAs are invalid');
   assert(HEX64.test(packet.reviewInputDigest), 'reviewInputDigest is invalid');
-  validateReviewInputSnapshot(input);
+  if (input?.schemaVersion === 3) {
+    assert(
+      packet.schemaVersion === 1 && packet.recommendedAction === 'COMMENT',
+      'legacy review input v3 may only ingest a schema v1 COMMENT packet'
+    );
+  }
+  validateReviewInputForIngestion(input);
   assert(
     packet.repositoryId === input.repositoryId &&
       packet.pullRequest === input.pullRequest &&
@@ -781,7 +809,7 @@ export function validateReviewPacket(packet, input) {
     'review packet does not match its input snapshot'
   );
   assert(
-    packet.reviewInputDigest === computeReviewInputDigest(input),
+    packet.reviewInputDigest === computeReviewIngestionInputDigest(input),
     'reviewInputDigest does not match the canonical input snapshot'
   );
   validateTimestamp(packet.observedAt, 'observedAt');
@@ -1088,6 +1116,14 @@ export function verifyLiveReviewInput(packet, freshInput) {
   return true;
 }
 
+function validateReviewMutationInput(input) {
+  assert(
+    input?.schemaVersion !== 3,
+    'legacy review input v3 is read-only; re-collect v5 before a review submission or merge'
+  );
+  return validateReviewInputSnapshot(input);
+}
+
 function standingAuthorizationMatches(
   authorization,
   { executionMode, executionModeSource, repositoryId }
@@ -1150,6 +1186,7 @@ export function authorizeReviewSubmission({
   priorPacket = null,
 }) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
+  validateReviewMutationInput(input);
   validateReviewPacket(packet, input);
   verifyLiveReviewInput(packet, liveInput);
   const revision = inspectReviewRevision(packet, input, liveInput.headSha, null, liveInput.baseSha);
@@ -1374,6 +1411,7 @@ export function authorizePullRequestMerge({
   mergeStateStatus,
 }) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
+  validateReviewMutationInput(input);
   validateReviewPacket(packet, input);
   verifyLiveReviewInput(packet, liveInput);
   const revision = inspectReviewRevision(packet, input, liveInput.headSha, null, liveInput.baseSha);
