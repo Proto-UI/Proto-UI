@@ -1197,7 +1197,24 @@ export function authorizePullRequestMerge({
   if (liveInput.threads.some((thread) => thread.isResolved !== true)) {
     return { allowed: false, reason: 'merge requires every review thread to be resolved' };
   }
-  if (mergeable !== 'MERGEABLE' || mergeStateStatus !== 'CLEAN') {
+  // GitHub marks a mergeable head UNSTABLE even when its only non-passing
+  // context is the verified Vercel preview-authorization prompt. That exact
+  // publication debt is already excluded from trusted CI; do not reintroduce
+  // it through the aggregate merge state. Every other context must be terminal
+  // and successful, and the final non-admin merge API still enforces GitHub rules.
+  const previewAuthorizationOnlyUnstable =
+    mergeStateStatus === 'UNSTABLE' &&
+    liveInput.checks.some(isExternalPreviewAuthorizationFailure) &&
+    liveInput.checks.every(
+      (check) =>
+        check.status === 'COMPLETED' &&
+        (isExternalPreviewAuthorizationFailure(check) ||
+          ['SUCCESS', 'SKIPPED', 'NEUTRAL'].includes(check.conclusion))
+    );
+  if (
+    mergeable !== 'MERGEABLE' ||
+    (mergeStateStatus !== 'CLEAN' && !previewAuthorizationOnlyUnstable)
+  ) {
     return { allowed: false, reason: 'GitHub does not report the exact head as merge-ready' };
   }
 

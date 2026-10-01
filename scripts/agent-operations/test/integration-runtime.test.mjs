@@ -130,6 +130,143 @@ function scheduledMerge(overrides = {}) {
   });
 }
 
+function previewAuthorizationTarget(previewOverrides = {}) {
+  const preview = {
+    name: 'Vercel',
+    status: 'COMPLETED',
+    conclusion: 'FAILURE',
+    completedAt: '2026-09-23T03:00:00.000Z',
+    detailsUrl: 'https://vercel.com/git/authorize?team=external',
+    source: 'vercel',
+    repository: null,
+    workflowName: null,
+    workflowPath: null,
+    ...previewOverrides,
+  };
+  const evidence = agentEvidence(sha('b'));
+  evidence.debt.push({
+    kind: 'publication',
+    missing: 'Vercel preview deployment',
+    reason: 'The verified Vercel Bot reports missing preview authorization; repository CI passed.',
+    nextAction: 'Authorize deployment and verify the preview independently.',
+  });
+  const input = reviewInput({
+    checks: [...reviewInput().checks, preview],
+    reviews: [
+      {
+        ...reviewInput().reviews[0],
+        body: `Approved exact head with preview debt\n\n<!-- ${agentEvidenceMarker({ schemaVersion: 2, agentEvidence: evidence })} -->`,
+      },
+    ],
+  });
+  return { input, packet: packet(input, { agentEvidence: evidence }) };
+}
+
+test('verified preview authorization alone permits a MERGEABLE/UNSTABLE head', () => {
+  const result = scheduledMerge({
+    ...previewAuthorizationTarget(),
+    mergeStateStatus: 'UNSTABLE',
+  });
+  assert.equal(result.allowed, true);
+  assert.equal(result.headSha, sha('b'));
+  assert.equal(result.mergeMethod, 'squash');
+});
+
+test('preview authorization does not admit blocked, conflicting, or unknown merge states', () => {
+  for (const mergeStateStatus of ['BLOCKED', 'DIRTY', 'BEHIND', 'DRAFT', 'UNKNOWN', 'HAS_HOOKS']) {
+    const result = scheduledMerge({ ...previewAuthorizationTarget(), mergeStateStatus });
+    assert.equal(result.allowed, false, mergeStateStatus);
+    assert.match(result.reason, /merge-ready/);
+  }
+  for (const mergeable of ['CONFLICTING', 'UNKNOWN']) {
+    const result = scheduledMerge({
+      ...previewAuthorizationTarget(),
+      mergeable,
+      mergeStateStatus: 'UNSTABLE',
+    });
+    assert.equal(result.allowed, false, mergeable);
+  }
+});
+
+test('generic unstable heads, real preview failures, and lookalikes remain blocked', () => {
+  assert.equal(scheduledMerge({ mergeStateStatus: 'UNSTABLE' }).allowed, false);
+  for (const preview of [
+    { source: 'status-context' },
+    { detailsUrl: 'https://vercel.com/deployments/failed' },
+    { detailsUrl: 'https://vercel.example/git/authorize' },
+    { detailsUrl: 'http://vercel.com/git/authorize' },
+    { name: 'Other preview' },
+    { status: 'IN_PROGRESS' },
+    { conclusion: 'ERROR' },
+  ]) {
+    const result = scheduledMerge({
+      ...previewAuthorizationTarget(preview),
+      mergeStateStatus: 'UNSTABLE',
+    });
+    assert.equal(result.allowed, false, JSON.stringify(preview));
+  }
+});
+
+test('an unstable preview exception rejects every other failed or pending check', () => {
+  for (const check of [
+    { name: 'test', status: 'COMPLETED', conclusion: 'FAILURE' },
+    { name: 'DCO', status: 'COMPLETED', conclusion: 'FAILURE', source: 'dco' },
+    { name: 'other-preview', status: 'COMPLETED', conclusion: 'ERROR' },
+    { name: 'test', status: 'IN_PROGRESS', conclusion: null },
+    { name: 'test', status: 'QUEUED', conclusion: null },
+    { name: 'test', status: 'COMPLETED', conclusion: 'TIMED_OUT' },
+  ]) {
+    const target = previewAuthorizationTarget();
+    target.input.checks.push({ ...reviewInput().checks[0], ...check });
+    const result = scheduledMerge({
+      input: target.input,
+      packet: packet(target.input, { agentEvidence: target.packet.agentEvidence }),
+      mergeStateStatus: 'UNSTABLE',
+    });
+    assert.equal(result.allowed, false, JSON.stringify(check));
+  }
+});
+
+test('the unstable preview exception retains approval, review, receipt, and trusted CI gates', () => {
+  const target = previewAuthorizationTarget();
+  const evidence = target.packet.agentEvidence;
+  for (const changes of [
+    { reviews: [] },
+    {
+      reviews: [
+        ...target.input.reviews,
+        {
+          ...target.input.reviews[0],
+          id: 'PRR_blocking',
+          author: 'blocking-reviewer',
+          state: 'CHANGES_REQUESTED',
+        },
+      ],
+    },
+    { threads: [{ ...target.input.threads[0], isResolved: false }] },
+    { reviews: [{ ...target.input.reviews[0], body: 'Approved without published evidence' }] },
+    { isDraft: true },
+  ]) {
+    const input = { ...target.input, ...changes };
+    assert.equal(
+      scheduledMerge({
+        input,
+        packet: packet(input, { agentEvidence: evidence }),
+        mergeStateStatus: 'UNSTABLE',
+      }).allowed,
+      false
+    );
+  }
+  assert.equal(
+    scheduledMerge({ ...target, mergeStateStatus: 'UNSTABLE', ciConclusion: 'unknown' }).allowed,
+    false
+  );
+  assert.equal(
+    scheduledMerge({ ...target, mergeStateStatus: 'UNSTABLE', credentialCanMerge: false }).allowed,
+    false
+  );
+});
+
 test('standing authorization permits an exact-head merge after independent approval', () => {
   const unverified = packet(reviewInput());
   unverified.agentEvidence.debt[0].kind = 'verification';
