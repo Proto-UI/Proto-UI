@@ -5,10 +5,19 @@ const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
 
 type ElementWithProtoParent = HTMLElement & Record<symbol, unknown>;
 
-type DynamicEventTarget = EventTarget & {
+export type RebindableEventTarget = EventTarget & {
   setTarget(target: EventTarget | null): void;
   getTarget(): EventTarget | null;
 };
+
+const isDomNode = (value: unknown): value is Node =>
+  !!value && typeof (value as Node).nodeType === 'number';
+const isHtmlElement = (value: unknown): value is HTMLElement =>
+  isDomNode(value) &&
+  value.nodeType === 1 &&
+  (value as Element).namespaceURI === 'http://www.w3.org/1999/xhtml';
+const isShadowRoot = (value: unknown): value is ShadowRoot =>
+  isDomNode(value) && value.nodeType === 11 && 'host' in value;
 
 export function releaseWebTriggerSurface(target: HTMLElement): void {
   target.removeAttribute('tabindex');
@@ -19,17 +28,27 @@ export function releaseWebTriggerSurface(target: HTMLElement): void {
   }
 }
 
-function createDynamicEventTarget(): DynamicEventTarget {
-  type Registration = {
-    type: string;
-    listener: EventListenerOrEventListenerObject;
-    options?: boolean | AddEventListenerOptions;
-  };
+export function createRebindableEventTarget(): RebindableEventTarget {
+  type Registration = [
+    string,
+    EventListenerOrEventListenerObject,
+    boolean,
+    boolean,
+    boolean,
+    EventListener,
+    AbortSignal?,
+    (() => void)?,
+  ];
 
   let target: EventTarget | null = null;
   const registrations: Registration[] = [];
-  const capture = (options?: boolean | AddEventListenerOptions | EventListenerOptions) =>
-    typeof options === 'boolean' ? options : options?.capture === true;
+  const remove = (registration: Registration) => {
+    const index = registrations.indexOf(registration);
+    if (index < 0) return;
+    registrations.splice(index, 1);
+    target?.removeEventListener(registration[0], registration[5], registration[2]);
+    if (registration[7]) registration[6]?.removeEventListener('abort', registration[7]);
+  };
 
   const bridge = {
     addEventListener(
@@ -38,18 +57,39 @@ function createDynamicEventTarget(): DynamicEventTarget {
       options?: boolean | AddEventListenerOptions
     ) {
       if (!listener) return;
+      const capture = typeof options === 'boolean' ? options : options?.capture === true;
       if (
         registrations.some(
-          (entry) =>
-            entry.type === type &&
-            entry.listener === listener &&
-            capture(entry.options) === capture(options)
+          (entry) => entry[0] === type && entry[1] === listener && entry[2] === capture
         )
       ) {
         return;
       }
-      registrations.push({ type, listener, options });
-      target?.addEventListener(type, listener, options);
+      const signal = typeof options === 'boolean' ? undefined : options?.signal;
+      if (signal?.aborted) return;
+      const registration = [
+        type,
+        listener,
+        capture,
+        typeof options === 'boolean' ? false : options?.passive === true,
+        typeof options === 'boolean' ? false : options?.once === true,
+        undefined,
+        signal,
+      ] as unknown as Registration;
+      registration[5] = function (event) {
+        if (registration[4]) remove(registration);
+        if (typeof listener === 'function') listener.call(this, event);
+        else listener.handleEvent(event);
+      };
+      if (signal) {
+        registration[7] = () => remove(registration);
+        signal.addEventListener('abort', registration[7], { once: true });
+      }
+      registrations.push(registration);
+      target?.addEventListener(type, registration[5], {
+        capture,
+        passive: registration[3],
+      });
     },
     removeEventListener(
       type: string,
@@ -57,15 +97,11 @@ function createDynamicEventTarget(): DynamicEventTarget {
       options?: boolean | EventListenerOptions
     ) {
       if (!listener) return;
-      const index = registrations.findIndex(
-        (entry) =>
-          entry.type === type &&
-          entry.listener === listener &&
-          capture(entry.options) === capture(options)
+      const capture = typeof options === 'boolean' ? options : options?.capture === true;
+      const registration = registrations.find(
+        (entry) => entry[0] === type && entry[1] === listener && entry[2] === capture
       );
-      if (index < 0) return;
-      const [entry] = registrations.splice(index, 1);
-      target?.removeEventListener(type, listener, entry?.options);
+      if (registration) remove(registration);
     },
     dispatchEvent(event: Event) {
       return target?.dispatchEvent(event) ?? false;
@@ -74,13 +110,16 @@ function createDynamicEventTarget(): DynamicEventTarget {
       if (target === nextTarget) return;
       if (target) {
         for (const entry of registrations) {
-          target.removeEventListener(entry.type, entry.listener, entry.options);
+          target.removeEventListener(entry[0], entry[5], entry[2]);
         }
       }
       target = nextTarget;
       if (target) {
         for (const entry of registrations) {
-          target.addEventListener(entry.type, entry.listener, entry.options);
+          target.addEventListener(entry[0], entry[5], {
+            capture: entry[2],
+            passive: entry[3],
+          });
         }
       }
     },
@@ -89,7 +128,7 @@ function createDynamicEventTarget(): DynamicEventTarget {
     },
   };
 
-  return bridge as DynamicEventTarget;
+  return bridge as RebindableEventTarget;
 }
 
 export type LogicalInstanceToken = object & {
@@ -107,7 +146,7 @@ function writeProtoParentMark(instance: HTMLElement, parent: HTMLElement | null)
 
 function readProtoParentMark(instance: HTMLElement): HTMLElement | null {
   const mark = (instance as ElementWithProtoParent)[PROTO_PARENT_INSTANCE];
-  return mark instanceof HTMLElement ? mark : null;
+  return isHtmlElement(mark) ? mark : null;
 }
 
 export type InstanceTreeMarkerOptions = {
@@ -126,7 +165,7 @@ export function createInstanceTreeMarkers(
   const PARENT_BY_TOKEN = new WeakMap<LogicalInstanceToken, LogicalInstanceToken>();
   const CHILDREN_BY_TOKEN = new WeakMap<LogicalInstanceToken, Set<LogicalInstanceToken>>();
   const TRIGGER_GROUP_ANCHOR_BY_TOKEN = new WeakMap<LogicalInstanceToken, LogicalInstanceToken>();
-  const EVENT_TARGET_BY_TOKEN = new WeakMap<LogicalInstanceToken, DynamicEventTarget>();
+  const EVENT_TARGET_BY_TOKEN = new WeakMap<LogicalInstanceToken, RebindableEventTarget>();
   const BOUND_EVENT_TARGET_BY_TOKEN = new WeakMap<LogicalInstanceToken, EventTarget>();
   const TRIGGER_GROUP_MEMBERS_BY_ANCHOR = new WeakMap<
     LogicalInstanceToken,
@@ -213,7 +252,7 @@ export function createInstanceTreeMarkers(
   }
 
   function syncLogicalEventTarget(token: LogicalInstanceToken): void {
-    const bridge = getLogicalEventTarget(token) as DynamicEventTarget;
+    const bridge = getLogicalEventTarget(token) as RebindableEventTarget;
     const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
     const surface = TRIGGER_GROUP_SURFACE_BY_ANCHOR.get(owner) ?? owner;
     if (surface !== token) {
@@ -332,7 +371,8 @@ export function createInstanceTreeMarkers(
   function markProtoInstance(
     el: HTMLElement,
     proto: Prototype<any>,
-    token: LogicalInstanceToken = createLogicalInstance(proto)
+    token: LogicalInstanceToken = createLogicalInstance(proto),
+    clearMissingParent = false
   ): LogicalInstanceToken {
     const parentRoot = getProtoParent(el);
     const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
@@ -353,7 +393,7 @@ export function createInstanceTreeMarkers(
       notifyInstanceLifecycle(token);
     }
 
-    if (parentToken) setLogicalParentInternal(token, parentToken);
+    if (parentToken || clearMissingParent) setLogicalParentInternal(token, parentToken ?? null);
     for (const descendant of el.querySelectorAll<HTMLElement>('*')) {
       const descendantToken = TOKEN_BY_INSTANCE.get(descendant);
       if (!descendantToken) continue;
@@ -396,18 +436,18 @@ export function createInstanceTreeMarkers(
   function getLogicalEventRouteSurfaceForTarget(
     target: EventTarget | null
   ): LogicalInstanceToken | null {
-    let cur: Node | null = target instanceof Node ? target : null;
+    let cur: Node | null = isDomNode(target) ? target : null;
     const visited = new Set<Node>();
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
 
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
 
-      if (cur instanceof HTMLElement) {
+      if (isHtmlElement(cur)) {
         const token = TOKEN_BY_INSTANCE.get(cur);
         if (token) {
           const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
@@ -427,20 +467,20 @@ export function createInstanceTreeMarkers(
   }
 
   function resolveLogicalTriggerEventRouteForTarget(
-    target: EventTarget | null
+    target: EventTarget | null,
+    visited = new Set<Node>()
   ): { matched: true; accepted: boolean; surface: LogicalInstanceToken } | null {
-    let cur: Node | null = target instanceof Node ? target : null;
-    const visited = new Set<Node>();
+    let cur: Node | null = isDomNode(target) ? target : null;
     while (cur) {
       if (visited.has(cur)) return null;
       visited.add(cur);
 
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
 
-      if (cur instanceof HTMLElement) {
+      if (isHtmlElement(cur)) {
         const token = TOKEN_BY_INSTANCE.get(cur);
         if (token && TRIGGER_TOKENS.has(token)) {
           const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
@@ -458,6 +498,41 @@ export function createInstanceTreeMarkers(
       cur = cur.parentNode;
     }
     return null;
+  }
+
+  function isLogicalEventRouteCandidate(root: HTMLElement, targets: EventTarget[]): boolean {
+    // Native composedPath already contains the physical ancestors. Only a
+    // logical link diverging from that path can reach an unrelated root.
+    // Nothing is retained across calls: synchronous reparenting stays visible.
+    const path = new Set(targets);
+    if (path.has(root)) return true;
+    const visited = new Set<Node>();
+    const reachesRoot = (start: EventTarget | null): boolean => {
+      let node = isDomNode(start) ? start : null;
+      while (node) {
+        if (node === root) return true;
+        if (visited.has(node)) return false;
+        visited.add(node);
+        if (isHtmlElement(node)) {
+          const linked = readProtoParentMark(node) ?? PROTO_PARENT_BY_INSTANCE.get(node);
+          if (linked && linked !== node && reachesRoot(linked)) return true;
+        }
+        node = isShadowRoot(node) ? node.host : node.parentNode;
+      }
+      return false;
+    };
+    // Also covers native.target / activeElement seeds whose ancestors may not
+    // be in composedPath (keyboard fallback and host-local direct dispatch).
+    for (const target of targets) {
+      if (!isDomNode(target)) continue;
+      if (isHtmlElement(target)) {
+        const linked = readProtoParentMark(target) ?? PROTO_PARENT_BY_INSTANCE.get(target);
+        if (linked && !path.has(linked) && reachesRoot(linked)) return true;
+      }
+      const parent = isShadowRoot(target) ? target.host : target.parentNode;
+      if (parent && !path.has(parent) && reachesRoot(parent)) return true;
+    }
+    return false;
   }
 
   function getLogicalTriggerSurfaceOwner(token: LogicalInstanceToken): LogicalInstanceToken {
@@ -485,7 +560,7 @@ export function createInstanceTreeMarkers(
   function getLogicalEventTarget(token: LogicalInstanceToken): EventTarget {
     let target = EVENT_TARGET_BY_TOKEN.get(token);
     if (!target) {
-      target = createDynamicEventTarget();
+      target = createRebindableEventTarget();
       EVENT_TARGET_BY_TOKEN.set(token, target);
     }
     return target;
@@ -534,13 +609,13 @@ export function createInstanceTreeMarkers(
       PROTO_PARENT_BY_INSTANCE.get(instance) ??
       instance.parentNode;
     while (cur) {
-      if (typeof ShadowRoot !== 'undefined' && cur instanceof ShadowRoot) {
+      if (isShadowRoot(cur)) {
         cur = cur.host;
         continue;
       }
       if (isProtoInstance(cur)) return cur as HTMLElement;
 
-      if (cur instanceof HTMLElement) {
+      if (isHtmlElement(cur)) {
         const linkedParent =
           readProtoParentMark(cur) ?? PROTO_PARENT_BY_INSTANCE.get(cur as HTMLElement) ?? null;
         if (linkedParent && linkedParent !== cur) {
@@ -596,6 +671,7 @@ export function createInstanceTreeMarkers(
     getLogicalEventRouteOwner: getLogicalTriggerGroupAnchor,
     getLogicalEventRouteSurfaceForTarget,
     resolveLogicalTriggerEventRouteForTarget,
+    isLogicalEventRouteCandidate,
     getLogicalTriggerSurfaceOwner,
     getLogicalTriggerSurfaceRoot,
     subscribeLogicalTriggerSurface,

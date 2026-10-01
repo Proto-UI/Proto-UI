@@ -1,0 +1,71 @@
+---
+import './shadow-split-s5.css';
+const zh = Astro.url.pathname.startsWith('/zh-cn/');
+---
+
+<section
+  id="shadow-split-s5"
+  class="s5"
+  data-shadow-s5
+  data-lang={zh ? 'zh' : 'en'}
+  aria-label="Shadow split S5"
+>
+  <h2>Shadow split · S5</h2>
+  <p>
+    {
+      zh
+        ? '原生文本输入：Base Input、Base Textarea、Shadcn Textarea 与 Tabs。Light / split / mixed；仍为 draft。'
+        : 'Native text editing: Base Input, Base Textarea, Shadcn Textarea and Tabs. Light / split / mixed; still draft.'
+    }
+  </p>
+  <div data-s5-app></div>
+  <details>
+    <summary>{zh ? '人工验收目标与边界' : 'Manual targets and boundaries'}</summary>
+    <ol>
+      <li>
+        {
+          zh
+            ? '输入、选择、方向键移动光标和中文 IME；重点比较候选阶段、提交和取消。自动 composition 测试不能代替真实系统 IME。'
+            : 'Type, select, move the caret and use a real IME; compare candidates, commit and cancellation. Synthetic composition tests do not replace platform IME acceptance.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? 'Input 与 Shadcn Textarea 为受控值；启用拒绝受控提案后，编辑提案不被接受。Base Textarea 为非受控值，无关 props 更新不得覆盖已输入内容。'
+            : 'Input and Shadcn Textarea are controlled; rejected proposals restore the accepted value. Base Textarea is uncontrolled; unrelated props updates must retain edits.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '比较鼠标和键盘 focus ring、disabled/readOnly、rows 及主题。surface customization 应只改变原生 editor，撤销后恢复。'
+            : 'Compare pointer/keyboard focus rings, disabled/readOnly, rows and theme. Surface customization targets only the native editor and is reversible.'
+        }
+      </li>
+      <li>
+        {
+          zh
+            ? '反复切换 Tabs 和 keepMounted，观察 view 计数和模型；移除重连会新建实例。受控值由 Maker 保留，非受控值在终止实例后重置是预期行为。'
+            : 'Repeat Tabs/keepMounted changes and inspect view counts and models. Reconnection creates new instances; the Maker retains controlled values while terminal teardown resets uncontrolled state.'
+        }
+      </li>
+    </ol>
+    <p>
+      {
+        zh
+          ? '混合列包含 Light Input/Tabs Root/List/Trigger 与 split Textarea/Content。原生 editor 本身是 part="control surface"，没有额外视觉 div；Base 原生外观刻意保留。仅使用正式 CLI companion，撤销网站 reset，不补算尺寸。跨 Shadow 的外部 labelledBy/describedBy IDREF、Form、auto-resize、Image View 及 Dialog #645 不属于本次验收保证。'
+          : 'Mixed combines Light Input/Tabs Root/List/Trigger with split Textarea/Content. The editor itself is part="control surface", without a visual div; Base keeps native appearance. Uses the real CLI companion and withdraws site reset without sizing patches. External cross-Shadow labelledBy/describedBy IDREFs, Form, auto-resize, Image View and Dialog #645 are outside this acceptance guarantee.'
+      }
+    </p>
+  </details>
+</section>
+<script>
+  import { mountShadowSplitS5 } from './shadow-split-s5';
+  const initialize = () =>
+    document
+      .querySelectorAll<HTMLElement>('[data-shadow-s5]')
+      .forEach((el) => mountShadowSplitS5(el));
+  initialize();
+  document.addEventListener('astro:page-load', initialize);
+</script>

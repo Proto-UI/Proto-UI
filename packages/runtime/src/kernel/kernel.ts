@@ -183,11 +183,15 @@ export function createKernel<P extends PropsBaseType>(
   // render
   // ----------------
   const renderOnce = () => {
+    const previousPhase = phase;
     setPhase('render');
-    const children = renderFn(renderer);
-    setPhase('unknown');
-
-    return children;
+    try {
+      return renderFn(renderer);
+    } finally {
+      // A synchronous host update can render inside an outward-event callback.
+      // Resume that invocation, including on render failure; never leak render/idle.
+      setPhase(previousPhase);
+    }
   };
 
   return {

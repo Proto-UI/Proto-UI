@@ -10,10 +10,16 @@ Core commands:
   add               Install adapter/prototype packages and generate component facade exports
 
 Style commands:
-  proto-ui shadcn --styles-dir ./src/styles
-  proto-ui tokens --input ./packages/prototypes --out ./src/styles/proto-ui-tokens.generated.css
+  proto-ui shadcn --styles-dir ./src/styles [--shadow-out <file.js>]
+  proto-ui brutalist --styles-dir ./src/styles [--shadow-out <file.js>]
+  proto-ui tokens --input ./packages/prototypes --out ./src/styles/proto-ui-tokens.generated.css [--shadow-out <file.js>]
   proto-ui style --out ./src/styles/proto-ui-style.css
   proto-ui theme shadcn --out ./src/styles/shadcn-theme.css
+
+Shadow companion (opt-in, controlled integration):
+  --shadow-out <file.js>  Also generate an ESM protoShadowStyleArtifact and same-stem .d.ts
+  Paths are relative to cwd. Regenerate the CSS, .js and .d.ts together.
+  This does not activate a split Shadow Adapter; init/add do not generate companions.
 
 Examples:
   proto-ui init

@@ -1,0 +1,171 @@
+id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+type: decision
+title: Root style application roles preserve canonical provenance through internal effects
+status: draft
+lifecycleRationale:
+  zh-CN: 当前仅准入已验证的内部 Root role 与有界 recipe；显式作者 role 语法、通用 placement channel 和未治理组合仍未决，未批准稳定化。
+  en: Only verified internal Root roles and bounded recipes are admitted; explicit author roles, a general placement channel and ungoverned combinations remain unsettled, with no stable admission approved.
+since: 0.3.0-alpha.0
+summary: Root effects carry canonical role provenance before lowering and through merge, Rule updates, runtime patches, and view replay without changing author handles, public token snapshots, or collapsed Adapter output.
+statement:
+  zh-CN: >-
+    Prototype Root 的 `feedback.style` token 在 host lowering 前获得 Core-owned application role，并通过内部 Root effect 保留原 token、physical token、role provenance 与 setup/rule/runtime 来源阶段。Merge、Rule、runtime patch/suppress 与 view replay 必须保留胜出 entry 的信息，且不改变既有 token 顺序、作者 handle 或公共 token snapshot。Canonical role 不由 Adapter 猜测；已知高歧义 token 保持 unresolved，unknown extension token 使用可区分的 surface fallback。此 transport 不自行激活 split Adapter。
+
+
+  en: >-
+    Prototype Root `feedback.style` tokens receive Core-owned application roles before host lowering. Internal Root effects retain original and physical tokens, role provenance, and setup/rule/runtime origin through merge, Rule updates, runtime patch/suppress, and view replay. Winning entries retain their information without changing token ordering, author handles, or public token snapshots. Adapters do not guess canonical roles; known ambiguous tokens remain unresolved and unknown extension tokens retain a distinguishable surface fallback. Transport alone does not activate a split Adapter.
+
+
+criteria:
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-A
+    text:
+      zh-CN: 第一阶段 application-role vocabulary 必须区分 `surface`、`placement`、`composite` 与 `unresolved`，且 classification result 必须保留原 token 与 role provenance。
+      en: The first-stage application-role vocabulary must distinguish `surface`, `placement`, `composite`, and `unresolved`, and each classification result must retain the original token and role provenance.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-B
+    text:
+      zh-CN: 已有明确单一语义的 token family 必须由 Core-owned canonical classifier 获得稳定 role；同一 token 的 canonical role 不得由 Adapter profile 或运行期配置改变。
+      en: Token families with one clear semantic role must receive a stable role from a Core-owned canonical classifier; Adapter profiles and runtime configuration must not change the canonical role of the same token.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-C
+    text:
+      zh-CN: 已知同时具有 surface、placement 或跨 domain 合理解释的高歧义 token 必须分类为 `unresolved`，不得用 CSS property 名称或当前 Adapter DOM shape 猜测目标。
+      en: Known high-ambiguity tokens with reasonable surface, placement, or cross-domain interpretations must classify as `unresolved` rather than guessing a target from CSS property names or the current Adapter DOM shape.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-D
+    text:
+      zh-CN: 未被 canonical 或 unresolved family 识别的 token 必须使用 `surface` fallback，并以 `fallback` provenance 与 canonical surface token 保持可区分。
+      en: Tokens not recognized by canonical or unresolved families must use the `surface` fallback and remain distinguishable from canonical surface tokens through `fallback` provenance.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-E
+    text:
+      zh-CN: 内部 Root effect transport 不得改变公共 author syntax、`StyleHandle` shape、token validation、公共 token snapshot、既有 semantic group/顺序或 collapsed Adapter 的 physical token 输出；既有 profile 仍把全部 role 投到原 target。
+      en: Internal Root effect transport must preserve public author syntax, the StyleHandle shape, token validation, public token snapshots, existing semantic groups/order, and collapsed Adapter physical-token output; existing profiles continue projecting every role to their original target.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F
+    text:
+      zh-CN: 当前禁止 `:` 的作者 token purity 规则保持不变；显式 role qualifier 与改变冲突分组的 role-aware merge 留给独立决策。Template node style 不进入 Root role transport。
+      en: The author token-purity rule forbidding ':' remains unchanged. Explicit role qualifiers and role-aware changes to conflict grouping remain separate decisions. Template-node style does not enter Root role transport.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-G
+    text:
+      zh-CN: Root effect entry 必须保留原 author token、当前 physical token、role、roleSource 与 setup/rule/runtime 来源阶段；Web Rule lowering 在改写 token 前解析 role，之后不得对带 selector 的字符串重新分类。缺失原始 provenance 的内部 unsafe selector token 保持 unresolved，不伪称 unknown author token 的 surface fallback。
+      en: Root effect entries retain author token, current physical token, role, roleSource, and setup/rule/runtime origin. Web Rule lowering resolves roles before rewriting tokens and must not reclassify selector-bearing strings. Internal unsafe selector tokens without original provenance remain unresolved rather than claiming an unknown-author surface fallback.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-H
+    text:
+      zh-CN: Semantic merge 保留胜出 token 的完整 entry；Rule activation/deactivation、runtime patch/suppress/clear、additional base 与 view epoch replay 保持 role 和来源阶段，不把 replay 误标为新 author 输入。导出快照不得共享可变内部 entry。
+      en: Semantic merge preserves the complete winning entry. Rule activation/deactivation, runtime patch/suppress/clear, additional base, and view-epoch replay retain roles and origin without treating replay as new author input. Exported snapshots must not share mutable internal entries.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-I
+    text:
+      zh-CN: Application role 表达语义归属，不要求一条 intent 只生成一个物理 target 的产物。Split profile 可以把 surface 的 decoration extent、font metrics 等必要尺寸贡献提供给 host，同时只在 inner surface 绘制可见样式；不得重复增加尺寸贡献或改变 canonical role。
+      en: An application role expresses semantic ownership, not a one-target restriction. A split profile may provide necessary sizing contributions such as surface decoration extents and font metrics to the host while painting visible styles only on the inner surface, without double-counting contributions or changing canonical roles.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-J
+    text:
+      zh-CN: 尺寸贡献与 surface 样式必须来自同一 token declaration、相同的 lowered condition 与合并结果，首个可见 view 和 runtime update 必须同步一致。不得靠首帧之后的 ResizeObserver 修补宣称等价。百分比约束和 font-relative 值必须保持求值依据，内部 fill 对齐不足以证明父布局分配等价。
+      en: Sizing contributions and surface styles must derive from the same token declaration, lowered condition, and merged result, synchronously agreeing at the first visible view and runtime updates. Post-frame ResizeObserver repair cannot establish equivalence. Percentage constraints and font-relative values must retain their evaluation basis; matching inner fill alone does not prove equivalent parent-layout allocation.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K
+    text:
+      zh-CN: Split projection 在修改任一 target 前必须验证完整 Root effect；known unresolved 或尚无已验证 recipe 的组合必须同步失败并保留上一份完整投影，诊断包含 prototype、原 token、origin 与修复方向。Unsupported recipe 不改变 canonical classification；不得静默丢弃 token、猜测 role 或退化到 collapsed。清理只撤销 Adapter 拥有的贡献。
+      en: Split projection validates the entire Root effect before mutating either target. Known unresolved tokens or combinations without a verified recipe fail synchronously and preserve the previous complete projection, with prototype, author token, origin, and corrective direction in diagnostics. Unsupported recipes do not change canonical classification; tokens must not be silently dropped, roles guessed, or the profile degraded to collapsed. Cleanup revokes only Adapter-owned contributions.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-L
+    text:
+      zh-CN: H1 在内部 vocabulary 中增加 `root-geometry` 与 `hit-testing`，不增加作者 API。首批精确准入 `translate-y-px`、`translate-x-0`、`translate-x-[calc(100%_-_2px)]`、`scale-[0.98]`、`will-change-transform` 为 canonical root-geometry，`pointer-events-none` 为 canonical hit-testing。其余未治理的 translate/scale/will-change/pointer-events 值仍 unresolved；分类准入不等于物理 recipe 已支持。新增信息必须沿用 G–H 的完整 provenance transport。
+      en: H1 adds internal `root-geometry` and `hit-testing` vocabulary without author APIs. The initial exact canonical root-geometry tokens are `translate-y-px`, `translate-x-0`, `translate-x-[calc(100%_-_2px)]`, `scale-[0.98]`, and `will-change-transform`; `pointer-events-none` is canonical hit-testing. Other ungoverned translate/scale/will-change/pointer-events values remain unresolved. Classification admission does not establish physical recipe support. New information retains the complete provenance transport under G-H.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-M
+    text:
+      zh-CN: H1 Root 变换必须作用于完整实例的视觉与命中几何；WC split 在 boundary 上执行一次，surface 与 slot 随动而不重复变换。保留 collapsed Root 的普通流尺寸分配、百分比参照与 transform origin；will-change-transform 跟随实际变换 target，包括 stacking/containing-block 效应。不得通过变换接管 slot 内容样式或状态。
+      en: H1 Root transforms affect the complete instance's visual and hit geometry. WC split applies them once at the boundary, carrying the surface and slot without a duplicate transform. Preserve collapsed Root normal-flow allocation, percentage reference, and transform origin. will-change-transform follows the physical transform target, including stacking and containing-block effects. Transform projection must not take ownership of slot styling or state.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-N
+    text:
+      zh-CN: H1 pointer-events-none 属于 Root 指针命中领域，在 WC split boundary 上投影；不是 surface 绘制或 placement 布局。Surface 继承该命中环境，不得自动恢复 auto。保留消费者后代以原生 CSS 显式恢复 pointer-events 的能力；该 token 不产生 disabled、键盘、焦点或 a11y 语义。
+      en: H1 pointer-events-none belongs to Root pointer hit testing and projects onto the WC split boundary, not surface paint or placement layout. The surface inherits this hit environment without automatically restoring auto. Preserve consumers' ability to explicitly restore descendant pointer-events with native CSS. This token creates no disabled, keyboard, focus, or accessibility semantics.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-O
+    text:
+      zh-CN: transition-all 的 canonical surface 归属不变；具备 recipe 后，其时长、延迟、缓动与条件必须同源协调 boundary 的尺寸/几何和 surface 绘制。动画中间帧及途中反向也必须保持贡献不重复、内外对齐；不以静态终点或移除拒绝 guard 代替证据。零声明 marker 的编译成员证据不意味着跨 Shadow selector 组合受支持。
+      en: transition-all retains canonical surface ownership. Once a recipe exists, its duration, delay, easing, and conditions coordinate boundary sizing/geometry and surface painting from the same source. Intermediate frames and reversals must keep contributions unduplicated and targets aligned; static endpoints or removal of a rejection guard are insufficient evidence. Compiled membership for zero-declaration markers does not establish cross-Shadow selector composition support.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-P
+    text:
+      zh-CN: I1 精确准入 hidden 为 canonical root-participation，relative 为 canonical root-geometry；新增内部 role 不改变作者 API、collapsed 输出或 G–H 的 provenance transport。其余未治理的隐藏、定位与几何 token 不由本次准入扩展。
+      en: I1 admits exactly hidden as canonical root-participation and relative as canonical root-geometry. The new internal role changes neither author APIs, collapsed output, nor provenance transport under G-H. This admission does not broaden other ungoverned hiding, positioning, or geometry tokens.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q
+    text:
+      zh-CN: hidden 控制完整 Root 的 box 参与；WC split 在 boundary 投影 display none，连同 surface 与 slot 一起退出布局和绘制，取消后恢复当前合并结果的显示方式。它不生成 ViewIntent、dispose、disabled 或 a11y intent；Web 正常命中、Tab 与 AX 排除必须由实际隐藏结果验证。Lifecycle、semantic tree hiding 与 legacy a11y state hidden 的兼容路径保持独立。
+      en: hidden controls whole-Root box participation. WC split projects display none on the boundary, removing the surface and slot together from layout and painting, and restores display from the current merged result when canceled. It creates no ViewIntent, disposal, disabled, or a11y intent; normal Web hit, Tab, and AX exclusion must be verified against actual hiding. Lifecycle, semantic-tree hiding, and legacy a11y state-hidden compatibility remain independent.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-R
+    text:
+      zh-CN: relative 表达完整 Root 的定位与后代坐标参照；WC split 只在 boundary 执行一次，不为 surface 额外建立定位包含块。Recipe 必须保留普通流占位、offset/z-index 组合及 absolute 后代的参照，不接管 slot 节点或样式；分类准入仍不能代替具体 recipe 的浏览器证据。
+      en: relative expresses whole-Root positioning and descendant coordinate reference. WC split applies it once on the boundary without making the surface an additional positioned containing block. Recipes must preserve normal-flow allocation, offset/z-index combinations, and absolute-descendant references without owning slot nodes or styling. Classification admission still does not replace browser evidence for a concrete recipe.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-S
+    text:
+      zh-CN: K1 精确准入 `-translate-x-1/2`、`-translate-y-1/2` 为 canonical root-geometry，不属于 placement 或 surface，且不扩大其余百分比/轴向变体。WC split 按 M 的完整 Root 语义在 boundary 执行一次，以完整外部盒为百分比参照；动态尺寸和 slot 换行不得改变居中依据，provenance 与 collapsed 输出保持不变。
+      en: K1 admits exactly `-translate-x-1/2` and `-translate-y-1/2` as canonical root-geometry, not placement or surface, without broadening other percentage or axis variants. WC split applies them once at the boundary under M's whole-Root semantics, using the complete outer box as the percentage reference. Dynamic sizing and slot wrapping must preserve centering, provenance, and collapsed output.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-T
+    text:
+      zh-CN: K1 的普通 Dialog 居中与 fade/zoom 组合必须由同一 token declaration、lowered condition、merge 结果和时序协调。整体几何动画作用于 boundary，surface 只保留视觉绘制，不重复变换；animate/fade/zoom 的 canonical surface 归属不因此改变。首帧、中间帧、途中反向和结束后必须保持中心、slot 随动和命中几何一致；分类或静态终点通过不代表 recipe 完成，也不承诺任意动画组合。
+      en: K1's ordinary Dialog centering and fade/zoom combination must coordinate from the same token declarations, lowered conditions, merge results, and timing. Whole-Root geometry animation targets the boundary while surface painting remains on the surface without duplicate transforms; canonical surface ownership of animate/fade/zoom is unchanged. Initial and intermediate frames, reversals, and completion must preserve centering, carried slots, and hit geometry. Classification or static endpoints alone do not establish recipe completion or arbitrary animation support.
+openQuestions:
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q-PLACEMENT-CHANNEL
+    question:
+      zh-CN: '`placement` 最终继续作为 Root `feedback.style` 的 application role，还是进入独立 information channel、Module 或 Host Capability？'
+      en: Should `placement` remain an application role of Root `feedback.style`, or move into a separate information channel, Module, or Host Capability?
+    context:
+      zh-CN: D1 暂把 placement 留在 Root effect；是否提升为通用独立 channel 仍需第二种 split projection 的证据。
+      en: D1 keeps placement in Root effects; promotion to an independent general channel awaits evidence from a second split projection.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q-EXPLICIT-ROLE
+    question:
+      zh-CN: 真实非默认需求出现后，应采用保留的 `surface:` / `placement:` grammar，还是结构化 role handle？
+      en: After a real non-default need appears, should authoring use reserved `surface:` or `placement:` grammar or structured role handles?
+    context:
+      zh-CN: 当前公共语法与 `C-FEEDBACK-STYLE-0004` 的冒号禁令均保持不变。
+      en: Current public syntax and the colon prohibition in `C-FEEDBACK-STYLE-0004` both remain unchanged.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q-COMPOSITE
+    question:
+      zh-CN: Composite display 与 geometry token 在 collapsed target 上如何重组、在 split target 上如何分解，才能保持 box model 与 baseline 等价？
+      en: How should composite display and geometry tokens recombine on collapsed targets and split across separate targets while preserving box-model and baseline equivalence?
+    context:
+      zh-CN: E1 批准必要的非绘制性 host 尺寸贡献；具体 recipe 仍需逐项浏览器证据，不承诺通用 box/baseline 等价。
+      en: E1 admits necessary non-paint host sizing contributions; concrete recipes still require scoped browser evidence rather than a universal box/baseline equivalence claim.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-Q-TEMPLATE
+    question:
+      zh-CN: Template node `style` 与 Root `feedback.style` 当前复用 handle shape；application role 是否只属于 Root style？
+      en: Template-node `style` and Root `feedback.style` currently share a handle shape; should application roles belong only to Root style?
+    context:
+      zh-CN: D1 明确当前 role transport 仅覆盖 Root，不扩大 Template authoring surface；未来 Template role 的必要性仍未决定。
+      en: D1 confines current role transport to Root without widening Template authoring; the need for future Template roles remains undecided.
+sources:
+  - path: internal/records/2026-09-12-shadow-dom-web-component-adapter-and-style-roles.zh-CN.md
+  - path: packages/core/src/spec/feedback/application-role.ts
+  - path: packages/core/src/spec/feedback/semantic-merge.ts
+  - path: internal/records/2026-09-12-shadow-public-delivery-and-root-routing-decision-packet.zh-CN.md
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0003
+    - C-FEEDBACK-STYLE-0004
+relates:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+  knowledge:
+    - K-HOST-SURFACE-ROLES-0001
+verifies:
+  tests:
+    - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved K1 exact half-translation Root geometry and same-source bounded Dialog fade/zoom obligations; draft retained.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved I1 exact hidden participation and relative coordinate ownership, retaining independent lifecycle/a11y paths and draft status.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved H1 exact S2 Root geometry and separate hit-testing ownership, unchanged author syntax, and same-source animated recipe obligations; draft retained.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Admitted E1 synchronous non-paint host sizing contributions with same-source declarations and fail-closed recipe boundaries.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Admitted D1 internal Root effect transport with pre-lowering provenance and unchanged collapsed output; no public split activation or author grammar expansion.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the approved non-integrated first slice for portable Root style application-role classification.
+tags:
+  - feedback
+  - style
+  - application-role
+  - surface
+  - placement
+  - compatibility

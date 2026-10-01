@@ -5,7 +5,9 @@ export { releaseWebTriggerSurface as releaseTriggerSurface } from '@proto.ui/ada
 export const {
   PROTO_INSTANCE: __WC_PROTO_INSTANCE,
   createLogicalInstance,
+  bindLogicalParent,
   markProtoInstance,
+  isProtoInstance,
   unbindProtoInstance,
   setProtoParent,
   getProtoParent,
@@ -19,6 +21,7 @@ export const {
   getLogicalEventRouteOwner,
   getLogicalEventRouteSurfaceForTarget,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   getLogicalTriggerSurfaceOwner,
   getLogicalTriggerSurfaceRoot,
   subscribeLogicalTriggerSurface,

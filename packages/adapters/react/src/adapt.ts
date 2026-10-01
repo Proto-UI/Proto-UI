@@ -45,6 +45,7 @@ import {
   bindLogicalEventTarget,
   createLogicalInstance,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   markProtoInstance,
   unbindProtoInstance,
   unbindLogicalEventTarget,
@@ -415,6 +416,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           rootEl,
           instanceToken: instanceTokenRef.current,
           resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
+          isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
           globalEl: typeof window === 'undefined' ? rootEl : window,
           isEnabled: () => eventGate.isEnabled?.() ?? true,
         });

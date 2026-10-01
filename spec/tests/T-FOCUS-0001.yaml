@@ -97,6 +97,12 @@ cases:
     expectation: focus-visible-equals-native-result-when-supported-modality-fallback-when-unsupported
 
 implementations:
+  - id: module-focus-scope-sequential-participation
+    kind: module-test
+    status: passing
+    path: packages/modules/focus/test/center.test.ts
+    required: true
+    consumesCases: [T-FOCUS-0001-CASE-NAV-PARTICIPATION]
   - id: runtime-focus-contract
     kind: runtime-test
     status: passing
@@ -122,6 +128,9 @@ implementations:
     required: true
     consumesCases:
       - T-FOCUS-0001-CASE-ENTRY-HOST-DELEGATION
+      - T-FOCUS-0001-CASE-ENTRY-DISABLE
+    notes:
+      - Covers live descendant tabindex/disabled/removal changes, entry disable/enable, terminal cleanup and reconnect. Native Tabs re-entry is additionally exercised by the S3 browser journey.
   - id: adapter-base-layout-readiness
     kind: adapter-test
     status: passing

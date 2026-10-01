@@ -44,6 +44,7 @@ import {
   bindLogicalEventTarget,
   createLogicalInstance,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   markProtoInstance,
   unbindProtoInstance,
   unbindLogicalEventTarget,
@@ -379,6 +380,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             rootEl,
             instanceToken,
             resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
+            isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
             globalEl: typeof window === 'undefined' ? rootEl : window,
             isEnabled: () => eventGate.isEnabled?.() ?? true,
           });

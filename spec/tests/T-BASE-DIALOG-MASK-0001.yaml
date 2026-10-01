@@ -5,6 +5,11 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers modal backdrop ownership, Transition-backed presence, passthrough, and the absence of independent dismissal policy.
 cases:
+  - id: T-BASE-DIALOG-MASK-0001-CASE-DEFAULT-FOCUS
+    title: Participating backdrop does not steal restored focus through a native default action
+    covers:
+      [P-BASE-DIALOG-MASK-MODAL, P-BASE-DIALOG-MASK-NO-DISMISS, P-BASE-DIALOG-MASK-PASSTHROUGH]
+    expectation: prevent-default-focus-without-owning-dismissal-or-affecting-passthrough
   - id: T-BASE-DIALOG-MASK-0001-CASE-PRESENCE
     title: Mask retains modal resources and its view through leave
     covers:
@@ -25,6 +30,7 @@ implementations:
     path: packages/prototypes/base/test/dialog.test.ts
     required: true
     consumesCases:
+      - T-BASE-DIALOG-MASK-0001-CASE-DEFAULT-FOCUS
       - T-BASE-DIALOG-MASK-0001-CASE-PRESENCE
       - T-BASE-DIALOG-MASK-0001-CASE-PARTICIPATION
     exercises: [P-BASE-DIALOG-MASK]
@@ -37,5 +43,8 @@ verifies:
         - P-BASE-DIALOG-MASK-NO-DISMISS
 exercises: { prototypes: [P-BASE-DIALOG-MASK] }
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added backdrop default-focus prevention evidence without assigning dismissal ownership to Mask.
   - { version: 0.2.0-rc.0, change: introduced, summary: Added Dialog Mask protocol coverage. }
 tags: [prototype, base, dialog, mask, test]

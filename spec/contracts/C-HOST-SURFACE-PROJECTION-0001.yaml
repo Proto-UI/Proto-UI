@@ -24,8 +24,8 @@ criteria:
       en: Instance lifecycle, logical parenthood, the semantic event boundary, exposes or refs, and adapter identity metadata such as `data-pui-root` must remain anchored to the boundaryTarget rather than moving to the raw physical control when the visual target diverges.
   - id: C-HOST-SURFACE-PROJECTION-0001-C
     text:
-      zh-CN: Prototype Root style、`feedback.style` 翻译结果与 adapter-normalized surface class/style 必须投影到 surfaceTarget；wrapper 不得因误收这些视觉输入而形成额外边框、背景、命中错觉或无法命中的 focus pseudo-class。
-      en: Prototype Root styling, translated `feedback.style` output, and adapter-normalized surface class or style must project to the surfaceTarget; a wrapper must not accidentally receive those visual inputs and create an extra border, background, misleading hit area, or focus pseudo-class that can never match.
+      zh-CN: Root style 的可见 surface 绘制与 adapter-normalized surface class/style 必须投影到 surfaceTarget；wrapper 不得形成额外可见边框、背景、命中错觉或无法命中的 focus pseudo-class。明确治理的 split profile 可以把 Root placement 投到 boundary，并为保持布局语义向 boundary 提供 surface intent 的必要非绘制性尺寸贡献；不得因此迁移 surface 绘制或其它 domain ownership。既有 profile 的 target 映射保持不变。
+      en: Visible Root surface painting and adapter-normalized surface class/style must project to surfaceTarget without creating an extra visible border, background, misleading hit area, or unmatchable focus pseudo-class on the wrapper. An explicitly governed split profile may project Root placement to the boundary and provide necessary non-paint sizing contributions from surface intent to preserve layout semantics; this must not move surface painting or other domain ownership. Existing profile target mappings remain unchanged.
   - id: C-HOST-SURFACE-PROJECTION-0001-D
     text:
       zh-CN: Surface role 不得被解释为通用 focus、a11y、event、hit-testing 或 native-property target；这些 domain 继续由各自 contract/host capability 决定，并可在具体 profile 中与 surfaceTarget 指向同一物理对象。
@@ -42,7 +42,22 @@ criteria:
     text:
       zh-CN: 当 adapter 把 rule 翻译成依赖 Web state attribute 或其他 selector context 的 surface style，并且 boundaryTarget 与 surfaceTarget 分离时，attached view 必须在 surfaceTarget 上提供等价的 selector context；canonical instance state exposure 仍保留在 boundaryTarget，surface 上的副本只属于 presentation translation，不得因此获得第二份 state ownership 或 adapter identity metadata。
       en: When an adapter translates a rule into surface styling that depends on Web state attributes or other selector context while boundaryTarget and surfaceTarget diverge, the attached view must provide equivalent selector context on the surfaceTarget. Canonical instance-state exposure remains on the boundaryTarget; the surface copy belongs only to presentation translation and must not create a second state owner or receive adapter identity metadata.
+  - id: C-HOST-SURFACE-PROJECTION-0001-H
+    text:
+      zh-CN: H1 的完整 Root 动态几何与指针命中投影分别遵守 D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 M–N；在 WC split 中两者的物理 target 都是 boundary，但不因此合并为 surface 或 placement 领域。该有界映射不改变其它 Adapter 的既有 target 或其它未治理 host domain。
+      en: H1 whole-Root dynamic geometry and pointer hit projection respectively follow D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 M-N. Both physically target the WC split boundary without becoming surface or placement ownership. This bounded mapping changes neither existing targets in other Adapters nor other ungoverned host domains.
+    references:
+      decisions:
+        - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+          since: 0.3.0-alpha.0
+          anchors:
+            [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-M, D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-N]
+  - id: C-HOST-SURFACE-PROJECTION-0001-I
+    text:
+      zh-CN: I1 的 hidden 布局参与与 relative 坐标参照遵守 D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 Q–R，在 WC split boundary 上投影；surface 不因这些职责成为 lifecycle、a11y 或坐标的第二个 owner。其它 Adapter 的既有 target 映射保持不变。
+      en: I1 hidden participation and relative coordinate reference follow D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 Q-R and project onto the WC split boundary. These responsibilities do not make the surface a second lifecycle, accessibility, or coordinate owner. Existing target mappings in other Adapters remain unchanged.
 sources:
+  - path: internal/records/2026-09-13-shadow-g1-s1-approved-goal.zh-CN.md
   - path: internal/records/2026-08-02-host-surface-projection.zh-CN.md
   - path: packages/adapters/base/src/host/surface-projection.ts
   - path: packages/adapters/web-component/src/adapt.ts
@@ -53,10 +68,23 @@ dependsOn:
     - C-FEEDBACK-STYLE-0003
   knowledge:
     - K-HOST-SURFACE-ROLES-0001
+relates:
+  decisions:
+    - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      since: 0.3.0-alpha.0
 verifies:
   tests:
     - T-HOST-SURFACE-PROJECTION-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound I1 whole-Root participation and coordinate projection without widening surface ownership or changing other Adapter targets.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound H1 WC split whole-Root geometry and separate pointer hit testing to the boundary without broadening surface ownership.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Admitted E1 non-paint boundary sizing contributions for governed split profiles while preserving visible surface and domain ownership.
   - version: 0.2.0-rc.7
     change: revised
     summary: Required state-dependent translated styles to receive equivalent selector context on split presentation surfaces.
