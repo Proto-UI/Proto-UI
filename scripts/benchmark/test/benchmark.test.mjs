@@ -13,6 +13,7 @@ import {
   preparePacket,
   dryRun,
   assertFormalExecutionBlocked,
+  renderReport,
 } from '../benchmark.mjs';
 import {
   schemas,
@@ -31,12 +32,15 @@ import {
   writeNew,
   sealEvidence,
   verifyEvidence,
+  listFiles,
 } from '../evidence.mjs';
 import { verifyRun } from '../verify-run.mjs';
 import {
   retainBrowserIdentity,
   negativeControlDeviation,
   fixtureArtifact,
+  calibrationSourcePaths,
+  verifySourceImports,
 } from '../calibration-policy.mjs';
 const temporary = () => fs.mkdtempSync(path.join(os.tmpdir(), 'proto-benchmark-test-'));
 const copy = (value) => structuredClone(value);
@@ -346,7 +350,7 @@ test('rehashed provenance and source-policy contradictions are rejected', async 
       else scoring.aggregation = 'A changed scoring policy absent from the source snapshot';
       fs.writeFileSync(path.join(dir, 'scoring.json'), json(scoring));
       manifest.scoring.sha256 = start.scoring.sha256 = sha256(json(scoring));
-    } else manifest.plan.repairBudget = 99;
+    } else manifest.harness.os = 'Changed after the run started';
     fs.writeFileSync(path.join(dir, 'run.json'), json(manifest));
     fs.writeFileSync(path.join(dir, 'run-start.json'), json(start));
     fs.unlinkSync(path.join(dir, 'inventory.json'));
@@ -429,6 +433,10 @@ test('missing cells need typed, count-bound failure evidence and matching abort 
             completedCells: mode === 'wrong-count' ? 2 : 1,
           };
     fs.writeFileSync(path.join(dir, 'failure.json'), json(failure));
+    fs.writeFileSync(
+      path.join(dir, 'report.md'),
+      renderReport(readJson(path.join(dir, 'run.json')), rows, new Error(message))
+    );
     fs.unlinkSync(path.join(dir, 'inventory.json'));
     fs.unlinkSync(path.join(dir, 'seal.json'));
     sealEvidence(dir);
@@ -460,6 +468,468 @@ test('initialization failure is typed and cannot claim completed cells without a
       .map(JSON.stringify)
       .join('\n') + '\n'
   );
+  writeNew(dir, 'report.md', renderReport(undefined, [], new Error(message)));
   sealEvidence(dir);
   assert.equal(verifyRun(dir).status, 'blocked-before-manifest');
+});
+
+function reseal(dir) {
+  fs.unlinkSync(path.join(dir, 'inventory.json'));
+  fs.unlinkSync(path.join(dir, 'seal.json'));
+  sealEvidence(dir);
+}
+
+test('all observed harness provenance is bound to retained sources and raw environments', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const field of ['node', 'os', 'lockfileSha256', 'sourceInventory', 'packageManager']) {
+    const dir = path.join(temporary(), field);
+    fs.cpSync(original, dir, { recursive: true });
+    for (const file of ['run.json', 'run-start.json']) {
+      const run = readJson(path.join(dir, file));
+      if (['node', 'os'].includes(field)) run.harness[field] = 'FAKE-PROVENANCE';
+      else if (field === 'packageManager') run.harness.packageManager = measured('fake-pm@999');
+      else
+        run.harness.toolchain.value[field] =
+          field === 'lockfileSha256' ? '0'.repeat(64) : 'missing-inventory.json';
+      fs.writeFileSync(path.join(dir, file), json(run));
+    }
+    reseal(dir);
+    assert.throws(() => verifyRun(dir), /Harness Node\/OS|dependency\/inventory provenance/);
+  }
+});
+
+test('every completed cell needs exactly one preceding start in declared order', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const mode of ['missing', 'duplicate', 'reordered']) {
+    const dir = path.join(temporary(), mode);
+    fs.cpSync(original, dir, { recursive: true });
+    let events = fs
+      .readFileSync(path.join(dir, 'events.jsonl'), 'utf8')
+      .trim()
+      .split('\n')
+      .map(JSON.parse);
+    const start = events.findIndex((event) => event.type === 'cell-start');
+    if (mode === 'missing') events.splice(start, 1);
+    else if (mode === 'duplicate') events.splice(start, 0, { ...events[start] });
+    else [events[start], events[start + 1]] = [events[start + 1], events[start]];
+    fs.writeFileSync(
+      path.join(dir, 'events.jsonl'),
+      events.map((event, index) => JSON.stringify({ ...event, seq: index + 1 })).join('\n') + '\n'
+    );
+    reseal(dir);
+    assert.throws(() => verifyRun(dir), /Cell start|Cell finish/);
+  }
+});
+
+test('calibration cannot claim model participants, verified isolation, repairs or unmeasured costs', async () => {
+  const dir = path.join(temporary(), 'original');
+  await dryRun({
+    output: dir,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  const run = readJson(path.join(dir, 'run.json'));
+  for (const mutate of [
+    (v) => {
+      v.participant.kind = 'model';
+    },
+    (v) => {
+      v.participant.modelId = measured('fake-model');
+    },
+    (v) => {
+      v.exposure.boundary = 'verified-external-isolation';
+    },
+    (v) => {
+      v.exposure.audit = measured({ verified: true });
+    },
+  ]) {
+    const value = copy(run);
+    mutate(value);
+    assert.throws(() => validateDocument('run', value), /Calibration/);
+  }
+  const result = readJson(path.join(dir, 'results.json'))[0];
+  for (const key of [
+    'firstPassCorrectness',
+    'finalCorrectness',
+    'repairCycles',
+    'tokens',
+    'humanWork',
+    'requirementRecall',
+  ]) {
+    const value = copy(result);
+    if (key === 'repairCycles') value.metrics[key] = 9;
+    else if (key.endsWith('Correctness'))
+      value.metrics[key] = measured({
+        scope: 'executed-public-calibration-checks-only',
+        status: 'pass',
+      });
+    else value.metrics[key] = measured(123);
+    assert.throws(() => validateDocument('result', value), /Calibration|calibration/);
+  }
+});
+
+test('reports, mandatory source, orphan cells, task identity and duplicate failure evidence are bound', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const mode of [
+    'report',
+    'missing-report',
+    'core-source',
+    'import-source',
+    'orphan',
+    'task-id',
+    'failure-sidecar',
+  ]) {
+    const dir = path.join(temporary(), mode);
+    fs.cpSync(original, dir, { recursive: true });
+    const cell = 'cells/dialog-open-close/blind/1';
+    if (mode === 'report')
+      fs.writeFileSync(path.join(dir, 'report.md'), 'Invented 100 percent pass report');
+    else if (mode === 'missing-report') fs.unlinkSync(path.join(dir, 'report.md'));
+    else if (mode.endsWith('source')) {
+      const omitted =
+        mode === 'core-source'
+          ? 'scripts/benchmark/browser-calibration.mjs'
+          : 'scripts/benchmark/report.mjs';
+      const inventory = readJson(path.join(dir, 'source-inventory.json'));
+      inventory.files = inventory.files.filter((file) => file.path !== omitted);
+      fs.writeFileSync(path.join(dir, 'source-inventory.json'), json(inventory));
+      fs.unlinkSync(path.join(dir, 'source', omitted));
+      for (const file of ['run.json', 'run-start.json']) {
+        const run = readJson(path.join(dir, file));
+        run.harness.sourceDigest = sha256(json(inventory.files));
+        fs.writeFileSync(path.join(dir, file), json(run));
+      }
+    } else if (mode === 'orphan')
+      fs.cpSync(path.join(dir, cell), path.join(dir, 'cells/tabs-manual-activation/knowledge/99'), {
+        recursive: true,
+      });
+    else if (mode === 'failure-sidecar')
+      fs.writeFileSync(path.join(dir, cell, 'evidence/failures.json'), '[]');
+    else {
+      const task = readJson(
+        path.join(dir, 'source/benchmarks/interaction/cases/tabs-manual-activation.json')
+      );
+      fs.writeFileSync(path.join(dir, 'tasks/dialog-open-close.json'), json(task));
+      const rows = readJson(path.join(dir, 'results.json'));
+      const row = rows[0];
+      const html = fs.readFileSync(
+        path.join(dir, 'source/benchmarks/interaction/fixtures/tabs.html')
+      );
+      const prompt = `${task.title}\n\n${task.requirements}\n`;
+      fs.writeFileSync(path.join(dir, cell, 'artifact.html'), html);
+      fs.writeFileSync(path.join(dir, cell, 'participant/task.txt'), prompt);
+      row.oracleRef = task.oracleRef;
+      row.exclusions = task.exclusions;
+      row.artifactSha256 = sha256(html);
+      row.promptSha256 = sha256(prompt);
+      fs.writeFileSync(path.join(dir, 'results.json'), json(rows));
+      fs.writeFileSync(path.join(dir, cell, 'result.json'), json(row));
+      const exposure = readJson(path.join(dir, cell, 'exposure.json'));
+      exposure.promptSha256 = row.promptSha256;
+      fs.writeFileSync(path.join(dir, cell, 'exposure.json'), json(exposure));
+    }
+    reseal(dir);
+    assert.doesNotThrow(() => verifyEvidence(dir));
+    const expected =
+      mode === 'report'
+        ? /Report differs/
+        : mode === 'missing-report'
+          ? /ENOENT/
+          : mode === 'core-source'
+            ? /public input allowlist/
+            : mode === 'import-source'
+              ? /relative harness import/
+              : mode === 'orphan'
+                ? /Orphan\/unplanned/
+                : mode === 'task-id'
+                  ? /Task\/result mismatch|Task differs from source snapshot/
+                  : /Failure sidecar/;
+    assert.throws(() => verifyRun(dir), expected);
+  }
+});
+
+test('public capture excludes undeclared files and dirty patches, and rejects unselected private cases', () => {
+  const directory = temporary();
+  const isolated = path.join(directory, 'repo');
+  fs.mkdirSync(isolated);
+  const { dataset, cases } = loadDataset();
+  for (const file of calibrationSourcePaths(dataset, cases)) {
+    fs.mkdirSync(path.dirname(path.join(isolated, file)), { recursive: true });
+    fs.copyFileSync(path.join(root, file), path.join(isolated, file));
+  }
+  fs.symlinkSync(path.join(root, 'node_modules'), path.join(isolated, 'node_modules'), 'dir');
+  fs.mkdirSync(path.join(isolated, 'apps/www'), { recursive: true });
+  fs.symlinkSync(
+    path.join(root, 'apps/www/node_modules'),
+    path.join(isolated, 'apps/www/node_modules'),
+    'dir'
+  );
+  const tracked = 'PRIVATE_TRACKED_' + path.basename(directory);
+  const untracked = 'PRIVATE_UNTRACKED_' + path.basename(directory);
+  const historical = 'PRIVATE_DELETED_' + path.basename(directory);
+  const readme = path.join(isolated, 'benchmarks/interaction/README.md');
+  const finalReadme = fs.readFileSync(readme, 'utf8');
+  fs.writeFileSync(readme, finalReadme + '\n' + historical);
+  const omitted = 'benchmarks/interaction/unlisted-audit-canary.txt';
+  fs.writeFileSync(path.join(isolated, omitted), 'Harmless baseline');
+  for (const args of [
+    ['init'],
+    ['add', '--', omitted, 'benchmarks/interaction/README.md'],
+    [
+      '-c',
+      'user.name=Calibration Test',
+      '-c',
+      'user.email=calibration@example.invalid',
+      'commit',
+      '-m',
+      'Create harmless test fixture',
+    ],
+  ]) {
+    const result = spawnSync('git', args, { cwd: isolated, encoding: 'utf8' });
+    assert.equal(result.status, 0, result.stderr);
+  }
+  fs.writeFileSync(readme, finalReadme);
+  fs.writeFileSync(path.join(isolated, omitted), tracked);
+  fs.writeFileSync(path.join(isolated, 'scripts/benchmark/untracked-audit-canary.txt'), untracked);
+  const output = path.join(directory, 'public-output');
+  const args = [
+    'scripts/benchmark/benchmark.mjs',
+    'dry-run',
+    '--case',
+    'dialog-open-close',
+    '--arm',
+    'blind',
+    '--chromium',
+    '/missing-public-calibration-chromium',
+    '--out',
+    output,
+  ];
+  const run = spawnSync(process.execPath, args, {
+    cwd: isolated,
+    encoding: 'utf8',
+    timeout: 15000,
+  });
+  assert.equal(run.status, 1, run.stderr);
+  assert.equal(verifyRun(output).cells, 1);
+  assert.equal(verifyRun(output).sourceCapturePolicy, 'explicit-public-final-snapshot-no-history');
+  assert.equal(fs.existsSync(path.join(output, 'source-worktree.patch')), false);
+  assert.equal(
+    fs.readFileSync(path.join(output, 'source/benchmarks/interaction/README.md'), 'utf8'),
+    finalReadme
+  );
+  for (const file of listFiles(output)) {
+    const content = fs.readFileSync(path.join(output, file)).toString();
+    assert.ok(
+      !content.includes(tracked) && !content.includes(untracked) && !content.includes(historical),
+      `Leaked canary in ${file}`
+    );
+  }
+  const privateCase = path.join(isolated, 'benchmarks/interaction/cases/select-keyboard.json');
+  const changed = readJson(privateCase);
+  changed.origin = 'private-authoring';
+  changed.split = 'held-out';
+  changed.requirements = 'HARMLESS_PRIVATE_' + path.basename(directory);
+  fs.writeFileSync(privateCase, json(changed));
+  const forbidden = path.join(directory, 'must-not-exist');
+  args[args.length - 1] = forbidden;
+  const rejected = spawnSync(process.execPath, args, {
+    cwd: isolated,
+    encoding: 'utf8',
+    timeout: 15000,
+  });
+  assert.equal(rejected.status, 1);
+  assert.match(rejected.stderr, /BLOCKED/);
+  assert.equal(fs.existsSync(forbidden), false);
+  assert.ok(!rejected.stderr.includes(changed.requirements));
+});
+
+test('current capture profile cannot retain history, omit its receipt, or downgrade its identity', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const mode of [
+    'historical-patch',
+    'capture-paths',
+    'capture-pointer',
+    'missing-receipt',
+    'profile-downgrade',
+  ]) {
+    const dir = path.join(temporary(), mode);
+    fs.cpSync(original, dir, { recursive: true });
+    if (mode === 'historical-patch')
+      writeNew(dir, 'source-worktree.patch', 'Harmless unwanted historical text');
+    else if (mode === 'missing-receipt') fs.unlinkSync(path.join(dir, 'source-capture.json'));
+    else if (mode === 'capture-paths') {
+      const receipt = readJson(path.join(dir, 'source-capture.json'));
+      receipt.paths.pop();
+      fs.writeFileSync(path.join(dir, 'source-capture.json'), json(receipt));
+    } else
+      for (const file of ['run.json', 'run-start.json']) {
+        const run = readJson(path.join(dir, file));
+        if (mode === 'capture-pointer')
+          run.harness.toolchain.value.sourceCapture = 'somewhere-else.json';
+        else run.harness.version = 'p0-calibration-v1';
+        fs.writeFileSync(path.join(dir, file), json(run));
+      }
+    reseal(dir);
+    assert.doesNotThrow(() => verifyEvidence(dir));
+    assert.throws(
+      () => verifyRun(dir),
+      /historical dirty patches|Source capture receipt|ENOENT|Harness profile differs/
+    );
+  }
+});
+
+test('aborted cells retain input, scope, evidence and failure bindings without inventing a result', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  const cell = 'cells/dialog-open-close/blind/1';
+  for (const mode of [
+    'valid',
+    'partial-packet',
+    'artifact',
+    'scope',
+    'orphan-result',
+    'sidecar',
+    'packet',
+  ]) {
+    const dir = path.join(temporary(), mode);
+    fs.cpSync(original, dir, { recursive: true });
+    const message = 'Synthetic source drift after evaluator returned';
+    fs.writeFileSync(path.join(dir, 'results.json'), json([]));
+    fs.writeFileSync(
+      path.join(dir, 'failure.json'),
+      json({ status: 'blocked', message, stack: message, completedCells: 0 })
+    );
+    fs.unlinkSync(path.join(dir, cell, 'result.json'));
+    const events = fs
+      .readFileSync(path.join(dir, 'events.jsonl'), 'utf8')
+      .trim()
+      .split('\n')
+      .map(JSON.parse)
+      .slice(0, mode === 'partial-packet' ? 1 : 2);
+    events.push(
+      { type: 'run-aborted', message, completedCells: 0 },
+      { type: 'run-finish', aborted: true, completedCells: 0 }
+    );
+    fs.writeFileSync(
+      path.join(dir, 'events.jsonl'),
+      events.map((event, index) => JSON.stringify({ ...event, seq: index + 1 })).join('\n') + '\n'
+    );
+    fs.writeFileSync(
+      path.join(dir, 'report.md'),
+      renderReport(readJson(path.join(dir, 'run.json')), [], new Error(message))
+    );
+    if (mode === 'partial-packet')
+      for (const file of ['evidence', 'exposure.json', 'artifact.html', 'evaluator-output.json'])
+        fs.rmSync(path.join(dir, cell, file), { recursive: true });
+    else if (mode === 'artifact')
+      fs.writeFileSync(path.join(dir, cell, 'artifact.html'), '<html>Wrong fixture</html>');
+    else if (mode === 'scope') {
+      const raw = readJson(path.join(dir, cell, 'evaluator-output.json'));
+      raw.environment.scope = 'model-evaluation';
+      fs.writeFileSync(path.join(dir, cell, 'evaluator-output.json'), json(raw));
+    } else if (mode === 'orphan-result')
+      fs.copyFileSync(
+        path.join(original, cell, 'result.json'),
+        path.join(dir, cell, 'result.json')
+      );
+    else if (mode === 'sidecar')
+      fs.writeFileSync(path.join(dir, cell, 'evidence/failures.json'), json([]));
+    else if (mode === 'packet')
+      fs.writeFileSync(path.join(dir, cell, 'participant/task.txt'), 'Wrong task');
+    if (mode === 'partial-packet') {
+      const run = readJson(path.join(dir, 'run.json'));
+      run.harness.browser = readJson(path.join(dir, 'run-start.json')).harness.browser;
+      fs.writeFileSync(path.join(dir, 'run.json'), json(run));
+    }
+    reseal(dir);
+    if (['valid', 'partial-packet'].includes(mode)) assert.equal(verifyRun(dir).status, 'aborted');
+    else
+      assert.throws(
+        () => verifyRun(dir),
+        /Artifact differs|Raw evaluator scope|Orphan cell result|Failure sidecar|Prompt differs/
+      );
+  }
+});
+
+test('initialization cannot hide cell lifecycle entries or evaluated artifacts', () => {
+  for (const mode of ['journal', 'cell-file']) {
+    const dir = temporary();
+    const message = 'Synthetic initialization failure';
+    writeNew(dir, 'results.json', json([]));
+    writeNew(
+      dir,
+      'failure.json',
+      json({ status: 'blocked', message, stack: message, completedCells: 0 })
+    );
+    const events = [{ type: 'run-aborted', message, completedCells: 0 }];
+    if (mode === 'journal')
+      events.push({ type: 'cell-start' }, { type: 'cell-finish', status: 'pass' });
+    else
+      writeNew(dir, 'cells/dialog-open-close/blind/1/evaluator-output.json', json({ checks: [] }));
+    events.push({ type: 'run-finish', aborted: true, completedCells: 0 });
+    writeNew(
+      dir,
+      'events.jsonl',
+      events.map((event, index) => JSON.stringify({ ...event, seq: index + 1 })).join('\n') + '\n'
+    );
+    writeNew(dir, 'report.md', renderReport(undefined, [], new Error(message)));
+    sealEvidence(dir);
+    assert.throws(
+      () => verifyRun(dir),
+      /Missing run manifest without valid initialization failure/
+    );
+  }
+});
+
+test('relative source closure includes side-effect, named, re-export and dynamic imports', () => {
+  const dir = temporary();
+  for (const statement of [
+    "import './omitted.mjs';",
+    "import { value } from './omitted.mjs';",
+    "export { value } from './omitted.mjs';",
+    "await import('./omitted.mjs');",
+    'await import(`./omitted.mjs`);',
+  ]) {
+    fs.mkdirSync(path.join(dir, 'scripts/benchmark'), { recursive: true });
+    fs.writeFileSync(path.join(dir, 'scripts/benchmark/test.mjs'), statement);
+    assert.throws(
+      () => verifySourceImports(dir, ['scripts/benchmark/test.mjs']),
+      /omits a relative harness import/
+    );
+  }
+  fs.writeFileSync(
+    path.join(dir, 'scripts/benchmark/test.mjs'),
+    `// import './comment-only.mjs';\nconst example = "import './string-only.mjs';";`
+  );
+  assert.doesNotThrow(() => verifySourceImports(dir, ['scripts/benchmark/test.mjs']));
 });

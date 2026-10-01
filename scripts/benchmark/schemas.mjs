@@ -124,6 +124,22 @@ export const schemas = {
       limitations: strings,
     })
   ),
+  sourceCapture: schema(
+    'source-capture',
+    object({
+      schemaVersion: { const: 1 },
+      policy: { const: 'explicit-public-final-snapshot-no-history' },
+      paths: array(string, 1),
+    })
+  ),
+  sourceInventory: schema(
+    'source-inventory',
+    object({
+      gitHead: sha,
+      note: string,
+      files: array(object({ path: string, sha256: digest }), 1),
+    })
+  ),
   scoring: schema(
     'scoring',
     object({
@@ -371,6 +387,20 @@ export function validateDocument(kind, value) {
       new Set(value.plan.arms).size !== value.plan.arms.length)
   )
     throw new Error('Duplicate planned cases or arms');
+  if (kind === 'run' && value.kind === 'calibration-stub') {
+    if (
+      value.participant.kind !== 'handwritten-fixture' ||
+      value.exposure.boundary !== 'public-calibration-only' ||
+      value.exposure.audit.value !== null ||
+      value.plan.repairBudget !== 0
+    )
+      throw new Error(
+        'Calibration manifests require a handwritten fixture, public-only boundary, unavailable audit and zero repair budget'
+      );
+    for (const [key, field] of Object.entries(value.participant))
+      if (key !== 'kind' && field.value !== null)
+        throw new Error(`Calibration participant metadata must be unavailable: ${key}`);
+  }
   if (kind === 'run' && value.kind === 'model-evaluation') {
     if (
       !value.scoring.frozen ||
@@ -390,6 +420,27 @@ export function validateDocument(kind, value) {
       throw new Error('Dimension aggregates differ from raw checks');
     if (value.status !== outcomeStatus(value.checks))
       throw new Error('Result status differs from raw checks');
+    for (const key of ['firstPassCorrectness', 'finalCorrectness']) {
+      const expected = {
+        value: { scope: 'executed-public-calibration-checks-only', status: value.status },
+        unavailableReason: null,
+      };
+      if (JSON.stringify(value.metrics[key]) !== JSON.stringify(expected))
+        throw new Error(`Calibration correctness metric differs from checks: ${key}`);
+    }
+    if (value.metrics.repairCycles !== 0)
+      throw new Error('Calibration fixture runs do not perform repairs');
+    for (const key of [
+      'requirementRecall',
+      'falseRequirements',
+      'discoveryCrosswalk',
+      'convergence',
+      'tokens',
+      'compute',
+      'humanWork',
+    ])
+      if (value.metrics[key].value !== null)
+        throw new Error(`Uninstrumented calibration metric must be unavailable: ${key}`);
   }
   return value;
 }
