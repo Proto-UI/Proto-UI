@@ -2,7 +2,7 @@
 //!
 //! `native/gpui/fixtures/base-button-session.json` is every message
 //! `createPeerSession` sent for `@proto.ui/prototypes-base/button`, recorded by
-//! `scripts/gpui/generate-button-session-fixture.mts`. These cases install that
+//! `scripts/gpui/generate-session-fixtures.mts`. These cases install that
 //! recorded transaction in the host model, build its surfaces, render them in a
 //! GPUI window and click them, so every step runs on what the peer actually
 //! sends rather than on what a hand-written example says it sends.
