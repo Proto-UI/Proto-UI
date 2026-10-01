@@ -59,6 +59,7 @@ fn surface(
         session: session.into(),
         style: boxed(left),
         focus,
+        a11y: None,
         children: children.into_iter().map(SurfaceChild::from).collect(),
     }
 }

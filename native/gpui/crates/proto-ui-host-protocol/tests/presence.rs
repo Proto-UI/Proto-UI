@@ -169,4 +169,14 @@ fn optional_fields_may_be_omitted() {
     });
     reads_as_peer_message(without(focus, &["options", "preventScroll"]))
         .expect("`options.preventScroll` is optional");
+    let part = example("hostToPeer", "session.open", |example| {
+        example["parentSessionId"].is_string()
+    });
+    reads_as_host_message(without(part, &["parentSessionId"]))
+        .expect("`parentSessionId` is optional: a top-level instance has no parent");
+    let trigger = example("peerToHost", "projection.install", |example| {
+        example["transaction"]["events"]["trigger"].is_object()
+    });
+    reads_as_peer_message(without(trigger, &["transaction", "events", "trigger"]))
+        .expect("`events.trigger` is optional: most instances are not triggers");
 }
