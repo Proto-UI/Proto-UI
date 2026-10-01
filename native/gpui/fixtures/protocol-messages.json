@@ -60,6 +60,14 @@
       }
     },
     {
+      "kind": "session.open",
+      "sessionId": "s-3",
+      "instanceId": "switch-thumb-1",
+      "prototypeKey": "base-switch-thumb",
+      "props": {},
+      "parentSessionId": "s-2"
+    },
+    {
       "kind": "props.set",
       "sessionId": "s-1",
       "props": {
@@ -206,7 +214,10 @@
               "scope": "global",
               "type": "key.down"
             }
-          ]
+          ],
+          "trigger": {
+            "anchor": "s-1"
+          }
         },
         "focus": {
           "targets": [

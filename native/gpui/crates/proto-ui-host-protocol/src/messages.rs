@@ -79,6 +79,10 @@ pub struct SessionOpen {
     pub instance_id: InstanceId,
     pub prototype_key: String,
     pub props: WireRecord,
+    /// The open session whose instance this one belongs to, such as a Switch
+    /// for its thumb. Absent for a top-level instance.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_session_id: Option<SessionId>,
 }
 
 /// `ok` or `failed`.
@@ -250,6 +254,9 @@ pub struct A11ySnapshotMessage {
     pub snapshot: Option<A11ySnapshotWire>,
 }
 
+/// Ends a session, and before it every session opened inside it, so that no
+/// instance outlives the one it belongs to. The peer reports
+/// `session.disposed` for each, a part before the instance it belongs to.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionDispose {
@@ -327,7 +334,9 @@ envelopes!(
     PeerToHostMessage {
         PeerHello(PeerHello) => "peer.hello",
         SessionOpened(SessionOpened) => "session.opened",
-        ProjectionInstall(ProjectionInstall) => "projection.install",
+        // Boxed: a transaction carries a whole template and plan, several
+        // times the size of any other message.
+        ProjectionInstall(Box<ProjectionInstall>) => "projection.install",
         ProjectionActivate(ProjectionActivate) => "projection.activate",
         LeaseRelease(LeaseRelease) => "lease.release",
         DefaultActionPrevent(DefaultActionPrevent) => "default-action.prevent",

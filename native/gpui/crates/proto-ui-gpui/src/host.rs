@@ -34,20 +34,31 @@
 //! reports the blur before the focus, in the order a browser dispatches them.
 //! GPUI's per-handle focus callbacks are only the trigger for that comparison:
 //! several of them fire for one change, in an order that is not guaranteed.
+//!
+//! # Accessibility
+//!
+//! A session's root surface carries the projection of its accessibility
+//! snapshot, see [`crate::a11y`]. Text is rendered with an id, which GPUI
+//! needs to report it: a button's name comes from the text beneath it. When
+//! assistive technology activates the root, the host routes a click no
+//! pointer made, which reaches the Prototype the way any activation does.
 
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::panic::Location;
 use std::rc::Rc;
 
 use gpui::prelude::*;
 use gpui::{
-    canvas, div, AnyElement, Context, DispatchPhase, ElementId, FocusHandle, KeyDownEvent,
-    KeyUpEvent, MouseButton, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MouseUpEvent,
-    SharedString, StyleRefinement, Subscription, Window,
+    accesskit, canvas, div, AccessibleAction, AnyElement, App, Bounds, Context, DispatchPhase, Div,
+    ElementId, Empty, FocusHandle, GlobalElementId, InspectorElementId, KeyDownEvent, KeyUpEvent,
+    LayoutId, MouseButton, MouseDownEvent, MouseExitEvent, MouseMoveEvent, MouseUpEvent, Pixels,
+    SharedString, Stateful, StyleRefinement, Subscription, Text, Window,
 };
 use proto_ui_host_protocol::event_type::{EventType, ExtensionEvent};
 use proto_ui_host_protocol::wire::SessionId;
 
+use crate::a11y::{names_from_descendants, A11yProjection};
 use crate::input::{
     HostInput, InputRouter, PointerPhase, RouteOwner, Routed, SessionRoute, SurfaceId, Target,
 };
@@ -62,18 +73,27 @@ pub struct SurfaceNode {
     pub session: SessionId,
     pub style: StyleRefinement,
     pub focus: Option<FocusHandle>,
+    /// What the surface reports to accessibility. Only a session's root
+    /// carries one: a snapshot describes the instance.
+    pub a11y: Option<A11yProjection>,
     pub children: Vec<SurfaceChild>,
 }
 
 /// What a surface contains: more surfaces, or text.
 ///
 /// Text is not a surface. It has no identity, takes no input of its own and
-/// belongs to no session, exactly as a DOM text node is not an element.
+/// belongs to no session, exactly as a DOM text node is not an element. Like
+/// a DOM text node it is still reported to accessibility.
 #[derive(Clone)]
 pub enum SurfaceChild {
     /// Boxed: a surface carries a whole style, and text is a handle.
     Surface(Box<SurfaceNode>),
     Text(SharedString),
+    /// Another session's instance, rendered here: a part the host places in
+    /// a slot of the instance it belongs to. The hub replaces it with that
+    /// session's surfaces when it publishes, and drops it while that session
+    /// has none.
+    Session(SessionId),
 }
 
 impl From<SurfaceNode> for SurfaceChild {
@@ -87,8 +107,43 @@ impl SurfaceNode {
     pub fn child_surfaces(&self) -> impl Iterator<Item = &SurfaceNode> {
         self.children.iter().filter_map(|child| match child {
             SurfaceChild::Surface(surface) => Some(surface.as_ref()),
-            SurfaceChild::Text(_) => None,
+            SurfaceChild::Text(_) | SurfaceChild::Session(_) => None,
         })
+    }
+
+    /// The text beneath this surface, in document order, one space between
+    /// separate pieces: what an accessible name computed from content reads.
+    pub fn text_content(&self) -> String {
+        fn collect(surface: &SurfaceNode, into: &mut Vec<String>) {
+            for child in &surface.children {
+                match child {
+                    SurfaceChild::Surface(inner) => collect(inner, into),
+                    SurfaceChild::Text(text) => {
+                        let text = text.trim();
+                        if !text.is_empty() {
+                            into.push(text.to_string());
+                        }
+                    }
+                    SurfaceChild::Session(_) => {}
+                }
+            }
+        }
+        let mut pieces = Vec::new();
+        collect(self, &mut pieces);
+        pieces.join(" ")
+    }
+
+    /// The sessions placed anywhere beneath this surface.
+    pub fn placed_sessions(&self) -> Vec<SessionId> {
+        let mut placed = Vec::new();
+        for child in &self.children {
+            match child {
+                SurfaceChild::Surface(surface) => placed.extend(surface.placed_sessions()),
+                SurfaceChild::Session(session) => placed.push(session.clone()),
+                SurfaceChild::Text(_) => {}
+            }
+        }
+        placed
     }
 }
 
@@ -113,6 +168,8 @@ pub struct InputBridge {
     /// rather than dropped: a Prototype would never have seen them, and
     /// knowing which ones arrived is how the key table grows.
     unmapped_keys: Vec<String>,
+    /// For each session that is a trigger, the session anchoring its group.
+    trigger_anchor: HashMap<SessionId, SessionId>,
 }
 
 impl InputBridge {
@@ -127,6 +184,21 @@ impl InputBridge {
 
     pub fn remove_session(&mut self, session_id: &str) {
         self.router.remove_session(session_id);
+        self.trigger_anchor.remove(session_id);
+    }
+
+    /// The session anchoring a trigger's group, if the session is a trigger.
+    pub fn trigger_anchor(&self, session_id: &str) -> Option<&SessionId> {
+        self.trigger_anchor.get(session_id)
+    }
+
+    /// Records whether a session is a trigger, and which session anchors its
+    /// group if it is.
+    pub fn set_trigger_anchor(&mut self, session_id: &str, anchor: Option<SessionId>) {
+        match anchor {
+            Some(anchor) => self.trigger_anchor.insert(session_id.to_string(), anchor),
+            None => self.trigger_anchor.remove(session_id),
+        };
     }
 
     /// Takes every sample routed since the last call, in routing order.
@@ -175,10 +247,28 @@ impl InputBridge {
         }
     }
 
+    /// Who owns an input on these surfaces, as the Web router decides it.
+    ///
+    /// `resolveOwningTrigger` first: the nearest trigger on the path owns the
+    /// input for its group, so a click on a Switch's thumb belongs to the
+    /// Switch. Without a trigger, `resolveOwningProtoInstance`: the innermost
+    /// instance owns it.
+    ///
+    /// A group's input goes to the group's anchor. For a lone trigger that is
+    /// the trigger itself, as in the Web. A group of several triggers routes
+    /// differently there: to its deepest member, whose router every member
+    /// shares. No Prototype this host runs forms such a group yet.
     fn target(&self, physical: Vec<SurfaceId>) -> Target {
-        let owner = physical
-            .first()
-            .and_then(|innermost| self.owner_of.get(innermost))
+        let trigger = physical.iter().find_map(|surface| {
+            let session = self.owner_of.get(surface)?;
+            self.trigger_anchor.get(session)
+        });
+        let owner = trigger
+            .or_else(|| {
+                physical
+                    .first()
+                    .and_then(|innermost| self.owner_of.get(innermost))
+            })
             .map_or(RouteOwner::Unowned, |session| {
                 RouteOwner::Session(session.clone())
             });
@@ -194,11 +284,27 @@ impl InputBridge {
         else {
             return Target::nowhere();
         };
-        let mut physical = vec![focused];
+        self.surface_target(focused)
+    }
+
+    /// A surface and its ancestors, innermost first.
+    fn surface_target(&self, surface: SurfaceId) -> Target {
+        let mut physical = vec![surface];
         while let Some(parent) = physical.last().and_then(|last| self.parent_of.get(last)) {
             physical.push(parent.clone());
         }
         self.target(physical)
+    }
+
+    /// Assistive technology asked to activate a surface: a click no pointer
+    /// made, as a browser dispatches one for an accessibility activation.
+    fn activate(&mut self, surface: SurfaceId) {
+        let target = self.surface_target(surface);
+        self.route(HostInput::Click {
+            target,
+            detail: 0,
+            modifiers: PortableModifiers::default(),
+        });
     }
 
     /// Compares the focused surface with the last one seen, and reports the
@@ -553,10 +659,140 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
     interactivity.on_any_mouse_down(move |_, _, _| on_down());
     interactivity.on_any_mouse_up(move |_, _, _| on_up());
     interactivity.on_mouse_move(move |_, _, _| on_move());
-    element
-        .children(surface.children.iter().map(|child| match child {
+    if let Some(a11y) = &surface.a11y {
+        element = element.role(a11y.role);
+        if let Some(label) = &a11y.label {
+            element = element.aria_label(label.clone());
+        } else if a11y.name_from_content && !names_from_descendants(a11y.role) {
+            // AccessKit does not name this role from the text beneath it, so
+            // the host reads the text and names it.
+            let text = surface.text_content();
+            if !text.is_empty() {
+                element = element.aria_label(text);
+            }
+        }
+        if let Some(toggled) = a11y.toggled {
+            element = element.aria_toggled(toggled);
+        }
+        if a11y.activatable {
+            let bridge = bridge.clone();
+            let id = surface.id.clone();
+            element = element.on_a11y_action(AccessibleAction::Click, move |_, _, _| {
+                bridge.borrow_mut().activate(id.clone())
+            });
+        }
+    }
+    let element = element.children(surface.children.iter().enumerate().map(|(index, child)| {
+        match child {
             SurfaceChild::Surface(surface) => render_surface(surface, bridge),
-            SurfaceChild::Text(text) => text.clone().into_any_element(),
-        }))
-        .into_any_element()
+            SurfaceChild::Text(text) => Text::new(
+                ElementId::NamedInteger("text".into(), index as u64),
+                text.clone(),
+            )
+            .into_any_element(),
+            // Only a session with nothing to show yet is still a placeholder.
+            SurfaceChild::Session(_) => Empty.into_any_element(),
+        }
+    }));
+    match &surface.a11y {
+        Some(a11y) if a11y.disabled => Disabled(element).into_any_element(),
+        _ => element.into_any_element(),
+    }
+}
+
+/// A surface reported to accessibility as disabled.
+///
+/// GPUI's element builders cannot mark an element disabled for
+/// accessibility, so this wraps the surface and adds the flag to what it
+/// reports. Everything else, layout and input included, is the surface's own.
+struct Disabled(Stateful<Div>);
+
+impl IntoElement for Disabled {
+    type Element = Self;
+
+    fn into_element(self) -> Self::Element {
+        self
+    }
+}
+
+impl Element for Disabled {
+    type RequestLayoutState = <Stateful<Div> as Element>::RequestLayoutState;
+    type PrepaintState = <Stateful<Div> as Element>::PrepaintState;
+
+    fn id(&self) -> Option<ElementId> {
+        Element::id(&self.0)
+    }
+
+    fn source_location(&self) -> Option<&'static Location<'static>> {
+        Element::source_location(&self.0)
+    }
+
+    fn request_layout(
+        &mut self,
+        id: Option<&GlobalElementId>,
+        inspector_id: Option<&InspectorElementId>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Self::RequestLayoutState) {
+        Element::request_layout(&mut self.0, id, inspector_id, window, cx)
+    }
+
+    fn prepaint(
+        &mut self,
+        id: Option<&GlobalElementId>,
+        inspector_id: Option<&InspectorElementId>,
+        bounds: Bounds<Pixels>,
+        request_layout: &mut Self::RequestLayoutState,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> Self::PrepaintState {
+        Element::prepaint(
+            &mut self.0,
+            id,
+            inspector_id,
+            bounds,
+            request_layout,
+            window,
+            cx,
+        )
+    }
+
+    fn paint(
+        &mut self,
+        id: Option<&GlobalElementId>,
+        inspector_id: Option<&InspectorElementId>,
+        bounds: Bounds<Pixels>,
+        request_layout: &mut Self::RequestLayoutState,
+        prepaint: &mut Self::PrepaintState,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        Element::paint(
+            &mut self.0,
+            id,
+            inspector_id,
+            bounds,
+            request_layout,
+            prepaint,
+            window,
+            cx,
+        )
+    }
+
+    fn a11y_role(&self) -> Option<accesskit::Role> {
+        Element::a11y_role(&self.0)
+    }
+
+    fn write_a11y_info(&self, node: &mut accesskit::Node) {
+        Element::write_a11y_info(&self.0, node);
+        node.set_disabled();
+    }
+
+    fn a11y_synthetic_children(
+        &mut self,
+        prepaint: &mut Self::PrepaintState,
+        builder: &mut gpui::A11ySubtreeBuilder,
+    ) {
+        Element::a11y_synthetic_children(&mut self.0, prepaint, builder)
+    }
 }
