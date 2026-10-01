@@ -598,78 +598,390 @@ test('review submission binds the GitHub Review API write to the inspected commi
   );
 });
 
-test('pull-request merge binds GitHub integration to the inspected exact head', () => {
+function mergeFixture({
+  before = {},
+  after = [],
+  parentSha = sha('a'),
+  putError = null,
+  putResponse = null,
+  branchSha = null,
+} = {}) {
   const calls = [];
+  let writes = 0;
+  let postReads = 0;
+  const open = {
+    number: 487,
+    state: 'open',
+    draft: false,
+    merged: false,
+    head: { sha: sha('b') },
+    base: { sha: sha('a'), ref: 'main', repo: { full_name: 'Proto-UI/Proto-UI' } },
+    ...before,
+  };
+  const merged = {
+    ...open,
+    state: 'closed',
+    merged: true,
+    merge_commit_sha: sha('c'),
+    merged_at: '2026-08-27T01:00:10Z',
+  };
+  return {
+    calls,
+    open,
+    merged,
+    get writes() {
+      return writes;
+    },
+    get postReads() {
+      return postReads;
+    },
+    runner(command, args, options) {
+      assert.equal(command, 'gh');
+      calls.push({ command, args, options });
+      if (args.includes('PUT')) {
+        writes += 1;
+        if (putError) throw putError;
+        return JSON.stringify(putResponse ?? { merged: true, sha: sha('c'), message: 'Merged' });
+      }
+      assert.equal(args[0], 'api');
+      assert.equal(args.length, 2, 'verification is a read-only GET');
+      if (args[1] === 'repos/Proto-UI/Proto-UI/git/ref/heads/main')
+        return JSON.stringify({
+          ref: 'refs/heads/main',
+          object: { type: 'commit', sha: branchSha ?? open.base.sha },
+        });
+      if (args[1] === `repos/Proto-UI/Proto-UI/git/commits/${sha('c')}`)
+        return JSON.stringify({ sha: sha('c'), parents: [{ sha: parentSha }] });
+      assert.equal(args[1], 'repos/Proto-UI/Proto-UI/pulls/487');
+      if (writes === 0) return JSON.stringify(open);
+      const observation = after[postReads++] ?? merged;
+      if (observation instanceof Error) throw observation;
+      return JSON.stringify(observation);
+    },
+  };
+}
+
+const mergeOptions = {
+  headSha: sha('b'),
+  expectedBaseSha: sha('a'),
+  baseRefName: 'main',
+  mergeMethod: 'squash',
+};
+const fastVerification = { verificationAttempts: 3, verificationDelayMs: 0, wait() {} };
+
+test('merge refuses a changed live base before any PUT', () => {
+  const fixture = mergeFixture({
+    before: { base: { sha: sha('d'), ref: 'main', repo: { full_name: 'Proto-UI/Proto-UI' } } },
+  });
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        'github.com:Proto-UI/Proto-UI',
+        487,
+        mergeOptions,
+        fixture.runner,
+        fastVerification
+      ),
+    /base|preflight/
+  );
+  assert.equal(fixture.writes, 0);
+});
+
+test('merge does not issue a bound receipt when the resulting parent raced the inspected base', () => {
+  const fixture = mergeFixture({ parentSha: sha('d') });
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        'github.com:Proto-UI/Proto-UI',
+        487,
+        mergeOptions,
+        fixture.runner,
+        fastVerification
+      ),
+    /parent|base/
+  );
+  assert.equal(fixture.writes, 1);
+});
+
+test('successful merge polls stale readback without another PUT', () => {
+  const fixture = mergeFixture({
+    after: [
+      {
+        number: 487,
+        state: 'open',
+        merged: false,
+        head: { sha: sha('b') },
+        base: { ref: 'main', repo: { full_name: 'Proto-UI/Proto-UI' } },
+      },
+    ],
+  });
+  const receipt = submitGitHubMerge(
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    mergeOptions,
+    fixture.runner,
+    fastVerification
+  );
+  assert.equal(receipt.mergeCommitSha, sha('c'));
+  assert.equal(fixture.writes, 1);
+  assert.equal(fixture.postReads, 2);
+});
+
+test('successful merge retries a transient read failure without another PUT', () => {
+  const fixture = mergeFixture({ after: [new Error('gh: Bad Gateway (HTTP 502)')] });
+  const receipt = submitGitHubMerge(
+    'github.com:Proto-UI/Proto-UI',
+    487,
+    mergeOptions,
+    fixture.runner,
+    fastVerification
+  );
+  assert.equal(receipt.mergeCommitSha, sha('c'));
+  assert.equal(fixture.writes, 1);
+  assert.equal(fixture.postReads, 2);
+});
+
+test('merge rechecks the actual base ref even when the PR base snapshot is unchanged', () => {
+  const fixture = mergeFixture({ branchSha: sha('d') });
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        'github.com:Proto-UI/Proto-UI',
+        487,
+        mergeOptions,
+        fixture.runner,
+        fastVerification
+      ),
+    /live base branch changed/
+  );
+  assert.equal(fixture.writes, 0);
+});
+
+for (const [name, before] of [
+  ['head', { head: { sha: sha('d') } }],
+  [
+    'repository',
+    { base: { sha: sha('a'), ref: 'main', repo: { full_name: 'outsider/Proto-UI' } } },
+  ],
+  ['PR identity', { number: 488 }],
+  ['draft', { draft: true }],
+  ['closed state', { state: 'closed' }],
+]) {
+  test(`merge refuses changed ${name} before its PUT`, () => {
+    const fixture = mergeFixture({ before });
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          'github.com:Proto-UI/Proto-UI',
+          487,
+          mergeOptions,
+          fixture.runner,
+          fastVerification
+        ),
+      /merge preflight/
+    );
+    assert.equal(fixture.writes, 0);
+  });
+}
+
+test('successful merge verification stops at its read-only polling bound', () => {
+  const after = [];
+  const fixture = mergeFixture({ after });
+  after.push(fixture.open, fixture.open, fixture.open);
+  const waits = [];
+  assert.throws(
+    () =>
+      submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, fixture.runner, {
+        verificationAttempts: 3,
+        verificationDelayMs: 10,
+        wait(ms) {
+          waits.push(ms);
+        },
+      }),
+    /exhausted 3 read-only attempts/
+  );
+  assert.equal(fixture.writes, 1);
+  assert.equal(fixture.postReads, 3);
+  assert.deepEqual(waits, [10, 10]);
+});
+
+for (const code of [401, 403, 404, 429]) {
+  test(`successful merge does not retry an HTTP ${code} verification failure`, () => {
+    const fixture = mergeFixture({
+      after: [new Error(`gh: denied or unavailable (HTTP ${code})`)],
+    });
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          'github.com:Proto-UI/Proto-UI',
+          487,
+          mergeOptions,
+          fixture.runner,
+          fastVerification
+        ),
+      /PUT succeeded.*do not repeat the PUT/
+    );
+    assert.equal(fixture.writes, 1);
+    assert.equal(fixture.postReads, 1);
+  });
+}
+
+test('an unknown PUT never gains the successful-PUT polling path', () => {
+  const fixture = mergeFixture({
+    putError: new Error('lost PUT response'),
+    after: [new Error('gh: Bad Gateway (HTTP 502)')],
+  });
+  let waits = 0;
+  assert.throws(
+    () =>
+      submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, fixture.runner, {
+        ...fastVerification,
+        wait() {
+          waits += 1;
+        },
+      }),
+    /merge outcome was not confirmed/
+  );
+  assert.equal(fixture.writes, 1);
+  assert.equal(fixture.postReads, 1);
+  assert.equal(waits, 0);
+});
+
+for (const endpoint of ['pulls/487', `git/commits/${sha('c')}`]) {
+  test(`malformed JSON cannot choose retry behavior in ${endpoint}`, () => {
+    const fixture = mergeFixture();
+    const runner = (command, args, options) => {
+      const result = fixture.runner(command, args, options);
+      return fixture.writes > 0 &&
+        args.length === 2 &&
+        args[1] === `repos/Proto-UI/Proto-UI/${endpoint}`
+        ? 'HTTP 502 unexpected EOF'
+        : result;
+    };
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          'github.com:Proto-UI/Proto-UI',
+          487,
+          mergeOptions,
+          runner,
+          fastVerification
+        ),
+      /PUT succeeded.*do not repeat the PUT/
+    );
+    assert.equal(fixture.writes, 1);
+    assert.equal(fixture.postReads, 1);
+  });
+}
+
+test('successful merge refuses conflicting or malformed readback instead of attributing a receipt', () => {
+  for (const change of [
+    { head: { sha: sha('d') } },
+    { merge_commit_sha: sha('d') },
+    { merged_at: null },
+    { merged_at: '2026-02-31T01:00:00Z' },
+    { merged_at: '2026-08-27' },
+    { merged_at: 1 },
+    { number: 488 },
+  ]) {
+    const after = [];
+    const fixture = mergeFixture({ after });
+    after.push({ ...fixture.merged, ...change });
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          'github.com:Proto-UI/Proto-UI',
+          487,
+          mergeOptions,
+          fixture.runner,
+          fastVerification
+        ),
+      /PUT succeeded.*do not repeat the PUT/
+    );
+    assert.equal(fixture.writes, 1);
+    assert.equal(fixture.postReads, 1);
+  }
+});
+
+test('merge rejects missing base binding and excessive polling options without any runner call', () => {
+  for (const [settings, options] of [
+    [{ ...mergeOptions, expectedBaseSha: undefined }, fastVerification],
+    [{ ...mergeOptions, baseRefName: undefined }, fastVerification],
+    [mergeOptions, { ...fastVerification, verificationAttempts: 0 }],
+    [mergeOptions, { ...fastVerification, verificationAttempts: 13 }],
+    [mergeOptions, { ...fastVerification, verificationDelayMs: 1001 }],
+  ]) {
+    const fixture = mergeFixture();
+    assert.throws(
+      () =>
+        submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, settings, fixture.runner, options),
+      /base|polling bounds/
+    );
+    assert.equal(fixture.calls.length, 0);
+  }
+});
+
+test('pull-request merge binds the successful response to the inspected head and actual base parent', () => {
+  const fixture = mergeFixture();
   const result = submitGitHubMerge(
     'github.com:Proto-UI/Proto-UI',
     487,
-    { headSha: sha('b'), mergeMethod: 'squash' },
-    (command, args, options) => {
-      calls.push({ command, args, options });
-      if (args.some((arg) => arg.endsWith('/merge'))) {
-        return JSON.stringify({
-          sha: sha('c'),
-          merged: true,
-          message: 'Pull Request successfully merged',
-        });
-      }
-      return JSON.stringify({
-        merged: true,
-        head: { sha: sha('b') },
-        merge_commit_sha: sha('c'),
-        merged_at: '2026-08-27T01:00:10Z',
-      });
-    }
+    mergeOptions,
+    fixture.runner,
+    fastVerification
   );
-  assert.deepEqual(JSON.parse(calls[0].options.input), {
-    sha: sha('b'),
-    merge_method: 'squash',
-  });
-  assert.deepEqual(calls[0].args.slice(0, 5), [
+  const mutation = fixture.calls.find((call) => call.args.includes('PUT'));
+  assert.deepEqual(JSON.parse(mutation.options.input), { sha: sha('b'), merge_method: 'squash' });
+  assert.deepEqual(mutation.args.slice(0, 5), [
     'api',
     '--method',
     'PUT',
     'repos/Proto-UI/Proto-UI/pulls/487/merge',
     '--input',
   ]);
-  assert.equal(calls.length, 2);
+  assert.equal(fixture.calls.length, 5);
+  assert.equal(fixture.writes, 1);
   assert.equal(result.liveHeadSha, sha('b'));
   assert.equal(result.mergedAt, '2026-08-27T01:00:10Z');
   assert.equal(result.headSha, sha('b'));
   assert.equal(result.mergeCommitSha, sha('c'));
+  assert.equal(result.baseSha, sha('a'));
+  assert.equal(result.mergeParentSha, sha('a'));
+  assert.equal(result.baseRefName, 'main');
   assert.equal(result.reconciled, false);
 
+  const rejected = mergeFixture({
+    putResponse: { merged: false, message: 'Head branch was modified' },
+  });
   assert.throws(
     () =>
       submitGitHubMerge(
         'github.com:Proto-UI/Proto-UI',
         487,
-        { headSha: sha('b'), mergeMethod: 'squash' },
-        () => JSON.stringify({ merged: false, message: 'Head branch was modified' })
+        mergeOptions,
+        rejected.runner,
+        fastVerification
       ),
     /merge was rejected/
   );
+  assert.equal(rejected.writes, 1);
+  assert.equal(rejected.postReads, 0);
 
-  let attempt = 0;
+  const unknown = mergeFixture({ putError: new Error('connection closed after write') });
   assert.throws(
     () =>
       submitGitHubMerge(
         'github.com:Proto-UI/Proto-UI',
         487,
-        { headSha: sha('b'), mergeMethod: 'squash' },
-        () => {
-          attempt += 1;
-          if (attempt === 1) throw new Error('connection closed after write');
-          return JSON.stringify({
-            merged: true,
-            head: { sha: sha('b') },
-            merge_commit_sha: sha('c'),
-          });
-        }
+        mergeOptions,
+        unknown.runner,
+        fastVerification
       ),
     /cannot be attributed; do not retry blindly/
   );
-  assert.equal(attempt, 2);
+  assert.equal(unknown.writes, 1);
+  assert.equal(unknown.postReads, 1);
+  assert.equal(unknown.calls.length, 4);
 });
 
 test('live collector fails closed when the REST changed-file list is incomplete', () => {

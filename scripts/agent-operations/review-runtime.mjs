@@ -585,27 +585,85 @@ export function agentEvidenceMarker(packet) {
   return `proto-ui:agent-evidence:sha256=${digest(packet.agentEvidence)}`;
 }
 
-function hasReceiptMarker(body, marker) {
-  if (typeof body !== 'string') return false;
+function receiptMarkerTokens(body) {
+  const tokens = [];
+  if (typeof body !== 'string') return tokens;
   let cursor = 0;
   while (cursor < body.length) {
     const start = body.indexOf('<!--', cursor);
-    if (start === -1) return false;
+    if (start === -1) break;
     const end = body.indexOf('-->', start + 4);
-    if (end === -1) return false;
+    if (end === -1) break;
     // renderReviewBody combines packet and evidence markers in one comment.
     // Match a complete whitespace-delimited token, never a prefix or suffix.
-    if (
-      body
+    tokens.push(
+      ...body
         .slice(start + 4, end)
         .trim()
         .split(/\s+/)
-        .includes(marker)
-    )
-      return true;
+    );
     cursor = end + 3;
   }
-  return false;
+  return tokens;
+}
+
+function hasReceiptMarker(body, marker) {
+  return receiptMarkerTokens(body).includes(marker);
+}
+
+function requiredPriorReview(input, reviewer) {
+  const candidates = input.reviews
+    .filter(
+      (review) =>
+        review.author?.toLowerCase() === reviewer.toLowerCase() &&
+        ['APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'].includes(review.state)
+    )
+    .map((review) => ({
+      ...review,
+      packetDigests: [
+        ...new Set(
+          receiptMarkerTokens(review.body)
+            .filter((token) => /^proto-ui:review-packet:sha256=[a-f0-9]{64}$/.test(token))
+            .map((token) => token.slice('proto-ui:review-packet:sha256='.length))
+        ),
+      ],
+    }))
+    // A COMMENT cannot replace findings from a disposition. Dismissals keep
+    // their existing clearing behavior, without certifying old publications.
+    .filter((review) => review.packetDigests.length > 0 || review.state === 'DISMISSED');
+  if (!candidates.some((review) => review.state !== 'DISMISSED')) return null;
+  assert(
+    candidates.every((review) => review.submittedAt !== null),
+    'the governed prior review order is unavailable; re-collect before a disposition'
+  );
+  const latestTime = Math.max(...candidates.map((review) => Date.parse(review.submittedAt)));
+  const latest = candidates.filter((review) => Date.parse(review.submittedAt) === latestTime);
+  assert(
+    latest.length === 1,
+    'the governed prior review order is ambiguous; reconcile live history before a disposition'
+  );
+  const review = latest[0];
+  if (review.state === 'DISMISSED') return null;
+  assert(review.packetDigests.length === 1, 'the governed prior review packet marker is ambiguous');
+  assert(SHA.test(review.commitSha), 'the governed prior review head is unavailable');
+  return { ...review, packetDigest: review.packetDigests[0] };
+}
+
+function verifySubmissionReconciliation(packet, input, reviewer, priorPacket) {
+  if (['APPROVE', 'REQUEST_CHANGES'].includes(packet.recommendedAction)) {
+    const prior = requiredPriorReview(input, reviewer);
+    if (prior !== null) {
+      assert(
+        packet.reconciliation.priorPacketDigest === prior.packetDigest &&
+          packet.reconciliation.priorReviewedHeadSha === prior.commitSha,
+        'the disposition must reconcile the latest governed prior review from this reviewer'
+      );
+      assert(priorPacket, 'the governed prior review artifact is required before a disposition');
+    }
+  }
+  if (packet.reconciliation.priorPacketDigest !== null) {
+    verifyReconciliation(packet, priorPacket);
+  }
 }
 
 export function verifyReconciliation(packet, priorPacket) {
@@ -1089,6 +1147,7 @@ export function authorizeReviewSubmission({
   reviewer,
   ciConclusion,
   dcoConclusion,
+  priorPacket = null,
 }) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
   validateReviewPacket(packet, input);
@@ -1196,6 +1255,14 @@ export function authorizeReviewSubmission({
       reason: 'the live head already carries this exact rendered review from this reviewer',
       recommendedAction,
     };
+  }
+  // The packet cannot opt out by clearing its prior pointers. Derive the
+  // required predecessor from canonical live history and the actual viewer,
+  // then bind the supplied artifact before permitting another disposition.
+  try {
+    verifySubmissionReconciliation(packet, liveInput, reviewer, priorPacket);
+  } catch (error) {
+    return { allowed: false, reason: error.message };
   }
   if (
     ['REQUEST_CHANGES', 'APPROVE'].includes(recommendedAction) &&

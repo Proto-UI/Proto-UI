@@ -167,6 +167,452 @@ function assessment(band, reviewClasses, { fresh = true, validated = true } = {}
   };
 }
 
+function priorReviewFixture() {
+  const priorInput = reviewInput({ headSha: sha('9') });
+  const priorPacket = packet(
+    {
+      headSha: priorInput.headSha,
+      recommendedAction: 'REQUEST_CHANGES',
+      limitations: [],
+      findings: [
+        {
+          id: 'F-PRIOR',
+          severity: 'P1',
+          confidence: 'high',
+          file: 'scripts/example.mjs',
+          line: 10,
+          authority: 'internal/agent-operations/contributor-agents.md',
+          observed: 'Prior findings can disappear from a new disposition',
+          expected: 'Every prior finding is reconciled',
+          impact: 'An approval can silently supersede an unresolved finding',
+          fix: 'Bind reconciliation to the live prior review',
+        },
+      ],
+      reconciliation: {
+        priorReviewedHeadSha: null,
+        priorPacketDigest: null,
+        resolvedFindingIds: [],
+        openFindingIds: [],
+        newFindingIds: ['F-PRIOR'],
+      },
+    },
+    priorInput
+  );
+  validateReviewPacket(priorPacket, priorInput);
+  const review = {
+    id: 'PRR_prior',
+    author: 'agent',
+    state: 'CHANGES_REQUESTED',
+    commitSha: priorInput.headSha,
+    submittedAt: '2026-08-22T00:00:00.000Z',
+    body: renderReviewBody(priorPacket),
+  };
+  const boundary = (reviews = [review], overrides = {}) => {
+    const input = reviewInput({ reviews });
+    return {
+      packet: packet({ limitations: [], recommendedAction: 'APPROVE' }, input),
+      input,
+      liveInput: structuredClone(input),
+      executionMode: 'human-assisted',
+      executionModeSource: 'current-user',
+      authorizationId: 'explicit-current-user',
+      policy,
+      selfAssessment: null,
+      credentialCanReview: true,
+      reviewer: 'agent',
+      ciConclusion: 'success',
+      dcoConclusion: 'success',
+      ...overrides,
+    };
+  };
+  const reconciled = (base, prior = priorPacket) => ({
+    ...base,
+    priorPacket: prior,
+    packet: {
+      ...base.packet,
+      reconciliation: {
+        priorReviewedHeadSha: prior.headSha,
+        priorPacketDigest: computeReviewPacketDigest(prior),
+        resolvedFindingIds: prior.findings.map((finding) => finding.id),
+        openFindingIds: [],
+        newFindingIds: [],
+      },
+    },
+  });
+  return { priorPacket, review, boundary, reconciled };
+}
+
+test('review submission cannot null reconciliation to supersede its governed prior review', () => {
+  const { boundary } = priorReviewFixture();
+  const result = authorizeReviewSubmission(boundary());
+  assert.equal(result.allowed, false, 'a live prior finding requires reconciliation');
+  assert.match(result.reason, /prior review/);
+});
+
+test('governed prior reviews bind the artifact, live head and all prior findings', () => {
+  const { priorPacket, review, boundary, reconciled } = priorReviewFixture();
+  const valid = reconciled(boundary([{ ...review, author: 'AgEnT' }]));
+  assert.equal(authorizeReviewSubmission(valid).allowed, true);
+  for (const [label, candidate, reason] of [
+    ['missing artifact', { ...valid, priorPacket: null }, /prior review artifact is required/],
+    [
+      'different artifact',
+      { ...valid, priorPacket: { ...priorPacket, scope: ['unrelated scope'] } },
+      /does not match the recorded priorPacketDigest/,
+    ],
+    [
+      'unaccounted finding',
+      {
+        ...valid,
+        packet: {
+          ...valid.packet,
+          reconciliation: { ...valid.packet.reconciliation, resolvedFindingIds: [] },
+        },
+      },
+      /cover every prior finding/,
+    ],
+    [
+      'wrong head',
+      reconciled(boundary([{ ...review, commitSha: sha('8') }])),
+      /latest governed prior review/,
+    ],
+    [
+      'wrong live digest',
+      reconciled(
+        boundary([
+          {
+            ...review,
+            body: review.body.replace(computeReviewPacketDigest(priorPacket), digest('0')),
+          },
+        ])
+      ),
+      /latest governed prior review/,
+    ],
+    [
+      'missing head',
+      reconciled(boundary([{ ...review, commitSha: null }])),
+      /prior review head is unavailable/,
+    ],
+  ]) {
+    const denied = authorizeReviewSubmission(candidate);
+    assert.equal(denied.allowed, false, label);
+    assert.match(denied.reason, reason, label);
+  }
+
+  const changes = reconciled(boundary());
+  changes.packet.recommendedAction = 'REQUEST_CHANGES';
+  changes.packet.findings = priorPacket.findings;
+  changes.packet.reconciliation.resolvedFindingIds = [];
+  changes.packet.reconciliation.openFindingIds = ['F-PRIOR'];
+  assert.equal(authorizeReviewSubmission(changes).allowed, true);
+  changes.packet.reconciliation.priorPacketDigest = null;
+  changes.packet.reconciliation.priorReviewedHeadSha = null;
+  assert.equal(authorizeReviewSubmission(changes).allowed, false);
+});
+
+test('a later COMMENT or forged receipt cannot erase a governed disposition', () => {
+  const { priorPacket, review, boundary, reconciled } = priorReviewFixture();
+  const laterPacket = packet({ limitations: [], recommendedAction: 'COMMENT' });
+  const later = {
+    ...review,
+    id: 'PRR_later',
+    commitSha: sha('b'),
+    state: 'COMMENTED',
+    submittedAt: '2026-08-23T01:00:00Z',
+    body: renderReviewBody(laterPacket),
+  };
+  const token = `proto-ui:review-packet:sha256=${computeReviewPacketDigest(laterPacket)}`;
+  const lookalikes = [
+    token,
+    `<!-- prefix-${token} -->`,
+    `<!-- ${token}-suffix -->`,
+    `<!-- ${token}f -->`,
+    `<!-- ${token}`,
+  ];
+  for (const successor of [
+    later,
+    ...lookalikes.map((body) => ({ ...later, state: 'APPROVED', body })),
+  ]) {
+    const current = boundary([successor, review]);
+    assert.equal(authorizeReviewSubmission(current).allowed, false);
+    assert.equal(authorizeReviewSubmission(reconciled(current)).allowed, true);
+    assert.equal(authorizeReviewSubmission(reconciled(current, laterPacket)).allowed, false);
+  }
+  // Marker text from another actor or an ordinary COMMENT establishes no
+  // predecessor for the live reviewer. The real renderer is the positive control.
+  for (const unrelated of [
+    { ...review, author: 'someone-else' },
+    { ...review, author: null },
+    later,
+  ]) {
+    assert.equal(authorizeReviewSubmission(boundary([unrelated])).allowed, true);
+  }
+  for (const body of lookalikes) {
+    assert.equal(authorizeReviewSubmission(boundary([{ ...review, body }])).allowed, true);
+  }
+  const foreign = { ...later, author: 'someone-else', state: 'APPROVED' };
+  assert.equal(
+    authorizeReviewSubmission(reconciled(boundary([review, foreign]), laterPacket)).allowed,
+    false
+  );
+  assert.equal(
+    authorizeReviewSubmission(reconciled(boundary([review, foreign]), priorPacket)).allowed,
+    true
+  );
+});
+
+test('prior review selection rejects older caller choices and ambiguous live order', () => {
+  const { priorPacket, review, boundary, reconciled } = priorReviewFixture();
+  const olderPacket = { ...priorPacket, scope: ['older reviewed scope'] };
+  const older = {
+    ...review,
+    id: 'PRR_older',
+    submittedAt: '2026-08-21T23:00:00Z',
+    body: renderReviewBody(olderPacket),
+  };
+  assert.equal(
+    authorizeReviewSubmission(reconciled(boundary([review, older]), olderPacket)).allowed,
+    false
+  );
+  assert.equal(authorizeReviewSubmission(reconciled(boundary([review, older]))).allowed, true);
+  for (const submittedAt of [null, review.submittedAt, '2026-08-22T02:00:00+02:00']) {
+    const denied = authorizeReviewSubmission(
+      reconciled(boundary([review, { ...older, submittedAt }]))
+    );
+    assert.equal(denied.allowed, false);
+    assert.match(
+      denied.reason,
+      /prior review order is unavailable|prior review order is ambiguous/
+    );
+  }
+  const multipleMarkers = {
+    ...review,
+    body: `${review.body}\n<!-- proto-ui:review-packet:sha256=${computeReviewPacketDigest(olderPacket)} -->`,
+  };
+  assert.match(
+    authorizeReviewSubmission(reconciled(boundary([multipleMarkers]))).reason,
+    /prior review packet marker is ambiguous/
+  );
+});
+
+test('prior review binding preserves COMMENT disclosure, dismissal and duplicate no-op', () => {
+  const { review, boundary } = priorReviewFixture();
+  const disclosure = boundary();
+  disclosure.packet.recommendedAction = 'COMMENT';
+  disclosure.packet.limitations = ['Prior artifact is unavailable; findings remain unresolved'];
+  assert.equal(authorizeReviewSubmission(disclosure).allowed, true);
+  assert.equal(
+    authorizeReviewSubmission(boundary([{ ...review, state: 'DISMISSED' }])).allowed,
+    true
+  );
+  const dismissed = {
+    ...review,
+    id: 'PRR_dismissed',
+    state: 'DISMISSED',
+    submittedAt: '2026-08-23T01:00:00Z',
+  };
+  assert.equal(authorizeReviewSubmission(boundary([review, dismissed])).allowed, true);
+  const published = {
+    ...dismissed,
+    id: 'PRR_published',
+    state: 'APPROVED',
+    commitSha: sha('b'),
+    body: renderReviewBody(boundary().packet),
+  };
+  const duplicate = authorizeReviewSubmission(boundary([review, published]));
+  assert.equal(duplicate.allowed, false);
+  assert.equal(duplicate.duplicate, true);
+});
+
+test('submit-review CLI binds rendered live prior metadata before the mocked GitHub write', () => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'pui-review-live-prior-'));
+  const inputPath = path.join(directory, 'input.json');
+  const packetPath = path.join(directory, 'packet.json');
+  const priorPath = path.join(directory, 'prior.json');
+  const handoffPath = path.join(directory, 'handoff.json');
+  const fixturePath = path.join(directory, 'fixture.json');
+  const callsPath = path.join(directory, 'calls.jsonl');
+  const preloadPath = path.join(directory, 'mock-gh.mjs');
+  try {
+    const { priorPacket, boundary, reconciled } = priorReviewFixture();
+    const base = boundary();
+    base.input.checks = [
+      ...policy.trustedCiEvidence.checkNames.map((name) => ({ ...base.input.checks[0], name })),
+      {
+        ...base.input.checks[0],
+        name: 'DCO',
+        source: policy.trustedDcoEvidence.source,
+        providerId: policy.trustedDcoEvidence.providerId,
+        detailsUrl: policy.trustedDcoEvidence.detailsUrl,
+        workflowName: null,
+        workflowPath: null,
+      },
+    ];
+    base.packet = packet({ limitations: [], recommendedAction: 'APPROVE' }, base.input);
+    const input = base.input;
+    const connection = (nodes) => ({ nodes, pageInfo: { hasNextPage: false } });
+    const actor = ({ login, name, email }) => ({ user: { login }, name, email });
+    const contexts = connection(
+      input.checks.map((check) => ({
+        __typename: 'CheckRun',
+        ...check,
+        checkSuite: {
+          app: { id: check.providerId, slug: check.source },
+          repository: { nameWithOwner: check.repository },
+          workflowRun: {
+            file: { path: check.workflowPath },
+            workflow: { name: check.workflowName },
+          },
+        },
+      }))
+    );
+    writeFileSync(
+      fixturePath,
+      JSON.stringify({
+        payload: {
+          data: {
+            viewer: { login: 'agent' },
+            repository: {
+              viewerPermission: 'WRITE',
+              pullRequest: {
+                state: input.pullRequestState,
+                isDraft: input.isDraft,
+                body: input.pullRequestBody,
+                baseRefName: input.baseRefName,
+                baseRefOid: input.baseSha,
+                headRefOid: input.headSha,
+                changedFiles: input.changedFiles.length,
+                author: { login: input.pullRequestAuthor },
+                commits: connection(
+                  input.commits.map((commit) => ({
+                    commit: {
+                      oid: commit.sha,
+                      message: commit.message,
+                      author: actor(commit.author),
+                      committer: actor(commit.committer),
+                      statusCheckRollup: { contexts },
+                    },
+                  }))
+                ),
+                reviews: connection(
+                  input.reviews.map((review) => ({
+                    ...review,
+                    author: { login: review.author },
+                    commit: { oid: review.commitSha },
+                  }))
+                ),
+                comments: connection([]),
+                reviewThreads: connection([]),
+              },
+            },
+          },
+        },
+        filePages: [
+          input.changedFiles.map((file) => ({ filename: file.path, status: file.status })),
+        ],
+      })
+    );
+    writeFileSync(
+      preloadPath,
+      `
+      import assert from 'node:assert/strict';
+      import cp from 'node:child_process';
+      import { appendFileSync, readFileSync } from 'node:fs';
+      import { syncBuiltinESMExports } from 'node:module';
+      const fixture = JSON.parse(readFileSync(process.env.PUI_REVIEW_TEST_FIXTURE, 'utf8'));
+      cp.execFileSync = (command, args, options) => {
+        assert.equal(command, 'gh');
+        appendFileSync(process.env.PUI_REVIEW_TEST_CALLS, JSON.stringify(args) + '\\n');
+        if (args[1] === 'graphql') return JSON.stringify(fixture.payload);
+        if (args.includes('--paginate')) return JSON.stringify(fixture.filePages);
+        if (args.includes('POST')) {
+          const request = JSON.parse(options.input);
+          return JSON.stringify({
+            id: 999, state: 'APPROVED', commit_id: request.commit_id,
+            body: request.body, user: { login: 'agent' },
+          });
+        }
+        throw new Error('Unexpected mocked GitHub call: ' + args.join(' '));
+      };
+      syncBuiltinESMExports();
+    `
+    );
+    writeFileSync(inputPath, JSON.stringify(input));
+    writeFileSync(priorPath, JSON.stringify(priorPacket));
+    writeFileSync(
+      handoffPath,
+      JSON.stringify({
+        schemaVersion: 1,
+        kind: 'proto-ui.skill-handoff',
+        entrypoint: 'development',
+        executionMode: 'human-assisted',
+        executionModeSource: 'current-user',
+        fromId: 'pui-validate',
+        nextSkillId: 'pui-review',
+        artifacts: [
+          { type: 'authority-map', reference: 'review authority map' },
+          { type: 'candidate-change', reference: 'bounded candidate change' },
+          { type: 'evidence-report', reference: 'validation evidence' },
+          { type: 'review-input', reference: inputPath },
+        ],
+        humanGates: [],
+        notes: [],
+      })
+    );
+    const submit = (candidate, priorArgs = []) => {
+      writeFileSync(packetPath, JSON.stringify(candidate));
+      writeFileSync(callsPath, '');
+      const result = JSON.parse(
+        execFileSync(
+          process.execPath,
+          [
+            '--import',
+            preloadPath,
+            path.join(root, 'scripts/agent-operations/review-packet.mjs'),
+            'submit-review',
+            '--input',
+            inputPath,
+            '--packet',
+            packetPath,
+            '--handoff',
+            handoffPath,
+            '--authorization',
+            'explicit-current-user',
+            ...priorArgs,
+          ],
+          {
+            cwd: root,
+            encoding: 'utf8',
+            env: {
+              ...process.env,
+              PUI_REVIEW_TEST_FIXTURE: fixturePath,
+              PUI_REVIEW_TEST_CALLS: callsPath,
+            },
+          }
+        )
+      );
+      const calls = readFileSync(callsPath, 'utf8')
+        .trim()
+        .split('\n')
+        .map((line) => JSON.parse(line));
+      return { result, calls };
+    };
+    const blocked = submit(base.packet);
+    assert.equal(blocked.result.allowed, false);
+    assert.match(blocked.result.reason, /latest governed prior review/);
+    assert.equal(
+      blocked.calls.some((args) => args.includes('POST')),
+      false
+    );
+    const allowed = submit(reconciled(base).packet, ['--prior-packet', priorPath]);
+    assert.equal(allowed.result.allowed, true);
+    assert.equal(allowed.result.submitted, true);
+    assert.equal(allowed.calls.filter((args) => args.includes('POST')).length, 1);
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 test('review packets cannot silently omit public Agent evidence', () => {
   const legacy = packet();
   delete legacy.agentEvidence;

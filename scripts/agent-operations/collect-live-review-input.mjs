@@ -633,110 +633,193 @@ function reviewReceipt(response, invocationId, reconciled) {
   };
 }
 
+function waitForMergeRead(delayMs) {
+  if (delayMs > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
+}
+
+function isTransientMergeRead(error) {
+  if (error instanceof SyntaxError || ['EACCES', 'EPERM', 'ENOBUFS'].includes(error?.code))
+    return false;
+  const detail = `${error?.stderr ?? ''}\n${error?.message ?? ''}`;
+  if (/HTTP (?:401|403|404|429)\b/i.test(detail)) return false;
+  return (
+    /HTTP (?:408|500|502|503|504)\b/i.test(detail) ||
+    ['ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN', 'ECONNREFUSED'].includes(error?.code) ||
+    /TLS handshake timeout|i\/o timeout|connection reset by peer|unexpected EOF/i.test(detail)
+  );
+}
+
+function isGitHubMergeTime(value) {
+  return (
+    typeof value === 'string' &&
+    /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z$/.test(value) &&
+    Number.isFinite(Date.parse(value)) &&
+    new Date(value).toISOString().slice(0, 19) === value.slice(0, 19)
+  );
+}
+
 export function submitGitHubMerge(
   repositoryId,
   pullRequest,
-  { headSha, mergeMethod, authorizationId = 'explicit-current-user' },
-  runner = execFileSync
+  { headSha, expectedBaseSha, baseRefName, mergeMethod, authorizationId = 'explicit-current-user' },
+  runner = execFileSync,
+  options = {}
 ) {
   const { owner, name } = parseRepositoryId(repositoryId);
-  if (!Number.isInteger(pullRequest) || pullRequest < 1) {
+  if (!Number.isInteger(pullRequest) || pullRequest < 1)
     throw new Error('merge pull request is invalid');
-  }
-  if (!/^[a-f0-9]{40,64}$/.test(headSha)) {
-    throw new Error('merge head SHA is invalid');
-  }
-  if (mergeMethod !== 'squash') {
-    throw new Error('merge method must be squash');
-  }
-  if (!['explicit-current-user', 'proto-ui-scheduled-merge-v1'].includes(authorizationId)) {
+  if (!/^[a-f0-9]{40,64}$/.test(headSha ?? '')) throw new Error('merge head SHA is invalid');
+  if (!/^[a-f0-9]{40,64}$/.test(expectedBaseSha ?? ''))
+    throw new Error('expected merge base SHA is required');
+  if (typeof baseRefName !== 'string' || baseRefName.length === 0)
+    throw new Error('merge base ref is required');
+  if (mergeMethod !== 'squash') throw new Error('merge method must be squash');
+  if (!['explicit-current-user', 'proto-ui-scheduled-merge-v1'].includes(authorizationId))
     throw new Error('merge authorization is invalid');
-  }
+  const maxAttempts = options.verificationAttempts ?? 12;
+  const delayMs = options.verificationDelayMs ?? 1_000;
+  const wait = options.wait ?? waitForMergeRead;
+  if (
+    !Number.isInteger(maxAttempts) ||
+    maxAttempts < 1 ||
+    maxAttempts > 12 ||
+    !Number.isInteger(delayMs) ||
+    delayMs < 0 ||
+    delayMs > 1_000 ||
+    typeof wait !== 'function'
+  )
+    throw new Error('merge verification polling bounds are invalid');
+  const prefix = `repos/${owner}/${name}`;
+  const read = (endpoint) => {
+    const value = JSON.parse(
+      runner('gh', ['api', endpoint], {
+        encoding: 'utf8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+        maxBuffer: MAX_LIVE_RESPONSE_BYTES,
+      })
+    );
+    if (!value || typeof value !== 'object' || Array.isArray(value))
+      throw new Error('merge readback is malformed');
+    return value;
+  };
+  const matchesTarget = (pull) =>
+    pull.number === pullRequest &&
+    pull.base?.repo?.full_name === `${owner}/${name}` &&
+    pull.base?.ref === baseRefName &&
+    pull.head?.sha === headSha;
+
+  // GitHub's PUT supports a head SHA precondition, not a base SHA CAS. Re-read
+  // both the PR and the actual base ref, then verify the resulting parent below.
+  // A base change in the final read/write interval can still merge irreversibly;
+  // that result must never produce a receipt bound to the old reviewed base.
+  const before = read(`${prefix}/pulls/${pullRequest}`);
+  if (
+    !matchesTarget(before) ||
+    before.state !== 'open' ||
+    before.merged !== false ||
+    before.draft !== false ||
+    before.base.sha !== expectedBaseSha
+  )
+    throw new Error('merge preflight head, base, target or open state changed; no PUT attempted');
+  const base = read(`${prefix}/git/ref/heads/${encodeURIComponent(baseRefName)}`);
+  if (
+    base.ref !== `refs/heads/${baseRefName}` ||
+    base.object?.type !== 'commit' ||
+    base.object?.sha !== expectedBaseSha
+  )
+    throw new Error('live base branch changed before merge; no PUT attempted');
 
   let response;
   try {
     response = JSON.parse(
       runner(
         'gh',
-        [
-          'api',
-          '--method',
-          'PUT',
-          `repos/${owner}/${name}/pulls/${pullRequest}/merge`,
-          '--input',
-          '-',
-        ],
+        ['api', '--method', 'PUT', `${prefix}/pulls/${pullRequest}/merge`, '--input', '-'],
         {
           encoding: 'utf8',
           input: JSON.stringify({ sha: headSha, merge_method: mergeMethod }),
           stdio: ['pipe', 'pipe', 'pipe'],
+          maxBuffer: MAX_LIVE_RESPONSE_BYTES,
         }
       )
     );
   } catch (error) {
+    // A lost/unknown PUT has no attributable successful response. Keep exactly
+    // one read-only reconciliation; the successful-PUT poll never applies here.
     try {
-      const live = JSON.parse(
-        runner('gh', ['api', `repos/${owner}/${name}/pulls/${pullRequest}`], {
-          encoding: 'utf8',
-          stdio: ['ignore', 'pipe', 'pipe'],
-        })
-      );
+      const live = read(`${prefix}/pulls/${pullRequest}`);
       if (
         live.merged === true &&
         live.head?.sha === headSha &&
         /^[a-f0-9]{40,64}$/.test(live.merge_commit_sha ?? '')
-      ) {
+      )
         throw new Error(
           `merge outcome is ambiguous after live reconciliation: ${live.merge_commit_sha} merged the inspected head, but this invocation and ${mergeMethod} method cannot be attributed; do not retry blindly`
         );
-      }
     } catch (reconciliationError) {
       if (
         reconciliationError instanceof Error &&
         reconciliationError.message.startsWith('merge outcome is ambiguous')
-      ) {
+      )
         throw reconciliationError;
-      }
-      // The original mutation outcome remains authoritative when reconciliation also fails.
     }
     throw new Error(`merge outcome was not confirmed; do not retry blindly (${error.message})`);
   }
-
-  if (response.merged !== true || !/^[a-f0-9]{40,64}$/.test(response.sha ?? '')) {
+  if (response?.merged === false)
     throw new Error(`merge was rejected: ${response.message ?? 'receipt is incomplete'}`);
-  }
-  let live;
-  try {
-    live = JSON.parse(
-      runner('gh', ['api', `repos/${owner}/${name}/pulls/${pullRequest}`], {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
-      })
+  if (response?.merged !== true || !/^[a-f0-9]{40,64}$/.test(response.sha ?? ''))
+    throw new Error(
+      'merge response did not provide a confirmed commit identity; do not retry blindly'
     );
-  } catch (error) {
-    throw new Error(`merge receipt could not be bound to live exact head (${error.message})`);
+
+  let lastObservation = 'merged state is not yet visible';
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      const live = read(`${prefix}/pulls/${pullRequest}`);
+      if (!matchesTarget(live)) throw new Error('post-merge target or head does not match');
+      if (live.merged === true && live.state === 'closed') {
+        if (live.merge_commit_sha !== response.sha || !isGitHubMergeTime(live.merged_at))
+          throw new Error('live merge commit or merge time does not match the successful response');
+        const commit = read(`${prefix}/git/commits/${response.sha}`);
+        if (
+          commit.sha !== response.sha ||
+          !Array.isArray(commit.parents) ||
+          commit.parents.length !== 1 ||
+          commit.parents[0]?.sha !== expectedBaseSha
+        )
+          throw new Error('resulting merge parent differs from the inspected base');
+        return {
+          merged: true,
+          reconciled: false,
+          repositoryId,
+          pullRequest,
+          authorizationId,
+          mergeCommitSha: response.sha,
+          headSha,
+          liveHeadSha: live.head.sha,
+          baseRefName,
+          baseSha: expectedBaseSha,
+          mergeParentSha: commit.parents[0].sha,
+          mergeMethod,
+          mergedAt: live.merged_at,
+          message: response.message ?? null,
+        };
+      }
+      if (live.merged !== false || live.state !== 'open')
+        throw new Error('post-merge state is inconsistent');
+      lastObservation = 'merged state is not yet visible';
+    } catch (error) {
+      if (!isTransientMergeRead(error))
+        throw new Error(
+          `merge PUT succeeded as ${response.sha}, but its receipt cannot bind the reviewed head/base (${error.message}); do not repeat the PUT`
+        );
+      lastObservation = error.message;
+    }
+    if (attempt < maxAttempts) wait(delayMs);
   }
-  if (
-    live.merged !== true ||
-    live.head?.sha !== headSha ||
-    live.merge_commit_sha !== response.sha ||
-    !Number.isFinite(Date.parse(live.merged_at ?? ''))
-  ) {
-    throw new Error('merge receipt does not bind the live exact head and squash commit');
-  }
-  return {
-    merged: true,
-    reconciled: false,
-    repositoryId,
-    pullRequest,
-    authorizationId,
-    mergeCommitSha: response.sha,
-    headSha,
-    liveHeadSha: live.head.sha,
-    mergeMethod,
-    mergedAt: live.merged_at,
-    message: response.message ?? null,
-  };
+  throw new Error(
+    `merge PUT succeeded as ${response.sha}, but receipt verification exhausted ${maxAttempts} read-only attempts (${lastObservation}); do not repeat the PUT`
+  );
 }
 export function collectCurrentReviewerPermissions(input, options = {}) {
   validateReviewInputSnapshot(input);

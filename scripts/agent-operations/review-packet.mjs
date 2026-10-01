@@ -323,14 +323,14 @@ try {
     );
     const execution = validateExecution(args, packet, policy);
     const externalEvidence = readExternalEvidence(args);
+    const priorPath = args.get('--prior-packet');
+    const priorPacket = priorPath ? JSON.parse(fs.readFileSync(priorPath, 'utf8')) : null;
     // Submission must consume the bound prior packet whenever the packet
     // records one; an incremental reconciliation that is never verified
     // against its prior findings would otherwise publish unchecked state.
     if (packet.reconciliation.priorPacketDigest !== null) {
-      const priorPath = args.get('--prior-packet');
       if (!priorPath)
         throw new Error('--prior-packet is required when the packet reconciles a prior review');
-      const priorPacket = JSON.parse(fs.readFileSync(priorPath, 'utf8'));
       verifyReconciliation(packet, priorPacket);
     }
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
@@ -347,6 +347,7 @@ try {
       selfAssessment: execution.selfAssessment,
       credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
       reviewer: live.viewerLogin,
+      priorPacket,
       ciConclusion: summarizeLiveChecks(live.input.checks, {
         repositoryId: packet.repositoryId,
         trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
@@ -434,6 +435,8 @@ try {
     } else {
       const receipt = submitGitHubMerge(packet.repositoryId, packet.pullRequest, {
         headSha: authorization.headSha,
+        expectedBaseSha: packet.baseSha,
+        baseRefName: input.baseRefName,
         mergeMethod: authorization.mergeMethod,
         authorizationId: authorization.authorizationId,
       });
