@@ -55,6 +55,64 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Brutalist Spinner documentation browser regressions', () => {
+  it('matches bracket-valued token selectors and paints the same leading open edge', async () => {
+    const page = await browser.newPage();
+    try {
+      const token = 'border-[transparent_currentColor_currentColor_currentColor]';
+      const css = renderProtoStyleTokenCss(['border-2', token, 'animate-spin']);
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.setContent(`<!doctype html><style>${css}</style>
+        <span data-control="foo" data-pui-style="border-2 foo animate-spin"></span>
+        <span data-control="w-[2px]" data-pui-style="border-2 w-[2px] animate-spin"></span>
+        <span data-control="${token}" data-pui-style="border-2 ${token} animate-spin"
+          style="display:inline-block;width:24px;height:24px;color:rgb(40,50,60)"></span>`);
+      for (const value of ['foo', 'w-[2px]', token]) {
+        const element = page.locator(`[data-control="${value}"]`);
+        for (const selector of [
+          `[data-pui-style~="${value}"]`,
+          `:where([data-pui-style~="${value}"])`,
+        ]) {
+          // Native matching belongs here: happy-dom 15.11.7 interpolates an
+          // attribute value into a RegExp, misreading even the old w-[2px].
+          expect(await element.evaluate((node, query) => node.matches(query), selector)).toBe(true);
+        }
+      }
+      const spinner = page.locator(`[data-control="${token}"]`);
+      const facts = () =>
+        spinner.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            colors: [
+              style.borderTopColor,
+              style.borderRightColor,
+              style.borderBottomColor,
+              style.borderLeftColor,
+            ],
+            widths: [
+              style.borderTopWidth,
+              style.borderRightWidth,
+              style.borderBottomWidth,
+              style.borderLeftWidth,
+            ],
+            animation: style.animationName,
+          };
+        });
+      expect(await facts()).toEqual({
+        colors: ['rgba(0, 0, 0, 0)', 'rgb(40, 50, 60)', 'rgb(40, 50, 60)', 'rgb(40, 50, 60)'],
+        widths: ['2px', '2px', '2px', '2px'],
+        animation: 'pui-spin',
+      });
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      expect(await facts()).toEqual({
+        colors: ['rgba(0, 0, 0, 0)', 'rgb(40, 50, 60)', 'rgb(40, 50, 60)', 'rgb(40, 50, 60)'],
+        widths: ['2px', '2px', '2px', '2px'],
+        animation: 'none',
+      });
+    } finally {
+      await page.close();
+    }
+  });
+
   it('applies combined dark reduced-motion CSS only when both conditions hold', async () => {
     const page = await browser.newPage();
     try {

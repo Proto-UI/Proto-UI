@@ -38,9 +38,6 @@ describe('cli: proto-style-css spinner surface', () => {
     const css = renderProtoStyleTokenCss([token]);
     const selector = `:where([data-pui-style~="${token}"])`;
     expect(css).toContain(selector);
-    const element = document.createElement('span');
-    element.setAttribute('data-pui-style', `border-2 ${token} animate-spin`);
-    expect(element.matches(selector)).toBe(true);
     expect(css).toContain('border-color: currentColor;');
     expect(css).toContain('border-top-color: transparent;');
     expect(css).not.toContain('border-color: transparent currentColor');
