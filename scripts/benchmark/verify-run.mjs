@@ -10,6 +10,8 @@ import {
   retainBrowserIdentity,
   assertPublicCalibration,
   calibrationSourcePaths,
+  evaluatorDependencySources,
+  calibrationDependencyProvenance,
   auxiliarySourceModules,
   verifySourceImports,
 } from './calibration-policy.mjs';
@@ -135,7 +137,8 @@ export function verifyRun(output) {
   const expectedSources = calibrationSourcePaths(
     dataset,
     snapshotCases,
-    auxiliarySourceModules.filter((file) => physicalSources.includes(file))
+    auxiliarySourceModules.filter((file) => physicalSources.includes(file)),
+    manifest.harness.version === calibrationHarnessVersion ? evaluatorDependencySources : []
   );
   if (json(physicalSources) !== json(expectedSources))
     throw new Error('Source snapshot differs from the explicit public input allowlist');
@@ -151,7 +154,7 @@ export function verifyRun(output) {
   if (manifest.harness.version !== declaredProfile)
     throw new Error('Harness profile differs from retained producer source');
   let sourceCapturePolicy;
-  if (manifest.harness.version === calibrationHarnessVersion) {
+  if ([calibrationHarnessVersion, 'p0-calibration-v2'].includes(manifest.harness.version)) {
     const capture = validateDocument(
       'sourceCapture',
       readJson(safeFile(output, 'source-capture.json'))
@@ -170,6 +173,16 @@ export function verifyRun(output) {
     sourceCapturePolicy =
       'legacy-directory-and-history-capture; no public-source privacy guarantee';
   } else throw new Error('Unsupported calibration harness profile');
+
+  let evaluatorDependency = null;
+  if (manifest.harness.version === calibrationHarnessVersion) {
+    evaluatorDependency = calibrationDependencyProvenance(sourceRoot);
+    if (json(toolchain.evaluatorDependency) !== json(evaluatorDependency))
+      throw new Error('Harness evaluator dependency differs from retained workspace/lock sources');
+  }
+  const dependencyCapturePolicy = evaluatorDependency
+    ? 'workspace-declaration-and-lock-bound; observed-version-checked'
+    : 'legacy-incomplete-playwright-workspace-capture';
 
   const datasetCaseIds = snapshotCases.map((item) => item.id);
   if (manifest.plan.cases.some((id) => !datasetCaseIds.includes(id)))
@@ -232,6 +245,13 @@ export function verifyRun(output) {
           manifest.harness.os
       )
         throw new Error('Harness Node/OS differs from raw environment observations');
+      if (
+        evaluatorDependency &&
+        ((environment.playwrightVersion !== undefined &&
+          environment.playwrightVersion !== evaluatorDependency.resolvedVersion) ||
+          (raw.browser?.version && !environment.playwrightVersion))
+      )
+        throw new Error('Observed Playwright version differs from retained evaluator dependency');
       browser = retainBrowserIdentity(browser, raw.browser);
     }
   }
@@ -365,6 +385,11 @@ export function verifyRun(output) {
     if (present('evaluator-output.json')) {
       const raw = readJson(safeFile(output, `${dir}/evaluator-output.json`));
       if (
+        manifest.harness.version === calibrationHarnessVersion &&
+        (raw.caseId !== task.id || raw.oracleRef !== task.oracleRef)
+      )
+        throw new Error(`Raw evaluator oracle identity differs from task: ${cell}`);
+      if (
         raw.environment.semanticDomain !== task.semanticDomain ||
         raw.environment.fixtureOrigin !== 'hand-authored-public-reference' ||
         raw.environment.scope !== 'public-harness-calibration-only' ||
@@ -421,5 +446,6 @@ export function verifyRun(output) {
     cells: cells.size,
     plannedCells: expected,
     sourceCapturePolicy,
+    dependencyCapturePolicy,
   };
 }

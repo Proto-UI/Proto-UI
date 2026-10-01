@@ -1,20 +1,26 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
-import { listFiles, safeFile } from './evidence.mjs';
-import { measured, unavailable } from './schemas.mjs';
+import YAML from 'yaml';
+import { listFiles, safeFile, sha256 } from './evidence.mjs';
+import {
+  measured,
+  unavailable,
+  negativeControlDeviation,
+  validateCalibrationDeviations,
+} from './schemas.mjs';
+export { negativeControlDeviation } from './schemas.mjs';
 
-export const calibrationHarnessVersion = 'p0-calibration-v2';
+export const calibrationHarnessVersion = 'p0-calibration-v3';
 export const publicDatasetPath = 'benchmarks/interaction/dataset.json';
 export const publicFixtures = Object.freeze({
   'dialog-open-close': 'dialog',
   'tabs-manual-activation': 'tabs',
   'select-keyboard': 'select',
 });
-export const negativeControlDeviation =
-  'Artificial public negative control: disable fixture inline scripts; not a naturally occurring model regression';
 
 export function fixtureArtifact(html, deviations) {
+  validateCalibrationDeviations(deviations);
   return deviations.includes(negativeControlDeviation)
     ? html.replace(/<script\b/g, '<script type="application/x-disabled-calibration"')
     : html;
@@ -98,12 +104,19 @@ export const auxiliarySourceModules = [
   'scripts/benchmark/calibration-policy.mjs',
   'scripts/benchmark/report.mjs',
 ];
-export function calibrationSourcePaths(dataset, cases, auxiliaries = auxiliarySourceModules) {
+export const evaluatorDependencySources = ['apps/www/package.json', 'pnpm-workspace.yaml'];
+export function calibrationSourcePaths(
+  dataset,
+  cases,
+  auxiliaries = auxiliarySourceModules,
+  dependencySources = evaluatorDependencySources
+) {
   assertPublicCalibration(dataset, cases);
   return [
     ...new Set([
       'package.json',
       'pnpm-lock.yaml',
+      ...dependencySources,
       '.github/workflows/interaction-benchmark-calibration.yml',
       'benchmarks/interaction/README.md',
       publicDatasetPath,
@@ -161,4 +174,28 @@ export function verifySourceImports(sourceRoot, files) {
     };
     visit(source);
   }
+}
+
+export function calibrationDependencyProvenance(sourceRoot) {
+  const manifestPath = 'apps/www/package.json';
+  const workspacePath = 'pnpm-workspace.yaml';
+  const manifestBytes = fs.readFileSync(safeFile(sourceRoot, manifestPath));
+  const workspaceBytes = fs.readFileSync(safeFile(sourceRoot, workspacePath));
+  const manifest = JSON.parse(manifestBytes);
+  const lock = YAML.parse(fs.readFileSync(safeFile(sourceRoot, 'pnpm-lock.yaml'), 'utf8'));
+  const packageName = 'playwright-core';
+  const specifier = manifest.devDependencies?.[packageName] ?? manifest.dependencies?.[packageName];
+  const importer = lock.importers?.['apps/www'];
+  const locked = importer?.devDependencies?.[packageName] ?? importer?.dependencies?.[packageName];
+  if (!specifier || !locked || locked.specifier !== specifier || typeof locked.version !== 'string')
+    throw new Error('Playwright workspace declaration differs from locked evaluator dependency');
+  return {
+    package: packageName,
+    manifestPath,
+    manifestSha256: sha256(manifestBytes),
+    workspacePath,
+    workspaceSha256: sha256(workspaceBytes),
+    specifier,
+    resolvedVersion: locked.version,
+  };
 }

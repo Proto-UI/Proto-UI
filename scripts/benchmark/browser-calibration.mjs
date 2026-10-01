@@ -10,6 +10,13 @@ const domains = {
   'tabs-manual-activation': 'html-aria-manual-tabs',
   'select-keyboard': 'html-native-select',
 };
+// Explicit development-oracle identities. Changing measured expectations requires
+// a new case oracleRef; prior archives retain their original identities and bytes.
+export const PUBLIC_CALIBRATION_ORACLES = Object.freeze({
+  'dialog-open-close': 'public-calibration-dialog-open-close-v2',
+  'tabs-manual-activation': 'public-calibration-tabs-manual-activation-v1',
+  'select-keyboard': 'public-calibration-select-keyboard-v1',
+});
 const viewport = { width: 1000, height: 760 };
 const policy =
   "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'";
@@ -170,10 +177,22 @@ export async function evaluateCalibration({
       'focused element'
     );
   }
-  async function ax(role, name) {
+  async function ax(role, name, selector) {
+    let backendNodeId;
+    if (selector) {
+      const { root } = await cdp.send('DOM.getDocument');
+      const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+      assert.notEqual(nodeId, 0, `No DOM node matching ${selector}`);
+      const { node } = await cdp.send('DOM.describeNode', { nodeId });
+      backendNodeId = node.backendNodeId;
+    }
     const { nodes } = await cdp.send('Accessibility.getFullAXTree');
     const node = nodes.find(
-      (item) => !item.ignored && item.role?.value === role && item.name?.value === name
+      (item) =>
+        !item.ignored &&
+        item.role?.value === role &&
+        item.name?.value === name &&
+        (backendNodeId === undefined || item.backendDOMNodeId === backendNodeId)
     );
     assert.ok(node, `No exposed accessibility node with role=${role} name=${JSON.stringify(name)}`);
     return node;
@@ -324,6 +343,20 @@ export async function evaluateCalibration({
           'focus',
           'Opening places focus on the dialog input',
           () => active('display-name')
+        );
+        await check(
+          'dialog.input-accessible-name',
+          'accessibility',
+          'The dialog input is exposed as a textbox named Display name in Chromium accessibility output',
+          () => ax('textbox', 'Display name', '#display-name')
+        );
+        await check(
+          'dialog.input-initial-value',
+          'behavior',
+          'The dialog input initially contains Example before any editing interaction',
+          async () => {
+            assert.equal(await page.locator('#display-name').inputValue(), 'Example');
+          }
         );
         await check(
           'dialog.accessible-name',
@@ -751,5 +784,13 @@ export async function evaluateCalibration({
     if (artifacts.includes('trace.zip')) item.evidence.push('trace.zip');
     if (item.status === 'fail' || item.status === 'blocked') item.evidence.push('failures.json');
   }
-  return { checks, browser: browserInfo, environment, failures, artifacts };
+  return {
+    caseId,
+    oracleRef: PUBLIC_CALIBRATION_ORACLES[caseId],
+    checks,
+    browser: browserInfo,
+    environment,
+    failures,
+    artifacts,
+  };
 }

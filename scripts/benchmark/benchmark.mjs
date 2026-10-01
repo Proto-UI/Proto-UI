@@ -12,6 +12,7 @@ import {
   unavailable,
   summarizeChecks,
   outcomeStatus,
+  maxCalibrationRepeats,
 } from './schemas.mjs';
 import { verifyRun } from './verify-run.mjs';
 import { renderReport } from './report.mjs';
@@ -25,6 +26,7 @@ import {
   retainBrowserIdentity,
   deriveChecks,
   calibrationSourcePaths,
+  calibrationDependencyProvenance,
   verifySourceImports,
   assertPublicCalibration,
 } from './calibration-policy.mjs';
@@ -167,8 +169,8 @@ export async function dryRun({
       );
   if (!cases.length || (selectedCases && cases.length !== selectedCases.length))
     throw new Error('Unknown, duplicate, or empty case selection');
-  if (!Number.isInteger(repeats) || repeats < 1 || repeats > 10)
-    throw new Error('Calibration repetitions must be an integer in 1..10');
+  if (!Number.isInteger(repeats) || repeats < 1 || repeats > maxCalibrationRepeats)
+    throw new Error(`Calibration repetitions must be an integer in 1..${maxCalibrationRepeats}`);
   if (
     !arms.length ||
     new Set(arms).size !== arms.length ||
@@ -241,6 +243,7 @@ export async function dryRun({
           lockfileSha256: sha256(fs.readFileSync(path.join(root, 'pnpm-lock.yaml'))),
           sourceInventory: 'source-inventory.json',
           sourceCapture: 'source-capture.json',
+          evaluatorDependency: calibrationDependencyProvenance(path.join(output, 'source')),
           ci: Object.fromEntries(
             [
               'ImageOS',
@@ -326,6 +329,8 @@ export async function dryRun({
           } catch (error) {
             writeNew(evidenceDir, 'harness-error.txt', `${error.stack ?? error}\n`);
             evaluated = {
+              caseId: item.id,
+              oracleRef: item.oracleRef,
               checks: [
                 {
                   id: 'harness-execution',

@@ -798,7 +798,7 @@ test('current capture profile cannot retain history, omit its receipt, or downgr
     assert.doesNotThrow(() => verifyEvidence(dir));
     assert.throws(
       () => verifyRun(dir),
-      /historical dirty patches|Source capture receipt|ENOENT|Harness profile differs/
+      /historical dirty patches|Source capture receipt|ENOENT|Harness profile differs|public input allowlist/
     );
   }
 });
@@ -932,4 +932,128 @@ test('relative source closure includes side-effect, named, re-export and dynamic
     `// import './comment-only.mjs';\nconst example = "import './string-only.mjs';";`
   );
   assert.doesNotThrow(() => verifySourceImports(dir, ['scripts/benchmark/test.mjs']));
+});
+
+test('calibration rejects unknown or duplicate deviations in manifests, results and transforms', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const deviations of [
+    ['Unapplied experimental change'],
+    [negativeControlDeviation, negativeControlDeviation],
+  ]) {
+    const dir = path.join(temporary(), 'changed');
+    fs.cpSync(original, dir, { recursive: true });
+    for (const file of ['run.json', 'run-start.json']) {
+      const value = readJson(path.join(dir, file));
+      value.deviations = deviations;
+      fs.writeFileSync(path.join(dir, file), json(value));
+      assert.throws(() => validateDocument('run', value), /Calibration deviations/);
+    }
+    const rows = readJson(path.join(dir, 'results.json'));
+    rows[0].deviations = deviations;
+    fs.writeFileSync(path.join(dir, 'results.json'), json(rows));
+    fs.writeFileSync(path.join(dir, 'cells/dialog-open-close/blind/1/result.json'), json(rows[0]));
+    assert.throws(() => validateDocument('result', rows[0]), /Calibration deviations/);
+    assert.throws(
+      () => fixtureArtifact('<script>example</script>', deviations),
+      /Calibration deviations/
+    );
+    reseal(dir);
+    assert.throws(() => verifyRun(dir), /Calibration deviations/);
+  }
+});
+
+test('calibration repeat bounds reject oversized plans before expansion with bounded verifier resources', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const repeats of [11, 1_000_000_000]) {
+    const dir = path.join(temporary(), 'oversized');
+    fs.cpSync(original, dir, { recursive: true });
+    for (const file of ['run.json', 'run-start.json']) {
+      const value = readJson(path.join(dir, file));
+      value.plan.repeats = repeats;
+      assert.throws(() => validateDocument('run', value), /Calibration repetitions/);
+      fs.writeFileSync(path.join(dir, file), json(value));
+    }
+    reseal(dir);
+    const checked = spawnSync(
+      process.execPath,
+      ['--max-old-space-size=128', 'scripts/benchmark/benchmark.mjs', 'verify', '--out', dir],
+      { cwd: root, encoding: 'utf8', timeout: 5000 }
+    );
+    assert.equal(checked.status, 1, checked.stderr);
+    assert.match(checked.stderr, /Calibration repetitions must be an integer in 1\.\.10/);
+  }
+  const row = readJson(path.join(original, 'results.json'))[0];
+  row.repeat = 11;
+  assert.throws(() => validateDocument('result', row), /Calibration result repeat exceeds/);
+});
+
+test('evaluator dependency workspace files, metadata and observed version are source-bound', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  const run = readJson(path.join(original, 'run.json'));
+  assert.equal(run.harness.version, 'p0-calibration-v3');
+  assert.equal(run.harness.toolchain.value.evaluatorDependency.package, 'playwright-core');
+  assert.equal(
+    run.harness.toolchain.value.evaluatorDependency.manifestPath,
+    'apps/www/package.json'
+  );
+  assert.equal(
+    verifyRun(original).dependencyCapturePolicy,
+    'workspace-declaration-and-lock-bound; observed-version-checked'
+  );
+  for (const mode of [
+    'apps/www/package.json',
+    'pnpm-workspace.yaml',
+    'metadata',
+    'observed-version',
+    'oracle-identity',
+  ]) {
+    const dir = path.join(temporary(), 'changed');
+    fs.cpSync(original, dir, { recursive: true });
+    if (mode.endsWith('.json') || mode.endsWith('.yaml')) {
+      const inventory = readJson(path.join(dir, 'source-inventory.json'));
+      inventory.files = inventory.files.filter((file) => file.path !== mode);
+      fs.unlinkSync(path.join(dir, 'source', mode));
+      fs.writeFileSync(path.join(dir, 'source-inventory.json'), json(inventory));
+      for (const file of ['run.json', 'run-start.json']) {
+        const value = readJson(path.join(dir, file));
+        value.harness.sourceDigest = sha256(json(inventory.files));
+        fs.writeFileSync(path.join(dir, file), json(value));
+      }
+    } else if (mode === 'metadata') {
+      for (const file of ['run.json', 'run-start.json']) {
+        const value = readJson(path.join(dir, file));
+        value.harness.toolchain.value.evaluatorDependency.resolvedVersion = '999.0.0';
+        fs.writeFileSync(path.join(dir, file), json(value));
+      }
+    } else {
+      const file = path.join(dir, 'cells/dialog-open-close/blind/1/evaluator-output.json');
+      const raw = readJson(file);
+      if (mode === 'observed-version') raw.environment.playwrightVersion = '999.0.0';
+      else raw.oracleRef = 'public-calibration-dialog-open-close-v1';
+      fs.writeFileSync(file, json(raw));
+    }
+    reseal(dir);
+    assert.throws(
+      () => verifyRun(dir),
+      /public input allowlist|evaluator dependency differs|Observed Playwright version|oracle identity differs/
+    );
+  }
 });

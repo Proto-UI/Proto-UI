@@ -4,7 +4,10 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
-import { evaluateCalibration as evaluate } from './browser-calibration.mjs';
+import {
+  evaluateCalibration as evaluate,
+  PUBLIC_CALIBRATION_ORACLES,
+} from './browser-calibration.mjs';
 
 const evidenceRoot = process.env.PROTO_BENCHMARK_EVIDENCE_ROOT || os.tmpdir();
 await mkdir(evidenceRoot, { recursive: true });
@@ -21,9 +24,24 @@ async function evaluateCalibration(options) {
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const cases = [
-  { caseId: 'dialog-open-close', name: 'dialog', domain: 'html-native-dialog' },
-  { caseId: 'tabs-manual-activation', name: 'tabs', domain: 'html-aria-manual-tabs' },
-  { caseId: 'select-keyboard', name: 'select', domain: 'html-native-select' },
+  {
+    caseId: 'dialog-open-close',
+    name: 'dialog',
+    domain: 'html-native-dialog',
+    oracleRef: 'public-calibration-dialog-open-close-v2',
+  },
+  {
+    caseId: 'tabs-manual-activation',
+    name: 'tabs',
+    domain: 'html-aria-manual-tabs',
+    oracleRef: 'public-calibration-tabs-manual-activation-v1',
+  },
+  {
+    caseId: 'select-keyboard',
+    name: 'select',
+    domain: 'html-native-select',
+    oracleRef: 'public-calibration-select-keyboard-v1',
+  },
 ];
 const fixture = (name) => path.join(root, 'benchmarks/interaction/fixtures', `${name}.html`);
 const browserOptions = {
@@ -38,6 +56,23 @@ test('public fixtures identify the native calibration scope and contain no exter
     assert.ok(html.includes(`data-calibration-domain="${domain}"`));
     assert.doesNotMatch(html, /(?:src|href)\s*=\s*["'](?:https?:)?\/\//i);
     assert.doesNotMatch(html, /(?:import|require)\s*\(?\s*["']@proto/i);
+  }
+});
+
+test('public oracle identities match source case metadata with explicit Dialog v2 coverage', async () => {
+  assert.equal(Object.isFrozen(PUBLIC_CALIBRATION_ORACLES), true);
+  assert.deepEqual(
+    Object.keys(PUBLIC_CALIBRATION_ORACLES).sort(),
+    cases.map(({ caseId }) => caseId).sort()
+  );
+  for (const { caseId, oracleRef } of cases) {
+    const task = JSON.parse(
+      await readFile(path.join(root, 'benchmarks/interaction/cases', `${caseId}.json`), 'utf8')
+    );
+    assert.equal(PUBLIC_CALIBRATION_ORACLES[caseId], oracleRef);
+    assert.equal(task.oracleRef, oracleRef);
+    if (caseId === 'dialog-open-close')
+      assert.match(task.requirements, /labelled Display name input initially containing Example/);
   }
 });
 
@@ -56,6 +91,11 @@ test('unavailable Chromium is a blocked setup with raw failure evidence, never a
     evidenceDir,
     chromiumPath: path.join(evidenceDir, 'missing-chromium'),
   });
+  assert.equal(result.caseId, 'dialog-open-close');
+  assert.equal(result.oracleRef, 'public-calibration-dialog-open-close-v2');
+  const raw = JSON.parse(await readFile(path.join(evidenceDir, 'evaluator-result.json'), 'utf8'));
+  assert.equal(raw.caseId, result.caseId);
+  assert.equal(raw.oracleRef, result.oracleRef);
   assert.equal(result.checks.find((item) => item.id === 'host.browser-ready')?.status, 'blocked');
   assert.equal(
     result.checks.find((item) => item.id === 'scope.proto-conformance')?.status,
@@ -74,7 +114,7 @@ test('unavailable Chromium is a blocked setup with raw failure evidence, never a
 
 // Opt in explicitly on a host that permits Chromium. A failed launch is a failed
 // browser test, never an implicit skip or a successful calibration run.
-for (const { caseId, name, domain } of cases) {
+for (const { caseId, name, domain, oracleRef } of cases) {
   test(`real Chromium positive control: ${caseId}`, browserOptions, async () => {
     const evidenceDir = await mkdtemp(path.join(evidenceRoot, `proto-calibration-${name}-`));
     const result = await evaluateCalibration({
@@ -84,7 +124,13 @@ for (const { caseId, name, domain } of cases) {
       chromiumPath: process.env.CHROME_PATH || process.env.CHROMIUM_PATH || '/usr/bin/chromium',
     });
     assert.deepEqual(result.failures, [], JSON.stringify(result.failures));
+    assert.equal(result.caseId, caseId);
+    assert.equal(result.oracleRef, oracleRef);
     assert.equal(result.environment.semanticDomain, domain);
+    if (caseId === 'dialog-open-close') {
+      for (const id of ['dialog.input-accessible-name', 'dialog.input-initial-value'])
+        assert.equal(result.checks.find((item) => item.id === id)?.status, 'pass');
+    }
     assert.equal(result.environment.protoConformance, 'untested');
     assert.ok(result.browser.version);
     assert.ok(result.checks.filter((item) => item.status === 'pass').length > 10);
@@ -187,6 +233,67 @@ test(
     assert.equal(result.checks.find((item) => item.id === 'dialog.cancel-close')?.status, 'pass');
   }
 );
+
+for (const { name, suffix, before, after, failedCheck, passingCheck } of [
+  {
+    name: 'removed dialog input label fails only the intended accessible-name check',
+    suffix: 'label',
+    before: '<label for="display-name">Display name</label>',
+    after: '',
+    failedCheck: 'dialog.input-accessible-name',
+    passingCheck: 'dialog.input-initial-value',
+  },
+  {
+    name: 'changed dialog initial value fails only the intended value check',
+    suffix: 'value',
+    before: '<input id="display-name" autofocus value="Example" />',
+    after: '<input id="display-name" autofocus value="Changed" />',
+    failedCheck: 'dialog.input-initial-value',
+    passingCheck: 'dialog.input-accessible-name',
+  },
+]) {
+  test(`real Chromium negative control: ${name}`, browserOptions, async () => {
+    const evidenceDir = await mkdtemp(
+      path.join(evidenceRoot, `proto-calibration-negative-dialog-${suffix}-`)
+    );
+    const htmlPath = path.join(evidenceDir, 'mutated-dialog.html');
+    const html = await readFile(fixture('dialog'), 'utf8');
+    assert.equal(html.split(before).length, 2, 'Mutation must change exactly one fixture element');
+    await writeFile(htmlPath, html.replace(before, after));
+    const result = await evaluateCalibration({
+      caseId: 'dialog-open-close',
+      htmlPath,
+      evidenceDir,
+      chromiumPath: process.env.CHROME_PATH || process.env.CHROMIUM_PATH || '/usr/bin/chromium',
+    });
+    assert.equal(result.caseId, 'dialog-open-close');
+    assert.equal(result.oracleRef, 'public-calibration-dialog-open-close-v2');
+    assert.ok(
+      !result.checks.some((item) => item.status === 'blocked'),
+      JSON.stringify(result.failures)
+    );
+    assert.equal(result.checks.find((item) => item.id === failedCheck)?.status, 'fail');
+    assert.deepEqual(
+      result.failures.map((item) => item.stage),
+      [failedCheck]
+    );
+    for (const id of [
+      passingCheck,
+      'dialog.keyboard-open',
+      'dialog.initial-focus',
+      'dialog.accessible-name',
+      'dialog.repeat-cycle',
+      'cleanup.remove-fixture',
+    ])
+      assert.equal(result.checks.find((item) => item.id === id)?.status, 'pass');
+    assert.ok(
+      result.checks.every(
+        (item) =>
+          item.status === 'pass' || item.id === failedCheck || item.id === 'scope.proto-conformance'
+      )
+    );
+  });
+}
 
 test(
   'real Chromium negative control: blocked native select keys fail keyboard checks',

@@ -1,4 +1,17 @@
 /** Canonical JSON Schemas. `benchmark schemas` exports ordinary JSON, without code. */
+export const maxCalibrationRepeats = 10;
+export const negativeControlDeviation =
+  'Artificial public negative control: disable fixture inline scripts; not a naturally occurring model regression';
+export function validateCalibrationDeviations(deviations) {
+  if (
+    !Array.isArray(deviations) ||
+    deviations.length > 1 ||
+    (deviations.length === 1 && deviations[0] !== negativeControlDeviation)
+  )
+    throw new Error(
+      'Calibration deviations must be empty or exactly the supported negative control, without duplicates'
+    );
+}
 const string = { type: 'string', minLength: 1 };
 const strings = { type: 'array', items: string };
 const id = { type: 'string', pattern: '^[a-z0-9][a-z0-9.-]*$' };
@@ -388,6 +401,9 @@ export function validateDocument(kind, value) {
   )
     throw new Error('Duplicate planned cases or arms');
   if (kind === 'run' && value.kind === 'calibration-stub') {
+    validateCalibrationDeviations(value.deviations);
+    if (value.plan.repeats > maxCalibrationRepeats)
+      throw new Error(`Calibration repetitions must be an integer in 1..${maxCalibrationRepeats}`);
     if (
       value.participant.kind !== 'handwritten-fixture' ||
       value.exposure.boundary !== 'public-calibration-only' ||
@@ -413,6 +429,9 @@ export function validateDocument(kind, value) {
       );
   }
   if (kind === 'result') {
+    validateCalibrationDeviations(value.deviations);
+    if (value.repeat > maxCalibrationRepeats)
+      throw new Error(`Calibration result repeat exceeds ${maxCalibrationRepeats}`);
     if (new Set(value.checks.map((checkValue) => checkValue.id)).size !== value.checks.length)
       throw new Error('Duplicate check IDs');
     const expected = summarizeChecks(value.checks);
