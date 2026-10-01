@@ -203,11 +203,23 @@ jobs:
 
       - name: Lint
         working-directory: native/gpui
-        run: cargo clippy --workspace --all-targets -- -D warnings
+        run: |
+          set -euo pipefail
+          cargo clippy --workspace --all-targets -- -D warnings
+          # The real-window test is behind a feature; lint it too.
+          cargo clippy -p proto-ui-gpui --features macos-accessibility-test --all-targets -- -D warnings
 
       - name: Test
         working-directory: native/gpui
         run: cargo test --workspace
+
+      - name: Base Button through macOS accessibility
+        # Opens a real window, so it is not part of `cargo test --workspace`.
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --features macos-accessibility-test --test accesskit_macos 2>&1 | tee accesskit.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" accesskit.log
 
   rust-interop:
     # The real Rust host against the real Node peer. These tests are ignored
@@ -260,6 +272,48 @@ jobs:
           # An ignored test that was renamed or filtered away would pass as
           # zero tests; require that one actually ran.
           grep -Eq "test result: ok\. [1-9][0-9]* passed" t0_peer.log
+
+      - name: Base Button over T0 in a GPUI window
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test button_t0 -- --ignored --test-threads=1 2>&1 | tee button_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" button_t0.log
+
+      - name: Base Toggle over T0 in a GPUI window
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test toggle_t0 -- --ignored --test-threads=1 2>&1 | tee toggle_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" toggle_t0.log
+
+      - name: Base Switch over T0 in a GPUI window
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test switch_t0 -- --ignored --test-threads=1 2>&1 | tee switch_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" switch_t0.log
+
+      - name: Base Tabs panels follow their view intent over T0
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test view_intent_t0 -- --ignored --test-threads=1 2>&1 | tee view_intent_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" view_intent_t0.log
+
+      - name: Base Tabs over T0 in a GPUI window
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test tabs_t0 -- --ignored --test-threads=1 2>&1 | tee tabs_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" tabs_t0.log
+
+      - name: Base Transition over T0 in a GPUI window
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test transition_t0 -- --ignored --test-threads=1 2>&1 | tee transition_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" transition_t0.log
 
   test:
     runs-on: ubuntu-latest

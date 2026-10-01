@@ -15,8 +15,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 
 use crate::wire::{
-    A11ySnapshotWire, CommitId, DefaultActionRequest, FocusTargetRef, HostDiagnostic, InputSample,
-    InstanceId, LeaseId, ProjectionAck, ProjectionTransaction, SessionId, ViewEpoch,
+    A11ySnapshotWire, CommitId, DefaultActionRequest, FocusPlan, FocusTargetRef, HostDiagnostic,
+    InputSample, InstanceId, LeaseId, ProjectionAck, ProjectionTransaction, SessionId, ViewEpoch,
 };
 
 /// A record of wire values, as `WireRecord` is on the TypeScript side.
@@ -79,6 +79,10 @@ pub struct SessionOpen {
     pub instance_id: InstanceId,
     pub prototype_key: String,
     pub props: WireRecord,
+    /// The open session whose instance this one belongs to, such as a Switch
+    /// for its thumb. Absent for a top-level instance.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub parent_session_id: Option<SessionId>,
 }
 
 /// `ok` or `failed`.
@@ -120,6 +124,16 @@ pub struct ProjectionActivate {
     pub session_id: SessionId,
     pub view_epoch: ViewEpoch,
     pub commit_id: CommitId,
+}
+
+/// The instance unmounted the view of `view_epoch` because its view intent no
+/// longer wants one (C-LIFECYCLE-0008). The instance stays alive; a later
+/// `projection.install` with a greater epoch attaches a new view.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ProjectionDetach {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -239,6 +253,26 @@ pub struct ExposeResult {
     pub diagnostics: Vec<HostDiagnostic>,
 }
 
+/// The instance's focus plan changed outside a commit, as a roving group's
+/// selection moves its tab stop. It replaces the plan the view carried, whole.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FocusPlanMessage {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
+    pub focus: FocusPlan,
+}
+
+/// The instance root's feedback style changed outside a commit. It replaces
+/// the style the view carried, whole.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StyleApply {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
+    pub tokens: Vec<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct A11ySnapshotMessage {
@@ -250,6 +284,9 @@ pub struct A11ySnapshotMessage {
     pub snapshot: Option<A11ySnapshotWire>,
 }
 
+/// Ends a session, and before it every session opened inside it, so that no
+/// instance outlives the one it belongs to. The peer reports
+/// `session.disposed` for each, a part before the instance it belongs to.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SessionDispose {
@@ -327,8 +364,11 @@ envelopes!(
     PeerToHostMessage {
         PeerHello(PeerHello) => "peer.hello",
         SessionOpened(SessionOpened) => "session.opened",
-        ProjectionInstall(ProjectionInstall) => "projection.install",
+        // Boxed: a transaction carries a whole template and plan, several
+        // times the size of any other message.
+        ProjectionInstall(Box<ProjectionInstall>) => "projection.install",
         ProjectionActivate(ProjectionActivate) => "projection.activate",
+        ProjectionDetach(ProjectionDetach) => "projection.detach",
         LeaseRelease(LeaseRelease) => "lease.release",
         DefaultActionPrevent(DefaultActionPrevent) => "default-action.prevent",
         FocusRequest(FocusRequest) => "focus.request",
@@ -337,6 +377,8 @@ envelopes!(
         ExposeSignal(ExposeSignal) => "expose.signal",
         ExposeResult(ExposeResult) => "expose.result",
         A11ySnapshot(A11ySnapshotMessage) => "a11y.snapshot",
+        FocusPlan(FocusPlanMessage) => "focus.plan",
+        StyleApply(StyleApply) => "style.apply",
         SessionDisposed(SessionDisposed) => "session.disposed",
         Lifecycle(Lifecycle) => "lifecycle",
         Diagnostic(Diagnostic) => "diagnostic",
