@@ -35,8 +35,8 @@ criteria:
       zh-CN: Adapter 为 Boundary 接入当前 host boundary 与 Web classification bridge，Event 传输 pointer sample。分离 regions 与未解析证据保留三态分类；top layer 关闭不将同一 sample 传给较低 active boundary。
   - id: A-VUE-3-0001-FOCUS
     text:
-      en: The Adapter translates the bounded Focus Module with logical target identity, current host focus requests/readiness, sequential versus programmatic eligibility, and descendant-first entry delegation. Real Adapter evidence covers roving membership and entry fallback; Runtime evidence owns scope and retained-request arbitration.
-      zh-CN: Adapter 翻译有界 Focus Module，提供 logical target identity、当前 host focus request/readiness、顺序与程序化资格区分、descendant-first entry delegation。真实 Adapter 证据覆盖 roving membership 与 entry fallback；Runtime 证据负责 scope 与 retained-request 仲裁。
+      en: The Adapter translates the bounded Focus Module with logical target identity, current host focus requests/readiness, sequential versus programmatic eligibility, and descendant-first entry delegation. Real Adapter evidence covers roving membership, document order and entry fallback; Runtime evidence owns scope and retained-request arbitration.
+      zh-CN: Adapter 翻译有界 Focus Module，提供 logical target identity、当前 host focus request/readiness、顺序与程序化资格区分、descendant-first entry delegation。真实 Adapter 证据覆盖 roving membership、文档顺序与 entry fallback；Runtime 证据负责 scope 与 retained-request 仲裁。
   - id: A-VUE-3-0001-TRIGGER
     text:
       en: The Adapter installs the bounded Trigger Module and translates logical chains through the shared host group owner. Three nested members share one semantic activation route, host-local events stay local, and sibling Trigger branches are rejected by the host owner.
@@ -141,6 +141,21 @@ criteria:
     text:
       en: The standard Adapter wires Scroll with host-owned overflow and the current root, translates normalized requests/facts, and restores owned styles and listeners on teardown. Composed Thumb geometry and Move Gesture remain attached to the same Context/Anatomy-resolved surface; evidence uses simulated Web geometry, not native physics certification.
       zh-CN: standard Adapter 将 Scroll 接入 host-owned overflow 与当前 root，翻译 normalized request/fact，并在 teardown 恢复拥有的样式、释放 listener。composed Thumb geometry 与 Move Gesture 附着到同一个 Context/Anatomy 解析的 surface；证据使用模拟 Web geometry，不是 native physics 认证。
+  - id: A-VUE-3-0001-SCROLL-END-FOLLOW
+    text:
+      en: The standard Adapter routes the opt-in vertical policy, read-only atEnd and follow facts, and semantic to-end request through the existing Scroll Module and Web host. The shared simulated-DOM journey verifies end alignment, stationary-contact non-interference, and explicit request completion; it does not certify native panning or promote the draft end-follow contract.
+      zh-CN: standard Adapter 经既有 Scroll Module 与 Web host 路由 opt-in vertical policy、只读 atEnd/follow facts 及 semantic to-end request。共享模拟 DOM journey 验证 end alignment、静止接触不干扰 follow 与显式 request completion；不认证 native panning，也不提升 draft end-follow contract。
+    dependsOn:
+      contracts:
+        - id: C-SCROLL-END-FOLLOW-0001
+          since: 0.3.0-alpha.0
+          anchors:
+            [
+              C-SCROLL-END-FOLLOW-0001-POLICY,
+              C-SCROLL-END-FOLLOW-0001-FACTS,
+              C-SCROLL-END-FOLLOW-0001-INTERRUPT,
+              C-SCROLL-END-FOLLOW-0001-RESUME,
+            ]
   - id: A-VUE-3-0001-RULE-META
     text:
       en: The bounded draft Rule Meta slice passes the exact default getter/source pair through owner/view wiring, updates mixed Rule styles without a Proto update, and preserves retained-owner remount and normal Props synchronization. Custom getMeta remains sampled without the default source. Happy-dom evidence covers token/identity behavior, not browser paint or all framework replay paths.
@@ -251,6 +266,10 @@ provides:
     - id: HC-FOCUS-ENTRY-0001
       since: 0.3.0-alpha.0
       role: translated-capability
+    - id: HC-FOCUS-ORDER-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Document order when all targets share one tree; a set spanning trees is reported unorderable, and Focus keeps registration order for it.
     - id: HC-TRIGGER-GROUP-0001
       since: 0.3.0-alpha.0
       role: translated-capability
@@ -330,6 +349,8 @@ verifies:
       since: 0.3.0-alpha.0
     - id: T-FOCUS-0002
       since: 0.3.0-alpha.0
+    - id: T-FOCUS-ORDER-0001
+      since: 0.3.0-alpha.1
     - id: T-AS-TRIGGER-0002
       since: 0.3.0-alpha.0
     - id: T-RULE-EXPOSE-STATE-WEB-0001
@@ -366,6 +387,9 @@ verifies:
       since: 0.3.0-alpha.0
     - id: T-SCROLL-COMPOSED-CONTROL-0001
       since: 0.3.0-alpha.0
+    - id: T-SCROLL-END-FOLLOW-0001
+      since: 0.3.0-alpha.0
+      anchors: [T-SCROLL-END-FOLLOW-0001-CASE-WEB-ADAPTERS]
 sources:
   - path: packages/adapters/vue/test/color-scheme.integration.test.ts
   - path: packages/adapters/base/src/platform/web-color-scheme-source.ts
@@ -394,6 +418,9 @@ sources:
   - path: packages/adapters/vue/test/context.integration.test.ts
   - path: packages/adapters/vue/test/expose-state-web.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: clarified
+    summary: Bound the existing vertical end-follow policy, facts and request journey to precise Adapter evidence without admitting the draft contract as stable.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Cataloged bounded Positioning support with active-view geometry and cleanup evidence.
@@ -472,4 +499,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: extended
     summary: Cataloged bounded draft Rule Meta wiring and the conditional default colorScheme source, separating token evidence from browser painting.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Provides the draft Focus navigation order through document order within one tree, with roving evidence where document and registration order differ.
 tags: [adapter, vue, web, props, event, lifecycle, state, expose, official]

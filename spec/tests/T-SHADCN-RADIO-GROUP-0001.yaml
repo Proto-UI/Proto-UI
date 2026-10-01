@@ -1,0 +1,152 @@
+id: T-SHADCN-RADIO-GROUP-0001
+type: test
+title: Shadcn Radio Group inheritance, public surface and rendered presentation tests
+status: draft
+lifecycleRationale: This evidence map accompanies the draft three-part Shadcn projection. Pending executions remain planned; successful runs establish only their declared package, Web Adapter and browser scopes, not stable admission or non-Web conformance.
+since: 0.3.0-alpha.1
+summary: Covers exact inherited APIs and package entries, visual rule tokens, controlled and uncontrolled selection, effective disabled, roving focus, nearest-domain isolation and passive repeatable Indicators; browser evidence separately verifies actual rendered presentation.
+cases:
+  - id: T-SHADCN-RADIO-GROUP-0001-CASE-PUBLIC-SURFACE
+    title: The family exposes exactly three direct parts with Base types and no deferred APIs
+    covers:
+      - P-SHADCN-RADIO-GROUP-DIRECT-ENTRY
+      - P-SHADCN-RADIO-GROUP-PUBLIC-SURFACE
+      - P-SHADCN-RADIO-GROUP-COMPATIBILITY-SUBSET
+      - P-SHADCN-RADIO-GROUP-ITEM-DIRECT-ENTRY
+      - P-SHADCN-RADIO-GROUP-INDICATOR-DIRECT-ENTRY
+    expectation: shadcn-radio-group-keeps-exact-three-part-package-and-base-api-surfaces
+  - id: T-SHADCN-RADIO-GROUP-0001-CASE-SURFACES
+    title: Root Item and Indicator project complete default and conditional style tokens
+    covers:
+      - P-SHADCN-RADIO-GROUP-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-ITEM-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-ITEM-FOCUS-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-ITEM-DISABLED-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-INDICATOR-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-INDICATOR-DERIVED-VISIBILITY
+    expectation: shadcn-radio-group-style-rules-consume-inherited-facts-without-unconditional-focus-or-disabled-feedback
+    notes:
+      - Adapter attribute and token assertions do not claim happy-dom computed paint; exact rendered geometry and color belong to the browser implementation.
+  - id: T-SHADCN-RADIO-GROUP-0001-CASE-TOKEN-CLOSURE
+    title: Isolated family scanning and CLI initialization retain the inherited state and theme selectors
+    covers:
+      - P-SHADCN-RADIO-GROUP-ITEM-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-ITEM-FOCUS-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-ITEM-DISABLED-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-INDICATOR-DERIVED-VISIBILITY
+    expectation: isolated-radio-group-scanning-retains-checked-focus-disabled-and-dark-variants-and-cli-init-emits-the-checked-opacity-selector
+    notes:
+      - The isolated source scan must include data-[checked]:opacity-100, the inherited focus-visible ring and disabled variants, and dark:bg-input/30 without relying on tokens supplied by another family.
+      - Generated CLI CSS must contain the checked opacity selector. Scanner, hook-resolution and CSS-text assertions prove token closure only, not browser paint or interaction acceptance.
+  - id: T-SHADCN-RADIO-GROUP-0001-CASE-SELECTION
+    title: Root preserves controlled requests and uncontrolled commits while disabled and invalid requests stay inert
+    covers:
+      - P-SHADCN-RADIO-GROUP-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-OWNERSHIP-BOUNDARY
+      - P-SHADCN-RADIO-GROUP-ITEM-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-ITEM-DISABLED-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-INDICATOR-DERIVED-VISIBILITY
+    expectation: shadcn-radio-group-keeps-root-owned-selection-and-effective-disabled-derivation
+  - id: T-SHADCN-RADIO-GROUP-0001-CASE-DOMAINS
+    title: Nearest Root and Item contexts isolate nested groups and derive repeated passive Indicators
+    covers:
+      - P-SHADCN-RADIO-GROUP-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-OWNERSHIP-BOUNDARY
+      - P-SHADCN-RADIO-GROUP-INDICATOR-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-INDICATOR-DERIVED-VISIBILITY
+      - P-SHADCN-RADIO-GROUP-INDICATOR-PASSIVE-BOUNDARY
+    expectation: shadcn-radio-group-preserves-nearest-domain-ownership-without-injected-or-duplicate-controls
+  - id: T-SHADCN-RADIO-GROUP-0001-CASE-ROVING
+    title: Selected-or-first entry wrapped navigation Space and focus-visible presentation remain Base-owned
+    covers:
+      - P-SHADCN-RADIO-GROUP-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-ITEM-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-ITEM-FOCUS-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-INDICATOR-PASSIVE-BOUNDARY
+    expectation: shadcn-radio-group-keeps-one-roving-item-skips-disabled-and-selects-only-through-base-input
+    notes:
+      - The passing unit path covers empty or first-selected entry and current choices established by programmatic focus or navigation. It does not verify initial Tab entry when the initially selected Item is not first.
+  - id: T-SHADCN-RADIO-GROUP-0001-CASE-BROWSER
+    title: Real package previews render and interact across Web Component React Vue and Vue 2 in both themes and narrow layouts
+    covers:
+      - P-SHADCN-RADIO-GROUP-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-OWNERSHIP-BOUNDARY
+      - P-SHADCN-RADIO-GROUP-ITEM-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-ITEM-FOCUS-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-ITEM-DISABLED-FEEDBACK
+      - P-SHADCN-RADIO-GROUP-INDICATOR-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-RADIO-GROUP-INDICATOR-DERIVED-VISIBILITY
+      - P-SHADCN-RADIO-GROUP-INDICATOR-PASSIVE-BOUNDARY
+    expectation: rendered-shadcn-radio-group-preserves-base-interactions-and-exact-circle-focus-disabled-presentation
+implementations:
+  - id: prototypes-shadcn-radio-group-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/radio-group.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-RADIO-GROUP-0001-CASE-PUBLIC-SURFACE
+      - T-SHADCN-RADIO-GROUP-0001-CASE-SURFACES
+      - T-SHADCN-RADIO-GROUP-0001-CASE-SELECTION
+      - T-SHADCN-RADIO-GROUP-0001-CASE-DOMAINS
+      - T-SHADCN-RADIO-GROUP-0001-CASE-ROVING
+    exercises: &radio-group-prototypes
+      - P-BASE-RADIO-GROUP
+      - P-BASE-RADIO-GROUP-ITEM
+      - P-BASE-RADIO-GROUP-INDICATOR
+      - P-SHADCN-RADIO-GROUP
+      - P-SHADCN-RADIO-GROUP-ITEM
+      - P-SHADCN-RADIO-GROUP-INDICATOR
+    notes:
+      - Eight unit tests pass for their Runtime setup and WC Adapter observables; non-first-selected initial Tab entry is verified separately by the browser implementation.
+  - id: cli-shadcn-radio-group-facade
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/cli.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-RADIO-GROUP-0001-CASE-PUBLIC-SURFACE
+      - T-SHADCN-RADIO-GROUP-0001-CASE-TOKEN-CLOSURE
+    exercises: *radio-group-prototypes
+    notes:
+      - Verifies exactly three compound facade parts with no preset-injected Indicator and the checked opacity selector in initialized CSS; it does not execute those generated facades in a browser.
+  - id: cli-shadcn-radio-group-style-closure
+    kind: module-test
+    status: passing
+    path: packages/cli/test/prototype-style-tokens.test.ts
+    required: true
+    consumesCases: [T-SHADCN-RADIO-GROUP-0001-CASE-TOKEN-CLOSURE]
+    exercises: *radio-group-prototypes
+    notes:
+      - The isolated Radio Group scan failed on the missing data-[checked]:opacity-100 token before the Base Item and Indicator hook-state mappings were added to the CLI resolver, then passed with those mappings.
+  - id: cli-shadcn-radio-group-lowered-hooks
+    kind: workspace-check
+    status: passing
+    path: packages/cli/test/lowered-hook-coverage.test.ts
+    required: true
+    consumesCases: [T-SHADCN-RADIO-GROUP-0001-CASE-TOKEN-CLOSURE]
+    exercises: *radio-group-prototypes
+    notes:
+      - Production-source traversal checks that the inherited Item and Indicator states read by shipped Rule conditions resolve to lowerable data variants; this is not rendered-state evidence.
+  - id: www-shadcn-radio-group-browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-RADIO-GROUP-0001-CASE-BROWSER]
+    exercises: *radio-group-prototypes
+    notes:
+      - All eight required public-page cases pass in WC, React, Vue and Vue 2 after consuming the independently reviewed Base entry repair in https://github.com/Proto-UI/Proto-UI/pull/669. The four non-first-selected initial-entry cases retain their pre-input tabindex and native Tab assertions.
+      - Four separate interaction cases pass after real pointer selections establish current. Executed evidence includes native Shift+Tab/Tab re-entry, both arrow axes and Home/End, empty-group Tab/Enter no-selection and Space selection, pointer cancellation and commit, disabled controls, computed geometry and focus feedback, light/dark changes and a 320px layout. These public previews do not establish external tarball-consumer acceptance.
+verifies:
+  prototypes:
+    - P-SHADCN-RADIO-GROUP
+    - P-SHADCN-RADIO-GROUP-ITEM
+    - P-SHADCN-RADIO-GROUP-INDICATOR
+exercises:
+  prototypes: *radio-group-prototypes
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the draft Shadcn Radio Group evidence map for inherited behavior, exact surfaces and separate rendered verification.
+tags: [test, shadcn, radio-group, projection, interaction, focus, accessibility]

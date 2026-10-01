@@ -40,6 +40,18 @@ export type AnatomyPort = ModulePort & {
   getDiagnostics(): readonly AnatomyDiagnostic[];
   /** Module-internal bridge. Never expose the returned host target to prototype authors. */
   resolvePartTarget(part: AnatomyPartView): unknown | null;
+  /** Opaque logical instance identity for module-to-module coordination; never author-facing. */
+  resolvePartInstance(part: AnatomyPartView): unknown | null;
+  /** Opaque identity of the current logical instance; never a host target. */
+  resolveSelfInstance(): unknown;
+  /** Current same-family claim role for module-to-module consistency checks. */
+  resolveSelfRole(family: AnatomyFamily): string | null;
+  /** Nearest same-family ancestor identity for module-to-module structural coordination. */
+  resolveAncestorInstance(
+    family: AnatomyFamily,
+    part: AnatomyPartView,
+    role: string
+  ): unknown | null;
   /** Opaque root-claim identity for bounded module-internal family coordination. */
   resolveDomainScope(family: AnatomyFamily): unknown | null;
   /** Module-internal structural query scoped to one already resolved family domain. */

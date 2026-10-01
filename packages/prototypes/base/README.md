@@ -13,7 +13,7 @@ Prototype library package intended to be consumed together with Proto UI adapter
 ## Install
 
 ```bash
-npm install @proto.ui/prototypes-base@0.3.0-alpha.0
+npm install @proto.ui/prototypes-base@0.3.0-alpha.1
 ```
 
 ## Family Imports
@@ -76,6 +76,7 @@ The root package export remains available for compatibility. Compound anatomy pa
 - `@proto.ui/hooks`
 - `@proto.ui/module-text-control`
 - `@proto.ui/module-image-view`
+- `@proto.ui/module-table-structure`
 
 ## License
 

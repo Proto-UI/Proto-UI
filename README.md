@@ -129,6 +129,8 @@ Roadmap direction is recorded under [`internal/records/**`](internal/records/); 
 - **GitHub Issues:** [Proto-UI/Proto-UI](https://github.com/Proto-UI/Proto-UI/issues)
 - **Contributing:** [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Discord:** [Join the community](https://discord.gg/MrWQd7h34R)
+- **X:** [@Proto_UI](https://x.com/Proto_UI)
+- **Bluesky:** [@proto-ui.com](https://bsky.app/profile/proto-ui.com)
 - **Email:** guangliang2018@foxmail.com
 
 Contributions to protocols, tests, Adapters, Prototype libraries, documentation, and consumer evidence are welcome.

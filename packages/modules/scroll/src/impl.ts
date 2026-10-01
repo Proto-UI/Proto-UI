@@ -6,6 +6,8 @@ import type {
   ScrollComposedChromeBinding,
   ScrollAxes,
   ScrollAxisSnapshot,
+  ScrollEndFollowRequestStatus,
+  ScrollEndFollowState,
   ScrollResolvedProjection,
   ScrollSurfaceConfig,
   ScrollSurfaceConfigPatch,
@@ -34,11 +36,15 @@ const EMPTY_AXIS: ScrollAxisSnapshot = Object.freeze({
   visibleRatio: 1,
   canScrollBefore: false,
   canScrollAfter: false,
+  atEnd: true,
 });
+
+const END_FOLLOW_OFF = Object.freeze({ mode: 'off' as const });
 
 const DEFAULT_CONFIG: ScrollSurfaceConfig = Object.freeze({
   axes: 'both',
   projection: 'auto',
+  endFollow: END_FOLLOW_OFF,
 });
 
 const clampRatio = (value: number) =>
@@ -53,18 +59,24 @@ export class ScrollModuleImpl extends ModuleBase {
   private lease: ScrollSurfaceHostLease | null = null;
   private mounted = false;
   private leaseEpoch = 0;
+  private snapshotEpoch = 0;
+  private attachingLease: { epoch: number; requests: ScrollSurfaceRequest[] } | null = null;
 
   private readonly axesOwned: OwnedStateHandle<ScrollAxes>;
   private readonly scrollingOwned: OwnedStateHandle<boolean>;
   private readonly projectionOwned: OwnedStateHandle<ScrollResolvedProjection>;
+  private readonly endFollowStateOwned: OwnedStateHandle<ScrollEndFollowState>;
+  private readonly endFollowRequestStatusOwned: OwnedStateHandle<ScrollEndFollowRequestStatus>;
   private readonly horizontalPositionOwned: OwnedStateHandle<number>;
   private readonly horizontalVisibleOwned: OwnedStateHandle<number>;
   private readonly horizontalBeforeOwned: OwnedStateHandle<boolean>;
   private readonly horizontalAfterOwned: OwnedStateHandle<boolean>;
+  private readonly horizontalAtEndOwned: OwnedStateHandle<boolean>;
   private readonly verticalPositionOwned: OwnedStateHandle<number>;
   private readonly verticalVisibleOwned: OwnedStateHandle<number>;
   private readonly verticalBeforeOwned: OwnedStateHandle<boolean>;
   private readonly verticalAfterOwned: OwnedStateHandle<boolean>;
+  private readonly verticalAtEndOwned: OwnedStateHandle<boolean>;
 
   private readonly handle: ScrollSurfaceHandle<PropsBaseType>;
 
@@ -84,6 +96,12 @@ export class ScrollModuleImpl extends ModuleBase {
     this.projectionOwned = stateFacade.enum('@scroll/projection', 'unresolved', {
       options: ['unresolved', 'system', 'composed'] as const,
     });
+    this.endFollowStateOwned = stateFacade.enum('@scroll/endFollowState', 'off', {
+      options: ['off', 'pending', 'following', 'paused'] as const,
+    });
+    this.endFollowRequestStatusOwned = stateFacade.enum('@scroll/endFollowRequestStatus', 'idle', {
+      options: ['idle', 'pending', 'applied', 'rejected'] as const,
+    });
     this.horizontalPositionOwned = this.createRatio(stateFacade, '@scroll/horizontalPosition', 0);
     this.horizontalVisibleOwned = this.createRatio(
       stateFacade,
@@ -92,10 +110,12 @@ export class ScrollModuleImpl extends ModuleBase {
     );
     this.horizontalBeforeOwned = stateFacade.bool('@scroll/horizontalCanScrollBefore', false);
     this.horizontalAfterOwned = stateFacade.bool('@scroll/horizontalCanScrollAfter', false);
+    this.horizontalAtEndOwned = stateFacade.bool('@scroll/horizontalAtEnd', true);
     this.verticalPositionOwned = this.createRatio(stateFacade, '@scroll/verticalPosition', 0);
     this.verticalVisibleOwned = this.createRatio(stateFacade, '@scroll/verticalVisibleRatio', 1);
     this.verticalBeforeOwned = stateFacade.bool('@scroll/verticalCanScrollBefore', false);
     this.verticalAfterOwned = stateFacade.bool('@scroll/verticalCanScrollAfter', false);
+    this.verticalAtEndOwned = stateFacade.bool('@scroll/verticalAtEnd', true);
 
     this.handle = {
       axes: this.observed(this.axesOwned),
@@ -104,15 +124,21 @@ export class ScrollModuleImpl extends ModuleBase {
         visibleRatio: this.observed(this.horizontalVisibleOwned),
         canScrollBefore: this.observed(this.horizontalBeforeOwned),
         canScrollAfter: this.observed(this.horizontalAfterOwned),
+        atEnd: this.observed(this.horizontalAtEndOwned),
       },
       vertical: {
         position: this.observed(this.verticalPositionOwned),
         visibleRatio: this.observed(this.verticalVisibleOwned),
         canScrollBefore: this.observed(this.verticalBeforeOwned),
         canScrollAfter: this.observed(this.verticalAfterOwned),
+        atEnd: this.observed(this.verticalAtEndOwned),
       },
       scrolling: this.observed(this.scrollingOwned),
       projection: this.observed(this.projectionOwned),
+      endFollow: {
+        state: this.observed(this.endFollowStateOwned),
+        requestStatus: this.observed(this.endFollowRequestStatusOwned),
+      },
       configure: (patch) => this.configure(patch),
       bindComposedChrome: (binding) => this.bindComposedChrome(binding),
       request: (request) => this.request(request),
@@ -150,6 +176,12 @@ export class ScrollModuleImpl extends ModuleBase {
         typeof patch.requireProjection === 'undefined'
           ? this.config.requireProjection
           : patch.requireProjection,
+      endFollow:
+        typeof patch.endFollow === 'undefined'
+          ? this.config.endFollow
+          : patch.endFollow.mode === 'while-at-end'
+            ? Object.freeze({ mode: 'while-at-end', axis: patch.endFollow.axis })
+            : END_FOLLOW_OFF,
     });
     this.set(this.axesOwned, this.config.axes);
   }
@@ -176,7 +208,17 @@ export class ScrollModuleImpl extends ModuleBase {
       request.kind === 'to' || request.kind === 'control-drag'
         ? { ...request, position: clampRatio(request.position) }
         : request;
-    this.lease?.request(normalized);
+    if (this.attachingLease?.epoch === this.leaseEpoch) {
+      this.attachingLease.requests.push(normalized);
+      return;
+    }
+    if (!this.lease) {
+      if (normalized.kind === 'to-end') {
+        this.set(this.endFollowRequestStatusOwned, 'rejected');
+      }
+      return;
+    }
+    this.lease.request(normalized);
   }
 
   getConfig(): ScrollSurfaceConfig {
@@ -191,15 +233,21 @@ export class ScrollModuleImpl extends ModuleBase {
         visibleRatio: this.horizontalVisibleOwned.get(),
         canScrollBefore: this.horizontalBeforeOwned.get(),
         canScrollAfter: this.horizontalAfterOwned.get(),
+        atEnd: this.horizontalAtEndOwned.get(),
       }),
       vertical: Object.freeze({
         position: this.verticalPositionOwned.get(),
         visibleRatio: this.verticalVisibleOwned.get(),
         canScrollBefore: this.verticalBeforeOwned.get(),
         canScrollAfter: this.verticalAfterOwned.get(),
+        atEnd: this.verticalAtEndOwned.get(),
       }),
       scrolling: this.scrollingOwned.get(),
       projection: this.projectionOwned.get(),
+      endFollow: Object.freeze({
+        state: this.endFollowStateOwned.get(),
+        requestStatus: this.endFollowRequestStatusOwned.get(),
+      }),
     });
   }
 
@@ -236,34 +284,53 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   private attach(): void {
-    this.leaseEpoch += 1;
+    const epoch = ++this.leaseEpoch;
+    this.snapshotEpoch++;
+    this.attachingLease = null;
     const previous = this.lease;
     this.lease = null;
     previous?.dispose();
+    if (epoch !== this.leaseEpoch || !this.mounted) return;
     const host = this.getHost();
     if (!host) {
       this.set(this.projectionOwned, 'unresolved');
+      if (epoch !== this.leaseEpoch || !this.mounted) return;
+      this.set(this.endFollowStateOwned, 'off');
+      if (epoch !== this.leaseEpoch || !this.mounted) return;
+      this.set(this.endFollowRequestStatusOwned, 'idle');
       return;
     }
     const projection = resolveScrollProjection(this.config, host.support, host.preference);
-    this.set(this.projectionOwned, projection);
-    const epoch = this.leaseEpoch;
-    const lease = host.attach(this.createHostAttachment());
-    if (epoch !== this.leaseEpoch || !this.mounted) {
-      lease.dispose();
-      return;
+    const attaching = { epoch, requests: [] as ScrollSurfaceRequest[] };
+    this.attachingLease = attaching;
+    try {
+      this.set(this.projectionOwned, projection);
+      if (epoch !== this.leaseEpoch || !this.mounted) return;
+      const lease = host.attach(this.createHostAttachment(epoch));
+      if (epoch !== this.leaseEpoch || !this.mounted) {
+        lease.dispose();
+        return;
+      }
+      this.lease = lease;
+      // Keep the token while draining so reentrant requests join the tail,
+      // rather than overtaking requests emitted by earlier fact watchers.
+      for (const request of attaching.requests) {
+        if (this.lease !== lease || epoch !== this.leaseEpoch) break;
+        lease.request(request);
+      }
+    } finally {
+      if (this.attachingLease === attaching) this.attachingLease = null;
     }
-    this.lease = lease;
   }
 
-  private createHostAttachment(): ScrollSurfaceHostAttachment {
-    const epoch = this.leaseEpoch;
+  private createHostAttachment(epoch = this.leaseEpoch): ScrollSurfaceHostAttachment {
     const composedChrome = this.resolveComposedChrome();
     const attachment: ScrollSurfaceHostAttachment = {
       config: this.config,
       projection: this.projectionOwned.get() as Exclude<ScrollResolvedProjection, 'unresolved'>,
       onFacts: (snapshot) => {
-        if (epoch === this.leaseEpoch && this.mounted) this.applySnapshot(snapshot);
+        if (epoch !== this.leaseEpoch || !this.mounted) return;
+        this.applySnapshot(snapshot);
       },
       ...(composedChrome ? { composedChrome } : {}),
     };
@@ -314,14 +381,25 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   private applySnapshot(snapshot: ScrollSurfaceSnapshot): void {
+    const epoch = ++this.snapshotEpoch;
     this.set(this.axesOwned, snapshot.axes);
-    this.applyAxis('horizontal', snapshot.horizontal);
-    this.applyAxis('vertical', snapshot.vertical);
+    if (epoch !== this.snapshotEpoch) return;
+    if (!this.applyAxis('horizontal', snapshot.horizontal, epoch)) return;
+    if (!this.applyAxis('vertical', snapshot.vertical, epoch)) return;
     this.set(this.scrollingOwned, snapshot.scrolling);
+    if (epoch !== this.snapshotEpoch) return;
     this.set(this.projectionOwned, snapshot.projection);
+    if (epoch !== this.snapshotEpoch) return;
+    this.set(this.endFollowStateOwned, snapshot.endFollow.state);
+    if (epoch !== this.snapshotEpoch) return;
+    this.set(this.endFollowRequestStatusOwned, snapshot.endFollow.requestStatus);
   }
 
-  private applyAxis(axis: 'horizontal' | 'vertical', snapshot: ScrollAxisSnapshot): void {
+  private applyAxis(
+    axis: 'horizontal' | 'vertical',
+    snapshot: ScrollAxisSnapshot,
+    epoch: number
+  ): boolean {
     const value = snapshot ?? EMPTY_AXIS;
     const handles =
       axis === 'horizontal'
@@ -330,17 +408,25 @@ export class ScrollModuleImpl extends ModuleBase {
             this.horizontalVisibleOwned,
             this.horizontalBeforeOwned,
             this.horizontalAfterOwned,
+            this.horizontalAtEndOwned,
           ]
         : [
             this.verticalPositionOwned,
             this.verticalVisibleOwned,
             this.verticalBeforeOwned,
             this.verticalAfterOwned,
+            this.verticalAtEndOwned,
           ];
     this.set(handles[0] as OwnedStateHandle<number>, clampRatio(value.position));
+    if (epoch !== this.snapshotEpoch) return false;
     this.set(handles[1] as OwnedStateHandle<number>, clampRatio(value.visibleRatio));
+    if (epoch !== this.snapshotEpoch) return false;
     this.set(handles[2] as OwnedStateHandle<boolean>, value.canScrollBefore);
+    if (epoch !== this.snapshotEpoch) return false;
     this.set(handles[3] as OwnedStateHandle<boolean>, value.canScrollAfter);
+    if (epoch !== this.snapshotEpoch) return false;
+    this.set(handles[4] as OwnedStateHandle<boolean>, value.atEnd);
+    return epoch === this.snapshotEpoch;
   }
 
   private set<V>(handle: OwnedStateHandle<V>, value: V): void {
@@ -349,11 +435,19 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   disconnect(): void {
-    this.leaseEpoch += 1;
+    const epoch = ++this.leaseEpoch;
+    this.snapshotEpoch++;
+    this.attachingLease = null;
     const previous = this.lease;
     this.lease = null;
     previous?.dispose();
+    if (epoch !== this.leaseEpoch) return;
     this.set(this.scrollingOwned, false);
+    if (epoch !== this.leaseEpoch) return;
     this.set(this.projectionOwned, 'unresolved');
+    if (epoch !== this.leaseEpoch) return;
+    this.set(this.endFollowStateOwned, 'off');
+    if (epoch !== this.leaseEpoch) return;
+    this.set(this.endFollowRequestStatusOwned, 'idle');
   }
 }

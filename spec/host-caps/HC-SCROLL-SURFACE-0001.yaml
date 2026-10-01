@@ -42,9 +42,22 @@ criteria:
     text:
       zh-CN: composed control 存在时，host-cap 必须通过 `HC-MOVE-GESTURE-0001` 取得 Thumb 的有界移动会话，使用当前 track geometry 映射 normalized `control-drag` request，并在 replacement、projection change 或 dispose 时释放 gesture lease。
       en: When a composed control exists, the host capability must obtain a bounded Thumb movement session through `HC-MOVE-GESTURE-0001`, map current track geometry to normalized `control-drag` requests, and release the gesture lease on replacement, projection change, or disposal.
+  - id: HC-SCROLL-SURFACE-0001-H
+    text:
+      zh-CN: End-follow 启用时，host-cap 必须以 host/profile-bounded threshold 判断 configured axis 的 logical end，观察 layout 与 content extent，并把同一 layout window 内的重复 growth coalesce 为一次 end application。
+      en: While end-follow is enabled, the host capability must use a host or profile bounded threshold to detect the configured axis's logical end, observe layout and content extent, and coalesce repeated growth in one layout window into one end application.
+  - id: HC-SCROLL-SURFACE-0001-I
+    text:
+      zh-CN: Host-cap 必须根据有证据的 reader/host input 与实际 `atEnd` facts pause 或恢复 follow，允许显式 `to-end` request 在 layout-ready 后恢复 matching lease，并不得把 zoom/reflow 或未分类 callback 猜测为 ordinary pointer departure。
+      en: The host capability must pause or resume following from evidenced reader or host input and actual `atEnd` facts, allow an explicit `to-end` request to resume the matching lease after layout readiness, and must not guess that zoom, reflow, or an unclassified callback is ordinary pointer departure.
+  - id: HC-SCROLL-SURFACE-0001-J
+    text:
+      zh-CN: End-follow session cleanup 必须取消 scheduled layout movement 与 request outcome，并释放新增 observer/listener；旧 target/epoch 的 callback 不得移动或发布到 replacement lease。
+      en: End-follow session cleanup must cancel scheduled layout movement and request outcomes and release added observers and listeners; callbacks from an old target or epoch must not move or publish into a replacement lease.
 satisfies:
   contracts:
     - C-SCROLL-0001
+    - { id: C-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - C-SCROLL-COMPOSED-CONTROL-0001
 requires:
   hostCaps:
@@ -55,6 +68,7 @@ relates:
 verifies:
   tests:
     - T-SCROLL-0001
+    - { id: T-SCROLL-END-FOLLOW-0001, since: 0.3.0-alpha.0 }
     - T-SCROLL-COMPOSED-CHROME-0001
     - T-SCROLL-COMPOSED-CONTROL-0001
 sources:
@@ -62,6 +76,9 @@ sources:
   - path: packages/modules/scroll/src/caps.ts
   - path: packages/modules/scroll/src/web/create-web-scroll-host.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added host-bounded end proximity, coalesced layout-ready following, evidence-based interruption, resume, and exact stale-callback cleanup.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added Move Gesture-backed composed Thumb control mapping and bounded cleanup.

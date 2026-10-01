@@ -1,0 +1,77 @@
+id: T-FOCUS-ORDER-0001
+type: test
+title: Focus navigation order from the host
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Draft with HC-FOCUS-ORDER-0001: the cases cover the module and the four Web Adapters, while cross-tree Web order and non-Web providers remain open.'
+  zh-CN: '与 HC-FOCUS-ORDER-0001 同为 draft：cases 覆盖模块与四个 Web Adapter，跨树的 Web 顺序与非 Web 提供方仍待定。'
+summary: Module and four-Adapter evidence that a navigation follows one host order, and otherwise keeps registration order throughout.
+cases:
+  - id: T-FOCUS-ORDER-0001-CASE-HOST-ORDER
+    title: Roving and scope navigation follow the owner's host order, with non-DOM targets and no Node global
+    covers: [M-FOCUS-0001-F, HC-FOCUS-ORDER-0001-A, HC-FOCUS-ORDER-0001-D]
+    expectation: roving-and-scope-navigation-follow-one-host-order-without-dom-apis
+  - id: T-FOCUS-ORDER-0001-CASE-REGISTRATION-FALLBACK
+    title: No capability, an unorderable or malformed answer, or a member without a target keep registration order for the whole navigation
+    covers: [M-FOCUS-0001-F, HC-FOCUS-ORDER-0001-C]
+    expectation: whole-navigation-registration-order-without-pairwise-mixing
+  - id: T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER
+    title: Each Web Adapter moves roving focus in document order when it differs from registration order
+    covers: [M-FOCUS-0001-F, HC-FOCUS-ORDER-0001-B]
+    expectation: web-roving-follows-document-order-over-registration-order
+  - id: T-FOCUS-ORDER-0001-CASE-WEB-CROSS-TREE
+    title: The Web realization reports targets in different trees, or a target that is not a node, unorderable
+    covers: [HC-FOCUS-ORDER-0001-B]
+    expectation: web-cross-tree-or-non-node-targets-unorderable
+implementations:
+  - id: module-focus-center-order
+    kind: module-test
+    status: passing
+    path: packages/modules/focus/test/center-order.test.ts
+    required: true
+    consumesCases:
+      [T-FOCUS-ORDER-0001-CASE-HOST-ORDER, T-FOCUS-ORDER-0001-CASE-REGISTRATION-FALLBACK]
+  - id: adapter-base-focus-order
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/focus-order.test.ts
+    required: true
+    consumesCases:
+      [T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER, T-FOCUS-ORDER-0001-CASE-WEB-CROSS-TREE]
+  - id: react-focus-order
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases: [T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER]
+  - id: vue-focus-order
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases: [T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER]
+  - id: vue2-focus-order
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases: [T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER]
+  - id: web-component-focus-order
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/focus-catalog.integration.test.ts
+    required: true
+    consumesCases: [T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER]
+verifies:
+  modules: [M-FOCUS-0001]
+  hostCaps: [HC-FOCUS-ORDER-0001]
+  adapters: [A-REACT-18-19-0001, A-VUE-3-0001, A-VUE-2-0001, A-WEB-COMPONENT-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added module and four-Adapter evidence for host navigation order and its whole-navigation registration fallback.
+tags:
+  - focus
+  - order
+  - host-capability

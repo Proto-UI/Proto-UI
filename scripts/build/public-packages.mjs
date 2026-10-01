@@ -259,9 +259,12 @@ function selectChangedPackages(packages, base) {
       .filter(Boolean)
       .forEach((file) => files.add(file));
   }
-  const changedFiles = [...files];
+  return selectAffectedPackages(packages, [...files]);
+}
+
+export function selectAffectedPackages(packages, changedFiles) {
   const globalChange = changedFiles.some((file) =>
-    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|\.github\/)/.test(
+    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|scripts\/analysis\/package-budgets\.mjs$|\.github\/)/.test(
       file
     )
   );

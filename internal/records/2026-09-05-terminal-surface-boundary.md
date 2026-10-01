@@ -57,6 +57,32 @@ Non-Web evidence was inspected in Microsoft Console and Windows Terminal sources
 
 These sources support a cross-host boundary, not cross-host conformance: engines own terminal protocol, buffers, selection, rendering, and platform accessibility mechanics; a narrow surface may coordinate portable facts and requests without copying those internals.
 
+### 2026-09-21 evidence refresh
+
+The option-C recommendation and engine exemption above remain unchanged after a fresh primary-source check:
+
+- xterm.js `master` still resolves to the already pinned `c58ea3637f3968e0e6e79cd92cf9aace7ef89ee2`. Its `AccessibilityManager` owns an engine-specific row tree, selection bridge, focus-boundary scrolling and live region; normal output announcement stops after 20 rows. `TimeBasedDebouncer` coalesces accessibility row refreshes to at most once per 1,000 ms by default. These are engine/accessibility implementation policies, not portable Terminal State, and support the existing **zero portable grid-diff** threshold plus an optional bounded/pull snapshot.
+- Current xterm public typings keep the input textarea, DOM element, buffer, modes, selection, binary mouse reports, resize, parser/render callbacks and disposal on the terminal engine object. They also warn that terminal-provided hyperlinks require host validation. No raw member belongs in Prototype authoring.
+- Current Microsoft Terminal `main@7c92ecd037476f957809d0813b14d8bc44bb071a` retains `IControlAccessibilityInfo` as a host-renderer/UIA interface for font size, bounds, padding, viewport changes and the host UIA provider. Microsoft ConPTY documentation independently keeps bidirectional channel draining, VT decoding, process creation, character-cell sizing, close/final-frame hazards and resource cleanup in host/backend infrastructure.
+- AppKit `NSAccessibilityProtocol` confirms the non-Web shape: a custom host control supplies role-specific informational properties, actions and notifications to assistive technology. This supports a host-owned accessibility bridge; it does not prove a common Terminal accessibility implementation or authorize copying native selectors into portable values.
+
+A private no-product fake exercised only the issue's minimum lease shape: generation-bound attach, character-cell resize, committed plain text/key intent, status snapshot, replacement and disposal. The controlled run passed and rejected a late generation-1 screen-diff after generation 2 attached. This is **simulation evidence**, not implementation or conformance; its only durable conclusion is that the bounded request/result shape does not require exposing an engine object. The more complete falsification matrix below remains the proposal checkpoint's test plan.
+
+### Luna adversarial pass (hypotheses, not evidence)
+
+A no-tool Luna run received only the recommendation and cited facts, then proposed eight falsification questions. None is treated as source authority or independent approval. Repository/source reconciliation produced these dispositions:
+
+1. **Grid attributes/cursor/alternate-screen/hyperlink/A11y changes:** valid pressure, already inside the zero-grid-diff exemption. The engine still renders and exposes them through its host accessibility implementation; “zero portable” never means “zero visible engine updates.”
+2. **Composition/dead keys/repeat/modifiers/echo:** valid boundary test, already separated at lines 536–544. Physical composition stays host-private; only committed Unicode text or bounded non-text key intent crosses once. The later proposal must test cancellation/echo races before admission.
+3. **Input/output/resize/final-drain ordering:** valid lifecycle test, covered by binding sequence, resize revision, replacement/close settlement and final-drain cases in the fake matrix. No new portable stream is needed.
+4. **Resize result becoming stale:** valid counterexample; the proposal already exposes only last applied effective dimensions/revision and requires superseded/rejected outcomes. “Applied” cannot mean future-stable geometry.
+5. **Who owns row announcements/cursor/live-region cadence:** engine/Host Capability. xterm’s row tree, 20-row cap and one-second accessibility refresh are one Web implementation, not semantics Proto UI reproduces.
+6. **Status/focus/attention ordering:** Focus remains Focus; lifecycle and resize results are ordered; attention uses bounded sequence-bearing batches with explicit overflow loss rather than arbitrary coalescing.
+7. **Mouse/selection-heavy full-screen apps:** real option-C exclusion. The first slice requires terminal mouse reporting denied; such apps need later option D or remain private infrastructure.
+8. **How the user sees prompts/redraws with zero portable grid:** through the infrastructure engine’s presentation surface and accessibility bridge. Option A is only the static/log fallback, not the rendering path for option C.
+
+The pass therefore found no second viable semantic owner, but it sharpened proposal tests for IME/echo, resize staleness, accessibility cadence and mouse-heavy unsupported cases.
+
 ## User-job and slice comparison
 
 | Option | User job | Benefit | Cost or failure | Disposition |
@@ -607,7 +633,7 @@ No new Adapter identity is justified: React Web already has `A-REACT-18-19-0001`
 
 ## #513/#514 matrix consumption
 
-PR #563 currently carries the intended authoritative file `internal/agent-harness/dogfood-coverage-matrix.md`, but it is not on `main`, is conflicting, and has an active `CHANGES_REQUESTED` review. This record must not copy that full matrix or create a second source of truth.
+PR #563 exact head `d7d6b17a3bc948fefb0e09f029caae9ba299c8ee` currently carries the intended authoritative file `internal/agent-harness/dogfood-coverage-matrix.md`. GitHub reports it mergeable but blocked with an active `CHANGES_REQUESTED` review, so it is not on `main`. This record must not copy that full matrix or create a second source of truth.
 
 When the matrix carrier lands, a follow-up #530 carrier must update exactly these rows:
 

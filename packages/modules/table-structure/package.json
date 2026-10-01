@@ -1,0 +1,49 @@
+{
+  "name": "@proto.ui/module-table-structure",
+  "version": "0.3.0-alpha.1",
+  "private": false,
+  "type": "module",
+  "dependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/module-a11y": "workspace:*",
+    "@proto.ui/module-anatomy": "workspace:*",
+    "@proto.ui/module-base": "workspace:*",
+    "@proto.ui/module-state": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "description": "Proto UI module for passive two-dimensional Table topology and header relationships.",
+  "license": "MIT",
+  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/table-structure",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proto-UI/Proto-UI.git",
+    "directory": "packages/modules/table-structure"
+  },
+  "bugs": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "proto-ui",
+    "module",
+    "table",
+    "accessibility",
+    "topology"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/module-table-structure",
+    "prepack": "pnpm run build"
+  }
+}

@@ -554,6 +554,18 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/checkbox');
     registerPrototype('shadcn-checkbox-indicator', mod.shadcnCheckboxIndicator);
   },
+  'shadcn-radio-group-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/radio-group');
+    registerPrototype('shadcn-radio-group-root', mod.shadcnRadioGroupRoot);
+  },
+  'shadcn-radio-group-item': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/radio-group');
+    registerPrototype('shadcn-radio-group-item', mod.shadcnRadioGroupItem);
+  },
+  'shadcn-radio-group-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/radio-group');
+    registerPrototype('shadcn-radio-group-indicator', mod.shadcnRadioGroupIndicator);
+  },
   // Runtime-selected preview registry keeps the public Scroll Area package import lazy.
   'shadcn-scroll-area-root': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/scroll-area');

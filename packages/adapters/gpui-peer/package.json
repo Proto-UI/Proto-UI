@@ -1,0 +1,35 @@
+{
+  "name": "@proto.ui/adapter-gpui-peer",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "protoUi": {
+    "release": {
+      "scan": false
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "@proto.ui/adapter-base": "workspace:*",
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/host-protocol": "workspace:*",
+    "@proto.ui/module-a11y": "workspace:*",
+    "@proto.ui/module-as-trigger": "workspace:*",
+    "@proto.ui/module-context": "workspace:*",
+    "@proto.ui/module-event": "workspace:*",
+    "@proto.ui/module-expose-event": "workspace:*",
+    "@proto.ui/module-expose-state": "workspace:*",
+    "@proto.ui/module-focus": "workspace:*",
+    "@proto.ui/runtime": "workspace:*",
+    "@proto.ui/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@proto.ui/prototypes-base": "workspace:*"
+  },
+  "description": "Private TypeScript runtime peer for the GPUI host Adapter direction (#687): runs RuntimeSession semantics and speaks the host protocol. Not an official Adapter profile."
+}

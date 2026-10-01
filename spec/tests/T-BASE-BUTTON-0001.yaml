@@ -21,6 +21,15 @@ cases:
       - P-BASE-BUTTON-PRESS-LIFECYCLE
       - P-BASE-BUTTON-FOCUSABLE
     expectation: button-interaction-facts-are-exposed
+  - id: T-BASE-BUTTON-0001-CASE-VIEW-LIFETIME
+    title: transient Button facts end with a detached view while logical state and ordinary activation remain intact
+    covers:
+      - P-BASE-BUTTON-POINTER-HOVER
+      - P-BASE-BUTTON-PRESS-LIFECYCLE
+      - P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT
+      - P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
+      - P-BASE-BUTTON-CLICK-SIGNAL
+    expectation: button-view-detach-ends-transient-contact-without-phantom-activation-or-logical-state-loss
   - id: T-BASE-BUTTON-0001-CASE-CLICK-SIGNAL
     title: confirmed activation emits the click outward signal while enabled
     covers:
@@ -77,8 +86,29 @@ implementations:
     notes:
       - Covers current executable Button behavior through the asButton authoring entry and compares it with the direct base-button prototype.
       - Deferred form, command, and visual surfaces are covered as absence checks rather than positive host integration behavior.
+  - id: prototypes-base-button-view-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/button-view-lifetime.test.ts
+    required: true
+    consumesCases: [T-BASE-BUTTON-0001-CASE-VIEW-LIFETIME]
+    exercises: [P-BASE-BUTTON, P-SHADCN-BUTTON, P-BRUTALIST-BUTTON]
+    notes:
+      - Direct Base, asButton, Shadcn and Brutalist entries share a retained RuntimeSession with a replaceable semantic EventTarget. This proves protocol facts and route lifetime, not native browser input or rendered paint.
+  - id: www-button-view-lifetime-browser
+    kind: adapter-test
+    status: passing
+    path: apps/www/test/button-view-lifetime.browser.test.ts
+    required: true
+    consumesCases: [T-BASE-BUTTON-0001-CASE-VIEW-LIFETIME]
+    exercises: [P-BASE-BUTTON, P-SHADCN-BUTTON, P-BRUTALIST-BUTTON]
+    notes:
+      - Eight Chromium journeys use the real Shadcn and Brutalist exports through WC, React, Vue and Vue 2. A consumer adds public ViewIntent controls without replacing the logical owner or writing interaction facts.
+      - Native press and hover-only detach/remount restore actual paint; handle identity, ordinary pointer/keyboard activation, disabled cancellation and terminal disposal remain covered. WC retains its owner shell, while the framework Adapters replace the physical root.
 sources:
   - path: packages/prototypes/base/test/as-button.test.ts
+  - path: packages/prototypes/base/test/button-view-lifetime.test.ts
+  - path: apps/www/test/button-view-lifetime.browser.test.ts
   - path: packages/prototypes/base/src/button/button.proto.ts
 exercises:
   prototypes:
@@ -87,6 +117,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Introduced Base Button protocol test entity aligned to P-BASE-BUTTON criteria.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added view-detach and target-replacement evidence across the four Button entries with retained-state and cancellation controls.
 tags:
   - prototype
   - base

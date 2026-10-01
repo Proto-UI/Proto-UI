@@ -11,6 +11,7 @@ export * from './as-image-view';
 export * from './as-text-control';
 export * from './as-overlay';
 export * from './as-scroll-surface';
+export * from './as-table-structure';
 export * from './as-trigger';
 export * from './collection/use-collection';
 export * from './collection/use-collection-item';

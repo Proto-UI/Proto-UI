@@ -31,6 +31,12 @@ cases:
     covers:
       - C-LIFECYCLE-0006-C
     expectation: stale-epoch-completion-is-inert
+  - id: T-LIFECYCLE-0005-CASE-UPDATE-EPOCH
+    title: A replacement view can update without waiting for an obsolete commit acknowledgement
+    covers:
+      - C-LIFECYCLE-0006-C
+      - C-LIFECYCLE-0006-D
+    expectation: in-flight-updates-and-coalesced-intents-belong-to-their-view-epoch
   - id: T-LIFECYCLE-0005-CASE-MODULE-RESOURCE-SYMMETRY
     title: Mixed modules suspend host resources and realize their latest logical state on remount
     covers:
@@ -90,6 +96,23 @@ implementations:
     required: true
     consumesCases:
       - T-LIFECYCLE-0005-CASE-MODULE-RESOURCE-SYMMETRY
+  - id: runtime-update-epoch
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.session.update-epoch.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0005-CASE-STALE-COMPLETION
+      - T-LIFECYCLE-0005-CASE-UPDATE-EPOCH
+  - id: adapter-react-update-epoch
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/contract/update-epoch.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0005-CASE-OWNER-ONE-INSTANCE
+      - T-LIFECYCLE-0005-CASE-TERMINAL-OWNER-TEARDOWN
+      - T-LIFECYCLE-0005-CASE-UPDATE-EPOCH
 verifies:
   contracts:
     - id: C-LIFECYCLE-0006
@@ -112,6 +135,9 @@ verifies:
       anchors:
         - A-WEB-COMPONENT-0001-G
 revisions:
+  - version: 0.3.0-alpha.1
+    change: strengthened
+    summary: Added Runtime update-epoch acknowledgement interleavings and native React Activity replay coverage.
   - version: 0.3.0-alpha.0
     change: strengthened
     summary: Added Vue 2 keep-alive view-epoch and terminal-owner evidence.

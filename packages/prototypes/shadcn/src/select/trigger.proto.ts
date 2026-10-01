@@ -68,7 +68,7 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
     });
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-input/70')),
+      intent: (i) => i.feedback.style.use(tw('bg-input/70 translate-y-px')),
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),

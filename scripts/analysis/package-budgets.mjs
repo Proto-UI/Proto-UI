@@ -23,15 +23,41 @@ const environment = {
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
-  ['core root', 'packages/core/src/index.ts', 6_000],
-  ['runtime root', 'packages/runtime/src/index.ts', 60_000],
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 75_000],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 75_000],
-  // PR #652 shadow split S1-S5 and composed-tree focus correctness. Canonical CI
-  // measures 84,683 gzip bytes at head dd820b30 (main at ddac15da: 75,664 with
-  // the same toolchain). Attribution and headroom evidence:
+  // Separate, evidence-backed budget proposal for the already-implemented
+  // #652 capability growth. The blocking whole-entry gate and measurement
+  // shape remain unchanged; see the exact Linux CI comparison and attribution:
+  // internal/records/2026-09-27-shadow-split-budget-proposal.zh-CN.md
+  ['core root', 'packages/core/src/index.ts', 6_600],
+  // The prior 64,000 ceiling covered #621 Table Checkpoint B registering
+  // module-table-structure in the eager runtime closure: +3,294 gzip bytes
+  // over main 9eb93e9b (63,294 at Table head 2d305208 vs 60,000 on main).
+  // #549 relationship candidate 868d3adb measures 65,865 after main 9d9552bb;
+  // separate numeric transaction and closure attribution:
+  // internal/records/2026-09-21-table-structure-runtime-budget.zh-CN.md
+  // internal/records/2026-09-22-a11y-part-relationship-budget.zh-CN.md
+  // Current #738 + #688 exact-head reconciliation and 479-byte headroom:
+  // internal/records/2026-09-27-a11y-part-relationship-budget-reconciliation.zh-CN.md
+  // Merged #738 proposal and combined #549 headroom:
+  ['runtime root', 'packages/runtime/src/index.ts', 66_500],
+  // #623 scroll end-follow, #625 direct-reference transport, and the earlier
+  // #652 baseline proposal were measured on merge-ref main c473eae3 at React
+  // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
+  // internal/records/2026-09-20-adapter-budget-direct-reference-shadow-combined.zh-CN.md
+  // #621 Table Checkpoint B adds a measured +3,394 gzip bytes to the React
+  // adapter root (82,816 at Table head 2d305208; main 79,422) and +3,364 to
+  // the Vue adapter root (82,527; main 79,163). Retain ~700-1,000 bytes of
+  // bounded headroom.
+  // #549 adds 2,593 / 2,613 gzip bytes over main 9d9552bb: 85,351 / 85,093.
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 86_500],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 86_500],
+  // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
+  // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
+  // prior 97,000 ceiling rationale is retained here; current proposal:
   // internal/records/2026-09-18-wc-adapter-budget-shadow-split-baseline.zh-CN.md
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 86_000],
+  // The same exact merge-ref measured 95,936 gzip after three accepted
+  // capability slices. Current proposal evidence and headroom are in the
+  // dated record above.
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 104_500],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];

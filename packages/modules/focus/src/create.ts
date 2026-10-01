@@ -33,6 +33,7 @@ import {
   FOCUS_BLUR_CAP,
   FOCUS_INSTANCE_TOKEN_CAP,
   FOCUS_IS_NATIVELY_FOCUSABLE_CAP,
+  FOCUS_ORDER_CAP,
   FOCUS_PARENT_CAP,
   FOCUS_RESOLVE_ENTRY_TARGET_CAP,
   FOCUS_REQUEST_FOCUS_CAP,
@@ -333,6 +334,8 @@ class FocusModuleImpl extends ModuleBase {
       getRovingConfig: () => this.rovingConfig,
       getFacts: () => this.getFacts(),
       getRootTarget: () => this.getRootTarget(),
+      orderTargets: (targets) =>
+        this.caps.has(FOCUS_ORDER_CAP) ? this.caps.get(FOCUS_ORDER_CAP)(targets) : null,
       requestFocus: (options?: FocusRequestOptions, behavior?: FocusRequestBehavior) => {
         let outcome: FocusRequestOutcome = 'rejected';
         this.runInCallbackScope(() => {

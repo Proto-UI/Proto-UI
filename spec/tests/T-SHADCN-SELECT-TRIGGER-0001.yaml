@@ -3,10 +3,10 @@ type: test
 title: Shadcn Select Trigger delta protocol contract tests
 status: draft
 since: 0.2.0-rc.0
-summary: Covers Trigger Base inheritance, size, state styles, chevron, asChild omission, and bounded parity.
+summary: Covers Trigger Base inheritance, size, state styles including Adapter-projected one-pixel press feedback, chevron, asChild omission, and bounded parity.
 cases:
   - id: T-SHADCN-SELECT-TRIGGER-0001-CASE-CURRENT-PROTOCOL
-    title: Trigger inherits combobox behavior and projects current size, state, and chevron surface
+    title: Trigger inherits combobox behavior and projects current size, state, one-pixel press, and chevron surface
     covers:
       [
         P-SHADCN-SELECT-TRIGGER-UPSTREAM-IDENTITY,
@@ -20,7 +20,7 @@ cases:
         P-SHADCN-SELECT-TRIGGER-COMPATIBILITY-SUBSET,
         P-SHADCN-SELECT-TRIGGER-AS-CHILD-OMISSION,
       ]
-    expectation: shadcn-select-trigger-current-combobox-surface
+    expectation: shadcn-select-trigger-current-combobox-surface-with-adapter-press-feedback
 implementations:
   - id: prototypes-shadcn-select-trigger-contract
     kind: module-test
@@ -35,6 +35,7 @@ implementations:
         placeholder,
         default and sm size,
         chevron,
+        inherited pressed state and Adapter-projected one-pixel displacement,
         open requests,
         keyboard entry,
         and current tokens; remaining gaps stay centralized.,
@@ -62,6 +63,11 @@ revisions:
       version: 0.2.0-rc.0,
       change: introduced,
       summary: Added Shadcn Select Trigger delta coverage.,
+    },
+    {
+      version: 0.3.0-alpha.0,
+      change: revised,
+      summary: Added executable coverage for Adapter-projected one-pixel feedback from the inherited pressed state.,
     },
   ]
 tags: [prototype, shadcn, select, trigger, delta, compatibility, test]

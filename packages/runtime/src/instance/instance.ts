@@ -33,6 +33,7 @@ import { PresenceModuleDef } from '@proto.ui/module-presence';
 import { __RUN_TEST_SYS, TestSysModuleDef, type TestSysPort } from '@proto.ui/module-test-sys';
 import { TextControlModuleDef } from '@proto.ui/module-text-control';
 import { ImageViewModuleDef } from '@proto.ui/module-image-view';
+import { TableStructureModuleDef } from '@proto.ui/module-table-structure';
 
 import type { ModuleOrchestrator } from '../orchestrator/module-orchestrator';
 import { RuntimeModuleOrchestrator } from '../orchestrator/module-orchestrator';
@@ -94,6 +95,7 @@ export function createRuntimeInstance<P extends PropsBaseType>(
       FocusModuleDef,
       TextControlModuleDef,
       ImageViewModuleDef,
+      TableStructureModuleDef,
       BoundaryModuleDef,
       HitParticipationModuleDef,
       PositioningModuleDef,

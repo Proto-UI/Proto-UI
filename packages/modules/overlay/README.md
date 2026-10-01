@@ -13,13 +13,14 @@ Adapter-facing module package used by the Proto UI runtime and adapter layer.
 ## Install
 
 ```bash
-npm install @proto.ui/module-overlay@0.3.0-alpha.0
+npm install @proto.ui/module-overlay@0.3.0-alpha.1
 ```
 
 ## Internal Structure
 
 - `src/caps.ts`
 - `src/create.ts`
+- `src/escape-coordinator.ts`
 - `src/impl.ts`
 - `src/index.ts`
 - `src/types.ts`

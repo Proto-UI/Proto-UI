@@ -103,6 +103,7 @@ Proto UI 的 module 是主要由 adapter 消费的能力单元。
 | `@proto.ui/module-state` | 必选 | 提供统一的 Proto UI state 模型 | 无直接 host-cap | 无 | prototype 将失去标准 state 语法与类状态机的行为模型 | 当前设计里它更像纯能力层，不依赖单独的 module host-cap |
 | `@proto.ui/module-state-accessibility` | 必选 | 为 state 增加 `fromAccessibility` 一类 accessibility 派生能力 | 无直接 host-cap | `@proto.ui/module-state` | state 将无法表达标准 accessibility 派生子 API | 当前更依赖 state 语义本身，而不是额外 host-cap |
 | `@proto.ui/module-state-interaction` | 必选 | 为 state 增加 hover、focus 等 interaction 派生能力 | 无直接 host-cap | `@proto.ui/module-state`、`@proto.ui/module-event` | state 将无法表达官方维护的 interaction 派生状态 | 当前更依赖 event 与 state 流，而不是独立 host-cap |
+| `@proto.ui/module-table-structure` | 必选 | 为 declared Base Table parts 拥有 passive nearest-domain topology、structural diagnostics、coordinates、spans 与有序 opaque header relationships | 无直接 host-cap；复用通用 A11y projection | `@proto.ui/module-anatomy`、`@proto.ui/module-a11y`、`@proto.ui/module-state` | Base Table 无法产生已批准的 structural snapshot 或通用 A11y relationship graph | 作为标准 Runtime semantic infrastructure 安装；不创建 `HC-TABLE`、不访问 host node，也不暗示 Adapter Table conformance |
 | `@proto.ui/module-test-sys` | 必选 | 以 module 形式融入 core -> runtime -> adapter 生命周期，提供自动自检能力 | 可选 `HOST_PROBE_CAP` | 无 | adapter 集成层将失去官方的模块化自检通路 | 基础自检不依赖 host probe；若提供 probe，可额外验证 host-cap wiring |
 
 ---

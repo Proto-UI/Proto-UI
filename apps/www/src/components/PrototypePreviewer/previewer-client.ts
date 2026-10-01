@@ -15,6 +15,8 @@ import {
   setSelectValue,
   type SiteSelectRoot,
 } from '../site-shadcn-controls';
+import { initProjectedPreviewer } from './projected-previewer-client';
+import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 
@@ -26,9 +28,28 @@ interface PreviewerOptions {
   demoProps: Record<string, unknown>;
   runtimeList: RuntimeId[];
   loader?: string; // 动态导入路径
+  projectionFamilyId?: ProjectionFamilyId;
+  projectionComponentId?: ProjectionComponentId;
+  projectionToolbar?: boolean;
 }
 
 export function initPreviewer(options: PreviewerOptions) {
+  if (options.projectionFamilyId || options.projectionComponentId) {
+    if (!options.demoId || !options.projectionFamilyId || !options.projectionComponentId) {
+      throw new Error(
+        '[PrototypePreviewer] fixed-family projection requires demoId, projectionFamilyId, and projectionComponentId.'
+      );
+    }
+    return initProjectedPreviewer({
+      root: options.root,
+      initialRuntime: options.initialRuntime,
+      runtimeList: options.runtimeList,
+      projectionFamilyId: options.projectionFamilyId,
+      componentId: options.projectionComponentId,
+      toolbar: options.projectionToolbar !== false,
+    });
+  }
+
   const { root, prototypeId, demoId, initialRuntime, demoProps, runtimeList, loader } = options;
 
   // 防重复初始化

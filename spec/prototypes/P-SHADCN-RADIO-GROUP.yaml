@@ -1,0 +1,75 @@
+id: P-SHADCN-RADIO-GROUP
+type: prototype
+title: Shadcn Radio Group Root preserves the Base single-selection owner
+status: draft
+lifecycleRationale: This three-part presentation inherits the draft Base Radio Group protocol. Its package, interaction and browser evidence supports independent review of the bounded projection, not stable admission of the family.
+since: 0.3.0-alpha.1
+summary: Shadcn Radio Group is an unofficial Proto UI-maintained projection that preserves the Base value, Collection, roving-focus and accessibility owners while adding the grid presentation.
+statement:
+  en: >-
+    Root, Item and Indicator project the existing Base Radio Group anatomy. Root remains the sole selected-value, Collection, Focus Roving and radiogroup owner. This unofficial projection compares against shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc, apps/v4/registry/new-york-v4/ui/radio-group.tsx, without claiming upstream endorsement or Radix API compatibility.
+
+
+  zh-CN: >-
+    Root、Item 与 Indicator 投射既有 Base Radio Group anatomy。Root 继续作为唯一 selected-value、Collection、Focus Roving 与 radiogroup owner。该非官方投射的比较基线固定为 shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc 的 apps/v4/registry/new-york-v4/ui/radio-group.tsx，不主张上游认可或 Radix API 兼容。
+
+
+criteria:
+  - id: P-SHADCN-RADIO-GROUP-BASE-INHERITANCE
+    text:
+      en: Root must inherit P-BASE-RADIO-GROUP through asRadioGroupRoot() exactly once, preserving controlled and uncontrolled requests, empty and unmatched values, Collection order and nearest-domain isolation.
+      zh-CN: Root 必须通过 asRadioGroupRoot() 恰好继承一次 P-BASE-RADIO-GROUP，保留 controlled/uncontrolled requests、空值与 unmatched value、Collection 顺序及 nearest-domain isolation。
+  - id: P-SHADCN-RADIO-GROUP-DIRECT-ENTRY
+    text:
+      en: The direct Root entry is shadcn-radio-group-root; this layer introduces no authored asHook or convenience wrapper.
+      zh-CN: Root direct entry 为 shadcn-radio-group-root；本层不增加 authored asHook 或 convenience wrapper。
+  - id: P-SHADCN-RADIO-GROUP-PUBLIC-SURFACE
+    text:
+      en: >-
+        The package root and ./radio-group subpath expose only ShadcnRadioGroupRoot, ShadcnRadioGroupItem, ShadcnRadioGroupIndicator and their shadcnRadioGroupRoot, shadcnRadioGroupItem, shadcnRadioGroupIndicator aliases for this family. Each part's Props, Exposes, StateHandles and AsHookContract types retain its Base shape. The shadcn-radio-group CLI entry exposes these three parts as a compound family without injecting an Indicator or creating another facade.
+
+
+      zh-CN: >-
+        package root 与 ./radio-group subpath 为该 family 仅导出 ShadcnRadioGroupRoot、ShadcnRadioGroupItem、ShadcnRadioGroupIndicator 及其 shadcnRadioGroupRoot、shadcnRadioGroupItem、shadcnRadioGroupIndicator aliases。各 part 的 Props、Exposes、StateHandles 与 AsHookContract types 保留对应 Base shape。shadcn-radio-group CLI entry 将这三个 part 暴露为 compound family，不注入 Indicator 或增加另一层 facade。
+
+
+  - id: P-SHADCN-RADIO-GROUP-CURRENT-VISUAL-SURFACE
+    text:
+      en: Root projects grid gap-3; consumer content and layout determine the authored choices and outer dimensions.
+      zh-CN: Root 投射 grid gap-3；authored choices 与外部尺寸由 consumer content 和 layout 决定。
+  - id: P-SHADCN-RADIO-GROUP-OWNERSHIP-BOUNDARY
+    text:
+      en: The projection must add no second value, selection, Collection, focus, activation, disabled or accessibility owner; Indicator remains an explicit optional and repeatable Item child.
+      zh-CN: 投射不得增加第二个 value、selection、Collection、focus、activation、disabled 或 accessibility owner；Indicator 继续作为显式、可选且可重复的 Item child。
+  - id: P-SHADCN-RADIO-GROUP-COMPATIBILITY-SUBSET
+    text:
+      en: >-
+        No asChild, form submission or validation, required or invalid state, native input, Toolbar, public orientation or loop, callback prop, visual variant or size API is added. Upstream aria-invalid styles and prop forwarding are excluded because Base does not own those semantics. The explicit Indicator and host-neutral centering are intentional presentation differences, not Radix compatibility claims.
+
+
+      zh-CN: >-
+        不增加 asChild、form submission/validation、required/invalid state、native input、Toolbar、公开 orientation/loop、callback prop 或视觉 variant/size API。Base 不拥有相应语义，因此不投射 upstream aria-invalid 样式或 prop forwarding。显式 Indicator 与 host-neutral 居中为有意呈现差异，不构成 Radix 兼容性声明。
+
+
+sources:
+  - path: packages/prototypes/shadcn/src/radio-group/root.proto.ts
+  - path: packages/prototypes/shadcn/src/radio-group/types.ts
+  - path: packages/prototypes/shadcn/src/radio-group/index.ts
+  - path: packages/prototypes/shadcn/test/radio-group.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/issues/662
+    label: Bounded Shadcn Radio Group projection admission
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/radio-group.tsx
+    label: Pinned shadcn/ui v4 new-york Radio Group comparison
+inherits:
+  prototypes: [P-BASE-RADIO-GROUP]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions:
+    [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001, D-CLI-SHADCN-PRESET-CLOSURE-0001]
+verifies:
+  tests: [T-SHADCN-RADIO-GROUP-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the draft three-part Shadcn Radio Group projection and exact inherited public boundary.
+tags: [prototype, shadcn, radio-group, selection, focus, visual, compatibility]

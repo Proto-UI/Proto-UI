@@ -159,6 +159,7 @@ Proto UI 当前已经拥有较多 workspace package，但第一次公开发布�
 - `@proto.ui/module-state`
 - `@proto.ui/module-state-accessibility`
 - `@proto.ui/module-state-interaction`
+- `@proto.ui/module-table-structure`
 - `@proto.ui/module-test-sys`
 - `@proto.ui/module-text-control`
 

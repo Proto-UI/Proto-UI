@@ -10,6 +10,14 @@ const replacements = [
         pattern: /\*\*Discord:\*\* \[Join the community\]\([^)]+\)/,
         value: `**Discord:** [Join the community](${links.discord})`,
       },
+      {
+        pattern: /\*\*X:\*\* \[@Proto_UI\]\([^)]+\)/,
+        value: `**X:** [@Proto_UI](${links.x})`,
+      },
+      {
+        pattern: /\*\*Bluesky:\*\* \[@proto-ui\.com\]\([^)]+\)/,
+        value: `**Bluesky:** [@proto-ui.com](${links.bluesky})`,
+      },
     ],
   },
   {
@@ -18,6 +26,14 @@ const replacements = [
       {
         pattern: /\*\*Discord：\*\* \[加入社区\]\([^)]+\)/,
         value: `**Discord：** [加入社区](${links.discord})`,
+      },
+      {
+        pattern: /\*\*X：\*\* \[@Proto_UI\]\([^)]+\)/,
+        value: `**X：** [@Proto_UI](${links.x})`,
+      },
+      {
+        pattern: /\*\*Bluesky：\*\* \[@proto-ui\.com\]\([^)]+\)/,
+        value: `**Bluesky：** [@proto-ui.com](${links.bluesky})`,
       },
     ],
   },
@@ -64,4 +80,4 @@ for (const target of replacements) {
   await writeFile(target.path, content, 'utf8');
 }
 
-console.log('[sync-shared-links] synced Discord links from shared/links.json');
+console.log('[sync-shared-links] synced social links from shared/links.json');

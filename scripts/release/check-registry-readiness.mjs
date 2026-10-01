@@ -7,6 +7,7 @@ import { findProtoPackages } from './version-utils.mjs';
 
 const DEFAULT_REGISTRY = 'https://registry.npmjs.org/';
 const BOOTSTRAP_VERSION = /^0\.0\.0-bootstrap(?:[.-]|$)/;
+const PRERELEASE_VERSION = /^\d+\.\d+\.\d+-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*$/;
 
 function isRecord(value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -32,8 +33,14 @@ function bootstrapReadinessViolation(metadata) {
       isRecord(latestMetadata) &&
       typeof latestMetadata.deprecated === 'string' &&
       latestMetadata.deprecated.trim().length > 0;
-    if (!isSoleVersion || !isDeprecated) {
-      return 'latest may retain bootstrap version only when it is the sole deprecated version';
+    const nextVersion = distTags.next;
+    const hasPublishedPrereleaseOnNext =
+      typeof nextVersion === 'string' &&
+      PRERELEASE_VERSION.test(nextVersion) &&
+      !BOOTSTRAP_VERSION.test(nextVersion) &&
+      isRecord(versions[nextVersion]);
+    if (!isDeprecated || (!isSoleVersion && !hasPublishedPrereleaseOnNext)) {
+      return 'latest may retain bootstrap only when deprecated and either sole or superseded by an existing non-bootstrap prerelease on next';
     }
   }
 

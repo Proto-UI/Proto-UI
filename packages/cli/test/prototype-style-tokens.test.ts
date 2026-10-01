@@ -11,6 +11,24 @@ import {
 import { collectProtoStyleTokens } from '../src/services/prototype-style-tokens';
 
 describe('collectProtoStyleTokens', () => {
+  it('closes the isolated Shadcn Radio Group state and theme rules', async () => {
+    const tokens = await collectProtoStyleTokens(
+      path.resolve(process.cwd(), 'packages/prototypes/shadcn/src/radio-group')
+    );
+
+    for (const token of [
+      'data-[checked]:opacity-100',
+      'data-[focus-visible]:border-ring',
+      'data-[focus-visible]:ring-3',
+      'data-[focus-visible]:ring-ring/50',
+      'data-[disabled]:cursor-not-allowed',
+      'data-[disabled]:opacity-50',
+      'dark:bg-input/30',
+    ]) {
+      expect(tokens).toContain(token);
+    }
+  });
+
   let dir: string;
 
   beforeEach(async () => {

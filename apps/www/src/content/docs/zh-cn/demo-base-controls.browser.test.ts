@@ -11,7 +11,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { choosePreviewRuntime, runtimeSelectTrigger } from './browser-harness';
+import { runtimeSelectTrigger, selectRuntime as selectPreviewRuntime } from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -201,24 +201,7 @@ async function selectRuntime(
   readySelector: string,
   expectedCount: number
 ): Promise<void> {
-  await choosePreviewRuntime(page, previewer, runtime);
-  await page.waitForFunction(
-    ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
-      const root = document.querySelector<HTMLElement>('[data-previewer-id]');
-      const select = root?.querySelector<HTMLElement>('[data-adapter-select-root]');
-      const host = root?.querySelector<HTMLElement>('.host');
-      const firstRoot = host?.querySelector<HTMLElement>('[data-pui-root]');
-      if (!root || !select || !host || select.dataset.value !== selectedRuntime) return false;
-      if (host.querySelectorAll(selector).length !== count || !firstRoot) return false;
-      if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
-      if (selectedRuntime === 'vue') return host.hasAttribute('data-v-app');
-      // React owns neither a custom element nor a Vue app root. The host tag is
-      // not always a div: a text-control Prototype roots on its native control.
-      return !firstRoot.tagName.startsWith('WC-') && !host.hasAttribute('data-v-app');
-    },
-    { expectedCount, readySelector, runtime },
-    { timeout: 20_000 }
-  );
+  await selectPreviewRuntime(page, previewer, runtime, readySelector, expectedCount);
 }
 
 /**

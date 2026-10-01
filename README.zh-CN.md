@@ -129,6 +129,8 @@ Module、Host Capability 与 Adapter 的系统编目会根据真实消费证据�
 - **GitHub Issues：** [Proto-UI/Proto-UI](https://github.com/Proto-UI/Proto-UI/issues)
 - **贡献指南：** [CONTRIBUTING.md](CONTRIBUTING.md)
 - **Discord：** [加入社区](https://discord.gg/MrWQd7h34R)
+- **X：** [@Proto_UI](https://x.com/Proto_UI)
+- **Bluesky：** [@proto-ui.com](https://bsky.app/profile/proto-ui.com)
 - **邮箱：** guangliang2018@foxmail.com
 
 欢迎参与协议、测试、Adapter、Prototype library、文档和消费证据建设。

@@ -38,32 +38,40 @@ function pushOverrideWarning(warnings: string[], field: string, prev: unknown, n
   warnings.push(`[Boundary] ${field} overridden: ${String(prev)} -> ${String(next)}`);
 }
 
+type StackEntry = { suspended: boolean };
+
 const STACK_CENTER = (() => {
-  const order: number[] = [];
-  const sampleOwners = new WeakMap<object, number | null>();
+  const order: StackEntry[] = [];
+  const sampleOwners = new WeakMap<object, StackEntry | null>();
 
   return {
-    activate(id: number) {
-      const existingIndex = order.indexOf(id);
+    activate(entry: StackEntry) {
+      const existingIndex = order.indexOf(entry);
       if (existingIndex >= 0) {
         order.splice(existingIndex, 1);
       }
-      order.push(id);
+      order.push(entry);
     },
-    deactivate(id: number) {
-      const existingIndex = order.indexOf(id);
+    deactivate(entry: StackEntry) {
+      const existingIndex = order.indexOf(entry);
       if (existingIndex >= 0) {
         order.splice(existingIndex, 1);
       }
     },
-    topForSample(sample?: BoundarySample): number | null {
+    topForSample(sample?: BoundarySample): StackEntry | null {
       const native = sample?.nativeEvent;
       const identity =
         native && (typeof native === 'object' || typeof native === 'function')
           ? (native as object)
           : sample;
       if (identity && sampleOwners.has(identity)) return sampleOwners.get(identity) ?? null;
-      const owner = order.at(-1) ?? null;
+      let owner: StackEntry | null = null;
+      for (let index = order.length - 1; index >= 0; index--) {
+        if (!order[index].suspended) {
+          owner = order[index];
+          break;
+        }
+      }
       // Every Event listener wraps the same native sample independently. Retain
       // its original owner even when that owner's outside callback closes it.
       if (identity) sampleOwners.set(identity, owner);
@@ -73,10 +81,9 @@ const STACK_CENTER = (() => {
 })();
 
 export class BoundaryModuleImpl extends ModuleBase {
-  private static nextBoundaryInstanceId = 1;
   private config: BoundaryConfig = DEFAULT_CONFIG;
   private readonly prototypeName: string;
-  private readonly boundaryInstanceId = BoundaryModuleImpl.nextBoundaryInstanceId++;
+  private readonly stackEntry: StackEntry = { suspended: false };
   private readonly warnings: string[] = [];
   private readonly outsideSubscribers = new Set<(event: BoundaryOutsideEvent) => void>();
   private hostBridge: BoundaryHostBridge | null = null;
@@ -84,7 +91,6 @@ export class BoundaryModuleImpl extends ModuleBase {
   private nextRegionId = 1;
   private regions: BoundaryRegionRecord[] = [];
   private stackActive = false;
-  private suspended = false;
   private observingPointerDown = false;
 
   constructor(
@@ -112,13 +118,12 @@ export class BoundaryModuleImpl extends ModuleBase {
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
     if (phase === 'unmounting' || phase === 'detached') {
-      this.suspended = true;
-      STACK_CENTER.deactivate(this.boundaryInstanceId);
+      this.stackEntry.suspended = true;
+      // View suspension removes eligibility, not the logical activation rank.
       return;
     }
     if (phase === 'mounted') {
-      this.suspended = false;
-      if (this.stackActive) STACK_CENTER.activate(this.boundaryInstanceId);
+      this.stackEntry.suspended = false;
     }
   }
 
@@ -159,21 +164,14 @@ export class BoundaryModuleImpl extends ModuleBase {
   }
 
   setStackActive(active: boolean): void {
-    if (Object.is(this.stackActive, active)) {
-      if (active && !this.suspended) {
-        STACK_CENTER.activate(this.boundaryInstanceId);
-      }
-      return;
-    }
-
     this.stackActive = active;
 
-    if (active && !this.suspended) {
-      STACK_CENTER.activate(this.boundaryInstanceId);
+    if (active) {
+      STACK_CENTER.activate(this.stackEntry);
       return;
     }
 
-    STACK_CENTER.deactivate(this.boundaryInstanceId);
+    STACK_CENTER.deactivate(this.stackEntry);
   }
 
   registerRegion(target: unknown, options: BoundaryRegionOptions = {}): () => void {
@@ -233,12 +231,12 @@ export class BoundaryModuleImpl extends ModuleBase {
   }
 
   notify(sample?: BoundarySample): BoundaryClassification {
-    if (this.suspended) return 'unknown';
-    const topBoundaryId = this.stackActive ? STACK_CENTER.topForSample(sample) : null;
+    if (this.stackEntry.suspended) return 'unknown';
+    const topBoundary = this.stackActive ? STACK_CENTER.topForSample(sample) : null;
     const classification = this.classify(sample);
     if (classification !== 'outside') return classification;
     if (this.stackActive) {
-      if (topBoundaryId !== null && topBoundaryId !== this.boundaryInstanceId) {
+      if (topBoundary !== null && topBoundary !== this.stackEntry) {
         return 'unknown';
       }
     }

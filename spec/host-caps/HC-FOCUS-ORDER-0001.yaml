@@ -1,0 +1,67 @@
+id: HC-FOCUS-ORDER-0001
+type: host-cap
+title: Host orders the targets of one Focus navigation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Draft: the maintainers chose a host-supplied total order for the ordering half of M-FOCUS-0001-Q-PORTABILITY (#721) and authorized this draft. Only the four Web Adapters provide it, cross-tree Web order is not claimed, and no non-Web host has provider evidence yet.'
+  zh-CN: 'Draft：维护者为 M-FOCUS-0001-Q-PORTABILITY 的排序部分选择了由宿主提供全序（#721），并授权本 draft。目前只有四个 Web Adapter 提供该能力，不声称跨树的 Web 顺序，也还没有非 Web 宿主的提供方证据。'
+summary: For one navigation, the host orders the member targets as one total order or reports that it cannot, and Focus otherwise keeps registration order for the whole navigation.
+statement:
+  en: A Focus navigation over scope or roving members asks the host of the entry that owns it to order all member targets at once. The host answers with one total order or with none; Focus never combines host answers and registration order pair by pair.
+  zh-CN: 对 scope 或 roving 成员的一次 Focus 导航，会请拥有它的 entry 所在宿主一次性排列全部成员 target。宿主要么给出一个全序，要么不给；Focus 从不把宿主的答案与注册顺序逐对混用。
+criteria:
+  - id: HC-FOCUS-ORDER-0001-A
+    text:
+      en: For one navigation, the host orders the given member targets as one total order, returning each target exactly once, or reports that it cannot order that set. It never answers for only part of the set.
+      zh-CN: 对一次导航，宿主把给定的成员 target 排成一个全序，每个 target 恰好返回一次；或者报告无法排列该集合。宿主不只回答集合的一部分。
+  - id: HC-FOCUS-ORDER-0001-B
+    text:
+      en: The Web realization is document order when every target is a node in the same tree. Targets in different trees, such as another shadow root, a detached subtree or another document, have no single document order, so the Web host reports the set unorderable. No geometric, visual or cross-tree order is claimed.
+      zh-CN: Web realization 在所有 target 都是同一棵树中的节点时使用文档顺序。位于不同树中的 target，例如另一个 shadow root、脱离文档的子树或另一个文档，没有单一的文档顺序，因此 Web 宿主报告该集合无法排序。不声称几何、视觉或跨树顺序。
+  - id: HC-FOCUS-ORDER-0001-C
+    text:
+      en: An absent capability, an unorderable answer, an answer that is not an order of exactly the given targets, or a member without a target leaves the whole navigation in stable registration order, without throwing.
+      zh-CN: 能力缺失、回答无法排序、回答不是恰好这些 target 的排列，或有成员尚无 target 时，整次导航保持稳定注册顺序，且不抛错。
+  - id: HC-FOCUS-ORDER-0001-D
+    text:
+      en: The capability takes and returns targets as opaque host values and answers synchronously from the host's current order. The portable Focus Module needs no DOM type or global for it, and no host round trip per key.
+      zh-CN: 该能力以不透明的宿主值接收并返回 target，并根据宿主当前的顺序同步回答。可移植的 Focus Module 因此不需要任何 DOM 类型或全局对象，也不需要每次按键往返宿主。
+relates:
+  contracts: [C-AS-FOCUS-ROVING-0001, C-AS-FOCUS-SCOPE-0002, C-FOCUS-0002]
+  decisions: [D-COLLECTION-FOCUS-ROVING-RELATIONSHIP-0001]
+verifies:
+  tests: [T-FOCUS-ORDER-0001]
+sources:
+  - path: packages/modules/focus/src/caps.ts
+  - path: packages/modules/focus/src/center.ts
+  - path: packages/adapters/base/src/platform/focus-order.ts
+  - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/vue/src/runtime/modules.ts
+  - path: packages/adapters/vue2/src/runtime/modules.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+openQuestions:
+  - id: HC-FOCUS-ORDER-0001-Q-CROSS-TREE
+    question:
+      en: Should the Web realization order targets across shadow roots or portals by a composed or flat-tree order?
+      zh-CN: Web realization 是否应按 composed 或 flat-tree 顺序排列跨 shadow root 或 portal 的 target？
+    context:
+      en: This draft reports such sets unorderable, so Focus keeps registration order for them. Before it, the Focus comparator returned the implementation-specific order that document position comparison gives for nodes in different trees.
+      zh-CN: 本 draft 将这类集合报告为无法排序，Focus 因此对其保持注册顺序。此前 Focus 的比较函数对不同树中的节点返回文档位置比较给出的、由实现决定的顺序。
+    blocks: ['criterion:HC-FOCUS-ORDER-0001#HC-FOCUS-ORDER-0001-B']
+  - id: HC-FOCUS-ORDER-0001-Q-NON-WEB
+    question:
+      en: How does a non-Web host keep its projected order available to a Focus Module that runs in another realm?
+      zh-CN: 非 Web 宿主如何让运行在另一个 realm 中的 Focus Module 取得它投影的顺序？
+    context:
+      en: A native host such as the GPUI direction in #687 is expected to project a stable order locally rather than answer each key over a round trip. No non-Web host provides the capability yet, so such hosts keep registration order.
+      zh-CN: '#687 中 GPUI 方向这样的原生宿主，预期在本地投影稳定顺序，而不是每次按键都往返回答。目前还没有非 Web 宿主提供该能力，这类宿主保持注册顺序。'
+    blocks: ['activation:HC-FOCUS-ORDER-0001']
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the host order for Focus navigations, with its Web document-order realization and whole-navigation registration fallback.
+tags:
+  - focus
+  - host-capability
+  - order

@@ -1,0 +1,60 @@
+id: M-TABLE-STRUCTURE-0001
+type: module
+title: Table Structure owns passive two-dimensional topology and header relationships
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Checkpoint B implements the approved host-neutral semantic owner with Module and Base evidence, and bounded Web Component materialization now passes. React, Vue and Vue 2 materialization plus complete reader evidence remain Checkpoint C activation blockers.
+  zh-CN: Checkpoint B 实现已批准的 host-neutral semantic owner，并具备 Module/Base 证据与通过的有界 Web Component materialization；React、Vue、Vue 2 materialization 及完整 reader evidence 仍是 Checkpoint C activation blocker。
+summary: The Table Structure Module recomputes one nearest-domain passive topology from Anatomy order and projects opaque header relationships through generic A11y.
+statement:
+  en: Table Structure owns range-based placement, structural validity, diagnostics and ordered opaque header references for one nearest Base Table domain. It consumes Anatomy, State and A11y only; it owns no host service, App data or interaction state.
+  zh-CN: Table Structure 为最近的 Base Table domain 拥有 range-based placement、结构 validity、diagnostics 与有序 opaque header references。它只消费 Anatomy、State 与 A11y；不拥有 host service、App data 或交互状态。
+criteria:
+  - id: M-TABLE-STRUCTURE-0001-A
+    text:
+      en: One root recomputes current ordered Rows and their HeaderCell and Cell descendants from the nearest Table Anatomy domain without host-node access or cross-domain lookup.
+      zh-CN: 一个 root 必须从最近 Table Anatomy domain 重算当前 ordered Rows 及其 HeaderCell/Cell 后代，不访问 host node，也不跨 domain 查询。
+  - id: M-TABLE-STRUCTURE-0001-B
+    text:
+      en: Placement uses merged column ranges and a monotonic per-Row cursor, accepts only positive safe-integer spans, and never allocates in proportion to span magnitude.
+      zh-CN: Placement 使用 merged column ranges 与每 Row monotonic cursor，只接受 positive safe-integer spans，且不得按 span magnitude 分配空间。
+  - id: M-TABLE-STRUCTURE-0001-C
+    text:
+      en: Protocol header keys resolve only to unique placeable same-domain HeaderCell semantic-object refs; orderedHeaders preserves authored order across header kinds, rowHeaders and columnHeaders preserve their per-kind order, and ambiguous, missing, self or downstream targets are rejected.
+      zh-CN: Protocol header keys 只能解析到 unique、placeable、same-domain HeaderCell semantic-object refs；orderedHeaders 保留跨 header kind 的 authored order，rowHeaders/columnHeaders 保留各自 kind 内顺序，并拒绝 ambiguous、missing、self 或 downstream target。
+  - id: M-TABLE-STRUCTURE-0001-D
+    text:
+      en: Insert, remove, reorder and authored-configuration changes recompute a read-only snapshot and generic A11y states and relations; invalid structure clears structural roles and every other valid projection fact while remaining addressably diagnostic.
+      zh-CN: Insert、remove、reorder 与 authored configuration 变化必须重算只读 snapshot 和通用 A11y states/relations；无效结构清除 structural roles 及其它全部 valid projection facts，并保留可寻址 diagnostic。
+  - id: M-TABLE-STRUCTURE-0001-E
+    text:
+      en: The Module exposes no sorting, selection, pagination, virtualization, editing, fetching, focus, layout-table or host-materialization behavior and introduces no Table-specific Host Capability.
+      zh-CN: Module 不暴露 sorting、selection、pagination、virtualization、editing、fetching、focus、layout-table 或 host-materialization 行为，也不新增 Table-specific Host Capability。
+owns:
+  contracts: [C-TABLE-STRUCTURE-0001]
+satisfies:
+  contracts: [C-TABLE-STRUCTURE-0001]
+dependsOn:
+  modules: [M-ANATOMY-0001, M-A11Y-0001, M-STATE-0001]
+  decisions: [D-BASE-TABLE-STRUCTURE-0001]
+verifies:
+  tests: [T-TABLE-STRUCTURE-0001]
+openQuestions:
+  - id: M-TABLE-STRUCTURE-0001-Q-ADAPTER-EVIDENCE
+    question:
+      en: Have all four official Web Adapter profiles projected and independently reviewed the bounded Table A11y graph?
+      zh-CN: 四个 official Web Adapter profile 是否已投射并独立评审有界 Table A11y graph？
+    blocks: [activation:M-TABLE-STRUCTURE-0001]
+sources:
+  - path: packages/modules/table-structure/src/create.ts
+  - path: packages/modules/table-structure/src/projection.ts
+  - path: packages/modules/table-structure/test/impl-spec.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Implemented the approved Checkpoint B host-neutral semantic owner, topology, diagnostics and opaque relationship evidence.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded Web Component evidence, global authored header order, and fail-closed semantic-role cleanup while retaining three Adapter activation blockers.
+tags: [table, structure, module, anatomy, accessibility, draft]

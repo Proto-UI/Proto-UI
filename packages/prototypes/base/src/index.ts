@@ -33,3 +33,4 @@ export { default as liveRegionRoot } from './live-region';
 export * from './async-region';
 export { default as asyncRegionRoot } from './async-region';
 export * from './image';
+export * from './table';

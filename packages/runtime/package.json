@@ -1,6 +1,6 @@
 {
   "name": "@proto.ui/runtime",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0-alpha.1",
   "private": false,
   "type": "module",
   "dependencies": {
@@ -35,7 +35,8 @@
     "@proto.ui/module-presence": "workspace:*",
     "@proto.ui/module-test-sys": "workspace:*",
     "@proto.ui/module-text-control": "workspace:*",
-    "@proto.ui/module-image-view": "workspace:*"
+    "@proto.ui/module-image-view": "workspace:*",
+    "@proto.ui/module-table-structure": "workspace:*"
   },
   "exports": {
     ".": {

@@ -1,0 +1,60 @@
+id: P-BASE-TABLE
+type: prototype
+title: Base Table owns one passive structural domain and snapshot
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Real host-neutral source and bounded Web Component evidence exist; React, Vue and Vue 2 conformance plus complete reader evidence remain planned.
+  zh-CN: 已有真实 host-neutral source 与有界 Web Component 证据；React、Vue、Vue 2 conformance 及完整 reader evidence 仍为 planned。
+summary: Base Table establishes the nearest structural domain and exposes its current read-only topology snapshot.
+statement:
+  en: Base Table is a transparent passive root over Table Structure. It owns no data operations, focus policy, host layout or design-language presentation.
+  zh-CN: Base Table 是 Table Structure 上的透明 passive root；不拥有 data operations、focus policy、host layout 或 design-language presentation。
+anatomy:
+  family: base-table
+  roles:
+    root: { cardinality: { min: 1, max: 1 } }
+    caption: { cardinality: { min: 0, max: 1 } }
+    row: { cardinality: { min: 1, max: '*' } }
+    headerCell: { cardinality: { min: 1, max: '*' } }
+    cell: { cardinality: { min: 1, max: '*' } }
+  relations:
+    - { kind: contains, parent: root, child: caption }
+    - { kind: contains, parent: root, child: row }
+    - { kind: contains, parent: row, child: headerCell }
+    - { kind: contains, parent: row, child: cell }
+criteria:
+  - id: P-BASE-TABLE-DOMAIN
+    text:
+      en: The root establishes one independent nearest Table Anatomy domain and exposes getStructure as the current read-only snapshot.
+      zh-CN: Root 建立一个独立的最近 Table Anatomy domain，并以 getStructure 暴露当前只读 snapshot。
+  - id: P-BASE-TABLE-TRANSPARENT-CONTENT
+    text:
+      en: The root preserves authored descendants through one anonymous slot and does not synthesize Head, Body or RowGroup parts.
+      zh-CN: Root 通过一个 anonymous slot 保留 authored descendants，且不合成 Head、Body 或 RowGroup parts。
+  - id: P-BASE-TABLE-PASSIVE
+    text:
+      en: The root exposes no sorting, selection, pagination, virtualization, editing, data, focus, form, layout-table or styling channel.
+      zh-CN: Root 不暴露 sorting、selection、pagination、virtualization、editing、data、focus、form、layout-table 或 styling channel。
+dependsOn:
+  contracts: [C-TABLE-STRUCTURE-0001]
+  decisions: [D-BASE-TABLE-STRUCTURE-0001]
+  modules: [M-TABLE-STRUCTURE-0001]
+verifies: { tests: [T-TABLE-STRUCTURE-0001] }
+openQuestions:
+  - id: P-BASE-TABLE-Q-ADAPTERS
+    question:
+      en: Has the Table family completed the approved Checkpoint C Adapter and reader evidence?
+      zh-CN: Table family 是否已完成批准的 Checkpoint C Adapter 与 reader 证据？
+    blocks: [activation:P-BASE-TABLE]
+sources:
+  - path: packages/prototypes/base/src/table/root.proto.ts
+  - path: packages/prototypes/base/test/table.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the passive Base Table root, exact Anatomy domain and read-only structure snapshot.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded bounded Web Component Table evidence while retaining the remaining Adapter and reader activation blockers.
+tags: [table, base, prototype, structure, draft]

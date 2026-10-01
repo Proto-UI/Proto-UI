@@ -1,0 +1,47 @@
+id: P-BASE-TABLE-CELL
+type: prototype
+title: Base Table Cell declares spans and ordered header keys
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Real source, topology/header evidence and bounded content-preserving Web Component Cell materialization exist; React, Vue and Vue 2 remain planned.
+  zh-CN: 已有真实 source、topology/header 证据与保留内容的有界 Web Component Cell materialization；React、Vue 与 Vue 2 仍为 planned。
+summary: Cell contributes positive spans and an ordered non-empty header-key set to the nearest passive Table domain.
+statement:
+  en: Base Table Cell retains App-owned slot content while Table Structure computes coordinates and resolves authored keys into ordered opaque row and column header refs.
+  zh-CN: Base Table Cell 保留 App-owned slot content；Table Structure 计算 coordinates，并把 authored keys 解析为有序 opaque row/column header refs。
+criteria:
+  - id: P-BASE-TABLE-CELL-FACTS
+    text:
+      en: Cell declares positive safe rowSpan and columnSpan values plus an ordered non-empty header-key set; invalid facts remain diagnostic and are never guessed.
+      zh-CN: Cell 声明 positive safe rowSpan/columnSpan 与有序 non-empty header-key set；无效 facts 保持 diagnostic，且不得猜测。
+  - id: P-BASE-TABLE-CELL-RELATIONS
+    text:
+      en: Resolved keys retain authored order in orderedHeaders and split by target header kind into opaque rowHeaders and columnHeaders without losing per-kind order.
+      zh-CN: Resolved keys 在 orderedHeaders 中保留 authored order，并按 target header kind 分为 opaque rowHeaders 与 columnHeaders，且不丢失各 kind 内顺序。
+  - id: P-BASE-TABLE-CELL-CONTENT
+    text:
+      en: Authored content remains untouched in one anonymous slot and is excluded from the structural data model.
+      zh-CN: Authored content 原样保留在一个 anonymous slot 中，并排除在 structural data model 之外。
+dependsOn:
+  contracts: [C-TABLE-STRUCTURE-0001]
+  prototypes: [P-BASE-TABLE-ROW, P-BASE-TABLE-HEADER-CELL]
+  modules: [M-TABLE-STRUCTURE-0001]
+verifies: { tests: [T-TABLE-STRUCTURE-0001] }
+openQuestions:
+  - id: P-BASE-TABLE-CELL-Q-ADAPTERS
+    question:
+      en: Are Cell coordinates, spans and relationships proven across official Adapter profiles?
+      zh-CN: Cell coordinates、spans 与 relationships 是否已在 official Adapter profiles 中取证？
+    blocks: [activation:P-BASE-TABLE-CELL]
+sources:
+  - path: packages/prototypes/base/src/table/cell.proto.ts
+  - path: packages/prototypes/base/test/table.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added passive Table Cell spans, ordered header keys and opaque relationship projection.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added cross-kind ordered header projection and bounded content-preserving Web Component evidence while retaining three planned Adapter paths.
+tags: [table, cell, base, prototype, accessibility, draft]

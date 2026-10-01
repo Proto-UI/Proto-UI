@@ -89,6 +89,26 @@ describe('prototypes/shadcn: select', () => {
     expect(alpha.lastElementChild?.tagName).toBe('SPAN');
   });
 
+  it('projects one-pixel press feedback from inherited state through the Adapter', async () => {
+    vi.useFakeTimers();
+    const { trigger } = createSelect();
+    await settle();
+
+    expect(trigger.getExposes().pressed.get()).toBe(false);
+    expect(styleContains(trigger, 'data-[pressed]:translate-y-px')).toBe(true);
+    expect(styleContains(trigger, 'translate-y-px')).toBe(false);
+
+    trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await flush();
+    expect(trigger.getExposes().pressed.get()).toBe(true);
+    expect(trigger.hasAttribute('data-pressed')).toBe(true);
+
+    trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    await flush();
+    expect(trigger.getExposes().pressed.get()).toBe(false);
+    expect(trigger.hasAttribute('data-pressed')).toBe(false);
+  });
+
   it('inherits keyboard selection behavior and selected indicator facts from Base', async () => {
     vi.useFakeTimers();
     const { root, trigger, value, content, alpha, beta } = createSelect({

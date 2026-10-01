@@ -163,7 +163,7 @@ async function separatorGeometry(locator: Locator): Promise<SeparatorGeometry> {
 }
 
 function roots(previewer: Locator): Locator {
-  return previewer.locator('.host [data-pui-root]');
+  return previewer.locator('[data-projection-content] [data-pui-root]');
 }
 
 async function expectVisibility(locator: Locator, visible: boolean, label: string): Promise<void> {
@@ -202,7 +202,12 @@ async function resolvedThemeColors(
       const probe = document.createElement('span');
       probe.style.position = 'fixed';
       probe.style.visibility = 'hidden';
-      document.body.appendChild(probe);
+      // Lane variables live on the projected presentation scope, not :root, so
+      // the probe reads through the same surface the demo paints with.
+      const probeHost =
+        document.querySelector<HTMLElement>('[data-previewer-id] [data-projection-content]') ??
+        document.body;
+      probeHost.appendChild(probe);
       const values = customProperties.map((customProperty) => {
         probe.style[cssProperty] = `var(${customProperty})`;
         return getComputedStyle(probe)[cssProperty];
@@ -531,8 +536,8 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         );
         await opened.page.waitForFunction(
           () =>
-            document.querySelector<HTMLElement>('[data-previewer-id] .host')?.dataset
-              .separatorDemoReady === 'true',
+            document.querySelector<HTMLElement>('[data-previewer-id] [data-projection-content]')
+              ?.dataset.separatorDemoReady === 'true',
           undefined,
           { timeout: 10_000 }
         );
@@ -548,7 +553,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           `${runtime}/dynamic/before-length`
         ).toBeLessThanOrEqual(0.5);
         await opened.page.evaluate(() => {
-          document.querySelector('[data-previewer-id] .host')?.dispatchEvent(
+          document.querySelector('[data-previewer-id] [data-projection-content]')?.dispatchEvent(
             new CustomEvent('proto-ui-test:separator-orientation', {
               detail: { orientation: 'horizontal' },
             })
@@ -572,7 +577,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           `${runtime}/dynamic/after-length`
         ).toBeLessThanOrEqual(0.5);
         await opened.page.evaluate(() => {
-          document.querySelector('[data-previewer-id] .host')?.dispatchEvent(
+          document.querySelector('[data-previewer-id] [data-projection-content]')?.dispatchEvent(
             new CustomEvent('proto-ui-test:separator-orientation', {
               detail: { orientation: 'vertical' },
             })
@@ -983,7 +988,7 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           '[data-pui-root]',
           3
         );
-        const nodes = opened.previewer.locator('.host [data-pui-root]');
+        const nodes = opened.previewer.locator('[data-projection-content] [data-pui-root]');
         const trigger = nodes.nth(1);
         await opened.page.mouse.move(5, 5);
         const triggerElement = await trigger.elementHandle();
@@ -1090,7 +1095,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         await trigger.dispatchEvent('pointerleave');
         await expectVisibility(panelText, false, `${runtime}/hover-focus-close`);
         await applyColorScheme(opened.page, 'dark');
-        const darkTrigger = opened.previewer.locator('.host [data-pui-root]').nth(1);
+        const darkTrigger = opened.previewer
+          .locator('[data-projection-content] [data-pui-root]')
+          .nth(1);
         const darkTriggerElement = await darkTrigger.elementHandle();
         if (!darkTriggerElement) throw new Error('Dark Hover Card trigger was not materialized.');
         await opened.page.waitForFunction(

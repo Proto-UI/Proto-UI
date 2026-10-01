@@ -1,0 +1,27 @@
+//! Host half of the Proto UI GPUI host protocol, version 0.
+//!
+//! This crate is a port of `packages/host-protocol` and is kept honest by the
+//! shared conformance vectors in `packages/host-protocol/vectors/`, which both
+//! implementations replay. It has no GPUI dependency and performs no I/O.
+
+pub mod event_type;
+pub mod frame;
+pub mod messages;
+pub mod model;
+pub mod t0;
+pub mod wire;
+
+pub use event_type::{
+    CoreEvent, EventType, ExtensionEvent, InvalidEventType, OptionalEvent, EXTENSION_PREFIX,
+};
+pub use model::{
+    ActivationStatus, DefaultActionStatus, DeliveryRejection, DeliveryResult, DisposeResult,
+    HostSessionModel, HostSessionSnapshot, InstallOptions, LeaseRecord, ReleaseResult,
+    RetainedLogicalState, SessionPhase,
+};
+pub use wire::{
+    A11yActionWire, A11yNameWire, A11ySnapshotWire, DefaultActionRequest, EventBindingPlan,
+    EventRegistration, EventScope, FocusPlan, FocusTargetPlan, HostDiagnostic, InputSample,
+    ProjectionAck, ProjectionAckStatus, ProjectionTransaction, RawEventRegistration, SlotPlan,
+    HOST_PROTOCOL_VERSION,
+};

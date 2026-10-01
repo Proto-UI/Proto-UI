@@ -118,6 +118,38 @@ describe('prototypes/base: tabs', () => {
     await Promise.resolve();
   });
 
+  it('a panel that comes back is still labelled by its tab', async () => {
+    const root = document.createElement('base-tabs-root') as any;
+    const list = document.createElement('base-tabs-list') as any;
+    const triggerA = document.createElement('base-tabs-trigger') as any;
+    const triggerB = document.createElement('base-tabs-trigger') as any;
+    const contentA = document.createElement('base-tabs-content') as any;
+    const contentB = document.createElement('base-tabs-content') as any;
+    setElementProps(root, { defaultValue: 'a' });
+    setElementProps(triggerA, { value: 'a' });
+    setElementProps(triggerB, { value: 'b' });
+    setElementProps(contentA, { value: 'a' });
+    setElementProps(contentB, { value: 'b' });
+    list.appendChild(triggerA);
+    list.appendChild(triggerB);
+    root.appendChild(list);
+    root.appendChild(contentA);
+    root.appendChild(contentB);
+    document.body.appendChild(root);
+    await waitForFrameCondition(() => contentA.tabIndex === 0);
+    expect(contentA.getAttribute('aria-labelledby')).toBe(triggerA.getAttribute('id'));
+
+    // Away and back: the panel's view goes and returns.
+    triggerB.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await waitForFrameCondition(() => contentB.tabIndex === 0);
+    triggerA.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await waitForFrameCondition(() => contentA.tabIndex === 0);
+    expect(contentA.getAttribute('aria-labelledby')).toBe(triggerA.getAttribute('id'));
+
+    root.remove();
+    await Promise.resolve();
+  });
+
   it('uncontrolled tabs falls back to the first enabled trigger when selection is invalid', async () => {
     // T-BASE-TABS-0001-CASE-SELECTION-FALLBACK
     const root = document.createElement('base-tabs-root') as any;

@@ -11,6 +11,7 @@ type MatrixFacts = {
   previewers: number;
   initialized: number;
   errors: number;
+  errorDetails: string[];
   overflow: number;
   adapterColumns: string;
   adapterColumnCount: number;
@@ -90,13 +91,18 @@ async function readMatrixFacts(page: Page): Promise<MatrixFacts> {
         (adapter) => Math.round(adapter.getBoundingClientRect().left)
       )
     );
+    const errorPreviewers = [...document.querySelectorAll('[data-previewer-id]')].filter(
+      (previewer) => previewer.textContent?.includes('[Preview Error]')
+    );
     return {
       demos: document.querySelectorAll('.demo-matrix__item').length,
       previewers: document.querySelectorAll('[data-previewer-id]').length,
       initialized: document.querySelectorAll('[data-previewer-id][data-inited="1"]').length,
-      errors: [...document.querySelectorAll('[data-previewer-id]')].filter((previewer) =>
-        previewer.textContent?.includes('[Preview Error]')
-      ).length,
+      errors: errorPreviewers.length,
+      errorDetails: errorPreviewers.map(
+        (previewer) =>
+          `${previewer.closest('.demo-matrix__adapter')?.getAttribute('aria-label')} (${previewer.getAttribute('data-previewer-id')}): ${previewer.textContent}`
+      ),
       overflow: root.scrollWidth - root.clientWidth,
       adapterColumns: firstGrid ? getComputedStyle(firstGrid).gridTemplateColumns : '',
       adapterColumnCount: firstColumns.size,
@@ -203,7 +209,7 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Website Demo Matrix browser smoke', () => {
-  it('mounts every supported demo and names the unimplemented Image adapter', async () => {
+  it('mounts every demo in every official Web adapter', async () => {
     const { context, page } = await openRoute(browser, baseUrl, MATRIX_ROUTE, {
       width: 1440,
       height: 900,
@@ -213,14 +219,11 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await waitForMatrix(page);
       const facts = await readMatrixFacts(page);
       expect(facts.demos).toBeGreaterThan(0);
-      // D-IMAGE-VIEW-PROJECTION-0001-E admits only WC/React/Vue 3 for Image.
-      expect(facts.unavailable).toEqual(['demo-base-image:vue2']);
-      expect(facts.previewers).toBe(facts.demos * RUNTIMES.length - 1);
-      expect(await page.locator('[data-unavailable]').innerText()).toContain(
-        'Image View is not implemented for Vue 2.'
-      );
+      // D-IMAGE-VIEW-PROJECTION-0001-E admits all four official Web adapters.
+      expect(facts.unavailable).toEqual([]);
+      expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
       expect(facts.initialized).toBe(facts.previewers);
-      expect(facts.errors).toBe(0);
+      expect(facts.errors, facts.errorDetails.join('\n\n')).toBe(0);
       expect(facts.overflow).toBeLessThanOrEqual(0);
       expect(facts.adapterColumnCount).toBe(RUNTIMES.length);
       for (const runtime of RUNTIMES) {
@@ -272,11 +275,11 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       try {
         await waitForMatrix(page);
         const facts = await readMatrixFacts(page);
-        expect(facts.errors).toBe(0);
+        expect(facts.errors, facts.errorDetails.join('\n\n')).toBe(0);
         expect(facts.overflow).toBeLessThanOrEqual(0);
         expect(facts.adapterColumnCount).toBe(1);
-        expect(facts.unavailable).toEqual(['demo-base-image:vue2']);
-        expect(facts.previewers).toBe(facts.demos * RUNTIMES.length - 1);
+        expect(facts.unavailable).toEqual([]);
+        expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
       } finally {
         await context.close();
       }

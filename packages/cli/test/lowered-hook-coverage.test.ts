@@ -1620,7 +1620,7 @@ describe('lowered hook coverage', () => {
 
     let scanned = 0;
     for (const absolute of await prototypeSourceFiles()) {
-      const file = path.relative(REPO_ROOT, absolute);
+      const file = path.relative(REPO_ROOT, absolute).split(path.sep).join('/');
       const text = await readFile(absolute, 'utf8');
       if (!RULE_CALL.test(text)) continue;
       scanned += 1;

@@ -7,7 +7,7 @@ import type {
   FocusScopeConfig,
   FocusRovingEntryRequestOptions,
 } from '@proto.ui/core';
-import type { FocusInstanceToken, FocusParentGetter } from './caps';
+import type { FocusInstanceToken, FocusOrderTargets, FocusParentGetter } from './caps';
 
 export type FocusRequestBehavior = Readonly<{
   bypassGate?: boolean;
@@ -27,6 +27,8 @@ export type FocusCenterEntry = {
   getRovingConfig(): FocusRovingConfig;
   getFacts(): FocusFacts;
   getRootTarget(): HTMLElement | null;
+  /** The host's order for a navigation this entry owns, if the host has one. */
+  orderTargets?: FocusOrderTargets;
   requestFocus(options?: FocusRequestOptions, behavior?: FocusRequestBehavior): FocusRequestOutcome;
   hasPendingFocus(): boolean;
   clearFocus(reason: unknown): void;
@@ -113,14 +115,31 @@ export class FocusCenter {
     return null;
   }
 
-  private compareEntries(a: FocusCenterEntry, b: FocusCenterEntry): number {
-    const aEl = a.getRootTarget();
-    const bEl = b.getRootTarget();
-    if (!aEl || !bEl || aEl === bEl) return 0;
-    const pos = aEl.compareDocumentPosition(bEl);
-    if (pos & Node.DOCUMENT_POSITION_FOLLOWING) return -1;
-    if (pos & Node.DOCUMENT_POSITION_PRECEDING) return 1;
-    return 0;
+  /**
+   * Puts one navigation's members, given in registration order, in the host
+   * order of the entry that owns the navigation.
+   *
+   * The host orders the whole set or none of it. Without an order capability,
+   * with a member that has no target yet, or with an answer that is not an
+   * order of exactly these targets, the navigation keeps registration order
+   * throughout: host answers and registration order are never mixed pair by
+   * pair.
+   */
+  private orderEntries(owner: FocusCenterEntry, entries: FocusCenterEntry[]): FocusCenterEntry[] {
+    if (entries.length < 2 || !owner.orderTargets) return entries;
+    const targets: object[] = [];
+    for (const entry of entries) {
+      const target = entry.getRootTarget();
+      if (!target) return entries;
+      if (!targets.includes(target)) targets.push(target);
+    }
+    const ordered = owner.orderTargets(targets);
+    if (!ordered || !isOrderOf(ordered, targets)) return entries;
+    const rank = new Map(ordered.map((target, index) => [target, index]));
+    // A stable sort keeps members that share a target in registration order.
+    return [...entries].sort(
+      (a, b) => rank.get(a.getRootTarget()!)! - rank.get(b.getRootTarget()!)!
+    );
   }
 
   private isDescendantOf(entry: FocusCenterEntry, ancestor: FocusCenterEntry): boolean {
@@ -173,7 +192,7 @@ export class FocusCenter {
       if (focusable.disabled) return false;
       return this.isDescendantOf(entry, scope);
     });
-    return this.dedupeSharedHostTargets(members.sort((a, b) => this.compareEntries(a, b)));
+    return this.dedupeSharedHostTargets(this.orderEntries(scope, members));
   }
 
   private dedupeSharedHostTargets(entries: FocusCenterEntry[]): FocusCenterEntry[] {
@@ -389,7 +408,7 @@ export class FocusCenter {
       return resolved === provider.instance;
     });
 
-    return this.dedupeSharedHostTargets(members.sort((a, b) => this.compareEntries(a, b)));
+    return this.dedupeSharedHostTargets(this.orderEntries(provider, members));
   }
 
   focusInRoving(
@@ -492,6 +511,18 @@ export class FocusCenter {
       this.focusInRoving(provider, pending.op, { entryRequest: pending.options });
     }
   }
+}
+
+/**
+ * Whether a host's answer is an array holding each of `targets` exactly once,
+ * and nothing else. The answer comes from outside the Module, so anything else
+ * it could be, such as an array-like object, fails here rather than throwing.
+ */
+function isOrderOf(ordered: unknown, targets: readonly object[]): ordered is readonly object[] {
+  if (!Array.isArray(ordered) || ordered.length !== targets.length) return false;
+  const seen = new Set<unknown>();
+  for (let index = 0; index < ordered.length; index++) seen.add(ordered[index]);
+  return seen.size === targets.length && targets.every((target) => seen.has(target));
 }
 
 export const FOCUS_CENTER = new FocusCenter();

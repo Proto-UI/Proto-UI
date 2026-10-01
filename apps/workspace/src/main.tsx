@@ -634,6 +634,7 @@ function WorkspaceView(props: {
           />
           <EntityInspector
             entity={props.selectedEntity}
+            entities={props.snapshot.entities}
             locale={props.locale}
             t={props.t}
             onSelectEntity={props.onSelectEntity}
@@ -669,7 +670,12 @@ function SummaryMetric(props: { label: string; value: number; tone?: 'ok' | 'war
   );
 }
 
-function BlockTargets(props: { targets: string[]; t: UiText; onSelectEntity(id: string): void }) {
+function BlockTargets(props: {
+  targets: string[];
+  entities: SpecEntity[];
+  t: UiText;
+  onSelectEntity(id: string): void;
+}) {
   if (!props.targets.length) return null;
   return (
     <ul className="block-targets">
@@ -680,9 +686,13 @@ function BlockTargets(props: { targets: string[]; t: UiText; onSelectEntity(id: 
             {block ? (
               <>
                 <span>{props.t.blockKinds[block.kind]}: </span>
-                <button type="button" onClick={() => props.onSelectEntity(block.entityId)}>
-                  {block.entityId}
-                </button>
+                {props.entities.some((entity) => entity.id === block.entityId) ? (
+                  <button type="button" onClick={() => props.onSelectEntity(block.entityId)}>
+                    {block.entityId}
+                  </button>
+                ) : (
+                  <span>{block.entityId}</span>
+                )}
                 {block.kind !== 'activation' ? <code>#{block.targetId}</code> : null}
               </>
             ) : (
@@ -801,6 +811,7 @@ function LifecyclePanel(props: {
 
 function EntityInspector(props: {
   entity: SpecEntity | null;
+  entities: SpecEntity[];
   locale: Locale;
   t: UiText;
   onSelectEntity(id: string): void;
@@ -907,6 +918,7 @@ function EntityInspector(props: {
                 ) : null}
                 <BlockTargets
                   targets={question.blocks}
+                  entities={props.entities}
                   t={props.t}
                   onSelectEntity={props.onSelectEntity}
                 />
@@ -1532,6 +1544,7 @@ function OpenQuestionsPanel(props: {
               <p>{renderLocalizedText(question.question, props.locale)}</p>
               <BlockTargets
                 targets={question.blocks}
+                entities={props.entities}
                 t={props.t}
                 onSelectEntity={props.onSelectEntity}
               />

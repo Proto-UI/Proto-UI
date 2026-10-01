@@ -88,7 +88,11 @@ describe('module-scroll: Web scroll surface host', () => {
       track.append(thumb);
       document.body.append(target, track);
       const connection = (projection: 'composed' | 'system', present = true) => ({
-        config: { axes: 'vertical' as const, projection: 'composed' as const },
+        config: {
+          axes: 'vertical' as const,
+          projection: 'composed' as const,
+          endFollow: { mode: 'off' } as const,
+        },
         projection,
         composedChrome: {
           scope: {},
@@ -145,7 +149,7 @@ describe('module-scroll: Web scroll surface host', () => {
     const lease = createWebScrollSurfaceHost(target, {
       moveGestureHost: createMoveHarness().host,
     }).attach({
-      config: { axes: 'vertical', projection: 'system' },
+      config: { axes: 'vertical', projection: 'system', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},
@@ -177,7 +181,7 @@ describe('module-scroll: Web scroll surface host', () => {
     const move = createMoveHarness();
 
     const lease = createWebScrollSurfaceHost(target, { moveGestureHost: move.host }).attach({
-      config: { axes: 'both', projection: 'system' },
+      config: { axes: 'both', projection: 'system', endFollow: { mode: 'off' } },
       projection: 'system',
       onFacts: (snapshot) => snapshots.push(snapshot),
     });
@@ -221,7 +225,7 @@ describe('module-scroll: Web scroll surface host', () => {
       moveGestureHost: move.host,
       preference: 'composed',
     }).attach({
-      config: { axes: 'vertical', projection: 'auto' },
+      config: { axes: 'vertical', projection: 'auto', endFollow: { mode: 'off' } },
       projection: 'composed',
       onFacts: () => reports++,
     });
@@ -264,7 +268,7 @@ describe('module-scroll: Web scroll surface host', () => {
       preference: 'composed',
       minThumbSize: 18,
     }).attach({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -356,7 +360,7 @@ describe('module-scroll: Web scroll surface host', () => {
       moveGestureHost: move.host,
       preference: 'composed',
     }).attach({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -433,7 +437,7 @@ describe('module-scroll: Web scroll surface host', () => {
       moveGestureHost: move.host,
       preference: 'composed',
     }).attach({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -455,7 +459,7 @@ describe('module-scroll: Web scroll surface host', () => {
 
     binding?.onEnd(moveSample(0, 40));
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       onFacts: () => {},
     });
@@ -486,7 +490,7 @@ describe('module-scroll: Web scroll surface host', () => {
       moveGestureHost: move.host,
       preference: 'composed',
     }).attach({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -524,7 +528,7 @@ describe('module-scroll: Web scroll surface host', () => {
       moveGestureHost: move.host,
       preference: 'composed',
     }).attach({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -540,7 +544,7 @@ describe('module-scroll: Web scroll surface host', () => {
 
     // Fall back to system: authored chrome must hide.
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},
@@ -554,7 +558,7 @@ describe('module-scroll: Web scroll surface host', () => {
 
     // Restore composed: authored chrome reappears.
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -569,7 +573,7 @@ describe('module-scroll: Web scroll surface host', () => {
 
     // Dispose after system fallback restores original authored display.
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},
@@ -612,7 +616,7 @@ describe('module-scroll: Web scroll surface host', () => {
       moveGestureHost: move.host,
       preference: 'composed',
     }).attach({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: undefined,
       onFacts: () => {},
@@ -625,7 +629,7 @@ describe('module-scroll: Web scroll surface host', () => {
     // Late attachment: Anatomy reports the first control after fallback has
     // already started; the next publish pass must hide it.
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},
@@ -639,7 +643,7 @@ describe('module-scroll: Web scroll surface host', () => {
     // Replacement: a new control replaces the late one; the stale track must
     // restore and the replacement must hide on the same pass.
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},
@@ -722,7 +726,7 @@ describe('module-scroll: Web scroll surface host', () => {
       moveGestureHost: createMoveHarness().host,
       preference: 'composed',
     }).attach({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},
@@ -738,7 +742,7 @@ describe('module-scroll: Web scroll surface host', () => {
     expect(thumb.style.display).toBe('none');
 
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},
@@ -749,7 +753,7 @@ describe('module-scroll: Web scroll surface host', () => {
     expect(displayWrites).toBe(1);
 
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'composed',
       composedChrome: {
         scope: {},
@@ -761,7 +765,7 @@ describe('module-scroll: Web scroll surface host', () => {
     expect(thumb.style.display).toBe('inline-block');
 
     lease.update({
-      config: { axes: 'vertical', projection: 'composed' },
+      config: { axes: 'vertical', projection: 'composed', endFollow: { mode: 'off' } },
       projection: 'system',
       composedChrome: {
         scope: {},

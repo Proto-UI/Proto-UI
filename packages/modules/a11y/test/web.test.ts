@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { createA11ySemanticObjectRef } from '@proto.ui/core';
 import { createWebA11yProjector } from '../src/web';
 
 describe('module-a11y web projector', () => {
@@ -7,8 +8,10 @@ describe('module-a11y web projector', () => {
     const second = document.createElement('div');
     let target: HTMLElement | null = first;
     const project = createWebA11yProjector(() => target);
+    const objectRef = createA11ySemanticObjectRef();
 
     project({
+      objectRef,
       role: 'heading',
       id: undefined,
       name: undefined,
@@ -24,6 +27,7 @@ describe('module-a11y web projector', () => {
 
     target = null;
     project({
+      objectRef,
       role: 'heading',
       id: undefined,
       name: undefined,
@@ -39,6 +43,7 @@ describe('module-a11y web projector', () => {
 
     target = second;
     project({
+      objectRef,
       role: 'heading',
       id: undefined,
       name: undefined,
@@ -53,6 +58,7 @@ describe('module-a11y web projector', () => {
     expect(second.getAttribute('aria-level')).toBe('4');
 
     project({
+      objectRef,
       role: 'button',
       id: undefined,
       name: undefined,
@@ -67,6 +73,7 @@ describe('module-a11y web projector', () => {
     expect(second.hasAttribute('aria-level')).toBe(false);
 
     project({
+      objectRef,
       role: 'heading',
       id: undefined,
       name: undefined,
@@ -81,6 +88,7 @@ describe('module-a11y web projector', () => {
 
     project({
       role: 'heading',
+      objectRef,
       id: undefined,
       name: undefined,
       description: undefined,
@@ -98,9 +106,11 @@ describe('module-a11y web projector', () => {
     target.setAttribute('aria-level', '7');
     const project = createWebA11yProjector(target);
 
+    const objectRef = createA11ySemanticObjectRef();
     project({
       role: 'button',
       id: undefined,
+      objectRef,
       name: undefined,
       description: undefined,
       states: {},

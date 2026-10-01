@@ -1,12 +1,13 @@
 {
   "name": "@proto.ui/hooks",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0-alpha.1",
   "private": false,
   "type": "module",
   "dependencies": {
     "@proto.ui/core": "workspace:*",
     "@proto.ui/module-anatomy": "workspace:*",
     "@proto.ui/module-collection": "workspace:*",
+    "@proto.ui/module-table-structure": "workspace:*",
     "@proto.ui/types": "workspace:*"
   },
   "exports": {

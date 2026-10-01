@@ -29,7 +29,9 @@ describe('Radio Group release-history boundary', () => {
       expect(entity, id).toBeDefined();
       expect(entity?.since, id).toBe('0.3.0-alpha.0');
       expect(
-        entity?.revisions?.map((revision) => revision.version),
+        entity?.revisions
+          ?.filter((revision) => revision.change === 'introduced')
+          .map((revision) => revision.version),
         id
       ).toEqual(['0.3.0-alpha.0']);
     }

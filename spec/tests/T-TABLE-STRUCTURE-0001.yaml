@@ -3,7 +3,7 @@ type: test
 title: Table Structure decision, topology, header graph, and boundary evidence
 status: draft
 since: 0.3.0-alpha.0
-summary: Maps the Base Table admission and structural contract to an executable host-neutral topology probe plus planned module, Base prototype, and Web Adapter conformance paths without claiming current host support.
+summary: Maps the Base Table admission and structural contract to executable host-neutral Module and Base evidence, bounded passing Web Component projection evidence, and planned React, Vue, and Vue 2 conformance paths.
 cases:
   - id: T-TABLE-STRUCTURE-0001-CASE-INDEPENDENT-PROTOCOL
     title: Table Structure carries a two-dimensional header graph beyond Template anatomy
@@ -82,12 +82,11 @@ implementations:
       - Exercised by packages/spec/fixtures/test/table-structure-reference.test.ts.
   - id: module-table-structure-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/modules/table-structure/test/impl-spec.test.ts
     required: true
     consumesCases:
       - T-TABLE-STRUCTURE-0001-CASE-INDEPENDENT-PROTOCOL
-      - T-TABLE-STRUCTURE-0001-CASE-DOMAIN-ISOLATION
       - T-TABLE-STRUCTURE-0001-CASE-TOPOLOGY
       - T-TABLE-STRUCTURE-0001-CASE-HEADER-GRAPH
       - T-TABLE-STRUCTURE-0001-CASE-DIAGNOSTICS
@@ -95,17 +94,18 @@ implementations:
       - T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY
   - id: prototypes-base-table-contract
     kind: runtime-test
-    status: planned
+    status: passing
     path: packages/prototypes/base/test/table.test.ts
     required: true
     consumesCases:
       - T-TABLE-STRUCTURE-0001-CASE-ANATOMY
+      - T-TABLE-STRUCTURE-0001-CASE-DOMAIN-ISOLATION
       - T-TABLE-STRUCTURE-0001-CASE-HEADER-GRAPH
       - T-TABLE-STRUCTURE-0001-CASE-STRUCTURAL-CHURN
       - T-TABLE-STRUCTURE-0001-CASE-EXCLUSIONS
   - id: adapter-web-component-table-contract
     kind: adapter-test
-    status: planned
+    status: passing
     path: packages/adapters/web-component/test/table.test.ts
     required: true
     consumesCases: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]
@@ -155,6 +155,47 @@ verifies:
         - C-TABLE-STRUCTURE-0001-CHURN
         - C-TABLE-STRUCTURE-0001-A11Y-PROJECTION
         - C-TABLE-STRUCTURE-0001-EXCLUSIONS
+  modules:
+    - id: M-TABLE-STRUCTURE-0001
+      since: 0.3.0-alpha.1
+      anchors:
+        - M-TABLE-STRUCTURE-0001-A
+        - M-TABLE-STRUCTURE-0001-B
+        - M-TABLE-STRUCTURE-0001-C
+        - M-TABLE-STRUCTURE-0001-D
+        - M-TABLE-STRUCTURE-0001-E
+  adapters:
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.1
+      anchors: [A-WEB-COMPONENT-0001-TABLE]
+  prototypes:
+    - id: P-BASE-TABLE
+      since: 0.3.0-alpha.1
+      anchors: [P-BASE-TABLE-DOMAIN, P-BASE-TABLE-TRANSPARENT-CONTENT, P-BASE-TABLE-PASSIVE]
+    - id: P-BASE-TABLE-CAPTION
+      anchors: [P-BASE-TABLE-CAPTION-ROLE, P-BASE-TABLE-CAPTION-CONTENT]
+      since: 0.3.0-alpha.1
+    - id: P-BASE-TABLE-ROW
+      since: 0.3.0-alpha.1
+      anchors: [P-BASE-TABLE-ROW-ORDER, P-BASE-TABLE-ROW-CONTENT]
+    - id: P-BASE-TABLE-HEADER-CELL
+      since: 0.3.0-alpha.1
+      anchors:
+        [
+          P-BASE-TABLE-HEADER-CELL-FACTS,
+          P-BASE-TABLE-HEADER-CELL-RELATIONS,
+          P-BASE-TABLE-HEADER-CELL-CONTENT,
+        ]
+    - id: P-BASE-TABLE-CELL
+      anchors: [P-BASE-TABLE-CELL-FACTS, P-BASE-TABLE-CELL-RELATIONS, P-BASE-TABLE-CELL-CONTENT]
+      since: 0.3.0-alpha.1
+exercises:
+  prototypes:
+    - { id: P-BASE-TABLE, since: 0.3.0-alpha.1 }
+    - { id: P-BASE-TABLE-CAPTION, since: 0.3.0-alpha.1 }
+    - { id: P-BASE-TABLE-ROW, since: 0.3.0-alpha.1 }
+    - { id: P-BASE-TABLE-HEADER-CELL, since: 0.3.0-alpha.1 }
+    - { id: P-BASE-TABLE-CELL, since: 0.3.0-alpha.1 }
 references:
   modules: [M-A11Y-0001]
   hostCaps: [HC-A11Y-0001]
@@ -163,8 +204,13 @@ sources:
   - path: spec/contracts/C-TABLE-STRUCTURE-0001.yaml
   - path: https://github.com/Proto-UI/Proto-UI/issues/387
     label: Issue 387 acceptance and implementation boundary
+  - path: spec/adapters/A-WEB-COMPONENT-0001.yaml
+  - path: packages/adapters/web-component/test/table.test.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added executable-probe and planned conformance mappings for Table identity, topology, header relations, diagnostics, churn, A11y projection, and negative boundaries.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Marked Checkpoint B Module and Base implementations passing with topology, nearest-domain, role mismatch, churn, diagnostics, cross-kind ordered relationships and fail-closed role cleanup; added bounded passing Web Component ARIA projection evidence while React, Vue and Vue 2 remain planned.
 tags: [table, structure, test, accessibility]

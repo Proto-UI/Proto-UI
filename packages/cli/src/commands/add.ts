@@ -31,7 +31,7 @@ export async function runAddCommand(argv: string[]): Promise<void> {
   if (!host) {
     throw new Error(
       hostInput
-        ? `unsupported host "${hostInput}". supported: react, vue, wc`
+        ? `unsupported host "${hostInput}". supported: react, vue, vue2, wc`
         : 'missing host argument'
     );
   }

@@ -64,6 +64,7 @@ export type TableStructureCellSnapshot<Ref> = {
   readonly columnSpan: number;
   readonly columnHeaders: readonly Ref[];
   readonly rowHeaders: readonly Ref[];
+  readonly orderedHeaders: readonly Ref[];
 };
 
 export type TableStructureRowSnapshot<Ref> = {
@@ -199,6 +200,7 @@ export function projectTableStructure<Ref>(
         columnSpan: size.columnSpan,
         columnHeaders: [],
         rowHeaders: [],
+        orderedHeaders: [],
       };
       cells.push(snapshot);
       placed.push({ input: cell, snapshot });
@@ -240,6 +242,7 @@ export function projectTableStructure<Ref>(
       const source = placedByInput.get(cell)?.snapshot;
       const columnHeaders: Ref[] = [];
       const rowHeaders: Ref[] = [];
+      const orderedHeaders: Ref[] = [];
       const seen = new Set<string>();
       for (const authoredKey of headerKeys) {
         const headerKey = authoredKey;
@@ -283,6 +286,7 @@ export function projectTableStructure<Ref>(
           diagnostics.push({ code: 'non-upstream-header-target', ref: cell.ref, row, headerKey });
           continue;
         }
+        orderedHeaders.push(targetInput.ref);
         if (targetInput.headerKind === 'column') columnHeaders.push(targetInput.ref);
         else rowHeaders.push(targetInput.ref);
       }
@@ -290,6 +294,7 @@ export function projectTableStructure<Ref>(
       if (!source) continue;
       (source.columnHeaders as Ref[]).push(...columnHeaders);
       (source.rowHeaders as Ref[]).push(...rowHeaders);
+      (source.orderedHeaders as Ref[]).push(...orderedHeaders);
     }
   }
 

@@ -35,12 +35,23 @@ cases:
       - P-BASE-RADIO-GROUP-DISABLED-SELECTION
     expectation: radio-group-preserves-value-and-rejects-ambiguous-selection
   - id: T-BASE-RADIO-GROUP-0001-CASE-ROVING
-    title: Selected-or-first focus entry and both-axis wrapped navigation skip disabled Items
+    title: Both-axis wrapped navigation skips disabled Items
     covers:
       - P-BASE-RADIO-GROUP-COLLECTION-AND-ROVING
-      - P-BASE-RADIO-GROUP-FOCUS-ENTRY
       - P-BASE-RADIO-GROUP-KEYBOARD-NAVIGATION
     expectation: radio-group-roving-selects-targets-and-skips-disabled-items
+  - id: T-BASE-RADIO-GROUP-0001-CASE-INITIAL-ENTRY
+    title: Initial controlled and uncontrolled entry prefers the checked enabled Item without moving focus or selecting
+    covers:
+      - P-BASE-RADIO-GROUP-FOCUS-ENTRY
+    expectation: radio-group-initial-entry-is-derived-without-an-explicit-current-preference
+  - id: T-BASE-RADIO-GROUP-0001-CASE-CURRENT-PREFERENCE
+    title: Explicit current survives publication while provisional and invalid current follow eligible selection and order
+    covers:
+      - P-BASE-RADIO-GROUP-FOCUS-ENTRY
+      - P-BASE-RADIO-GROUP-STRUCTURAL-PRESERVATION
+      - P-BASE-RADIO-GROUP-DISABLED-SELECTION
+    expectation: radio-group-retains-only-valid-explicit-current-preferences
   - id: T-BASE-RADIO-GROUP-0001-CASE-A11Y-INDEPENDENCE-AND-BOUNDARIES
     title: Independent named radiogroups project exact accessibility state and omit deferred APIs
     covers:
@@ -60,11 +71,26 @@ implementations:
       - T-BASE-RADIO-GROUP-0001-CASE-CONTROLLED
       - T-BASE-RADIO-GROUP-0001-CASE-EMPTY-DUPLICATE-AND-STRUCTURE
       - T-BASE-RADIO-GROUP-0001-CASE-ROVING
+      - T-BASE-RADIO-GROUP-0001-CASE-INITIAL-ENTRY
+      - T-BASE-RADIO-GROUP-0001-CASE-CURRENT-PREFERENCE
       - T-BASE-RADIO-GROUP-0001-CASE-A11Y-INDEPENDENCE-AND-BOUNDARIES
     exercises: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP-INDICATOR]
     notes:
       - Uses real prototype runtime instances and host-rendered accessibility projections.
       - Public-surface and deferred-boundary criteria are protected by exact key and absence assertions.
+      - Initial entry covers non-first controlled/default selection, empty/unmatched and disabled-selected fallback, and late registration.
+      - Explicit current covers same-current Item and Root focus methods, navigation, accepted requests, controlled updates, reordering, removal, and Item disablement without synthetic valueChange.
+  - id: browser-base-radio-group-initial-entry
+    kind: adapter-test
+    status: passing
+    path: apps/www/test/radio-group-entry.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-RADIO-GROUP-0001-CASE-INITIAL-ENTRY
+    exercises: [P-BASE-RADIO-GROUP, P-BASE-RADIO-GROUP-ITEM]
+    notes:
+      - Uses real Base exports through WC, React, Vue, and Vue 2 with native Tab and Shift+Tab input.
+      - Covers non-first controlled/default selected entry and controlled value updates retaining native focus and the current Tab entry; fallback and structural coverage remain in the owner-level tests.
   - id: adapter-web-component-radio-group-contract
     kind: adapter-test
     status: passing
@@ -105,6 +131,7 @@ verifies:
         - P-BASE-RADIO-GROUP-SOLE-VALUE-OWNER
         - P-BASE-RADIO-GROUP-CONTROLLED-REQUEST
         - P-BASE-RADIO-GROUP-CANONICAL-CHECKED-SAFETY
+        - P-BASE-RADIO-GROUP-FOCUS-ENTRY
         - P-BASE-RADIO-GROUP-KEYBOARD-NAVIGATION
         - P-BASE-RADIO-GROUP-A11Y-GROUP
         - P-BASE-RADIO-GROUP-DEFERRED-BOUNDARIES
@@ -114,4 +141,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced executable root protocol evidence for value ownership, canonical checked safety, roving navigation, accessibility, and deferred boundaries.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added direct evidence for selected initial entry and preservation of explicit current preferences.
 tags: [prototype, base, radio-group, root, test]

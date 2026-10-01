@@ -141,8 +141,8 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
   focused.watch((run, event) => {
     if (event.type !== 'next' || !event.next || disabled.get()) return;
     const group = run.context.read(RADIO_GROUP_CONTEXT);
-    if (group.currentItemId === instanceId) return;
     setCurrent(run);
+    if (group.currentItemId === instanceId) return;
     requestSelection(run);
   });
 

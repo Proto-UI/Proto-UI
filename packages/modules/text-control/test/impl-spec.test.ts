@@ -9,6 +9,7 @@ import {
 } from '../src/caps';
 import { createTextControlModule } from '../src/create';
 import { declareTextControl } from '../src/declaration';
+import { createWebTextControlHost } from '../src/web';
 
 type TestSystemCaps = SystemCaps & {
   phase: 'setup' | 'callback';
@@ -304,6 +305,126 @@ describe('module-text-control', () => {
     expect(control.snapshot()?.value).toBe('retained');
   });
 });
+
+describe.each(['single', 'multiline'] as const)('text-control %s composition lease', (lineMode) => {
+  for (const valueMode of ['controlled', 'uncontrolled'] as const) {
+    it.each(['detach', 'provider reset', 'provider replacement'] as const)(
+      `projects the retained ${valueMode} value after %s interrupts composition`,
+      (boundary) => {
+        const h = createHarness(false, lineMode);
+        const createTarget = () =>
+          document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+        let target = createTarget();
+        const host = createWebTextControlHost(() => target);
+        h.vault.attach([[TEXT_CONTROL_HOST_CAP, host]]);
+        const control = h.module.facade.declare();
+        const seen: TextControlEvent[] = [];
+        for (const type of ['input', 'change', 'compositionstart', 'compositionend'] as const) {
+          control.on(type, (_run, next) => seen.push(next));
+        }
+        h.module.hooks.onMountPhase?.('mounted', 1);
+        h.sys.phase = 'callback';
+        control.sync({ valueMode, value: 'owner', defaultValue: 'initial' });
+        target.dispatchEvent(new CompositionEvent('compositionstart'));
+        target.value = 'draft\r\nvalue';
+        target.dispatchEvent(new InputEvent('input', { isComposing: true }));
+        control.sync({ value: 'latest\r\nowner' });
+        const expected = valueMode === 'controlled' ? 'latest\nowner' : 'draft\nvalue';
+        const value = lineMode === 'single' ? expected.replace('\n', '') : expected;
+        expect(control.snapshot()).toEqual({ value, composing: true });
+        const old = target;
+        const beforeRevocation = seen.slice();
+
+        if (boundary === 'detach') {
+          h.module.hooks.onMountPhase?.('unmounting', 1);
+          h.module.hooks.onMountPhase?.('detached', 1);
+        } else if (boundary === 'provider reset') {
+          h.vault.resetAttached();
+        }
+        target = createTarget();
+        if (boundary === 'detach') {
+          h.module.hooks.onMountPhase?.('mounted', 2);
+        } else {
+          h.vault.attach([
+            [
+              TEXT_CONTROL_HOST_CAP,
+              boundary === 'provider reset' ? host : createWebTextControlHost(() => target),
+            ],
+          ]);
+        }
+
+        expect(control.snapshot()).toEqual({ value, composing: false });
+        expect(target.value).toBe(value);
+        expect(seen).toEqual(beforeRevocation);
+        control.sync({ value: 'next owner', placeholder: 'new lease' });
+        expect(target.value).toBe(valueMode === 'controlled' ? 'next owner' : value);
+        expect(target.placeholder).toBe('new lease');
+
+        target.dispatchEvent(new CompositionEvent('compositionstart'));
+        target.value = 'new candidate';
+        old.dispatchEvent(new CompositionEvent('compositionend'));
+        old.dispatchEvent(new InputEvent('input'));
+        expect(control.snapshot()?.composing).toBe(true);
+        expect(target.value).toBe('new candidate');
+        expect(seen).toHaveLength(beforeRevocation.length + 1);
+        h.module.hooks.dispose?.();
+        target.dispatchEvent(new CompositionEvent('compositionend'));
+        target.dispatchEvent(new InputEvent('input'));
+        expect(control.snapshot()).toBeNull();
+        expect(target.value).toBe('new candidate');
+        expect(seen).toHaveLength(beforeRevocation.length + 1);
+      }
+    );
+  }
+});
+
+it('keeps old composition callbacks and queued restoration out of a new lease', async () => {
+  const h = createHarness();
+  const control = h.module.facade.declare();
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ valueMode: 'controlled', value: 'owner' });
+  const old = h.connectionBox.current!;
+  old.onEvent(event('compositionstart', 'owner', true));
+  old.onEvent(event('compositionend', 'old candidate'));
+  h.module.hooks.onMountPhase?.('detached', 1);
+  h.module.hooks.onMountPhase?.('mounted', 2);
+  h.connectionBox.current!.onEvent(event('compositionstart', 'owner', true));
+  h.setPatchValue('new candidate');
+  const updates = h.getUpdateCount();
+
+  old.onEvent(event('compositionend', 'stale'));
+  old.onEvent(event('input', 'stale'));
+  await Promise.resolve();
+  expect(control.snapshot()).toEqual({ value: 'owner', composing: true });
+  expect(h.getPatchValue()).toBe('new candidate');
+  expect(h.getUpdateCount()).toBe(updates);
+});
+
+it.each(['input', 'compositionend'] as const)(
+  'does not schedule old %s restoration into a lease replaced by its listener',
+  async (type) => {
+    const h = createHarness();
+    const control = h.module.facade.declare();
+    control.on(type, () => {
+      h.module.hooks.onMountPhase?.('detached', 1);
+      h.module.hooks.onMountPhase?.('mounted', 2);
+      h.connectionBox.current!.onEvent(event('compositionstart', 'owner', true));
+      h.setPatchValue('new candidate');
+    });
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    const old = h.connectionBox.current!;
+    old.onEvent(event('compositionstart', 'owner', true));
+    old.onEvent(event(type, 'old candidate'));
+    const updates = h.getUpdateCount();
+    await Promise.resolve();
+    expect(control.snapshot()).toEqual({ value: 'owner', composing: true });
+    expect(h.getPatchValue()).toBe('new candidate');
+    expect(h.getUpdateCount()).toBe(updates);
+  }
+);
 
 it('T-TEXT-CONTROL-0001-CASE-LIFETIME: stale lease events cannot change current value or invoke listeners', () => {
   const h = createHarness();

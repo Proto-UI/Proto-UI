@@ -36,10 +36,23 @@ it('T-SCROLL-0001-CASE-LIFETIME: replacement, detach and terminal disposal rejec
     ]);
   const facts = (position: number) => ({
     axes: 'vertical' as const,
-    horizontal: { position: 0, visibleRatio: 1, canScrollBefore: false, canScrollAfter: false },
-    vertical: { position, visibleRatio: 0.2, canScrollBefore: true, canScrollAfter: true },
+    horizontal: {
+      position: 0,
+      visibleRatio: 1,
+      canScrollBefore: false,
+      canScrollAfter: false,
+      atEnd: true,
+    },
+    vertical: {
+      position,
+      visibleRatio: 0.2,
+      canScrollBefore: true,
+      canScrollAfter: true,
+      atEnd: false,
+    },
     scrolling: true,
     projection: 'system' as const,
+    endFollow: { state: 'off' as const, requestStatus: 'idle' as const },
   });
   sys.__setExecPhase('callback');
   install();

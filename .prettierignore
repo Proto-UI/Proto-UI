@@ -4,3 +4,6 @@ dist
 pnpm-lock.yaml
 # Verbatim legal text; formatting would alter the official DCO 1.1 copy.
 DCO.md
+# Written by scripts/gpui/generate-*-fixture.mts and verified byte-for-byte by
+# their --check mode, so a formatter rewrite would make the check fail.
+native/gpui/fixtures/

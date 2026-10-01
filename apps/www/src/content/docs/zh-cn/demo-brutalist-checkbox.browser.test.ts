@@ -81,7 +81,8 @@ async function surfacePaint(locator: Locator, variables: SurfaceVariables): Prom
     };
 
     const style = getComputedStyle(element);
-    const rootStyle = getComputedStyle(document.documentElement);
+    // Lane variables live on the projected presentation scope, not :root; the
+    // surface's own computed style is the consumer-owned theme boundary.
     return {
       background: paint(style.backgroundColor),
       color: paint(style.color),
@@ -90,9 +91,9 @@ async function surfacePaint(locator: Locator, variables: SurfaceVariables): Prom
       borderRadius: style.borderTopLeftRadius,
       boxShadow: style.boxShadow,
       variables: {
-        background: paint(rootStyle.getPropertyValue(expectedVariables.background).trim()),
-        color: paint(rootStyle.getPropertyValue(expectedVariables.color).trim()),
-        border: paint(rootStyle.getPropertyValue(expectedVariables.border).trim()),
+        background: paint(style.getPropertyValue(expectedVariables.background).trim()),
+        color: paint(style.getPropertyValue(expectedVariables.color).trim()),
+        border: paint(style.getPropertyValue(expectedVariables.border).trim()),
       },
     };
   }, variables);

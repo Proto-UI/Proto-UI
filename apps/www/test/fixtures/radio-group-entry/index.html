@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Base Radio Group entry</title>
+    <style>
+      body {
+        margin: 0;
+        font:
+          16px system-ui,
+          sans-serif;
+        color: #172033;
+        background: #f8fafc;
+      }
+      main {
+        max-width: 520px;
+        margin: 32px auto;
+        padding: 24px;
+        background: white;
+      }
+      h1 {
+        font-size: 24px;
+      }
+      button {
+        margin: 16px 0;
+        padding: 8px 12px;
+      }
+      [role='radiogroup'] {
+        display: grid;
+        gap: 12px;
+      }
+      [role='radio'] {
+        display: block;
+        padding: 16px;
+        border: 1px solid #64748b;
+        border-radius: 8px;
+      }
+      [aria-checked='true'] {
+        background: #dbeafe;
+        border-color: #1d4ed8;
+      }
+      [role='radio']:focus-visible {
+        outline: 3px solid #15803d;
+        outline-offset: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="board">
+      <h1>Base Radio Group entry</h1>
+      <p id="scenario"></p>
+      <p>Blue shows checked; green outline shows native keyboard focus.</p>
+      <button id="before">Before the group</button>
+      <div id="app"></div>
+      <button id="after">After the group</button>
+    </main>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

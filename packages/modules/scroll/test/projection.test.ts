@@ -5,14 +5,14 @@ describe('module-scroll: projection negotiation', () => {
   it('resolves explicit and host preferences with deterministic fallback', () => {
     expect(
       resolveScrollProjection(
-        { axes: 'both', projection: 'auto' },
+        { axes: 'both', projection: 'auto', endFollow: { mode: 'off' } },
         { system: true, composed: true },
         'composed'
       )
     ).toBe('composed');
     expect(
       resolveScrollProjection(
-        { axes: 'both', projection: 'composed' },
+        { axes: 'both', projection: 'composed', endFollow: { mode: 'off' } },
         { system: true, composed: false }
       )
     ).toBe('system');
@@ -21,7 +21,12 @@ describe('module-scroll: projection negotiation', () => {
   it('does not silently downgrade a required projection', () => {
     expect(() =>
       resolveScrollProjection(
-        { axes: 'both', projection: 'auto', requireProjection: 'composed' },
+        {
+          axes: 'both',
+          projection: 'auto',
+          requireProjection: 'composed',
+          endFollow: { mode: 'off' },
+        },
         { system: true, composed: false }
       )
     ).toThrowError(

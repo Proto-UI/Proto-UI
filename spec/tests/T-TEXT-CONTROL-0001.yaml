@@ -77,6 +77,15 @@ cases:
     covers:
       - C-TEXT-CONTROL-0001-F
     expectation: inner-native-events-and-listeners-remain-bounded-by-the-wrapper-host-lease
+  - id: T-TEXT-CONTROL-0001-CASE-COMPOSITION-LEASE
+    title: Revoking an input or textarea lease ends its composition fact while retaining logical value ownership
+    covers:
+      - C-TEXT-CONTROL-0001-D
+      - C-TEXT-CONTROL-0001-E
+      - C-TEXT-CONTROL-0001-F
+      - M-TEXT-CONTROL-0001-B
+      - HC-TEXT-CONTROL-0001-A
+    expectation: replacement-leases-project-retained-values-and-ignore-revoked-composition-events-and-restoration
   - id: T-TEXT-CONTROL-0001-CASE-EDITING-SESSION
     title: Ordinary patches preserve active selection and controlled composition candidates
     covers:
@@ -136,6 +145,7 @@ implementations:
     consumesCases:
       - T-TEXT-CONTROL-0001-CASE-VALUE-AND-IME
       - T-TEXT-CONTROL-0001-CASE-LEASE-BOUNDARY
+      - T-TEXT-CONTROL-0001-CASE-COMPOSITION-LEASE
       - T-TEXT-CONTROL-0001-CASE-CRLF-CANONICALIZATION
       - T-TEXT-CONTROL-0001-CASE-MODE-COMPATIBILITY
       - T-TEXT-CONTROL-0001-CASE-PATCH-PRESERVATION
@@ -280,6 +290,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Connected M/HC/A criteria to existing editor evidence and added stale-lease/setup-cancel regressions.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added interrupted composition coverage for input and textarea across detach, provider reset, replacement and disposal, including stale restoration after listener reentry.
 
 tags:
   - text-control

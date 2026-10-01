@@ -1,0 +1,214 @@
+{
+  "name": "Older epochs are superseded and a new epoch prunes the old plan",
+  "sessionId": "s1",
+  "steps": [
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 1,
+      "expect": {
+        "status": "activated"
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 2,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-c",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 5,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-x",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "superseded",
+        "diagnosticCodes": ["stale-projection"]
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 2,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-y",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "superseded",
+        "diagnosticCodes": ["stale-projection"]
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "currentEpoch": 2,
+        "currentCommit": 1,
+        "activeEpoch": null,
+        "leases": [
+          {
+            "leaseId": "l-a",
+            "active": false,
+            "released": true
+          },
+          {
+            "leaseId": "l-c",
+            "active": false,
+            "released": false
+          }
+        ]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-1",
+        "viewEpoch": 1,
+        "type": "press.commit",
+        "leaseIds": ["l-a"]
+      },
+      "expect": {
+        "status": "rejected",
+        "reason": "stale-epoch"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 2,
+      "commitId": 1,
+      "expect": {
+        "status": "activated"
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-2",
+        "viewEpoch": 2,
+        "type": "press.commit",
+        "leaseIds": ["l-c"]
+      },
+      "expect": {
+        "status": "delivered",
+        "leaseIds": ["l-c"]
+      }
+    }
+  ]
+}

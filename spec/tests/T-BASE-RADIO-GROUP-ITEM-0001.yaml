@@ -33,6 +33,12 @@ cases:
       - P-BASE-RADIO-GROUP-ITEM-NAVIGATION-SELECTION
       - P-BASE-RADIO-GROUP-ITEM-EFFECTIVE-DISABLED
     expectation: radio-group-item-roving-focus-selects-only-enabled-targets
+  - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-ENTRY-PARTICIPATION
+    title: Initial and dynamically registered Items derive one eligible entry while preserving explicit current
+    covers:
+      - P-BASE-RADIO-GROUP-ITEM-ROVING-PARTICIPATION
+      - P-BASE-RADIO-GROUP-ITEM-DYNAMIC-SYNCHRONIZATION
+    expectation: radio-group-item-entry-follows-root-current-without-owning-selection
   - id: T-BASE-RADIO-GROUP-ITEM-0001-CASE-A11Y-AND-BOUNDARIES
     title: Item is the sole radio object and omits native form and visual ownership
     covers:
@@ -50,6 +56,7 @@ implementations:
       - T-BASE-RADIO-GROUP-ITEM-0001-CASE-DERIVED-STATE
       - T-BASE-RADIO-GROUP-ITEM-0001-CASE-KEYBOARD-AND-POINTER
       - T-BASE-RADIO-GROUP-ITEM-0001-CASE-ROVING-SELECTION
+      - T-BASE-RADIO-GROUP-ITEM-0001-CASE-ENTRY-PARTICIPATION
       - T-BASE-RADIO-GROUP-ITEM-0001-CASE-A11Y-AND-BOUNDARIES
     exercises: [P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP]
     notes:
@@ -63,6 +70,7 @@ verifies:
         - P-BASE-RADIO-GROUP-ITEM-EFFECTIVE-DISABLED
         - P-BASE-RADIO-GROUP-ITEM-SPACE-ACTIVATION
         - P-BASE-RADIO-GROUP-ITEM-POINTER-ACTIVATION
+        - P-BASE-RADIO-GROUP-ITEM-ROVING-PARTICIPATION
         - P-BASE-RADIO-GROUP-ITEM-A11Y-RADIO
 exercises:
   prototypes: [P-BASE-RADIO-GROUP-ITEM, P-BASE-RADIO-GROUP]
@@ -70,4 +78,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced executable Item evidence for derived state, activation, roving selection, radio accessibility, and excluded form/visual APIs.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added selected-or-first entry evidence for registration, explicit current, and Item structure changes.
 tags: [prototype, base, radio-group, item, test]

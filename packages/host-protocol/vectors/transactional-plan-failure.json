@@ -1,0 +1,184 @@
+{
+  "name": "A failed allocation installs nothing and an explicit retry installs all",
+  "sessionId": "s1",
+  "steps": [
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-a",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "activate",
+      "viewEpoch": 1,
+      "commitId": 1,
+      "expect": {
+        "status": "activated"
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 2,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-c",
+              "scope": "root",
+              "type": "press.commit"
+            },
+            {
+              "leaseId": "l-d",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "failAllocation": ["l-d"],
+      "expect": {
+        "status": "failed",
+        "diagnosticCodes": ["allocation-failed"]
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "currentEpoch": 1,
+        "currentCommit": 1,
+        "leases": [
+          {
+            "leaseId": "l-a",
+            "active": true,
+            "released": false
+          }
+        ]
+      }
+    },
+    {
+      "op": "deliver",
+      "sample": {
+        "sampleId": "sm-1",
+        "viewEpoch": 1,
+        "type": "press.commit",
+        "leaseIds": ["l-a"]
+      },
+      "expect": {
+        "status": "delivered",
+        "leaseIds": ["l-a"]
+      }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 2,
+        "commitId": 1,
+        "template": null,
+        "slots": {
+          "slots": ["slot-default"]
+        },
+        "events": {
+          "registrations": [
+            {
+              "leaseId": "l-c",
+              "scope": "root",
+              "type": "press.commit"
+            },
+            {
+              "leaseId": "l-d",
+              "scope": "root",
+              "type": "press.commit"
+            }
+          ]
+        },
+        "focus": {
+          "targets": [
+            {
+              "ref": "focus-root",
+              "sequential": true,
+              "programmatic": true
+            }
+          ]
+        },
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied"
+      }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "currentEpoch": 2,
+        "leases": [
+          {
+            "leaseId": "l-a",
+            "active": false,
+            "released": true
+          },
+          {
+            "leaseId": "l-c",
+            "active": false,
+            "released": false
+          },
+          {
+            "leaseId": "l-d",
+            "active": false,
+            "released": false
+          }
+        ]
+      }
+    }
+  ]
+}

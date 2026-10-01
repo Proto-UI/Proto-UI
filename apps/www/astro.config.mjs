@@ -53,7 +53,7 @@ function resolveProtoUiSource(id) {
       .replace(/\.d\.ts$/, '.ts')
       .replace(/\.js$/, '.ts');
     const sourcePath = path.resolve(packageRoot, sourceTarget);
-    if (fs.existsSync(sourcePath)) return sourcePath;
+    if (fs.existsSync(sourcePath)) return sourcePath.split(path.sep).join('/');
   }
   return null;
 }
@@ -147,7 +147,7 @@ export default defineConfig({
       head: [
         {
           tag: 'style',
-          content: '@layer base, starlight, components, utilities, proto-ui, code-surfaces;',
+          content: '@layer theme, base, starlight, components, utilities, proto-ui, code-surfaces;',
         },
         // 双 theme-color
         {
@@ -432,6 +432,11 @@ export default defineConfig({
                   label: 'Checkbox',
                   translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
                   slug: 'ui-libraries/shadcn/checkbox',
+                },
+                {
+                  label: 'Radio Group',
+                  translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
+                  slug: 'ui-libraries/shadcn/radio-group',
                 },
                 {
                   label: 'Scroll Area',

@@ -3,7 +3,7 @@ type: test
 title: Image View declaration, module, fake-host, and official Web adapter contract tests
 status: draft
 since: 0.3.0-alpha.0
-summary: Covers host-neutral image presentation requirements, portable property projection, a11y binary input, generation-bound lease lifecycle, loading status transitions, stale completion rejection, replacement visual clearing, lease cleanup, and the bounded Web Component, React, and Vue profile.
+summary: Covers host-neutral image presentation requirements, portable property projection, a11y binary input, generation-bound lease lifecycle, loading status transitions, stale completion rejection, replacement visual clearing, lease cleanup, and the bounded Web Component, React, Vue 3, and Vue 2 profile.
 cases:
   - id: T-IMAGE-VIEW-0001-CASE-BASE-ENTRIES
     title: Direct and authored Base Image entries share frozen static requirements
@@ -14,9 +14,9 @@ cases:
     covers: [P-BASE-IMAGE-SOURCE, P-BASE-IMAGE-FIT, P-BASE-IMAGE-STATUS]
     expectation: base-image-props-and-source-replacement-project-canonical-status-and-fit
   - id: T-IMAGE-VIEW-0001-CASE-PUBLIC-CONSUMER
-    title: Installed public Image exports generate typed components in the three supported adapters
+    title: Installed public Image exports generate typed components in the four supported adapters
     covers: [P-BASE-IMAGE-DECLARATION, P-BASE-IMAGE-FIT]
-    expectation: packed-image-exports-generate-typed-wc-react-vue-components-with-one-physical-image
+    expectation: packed-image-exports-generate-typed-wc-react-vue-vue2-components-with-one-physical-image
   - id: T-IMAGE-VIEW-0001-CASE-PUBLIC-BROWSER
     title: Public Image demo renders fit, accessibility, and actual resource transitions
     covers:
@@ -24,7 +24,7 @@ cases:
       - P-BASE-IMAGE-ALT-TEXT
       - P-BASE-IMAGE-FIT
       - P-BASE-IMAGE-STATUS
-    expectation: real-wc-react-vue-images-show-fit-and-alt-with-idle-loading-loaded-error-replacement-and-clear-transitions
+    expectation: real-wc-react-vue-vue2-images-show-fit-and-alt-with-idle-loading-loaded-error-replacement-and-clear-transitions
   - id: T-IMAGE-VIEW-0001-CASE-DECLARATION
     title: Host-neutral static requirement declares one image presentation target
     covers:
@@ -87,6 +87,7 @@ cases:
       - HC-IMAGE-VIEW-0001-A
       - A-REACT-18-19-0001-IMAGE-VIEW
       - A-VUE-3-0001-IMAGE-VIEW
+      - A-VUE-2-0001-IMAGE-VIEW
       - A-WEB-COMPONENT-0001-IMAGE-VIEW
     expectation: web-image-leases-map-cache-hit-or-request-scoped-decode-to-terminal-status-and-retire-old-settlements-on-replacement-or-detach
   - id: T-IMAGE-VIEW-0001-CASE-CANCEL
@@ -183,7 +184,13 @@ implementations:
     path: packages/adapters/vue2/test/image-view.integration.test.ts
     required: true
     consumesCases:
+      - T-IMAGE-VIEW-0001-CASE-WEB-PROJECTION
+      - T-IMAGE-VIEW-0001-CASE-WEB-LIFECYCLE
       - T-IMAGE-VIEW-0001-CASE-VUE2
+    exercises:
+      - M-IMAGE-VIEW-0001
+      - HC-IMAGE-VIEW-0001
+      - P-BASE-IMAGE
   - id: base-image-packed-consumer
     kind: workspace-check
     status: passing
@@ -261,6 +268,7 @@ exercises:
     - A-WEB-COMPONENT-0001
     - A-REACT-18-19-0001
     - A-VUE-3-0001
+    - A-VUE-2-0001
 sources:
   - path: scripts/release/consumer-smoke-cli.mjs
   - path: apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts
@@ -270,6 +278,7 @@ sources:
   - path: packages/adapters/web-component/test/image-view.integration.test.ts
   - path: packages/adapters/react/test/image-view.integration.test.ts
   - path: packages/adapters/vue/test/image-view.integration.test.ts
+  - path: packages/adapters/vue2/test/image-view.integration.test.ts
 revisions:
   - version: 0.3.0-alpha.0
     change: extended
@@ -283,6 +292,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Connected M/HC/A criteria and added Vue 2 current-generation and setup-removal evidence.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Reconciled packed-consumer and public-browser Image View evidence with the active Vue 2 adapter profile.
 
 tags:
   - image

@@ -1,0 +1,48 @@
+id: P-SHADCN-RADIO-GROUP-INDICATOR
+type: prototype
+title: Shadcn Radio Group Indicator displays passive Base checked feedback
+status: draft
+lifecycleRationale: The explicit optional Indicator projects draft Base Item-derived facts. Its decorative glyph and visibility evidence support this presentation slice without creating or activating a new interaction, focus or accessibility owner.
+since: 0.3.0-alpha.1
+summary: Shadcn Radio Group Indicator consumes the nearest Item's checked and effective-disabled facts and presents one decorative circular glyph without owning selection or presence.
+statement:
+  en: Indicator is an explicit, optional and repeatable Base Item child. It keeps the nearest Item's read-only derived facts and renders a decorative circle whose opacity follows checked through Rule; it introduces no new state or presence owner.
+  zh-CN: Indicator 是显式、可选且可重复的 Base Item child。它保留最近 Item 的只读派生 facts，并渲染装饰圆形；opacity 通过 Rule 跟随 checked，不增加 state 或 presence owner。
+criteria:
+  - id: P-SHADCN-RADIO-GROUP-INDICATOR-BASE-INHERITANCE
+    text:
+      en: Indicator must inherit P-BASE-RADIO-GROUP-INDICATOR through asRadioGroupIndicator() exactly once, consuming checked and effective disabled from the nearest Item even when multiple Indicators are authored.
+      zh-CN: Indicator 必须通过 asRadioGroupIndicator() 恰好继承一次 P-BASE-RADIO-GROUP-INDICATOR；即使 author 多个 Indicator，也仅从最近 Item 消费 checked 与 effective disabled。
+  - id: P-SHADCN-RADIO-GROUP-INDICATOR-DIRECT-ENTRY
+    text:
+      en: The direct Indicator entry is shadcn-radio-group-indicator, with empty props and only checked, disabled and isChecked exposes inherited from Base; no authored asHook or event is added.
+      zh-CN: Indicator direct entry 为 shadcn-radio-group-indicator，props 为空，仅保留继承自 Base 的 checked、disabled 与 isChecked exposes；不增加 authored asHook 或 event。
+  - id: P-SHADCN-RADIO-GROUP-INDICATOR-CURRENT-VISUAL-SURFACE
+    text:
+      en: Indicator projects flex size-2 items-center justify-center and renders exactly one 8px circular SVG glyph with primary fill. The SVG is aria-hidden and does not supply an additional accessible name or control.
+      zh-CN: Indicator 投射 flex size-2 items-center justify-center，并渲染恰好一个 primary fill 的 8px 圆形 SVG glyph。SVG 为 aria-hidden，不提供额外 accessible name 或 control。
+  - id: P-SHADCN-RADIO-GROUP-INDICATOR-DERIVED-VISIBILITY
+    text:
+      en: Rule projects opacity-0 for inherited checked=false and opacity-100 for checked=true. Repeated value updates reuse one glyph; no local checked prop, selection request, forceMount or presence state controls it.
+      zh-CN: Rule 在 inherited checked=false 时投射 opacity-0，在 checked=true 时投射 opacity-100。重复 value updates 保持一个 glyph，不由 local checked prop、selection request、forceMount 或 presence state 控制。
+  - id: P-SHADCN-RADIO-GROUP-INDICATOR-PASSIVE-BOUNDARY
+    text:
+      en: Indicator remains roleless, outside sequential focus and without radio, checked, disabled, live-region or activation accessibility projection. Item remains the only radio control, and the family does not inject default Indicators.
+      zh-CN: Indicator 保持 roleless、不进入 sequential focus，不投射 radio、checked、disabled、live-region 或 activation accessibility；Item 继续为唯一 radio control，family 不注入默认 Indicator。
+sources:
+  - path: packages/prototypes/shadcn/src/radio-group/indicator.proto.ts
+  - path: packages/prototypes/shadcn/test/radio-group.test.ts
+inherits:
+  prototypes: [P-BASE-RADIO-GROUP-INDICATOR]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  prototypes: [P-SHADCN-RADIO-GROUP-ITEM]
+relates:
+  prototypes: [P-SHADCN-RADIO-GROUP]
+verifies:
+  tests: [T-SHADCN-RADIO-GROUP-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced explicit passive Shadcn Indicators with Item-derived checked opacity and decorative circular glyphs.
+tags: [prototype, shadcn, radio-group, indicator, passive, visual]

@@ -1,0 +1,43 @@
+id: P-BASE-TABLE-CAPTION
+type: prototype
+title: Base Table Caption supplies App-owned purpose content
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Real source, Base evidence and bounded Web Component caption materialization exist; React, Vue and Vue 2 remain Checkpoint C blockers.
+  zh-CN: 已有真实 source、Base 证据与有界 Web Component caption materialization；React、Vue 与 Vue 2 仍是 Checkpoint C blocker。
+summary: Caption contributes one optional same-domain semantic object while preserving authored content.
+statement:
+  en: Base Table Caption claims the optional caption role, projects caption accessibility identity, and transparently preserves one anonymous App-owned slot.
+  zh-CN: Base Table Caption 声明 optional caption role，投射 caption accessibility identity，并透明保留一个 App-owned anonymous slot。
+criteria:
+  - id: P-BASE-TABLE-CAPTION-ROLE
+    text:
+      en: At most one Caption belongs to the nearest Table domain and supplies the root caption relationship through an opaque semantic-object ref.
+      zh-CN: 最近 Table domain 最多包含一个 Caption，并通过 opaque semantic-object ref 提供 root caption relationship。
+  - id: P-BASE-TABLE-CAPTION-CONTENT
+    text:
+      en: Caption preserves authored content through one anonymous slot and Table Structure never parses it as data.
+      zh-CN: Caption 通过一个 anonymous slot 保留 authored content，Table Structure 不得把它解析为 data。
+dependsOn:
+  contracts: [C-TABLE-STRUCTURE-0001]
+  prototypes: [P-BASE-TABLE]
+  modules: [M-TABLE-STRUCTURE-0001]
+verifies: { tests: [T-TABLE-STRUCTURE-0001] }
+openQuestions:
+  - id: P-BASE-TABLE-CAPTION-Q-ADAPTERS
+    question:
+      en: Is Caption projection proven across the official Adapter profiles?
+      zh-CN: Caption projection 是否已在 official Adapter profiles 中取证？
+    blocks: [activation:P-BASE-TABLE-CAPTION]
+sources:
+  - path: packages/prototypes/base/src/table/caption.proto.ts
+  - path: packages/prototypes/base/test/table.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the optional transparent Table Caption identity and semantic relationship source.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded bounded Web Component caption materialization while retaining the remaining Adapter blockers.
+tags: [table, caption, base, prototype, draft]

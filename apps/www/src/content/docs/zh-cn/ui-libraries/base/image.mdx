@@ -6,17 +6,17 @@ description: '由宿主呈现图片，显式表达可访问性与加载状态'
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-`base-image-root` 是 `0.3.0-alpha.0` 包系列中的 draft Base 原型。它声明一个由宿主管理的图片目标，并公开 source、fit 和加载状态。目前 Web Components、React、Vue 3 将每个实例投射为一个物理 `<img>`。Vue 2 尚未接入 Image View；这些预览验证的是有界 Web profile，不代表非 Web 宿主支持。
+`base-image-root` 是 `0.3.0-alpha.0` 包系列中的 draft Base 原型。它声明一个由宿主管理的图片目标，并公开 source、fit 和加载状态。目前 Web Components、React、Vue 3 与 Vue 2 都将每个实例投射为一个物理 `<img>`。这些预览验证的是有界 Web profile，不代表非 Web 宿主支持。
 
 <div>
   <PrototypePreviewer
     demoId="demo-base-image"
     initialRuntime="wc"
-    runtimes={['wc', 'react', 'vue']}
+    runtimes={['wc', 'react', 'vue', 'vue2']}
   />
 </div>
 
-上方三个等大的框用同一张图片比较 `contain`、`cover` 和 `fill`。小图是装饰性图片。下方图片初始没有 source：加载、替换、传入无效 source 或清空，观察真实的 `loadingStatusChange` 事件。缓存或本地图片可能很快完成加载，来不及看到中间状态；事件记录会保留这次转换。按钮、图片框尺寸和记录区域由 demo 提供，不属于 Base Image。
+上方三个等大的框在四个 Web adapter 中用同一张图片比较 `contain`、`cover` 和 `fill`。小图是装饰性图片。下方图片初始没有 source：加载、替换、传入无效 source 或清空，观察真实的 `loadingStatusChange` 事件。缓存或本地图片可能很快完成加载，来不及看到中间状态；事件记录会保留这次转换。按钮、图片框尺寸和记录区域由 demo 提供，不属于 Base Image。
 
 ## 使用 Image
 
@@ -42,11 +42,11 @@ export function Cover() {
 }
 ```
 
-Vue 使用 `createVueAdapter(Vue)(imageRoot)`。Web Components 使用 `AdaptToWebComponent(imageRoot, { registerAs: 'app-image' })`，挂载前通过 `setElementProps()` 设置声明的 props。应用内各个包应使用一致的精确版本。
+Vue 3 使用 `createVueAdapter(Vue)(imageRoot)`，Vue 2 使用 `createVue2Adapter({ extend: Vue.extend.bind(Vue), nextTick: Vue.nextTick.bind(Vue), set: Vue.set.bind(Vue) })(imageRoot)`。Web Components 使用 `AdaptToWebComponent(imageRoot, { registerAs: 'app-image' })`，挂载前通过 `setElementProps()` 设置声明的 props。应用内各个包应使用一致的精确版本。
 
-工作区 CLI 已为 `react`、`vue`、`wc` 注册 `base-image`，生成 `BaseImageRoot` 或 `BaseImageRootElement`。包含新注册项的构建支持 `proto-ui add react base-image` 及对应的 `vue` / `wc` 命令。
+工作区 CLI 已为 `react`、`vue`、`vue2`、`wc` 注册 `base-image`，生成 `BaseImageRoot` 或 `BaseImageRootElement`。包含新注册项的构建支持 `proto-ui add react base-image` 及对应的 `vue` / `vue2` / `wc` 命令。
 
-历史发行边界：`0.3.0-alpha.0` 预发行包包含上面示例中的 Image 直接导出，但它的 CLI 早于 `base-image` 注册项。Image 不属于稳定版 `0.2.0` 的功能范围。
+历史发行边界：已发布的 `0.3.0-alpha.0` 预发行包包含上面示例中的 Image 直接导出，但它的 CLI 早于 `base-image` 注册项。Image 不属于稳定版 `0.2.0` 的功能范围。
 
 ## Props 与 Exposes
 
@@ -71,7 +71,7 @@ informative 图片把替代文本投射到物理目标。decorative 图片使用
 
 ## 组合与样式
 
-Root 不接收 authored children。应用负责尺寸、外框、相邻说明和状态显示；`fit` 负责图片如何填充这个物理框。Web Components 保留自定义元素边界和一个内部图片，`surfaceClassName`、`surfaceStyle` 指向物理图片；React 与 Vue 直接使用物理图片作为 root。
+Root 不接收 authored children。应用负责尺寸、外框、相邻说明和状态显示；`fit` 负责图片如何填充这个物理框。Web Components 保留自定义元素边界和一个内部图片，`surfaceClassName`、`surfaceStyle` 指向物理图片；React、Vue 3 与 Vue 2 直接使用物理图片作为 root。
 
 复用 authored hook 的原型还必须携带它已经冻结的静态需求，让 Adapter 在 setup 之前选定图片目标：
 

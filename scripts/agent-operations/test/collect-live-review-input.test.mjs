@@ -231,7 +231,7 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   assert.equal(result.input.checks[1].name, 'legacy-ci');
   assert.equal(result.input.checks[1].status, 'COMPLETED');
   assert.equal(result.input.checks[1].conclusion, 'FAILURE');
-  assert.equal(summarizeLiveChecks(result.input.checks, trustedOptions), 'success');
+  assert.equal(summarizeLiveChecks(result.input.checks, trustedOptions), 'failure');
   assert.deepEqual(result.input.externalEvidence, []);
 });
 
@@ -824,7 +824,11 @@ test('trusted DCO status requires the exact check, app provider, repository, and
     ...trustedProvenance,
   };
   const failedDco = { ...trustedDco, conclusion: 'FAILURE' };
-  assert.equal(summarizeLiveChecks([trustedCi, failedDco], trustedOptions), 'success');
+  assert.equal(
+    summarizeLiveChecks([trustedCi, failedDco], trustedOptions),
+    'failure',
+    'main keeps failed external checks blocking in addition to the separately trusted DCO gate'
+  );
   assert.equal(summarizeLiveDco([trustedCi, failedDco], trustedDcoOptions), 'failure');
   assert.equal(
     summarizeLiveDco(
@@ -1096,5 +1100,58 @@ test('live collector fails on the explicit documented payload bound instead of a
         },
       }),
     /exceeds the documented \d+-byte payload bound/
+  );
+});
+
+test('Vercel authorization failure is not trusted CI, but real CI failures still block', () => {
+  const ci = {
+    name: 'test',
+    status: 'COMPLETED',
+    conclusion: 'SUCCESS',
+    completedAt: '2026-09-23T03:00:00Z',
+    detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+    source: 'github-actions',
+    ...trustedProvenance,
+  };
+  const previewStatus = {
+    __typename: 'StatusContext',
+    context: 'Vercel',
+    state: 'FAILURE',
+    createdAt: '2026-09-23T03:00:00Z',
+    targetUrl: 'https://vercel.com/git/authorize?team=external',
+    creator: { login: 'vercel', __typename: 'Bot' },
+  };
+  const preview = normalizeCheck(previewStatus);
+  const options = { ...trustedOptions, trustedCheckNames: ['test'] };
+
+  assert.equal(summarizeLiveChecks([ci, preview], options), 'success');
+  assert.equal(
+    summarizeLiveChecks(
+      [ci, normalizeCheck({ ...previewStatus, creator: { login: 'other', __typename: 'Bot' } })],
+      options
+    ),
+    'failure',
+    'a non-Vercel publisher cannot forge an authorization-only preview debt'
+  );
+  assert.equal(
+    summarizeLiveChecks([{ ...ci, conclusion: 'FAILURE' }, preview], options),
+    'failure'
+  );
+  assert.equal(
+    summarizeLiveChecks([ci, preview, { ...preview, name: 'DCO' }], options),
+    'failure',
+    'repository-required DCO failure cannot be hidden by preview authorization debt'
+  );
+  assert.equal(
+    summarizeLiveChecks([{ ...ci, status: 'IN_PROGRESS', conclusion: null }, preview], options),
+    'unknown'
+  );
+  assert.equal(
+    summarizeLiveChecks(
+      [ci, { ...preview, detailsUrl: 'https://vercel.com/deployments/failed' }],
+      options
+    ),
+    'failure',
+    'a real deployment failure is not an authorization-only preview debt'
   );
 });

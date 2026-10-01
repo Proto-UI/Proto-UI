@@ -1,0 +1,52 @@
+id: P-SHADCN-RADIO-GROUP-ITEM
+type: prototype
+title: Shadcn Radio Group Item presents the Base radio choice
+status: draft
+lifecycleRationale: This circular Item presentation consumes draft Base selection, disabled and focus facts. Rendered and executable evidence remains scoped to the reviewed Web projection and does not admit additional form or interaction semantics.
+since: 0.3.0-alpha.1
+summary: Shadcn Radio Group Item retains the nearest Base Root's selection and roving-focus protocol and adds a circular surface, focus ring, dark tint and disabled presentation.
+statement:
+  en: Item remains a Base radio choice that derives checked and effective disabled from its nearest Root. Its visual rules consume inherited facts without controlling value, activation, keyboard navigation or accessibility.
+  zh-CN: Item 继续作为 Base radio choice，从最近 Root 派生 checked 与 effective disabled。视觉 rules 只消费继承的 facts，不接管 value、activation、keyboard navigation 或 accessibility。
+criteria:
+  - id: P-SHADCN-RADIO-GROUP-ITEM-BASE-INHERITANCE
+    text:
+      en: Item must inherit P-BASE-RADIO-GROUP-ITEM through asRadioGroupItem() exactly once, preserving nearest-Root registration, derived checked and disabled facts, Space and successful primary pointer selection, and Enter and cancellation no-ops.
+      zh-CN: Item 必须通过 asRadioGroupItem() 恰好继承一次 P-BASE-RADIO-GROUP-ITEM，保留 nearest-Root 注册、派生 checked/disabled facts、Space 与成功 primary pointer selection，以及 Enter/cancellation no-op。
+  - id: P-SHADCN-RADIO-GROUP-ITEM-DIRECT-ENTRY
+    text:
+      en: The direct Item entry is shadcn-radio-group-item and retains the exact Base Item props, exposes and events without adding an authored asHook.
+      zh-CN: Item direct entry 为 shadcn-radio-group-item，保留精确的 Base Item props、exposes 与 events，不增加 authored asHook。
+  - id: P-SHADCN-RADIO-GROUP-ITEM-CURRENT-VISUAL-SURFACE
+    text:
+      en: >-
+        Item projects inline-flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border border-input text-primary bg-transparent shadow-xs transition-[color,box-shadow] outline-none, with dark:bg-input/30 and the default 150ms color and box-shadow transition. The 16px circular surface uses flex centering for its explicit Indicator instead of the pinned upstream absolutely positioned internal glyph.
+
+
+      zh-CN: >-
+        Item 投射 inline-flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border border-input text-primary bg-transparent shadow-xs transition-[color,box-shadow] outline-none，以及 dark:bg-input/30 和默认 150ms color/box-shadow transition。16px 圆形表面以 flex 居中显式 Indicator，区别于固定 upstream 内部 glyph 的 absolute positioning。
+
+
+  - id: P-SHADCN-RADIO-GROUP-ITEM-FOCUS-FEEDBACK
+    text:
+      en: Inherited focusVisible projects border-ring ring-3 ring-ring/50 on Item only; selected-or-first roving entry, wrapped navigation and disabled skipping remain Base-owned.
+      zh-CN: inherited focusVisible 仅在 Item 投射 border-ring ring-3 ring-ring/50；selected-or-first roving entry、循环导航与 disabled skipping 继续由 Base 所有。
+  - id: P-SHADCN-RADIO-GROUP-ITEM-DISABLED-FEEDBACK
+    text:
+      en: Inherited item-disabled OR group-disabled projects cursor-not-allowed opacity-50. Disabling the selected Item retains checked while excluding it from focus and activation; restoring group availability does not clear an Item's own disabled prop.
+      zh-CN: inherited item-disabled OR group-disabled 投射 cursor-not-allowed opacity-50。禁用 selected Item 保留 checked，但排除其 focus 与 activation；恢复 group availability 不清除 Item 自己的 disabled prop。
+sources:
+  - path: packages/prototypes/shadcn/src/radio-group/item.proto.ts
+  - path: packages/prototypes/shadcn/test/radio-group.test.ts
+inherits:
+  prototypes: [P-BASE-RADIO-GROUP-ITEM]
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  prototypes: [P-SHADCN-RADIO-GROUP]
+verifies:
+  tests: [T-SHADCN-RADIO-GROUP-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the circular Shadcn Item surface with inherited focus and effective-disabled feedback.
+tags: [prototype, shadcn, radio-group, item, focus, disabled, visual]

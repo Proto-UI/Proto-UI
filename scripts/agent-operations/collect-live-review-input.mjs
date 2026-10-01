@@ -1,5 +1,8 @@
 import { execFileSync } from 'node:child_process';
-import { validateReviewInputSnapshot } from './review-runtime.mjs';
+import {
+  isExternalPreviewAuthorizationFailure,
+  validateReviewInputSnapshot,
+} from './review-runtime.mjs';
 
 const TERMINAL_CHECK_STATES = new Set(['SUCCESS', 'FAILURE', 'ERROR']);
 const FAILED_CONCLUSIONS = new Set([
@@ -62,7 +65,7 @@ query($owner: String!, $name: String!, $number: Int!) {
                       }
                     }
                   }
-                  ... on StatusContext { context state targetUrl createdAt }
+                  ... on StatusContext { context state targetUrl createdAt creator { login __typename } }
                 }
                 pageInfo { hasNextPage }
               }
@@ -229,7 +232,10 @@ export function normalizeCheck(node) {
     conclusion: terminal ? node.state : null,
     completedAt: node.createdAt,
     detailsUrl: node.targetUrl,
-    source: 'status-context',
+    source:
+      node.creator?.login === 'vercel' && node.creator?.__typename === 'Bot'
+        ? 'vercel'
+        : 'status-context',
     providerId: null,
     repository: null,
     workflowName: null,
@@ -248,6 +254,11 @@ function repositoryActionsPrefix(repositoryId) {
 
 export function summarizeLiveChecks(checks, options = {}) {
   if (!Array.isArray(checks) || checks.length === 0) return 'unknown';
+  const ciChecks = checks.filter((check) => !isExternalPreviewAuthorizationFailure(check));
+  if (ciChecks.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
+  const allReady = ciChecks.every(
+    (check) => check.status === 'COMPLETED' && SUCCESSFUL_CONCLUSIONS.has(check.conclusion)
+  );
   const actionsPrefix = repositoryActionsPrefix(options.repositoryId);
   const trustedSource = options.trustedSource ?? 'github-actions';
   const trustedRepository = repositoryName(options.trustedRepositoryId ?? options.repositoryId);
@@ -282,10 +293,6 @@ export function summarizeLiveChecks(checks, options = {}) {
   ) {
     return 'unknown';
   }
-  if (trustedChecks.some((check) => FAILED_CONCLUSIONS.has(check.conclusion))) return 'failure';
-  const allReady = trustedChecks.every(
-    (check) => check.status === 'COMPLETED' && SUCCESSFUL_CONCLUSIONS.has(check.conclusion)
-  );
   return allReady && trustedChecks.some((check) => check.conclusion === 'SUCCESS')
     ? 'success'
     : 'unknown';

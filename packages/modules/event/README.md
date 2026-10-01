@@ -19,7 +19,7 @@ The machine-governed semantic entity realized by this package is `spec/modules/M
 ## Install
 
 ```bash
-npm install @proto.ui/module-event@0.3.0-alpha.0
+npm install @proto.ui/module-event@0.3.0-alpha.1
 ```
 
 ## Internal Structure

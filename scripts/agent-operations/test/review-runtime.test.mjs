@@ -338,6 +338,7 @@ test('review packet binds revision and input state and supports incremental reco
           ? {
               ...check,
               source: 'vercel',
+              providerId: null,
               workflowName: null,
               workflowPath: null,
             }
@@ -857,6 +858,51 @@ test('human-assisted review is dispositive without assessment while autonomous r
       'human-assisted'
     )
   );
+});
+
+test('approval discloses a Vercel authorization failure as publication debt', () => {
+  const input = reviewInput({
+    checks: [
+      ...reviewInput().checks,
+      {
+        name: 'Vercel',
+        status: 'COMPLETED',
+        conclusion: 'FAILURE',
+        completedAt: '2026-09-23T03:00:00Z',
+        detailsUrl: 'https://vercel.com/git/authorize?team=external',
+        source: 'vercel',
+        providerId: null,
+        repository: null,
+        workflowName: null,
+        workflowPath: null,
+      },
+    ],
+  });
+  const review = packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input);
+  const submission = {
+    packet: review,
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    authorizationId: 'explicit-current-user',
+    policy,
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+    dcoConclusion: 'success',
+  };
+
+  assert.equal(authorizeReviewSubmission(submission).allowed, false);
+  review.agentEvidence.debt.push({
+    kind: 'publication',
+    missing: 'Vercel preview deployment',
+    reason: 'The external team has not authorized the contributor; repository CI passed.',
+    nextAction: 'Authorize deployment and verify the preview independently.',
+  });
+  assert.equal(authorizeReviewSubmission(submission).allowed, true);
+  assert.match(renderReviewBody(review), /Vercel preview deployment/);
 });
 
 test('review submission preserves explicit authorization and activates the bounded scheduled scope', () => {

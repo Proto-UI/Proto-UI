@@ -4,9 +4,9 @@ Translates Proto UI prototypes into Vue 2.6 component options for the official V
 
 ## Status
 
-The repository treats this as a public package beginning with `0.3.0-alpha.0`. Its governed profile is `A-VUE-2-0001`, targeting Vue `>=2.6.0 <2.7` on the Web platform.
+The repository treats this as a public package beginning with `0.3.0-alpha.0`. Its governed profile is `A-VUE-2-0001`, targeting Vue `>=2.6.0 <2.7` on the Web platform. The unreleased `0.3.0-alpha.1` train updates this package's local projection but does not change that availability boundary.
 
-The package cannot be installed from npm until the `@proto.ui/adapter-vue2` registry identity is created and the release workflow publishes it. Repository readiness does not imply that publication has happened.
+The `@proto.ui/adapter-vue2` registry identity already exists on npm under `next`; the unreleased `0.3.0-alpha.1` package cannot be installed until the release workflow publishes it. Repository readiness does not imply that alpha.1 publication has happened.
 
 ## Usage
 

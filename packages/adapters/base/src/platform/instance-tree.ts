@@ -147,6 +147,9 @@ export function createInstanceTreeMarkers(
       for (const listener of TRIGGER_SURFACE_LISTENERS.get(member) ?? []) listener();
     }
   }
+  function notifyInstanceLifecycle(token: LogicalInstanceToken): void {
+    for (const listener of TRIGGER_SURFACE_LISTENERS.get(token) ?? []) listener();
+  }
 
   function syncTriggerGroupEventTargets(owner: LogicalInstanceToken): void {
     for (const member of TRIGGER_GROUP_MEMBERS_BY_ANCHOR.get(owner) ?? []) {
@@ -233,7 +236,9 @@ export function createInstanceTreeMarkers(
     declaredAnchor?: LogicalInstanceToken
   ): void {
     const reject = () => {
-      throw new Error('[as-trigger] Trigger group must be a continuous chain; sibling Trigger branches are not supported.');
+      throw new Error(
+        '[as-trigger] Trigger group must be a continuous chain; sibling Trigger branches are not supported.'
+      );
     };
     if (parent && (isRegisteredTrigger(parent) || declaredAnchor === parent)) {
       for (const sibling of CHILDREN_BY_TOKEN.get(parent) ?? []) {
@@ -340,11 +345,12 @@ export function createInstanceTreeMarkers(
     INSTANCE_BY_TOKEN.set(token, el);
     PROTO_BY_TOKEN.set(token, proto);
     projectTriggerGroupAnchor(token);
-
     if (TRIGGER_TOKENS.has(token)) {
       const owner = TRIGGER_GROUP_ANCHOR_BY_TOKEN.get(token) ?? token;
       registerTriggerMember(token, owner, true);
       notifyTriggerSurface(owner);
+    } else {
+      notifyInstanceLifecycle(token);
     }
 
     if (parentToken) setLogicalParentInternal(token, parentToken);
@@ -361,12 +367,14 @@ export function createInstanceTreeMarkers(
   function unbindProtoInstance(token: LogicalInstanceToken, el?: HTMLElement): void {
     const current = INSTANCE_BY_TOKEN.get(token);
     if (!current || (el && current !== el)) return;
+    const wasTrigger = TRIGGER_TOKENS.has(token);
     INSTANCE_BY_TOKEN.delete(token);
     TOKEN_BY_INSTANCE.delete(current);
     PROTO_BY_INSTANCE.delete(current);
-    delete (current as any)[PROTO_INSTANCE];
+    delete (current as unknown as Record<PropertyKey, unknown>)[PROTO_INSTANCE];
     delete (current as ElementWithProtoParent)[TRIGGER_OWNER_MARK];
     unregisterTriggerMember(token);
+    notifyInstanceLifecycle(token);
   }
 
   function mergeLogicalTriggerGroup(

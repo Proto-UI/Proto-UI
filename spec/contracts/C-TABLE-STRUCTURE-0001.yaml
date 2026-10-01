@@ -83,8 +83,8 @@ criteria:
             [D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-B, D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-C]
   - id: C-TABLE-STRUCTURE-0001-HEADER-RELATIONS
     text:
-      zh-CN: Resolution 必须把每个 key 转换为当前 domain 中唯一且可 placement 的 HeaderCell opaque semantic-object ref，并按 target headerKind 形成 ordered rowHeaders/columnHeaders；一个 cell 可关联多个 row/column headers，输入顺序必须保留。HeaderCell 的 upstream target 必须在 computed row-major topology 中先于 source；self 或 later/downstream reference 必须拒绝，以保持 header graph acyclic。
-      en: Resolution must convert each key to the opaque semantic-object reference of the unique, placeable HeaderCell in the current domain and form ordered rowHeaders and columnHeaders according to the target headerKind; a cell may relate to multiple row and column headers, and input order must be preserved. A HeaderCell's upstream target must precede the source in computed row-major topology; self or later/downstream references must be rejected so the header graph remains acyclic.
+      zh-CN: Resolution 必须把每个 key 转换为当前 domain 中唯一且可 placement 的 HeaderCell opaque semantic-object ref；orderedHeaders 保留跨 target headerKind 的完整输入顺序，rowHeaders/columnHeaders 分别保留各 kind 内输入顺序。一个 cell 可关联多个 row/column headers。HeaderCell 的 upstream target 必须在 computed row-major topology 中先于 source；self 或 later/downstream reference 必须拒绝，以保持 header graph acyclic。
+      en: Resolution must convert each key to the opaque semantic-object reference of the unique, placeable HeaderCell in the current domain; orderedHeaders preserves complete input order across target header kinds, while rowHeaders and columnHeaders preserve input order within each kind. A cell may relate to multiple row and column headers. A HeaderCell's upstream target must precede the source in computed row-major topology; self or later/downstream references must be rejected so the header graph remains acyclic.
     dependsOn:
       contracts:
         - id: C-A11Y-0001
@@ -95,16 +95,16 @@ criteria:
             [D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-A, D-A11Y-PART-RELATIONSHIP-PROJECTION-0001-E]
   - id: C-TABLE-STRUCTURE-0001-DIAGNOSTICS
     text:
-      zh-CN: Invalid cardinality、empty Row、invalid/unsafe span、missing/duplicate headerKey、duplicate key reference、missing/ambiguous/unprojectable target、self/downstream HeaderCell target，以及越过 Row count 或 safe column-coordinate boundary 的 placement 必须产生 addressable structural diagnostic；实现不得猜 target、生成 fallback id、补 part 或把 invalid snapshot 表述为 valid table projection。
-      en: Invalid cardinality, empty Rows, invalid or unsafe spans, missing or duplicate headerKeys, duplicate key references, missing, ambiguous, or unprojectable targets, self or downstream HeaderCell targets, and placements beyond the Row count or safe column-coordinate boundary must produce addressable structural diagnostics; implementations must not guess targets, generate fallback IDs, synthesize parts, or present an invalid snapshot as a valid table projection.
+      zh-CN: Invalid cardinality、empty Row、Anatomy/Module role mismatch、invalid/unsafe span、missing/duplicate headerKey、duplicate key reference、missing/ambiguous/unprojectable target、self/downstream HeaderCell target，以及越过 Row count 或 safe column-coordinate boundary 的 placement 必须产生 addressable structural diagnostic；实现不得猜 target、生成 fallback id、补 part 或把 invalid snapshot 表述为 valid table projection。
+      en: Invalid cardinality, empty Rows, Anatomy/Module role mismatches, invalid or unsafe spans, missing or duplicate headerKeys, duplicate key references, missing, ambiguous, or unprojectable targets, self or downstream HeaderCell targets, and placements beyond the Row count or safe column-coordinate boundary must produce addressable structural diagnostics; implementations must not guess targets, generate fallback IDs, synthesize parts, or present an invalid snapshot as a valid table projection.
   - id: C-TABLE-STRUCTURE-0001-CHURN
     text:
       zh-CN: Insert、remove 与 reorder 必须从当前 actual parts 重算 topology、coordinates 与 relationships；暂时无效的 runtime structure 可以保持 mounted 并报告 invalid snapshot，但不得重写 authored content/header keys、制造 data mutation 或发出 sorting/selection/pagination signal。
       en: Insert, removal, and reorder must recompute topology, coordinates, and relationships from current actual parts; temporarily invalid runtime structure may remain mounted and report an invalid snapshot, but it must not rewrite authored content or header keys, invent data mutation, or emit sorting, selection, or pagination signals.
   - id: C-TABLE-STRUCTURE-0001-A11Y-PROJECTION
     text:
-      zh-CN: Valid snapshot 必须向通用 A11y path 提供 table/caption/row/column-header/row-header/cell identity、coordinates、spans 与 opaque relationships；Host Adapter 选择 native、translated、degraded 或 diagnostic-only projection。当前任何 Adapter support 在单独编目和测试前都不是本 contract 的 passing evidence。
-      en: A valid snapshot must provide table, caption, row, column-header, row-header, and cell identities, coordinates, spans, and opaque relationships to the generic A11y path; the Host Adapter selects native, translated, degraded, or diagnostic-only projection. No current Adapter support is passing evidence for this contract until separately cataloged and tested.
+      zh-CN: Valid snapshot 必须向通用 A11y path 提供 table/caption/row/column-header/row-header/cell identity、coordinates、spans 与 opaque relationships；invalid snapshot 必须清除这些 structural roles 及其它 valid projection facts。Host Adapter 选择 native、translated、degraded 或 diagnostic-only projection。Adapter support 只有单独编目并测试后才构成本 contract 的 passing evidence；当前有界 Web Component slice 满足该 evidence boundary，但不扩展到其它 Adapter。
+      en: A valid snapshot must provide table, caption, row, column-header, row-header, and cell identities, coordinates, spans, and opaque relationships to the generic A11y path; an invalid snapshot must clear those structural roles and every other valid projection fact. The Host Adapter selects native, translated, degraded, or diagnostic-only projection. Adapter support contributes passing evidence only after separate cataloging and testing; the current bounded Web Component slice meets that evidence boundary without extending it to another Adapter.
     dependsOn:
       decisions:
         - id: D-A11Y-SEMANTIC-DOMAIN-0001
@@ -162,4 +162,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Defined the draft Table Structure domain, deterministic topology, explicit multi-header relationships, structural diagnostics and churn, generic A11y boundary, and Data Table exclusions.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Required cross-kind ordered header output, Anatomy/Module role diagnostics, invalid semantic-role cleanup, and separately cataloged bounded Web Component evidence.
 tags: [table, structure, topology, accessibility, contract]
