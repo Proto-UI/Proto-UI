@@ -249,6 +249,7 @@ function markerComment(repositoryId, number, marker, runner) {
         nodeId: comment.node_id ?? null,
         url: comment.html_url ?? null,
         createdAt: comment.created_at,
+        authorLogin: comment.user?.login ?? null,
         body: comment.body,
       }
     : null;
@@ -549,18 +550,42 @@ export class CollaborationPreWriteRejection extends Error {
   }
 }
 
+function noWriteResult(postState) {
+  return {
+    mutationCount: 0,
+    reconciliationCount: 0,
+    reconciled: false,
+    rawResponse: null,
+    platformObject: null,
+    postState,
+  };
+}
+
+function verifyCommentProvenance(rawResponse, latestState, postState) {
+  const comment = postState.current.markerComment;
+  const createdAt = Date.parse(comment?.createdAt);
+  // GitHub comment timestamps have second precision. The returned object ID,
+  // not this time window, binds a successful response to this invocation.
+  const earliest = Math.floor(Date.parse(latestState.observedAt) / 1000) * 1000;
+  if (
+    !comment?.id ||
+    rawResponse?.id === undefined ||
+    String(rawResponse.id) !== comment.id ||
+    rawResponse.user?.login?.toLowerCase() !== latestState.viewerLogin.toLowerCase() ||
+    comment.authorLogin?.toLowerCase() !== latestState.viewerLogin.toLowerCase() ||
+    rawResponse.created_at !== comment.createdAt ||
+    !Number.isFinite(createdAt) ||
+    createdAt < earliest ||
+    createdAt > Date.parse(postState.observedAt)
+  ) {
+    throw new Error(
+      'comment response provenance does not match the live object; do not retry blindly'
+    );
+  }
+}
+
 export function applyGitHubCollaborationMutation(request, preState, options = {}) {
   validateCollaborationRequest(request);
-  if (desiredCollaborationStateSatisfied(request, preState)) {
-    return {
-      mutationCount: 0,
-      reconciliationCount: 0,
-      reconciled: false,
-      rawResponse: null,
-      platformObject: null,
-      postState: preState,
-    };
-  }
   const runner = options.runner ?? execFileSync;
   const collectState = options.collectState ?? collectLiveCollaborationState;
   let rawResponse;
@@ -580,14 +605,14 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
       selfAssessment: context.selfAssessment ?? null,
     });
   const beforeDecision = authorizeState(preState);
-  if (!beforeDecision.allowed || beforeDecision.outcome !== 'mutate')
+  if (!beforeDecision.allowed)
     throw new CollaborationPreWriteRejection(beforeDecision.reason, preState);
+  if (beforeDecision.outcome === 'no-op') return noWriteResult(preState);
   const latestState = collectState(request, { runner });
   const current = latestState.current ?? {};
   const preCurrent = preState.current ?? {};
   const decision = authorizeState(latestState);
-  if (!decision.allowed || decision.outcome !== 'mutate')
-    throw new CollaborationPreWriteRejection(decision.reason, latestState);
+  if (!decision.allowed) throw new CollaborationPreWriteRejection(decision.reason, latestState);
   if (
     latestState.viewerLogin.toLowerCase() !== preState.viewerLogin.toLowerCase() ||
     latestState.viewerPermission !== preState.viewerPermission ||
@@ -604,6 +629,8 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     );
   }
 
+  if (decision.outcome === 'no-op') return noWriteResult(latestState);
+
   try {
     const mutationRequest =
       request.action === 'mark-exact-head-ready-for-review'
@@ -611,27 +638,17 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
         : request;
     rawResponse = mutationResponse(mutationRequest, runner);
   } catch (error) {
-    let reconciledState;
     try {
-      reconciledState = collectState(request, { runner });
+      collectState(request, { runner });
     } catch (reconciliationError) {
       throw new Error(
         `${request.action} outcome is unknown and live reconciliation failed; do not retry blindly (${error.message}; ${reconciliationError.message})`
       );
     }
-    if (
-      request.action === 'post-bounded-reconciliation-comment' &&
-      desiredCollaborationStateSatisfied(request, reconciledState)
-    ) {
-      return {
-        mutationCount: 1,
-        reconciliationCount: 1,
-        reconciled: true,
-        rawResponse: null,
-        platformObject: platformObject(request, null, reconciledState),
-        postState: reconciledState,
-      };
-    }
+    // A deterministic request marker proves a matching live object, not which
+    // invocation wrote it. Even the same credential and timestamp can belong
+    // to a concurrent runner. Never claim an applied receipt after a lost
+    // response; the one reconciliation is read-only and never retries.
     throw new Error(
       `${request.action} outcome is ambiguous after one live reconciliation; do not retry blindly (${error.message})`
     );
@@ -666,6 +683,9 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     failure.raced = true;
     throw failure;
   }
+  if (request.action === 'post-bounded-reconciliation-comment')
+    verifyCommentProvenance(rawResponse, latestState, postState);
+
   return {
     mutationCount: 1,
     reconciliationCount: 0,

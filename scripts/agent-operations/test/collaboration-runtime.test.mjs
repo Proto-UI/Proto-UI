@@ -1049,7 +1049,7 @@ test('unknown outcomes reconcile once and never retry a non-attributable mutatio
   assert.equal(reconciliations, 2);
 });
 
-test('a bounded comment can reconcile an unknown outcome through its unique request marker', () => {
+test('an unknown comment POST stays ambiguous even when the same credential publishes the exact request', () => {
   const base = metadataRequest();
   const request = seal({
     ...base,
@@ -1074,11 +1074,13 @@ test('a bounded comment can reconcile an unknown outcome through its unique requ
   const preState = { ...metadataLive(), action: request.action, current };
   const postState = {
     ...preState,
+    observedAt: '2026-08-27T01:00:11.000Z',
     current: {
       ...current,
       updatedAt: '2026-08-27T01:00:10.000Z',
       markerComment: {
         id: '9001',
+        authorLogin: 'maintainer',
         nodeId: 'IC_node',
         url: 'https://github.com/Proto-UI/Proto-UI/pull/509#issuecomment-9001',
         createdAt: '2026-08-27T01:00:09.000Z',
@@ -1088,21 +1090,23 @@ test('a bounded comment can reconcile an unknown outcome through its unique requ
   };
   let writes = 0;
   let reconciliations = 0;
-  const result = applyGitHubCollaborationMutation(request, preState, {
-    runner() {
-      writes += 1;
-      throw new Error('socket closed');
-    },
-    collectState() {
-      if (writes === 0) return preState;
-      reconciliations += 1;
-      return postState;
-    },
-  });
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(request, preState, {
+        runner() {
+          writes += 1;
+          throw new Error('socket closed');
+        },
+        collectState() {
+          if (writes === 0) return preState;
+          reconciliations += 1;
+          return postState;
+        },
+      }),
+    /ambiguous after one live reconciliation/
+  );
   assert.equal(writes, 1);
   assert.equal(reconciliations, 1);
-  assert.equal(result.reconciliationCount, 1);
-  assert.equal(result.reconciled, true);
 });
 test('bounded comment idempotency requires the complete canonical body', () => {
   const base = metadataRequest();
@@ -1472,6 +1476,14 @@ for (const scenario of [
     states: [metadataLive({ title: 'New title', updatedAt: '2026-08-27T01:00:09.000Z' })],
   },
   {
+    name: 'desired state achieved before the final write',
+    kind: 'no-op',
+    states: [
+      metadataLive(),
+      metadataLive({ title: 'New title', updatedAt: '2026-08-27T01:00:09.000Z' }),
+    ],
+  },
+  {
     name: 'initial authorization rejection',
     kind: 'rejected',
     states: [metadataLive({ state: 'CLOSED' })],
@@ -1809,12 +1821,19 @@ function nonMetadataMutationCases() {
       after: {
         markerComment: {
           id: '271',
+          authorLogin: 'maintainer',
+          createdAt: '2026-08-27T01:00:09.000Z',
           nodeId: 'IC_271',
           url: 'https://github.com/Proto-UI/Proto-UI/pull/509#issuecomment-271',
           body: `${commentRequest.desired.body}\n\n${collaborationMarker(commentRequest)}`,
         },
       },
-      response: JSON.stringify({ id: 271, node_id: 'IC_271' }),
+      response: JSON.stringify({
+        id: 271,
+        node_id: 'IC_271',
+        user: { login: 'maintainer' },
+        created_at: '2026-08-27T01:00:09.000Z',
+      }),
       endpoint: 'repos/Proto-UI/Proto-UI/issues/509/comments',
       method: 'POST',
       input: { body: `${commentRequest.desired.body}\n\n${collaborationMarker(commentRequest)}` },
@@ -1897,7 +1916,7 @@ for (const fixture of nonMetadataMutationCases()) {
     changes.push(['closed target', (s) => (s.current.state = 'CLOSED')]);
   if (fixture.name === 'rerun failed jobs')
     changes.push(
-      ['attempt', (s) => (s.current.attempt = 2)],
+      ['earlier attempt', (s) => (s.current.attempt = 0)],
       ['successful result', (s) => (s.current.conclusion = 'success')],
       ['running status', (s) => (s.current.status = 'in_progress')],
       ['workflow identity', (s) => (s.current.workflowName = 'Untrusted workflow')],
@@ -2274,4 +2293,275 @@ test('comment preflight scans every page and rejects duplicate idempotency marke
       }),
     /multiple comments use the exact collaboration marker/
   );
+});
+
+for (const fixture of [
+  {
+    name: 'metadata',
+    request: metadataRequest(),
+    before: metadataLive().current,
+    after: { title: 'New title' },
+  },
+  ...nonMetadataMutationCases(),
+]) {
+  test(`${fixture.name}: a fully authorized final desired state is a zero-write no-op`, () => {
+    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...fixture.after },
+    };
+    let writes = 0;
+    const result = applyGitHubCollaborationMutation(fixture.request, preState, {
+      collectState: () => postState,
+      runner() {
+        writes += 1;
+        throw new Error('no-op must not write');
+      },
+    });
+    assert.equal(result.mutationCount, 0);
+    assert.equal(result.reconciliationCount, 0);
+    assert.equal(result.platformObject, null);
+    assert.deepEqual(result.postState, postState);
+    assert.equal(writes, 0);
+    assert.throws(
+      () => applyMutationWithContext(fixture.request, postState),
+      /execution authorization context/
+    );
+    assert.throws(
+      () =>
+        applyGitHubCollaborationMutation(fixture.request, preState, {
+          collectState: () => ({ ...postState, viewerLogin: 'another-maintainer' }),
+          runner() {
+            throw new Error('identity drift must not write');
+          },
+        }),
+      /identity changed|unexpected comment/
+    );
+  });
+}
+
+for (const [name, change] of [
+  [
+    'wrong actor',
+    (comment) => {
+      comment.authorLogin = 'other-maintainer';
+    },
+  ],
+  [
+    'missing actor',
+    (comment) => {
+      delete comment.authorLogin;
+    },
+  ],
+  [
+    'old timestamp',
+    (comment) => {
+      comment.createdAt = '2026-08-26T00:00:00.000Z';
+    },
+  ],
+  [
+    'missing timestamp',
+    (comment) => {
+      delete comment.createdAt;
+    },
+  ],
+  [
+    'future timestamp',
+    (comment) => {
+      comment.createdAt = '2026-08-28T00:00:00.000Z';
+    },
+  ],
+  [
+    'wrong request marker',
+    (comment) => {
+      comment.body = comment.body.replace('proto-ui-collaboration:', 'another-request:');
+    },
+  ],
+]) {
+  test(`bounded comment idempotency rejects ${name}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    const live = {
+      ...metadataLive(),
+      observedAt: '2026-08-27T01:00:11.000Z',
+      action: fixture.request.action,
+      current: { ...fixture.before, ...structuredClone(fixture.after) },
+    };
+    assert.equal(desiredCollaborationStateSatisfied(fixture.request, live), true);
+    change(live.current.markerComment);
+    assert.equal(desiredCollaborationStateSatisfied(fixture.request, live), false);
+    assert.equal(authorize(fixture.request, live).allowed, false);
+  });
+}
+
+for (const [name, change] of [
+  [
+    'a different comment ID',
+    (raw) => {
+      raw.id = 999;
+    },
+  ],
+  [
+    'a missing comment ID',
+    (raw) => {
+      delete raw.id;
+    },
+  ],
+  [
+    'a different response actor',
+    (raw) => {
+      raw.user.login = 'other-maintainer';
+    },
+  ],
+  [
+    'a missing response actor',
+    (raw) => {
+      delete raw.user;
+    },
+  ],
+  [
+    'a different response timestamp',
+    (raw) => {
+      raw.created_at = '2026-08-27T01:00:08.000Z';
+    },
+  ],
+  [
+    'a missing response timestamp',
+    (raw) => {
+      delete raw.created_at;
+    },
+  ],
+  [
+    'a comment predating the final read',
+    (raw, post) => {
+      raw.created_at = post.current.markerComment.createdAt = '2026-08-27T01:00:01.000Z';
+    },
+  ],
+]) {
+  test(`successful comment POST cannot be attributed with ${name}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...structuredClone(fixture.after) },
+    };
+    const raw = JSON.parse(fixture.response);
+    change(raw, postState);
+    let writes = 0;
+    assert.throws(
+      () =>
+        applyGitHubCollaborationMutation(fixture.request, preState, {
+          collectState: () => (writes === 0 ? preState : postState),
+          runner() {
+            writes += 1;
+            return JSON.stringify(raw);
+          },
+        }),
+      /comment.*provenance.*do not retry blindly/
+    );
+    assert.equal(writes, 1);
+  });
+}
+
+for (const [name, change] of [
+  [
+    'wrong actor',
+    (comment) => {
+      comment.authorLogin = 'other-maintainer';
+    },
+  ],
+  [
+    'missing actor',
+    (comment) => {
+      delete comment.authorLogin;
+    },
+  ],
+  [
+    'old timestamp',
+    (comment) => {
+      comment.createdAt = '2026-08-26T00:00:00.000Z';
+    },
+  ],
+  [
+    'missing timestamp',
+    (comment) => {
+      delete comment.createdAt;
+    },
+  ],
+  [
+    'wrong request marker',
+    (comment) => {
+      comment.body = comment.body.replace('proto-ui-collaboration:', 'another-request:');
+    },
+  ],
+]) {
+  test(`an unknown comment POST stays ambiguous with ${name}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...structuredClone(fixture.after) },
+    };
+    change(postState.current.markerComment);
+    let writes = 0;
+    let reconciliations = 0;
+    assert.throws(
+      () =>
+        applyGitHubCollaborationMutation(fixture.request, preState, {
+          collectState() {
+            if (writes === 0) return preState;
+            reconciliations += 1;
+            return postState;
+          },
+          runner() {
+            writes += 1;
+            throw new Error('socket closed');
+          },
+        }),
+      /ambiguous after one live reconciliation/
+    );
+    assert.equal(writes, 1);
+    assert.equal(reconciliations, 1);
+  });
+}
+
+test('comment collection retains the platform author and creation time', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+  const comment = fixture.after.markerComment;
+  const live = collectLiveCollaborationState(fixture.request, {
+    now: () => new Date('2026-08-27T01:00:11.000Z'),
+    runner(command, args) {
+      if (args.includes('graphql'))
+        return JSON.stringify({
+          data: { viewer: { login: 'maintainer' }, repository: { viewerPermission: 'WRITE' } },
+        });
+      if (args.includes('repos/Proto-UI/Proto-UI/pulls/509'))
+        return JSON.stringify({
+          number: 509,
+          node_id: 'PR_node',
+          state: 'open',
+          user: { login: 'contributor' },
+          updated_at: UPDATED_AT,
+          head: { sha: HEAD },
+        });
+      if (args.some((arg) => arg.includes('/issues/509/comments?per_page=100')))
+        return JSON.stringify([
+          [
+            {
+              id: 271,
+              node_id: 'IC_271',
+              body: comment.body,
+              created_at: comment.createdAt,
+              user: { login: comment.authorLogin },
+            },
+          ],
+        ]);
+      throw new Error('unexpected fake GitHub call');
+    },
+  });
+  assert.equal(live.current.markerComment.authorLogin, 'maintainer');
+  assert.equal(live.current.markerComment.createdAt, comment.createdAt);
+  assert.equal(desiredCollaborationStateSatisfied(fixture.request, live), true);
 });

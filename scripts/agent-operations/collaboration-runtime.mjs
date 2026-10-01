@@ -599,7 +599,11 @@ export function desiredCollaborationStateSatisfied(request, liveState) {
   const marker = collaborationMarker(request);
   return (
     targetHeadMatches(request, current) &&
-    current.markerComment?.body === `${request.desired.body}\n\n${marker}`
+    current.markerComment?.body === `${request.desired.body}\n\n${marker}` &&
+    current.markerComment.authorLogin?.toLowerCase() === liveState.viewerLogin.toLowerCase() &&
+    Date.parse(current.markerComment.createdAt) >=
+      Math.floor(Date.parse(request.requestedAt) / 1000) * 1000 &&
+    Date.parse(current.markerComment.createdAt) <= Date.parse(liveState.observedAt)
   );
 }
 
@@ -769,13 +773,13 @@ export function authorizeCollaborationMutation({
     if (current.threadId !== request.target.threadId) {
       return rejected(request, 'live review-thread identity does not match request');
     }
+    if (current.threadUpdatedAt !== request.target.threadUpdatedAt) {
+      return rejected(request, 'live review-thread revision is stale');
+    }
     if (current.isResolved === true)
       return noOp(request, 'exact review thread is already resolved');
     if (current.updatedAt !== request.target.updatedAt) {
       return rejected(request, 'live target updatedAt is stale');
-    }
-    if (current.threadUpdatedAt !== request.target.threadUpdatedAt) {
-      return rejected(request, 'live review-thread revision is stale');
     }
     if (current.isResolved !== request.expected.isResolved) {
       return rejected(request, 'live review-thread state does not match expected state');
@@ -827,7 +831,7 @@ export function authorizeCollaborationMutation({
     if (desiredCollaborationStateSatisfied(request, liveState)) {
       return noOp(request, 'bounded comment with this exact request marker already exists');
     }
-    return rejected(request, 'request marker exists with unexpected comment content');
+    return rejected(request, 'request marker exists with unexpected comment content or provenance');
   }
   if (current.updatedAt !== request.target.updatedAt) {
     return rejected(request, 'live target updatedAt is stale');

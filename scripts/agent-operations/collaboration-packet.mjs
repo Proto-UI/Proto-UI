@@ -222,7 +222,7 @@ export function runCollaborationCli(argv, dependencies = {}) {
     preState,
     postState: applied.postState,
     actor: preState.viewerLogin,
-    outcome: 'applied',
+    outcome: applied.mutationCount === 0 ? 'no-op' : 'applied',
     mutationCount: applied.mutationCount,
     reconciliationCount: applied.reconciliationCount,
     platformObject: applied.platformObject,
@@ -231,9 +231,10 @@ export function runCollaborationCli(argv, dependencies = {}) {
       request.action === 'post-bounded-reconciliation-comment'
         ? 'idempotency-marker-present'
         : 'live-state-matches-desired',
-    note: applied.reconciled
-      ? 'The unique request marker proved the exact comment after one unknown-outcome reconciliation.'
-      : 'The exact desired state was verified after the single authorized mutation.',
+    note:
+      applied.mutationCount === 0
+        ? 'The exact desired state was already satisfied at the final authorized read; no mutation was attempted.'
+        : 'The exact desired state was verified after the single authorized mutation.',
   });
 }
 
