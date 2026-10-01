@@ -39,7 +39,9 @@ Review packet 要写明仓库、PR、base ref name、base/head SHA、review clas
 
 自治 review classes 从事实与 CI 开始，逐步覆盖文档与链接、测试、bounded regression、受治理实现切片、跨域语义，以及治理或发布证据。在 `human-assisted` 模式中，这些类别只调整复核深度和限制说明，不会挡住用户要求的 review。
 
-本地定时任务的 standing scope `proto-ui-scheduled-review-v1` 已激活：它可以提交证据完整且带 finding 的 `REQUEST_CHANGES`；只有 clean packet、可信仓库 CI 成功，并且所有 changed file 的当前路径与重命名前路径都不属于九类 `spec/**` YAML 实体时，才允许 `APPROVE`。独立的 `proto-ui-scheduled-merge-v1` 允许 `pui-integrate` 在 exact head 已获得独立批准、没有 active change request、所有 thread 已解决、可信 CI 通过、实时权限有效且 GitHub 同时报 `MERGEABLE`/`CLEAN` 时执行 squash merge。spec 实体改动仍需先获得独立人工批准，但闸门满足后不再需要维护者再点一次 merge。
+本地定时任务的 standing scope `proto-ui-scheduled-review-v1` 已激活：它可以提交证据完整且带 finding 的 `REQUEST_CHANGES`；只有 clean packet、可信仓库 CI 成功，并且所有 changed file 的当前路径与重命名前路径都不属于九类 `spec/**` YAML 实体时，才允许 `APPROVE`。独立的 `proto-ui-scheduled-merge-v1` 允许 `pui-integrate` 在 exact head 已获得独立批准、没有 active change request、所有 thread 已解决、可信 CI 通过、实时权限有效，且 GitHub 同时报 `MERGEABLE`/`CLEAN` 或符合下述狭义预览授权例外时执行 squash merge。spec 实体改动仍需先获得独立人工批准，但闸门满足后不再需要维护者再点一次 merge。
+
+[已验证的 Vercel 预览授权例外](https://github.com/Proto-UI/Proto-UI/blob/main/internal/agent-operations/contributor-agents.md#review-as-an-evidence-packet)只在 verified `vercel` Bot 的 `https://vercel.com/git/authorize` 失败确实存在、所有 check 均已结束，且其他结论均为 `SUCCESS`、`SKIPPED` 或 `NEUTRAL` 时，允许 `MERGEABLE`/`UNSTABLE`。Packet 必须把缺失预览明确记为 publication debt。真实部署失败、其他失败或未结束的检查仍会阻止合并，独立批准、可信 CI、证据、权限和仓库规则也没有被豁免；最终非 admin、绑定 exact head 的 GitHub merge API 保持不变。
 
 本地复核始终可以进行。低档位 Agent 在有人协作时可以给出部分复核或明确的 `ABSTAIN`，同时说明自己没覆盖什么。`submit-review` 会从 GitHub 实时重新采集完整规范化输入（body、commits、PR 顶层 conversation comments、replies、threads、checks）并比对 digest，从实时上下文派生身份、权限和可信 CI，并使用 `commit_id` 绑定已审 head。`merge-pull-request` 会再次做同样的 reconciliation，要求 exact-head 独立批准和仓库就绪状态，再把 `sha` 固定为该 head；不得把任一预检与后续未绑定的 GitHub 写入拆开。公开 desktop task 名称不充当认证；当前范围依赖单一持证本地 runner、精确 standing policy、exact-head 写入和 GitHub 规则。扩展到并发 runner 前仍需服务侧 lease 与更强 runtime attribution。
 
