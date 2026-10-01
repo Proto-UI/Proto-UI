@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { computeReviewInputDigest } from '../review-runtime.mjs';
+import { computeReviewInputDigest, agentEvidenceMarker } from '../review-runtime.mjs';
+import { readFileSync } from 'node:fs';
+import { parse as parseYaml } from 'yaml';
+import { agentEvidence } from './fixtures/agent-evidence.mjs';
 import {
   assertNoTruncation,
   buildLiveReviewInput,
@@ -598,6 +601,107 @@ test('review submission binds the GitHub Review API write to the inspected commi
   );
 });
 
+function mergeAuthorizationFixture() {
+  const policy = parseYaml(
+    readFileSync(
+      new URL('../../../internal/agent-operations/capability-policy.yaml', import.meta.url),
+      'utf8'
+    )
+  );
+  const raw = payload();
+  const pull = raw.data.repository.pullRequest;
+  pull.changedFiles = 1;
+  pull.comments.nodes = [];
+  pull.reviewThreads.nodes = [];
+  const evidence = agentEvidence(sha('b'));
+  pull.reviews.nodes = [
+    {
+      id: 'PRR_independent',
+      author: { login: 'independent-reviewer' },
+      state: 'APPROVED',
+      commit: { oid: sha('b') },
+      submittedAt: '2026-08-23T06:00:00Z',
+      body: `Approved\n\n<!-- ${agentEvidenceMarker({ schemaVersion: 2, agentEvidence: evidence })} -->`,
+    },
+  ];
+  const contexts = pull.commits.nodes[0].commit.statusCheckRollup.contexts;
+  contexts.nodes = [
+    ...policy.trustedCiEvidence.checkNames.map((name) => ({
+      ...structuredClone(contexts.nodes[0]),
+      name,
+    })),
+    {
+      __typename: 'CheckRun',
+      name: 'DCO',
+      status: 'COMPLETED',
+      conclusion: 'SUCCESS',
+      completedAt: '2026-08-23T06:00:00Z',
+      detailsUrl: 'https://probot.github.io/apps/dco/',
+      checkSuite: {
+        app: { id: 'MDM6QXBwMTg2MQ==', slug: 'dco' },
+        repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
+      },
+    },
+  ];
+  const permission = { user: { login: 'independent-reviewer' }, permission: 'write' };
+  const runner = (_command, args) => {
+    if (args.includes('graphql')) return JSON.stringify(raw);
+    if (args.includes('repos/Proto-UI/Proto-UI/pulls/487/files?per_page=100'))
+      return JSON.stringify([[changedFiles[0]]]);
+    if (args.includes('repos/Proto-UI/Proto-UI/collaborators/independent-reviewer/permission'))
+      return JSON.stringify(permission);
+    throw new Error(`Unexpected authorization read: ${args.join(' ')}`);
+  };
+  const live = collectLiveReviewInput(repositoryId, 487, { runner });
+  const input = live.input;
+  const packet = {
+    schemaVersion: 2,
+    kind: 'proto-ui.review-packet',
+    repositoryId,
+    pullRequest: 487,
+    baseSha: input.baseSha,
+    headSha: input.headSha,
+    reviewInputDigest: computeReviewInputDigest(input),
+    observedAt: '2026-08-23T06:01:00Z',
+    reviewClass: 'review-governance-and-release-evidence',
+    scope: ['bounded merge verification'],
+    affectedEntities: [],
+    affectedSurfaces: ['GitHub pull request'],
+    agentEvidence: evidence,
+    findings: [],
+    validation: {
+      commands: [{ command: 'fixture verification', exitCode: 0, result: 'passed' }],
+      checksNotRun: [],
+    },
+    reconciliation: {
+      priorReviewedHeadSha: null,
+      priorPacketDigest: null,
+      resolvedFindingIds: [],
+      openFindingIds: [],
+      newFindingIds: [],
+    },
+    limitations: [],
+    unknowns: [],
+    humanGates: [],
+    recommendedAction: 'APPROVE',
+  };
+  const authorizationContext = {
+    packet,
+    input,
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    authorizationId: 'explicit-current-user',
+    actor: live.viewerLogin,
+    viewerPermission: live.viewerPermission,
+    policy,
+    selfAssessment: null,
+    externalEvidence: [],
+  };
+  return { raw, permission, runner, authorizationContext };
+}
+
+const originalMergeAuthorization = mergeAuthorizationFixture();
+
 function mergeFixture({
   before = {},
   after = [],
@@ -605,7 +709,10 @@ function mergeFixture({
   putError = null,
   putResponse = null,
   branchSha = null,
+  alterAuthorization = null,
 } = {}) {
+  const currentAuthorization = mergeAuthorizationFixture();
+  alterAuthorization?.(currentAuthorization);
   const calls = [];
   let writes = 0;
   let postReads = 0;
@@ -614,6 +721,8 @@ function mergeFixture({
     state: 'open',
     draft: false,
     merged: false,
+    mergeable: true,
+    mergeable_state: 'clean',
     head: { sha: sha('b') },
     base: { sha: sha('a'), ref: 'main', repo: { full_name: 'Proto-UI/Proto-UI' } },
     ...before,
@@ -638,6 +747,11 @@ function mergeFixture({
     runner(command, args, options) {
       assert.equal(command, 'gh');
       calls.push({ command, args, options });
+      if (
+        args.includes('graphql') ||
+        args.some((arg) => arg.includes('/files?per_page=100') || arg.includes('/collaborators/'))
+      )
+        return currentAuthorization.runner(command, args, options);
       if (args.includes('PUT')) {
         writes += 1;
         if (putError) throw putError;
@@ -667,12 +781,126 @@ function mergeFixture({
 }
 
 const mergeOptions = {
+  authorizationContext: originalMergeAuthorization.authorizationContext,
   headSha: sha('b'),
   expectedBaseSha: sha('a'),
   baseRefName: 'main',
   mergeMethod: 'squash',
 };
 const fastVerification = { verificationAttempts: 3, verificationDelayMs: 0, wait() {} };
+
+for (const before of [
+  { mergeable: false, mergeable_state: 'blocked' },
+  { mergeable: true, mergeable_state: 'blocked' },
+  { mergeable: null, mergeable_state: 'unknown' },
+  { mergeable: true, mergeable_state: 'unstable' },
+]) {
+  test(`merge rejects final REST readiness drift: ${JSON.stringify(before)}`, () => {
+    const fixture = mergeFixture({ before });
+    assert.throws(
+      () => submitGitHubMerge(repositoryId, 487, mergeOptions, fixture.runner, fastVerification),
+      /merge.ready|merge readiness|merge eligibility/
+    );
+    assert.equal(fixture.writes, 0);
+  });
+}
+
+for (const [name, change] of [
+  [
+    'CI failure',
+    (f) => {
+      f.raw.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts.nodes[0].conclusion =
+        'FAILURE';
+    },
+  ],
+  [
+    'DCO failure',
+    (f) => {
+      f.raw.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts.nodes.find(
+        (check) => check.name === 'DCO'
+      ).conclusion = 'FAILURE';
+    },
+  ],
+  [
+    'approval withdrawn',
+    (f) => {
+      f.raw.data.repository.pullRequest.reviews.nodes[0].state = 'CHANGES_REQUESTED';
+    },
+  ],
+  [
+    'reviewer permission revoked',
+    (f) => {
+      f.permission.permission = 'read';
+    },
+  ],
+  [
+    'credential replaced',
+    (f) => {
+      f.raw.data.viewer.login = 'different-actor';
+    },
+  ],
+  [
+    'credential downgraded',
+    (f) => {
+      f.raw.data.repository.viewerPermission = 'READ';
+    },
+  ],
+  [
+    'thread reopened',
+    (f) => {
+      f.raw.data.repository.pullRequest.reviewThreads.nodes = [
+        {
+          id: 'thread',
+          isResolved: false,
+          comments: {
+            nodes: [
+              {
+                databaseId: 1,
+                author: { login: 'reviewer' },
+                body: 'new finding',
+                updatedAt: '2026-08-23T06:00:00Z',
+              },
+            ],
+            pageInfo: { hasNextPage: false },
+          },
+        },
+      ];
+    },
+  ],
+]) {
+  test(`merge re-collects governed facts at its write boundary: ${name}`, () => {
+    const fixture = mergeFixture({ alterAuthorization: change });
+    assert.throws(
+      () => submitGitHubMerge(repositoryId, 487, mergeOptions, fixture.runner, fastVerification),
+      /merge eligibility|identity|permission|live canonical review input/
+    );
+    assert.equal(fixture.writes, 0);
+  });
+}
+
+test('merge refuses missing or cross-target authorization context before any API call', () => {
+  for (const authorizationContext of [
+    undefined,
+    {
+      ...mergeOptions.authorizationContext,
+      input: { ...mergeOptions.authorizationContext.input, headSha: sha('d') },
+    },
+  ]) {
+    const fixture = mergeFixture();
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          repositoryId,
+          487,
+          { ...mergeOptions, authorizationContext },
+          fixture.runner,
+          fastVerification
+        ),
+      /authorization context|target binding/
+    );
+    assert.equal(fixture.calls.length, 0);
+  }
+});
 
 test('merge refuses a changed live base before any PUT', () => {
   const fixture = mergeFixture({
@@ -1177,7 +1405,7 @@ test('pull-request merge binds the successful response to the inspected head and
     'repos/Proto-UI/Proto-UI/pulls/487/merge',
     '--input',
   ]);
-  assert.equal(fixture.calls.length, 5);
+  assert.equal(fixture.calls.length, 8);
   assert.equal(fixture.writes, 1);
   assert.equal(result.liveHeadSha, sha('b'));
   assert.equal(result.mergedAt, '2026-08-27T01:00:10Z');
@@ -1219,7 +1447,7 @@ test('pull-request merge binds the successful response to the inspected head and
   );
   assert.equal(unknown.writes, 1);
   assert.equal(unknown.postReads, 1);
-  assert.equal(unknown.calls.length, 4);
+  assert.equal(unknown.calls.length, 7);
 });
 
 test('live collector fails closed when the REST changed-file list is incomplete', () => {

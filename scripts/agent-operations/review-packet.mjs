@@ -7,7 +7,6 @@ import {
   validateSelfAssessmentResult,
 } from './assessment-runtime.mjs';
 import {
-  authorizePullRequestMerge,
   authorizeReviewSubmission,
   computeReviewInputDigest,
   computeReviewIngestionInputDigest,
@@ -24,6 +23,7 @@ import {
   verifyReconciliation,
 } from './review-runtime.mjs';
 import {
+  authorizeLivePullRequestMerge,
   collectLiveReviewInput,
   submitGitHubMerge,
   submitGitHubReview,
@@ -411,36 +411,19 @@ try {
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
       externalEvidence,
     });
-    const authorization = authorizePullRequestMerge({
+    const authorizationContext = {
       packet,
       input,
-      liveInput: live.input,
       executionMode: execution.handoff.executionMode,
       executionModeSource: execution.handoff.executionModeSource,
       authorizationId: args.get('--authorization'),
       policy,
       selfAssessment: execution.selfAssessment,
-      credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
       actor: live.viewerLogin,
-      ciConclusion: summarizeLiveChecks(live.input.checks, {
-        repositoryId: packet.repositoryId,
-        trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
-        trustedSource: policy.trustedCiEvidence?.source,
-        trustedCheckNames: policy.trustedCiEvidence?.checkNames,
-        trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
-        trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
-      }),
-      dcoConclusion: summarizeLiveDco(live.input.checks, {
-        repositoryId: packet.repositoryId,
-        trustedRepositoryId: policy.trustedDcoEvidence?.repositoryId,
-        trustedCheckName: policy.trustedDcoEvidence?.checkName,
-        trustedSource: policy.trustedDcoEvidence?.source,
-        trustedProviderId: policy.trustedDcoEvidence?.providerId,
-        trustedDetailsUrl: policy.trustedDcoEvidence?.detailsUrl,
-      }),
-      mergeable: live.mergeable,
-      mergeStateStatus: live.mergeStateStatus,
-    });
+      viewerPermission: live.viewerPermission,
+      externalEvidence,
+    };
+    const authorization = authorizeLivePullRequestMerge(authorizationContext, live);
     if (!authorization.allowed) {
       output = authorization;
     } else {
@@ -450,10 +433,11 @@ try {
         baseRefName: input.baseRefName,
         mergeMethod: authorization.mergeMethod,
         authorizationId: authorization.authorizationId,
+        authorizationContext,
       });
       output = {
         ...authorization,
-        permissionsObservedAt: live.permissionsObservedAt,
+        permissionsObservedAt: receipt.permissionsObservedAt,
         submitted: true,
         receipt,
       };

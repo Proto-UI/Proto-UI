@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import {
+  authorizePullRequestMerge,
   isExternalPreviewAuthorizationFailure,
   reviewerPermissionSubjects,
   validateReviewInputSnapshot,
@@ -710,10 +711,51 @@ function isGitHubMergeTime(value) {
   );
 }
 
+export function authorizeLivePullRequestMerge(context, live) {
+  const { policy } = context;
+  return authorizePullRequestMerge({
+    packet: context.packet,
+    input: context.input,
+    liveInput: live.input,
+    executionMode: context.executionMode,
+    executionModeSource: context.executionModeSource,
+    authorizationId: context.authorizationId,
+    policy,
+    selfAssessment: context.selfAssessment,
+    credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
+    actor: live.viewerLogin,
+    ciConclusion: summarizeLiveChecks(live.input.checks, {
+      repositoryId: context.packet.repositoryId,
+      trustedRepositoryId: policy?.trustedCiEvidence?.repositoryId,
+      trustedSource: policy?.trustedCiEvidence?.source,
+      trustedCheckNames: policy?.trustedCiEvidence?.checkNames,
+      trustedWorkflowNames: policy?.trustedCiEvidence?.workflowNames,
+      trustedWorkflowPaths: policy?.trustedCiEvidence?.workflowPaths,
+    }),
+    dcoConclusion: summarizeLiveDco(live.input.checks, {
+      repositoryId: context.packet.repositoryId,
+      trustedRepositoryId: policy?.trustedDcoEvidence?.repositoryId,
+      trustedCheckName: policy?.trustedDcoEvidence?.checkName,
+      trustedSource: policy?.trustedDcoEvidence?.source,
+      trustedProviderId: policy?.trustedDcoEvidence?.providerId,
+      trustedDetailsUrl: policy?.trustedDcoEvidence?.detailsUrl,
+    }),
+    mergeable: live.mergeable,
+    mergeStateStatus: live.mergeStateStatus,
+  });
+}
+
 export function submitGitHubMerge(
   repositoryId,
   pullRequest,
-  { headSha, expectedBaseSha, baseRefName, mergeMethod, authorizationId = 'explicit-current-user' },
+  {
+    headSha,
+    expectedBaseSha,
+    baseRefName,
+    mergeMethod,
+    authorizationId = 'explicit-current-user',
+    authorizationContext,
+  },
   runner = execFileSync,
   options = {}
 ) {
@@ -743,6 +785,44 @@ export function submitGitHubMerge(
     typeof now !== 'function'
   )
     throw new Error('merge verification polling bounds are invalid');
+  if (!authorizationContext || typeof authorizationContext !== 'object')
+    throw new Error('merge authorization context is required before any API call');
+  const { packet, input } = authorizationContext;
+  if (
+    packet?.repositoryId !== repositoryId ||
+    input?.repositoryId !== repositoryId ||
+    packet?.pullRequest !== pullRequest ||
+    input?.pullRequest !== pullRequest ||
+    packet?.headSha !== headSha ||
+    input?.headSha !== headSha ||
+    packet?.baseSha !== expectedBaseSha ||
+    input?.baseSha !== expectedBaseSha ||
+    input?.baseRefName !== baseRefName ||
+    authorizationContext.authorizationId !== authorizationId ||
+    typeof authorizationContext.actor !== 'string' ||
+    !authorizationContext.actor ||
+    !['ADMIN', 'MAINTAIN', 'WRITE'].includes(authorizationContext.viewerPermission)
+  )
+    throw new Error('merge authorization context target binding is invalid; no PUT attempted');
+  validateReviewInputSnapshot(input);
+  // The writer owns this final collection. A caller-supplied allowed boolean
+  // or callback cannot stand in for current checks, approvals or permissions.
+  const finalLive = collectLiveReviewInput(repositoryId, pullRequest, {
+    runner,
+    externalEvidence: authorizationContext.externalEvidence,
+  });
+  if (
+    finalLive.viewerLogin !== authorizationContext.actor ||
+    finalLive.viewerPermission !== authorizationContext.viewerPermission
+  )
+    throw new Error(
+      'merge credential identity or permission changed at the final boundary; no PUT attempted'
+    );
+  const finalAuthorization = authorizeLivePullRequestMerge(authorizationContext, finalLive);
+  if (!finalAuthorization.allowed)
+    throw new Error(
+      `merge eligibility changed at the final boundary: ${finalAuthorization.reason}; no PUT attempted`
+    );
   const prefix = `repos/${owner}/${name}`;
   const read = (endpoint, includeHeaders = false) => {
     let output;
@@ -784,6 +864,8 @@ export function submitGitHubMerge(
     before.base.sha !== expectedBaseSha
   )
     throw new Error('merge preflight head, base, target or open state changed; no PUT attempted');
+  if (before.mergeable !== true || before.mergeable_state !== 'clean')
+    throw new Error('final GitHub merge readiness is not clean; no PUT attempted');
   const base = read(`${prefix}/git/ref/heads/${encodeURIComponent(baseRefName)}`);
   if (
     base.ref !== `refs/heads/${baseRefName}` ||
@@ -860,6 +942,7 @@ export function submitGitHubMerge(
           repositoryId,
           pullRequest,
           authorizationId,
+          permissionsObservedAt: finalLive.permissionsObservedAt,
           mergeCommitSha: response.sha,
           headSha,
           liveHeadSha: live.head.sha,
