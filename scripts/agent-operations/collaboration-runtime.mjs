@@ -6,6 +6,8 @@ const DIGEST = /^sha256:[a-f0-9]{64}$/;
 const REPOSITORY_ID = /^github\.com:[^/\s]+\/[^/\s]+$/;
 const RFC3339 = /^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$/;
 const BANDS = ['U0', 'C1', 'C2', 'C3', 'C4'];
+const GOVERNED_OUTCOME_PUBLICATION_BLOCK =
+  'autonomous collaboration is blocked: trusted governed-outcome publication verification is not implemented';
 
 export const COLLABORATION_ACTIONS = Object.freeze([
   'update-governed-issue-or-pull-request-metadata',
@@ -398,6 +400,9 @@ export function validateCollaborationHandoffBinding(
       capabilityArtifact?.digest === `sha256:${selfAssessment.resultDigest}`,
       'capability-envelope artifact does not bind the loaded self-assessment'
     );
+    // A caller-supplied artifact reference/digest only binds bytes. No accepted
+    // producer/publication verifier currently establishes its governing authority.
+    throw new Error(GOVERNED_OUTCOME_PUBLICATION_BLOCK);
   }
   return handoff;
 }
@@ -541,7 +546,7 @@ function validateAuthority({
   ) {
     return 'collaboration mutation exceeds the autonomous capability ceiling';
   }
-  return null;
+  return GOVERNED_OUTCOME_PUBLICATION_BLOCK;
 }
 
 function targetHeadMatches(request, current) {

@@ -72,8 +72,8 @@ const assessment = {
 function applyGitHubCollaborationMutation(request, preState, options = {}) {
   return applyMutationWithContext(request, preState, {
     authorizationContext: {
-      executionMode: 'autonomous',
-      executionModeSource: 'schedule',
+      executionMode: 'human-assisted',
+      executionModeSource: 'current-user',
       policy,
       selfAssessment: assessment,
     },
@@ -92,7 +92,7 @@ function metadataRequest(overrides = {}) {
     schemaVersion: 1,
     kind: 'proto-ui.collaboration-request',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
-    authorizationId: 'proto-ui-scheduled-collaboration-v1',
+    authorizationId: 'explicit-current-user',
     action: 'update-governed-issue-or-pull-request-metadata',
     requestedAt: REQUESTED_AT,
     requestDigest: '0'.repeat(64),
@@ -118,8 +118,8 @@ function metadataRequest(overrides = {}) {
     },
     evidence: [
       {
-        type: 'governed-outcome',
-        reference: 'artifact://governed-outcome/pr-509',
+        type: 'current-user-instruction',
+        reference: 'instruction://current-user/pr-509',
         digest: `sha256:${'e'.repeat(64)}`,
       },
     ],
@@ -162,8 +162,8 @@ function authorize(request, liveState, overrides = {}) {
   return authorizeCollaborationMutation({
     request,
     liveState,
-    executionMode: 'autonomous',
-    executionModeSource: 'schedule',
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
     policy,
     selfAssessment: assessment,
     ...overrides,
@@ -179,28 +179,140 @@ test('request digest binds every purpose and rejects tampering', () => {
   );
 });
 
+function autonomousRequest(overrides = {}) {
+  return metadataRequest({
+    authorizationId: 'proto-ui-scheduled-collaboration-v1',
+    evidence: [
+      {
+        type: 'governed-outcome',
+        reference: 'artifact://governed-outcome/pr-509',
+        digest: `sha256:${'e'.repeat(64)}`,
+      },
+    ],
+    ...overrides,
+  });
+}
+
+function authorizeAutonomous(request, live, overrides = {}) {
+  return authorize(request, live, {
+    executionMode: 'autonomous',
+    executionModeSource: 'schedule',
+    ...overrides,
+  });
+}
+
 test('autonomous collaboration requires the exact active scope and a fresh C2 task ceiling', () => {
-  const request = metadataRequest();
+  const request = autonomousRequest();
   const live = metadataLive();
   const staleAssessment = {
     ...assessment,
     fresh: false,
   };
-  assert.deepEqual(authorize(request, live, { selfAssessment: staleAssessment }), {
+  assert.deepEqual(authorizeAutonomous(request, live, { selfAssessment: staleAssessment }), {
     allowed: false,
     outcome: 'rejected',
     reason: 'autonomous collaboration requires a fresh validated self-assessment',
     requestDigest: request.requestDigest,
   });
   const wrongScope = seal({ ...request, authorizationId: 'some-other-scope' });
-  assert.match(authorize(wrongScope, live).reason, /active standing authorization/);
+  assert.match(authorizeAutonomous(wrongScope, live).reason, /active standing authorization/);
 });
 
 test('standing authorization still requires purpose evidence for the current governed outcome', () => {
-  const request = seal({ ...metadataRequest(), evidence: [] });
-  const decision = authorize(request, metadataLive());
+  const request = seal({ ...autonomousRequest(), evidence: [] });
+  const decision = authorizeAutonomous(request, metadataLive());
   assert.equal(decision.allowed, false);
   assert.match(decision.reason, /current governed outcome/);
+});
+
+for (const evidenceKind of ['missing-digest', 'caller-sealed']) {
+  test(`an activated standing scope rejects unverified governed-outcome evidence: ${evidenceKind}`, () => {
+    const request =
+      evidenceKind === 'missing-digest'
+        ? autonomousRequest({
+            evidence: [{ type: 'governed-outcome', reference: 'artifact://unverified/outcome' }],
+          })
+        : autonomousRequest();
+    assert.equal(authorizeAutonomous(request, metadataLive()).allowed, false);
+  });
+}
+
+test('an autonomous handoff cannot omit its governed-outcome artifact and publication binding', () => {
+  const request = autonomousRequest();
+  const result = { ...assessment, resultDigest: 'f'.repeat(64) };
+  const handoff = {
+    executionMode: 'autonomous',
+    artifacts: [
+      {
+        type: 'collaboration-request',
+        reference: 'artifact://collaboration/pr-509',
+        digest: `sha256:${request.requestDigest}`,
+      },
+      { type: 'mutation-authorization', reference: request.authorizationId },
+      {
+        type: 'capability-envelope',
+        reference: 'artifact://assessment/current',
+        digest: `sha256:${result.resultDigest}`,
+      },
+    ],
+  };
+  assert.throws(
+    () => validateCollaborationHandoffBinding(request, handoff, { selfAssessment: result }),
+    /governed-outcome|publication/
+  );
+  handoff.artifacts.push(structuredClone(request.evidence[0]));
+  assert.throws(
+    () => validateCollaborationHandoffBinding(request, handoff, { selfAssessment: result }),
+    /trusted governed-outcome publication verification is not implemented/
+  );
+});
+
+test('all seven autonomous writers stay blocked even after scope activation and caller sealing', () => {
+  const cases = [
+    { request: metadataRequest(), before: metadataLive().current },
+    ...nonMetadataMutationCases(),
+  ];
+  for (const fixture of cases) {
+    const request = seal({
+      ...fixture.request,
+      authorizationId: 'proto-ui-scheduled-collaboration-v1',
+      evidence: [
+        ...fixture.request.evidence.filter(
+          (entry) => !['current-user-instruction', 'governed-outcome'].includes(entry.type)
+        ),
+        ...autonomousRequest().evidence,
+      ],
+    });
+    const live = { ...metadataLive(), action: request.action, current: fixture.before };
+    const decision = authorizeAutonomous(request, live);
+    assert.equal(decision.allowed, false, request.action);
+    assert.match(
+      decision.reason,
+      /trusted governed-outcome publication verification is not implemented/
+    );
+    let calls = 0;
+    assert.throws(
+      () =>
+        applyMutationWithContext(request, live, {
+          authorizationContext: {
+            executionMode: 'autonomous',
+            executionModeSource: 'schedule',
+            policy,
+            selfAssessment: assessment,
+          },
+          runner() {
+            calls += 1;
+            throw new Error('unexpected external runner');
+          },
+          collectState() {
+            calls += 1;
+            throw new Error('unexpected live read');
+          },
+        }),
+      /trusted governed-outcome publication verification is not implemented/
+    );
+    assert.equal(calls, 0);
+  }
 });
 
 test('handoff artifacts bind the exact request digest and authorization scope', () => {
