@@ -488,71 +488,94 @@ async function createCanaryThemeOwner(
   page: Page,
   runtime: string
 ): Promise<JSHandle<CanaryThemeOwner>> {
-  return page.evaluateHandle(
-    async ({ runtimeId, refs }) => {
-      const materializerUrl = '/src/components/PrototypePreviewer/projection-materializer.ts';
-      const themeUrl = '/src/components/PrototypePreviewer/projection-theme.ts';
-      const { materializeProjectionCandidate } = await import(/* @vite-ignore */ materializerUrl);
-      const { resolveProjectionThemeSurfaceStyle } = await import(/* @vite-ignore */ themeUrl);
-      const mount = document.createElement('div');
-      mount.dataset.theme = 'light';
-      document.body.appendChild(mount);
-      let candidate: CanaryThemeOwner['candidate'] | undefined;
-      try {
-        candidate = await materializeProjectionCandidate(
-          { selection: { runtimeId, projectionFamilyId: 'brutalist' }, generation: 1 },
-          {
-            mount,
-            ownerId: `button-canary-${runtimeId}-${crypto.randomUUID()}`,
-            componentId: 'button',
-            controlIds: [],
-            controls: {
-              runtime: {
-                label: 'Runtime',
-                options: [{ value: runtimeId, label: runtimeId }],
-                onValueChange() {},
-              },
-              family: {
-                label: 'Family',
-                options: [{ value: 'brutalist', label: 'Brutalist' }],
-                onValueChange() {},
-              },
-              component: {
-                label: 'Component',
-                options: [{ value: 'button', label: 'Button' }],
-                onValueChange() {},
-              },
-            },
-          }
-        );
-        if (!candidate) throw new Error('The materializer must return a controlled candidate.');
-        candidate.activate();
-        const nodes = Object.fromEntries(
-          refs.map((ref) => {
-            const node = mount.querySelector<HTMLElement>(`[data-demo-ref="${ref}"]`);
-            if (!node) throw new Error(`The controlled Button projection must render ${ref}.`);
-            return [ref, node];
-          })
-        );
-        return {
-          candidate,
-          mount,
-          nodes,
-          theme: resolveProjectionThemeSurfaceStyle('brutalist', mount),
-          events: [],
-          expectedRestamp: '',
-        };
-      } catch (error) {
+  // A string expression stays native in the browser; Vitest's SSR transform
+  // must not replace import() with its Node-side private loader helper.
+  const nativeImport = await page.evaluateHandle<(path: string) => Promise<any>>(`(path) => {
+    const allowed = [
+      '/src/components/PrototypePreviewer/projection-materializer.ts',
+      '/src/components/PrototypePreviewer/projection-theme.ts'
+    ];
+    if (!allowed.includes(path)) throw new Error('Unapproved canary module path');
+    return import(path);
+  }`);
+  let factoryFailed = false;
+  try {
+    return await page.evaluateHandle(
+      async ({ runtimeId, refs, loadModule }) => {
+        const materializerUrl = '/src/components/PrototypePreviewer/projection-materializer.ts';
+        const themeUrl = '/src/components/PrototypePreviewer/projection-theme.ts';
+        const { materializeProjectionCandidate } = await loadModule(materializerUrl);
+        const { resolveProjectionThemeSurfaceStyle } = await loadModule(themeUrl);
+        const mount = document.createElement('div');
+        mount.dataset.theme = 'light';
+        document.body.appendChild(mount);
+        let candidate: CanaryThemeOwner['candidate'] | undefined;
         try {
-          await candidate?.dispose();
-        } finally {
-          mount.remove();
+          candidate = await materializeProjectionCandidate(
+            { selection: { runtimeId, projectionFamilyId: 'brutalist' }, generation: 1 },
+            {
+              mount,
+              ownerId: `button-canary-${runtimeId}-${crypto.randomUUID()}`,
+              componentId: 'button',
+              controlIds: [],
+              controls: {
+                runtime: {
+                  label: 'Runtime',
+                  options: [{ value: runtimeId, label: runtimeId }],
+                  onValueChange() {},
+                },
+                family: {
+                  label: 'Family',
+                  options: [{ value: 'brutalist', label: 'Brutalist' }],
+                  onValueChange() {},
+                },
+                component: {
+                  label: 'Component',
+                  options: [{ value: 'button', label: 'Button' }],
+                  onValueChange() {},
+                },
+              },
+            }
+          );
+          if (!candidate) throw new Error('The materializer must return a controlled candidate.');
+          candidate.activate();
+          const nodes = Object.fromEntries(
+            refs.map((ref) => {
+              const node = mount.querySelector<HTMLElement>(`[data-demo-ref="${ref}"]`);
+              if (!node) throw new Error(`The controlled Button projection must render ${ref}.`);
+              return [ref, node];
+            })
+          );
+          return {
+            candidate,
+            mount,
+            nodes,
+            theme: resolveProjectionThemeSurfaceStyle('brutalist', mount),
+            events: [],
+            expectedRestamp: '',
+          };
+        } catch (error) {
+          try {
+            await candidate?.dispose();
+          } finally {
+            mount.remove();
+          }
+          throw error;
         }
-        throw error;
-      }
-    },
-    { runtimeId: runtime, refs: Object.keys(BUTTON_FILLS) }
-  );
+      },
+      { runtimeId: runtime, refs: Object.keys(BUTTON_FILLS), loadModule: nativeImport }
+    );
+  } catch (error) {
+    factoryFailed = true;
+    throw error;
+  } finally {
+    try {
+      await nativeImport.dispose();
+    } catch (error) {
+      if (!factoryFailed) throw error;
+      console.warn('Canary native loader cleanup failed', error);
+    }
+  }
 }
 
 async function applyCanaryTheme(
