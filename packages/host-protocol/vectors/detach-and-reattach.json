@@ -1,0 +1,118 @@
+{
+  "name": "Detaching a view retires its epoch; only a greater epoch installs again",
+  "sessionId": "s1",
+  "steps": [
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 1,
+        "template": null,
+        "slots": { "slots": ["slot-default"] },
+        "events": {
+          "registrations": [{ "leaseId": "l-a", "scope": "root", "type": "press.commit" }]
+        },
+        "focus": { "targets": [{ "ref": "focus-root", "sequential": true, "programmatic": true }] },
+        "style": [],
+        "a11y": { "semanticObjectId": "o1", "states": {}, "actions": {}, "relations": {} }
+      },
+      "expect": {
+        "status": "applied",
+        "readySurfaces": ["proto-surface", "slot-default"],
+        "diagnosticCodes": []
+      }
+    },
+    { "op": "activate", "viewEpoch": 1, "commitId": 1, "expect": { "status": "activated" } },
+    {
+      "op": "detach",
+      "viewEpoch": 2,
+      "expect": { "status": "not-installed", "releasedLeaseIds": [] }
+    },
+    {
+      "op": "detach",
+      "viewEpoch": 1,
+      "expect": { "status": "detached", "releasedLeaseIds": ["l-a"] }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "phase": "open",
+        "currentEpoch": null,
+        "currentCommit": null,
+        "activeEpoch": null,
+        "leases": [{ "leaseId": "l-a", "active": false, "released": true }]
+      }
+    },
+    { "op": "detach", "viewEpoch": 1, "expect": { "status": "stale", "releasedLeaseIds": [] } },
+    {
+      "op": "deliver",
+      "sample": { "sampleId": "sm-1", "viewEpoch": 1, "type": "press.commit", "leaseIds": ["l-a"] },
+      "expect": { "status": "rejected", "reason": "stale-epoch" }
+    },
+    { "op": "activate", "viewEpoch": 1, "commitId": 1, "expect": { "status": "stale" } },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 1,
+        "commitId": 2,
+        "template": null,
+        "slots": { "slots": ["slot-default"] },
+        "events": {
+          "registrations": [{ "leaseId": "l-b", "scope": "root", "type": "press.commit" }]
+        },
+        "focus": { "targets": [{ "ref": "focus-root", "sequential": true, "programmatic": true }] },
+        "style": [],
+        "a11y": null
+      },
+      "expect": { "status": "superseded", "diagnosticCodes": ["stale-projection"] }
+    },
+    {
+      "op": "install",
+      "transaction": {
+        "protocolVersion": 0,
+        "sessionId": "s1",
+        "instanceId": "i1",
+        "viewEpoch": 2,
+        "commitId": 1,
+        "template": null,
+        "slots": { "slots": ["slot-default"] },
+        "events": {
+          "registrations": [{ "leaseId": "l-c", "scope": "root", "type": "press.commit" }]
+        },
+        "focus": { "targets": [{ "ref": "focus-root", "sequential": true, "programmatic": true }] },
+        "style": [],
+        "a11y": null
+      },
+      "expect": {
+        "status": "applied",
+        "readySurfaces": ["proto-surface", "slot-default"],
+        "diagnosticCodes": []
+      }
+    },
+    { "op": "activate", "viewEpoch": 2, "commitId": 1, "expect": { "status": "activated" } },
+    {
+      "op": "deliver",
+      "sample": { "sampleId": "sm-2", "viewEpoch": 2, "type": "press.commit", "leaseIds": ["l-c"] },
+      "expect": { "status": "delivered", "leaseIds": ["l-c"] }
+    },
+    {
+      "op": "snapshot",
+      "expect": {
+        "phase": "open",
+        "currentEpoch": 2,
+        "currentCommit": 1,
+        "activeEpoch": 2,
+        "leases": [
+          { "leaseId": "l-a", "active": false, "released": true },
+          { "leaseId": "l-c", "active": true, "released": false }
+        ]
+      }
+    }
+  ]
+}

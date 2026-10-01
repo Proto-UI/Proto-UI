@@ -91,6 +91,20 @@ pub enum DefaultActionStatus {
     Disposed,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum DetachStatus {
+    Detached,
+    Stale,
+    NotInstalled,
+    Disposed,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DetachResult {
+    pub status: DetachStatus,
+    pub released_lease_ids: Vec<LeaseId>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DisposeResult {
     pub already_disposed: bool,
@@ -114,6 +128,9 @@ pub struct HostSessionModel {
     current_epoch: Option<ViewEpoch>,
     current_commit: Option<CommitId>,
     active_epoch: Option<ViewEpoch>,
+    /// The last view the instance detached. No projection, commit or
+    /// activation for it, or for anything older, can bring it back.
+    retired_epoch: Option<ViewEpoch>,
     instance_id: Option<InstanceId>,
     focus_targets: Vec<FocusTargetRef>,
     semantic_object_id: Option<SemanticObjectId>,
@@ -134,6 +151,7 @@ impl HostSessionModel {
             current_epoch: None,
             current_commit: None,
             active_epoch: None,
+            retired_epoch: None,
             instance_id: None,
             focus_targets: Vec::new(),
             semantic_object_id: None,
@@ -191,7 +209,15 @@ impl HostSessionModel {
             .find(|lease| lease.lease_id == lease_id)
     }
 
+    fn is_retired(&self, view_epoch: ViewEpoch) -> bool {
+        self.retired_epoch
+            .is_some_and(|retired| view_epoch <= retired)
+    }
+
     fn is_stale(&self, view_epoch: ViewEpoch, commit_id: CommitId) -> bool {
+        if self.is_retired(view_epoch) {
+            return true;
+        }
         match (self.current_epoch, self.current_commit) {
             (Some(epoch), Some(commit)) => {
                 view_epoch < epoch || (view_epoch == epoch && commit_id <= commit)
@@ -424,7 +450,11 @@ impl HostSessionModel {
             return ActivationStatus::Disposed;
         }
         let Some(current) = self.current_epoch else {
-            return ActivationStatus::NotInstalled;
+            return if self.is_retired(view_epoch) {
+                ActivationStatus::Stale
+            } else {
+                ActivationStatus::NotInstalled
+            };
         };
         if view_epoch > current {
             return ActivationStatus::NotInstalled;
@@ -565,6 +595,50 @@ impl HostSessionModel {
             Some(json!({ "sampleId": request.sample_id })),
         );
         DefaultActionStatus::LatePrevention
+    }
+
+    /// Retires the installed view when the instance detaches it: its leases
+    /// are released and nothing more is delivered to it. The session stays
+    /// open, so the instance keeps its logical state (C-LIFECYCLE-0008-E), and
+    /// only a greater epoch can install a view again.
+    pub fn detach_view(&mut self, view_epoch: ViewEpoch) -> DetachResult {
+        let refused = |status| DetachResult {
+            status,
+            released_lease_ids: Vec::new(),
+        };
+        if self.phase == SessionPhase::Disposed {
+            return refused(DetachStatus::Disposed);
+        }
+        if self.current_epoch != Some(view_epoch) {
+            let older = self.is_retired(view_epoch)
+                || self
+                    .current_epoch
+                    .is_some_and(|current| view_epoch < current);
+            return refused(if older {
+                DetachStatus::Stale
+            } else {
+                DetachStatus::NotInstalled
+            });
+        }
+        let released_lease_ids: Vec<LeaseId> = self
+            .leases
+            .iter()
+            .filter(|lease| !lease.released)
+            .map(|lease| lease.lease_id.clone())
+            .collect();
+        for lease in self.leases.iter_mut() {
+            if !lease.released {
+                lease.active = false;
+                lease.released = true;
+            }
+        }
+        self.retired_epoch = self.current_epoch.take();
+        self.current_commit = None;
+        self.active_epoch = None;
+        DetachResult {
+            status: DetachStatus::Detached,
+            released_lease_ids,
+        }
     }
 
     pub fn dispose(&mut self) -> DisposeResult {

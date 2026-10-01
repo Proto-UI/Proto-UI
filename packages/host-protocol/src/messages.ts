@@ -1,6 +1,7 @@
 import type {
   A11ySnapshotWire,
   DefaultActionRequest,
+  FocusPlan,
   FocusTargetRef,
   HostDiagnostic,
   InputSample,
@@ -48,12 +49,28 @@ export type HostHelloMessage = {
   readonly features: readonly string[];
 };
 
+/**
+ * The environment the host reports for rules to read as meta, such as
+ * `reducedMotion`. It replaces the environment sent before, whole; a key it
+ * omits reads as unset.
+ */
+export type MetaSetMessage = {
+  readonly kind: 'meta.set';
+  readonly meta: WireRecord;
+};
+
 export type SessionOpenMessage = {
   readonly kind: 'session.open';
   readonly sessionId: SessionId;
   readonly instanceId: InstanceId;
   readonly prototypeKey: string;
   readonly props: WireRecord;
+  /**
+   * The open session whose instance this one belongs to, such as a Switch for
+   * its thumb. The host composes the instance tree; the peer resolves context,
+   * anatomy and trigger lookups through it. Absent for a top-level instance.
+   */
+  readonly parentSessionId?: SessionId;
 };
 
 export type SessionOpenedMessage = {
@@ -84,6 +101,17 @@ export type ProjectionActivateMessage = {
   readonly sessionId: SessionId;
   readonly viewEpoch: ViewEpoch;
   readonly commitId: number;
+};
+
+/**
+ * The instance unmounted the view of `viewEpoch` because its view intent no
+ * longer wants one (C-LIFECYCLE-0008). The instance stays alive; a later
+ * `projection.install` with a greater epoch attaches a new view.
+ */
+export type ProjectionDetachMessage = {
+  readonly kind: 'projection.detach';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
 };
 
 export type LeaseReleaseMessage = {
@@ -168,6 +196,33 @@ export type A11ySnapshotMessage = {
   readonly snapshot: A11ySnapshotWire | null;
 };
 
+/**
+ * The instance's focus plan changed outside a commit, as a roving group's
+ * selection moves its tab stop. It replaces the plan the view carried, whole.
+ */
+export type FocusPlanMessage = {
+  readonly kind: 'focus.plan';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly focus: FocusPlan;
+};
+
+/**
+ * The instance root's feedback style changed outside a commit, as a rule on
+ * hover or press changes it. It replaces the style the view carried, whole.
+ */
+export type StyleApplyMessage = {
+  readonly kind: 'style.apply';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly tokens: readonly string[];
+};
+
+/**
+ * Ends a session, and before it every session opened inside it, so that no
+ * instance outlives the one it belongs to. The peer reports `session.disposed`
+ * for each, a part before the instance it belongs to.
+ */
 export type SessionDisposeMessage = {
   readonly kind: 'session.dispose';
   readonly sessionId: SessionId;
@@ -192,6 +247,7 @@ export type DiagnosticMessage = {
 
 export type HostToPeerMessage =
   | HostHelloMessage
+  | MetaSetMessage
   | SessionOpenMessage
   | PropsSetMessage
   | ProjectionAckMessage
@@ -205,6 +261,7 @@ export type PeerToHostMessage =
   | SessionOpenedMessage
   | ProjectionInstallMessage
   | ProjectionActivateMessage
+  | ProjectionDetachMessage
   | LeaseReleaseMessage
   | DefaultActionPreventMessage
   | FocusRequestMessage
@@ -213,6 +270,8 @@ export type PeerToHostMessage =
   | ExposeSignalMessage
   | ExposeResultMessage
   | A11ySnapshotMessage
+  | FocusPlanMessage
+  | StyleApplyMessage
   | SessionDisposedMessage
   | LifecycleMessage
   | DiagnosticMessage;

@@ -37,6 +37,7 @@
             }
           ]
         },
+        "style": [],
         "a11y": null
       },
       "expect": {
@@ -147,6 +148,17 @@
       "op": "defaultAction",
       "request": {
         "sessionId": "s1",
+        "sampleId": "sm-3"
+      },
+      "withinWindow": true,
+      "expect": {
+        "status": "duplicate"
+      }
+    },
+    {
+      "op": "defaultAction",
+      "request": {
+        "sessionId": "s1",
         "sampleId": "sm-unknown"
       },
       "withinWindow": true,
@@ -209,6 +221,7 @@
             }
           ]
         },
+        "style": [],
         "a11y": null
       },
       "expect": {
