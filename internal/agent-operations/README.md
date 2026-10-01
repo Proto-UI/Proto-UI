@@ -39,6 +39,8 @@ The local repository cannot authenticate a Codex task name, and a process holdin
 
 These authorizations do not change `.github/workflows/agent-operations-shadow.yml`, `policy.yaml`, or the Phase A token boundary. Review authorization excludes `COMMENT`, `ABSTAIN`, spec-entity approval, ready-for-review, and unrelated GitHub mutations. Merge authorization cannot manufacture approval or bypass a blocked PR; it fixes the base to `main` and method to `squash`. Publication, release, access, secrets, and rulesets remain excluded. The mutation commands bind review `commit_id` or merge `sha` to the inspected packet head and fail closed on stale, retargeted, incomplete, duplicate, self-reviewed, unresolved, permission-unknown, CI-unknown, or a merge state outside the documented boundary. The final non-admin GitHub merge API still enforces repository rules.
 
+The preview-authorization exception requires structured `previewAuthorization` publication debt bound to the collected status URL, `WRITE`/`MAINTAIN` permission, and an explicit live `viewerCanMergeAsAdmin: false`. Admin, bypass-capable, or unknown capability cannot use it; mentioning Vercel in unrelated debt is insufficient. See the [canonical Agent policy](contributor-agents.md#review-as-an-evidence-packet).
+
 ## Execution boundary
 
 The hourly scheduled and manually dispatched workflow in `.github/workflows/agent-operations-shadow.yml` uses this sequence:

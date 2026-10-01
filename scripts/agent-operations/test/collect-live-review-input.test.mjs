@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  QUERY,
   assertNoTruncation,
   buildLiveReviewInput,
   normalizeCheck,
@@ -43,6 +44,7 @@ function payload(overrides = {}) {
           isDraft: false,
           mergeable: 'MERGEABLE',
           mergeStateStatus: 'CLEAN',
+          viewerCanMergeAsAdmin: false,
           changedFiles: changedFiles.length,
           body: 'Bounded target',
           baseRefName: 'main',
@@ -151,6 +153,7 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   );
   assert.equal(result.viewerLogin, 'reviewer');
   assert.equal(result.viewerPermission, 'WRITE');
+  assert.equal(result.viewerCanMergeAsAdmin, false);
   assert.equal(result.authorLogin, 'contributor');
   assert.equal(result.mergeable, 'MERGEABLE');
   assert.equal(result.mergeStateStatus, 'CLEAN');
@@ -212,6 +215,18 @@ test('live collector derives thread time from comments and never fabricates time
     () => buildLiveReviewInput(empty, 'github.com:Proto-UI/Proto-UI', 487, [], changedFiles),
     /no comment timestamps/
   );
+});
+
+test('live collector preserves bypass capability and leaves missing capability unknown', () => {
+  for (const capability of [true, false, undefined, 'false']) {
+    const current = payload();
+    current.data.repository.pullRequest.viewerCanMergeAsAdmin = capability;
+    assert.equal(
+      buildLiveReviewInput(current, repositoryId, 487, [], changedFiles).viewerCanMergeAsAdmin,
+      typeof capability === 'boolean' ? capability : null
+    );
+  }
+  assert.match(QUERY, /viewerCanMergeAsAdmin/);
 });
 
 test('live collector fails closed on pagination truncation for every connection', () => {

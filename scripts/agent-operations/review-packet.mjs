@@ -345,6 +345,8 @@ try {
       policy,
       selfAssessment: execution.selfAssessment,
       credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
+      credentialPermission: live.viewerPermission,
+      credentialCanBypass: live.viewerCanMergeAsAdmin,
       actor: live.viewerLogin,
       pullRequestAuthor: live.authorLogin,
       ciConclusion: summarizeLiveChecks(live.input.checks, {

@@ -122,8 +122,27 @@
               "kind": { "enum": ["publication", "verification", "outside-scope"] },
               "missing": { "type": "string", "minLength": 1 },
               "reason": { "type": "string", "minLength": 1 },
-              "nextAction": { "type": "string", "minLength": 1 }
-            }
+              "nextAction": { "type": "string", "minLength": 1 },
+              "previewAuthorization": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["provider", "checkName", "authorizationUrl"],
+                "properties": {
+                  "provider": { "const": "vercel" },
+                  "checkName": { "const": "Vercel" },
+                  "authorizationUrl": {
+                    "type": "string",
+                    "pattern": "^https://vercel\\.com/git/authorize(?:\\?[^#]*)?(?:#.*)?$"
+                  }
+                }
+              }
+            },
+            "allOf": [
+              {
+                "if": { "required": ["previewAuthorization"] },
+                "then": { "properties": { "kind": { "const": "publication" } } }
+              }
+            ]
           }
         }
       },

@@ -45,6 +45,8 @@ Review packet 要写明仓库、PR、base ref name、base/head SHA、review clas
 
 本地复核始终可以进行。低档位 Agent 在有人协作时可以给出部分复核或明确的 `ABSTAIN`，同时说明自己没覆盖什么。`submit-review` 会从 GitHub 实时重新采集完整规范化输入（body、commits、PR 顶层 conversation comments、replies、threads、checks）并比对 digest，从实时上下文派生身份、权限和可信 CI，并使用 `commit_id` 绑定已审 head。`merge-pull-request` 会再次做同样的 reconciliation，要求 exact-head 独立批准和仓库就绪状态，再把 `sha` 固定为该 head；不得把任一预检与后续未绑定的 GitHub 写入拆开。公开 desktop task 名称不充当认证；当前范围依赖单一持证本地 runner、精确 standing policy、exact-head 写入和 GitHub 规则。扩展到并发 runner 前仍需服务侧 lease 与更强 runtime attribution。
 
+预览授权例外还要求 `WRITE`/`MAINTAIN` 权限，以及 GitHub 明确返回 `viewerCanMergeAsAdmin: false`；admin、可绕过保护或能力未知的凭据不能使用它。Publication debt 必须包含 `previewAuthorization`，其中 `provider: vercel`、`checkName: Vercel`，`authorizationUrl` 与采集到的完整 status URL 一致。仅在自由文本中提到 Vercel 不够，详见上文链接的 canonical policy。
+
 ## 谨慎选择任务
 
 自治 Agent 只能提议已经就绪、范围明确、无人占用，并且没有超过最新本地上限的任务。它要检查负责人、近期评论、关联工作、labels、milestone，以及 Project 启用后的字段。真正发布 claim 是单独的外部写操作。没有合格任务时，直接报告无任务即可。

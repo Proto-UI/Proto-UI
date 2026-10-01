@@ -121,6 +121,8 @@ function scheduledMerge(overrides = {}) {
       capability: { band: 'C4' },
     },
     credentialCanMerge: true,
+    credentialPermission: 'MAINTAIN',
+    credentialCanBypass: false,
     actor: 'contributor',
     pullRequestAuthor: 'contributor',
     ciConclusion: 'success',
@@ -149,6 +151,11 @@ function previewAuthorizationTarget(previewOverrides = {}) {
     missing: 'Vercel preview deployment',
     reason: 'The verified Vercel Bot reports missing preview authorization; repository CI passed.',
     nextAction: 'Authorize deployment and verify the preview independently.',
+    previewAuthorization: {
+      provider: 'vercel',
+      checkName: 'Vercel',
+      authorizationUrl: 'https://vercel.com/git/authorize?team=external',
+    },
   });
   const input = reviewInput({
     checks: [...reviewInput().checks, preview],
@@ -170,6 +177,70 @@ test('verified preview authorization alone permits a MERGEABLE/UNSTABLE head', (
   assert.equal(result.allowed, true);
   assert.equal(result.headSha, sha('b'));
   assert.equal(result.mergeMethod, 'squash');
+});
+
+test('the unstable exception rejects admin, bypass-capable, and unknown credentials', () => {
+  for (const credentialPermission of ['MAINTAIN', 'WRITE']) {
+    assert.equal(
+      scheduledMerge({
+        ...previewAuthorizationTarget(),
+        mergeStateStatus: 'UNSTABLE',
+        credentialPermission,
+        credentialCanBypass: false,
+      }).allowed,
+      true
+    );
+  }
+  for (const credentials of [
+    { credentialPermission: 'ADMIN', credentialCanBypass: false },
+    { credentialPermission: 'MAINTAIN', credentialCanBypass: true },
+    { credentialPermission: 'WRITE', credentialCanBypass: true },
+    { credentialPermission: 'MAINTAIN', credentialCanBypass: undefined },
+    { credentialPermission: undefined, credentialCanBypass: false },
+    { credentialPermission: 'READ', credentialCanBypass: false },
+  ]) {
+    const result = scheduledMerge({
+      ...previewAuthorizationTarget(),
+      mergeStateStatus: 'UNSTABLE',
+      ...credentials,
+    });
+    assert.equal(result.allowed, false, JSON.stringify(credentials));
+  }
+});
+
+test('an unrelated published Vercel debt does not disclose preview authorization', () => {
+  for (const missing of ['Vercel release notes', 'Vercel billing report']) {
+    const target = previewAuthorizationTarget();
+    const evidence = target.packet.agentEvidence;
+    evidence.debt.at(-1).missing = missing;
+    delete evidence.debt.at(-1).previewAuthorization;
+    target.input.reviews[0].body = `Approved\n\n<!-- ${agentEvidenceMarker({ schemaVersion: 2, agentEvidence: evidence })} -->`;
+    const result = scheduledMerge({
+      input: target.input,
+      packet: packet(target.input, { agentEvidence: evidence }),
+      mergeStateStatus: 'UNSTABLE',
+    });
+    assert.equal(result.allowed, false, missing);
+    assert.match(result.reason, /preview authorization debt/);
+  }
+});
+
+test('preview debt must bind the exact authorization URL and published receipt', () => {
+  const target = previewAuthorizationTarget();
+  target.packet.agentEvidence.debt.at(-1).previewAuthorization.authorizationUrl =
+    'https://vercel.com/git/authorize?team=another';
+  assert.match(
+    scheduledMerge({ ...target, mergeStateStatus: 'UNSTABLE' }).reason,
+    /preview authorization debt/
+  );
+
+  const changedReceipt = previewAuthorizationTarget();
+  changedReceipt.packet.agentEvidence.debt.at(-1).nextAction =
+    'Verify the new preview after authorization.';
+  assert.match(
+    scheduledMerge({ ...changedReceipt, mergeStateStatus: 'UNSTABLE' }).reason,
+    /published Agent evidence receipt/
+  );
 });
 
 test('preview authorization does not admit blocked, conflicting, or unknown merge states', () => {
@@ -303,6 +374,11 @@ test('merge requires published preview-authorization debt even after independent
     missing: 'Vercel preview deployment',
     reason: 'The external team has not authorized the contributor; repository CI passed.',
     nextAction: 'Authorize deployment and verify the preview independently.',
+    previewAuthorization: {
+      provider: 'vercel',
+      checkName: 'Vercel',
+      authorizationUrl: preview.detailsUrl,
+    },
   });
   const disclosed = reviewInput({
     checks: input.checks,

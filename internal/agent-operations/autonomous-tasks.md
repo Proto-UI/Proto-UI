@@ -14,6 +14,8 @@ The repository does not pretend that a caller-provided desktop task name is auth
 
 Autonomous maintenance is still a manual protocol. `pui-mission` defines the candidate-to-frozen transition. A maintainer currently freezes one mission and starts each fresh Agent context outside an autonomous controller. There is no scheduler, callback service, or globally atomic lease service for that state machine, so competing runners and automatic external writes remain unavailable.
 
+The preview-authorization exception requires structured `previewAuthorization` publication debt bound to the collected status URL, `WRITE`/`MAINTAIN` permission, and an explicit live `viewerCanMergeAsAdmin: false`. Admin, bypass-capable, or unknown capability cannot use it; mentioning Vercel in unrelated debt is insufficient. See the [canonical Agent policy](contributor-agents.md#review-as-an-evidence-packet).
+
 ## What is only a candidate
 
 CI diagnosis, collaboration-governance audits, deployment evidence audits, and dependency drift audits are useful read-only task families, but no deployed controller currently dispatches them. Their proposed boundaries are recorded in `autonomous-tasks.yaml` so future automation starts from explicit inputs, outputs, permissions, and stop conditions.

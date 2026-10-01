@@ -32,6 +32,7 @@ const CHANGED_FILE_STATUSES = new Set([
 ]);
 const SPEC_ENTITY_PATH =
   /^spec\/(contracts|prototypes|modules|adapters|decisions|host-caps|tests|versions|knowledge)\/[^/]+\.yaml$/;
+const PREVIEW_AUTHORIZATION_URL = /^https:\/\/vercel\.com\/git\/authorize(?:\?[^#]*)?(?:#.*)?$/;
 
 // An external preview authorization prompt is not evidence about repository CI.
 // Keep its status in the canonical input and require explicit publication debt
@@ -62,7 +63,11 @@ function hasUndisclosedPreviewAuthorizationDebt(packet, input) {
     (check) =>
       isExternalPreviewAuthorizationFailure(check) &&
       !packet.agentEvidence.debt.some(
-        (item) => item.kind === 'publication' && item.missing.includes(check.name)
+        (item) =>
+          item.kind === 'publication' &&
+          item.previewAuthorization?.provider === check.source &&
+          item.previewAuthorization.checkName === check.name &&
+          item.previewAuthorization.authorizationUrl === check.detailsUrl
       )
   );
 }
@@ -680,7 +685,18 @@ export function validateAgentEvidence(evidence, headSha) {
   );
   assert(Array.isArray(evidence.debt), 'agentEvidence.debt must be an array');
   for (const debt of evidence.debt) {
-    exactKeys(debt, ['kind', 'missing', 'reason', 'nextAction'], 'agentEvidence.debt item');
+    const hasPreviewAuthorization = Object.hasOwn(debt, 'previewAuthorization');
+    exactKeys(
+      debt,
+      [
+        'kind',
+        'missing',
+        'reason',
+        'nextAction',
+        ...(hasPreviewAuthorization ? ['previewAuthorization'] : []),
+      ],
+      'agentEvidence.debt item'
+    );
     assert(
       ['publication', 'verification', 'outside-scope'].includes(debt.kind),
       'agentEvidence.debt.kind is invalid'
@@ -690,6 +706,25 @@ export function validateAgentEvidence(evidence, headSha) {
         typeof debt[field] === 'string' && debt[field].trim().length > 0,
         `agentEvidence.debt.${field} is required`
       );
+    if (hasPreviewAuthorization) {
+      exactKeys(
+        debt.previewAuthorization,
+        ['provider', 'checkName', 'authorizationUrl'],
+        'agentEvidence.debt.previewAuthorization'
+      );
+      assert(
+        debt.kind === 'publication' &&
+          typeof debt.previewAuthorization.authorizationUrl === 'string' &&
+          PREVIEW_AUTHORIZATION_URL.test(debt.previewAuthorization.authorizationUrl) &&
+          isExternalPreviewAuthorizationFailure({
+            name: debt.previewAuthorization.checkName,
+            source: debt.previewAuthorization.provider,
+            conclusion: 'FAILURE',
+            detailsUrl: debt.previewAuthorization.authorizationUrl,
+          }),
+        'agentEvidence.debt.previewAuthorization must identify a Vercel authorization publication debt'
+      );
+    }
   }
   assert(
     evidence.disposition === 'complete' ? evidence.debt.length === 0 : evidence.debt.length > 0,
@@ -754,7 +789,10 @@ export function renderReviewBody(packet) {
       ? list(
           evidence.debt.map(
             (item) =>
-              `[${item.kind}] ${item.missing}. Reason: ${item.reason} Next Agent action: ${item.nextAction}`
+              `[${item.kind}] ${item.missing}. Reason: ${item.reason} Next Agent action: ${item.nextAction}` +
+              (item.previewAuthorization
+                ? ` Preview authorization: ${item.previewAuthorization.provider}/${item.previewAuthorization.checkName} <${item.previewAuthorization.authorizationUrl}>.`
+                : '')
           )
         )
       : 'No known debt within that evidence scope.',
@@ -1105,6 +1143,8 @@ export function authorizePullRequestMerge({
   policy,
   selfAssessment,
   credentialCanMerge,
+  credentialPermission,
+  credentialCanBypass,
   actor,
   pullRequestAuthor,
   ciConclusion,
@@ -1204,6 +1244,8 @@ export function authorizePullRequestMerge({
   // and successful, and the final non-admin merge API still enforces GitHub rules.
   const previewAuthorizationOnlyUnstable =
     mergeStateStatus === 'UNSTABLE' &&
+    ['MAINTAIN', 'WRITE'].includes(credentialPermission) &&
+    credentialCanBypass === false &&
     liveInput.checks.some(isExternalPreviewAuthorizationFailure) &&
     liveInput.checks.every(
       (check) =>

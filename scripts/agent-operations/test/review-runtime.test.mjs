@@ -655,9 +655,40 @@ test('approval discloses a Vercel authorization failure as publication debt', ()
     missing: 'Vercel preview deployment',
     reason: 'The external team has not authorized the contributor; repository CI passed.',
     nextAction: 'Authorize deployment and verify the preview independently.',
+    previewAuthorization: {
+      provider: 'vercel',
+      checkName: 'Vercel',
+      authorizationUrl: input.checks.at(-1).detailsUrl,
+    },
   });
   assert.equal(authorizeReviewSubmission(submission).allowed, true);
   assert.match(renderReviewBody(review), /Vercel preview deployment/);
+  assert.match(renderReviewBody(review), /Preview authorization: vercel\/Vercel/);
+  assert.match(renderReviewBody(review), /https:\/\/vercel.com\/git\/authorize\?team=external/);
+
+  const previewDebt = review.agentEvidence.debt.at(-1);
+  for (const malformed of [
+    null,
+    { provider: 'vercel', checkName: 'Vercel' },
+    { ...previewDebt.previewAuthorization, provider: 'status-context' },
+    { ...previewDebt.previewAuthorization, checkName: 'Other preview' },
+    {
+      ...previewDebt.previewAuthorization,
+      authorizationUrl: 'https://vercel.example/git/authorize',
+    },
+    {
+      ...previewDebt.previewAuthorization,
+      authorizationUrl: 'https://vercel.com/deployments/failed',
+    },
+    { ...previewDebt.previewAuthorization, extra: true },
+  ]) {
+    const invalid = structuredClone(review);
+    invalid.agentEvidence.debt.at(-1).previewAuthorization = malformed;
+    assert.throws(() => validateReviewPacket(invalid, input), /previewAuthorization/);
+  }
+  previewDebt.previewAuthorization.authorizationUrl =
+    'https://vercel.com/git/authorize?team=another';
+  assert.equal(authorizeReviewSubmission(submission).allowed, false);
 });
 
 test('review submission preserves explicit authorization and activates the bounded scheduled scope', () => {

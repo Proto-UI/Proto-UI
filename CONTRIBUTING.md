@@ -290,6 +290,8 @@ The maintainer-controlled local Codex schedule has two active standing scopes. `
 
 The full Agent policy is in `internal/agent-operations/contributor-agents.md`. The human-readable skill catalog is on the documentation site. Autonomous-maintenance experiments use `$pui-maintain` and its separate independence protocol; supported no-finding and rejected outcomes close through `pui-record`, not a fake remediation review.
 
+The preview-authorization exception requires structured `previewAuthorization` publication debt bound to the collected status URL, `WRITE`/`MAINTAIN` permission, and an explicit live `viewerCanMergeAsAdmin: false`. Admin, bypass-capable, or unknown capability cannot use it; mentioning Vercel in unrelated debt is insufficient. See the [canonical Agent policy](./internal/agent-operations/contributor-agents.md#review-as-an-evidence-packet).
+
 ## Communication
 
 - [GitHub Issues](https://github.com/Proto-UI/Proto-UI/issues) hold bounded work.

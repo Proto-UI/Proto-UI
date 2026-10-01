@@ -28,6 +28,7 @@ query($owner: String!, $name: String!, $number: Int!) {
       isDraft
       mergeable
       mergeStateStatus
+      viewerCanMergeAsAdmin
       changedFiles
       body
       baseRefName
@@ -312,6 +313,10 @@ export function buildLiveReviewInput(
     input,
     viewerLogin: payload.data.viewer.login,
     viewerPermission: payload.data.repository.viewerPermission,
+    viewerCanMergeAsAdmin:
+      typeof pullRequestPayload.viewerCanMergeAsAdmin === 'boolean'
+        ? pullRequestPayload.viewerCanMergeAsAdmin
+        : null,
     authorLogin: pullRequestPayload.author?.login,
     mergeable: pullRequestPayload.mergeable,
     mergeStateStatus: pullRequestPayload.mergeStateStatus,
