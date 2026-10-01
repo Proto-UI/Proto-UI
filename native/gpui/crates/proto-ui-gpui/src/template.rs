@@ -190,6 +190,9 @@ pub fn build(template: &Template, context: BuildContext<'_>) -> (SurfaceNode, Ve
         session: context.session_id.to_string(),
         style: context.root_style.clone(),
         focus: context.focus.clone(),
+        // The host attaches the instance's accessibility projection, which
+        // arrives with the snapshot rather than with the template.
+        a11y: None,
         children,
     };
     (root, issues)
@@ -222,6 +225,7 @@ fn build_children(
                     session: context.session_id.to_string(),
                     style: style.refinement,
                     focus: None,
+                    a11y: None,
                     children: build_children(children, &id, context, issues),
                 }));
             }
