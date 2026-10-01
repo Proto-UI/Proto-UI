@@ -9,8 +9,10 @@ import {
   agentEvidenceMarker,
   authorizePullRequestMerge,
   computeReviewInputDigest,
+  renderReviewBody,
   validateReviewInputSnapshot,
 } from '../review-runtime.mjs';
+import { collectLiveReviewInput, submitGitHubReview } from '../collect-live-review-input.mjs';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
@@ -551,3 +553,174 @@ test('permission observation order is canonical and duplicate identities fail cl
   input.reviewerPermissions.push(input.reviewerPermissions[0]);
   assert.throws(() => validateReviewInputSnapshot(input), /duplicates reviewer permission login/);
 });
+
+test('rendered review submission and fresh collection produce a usable merge evidence receipt', () => {
+  const before = reviewInput({ reviews: [], threads: [] });
+  const reviewed = packet(before);
+  const body = renderReviewBody(reviewed);
+  assert.match(
+    body,
+    /<!-- proto-ui:review-packet:sha256=[a-f0-9]{64} proto-ui:agent-evidence:sha256=[a-f0-9]{64} -->/
+  );
+  let writes = 0;
+  const receipt = submitGitHubReview(
+    before.repositoryId,
+    before.pullRequest,
+    { commitId: before.headSha, event: 'APPROVE', body },
+    (_command, _args, options) => {
+      writes += 1;
+      assert.equal(JSON.parse(options.input).body, body);
+      return JSON.stringify({
+        id: 9001,
+        state: 'APPROVED',
+        commit_id: before.headSha,
+        user: { login: 'independent-reviewer' },
+        body,
+      });
+    },
+    { reviewerLogin: 'independent-reviewer' }
+  );
+  assert.equal(receipt.status, 'applied');
+  assert.equal(writes, 1);
+  const complete = (nodes) => ({ nodes, pageInfo: { hasNextPage: false } });
+  const githubPayload = {
+    data: {
+      viewer: { login: 'contributor' },
+      repository: {
+        viewerPermission: 'WRITE',
+        pullRequest: {
+          state: before.pullRequestState,
+          isDraft: before.isDraft,
+          mergeable: 'MERGEABLE',
+          mergeStateStatus: 'CLEAN',
+          changedFiles: before.changedFiles.length,
+          body: before.pullRequestBody,
+          baseRefName: before.baseRefName,
+          baseRefOid: before.baseSha,
+          headRefOid: before.headSha,
+          author: { login: before.pullRequestAuthor },
+          commits: complete(
+            before.commits.map((commit) => ({
+              commit: {
+                oid: commit.sha,
+                message: commit.message,
+                author: {
+                  name: commit.author.name,
+                  email: commit.author.email,
+                  user: { login: commit.author.login },
+                },
+                committer: {
+                  name: commit.committer.name,
+                  email: commit.committer.email,
+                  user: { login: commit.committer.login },
+                },
+                statusCheckRollup: {
+                  contexts: complete([
+                    {
+                      __typename: 'CheckRun',
+                      name: 'test',
+                      status: 'COMPLETED',
+                      conclusion: 'SUCCESS',
+                      completedAt: '2026-08-27T06:00:00Z',
+                      detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
+                      checkSuite: {
+                        app: { id: 'APP_github_actions', slug: 'github-actions' },
+                        repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
+                        workflowRun: {
+                          file: { path: '.github/workflows/ci.yml' },
+                          workflow: { name: 'CI' },
+                        },
+                      },
+                    },
+                  ]),
+                },
+              },
+            }))
+          ),
+          reviews: complete([
+            {
+              id: receipt.id,
+              author: { login: 'independent-reviewer' },
+              state: receipt.state,
+              commit: { oid: receipt.commitId },
+              submittedAt: '2026-08-27T06:01:00Z',
+              body,
+            },
+          ]),
+          comments: complete([]),
+          reviewThreads: complete([]),
+        },
+      },
+    },
+  };
+  const reads = [];
+  const live = collectLiveReviewInput(before.repositoryId, before.pullRequest, {
+    runner(_command, args) {
+      reads.push(args);
+      if (args.includes('graphql')) return JSON.stringify(githubPayload);
+      if (args.includes('repos/Proto-UI/Proto-UI/pulls/487/files?per_page=100'))
+        return JSON.stringify([
+          before.changedFiles.map((file) => ({ filename: file.path, status: file.status })),
+        ]);
+      if (args.includes('repos/Proto-UI/Proto-UI/collaborators/independent-reviewer/permission'))
+        return JSON.stringify({ user: { login: 'independent-reviewer' }, permission: 'write' });
+      throw new Error(`unexpected fake read: ${args.join(' ')}`);
+    },
+  });
+  const collected = live.input;
+  assert.equal(collected.schemaVersion, 5);
+  assert.equal(reads.length, 3);
+  assert.equal(collected.reviewerPermissions[0].login, 'independent-reviewer');
+
+  assert.notEqual(computeReviewInputDigest(before), computeReviewInputDigest(collected));
+  const mergePacket = packet(collected);
+  assert.equal(agentEvidenceMarker(reviewed), agentEvidenceMarker(mergePacket));
+  assert.equal(scheduledMerge({ input: collected, packet: mergePacket }).allowed, true);
+  const copiedComment = structuredClone(collected);
+  copiedComment.reviews[0].body = 'Plain independent approval without publication evidence';
+  copiedComment.comments = [
+    {
+      id: 'copied-comment',
+      author: 'independent-reviewer',
+      body,
+      updatedAt: '2026-08-27T06:02:00Z',
+    },
+  ];
+  const copiedResult = scheduledMerge({ input: copiedComment, packet: packet(copiedComment) });
+  assert.equal(copiedResult.allowed, false);
+  assert.match(copiedResult.reason, /comment.*authorization.*receipt/);
+  const revoked = structuredClone(collected);
+  revoked.reviewerPermissions[0].permission = 'read';
+  assert.equal(scheduledMerge({ input: revoked, packet: packet(revoked) }).allowed, false);
+});
+
+for (const [name, transform, allowed] of [
+  [
+    'line-wrapped combined comment',
+    (token) => `<!-- proto-ui:review-packet:sha256=${'a'.repeat(64)}\n${token} -->`,
+    true,
+  ],
+  [
+    'combined comment with a forged prefix',
+    (token) => `<!-- proto-ui:review-packet:sha256=${'a'.repeat(64)} prefix-${token} -->`,
+    false,
+  ],
+  [
+    'combined comment with a forged suffix',
+    (token) => `<!-- proto-ui:review-packet:sha256=${'a'.repeat(64)} ${token}-suffix -->`,
+    false,
+  ],
+  [
+    'combined comment with a wrong digest',
+    (token) =>
+      `<!-- proto-ui:review-packet:sha256=${'a'.repeat(64)} ${token.slice(0, -1)}${token.endsWith('0') ? '1' : '0'} -->`,
+    false,
+  ],
+  ['plain prose outside a receipt comment', (token) => `Published ${token} in prose`, false],
+]) {
+  test(`merge evidence marker handles ${name}`, () => {
+    const input = reviewInput();
+    input.reviews[0].body = transform(evidenceReceiptMarker(input.headSha));
+    assert.equal(scheduledMerge({ input, packet: packet(input) }).allowed, allowed);
+  });
+}

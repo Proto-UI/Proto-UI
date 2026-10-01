@@ -585,6 +585,29 @@ export function agentEvidenceMarker(packet) {
   return `proto-ui:agent-evidence:sha256=${digest(packet.agentEvidence)}`;
 }
 
+function hasReceiptMarker(body, marker) {
+  if (typeof body !== 'string') return false;
+  let cursor = 0;
+  while (cursor < body.length) {
+    const start = body.indexOf('<!--', cursor);
+    if (start === -1) return false;
+    const end = body.indexOf('-->', start + 4);
+    if (end === -1) return false;
+    // renderReviewBody combines packet and evidence markers in one comment.
+    // Match a complete whitespace-delimited token, never a prefix or suffix.
+    if (
+      body
+        .slice(start + 4, end)
+        .trim()
+        .split(/\s+/)
+        .includes(marker)
+    )
+      return true;
+    cursor = end + 3;
+  }
+  return false;
+}
+
 export function verifyReconciliation(packet, priorPacket) {
   assert(
     packet && typeof packet.reconciliation === 'object',
@@ -1395,7 +1418,7 @@ export function authorizePullRequestMerge({
 
   // The publication source must itself be a valid independent approval.
   // A matching digest in arbitrary participant-authored text is not authority.
-  const evidenceReceipt = `<!-- ${agentEvidenceMarker(packet)} -->`;
+  const evidenceReceipt = agentEvidenceMarker(packet);
   const publicationReceipt = liveInput.reviews.some(
     (review) =>
       review.commitSha === liveInput.headSha &&
@@ -1405,11 +1428,12 @@ export function authorizePullRequestMerge({
       hasCurrentReviewWritePermission(liveInput, review.author) &&
       headReviewStates.get(`login:${review.author.toLowerCase()}`) === 'APPROVED' &&
       typeof review.body === 'string' &&
-      review.body.includes(evidenceReceipt)
+      hasReceiptMarker(review.body, evidenceReceipt)
   );
   if (!publicationReceipt) {
     const unboundComment = liveInput.comments.some(
-      (comment) => typeof comment.body === 'string' && comment.body.includes(evidenceReceipt)
+      (comment) =>
+        typeof comment.body === 'string' && hasReceiptMarker(comment.body, evidenceReceipt)
     );
     return {
       allowed: false,
