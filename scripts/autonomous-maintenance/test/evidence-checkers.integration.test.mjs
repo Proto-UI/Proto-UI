@@ -47,6 +47,29 @@ function writeRunLedger(root, run) {
   );
 }
 
+function runCheckerWithGitHubFixture(fixture, responses = {}) {
+  // Test-only runner injection. Production has no file/env escape hatch for
+  // replacing GitHub facts with caller-supplied receipts or snapshots.
+  const driver = path.join(fixture.root, 'run-checker-fixture.mjs');
+  fs.writeFileSync(
+    driver,
+    `
+    import cp from 'node:child_process';
+    import { syncBuiltinESMExports } from 'node:module';
+    const original = cp.execFileSync;
+    const responses = ${JSON.stringify(responses)};
+    cp.execFileSync = (command, args, options) => {
+      if (command !== 'gh') return original(command, args, options);
+      if (args[0] !== 'api' || !Object.hasOwn(responses, args[1])) throw new Error('fixture: live proof unavailable');
+      return JSON.stringify(responses[args[1]]);
+    };
+    syncBuiltinESMExports();
+    await import(${JSON.stringify(runChecker)});
+  `
+  );
+  return spawnSync(process.execPath, [driver], { cwd: fixture.root, encoding: 'utf8' });
+}
+
 test('review packet canonicalization preserves historical review digests', () => {
   const packet = markdownMetadata('Digest history fixture', {
     integrationEligibility: { status: 'eligible', exactHead: 'satisfied' },
@@ -568,6 +591,103 @@ test('run checker rejects a squash receipt with an additional whitespace-only pa
   assert.equal(result.status, 1, result.stdout);
   assert.match(result.stderr, /mergeCommitSha changed paths must match/);
 });
+
+for (const parentKind of ['unrelated-root', 'unmerged-baseline-child']) {
+  test(`run checker rejects a fabricated integrated receipt on an ${parentKind}`, (t) => {
+    const fixture = createFixture(t);
+    fixture.finding.remediationReview.integrationEligibility = 'integrated';
+    fixture.review.integrationEligibility.status = 'integrated';
+    writeFile(
+      fixture.root,
+      fixture.findingPath,
+      markdownMetadata('AM-P0-004-F1: Fixture finding', fixture.finding)
+    );
+    commitReviewedFixture(fixture);
+    let parent = fixture.baselineCommit;
+    if (parentKind === 'unrelated-root') {
+      const baselineTree = execFileSync('git', ['rev-parse', `${parent}^{tree}`], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      }).trim();
+      parent = execFileSync('git', ['commit-tree', baselineTree, '-m', 'unrelated root'], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      }).trim();
+    }
+    const exactTree = execFileSync('git', ['rev-parse', `${fixture.exactHeadSha}^{tree}`], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    }).trim();
+    const mergeCommitSha = execFileSync(
+      'git',
+      ['commit-tree', exactTree, '-p', parent, '-m', 'fabricated squash'],
+      {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      }
+    ).trim();
+    fixture.run.integration.status = 'integrated';
+    fixture.run.integration.receipt = {
+      repositoryId: 'github.com:Proto-UI/Proto-UI',
+      pullRequest: 1,
+      authorizationId: 'explicit-current-user',
+      headSha: fixture.exactHeadSha,
+      liveHeadSha: fixture.exactHeadSha,
+      mergeCommitSha,
+      mergeMethod: 'squash',
+      mergedAt: '2026-10-01T00:00:00Z',
+    };
+    writeRunLedger(fixture.root, fixture.run);
+    const result = runCheckerWithGitHubFixture(fixture);
+    assert.equal(
+      result.status,
+      1,
+      'local matching bytes and caller-provided receipt cannot prove a GitHub merge'
+    );
+    assert.match(
+      result.stderr,
+      parentKind === 'unrelated-root' ? /merge parent does not descend/ : /missing live merge proof/
+    );
+    if (parentKind === 'unmerged-baseline-child') {
+      const prefix = 'repos/Proto-UI/Proto-UI/';
+      const live = runCheckerWithGitHubFixture(fixture, {
+        [`${prefix}pulls/1`]: {
+          number: 1,
+          state: 'closed',
+          merged: true,
+          base: { ref: 'main', repo: { full_name: 'Proto-UI/Proto-UI' } },
+          head: { sha: fixture.exactHeadSha },
+          merge_commit_sha: mergeCommitSha,
+          merged_at: fixture.run.integration.receipt.mergedAt,
+        },
+        [`${prefix}git/commits/${mergeCommitSha}`]: {
+          sha: mergeCommitSha,
+          parents: [{ sha: fixture.baselineCommit }],
+        },
+        [`${prefix}git/ref/heads/main`]: {
+          ref: 'refs/heads/main',
+          object: { type: 'commit', sha: mergeCommitSha },
+        },
+        [`${prefix}compare/${fixture.baselineCommit}...${fixture.baselineCommit}?per_page=1`]: {
+          status: 'identical',
+          base_commit: { sha: fixture.baselineCommit },
+          merge_base_commit: { sha: fixture.baselineCommit },
+        },
+        [`${prefix}compare/${mergeCommitSha}...${mergeCommitSha}?per_page=1`]: {
+          status: 'identical',
+          base_commit: { sha: mergeCommitSha },
+          merge_base_commit: { sha: mergeCommitSha },
+        },
+      });
+      assert.equal(live.status, 1);
+      assert.match(
+        live.stderr,
+        /actual GitHub merge is verified, but trusted receipt-producer evidence for the historical squash method is unavailable/
+      );
+      assert.doesNotMatch(live.stderr, /missing live merge proof/);
+    }
+  });
+}
 
 for (const target of ['review-packet', 'implementation']) {
   for (const modeCase of [

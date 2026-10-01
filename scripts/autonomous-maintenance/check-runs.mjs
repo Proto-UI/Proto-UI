@@ -10,6 +10,7 @@ import {
 } from './evidence-state.mjs';
 import { computeReviewedContentDigest } from './reviewed-content-digest.mjs';
 import { readGitPathNames } from './git-paths.mjs';
+import { verifyLiveIntegrationFacts } from './live-integration-facts.mjs';
 
 const root = process.cwd();
 const phaseDirectory = path.join(root, 'internal/autonomous-maintenance/phase-0');
@@ -681,6 +682,7 @@ function validateForwardRunState(run, label) {
     if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) {
       fail(ledgerFile, `${label}.integration.receipt is required after integration`);
     } else {
+      const receiptErrorsBefore = errors.length;
       if (receipt.repositoryId !== 'github.com:Proto-UI/Proto-UI') {
         fail(ledgerFile, `${label}.integration.receipt.repositoryId is invalid`);
       }
@@ -715,6 +717,24 @@ function validateForwardRunState(run, label) {
       }
       if (mergeCommitIsLocal) {
         try {
+          const parents = execFileSync(
+            'git',
+            ['rev-list', '--parents', '-n', '1', receipt.mergeCommitSha],
+            { cwd: root, encoding: 'utf8' }
+          )
+            .trim()
+            .split(/\s+/)
+            .slice(1);
+          if (parents.length !== 1)
+            throw new Error('expected exactly one parent for the supported squash shape');
+          try {
+            execFileSync('git', ['merge-base', '--is-ancestor', run.baselineCommit, parents[0]], {
+              cwd: root,
+              stdio: 'ignore',
+            });
+          } catch {
+            throw new Error('merge parent does not descend from the reviewed baseline');
+          }
           const mergePaths = committedChangedPaths(
             `${receipt.mergeCommitSha}^`,
             receipt.mergeCommitSha
@@ -769,6 +789,21 @@ function validateForwardRunState(run, label) {
             ledgerFile,
             `${label}.integration.receipt.mergeCommitSha could not be verified: ${error.message}`
           );
+        }
+        if (
+          errors.length === receiptErrorsBefore &&
+          receipt.mergeMethod === 'squash' &&
+          isRfc3339Timestamp(receipt.mergedAt)
+        ) {
+          try {
+            verifyLiveIntegrationFacts(receipt, run.baselineCommit);
+            fail(
+              ledgerFile,
+              `${label}.integration actual GitHub merge is verified, but trusted receipt-producer evidence for the historical squash method is unavailable; integrated remains blocked`
+            );
+          } catch (error) {
+            fail(ledgerFile, `${label}.integration is missing live merge proof: ${error.message}`);
+          }
         }
       }
       if (receipt.mergeMethod !== 'squash') {
