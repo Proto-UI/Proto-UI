@@ -644,19 +644,24 @@ function mergeFixture({
         return JSON.stringify(putResponse ?? { merged: true, sha: sha('c'), message: 'Merged' });
       }
       assert.equal(args[0], 'api');
-      assert.equal(args.length, 2, 'verification is a read-only GET');
+      assert.ok(
+        args.length === 2 || (args.length === 3 && args[2] === '--include'),
+        'verification is a read-only GET'
+      );
+      const json = (value) =>
+        `${args.includes('--include') ? 'HTTP/2.0 200 OK\nContent-Type: application/json\r\n\r\n' : ''}${JSON.stringify(value)}`;
       if (args[1] === 'repos/Proto-UI/Proto-UI/git/ref/heads/main')
-        return JSON.stringify({
+        return json({
           ref: 'refs/heads/main',
           object: { type: 'commit', sha: branchSha ?? open.base.sha },
         });
       if (args[1] === `repos/Proto-UI/Proto-UI/git/commits/${sha('c')}`)
-        return JSON.stringify({ sha: sha('c'), parents: [{ sha: parentSha }] });
+        return json({ sha: sha('c'), parents: [{ sha: parentSha }] });
       assert.equal(args[1], 'repos/Proto-UI/Proto-UI/pulls/487');
-      if (writes === 0) return JSON.stringify(open);
+      if (writes === 0) return json(open);
       const observation = after[postReads++] ?? merged;
       if (observation instanceof Error) throw observation;
-      return JSON.stringify(observation);
+      return json(observation);
     },
   };
 }
@@ -826,6 +831,173 @@ for (const code of [401, 403, 404, 429]) {
   });
 }
 
+function mergeReadLimit(headers = {}, status = 429) {
+  const error = new Error(`gh: response (HTTP ${status})`);
+  error.stdout = `HTTP/2.0 ${status} Too Many Requests\n${Object.entries(headers)
+    .map(([name, value]) => `${name}: ${value}\r\n`)
+    .join('')}\r\n${JSON.stringify({ message: 'rate limit' })}`;
+  return error;
+}
+
+for (const endpoint of ['pulls/487', `git/commits/${sha('c')}`]) {
+  test(`successful merge honors Retry-After for a rate-limited ${endpoint}`, () => {
+    const fixture = mergeFixture();
+    let limited = false;
+    const waits = [];
+    const runner = (command, args, options) => {
+      if (fixture.writes > 0 && args[1] === `repos/Proto-UI/Proto-UI/${endpoint}` && !limited) {
+        limited = true;
+        throw mergeReadLimit({ 'Retry-After': '2' });
+      }
+      return fixture.runner(command, args, options);
+    };
+    const result = submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, runner, {
+      ...fastVerification,
+      wait(ms) {
+        waits.push(ms);
+      },
+    });
+    assert.equal(result.mergeParentSha, sha('a'));
+    assert.deepEqual(waits, [2000]);
+    assert.equal(fixture.writes, 1);
+  });
+}
+
+for (const [name, headers, expected] of [
+  ['missing timing headers', {}, 60000],
+  ['primary rate reset', { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '120' }, 21000],
+  [
+    'Retry-After precedence',
+    { 'Retry-After': '3', 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': '120' },
+    3000,
+  ],
+]) {
+  test(`successful merge rate limit delay: ${name}`, () => {
+    const fixture = mergeFixture({ after: [mergeReadLimit(headers)] });
+    const waits = [];
+    const result = submitGitHubMerge(
+      'github.com:Proto-UI/Proto-UI',
+      487,
+      mergeOptions,
+      fixture.runner,
+      {
+        ...fastVerification,
+        now: () => 100000,
+        wait(ms) {
+          waits.push(ms);
+        },
+      }
+    );
+    assert.equal(result.merged, true);
+    assert.deepEqual(waits, [expected]);
+    assert.equal(fixture.writes, 1);
+  });
+}
+
+test('repeated headerless rate limits back off and stop before exceeding the cumulative budget', () => {
+  const fixture = mergeFixture({ after: [mergeReadLimit(), mergeReadLimit()] });
+  const waits = [];
+  assert.throws(
+    () =>
+      submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, fixture.runner, {
+        ...fastVerification,
+        wait(ms) {
+          waits.push(ms);
+        },
+      }),
+    /rate.limit.*budget.*do not repeat the PUT/
+  );
+  assert.deepEqual(waits, [60000]);
+  assert.equal(fixture.postReads, 2);
+  assert.equal(fixture.writes, 1);
+});
+
+for (const headers of [
+  { 'Retry-After': '121' },
+  { 'Retry-After': '-1' },
+  { 'Retry-After': 'invalid' },
+  { 'Retry-After': '2, 3' },
+  { 'X-RateLimit-Remaining': '0' },
+  { 'X-RateLimit-Remaining': '0', 'X-RateLimit-Reset': 'NaN' },
+]) {
+  test(`rate limit timing cannot be shortened or guessed: ${JSON.stringify(headers)}`, () => {
+    const fixture = mergeFixture({ after: [mergeReadLimit(headers)] });
+    const waits = [];
+    assert.throws(
+      () =>
+        submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, fixture.runner, {
+          ...fastVerification,
+          now: () => 100000,
+          wait(ms) {
+            waits.push(ms);
+          },
+        }),
+      /PUT succeeded.*do not repeat the PUT/
+    );
+    assert.deepEqual(waits, []);
+    assert.equal(fixture.postReads, 1);
+    assert.equal(fixture.writes, 1);
+  });
+}
+
+test('rate-limit status comes from HTTP headers, never body or stderr wording', () => {
+  for (const error of [
+    Object.assign(new Error('HTTP 429'), {
+      stdout: 'HTTP/2.0 403 Forbidden\nRetry-After: 1\r\n\r\n{"message":"HTTP 429"}',
+    }),
+    Object.assign(new Error('HTTP 502'), {
+      stdout: 'HTTP/2.0 200 OK\nContent-Type: application/json\r\n\r\nHTTP 429 unexpected EOF',
+    }),
+    Object.assign(new Error('HTTP 429'), {
+      stdout: 'HTTP/2.0 429 Rate Limited\nRetry-After: 1\r\nretry-after: 2\r\n\r\n{}',
+    }),
+    Object.assign(new Error('HTTP 429'), { stdout: '{"message":"HTTP 429","Retry-After":"1"}' }),
+  ]) {
+    const fixture = mergeFixture({ after: [error] });
+    let waits = 0;
+    assert.throws(
+      () =>
+        submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, fixture.runner, {
+          ...fastVerification,
+          wait() {
+            waits += 1;
+          },
+        }),
+      /PUT succeeded.*do not repeat the PUT/
+    );
+    assert.equal(waits, 0);
+    assert.equal(fixture.postReads, 1);
+    assert.equal(fixture.writes, 1);
+  }
+});
+
+for (const code of ['EACCES', 'EPERM', 'ENOBUFS', 'SyntaxError']) {
+  for (const status of [429, 502]) {
+    test(`buffered HTTP ${status} cannot override terminal ${code}`, () => {
+      const error =
+        code === 'SyntaxError'
+          ? new SyntaxError('invalid runner response')
+          : Object.assign(new Error('runner cannot complete'), { code });
+      error.stdout = mergeReadLimit({ 'Retry-After': '1' }, status).stdout;
+      const fixture = mergeFixture({ after: [error] });
+      const waits = [];
+      assert.throws(
+        () =>
+          submitGitHubMerge('github.com:Proto-UI/Proto-UI', 487, mergeOptions, fixture.runner, {
+            ...fastVerification,
+            wait(ms) {
+              waits.push(ms);
+            },
+          }),
+        /PUT succeeded.*do not repeat the PUT/
+      );
+      assert.deepEqual(waits, []);
+      assert.equal(fixture.postReads, 1);
+      assert.equal(fixture.writes, 1);
+    });
+  }
+}
+
 test('an unknown PUT never gains the successful-PUT polling path', () => {
   const fixture = mergeFixture({
     putError: new Error('lost PUT response'),
@@ -853,7 +1025,7 @@ for (const endpoint of ['pulls/487', `git/commits/${sha('c')}`]) {
     const runner = (command, args, options) => {
       const result = fixture.runner(command, args, options);
       return fixture.writes > 0 &&
-        args.length === 2 &&
+        args.includes('--include') &&
         args[1] === `repos/Proto-UI/Proto-UI/${endpoint}`
         ? 'HTTP 502 unexpected EOF'
         : result;

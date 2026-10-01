@@ -689,11 +689,11 @@ export function authorizeCollaborationMutation({
     if (closed) return closed;
     if (current.baseSha !== request.target.baseSha)
       return rejected(request, 'live base SHA is stale');
+    if (current.headSha !== request.target.headSha)
+      return rejected(request, 'live head SHA is stale');
     if (current.containsBaseSha === true) {
       return noOp(request, 'pull-request branch already contains the exact base SHA');
     }
-    if (current.headSha !== request.target.headSha)
-      return rejected(request, 'live head SHA is stale');
     if (current.updatedAt !== request.target.updatedAt) {
       return rejected(request, 'live target updatedAt is stale');
     }

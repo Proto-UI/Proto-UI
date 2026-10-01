@@ -637,7 +637,59 @@ function waitForMergeRead(delayMs) {
   if (delayMs > 0) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delayMs);
 }
 
+class MergeHttpReadError extends Error {
+  constructor(status, headers) {
+    super(`GitHub merge verification GET returned HTTP ${status}`);
+    this.status = status;
+    this.headers = headers;
+  }
+}
+
+function parseMergeReadResponse(output) {
+  const text = String(output);
+  const boundary = /\r?\n\r?\n/.exec(text);
+  if (!boundary || boundary.index > 65_536)
+    throw new SyntaxError('merge verification HTTP headers are malformed');
+  const lines = text.slice(0, boundary.index).split(/\r?\n/);
+  const statusLine = /^HTTP\/\d(?:\.\d)? ([1-5]\d{2})(?: [^\r\n]*)?$/.exec(lines.shift());
+  if (!statusLine) throw new SyntaxError('merge verification HTTP status is malformed');
+  const headers = Object.create(null);
+  for (const line of lines) {
+    const header = /^([!#$%&'*+.^_`|~\da-z-]+):[ \t]*([^\r\n]*)$/i.exec(line);
+    if (!header) throw new SyntaxError('merge verification HTTP header is malformed');
+    const name = header[1].toLowerCase();
+    if (['retry-after', 'x-ratelimit-remaining', 'x-ratelimit-reset'].includes(name)) {
+      if (Object.hasOwn(headers, name))
+        throw new SyntaxError('merge verification timing header is duplicated');
+      headers[name] = header[2].trim();
+    }
+  }
+  const status = Number(statusLine[1]);
+  if (status !== 200) throw new MergeHttpReadError(status, headers);
+  return text.slice(boundary.index + boundary[0].length);
+}
+
+function mergeRateLimitDelay(error, attempt, now) {
+  const integerHeader = (name) => {
+    const value = error.headers[name];
+    if (!/^\d+$/.test(value ?? '') || !Number.isSafeInteger(Number(value)))
+      throw new Error(`rate-limit ${name} is missing or invalid`);
+    return Number(value);
+  };
+  if (Object.hasOwn(error.headers, 'retry-after')) return integerHeader('retry-after') * 1000;
+  if (error.headers['x-ratelimit-remaining'] === '0') {
+    const reset = integerHeader('x-ratelimit-reset') * 1000;
+    const current = now();
+    if (!Number.isFinite(current)) throw new Error('rate-limit observation time is invalid');
+    return Math.max(1000, reset - current + 1000);
+  }
+  // Without explicit timing, GitHub requires at least one minute, then
+  // exponential backoff. Never fit an excessive delay by shortening it.
+  return 60_000 * 2 ** (attempt - 1);
+}
+
 function isTransientMergeRead(error) {
+  if (error instanceof MergeHttpReadError) return [408, 500, 502, 503, 504].includes(error.status);
   if (error instanceof SyntaxError || ['EACCES', 'EPERM', 'ENOBUFS'].includes(error?.code))
     return false;
   const detail = `${error?.stderr ?? ''}\n${error?.message ?? ''}`;
@@ -679,6 +731,7 @@ export function submitGitHubMerge(
   const maxAttempts = options.verificationAttempts ?? 12;
   const delayMs = options.verificationDelayMs ?? 1_000;
   const wait = options.wait ?? waitForMergeRead;
+  const now = options.now ?? Date.now;
   if (
     !Number.isInteger(maxAttempts) ||
     maxAttempts < 1 ||
@@ -686,18 +739,28 @@ export function submitGitHubMerge(
     !Number.isInteger(delayMs) ||
     delayMs < 0 ||
     delayMs > 1_000 ||
-    typeof wait !== 'function'
+    typeof wait !== 'function' ||
+    typeof now !== 'function'
   )
     throw new Error('merge verification polling bounds are invalid');
   const prefix = `repos/${owner}/${name}`;
-  const read = (endpoint) => {
-    const value = JSON.parse(
-      runner('gh', ['api', endpoint], {
+  const read = (endpoint, includeHeaders = false) => {
+    let output;
+    try {
+      output = runner('gh', ['api', endpoint, ...(includeHeaders ? ['--include'] : [])], {
         encoding: 'utf8',
         stdio: ['ignore', 'pipe', 'pipe'],
         maxBuffer: MAX_LIVE_RESPONSE_BYTES,
-      })
-    );
+      });
+    } catch (error) {
+      if (error instanceof SyntaxError || ['EACCES', 'EPERM', 'ENOBUFS'].includes(error?.code))
+        throw error;
+      // gh --include prints real response headers to stdout even on HTTP
+      // failure. Body/stderr text alone cannot declare a rate-limit response.
+      if (includeHeaders && error.stdout?.length) JSON.parse(parseMergeReadResponse(error.stdout));
+      throw error;
+    }
+    const value = JSON.parse(includeHeaders ? parseMergeReadResponse(output) : output);
     if (!value || typeof value !== 'object' || Array.isArray(value))
       throw new Error('merge readback is malformed');
     return value;
@@ -773,14 +836,17 @@ export function submitGitHubMerge(
     );
 
   let lastObservation = 'merged state is not yet visible';
+  let rateLimitAttempts = 0;
+  let rateLimitWaitMs = 0;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    let nextDelayMs = delayMs;
     try {
-      const live = read(`${prefix}/pulls/${pullRequest}`);
+      const live = read(`${prefix}/pulls/${pullRequest}`, true);
       if (!matchesTarget(live)) throw new Error('post-merge target or head does not match');
       if (live.merged === true && live.state === 'closed') {
         if (live.merge_commit_sha !== response.sha || !isGitHubMergeTime(live.merged_at))
           throw new Error('live merge commit or merge time does not match the successful response');
-        const commit = read(`${prefix}/git/commits/${response.sha}`);
+        const commit = read(`${prefix}/git/commits/${response.sha}`, true);
         if (
           commit.sha !== response.sha ||
           !Array.isArray(commit.parents) ||
@@ -809,13 +875,25 @@ export function submitGitHubMerge(
         throw new Error('post-merge state is inconsistent');
       lastObservation = 'merged state is not yet visible';
     } catch (error) {
-      if (!isTransientMergeRead(error))
+      if (error instanceof MergeHttpReadError && error.status === 429) {
+        try {
+          nextDelayMs = Math.max(delayMs, mergeRateLimitDelay(error, ++rateLimitAttempts, now));
+          if (!Number.isSafeInteger(nextDelayMs) || nextDelayMs + rateLimitWaitMs > 120_000)
+            throw new Error('rate-limit wait exceeds the 120000ms cumulative verification budget');
+          rateLimitWaitMs += nextDelayMs;
+        } catch (timingError) {
+          throw new Error(
+            `merge PUT succeeded as ${response.sha}, but ${timingError.message}; do not repeat the PUT`
+          );
+        }
+      } else if (!isTransientMergeRead(error)) {
         throw new Error(
           `merge PUT succeeded as ${response.sha}, but its receipt cannot bind the reviewed head/base (${error.message}); do not repeat the PUT`
         );
+      }
       lastObservation = error.message;
     }
-    if (attempt < maxAttempts) wait(delayMs);
+    if (attempt < maxAttempts) wait(nextDelayMs);
   }
   throw new Error(
     `merge PUT succeeded as ${response.sha}, but receipt verification exhausted ${maxAttempts} read-only attempts (${lastObservation}); do not repeat the PUT`

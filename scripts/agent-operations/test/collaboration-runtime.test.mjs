@@ -864,7 +864,7 @@ test('a push racing ready-for-review stays at one write and reports the race rea
                   id: 'PR_node',
                   isDraft: false,
                   updatedAt: UPDATED_AT,
-                  headRefOid: NEXT_HEAD,
+                  headRefOid: HEAD,
                 },
               },
             },
@@ -1313,9 +1313,35 @@ test('update-branch no-op is bound to the exact base and rejects an unrelated st
     },
   };
   assert.match(authorize(request, live).reason, /head SHA is stale/);
+  for (const updatedAt of [UPDATED_AT, live.current.updatedAt]) {
+    const staleSatisfied = {
+      ...live,
+      current: { ...live.current, updatedAt, containsBaseSha: true },
+    };
+    const staleDecision = authorize(request, staleSatisfied);
+    assert.equal(staleDecision.allowed, false);
+    assert.match(staleDecision.reason, /head SHA is stale/);
+    let writes = 0;
+    const preState = {
+      ...live,
+      current: { ...live.current, updatedAt: UPDATED_AT, headSha: HEAD },
+    };
+    assert.throws(
+      () =>
+        applyGitHubCollaborationMutation(request, preState, {
+          collectState: () => staleSatisfied,
+          runner() {
+            writes += 1;
+            throw new Error('stale head must not write');
+          },
+        }),
+      /head SHA is stale/
+    );
+    assert.equal(writes, 0);
+  }
   const satisfied = authorize(request, {
     ...live,
-    current: { ...live.current, containsBaseSha: true },
+    current: { ...live.current, headSha: HEAD, containsBaseSha: true },
   });
   assert.equal(satisfied.outcome, 'no-op');
 });
@@ -2572,7 +2598,9 @@ for (const fixture of [
     const postState = {
       ...preState,
       observedAt: '2026-08-27T01:00:11.000Z',
-      current: { ...fixture.before, ...fixture.after },
+      // A pre-write no-op must retain the requested head. A successful branch
+      // update may publish a new head only after this invocation's write.
+      current: { ...fixture.before, ...fixture.after, headSha: fixture.before.headSha },
     };
     let writes = 0;
     const result = applyGitHubCollaborationMutation(fixture.request, preState, {

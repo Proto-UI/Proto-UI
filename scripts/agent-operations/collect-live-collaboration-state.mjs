@@ -521,13 +521,39 @@ function mutationResponse(request, runner) {
   );
 }
 
+function verifyGraphqlMutationResponse(request, raw) {
+  const ready = request.action === 'mark-exact-head-ready-for-review';
+  if (!ready && request.action !== 'resolve-fixed-review-thread') return;
+  // HTTP success is not GraphQL mutation success: partial data can accompany
+  // errors. A later matching state cannot attribute this invocation's write.
+  if (raw?.errors !== undefined && (!Array.isArray(raw.errors) || raw.errors.length > 0)) {
+    throw new Error('GraphQL mutation response contains errors or an invalid errors field');
+  }
+  const object = ready
+    ? raw?.data?.markPullRequestReadyForReview?.pullRequest
+    : raw?.data?.resolveReviewThread?.thread;
+  const targetNodeId = ready ? request.targetNodeId : request.target.threadId;
+  if (
+    typeof object?.id !== 'string' ||
+    object.id.length === 0 ||
+    object.id !== targetNodeId ||
+    (ready
+      ? object.isDraft !== false || object.headRefOid !== request.target.headSha
+      : object.isResolved !== true)
+  ) {
+    throw new Error(
+      'GraphQL mutation response does not acknowledge the exact target and desired state'
+    );
+  }
+}
+
 function platformObject(request, raw, postState) {
   const current = postState.current;
   let response = raw;
   if (request.action === 'mark-exact-head-ready-for-review') {
-    response = raw?.data?.markPullRequestReadyForReview?.pullRequest ?? raw;
+    response = raw.data.markPullRequestReadyForReview.pullRequest;
   } else if (request.action === 'resolve-fixed-review-thread') {
-    response = raw?.data?.resolveReviewThread?.thread ?? raw;
+    response = raw.data.resolveReviewThread.thread;
   }
   const comment = current.markerComment;
   const id =
@@ -687,6 +713,7 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
         ? { ...request, targetNodeId: preState.current.nodeId }
         : request;
     rawResponse = mutationResponse(mutationRequest, runner);
+    verifyGraphqlMutationResponse(mutationRequest, rawResponse);
   } catch (error) {
     try {
       collectState(request, { runner });
@@ -697,8 +724,8 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     }
     // A deterministic request marker proves a matching live object, not which
     // invocation wrote it. Even the same credential and timestamp can belong
-    // to a concurrent runner. Never claim an applied receipt after a lost
-    // response; the one reconciliation is read-only and never retries.
+    // to a concurrent runner. Never claim an applied receipt after a lost or
+    // invalid acknowledgment; the one reconciliation is read-only and never retries.
     throw new Error(
       `${request.action} outcome is ambiguous after one live reconciliation; do not retry blindly (${error.message})`
     );
