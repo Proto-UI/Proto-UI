@@ -33,6 +33,11 @@ import {
   verifyEvidence,
 } from '../evidence.mjs';
 import { verifyRun } from '../verify-run.mjs';
+import {
+  retainBrowserIdentity,
+  negativeControlDeviation,
+  fixtureArtifact,
+} from '../calibration-policy.mjs';
 const temporary = () => fs.mkdtempSync(path.join(os.tmpdir(), 'proto-benchmark-test-'));
 const copy = (value) => structuredClone(value);
 
@@ -203,3 +208,110 @@ test('CI publishes the complete allowlisted archive, including its hidden source
   );
   assert.equal(workflow.permissions.contents, 'read');
 });
+
+test('a later unavailable browser does not erase an earlier measured identity', () => {
+  const browser = {
+    name: 'chromium',
+    version: 'test-only-version',
+    executable: '/test-only/browser',
+  };
+  const known = retainBrowserIdentity(unavailable('not started'), browser);
+  assert.deepEqual(known, measured(browser));
+  assert.deepEqual(retainBrowserIdentity(known, { name: 'chromium', version: null }), known);
+  assert.equal(retainBrowserIdentity(unavailable('not started'), null).value, null);
+});
+
+test('rehashed wrong-fixture and fabricated-result archives fail semantic binding', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const mutation of ['wrong-fixture', 'drop-check', 'fabricate-check', 'drop-failures']) {
+    const archive = path.join(temporary(), mutation);
+    fs.cpSync(original, archive, { recursive: true });
+    const rows = readJson(path.join(archive, 'results.json'));
+    const row = rows[0];
+    const cell = path.join(archive, 'cells/dialog-open-close/blind/1');
+    if (mutation === 'wrong-fixture') {
+      const wrong = fs.readFileSync(
+        path.join(archive, 'source/benchmarks/interaction/fixtures/tabs.html')
+      );
+      fs.writeFileSync(path.join(cell, 'artifact.html'), wrong);
+      row.artifactSha256 = sha256(wrong);
+    } else if (mutation === 'drop-check')
+      row.checks = row.checks.filter((check) => check.id !== 'host.browser-ready');
+    else if (mutation === 'fabricate-check')
+      row.checks[0].reason = 'Fabricated but structurally coherent verdict';
+    else row.failures = [];
+    row.status = outcomeStatus(row.checks);
+    row.dimensions = summarizeChecks(row.checks);
+    fs.writeFileSync(path.join(cell, 'result.json'), json(row));
+    fs.writeFileSync(path.join(archive, 'results.json'), json(rows));
+    fs.unlinkSync(path.join(archive, 'inventory.json'));
+    fs.unlinkSync(path.join(archive, 'seal.json'));
+    sealEvidence(archive);
+    assert.doesNotThrow(() => verifyEvidence(archive));
+    assert.throws(
+      () => verifyRun(archive),
+      mutation === 'wrong-fixture' ? /declared source fixture/ : /raw evaluator output/
+    );
+  }
+  assert.doesNotThrow(() => verifyRun(original));
+});
+
+test('declared negative-control artifacts verify against the frozen source transformation', async () => {
+  const source = '<html><script>run()</script></html>';
+  assert.equal(fixtureArtifact(source, []), source);
+  assert.match(
+    fixtureArtifact(source, [negativeControlDeviation]),
+    /application\/x-disabled-calibration/
+  );
+  const archive = path.join(temporary(), 'negative');
+  await dryRun({
+    output: archive,
+    selectedCases: ['tabs-manual-activation'],
+    arms: ['blind'],
+    negativeControl: true,
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  assert.equal(verifyRun(archive).cells, 1);
+});
+
+test('CI browser watchdogs preserve time and streamed evidence for upload', () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(root, '.github/workflows/interaction-benchmark-calibration.yml'),
+      'utf8'
+    )
+  );
+  const steps = workflow.jobs['public-calibration'].steps;
+  for (const name of [
+    'Real-browser positive and negative controls',
+    'Public dry run with repeated packet arms',
+  ]) {
+    const step = steps.find((item) => item.name === name);
+    assert.match(step.run, /timeout --signal=TERM --kill-after=10s 90s node/);
+    assert.match(step.run, /tee .*interaction-controls\//);
+  }
+  assert.equal(steps.find((step) => step.uses === 'actions/upload-artifact@v4').if, 'always()');
+});
+
+test(
+  'a stuck browser-command stand-in is terminated while its raw log survives',
+  { skip: process.platform !== 'linux' },
+  () => {
+    const directory = temporary();
+    const log = path.join(directory, 'browser-watchdog.log');
+    const script = `set -o pipefail; timeout --signal=TERM --kill-after=1s 0.2s "$NODE" -e 'console.log("started-before-hang"); setInterval(() => {}, 1000)' 2>&1 | tee "$RAW_LOG"`;
+    const result = spawnSync('bash', ['-c', script], {
+      env: { ...process.env, NODE: process.execPath, RAW_LOG: log },
+      encoding: 'utf8',
+      timeout: 5000,
+    });
+    assert.equal(result.status, 124);
+    assert.match(fs.readFileSync(log, 'utf8'), /started-before-hang/);
+  }
+);

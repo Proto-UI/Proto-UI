@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { validateDocument } from './schemas.mjs';
+import { publicFixtures, fixtureArtifact, deriveChecks } from './calibration-policy.mjs';
 import { readJson, sha256, json, safeFile, verifyEvidence, listFiles } from './evidence.mjs';
 /** Cross-bind the archive; file hashes alone cannot establish experimental validity. */
 export function verifyRun(output) {
@@ -66,6 +67,27 @@ export function verifyRun(output) {
     if (!casePath || json(readJson(safeFile(output, `source/${casePath}`))) !== json(task))
       throw new Error(`Task differs from source snapshot: ${cell}`);
     const dir = `cells/${cell}`;
+    if (!Object.hasOwn(publicFixtures, task.id))
+      throw new Error(`Unknown fixture mapping: ${task.id}`);
+    const fixturePath = `source/benchmarks/interaction/fixtures/${publicFixtures[task.id]}.html`;
+    const expectedArtifact = fixtureArtifact(
+      fs.readFileSync(safeFile(output, fixturePath), 'utf8'),
+      manifest.deviations
+    );
+    if (fs.readFileSync(safeFile(output, `${dir}/artifact.html`), 'utf8') !== expectedArtifact)
+      throw new Error(`Artifact differs from declared source fixture: ${cell}`);
+    if (
+      json(result.deviations) !== json(manifest.deviations) ||
+      json(result.exclusions) !== json(task.exclusions)
+    )
+      throw new Error(`Result exclusions/deviations differ from declared scope: ${cell}`);
+    const raw = readJson(safeFile(output, `${dir}/evaluator-output.json`));
+    const expectedChecks = deriveChecks(raw.checks, task, safeFile(output, `${dir}/evidence`));
+    if (
+      json(result.checks) !== json(expectedChecks) ||
+      json(result.failures) !== json(raw.failures ?? [])
+    )
+      throw new Error(`Reported result differs from raw evaluator output: ${cell}`);
     const packetDir = safeFile(output, `${dir}/participant`);
     const expectedPrompt = `${task.title}\n\n${task.requirements}\n`;
     if (fs.readFileSync(path.join(packetDir, 'task.txt'), 'utf8') !== expectedPrompt)

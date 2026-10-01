@@ -15,6 +15,13 @@ import {
 } from './schemas.mjs';
 import { verifyRun } from './verify-run.mjs';
 import {
+  publicFixtures,
+  negativeControlDeviation,
+  fixtureArtifact,
+  retainBrowserIdentity,
+  deriveChecks,
+} from './calibration-policy.mjs';
+import {
   sha256,
   json,
   readJson,
@@ -26,11 +33,6 @@ import {
 } from './evidence.mjs';
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const defaultDataset = 'benchmarks/interaction/dataset.json';
-const publicFixtures = Object.freeze({
-  'dialog-open-close': 'dialog',
-  'tabs-manual-activation': 'tabs',
-  'select-keyboard': 'select',
-});
 
 export function loadDataset(datasetPath = defaultDataset) {
   const dataset = validateDocument('dataset', readJson(safeFile(root, datasetPath)));
@@ -102,36 +104,6 @@ export function preparePacket(item, arm, output) {
 }
 export const summarizeDimensions = summarizeChecks;
 
-function checkEvidenceRequirements(item, evidenceDir, checks) {
-  const files = listFiles(evidenceDir);
-  const requirements = {
-    screenshot: (f) => f.endsWith('.png'),
-    trace: (f) => f.endsWith('.zip'),
-    dom: (f) => /dom.*\.(json|html|txt)$/.test(f),
-    accessibility: (f) => /accessibility.*\.(json|yaml|txt)$/.test(f),
-  };
-  for (const required of item.evidenceRequirements) {
-    if (
-      requirements[required] &&
-      !files.some(
-        (file) => requirements[required](file) && fs.statSync(path.join(evidenceDir, file)).size > 0
-      )
-    )
-      checks.push({
-        id: `evidence-missing-${required}`,
-        dimension: 'host',
-        status: 'blocked',
-        reason: `Required ${required} evidence was not produced`,
-        evidence: [],
-      });
-  }
-  for (const check of checks)
-    for (const file of check.evidence) {
-      const resolved = safeFile(evidenceDir, file);
-      if (!fs.existsSync(resolved) || !fs.statSync(resolved).isFile())
-        throw new Error(`Check references missing evidence: ${file}`);
-    }
-}
 function snapshotSources(output) {
   const files = [
     'package.json',
@@ -326,11 +298,7 @@ export async function dryRun({
         oracleAccess: 'Public evaluator exists in repository; not a hidden oracle',
         audit: unavailable('No independent isolation audit; formal execution blocked'),
       },
-      deviations: negativeControl
-        ? [
-            'Artificial public negative control: disable fixture inline scripts; not a naturally occurring model regression',
-          ]
-        : [],
+      deviations: negativeControl ? [negativeControlDeviation] : [],
     };
     validateDocument('run', manifest);
     writeNew(output, 'run-start.json', json(manifest));
@@ -351,8 +319,7 @@ export async function dryRun({
             path.join(output, `source/benchmarks/interaction/fixtures/${fixture}.html`),
             'utf8'
           );
-          if (negativeControl)
-            html = html.replace(/<script\b/g, '<script type="application/x-disabled-calibration"');
+          html = fixtureArtifact(html, manifest.deviations);
           writeNew(cellDir, 'artifact.html', html);
           const evidenceDir = path.join(cellDir, 'evidence');
           fs.mkdirSync(evidenceDir);
@@ -386,16 +353,7 @@ export async function dryRun({
           }
           writeNew(cellDir, 'evaluator-output.json', json(evaluated));
           assertSnapshotUnchanged(snapshot);
-          const checks = evaluated.checks;
-          if (!checks.length)
-            checks.push({
-              id: 'no-executed-checks',
-              dimension: 'host',
-              status: 'blocked',
-              reason: 'Evaluator returned no checks',
-              evidence: [],
-            });
-          checkEvidenceRequirements(item, evidenceDir, checks);
+          const checks = deriveChecks(evaluated.checks, item, evidenceDir);
           const status = outcomeStatus(checks);
           const result = {
             schemaVersion: 1,
@@ -442,11 +400,10 @@ export async function dryRun({
           validateDocument('result', result);
           writeNew(cellDir, 'result.json', json(result));
           results.push(result);
-          if (evaluated.browser?.version) manifest.harness.browser = measured(evaluated.browser);
-          else
-            manifest.harness.browser = unavailable(
-              'Browser launch/version unavailable; see preserved setup failures'
-            );
+          manifest.harness.browser = retainBrowserIdentity(
+            manifest.harness.browser,
+            evaluated.browser
+          );
           event('cell-finish', { caseId: item.id, arm, repeat, status });
         }
     }
