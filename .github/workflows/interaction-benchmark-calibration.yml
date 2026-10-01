@@ -8,6 +8,8 @@ on:
       - 'benchmarks/interaction/**'
       - 'package.json'
       - 'pnpm-lock.yaml'
+      - 'apps/www/package.json'
+      - 'pnpm-workspace.yaml'
   workflow_dispatch:
 
 # Public handwritten calibration only. No model endpoint, credentials, hidden

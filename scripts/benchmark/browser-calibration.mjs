@@ -13,10 +13,18 @@ const domains = {
 // Explicit development-oracle identities. Changing measured expectations requires
 // a new case oracleRef; prior archives retain their original identities and bytes.
 export const PUBLIC_CALIBRATION_ORACLES = Object.freeze({
-  'dialog-open-close': 'public-calibration-dialog-open-close-v2',
-  'tabs-manual-activation': 'public-calibration-tabs-manual-activation-v1',
-  'select-keyboard': 'public-calibration-select-keyboard-v1',
+  'dialog-open-close': 'public-calibration-dialog-open-close-v3',
+  'tabs-manual-activation': 'public-calibration-tabs-manual-activation-v2',
+  'select-keyboard': 'public-calibration-select-keyboard-v2',
 });
+// Expected public identities come from cases/*.json requirements, not fixture
+// scripts. DOM IDs only bind each observed control to this bounded journey.
+const expectedTabs = [
+  { id: 'tab-overview', name: 'Overview', disabled: false },
+  { id: 'tab-disabled', name: 'Unavailable', disabled: true },
+  { id: 'tab-details', name: 'Details', disabled: false },
+  { id: 'tab-history', name: 'History', disabled: false },
+];
 const viewport = { width: 1000, height: 760 };
 const policy =
   "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'";
@@ -204,12 +212,56 @@ export async function evaluateCalibration({
         .evaluateAll((nodes) => nodes.map((n) => n.id)),
       [expected]
     );
-    assert.deepEqual(
-      await page
-        .locator('[role="tabpanel"]')
-        .evaluateAll((nodes) => nodes.filter((n) => !n.hidden).map((n) => n.id)),
-      [expected.replace('tab-', 'panel-')]
+    const visiblePanels = [];
+    for (const panel of await page.locator('[role="tabpanel"]').all()) {
+      if (await panel.isVisible()) visiblePanels.push(await panel.getAttribute('id'));
+    }
+    assert.deepEqual(visiblePanels, [expected.replace('tab-', 'panel-')]);
+    await tabRelationships();
+    await ax(
+      'tabpanel',
+      expectedTabs.find(({ id }) => id === expected).name,
+      `#${expected.replace('tab-', 'panel-')}`
     );
+  }
+  async function tabRelationships() {
+    assert.equal(await page.locator('[role="tabpanel"]').count(), 4);
+    assert.equal(
+      await page.locator('[role="tab"]').evaluateAll((tabs) =>
+        tabs.every((tab) => {
+          const panel = document.getElementById(tab.getAttribute('aria-controls'));
+          return (
+            panel?.getAttribute('role') === 'tabpanel' &&
+            panel.getAttribute('aria-labelledby') === tab.id
+          );
+        })
+      ),
+      true,
+      'Every tab and associated panel retain reciprocal accessible relationships'
+    );
+  }
+  async function rovingTabStop(expected) {
+    const tabs = await page.locator('[role="tab"]').evaluateAll((nodes) =>
+      nodes.map((tab) => ({
+        id: tab.id,
+        tabIndex: tab.tabIndex,
+        nativeDisabled: tab.matches(':disabled'),
+      }))
+    );
+    // Actually disabled native controls are not focusable even with tabindex=0.
+    // aria-disabled alone does not remove a control from sequential navigation.
+    // https://html.spec.whatwg.org/multipage/interaction.html#focusable-area
+    assert.deepEqual(
+      tabs.filter((tab) => tab.tabIndex >= 0 && !tab.nativeDisabled).map((tab) => tab.id),
+      [expected],
+      'Exactly the expected tab is in the tab sequence'
+    );
+    assert.equal(tabs.find((tab) => tab.id === expected)?.tabIndex, 0);
+  }
+  async function tabState(selected, focused) {
+    await selectedTab(selected);
+    await rovingTabStop(focused);
+    await active(focused);
   }
   async function dialogOpen(expected) {
     assert.equal(await page.locator('#reference-dialog').evaluate((node) => node.open), expected);
@@ -217,7 +269,22 @@ export async function evaluateCalibration({
   }
   async function selectValue(expected) {
     assert.equal(await page.locator('#reference-select').inputValue(), expected);
+    assert.deepEqual(
+      await page.locator('#reference-select').evaluate((node) =>
+        [...node.selectedOptions].map((option) => ({
+          value: option.value,
+          disabled: option.matches(':disabled'),
+        }))
+      ),
+      [{ value: expected, disabled: false }],
+      'Each keyboard observation retains one enabled selected option'
+    );
     assert.equal(await page.locator('#selection-output').textContent(), expected);
+    assert.equal(await page.locator('#selection-output').isVisible(), true, 'Output is visible');
+  }
+  async function selectKeyboardState(expected) {
+    await selectValue(expected);
+    await active('reference-select');
   }
 
   try {
@@ -320,7 +387,35 @@ export async function evaluateCalibration({
           );
         }
       );
+      await check(
+        'cleanup.control-identities',
+        'accessibility',
+        'The visible Remove reference fixture and After fixture buttons have their required names and document order',
+        async () => {
+          await ax('button', 'Remove reference fixture', '#remove-fixture');
+          await ax('button', 'After fixture', '#after-fixture');
+          for (const id of ['remove-fixture', 'after-fixture'])
+            assert.equal(await page.locator(`#${id}`).isVisible(), true);
+          assert.equal(
+            await page
+              .locator('#remove-fixture')
+              .evaluate((node) =>
+                Boolean(
+                  node.compareDocumentPosition(document.getElementById('after-fixture')) &
+                  Node.DOCUMENT_POSITION_FOLLOWING
+                )
+              ),
+            true
+          );
+        }
+      );
       if (caseId === 'dialog-open-close') {
+        await check(
+          'dialog.trigger-accessible-name',
+          'accessibility',
+          'The opening control is a button named Open reference dialog',
+          () => ax('button', 'Open reference dialog', '#open-dialog')
+        );
         await check(
           'dialog.initial-closed',
           'behavior',
@@ -348,7 +443,7 @@ export async function evaluateCalibration({
           'dialog.input-accessible-name',
           'accessibility',
           'The dialog input is exposed as a textbox named Display name in Chromium accessibility output',
-          () => ax('textbox', 'Display name', '#display-name')
+          () => ax('textbox', 'Display name', '#reference-dialog #display-name')
         );
         await check(
           'dialog.input-initial-value',
@@ -359,11 +454,20 @@ export async function evaluateCalibration({
           }
         );
         await check(
+          'dialog.action-accessible-names',
+          'accessibility',
+          'The modal contains exposed Cancel and Save buttons',
+          async () => {
+            await ax('button', 'Cancel', '#reference-dialog #cancel-dialog');
+            await ax('button', 'Save', '#reference-dialog #save-dialog');
+          }
+        );
+        await check(
           'dialog.accessible-name',
           'accessibility',
           'Modal dialog has a name and description in Chromium accessibility output',
           async () => {
-            const node = await ax('dialog', 'Reference settings');
+            const node = await ax('dialog', 'Reference settings', '#reference-dialog');
             assert.equal(
               node.description?.value,
               'A public harness fixture for a modal keyboard journey.'
@@ -374,6 +478,27 @@ export async function evaluateCalibration({
               )
             );
           }
+        );
+        const dialogTabSequence = [];
+        await step(
+          'dialog.control-tab-sequence',
+          'focus',
+          'Tab and Shift+Tab traverse input, Cancel and Save in both directions without leaving the modal',
+          async () => {
+            for (const key of ['Tab', 'Tab', 'Tab', 'Shift+Tab', 'Shift+Tab', 'Shift+Tab']) {
+              await page.keyboard.press(key);
+              dialogTabSequence.push(await page.evaluate(() => document.activeElement?.id));
+            }
+          },
+          async () =>
+            assert.deepEqual(dialogTabSequence, [
+              'cancel-dialog',
+              'save-dialog',
+              'display-name',
+              'save-dialog',
+              'cancel-dialog',
+              'display-name',
+            ])
         );
         await step(
           'dialog.reverse-tab-wrap',
@@ -407,7 +532,10 @@ export async function evaluateCalibration({
           'lifecycle',
           'A pointer click can reopen the previously dismissed dialog',
           () => page.locator('#open-dialog').click(),
-          () => dialogOpen(true)
+          async () => {
+            await dialogOpen(true);
+            await active('display-name');
+          }
         );
         await step(
           'dialog.cancel-close',
@@ -429,6 +557,7 @@ export async function evaluateCalibration({
           async () => {
             await page.locator('#open-dialog').click();
             await dialogOpen(true);
+            await active('display-name');
             await page.locator('#save-dialog').click();
           },
           async () => {
@@ -439,31 +568,74 @@ export async function evaluateCalibration({
         );
       } else if (caseId === 'tabs-manual-activation') {
         await check(
+          'tabs.control-identities',
+          'accessibility',
+          'Four ordered tabs expose Overview, Unavailable, Details and History; only Unavailable is disabled',
+          async () => {
+            assert.equal(await page.locator('[role="tablist"]').count(), 1);
+            assert.deepEqual(
+              await page
+                .locator('[role="tablist"] [role="tab"]')
+                .evaluateAll((tabs) => tabs.map((tab) => tab.id)),
+              expectedTabs.map(({ id }) => id)
+            );
+            for (const { id, name, disabled } of expectedTabs) {
+              const node = await ax('tab', name, `#${id}`);
+              assert.equal(await page.locator(`#${id}`).isVisible(), true);
+              assert.equal(
+                await page.locator(`#${id}`).isDisabled(),
+                disabled,
+                `${name} disabled state`
+              );
+              assert.equal(
+                node.properties?.some(
+                  (property) => property.name === 'disabled' && property.value.value === true
+                ) ?? false,
+                disabled,
+                `${name} accessibility disabled state`
+              );
+            }
+          }
+        );
+        await check(
+          'tabs.horizontal-orientation',
+          'accessibility',
+          'The named tablist exposes horizontal orientation, with no contradictory aria-orientation declaration',
+          async () => {
+            const node = await ax('tablist', 'Reference sections', '[role="tablist"]');
+            const orientation = await page
+              .locator('[role="tablist"]')
+              .getAttribute('aria-orientation');
+            // Omission uses the ARIA tablist horizontal default; vertical is not
+            // interchangeable with the task's explicit horizontal configuration.
+            assert.ok(orientation === null || orientation === 'horizontal');
+            assert.equal(
+              node.properties?.find((property) => property.name === 'orientation')?.value.value,
+              'horizontal'
+            );
+          }
+        );
+        await check(
           'tabs.initial-selection',
           'behavior',
           'Only Overview and its panel are selected and visible initially',
           () => selectedTab('tab-overview')
         );
         await check(
+          'tabs.initial-roving-stop',
+          'focus',
+          'Initially only Overview is in the tab sequence',
+          () => rovingTabStop('tab-overview')
+        );
+        await check(
           'tabs.accessibility-relationships',
           'accessibility',
           'Tabs and panels have explicit reciprocal relationships and exposed labels',
           async () => {
-            await ax('tablist', 'Reference sections');
-            await ax('tab', 'Overview');
-            await ax('tabpanel', 'Overview');
-            assert.equal(
-              await page.locator('[role="tab"]').evaluateAll((tabs) =>
-                tabs.every((tab) => {
-                  const panel = document.getElementById(tab.getAttribute('aria-controls'));
-                  return (
-                    panel?.getAttribute('role') === 'tabpanel' &&
-                    panel.getAttribute('aria-labelledby') === tab.id
-                  );
-                })
-              ),
-              true
-            );
+            await ax('tablist', 'Reference sections', '[role="tablist"]');
+            await ax('tab', 'Overview', '#tab-overview');
+            await ax('tabpanel', 'Overview', '#panel-overview');
+            await tabRelationships();
           }
         );
         await step(
@@ -471,14 +643,14 @@ export async function evaluateCalibration({
           'focus',
           'Tab enters the selected roving tab stop',
           () => page.keyboard.press('Tab'),
-          () => active('tab-overview')
+          () => tabState('tab-overview', 'tab-overview')
         );
         await step(
           'tabs.arrow-skip-disabled',
           'keyboard',
           'ArrowRight skips the disabled tab and focuses Details',
           () => page.keyboard.press('ArrowRight'),
-          () => active('tab-details')
+          () => tabState('tab-overview', 'tab-details')
         );
         await check(
           'tabs.manual-navigation',
@@ -490,74 +662,64 @@ export async function evaluateCalibration({
           'tabs.one-roving-stop',
           'focus',
           'Only the newly focused Details tab remains in the tab sequence',
-          async () => {
-            assert.deepEqual(
-              await page
-                .locator('[role="tab"]')
-                .evaluateAll((tabs) =>
-                  tabs.filter((tab) => tab.tabIndex === 0).map((tab) => tab.id)
-                ),
-              ['tab-details']
-            );
-          }
+          () => rovingTabStop('tab-details')
         );
         await step(
           'tabs.enter-activate',
           'keyboard',
           'Enter activates the focused Details tab',
           () => page.keyboard.press('Enter'),
-          () => selectedTab('tab-details')
+          () => tabState('tab-details', 'tab-details')
         );
         await step(
           'tabs.end-navigation',
           'keyboard',
           'End moves focus to History without selecting it',
           () => page.keyboard.press('End'),
-          async () => {
-            await active('tab-history');
-            await selectedTab('tab-details');
-          }
+          () => tabState('tab-details', 'tab-history')
         );
         await step(
           'tabs.space-activate',
           'keyboard',
           'Space activates History',
           () => page.keyboard.press('Space'),
-          () => selectedTab('tab-history')
+          () => tabState('tab-history', 'tab-history')
         );
         await step(
           'tabs.arrow-wrap',
           'keyboard',
           'ArrowRight wraps from the last enabled tab to the first without activation',
           () => page.keyboard.press('ArrowRight'),
-          async () => {
-            await active('tab-overview');
-            await selectedTab('tab-history');
-          }
+          () => tabState('tab-history', 'tab-overview')
         );
         await step(
           'tabs.reverse-wrap',
           'keyboard',
-          'ArrowLeft wraps back to the last enabled tab',
-          () => page.keyboard.press('ArrowLeft'),
-          () => active('tab-history')
+          'After activating Overview, ArrowLeft wraps to History without changing selection',
+          async () => {
+            await page.keyboard.press('Space');
+            await tabState('tab-overview', 'tab-overview');
+            await page.keyboard.press('ArrowLeft');
+          },
+          () => tabState('tab-overview', 'tab-history')
         );
         await step(
           'tabs.home-navigation',
           'keyboard',
-          'Home moves to the first tab without activation',
-          () => page.keyboard.press('Home'),
+          'After activating History, Home moves to the first tab without activation',
           async () => {
-            await active('tab-overview');
-            await selectedTab('tab-history');
-          }
+            await page.keyboard.press('Space');
+            await tabState('tab-history', 'tab-history');
+            await page.keyboard.press('Home');
+          },
+          () => tabState('tab-history', 'tab-overview')
         );
         await step(
           'tabs.pointer-selection',
           'behavior',
           'Pointer activation selects Overview',
           () => page.locator('#tab-overview').click(),
-          () => selectedTab('tab-overview')
+          () => tabState('tab-overview', 'tab-overview')
         );
         await step(
           'tabs.repeated-selection',
@@ -565,17 +727,52 @@ export async function evaluateCalibration({
           'Repeated selection produces no duplicate tabs or panels',
           async () => {
             await page.locator('#tab-details').click();
-            await selectedTab('tab-details');
+            await tabState('tab-details', 'tab-details');
             await page.locator('#tab-overview').click();
+            await tabState('tab-overview', 'tab-overview');
             await page.locator('#tab-overview').click();
           },
           async () => {
-            await selectedTab('tab-overview');
+            await tabState('tab-overview', 'tab-overview');
             assert.equal(await page.locator('[role="tab"]').count(), 4);
             assert.equal(await page.locator('[role="tabpanel"]').count(), 4);
           }
         );
+        await step(
+          'tabs.reverse-skip-disabled',
+          'keyboard',
+          'ArrowLeft from selected Details skips Unavailable and focuses Overview without changing selection',
+          async () => {
+            await page.locator('#tab-details').click();
+            await tabState('tab-details', 'tab-details');
+            await page.keyboard.press('ArrowLeft');
+          },
+          () => tabState('tab-details', 'tab-overview')
+        );
       } else {
+        await check(
+          'select.option-configuration',
+          'behavior',
+          'The native select contains the four required ordered labels, values and disabled states, initially selecting only Alpha',
+          async () => {
+            assert.deepEqual(
+              await page.locator('#reference-select').evaluate((node) =>
+                [...node.options].map((option) => ({
+                  label: option.label,
+                  value: option.value,
+                  disabled: option.matches(':disabled'),
+                  selected: option.selected,
+                }))
+              ),
+              [
+                { label: 'Alpha', value: 'alpha', disabled: false, selected: true },
+                { label: 'Unavailable Beta', value: 'beta', disabled: true, selected: false },
+                { label: 'Gamma', value: 'gamma', disabled: false, selected: false },
+                { label: 'Delta', value: 'delta', disabled: false, selected: false },
+              ]
+            );
+          }
+        );
         await check(
           'select.finite-single-selection',
           'behavior',
@@ -598,7 +795,12 @@ export async function evaluateCalibration({
           'accessibility',
           'The native select has its visible label in Chromium accessibility output',
           async () => {
-            await ax('combobox', 'Reference choice');
+            await ax('combobox', 'Reference choice', '#reference-select');
+            assert.equal(
+              await page.locator('label[for="reference-select"]').innerText(),
+              'Reference choice'
+            );
+            assert.equal(await page.locator('label[for="reference-select"]').isVisible(), true);
           }
         );
         await step(
@@ -613,14 +815,14 @@ export async function evaluateCalibration({
           'keyboard',
           'ArrowDown commits Gamma, skipping disabled Beta in this native Chromium control',
           () => page.keyboard.press('ArrowDown'),
-          () => selectValue('gamma')
+          () => selectKeyboardState('gamma')
         );
         await step(
           'select.down-next',
           'keyboard',
           'ArrowDown commits the next enabled value',
           () => page.keyboard.press('ArrowDown'),
-          () => selectValue('delta')
+          () => selectKeyboardState('delta')
         );
         await step(
           'select.end-boundary',
@@ -628,7 +830,7 @@ export async function evaluateCalibration({
           'ArrowDown at the last option preserves a single Delta selection',
           () => page.keyboard.press('ArrowDown'),
           async () => {
-            await selectValue('delta');
+            await selectKeyboardState('delta');
             assert.equal(
               await page
                 .locator('#reference-select')
@@ -643,10 +845,10 @@ export async function evaluateCalibration({
           'Repeated ArrowUp skips disabled Beta and returns to Alpha',
           async () => {
             await page.keyboard.press('ArrowUp');
-            await selectValue('gamma');
+            await selectKeyboardState('gamma');
             await page.keyboard.press('ArrowUp');
           },
-          () => selectValue('alpha')
+          () => selectKeyboardState('alpha')
         );
         await step(
           'select.repeat-cycle',
@@ -654,10 +856,10 @@ export async function evaluateCalibration({
           'A repeated keyboard round trip keeps the native value and visible output synchronized',
           async () => {
             await page.keyboard.press('ArrowDown');
-            await selectValue('gamma');
+            await selectKeyboardState('gamma');
             await page.keyboard.press('ArrowUp');
           },
-          () => selectValue('alpha')
+          () => selectKeyboardState('alpha')
         );
         await check(
           'select.focus-retained',

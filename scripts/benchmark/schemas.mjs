@@ -12,6 +12,12 @@ export function validateCalibrationDeviations(deviations) {
       'Calibration deviations must be empty or exactly the supported negative control, without duplicates'
     );
 }
+export function timestampValue(value, field = 'timestamp') {
+  const parsed = typeof value === 'string' ? Date.parse(value) : NaN;
+  if (!Number.isFinite(parsed) || new Date(parsed).toISOString() !== value)
+    throw new Error(`${field} must be a canonical UTC ISO timestamp`);
+  return parsed;
+}
 const string = { type: 'string', minLength: 1 };
 const strings = { type: 'array', items: string };
 const id = { type: 'string', pattern: '^[a-z0-9][a-z0-9.-]*$' };
@@ -400,7 +406,10 @@ export function validateDocument(kind, value) {
       new Set(value.plan.arms).size !== value.plan.arms.length)
   )
     throw new Error('Duplicate planned cases or arms');
+  if (kind === 'run') timestampValue(value.startedAt, 'Run startedAt');
   if (kind === 'run' && value.kind === 'calibration-stub') {
+    if (value.runId !== `calibration-${value.startedAt.replace(/[^0-9]/g, '')}`)
+      throw new Error('Calibration runId differs from startedAt timestamp');
     validateCalibrationDeviations(value.deviations);
     if (value.plan.repeats > maxCalibrationRepeats)
       throw new Error(`Calibration repetitions must be an integer in 1..${maxCalibrationRepeats}`);
@@ -429,6 +438,11 @@ export function validateDocument(kind, value) {
       );
   }
   if (kind === 'result') {
+    if (
+      timestampValue(value.startedAt, 'Result startedAt') >
+      timestampValue(value.finishedAt, 'Result finishedAt')
+    )
+      throw new Error('Result timestamps finish before start');
     validateCalibrationDeviations(value.deviations);
     if (value.repeat > maxCalibrationRepeats)
       throw new Error(`Calibration result repeat exceeds ${maxCalibrationRepeats}`);

@@ -70,7 +70,58 @@ Historical `p0-calibration-v1` archives keep their original directory/history ca
 - Dataset `0.0.0-calibration.1`, Dialog oracle `public-calibration-dialog-open-close-v1`: the original public journey did not assert the required input accessible name or initial value. Its retained evidence describes that narrower check vector
 - Dataset `0.0.0-calibration.2`, Dialog oracle `public-calibration-dialog-open-close-v2`, harness `p0-calibration-v3`: add separate assertions for the input’s accessible name `Display name` and initial value `Example`, plus independently targeted missing-label and wrong-value controls. Requirements and fixture bytes are unchanged. Tabs/Select oracle identities remain v1
 
+- Dataset `0.0.0-calibration.3`, Dialog oracle v3 and Tabs/Select oracle v2: extend declared-control identities, finite navigation/focus invariants, option configuration and shared cleanup checks following the requirement map below. This adds 15 targeted mutations; all prior controls, requirements and fixture bytes are retained
+
 V3 raw records carry the case and oracle identities and must match their retained tasks. This is an explicit draft calibration revision, not a silently changed frozen oracle. Preserve previous sources, check vectors and evidence; do not interpret the increased check count as a comparative quality improvement. To reconstruct a run, start from the exact checkout identified by `source-inventory.json`’s `gitHead`, then overlay its retained exact source files before installing the locked workspace. The older `dataset.source.sha` is the semantic baseline, not necessarily that checkout. Preserve access to the checkout tree as well: the archive is not a standalone copy of every repository package.
+
+### Requirement-to-assertion coverage map
+
+This maps **implemented finite observations** to the existing public task clauses. Execution status comes from each exact-head CI archive; this table alone is not a passing result or an independently reviewed general oracle. Selectors target the public reference fixtures. It does not imply coverage of every interaction history or a Proto guarantee.
+
+| Task | Requirement clause | Implemented checks/observations |
+| --- | --- | --- |
+| Dialog | Named opening button; keyboard and pointer opening | `dialog.trigger-accessible-name`, `dialog.keyboard-open`, `dialog.pointer-reopen`; actual trigger AX identity and trusted input |
+| Dialog | Modal name/description; one opened modal | `dialog.accessible-name` binds the actual dialog’s AX name, description and modal state; `dialogOpen` observes open/:modal state |
+| Dialog | Labelled Display name input; initial Example | `dialog.input-accessible-name` binds the textbox within the dialog; `dialog.input-initial-value` checks its first-open value |
+| Dialog | Cancel/Save controls | `dialog.action-accessible-names` binds both actual buttons within the dialog |
+| Dialog | Opening focuses input; Tab/Shift+Tab stay within controls | `dialog.initial-focus`, focus rechecks on pointer/repeat opening, `dialog.control-tab-sequence`, `dialog.reverse-tab-wrap`, `dialog.forward-tab-wrap` |
+| Dialog | Escape/Cancel/Save close and restore trigger focus | Escape and Cancel close/focus-return pairs; `dialog.repeat-cycle` checks Save close, trigger focus and single-dialog count |
+| Dialog | Repeated cycles; removal while closed | Three keyboard/pointer cycles with different close paths; final repeat verifies closed before shared cleanup |
+| Tabs | Four ordered named tabs in Reference sections; Unavailable disabled | `tabs.control-identities` checks ordered controls, selector-bound AX names, effective disabled/enabled state and visibility; `tabs.accessibility-relationships` binds the named tablist |
+| Tabs | Horizontal configuration | `tabs.horizontal-orientation` checks explicit/default horizontal DOM semantics and AX orientation; pixel row geometry is untested |
+| Tabs | Initially Overview selected; its panel visible | `tabs.initial-selection` checks unique selection, layout-visible panel identity, reciprocal DOM relationships and that active panel’s AX name |
+| Tabs | Left/Right skip disabled and wrap; Home/End | Forward/reverse skip and wrap plus Home/End checks; setup deliberately varies selected state so focus-only assertions cannot pass coincidentally |
+| Tabs | Navigation moves focus only; Enter/Space/pointer activate | Navigation and `tabState` preserve selected state; `tabs.enter-activate`, `tabs.space-activate`, `tabs.pointer-selection` and repeated selection exercise activation |
+| Tabs | One roving stop, one selection, one visible panel; reciprocal relationships | Initial/final roving checks and each `tabState`/`selectedTab` checkpoint reassert invariants; inactive negative tabindex values are not needlessly fixed to -1; natively disabled controls are excluded from actual tab-stop candidates |
+| Tabs | Repeated selection does not duplicate tabs/panels | `tabs.repeated-selection` checks intermediate states and final four-tab/four-panel counts |
+| Select | Native single select with visible Reference choice label | `select.finite-single-selection` checks tag/multiple/count; `select.accessible-label` binds actual AX identity and associated visible label |
+| Select | Ordered Alpha/alpha, disabled Unavailable Beta/beta, Gamma/gamma, Delta/delta; initial Alpha | `select.option-configuration` checks every label, value, effective disabled state and initial selected flag |
+| Select | Display selected value; keyboard commits enabled values and skips Beta | Down/next/end/reverse navigation checks plus `selectValue` require one enabled selection and a matching layout-visible output at each observed value |
+| Select | Repeated round trips synchronize output and preserve focus | `select.repeat-cycle`, each `selectKeyboardState` checkpoint and `select.focus-retained` |
+| Select | Clicking label restores focus from outside | `select.label-pointer-focus` first establishes outside-button focus, then clicks the associated label and checks select focus |
+| All | Named Remove reference fixture followed by After fixture | `cleanup.control-identities` binds AX names/roles, layout visibility and document order |
+| All | Removal and subsequent keyboard navigation | `cleanup.remove-fixture` observes root detachment/no modal; `cleanup.keyboard-after-removal` uses trusted Tab to reach the outside control |
+| All | Recorded host/evidence conditions | Existing fixture-domain, trusted-input, runtime-error/network checks and retained screenshots, DOM/AX snapshots and traces |
+
+The opt-in suite contains three reference positives, one valid-native-variant positive, and twenty negative controls. The legal variant retains a native disabled tab with tabindex 0, which is excluded from actual focusable areas by the [HTML focus model](https://html.spec.whatwg.org/multipage/interaction.html#focusable-area); aria-disabled-only controls are not indiscriminately excluded. Mutations exercise declared identities/configuration, traversal/roving/skip behavior and cleanup ordering; they are artificial controls, not naturally occurring regressions. Retain all previous controls and failed attempts when adding coverage.
+
+Explicit limits: the roving candidate helper covers these visible light-DOM fixtures, not every inert/shadow/platform-preference focusability rule. DOM/AX orientation is not pixel geometry; layout visibility is not paint/opacity/occlusion proof; the never-activated disabled tabpanel’s AX presentation is untested although its DOM relationships are checked. Screen readers/assistive technology, other hosts, arbitrary histories, resource leaks/retained-owner lifetimes, real Proto/adapters/compiler/model behavior and strict hidden isolation remain untested or unsupported. `scope.proto-conformance` remains explicitly untested in every cell. No task or fixture was rewritten to satisfy these checks.
+
+### Producer states and timestamp authority
+
+| Producer phase | Retained evidence accepted by verification |
+| --- | --- |
+| Reject task/configuration before output creation | No run archive is claimed |
+| Initialization fails before the run manifest/journal starts | Typed zero-cell failure; exactly abort then finish; partial source capture may remain, but no task/cell/start-manifest execution evidence |
+| Run starts and prepares the next planned cell | Source/run-start records exist. Preparation is a prefix: task text, ordered materials, exposure, artifact, evidence directory |
+| Cell starts | Full participant packet, exposure and artifact must exist. Partial evaluator evidence may remain if interrupted before raw output; an empty evidence directory can disappear during file-only archive transport |
+| Evaluator returns | Raw identity, checks, failures and file inventory bind to the prepared task and evidence. A setup/behavior failure can still produce a completed **blocked/failed cell**; it is not necessarily a run abort |
+| Cell finishes | Result plus matching ordered start/finish extend the completed prefix; there can be at most one subsequent partial cell |
+| Run aborts | Typed failure and abort journal agree, and fewer cells are completed than planned. Full-plan completion cannot be relabelled an abort |
+| Run completes | Every planned cell has a result and finish; no abort/failure document |
+| Process kill, storage failure or clock discontinuity | Preserve the attempt. It may be unsealed or fail coherence verification; do not invent missing events, adjust timestamps or relabel it a verified run |
+
+The seal inventories regular files, not empty directories. The producer creates the evidence directory before starting a cell, but verification does not treat empty-directory metadata as retained evidence. The producer uses `new Date().toISOString()` for UTC wall-clock observations and derives `runId` from the recorded `startedAt`. Verification parses canonical timestamps, binds that ID, and requires nondecreasing journal times. The observed order is `run.startedAt <= run-start`; for each completed cell it is `previous journal event <= result.startedAt <= cell-start <= result.finishedAt <= cell-finish`, followed by later journal entries. These are structural checks under a stable system clock, not independent clock attestation. System clock corrections can violate them; such evidence is preserved as unverifiable rather than declared impossible execution. `wallTimeMs` uses the separate local monotonic `performance.now()` interval and remains an un-attested elapsed observation, not token/compute cost or an externally verified duration.
 
 ### Authority and cross-binding audit
 
@@ -106,6 +157,6 @@ P0 is partial until a real-browser positive/negative-control run succeeds and it
 4. P1: frontier first; run #748 discovery and #734 blind/knowledge with **at least three independent repetitions per task × condition × model**. Prefer fewer models to fewer repeats. Model access and cost require explicit configuration/authorization. Equal or negative results are useful
 5. Keep later lanes gated: #754 regression prevention and detection are distinct; #749 needs an accepted real generated path; #751 needs predeclared repair economics; #757 needs a pinned real external protocol; #758 needs a real generated consumer
 
-Main currently provides no supported compiler. CLI facades are runtime-backed, and unmerged compiler PRs are not the accepted baseline. This scaffold does not merge them, create a product integration, promote a draft guarantee, or run model endpoints.
+The pinned baseline provides no supported compiler. CLI facades are runtime-backed, and unmerged compiler PRs are not the accepted baseline. This scaffold does not merge them, create a product integration, promote a draft guarantee, or run model endpoints.
 
 Methodology sources: [#734](https://github.com/Proto-UI/Proto-UI/issues/734#issuecomment-5909865821), [#748](https://github.com/Proto-UI/Proto-UI/issues/748#issuecomment-5909870381), [#754](https://github.com/Proto-UI/Proto-UI/issues/754#issuecomment-5909881394), [#749](https://github.com/Proto-UI/Proto-UI/issues/749), [#751](https://github.com/Proto-UI/Proto-UI/issues/751), [#757](https://github.com/Proto-UI/Proto-UI/issues/757), [#758](https://github.com/Proto-UI/Proto-UI/issues/758), dependencies [#732](https://github.com/Proto-UI/Proto-UI/issues/732), [#733](https://github.com/Proto-UI/Proto-UI/issues/733), [#750](https://github.com/Proto-UI/Proto-UI/issues/750).

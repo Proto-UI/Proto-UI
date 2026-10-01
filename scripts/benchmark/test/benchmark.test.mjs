@@ -462,8 +462,14 @@ test('initialization failure is typed and cannot claim completed cells without a
     dir,
     'events.jsonl',
     [
-      { seq: 1, type: 'run-aborted', message, completedCells: 0 },
-      { seq: 2, type: 'run-finish', aborted: true, completedCells: 0 },
+      { at: new Date().toISOString(), seq: 1, type: 'run-aborted', message, completedCells: 0 },
+      {
+        at: new Date().toISOString(),
+        seq: 2,
+        type: 'run-finish',
+        aborted: true,
+        completedCells: 0,
+      },
     ]
       .map(JSON.stringify)
       .join('\n') + '\n'
@@ -529,7 +535,7 @@ test('every completed cell needs exactly one preceding start in declared order',
       events.map((event, index) => JSON.stringify({ ...event, seq: index + 1 })).join('\n') + '\n'
     );
     reseal(dir);
-    assert.throws(() => verifyRun(dir), /Cell start|Cell finish/);
+    assert.throws(() => verifyRun(dir), /Cell start|Cell finish|Lifecycle timestamps/);
   }
 });
 
@@ -837,8 +843,8 @@ test('aborted cells retain input, scope, evidence and failure bindings without i
       .map(JSON.parse)
       .slice(0, mode === 'partial-packet' ? 1 : 2);
     events.push(
-      { type: 'run-aborted', message, completedCells: 0 },
-      { type: 'run-finish', aborted: true, completedCells: 0 }
+      { at: new Date().toISOString(), type: 'run-aborted', message, completedCells: 0 },
+      { at: new Date().toISOString(), type: 'run-finish', aborted: true, completedCells: 0 }
     );
     fs.writeFileSync(
       path.join(dir, 'events.jsonl'),
@@ -891,12 +897,22 @@ test('initialization cannot hide cell lifecycle entries or evaluated artifacts',
       'failure.json',
       json({ status: 'blocked', message, stack: message, completedCells: 0 })
     );
-    const events = [{ type: 'run-aborted', message, completedCells: 0 }];
+    const events = [
+      { at: new Date().toISOString(), type: 'run-aborted', message, completedCells: 0 },
+    ];
     if (mode === 'journal')
-      events.push({ type: 'cell-start' }, { type: 'cell-finish', status: 'pass' });
+      events.push(
+        { at: new Date().toISOString(), type: 'cell-start' },
+        { at: new Date().toISOString(), type: 'cell-finish', status: 'pass' }
+      );
     else
       writeNew(dir, 'cells/dialog-open-close/blind/1/evaluator-output.json', json({ checks: [] }));
-    events.push({ type: 'run-finish', aborted: true, completedCells: 0 });
+    events.push({
+      at: new Date().toISOString(),
+      type: 'run-finish',
+      aborted: true,
+      completedCells: 0,
+    });
     writeNew(
       dir,
       'events.jsonl',
@@ -1054,6 +1070,213 @@ test('evaluator dependency workspace files, metadata and observed version are so
     assert.throws(
       () => verifyRun(dir),
       /public input allowlist|evaluator dependency differs|Observed Playwright version|oracle identity differs/
+    );
+  }
+});
+
+test('a completed plan cannot be relabelled as an aborted producer state', async () => {
+  const dir = path.join(temporary(), 'complete-abort');
+  await dryRun({
+    output: dir,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  const rows = readJson(path.join(dir, 'results.json'));
+  const message = 'Synthetic impossible post-completion failure';
+  const events = fs
+    .readFileSync(path.join(dir, 'events.jsonl'), 'utf8')
+    .trim()
+    .split('\n')
+    .map(JSON.parse);
+  events.splice(-1, 0, {
+    at: events.at(-1).at,
+    type: 'run-aborted',
+    message,
+    completedCells: rows.length,
+  });
+  events.at(-1).aborted = true;
+  fs.writeFileSync(
+    path.join(dir, 'events.jsonl'),
+    events.map((event, index) => JSON.stringify({ ...event, seq: index + 1 })).join('\n') + '\n'
+  );
+  writeNew(
+    dir,
+    'failure.json',
+    json({ status: 'blocked', message, stack: message, completedCells: rows.length })
+  );
+  fs.writeFileSync(
+    path.join(dir, 'report.md'),
+    renderReport(readJson(path.join(dir, 'run.json')), rows, new Error(message))
+  );
+  reseal(dir);
+  assert.throws(() => verifyRun(dir), /Abort after the declared plan is complete/);
+});
+
+test('result and run timestamps must be canonical and ordered inside their observed lifecycle intervals', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const mode of [
+    'invalid-result',
+    'reversed-result',
+    'before-run',
+    'after-cell-start',
+    'after-cell-finish',
+    'invalid-event',
+    'reversed-events',
+    'late-run-start',
+    'run-id-time',
+  ]) {
+    const dir = path.join(temporary(), mode);
+    fs.cpSync(original, dir, { recursive: true });
+    const rows = readJson(path.join(dir, 'results.json'));
+    const events = fs
+      .readFileSync(path.join(dir, 'events.jsonl'), 'utf8')
+      .trim()
+      .split('\n')
+      .map(JSON.parse);
+    const change = (value, ms) => new Date(Date.parse(value) + ms).toISOString();
+    if (mode === 'invalid-result') rows[0].startedAt = 'not-a-time';
+    else if (mode === 'reversed-result') rows[0].finishedAt = change(rows[0].startedAt, -1);
+    else if (mode === 'before-run') rows[0].startedAt = change(events[0].at, -1);
+    else if (mode === 'after-cell-start')
+      rows[0].startedAt = change(events.find((e) => e.type === 'cell-start').at, 1);
+    else if (mode === 'after-cell-finish')
+      rows[0].finishedAt = change(events.find((e) => e.type === 'cell-finish').at, 1);
+    else if (mode === 'invalid-event') events[1].at = 'impossible';
+    else if (mode === 'reversed-events') events[1].at = change(events[0].at, -1);
+    else if (['late-run-start', 'run-id-time'].includes(mode))
+      for (const file of ['run.json', 'run-start.json']) {
+        const run = readJson(path.join(dir, file));
+        run.startedAt =
+          mode === 'late-run-start' ? change(events[0].at, 1) : '2020-01-01T00:00:00.000Z';
+        fs.writeFileSync(path.join(dir, file), json(run));
+      }
+    fs.writeFileSync(path.join(dir, 'results.json'), json(rows));
+    fs.writeFileSync(path.join(dir, 'cells/dialog-open-close/blind/1/result.json'), json(rows[0]));
+    fs.writeFileSync(path.join(dir, 'events.jsonl'), events.map(JSON.stringify).join('\n') + '\n');
+    reseal(dir);
+    assert.throws(() => verifyRun(dir), /timestamp|timestamps/);
+  }
+});
+
+test('calibration CI triggers on every captured source and dependency input', () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(
+      path.join(root, '.github/workflows/interaction-benchmark-calibration.yml'),
+      'utf8'
+    )
+  );
+  const paths = workflow.on.pull_request.paths;
+  const { dataset, cases } = loadDataset();
+  for (const file of calibrationSourcePaths(dataset, cases))
+    assert.ok(
+      paths.some(
+        (pattern) =>
+          pattern === file || (pattern.endsWith('/**') && file.startsWith(pattern.slice(0, -2)))
+      ),
+      `Missing calibration trigger for ${file}`
+    );
+});
+
+test('interrupted preparation is an ordered file prefix and every started cell has complete inputs', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['knowledge'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  const cell = 'cells/dialog-open-close/knowledge/1';
+  for (const mode of [
+    'valid-before-start',
+    'valid-started-no-raw',
+    'started-partial',
+    'started-no-files',
+    'artifact-without-exposure',
+    'material-without-task',
+  ]) {
+    const dir = path.join(temporary(), mode);
+    fs.cpSync(original, dir, { recursive: true });
+    for (const file of ['result.json', 'evaluator-output.json', 'evidence'])
+      fs.rmSync(path.join(dir, cell, file), { recursive: true });
+    const active = mode.startsWith('started-') || mode === 'valid-started-no-raw';
+    const events = fs
+      .readFileSync(path.join(dir, 'events.jsonl'), 'utf8')
+      .trim()
+      .split('\n')
+      .map(JSON.parse)
+      .slice(0, active ? 2 : 1);
+    const message = 'Synthetic preparation interruption';
+    events.push(
+      { at: new Date().toISOString(), type: 'run-aborted', message, completedCells: 0 },
+      { at: new Date().toISOString(), type: 'run-finish', aborted: true, completedCells: 0 }
+    );
+    fs.writeFileSync(
+      path.join(dir, 'events.jsonl'),
+      events.map((event, index) => JSON.stringify({ ...event, seq: index + 1 })).join('\n') + '\n'
+    );
+    fs.writeFileSync(path.join(dir, 'results.json'), json([]));
+    writeNew(
+      dir,
+      'failure.json',
+      json({ status: 'blocked', message, stack: message, completedCells: 0 })
+    );
+    const run = readJson(path.join(dir, 'run.json'));
+    run.harness.browser = readJson(path.join(dir, 'run-start.json')).harness.browser;
+    fs.writeFileSync(path.join(dir, 'run.json'), json(run));
+    fs.writeFileSync(path.join(dir, 'report.md'), renderReport(run, [], new Error(message)));
+    if (mode === 'started-no-files') {
+      fs.rmSync(path.join(dir, cell), { recursive: true });
+      fs.mkdirSync(path.join(dir, cell));
+    } else if (mode !== 'valid-started-no-raw') {
+      fs.unlinkSync(path.join(dir, cell, 'exposure.json'));
+      if (mode !== 'artifact-without-exposure')
+        fs.unlinkSync(path.join(dir, cell, 'artifact.html'));
+      if (mode === 'material-without-task')
+        fs.unlinkSync(path.join(dir, cell, 'participant/task.txt'));
+      else if (mode !== 'artifact-without-exposure')
+        fs.unlinkSync(path.join(dir, cell, 'participant/material-1.txt'));
+    }
+    reseal(dir);
+    if (mode.startsWith('valid-')) assert.equal(verifyRun(dir).status, 'aborted');
+    else
+      assert.throws(
+        () => verifyRun(dir),
+        /Started cell lacks complete producer preparation|Artifact exists before|Participant preparation/
+      );
+  }
+});
+
+test('cell journal identities cannot be coerced from arrays or string repeats', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const field of ['caseId', 'arm', 'repeat']) {
+    const dir = path.join(temporary(), field);
+    fs.cpSync(original, dir, { recursive: true });
+    const events = fs
+      .readFileSync(path.join(dir, 'events.jsonl'), 'utf8')
+      .trim()
+      .split('\n')
+      .map(JSON.parse);
+    for (const event of events)
+      if (['cell-start', 'cell-finish'].includes(event.type))
+        event[field] = field === 'repeat' ? String(event[field]) : [event[field]];
+    fs.writeFileSync(path.join(dir, 'events.jsonl'), events.map(JSON.stringify).join('\n') + '\n');
+    reseal(dir);
+    assert.throws(
+      () => verifyRun(dir),
+      /Cell event identities must use scalar strings and an integer repeat/
     );
   }
 });

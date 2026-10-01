@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { validateDocument, unavailable } from './schemas.mjs';
+import { validateDocument, unavailable, timestampValue } from './schemas.mjs';
 import {
   calibrationHarnessVersion,
   publicFixtures,
@@ -49,6 +49,9 @@ export function verifyRun(output) {
     )
       throw new Error('Failure evidence differs from completed results or abort journal');
   } else if (aborts.length) throw new Error('Abort journal requires validated failure evidence');
+  const eventTimes = events.map((event) => timestampValue(event.at, `Event ${event.seq} at`));
+  if (eventTimes.some((time, index) => index > 0 && time < eventTimes[index - 1]))
+    throw new Error('Lifecycle timestamps are not nondecreasing');
   const checkReport = (manifest) => {
     const expected = renderReport(manifest, results, failure ? new Error(failure.message) : null);
     if (fs.readFileSync(safeFile(output, 'report.md'), 'utf8') !== expected)
@@ -89,6 +92,8 @@ export function verifyRun(output) {
     events[0].kind !== manifest.kind
   )
     throw new Error('Start event differs from manifest');
+  if (timestampValue(manifest.startedAt) > eventTimes[0])
+    throw new Error('Run timestamp starts after its lifecycle journal');
   if (
     sha256(json(dataset)) !== manifest.dataset.sha256 ||
     sha256(json(scoring)) !== manifest.scoring.sha256
@@ -194,15 +199,24 @@ export function verifyRun(output) {
   );
   const started = new Set();
   let activeCell = null;
+  let activeTiming = null;
   let completed = 0;
   let abortSeen = false;
   for (const event of events.slice(1, -1)) {
+    if (
+      ['cell-start', 'cell-finish'].includes(event.type) &&
+      (typeof event.caseId !== 'string' ||
+        typeof event.arm !== 'string' ||
+        !Number.isInteger(event.repeat))
+    )
+      throw new Error('Cell event identities must use scalar strings and an integer repeat');
     const key = `${event.caseId}/${event.arm}/${event.repeat}`;
     if (event.type === 'cell-start') {
       if (abortSeen || activeCell !== null || key !== planned[completed] || started.has(key))
         throw new Error('Cell start is missing, duplicated, or out of plan order');
       started.add(key);
       activeCell = key;
+      activeTiming = { previous: eventTimes[event.seq - 2], start: eventTimes[event.seq - 1] };
     } else if (event.type === 'cell-finish') {
       if (
         abortSeen ||
@@ -212,10 +226,23 @@ export function verifyRun(output) {
         event.status !== results[completed].status
       )
         throw new Error('Cell finish lacks its matching ordered start/result');
+      const row = results[completed];
+      const from = timestampValue(row.startedAt, 'Result startedAt');
+      const to = timestampValue(row.finishedAt, 'Result finishedAt');
+      if (
+        from < activeTiming.previous ||
+        from > activeTiming.start ||
+        to < activeTiming.start ||
+        to < from ||
+        to > eventTimes[event.seq - 1]
+      )
+        throw new Error('Result timestamps differ from matching lifecycle interval');
       activeCell = null;
+      activeTiming = null;
       completed++;
     } else if (event.type === 'run-aborted') {
       if (!failure || abortSeen) throw new Error('Unexpected abort event');
+      if (completed >= planned.length) throw new Error('Abort after the declared plan is complete');
       abortSeen = true;
     } else throw new Error(`Unexpected lifecycle event: ${event.type}`);
   }
@@ -292,7 +319,7 @@ export function verifyRun(output) {
   );
   for (const cell of cells)
     if (!physicalCells.has(cell)) throw new Error(`Missing completed cell: ${cell}`);
-  for (const cell of physicalCells) {
+  for (const cell of new Set([...physicalCells, ...started])) {
     const result = results.find((row) => `${row.caseId}/${row.arm}/${row.repeat}` === cell);
     const [caseId, arm] = cell.split('/');
     const dir = `cells/${cell}`;
@@ -316,6 +343,13 @@ export function verifyRun(output) {
         throw new Error(`Unexpected cell file: ${cell}/${file}`);
     if (present('result.json') && !result)
       throw new Error(`Orphan cell result absent from aggregate: ${cell}`);
+    if (present('artifact.html') && !present('exposure.json'))
+      throw new Error(`Artifact exists before completed participant exposure: ${cell}`);
+    if (
+      started.has(cell) &&
+      ['artifact.html', 'participant/task.txt', 'exposure.json'].some((file) => !present(file))
+    )
+      throw new Error(`Started cell lacks complete producer preparation: ${cell}`);
     const required = [
       'artifact.html',
       'participant/task.txt',
@@ -353,6 +387,18 @@ export function verifyRun(output) {
       ((result || present('exposure.json')) && json(packetFiles) !== json(names))
     )
       throw new Error(`Unexpected or missing participant material: ${cell}`);
+    const preparationOrder = [
+      'task.txt',
+      ...materials.map((_, index) => `material-${index + 1}.txt`),
+    ];
+    if (
+      packetFiles.some((file) =>
+        preparationOrder
+          .slice(0, preparationOrder.indexOf(file))
+          .some((earlier) => !packetFiles.includes(earlier))
+      )
+    )
+      throw new Error(`Participant preparation is not a producer prefix: ${cell}`);
     if (
       present('participant/task.txt') &&
       fs.readFileSync(path.join(packetDir, 'task.txt'), 'utf8') !== expectedPrompt

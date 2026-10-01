@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "interaction-benchmark-v0",
-  "version": "0.0.0-calibration.2",
+  "version": "0.0.0-calibration.3",
   "status": "draft",
   "source": {
     "repository": "https://github.com/Proto-UI/Proto-UI",
