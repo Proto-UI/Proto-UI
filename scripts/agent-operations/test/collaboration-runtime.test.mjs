@@ -2193,6 +2193,157 @@ test('live review-request preflight collects every commit contributor identity',
   assert.equal(live.current.commitContributorIdentityComplete, true);
 });
 
+function collectReviewRequestWithPlatformCommit(change = () => {}) {
+  const request = seal({
+    ...metadataRequest(),
+    action: 'request-independent-review',
+    expected: { requestedReviewerLogins: [] },
+    desired: { reviewerLogin: 'independent-reviewer' },
+  });
+  const commit = {
+    sha: HEAD,
+    author: { login: 'platform-commit-author' },
+    committer: null,
+    commit: {
+      author: { name: 'GitHub', email: 'noreply@github.com' },
+      committer: { name: 'GitHub', email: 'noreply@github.com' },
+      verification: { verified: true, reason: 'valid' },
+    },
+  };
+  const attestation = {
+    data: {
+      repository: {
+        nameWithOwner: 'Proto-UI/Proto-UI',
+        object: {
+          __typename: 'Commit',
+          oid: HEAD,
+          committer: { name: 'GitHub', email: 'noreply@github.com', user: null },
+          signature: { __typename: 'GpgSignature', isValid: true, wasSignedByGitHub: true },
+        },
+      },
+    },
+  };
+  change({ commit, attestation });
+  const calls = [];
+  const live = collectLiveCollaborationState(request, {
+    now: () => new Date('2026-08-27T01:00:05.000Z'),
+    runner(command, args) {
+      calls.push({ command, args });
+      assert.equal(command, 'gh');
+      assert.equal(args.includes('--method'), false);
+      if (args.some((arg) => arg.includes('ProtoUiCollaborationCommitter'))) {
+        assert.ok(args.includes('owner=Proto-UI'));
+        assert.ok(args.includes('name=Proto-UI'));
+        assert.ok(args.includes(`oid=${HEAD}`));
+        const query = args.find((arg) => arg.startsWith('query='));
+        assert.match(query, /object\(oid: \$oid\)/);
+        assert.match(query, /isValid wasSignedByGitHub/);
+        assert.doesNotMatch(query, /\bmutation\b/);
+        return JSON.stringify(attestation);
+      }
+      if (args.includes('graphql')) {
+        return JSON.stringify({
+          data: { viewer: { login: 'maintainer' }, repository: { viewerPermission: 'WRITE' } },
+        });
+      }
+      if (args.includes('repos/Proto-UI/Proto-UI/pulls/509')) {
+        return JSON.stringify({
+          number: 509,
+          state: 'open',
+          user: { login: 'contributor' },
+          updated_at: UPDATED_AT,
+          head: { sha: HEAD },
+          requested_reviewers: [],
+        });
+      }
+      if (args.some((arg) => arg.includes('/pulls/509/commits?per_page=100'))) {
+        return JSON.stringify([
+          [
+            {
+              sha: BASE,
+              author: { login: 'human-author' },
+              committer: { login: 'human-committer' },
+            },
+          ],
+          [commit],
+        ]);
+      }
+      throw new Error(`unexpected fake GitHub call: ${args.join(' ')}`);
+    },
+  });
+  return { request, live, calls };
+}
+
+test('live review-request preflight accepts an attested GitHub committer and retains human contributors', () => {
+  const { request, live, calls } = collectReviewRequestWithPlatformCommit();
+  assert.equal(live.current.commitContributorIdentityComplete, true);
+  assert.deepEqual(live.current.commitContributorLogins, [
+    'human-author',
+    'human-committer',
+    'platform-commit-author',
+  ]);
+  assert.equal(authorize(request, live).outcome, 'mutate');
+  for (const login of live.current.commitContributorLogins) {
+    const contributorRequest = seal({ ...request, desired: { reviewerLogin: login } });
+    assert.match(authorize(contributorRequest, live).reason, /commit contributor/);
+  }
+  assert.equal(calls.length, 4);
+});
+
+for (const [name, change] of [
+  ['missing author', ({ commit }) => (commit.author = null)],
+  [
+    'invalid signature',
+    ({ attestation }) => (attestation.data.repository.object.signature.isValid = false),
+  ],
+  [
+    'foreign signer',
+    ({ attestation }) => (attestation.data.repository.object.signature.wasSignedByGitHub = false),
+  ],
+  ['missing signature', ({ attestation }) => (attestation.data.repository.object.signature = null)],
+  ['missing committer', ({ attestation }) => (attestation.data.repository.object.committer = null)],
+  [
+    'unattested committer name',
+    ({ attestation }) => (attestation.data.repository.object.committer.name = 'Human'),
+  ],
+  [
+    'unattested committer email',
+    ({ attestation }) => (attestation.data.repository.object.committer.email = 'human@example.com'),
+  ],
+  [
+    'foreign repository',
+    ({ attestation }) => (attestation.data.repository.nameWithOwner = 'other/repository'),
+  ],
+  ['exact SHA mismatch', ({ attestation }) => (attestation.data.repository.object.oid = NEXT_HEAD)],
+  ['missing commit object', ({ attestation }) => (attestation.data.repository.object = null)],
+  [
+    'wrong object type',
+    ({ attestation }) => (attestation.data.repository.object.__typename = 'Tag'),
+  ],
+  [
+    'partial GraphQL errors',
+    ({ attestation }) => (attestation.errors = [{ message: 'Unavailable signature' }]),
+  ],
+]) {
+  test(`live review-request preflight fails closed on ${name} despite REST verification`, () => {
+    const { request, live } = collectReviewRequestWithPlatformCommit(change);
+    assert.equal(live.current.commitContributorIdentityComplete, false);
+    assert.ok(live.current.commitContributorLogins.includes('human-author'));
+    assert.ok(live.current.commitContributorLogins.includes('human-committer'));
+    assert.match(authorize(request, live).reason, /contributor identity is unavailable/);
+  });
+}
+
+test('live review-request preflight retains a linked committer returned by exact-commit GraphQL', () => {
+  const { request, live } = collectReviewRequestWithPlatformCommit(({ attestation }) => {
+    attestation.data.repository.object.committer.user = { login: 'linked-committer' };
+  });
+  assert.equal(live.current.commitContributorIdentityComplete, true);
+  assert.ok(live.current.commitContributorLogins.includes('linked-committer'));
+  const contributorRequest = seal({ ...request, desired: { reviewerLogin: 'linked-committer' } });
+  assert.match(authorize(contributorRequest, live).reason, /commit contributor/);
+});
+
 test('live review-request preflight rejects a malformed commit page without dropping contributors', () => {
   const base = metadataRequest();
   const request = seal({

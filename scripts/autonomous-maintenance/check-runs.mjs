@@ -9,6 +9,7 @@ import {
   validateObserverVerifierIndependence,
 } from './evidence-state.mjs';
 import { computeReviewedContentDigest } from './reviewed-content-digest.mjs';
+import { readGitPathNames } from './git-paths.mjs';
 
 const root = process.cwd();
 const phaseDirectory = path.join(root, 'internal/autonomous-maintenance/phase-0');
@@ -197,14 +198,15 @@ function repositoryPath(value) {
 }
 
 function committedChangedPaths(baseline, head) {
-  return execFileSync('git', ['diff', '--name-only', '--no-renames', baseline, head, '--'], {
-    cwd: root,
-    encoding: 'utf8',
-  })
-    .split(/\r?\n/)
-    .map((entry) => entry.trim())
-    .filter(Boolean)
-    .sort();
+  return readGitPathNames(root, [
+    'diff',
+    '--name-only',
+    '-z',
+    '--no-renames',
+    baseline,
+    head,
+    '--',
+  ]).sort();
 }
 
 function validateExactInventoryPaths(value, label) {

@@ -372,7 +372,7 @@ export const GITHUB_WEB_FLOW_PLATFORM = {
 // verified platform actor; promoting the author from the same attestation
 // would turn an unattested name/email claim into a trusted identity
 // (PR509-PLATFORM-AUTHOR-IDENTITY-008).
-function commitActorIdentity(actor, signature, role) {
+export function commitActorIdentity(actor, signature, role) {
   if (role !== 'author' && role !== 'committer') {
     throw new Error('commit actor role must be author or committer');
   }

@@ -1,5 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import {
+  commitActorIdentity,
   latestThreadUpdate,
   MAX_LIVE_RESPONSE_BYTES,
   parseRepositoryId,
@@ -15,6 +16,25 @@ const VIEWER_QUERY = `
 query ProtoUiCollaborationViewer($owner: String!, $name: String!) {
   viewer { login }
   repository(owner: $owner, name: $name) { viewerPermission }
+}`;
+
+const COMMITTER_QUERY = `
+query ProtoUiCollaborationCommitter($owner: String!, $name: String!, $oid: GitObjectID!) {
+  repository(owner: $owner, name: $name) {
+    nameWithOwner
+    object(oid: $oid) {
+      __typename
+      ... on Commit {
+        oid
+        committer { name email user { login } }
+        signature {
+          __typename
+          ... on GpgSignature { isValid wasSignedByGitHub }
+          ... on SshSignature { isValid wasSignedByGitHub }
+        }
+      }
+    }
+  }
 }`;
 
 const THREAD_QUERY = `
@@ -143,6 +163,22 @@ function pullRequestState(repositoryId, number, runner) {
   return pull;
 }
 
+function collectCommitterIdentity(repositoryId, sha, runner) {
+  const { owner, name } = parseRepositoryId(repositoryId);
+  const payload = graphql(runner, COMMITTER_QUERY, { owner, name, oid: sha });
+  const repository = payload?.data?.repository;
+  const commit = repository?.object;
+  if (
+    (payload?.errors?.length ?? 0) > 0 ||
+    repositoryIdFromNameWithOwner(repository?.nameWithOwner) !== repositoryId ||
+    commit?.__typename !== 'Commit' ||
+    commit.oid !== sha
+  ) {
+    return null;
+  }
+  return commitActorIdentity(commit.committer, commit.signature, 'committer');
+}
+
 function pullRequestCommitContributors(repositoryId, number, runner) {
   const { owner, name } = parseRepositoryId(repositoryId);
   const pages = run(runner, [
@@ -165,13 +201,22 @@ function pullRequestCommitContributors(repositoryId, number, runner) {
   const logins = [];
   let identityComplete = true;
   for (const commit of commits) {
-    if (typeof commit?.sha !== 'string') {
+    if (typeof commit?.sha !== 'string' || !/^[a-f0-9]{40}$/.test(commit.sha)) {
       throw new Error('pull-request commit pagination returned an invalid commit');
     }
     for (const role of ['author', 'committer']) {
       const login = commit?.[role]?.login;
       if (typeof login !== 'string' || login.length === 0) {
-        identityComplete = false;
+        // REST verification.verified also accepts signatures made by humans.
+        // Only exact-commit GitHub attestation may identify a platform committer;
+        // it never establishes the identity of an unlinked author.
+        const identity =
+          role === 'committer' ? collectCommitterIdentity(repositoryId, commit.sha, runner) : null;
+        if (typeof identity?.login === 'string' && identity.login.length > 0) {
+          logins.push(identity.login);
+        } else if (!identity?.platform) {
+          identityComplete = false;
+        }
       } else {
         logins.push(login);
       }

@@ -6,6 +6,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import YAML from 'yaml';
+import { parseGitPathNames } from '../git-paths.mjs';
 import {
   canonicalizeReviewPacket,
   computeReviewedContentDigest,
@@ -93,7 +94,7 @@ test('reviewed content retains every integration eligibility fact and its eviden
   }
 });
 
-function createFixture(t, { remediation = 'modify', reuseRole = null } = {}) {
+function createFixture(t, { remediation = 'modify', reuseRole = null, baselinePaths = [] } = {}) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-maintenance-check-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   execFileSync('git', ['init', '--quiet'], { cwd: root });
@@ -111,6 +112,7 @@ function createFixture(t, { remediation = 'modify', reuseRole = null } = {}) {
     })
   );
   writeFile(root, 'src/example.js', 'export const projection = "before";\n');
+  for (const entry of baselinePaths) writeFile(root, entry, 'baseline content\n');
   execFileSync('git', ['add', '.'], { cwd: root });
   execFileSync('git', ['commit', '--quiet', '-m', 'fixture baseline'], { cwd: root });
   const baselineCommit = execFileSync('git', ['rev-parse', 'HEAD'], {
@@ -438,6 +440,192 @@ function createFixture(t, { remediation = 'modify', reuseRole = null } = {}) {
     run,
     sections,
   };
+}
+
+function fixtureDigest(fixture, options = {}) {
+  return computeReviewedContentDigest({
+    root: fixture.root,
+    baseline: fixture.baselineCommit,
+    head: fixture.exactHeadSha,
+    exactPaths: fixture.review.changeInventory.exactPaths,
+    reviewPath: fixture.reviewPath,
+    ...options,
+  });
+}
+
+function commitReviewedFixture(fixture) {
+  const writePacket = () =>
+    writeFile(
+      fixture.root,
+      fixture.reviewPath,
+      markdownMetadata('AM-P0-004-F1 remediation review packet', fixture.review, fixture.sections)
+    );
+  writePacket();
+  const digest = fixtureDigest(fixture, { worktree: true });
+  fixture.review.changeInventory.reviewedContentDigest = digest;
+  fixture.review.independentReview.reviewedContentDigest = digest;
+  fixture.review.independentReview.history.at(-1).reviewedContentDigest = digest;
+  writePacket();
+  const worktreeResult = spawnSync(process.execPath, [reviewChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  });
+  assert.equal(worktreeResult.status, 0, worktreeResult.stderr);
+  execFileSync('git', ['add', '-A', '--', ...fixture.review.changeInventory.exactPaths], {
+    cwd: fixture.root,
+    env: { ...process.env, GIT_LITERAL_PATHSPECS: '1' },
+  });
+  execFileSync('git', ['commit', '--quiet', '-m', 'fixture reviewed update'], {
+    cwd: fixture.root,
+  });
+  fixture.exactHeadSha = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  }).trim();
+  fixture.run.integration.exactHeadSha = fixture.exactHeadSha;
+  writeRunLedger(fixture.root, fixture.run);
+  assert.equal(fixtureDigest(fixture), digest, 'pre-commit and exact-head digests agree');
+}
+
+const literalNames = [
+  ' ',
+  ' leading ',
+  'trailing ',
+  'quote"name',
+  'line\nbreak',
+  'tab\tname',
+  'return\rname',
+  'café/文件',
+  '\uFEFFname',
+];
+test('NUL-delimited Git paths preserve names and reject lossy or malformed output', () => {
+  assert.deepEqual(parseGitPathNames(Buffer.from(`${literalNames.join('\0')}\0`)), literalNames);
+  assert.deepEqual(parseGitPathNames(Buffer.alloc(0)), []);
+  assert.throws(() => parseGitPathNames(Buffer.from('name')), /not NUL-terminated/);
+  assert.throws(() => parseGitPathNames(Buffer.from('name\0\0')), /empty name/);
+  assert.throws(() => parseGitPathNames(Buffer.from([0xff, 0])), /encoded data/);
+});
+for (const operation of ['add', 'delete']) {
+  test(`forward checkers preserve literal Git filenames for ${operation} entries`, (t) => {
+    const fixture = createFixture(t, { baselinePaths: operation === 'delete' ? literalNames : [] });
+    for (const entry of literalNames) {
+      if (operation === 'delete') fs.rmSync(path.join(fixture.root, entry));
+      else writeFile(fixture.root, entry, 'reviewed content\n');
+    }
+    fixture.review.changeInventory.exactPaths.push(...literalNames);
+    fixture.review.changeInventory.implementation.push(...literalNames);
+    commitReviewedFixture(fixture);
+    for (const checker of [reviewChecker, runChecker]) {
+      const result = spawnSync(process.execPath, [checker], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      });
+      assert.equal(result.status, 0, `${path.basename(checker)}: ${result.stderr}`);
+    }
+  });
+}
+
+test('run checker rejects a committed whitespace-only path omitted from the reviewed inventory', (t) => {
+  const fixture = createFixture(t);
+  writeFile(fixture.root, ' ', 'unreviewed content\n');
+  execFileSync('git', ['add', '--', ' '], { cwd: fixture.root });
+  execFileSync('git', ['commit', '--quiet', '-m', 'fixture unreviewed whitespace path'], {
+    cwd: fixture.root,
+  });
+  fixture.run.integration.exactHeadSha = execFileSync('git', ['rev-parse', 'HEAD'], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  }).trim();
+  writeRunLedger(fixture.root, fixture.run);
+  const result = spawnSync(process.execPath, [runChecker], { cwd: fixture.root, encoding: 'utf8' });
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /changed inventory does not match/);
+});
+
+test('run checker rejects a squash receipt with an additional whitespace-only path', (t) => {
+  const fixture = createFixture(t);
+  writeFile(fixture.root, ' ', 'unreviewed squash content\n');
+  execFileSync('git', ['add', '--', ' '], { cwd: fixture.root });
+  const tree = execFileSync('git', ['write-tree'], { cwd: fixture.root, encoding: 'utf8' }).trim();
+  const mergeCommitSha = execFileSync(
+    'git',
+    ['commit-tree', tree, '-p', fixture.baselineCommit, '-m', 'fixture squash'],
+    { cwd: fixture.root, encoding: 'utf8' }
+  ).trim();
+  fixture.run.integration.status = 'integrated';
+  fixture.run.integration.receipt = {
+    repositoryId: 'github.com:Proto-UI/Proto-UI',
+    pullRequest: 1,
+    authorizationId: 'explicit-current-user',
+    headSha: fixture.exactHeadSha,
+    liveHeadSha: fixture.exactHeadSha,
+    mergeCommitSha,
+    mergeMethod: 'squash',
+    mergedAt: '2026-10-01T00:00:00Z',
+  };
+  writeRunLedger(fixture.root, fixture.run);
+  const result = spawnSync(process.execPath, [runChecker], { cwd: fixture.root, encoding: 'utf8' });
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /mergeCommitSha changed paths must match/);
+});
+
+for (const target of ['review-packet', 'implementation']) {
+  for (const modeCase of [
+    'unstaged-executable',
+    'ignored-worktree-executable',
+    'staged-executable',
+    'staged-executable-overridden',
+    'untracked-executable',
+  ]) {
+    test(`worktree digest honors Git mode semantics for ${target}: ${modeCase}`, (t) => {
+      const fixture = createFixture(t);
+      const entry = target === 'review-packet' ? fixture.reviewPath : 'src/example.js';
+      execFileSync(
+        'git',
+        [
+          'config',
+          'core.filemode',
+          ['unstaged-executable', 'staged-executable-overridden'].includes(modeCase)
+            ? 'true'
+            : 'false',
+        ],
+        {
+          cwd: fixture.root,
+        }
+      );
+      if (modeCase.startsWith('staged-executable')) {
+        execFileSync('git', ['update-index', '--chmod=+x', '--', entry], { cwd: fixture.root });
+        fs.chmodSync(path.join(fixture.root, entry), 0o644);
+      } else {
+        if (modeCase === 'untracked-executable')
+          execFileSync('git', ['rm', '--cached', '--quiet', '--', entry], { cwd: fixture.root });
+        fs.chmodSync(path.join(fixture.root, entry), 0o755);
+      }
+      const indexBefore = execFileSync('git', ['ls-files', '--stage', '-z'], { cwd: fixture.root });
+      const worktreeDigest = fixtureDigest(fixture, { worktree: true });
+      assert.deepEqual(
+        execFileSync('git', ['ls-files', '--stage', '-z'], { cwd: fixture.root }),
+        indexBefore
+      );
+      execFileSync('git', ['add', '--', entry], { cwd: fixture.root });
+      execFileSync('git', ['commit', '--quiet', '--allow-empty', '-m', 'fixture mode update'], {
+        cwd: fixture.root,
+      });
+      const head = execFileSync('git', ['rev-parse', 'HEAD'], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      }).trim();
+      assert.equal(fixtureDigest(fixture, { head }), worktreeDigest);
+      const actualMode = execFileSync('git', ['ls-tree', head, '--', entry], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      }).slice(0, 6);
+      assert.equal(
+        actualMode,
+        ['unstaged-executable', 'staged-executable'].includes(modeCase) ? '100755' : '100644'
+      );
+    });
+  }
 }
 
 test('run checker parses coherent v2 finding evidence and rejects contradictory completion', (t) => {

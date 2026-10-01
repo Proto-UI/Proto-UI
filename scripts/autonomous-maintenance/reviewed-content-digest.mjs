@@ -4,6 +4,7 @@ import { lstatSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import YAML from 'yaml';
+import { parseGitPathNames } from './git-paths.mjs';
 
 const digestSentinel = `sha256:${'0'.repeat(64)}`;
 const digestDomain = 'proto-ui-autonomous-maintenance-reviewed-content-v1';
@@ -83,13 +84,16 @@ function readWorktreePath(root, repositoryPath) {
   }
 }
 
-// Stage the reviewed worktree paths on top of the reviewed head into a
-// throwaway index, then diff the baseline against that index. The resulting
+// Overlay the real index entries for reviewed paths on the reviewed head in a
+// throwaway index, then stage their worktree state with Git's core.filemode
+// semantics. The real index matters for explicit staged modes when filemode is
+// false; HEAD alone and filesystem executable bits are not equivalent sources.
+// Read both the packet mode and the reviewed patch from this one index. The resulting
 // patch stream is byte-identical to `git diff baseline <new head>` after the
 // worktree content is committed, which keeps the pre-commit and post-commit
 // digest over the same canonical stream (including untracked paths and
 // deletions, interleaved in path order).
-function readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions) {
+function readWorktreeSnapshot(root, baseline, head, reviewedPaths, reviewPath, diffOptions) {
   const tempDir = mkdtempSync(join(tmpdir(), 'proto-ui-reviewed-content-index-'));
   const env = literalPathspecEnv({ GIT_INDEX_FILE: join(tempDir, 'index') });
   try {
@@ -98,13 +102,39 @@ function readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions) {
       env,
       stdio: ['ignore', 'ignore', 'pipe'],
     });
-    // Stage only paths present in the worktree or in the reviewed head tree;
-    // a path deleted before the head matches nothing and would fail the add,
-    // while its baseline deletion is still captured by the cached diff below.
-    const stagedPaths = reviewedPaths.filter(
+    const exactPaths = [...reviewedPaths, reviewPath];
+    const indexEntries = execFileSync('git', ['ls-files', '--stage', '-z', '--', ...exactPaths], {
+      cwd: root,
+      env: literalPathspecEnv(),
+      maxBuffer: 64 * 1024 * 1024,
+    });
+    execFileSync('git', ['update-index', '--force-remove', '-z', '--stdin'], {
+      cwd: root,
+      env,
+      input: `${exactPaths.join('\0')}\0`,
+      stdio: ['pipe', 'ignore', 'pipe'],
+    });
+    execFileSync('git', ['update-index', '-z', '--index-info'], {
+      cwd: root,
+      env,
+      input: indexEntries,
+      stdio: ['pipe', 'ignore', 'pipe'],
+    });
+    const indexedPaths = new Set(
+      parseGitPathNames(
+        execFileSync('git', ['ls-files', '-z', '--', ...exactPaths], {
+          cwd: root,
+          env,
+          maxBuffer: 64 * 1024 * 1024,
+        })
+      )
+    );
+    // A path absent from both index and worktree is already deleted. Its
+    // baseline deletion remains in the cached diff without an invalid git add.
+    const stagedPaths = exactPaths.filter(
       (reviewedPath) =>
         lstatSync(resolve(root, reviewedPath), { throwIfNoEntry: false }) !== undefined ||
-        readCommitMode(root, head, reviewedPath) !== null
+        indexedPaths.has(reviewedPath)
     );
     if (stagedPaths.length > 0) {
       execFileSync('git', ['add', '--force', '--', ...stagedPaths], {
@@ -113,33 +143,19 @@ function readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions) {
         stdio: ['ignore', 'ignore', 'pipe'],
       });
     }
-    return execFileSync(
+    const patch = execFileSync(
       'git',
       ['diff', '--cached', ...diffOptions, baseline, '--', ...reviewedPaths],
       { cwd: root, env, maxBuffer: 64 * 1024 * 1024 }
     );
+    const packetEntry = execFileSync('git', ['ls-files', '--stage', '-z', '--', reviewPath], {
+      cwd: root,
+      env,
+      encoding: 'utf8',
+    });
+    return { patch, packetMode: packetEntry ? packetEntry.split(' ', 1)[0] : 'absent' };
   } finally {
     rmSync(dirname(env.GIT_INDEX_FILE), { recursive: true, force: true });
-  }
-}
-function readWorktreeMode(root, repositoryPath) {
-  try {
-    const indexed = execFileSync('git', ['ls-files', '--stage', '--', repositoryPath], {
-      cwd: root,
-      encoding: 'utf8',
-      env: literalPathspecEnv(),
-      stdio: ['ignore', 'pipe', 'ignore'],
-    }).trim();
-    if (indexed) return indexed.split(/\s+/, 1)[0];
-  } catch {
-    // Fall through to the filesystem mode for an untracked path.
-  }
-  try {
-    const stats = lstatSync(resolve(root, repositoryPath));
-    if (stats.isSymbolicLink()) return '120000';
-    return (stats.mode & 0o111) !== 0 ? '100755' : '100644';
-  } catch {
-    return null;
   }
 }
 
@@ -162,8 +178,11 @@ export function computeReviewedContentDigest({
     '--no-textconv',
     '--no-renames',
   ];
-  const patch = worktree
-    ? readWorktreeDiff(root, baseline, head, reviewedPaths, diffOptions)
+  const worktreeSnapshot = worktree
+    ? readWorktreeSnapshot(root, baseline, head, reviewedPaths, reviewPath, diffOptions)
+    : null;
+  const patch = worktreeSnapshot
+    ? worktreeSnapshot.patch
     : execFileSync('git', ['diff', ...diffOptions, baseline, head, '--', ...reviewedPaths], {
         cwd: root,
         env: literalPathspecEnv(),
@@ -193,8 +212,8 @@ export function computeReviewedContentDigest({
     'baseline-review-packet',
     baselinePacket === null ? 'absent' : canonicalizeReviewPacket(baselinePacket)
   );
-  const headPacketMode = worktree
-    ? (readWorktreeMode(root, reviewPath) ?? readCommitMode(root, head, reviewPath) ?? '100644')
+  const headPacketMode = worktreeSnapshot
+    ? worktreeSnapshot.packetMode
     : (readCommitMode(root, head, reviewPath) ?? 'absent');
   updateField(hash, 'head-review-packet-mode', headPacketMode);
   updateField(hash, 'head-review-packet', canonicalizeReviewPacket(headPacket));

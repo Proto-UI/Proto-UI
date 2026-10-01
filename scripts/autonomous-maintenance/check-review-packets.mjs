@@ -5,6 +5,7 @@ import process from 'node:process';
 import YAML from 'yaml';
 import { validateForwardReviewIndependence } from './evidence-state.mjs';
 import { computeReviewedContentDigest } from './reviewed-content-digest.mjs';
+import { readGitPathNames } from './git-paths.mjs';
 
 const root = process.cwd();
 const reviewDirectory = path.join(root, 'internal/autonomous-maintenance/phase-0/reviews');
@@ -373,13 +374,6 @@ function resolveRepositoryPath(file, value, errors, label, options = {}) {
   return resolved;
 }
 
-function gitLines(args) {
-  return execFileSync('git', args, { cwd: root, encoding: 'utf8' })
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
 function changedPathsSince(commit, file, errors) {
   try {
     execFileSync('git', ['cat-file', '-e', `${commit}^{commit}`], {
@@ -391,10 +385,15 @@ function changedPathsSince(commit, file, errors) {
     return new Set();
   }
 
-  return new Set([
-    ...gitLines(['diff', '--name-only', '--no-renames', commit, '--']),
-    ...gitLines(['ls-files', '--others', '--exclude-standard']),
-  ]);
+  try {
+    return new Set([
+      ...readGitPathNames(root, ['diff', '--name-only', '-z', '--no-renames', commit, '--']),
+      ...readGitPathNames(root, ['ls-files', '-z', '--others', '--exclude-standard']),
+    ]);
+  } catch (error) {
+    fail(errors, file, `changed inventory could not be read: ${error.message}`);
+    return new Set();
+  }
 }
 
 function validateAuthority(file, entries, stage, errors) {
