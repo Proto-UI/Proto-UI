@@ -315,3 +315,151 @@ test(
     assert.match(fs.readFileSync(log, 'utf8'), /started-before-hang/);
   }
 );
+
+test('rehashed provenance and source-policy contradictions are rejected', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const mutation of ['browser', 'dataset', 'scoring', 'scoring-shape', 'immutable-manifest']) {
+    const dir = path.join(temporary(), mutation);
+    fs.cpSync(original, dir, { recursive: true });
+    const manifest = readJson(path.join(dir, 'run.json'));
+    const start = readJson(path.join(dir, 'run-start.json'));
+    if (mutation === 'browser')
+      manifest.harness.browser = measured({
+        name: 'chromium',
+        version: 'FAKE-999',
+        executable: '/test-only',
+      });
+    else if (mutation === 'dataset') {
+      const dataset = readJson(path.join(dir, 'dataset.json'));
+      dataset.limitations.push('Stale copied dataset');
+      fs.writeFileSync(path.join(dir, 'dataset.json'), json(dataset));
+      manifest.dataset.sha256 = start.dataset.sha256 = sha256(json(dataset));
+    } else if (mutation.startsWith('scoring')) {
+      const scoring = readJson(path.join(dir, 'scoring.json'));
+      if (mutation === 'scoring-shape') scoring.severity.status = 'invented-approval';
+      else scoring.aggregation = 'A changed scoring policy absent from the source snapshot';
+      fs.writeFileSync(path.join(dir, 'scoring.json'), json(scoring));
+      manifest.scoring.sha256 = start.scoring.sha256 = sha256(json(scoring));
+    } else manifest.plan.repairBudget = 99;
+    fs.writeFileSync(path.join(dir, 'run.json'), json(manifest));
+    fs.writeFileSync(path.join(dir, 'run-start.json'), json(start));
+    fs.unlinkSync(path.join(dir, 'inventory.json'));
+    fs.unlinkSync(path.join(dir, 'seal.json'));
+    sealEvidence(dir);
+    assert.doesNotThrow(() => verifyEvidence(dir));
+    const expected =
+      mutation === 'browser'
+        ? /browser identity/
+        : mutation === 'scoring-shape'
+          ? /must be one of/
+          : mutation === 'immutable-manifest'
+            ? /manifest changed/
+            : /source snapshot/;
+    assert.throws(() => verifyRun(dir), expected);
+  }
+});
+
+test('a raw measured browser remains bound after a subsequent blocked launch', async () => {
+  const dir = path.join(temporary(), 'mixed-browser');
+  await dryRun({
+    output: dir,
+    repeats: 2,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  // Synthetic metadata-only control: no real browser/version is claimed here.
+  const browser = { name: 'test-only-browser', version: 'synthetic-v1', executable: '/test-only' };
+  const rawPath = path.join(dir, 'cells/dialog-open-close/blind/1/evaluator-output.json');
+  const raw = readJson(rawPath);
+  raw.browser = browser;
+  fs.writeFileSync(rawPath, json(raw));
+  const manifest = readJson(path.join(dir, 'run.json'));
+  manifest.harness.browser = measured(browser);
+  fs.writeFileSync(path.join(dir, 'run.json'), json(manifest));
+  fs.unlinkSync(path.join(dir, 'inventory.json'));
+  fs.unlinkSync(path.join(dir, 'seal.json'));
+  sealEvidence(dir);
+  assert.equal(verifyRun(dir).cells, 2);
+});
+
+test('missing cells need typed, count-bound failure evidence and matching abort events', async () => {
+  const original = path.join(temporary(), 'original');
+  await dryRun({
+    output: original,
+    repeats: 2,
+    selectedCases: ['dialog-open-close'],
+    arms: ['blind'],
+    chromiumPath: '/missing-public-calibration-chromium',
+  });
+  for (const mode of ['empty', 'wrong-count', 'wrong-status', 'valid']) {
+    const dir = path.join(temporary(), mode);
+    fs.cpSync(original, dir, { recursive: true });
+    const rows = readJson(path.join(dir, 'results.json')).slice(0, 1);
+    fs.writeFileSync(path.join(dir, 'results.json'), json(rows));
+    fs.rmSync(path.join(dir, 'cells/dialog-open-close/blind/2'), { recursive: true });
+    const message = 'Synthetic interruption before repeat 2';
+    const events = fs
+      .readFileSync(path.join(dir, 'events.jsonl'), 'utf8')
+      .trim()
+      .split('\n')
+      .map(JSON.parse)
+      .filter((event) => event.type !== 'run-finish' && event.repeat !== 2);
+    events.push(
+      { at: new Date().toISOString(), type: 'run-aborted', message, completedCells: 1 },
+      { at: new Date().toISOString(), type: 'run-finish', aborted: true, completedCells: 1 }
+    );
+    fs.writeFileSync(
+      path.join(dir, 'events.jsonl'),
+      events.map((event, index) => JSON.stringify({ ...event, seq: index + 1 })).join('\n') + '\n'
+    );
+    const failure =
+      mode === 'empty'
+        ? {}
+        : {
+            status: mode === 'wrong-status' ? 'pass' : 'blocked',
+            message,
+            stack: 'Synthetic test-only interruption',
+            completedCells: mode === 'wrong-count' ? 2 : 1,
+          };
+    fs.writeFileSync(path.join(dir, 'failure.json'), json(failure));
+    fs.unlinkSync(path.join(dir, 'inventory.json'));
+    fs.unlinkSync(path.join(dir, 'seal.json'));
+    sealEvidence(dir);
+    if (mode === 'valid') assert.deepEqual(verifyRun(dir).status, 'aborted');
+    else
+      assert.throws(
+        () => verifyRun(dir),
+        mode === 'wrong-count' ? /Failure evidence differs/ : /missing status|must equal blocked/
+      );
+  }
+});
+
+test('initialization failure is typed and cannot claim completed cells without a manifest', () => {
+  const dir = temporary();
+  const message = 'Synthetic initialization failure';
+  writeNew(dir, 'results.json', json([]));
+  writeNew(
+    dir,
+    'failure.json',
+    json({ status: 'blocked', message, stack: 'Synthetic test stack', completedCells: 0 })
+  );
+  writeNew(
+    dir,
+    'events.jsonl',
+    [
+      { seq: 1, type: 'run-aborted', message, completedCells: 0 },
+      { seq: 2, type: 'run-finish', aborted: true, completedCells: 0 },
+    ]
+      .map(JSON.stringify)
+      .join('\n') + '\n'
+  );
+  sealEvidence(dir);
+  assert.equal(verifyRun(dir).status, 'blocked-before-manifest');
+});

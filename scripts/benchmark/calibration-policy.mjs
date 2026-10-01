@@ -3,6 +3,7 @@ import path from 'node:path';
 import { listFiles, safeFile } from './evidence.mjs';
 import { measured, unavailable } from './schemas.mjs';
 
+export const publicDatasetPath = 'benchmarks/interaction/dataset.json';
 export const publicFixtures = Object.freeze({
   'dialog-open-close': 'dialog',
   'tabs-manual-activation': 'tabs',

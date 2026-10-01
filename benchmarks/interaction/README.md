@@ -28,7 +28,7 @@ Local browser actions have explicit bounds (10-second launch, 1.2-second action,
 - `materials/*.txt`: small, source-pinned **draft** Proto knowledge excerpts used only to test knowledge-packet delivery
 - `fixtures/*.html`: intentionally public handwritten native-browser controls; their answers are already exposed
 - `scoring.json`: draft dimension/status/conflict policy; no aggregate score and no calibrated severity weights
-- `scripts/benchmark/schemas.mjs`: canonical JSON Schemas plus a strict validator for the supported keywords; export machine-readable JSON with `node scripts/benchmark/benchmark.mjs schemas`
+- `scripts/benchmark/schemas.mjs`: canonical case/dataset/scoring/run/result/failure JSON Schemas plus a strict validator for the supported keywords; export machine-readable JSON with `node scripts/benchmark/benchmark.mjs schemas`
 - `scripts/benchmark/browser-calibration.mjs`: public black-box smoke journeys, independent of fixture implementation imports; **not yet an independently reviewed hidden oracle**
 - `scripts/benchmark/verify-run.mjs`: evidence, schema, cell-plan, source, prompt, artifact and result binding checks
 
@@ -63,7 +63,7 @@ A run records source/base SHA, dataset/scoring bytes, exact harness/fixture sour
 
 Before and after each cell, the runner rejects detected changes to snapshotted source bytes. Fixtures execute from the snapshot. Run one coordinator and do not edit source while collecting a run. This calibration drift check is not an adversarial sandbox or a substitute for immutable execution images in formal work.
 
-The run manifest preserves the first successfully measured browser identity; a later setup failure cannot erase it, and every cell retains its own browser/launch details. Verification binds each copied artifact back to its case-mapped source fixture (including the declared negative transformation) and replays the narrowly defined runner-derived checks against the raw evaluator output and failures.
+The run manifest preserves the first successfully measured browser identity; a later setup failure cannot erase it, and every cell retains its own browser/launch details. Verification rederives that identity from ordered raw cell records, binds dataset/scoring copies to their snapshotted sources, and validates typed failure records/counts against the abort journal before accepting a partial run. It also preserves the initial manifest except for the declared browser-identity update. Verification binds each copied artifact back to its case-mapped source fixture (including the declared negative transformation) and replays the narrowly defined runner-derived checks against the raw evaluator output and failures.
 
 The runner refuses to reuse a directory or overwrite an artifact. `inventory.json` hashes every payload; `seal.json` binds the inventory. `verify` detects corruption, missing/extra files, invalid results, duplicate/unplanned cells, changed source/inputs and missing result references. These are **write-once-by-runner, tamper-evident local files**, not trusted immutable storage: an owner can rewrite files and both hashes. Preserve the independently received inventory digest and archive in access-controlled append-only/WORM storage before relying on formal results.
 

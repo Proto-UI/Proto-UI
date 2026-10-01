@@ -16,6 +16,7 @@ import {
 import { verifyRun } from './verify-run.mjs';
 import {
   publicFixtures,
+  publicDatasetPath,
   negativeControlDeviation,
   fixtureArtifact,
   retainBrowserIdentity,
@@ -32,7 +33,7 @@ import {
   verifyEvidence,
 } from './evidence.mjs';
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const defaultDataset = 'benchmarks/interaction/dataset.json';
+const defaultDataset = publicDatasetPath;
 
 export function loadDataset(datasetPath = defaultDataset) {
   const dataset = validateDocument('dataset', readJson(safeFile(root, datasetPath)));
@@ -53,7 +54,7 @@ export function loadDataset(datasetPath = defaultDataset) {
         throw new Error(`Material digest mismatch: ${material.path}`);
     }
   }
-  const scoring = readJson(safeFile(root, dataset.scoringPath));
+  const scoring = validateDocument('scoring', readJson(safeFile(root, dataset.scoringPath)));
   if (
     JSON.stringify(scoring.dimensions) !== JSON.stringify(dimensions) ||
     JSON.stringify(scoring.statuses) !== JSON.stringify(statuses)
@@ -352,6 +353,11 @@ export async function dryRun({
             };
           }
           writeNew(cellDir, 'evaluator-output.json', json(evaluated));
+          manifest.harness.browser = retainBrowserIdentity(
+            manifest.harness.browser,
+            evaluated.browser
+          );
+
           assertSnapshotUnchanged(snapshot);
           const checks = deriveChecks(evaluated.checks, item, evidenceDir);
           const status = outcomeStatus(checks);
@@ -400,10 +406,6 @@ export async function dryRun({
           validateDocument('result', result);
           writeNew(cellDir, 'result.json', json(result));
           results.push(result);
-          manifest.harness.browser = retainBrowserIdentity(
-            manifest.harness.browser,
-            evaluated.browser
-          );
           event('cell-finish', { caseId: item.id, arm, repeat, status });
         }
     }

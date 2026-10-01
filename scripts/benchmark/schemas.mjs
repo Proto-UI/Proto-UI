@@ -124,6 +124,42 @@ export const schemas = {
       limitations: strings,
     })
   ),
+  scoring: schema(
+    'scoring',
+    object({
+      schemaVersion: { const: 1 },
+      version: string,
+      frozen: { type: 'boolean' },
+      dimensions: array(dimension, 1),
+      statuses: array(status, 1),
+      aggregation: string,
+      severity: object({ status: choice('not-calibrated', 'frozen'), policy: string }),
+      oracleConflictPolicy: string,
+      discoveryCategories: array(
+        choice(
+          'both',
+          'agent-only-valid',
+          'proto-only',
+          'semantically-equivalent',
+          'missing-from-proto',
+          'ambiguous-disputed',
+          'unsupported-false'
+        ),
+        1
+      ),
+      repairPolicy: object({ calibrationMaxCycles: integer, formal: string }),
+      claims: string,
+    })
+  ),
+  failure: schema(
+    'failure',
+    object({
+      status: { const: 'blocked' },
+      message: string,
+      stack: string,
+      completedCells: integer,
+    })
+  ),
   run: schema(
     'run',
     object({
@@ -323,6 +359,18 @@ export function validateDocument(kind, value) {
     if (layers.length !== 3 || new Set(layers).size !== 3)
       throw new Error('Exactly three distinct oracle layers required');
   }
+  if (
+    kind === 'scoring' &&
+    (JSON.stringify(value.dimensions) !== JSON.stringify(dimensions) ||
+      JSON.stringify(value.statuses) !== JSON.stringify(statuses))
+  )
+    throw new Error('Scoring vocabulary differs from result schema');
+  if (
+    kind === 'run' &&
+    (new Set(value.plan.cases).size !== value.plan.cases.length ||
+      new Set(value.plan.arms).size !== value.plan.arms.length)
+  )
+    throw new Error('Duplicate planned cases or arms');
   if (kind === 'run' && value.kind === 'model-evaluation') {
     if (
       !value.scoring.frozen ||
