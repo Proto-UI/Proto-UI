@@ -1,6 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import {
   isExternalPreviewAuthorizationFailure,
+  reviewerPermissionSubjects,
   validateReviewInputSnapshot,
 } from './review-runtime.mjs';
 
@@ -167,11 +168,15 @@ function collectRemainingConnectionPages({
   pullRequest,
   runner,
 }) {
-  while (connection.pageInfo?.hasNextPage === true) {
+  assertConnectionShape(connection?.nodes, connection?.pageInfo, field);
+  const seenCursors = new Set();
+  while (connection.pageInfo.hasNextPage === true) {
     const cursor = connection.pageInfo.endCursor;
     if (typeof cursor !== 'string' || cursor.length === 0) {
       throw new Error(`live ${field} collection cannot continue without an end cursor`);
     }
+    if (seenCursors.has(cursor)) throw new Error(`live ${field} pagination repeated a cursor`);
+    seenCursors.add(cursor);
     const raw = ghJson(
       [
         'api',
@@ -193,16 +198,20 @@ function collectRemainingConnectionPages({
       throw new Error(`live ${field} collection failed: ${raw.errors[0].message}`);
     }
     const page = raw.data?.repository?.pullRequest?.[field];
-    if (!Array.isArray(page?.nodes) || !page?.pageInfo) {
-      throw new Error(`live ${field} pagination payload is malformed`);
-    }
+    assertConnectionShape(page?.nodes, page?.pageInfo, field);
     connection.nodes.push(...page.nodes);
     connection.pageInfo = page.pageInfo;
   }
 }
 
-export function assertNoTruncation(nodes, pageInfo, label) {
+function assertConnectionShape(nodes, pageInfo, label) {
   if (!Array.isArray(nodes)) throw new Error(`live ${label} payload is malformed`);
+  if (typeof pageInfo?.hasNextPage !== 'boolean')
+    throw new Error(`live ${label} pagination payload is malformed`);
+}
+
+export function assertNoTruncation(nodes, pageInfo, label) {
+  assertConnectionShape(nodes, pageInfo, label);
   if (pageInfo?.hasNextPage === true) {
     throw new Error(
       `live ${label} collection exceeds one page: re-collect with pagination or bound the review target before submission`
@@ -325,16 +334,24 @@ export function parseRepositoryId(repositoryId) {
   return { owner, name };
 }
 
-function latestThreadUpdate(thread) {
-  const updates = (thread.comments?.nodes ?? [])
-    .map((comment) => comment.updatedAt)
-    .filter(Boolean);
+export function latestThreadUpdate(thread) {
+  assertNoTruncation(thread.comments?.nodes, thread.comments?.pageInfo, 'thread comments');
+  const updates = thread.comments.nodes.map((comment) => comment?.updatedAt);
   if (updates.length === 0) {
     throw new Error(
-      `live review thread ${thread.id} carries no comment timestamps; re-collect the canonical input with the same convention before submission`
+      `live review thread ${thread.id} carries no comment timestamps; re-collect before resolution`
     );
   }
-  return updates.sort().at(-1);
+  const timestamp = /^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:[Zz]|[+-]\d{2}:\d{2})$/;
+  if (
+    updates.some(
+      (value) =>
+        typeof value !== 'string' || !timestamp.test(value) || !Number.isFinite(Date.parse(value))
+    )
+  ) {
+    throw new Error(`live review thread ${thread.id} carries invalid comment timestamps`);
+  }
+  return updates.sort((left, right) => Date.parse(left) - Date.parse(right)).at(-1);
 }
 
 // GitHub attests its own platform-generated commits (web merges, update-branch
@@ -449,7 +466,7 @@ export function buildLiveReviewInput(
   const checks = (checkContexts?.nodes ?? []).map(normalizeCheck);
 
   const input = {
-    schemaVersion: 4,
+    schemaVersion: 5,
     kind: 'proto-ui.review-input',
     repositoryId,
     pullRequest,
@@ -479,6 +496,7 @@ export function buildLiveReviewInput(
       submittedAt: review.submittedAt ?? null,
       body: review.body ?? '',
     })),
+    reviewerPermissions: [],
     comments: (pullRequestPayload.comments?.nodes ?? []).map((comment) => ({
       id: comment.id,
       author: comment.author?.login ?? 'ghost',
@@ -519,6 +537,8 @@ export function submitGitHubReview(
     throw new Error('review submission event is invalid');
   }
   if (typeof body !== 'string') throw new Error('review submission body is invalid');
+  if (typeof reviewerLogin !== 'string' || reviewerLogin.length === 0)
+    throw new Error('review submission requires the verified reviewer identity');
 
   const expectedState = {
     APPROVE: 'APPROVED',
@@ -569,15 +589,9 @@ export function submitGitHubReview(
       if (!Array.isArray(reviewPages) || !reviewPages.every(Array.isArray)) {
         throw new Error('review pagination returned an invalid page shape');
       }
-      const reviews = reviewPages.flat();
-      const matches = reviews.filter(
-        (review) =>
-          review?.commit_id === commitId &&
-          review?.state === expectedState &&
-          review?.body === body &&
-          (reviewerLogin === null || review?.user?.login === reviewerLogin)
-      );
-      if (matches.length === 1) return reviewReceipt(matches[0], invocationId, true);
+      // A matching review from the same credential can belong to another
+      // invocation. invocationId is local correlation metadata, not a token
+      // sent to GitHub, so this read cannot recover an applied receipt.
     } catch {
       // Preserve the explicit unknown outcome below; never retry the write.
     }
@@ -593,9 +607,16 @@ export function submitGitHubReview(
   if (response.commit_id !== commitId) {
     throw new Error('submitted review commit does not match the inspected head');
   }
-  if (!['number', 'string'].includes(typeof response.id) || response.state !== expectedState) {
+  const validId =
+    (Number.isInteger(response.id) && response.id > 0) ||
+    (typeof response.id === 'string' && /^[1-9]\d*$/.test(response.id));
+  if (!validId || response.state !== expectedState) {
     throw new Error('submitted review receipt is incomplete or has an unexpected state');
   }
+  if (response.body !== body || response.user?.login?.toLowerCase() !== reviewerLogin.toLowerCase())
+    throw new Error(
+      'submitted review provenance does not match the acting reviewer and exact body'
+    );
   return reviewReceipt(response, invocationId, false);
 }
 
@@ -717,6 +738,34 @@ export function submitGitHubMerge(
     message: response.message ?? null,
   };
 }
+export function collectCurrentReviewerPermissions(input, options = {}) {
+  validateReviewInputSnapshot(input);
+  const { owner, name } = parseRepositoryId(input.repositoryId);
+  const runner = options.runner ?? execFileSync;
+  const logins = reviewerPermissionSubjects(input);
+  return logins.map((login) => {
+    const endpoint = `repos/${owner}/${name}/collaborators/${encodeURIComponent(login)}/permission`;
+    const result = ghJson(['api', endpoint], runner);
+    if (
+      typeof result?.user?.login !== 'string' ||
+      result.user.login.toLowerCase() !== login ||
+      !['admin', 'write', 'read', 'none'].includes(result.permission)
+    ) {
+      throw new Error(`current reviewer permission identity or value is unavailable for ${login}`);
+    }
+    // GitHub's legacy base permission maps maintain -> write and triage -> read.
+    // role_name is display metadata; it cannot upgrade the observed base permission.
+    return {
+      login: result.user.login.toLowerCase(),
+      permission: result.permission,
+      source: 'github-rest-collaborator-permission',
+      endpoint,
+      repositoryId: input.repositoryId,
+      headSha: input.headSha,
+    };
+  });
+}
+
 export function collectLiveReviewInput(repositoryId, pullRequest, options = {}) {
   const { owner, name } = parseRepositoryId(repositoryId);
   const externalEvidence = Array.isArray(options.externalEvidence) ? options.externalEvidence : [];
@@ -772,5 +821,13 @@ export function collectLiveReviewInput(repositoryId, pullRequest, options = {}) 
     throw new Error('live changed-file collection is malformed');
   }
   const changedFiles = filePages.flat();
-  return buildLiveReviewInput(raw, repositoryId, pullRequest, externalEvidence, changedFiles);
+  const live = buildLiveReviewInput(raw, repositoryId, pullRequest, externalEvidence, changedFiles);
+  live.input.reviewerPermissions = collectCurrentReviewerPermissions(live.input, { runner });
+  validateReviewInputSnapshot(live.input);
+  // Stable permission facts belong to the digest. Freshness comes from the
+  // mandatory live fetch on every collection, not a caller-supplied timestamp.
+  // Keep wall-clock observation metadata outside the hash so unchanged facts
+  // can still be compared at the action boundary.
+  live.permissionsObservedAt = (options.now ?? (() => new Date()))().toISOString();
+  return live;
 }

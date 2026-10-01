@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import {
-  assertNoTruncation,
+  latestThreadUpdate,
   MAX_LIVE_RESPONSE_BYTES,
   parseRepositoryId,
 } from './collect-live-review-input.mjs';
@@ -236,8 +236,21 @@ function markerComment(repositoryId, number, marker, runner) {
     '--slurp',
     `repos/${owner}/${name}/issues/${number}/comments?per_page=100`,
   ]);
-  if (!Array.isArray(pages)) throw new Error('Issue comment pagination returned an invalid shape');
-  const comments = pages.flatMap((page) => (Array.isArray(page) ? page : []));
+  if (!Array.isArray(pages) || pages.length === 0 || !pages.every(Array.isArray))
+    throw new Error('Issue comment pagination returned an invalid page shape');
+  const comments = pages.flat();
+  if (
+    comments.some(
+      (comment) =>
+        !comment ||
+        typeof comment.body !== 'string' ||
+        !(
+          (Number.isInteger(comment.id) && comment.id > 0) ||
+          (typeof comment.id === 'string' && /^[1-9]\d*$/.test(comment.id))
+        )
+    )
+  )
+    throw new Error('Issue comment pagination returned an invalid comment');
   const matches = comments.filter(
     (comment) => typeof comment?.body === 'string' && comment.body.includes(marker)
   );
@@ -338,15 +351,7 @@ export function collectLiveCollaborationState(request, options = {}) {
     ) {
       throw new Error('live review thread response does not bind to the exact pull request');
     }
-    assertNoTruncation(thread.comments?.nodes, thread.comments?.pageInfo, 'thread comments');
-    const threadUpdates = (thread.comments?.nodes ?? [])
-      .map((comment) => comment.updatedAt)
-      .filter(Boolean);
-    if (threadUpdates.length === 0) {
-      throw new Error(
-        'live review thread carries no comment timestamps; re-collect before resolution'
-      );
-    }
+    const threadUpdatedAt = latestThreadUpdate(thread);
     current = {
       kind: 'review-thread',
       number: pull.number,
@@ -357,7 +362,7 @@ export function collectLiveCollaborationState(request, options = {}) {
       updatedAt: pull.updatedAt,
       headSha: pull.headRefOid,
       threadId: thread.id,
-      threadUpdatedAt: threadUpdates.sort().at(-1),
+      threadUpdatedAt,
       isResolved: thread.isResolved === true,
       isOutdated: thread.isOutdated === true,
     };

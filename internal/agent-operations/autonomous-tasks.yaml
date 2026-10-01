@@ -57,7 +57,7 @@ taskFamilies:
     reviewClass: content-specific-C1-through-C4
     executionMode: autonomous
     operationMode: automatic-read-only
-    input: canonical-review-input-v4
+    input: canonical-review-input-v5
     output: review-packet-and-no-submission-receipt
     mutation: none
     authorization: proto-ui-scheduled-review-v1
@@ -81,7 +81,7 @@ taskFamilies:
     taskClass: integrate-reviewed-pull-request
     executionMode: autonomous
     operationMode: automatic-read-only
-    input: canonical-review-input-v4
+    input: canonical-review-input-v5
     output: no-merge-receipt
     mutation: none
     authorization: proto-ui-scheduled-merge-v1

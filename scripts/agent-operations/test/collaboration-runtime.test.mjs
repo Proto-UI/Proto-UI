@@ -2565,3 +2565,81 @@ test('comment collection retains the platform author and creation time', () => {
   assert.equal(live.current.markerComment.createdAt, comment.createdAt);
   assert.equal(desiredCollaborationStateSatisfied(fixture.request, live), true);
 });
+
+for (const pages of [
+  null,
+  {},
+  [],
+  [null],
+  [[], { id: 271, body: 'marker hidden in a malformed page' }],
+  [[null]],
+  [[{ id: 271 }]],
+  [[{ body: 'missing identity' }]],
+]) {
+  test(`comment marker collection rejects malformed complete-page data: ${JSON.stringify(pages)}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    assert.throws(
+      () =>
+        collectLiveCollaborationState(fixture.request, {
+          runner(_command, args) {
+            if (args.includes('graphql'))
+              return JSON.stringify({
+                data: {
+                  viewer: { login: 'maintainer' },
+                  repository: { viewerPermission: 'WRITE' },
+                },
+              });
+            if (args.includes('repos/Proto-UI/Proto-UI/pulls/509'))
+              return JSON.stringify({
+                number: 509,
+                node_id: 'PR_node',
+                state: 'open',
+                user: { login: 'contributor' },
+                updated_at: UPDATED_AT,
+                head: { sha: HEAD },
+              });
+            return JSON.stringify(pages);
+          },
+        }),
+      /comment.*(invalid|malformed)/
+    );
+  });
+}
+
+test('thread collection rejects a missing timestamp instead of retaining an older revision', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'resolve thread');
+  assert.throws(
+    () =>
+      collectLiveCollaborationState(fixture.request, {
+        runner(_command, args) {
+          const query = args.find((x) => x.startsWith('query='));
+          if (query.includes('ProtoUiCollaborationViewer'))
+            return JSON.stringify({
+              data: { viewer: { login: 'maintainer' }, repository: { viewerPermission: 'WRITE' } },
+            });
+          return JSON.stringify({
+            data: {
+              node: {
+                id: fixture.request.target.threadId,
+                isResolved: false,
+                isOutdated: false,
+                pullRequest: {
+                  number: 509,
+                  state: 'OPEN',
+                  author: { login: 'contributor' },
+                  updatedAt: UPDATED_AT,
+                  headRefOid: HEAD,
+                  repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
+                },
+                comments: {
+                  nodes: [{ updatedAt: UPDATED_AT }, { updatedAt: null }],
+                  pageInfo: { hasNextPage: false },
+                },
+              },
+            },
+          });
+        },
+      }),
+    /comment timestamps/
+  );
+});

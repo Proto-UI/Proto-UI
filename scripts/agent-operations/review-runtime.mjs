@@ -130,6 +130,12 @@ function validateInputItems(items, fields, label, validator) {
 }
 
 export function validateReviewInputSnapshot(input) {
+  assert(
+    input?.schemaVersion === 5,
+    input?.schemaVersion === 4
+      ? 'legacy review input v4 must be re-collected as v5 with current reviewer permission observations'
+      : 'review input schemaVersion is invalid'
+  );
   exactKeys(
     input,
     [
@@ -147,6 +153,7 @@ export function validateReviewInputSnapshot(input) {
       'changedFiles',
       'commits',
       'reviews',
+      'reviewerPermissions',
       'comments',
       'replies',
       'threads',
@@ -155,7 +162,6 @@ export function validateReviewInputSnapshot(input) {
     ],
     'review input'
   );
-  assert(input.schemaVersion === 4, 'review input schemaVersion is invalid');
   assert(input.kind === 'proto-ui.review-input', 'review input kind is invalid');
   assert(
     typeof input.repositoryId === 'string' && input.repositoryId.length > 3,
@@ -260,6 +266,46 @@ export function validateReviewInputSnapshot(input) {
       assert(item.commitSha === null || SHA.test(item.commitSha), 'review commitSha is invalid');
       validateTimestamp(item.submittedAt, 'review submittedAt', { nullable: true });
       assert(typeof item.body === 'string', 'review body is invalid');
+    }
+  );
+  validateInputItems(
+    input.reviewerPermissions,
+    ['login', 'permission', 'source', 'endpoint', 'repositoryId', 'headSha'],
+    'review input reviewerPermissions',
+    (item) => {
+      assert(
+        typeof item.login === 'string' &&
+          item.login.length > 0 &&
+          item.login === item.login.toLowerCase(),
+        'reviewer permission login is invalid'
+      );
+      assert(
+        ['admin', 'write', 'read', 'none'].includes(item.permission),
+        'reviewer permission is invalid'
+      );
+      assert(
+        item.source === 'github-rest-collaborator-permission',
+        'reviewer permission source is invalid'
+      );
+      assert(
+        item.repositoryId === input.repositoryId && item.headSha === input.headSha,
+        'reviewer permission target binding is invalid'
+      );
+      const repository = input.repositoryId.replace(/^github\.com:/, '');
+      assert(
+        item.endpoint ===
+          `repos/${repository}/collaborators/${encodeURIComponent(item.login)}/permission`,
+        'reviewer permission endpoint is invalid'
+      );
+      assert(
+        input.reviews.some(
+          (review) =>
+            review.author?.toLowerCase() === item.login &&
+            review.state === 'APPROVED' &&
+            review.commitSha === input.headSha
+        ),
+        'reviewer permission has no exact-head approval subject'
+      );
     }
   );
   validateInputItems(
@@ -368,6 +414,7 @@ export function validateReviewInputSnapshot(input) {
   for (const [items, key, label] of [
     [input.commits, (item) => item.sha, 'commit SHA'],
     [input.reviews, (item) => item.id, 'review id'],
+    [input.reviewerPermissions, (item) => item.login, 'reviewer permission login'],
     [input.comments, (item) => item.id, 'comment id'],
     [input.replies, (item) => item.id, 'reply id'],
     [input.threads, (item) => item.id, 'thread id'],
@@ -390,6 +437,7 @@ function canonicalReviewInput(input) {
     'changedFiles',
     'commits',
     'reviews',
+    'reviewerPermissions',
     'comments',
     'replies',
     'threads',
@@ -1199,6 +1247,26 @@ function latestReviewStatesByAuthor(input, { exactHead = false } = {}) {
   return states;
 }
 
+export function reviewerPermissionSubjects(input) {
+  if (!hasCompleteCommitContributorIdentity(input)) return [];
+  const ineligible = dispositionIneligibleLogins(input);
+  return [...latestReviewStatesByAuthor(input, { exactHead: true }).entries()]
+    .filter(
+      ([identity, state]) =>
+        state === 'APPROVED' &&
+        identity.startsWith('login:') &&
+        !ineligible.has(identity.slice('login:'.length))
+    )
+    .map(([identity]) => identity.slice('login:'.length))
+    .sort();
+}
+
+function hasCurrentReviewWritePermission(input, login) {
+  return input.reviewerPermissions.some(
+    (item) => item.login === login.toLowerCase() && ['write', 'admin'].includes(item.permission)
+  );
+}
+
 export function authorizePullRequestMerge({
   packet,
   input,
@@ -1314,33 +1382,40 @@ export function authorizePullRequestMerge({
     ([reviewer, state]) =>
       state === 'APPROVED' &&
       reviewer.startsWith('login:') &&
-      !ineligibleApprovalLogins.has(reviewer.slice('login:'.length))
+      !ineligibleApprovalLogins.has(reviewer.slice('login:'.length)) &&
+      hasCurrentReviewWritePermission(liveInput, reviewer.slice('login:'.length))
   );
   if (!independentApproval) {
     return {
       allowed: false,
       reason:
-        'the exact head lacks an approval independent of the pull-request author and commit contributors',
+        'the exact head lacks an approval independent of the pull-request author and commit contributors with verified current repository write permission',
     };
   }
 
-  // Publication debt fails closed: a local packet whose Agent evidence never
-  // reached the live pull request cannot authorize the material merge update.
-  // The receipt is the evidence digest marker published by a governed review
-  // or additive evidence comment; it is stable across the review packet and
-  // this merge packet because the evidence content is identical.
-  const evidenceReceipt = agentEvidenceMarker(packet);
-  const publicationReceipt = [
-    ...liveInput.reviews
-      .filter((review) => review.commitSha === liveInput.headSha)
-      .map((review) => review.body),
-    ...liveInput.comments.map((comment) => comment.body),
-  ].some((body) => typeof body === 'string' && body.includes(evidenceReceipt));
+  // The publication source must itself be a valid independent approval.
+  // A matching digest in arbitrary participant-authored text is not authority.
+  const evidenceReceipt = `<!-- ${agentEvidenceMarker(packet)} -->`;
+  const publicationReceipt = liveInput.reviews.some(
+    (review) =>
+      review.commitSha === liveInput.headSha &&
+      review.state === 'APPROVED' &&
+      review.author !== null &&
+      !ineligibleApprovalLogins.has(review.author.toLowerCase()) &&
+      hasCurrentReviewWritePermission(liveInput, review.author) &&
+      headReviewStates.get(`login:${review.author.toLowerCase()}`) === 'APPROVED' &&
+      typeof review.body === 'string' &&
+      review.body.includes(evidenceReceipt)
+  );
   if (!publicationReceipt) {
+    const unboundComment = liveInput.comments.some(
+      (comment) => typeof comment.body === 'string' && comment.body.includes(evidenceReceipt)
+    );
     return {
       allowed: false,
-      reason:
-        'merge requires a live published Agent evidence receipt matching the packet evidence digest',
+      reason: unboundComment
+        ? 'comment evidence marker lacks a governed publication authorization receipt; publish through a valid exact-head independent APPROVE review and re-collect'
+        : 'merge requires a live published Agent evidence receipt from a valid exact-head independent APPROVE review matching the packet evidence digest',
     };
   }
 

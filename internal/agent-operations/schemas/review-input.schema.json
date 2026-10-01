@@ -17,6 +17,7 @@
     "changedFiles",
     "commits",
     "reviews",
+    "reviewerPermissions",
     "comments",
     "replies",
     "threads",
@@ -24,7 +25,7 @@
     "externalEvidence"
   ],
   "properties": {
-    "schemaVersion": { "const": 4 },
+    "schemaVersion": { "const": 5 },
     "kind": { "const": "proto-ui.review-input" },
     "repositoryId": { "type": "string", "minLength": 4 },
     "pullRequest": { "type": "integer", "minimum": 1 },
@@ -82,6 +83,22 @@
           "body": { "type": "string" }
         },
         "additionalProperties": false
+      }
+    },
+    "reviewerPermissions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["login", "permission", "source", "endpoint", "repositoryId", "headSha"],
+        "properties": {
+          "login": { "type": "string", "minLength": 1 },
+          "permission": { "enum": ["admin", "write", "read", "none"] },
+          "source": { "const": "github-rest-collaborator-permission" },
+          "endpoint": { "type": "string", "minLength": 1 },
+          "repositoryId": { "type": "string", "minLength": 4 },
+          "headSha": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" }
+        }
       }
     },
     "comments": {

@@ -9,6 +9,7 @@ import {
   agentEvidenceMarker,
   authorizePullRequestMerge,
   computeReviewInputDigest,
+  validateReviewInputSnapshot,
 } from '../review-runtime.mjs';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
 
@@ -28,8 +29,8 @@ for (const authorization of [
 const sha = (letter) => letter.repeat(40);
 
 function reviewInput(overrides = {}) {
-  return {
-    schemaVersion: 4,
+  const input = {
+    schemaVersion: 5,
     kind: 'proto-ui.review-input',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
     pullRequest: 487,
@@ -89,6 +90,26 @@ function reviewInput(overrides = {}) {
     externalEvidence: [],
     ...overrides,
   };
+  input.reviewerPermissions ??= [
+    ...new Set(
+      input.reviews
+        .filter(
+          (review) =>
+            review.author !== null &&
+            review.state === 'APPROVED' &&
+            review.commitSha === input.headSha
+        )
+        .map((review) => review.author.toLowerCase())
+    ),
+  ].map((login) => ({
+    login,
+    permission: 'write',
+    source: 'github-rest-collaborator-permission',
+    endpoint: `repos/Proto-UI/Proto-UI/collaborators/${encodeURIComponent(login)}/permission`,
+    repositoryId: input.repositoryId,
+    headSha: input.headSha,
+  }));
+  return input;
 }
 
 // The merge gate requires a live published receipt carrying the digest of the
@@ -411,5 +432,122 @@ test('merge requires a published Agent evidence receipt and a v2 packet', () => 
       },
     ],
   });
-  assert.equal(scheduledMerge({ input: viaComment, packet: packet(viaComment) }).allowed, true);
+  const commentResult = scheduledMerge({ input: viaComment, packet: packet(viaComment) });
+  assert.equal(commentResult.allowed, false);
+  assert.match(commentResult.reason, /comment.*publication.*authorization.*receipt/);
+});
+
+for (const [name, fields] of [
+  ['untrusted comment review', { author: 'unrelated-participant', state: 'COMMENTED' }],
+  ['dismissed review', { author: 'independent-reviewer', state: 'DISMISSED' }],
+  ['unavailable reviewer identity', { author: null, state: 'APPROVED' }],
+  ['pull-request author review', { author: 'contributor', state: 'APPROVED' }],
+  ['commit contributor review', { author: 'web-flow', state: 'APPROVED' }],
+  ['old-head review', { author: 'independent-reviewer', state: 'APPROVED', commitSha: sha('c') }],
+]) {
+  test(`merge does not accept an evidence marker from ${name}`, () => {
+    const input = reviewInput();
+    const source = {
+      ...input.reviews[0],
+      id: 'untrusted-source',
+      submittedAt: '2026-08-27T05:00:00.000Z',
+      ...fields,
+    };
+    input.reviews[0].body = 'Independent approval without this evidence receipt';
+    input.reviews.push(source);
+    const result = scheduledMerge({ input, packet: packet(input) });
+    assert.equal(result.allowed, false);
+    assert.match(result.reason, /published Agent evidence receipt/);
+  });
+}
+
+test('merge requires the complete governed evidence marker rather than a matching prefix', () => {
+  const input = reviewInput();
+  input.reviews[0].body = input.reviews[0].body.replace(' -->', 'forged-suffix -->');
+  const result = scheduledMerge({ input, packet: packet(input) });
+  assert.equal(result.allowed, false);
+  assert.match(result.reason, /published Agent evidence receipt/);
+});
+
+for (const permission of ['read', 'none', null]) {
+  test(`an outsider approval with ${permission} permission cannot bootstrap merge credit`, () => {
+    const input = reviewInput();
+    input.reviewerPermissions =
+      permission === null ? [] : input.reviewerPermissions.map((item) => ({ ...item, permission }));
+    const result = scheduledMerge({ input, packet: packet(input) });
+    assert.equal(result.allowed, false);
+    assert.match(result.reason, /verified current repository write permission/);
+  });
+  test(`an outsider evidence publisher with ${permission} permission cannot borrow another reviewer's approval`, () => {
+    const input = reviewInput();
+    input.reviews[0].body = 'Real independent approval, without the evidence marker';
+    input.reviews.push({
+      ...input.reviews[0],
+      id: 'outside-review',
+      author: 'outside-reader',
+      body: `<!-- ${evidenceReceiptMarker(input.headSha)} -->`,
+    });
+    if (permission !== null)
+      input.reviewerPermissions.push({
+        ...input.reviewerPermissions[0],
+        login: 'outside-reader',
+        endpoint: 'repos/Proto-UI/Proto-UI/collaborators/outside-reader/permission',
+        permission,
+      });
+    const result = scheduledMerge({ input, packet: packet(input) });
+    assert.equal(result.allowed, false);
+    assert.match(result.reason, /published Agent evidence receipt/);
+  });
+}
+
+test('revocation during an operation invalidates the previously sealed canonical input', () => {
+  const input = reviewInput();
+  const liveInput = structuredClone(input);
+  liveInput.reviewerPermissions[0].permission = 'read';
+  assert.notEqual(computeReviewInputDigest(input), computeReviewInputDigest(liveInput));
+  assert.throws(
+    () => scheduledMerge({ input, liveInput, packet: packet(input) }),
+    /live canonical review input does not match/
+  );
+});
+
+for (const [field, value] of [
+  ['repositoryId', 'github.com:Other/Repo'],
+  ['headSha', sha('c')],
+  ['login', 'other-person'],
+  ['endpoint', 'repos/Other/Repo/collaborators/independent-reviewer/permission'],
+  ['source', 'caller-assertion'],
+]) {
+  test(`reviewer permission observation rejects wrong ${field}`, () => {
+    const input = reviewInput();
+    input.reviewerPermissions[0][field] = value;
+    assert.throws(() => validateReviewInputSnapshot(input), /permission/);
+  });
+}
+
+test('legacy v4 input must be re-collected without mutating the historical input', () => {
+  const input = reviewInput();
+  input.schemaVersion = 4;
+  delete input.reviewerPermissions;
+  const prior = structuredClone(input);
+  assert.throws(
+    () => validateReviewInputSnapshot(input),
+    /legacy review input v4.*re-collected as v5/
+  );
+  assert.deepEqual(input, prior);
+});
+
+test('permission observation order is canonical and duplicate identities fail closed', () => {
+  const input = reviewInput();
+  input.reviews.push({ ...input.reviews[0], id: 'other', author: 'second-reviewer' });
+  input.reviewerPermissions.push({
+    ...input.reviewerPermissions[0],
+    login: 'second-reviewer',
+    endpoint: 'repos/Proto-UI/Proto-UI/collaborators/second-reviewer/permission',
+  });
+  const reversed = structuredClone(input);
+  reversed.reviewerPermissions.reverse();
+  assert.equal(computeReviewInputDigest(input), computeReviewInputDigest(reversed));
+  input.reviewerPermissions.push(input.reviewerPermissions[0]);
+  assert.throws(() => validateReviewInputSnapshot(input), /duplicates reviewer permission login/);
 });

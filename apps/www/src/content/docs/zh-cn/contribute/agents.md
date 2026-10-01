@@ -35,13 +35,13 @@ pnpm agent:assess:self-result -- --challenge <challenge.json> --response <respon
 
 推荐链路是 `pui-dev -> pui-orient -> pui-pr -> 可选 pui-collaborate -> pui-trace -> 必要时 pui-validate -> 新上下文 pui-review -> 可选 pui-integrate`。
 
-Review packet 写明仓库、PR、base/head、review class、精确输入 digest、范围、实体、验证、finding、限制、未知项和任何未决决定。Digest 由 canonical v4 快照重算，其中包含 PR author/state、changed paths、body、每个 commit 的完整 message 与 author/committer 平台身份、reviews、conversation、check source/provider/repository/workflow provenance、checks 与外部证据。新提交或 base retargeting 会让旧 packet 过期；同一 head 输入变化形成新的 review 机会，输入完全不变才是重复。可信 CI 与可信 DCO 是两条分离的机器证据；DCO 成功不能替代 source/license provenance 复核。测评不会派生批准。
+Review packet 写明仓库、PR、base/head、review class、精确输入 digest、范围、实体、验证、finding、限制、未知项和任何未决决定。Digest 由 canonical v5 快照重算，其中包含 PR author/state、changed paths、body、每个 commit 的完整 message 与 author/committer 平台身份、reviews、conversation、绑定 GitHub source/endpoint 与身份的 reviewer 当前仓库权限、check source/provider/repository/workflow provenance、checks 与外部证据。新提交或 base retargeting 会让旧 packet 过期；同一 head 输入变化形成新的 review 机会，输入完全不变才是重复。可信 CI 与可信 DCO 是两条分离的机器证据；DCO 成功不能替代 source/license provenance 复核。测评不会派生批准。
 
 自治 review classes 从事实与 CI 开始，逐步覆盖文档与链接、测试、bounded regression、受治理实现切片、跨域语义，以及治理或发布证据。在 `human-assisted` 模式中，这些类别只调整复核深度和限制说明，不会挡住用户要求的 review。
 
 本地定时任务的 scopes 都是 `pending-runtime-identity`，目前不是激活的 autonomous 写入 scope。在 Poppy broker-verified workload identity 绑定之前，定时执行只能进行只读观察与 reconciliation，不能提交 review disposition 或合并 PR。有人协作时的 review 与 integration 仍只能依据当前用户的明确授权；standing scope 激活后，exact-target、独立身份、可信 CI/DCO 与仓库规则 gate 仍然有效。Spec path 继续进入 packet，只有真正未决的产品方向才构成 decision boundary。
 
-本地复核始终可以进行。低档位 Agent 在有人协作时可以给出部分复核或明确的 `ABSTAIN`，同时说明自己没覆盖什么。`submit-review` 会从 GitHub 实时重新采集 canonical v4 输入并比对 digest，从实时上下文派生 reviewer 权限、PR/commit contributor 身份、可信 CI 与可信 DCO。`APPROVE` 和 `REQUEST_CHANGES` 会拒绝 PR author 或任一 commit author/committer； contributor login 缺失时 fail closed，clean approval 还要求两条可信机器结论分别成功。`merge-pull-request` 会再次做同样的 reconciliation，再把 `sha` 固定为已审 head；不得把任一预检与后续未绑定的 GitHub 写入拆开。公开 desktop task 名称不充当认证；当前范围依赖单一持证本地 runner、精确 standing policy、exact-head 写入和 GitHub 规则。扩展到并发 runner 前仍需服务侧 lease 与更强 runtime attribution。
+本地复核始终可以进行。低档位 Agent 在有人协作时可以给出部分复核或明确的 `ABSTAIN`，同时说明自己没覆盖什么。`submit-review` 会从 GitHub 实时重新采集 canonical v5 输入并比对 digest，从实时上下文派生 reviewer 权限、PR/commit contributor 身份、可信 CI 与可信 DCO。`APPROVE` 和 `REQUEST_CHANGES` 会拒绝 PR author 或任一 commit author/committer； contributor login 缺失时 fail closed，clean approval 还要求两条可信机器结论分别成功。`merge-pull-request` 会再次做同样的 reconciliation，再把 `sha` 固定为已审 head；Approval 与 evidence-publication credit 还要求实时确认 reviewer 具有仓库 write/maintain/admin 权限；公开参与者的批准或复制的评论 marker 不充当该凭据。旧 v4 输入必须重新采集，历史文件保留；当前权限观察不证明历史用户或 Agent 授权。不得把任一预检与后续未绑定的 GitHub 写入拆开。公开 desktop task 名称不充当认证；当前范围依赖单一持证本地 runner、精确 standing policy、exact-head 写入和 GitHub 规则。扩展到并发 runner 前仍需服务侧 lease 与更强 runtime attribution。
 
 ## 选择任务并持续推进
 

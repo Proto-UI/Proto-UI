@@ -41,8 +41,8 @@ const sha = (letter) => letter.repeat(40);
 const digest = (letter) => letter.repeat(64);
 
 function reviewInput(overrides = {}) {
-  return {
-    schemaVersion: 4,
+  const input = {
+    schemaVersion: 5,
     kind: 'proto-ui.review-input',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
     pullRequest: 487,
@@ -99,6 +99,26 @@ function reviewInput(overrides = {}) {
     externalEvidence: [],
     ...overrides,
   };
+  input.reviewerPermissions ??= [
+    ...new Set(
+      input.reviews
+        .filter(
+          (review) =>
+            review.author !== null &&
+            review.state === 'APPROVED' &&
+            review.commitSha === input.headSha
+        )
+        .map((review) => review.author.toLowerCase())
+    ),
+  ].map((login) => ({
+    login,
+    permission: 'write',
+    source: 'github-rest-collaborator-permission',
+    endpoint: `repos/Proto-UI/Proto-UI/collaborators/${encodeURIComponent(login)}/permission`,
+    repositoryId: input.repositoryId,
+    headSha: input.headSha,
+  }));
+  return input;
 }
 
 function packet(overrides = {}, input = reviewInput()) {
@@ -381,7 +401,7 @@ test('canonical review input is insensitive to top-level comment connection orde
   );
 });
 
-test('review input v4 binds identities, changed files, and check provenance while classifying spec entities', () => {
+test('review input v5 binds identities, changed files, and check provenance while classifying spec entities', () => {
   const ordinary = reviewInput();
   assert.equal(reviewChangesSpecEntities(ordinary), false);
   assert.equal(

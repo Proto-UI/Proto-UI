@@ -1,9 +1,11 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { computeReviewInputDigest } from '../review-runtime.mjs';
 import {
   assertNoTruncation,
   buildLiveReviewInput,
   collectLiveReviewInput,
+  collectCurrentReviewerPermissions,
   GITHUB_WEB_FLOW_PLATFORM,
   MAX_LIVE_RESPONSE_BYTES,
   normalizeCheck,
@@ -418,7 +420,7 @@ test('live collector fails closed on pagination truncation for every connection'
   }
 });
 
-test('reconciles a lost review POST once using reviewer, head, disposition, and body identity', () => {
+test('lost review POST stays unknown despite a matching concurrent same-credential review', () => {
   const calls = [];
   const result = submitGitHubReview(
     repositoryId,
@@ -448,17 +450,17 @@ test('reconciles a lost review POST once using reviewer, head, disposition, and 
   assert.ok(calls[1].args.includes('--slurp'));
   assert.equal(calls[1].args[1], '--method');
   assert.equal(calls[1].args[2], 'GET');
-  assert.equal(result.status, 'applied');
-  assert.equal(result.reconciled, true);
+  assert.equal(result.status, 'unknown');
+  assert.equal(result.reconciled, false);
   assert.equal(result.invocationId, 'invocation-1');
   assert.equal(result.commitId, sha('b'));
 });
 
-test('reconciles a lost review POST whose review list exceeds the legacy 1 MiB buffer', () => {
+test('lost review reconciliation preserves the documented buffer and unknown outcome', () => {
   // A review-heavy pull request can push the paginated reconciliation
   // response far above the implicit 1 MiB child-process buffer. The
   // reconciliation (and submission) calls must carry the same documented
-  // MAX_LIVE_RESPONSE_BYTES bound, so the applied review is recovered
+  // MAX_LIVE_RESPONSE_BYTES bound, so live state is read
   // exactly once instead of surfacing as an unattributed ENOBUFS
   // (PR509-REVIEW-RECONCILIATION-BUFFER-007).
   const reviewBody = 'review body';
@@ -505,8 +507,8 @@ test('reconciles a lost review POST whose review list exceeds the legacy 1 MiB b
     seenOptions.every((options) => options.maxBuffer === MAX_LIVE_RESPONSE_BYTES),
     'submission and reconciliation must both carry the documented payload bound'
   );
-  assert.equal(result.status, 'applied');
-  assert.equal(result.reconciled, true);
+  assert.equal(result.status, 'unknown');
+  assert.equal(result.reconciled, false);
   assert.equal(result.invocationId, 'invocation-large');
 });
 
@@ -544,12 +546,15 @@ test('review submission binds the GitHub Review API write to the inspected commi
       calls.push({ command, args, options });
       return JSON.stringify({
         id: 1234,
+        user: { login: 'reviewer' },
+        body: '',
         node_id: 'PRR_review_2',
         state: 'APPROVED',
         commit_id: sha('b'),
         html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-1234',
       });
-    }
+    },
+    { reviewerLogin: 'reviewer' }
   );
 
   assert.equal(calls.length, 1);
@@ -575,7 +580,8 @@ test('review submission binds the GitHub Review API write to the inspected commi
         'github.com:Proto-UI/Proto-UI',
         487,
         { commitId: sha('b'), event: 'APPROVE', body: '' },
-        () => JSON.stringify({ id: 1234, state: 'APPROVED', commit_id: sha('c') })
+        () => JSON.stringify({ id: 1234, state: 'APPROVED', commit_id: sha('c') }),
+        { reviewerLogin: 'reviewer' }
       ),
     /does not match the inspected head/
   );
@@ -585,7 +591,8 @@ test('review submission binds the GitHub Review API write to the inspected commi
         'github.com:Proto-UI/Proto-UI',
         487,
         { commitId: sha('b'), event: 'APPROVE', body: '' },
-        () => JSON.stringify({ id: 1234, state: 'COMMENTED', commit_id: sha('b') })
+        () => JSON.stringify({ id: 1234, state: 'COMMENTED', commit_id: sha('b') }),
+        { reviewerLogin: 'reviewer' }
       ),
     /unexpected state/
   );
@@ -1022,6 +1029,12 @@ test('live collector paginates reviews and review threads before canonical valid
   const result = collectLiveReviewInput(repositoryId, 487, {
     runner(_command, args, options) {
       calls.push({ args, options });
+      if (args.includes('repos/Proto-UI/Proto-UI/collaborators/later-reviewer/permission'))
+        return JSON.stringify({
+          user: { login: 'later-reviewer' },
+          permission: 'write',
+          role_name: 'maintain',
+        });
       if (!args.includes('graphql')) return JSON.stringify([changedFiles]);
       const query = args.find((value) => value.startsWith('query='));
       if (query.includes('reviews(first: 100, after: $cursor)')) {
@@ -1084,7 +1097,8 @@ test('live collector paginates reviews and review threads before canonical valid
   assert.equal(result.input.reviews.length, 2);
   assert.equal(result.input.threads.length, 2);
   assert.equal(result.input.replies.length, 2);
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 5);
+  assert.equal(result.input.reviewerPermissions[0].permission, 'write');
   assert.ok(calls.slice(1, 3).every(({ args }) => args.includes('-F')));
   assert.ok(calls.slice(1, 3).every(({ args }) => args.some((value) => value.includes('cursor='))));
 });
@@ -1155,3 +1169,268 @@ test('Vercel authorization failure is not trusted CI, but real CI failures still
     'a real deployment failure is not an authorization-only preview debt'
   );
 });
+
+for (const [name, change] of [
+  [
+    'wrong actor',
+    (r) => {
+      r.user.login = 'other-reviewer';
+    },
+  ],
+  [
+    'missing actor',
+    (r) => {
+      delete r.user;
+    },
+  ],
+  [
+    'wrong body',
+    (r) => {
+      r.body = 'another review';
+    },
+  ],
+  [
+    'missing body',
+    (r) => {
+      delete r.body;
+    },
+  ],
+]) {
+  test(`successful review POST rejects ${name} provenance`, () => {
+    const response = {
+      id: 1234,
+      state: 'APPROVED',
+      commit_id: sha('b'),
+      body: 'review body',
+      user: { login: 'reviewer' },
+    };
+    change(response);
+    let writes = 0;
+    assert.throws(
+      () =>
+        submitGitHubReview(
+          repositoryId,
+          487,
+          { commitId: sha('b'), event: 'APPROVE', body: 'review body' },
+          () => {
+            writes += 1;
+            return JSON.stringify(response);
+          },
+          { reviewerLogin: 'reviewer' }
+        ),
+      /provenance/
+    );
+    assert.equal(writes, 1);
+  });
+}
+
+test('review submission requires the verified acting identity before writing', () => {
+  let writes = 0;
+  assert.throws(
+    () =>
+      submitGitHubReview(
+        repositoryId,
+        487,
+        { commitId: sha('b'), event: 'COMMENT', body: 'body' },
+        () => {
+          writes += 1;
+          return JSON.stringify({ id: 1, commit_id: sha('b'), state: 'COMMENTED' });
+        }
+      ),
+    /reviewer identity/
+  );
+  assert.equal(writes, 0);
+});
+
+for (const pageInfo of [undefined, null, {}, { hasNextPage: 'false' }, { hasNextPage: null }]) {
+  test(`connection completeness requires a boolean page flag: ${JSON.stringify(pageInfo)}`, () => {
+    assert.throws(() => assertNoTruncation([], pageInfo, 'reviews'), /pagination.*malformed/);
+  });
+}
+
+test('live review pagination rejects repeated continuation cursors', () => {
+  const initial = payload();
+  initial.data.repository.pullRequest.reviews.pageInfo = { hasNextPage: true, endCursor: 'repeat' };
+  let reads = 0;
+  assert.throws(
+    () =>
+      collectLiveReviewInput(repositoryId, 487, {
+        runner(_command, args) {
+          reads += 1;
+          if (reads > 3) throw new Error('test safety guard: cursor never advances');
+          if (reads === 1) return JSON.stringify(initial);
+          return JSON.stringify({
+            data: {
+              repository: {
+                pullRequest: {
+                  reviews: {
+                    nodes: [],
+                    pageInfo: { hasNextPage: true, endCursor: 'repeat' },
+                  },
+                },
+              },
+            },
+          });
+        },
+      }),
+    /repeated.*cursor/
+  );
+  assert.equal(reads, 2);
+});
+
+function approvalPayload() {
+  const value = payload();
+  value.data.repository.pullRequest.reviews.nodes[0].state = 'APPROVED';
+  return value;
+}
+
+for (const permission of ['admin', 'write', 'read', 'none']) {
+  test(`permission collection binds live ${permission} facts and ignores caller-provided upgrades`, () => {
+    const calls = [];
+    const live = collectLiveReviewInput(repositoryId, 487, {
+      reviewerPermissions: [{ login: 'earlier-reviewer', permission: 'admin' }],
+      now: () => new Date('2026-10-01T15:00:00Z'),
+      runner(_command, args) {
+        calls.push(args);
+        if (args.includes('graphql')) return JSON.stringify(approvalPayload());
+        if (args.includes('repos/Proto-UI/Proto-UI/collaborators/earlier-reviewer/permission'))
+          return JSON.stringify({
+            user: { login: 'earlier-reviewer' },
+            permission,
+            role_name: 'admin',
+          });
+        return JSON.stringify([changedFiles]);
+      },
+    });
+    assert.deepEqual(live.input.reviewerPermissions, [
+      {
+        login: 'earlier-reviewer',
+        permission,
+        source: 'github-rest-collaborator-permission',
+        endpoint: 'repos/Proto-UI/Proto-UI/collaborators/earlier-reviewer/permission',
+        repositoryId,
+        headSha: sha('b'),
+      },
+    ]);
+    assert.equal(live.permissionsObservedAt, '2026-10-01T15:00:00.000Z');
+    assert.equal(calls.length, 3);
+  });
+}
+
+for (const response of [
+  null,
+  {},
+  { user: { login: 'other-person' }, permission: 'admin' },
+  { user: { login: 'earlier-reviewer' } },
+  { user: { login: 'earlier-reviewer' }, permission: 'maintain' },
+]) {
+  test(`permission collection rejects an unavailable or mismatched observation: ${JSON.stringify(response)}`, () => {
+    const input = buildLiveReviewInput(
+      approvalPayload(),
+      repositoryId,
+      487,
+      [],
+      changedFiles
+    ).input;
+    assert.throws(
+      () => collectCurrentReviewerPermissions(input, { runner: () => JSON.stringify(response) }),
+      /permission identity or value is unavailable/
+    );
+  });
+}
+
+test('permission read denial remains a fail-closed read error with no alternate query', () => {
+  const input = buildLiveReviewInput(approvalPayload(), repositoryId, 487, [], changedFiles).input;
+  let reads = 0;
+  assert.throws(
+    () =>
+      collectCurrentReviewerPermissions(input, {
+        runner() {
+          reads += 1;
+          throw new Error('HTTP 403 Forbidden');
+        },
+      }),
+    /403/
+  );
+  assert.equal(reads, 1);
+});
+
+test('fresh permission observations change the receipt clock but not unchanged canonical facts', () => {
+  const runner = (_command, args) => {
+    if (args.includes('graphql')) return JSON.stringify(approvalPayload());
+    if (args.some((arg) => arg.endsWith('/permission')))
+      return JSON.stringify({ user: { login: 'earlier-reviewer' }, permission: 'write' });
+    return JSON.stringify([changedFiles]);
+  };
+  const first = collectLiveReviewInput(repositoryId, 487, {
+    runner,
+    now: () => new Date('2026-10-01T15:00:00Z'),
+  });
+  const second = collectLiveReviewInput(repositoryId, 487, {
+    runner,
+    now: () => new Date('2026-10-01T15:01:00Z'),
+  });
+  assert.notEqual(first.permissionsObservedAt, second.permissionsObservedAt);
+  assert.equal(computeReviewInputDigest(first.input), computeReviewInputDigest(second.input));
+});
+
+for (const [name, mutate] of [
+  [
+    'pull-request author',
+    (p) => {
+      p.reviews.nodes[0].author.login = 'contributor';
+    },
+  ],
+  [
+    'commit committer',
+    (p) => {
+      p.reviews.nodes[0].author.login = 'web-flow';
+    },
+  ],
+  [
+    'old-head approval',
+    (p) => {
+      p.reviews.nodes[0].commit.oid = sha('c');
+    },
+  ],
+  [
+    'unavailable reviewer',
+    (p) => {
+      p.reviews.nodes[0].author = null;
+    },
+  ],
+  [
+    'superseded approval',
+    (p) => {
+      p.reviews.nodes.push({
+        ...p.reviews.nodes[0],
+        id: 'newer-review',
+        state: 'CHANGES_REQUESTED',
+        submittedAt: '2026-08-23T06:00:00Z',
+      });
+    },
+  ],
+  [
+    'dismissed approval',
+    (p) => {
+      p.reviews.nodes[0].state = 'DISMISSED';
+    },
+  ],
+]) {
+  test(`permission collection skips an already ineligible ${name}`, () => {
+    const source = approvalPayload();
+    mutate(source.data.repository.pullRequest);
+    const input = buildLiveReviewInput(source, repositoryId, 487, [], changedFiles).input;
+    let reads = 0;
+    assert.deepEqual(
+      collectCurrentReviewerPermissions(input, {
+        runner() {
+          reads += 1;
+          throw new Error('irrelevant permission lookup must not occur');
+        },
+      }),
+      []
+    );
+    assert.equal(reads, 0);
+  });
+}
