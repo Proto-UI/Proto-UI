@@ -31,6 +31,7 @@ function fixture(t, outcome = 'completed') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'round0-exchange-test-'));
   // Tests keep failed artifacts in their temporary directory for inspection.
   t.diagnostic(root);
+  if (process.env.RUNNER_TEMP) t.after(() => retainPublicTestEvidence(t.name, root));
   const input = path.join(root, 'input');
   fs.mkdirSync(input);
   put(input, 'task.txt', 'Public synthetic exchange task\n');
@@ -111,6 +112,57 @@ function fixture(t, outcome = 'completed') {
     produce,
     check,
   };
+}
+
+function retainPublicTestEvidence(name, root) {
+  const destination = path.join(
+    process.env.RUNNER_TEMP,
+    'interaction-controls',
+    'exchange-tests',
+    path.basename(root)
+  );
+  fs.mkdirSync(path.dirname(destination), { recursive: true });
+  fs.mkdirSync(destination);
+  const omitted = [];
+  function copy(relative = '') {
+    for (const entry of fs.readdirSync(path.join(root, relative)).sort()) {
+      const child = relative ? `${relative}/${entry}` : entry;
+      const stat = fs.lstatSync(path.join(root, child));
+      if (stat.isDirectory()) {
+        fs.mkdirSync(path.join(destination, child), { recursive: true });
+        copy(child);
+      } else if (stat.isFile() && stat.nlink === 1)
+        fs.copyFileSync(
+          path.join(root, child),
+          path.join(destination, child),
+          fs.constants.COPYFILE_EXCL
+        );
+      else
+        omitted.push({
+          path: child,
+          type: stat.isSymbolicLink()
+            ? 'symlink'
+            : stat.isFIFO()
+              ? 'fifo'
+              : stat.isFile()
+                ? 'hardlink'
+                : 'special',
+          links: stat.nlink,
+          bytes: stat.size,
+        });
+    }
+  }
+  copy();
+  put(
+    destination,
+    'test-retention.json',
+    json({
+      name,
+      scope: 'public synthetic test data only',
+      omitted,
+      note: 'Unsafe file types are recorded as metadata, never followed or opened. Test outcome is in the Actions log.',
+    })
+  );
 }
 
 for (const outcome of ['completed', 'failed', 'aborted', 'excluded'])

@@ -29,6 +29,8 @@ node scripts/benchmark/round0-exchange.mjs inspect \
 
 Use new output paths every time. This example describes file roles, not preexisting files or a model run. The executable tests construct all four outcomes and the malformed cases from public synthetic data. `pnpm benchmark:test` includes those tests automatically.
 
+When `RUNNER_TEMP` is available, test cleanup preserves public synthetic inputs, receipts and CLI logs under its `interaction-controls/exchange-tests` directory for the existing calibration workflow's always-upload step. Negative-test symlinks, hardlinks and special files are recorded as omitted file-type metadata; they are never followed/opened for upload. The original local test directories remain intact. Test outcomes are reported by the test runner, not inferred from the presence of a retained directory.
+
 ## Bounded files and interruption behavior
 
 Each plan permits at most 32 files, 1 MiB per payload file and 8 MiB total. JSON plans/receipts/dispositions are bounded to 64 KiB; disposition reasons to 4096 characters. Paths are shallow allowlisted ASCII names. Absolute paths, traversal, nested candidate paths, hidden files, undeclared files/directories, symbolic links (including path ancestors), hardlinks and special files are rejected. Input reads check file identity/size and use bounded buffers; output must be separate from input trees. Use canonical paths without symlink ancestors.
