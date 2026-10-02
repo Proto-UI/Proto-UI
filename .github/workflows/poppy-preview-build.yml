@@ -2,7 +2,7 @@ name: Poppy preview build
 # Quote the value: in plain YAML a space followed by `#` starts a comment,
 # which would collapse every run title to the same string and break the
 # per-PR deployment concurrency key.
-run-name: "Poppy preview build PR #${{ inputs.pr_number || github.event.pull_request.number }}"
+run-name: 'Poppy preview build PR #${{ inputs.pr_number || github.event.pull_request.number }}'
 
 on:
   pull_request:
@@ -97,10 +97,10 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Set up Node.js 22
+      - name: Set up Node.js 24
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: "22"
+          node-version: '24'
 
       - name: Enable the pinned pnpm release
         shell: bash

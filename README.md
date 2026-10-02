@@ -93,7 +93,7 @@ For contributors and Agents:
 
 ## Local development
 
-Use Node.js 22, which is the current CI baseline. Use the pnpm version declared in `package.json`; it is aligned with the lockfile and CI.
+Use Node.js 24, which is the current CI baseline. Use the pnpm version declared in `package.json`; it is aligned with the lockfile and CI.
 
 ```sh
 corepack pnpm@10.32.1 install --frozen-lockfile

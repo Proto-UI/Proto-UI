@@ -30,10 +30,10 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Use Node.js 22
+      - name: Use Node.js 24
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: integrations/proto-ui-preview/package-lock.json
 
@@ -62,7 +62,5 @@ jobs:
       - name: Lint installed and reviewed workflow copies
         shell: bash
         run: >-
-          "$RUNNER_TEMP/actionlint"
-          .github/workflows/poppy-preview-*.yml
-          integrations/proto-ui-preview/.github/workflows/*.yml
+          "$RUNNER_TEMP/actionlint" .github/workflows/poppy-preview-*.yml integrations/proto-ui-preview/.github/workflows/*.yml
 

@@ -93,7 +93,7 @@ Proto UI 以 [`spec/**`](spec/) 下的版本化实体作为机器治理的真理
 
 ## 本地开发
 
-请使用当前 CI 基线 Node.js 22，并通过 Corepack 使用 `package.json` 中声明的 pnpm 版本；该版本已与 lockfile 和 CI 对齐。
+请使用当前 CI 基线 Node.js 24，并通过 Corepack 使用 `package.json` 中声明的 pnpm 版本；该版本已与 lockfile 和 CI 对齐。
 
 ```sh
 corepack pnpm@10.32.1 install --frozen-lockfile

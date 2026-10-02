@@ -73,7 +73,7 @@ An assignee is the current responsible person, but it is not the only occupation
 
 ## Set up the repository
 
-Use Node.js 22 and the pnpm version declared in `package.json`.
+Use Node.js 24 and the pnpm version declared in `package.json`.
 
 ```sh
 corepack enable
