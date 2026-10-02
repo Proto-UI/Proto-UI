@@ -117,7 +117,10 @@ test('reviewed content retains every integration eligibility fact and its eviden
   }
 });
 
-function createFixture(t, { remediation = 'modify', reuseRole = null, baselinePaths = [] } = {}) {
+function createFixture(
+  t,
+  { remediation = 'modify', reuseRole = null, baselinePaths = [], recordFindingFirst = false } = {}
+) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-maintenance-check-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   execFileSync('git', ['init', '--quiet'], { cwd: root });
@@ -142,15 +145,18 @@ function createFixture(t, { remediation = 'modify', reuseRole = null, baselinePa
     cwd: root,
     encoding: 'utf8',
   }).trim();
-  if (remediation === 'modify') {
-    writeFile(root, 'src/example.js', 'export const projection = "after";\n');
-  } else if (remediation === 'delete') {
-    fs.rmSync(path.join(root, 'src/example.js'));
-  } else if (remediation === 'rename') {
-    fs.renameSync(path.join(root, 'src/example.js'), path.join(root, 'src/renamed.js'));
-  } else {
-    throw new Error(`unsupported remediation fixture: ${remediation}`);
-  }
+  const applyRemediation = () => {
+    if (remediation === 'modify') {
+      writeFile(root, 'src/example.js', 'export const projection = "after";\n');
+    } else if (remediation === 'delete') {
+      fs.rmSync(path.join(root, 'src/example.js'));
+    } else if (remediation === 'rename') {
+      fs.renameSync(path.join(root, 'src/example.js'), path.join(root, 'src/renamed.js'));
+    } else {
+      throw new Error(`unsupported remediation fixture: ${remediation}`);
+    }
+  };
+  if (!recordFindingFirst) applyRemediation();
 
   const findingPath = 'internal/autonomous-maintenance/phase-0/findings/AM-P0-004-F1.md';
   const reviewPath = 'internal/autonomous-maintenance/phase-0/reviews/AM-P0-004-F1.md';
@@ -218,6 +224,22 @@ function createFixture(t, { remediation = 'modify', reuseRole = null, baselinePa
     },
   };
   writeFile(root, findingPath, markdownMetadata('AM-P0-004-F1: Fixture finding', finding));
+  let recordedFindingHead = null;
+  if (recordFindingFirst) {
+    execFileSync('git', ['add', '--', findingPath], { cwd: root });
+    execFileSync(
+      'git',
+      ['commit', '--quiet', '-m', 'fixture recorded finding before remediation'],
+      {
+        cwd: root,
+      }
+    );
+    recordedFindingHead = execFileSync('git', ['rev-parse', 'HEAD'], {
+      cwd: root,
+      encoding: 'utf8',
+    }).trim();
+    applyRemediation();
+  }
 
   execFileSync('git', ['add', '-A', '--', 'src', findingPath], { cwd: root });
   execFileSync('git', ['commit', '--quiet', '-m', 'fixture remediation content'], { cwd: root });
@@ -456,6 +478,7 @@ function createFixture(t, { remediation = 'modify', reuseRole = null, baselinePa
     postReviewMutationHead,
     packetOnlyMutationHead,
     missingRemediationHead,
+    recordedFindingHead,
     findingPath,
     reviewPath,
     finding,
@@ -824,6 +847,207 @@ test('run checker rejects a same-path mutation after independent review', (t) =>
   assert.equal(result.status, 1);
   assert.match(result.stderr, /reviewed-content digest does not match/);
   assert.doesNotMatch(result.stderr, /changed inventory does not match/);
+});
+
+test('recorded finding remains valid when later remediation retains its frozen observation baseline', (t) => {
+  const fixture = createFixture(t, { recordFindingFirst: true });
+  assert.notEqual(fixture.recordedFindingHead, fixture.baselineCommit);
+  const findingAtRecord = execFileSync(
+    'git',
+    ['show', `${fixture.recordedFindingHead}:${fixture.findingPath}`],
+    { cwd: fixture.root }
+  );
+  assert.deepEqual(fs.readFileSync(path.join(fixture.root, fixture.findingPath)), findingAtRecord);
+  assert.equal(
+    execFileSync(
+      'git',
+      [
+        'diff',
+        '--name-only',
+        '-z',
+        fixture.recordedFindingHead,
+        fixture.exactHeadSha,
+        '--',
+        fixture.findingPath,
+      ],
+      { cwd: fixture.root, encoding: 'utf8' }
+    ),
+    '',
+    'remediation does not rewrite the previously recorded finding'
+  );
+  assert.deepEqual(
+    parseGitPathNames(
+      execFileSync(
+        'git',
+        ['diff', '--name-only', '-z', fixture.baselineCommit, fixture.exactHeadSha, '--'],
+        {
+          cwd: fixture.root,
+        }
+      )
+    ).sort(),
+    [...fixture.review.changeInventory.exactPaths].sort(),
+    'the frozen mission baseline still includes the finding in the complete changed-path set'
+  );
+  for (const checker of [reviewChecker, runChecker]) {
+    const result = spawnSync(process.execPath, [checker], { cwd: fixture.root, encoding: 'utf8' });
+    assert.equal(result.status, 0, `${path.basename(checker)}: ${result.stderr}`);
+  }
+});
+
+for (const stage of ['post-implementation', 'post-implementation-pilot']) {
+  test(`review checker rejects ${stage} inventory that omits the linked finding`, (t) => {
+    const fixture = createFixture(t);
+    fixture.review.stage = stage;
+    fixture.review.changeInventory.exactPaths = fixture.review.changeInventory.exactPaths.filter(
+      (entry) => entry !== fixture.findingPath
+    );
+    const writePacket = () =>
+      writeFile(
+        fixture.root,
+        fixture.reviewPath,
+        markdownMetadata('AM-P0-004-F1 remediation review packet', fixture.review, fixture.sections)
+      );
+    writePacket();
+    const digest = fixtureDigest(fixture, { worktree: true });
+    fixture.review.changeInventory.reviewedContentDigest = digest;
+    fixture.review.independentReview.reviewedContentDigest = digest;
+    fixture.review.independentReview.history.at(-1).reviewedContentDigest = digest;
+    writePacket();
+
+    // These evidence fields are not otherwise tied to the run ledger. Omitting
+    // the finding leaves their changes invisible to the declared path digest.
+    fixture.finding.expected = 'An unreviewed replacement requirement.';
+    fixture.finding.reproduction = 'An unreviewed replacement reproduction.';
+    writeFile(
+      fixture.root,
+      fixture.findingPath,
+      markdownMetadata('AM-P0-004-F1: Fixture finding', fixture.finding)
+    );
+    assert.equal(fixtureDigest(fixture, { worktree: true }), digest);
+    const result = spawnSync(process.execPath, [reviewChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(result.stderr, /exactPaths must include the linked finding/);
+    assert.doesNotMatch(result.stderr, /reviewed-content digest does not match/);
+  });
+}
+
+for (const stage of ['post-implementation', 'post-implementation-pilot']) {
+  test(`review checker rejects ${stage} finding symlink instead of trusting its unhashed target`, (t) => {
+    if (process.platform === 'win32') return t.skip('POSIX symlink fixture');
+    const fixture = createFixture(t);
+    fixture.review.stage = stage;
+    fixture.review.integrationEligibility.status = 'pending';
+    fixture.review.integrationEligibility.exactHead = 'pending';
+    const findingFile = path.join(fixture.root, fixture.findingPath);
+    const target = path.join(fixture.root, '.fixture-evidence/finding.md');
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.renameSync(findingFile, target);
+    fs.symlinkSync(path.relative(path.dirname(findingFile), target), findingFile);
+    const writePacket = () =>
+      writeFile(
+        fixture.root,
+        fixture.reviewPath,
+        markdownMetadata('AM-P0-004-F1 remediation review packet', fixture.review, fixture.sections)
+      );
+    writePacket();
+    const digest = fixtureDigest(fixture, { worktree: true });
+    fixture.review.changeInventory.reviewedContentDigest = digest;
+    fixture.review.independentReview.reviewedContentDigest = digest;
+    fixture.review.independentReview.history.at(-1).reviewedContentDigest = digest;
+    writePacket();
+    fixture.finding.expected = 'Unreviewed replacement requirement.';
+    fixture.finding.reproduction = 'Unreviewed replacement reproduction.';
+    fs.writeFileSync(target, markdownMetadata('AM-P0-004-F1: Fixture finding', fixture.finding));
+    assert.equal(fixtureDigest(fixture, { worktree: true }), digest);
+    const result = spawnSync(process.execPath, [reviewChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(
+      result.stderr,
+      /findingPath must be a regular repository file without symlink components/
+    );
+    assert.doesNotMatch(result.stderr, /reviewed-content digest does not match/);
+  });
+}
+
+test('review checker rejects finding symlink ancestors inside the repository', (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX symlink fixture');
+  const fixture = createFixture(t);
+  const directory = path.dirname(path.join(fixture.root, fixture.findingPath));
+  const target = path.join(fixture.root, '.fixture-findings');
+  fs.renameSync(directory, target);
+  fs.symlinkSync(path.relative(path.dirname(directory), target), directory, 'dir');
+  const result = spawnSync(process.execPath, [reviewChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(
+    result.stderr,
+    /findingPath must be a regular repository file without symlink components/
+  );
+});
+
+test('review checker rejects special finding files without waiting for a FIFO writer', (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX FIFO fixture');
+  const fixture = createFixture(t);
+  const findingFile = path.join(fixture.root, fixture.findingPath);
+  fs.rmSync(findingFile);
+  execFileSync('mkfifo', [findingFile]);
+  const result = spawnSync(process.execPath, [reviewChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+    timeout: 2000,
+  });
+  assert.equal(result.error, undefined, result.error?.message);
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(
+    result.stderr,
+    /findingPath must be a regular repository file without symlink components/
+  );
+});
+
+test('review checker accepts a regular finding through an outer workspace symlink', (t) => {
+  if (process.platform === 'win32') return t.skip('POSIX symlink fixture');
+  const fixture = createFixture(t);
+  const aliasRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-workspace-alias-'));
+  t.after(() => fs.rmSync(aliasRoot, { recursive: true, force: true }));
+  const alias = path.join(aliasRoot, 'workspace');
+  fs.symlinkSync(fixture.root, alias, 'dir');
+  const result = spawnSync(process.execPath, [reviewChecker], { cwd: alias, encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+});
+
+test('included finding evidence changes invalidate completed review', (t) => {
+  const fixture = createFixture(t);
+  const positive = spawnSync(process.execPath, [reviewChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  });
+  assert.equal(positive.status, 0, positive.stderr);
+  const original = structuredClone(fixture.finding);
+  const reviewedDigest = fixture.review.changeInventory.reviewedContentDigest;
+  for (const field of ['expected', 'observed', 'reproduction', 'impact', 'evidence']) {
+    const changed = structuredClone(original);
+    changed[field] = field === 'evidence' ? ['Unreviewed evidence.'] : 'Unreviewed replacement.';
+    writeFile(
+      fixture.root,
+      fixture.findingPath,
+      markdownMetadata('AM-P0-004-F1: Fixture finding', changed)
+    );
+    assert.notEqual(fixtureDigest(fixture, { worktree: true }), reviewedDigest, field);
+    const result = spawnSync(process.execPath, [reviewChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 1, `${field}: ${result.stdout}`);
+    assert.match(result.stderr, /reviewed-content digest does not match/);
+  }
 });
 
 test('reviewed-content digests treat inventory paths as literal Git pathspecs', (t) => {

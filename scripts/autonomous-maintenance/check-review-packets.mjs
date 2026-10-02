@@ -374,6 +374,39 @@ function resolveRepositoryPath(file, value, errors, label, options = {}) {
   return resolved;
 }
 
+function readRegularFinding(file, findingFile, errors) {
+  let descriptor;
+  try {
+    // Check only components within the repository. A caller may reach the
+    // trusted workspace itself through an outer symlink.
+    let current = root;
+    const components = path.relative(root, findingFile).split(path.sep);
+    for (const [index, component] of components.entries()) {
+      current = path.join(current, component);
+      const stat = fs.lstatSync(current);
+      if (
+        stat.isSymbolicLink() ||
+        (index === components.length - 1 ? !stat.isFile() : !stat.isDirectory())
+      ) {
+        throw new Error('non-regular finding path');
+      }
+    }
+    // Avoid following a replaced leaf or waiting on a replaced FIFO. This
+    // local check does not provide an atomic filesystem snapshot or sandbox.
+    descriptor = fs.openSync(
+      findingFile,
+      fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW ?? 0) | (fs.constants.O_NONBLOCK ?? 0)
+    );
+    if (!fs.fstatSync(descriptor).isFile()) throw new Error('non-regular finding descriptor');
+    return fs.readFileSync(descriptor, 'utf8');
+  } catch {
+    fail(errors, file, 'findingPath must be a regular repository file without symlink components');
+    return null;
+  } finally {
+    if (descriptor !== undefined) fs.closeSync(descriptor);
+  }
+}
+
 function changedPathsSince(commit, file, errors) {
   try {
     execFileSync('git', ['cat-file', '-e', `${commit}^{commit}`], {
@@ -457,7 +490,15 @@ function validateAuthority(file, entries, stage, errors) {
   }
 }
 
-function validateInventory(file, inventory, changedPaths, stage, packetSchema, errors) {
+function validateInventory(
+  file,
+  inventory,
+  changedPaths,
+  stage,
+  packetSchema,
+  findingPath,
+  errors
+) {
   let pathCount = 0;
   let exactPaths = null;
   if (packetSchema === 'forward') {
@@ -569,6 +610,13 @@ function validateInventory(file, inventory, changedPaths, stage, packetSchema, e
         `changeInventory.exactPaths must include the review packet: ${packetPath}`
       );
     }
+    if (!exactPaths?.has(findingPath)) {
+      fail(
+        errors,
+        file,
+        `changeInventory.exactPaths must include the linked finding: ${findingPath}`
+      );
+    }
     if ([...(exactPaths ?? [])].every((entry) => entry === packetPath)) {
       fail(
         errors,
@@ -610,8 +658,12 @@ function validateReview(file) {
 
   const findingFile = resolveRepositoryPath(file, metadata.findingPath, errors, 'findingPath');
   let findingMetadata = null;
-  if (findingFile) {
-    const finding = fs.readFileSync(findingFile, 'utf8');
+  const finding = findingFile
+    ? packetSchema === 'forward'
+      ? readRegularFinding(file, findingFile, errors)
+      : fs.readFileSync(findingFile, 'utf8')
+    : null;
+  if (finding !== null) {
     if (!finding.includes(`# ${metadata.findingId}:`)) {
       fail(errors, file, 'findingPath does not contain the declared finding heading');
     }
@@ -646,6 +698,7 @@ function validateReview(file) {
     changedPaths,
     metadata.stage,
     packetSchema,
+    metadata.findingPath,
     errors
   );
   if (
