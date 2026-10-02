@@ -421,7 +421,7 @@ function nullableNonNegativeInteger(value) {
 }
 
 function nullablePositiveNumber(value) {
-  return value === null || (typeof value === 'number' && value > 0);
+  return value === null || (Number.isFinite(value) && value > 0);
 }
 
 function validateDecision(file, decision, label) {

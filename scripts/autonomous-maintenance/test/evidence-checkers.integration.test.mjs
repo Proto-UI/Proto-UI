@@ -128,6 +128,8 @@ function createFixture(
     observerConfidence = 0.96,
     verifierConfidence = 0.98,
     reviewConfidence = 0.97,
+    durationMinutes = null,
+    independentReviewTiming = { reviewMinutes: null },
   } = {}
 ) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-maintenance-check-'));
@@ -185,7 +187,7 @@ function createFixture(
     baselineCommit,
     scope: ['C-TEST-0001'],
     budgetClass: 'small',
-    elapsedMinutes: null,
+    elapsedMinutes: durationMinutes,
     claim: 'The projection differs from authority.',
     entities: ['C-TEST-0001'],
     criteria: ['C-TEST-0001-A'],
@@ -219,7 +221,7 @@ function createFixture(
       previouslyUnknown: true,
       hasExternalOracle: true,
       actionValue: 2,
-      reviewMinutes: null,
+      reviewMinutes: durationMinutes,
       notes: 'Current authority fixes the expected result.',
     },
     decisionBoundary,
@@ -229,7 +231,7 @@ function createFixture(
       authorityResolution: 'governed',
       implementationVerification: 'passed',
       integrationEligibility: 'eligible',
-      reviewMinutes: null,
+      reviewMinutes: durationMinutes,
     },
   };
   writeFile(root, findingPath, markdownMetadata('AM-P0-004-F1: Fixture finding', finding));
@@ -324,7 +326,7 @@ function createFixture(
       status: 'adequate',
       reviewer,
       reviewedContentDigest: digestPlaceholder,
-      reviewMinutes: null,
+      ...independentReviewTiming,
       decision: 'Implementation is technically complete.',
       history: [
         {
@@ -453,7 +455,7 @@ function createFixture(
       actorId: 'agent:observer-1',
       taskId: 'task:observation-1',
       status: 'completed',
-      elapsedMinutes: null,
+      elapsedMinutes: durationMinutes,
       tokenUsage: null,
       candidateFindingCount: 1,
       trackedMutationCount: 0,
@@ -1085,6 +1087,135 @@ for (const disposition of ['record-no-finding', 'record-rejected', 'bounded-foll
       encoding: 'utf8',
     });
     assert.equal(result.status, 0, result.stderr);
+  });
+}
+
+for (const [label, timing, valid] of [
+  ['omitted', {}, true],
+  ['null', { reviewMinutes: null }, true],
+  ['positive fraction', { reviewMinutes: 0.25 }, true],
+  ['positive integer', { reviewMinutes: 1 }, true],
+  ['zero', { reviewMinutes: 0 }, false],
+  ['negative', { reviewMinutes: -1 }, false],
+  ['.nan', { reviewMinutes: NaN }, false],
+  ['.inf', { reviewMinutes: Infinity }, false],
+  ['-.inf', { reviewMinutes: -Infinity }, false],
+]) {
+  test(`forward checkers validate optional independent review duration ${label} through real YAML`, (t) => {
+    const fixture = createFixture(t, { independentReviewTiming: timing });
+    const packet = fs.readFileSync(path.join(fixture.root, fixture.reviewPath), 'utf8');
+    if (label.includes('.')) assert.ok(packet.includes(`reviewMinutes: ${label}\n`));
+    for (const checker of [reviewChecker, runChecker]) {
+      const result = spawnSync(process.execPath, [checker], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      });
+      assert.equal(result.status, valid ? 0 : 1, result.stderr || result.stdout);
+      if (!valid) {
+        assert.match(
+          result.stderr,
+          /independentReview\.reviewMinutes must be null or a positive number/
+        );
+        assert.doesNotMatch(result.stderr, /reviewed-content digest does not match/);
+      }
+    }
+  });
+}
+
+for (const [minutes, scalar] of [
+  [NaN, '.nan'],
+  [Infinity, '.inf'],
+  [-Infinity, '-.inf'],
+  [0, '0'],
+]) {
+  test(`run checker rejects real YAML duration ${scalar} in forward evidence`, (t) => {
+    const fixture = createFixture(t, { durationMinutes: minutes });
+    const findingYaml = fs.readFileSync(path.join(fixture.root, fixture.findingPath), 'utf8');
+    const ledgerYaml = fs.readFileSync(
+      path.join(fixture.root, 'internal/autonomous-maintenance/phase-0/runs.yaml'),
+      'utf8'
+    );
+    assert.ok(findingYaml.includes(`elapsedMinutes: ${scalar}\n`));
+    assert.ok(findingYaml.includes(`reviewMinutes: ${scalar}\n`));
+    assert.ok(ledgerYaml.includes(`elapsedMinutes: ${scalar}\n`));
+    const result = spawnSync(process.execPath, [runChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 1, result.stdout);
+    for (const field of [
+      'elapsedMinutes',
+      'findingDisposition.reviewMinutes',
+      'remediationReview.reviewMinutes',
+      'observer.elapsedMinutes',
+    ]) {
+      assert.ok(
+        result.stderr.includes(`${field} must be null or a positive number`),
+        `${field}: ${result.stderr}`
+      );
+    }
+    assert.doesNotMatch(result.stderr, /reviewed-content digest does not match/);
+  });
+}
+
+for (const minutes of [null, 0.25, 1]) {
+  test(`forward checkers preserve valid duration ${String(minutes)} through real YAML`, (t) => {
+    const fixture = createFixture(t, { durationMinutes: minutes });
+    for (const checker of [reviewChecker, runChecker]) {
+      const result = spawnSync(process.execPath, [checker], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      });
+      assert.equal(result.status, 0, `${path.basename(checker)}: ${result.stderr}`);
+    }
+  });
+}
+
+for (const minutes of [null, 0.25, 1, NaN, Infinity, -Infinity, 0, -1]) {
+  test(`legacy run checker validates review durations ${String(minutes)} through real YAML`, (t) => {
+    const fixture = createFixture(t, { remediation: 'none' });
+    const run = fixture.run;
+    run.schemaVersion = 1;
+    run.findingPaths = [];
+    for (const key of [
+      'findingDisposition',
+      'decisionBoundary',
+      'automatedCompletion',
+      'integration',
+    ]) {
+      delete run[key];
+    }
+    run.humanDecisions = Object.fromEntries(
+      ['findingDisposition', 'semantic', 'integration'].map((key) => [
+        key,
+        { status: 'not-required', reviewMinutes: minutes },
+      ])
+    );
+    run.remediation = {
+      status: 'not-required',
+      completionRule: 'not-required',
+      validationStatus: 'not-required',
+      completedOn: '2026-08-27',
+      reviewPacket: null,
+    };
+    writeRunLedger(fixture.root, run);
+    const result = spawnSync(process.execPath, [runChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    if (minutes === null || (Number.isFinite(minutes) && minutes > 0)) {
+      assert.equal(result.status, 0, result.stderr);
+    } else {
+      assert.equal(result.status, 1, result.stdout);
+      for (const field of ['findingDisposition', 'semantic', 'integration']) {
+        assert.ok(
+          result.stderr.includes(
+            `humanDecisions.${field}.reviewMinutes must be null or a positive number`
+          ),
+          result.stderr
+        );
+      }
+    }
   });
 }
 

@@ -76,7 +76,7 @@ function validateEvidence(errors, value, label, { required = false } = {}) {
 }
 
 function validateNullablePositiveNumber(errors, value, label) {
-  if (value !== null && !(typeof value === 'number' && value > 0)) {
+  if (value !== null && !(Number.isFinite(value) && value > 0)) {
     errors.push(`${label} must be null or a positive number`);
   }
 }
@@ -603,6 +603,10 @@ export function validateForwardReviewIndependence(metadata, finding) {
   }
   const review = metadata.independentReview;
   if (!recordValue(review)) return [...errors, 'independentReview must be an object'];
+
+  if (Object.hasOwn(review, 'reviewMinutes')) {
+    validateNullablePositiveNumber(errors, review.reviewMinutes, 'independentReview.reviewMinutes');
+  }
 
   if (!Object.hasOwn(review, 'reviewer')) {
     errors.push('independentReview.reviewer is required');

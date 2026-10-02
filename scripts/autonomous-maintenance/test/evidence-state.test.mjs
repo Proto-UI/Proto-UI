@@ -125,6 +125,33 @@ test('accepts a coherent schema-v2 finding and matching run state', () => {
   assert.deepEqual(errors, []);
 });
 
+for (const minutes of [null, 0.25, 1, Number.MAX_VALUE]) {
+  test(`accepts nullable finite positive finding durations ${String(minutes)}`, () => {
+    const finding = validForwardFinding();
+    finding.elapsedMinutes = minutes;
+    finding.findingDisposition.reviewMinutes = minutes;
+    finding.remediationReview.reviewMinutes = minutes;
+    assert.deepEqual(validateForwardFindingMetadata(finding), []);
+  });
+}
+
+for (const minutes of [NaN, Infinity, -Infinity, 0, -1, undefined, '1']) {
+  test(`rejects invalid finding durations ${String(minutes)}`, () => {
+    const finding = validForwardFinding();
+    finding.elapsedMinutes = minutes;
+    finding.findingDisposition.reviewMinutes = minutes;
+    finding.remediationReview.reviewMinutes = minutes;
+    const errors = validateForwardFindingMetadata(finding);
+    for (const field of [
+      'elapsedMinutes',
+      'findingDisposition.reviewMinutes',
+      'remediationReview.reviewMinutes',
+    ]) {
+      assert.ok(errors.includes(`${field} must be null or a positive number`), field);
+    }
+  });
+}
+
 for (const confidence of [NaN, Infinity, -Infinity, -0.01, 1.01, null, '0.5']) {
   test(`rejects invalid finding confidence ${String(confidence)}`, () => {
     const finding = validForwardFinding();
@@ -278,6 +305,44 @@ test('accepts independently attributed schema-v2 review evidence', () => {
     []
   );
 });
+
+for (const status of ['adequate', 'pending']) {
+  for (const [label, timing, valid] of [
+    ['omitted', {}, true],
+    ['null', { reviewMinutes: null }, true],
+    ['positive fraction', { reviewMinutes: 0.25 }, true],
+    ['positive integer', { reviewMinutes: 1 }, true],
+    ['zero', { reviewMinutes: 0 }, false],
+    ['negative', { reviewMinutes: -1 }, false],
+    ['NaN', { reviewMinutes: NaN }, false],
+    ['Infinity', { reviewMinutes: Infinity }, false],
+    ['-Infinity', { reviewMinutes: -Infinity }, false],
+    ['undefined', { reviewMinutes: undefined }, false],
+    ['string', { reviewMinutes: '1' }, false],
+  ]) {
+    test(`validates optional ${status} independent review duration ${label}`, () => {
+      const review = validForwardReview();
+      Object.assign(review.independentReview, timing);
+      if (status === 'pending') {
+        review.reviewStatus = 'ready-for-independent-review';
+        Object.assign(review.independentReview, {
+          status,
+          reviewer: null,
+          reviewedContentDigest: null,
+          history: [],
+        });
+      }
+      const errors = validateForwardReviewIndependence(review, validForwardFinding());
+      if (valid) {
+        assert.deepEqual(errors, []);
+      } else {
+        assert.ok(
+          errors.includes('independentReview.reviewMinutes must be null or a positive number')
+        );
+      }
+    });
+  }
+}
 
 for (const confidence of [NaN, Infinity, -Infinity, -0.01, 1.01, null, '0.5']) {
   test(`rejects invalid current and historical review confidence ${String(confidence)}`, () => {
