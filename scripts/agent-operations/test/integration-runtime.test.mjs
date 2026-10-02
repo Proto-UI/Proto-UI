@@ -706,9 +706,15 @@ for (const [name, transform, allowed] of [
 ]) {
   test(`merge evidence marker handles ${name}`, () => {
     const input = reviewInput();
-    input.reviews[0].body = transform(
-      evidenceReceiptMarker(input.headSha),
-      reviewPacketMarker(fixturePublishedPacket(input))
+    const evidenceToken = evidenceReceiptMarker(input.headSha);
+    const packetToken = reviewPacketMarker(fixturePublishedPacket(input));
+    const originalReceipt = `<!-- ${packetToken} ${evidenceToken} -->`;
+    assert.ok(input.reviews[0].body.includes(originalReceipt));
+    // Exercise receipt syntax within the real rendered disclosure. A receipt
+    // without that disclosure is no longer a valid publication positive.
+    input.reviews[0].body = input.reviews[0].body.replace(
+      originalReceipt,
+      transform(evidenceToken, packetToken)
     );
     assert.equal(scheduledMerge({ input, packet: packet(input) }).allowed, allowed);
   });

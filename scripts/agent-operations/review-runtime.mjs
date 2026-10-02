@@ -644,9 +644,32 @@ export function reviewPacketMarkerPresent(packet, bodies) {
   return bodies.some((body) => typeof body === 'string' && body.includes(marker));
 }
 
-/** Remove governed receipt markers so two rendered bodies compare by content. */
-function stripReceiptMarkers(body) {
-  return body.replace(/<!--[\s\S]*?proto-ui:[\s\S]*?-->/g, '').trim();
+/** Preserve disclosure; only pure receipt comments are transport metadata. */
+function normalizedReviewBody(body) {
+  const source = body.replace(/\r\n/g, '\n');
+  const content = [];
+  let cursor = 0;
+  while (cursor < source.length) {
+    const start = source.indexOf('<!--', cursor);
+    if (start === -1) break;
+    const end = source.indexOf('-->', start + 4);
+    if (end === -1) break;
+    content.push(source.slice(cursor, start));
+    const tokens = source
+      .slice(start + 4, end)
+      .trim()
+      .split(/\s+/);
+    if (
+      !tokens.every((token) =>
+        /^proto-ui:(?:review-packet|agent-evidence):sha256=[a-f0-9]{64}$/.test(token)
+      )
+    ) {
+      content.push(source.slice(start, end + 3));
+    }
+    cursor = end + 3;
+  }
+  content.push(source.slice(cursor));
+  return content.join('').trim();
 }
 
 /** Evidence identity shared by every packet and publication carrying it. */
@@ -1405,7 +1428,7 @@ export function authorizeReviewSubmission({
     REQUEST_CHANGES: 'CHANGES_REQUESTED',
     COMMENT: 'COMMENTED',
   }[recommendedAction];
-  const renderedBody = stripReceiptMarkers(renderReviewBody(packet));
+  const renderedBody = normalizedReviewBody(renderReviewBody(packet));
   if (
     liveInput.reviews.some(
       (review) =>
@@ -1415,14 +1438,20 @@ export function authorizeReviewSubmission({
         review.state === sameDispositionState &&
         typeof review.body === 'string' &&
         (() => {
-          if (hasReceiptMarker(review.body, reviewPacketMarker(packet))) return true;
-          if (recommendedAction === 'COMMENT')
-            return stripReceiptMarkers(review.body) === renderedBody;
+          const publishedBody = normalizedReviewBody(review.body);
+          if (recommendedAction === 'COMMENT') return publishedBody === renderedBody;
+          if (
+            hasUniquePublishedPacketReceipts(review.body, packet) &&
+            publishedBody === renderedBody
+          ) {
+            return true;
+          }
           if (!priorPacket) return false;
           try {
             validatePublishedReviewPacket(packet, priorPacket);
             return (
               hasUniquePublishedPacketReceipts(review.body, priorPacket) &&
+              publishedBody === normalizedReviewBody(renderReviewBody(priorPacket)) &&
               matchesPublishedReviewInput(priorPacket, liveInput, review)
             );
           } catch {
@@ -1696,6 +1725,7 @@ export function authorizePullRequestMerge({
     return { allowed: false, reason: error.message };
   }
   const evidenceReceipt = agentEvidenceMarker(publishedPacket);
+  const renderedPublication = normalizedReviewBody(renderReviewBody(publishedPacket));
   const publicationReceipt = liveInput.reviews.some(
     (review) =>
       review.commitSha === liveInput.headSha &&
@@ -1706,6 +1736,7 @@ export function authorizePullRequestMerge({
       headReviewStates.get(`login:${review.author.toLowerCase()}`) === 'APPROVED' &&
       typeof review.body === 'string' &&
       hasUniquePublishedPacketReceipts(review.body, publishedPacket) &&
+      normalizedReviewBody(review.body) === renderedPublication &&
       matchesPublishedReviewInput(publishedPacket, liveInput, review)
   );
   if (!publicationReceipt) {

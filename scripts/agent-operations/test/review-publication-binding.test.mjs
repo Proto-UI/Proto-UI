@@ -32,6 +32,7 @@ import {
   publishReview,
   refreshPacket,
   reviewSnapshot,
+  reviewPacket,
   reviewerPermission,
   sha,
 } from './fixtures/review-publication.mjs';
@@ -361,6 +362,109 @@ for (const reviewer of ['contributor', 'web-flow', null]) {
     resealCurrentPacket(fixture);
     assert.equal(merge(fixture).allowed, false);
     assert.match(merge(fixture).reason, /independent/);
+  });
+}
+
+const incompletePublicationBodies = [
+  [
+    'only valid receipts',
+    (_body, packet) => `<!-- ${reviewPacketMarker(packet)} ${agentEvidenceMarker(packet)} -->`,
+  ],
+  [
+    'arbitrary prose with valid receipts',
+    (_body, packet) =>
+      `Looks good.\n\n<!-- ${reviewPacketMarker(packet)} ${agentEvidenceMarker(packet)} -->`,
+  ],
+  [
+    'missing Agent evidence section',
+    (body) => body.replace(/## Agent evidence[\s\S]*?(?=### Validation and review limits)/, ''),
+  ],
+  ['missing publication debt', (body) => body.replace(/^- \[publication\].*\n?/m, '')],
+  ['changed validation result', (body) => body.replace('exit 0: passed', 'exit 1: failed')],
+  ['entire review hidden in a comment', (body) => `<!-- ${body} -->`],
+  [
+    'evidence hidden in a comment',
+    (body) =>
+      body
+        .replace('## Agent evidence', '<!-- ## Agent evidence')
+        .replace('### Validation and review limits', '-->\n### Validation and review limits'),
+  ],
+  [
+    'mixed prose in a receipt comment',
+    (body, packet) => `${body}\n<!-- Extra acceptance claim ${reviewPacketMarker(packet)} -->`,
+  ],
+  ['unrelated HTML comment', (body) => `${body}\n<!-- Unreviewed addition -->`],
+];
+for (const [name, changeBody] of incompletePublicationBodies) {
+  test(`publication credit and duplicate detection require rendered disclosure: ${name}`, () => {
+    const fixture = target();
+    const original = structuredClone(fixture.publishedPacket);
+    fixture.input.reviews[0].body = changeBody(fixture.body, fixture.publishedPacket);
+    assert.notEqual(
+      fixture.input.reviews[0].body,
+      fixture.body,
+      'negative fixture must alter publication'
+    );
+    resealCurrentPacket(fixture);
+    assert.equal(merge(fixture).allowed, false);
+    assert.notEqual(submit(fixture.input, fixture.packet, fixture.publishedPacket).duplicate, true);
+    assert.deepEqual(fixture.publishedPacket, original);
+  });
+}
+
+test('rendered publication tolerates CRLF and surrounding whitespace without losing disclosure', () => {
+  const fixture = target();
+  fixture.input.reviews[0].body = ` \r\n${fixture.body.replaceAll('\n', '\r\n')}\r\n `;
+  resealCurrentPacket(fixture);
+  assert.equal(merge(fixture).allowed, true);
+  assert.equal(submit(fixture.input, fixture.packet, fixture.publishedPacket).duplicate, true);
+});
+
+for (const [name, changeBody, duplicate] of [
+  ['unchanged', (body) => body, true],
+  ['outer whitespace', (body) => ` \n${body}\n `, true],
+  ['CRLF', (body) => body.replaceAll('\n', '\r\n'), true],
+  [
+    'hidden proto-ui prose',
+    (body) => `${body}\n<!-- arbitrary hidden proto-ui:warning claim -->`,
+    false,
+  ],
+  [
+    'mixed real receipt comment',
+    (body) => body.replace('<!-- proto-ui:', '<!-- Important qualification proto-ui:'),
+    false,
+  ],
+  [
+    'visible prose between separate comments',
+    (body) =>
+      body.replace(
+        '<!-- proto-ui:',
+        '<!-- inert comment -->\nNEW VISIBLE EVIDENCE QUALIFICATION\n<!-- proto-ui:'
+      ),
+    false,
+  ],
+  [
+    'changed visible evidence',
+    (body) => body.replace('No actionable findings', 'Unreviewed findings'),
+    false,
+  ],
+]) {
+  test(`COMMENT duplicate detection preserves all non-receipt content: ${name}`, () => {
+    const before = reviewSnapshot();
+    const original = reviewPacket(before, { recommendedAction: 'COMMENT' });
+    const input = structuredClone(before);
+    input.reviews.push({
+      id: 'PRR_comment',
+      author: 'independent-reviewer',
+      state: 'COMMENTED',
+      commitSha: input.headSha,
+      submittedAt: '2026-08-27T08:00:00Z',
+      body: changeBody(renderReviewBody(original)),
+    });
+    const current = refreshPacket(original, input);
+    const result = submit(input, current);
+    assert.equal(result.duplicate === true, duplicate);
+    if (!duplicate) assert.equal(result.allowed, true, result.reason);
   });
 }
 
