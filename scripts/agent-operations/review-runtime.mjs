@@ -1,4 +1,8 @@
 import { createHash } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
+
+// Match the existing governed live-response bound for this supplied artifact.
+export const MAX_PUBLISHED_REVIEW_PACKET_BYTES = 64 * 1024 * 1024;
 
 const SHA = /^[a-f0-9]{40,64}$/;
 const HEX64 = /^[a-f0-9]{64}$/;
@@ -585,6 +589,45 @@ export function computeReviewPacketDigest(priorPacket) {
   return digest(priorPacket);
 }
 
+// The supplied file is content, not authority. Its complete packet/evidence
+// tokens must also occur in the same qualified live approval below.
+export function validatePublishedReviewPacket(packet, publishedPacket) {
+  assert(
+    publishedPacket && typeof publishedPacket === 'object' && !Array.isArray(publishedPacket),
+    'the original published review packet is required'
+  );
+  let serialized;
+  try {
+    serialized = JSON.stringify(publishedPacket);
+  } catch {
+    throw new Error('the published review packet cannot be serialized');
+  }
+  assert(
+    typeof serialized === 'string' &&
+      Buffer.byteLength(serialized, 'utf8') <= MAX_PUBLISHED_REVIEW_PACKET_BYTES,
+    `the published review packet exceeds the ${MAX_PUBLISHED_REVIEW_PACKET_BYTES}-byte bound`
+  );
+  assert(publishedPacket.schemaVersion === 2, 'the published review packet must use schema v2');
+  exactKeys(publishedPacket, Object.keys(packet), 'published review packet');
+  assert(
+    typeof publishedPacket.reviewInputDigest === 'string' &&
+      HEX64.test(publishedPacket.reviewInputDigest),
+    'the published review input digest is invalid'
+  );
+  validateTimestamp(publishedPacket.observedAt, 'published review observedAt');
+  // Only these two transport fields change after publishing the review. All
+  // content, base/head, scope, evidence, findings and reconciliation stay exact.
+  assert(
+    isDeepStrictEqual(packet, {
+      ...publishedPacket,
+      reviewInputDigest: packet.reviewInputDigest,
+      observedAt: packet.observedAt,
+    }),
+    'the merge packet changed published review content beyond reviewInputDigest/observedAt'
+  );
+  return publishedPacket;
+}
+
 /**
  * Stable publication receipt marker embedded in every rendered review body and
  * evidence comment. Duplicate detection and merge authorization bind to this
@@ -636,6 +679,55 @@ function receiptMarkerTokens(body) {
 
 function hasReceiptMarker(body, marker) {
   return receiptMarkerTokens(body).includes(marker);
+}
+
+function hasUniquePublishedPacketReceipts(body, packet) {
+  const tokens = receiptMarkerTokens(body);
+  const packetTokens = [
+    ...new Set(
+      tokens.filter((token) => /^proto-ui:review-packet:sha256=[a-f0-9]{64}$/.test(token))
+    ),
+  ];
+  const evidenceTokens = [
+    ...new Set(
+      tokens.filter((token) => /^proto-ui:agent-evidence:sha256=[a-f0-9]{64}$/.test(token))
+    ),
+  ];
+  return (
+    packetTokens.length === 1 &&
+    packetTokens[0] === reviewPacketMarker(packet) &&
+    evidenceTokens.length === 1 &&
+    evidenceTokens[0] === agentEvidenceMarker(packet)
+  );
+}
+
+// Invert exactly one normal publication. Do not discard unrelated reviews,
+// comments, checks or files in search of a matching historical digest.
+function matchesPublishedReviewInput(publishedPacket, input, review) {
+  try {
+    const positions = input.reviews.flatMap((entry, index) =>
+      entry.id === review.id ? [index] : []
+    );
+    if (positions.length !== 1 || review.author === null) return false;
+    const reconstructed = {
+      ...input,
+      reviews: input.reviews.toSpliced(positions[0], 1),
+      reviewerPermissions: [...input.reviewerPermissions],
+    };
+    const publisher = review.author.toLowerCase();
+    // The collector adds this fact only when publication newly introduces an
+    // eligible approval subject. Existing subjects keep their exact fact.
+    if (!reviewerPermissionSubjects(reconstructed).includes(publisher)) {
+      reconstructed.reviewerPermissions = reconstructed.reviewerPermissions.filter(
+        (entry) => entry.login !== publisher
+      );
+    }
+    if (computeReviewInputDigest(reconstructed) !== publishedPacket.reviewInputDigest) return false;
+    validateReviewPacket(publishedPacket, reconstructed);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function requiredPriorReview(input, reviewer) {
@@ -1006,6 +1098,7 @@ export function renderReviewBody(packet) {
   const evidence = packet.agentEvidence;
   return [
     `Reviewed exact head \`${packet.headSha}\`.`,
+    `Reviewed exact base \`${packet.baseSha}\`.`,
     `Review class: ${packet.reviewClass}. Scope: ${packet.scope.join('; ')}.`,
     packet.findings.length
       ? list(
@@ -1321,7 +1414,21 @@ export function authorizeReviewSubmission({
         review.commitSha === liveInput.headSha &&
         review.state === sameDispositionState &&
         typeof review.body === 'string' &&
-        stripReceiptMarkers(review.body) === renderedBody
+        (() => {
+          if (hasReceiptMarker(review.body, reviewPacketMarker(packet))) return true;
+          if (recommendedAction === 'COMMENT')
+            return stripReceiptMarkers(review.body) === renderedBody;
+          if (!priorPacket) return false;
+          try {
+            validatePublishedReviewPacket(packet, priorPacket);
+            return (
+              hasUniquePublishedPacketReceipts(review.body, priorPacket) &&
+              matchesPublishedReviewInput(priorPacket, liveInput, review)
+            );
+          } catch {
+            return false;
+          }
+        })()
     )
   ) {
     return {
@@ -1434,6 +1541,7 @@ function hasCurrentReviewWritePermission(input, login) {
 
 export function authorizePullRequestMerge({
   packet,
+  publishedPacket = null,
   input,
   liveInput,
   executionMode,
@@ -1582,7 +1690,12 @@ export function authorizePullRequestMerge({
 
   // The publication source must itself be a valid independent approval.
   // A matching digest in arbitrary participant-authored text is not authority.
-  const evidenceReceipt = agentEvidenceMarker(packet);
+  try {
+    validatePublishedReviewPacket(packet, publishedPacket);
+  } catch (error) {
+    return { allowed: false, reason: error.message };
+  }
+  const evidenceReceipt = agentEvidenceMarker(publishedPacket);
   const publicationReceipt = liveInput.reviews.some(
     (review) =>
       review.commitSha === liveInput.headSha &&
@@ -1592,7 +1705,8 @@ export function authorizePullRequestMerge({
       hasCurrentReviewWritePermission(liveInput, review.author) &&
       headReviewStates.get(`login:${review.author.toLowerCase()}`) === 'APPROVED' &&
       typeof review.body === 'string' &&
-      hasReceiptMarker(review.body, evidenceReceipt)
+      hasUniquePublishedPacketReceipts(review.body, publishedPacket) &&
+      matchesPublishedReviewInput(publishedPacket, liveInput, review)
   );
   if (!publicationReceipt) {
     const unboundComment = liveInput.comments.some(
@@ -1603,7 +1717,7 @@ export function authorizePullRequestMerge({
       allowed: false,
       reason: unboundComment
         ? 'comment evidence marker lacks a governed publication authorization receipt; publish through a valid exact-head independent APPROVE review and re-collect'
-        : 'merge requires a live published Agent evidence receipt from a valid exact-head independent APPROVE review matching the packet evidence digest',
+        : 'merge requires a live published review packet and Agent evidence receipt from the same valid exact-head independent APPROVE review, with only its publication delta since the reviewed input',
     };
   }
 

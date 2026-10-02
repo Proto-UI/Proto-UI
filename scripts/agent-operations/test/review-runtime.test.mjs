@@ -412,14 +412,18 @@ test('prior review binding preserves COMMENT disclosure, dismissal and duplicate
     submittedAt: '2026-08-23T01:00:00Z',
   };
   assert.equal(authorizeReviewSubmission(boundary([review, dismissed])).allowed, true);
+  const publishedPacket = boundary().packet;
   const published = {
     ...dismissed,
     id: 'PRR_published',
     state: 'APPROVED',
     commitSha: sha('b'),
-    body: renderReviewBody(boundary().packet),
+    body: renderReviewBody(publishedPacket),
   };
-  const duplicate = authorizeReviewSubmission(boundary([review, published]));
+  const duplicate = authorizeReviewSubmission({
+    ...boundary([review, published]),
+    priorPacket: publishedPacket,
+  });
   assert.equal(duplicate.allowed, false);
   assert.equal(duplicate.duplicate, true);
 });
@@ -1686,8 +1690,8 @@ test('review submission preserves explicit authorization and activates the bound
   );
 
   // A legacy same-head approval without this packet's rendered body must not
-  // block a changed evidence packet; only an exact rendered-body match is an
-  // idempotent duplicate.
+  // block a changed evidence packet. A reconstructed publication-only snapshot
+  // and its matching published packet preserve the idempotent no-op.
   const legacyDuplicateInput = reviewInput({
     reviews: [
       {
@@ -1733,6 +1737,7 @@ test('review submission preserves explicit authorization and activates the bound
   });
   const exactDuplicateApproval = authorizeReviewSubmission({
     ...scheduledBase,
+    priorPacket: publishedPacket,
     input: exactDuplicateInput,
     liveInput: structuredClone(exactDuplicateInput),
     packet: packet(

@@ -525,10 +525,7 @@ test('workflow reruns require the exact trusted workflow identity and diagnosed 
     expected: { status: 'completed', conclusion: 'failure' },
     desired: { mode: 'failed-jobs' },
     evidence: [
-      {
-        type: 'governed-outcome',
-        reference: 'artifact://governed-outcome/pr-509',
-      },
+      ...base.evidence,
       {
         type: 'ci-diagnosis',
         reference: 'artifact://ci/1234/diagnosis',
@@ -1361,80 +1358,244 @@ test('update-branch no-op is bound to the exact base and rejects an unrelated st
   assert.equal(satisfied.outcome, 'no-op');
 });
 
-test('update-branch polls until both the new head and its ancestry are visible', () => {
-  const base = metadataRequest();
-  const request = seal({
-    ...base,
-    action: 'update-pull-request-branch-at-expected-head',
-    target: {
+test('update-branch post-write state requires ancestry from the requested head and base', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
+  const postState = {
+    ...metadataLive(),
+    action: fixture.request.action,
+    current: {
+      ...fixture.before,
+      ...fixture.after,
+      containsRequestedHeadSha: true,
+    },
+  };
+  assert.equal(desiredCollaborationStateSatisfied(fixture.request, postState), true);
+  for (const containsRequestedHeadSha of [false, undefined, null, 'true']) {
+    assert.equal(
+      desiredCollaborationStateSatisfied(fixture.request, {
+        ...postState,
+        current: { ...postState.current, containsRequestedHeadSha },
+      }),
+      false,
+      `a replacement head requires verified requested-head ancestry: ${containsRequestedHeadSha}`
+    );
+  }
+  assert.equal(
+    desiredCollaborationStateSatisfied(fixture.request, {
+      ...postState,
+      current: { ...postState.current, containsBaseSha: false },
+    }),
+    false
+  );
+});
+
+test('update-branch rejects an unrelated replacement head after one PUT and bounded reads', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
+  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+  const postState = {
+    ...preState,
+    current: {
+      ...fixture.before,
+      ...fixture.after,
+      containsRequestedHeadSha: false,
+    },
+  };
+  let reads = 0;
+  let writes = 0;
+  let waits = 0;
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(fixture.request, preState, {
+        runner(command, args, options) {
+          writes += 1;
+          assert.equal(command, 'gh');
+          assert.ok(args.includes(fixture.endpoint));
+          assert.equal(args[args.indexOf('--method') + 1], 'PUT');
+          assert.deepEqual(JSON.parse(options.input), { expected_head_sha: HEAD });
+          return fixture.response;
+        },
+        collectState() {
+          reads += 1;
+          return reads === 1 ? preState : postState;
+        },
+        asyncVerificationAttempts: 3,
+        wait() {
+          waits += 1;
+        },
+      }),
+    /bounded post-write verification polling.*do not retry blindly/
+  );
+  assert.equal(writes, 1);
+  assert.equal(reads, 4);
+  assert.equal(waits, 2);
+});
+
+test('update-branch unknown outcome remains ambiguous even with both ancestries verified', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
+  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+  let reads = 0;
+  let writes = 0;
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(fixture.request, preState, {
+        runner() {
+          writes += 1;
+          throw new Error('connection reset after request body was sent');
+        },
+        collectState() {
+          reads += 1;
+          return writes === 0
+            ? preState
+            : {
+                ...preState,
+                current: {
+                  ...fixture.before,
+                  ...fixture.after,
+                  containsRequestedHeadSha: true,
+                },
+              };
+        },
+        wait() {
+          assert.fail('an unknown outcome permits one reconciliation, not polling');
+        },
+      }),
+    /ambiguous after one live reconciliation.*do not retry blindly/
+  );
+  assert.equal(writes, 1);
+  assert.equal(reads, 2);
+});
+
+test('live update-branch collection compares both requested ancestors with the observed head', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
+  for (const [headSha, comparisonStatus, containsRequestedHeadSha] of [
+    [HEAD, null, true],
+    [NEXT_HEAD, 'ahead', true],
+    [NEXT_HEAD, 'diverged', false],
+    [NEXT_HEAD, 'behind', false],
+    [NEXT_HEAD, undefined, false],
+  ]) {
+    const comparisons = [];
+    const live = collectLiveCollaborationState(fixture.request, {
+      runner(command, args) {
+        assert.equal(command, 'gh');
+        if (args.includes('graphql')) {
+          return JSON.stringify({
+            data: {
+              viewer: { login: 'maintainer' },
+              repository: { viewerPermission: 'WRITE' },
+            },
+          });
+        }
+        if (args.includes('repos/Proto-UI/Proto-UI/pulls/509')) {
+          return JSON.stringify({
+            number: 509,
+            node_id: 'PR_node',
+            state: 'open',
+            user: { login: 'contributor' },
+            updated_at: UPDATED_AT,
+            head: { sha: headSha },
+            base: { sha: BASE },
+            maintainer_can_modify: true,
+          });
+        }
+        const endpoint = args[1];
+        comparisons.push(endpoint);
+        if (endpoint === `repos/Proto-UI/Proto-UI/compare/${BASE}...${headSha}`)
+          return JSON.stringify({ status: 'ahead' });
+        if (endpoint === `repos/Proto-UI/Proto-UI/compare/${HEAD}...${headSha}`)
+          return JSON.stringify({ status: comparisonStatus });
+        throw new Error(`unexpected fake GitHub call: ${args.join(' ')}`);
+      },
+    });
+    assert.equal(live.current.containsBaseSha, true);
+    assert.equal(live.current.containsRequestedHeadSha, containsRequestedHeadSha);
+    assert.deepEqual(comparisons, [
+      `repos/Proto-UI/Proto-UI/compare/${BASE}...${headSha}`,
+      ...(headSha === HEAD ? [] : [`repos/Proto-UI/Proto-UI/compare/${HEAD}...${headSha}`]),
+    ]);
+  }
+});
+
+for (const delayedAncestry of ['containsBaseSha', 'containsRequestedHeadSha']) {
+  test(`update-branch polls until the new head and delayed ${delayedAncestry} are visible`, () => {
+    const base = metadataRequest();
+    const request = seal({
+      ...base,
+      action: 'update-pull-request-branch-at-expected-head',
+      target: {
+        kind: 'pull-request',
+        number: 509,
+        updatedAt: UPDATED_AT,
+        headSha: HEAD,
+        baseSha: BASE,
+      },
+      expected: { containsBaseSha: false },
+      desired: { containsBaseSha: true },
+      rationale: 'Bring the exact branch head up to the exact current base.',
+    });
+    const current = {
       kind: 'pull-request',
       number: 509,
+      nodeId: 'PR_node',
+      url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
+      state: 'OPEN',
+      authorLogin: 'contributor',
       updatedAt: UPDATED_AT,
       headSha: HEAD,
       baseSha: BASE,
-    },
-    expected: { containsBaseSha: false },
-    desired: { containsBaseSha: true },
-    rationale: 'Bring the exact branch head up to the exact current base.',
-  });
-  const current = {
-    kind: 'pull-request',
-    number: 509,
-    nodeId: 'PR_node',
-    url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
-    state: 'OPEN',
-    authorLogin: 'contributor',
-    updatedAt: UPDATED_AT,
-    headSha: HEAD,
-    baseSha: BASE,
-    containsBaseSha: false,
-    maintainerCanModify: true,
-  };
-  const preState = { ...metadataLive(), action: request.action, current };
-  const states = [
-    preState, // Final authorization read precedes bounded post-write polling.
-    preState,
-    {
-      ...preState,
-      current: {
-        ...current,
-        headSha: NEXT_HEAD,
-        containsBaseSha: false,
+      containsBaseSha: false,
+      containsRequestedHeadSha: true,
+      maintainerCanModify: true,
+    };
+    const preState = { ...metadataLive(), action: request.action, current };
+    const states = [
+      preState, // Final authorization read precedes bounded post-write polling.
+      preState,
+      {
+        ...preState,
+        current: {
+          ...current,
+          headSha: NEXT_HEAD,
+          containsBaseSha: true,
+          [delayedAncestry]: false,
+        },
       },
-    },
-    {
-      ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
-      current: {
-        ...current,
-        updatedAt: '2026-08-27T01:00:10.000Z',
-        headSha: NEXT_HEAD,
-        containsBaseSha: true,
+      {
+        ...preState,
+        observedAt: '2026-08-27T01:00:11.000Z',
+        current: {
+          ...current,
+          updatedAt: '2026-08-27T01:00:10.000Z',
+          headSha: NEXT_HEAD,
+          containsBaseSha: true,
+        },
       },
-    },
-  ];
-  let reads = 0;
-  const waits = [];
-  const result = applyGitHubCollaborationMutation(request, preState, {
-    runner() {
-      return JSON.stringify({ message: 'Updating pull request branch.' });
-    },
-    collectState() {
-      return states[reads++];
-    },
-    asyncVerificationAttempts: 3,
-    asyncVerificationDelayMs: 25,
-    wait(delayMs) {
-      waits.push(delayMs);
-    },
-  });
+    ];
+    let reads = 0;
+    const waits = [];
+    const result = applyGitHubCollaborationMutation(request, preState, {
+      runner() {
+        return JSON.stringify({ message: 'Updating pull request branch.' });
+      },
+      collectState() {
+        return states[reads++];
+      },
+      asyncVerificationAttempts: 3,
+      asyncVerificationDelayMs: 25,
+      wait(delayMs) {
+        waits.push(delayMs);
+      },
+    });
 
-  assert.equal(reads, 4);
-  assert.deepEqual(waits, [25, 25]);
-  assert.equal(result.mutationCount, 1);
-  assert.equal(result.reconciliationCount, 0);
-  assert.equal(result.postState.current.headSha, NEXT_HEAD);
-});
+    assert.equal(reads, 4);
+    assert.deepEqual(waits, [25, 25]);
+    assert.equal(result.mutationCount, 1);
+    assert.equal(result.reconciliationCount, 0);
+    assert.equal(result.postState.current.headSha, NEXT_HEAD);
+    assert.equal(result.postState.current.containsBaseSha, true);
+    assert.equal(result.postState.current.containsRequestedHeadSha, true);
+  });
+}
 
 test('update-branch stops bounded polling when base or pull-request state changes', () => {
   const base = metadataRequest();
@@ -1688,7 +1849,17 @@ for (const scenario of [
       let reads = 0;
       let writes = 0;
       const output = runCollaborationCli(
-        ['apply', '--request', requestPath, '--handoff', handoffPath],
+        [
+          'apply',
+          '--mode',
+          'human-assisted',
+          '--mode-source',
+          'current-user',
+          '--request',
+          requestPath,
+          '--handoff',
+          handoffPath,
+        ],
         {
           collectState() {
             return scenario.states[Math.min(reads++, scenario.states.length - 1)];
@@ -1797,7 +1968,7 @@ function nonMetadataMutationCases() {
         containsBaseSha: false,
         maintainerCanModify: true,
       },
-      after: { headSha: NEXT_HEAD, containsBaseSha: true },
+      after: { headSha: NEXT_HEAD, containsBaseSha: true, containsRequestedHeadSha: true },
       response: JSON.stringify({ message: 'Updating pull request branch.' }),
       endpoint: 'repos/Proto-UI/Proto-UI/pulls/509/update-branch',
       method: 'PUT',

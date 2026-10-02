@@ -4,6 +4,8 @@ import {
   isExternalPreviewAuthorizationFailure,
   reviewerPermissionSubjects,
   validateReviewInputSnapshot,
+  validateReviewPacket,
+  validatePublishedReviewPacket,
 } from './review-runtime.mjs';
 
 const TERMINAL_CHECK_STATES = new Set(['SUCCESS', 'FAILURE', 'ERROR']);
@@ -720,6 +722,7 @@ export function authorizeLivePullRequestMerge(context, live) {
   const { policy } = context;
   return authorizePullRequestMerge({
     packet: context.packet,
+    publishedPacket: context.publishedPacket,
     input: context.input,
     liveInput: live.input,
     executionMode: context.executionMode,
@@ -812,6 +815,8 @@ export function submitGitHubMerge(
   )
     throw new Error('merge authorization context target binding is invalid; no PUT attempted');
   validateReviewInputSnapshot(input);
+  validateReviewPacket(packet, input);
+  validatePublishedReviewPacket(packet, authorizationContext.publishedPacket);
   // The writer owns this final collection. A caller-supplied allowed boolean
   // or callback cannot stand in for current checks, approvals or permissions.
   const finalLive = collectLiveReviewInput(repositoryId, pullRequest, {

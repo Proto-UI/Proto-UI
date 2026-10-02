@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { computeReviewInputDigest, agentEvidenceMarker } from '../review-runtime.mjs';
+import {
+  computeReviewInputDigest,
+  agentEvidenceMarker,
+  renderReviewBody,
+} from '../review-runtime.mjs';
 import { readFileSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
@@ -643,16 +647,7 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
       },
     });
   }
-  pull.reviews.nodes = [
-    {
-      id: 'PRR_independent',
-      author: { login: 'independent-reviewer' },
-      state: 'APPROVED',
-      commit: { oid: sha('b') },
-      submittedAt: '2026-08-23T06:00:00Z',
-      body: `Approved\n\n<!-- ${agentEvidenceMarker({ schemaVersion: 2, agentEvidence: evidence })} -->`,
-    },
-  ];
+  pull.reviews.nodes = [];
   const contexts = pull.commits.nodes[0].commit.statusCheckRollup.contexts;
   contexts.nodes = [
     ...policy.trustedCiEvidence.checkNames.map((name) => ({
@@ -693,7 +688,7 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
   };
   const live = collectLiveReviewInput(repositoryId, 487, { runner });
   const input = live.input;
-  const packet = {
+  const publishedPacket = {
     schemaVersion: 2,
     kind: 'proto-ui.review-packet',
     repositoryId,
@@ -724,9 +719,23 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
     humanGates: [],
     recommendedAction: 'APPROVE',
   };
+  pull.reviews.nodes.push({
+    id: 'PRR_independent',
+    author: { login: 'independent-reviewer' },
+    state: 'APPROVED',
+    commit: { oid: sha('b') },
+    submittedAt: '2026-08-23T06:00:00Z',
+    body: renderReviewBody(publishedPacket),
+  });
+  const publishedInput = collectLiveReviewInput(repositoryId, 487, { runner }).input;
+  const packet = {
+    ...publishedPacket,
+    reviewInputDigest: computeReviewInputDigest(publishedInput),
+  };
   const authorizationContext = {
     packet,
-    input,
+    publishedPacket,
+    input: publishedInput,
     executionMode: 'human-assisted',
     executionModeSource: 'current-user',
     authorizationId: 'explicit-current-user',
@@ -1479,6 +1488,55 @@ test('successful merge refuses conflicting or malformed readback instead of attr
     assert.equal(fixture.writes, 1);
     assert.equal(fixture.postReads, 1);
   }
+});
+
+test('merge requires the original published packet before any external read', () => {
+  const original = originalMergeAuthorization.authorizationContext.publishedPacket;
+  for (const publishedPacket of [
+    undefined,
+    null,
+    { ...original, baseSha: sha('d') },
+    { ...original, headSha: sha('d') },
+    { ...original, repositoryId: 'github.com:other/repository' },
+    { ...original, scope: ['unreviewed broader scope'] },
+    { ...original, reviewInputDigest: [original.reviewInputDigest] },
+  ]) {
+    const fixture = mergeFixture();
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          repositoryId,
+          487,
+          {
+            ...mergeOptions,
+            authorizationContext: { ...mergeOptions.authorizationContext, publishedPacket },
+          },
+          fixture.runner,
+          fastVerification
+        ),
+      /published|merge packet/
+    );
+    assert.equal(fixture.calls.length, 0);
+  }
+});
+
+test('final writer rejects a caller-resealed original even when the refreshed packet matches it', () => {
+  const fixture = mergeFixture();
+  const context = structuredClone(fixture.authorizationContext);
+  context.packet.scope = ['caller-expanded acceptance'];
+  context.publishedPacket.scope = ['caller-expanded acceptance'];
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        repositoryId,
+        487,
+        { ...mergeOptions, authorizationContext: context },
+        fixture.runner,
+        fastVerification
+      ),
+    /merge eligibility.*published review packet/
+  );
+  assert.equal(fixture.writes, 0);
 });
 
 test('merge rejects missing base binding and excessive polling options without any runner call', () => {

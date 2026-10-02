@@ -24,6 +24,7 @@ import {
   collectLiveThreadRevisionTarget,
 } from './collect-live-collaboration-state.mjs';
 import {
+  establishExecutionMode,
   evaluateSkillEligibility,
   loadSkillRegistry,
   skillRegistryRoot,
@@ -40,18 +41,19 @@ function usage() {
     'Usage:',
     '  pnpm agent:collaborate -- thread-revision --repository <github.com:owner/repo> --pull-request <number> --thread <thread-id>',
     '  pnpm agent:collaborate -- request-digest --request <request.json>',
-    '  pnpm agent:collaborate -- validate --request <request.json> --handoff <handoff.json> [--assessment <result.json>]',
-    '  pnpm agent:collaborate -- apply --request <request.json> --handoff <handoff.json> [--assessment <result.json>]',
+    '  pnpm agent:collaborate -- validate --mode human-assisted|autonomous --mode-source <trusted-source> --request <request.json> --handoff <handoff.json> [--assessment <result.json>]',
+    '  pnpm agent:collaborate -- apply --mode human-assisted|autonomous --mode-source <trusted-source> --request <request.json> --handoff <handoff.json> [--assessment <result.json>]',
     '',
-    'apply performs a fresh live GitHub preflight, authorizes one purpose-bound action, emits an idempotent no-op when already satisfied, or attempts exactly one mutation. A thrown/unknown write is reconciled once and is never retried blindly.',
+    'validate and apply require mode and source declared independently by the launcher/operator, matching the handoff. These arguments are declarations, not runtime attestation.',
+    'apply performs a fresh live GitHub preflight, checks admission for one declared purpose-bound action, emits an idempotent no-op when already satisfied, or attempts exactly one mutation. A thrown/unknown write is reconciled once and is never retried blindly.',
   ].join('\n');
 }
 
 const OPTIONS = new Map([
   ['thread-revision', new Set(['--repository', '--pull-request', '--thread'])],
   ['request-digest', new Set(['--request'])],
-  ['validate', new Set(['--request', '--handoff', '--assessment'])],
-  ['apply', new Set(['--request', '--handoff', '--assessment'])],
+  ['validate', new Set(['--mode', '--mode-source', '--request', '--handoff', '--assessment'])],
+  ['apply', new Set(['--mode', '--mode-source', '--request', '--handoff', '--assessment'])],
 ]);
 
 export function parseCollaborationCli(argv) {
@@ -101,8 +103,24 @@ function loadAssessment(path, policy, request) {
   return { ...result, validated: true, fresh: isSelfAssessmentFresh(result, snapshot) };
 }
 
-function loadCollaborationHandoff(path) {
+function loadInvocationContext(args) {
+  const executionMode = args.get('--mode');
+  const executionModeSource = args.get('--mode-source');
+  if (!executionMode) throw new Error('--mode is required for validate and apply');
+  if (!executionModeSource) throw new Error('--mode-source is required for validate and apply');
+  establishExecutionMode(executionMode, executionModeSource);
+  // Preserve the independent operator declaration before reading task-authored
+  // artifacts. This binding cannot authenticate a caller that controls both.
+  return Object.freeze({ executionMode, executionModeSource });
+}
+
+function loadCollaborationHandoff(path, invocationContext) {
   const handoff = readJson(path, '--handoff');
+  for (const field of ['executionMode', 'executionModeSource']) {
+    if (handoff?.[field] !== invocationContext[field]) {
+      throw new Error(`handoff ${field} does not match the independent invocation declaration`);
+    }
+  }
   const routed = validateSkillHandoff(handoff, loadSkillRegistry());
   if (routed.nextSkill?.id !== 'pui-collaborate') {
     throw new Error('handoff must select pui-collaborate');
@@ -113,22 +131,21 @@ function loadCollaborationHandoff(path) {
   return routed;
 }
 
-function validateExecution(request, args, policy) {
-  const routed = loadCollaborationHandoff(args.get('--handoff'));
+function validateExecution(request, args, policy, invocationContext, routed) {
   const selfAssessment = loadAssessment(args.get('--assessment'), policy, request);
   validateCollaborationHandoffBinding(request, routed.handoff, { selfAssessment });
   const eligibility = evaluateSkillEligibility(routed.nextSkill, {
-    executionMode: routed.handoff.executionMode,
+    executionMode: invocationContext.executionMode,
     selfAssessment,
   });
   if (!eligibility.eligible) throw new Error(eligibility.reason);
   if (
-    routed.handoff.executionMode === 'autonomous' &&
+    invocationContext.executionMode === 'autonomous' &&
     request.authorizationId === 'explicit-current-user'
   ) {
     throw new Error('autonomous collaboration cannot claim current-user authorization');
   }
-  return { handoff: routed.handoff, selfAssessment, eligibility };
+  return { selfAssessment, eligibility };
 }
 
 function rejectedReceipt(request, preState, postState, reason) {
@@ -172,15 +189,19 @@ export function runCollaborationCli(argv, dependencies = {}) {
     return { valid: true, requestDigest: request.requestDigest };
   }
 
+  const invocationContext = loadInvocationContext(args);
+  // Reject missing, invalid, or conflicting declarations before assessment
+  // collection, live GitHub reads, or any other external dependency is called.
+  const routed = loadCollaborationHandoff(args.get('--handoff'), invocationContext);
   const request = readRequest(args.get('--request'));
   const policy = (dependencies.loadPolicy ?? loadCapabilityPolicy)(POLICY_PATH);
-  const execution = validateExecution(request, args, policy);
+  const execution = validateExecution(request, args, policy, invocationContext, routed);
   if (command === 'validate') {
     return {
       valid: true,
       requestDigest: request.requestDigest,
       action: request.action,
-      executionMode: execution.handoff.executionMode,
+      ...invocationContext,
       eligibility: execution.eligibility,
     };
   }
@@ -190,8 +211,7 @@ export function runCollaborationCli(argv, dependencies = {}) {
   const decision = authorizeCollaborationMutation({
     request,
     liveState: preState,
-    executionMode: execution.handoff.executionMode,
-    executionModeSource: execution.handoff.executionModeSource,
+    ...invocationContext,
     policy,
     selfAssessment: execution.selfAssessment,
   });
@@ -223,8 +243,7 @@ export function runCollaborationCli(argv, dependencies = {}) {
       collectState,
       runner: dependencies.runner,
       authorizationContext: {
-        executionMode: execution.handoff.executionMode,
-        executionModeSource: execution.handoff.executionModeSource,
+        ...invocationContext,
         policy,
         selfAssessment: execution.selfAssessment,
       },
@@ -249,8 +268,8 @@ export function runCollaborationCli(argv, dependencies = {}) {
         : 'live-state-matches-desired',
     note:
       applied.mutationCount === 0
-        ? 'The exact desired state was already satisfied at the final authorized read; no mutation was attempted.'
-        : 'The exact desired state was verified after the single authorized mutation.',
+        ? 'The exact desired state was already satisfied at the final admission read; no mutation was attempted.'
+        : 'The exact desired state was verified after the single admitted mutation.',
   });
 }
 

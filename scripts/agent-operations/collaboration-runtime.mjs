@@ -368,6 +368,12 @@ export function validateCollaborationHandoffBinding(
     authorizationArtifact.reference === request.authorizationId,
     'mutation-authorization artifact does not bind authorizationId'
   );
+  if (handoff.executionMode === 'human-assisted') {
+    assert(
+      request.evidence.some((artifact) => artifact.type === 'current-user-instruction'),
+      'human-assisted collaboration requires current-user-instruction purpose evidence for the current user instruction'
+    );
+  }
   if (request.action === 'mark-exact-head-ready-for-review') {
     const validationReport = request.evidence?.find((entry) => entry.type === 'validation-report');
     assert(
@@ -498,7 +504,7 @@ function mutate(request) {
   return {
     allowed: true,
     outcome: 'mutate',
-    reason: 'exact live preflight and purpose-bound authorization are satisfied',
+    reason: 'exact live preflight and declared purpose-bound admission checks are satisfied',
     requestDigest: request.requestDigest,
     mutationCount: 1,
   };
@@ -518,12 +524,8 @@ function validateAuthority({
     if (request.authorizationId !== 'explicit-current-user') {
       return 'human-assisted collaboration requires explicit-current-user authorization';
     }
-    if (
-      !request.evidence.some((artifact) =>
-        ['current-user-instruction', 'governed-outcome'].includes(artifact.type)
-      )
-    ) {
-      return 'human-assisted collaboration requires purpose evidence for the current user instruction';
+    if (!request.evidence.some((artifact) => artifact.type === 'current-user-instruction')) {
+      return 'human-assisted collaboration requires current-user-instruction purpose evidence for the current user instruction';
     }
     return null;
   }
@@ -587,7 +589,11 @@ export function desiredCollaborationStateSatisfied(request, liveState) {
     return targetHeadMatches(request, current) && equalMetadata(current, request.desired);
   }
   if (action === 'update-pull-request-branch-at-expected-head') {
-    return current.baseSha === request.target.baseSha && current.containsBaseSha === true;
+    return (
+      current.baseSha === request.target.baseSha &&
+      current.containsBaseSha === true &&
+      current.containsRequestedHeadSha === true
+    );
   }
   if (action === 'mark-exact-head-ready-for-review') {
     return current.headSha === request.target.headSha && current.isDraft === false;

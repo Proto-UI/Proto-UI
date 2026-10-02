@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import process from 'node:process';
+import { readPublishedReviewPacket } from './published-review-packet.mjs';
 import {
   collectRepositorySnapshot,
   isSelfAssessmentFresh,
@@ -45,11 +46,11 @@ function usage() {
     '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
     '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
-    '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
+    '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --published-review-packet <original-approved-packet.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
     '',
     'input-digest, validate, and inspect preserve canonical v3 input for read-only legacy schema v1 COMMENT ingestion. v3 inputs cannot enter submit-review or merge-pull-request; those commands require a freshly collected v5 snapshot. v4 must also be re-collected.',
     '',
-    'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge additionally fails closed unless the live input already contains a valid exact-head independent APPROVED review carrying the complete packet evidence receipt marker (proto-ui:agent-evidence:sha256=...), so publish the evidence first, then re-collect and rebuild the merge packet. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
+    'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge requires the original --published-review-packet artifact (at most 64 MiB), authenticated by both its complete packet and evidence tokens in the same valid exact-head independent APPROVED review. Re-collection may add only that publication and its newly required reviewer permission; base, scope and other input changes require a new review. The refreshed merge packet may change only reviewInputDigest and observedAt. The supplied file alone provides no authority. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
     '',
     '  pnpm agent:review:smoke -- <repositoryId> <pullRequest>   # exercise the live collector against the real GitHub GraphQL schema',
   ].join('\n');
@@ -96,6 +97,7 @@ const ALLOWED_OPTIONS = new Map([
   [
     'merge-pull-request',
     new Set([
+      '--published-review-packet',
       '--packet',
       '--input',
       '--handoff',
@@ -407,12 +409,17 @@ try {
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
     const execution = validateIntegrationExecution(args, packet, input, policy);
+    const publishedPacket = readPublishedReviewPacket(
+      args.get('--published-review-packet'),
+      packet
+    );
     const externalEvidence = readExternalEvidence(args);
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
       externalEvidence,
     });
     const authorizationContext = {
       packet,
+      publishedPacket,
       input,
       executionMode: execution.handoff.executionMode,
       executionModeSource: execution.handoff.executionModeSource,

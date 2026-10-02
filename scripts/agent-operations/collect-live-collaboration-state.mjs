@@ -264,11 +264,11 @@ function desiredLabelsExist(repositoryId, desiredLabels, currentLabels, runner) 
   return true;
 }
 
-function compareContainsBase(repositoryId, baseSha, headSha, runner) {
+function compareContainsCommit(repositoryId, ancestorSha, headSha, runner) {
   const { owner, name } = parseRepositoryId(repositoryId);
   const comparison = rest(
     runner,
-    `repos/${owner}/${name}/compare/${encodeURIComponent(baseSha)}...${encodeURIComponent(headSha)}`
+    `repos/${owner}/${name}/compare/${encodeURIComponent(ancestorSha)}...${encodeURIComponent(headSha)}`
   );
   return ['ahead', 'identical'].includes(comparison?.status);
 }
@@ -437,12 +437,17 @@ export function collectLiveCollaborationState(request, options = {}) {
     current = {
       ...commonCurrent(pull, 'pull-request', pull.head?.sha),
       baseSha: pull.base?.sha,
-      containsBaseSha: compareContainsBase(
+      containsBaseSha: compareContainsCommit(
         request.repositoryId,
         pull.base?.sha,
         pull.head?.sha,
         runner
       ),
+      // Both ancestors bind the observed branch to the requested update, but
+      // ancestry does not identify which invocation produced the new head.
+      containsRequestedHeadSha:
+        pull.head?.sha === request.target.headSha ||
+        compareContainsCommit(request.repositoryId, request.target.headSha, pull.head?.sha, runner),
       maintainerCanModify: pull.maintainer_can_modify === true,
     };
   } else if (action === 'mark-exact-head-ready-for-review') {
