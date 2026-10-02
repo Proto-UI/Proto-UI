@@ -561,9 +561,8 @@ export function submitGitHubReview(
     '--input',
     '-',
   ];
-  let response;
   try {
-    response = JSON.parse(
+    const response = JSON.parse(
       runner('gh', postArgs, {
         encoding: 'utf8',
         input: JSON.stringify({ commit_id: commitId, event, body }),
@@ -574,6 +573,29 @@ export function submitGitHubReview(
         stdio: ['pipe', 'pipe', 'pipe'],
       })
     );
+    // Validation is still post-write: an unusable successful response is an
+    // unknown outcome, just like a lost response, and must never invite a retry.
+    if (!response || typeof response !== 'object' || Array.isArray(response)) {
+      throw new Error('submitted review receipt is incomplete or has an unexpected shape');
+    }
+    if (response.commit_id !== commitId) {
+      throw new Error('submitted review commit does not match the inspected head');
+    }
+    const validId =
+      (Number.isInteger(response.id) && response.id > 0) ||
+      (typeof response.id === 'string' && /^[1-9]\d*$/.test(response.id));
+    if (!validId || response.state !== expectedState) {
+      throw new Error('submitted review receipt is incomplete or has an unexpected state');
+    }
+    if (
+      response.body !== body ||
+      typeof response.user?.login !== 'string' ||
+      response.user.login.toLowerCase() !== reviewerLogin.toLowerCase()
+    )
+      throw new Error(
+        'submitted review provenance does not match the acting reviewer and exact body'
+      );
+    return reviewReceipt(response, invocationId, false);
   } catch (submissionError) {
     const reconciliationArgs = [
       'api',
@@ -612,20 +634,6 @@ export function submitGitHubReview(
       error: submissionError instanceof Error ? submissionError.message : String(submissionError),
     };
   }
-  if (response.commit_id !== commitId) {
-    throw new Error('submitted review commit does not match the inspected head');
-  }
-  const validId =
-    (Number.isInteger(response.id) && response.id > 0) ||
-    (typeof response.id === 'string' && /^[1-9]\d*$/.test(response.id));
-  if (!validId || response.state !== expectedState) {
-    throw new Error('submitted review receipt is incomplete or has an unexpected state');
-  }
-  if (response.body !== body || response.user?.login?.toLowerCase() !== reviewerLogin.toLowerCase())
-    throw new Error(
-      'submitted review provenance does not match the acting reviewer and exact body'
-    );
-  return reviewReceipt(response, invocationId, false);
 }
 
 function reviewReceipt(response, invocationId, reconciled) {

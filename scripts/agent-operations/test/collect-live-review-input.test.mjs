@@ -595,29 +595,6 @@ test('review submission binds the GitHub Review API write to the inspected commi
   });
   assert.equal(result.commitId, sha('b'));
   assert.equal(result.state, 'APPROVED');
-
-  assert.throws(
-    () =>
-      submitGitHubReview(
-        'github.com:Proto-UI/Proto-UI',
-        487,
-        { commitId: sha('b'), event: 'APPROVE', body: '' },
-        () => JSON.stringify({ id: 1234, state: 'APPROVED', commit_id: sha('c') }),
-        { reviewerLogin: 'reviewer' }
-      ),
-    /does not match the inspected head/
-  );
-  assert.throws(
-    () =>
-      submitGitHubReview(
-        'github.com:Proto-UI/Proto-UI',
-        487,
-        { commitId: sha('b'), event: 'APPROVE', body: '' },
-        () => JSON.stringify({ id: 1234, state: 'COMMENTED', commit_id: sha('b') }),
-        { reviewerLogin: 'reviewer' }
-      ),
-    /unexpected state/
-  );
 });
 
 function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
@@ -2118,58 +2095,150 @@ test('Vercel authorization failure is not trusted CI, but real CI failures still
   );
 });
 
-for (const [name, change] of [
+for (const [name, change, error] of [
+  [
+    'wrong head',
+    (r) => {
+      r.commit_id = sha('c');
+    },
+    /inspected head/,
+  ],
+  [
+    'missing head',
+    (r) => {
+      delete r.commit_id;
+    },
+    /inspected head/,
+  ],
+  [
+    'missing id',
+    (r) => {
+      delete r.id;
+    },
+    /incomplete/,
+  ],
+  [
+    'non-positive id',
+    (r) => {
+      r.id = 0;
+    },
+    /incomplete/,
+  ],
+  [
+    'wrong state',
+    (r) => {
+      r.state = 'COMMENTED';
+    },
+    /unexpected state/,
+  ],
   [
     'wrong actor',
     (r) => {
       r.user.login = 'other-reviewer';
     },
+    /provenance/,
   ],
   [
     'missing actor',
     (r) => {
       delete r.user;
     },
+    /provenance/,
+  ],
+  [
+    'non-string actor',
+    (r) => {
+      r.user.login = 12;
+    },
+    /provenance/,
   ],
   [
     'wrong body',
     (r) => {
       r.body = 'another review';
     },
+    /provenance/,
   ],
   [
     'missing body',
     (r) => {
       delete r.body;
     },
+    /provenance/,
   ],
 ]) {
-  test(`successful review POST rejects ${name} provenance`, () => {
-    const response = {
+  test(`successful review POST with ${name} reconciles once and stays unknown`, () => {
+    const good = {
       id: 1234,
       state: 'APPROVED',
       commit_id: sha('b'),
       body: 'review body',
       user: { login: 'reviewer' },
     };
+    const response = structuredClone(good);
     change(response);
-    let writes = 0;
-    assert.throws(
-      () =>
-        submitGitHubReview(
-          repositoryId,
-          487,
-          { commitId: sha('b'), event: 'APPROVE', body: 'review body' },
-          () => {
-            writes += 1;
-            return JSON.stringify(response);
-          },
-          { reviewerLogin: 'reviewer' }
-        ),
-      /provenance/
+    const calls = [];
+    const result = submitGitHubReview(
+      repositoryId,
+      487,
+      { commitId: sha('b'), event: 'APPROVE', body: 'review body' },
+      (command, args, options) => {
+        calls.push({ command, args, options });
+        // Even this exact matching readback cannot uniquely attribute the write.
+        return JSON.stringify(args[2] === 'POST' ? response : [[good]]);
+      },
+      { reviewerLogin: 'reviewer', invocationId: 'invalid-ack' }
     );
-    assert.equal(writes, 1);
+    assert.deepEqual(
+      calls.map((call) => call.args[2]),
+      ['POST', 'GET']
+    );
+    assert.ok(calls[1].args.includes('--paginate'));
+    assert.ok(calls[1].args.includes('--slurp'));
+    assert.ok(calls.every((call) => call.options.maxBuffer === MAX_LIVE_RESPONSE_BYTES));
+    assert.equal(result.status, 'unknown');
+    assert.equal(result.reconciled, false);
+    assert.equal(result.invocationId, 'invalid-ack');
+    assert.equal(result.commitId, sha('b'));
+    assert.equal(result.event, 'APPROVE');
+    assert.match(result.error, error);
+    assert.equal(result.id, undefined);
   });
+}
+
+for (const postBody of ['null', '[]', '{}', '"unexpected"', '{']) {
+  for (const readback of ['matching', 'malformed', 'failed']) {
+    test(`malformed review acknowledgement ${postBody} with ${readback} readback stays unknown`, () => {
+      const calls = [];
+      const result = submitGitHubReview(
+        repositoryId,
+        487,
+        { commitId: sha('b'), event: 'COMMENT', body: 'review body' },
+        (_command, args) => {
+          calls.push(args[2]);
+          if (args[2] === 'POST') return postBody;
+          if (readback === 'failed') throw new Error('read unavailable');
+          if (readback === 'malformed') return '{}';
+          return JSON.stringify([
+            [
+              {
+                id: 1,
+                commit_id: sha('b'),
+                state: 'COMMENTED',
+                body: 'review body',
+                user: { login: 'reviewer' },
+              },
+            ],
+          ]);
+        },
+        { reviewerLogin: 'reviewer', invocationId: 'malformed-ack' }
+      );
+      assert.deepEqual(calls, ['POST', 'GET']);
+      assert.equal(result.status, 'unknown');
+      assert.equal(result.reconciled, false);
+      assert.equal(result.id, undefined);
+    });
+  }
 }
 
 test('review submission requires the verified acting identity before writing', () => {
