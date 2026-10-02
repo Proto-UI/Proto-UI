@@ -5,7 +5,7 @@ description: Apply one governed bounded Proto UI dependency update after pui-dep
 
 # Update one dependency slice
 
-1. Require a current `pui-orient` envelope, the exact `pui-deps` dependency report, and implementation authorization from the current bounded request, governed work item, or active standing scope.
+1. Require a current `pui-orient` `capability-envelope`, the exact `pui-deps` `dependency-report`, an applicable `pui-trace` `authority-map`, and `implementation-authorization` from the current bounded request, governed work item, or active standing scope. The dependency report does not replace the authority map.
 2. Re-read every affected manifest and lockfile, the resolved package identity and provenance, direct and reverse consumers, package-manager policy, release surface, current advisory facts, and rollback boundary.
 3. Confirm that current authority fixes the supported runtime range and compatibility result. A genuinely undecided public compatibility promise routes to `unresolved-product-direction`; security disclosure, publication, release, or a provenance exception routes to `privileged-or-irreversible-operation`.
 4. Use Node.js 22 and the repository-declared pnpm through Corepack. Apply the smallest coherent manifest edit and let the package manager generate its lockfile projection; preserve unrelated resolutions and user changes.
@@ -17,6 +17,6 @@ The transition changes tracked feature-branch content only. External publication
 
 ## Explicit handoff
 
-Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry the dependency report and implementation authorization by reference, include the registered candidate change, and set `nextSkillId` to one eligible registered leaf or `null` without loading it.
+Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry `capability-envelope`, `dependency-report`, `authority-map`, and `implementation-authorization` by reference, preserving their existing references and any digests, and include the registered `candidate-change`. Set `nextSkillId` to one eligible registered leaf or `null` without loading it. Carry all artifacts required by that next leaf and validate the handoff before it is loaded; both `pui-validate` and `pui-review` require the existing authority map, and review additionally requires `evidence-report` and `review-input`.
 
 Communicate with the user in the user's current language. Keep package names, versions, registries, and revision identities canonical.

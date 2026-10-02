@@ -273,7 +273,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: update-governed-dependency
     mutation: feature-branch
-    requires: [capability-envelope, dependency-report, implementation-authorization]
+    requires: [capability-envelope, dependency-report, authority-map, implementation-authorization]
     produces: [candidate-change]
   - id: pui-release-prep
     entrypoints: [development]

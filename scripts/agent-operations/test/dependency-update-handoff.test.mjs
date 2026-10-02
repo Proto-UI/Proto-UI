@@ -14,7 +14,7 @@ const deps = registry.byId.get('pui-deps');
 const update = registry.byId.get('pui-dependency-update');
 const artifact = (type) => ({ type, reference: `memory:${type}` });
 
-function registeredInputHandoff() {
+function registeredInputHandoff(skill = deps) {
   return {
     schemaVersion: 1,
     kind: 'proto-ui.skill-handoff',
@@ -22,8 +22,8 @@ function registeredInputHandoff() {
     executionMode: 'human-assisted',
     executionModeSource: 'current-user',
     fromId: 'pui-dev',
-    nextSkillId: deps.id,
-    artifacts: deps.requires.map(artifact),
+    nextSkillId: skill.id,
+    artifacts: skill.requires.map(artifact),
     humanGates: [],
     notes: [],
   };
@@ -44,7 +44,9 @@ test('registered dependency-assessment inputs support a terminal report without 
   assert.deepEqual(deps.produces, ['dependency-report']);
   assert.equal(validateSkillHandoff(registeredInputHandoff(), registry).nextSkill.id, deps.id);
   const report = dependencyReport();
-  report.notes = ['Missing capability-envelope and implementation-authorization for the update.'];
+  report.notes = [
+    'Missing capability-envelope, authority-map, and implementation-authorization for the update.',
+  ];
   assert.equal(validateSkillHandoff(report, registry).nextSkill, null);
   assert.deepEqual(report.humanGates, []);
   assert.throws(
@@ -53,7 +55,7 @@ test('registered dependency-assessment inputs support a terminal report without 
   );
 });
 
-test('dependency update carries existing capability and authorization references with its report', () => {
+test('dependency update carries existing capability, authority, and authorization references with its report', () => {
   const envelope = {
     type: 'capability-envelope',
     reference: 'memory:current-pui-orient-envelope',
@@ -64,10 +66,18 @@ test('dependency update carries existing capability and authorization references
     reference: 'memory:current-bounded-dependency-update-request',
     digest: `sha256:${'b'.repeat(64)}`,
   };
-  const handoff = { ...dependencyReport([envelope, authorization]), nextSkillId: update.id };
+  const authority = {
+    type: 'authority-map',
+    reference: 'memory:current-dependency-authority-map',
+    digest: `sha256:${'c'.repeat(64)}`,
+  };
+  const handoff = {
+    ...dependencyReport([envelope, authority, authorization]),
+    nextSkillId: update.id,
+  };
   const result = validateSkillHandoff(handoff, registry);
   assert.equal(result.nextSkill.id, update.id);
-  for (const existing of [envelope, authorization]) {
+  for (const existing of [envelope, authority, authorization]) {
     assert.deepEqual(
       result.handoff.artifacts.find((item) => item.type === existing.type),
       existing
@@ -84,9 +94,59 @@ test('dependency update carries existing capability and authorization references
   }
 });
 
+test('declared dependency-update inputs carry authority through validation and review', () => {
+  const incoming = registeredInputHandoff(update);
+  for (const item of incoming.artifacts) item.digest = `sha256:${'d'.repeat(64)}`;
+  assert.equal(validateSkillHandoff(incoming, registry).nextSkill.id, update.id);
+
+  const candidate = {
+    ...incoming,
+    fromId: update.id,
+    nextSkillId: 'pui-validate',
+    artifacts: [...incoming.artifacts, ...update.produces.map(artifact)],
+  };
+  const validation = validateSkillHandoff(candidate, registry);
+  assert.equal(validation.nextSkill.id, 'pui-validate');
+
+  const review = {
+    ...candidate,
+    fromId: validation.nextSkill.id,
+    nextSkillId: 'pui-review',
+    artifacts: [
+      ...candidate.artifacts,
+      ...validation.nextSkill.produces.map(artifact),
+      artifact('review-input'),
+    ],
+  };
+  assert.equal(validateSkillHandoff(review, registry).nextSkill.id, 'pui-review');
+  assert.equal(
+    validateSkillHandoff({ ...review, fromId: update.id }, registry).nextSkill.id,
+    'pui-review'
+  );
+  for (const handoff of [candidate, review]) {
+    assert.deepEqual(
+      handoff.artifacts.find((item) => item.type === 'authority-map'),
+      incoming.artifacts.find((item) => item.type === 'authority-map')
+    );
+    assert.throws(
+      () =>
+        validateSkillHandoff(
+          {
+            ...handoff,
+            artifacts: handoff.artifacts.filter((item) => item.type !== 'authority-map'),
+          },
+          registry
+        ),
+      new RegExp(`lacks artifact required by ${handoff.nextSkillId}: authority-map`)
+    );
+  }
+});
+
 test('complete dependency-update artifacts do not bypass autonomous decisions or capability ceilings', () => {
   const handoff = {
-    ...dependencyReport(['capability-envelope', 'implementation-authorization'].map(artifact)),
+    ...dependencyReport(
+      ['capability-envelope', 'authority-map', 'implementation-authorization'].map(artifact)
+    ),
     executionMode: 'autonomous',
     executionModeSource: 'governed-queue',
     nextSkillId: update.id,
