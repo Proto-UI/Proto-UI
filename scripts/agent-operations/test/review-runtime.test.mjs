@@ -385,6 +385,33 @@ test('prior review selection rejects older caller choices and ambiguous live ord
       /prior review order is unavailable|prior review order is ambiguous/
     );
   }
+  const tiedOlder = { ...older, id: 'PRR_other_older' };
+  assert.equal(
+    authorizeReviewSubmission(reconciled(boundary([review, older, tiedOlder]))).allowed,
+    true
+  );
+  assert.equal(
+    authorizeReviewSubmission(
+      reconciled(
+        boundary([
+          { ...review, submittedAt: '2026-08-22T00:00:00.0002Z' },
+          { ...older, submittedAt: '2026-08-22T02:00:00.0001+02:00' },
+        ])
+      )
+    ).allowed,
+    true
+  );
+  assert.equal(
+    authorizeReviewSubmission(
+      reconciled(
+        boundary([
+          { ...review, submittedAt: '2026-08-22T00:00:00.0002Z' },
+          { ...older, submittedAt: '2026-08-22T02:00:00.00020+02:00' },
+        ])
+      )
+    ).allowed,
+    false
+  );
   const multipleMarkers = {
     ...review,
     body: `${review.body}\n<!-- proto-ui:review-packet:sha256=${computeReviewPacketDigest(olderPacket)} -->`,

@@ -753,6 +753,35 @@ function matchesPublishedReviewInput(publishedPacket, input, review) {
   }
 }
 
+function uniqueLatestReview(reviews) {
+  let latest = null;
+  let tied = false;
+  for (const review of reviews) {
+    const timestamp = review.submittedAt;
+    if (typeof timestamp !== 'string' || !RFC3339.test(timestamp)) return null;
+    const milliseconds = Date.parse(timestamp);
+    if (!Number.isFinite(milliseconds)) return null;
+    // Normalize timezone offsets without truncating admitted fractional digits.
+    // An opaque review ID and input array position supply no chronological order.
+    const second = Math.floor(milliseconds / 1000);
+    const fraction = timestamp.match(/\.(\d+)/)?.[1] ?? '';
+    const precision = Math.max(fraction.length, latest?.fraction.length ?? 0);
+    const paddedFraction = fraction.padEnd(precision, '0');
+    const latestFraction = latest?.fraction.padEnd(precision, '0');
+    if (
+      latest === null ||
+      second > latest.second ||
+      (second === latest.second && paddedFraction > latestFraction)
+    ) {
+      latest = { review, second, fraction };
+      tied = false;
+    } else if (second === latest.second && paddedFraction === latestFraction) {
+      tied = true;
+    }
+  }
+  return tied ? null : (latest?.review ?? null);
+}
+
 function requiredPriorReview(input, reviewer) {
   const candidates = input.reviews
     .filter(
@@ -774,17 +803,11 @@ function requiredPriorReview(input, reviewer) {
     // their existing clearing behavior, without certifying old publications.
     .filter((review) => review.packetDigests.length > 0 || review.state === 'DISMISSED');
   if (!candidates.some((review) => review.state !== 'DISMISSED')) return null;
+  const review = uniqueLatestReview(candidates);
   assert(
-    candidates.every((review) => review.submittedAt !== null),
-    'the governed prior review order is unavailable; re-collect before a disposition'
+    review !== null,
+    'the governed prior review order is unavailable or ambiguous; reconcile live history before a disposition'
   );
-  const latestTime = Math.max(...candidates.map((review) => Date.parse(review.submittedAt)));
-  const latest = candidates.filter((review) => Date.parse(review.submittedAt) === latestTime);
-  assert(
-    latest.length === 1,
-    'the governed prior review order is ambiguous; reconcile live history before a disposition'
-  );
-  const review = latest[0];
   if (review.state === 'DISMISSED') return null;
   assert(review.packetDigests.length === 1, 'the governed prior review packet marker is ambiguous');
   assert(SHA.test(review.commitSha), 'the governed prior review head is unavailable');
@@ -1526,26 +1549,26 @@ export function authorizeReviewSubmission({
 }
 
 function latestReviewStatesByAuthor(input, { exactHead = false } = {}) {
-  const reviews = input.reviews
-    .filter(
-      (review) =>
-        (!exactHead || review.commitSha === input.headSha) &&
-        ['APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'].includes(review.state)
-    )
-    .toSorted((left, right) => {
-      const leftKey = `${left.submittedAt ?? ''}:${left.id}`;
-      const rightKey = `${right.submittedAt ?? ''}:${right.id}`;
-      return leftKey.localeCompare(rightKey);
-    });
-  const states = new Map();
+  const reviews = input.reviews.filter(
+    (review) =>
+      (!exactHead || review.commitSha === input.headSha) &&
+      ['APPROVED', 'CHANGES_REQUESTED', 'DISMISSED'].includes(review.state)
+  );
+  const byAuthor = new Map();
   for (const review of reviews) {
     const identityKey =
       review.author === null
         ? `unknown-reviewer:${review.id}`
         : `login:${review.author.toLowerCase()}`;
-    states.set(identityKey, review.state);
+    if (!byAuthor.has(identityKey)) byAuthor.set(identityKey, []);
+    byAuthor.get(identityKey).push(review);
   }
-  return states;
+  return new Map(
+    [...byAuthor].map(([identity, history]) => [
+      identity,
+      uniqueLatestReview(history)?.state ?? null,
+    ])
+  );
 }
 
 export function reviewerPermissionSubjects(input) {
@@ -1687,6 +1710,12 @@ export function authorizePullRequestMerge({
   }
 
   const allHeadReviewStates = latestReviewStatesByAuthor(liveInput);
+  if ([...allHeadReviewStates.values()].includes(null)) {
+    return {
+      allowed: false,
+      reason: 'review order is unavailable or ambiguous; reconcile live history before merging',
+    };
+  }
   const activeChangeRequest = [...allHeadReviewStates.values()].includes('CHANGES_REQUESTED');
   if (activeChangeRequest) {
     return {
