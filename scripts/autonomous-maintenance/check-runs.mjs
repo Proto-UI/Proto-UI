@@ -305,6 +305,12 @@ function validateExactIntegrationBinding(run, label, reviewFile, currentReview) 
     if (committedFinding?.schemaVersion !== 2) {
       fail(ledgerFile, `${label}.integration exact-head finding must use schemaVersion 2`);
     }
+    for (const message of validateForwardFindingMetadata(committedFinding, {
+      expectedFindingId: committedReview.findingId,
+      expectedRunId: run.id,
+    })) {
+      fail(ledgerFile, `${label}.integration exact-head finding: ${message}`);
+    }
     for (const field of ['findingId', 'runId', 'baselineCommit']) {
       if (committedFinding?.[field] !== committedReview[field]) {
         fail(
@@ -330,11 +336,19 @@ function validateExactIntegrationBinding(run, label, reviewFile, currentReview) 
       `${label}.integration exact-head inventory must include its independent review packet: ${reviewPath}`
     );
   }
-  const reviewedPaths = expectedPaths.filter((entry) => entry !== reviewPath);
-  if (reviewedPaths.length === 0) {
+  if (!expectedPaths.includes(committedReview.findingPath)) {
     fail(
       ledgerFile,
-      `${label}.integration exact-head inventory must include reviewed remediation content outside the packet`
+      `${label}.integration exact-head inventory must include the linked finding: ${committedReview.findingPath}`
+    );
+  }
+  const remediationPaths = expectedPaths.filter(
+    (entry) => entry !== reviewPath && entry !== committedReview.findingPath
+  );
+  if (remediationPaths.length === 0) {
+    fail(
+      ledgerFile,
+      `${label}.integration exact-head inventory must include reviewed remediation content outside the finding and packet`
     );
   }
   const expectedDigest = committedReview.changeInventory?.reviewedContentDigest;
@@ -376,7 +390,7 @@ function validateExactIntegrationBinding(run, label, reviewFile, currentReview) 
         ` (missing: ${missing.join(', ') || 'none'}; undeclared: ${undeclared.join(', ') || 'none'})`
     );
   }
-  if (reviewedPaths.length > 0 && /^sha256:[0-9a-f]{64}$/.test(expectedDigest ?? '')) {
+  if (remediationPaths.length > 0 && /^sha256:[0-9a-f]{64}$/.test(expectedDigest ?? '')) {
     let actualDigest;
     try {
       actualDigest = computeReviewedContentDigest({
@@ -1052,7 +1066,7 @@ function validateLedger() {
       );
     }
     if (
-      typeof run.verification?.confidence !== 'number' ||
+      !Number.isFinite(run.verification?.confidence) ||
       run.verification.confidence < 0 ||
       run.verification.confidence > 1
     ) {

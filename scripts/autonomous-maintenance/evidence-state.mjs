@@ -276,7 +276,7 @@ export function validateForwardFindingMetadata(
   }
   validateNullablePositiveNumber(errors, finding.elapsedMinutes, 'elapsedMinutes');
   if (
-    typeof finding.observerConfidence !== 'number' ||
+    !Number.isFinite(finding.observerConfidence) ||
     finding.observerConfidence < 0 ||
     finding.observerConfidence > 1
   ) {
@@ -308,7 +308,7 @@ export function validateForwardFindingMetadata(
         errors.push('resolved verifier cannot retain classification pending');
       }
       if (
-        typeof verifier.confidence !== 'number' ||
+        !Number.isFinite(verifier.confidence) ||
         verifier.confidence < 0 ||
         verifier.confidence > 1
       ) {
@@ -682,7 +682,7 @@ export function validateForwardReviewIndependence(metadata, finding) {
     if (!independentReviewClassifications.has(entry.classification)) {
       errors.push(`${label}.classification is invalid: ${entry.classification}`);
     }
-    if (typeof entry.confidence !== 'number' || entry.confidence < 0 || entry.confidence > 1) {
+    if (!Number.isFinite(entry.confidence) || entry.confidence < 0 || entry.confidence > 1) {
       errors.push(`${label}.confidence must be between 0 and 1`);
     }
     if (!reviewRecommendations.has(entry.recommendedAction)) {

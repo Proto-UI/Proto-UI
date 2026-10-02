@@ -119,7 +119,16 @@ test('reviewed content retains every integration eligibility fact and its eviden
 
 function createFixture(
   t,
-  { remediation = 'modify', reuseRole = null, baselinePaths = [], recordFindingFirst = false } = {}
+  {
+    remediation = 'modify',
+    reuseRole = null,
+    baselinePaths = [],
+    recordFindingFirst = false,
+    reviewStage = 'post-implementation',
+    observerConfidence = 0.96,
+    verifierConfidence = 0.98,
+    reviewConfidence = 0.97,
+  } = {}
 ) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'proto-ui-maintenance-check-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
@@ -152,7 +161,7 @@ function createFixture(
       fs.rmSync(path.join(root, 'src/example.js'));
     } else if (remediation === 'rename') {
       fs.renameSync(path.join(root, 'src/example.js'), path.join(root, 'src/renamed.js'));
-    } else {
+    } else if (remediation !== 'none') {
       throw new Error(`unsupported remediation fixture: ${remediation}`);
     }
   };
@@ -194,14 +203,14 @@ function createFixture(
       actorId: 'agent:observer-1',
       taskId: 'task:observation-1',
     },
-    observerConfidence: 0.96,
+    observerConfidence,
     verifier: {
       actorId: 'agent:verifier-1',
       taskId: 'task:verification-1',
       status: 'completed',
       classification: 'confirmed',
       evidence: ['independent reproduction'],
-      confidence: 0.98,
+      confidence: verifierConfidence,
     },
     findingDisposition: {
       status: 'automatic-governed-remediation',
@@ -244,7 +253,11 @@ function createFixture(
   execFileSync('git', ['add', '-A', '--', 'src', findingPath], { cwd: root });
   execFileSync('git', ['commit', '--quiet', '-m', 'fixture remediation content'], { cwd: root });
   const implementationPaths =
-    remediation === 'rename' ? ['src/example.js', 'src/renamed.js'] : ['src/example.js'];
+    remediation === 'none'
+      ? []
+      : remediation === 'rename'
+        ? ['src/example.js', 'src/renamed.js']
+        : ['src/example.js'];
   const exactPaths = [findingPath, reviewPath, ...implementationPaths].sort();
   const digestPlaceholder = `sha256:${'0'.repeat(64)}`;
 
@@ -254,7 +267,7 @@ function createFixture(
     findingId: 'AM-P0-004-F1',
     findingPath,
     runId: 'AM-P0-004',
-    stage: 'post-implementation',
+    stage: reviewStage,
     reviewStatus: 'completed',
     baselineCommit,
     remediationAuthor: {
@@ -319,7 +332,7 @@ function createFixture(
           reviewer,
           reviewedContentDigest: digestPlaceholder,
           classification: 'adequate',
-          confidence: 0.97,
+          confidence: reviewConfidence,
           recommendedAction: 'accept-packet',
           summary: 'The bounded diff and evidence agree.',
         },
@@ -450,7 +463,7 @@ function createFixture(
       taskId: 'task:verification-1',
       status: 'completed',
       classification: 'confirmed',
-      confidence: 0.98,
+      confidence: verifierConfidence,
     },
     findingDisposition: { status: 'automatic-governed-remediation', evidence },
     decisionBoundary,
@@ -895,6 +908,29 @@ test('recorded finding remains valid when later remediation retains its frozen o
 });
 
 for (const stage of ['post-implementation', 'post-implementation-pilot']) {
+  for (const checker of [reviewChecker, runChecker]) {
+    test(`${path.basename(checker)} rejects ${stage} finding-and-packet-only remediation`, (t) => {
+      const fixture = createFixture(t, { remediation: 'none', reviewStage: stage });
+      assert.deepEqual(
+        parseGitPathNames(
+          execFileSync(
+            'git',
+            ['diff', '--name-only', '-z', fixture.baselineCommit, fixture.exactHeadSha, '--'],
+            { cwd: fixture.root }
+          )
+        ).sort(),
+        [fixture.findingPath, fixture.reviewPath].sort()
+      );
+      const result = spawnSync(process.execPath, [checker], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      });
+      assert.equal(result.status, 1, result.stdout);
+      assert.match(result.stderr, /reviewed remediation content outside the finding and packet/);
+      assert.doesNotMatch(result.stderr, /changed inventory does not match|digest does not match/);
+    });
+  }
+
   test(`review checker rejects ${stage} inventory that omits the linked finding`, (t) => {
     const fixture = createFixture(t);
     fixture.review.stage = stage;
@@ -931,6 +967,207 @@ for (const stage of ['post-implementation', 'post-implementation-pilot']) {
     assert.equal(result.status, 1, result.stdout);
     assert.match(result.stderr, /exactPaths must include the linked finding/);
     assert.doesNotMatch(result.stderr, /reviewed-content digest does not match/);
+  });
+}
+
+function recordWithoutRemediation(fixture, disposition) {
+  const noFinding = disposition === 'record-no-finding';
+  const blocked = disposition === 'bounded-follow-up';
+  const actionValue = blocked ? 1 : 0;
+  const classification = noFinding
+    ? 'no-finding'
+    : blocked
+      ? 'unresolved-semantic-question'
+      : 'expected-behavior';
+  fixture.finding.verifier.status = blocked ? 'blocked' : 'completed';
+  fixture.finding.verifier.classification = classification;
+  fixture.run.verification = { ...fixture.finding.verifier };
+  fixture.finding.findingDisposition = {
+    ...fixture.finding.findingDisposition,
+    status: disposition,
+    factScore: 0,
+    previouslyUnknown: false,
+    actionValue,
+    notes: 'Independent evidence supports recording this outcome without remediation.',
+  };
+  fixture.finding.remediationReview = {
+    status: 'not-required',
+    packet: null,
+    authorityResolution: 'not-required',
+    implementationVerification: 'not-required',
+    integrationEligibility: 'not-required',
+    reviewMinutes: null,
+  };
+  fixture.run.findingDisposition.status = disposition;
+  fixture.run.outcome.previouslyUnknown = false;
+  fixture.run.outcome.actionValue = actionValue;
+  fixture.run.automatedCompletion = {
+    status: 'not-required',
+    completionRule: 'not-required',
+    validationStatus: 'not-required',
+    completedOn: null,
+    reviewPacket: null,
+  };
+  fixture.run.integration = {
+    status: 'not-required',
+    exactHeadSha: null,
+    receipt: null,
+    evidence: [],
+  };
+  if (noFinding) {
+    fixture.run.findingPaths = [];
+    fixture.run.observer.candidateFindingCount = 0;
+    fs.rmSync(path.join(fixture.root, fixture.findingPath));
+  } else {
+    writeFile(
+      fixture.root,
+      fixture.findingPath,
+      markdownMetadata('AM-P0-004-F1: Fixture finding', fixture.finding)
+    );
+  }
+  fs.rmSync(path.join(fixture.root, fixture.reviewPath));
+  writeRunLedger(fixture.root, fixture.run);
+}
+
+for (const aliasPrefix of ['./', 'internal/./']) {
+  test(`run checker rejects finding alias ${aliasPrefix} as remediation content`, (t) => {
+    const fixture = createFixture(t, { remediation: 'none' });
+    fixture.review.findingPath =
+      aliasPrefix === './'
+        ? `./${fixture.findingPath}`
+        : fixture.findingPath.replace('internal/', 'internal/./');
+    fixture.run.findingPaths = [fixture.review.findingPath];
+    const writePacket = () =>
+      writeFile(
+        fixture.root,
+        fixture.reviewPath,
+        markdownMetadata('AM-P0-004-F1 remediation review packet', fixture.review, fixture.sections)
+      );
+    writePacket();
+    const digest = fixtureDigest(fixture, { worktree: true });
+    fixture.review.changeInventory.reviewedContentDigest = digest;
+    fixture.review.independentReview.reviewedContentDigest = digest;
+    fixture.review.independentReview.history.at(-1).reviewedContentDigest = digest;
+    writePacket();
+    execFileSync('git', ['add', fixture.reviewPath], { cwd: fixture.root });
+    execFileSync('git', ['commit', '--quiet', '-m', 'fixture aliased finding path'], {
+      cwd: fixture.root,
+    });
+    fixture.run.integration.exactHeadSha = execFileSync('git', ['rev-parse', 'HEAD'], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    }).trim();
+    writeRunLedger(fixture.root, fixture.run);
+
+    const result = spawnSync(process.execPath, [runChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(result.stderr, /exact-head inventory must include the linked finding/);
+    assert.doesNotMatch(result.stderr, /changed inventory does not match|digest does not match/);
+  });
+}
+
+for (const disposition of ['record-no-finding', 'record-rejected', 'bounded-follow-up']) {
+  test(`run checker preserves ${disposition} without a remediation packet or implementation`, (t) => {
+    const fixture = createFixture(t, { remediation: 'none' });
+    recordWithoutRemediation(fixture, disposition);
+    assert.equal(
+      execFileSync('git', ['diff', fixture.baselineCommit, '--', 'src'], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      }),
+      ''
+    );
+    const result = spawnSync(process.execPath, [runChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+  });
+}
+
+for (const [field, error] of [
+  ['observerConfidence', /observerConfidence must be between 0 and 1/],
+  ['verifierConfidence', /resolved verifier confidence must be between 0 and 1/],
+  ['reviewConfidence', /independentReview\.history\[0\]\.confidence must be between 0 and 1/],
+]) {
+  test(`evidence checker rejects real YAML .nan in ${field}`, (t) => {
+    const fixture = createFixture(t, { [field]: NaN });
+    const yamlFile = field === 'reviewConfidence' ? fixture.reviewPath : fixture.findingPath;
+    assert.match(fs.readFileSync(path.join(fixture.root, yamlFile), 'utf8'), /: \.nan\n/);
+    const checker = field === 'reviewConfidence' ? reviewChecker : runChecker;
+    const result = spawnSync(process.execPath, [checker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(result.stderr, error);
+    assert.doesNotMatch(result.stderr, /reviewed-content digest does not match/);
+  });
+}
+
+test('run checker rejects real YAML .nan in resolved verification without a linked finding', (t) => {
+  const fixture = createFixture(t, { remediation: 'none', verifierConfidence: NaN });
+  recordWithoutRemediation(fixture, 'record-no-finding');
+  const result = spawnSync(process.execPath, [runChecker], {
+    cwd: fixture.root,
+    encoding: 'utf8',
+  });
+  assert.equal(result.status, 1, result.stdout);
+  assert.match(result.stderr, /verification\.confidence must be between 0 and 1/);
+});
+
+for (const [field, error] of [
+  ['observerConfidence', /exact-head finding: observerConfidence must be between 0 and 1/],
+  [
+    'verifierConfidence',
+    /exact-head finding: resolved verifier confidence must be between 0 and 1/,
+  ],
+]) {
+  test(`run checker rejects committed ${field} .nan after current evidence is repaired`, (t) => {
+    const fixture = createFixture(t, { [field]: NaN });
+    const committedFinding = execFileSync(
+      'git',
+      ['show', `${fixture.exactHeadSha}:${fixture.findingPath}`],
+      { cwd: fixture.root, encoding: 'utf8' }
+    );
+    assert.match(committedFinding, /: \.nan\n/);
+    fixture.finding.observerConfidence = 0.96;
+    fixture.finding.verifier.confidence = 0.98;
+    fixture.run.verification.confidence = 0.98;
+    writeFile(
+      fixture.root,
+      fixture.findingPath,
+      markdownMetadata('AM-P0-004-F1: Fixture finding', fixture.finding)
+    );
+    writeRunLedger(fixture.root, fixture.run);
+
+    const result = spawnSync(process.execPath, [runChecker], {
+      cwd: fixture.root,
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 1, result.stdout);
+    assert.match(result.stderr, error);
+    assert.doesNotMatch(result.stderr, /changed inventory does not match|digest does not match/);
+  });
+}
+
+for (const confidence of [0, 1]) {
+  test(`forward checkers preserve confidence boundary ${confidence} through real YAML`, (t) => {
+    const fixture = createFixture(t, {
+      observerConfidence: confidence,
+      verifierConfidence: confidence,
+      reviewConfidence: confidence,
+    });
+    for (const checker of [reviewChecker, runChecker]) {
+      const result = spawnSync(process.execPath, [checker], {
+        cwd: fixture.root,
+        encoding: 'utf8',
+      });
+      assert.equal(result.status, 0, `${path.basename(checker)}: ${result.stderr}`);
+    }
   });
 }
 

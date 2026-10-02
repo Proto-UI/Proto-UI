@@ -125,6 +125,50 @@ test('accepts a coherent schema-v2 finding and matching run state', () => {
   assert.deepEqual(errors, []);
 });
 
+for (const confidence of [NaN, Infinity, -Infinity, -0.01, 1.01, null, '0.5']) {
+  test(`rejects invalid finding confidence ${String(confidence)}`, () => {
+    const finding = validForwardFinding();
+    finding.observerConfidence = confidence;
+    finding.verifier.confidence = confidence;
+    const errors = validateForwardFindingMetadata(finding);
+    assert.ok(errors.includes('observerConfidence must be between 0 and 1'));
+    assert.ok(errors.includes('resolved verifier confidence must be between 0 and 1'));
+  });
+}
+
+test('pending verifier preserves null confidence and rejects numeric or non-finite values', () => {
+  const finding = validForwardFinding();
+  finding.verifier.status = 'pending';
+  finding.verifier.classification = 'pending';
+  finding.verifier.confidence = null;
+  finding.verifier.evidence = [];
+  finding.findingDisposition = {
+    status: 'pending',
+    evidence: [],
+    factScore: null,
+    previouslyUnknown: null,
+    hasExternalOracle: null,
+    actionValue: null,
+    reviewMinutes: null,
+    notes: null,
+  };
+  finding.remediationReview = {
+    status: 'not-required',
+    packet: null,
+    authorityResolution: 'not-required',
+    implementationVerification: 'not-required',
+    integrationEligibility: 'not-required',
+    reviewMinutes: null,
+  };
+  assert.deepEqual(validateForwardFindingMetadata(finding), []);
+  for (const confidence of [0, 1, NaN, Infinity, -Infinity]) {
+    finding.verifier.confidence = confidence;
+    assert.ok(
+      validateForwardFindingMetadata(finding).includes('pending verifier requires null confidence')
+    );
+  }
+});
+
 test('rejects a completed finding that bypasses unresolved product direction', () => {
   const finding = validForwardFinding();
   finding.decisionBoundary = {
@@ -234,6 +278,22 @@ test('accepts independently attributed schema-v2 review evidence', () => {
     []
   );
 });
+
+for (const confidence of [NaN, Infinity, -Infinity, -0.01, 1.01, null, '0.5']) {
+  test(`rejects invalid current and historical review confidence ${String(confidence)}`, () => {
+    const review = validForwardReview();
+    review.independentReview.history.push({ ...review.independentReview.history[0], round: 2 });
+    for (const index of [0, 1]) {
+      const mutated = structuredClone(review);
+      mutated.independentReview.history[index].confidence = confidence;
+      assert.ok(
+        validateForwardReviewIndependence(mutated, validForwardFinding()).includes(
+          `independentReview.history[${index}].confidence must be between 0 and 1`
+        )
+      );
+    }
+  });
+}
 
 test('accepts an explicit pending review with no fabricated reviewer history', () => {
   const review = validForwardReview();

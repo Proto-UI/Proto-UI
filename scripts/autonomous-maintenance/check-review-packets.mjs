@@ -617,11 +617,15 @@ function validateInventory(
         `changeInventory.exactPaths must include the linked finding: ${findingPath}`
       );
     }
-    if ([...(exactPaths ?? [])].every((entry) => entry === packetPath)) {
+    if (
+      ![...(exactPaths ?? [])].some(
+        (entry) => entry !== packetPath && entry !== findingPath && changedPaths.has(entry)
+      )
+    ) {
       fail(
         errors,
         file,
-        'changeInventory.exactPaths must include reviewed remediation content outside the packet'
+        'changeInventory.exactPaths must include reviewed remediation content outside the finding and packet'
       );
     }
   }
@@ -785,7 +789,7 @@ function validateReview(file) {
       if (
         !Number.isInteger(review?.round) ||
         !allowedIndependentStatuses.has(review?.classification) ||
-        typeof review?.confidence !== 'number' ||
+        !Number.isFinite(review?.confidence) ||
         review.confidence < 0 ||
         review.confidence > 1 ||
         !review?.recommendedAction ||
