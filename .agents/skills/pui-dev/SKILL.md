@@ -43,6 +43,18 @@ Load only the skill needed for the current transition. The list below is routing
 
 Pass only registered artifacts through the validated handoff. Return a terminal handoff when there is no eligible next transition.
 
+## Drive implementation to verified evidence
+
+Within the established envelope, favor implementing, preserving, or extending the requested capability over omitting it. Decide reversible engineering details from the available evidence without waiting for another user choice. Keep the user's goal, acceptance criteria, explicit constraints, and authorized scope intact; optimism does not grant authority or settle an unresolved product decision.
+
+1. **Decide:** distinguish an open implementation option from a human gate. Choose a testable, reversible option consistent with the authority map; record material assumptions and the evidence that would change the choice.
+2. **Implement:** route one coherent slice to its owning leaf. A reviewable increment advances the full requested outcome; it does not silently redefine that outcome as a smaller deliverable.
+3. **Verify:** route the candidate to `pui-validate` with its authority map and prior evidence. Preserve the implementation authorization and other artifacts needed for a possible repair handoff.
+4. **Repair:** use the failure diagnosis to select the eligible implementation or test leaf, then validate the repaired candidate. Follow `internal/agent-operations/testing-method.md` for evidence-driven retries. One failed attempt does not establish infeasibility or justify abandoning a constraint, switching the requested approach, or reducing coverage.
+5. **Report:** distinguish implemented behavior, passed checks, failed or unrun checks, remaining work, and actual gates. Continue eligible work until the requested outcome is verified or a concrete blocker requires escalation. Keep formal independent review and publication as their separately governed transitions.
+
+When blocked, preserve the candidate and useful negative evidence, explain the constraint and attempted remedies, and propose the smallest decision or prerequisite needed to continue. Continue independent authorized work; do not fabricate success, relax permissions, or spend unbounded resources to avoid reporting a blocker.
+
 ## Stop at a gate
 
 Stop when product semantics, ownership, public surface, compatibility, lifecycle promotion, contributor rights, security, integration, publication, or release requires a human decision and no exact active standing authorization resolves that bounded action. Present one decision packet with the exact authorization requested and the actions it would not authorize.

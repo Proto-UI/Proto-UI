@@ -12,6 +12,14 @@ A live contact does not prove movement; a movement sample does not prove applied
 
 Preserve the failing baseline and assertion. Confirm red means the intended violation, not an import failure, missing dependency, selector mismatch or startup timeout. Add a normal control or narrow mutation check when it distinguishes competing explanations; mutation testing is not mandatory for every assertion. Do not alter unrelated user work. If an older test encoded the wrong premise, explain and repair the fixture while retaining the legitimate assertion. Investigate contradictory expectations against the catalog instead of editing the spec to excuse a failure.
 
+## Continue from the diagnosis
+
+Treat a failed attempt as evidence for the next engineering decision. Separate environment/setup, implementation, and test/fixture hypotheses. Choose a bounded probe or authorized repair that can distinguish them, then rerun the relevant assertions. Preserve the requested capability and explicit constraints while changing reversible implementation details; ask before replacing a user-specified approach or reducing the agreed outcome.
+
+Continue while an authorized next step can resolve the failure or produce useful new evidence. Before a costly retry, name the hypothesis, what changed, the expected observation, and a resource bound appropriate to the task. For transient read-only failures, the changed condition may be restored availability or a documented backoff. Do not repeat an unchanged failing experiment indefinitely. An uncertain external-write outcome requires the action's own reconciliation and idempotency rules; this method grants no new retry or write permission.
+
+Escalate when the next useful step needs unavailable access or capability, a product decision, action outside the current authorization, or resources beyond the agreed limit. Preserve the failure and attempted remedies, identify the smallest missing prerequisite, and continue independent authorized work. A blocked check stays blocked; a narrower passing probe does not replace it. Rerun affected checks after the prerequisite or candidate changes and retain both results in the evidence report.
+
 ## Probe transitions and ownership
 
 For event-driven behavior, identify the resource/request owner and state before and after meaningful events. Use an event/owner/observation table when it clarifies causality. Do not introduce portable state just to simplify a host-local test.

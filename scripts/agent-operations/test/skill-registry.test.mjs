@@ -251,6 +251,78 @@ test('handoff resolves exactly one next leaf and enforces artifact requirements'
   );
 });
 
+test('failed validation can route through an authorized repair leaf and back to validation', () => {
+  const registry = loadSkillRegistry({ root });
+  for (const [nextSkillId, evidenceType] of [
+    ['pui-regression', 'reproduction'],
+    ['pui-test', 'governed-behavior'],
+  ]) {
+    const repair = {
+      schemaVersion: 1,
+      kind: 'proto-ui.skill-handoff',
+      entrypoint: 'development',
+      executionMode: 'human-assisted',
+      executionModeSource: 'current-user',
+      fromId: 'pui-validate',
+      nextSkillId,
+      artifacts: [
+        'authority-map',
+        'candidate-change',
+        'evidence-report',
+        'implementation-authorization',
+        evidenceType,
+      ].map(artifact),
+      humanGates: [],
+      notes: [],
+    };
+    assert.equal(validateSkillHandoff(repair, registry).nextSkill.id, nextSkillId);
+    for (const required of ['authority-map', 'implementation-authorization', evidenceType]) {
+      assert.throws(
+        () =>
+          validateSkillHandoff(
+            { ...repair, artifacts: repair.artifacts.filter((item) => item.type !== required) },
+            registry
+          ),
+        new RegExp(`lacks artifact required by ${nextSkillId}: ${required}`)
+      );
+    }
+
+    const revalidation = {
+      ...repair,
+      fromId: nextSkillId,
+      nextSkillId: 'pui-validate',
+      artifacts: repair.artifacts.map((item) =>
+        item.type === 'candidate-change'
+          ? { type: item.type, reference: 'memory:repaired-candidate' }
+          : item
+      ),
+    };
+    assert.equal(validateSkillHandoff(revalidation, registry).nextSkill.id, 'pui-validate');
+    assert.throws(
+      () => validateSkillHandoff({ ...repair, nextSkillId: 'pui-validate' }, registry),
+      /recursively select/
+    );
+    const gatedRepair = {
+      ...repair,
+      executionMode: 'autonomous',
+      executionModeSource: 'governed-queue',
+      humanGates: ['semantic-direction'],
+    };
+    assert.throws(() => validateSkillHandoff(gatedRepair, registry), /must stop/);
+    assert.equal(
+      validateSkillHandoff({ ...gatedRepair, nextSkillId: null }, registry).nextSkill,
+      null
+    );
+    assert.equal(
+      evaluateSkillEligibility(resolveSkill(nextSkillId, registry), {
+        executionMode: 'autonomous',
+      }).eligible,
+      false
+    );
+  }
+  assert.equal(resolveSkill('pui-validate', registry).mutation, 'disposable-output-only');
+});
+
 test('terminal handoff does not resolve another skill', () => {
   const registry = loadSkillRegistry({ root });
   const handoff = {
