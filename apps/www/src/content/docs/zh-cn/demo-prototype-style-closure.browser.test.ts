@@ -254,11 +254,16 @@ describe.sequential('Prototype style closure without Website CSS', () => {
       const fixture = await page.evaluateHandle(async (runtimes) => {
         const rendererUrl = '/src/components/PrototypePreviewer/demo-renderer.ts';
         const modulesUrl = '/src/components/PrototypePreviewer/prototype-modules.ts';
-        const { renderDemo } = (await import(
-          /* @vite-ignore */ rendererUrl
+        // Vitest rewrites lexical import() for its Node SSR runner. Keep this
+        // fixture's module loading in the real browser realm instead.
+        const browserImport = new Function('url', 'return import(url)') as (
+          url: string
+        ) => Promise<unknown>;
+        const { renderDemo } = (await browserImport(
+          rendererUrl
         )) as typeof import('../../../components/PrototypePreviewer/demo-renderer');
-        const { loadPrototypes } = (await import(
-          /* @vite-ignore */ modulesUrl
+        const { loadPrototypes } = (await browserImport(
+          modulesUrl
         )) as typeof import('../../../components/PrototypePreviewer/prototype-modules');
         await loadPrototypes(['shadcn-textarea-root']);
         const root = document.createElement('section');
