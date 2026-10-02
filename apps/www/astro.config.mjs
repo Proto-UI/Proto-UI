@@ -147,7 +147,7 @@ export default defineConfig({
       head: [
         {
           tag: 'style',
-          content: '@layer theme, base, starlight, components, utilities, proto-ui, code-surfaces;',
+          content: '@layer theme, base, starlight, proto-ui, components, utilities, code-surfaces;',
         },
         // 双 theme-color
         {
