@@ -191,7 +191,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: integrate-reviewed-pull-request
     mutation: conditional-pull-request-merge
-    requires: [review-packet, review-input, mutation-authorization]
+    requires: [review-packet, review-input, published-review-packet, mutation-authorization]
     produces: [mutation-receipt]
   - id: pui-collaborate
     entrypoints: [development]

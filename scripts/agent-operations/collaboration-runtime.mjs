@@ -65,6 +65,19 @@ function timestamp(value, label) {
   assert(Number.isFinite(Date.parse(value)), `${label} must be a real timestamp`);
 }
 
+function timestampIsAfter(value, reference) {
+  // Both inputs have passed timestamp validation. Normalize the timezone at
+  // whole-second precision, then compare every supported fractional digit;
+  // Date.parse alone truncates otherwise valid RFC3339 sub-millisecond input.
+  const valueSecond = Math.floor(Date.parse(value) / 1000);
+  const referenceSecond = Math.floor(Date.parse(reference) / 1000);
+  if (valueSecond !== referenceSecond) return valueSecond > referenceSecond;
+  const valueFraction = value.match(/\.(\d+)/)?.[1] ?? '';
+  const referenceFraction = reference.match(/\.(\d+)/)?.[1] ?? '';
+  const precision = Math.max(valueFraction.length, referenceFraction.length);
+  return valueFraction.padEnd(precision, '0') > referenceFraction.padEnd(precision, '0');
+}
+
 function string(value, label, { min = 1, max = 4_000 } = {}) {
   assert(
     typeof value === 'string' && value.length >= min && value.length <= max,
@@ -721,7 +734,7 @@ export function authorizeCollaborationMutation({
       return rejected(request, 'live target updatedAt is stale');
     }
     const viewerOwnsPullRequest =
-      current.authorLogin.toLowerCase() === liveState.viewerLogin.toLowerCase();
+      current.authorLogin?.toLowerCase() === liveState.viewerLogin.toLowerCase();
     if (!viewerOwnsPullRequest && current.maintainerCanModify !== true) {
       return rejected(
         request,
@@ -757,6 +770,12 @@ export function authorizeCollaborationMutation({
     if (current.headSha !== request.target.headSha)
       return rejected(request, 'live head SHA is stale');
     const reviewer = request.desired.reviewerLogin;
+    if (!current.authorLogin) {
+      return rejected(
+        request,
+        'pull-request author identity is unavailable for independent review'
+      );
+    }
     if (reviewer.toLowerCase() === current.authorLogin.toLowerCase()) {
       return rejected(request, 'independent reviewer cannot be the pull-request author');
     }
@@ -861,6 +880,9 @@ export function authorizeCollaborationMutation({
   const closed = requireOpen(request, current);
   if (closed) return closed;
   if (!targetHeadMatches(request, current)) return rejected(request, 'live head SHA is stale');
+  if (timestampIsAfter(request.requestedAt, liveState.observedAt)) {
+    return rejected(request, 'comment requestedAt is later than the live preflight observation');
+  }
   if (current.markerComment !== null) {
     if (desiredCollaborationStateSatisfied(request, liveState)) {
       return noOp(request, 'bounded comment with this exact request marker already exists');

@@ -614,6 +614,11 @@ test('merge CLI rejects missing, oversized, and unbound originals before any Git
             reference: inputPath,
             digest: `sha256:${computeReviewInputDigest(fixture.input)}`,
           },
+          {
+            type: 'published-review-packet',
+            reference: publishedPath,
+            digest: `sha256:${computeReviewPacketDigest(fixture.publishedPacket)}`,
+          },
           { type: 'mutation-authorization', reference: 'explicit-current-user' },
         ],
         humanGates: [],
@@ -634,6 +639,10 @@ test('merge CLI rejects missing, oversized, and unbound originals before any Git
     `
     );
     const invoke = (publicationArgs) => {
+      const handoff = JSON.parse(readFileSync(handoffPath, 'utf8'));
+      handoff.artifacts.find((artifact) => artifact.type === 'published-review-packet').reference =
+        publicationArgs[1] ?? publishedPath;
+      writeFileSync(handoffPath, JSON.stringify(handoff));
       writeFileSync(callsPath, '');
       const result = spawnSync(
         process.execPath,

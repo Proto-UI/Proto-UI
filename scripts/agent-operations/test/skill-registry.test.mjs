@@ -328,6 +328,7 @@ test('a review handoff can route one separately authorized exact-head integratio
     artifacts: [
       artifact('review-packet'),
       artifact('review-input'),
+      artifact('published-review-packet'),
       artifact('mutation-authorization'),
     ],
     humanGates: [],

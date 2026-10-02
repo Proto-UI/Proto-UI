@@ -2167,6 +2167,222 @@ function nonMetadataMutationCases() {
   ];
 }
 
+function runCollaborationFixture(fixture, states) {
+  const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-preflight-'));
+  try {
+    const request = fixture.request;
+    const requestPath = join(directory, 'request.json');
+    const handoffPath = join(directory, 'handoff.json');
+    writeFileSync(requestPath, JSON.stringify(request));
+    writeFileSync(
+      handoffPath,
+      JSON.stringify({
+        schemaVersion: 1,
+        kind: 'proto-ui.skill-handoff',
+        entrypoint: 'development',
+        executionMode: 'human-assisted',
+        executionModeSource: 'current-user',
+        fromId: 'pui-pr',
+        nextSkillId: 'pui-collaborate',
+        artifacts: [
+          { type: 'pull-request-report', reference: 'artifact://pr/509/report' },
+          { type: 'review-input', reference: 'artifact://pr/509/review-input' },
+          { type: 'capability-envelope', reference: 'artifact://capability/current' },
+          { type: 'github-snapshot', reference: 'artifact://github/pr-509' },
+          { type: 'mutation-authorization', reference: 'explicit-current-user' },
+          {
+            type: 'collaboration-request',
+            reference: requestPath,
+            digest: `sha256:${request.requestDigest}`,
+          },
+        ],
+        humanGates: [],
+        notes: [],
+      })
+    );
+    let reads = 0;
+    let writes = 0;
+    const receipt = runCollaborationCli(
+      [
+        'apply',
+        '--mode',
+        'human-assisted',
+        '--mode-source',
+        'current-user',
+        '--request',
+        requestPath,
+        '--handoff',
+        handoffPath,
+      ],
+      {
+        collectState: () => states[Math.min(reads++, states.length - 1)],
+        runner: () => {
+          writes += 1;
+          return fixture.response;
+        },
+      }
+    );
+    validateCollaborationReceipt(receipt, request);
+    return { receipt, reads, writes };
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+}
+
+for (const scenario of [
+  'initial future request',
+  'subsecond future request',
+  'clock rollback at final preflight',
+  'equal live observation',
+]) {
+  test(`comment timestamp admission handles ${scenario} before the write`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    fixture.request = seal({
+      ...fixture.request,
+      requestedAt:
+        scenario === 'initial future request'
+          ? '2026-08-27T01:00:12.000Z'
+          : '2026-08-27T01:00:05.000Z',
+    });
+    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+    const finalState = structuredClone(preState);
+    if (scenario === 'subsecond future request') preState.observedAt = '2026-08-27T01:00:04.999Z';
+    if (scenario === 'clock rollback at final preflight')
+      finalState.observedAt = '2026-08-27T01:00:04.999Z';
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...structuredClone(fixture.after) },
+    };
+    postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
+    const { receipt, reads, writes } = runCollaborationFixture(fixture, [
+      preState,
+      finalState,
+      postState,
+    ]);
+    if (scenario === 'equal live observation') {
+      assert.equal(receipt.outcome, 'applied');
+      assert.equal(receipt.mutationCount, 1);
+      assert.equal(writes, 1);
+    } else {
+      assert.equal(receipt.outcome, 'rejected');
+      assert.equal(receipt.mutationCount, 0);
+      assert.equal(writes, 0);
+      assert.match(receipt.note, /requestedAt is later than the live preflight observation/);
+      assert.equal(reads, scenario === 'clock rollback at final preflight' ? 2 : 1);
+    }
+  });
+}
+
+for (const [name, requestedAt, initialAt, finalAt, expectedOutcome, expectedReads] of [
+  [
+    'fractional future',
+    '2026-08-27T01:00:05.0001Z',
+    '2026-08-27T01:00:05.000Z',
+    '2026-08-27T01:00:05.000Z',
+    'rejected',
+    1,
+  ],
+  [
+    'offset fractional future',
+    '2026-08-27T02:00:05.0001+01:00',
+    '2026-08-27T01:00:05.000Z',
+    '2026-08-27T01:00:05.000Z',
+    'rejected',
+    1,
+  ],
+  [
+    'final fractional rollback',
+    '2026-08-27T01:00:05.0001Z',
+    '2026-08-27T01:00:05.0002Z',
+    '2026-08-27T01:00:05.000Z',
+    'rejected',
+    2,
+  ],
+  [
+    'equal padded fraction',
+    '2026-08-27T01:00:05.0001000Z',
+    '2026-08-27T01:00:05.0001Z',
+    '2026-08-27T01:00:05.0001Z',
+    'applied',
+    3,
+  ],
+  [
+    'equal offset instant',
+    '2026-08-27T02:00:05.0001+01:00',
+    '2026-08-27T01:00:05.000100Z',
+    '2026-08-27T01:00:05.000100Z',
+    'applied',
+    3,
+  ],
+  [
+    'earlier second with longer fraction',
+    '2026-08-27T01:00:04.999999Z',
+    '2026-08-27T01:00:05.000Z',
+    '2026-08-27T01:00:05.000Z',
+    'applied',
+    3,
+  ],
+]) {
+  test(`comment timestamp admission preserves RFC3339 precision: ${name}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    fixture.request = seal({ ...fixture.request, requestedAt });
+    const preState = {
+      ...metadataLive(),
+      observedAt: initialAt,
+      action: fixture.request.action,
+      current: fixture.before,
+    };
+    const finalState = { ...preState, observedAt: finalAt };
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...structuredClone(fixture.after) },
+    };
+    postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
+    const { receipt, reads, writes } = runCollaborationFixture(fixture, [
+      preState,
+      finalState,
+      postState,
+    ]);
+    assert.equal(receipt.outcome, expectedOutcome);
+    assert.equal(reads, expectedReads);
+    assert.equal(writes, expectedOutcome === 'applied' ? 1 : 0);
+    assert.equal(receipt.mutationCount, writes);
+  });
+}
+
+for (const maintainerCanModify of [true, false]) {
+  test(`null PR author uses maintainer edit permission ${maintainerCanModify} without throwing`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
+    fixture.before.authorLogin = null;
+    fixture.before.maintainerCanModify = maintainerCanModify;
+    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...fixture.after },
+    };
+    const { receipt, writes } = runCollaborationFixture(fixture, [preState, preState, postState]);
+    assert.equal(receipt.outcome, maintainerCanModify ? 'applied' : 'rejected');
+    assert.equal(receipt.mutationCount, maintainerCanModify ? 1 : 0);
+    assert.equal(writes, maintainerCanModify ? 1 : 0);
+    if (!maintainerCanModify)
+      assert.match(receipt.note, /neither author-owned.*maintainer-editable/);
+  });
+}
+
+test('missing PR author rejects independent-review requests with a zero-write receipt', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'request reviewer');
+  fixture.before.authorLogin = null;
+  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+  const { receipt, writes } = runCollaborationFixture(fixture, [preState]);
+  assert.equal(receipt.outcome, 'rejected');
+  assert.equal(receipt.mutationCount, 0);
+  assert.equal(writes, 0);
+  assert.match(receipt.note, /pull-request author identity is unavailable/);
+});
+
 test('each non-metadata collaboration action maps to one exact GitHub mutation primitive', () => {
   const cases = nonMetadataMutationCases();
   for (const fixture of cases) {

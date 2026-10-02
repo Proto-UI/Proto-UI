@@ -239,11 +239,29 @@ function validateIntegrationExecution(args, packet, input, policy) {
   if (!skillEligibility.eligible) {
     throw new Error(skillEligibility.reason);
   }
+  const publishedPacketPath = args.get('--published-review-packet');
+  if (!publishedPacketPath)
+    throw new Error('--published-review-packet is required for merge-pull-request');
+  const publishedPacketArtifact = routed.handoff.artifacts.find(
+    (artifact) => artifact.type === 'published-review-packet'
+  );
+  if (!publishedPacketArtifact || publishedPacketArtifact.reference !== publishedPacketPath) {
+    throw new Error(
+      'integration handoff published-review-packet artifact does not bind the --published-review-packet argument'
+    );
+  }
+  const publishedPacket = readPublishedReviewPacket(publishedPacketPath, packet);
+  if (publishedPacketArtifact.digest !== `sha256:${computeReviewPacketDigest(publishedPacket)}`) {
+    throw new Error(
+      'integration handoff published-review-packet artifact does not bind original packet content'
+    );
+  }
   return {
     handoff: routed.handoff,
     reviewEligibility,
     selfAssessment,
     skillEligibility,
+    publishedPacket,
   };
 }
 
@@ -409,10 +427,7 @@ try {
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
     const execution = validateIntegrationExecution(args, packet, input, policy);
-    const publishedPacket = readPublishedReviewPacket(
-      args.get('--published-review-packet'),
-      packet
-    );
+    const publishedPacket = execution.publishedPacket;
     const externalEvidence = readExternalEvidence(args);
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
       externalEvidence,
