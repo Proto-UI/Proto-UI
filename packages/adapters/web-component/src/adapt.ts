@@ -423,6 +423,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         owner.attachView({
           modules: createWebComponentModules({
             el: thisEl,
+            surfaceProjection: this._surfaceProjection,
             instanceToken: this._instanceToken,
             router,
             rawPropsSource,

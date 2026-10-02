@@ -1,6 +1,6 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
 import { asAccessible, asFocusEntry } from '@proto.ui/hooks';
-import { createTabsPartId, TABS_CONTEXT, TABS_FAMILY, type TabsContextValue } from './shared';
+import { TABS_CONTEXT, TABS_FAMILY, type TabsContextValue } from './shared';
 import type { TabsContentAsHookContract, TabsContentExposes, TabsContentProps } from './types';
 
 function syncCurrentFromContext(
@@ -24,8 +24,7 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
   // P-BASE-TABS-CONTENT-CURRENT-DERIVED
   const current = def.state.bool('current', false);
   const hidden = def.state.bool('hidden', true);
-  const contentId = def.state.string('contentId', '');
-  const triggerId = def.state.string('triggerId', '');
+  const relationshipKey = def.state.string('relationshipKey', '');
   // P-BASE-TABS-CONTENT-FOCUS-ENTRY
   const focusEntry = asFocusEntry<TabsContentProps>();
   focusEntry.configure({
@@ -45,7 +44,6 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
   });
 
   let ownValue = '';
-  let rootId = '';
   let keepMounted = false;
   // P-BASE-TABS-CONTENT-CURRENT-EXPOSE
   def.expose.state('current', current);
@@ -53,27 +51,18 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
 
   // P-BASE-TABS-CONTENT-A11Y-ROLE, P-BASE-TABS-CONTENT-A11Y-LABELLEDBY-TARGET
   // P-BASE-TABS-CONTENT-A11Y-HIDDEN, P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE
-  accessible.id(contentId);
+  accessible.part(TABS_FAMILY, { key: relationshipKey });
   accessible.role('tabpanel');
   accessible.state('hidden', hidden);
-  accessible.relation('labelledBy', { target: triggerId });
-
-  const syncIds = () => {
-    // P-BASE-TABS-A11Y-RELATIONSHIP-TARGET
-    contentId.set(createTabsPartId(rootId, 'content', ownValue), 'reason: tabs content id sync');
-    triggerId.set(
-      createTabsPartId(rootId, 'trigger', ownValue),
-      'reason: tabs content relation sync'
-    );
-  };
+  accessible.relation('labelledBy', {
+    target: { kind: 'part', family: TABS_FAMILY, role: 'trigger', key: relationshipKey },
+  });
 
   const syncContext = (
     next: TabsContextValue,
     lifecycle: { setPresent(present: boolean): void }
   ) => {
     // P-BASE-TABS-CONTENT-CONTEXT-CONSUME, P-BASE-TABS-CONTENT-CURRENT-DERIVED
-    rootId = next.rootId;
-    syncIds();
     syncCurrentFromContext(next.value, ownValue, current, hidden, focusEntry);
     const nextCurrent = next.value === ownValue;
     // P-BASE-TABS-CONTENT-DEFAULT-L1-DETACH, P-BASE-TABS-CONTENT-PRESENCE-POLICY
@@ -86,6 +75,7 @@ function setupTabsContent(def: DefHandle<TabsContentProps, TabsContentExposes>):
 
   const syncProps = (next: Readonly<TabsContentProps>) => {
     ownValue = next.value ?? '';
+    relationshipKey.set(ownValue, 'reason: tabs relationship key sync');
     keepMounted = next.keepMounted ?? false;
   };
 

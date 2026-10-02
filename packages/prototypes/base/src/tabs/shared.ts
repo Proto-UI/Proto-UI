@@ -4,8 +4,6 @@ export type TabsOrientation = 'horizontal' | 'vertical';
 export type TabsActivationMode = 'automatic' | 'manual';
 
 export type TabsContextValue = {
-  // P-BASE-TABS-A11Y-RELATIONSHIP-TARGET
-  rootId: string;
   // P-BASE-TABS-CONTEXT-VALUE, P-BASE-TABS-ACTIVE-VALUE
   value: string;
   activeValue: string;
@@ -16,23 +14,6 @@ export type TabsContextValue = {
   requestVersion: number;
   validationVersion: number;
 };
-
-let nextTabsRootId = 0;
-
-export function createTabsRootId(): string {
-  nextTabsRootId += 1;
-  return `pui-tabs-${nextTabsRootId}`;
-}
-
-export function createTabsPartId(
-  rootId: string,
-  role: 'trigger' | 'content',
-  value: string
-): string {
-  const normalizedValue = value.trim() ? value.trim() : 'empty';
-  const safeValue = normalizedValue.replace(/[^a-zA-Z0-9_-]+/g, '-');
-  return `${rootId || 'pui-tabs'}-${role}-${safeValue}`;
-}
 
 // P-BASE-TABS-ANATOMY-FAMILY, P-BASE-TABS-FAMILY-ROLES
 // P-BASE-TABS-ROOT-CARDINALITY, P-BASE-TABS-LIST-CARDINALITY

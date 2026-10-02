@@ -32,6 +32,8 @@ Indicator 是 presentational context consumer。它 expose 当前 value、active
 
 Web profile 投射 tablist、tab 与 tabpanel relations。disabled Trigger 不参与 selection。automatic activation 会随 focus 移动选择；manual activation 将 focus navigation 与 selection 分开。inactive Content 默认 detach；`keepMounted` 会保留完整 host view，同时在 accessibility tree 中隐藏。
 
+在 0.3 实现中，Trigger 与 Content 在同一 Anatomy domain 内按精确 `value` 配对，`a+b` 与 `a b` 等 key 保持区别。缺失或重复 counterpart 时，对应关系不投影。Web Adapter 拥有宿主 ID，保留作者 ID 与独立的 IDREF token；任一端 detach 时撤销该关系，重新物化时恢复有效的 identity reservation。应用应使用 protocol value，不应依赖生成 ID 的格式。
+
 ## 0.2 交付与证据
 
 稳定版 0.2.0 package 从 `@proto.ui/prototypes-base/tabs` 导出全部五个 authoring surfaces。当前 `base-tabs` CLI facade 生成 Root、List、Trigger 与 Content；Indicator 是 public package authoring surface，但尚未进入该 generated facade。映射的 `T-BASE-TABS-*` entities 覆盖 `packages/prototypes/base/test/tabs.test.ts`，本页 Preview 通过三个 Web Adapter 运行整个 family。

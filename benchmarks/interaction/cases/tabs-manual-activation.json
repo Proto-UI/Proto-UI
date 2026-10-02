@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "id": "tabs-manual-activation",
+  "datasetId": "interaction-benchmark-v0",
+  "split": "development",
+  "origin": "public-calibration",
+  "taskClass": "implementation",
+  "semanticDomain": "html-aria-manual-tabs",
+  "title": "Manual activation reference tabs",
+  "requirements": "Build four horizontal tabs labelled Overview, Unavailable, Details and History in a tablist named Reference sections. Unavailable is disabled. Start with Overview selected and its associated panel visible. Left/Right skip disabled tabs and explicitly wrap around enabled tabs. Home/End move to the first/last enabled tab. Navigation changes focus only; Enter, Space or pointer activation changes selection. Keep one roving tab stop, one selected tab, one visible panel, and reciprocal accessible relationships. Repeated selections must not duplicate controls or panels. Include a Remove reference fixture button followed by an After fixture button; removing the fixture leaves keyboard navigation to the latter available. This fixture explicitly opts into looping; it does not assert a Proto default.",
+  "source": {
+    "repository": "https://github.com/Proto-UI/Proto-UI",
+    "sha": "f5bae261491368b586959f1d8b353cf372775221"
+  },
+  "oracleRef": "public-calibration-tabs-manual-activation-v2",
+  "visibility": {
+    "ordinary": [],
+    "knowledge": [
+      {
+        "path": "benchmarks/interaction/materials/tabs-manual-activation-knowledge.txt",
+        "sha256": "d0c7691246598fc7b688fd8ccb752ff70f67e857eab76bac29079ab9ea1bbecd"
+      }
+    ],
+    "withheld": [
+      "Evaluator code, check identifiers and expected observations are excluded from the participant packet.",
+      "Final fixture implementations, compiled output and raw evaluator artifacts are excluded.",
+      "Packet filtering is not a secure filesystem, git or network boundary."
+    ]
+  },
+  "oracleLayers": [
+    {
+      "kind": "platform",
+      "status": "calibration-only",
+      "references": ["https://www.w3.org/WAI/ARIA/apg/patterns/tabs/"],
+      "note": "Public platform/authoring references for this bounded HTML journey; no independent formal review yet."
+    },
+    {
+      "kind": "independent-journey",
+      "status": "unreviewed",
+      "references": ["scripts/benchmark/browser-calibration.mjs"],
+      "note": "Public black-box calibration journey authored for harness checks; not an independently reviewed hidden oracle."
+    },
+    {
+      "kind": "proto",
+      "status": "unsupported",
+      "references": [
+        "https://github.com/Proto-UI/Proto-UI/blob/f5bae261491368b586959f1d8b353cf372775221/spec/prototypes/P-BASE-TABS.yaml"
+      ],
+      "note": "Draft source context only. Handwritten HTML calibration does not execute or establish Proto UI conformance."
+    }
+  ],
+  "evidenceRequirements": [
+    "artifact",
+    "prompt",
+    "manifest",
+    "events",
+    "checks",
+    "screenshot",
+    "trace",
+    "dom",
+    "accessibility"
+  ],
+  "exclusions": [
+    "All compiler/generated-consumer claims",
+    "All model capability or knowledge-value conclusions"
+  ],
+  "limitations": [
+    "Public case has known answers and cannot be promoted to strict blind held-out.",
+    "The coordinator and fixture authors have seen source criteria; they are not blind measured participants.",
+    "Single Chromium host; accessibility snapshot is not assistive-technology testing."
+  ]
+}

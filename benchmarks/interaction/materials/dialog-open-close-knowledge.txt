@@ -1,0 +1,6 @@
+Public development calibration material only.
+Source: https://github.com/Proto-UI/Proto-UI/blob/f5bae261491368b586959f1d8b353cf372775221/spec/prototypes/P-BASE-DIALOG.yaml
+Entity: P-BASE-DIALOG; lifecycle: draft. Draft direction is not a stable guarantee.
+
+P-BASE-DIALOG-ROLE-MODAL-WINDOW
+Dialog must represent a modal-window protocol that overlays the current workflow and restricts outside interaction while active.

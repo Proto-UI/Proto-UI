@@ -107,7 +107,7 @@ implementations:
       - Light and Dark computed-style assertions cover Shadcn Button, exact default Textarea background and border token paint in three states, a separately consumer-overridden native Textarea, and portaled Hover Card Content; CSSOM assertions reject document-wide and bare native-control resets.
       - A deliberately conflicting base-layer Textarea sentinel must lose to Proto UI defaults, while a later named consumer layer must retain margin, padding, border, background, color, opacity, font, and content-box ownership across all four runtimes.
       - Adjacent enabled/disabled Textarea paint, focus/blur transition endpoints, and Hover Card closed/open endpoints are driven in every Runtime so conditional styles and transition assets cannot be replaced by static mount evidence.
-      - The same browser suite opens a Starlight documentation route and uses competing `theme` and `utilities` layer probes to verify that the earliest Website host prelude establishes the complete order before later styles load.
+      - The same browser suite opens a real Starlight documentation route and preserves the theme-versus-utilities control while mounting actual Shadcn Textareas through all four Web runtimes in Light and Dark. Explicit DemoNode.className inputs enter each Adapter's normalized surface channel; components-layer and utilities-layer padding must override generated Proto UI defaults without inline styles or important priority, while the default control remains unchanged.
 verifies:
   contracts:
     - id: C-PROTOTYPE-STYLE-CLOSURE-0001
@@ -144,6 +144,9 @@ sources:
   - path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
   - path: apps/www/src/pages/en/test/style-isolation.astro
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Strengthened the integrated Starlight cascade probe with real four-runtime Textarea default controls and explicit normalized components/utilities overrides in both themes.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added a Starlight-route browser probe proving the earliest Website host prelude keeps generated theme defaults below explicit consumer layers.

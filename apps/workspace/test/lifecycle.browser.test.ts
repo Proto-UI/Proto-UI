@@ -178,7 +178,7 @@ describe.sequential('Workspace lifecycle review projection', () => {
   }, 60_000);
 
   for (const width of [1440, 390]) {
-    it(`shows the current unreviewed draft and version boundaries at ${width}px`, async () => {
+    it(`keeps the implemented slice draft across version boundaries at ${width}px`, async () => {
       const context = await browser.newContext({ viewport: { width, height: 900 } });
       const page = await context.newPage();
       const errors: string[] = [];
@@ -188,9 +188,9 @@ describe.sequential('Workspace lifecycle review projection', () => {
         const panel = page.locator('.lifecycle-panel');
         await panel.locator(`[data-lifecycle-entity="${testId}"]`).waitFor();
         expect(await panel.innerText()).toContain('未评审草案');
-        expect(await panel.innerText()).toContain('六项 required implementation 均仍为 planned');
+        expect(await panel.innerText()).toContain('保留 draft，等待对应 contract 的独立稳定准入');
         expect(await panel.innerText()).toContain('不等于测试执行结果或稳定性批准');
-        expect(await panel.locator('dd').first().innerText()).toMatch(/^2 \/ \d+$/);
+        expect(await panel.locator('dd').first().innerText()).toMatch(/^11 \/ \d+$/);
         const screenshotDir = process.env.PROTO_UI_LIFECYCLE_SCREENSHOT_DIR;
         if (screenshotDir) {
           await mkdir(screenshotDir, { recursive: true });
@@ -200,7 +200,8 @@ describe.sequential('Workspace lifecycle review projection', () => {
         expect(await panel.innerText()).toContain('Unreviewed drafts');
         await panel.locator('summary').click();
         const gaps = await panel.locator('details li').allTextContents();
-        expect(gaps.filter((gap) => gap.endsWith(' is planned.'))).toHaveLength(6);
+        expect(gaps.filter((gap) => gap.endsWith(' is planned.'))).toHaveLength(0);
+        expect(await panel.innerText()).toContain('Remain draft');
         await panel.locator('summary').click();
         if (screenshotDir)
           await panel.screenshot({ path: path.join(screenshotDir, `lifecycle-en-${width}.png`) });
@@ -211,14 +212,14 @@ describe.sequential('Workspace lifecycle review projection', () => {
         expect(await page.locator('.entity-panel .block-targets').innerText()).toContain(
           'Activation:'
         );
-        expect(await page.locator('.entity-panel .block-targets').innerText()).toContain(
+        expect(await page.locator('.entity-panel .block-targets').innerText()).not.toContain(
           'Implementation:'
         );
         await page.getByRole('combobox', { name: 'To', exact: true }).selectOption('0.2.0');
         await expect.poll(() => panel.locator('dd').first().innerText()).toMatch(/^0 \/ \d+$/);
         expect(await panel.innerText()).not.toContain('Remain draft');
         await page.getByRole('combobox', { name: 'To', exact: true }).selectOption(version);
-        await expect.poll(() => panel.locator('dd').first().innerText()).toMatch(/^2 \/ \d+$/);
+        await expect.poll(() => panel.locator('dd').first().innerText()).toMatch(/^11 \/ \d+$/);
         expect(await panel.innerText()).toContain('Unreviewed drafts');
         expect(await panel.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(
           0
@@ -415,7 +416,10 @@ describe.sequential('Workspace lifecycle review projection', () => {
       await context.route('**/spec-workspace.json', async (route) => {
         const response = await route.fetch();
         const data = await response.json();
-        const slice = data.lifecyclePlans[version].slices[0];
+        const slice = data.lifecyclePlans[version].slices.find((entry: { entities: string[] }) =>
+          entry.entities.includes(testId)
+        );
+        data.lifecyclePlans[version].slices = [slice];
         if (conflict === 'slice ID') slice.entities = [contractId];
         data.lifecyclePlans[version].slices.push({
           ...slice,

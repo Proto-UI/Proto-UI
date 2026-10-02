@@ -95,7 +95,10 @@
     "check:styles:variant-order": "node --import tsx scripts/styles/generate-lowered-variant-order.ts --check",
     "agent:review:smoke": "node scripts/agent-operations/smoke-live-review-input.mjs",
     "release:lifecycle": "tsx scripts/spec/lifecycle-report.mjs",
-    "check:spec-authoring": "tsx scripts/spec/check-lifecycle-authoring.mjs"
+    "check:spec-authoring": "tsx scripts/spec/check-lifecycle-authoring.mjs",
+    "benchmark:validate": "node scripts/benchmark/benchmark.mjs validate",
+    "benchmark:test": "node --test scripts/benchmark/test/*.test.mjs scripts/benchmark/browser-calibration.test.mjs",
+    "benchmark:dry-run": "node scripts/benchmark/benchmark.mjs dry-run"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,mts,json,css,md,mdx,astro,yaml,yml}": "prettier --write"

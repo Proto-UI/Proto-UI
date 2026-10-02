@@ -82,6 +82,40 @@ describe('gpui peer: projection cycle', () => {
       { ref: 'focus-root', sequential: true, programmatic: true },
     ]);
   });
+
+  it('carries the first accessibility snapshot in the install without sending it early', async () => {
+    await harness.peer.mount();
+
+    const installIndex = harness.host.sent.findIndex(
+      (message) => message.kind === 'projection.install'
+    );
+    expect(installIndex).toBeGreaterThanOrEqual(0);
+    expect(
+      harness.host.sent.slice(0, installIndex).some((message) => message.kind === 'a11y.snapshot')
+    ).toBe(false);
+    expect(harness.host.last('projection.install')!.transaction.a11y).toMatchObject({
+      role: 'button',
+      name: { kind: 'content' },
+      states: { disabled: false },
+    });
+
+    await harness.peer.dispose();
+  });
+
+  it('continues sending accessibility updates for the installed view', async () => {
+    await harness.peer.mount();
+    harness.host.clear();
+
+    harness.peer.setProps({ disabled: true });
+    expect(harness.host.of('a11y.snapshot')).toContainEqual(
+      expect.objectContaining({
+        viewEpoch: 1,
+        snapshot: expect.objectContaining({ states: expect.objectContaining({ disabled: true }) }),
+      })
+    );
+
+    await harness.peer.dispose();
+  });
 });
 
 describe('gpui peer: interaction', () => {

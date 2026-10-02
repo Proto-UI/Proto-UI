@@ -23,7 +23,119 @@ async function waitForFrameCondition(predicate: () => boolean, maxFrames = 20): 
   throw new Error('Timed out waiting for frame condition.');
 }
 
+function createRelationshipTabs(keys: string[], contentKeys = keys, keepMounted = true) {
+  const root = document.createElement('base-tabs-root') as any;
+  const list = document.createElement('base-tabs-list');
+  setElementProps(root, { defaultValue: keys[0] });
+  const triggers = keys.map((value) => {
+    const trigger = document.createElement('base-tabs-trigger') as any;
+    setElementProps(trigger, { value });
+    list.appendChild(trigger);
+    return trigger;
+  });
+  const contents = contentKeys.map((value) => {
+    const content = document.createElement('base-tabs-content') as any;
+    setElementProps(content, { value, keepMounted });
+    return content;
+  });
+  root.append(list, ...contents);
+  return { root, triggers, contents };
+}
+
 describe('prototypes/base: tabs', () => {
+  it('matches exact relationship keys and fails closed for missing or duplicate content', async () => {
+    // T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
+    // T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+    const { root, triggers, contents } = createRelationshipTabs(
+      ['a+b', 'a b', 'missing', 'duplicate'],
+      ['a+b', 'a b', 'duplicate', 'duplicate']
+    );
+    try {
+      document.body.appendChild(root);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(root.getExposes().value.get()).toBe('a+b');
+      expect(contents[0].id).not.toBe('');
+      expect(contents[1].id).not.toBe('');
+      expect(contents[0].id).not.toBe(contents[1].id);
+      for (const index of [0, 1]) {
+        expect(triggers[index].getAttribute('aria-controls')).toBe(contents[index].id);
+        expect(contents[index].getAttribute('aria-labelledby')).toBe(triggers[index].id);
+      }
+      expect(triggers[2].hasAttribute('aria-controls')).toBe(false);
+      expect(triggers[3].hasAttribute('aria-controls')).toBe(false);
+
+      contents[3].remove();
+      await waitForFrameCondition(() => !!triggers[3].getAttribute('aria-controls'));
+      expect(triggers[3].getAttribute('aria-controls')).toBe(contents[2].id);
+    } finally {
+      root.remove();
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+  });
+
+  it('keeps same-key relationships inside adjacent and nested Tabs domains', async () => {
+    // T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
+    const outer = createRelationshipTabs(['shared']);
+    const nested = createRelationshipTabs(['shared']);
+    const adjacent = createRelationshipTabs(['shared']);
+    const host = document.createElement('div');
+    outer.root.appendChild(nested.root);
+    host.append(outer.root, adjacent.root);
+    try {
+      document.body.appendChild(host);
+      await Promise.resolve();
+      await Promise.resolve();
+
+      const ids = [outer, nested, adjacent].map(({ triggers, contents }) => {
+        expect(contents[0].id).not.toBe('');
+        expect(triggers[0].getAttribute('aria-controls')).toBe(contents[0].id);
+        expect(contents[0].getAttribute('aria-labelledby')).toBe(triggers[0].id);
+        return contents[0].id;
+      });
+      expect(new Set(ids).size).toBe(3);
+    } finally {
+      host.remove();
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+  });
+
+  it('withdraws lazy panel IDREFs and restores the same identity after rematerialization', async () => {
+    // T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE
+    // T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+    const { root, triggers, contents } = createRelationshipTabs(['a', 'b'], ['a', 'b'], false);
+    try {
+      document.body.appendChild(root);
+      await waitForFrameCondition(() => contents[0].tabIndex === 0);
+      const firstId = contents[0].id;
+      expect(firstId).not.toBe('');
+      expect(triggers[0].getAttribute('aria-controls')).toBe(firstId);
+      expect(triggers[1].hasAttribute('aria-controls')).toBe(false);
+
+      triggers[1].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await waitForFrameCondition(() => contents[1].tabIndex === 0);
+      expect(root.getExposes().value.get()).toBe('b');
+      expect(contents[0].getExposes().hidden.get()).toBe(true);
+      expect(triggers[0].hasAttribute('aria-controls')).toBe(false);
+      expect(triggers[1].getAttribute('aria-controls')).toBe(contents[1].id);
+
+      triggers[0].dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await waitForFrameCondition(() => contents[0].tabIndex === 0);
+      expect(root.getExposes().value.get()).toBe('a');
+      expect(contents[0].id).toBe(firstId);
+      expect(triggers[0].getAttribute('aria-controls')).toBe(firstId);
+      expect(contents[0].getAttribute('aria-labelledby')).toBe(triggers[0].id);
+      expect(triggers[1].hasAttribute('aria-controls')).toBe(false);
+    } finally {
+      root.remove();
+      await Promise.resolve();
+      await Promise.resolve();
+    }
+  });
+
   it('declares tabs anatomy family including optional indicator', () => {
     // T-BASE-TABS-0001-CASE-ANATOMY-FAMILY
     expect(TABS_FAMILY.debugName).toBe('base-tabs');

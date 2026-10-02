@@ -30,6 +30,7 @@ query($owner: String!, $name: String!, $number: Int!) {
       isDraft
       mergeable
       mergeStateStatus
+      viewerCanMergeAsAdmin
       changedFiles
       body
       baseRefName
@@ -514,6 +515,10 @@ export function buildLiveReviewInput(
     input,
     viewerLogin: payload.data.viewer.login,
     viewerPermission: payload.data.repository.viewerPermission,
+    viewerCanMergeAsAdmin:
+      typeof pullRequestPayload.viewerCanMergeAsAdmin === 'boolean'
+        ? pullRequestPayload.viewerCanMergeAsAdmin
+        : null,
     authorLogin: input.pullRequestAuthor,
     mergeable: pullRequestPayload.mergeable,
     mergeStateStatus: pullRequestPayload.mergeStateStatus,
@@ -723,6 +728,8 @@ export function authorizeLivePullRequestMerge(context, live) {
     policy,
     selfAssessment: context.selfAssessment,
     credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
+    credentialPermission: live.viewerPermission,
+    credentialCanBypass: live.viewerCanMergeAsAdmin,
     actor: live.viewerLogin,
     ciConclusion: summarizeLiveChecks(live.input.checks, {
       repositoryId: context.packet.repositoryId,
@@ -864,8 +871,20 @@ export function submitGitHubMerge(
     before.base.sha !== expectedBaseSha
   )
     throw new Error('merge preflight head, base, target or open state changed; no PUT attempted');
-  if (before.mergeable !== true || before.mergeable_state !== 'clean')
-    throw new Error('final GitHub merge readiness is not clean; no PUT attempted');
+  // Use the same accepted policy at the last REST boundary, including its
+  // narrow, source-bound preview-authorization exception. The writer's fresh
+  // collection supplies checks, publisher eligibility and bypass capability;
+  // a caller cannot substitute a permission flag or waive an unrelated failure.
+  const restAuthorization = authorizeLivePullRequestMerge(authorizationContext, {
+    ...finalLive,
+    mergeable: before.mergeable === true ? 'MERGEABLE' : 'UNKNOWN',
+    mergeStateStatus:
+      typeof before.mergeable_state === 'string' ? before.mergeable_state.toUpperCase() : 'UNKNOWN',
+  });
+  if (!restAuthorization.allowed)
+    throw new Error(
+      `final GitHub merge readiness is not eligible: ${restAuthorization.reason}; no PUT attempted`
+    );
   const base = read(`${prefix}/git/ref/heads/${encodeURIComponent(baseRefName)}`);
   if (
     base.ref !== `refs/heads/${baseRefName}` ||

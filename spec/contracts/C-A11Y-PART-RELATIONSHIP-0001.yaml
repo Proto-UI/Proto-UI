@@ -4,8 +4,8 @@ title: Same-domain anatomy-part relationship projection
 status: draft
 since: 0.3.0-alpha.0
 lifecycleRationale:
-  zh-CN: 以 draft 编目已接受的 relationship 方向；T-A11Y-PART-RELATIONSHIP-0001 的六项 required implementation 仍为 planned，structured carrier、宿主生命周期与 Tabs migration 尚未形成可验收的执行证据。
-  en: Cataloged as draft for the accepted relationship direction; all six required implementations in T-A11Y-PART-RELATIONSHIP-0001 remain planned, so the structured carrier, host lifecycle, and Tabs migration lack acceptance evidence.
+  zh-CN: 已实现 accepted relationship 方向及六项 required executable mappings；保留 draft，等待独立维护者对完整实现、宿主证据与稳定语义准入的审查。passing mappings 不自动构成 active 保证。
+  en: The accepted relationship direction and six required executable mappings are implemented. Remains draft pending independent maintainer review of the complete implementation, host evidence, and stable semantic admission; passing mappings do not automatically establish an active guarantee.
 summary: Governs how compound prototypes declare structured same-domain part-to-part accessibility relationships and how adapters project them to host IDREF attributes without guessing, breaking L1 detach, leaking resources, overwriting host-authored identity, or leaking host identity into portable state.
 statement:
   zh-CN: >-
@@ -64,16 +64,19 @@ criteria:
 openQuestions:
   - id: C-A11Y-PART-RELATIONSHIP-0001-Q-IMPLEMENTATION
     question:
-      zh-CN: 何时能为已接受的 structured relationship、宿主生命周期与 Tabs migration 补齐 required executable evidence？
-      en: When will the accepted structured relationship, host lifecycle, and Tabs migration have the required executable evidence?
+      zh-CN: 何时完成对 structured relationship、宿主生命周期及 Tabs migration 的独立稳定语义准入？
+      en: When will the structured relationship, host lifecycle, and Tabs migration receive independent admission as stable semantics?
     context:
-      zh-CN: '#553 合入的是 draft contract 与 planned test mappings；#549 的实现仍需完成。现有测试路径存在不等于已经覆盖这些 cases。'
-      en: '#553 integrated the draft contract and planned test mappings; the implementation tracked by #549 remains incomplete. Existing test paths do not prove coverage of these cases.'
+      zh-CN: '#553 接受了 draft contract；#549 实现了 carrier、按完整 tuple 的解析、lease 生命周期、Web ownership 与 Tabs migration，并补入实际执行断言。稳定准入仍需独立维护者审查，不能仅由文件存在或 passing 标记推断。'
+      en: '#553 admitted the draft contract; #549 implements the carrier, exact-tuple resolution, lease lifecycle, Web ownership, and Tabs migration with executable assertions. Stable admission still requires independent maintainer review, not file existence or a passing label alone.'
     blocks:
       - activation:C-A11Y-PART-RELATIONSHIP-0001
       - activation:T-A11Y-PART-RELATIONSHIP-0001
-      - implementation:T-A11Y-PART-RELATIONSHIP-0001#runtime-a11y-part-relationship-contract
 sources:
+  - path: packages/core/src/a11y.ts
+  - path: packages/modules/a11y/src/part-relationships.ts
+  - path: packages/modules/a11y/src/create.ts
+  - path: packages/modules/a11y/src/web.ts
   - path: internal/records/2026-08-26-same-domain-anatomy-relationship-design.md
     label: Same-domain anatomy-part relationship design record
   - path: spec/decisions/D-A11Y-PART-RELATIONSHIP-PROJECTION-0001.yaml
@@ -99,6 +102,9 @@ verifies:
   tests:
     - T-A11Y-PART-RELATIONSHIP-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded the structured carrier, bounded relationship service, host lease realization and executable mappings without promoting the draft contract.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Recorded the remain-draft lifecycle rationale and explicit activation blockers for the still-planned relationship implementation evidence.

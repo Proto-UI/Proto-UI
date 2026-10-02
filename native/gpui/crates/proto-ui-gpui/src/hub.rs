@@ -16,8 +16,8 @@ use std::collections::HashMap;
 
 use gpui::{Context, FocusHandle, StyleRefinement, Window};
 use proto_ui_host_protocol::messages::{
-    FocusResult, HostToPeerMessage, InputSampleMessage, OpenStatus, PeerToHostMessage,
-    ProjectionAckMessage, SessionOpen, WireRecord,
+    ExposeCall, FocusResult, HostToPeerMessage, InputSampleMessage, OpenStatus, PeerToHostMessage,
+    ProjectionAckMessage, PropsSet, SessionDispose, SessionOpen, WireRecord,
 };
 use proto_ui_host_protocol::model::{
     ActivationStatus, DeliveryResult, HostSessionModel, InstallOptions,
@@ -27,7 +27,7 @@ use proto_ui_host_protocol::wire::{
     ProjectionTransaction, SessionId,
 };
 use proto_ui_style::Theme;
-use serde_json::json;
+use serde_json::{json, Value};
 
 use crate::host::{ProtoHostView, SurfaceChild, SurfaceNode};
 use crate::input::{SessionRoute, SurfaceId};
@@ -105,6 +105,7 @@ pub struct HostHub {
     sessions: Vec<(SessionId, HubSession)>,
     outbox: Vec<HostToPeerMessage>,
     notes: Vec<HubNote>,
+    next_call: u64,
 }
 
 impl HostHub {
@@ -213,6 +214,41 @@ impl ProtoHostView {
                 states: WireRecord::new(),
             },
         ));
+    }
+
+    /// Replaces a session's props. The peer re-renders, which arrives as a
+    /// new commit in the current view.
+    pub fn set_props(&mut self, session_id: &str, props: WireRecord) {
+        self.hub.outbox.push(HostToPeerMessage::PropsSet(PropsSet {
+            session_id: session_id.to_string(),
+            props,
+        }));
+    }
+
+    /// Calls a method the instance exposes, returning the call's identifier;
+    /// the peer answers with an `expose.result` carrying it.
+    pub fn call_exposed(&mut self, session_id: &str, name: &str, args: Vec<Value>) -> String {
+        self.hub.next_call += 1;
+        let call_id = format!("{session_id}:call:{}", self.hub.next_call);
+        self.hub
+            .outbox
+            .push(HostToPeerMessage::ExposeCall(ExposeCall {
+                session_id: session_id.to_string(),
+                call_id: call_id.clone(),
+                name: name.to_string(),
+                args,
+            }));
+        call_id
+    }
+
+    /// Asks the peer to end a session. Its surfaces stay until the peer
+    /// reports `session.disposed`, which is when the host tears them down.
+    pub fn dispose_session(&mut self, session_id: &str) {
+        self.hub
+            .outbox
+            .push(HostToPeerMessage::SessionDispose(SessionDispose {
+                session_id: session_id.to_string(),
+            }));
     }
 
     /// Handles one message from the peer.

@@ -1,0 +1,86 @@
+name: Interaction benchmark calibration
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/interaction-benchmark-calibration.yml'
+      - 'scripts/benchmark/**'
+      - 'benchmarks/interaction/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'apps/www/package.json'
+      - 'pnpm-workspace.yaml'
+  workflow_dispatch:
+
+# Public handwritten calibration only. No model endpoint, credentials, hidden
+# oracle, repository mutations, release, deployment, or pull_request_target.
+permissions:
+  contents: read
+
+concurrency:
+  group: interaction-calibration-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  public-calibration:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install locked workspace dependencies
+        timeout-minutes: 3
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Locate runner-provided Chromium
+        run: |
+          set -euo pipefail
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser) || {
+            echo 'BLOCKED: runner has no Chrome/Chromium executable'; exit 1;
+          }
+          "$CHROME" --version
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Validate schemas and failure-path tests
+        timeout-minutes: 1
+        run: corepack pnpm@10.32.1 benchmark:test
+      - name: Real-browser positive and negative controls
+        env:
+          PROTO_BENCHMARK_BROWSER_TESTS: '1'
+          PROTO_BENCHMARK_EVIDENCE_ROOT: ${{ runner.temp }}/interaction-controls
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/interaction-controls"
+          timeout --signal=TERM --kill-after=10s 90s node --test scripts/benchmark/browser-calibration.test.mjs 2>&1 | tee "$RUNNER_TEMP/interaction-controls/browser-tests.log"
+      - name: Public dry run with repeated packet arms
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/interaction-controls"
+          timeout --signal=TERM --kill-after=10s 90s node scripts/benchmark/benchmark.mjs dry-run --out "$RUNNER_TEMP/interaction-calibration" --repeats 2 2>&1 | tee "$RUNNER_TEMP/interaction-controls/dry-runner.log"
+      - name: Verify retained archive
+        if: always()
+        run: |
+          if test -d "$RUNNER_TEMP/interaction-calibration"; then
+            node scripts/benchmark/benchmark.mjs verify --out "$RUNNER_TEMP/interaction-calibration"
+          else
+            echo 'No calibration archive: inspect earlier setup/control failure logs.'
+          fi
+      - name: Retain public raw evidence even on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: interaction-calibration-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/interaction-calibration
+            ${{ runner.temp }}/interaction-controls
+          # Only the two public calibration directories above are uploaded.
+          # The allowlisted source snapshot includes .github/workflows; dropping
+          # dot-directories would invalidate its sealed inventory after download.
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 30

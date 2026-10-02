@@ -28,12 +28,19 @@ jobs:
       REPOSTEWARD_COMMIT: e5db7d3496ef15072135533c5b9f4da91084b553
       REPOSTEWARD_RAW_PATH: reposteward-portfolio.json
       REPOSTEWARD_ENVELOPE_PATH: reposteward-portfolio-envelope.json
-      REPOSTEWARD_SOURCE: ${{ runner.temp }}/reposteward/source
-      REPOSTEWARD_CONFIG_PATH: ${{ runner.temp }}/reposteward/project.toml
-      XDG_CONFIG_HOME: ${{ runner.temp }}/reposteward/config
-      XDG_STATE_HOME: ${{ runner.temp }}/reposteward/state
-      XDG_DATA_HOME: ${{ runner.temp }}/reposteward/data
     steps:
+      - name: Initialize ephemeral trial paths
+        run: |
+          set -euo pipefail
+          # Job-level env is evaluated before runner context is available.
+          # Publish these runner-owned paths only after the job starts.
+          printf '%s\n' \
+            "REPOSTEWARD_SOURCE=${RUNNER_TEMP}/reposteward/source" \
+            "REPOSTEWARD_CONFIG_PATH=${RUNNER_TEMP}/reposteward/project.toml" \
+            "XDG_CONFIG_HOME=${RUNNER_TEMP}/reposteward/config" \
+            "XDG_STATE_HOME=${RUNNER_TEMP}/reposteward/state" \
+            "XDG_DATA_HOME=${RUNNER_TEMP}/reposteward/data" >> "${GITHUB_ENV}"
+
       - uses: actions/checkout@v4
         with:
           persist-credentials: false

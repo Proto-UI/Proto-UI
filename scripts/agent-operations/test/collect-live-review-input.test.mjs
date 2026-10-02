@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
 import {
+  QUERY,
   assertNoTruncation,
   buildLiveReviewInput,
   collectLiveReviewInput,
@@ -61,6 +62,7 @@ function payload(overrides = {}) {
           isDraft: false,
           mergeable: 'MERGEABLE',
           mergeStateStatus: 'CLEAN',
+          viewerCanMergeAsAdmin: false,
           changedFiles: changedFiles.length,
           body: 'Bounded target',
           baseRefName: 'main',
@@ -186,6 +188,7 @@ test('live collector builds a complete canonical input from the GraphQL payload'
   );
   assert.equal(result.viewerLogin, 'reviewer');
   assert.equal(result.viewerPermission, 'WRITE');
+  assert.equal(result.viewerCanMergeAsAdmin, false);
   assert.equal(result.authorLogin, 'contributor');
   assert.equal(result.mergeable, 'MERGEABLE');
   assert.equal(result.mergeStateStatus, 'CLEAN');
@@ -371,6 +374,18 @@ test('live collector preserves unavailable review identity as null', () => {
     changedFiles
   );
   assert.equal(result.input.reviews[0].author, null);
+});
+
+test('live collector preserves bypass capability and leaves missing capability unknown', () => {
+  for (const capability of [true, false, undefined, 'false']) {
+    const current = payload();
+    current.data.repository.pullRequest.viewerCanMergeAsAdmin = capability;
+    assert.equal(
+      buildLiveReviewInput(current, repositoryId, 487, [], changedFiles).viewerCanMergeAsAdmin,
+      typeof capability === 'boolean' ? capability : null
+    );
+  }
+  assert.match(QUERY, /viewerCanMergeAsAdmin/);
 });
 
 test('live collector fails closed on pagination truncation for every connection', () => {
@@ -601,7 +616,7 @@ test('review submission binds the GitHub Review API write to the inspected commi
   );
 });
 
-function mergeAuthorizationFixture() {
+function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
   const policy = parseYaml(
     readFileSync(
       new URL('../../../internal/agent-operations/capability-policy.yaml', import.meta.url),
@@ -614,6 +629,20 @@ function mergeAuthorizationFixture() {
   pull.comments.nodes = [];
   pull.reviewThreads.nodes = [];
   const evidence = agentEvidence(sha('b'));
+  if (previewAuthorization) {
+    pull.mergeStateStatus = 'UNSTABLE';
+    evidence.debt.push({
+      kind: 'publication',
+      missing: 'Vercel preview deployment',
+      reason: 'The verified Vercel Bot reports missing preview authorization.',
+      nextAction: 'Authorize the preview and verify its publication.',
+      previewAuthorization: {
+        provider: 'vercel',
+        checkName: 'Vercel',
+        authorizationUrl: 'https://vercel.com/git/authorize?team=external',
+      },
+    });
+  }
   pull.reviews.nodes = [
     {
       id: 'PRR_independent',
@@ -643,6 +672,16 @@ function mergeAuthorizationFixture() {
       },
     },
   ];
+  if (previewAuthorization) {
+    contexts.nodes.push({
+      __typename: 'StatusContext',
+      context: 'Vercel',
+      state: 'FAILURE',
+      targetUrl: 'https://vercel.com/git/authorize?team=external',
+      createdAt: '2026-08-23T06:00:00Z',
+      creator: { __typename: 'Bot', login: 'vercel' },
+    });
+  }
   const permission = { user: { login: 'independent-reviewer' }, permission: 'write' };
   const runner = (_command, args) => {
     if (args.includes('graphql')) return JSON.stringify(raw);
@@ -710,8 +749,9 @@ function mergeFixture({
   putResponse = null,
   branchSha = null,
   alterAuthorization = null,
+  previewAuthorization = false,
 } = {}) {
-  const currentAuthorization = mergeAuthorizationFixture();
+  const currentAuthorization = mergeAuthorizationFixture({ previewAuthorization });
   alterAuthorization?.(currentAuthorization);
   const calls = [];
   let writes = 0;
@@ -738,6 +778,7 @@ function mergeFixture({
     calls,
     open,
     merged,
+    authorizationContext: currentAuthorization.authorizationContext,
     get writes() {
       return writes;
     },
@@ -788,6 +829,77 @@ const mergeOptions = {
   mergeMethod: 'squash',
 };
 const fastVerification = { verificationAttempts: 3, verificationDelayMs: 0, wait() {} };
+
+for (const permission of ['WRITE', 'MAINTAIN']) {
+  test(`merge writer preserves verified preview authorization with live ${permission} permission`, () => {
+    const fixture = mergeFixture({
+      previewAuthorization: true,
+      before: { mergeable_state: 'unstable' },
+      alterAuthorization(f) {
+        f.raw.data.repository.viewerPermission = permission;
+        f.authorizationContext.viewerPermission = permission;
+      },
+    });
+    const result = submitGitHubMerge(
+      repositoryId,
+      487,
+      { ...mergeOptions, authorizationContext: fixture.authorizationContext },
+      fixture.runner,
+      fastVerification
+    );
+    assert.equal(result.merged, true);
+    assert.equal(result.mergeParentSha, sha('a'));
+    assert.equal(fixture.writes, 1);
+  });
+}
+
+for (const capability of [true, null, undefined, 'false']) {
+  test(`merge writer rejects preview authorization when live bypass is ${String(capability)}`, () => {
+    const fixture = mergeFixture({
+      previewAuthorization: true,
+      before: { mergeable_state: 'unstable' },
+      alterAuthorization(f) {
+        f.raw.data.repository.pullRequest.viewerCanMergeAsAdmin = capability;
+        // Caller-supplied facts cannot replace the writer's fresh GitHub read.
+        f.authorizationContext.credentialCanBypass = false;
+      },
+    });
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          repositoryId,
+          487,
+          { ...mergeOptions, authorizationContext: fixture.authorizationContext },
+          fixture.runner,
+          fastVerification
+        ),
+      /merge eligibility|merge readiness/
+    );
+    assert.equal(fixture.writes, 0);
+  });
+}
+
+for (const before of [
+  { mergeable: true, mergeable_state: 'blocked' },
+  { mergeable: true, mergeable_state: 'dirty' },
+  { mergeable: null, mergeable_state: 'unknown' },
+]) {
+  test(`verified preview debt does not override final REST state ${before.mergeable_state}`, () => {
+    const fixture = mergeFixture({ previewAuthorization: true, before });
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          repositoryId,
+          487,
+          { ...mergeOptions, authorizationContext: fixture.authorizationContext },
+          fixture.runner,
+          fastVerification
+        ),
+      /merge readiness/
+    );
+    assert.equal(fixture.writes, 0);
+  });
+}
 
 for (const before of [
   { mergeable: false, mergeable_state: 'blocked' },

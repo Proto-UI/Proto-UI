@@ -120,9 +120,12 @@ criteria:
     dependsOn:
       decisions:
         - D-A11Y-PART-RELATIONSHIP-PROJECTION-0001
+      contracts:
+        - id: C-A11Y-PART-RELATIONSHIP-0001
+          since: 0.3.0-alpha.1
     note:
-      zh-CN: 第一阶段通过 a11y relation target 投射为 Web `aria-labelledby`；后续仍可演进 adapter 生成目标 identity 的方式。
-      en: The first phase projects the a11y relation target to Web `aria-labelledby`; later work may still evolve how adapters generate target identity.
+      zh-CN: labelledBy 使用 C-A11Y-PART-RELATIONSHIP-0001 的同 domain、trigger role 与精确 value key；两端 L1 detach 都撤销本 lease 的关系，恢复时沿用有效 identity reservation。
+      en: labelledBy uses the same domain, trigger role and exact value key governed by C-A11Y-PART-RELATIONSHIP-0001; either endpoint L1 detach withdraws this lease and rematerialization reuses the valid identity reservation.
   - id: P-BASE-TABS-CONTENT-A11Y-HIDDEN
     text:
       zh-CN: 在具备 accessibility projection 的宿主中，非 current Tabs Content 的 hidden 状态必须被投射到 accessibility semantic tree。
@@ -173,6 +176,9 @@ verifies:
   tests:
     - T-BASE-TABS-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Migrated reciprocal Tabs accessibility relationships to the exact-key same-domain service without changing selection, Context or focus ownership.
   - version: 0.1.0
     change: introduced
     summary: Added the first Base Tabs Content protocol catalog.

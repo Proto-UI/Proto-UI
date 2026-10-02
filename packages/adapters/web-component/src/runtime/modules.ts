@@ -3,6 +3,7 @@ import {
   cancelWebEventDefaultAction,
   createCapsWiring,
   createWebMoveGestureHost,
+  type HostSurfaceProjection,
   type LogicalInstanceToken,
 } from '@proto.ui/adapter-base';
 import {
@@ -281,6 +282,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
 
 export function createWebComponentModules<Props extends PropsBaseType>(args: {
   el: HTMLElement;
+  surfaceProjection: HostSurfaceProjection<HTMLElement>;
   instanceToken: LogicalInstanceToken;
   router: {
     rootTarget: EventTarget;
@@ -364,8 +366,18 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [
         A11Y_PROJECT_CAP,
         createWebA11yProjector(
-          () => physicalControl() ?? physicalImage() ?? getConnectedTriggerSurface(),
-          (listener) => subscribeLogicalTriggerSurface(instanceToken, listener)
+          () => {
+            const surface = args.surfaceProjection.getSurfaceTarget();
+            return surface === el ? getConnectedTriggerSurface() : surface;
+          },
+          (listener) => {
+            const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
+            const offTrigger = subscribeLogicalTriggerSurface(instanceToken, listener);
+            return () => {
+              offSurface();
+              offTrigger();
+            };
+          }
         ),
       ],
     ])

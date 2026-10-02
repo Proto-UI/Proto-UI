@@ -261,6 +261,13 @@ jobs:
           # zero tests; require that one actually ran.
           grep -Eq "test result: ok\. [1-9][0-9]* passed" t0_peer.log
 
+      - name: Base Button over T0 in a GPUI window
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test button_t0 -- --ignored --test-threads=1 2>&1 | tee button_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" button_t0.log
+
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 20

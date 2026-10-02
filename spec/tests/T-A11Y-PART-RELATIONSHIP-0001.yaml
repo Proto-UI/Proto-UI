@@ -4,9 +4,9 @@ title: Same-domain anatomy-part relationship conformance
 status: draft
 since: 0.3.0-alpha.0
 lifecycleRationale:
-  zh-CN: 以 draft 建立七个 conformance cases 的执行映射；六项 required implementation 均仍为 planned，尚不能把现有测试路径表述为这些 cases 已通过的证据。
-  en: Introduced as a draft execution map for seven conformance cases; all six required implementations remain planned, so the existing test paths cannot be claimed as passing evidence for these cases.
-summary: Maps the structured relationship carrier, fail-closed matching, view lifecycle, host-id ownership, terminal cleanup, and Tabs migration criteria to the existing Runtime, Web adapter, and Base Tabs test surfaces that must implement them.
+  zh-CN: 七个 cases 已有实际 Runtime、Web ownership 与四 Adapter Tabs 执行断言；保留 draft，等待对应 contract 的独立稳定准入。React 仿真测试的 retained 范围与真实浏览器 L1 证据分开记录。
+  en: The seven cases now have executable Runtime, Web ownership and four-Adapter Tabs assertions. Remains draft pending independent stable admission of the corresponding contract; React simulation covers retained bindings separately from real-browser L1 evidence.
+summary: Maps the structured relationship carrier, exact matching, view epochs, host-id ownership, resource cleanup and Tabs migration to executable owning-layer, Runtime and four-Adapter tests.
 cases:
   - id: T-A11Y-PART-RELATIONSHIP-0001-CASE-STRUCTURED-CARRIER
     title: Structured relationship declarations preserve portable identity fields without exposing host data
@@ -62,7 +62,7 @@ cases:
 implementations:
   - id: runtime-a11y-part-relationship-contract
     kind: runtime-test
-    status: planned
+    status: passing
     path: packages/runtime/test/contract/a11y.v0.contract.test.ts
     required: true
     consumesCases:
@@ -70,10 +70,10 @@ implementations:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP
     notes:
-      - Existing test path is the required implementation target; planned status makes no passing claim in PR #553.
+      - Actual Runtime sessions exercise the generic authored family, derived structural carrier, dynamic key/domain changes, both endpoint epochs, intent-before-removal and bounded projector cleanup.
   - id: web-component-a11y-part-relationship-contract
     kind: adapter-test
-    status: planned
+    status: passing
     path: packages/adapters/web-component/test/contract/a11y.v0.contract.test.ts
     required: true
     consumesCases:
@@ -81,10 +81,10 @@ implementations:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-HOST-ID-OWNERSHIP
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-SAME-EPOCH-REPLACEMENT
     notes:
-      - Existing test path is the required Web projection target; planned status makes no passing claim in PR #553.
+      - Actual WC elements exercise both endpoint detach/remount and host ID mutation/collision. The actual WC surface capability provider exercises same-epoch source and native target replacement plus stale-epoch rejection.
   - id: base-tabs-structured-relationship-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/base/test/tabs.test.ts
     required: true
     consumesCases:
@@ -92,24 +92,26 @@ implementations:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
     notes:
-      - Existing test path is the required Web Component Tabs migration target; planned status makes no passing claim in PR #553.
+      - Actual WC Tabs exercise exact keys, ambiguity and recovery, nested/adjacent domains and lazy identity retention while preserving selection and keyboard coverage.
   - id: react-tabs-structured-relationship-contract
     kind: adapter-test
-    status: planned
+    status: passing
     path: packages/adapters/react/test/tabs.test.ts
     required: true
     consumesCases:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
+    notes:
+      - React simulation covers retained exact-key bindings, ambiguity recovery and domain isolation. Real React DOM browser evidence is required separately for physical L1 removal and reveal ordering.
   - id: vue-tabs-structured-relationship-contract
     kind: adapter-test
-    status: planned
+    status: passing
     path: packages/adapters/vue/test/tabs.test.ts
     required: true
     consumesCases:
       - T-A11Y-PART-RELATIONSHIP-0001-CASE-TABS-MIGRATION
   - id: vue2-tabs-structured-relationship-contract
     kind: adapter-test
-    status: planned
+    status: passing
     path: packages/adapters/vue2/test/tabs.test.ts
     required: true
     consumesCases:
@@ -143,6 +145,9 @@ sources:
   - path: packages/adapters/vue/test/tabs.test.ts
   - path: packages/adapters/vue2/test/tabs.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Implemented all six required paths, with explicit Runtime/host ownership assertions, exact-key Tabs migration and honest React simulation versus browser evidence boundaries.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Recorded the remain-draft lifecycle rationale while preserving all six required implementation mappings as planned.

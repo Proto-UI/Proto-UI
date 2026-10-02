@@ -32,6 +32,8 @@ Indicator is a presentational context consumer. It exposes current value, active
 
 The Web profile projects tablist, tab, and tabpanel relationships. Disabled triggers remain outside selection. Automatic activation selects while focus moves; manual activation keeps focus navigation and selection separate. Inactive Content detaches by default; `keepMounted` preserves the complete host view while accessibility-hidden.
 
+In the 0.3 implementation, Trigger and Content pair by exact `value` within their Anatomy domain. Keys such as `a+b` and `a b` remain distinct. Missing or duplicate counterparts leave the corresponding relationship unprojected. Web adapters own the host IDs, preserve authored IDs and independent IDREF tokens, withdraw the pair while either endpoint is detached, and restore a valid reserved identity on rematerialization. Applications should use protocol values rather than depend on a generated ID format.
+
 ## 0.2 delivery and evidence
 
 The stable 0.2.0 package exports all five authoring surfaces from `@proto.ui/prototypes-base/tabs`. The current `base-tabs` CLI facade generates Root, List, Trigger, and Content; Indicator remains a public package authoring surface but is not included in that generated facade. The mapped `T-BASE-TABS-*` entities cover `packages/prototypes/base/test/tabs.test.ts`, and this preview exercises the family through all three Web adapters.

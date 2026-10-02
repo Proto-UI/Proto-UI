@@ -32,10 +32,23 @@ criteria:
         The host capability must let adapters bind opaque semantic-object refs and ordered ref relationships to current accessibility targets and revoke their own projection when a target is unavailable, a view is replaced, or the logical object is terminally disposed; the capability does not require the host to resolve protocol match keys. Web host projection may set aria-level only when a snapshot carries both heading role and a valid level; when level is omitted, role is no longer heading, the target is replaced, or the view detaches or disposes, it must clear aria-level from the previous physical target and restore the current value when a valid snapshot rematerializes.
 
 
+  - id: HC-A11Y-0001-PART-LEASES
+    text:
+      en: Web part-relationship projection checks both endpoint epochs and accepts current physical bindings before the corresponding reveal. Target-change notifications synchronously replace ownership; host ID observation rechecks collisions and preserves authored values. The capability reports binding readiness so an unbound successor cannot prematurely release the previous logical identity reservation.
+      zh-CN: Web part relationship 投影校验两端 epoch，并在对应 reveal 前接纳当前物理 binding。target-change notification 同步替换 ownership；宿主 ID observation 重新校验冲突并保留作者值。capability 报告 binding readiness，避免尚未绑定的后继提前释放旧 logical identity reservation。
+    dependsOn:
+      contracts:
+        - id: C-A11Y-PART-RELATIONSHIP-0001
+          since: 0.3.0-alpha.1
 relates:
   contracts:
     - C-A11Y-0001
+    - id: C-A11Y-PART-RELATIONSHIP-0001
+      since: 0.3.0-alpha.1
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added epoch-aware part relationship projection, non-destructive ID observation and binding readiness for identity transfer before reveal.
   - version: 0.1.0
     change: introduced
     summary: Drafted the host projection capability for a11y semantic IR.

@@ -1,5 +1,7 @@
 // @vitest-environment node
 
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import type { Browser, BrowserContext, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -12,6 +14,7 @@ import {
 } from './browser-harness';
 
 const ROUTE = '/en/test/style-isolation/';
+const WEBSITE_ROUTE = '/en/ui-libraries/shadcn/select/';
 const VIEWPORT = { width: 1440, height: 1200 };
 const CONSUMER_THEME_PAINT = {
   light: {
@@ -94,7 +97,7 @@ async function readTokenPaint(): Promise<TokenPaint> {
 }
 
 beforeAll(async () => {
-  baseUrl = await startServer(ROUTE);
+  baseUrl = await startServer([ROUTE, WEBSITE_ROUTE]);
   browser = await launchBrowser();
   context = await browser.newContext({ viewport: VIEWPORT });
   page = await context.newPage();
@@ -232,30 +235,171 @@ describe.sequential('Prototype style closure without Website CSS', () => {
     }
   });
 
-  it('keeps Website theme defaults below consumer layers when Starlight declares first', async () => {
+  it('keeps Website Prototype defaults below normalized consumer layers when Starlight declares first', async () => {
     // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-CASCADE-LAYER-OWNERSHIP
-    await page.goto(`${baseUrl}/en/ui-libraries/shadcn/select/`, { waitUntil: 'networkidle' });
+    const observations = [];
+    const evidenceDir = process.env.PROTO_UI_STYLE_LAYER_EVIDENCE_DIR;
+    if (evidenceDir) await mkdir(evidenceDir, { recursive: true });
+    for (const colorScheme of COLOR_SCHEMES) {
+      await page.emulateMedia({ colorScheme });
+      await page.goto(`${baseUrl}${WEBSITE_ROUTE}`, { waitUntil: 'networkidle' });
+      await page.waitForFunction(
+        (theme) => document.documentElement.dataset.theme === theme,
+        colorScheme
+      );
 
-    const layerWinner = await page.evaluate(() => {
-      const style = document.createElement('style');
-      style.textContent = `
+      // A real consumer fixture in the integrated Starlight host. Classes enter
+      // through DemoNode.className's normalized Adapter channel, never by
+      // mutating a rendered control or replacing generated Prototype CSS.
+      const fixture = await page.evaluateHandle(async (runtimes) => {
+        const rendererUrl = '/src/components/PrototypePreviewer/demo-renderer.ts';
+        const modulesUrl = '/src/components/PrototypePreviewer/prototype-modules.ts';
+        // Vitest rewrites lexical import() for its Node SSR runner. Keep this
+        // fixture's module loading in the real browser realm instead.
+        const browserImport = new Function('url', 'return import(url)') as (
+          url: string
+        ) => Promise<unknown>;
+        const { renderDemo } = (await browserImport(
+          rendererUrl
+        )) as typeof import('../../../components/PrototypePreviewer/demo-renderer');
+        const { loadPrototypes } = (await browserImport(
+          modulesUrl
+        )) as typeof import('../../../components/PrototypePreviewer/prototype-modules');
+        await loadPrototypes(['shadcn-textarea-root']);
+        const root = document.createElement('section');
+        root.dataset.styleLayerFixture = '';
+        root.style.cssText =
+          'display: grid; gap: 16px; width: 760px; max-width: 100%; padding: 16px';
+        document.querySelector('main')!.append(root);
+        const style = document.createElement('style');
+        style.textContent = `
         @layer theme {
           [data-layer-order-probe] { --layer-order-probe: theme; }
         }
         @layer utilities {
           [data-layer-order-probe] { --layer-order-probe: consumer; }
+          .pui-layer-utilities { padding: 5px 7px; }
+        }
+        @layer components {
+          .pui-layer-components { padding: 24px 32px; }
         }
       `;
-      document.head.append(style);
-
-      const probe = document.createElement('div');
-      probe.dataset.layerOrderProbe = '';
-      document.body.append(probe);
-      return getComputedStyle(probe).getPropertyValue('--layer-order-probe').trim();
-    });
-
-    expect(layerWinner).toBe('consumer');
-  });
+        document.head.append(style);
+        const probe = document.createElement('div');
+        probe.dataset.layerOrderProbe = '';
+        root.append(probe);
+        const views: Awaited<ReturnType<typeof renderDemo>>[] = [];
+        try {
+          const runtimesObserved = [];
+          for (const runtime of runtimes) {
+            const host = document.createElement('div');
+            root.append(host);
+            views.push(
+              await renderDemo({
+                host,
+                runtime,
+                demo: {
+                  type: 'demo',
+                  root: {
+                    kind: 'box',
+                    children: [
+                      { kind: 'box', children: [`${runtime}: default / components / utilities`] },
+                      ...['', 'pui-layer-components', 'pui-layer-utilities'].map((className) => ({
+                        kind: 'proto' as const,
+                        prototypeId: 'shadcn-textarea-root',
+                        className,
+                        props: {
+                          defaultValue: `${runtime}: ${className || 'Prototype default'}`,
+                          rows: 2,
+                        },
+                      })),
+                    ],
+                  },
+                },
+              })
+            );
+            await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+            const controls = [...host.querySelectorAll<HTMLTextAreaElement>('textarea')];
+            const read = (control: HTMLTextAreaElement) => {
+              const computed = getComputedStyle(control);
+              return {
+                padding: computed.padding,
+                projected: Boolean(control.dataset.puiStyle),
+                inlinePadding: control.style.getPropertyValue('padding'),
+                inlinePriority: control.style.getPropertyPriority('padding'),
+              };
+            };
+            if (controls.length !== 3) throw new Error(`${runtime}: expected three real Textareas`);
+            runtimesObserved.push({
+              runtime,
+              defaults: read(controls[0]),
+              components: {
+                ...read(controls[1]),
+                normalizedClass: controls[1].classList.contains('pui-layer-components'),
+              },
+              utilities: {
+                ...read(controls[2]),
+                normalizedClass: controls[2].classList.contains('pui-layer-utilities'),
+              },
+            });
+          }
+          return {
+            layerWinner: getComputedStyle(probe).getPropertyValue('--layer-order-probe').trim(),
+            runtimesObserved,
+            async cleanup() {
+              for (const view of views.reverse()) await view.destroy();
+              root.remove();
+              style.remove();
+            },
+          };
+        } catch (error) {
+          for (const view of views.reverse()) await view.destroy();
+          root.remove();
+          style.remove();
+          throw error;
+        }
+      }, RUNTIMES);
+      try {
+        observations.push({
+          colorScheme,
+          ...(await fixture.evaluate(({ cleanup: _cleanup, ...measured }) => measured)),
+        });
+        if (evidenceDir) {
+          await page
+            .locator('[data-style-layer-fixture]')
+            .screenshot({ path: path.join(evidenceDir, `${colorScheme}.png`) });
+        }
+      } finally {
+        await fixture.evaluate(async (subject) => subject.cleanup());
+        await fixture.dispose();
+      }
+    }
+    if (evidenceDir)
+      await writeFile(
+        path.join(evidenceDir, 'observations.json'),
+        JSON.stringify(observations, null, 2)
+      );
+    const expectedControl = { projected: true, inlinePadding: '', inlinePriority: '' };
+    for (const { colorScheme, layerWinner, runtimesObserved } of observations) {
+      expect(layerWinner, `${colorScheme}/theme control`).toBe('consumer');
+      for (const { runtime, defaults, components, utilities } of runtimesObserved) {
+        expect(defaults, `${colorScheme}/${runtime}/Prototype control`).toEqual({
+          ...expectedControl,
+          padding: '8px 12px',
+        });
+        expect(components, `${colorScheme}/${runtime}/components override`).toEqual({
+          ...expectedControl,
+          padding: '24px 32px',
+          normalizedClass: true,
+        });
+        expect(utilities, `${colorScheme}/${runtime}/utilities override`).toEqual({
+          ...expectedControl,
+          padding: '5px 7px',
+          normalizedClass: true,
+        });
+      }
+    }
+  }, 90_000);
 
   it('activates distinct Light and Dark token endpoints', async () => {
     await openStandaloneTheme('light');

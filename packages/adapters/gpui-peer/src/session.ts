@@ -264,6 +264,7 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
   const projector: A11yProjector = Object.assign(
     (snapshot: A11ySemanticObjectSnapshot) => {
       latestA11y = toA11yWire(snapshot);
+      if (!viewInstalled) return;
       if (flushingCommit) {
         a11yDirtyDuringCommit = true;
         return;

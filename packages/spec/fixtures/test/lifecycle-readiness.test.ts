@@ -1805,11 +1805,11 @@ describe('ordinary lifecycle reporting', () => {
     });
   });
 
-  it('proves the real A11y relationship slice remains draft while the rest remains unreviewed', async () => {
+  it('keeps the implemented A11y relationship slice draft while unrelated drafts remain unreviewed', async () => {
     const root = process.cwd();
     const workspace = await loadSpecWorkspaceFromDirectory(path.join(root, 'spec'));
     expect(workspace.issues).toEqual([]);
-    const report = await loadSpecLifecycleReport(root, '0.3.0-alpha.0', workspace);
+    const report = await loadSpecLifecycleReport(root, '0.3.0-alpha.1', workspace);
     const ids = ['C-A11Y-PART-RELATIONSHIP-0001', 'T-A11Y-PART-RELATIONSHIP-0001'];
     const rows = report.rows.filter((row) => ids.includes(row.entityId));
     expect(rows).toHaveLength(2);
@@ -1818,7 +1818,7 @@ describe('ordinary lifecycle reporting', () => {
       expect(row.disposition?.disposition).toBe('remain-draft');
       expect(row.activationBlockers).toHaveLength(1);
       expect(
-        row.evidence.filter((item) => item.required && item.status === 'planned')
+        row.evidence.filter((item) => item.required && item.status === 'passing')
       ).toHaveLength(6);
     }
     expect(checkSpecLifecycleDispositions(report, ids)).toEqual([]);

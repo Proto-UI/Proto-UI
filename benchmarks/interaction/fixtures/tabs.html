@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Public harness calibration: manual tabs</title>
+    <style>
+      body {
+        font: 16px system-ui;
+        margin: 32px;
+      }
+      button {
+        font: inherit;
+        padding: 8px 16px;
+        margin: 4px;
+      }
+      :focus-visible {
+        outline: 3px solid #0754c9;
+        outline-offset: 3px;
+      }
+      [aria-selected='true'] {
+        background: #dbeafe;
+        border-bottom: 4px solid #0754c9;
+      }
+      [role='tabpanel'] {
+        padding: 24px;
+        border: 1px solid #777;
+        margin: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Manual tabs calibration</h1>
+    <p>Public, hand-authored browser reference. No Proto component or conformance claim.</p>
+    <main id="fixture" data-calibration-domain="html-aria-manual-tabs">
+      <div role="tablist" aria-label="Reference sections" aria-orientation="horizontal">
+        <button
+          id="tab-overview"
+          role="tab"
+          aria-selected="true"
+          aria-controls="panel-overview"
+          tabindex="0"
+        >
+          Overview
+        </button>
+        <button
+          id="tab-disabled"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-disabled"
+          aria-disabled="true"
+          disabled
+          tabindex="-1"
+        >
+          Unavailable
+        </button>
+        <button
+          id="tab-details"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-details"
+          tabindex="-1"
+        >
+          Details
+        </button>
+        <button
+          id="tab-history"
+          role="tab"
+          aria-selected="false"
+          aria-controls="panel-history"
+          tabindex="-1"
+        >
+          History
+        </button>
+      </div>
+      <section id="panel-overview" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
+        Overview content
+      </section>
+      <section
+        id="panel-disabled"
+        role="tabpanel"
+        aria-labelledby="tab-disabled"
+        tabindex="0"
+        hidden
+      >
+        Unavailable content
+      </section>
+      <section id="panel-details" role="tabpanel" aria-labelledby="tab-details" tabindex="0" hidden>
+        Details content
+      </section>
+      <section id="panel-history" role="tabpanel" aria-labelledby="tab-history" tabindex="0" hidden>
+        History content
+      </section>
+    </main>
+    <button id="remove-fixture" type="button">Remove reference fixture</button>
+    <button id="after-fixture" type="button">After fixture</button>
+    <script>
+      // Deliberately small, hand-authored public calibration code, not Proto output.
+      const root = document.querySelector('#fixture');
+      const tabs = [...root.querySelectorAll('[role="tab"]')];
+      const enabled = tabs.filter((tab) => !tab.disabled);
+      function moveFocus(tab) {
+        for (const item of tabs) item.tabIndex = item === tab ? 0 : -1;
+        tab.focus();
+      }
+      function select(tab) {
+        for (const item of tabs) {
+          item.setAttribute('aria-selected', String(item === tab));
+          document.getElementById(item.getAttribute('aria-controls')).hidden = item !== tab;
+        }
+        moveFocus(tab);
+      }
+      for (const tab of enabled) {
+        tab.addEventListener('click', () => select(tab));
+        tab.addEventListener('keydown', (event) => {
+          const index = enabled.indexOf(tab);
+          const targets = {
+            ArrowRight: enabled[(index + 1) % enabled.length],
+            ArrowLeft: enabled[(index - 1 + enabled.length) % enabled.length],
+            Home: enabled[0],
+            End: enabled.at(-1),
+          };
+          if (targets[event.key]) {
+            event.preventDefault();
+            moveFocus(targets[event.key]);
+          }
+        });
+      }
+      document.querySelector('#remove-fixture').addEventListener('click', () => root.remove());
+    </script>
+  </body>
+</html>

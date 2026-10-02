@@ -261,7 +261,7 @@ async function chooseControl(
   if (!optionLabel) throw new Error(`Unknown ${control} projection option ${value}.`);
   const option = portal.getByRole('option', { name: optionLabel, exact: true });
   expect(await option.count(), `${control} option ${value}`).toBe(1);
-  await option.click({ force: true });
+  await option.click();
 
   return { oldPortal };
 }

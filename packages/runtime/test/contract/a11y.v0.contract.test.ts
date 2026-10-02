@@ -5,7 +5,19 @@ import type {
   Prototype,
   State,
 } from '@proto.ui/core';
-import { createA11ySemanticObjectRef, defineAsHook, definePrototype } from '@proto.ui/core';
+import {
+  createA11ySemanticObjectRef,
+  createAnatomyFamily,
+  defineAsHook,
+  definePrototype,
+} from '@proto.ui/core';
+import {
+  ANATOMY_INSTANCE_TOKEN_CAP,
+  ANATOMY_PARENT_CAP,
+  ANATOMY_GET_PROTO_CAP,
+  ANATOMY_ROOT_TARGET_CAP,
+  ANATOMY_ORDER_OBSERVER_CAP,
+} from '@proto.ui/module-anatomy';
 import { asAccessible, asScrollSurface } from '@proto.ui/hooks';
 import { createInstanceTreeMarkers } from '@proto.ui/adapter-base';
 import {
@@ -865,4 +877,313 @@ describe('runtime contract: a11y (v0)', () => {
     expect(projectorDisposed).toBe(true);
     expect(projectedAfterDispose).toEqual([]);
   });
+});
+
+function createPartRuntimeFixture() {
+  const family = createAnatomyFamily('runtime-part-relationship', {
+    roles: {
+      root: { cardinality: { min: 1, max: 1 } },
+      source: { cardinality: { min: 0, max: '*' } },
+      target: { cardinality: { min: 0, max: '*' } },
+    },
+  });
+  const parents = new Map<object, object | null>();
+  const sessions: ReturnType<typeof createRuntimeSession>[] = [];
+  const physical = new Map<object, HTMLElement>();
+  const observers = new Set<() => void>();
+  const make = (
+    role: 'root' | 'source' | 'target',
+    parent: object | null,
+    initialKey = 'exact+key'
+  ) => {
+    const token = {};
+    const element = document.createElement(role === 'source' ? 'button' : 'div');
+    document.body.append(element);
+    physical.set(token, element);
+    parents.set(token, parent);
+    let key!: OwnedStateHandle<string>;
+    let ready = false;
+    let commits = 0;
+    const visibleRelations: Array<string | null> = [];
+    const targetListeners = new Set<() => void>();
+    const projector = createWebA11yProjector(
+      () => (ready ? element : null),
+      (listener) => {
+        targetListeners.add(listener);
+        return () => targetListeners.delete(listener);
+      }
+    );
+    const proto = definePrototype({
+      name: `runtime-part-${role}`,
+      setup(def) {
+        def.anatomy.claim(family, { role });
+        if (role === 'root') return;
+        key = def.state.string('protocolKey', initialKey);
+        const accessible = asAccessible();
+        accessible.part(family, { key });
+        accessible.role(role === 'source' ? 'button' : 'region');
+        accessible.relation(role === 'source' ? 'controls' : 'labelledBy', {
+          target: { kind: 'part', family, role: role === 'source' ? 'target' : 'source', key },
+        });
+      },
+    });
+    const session = createRuntimeSession(proto, {
+      prototypeName: proto.name,
+      getRawProps: () => ({}),
+      schedule: (task) => task(),
+      commit(_children, signal) {
+        ready = true;
+        signal?.done();
+        commits++;
+        visibleRelations.push(
+          element.getAttribute(role === 'source' ? 'aria-controls' : 'aria-labelledby')
+        );
+      },
+      onRuntimeReady(wiring) {
+        wiring.attach('anatomy', [
+          [ANATOMY_INSTANCE_TOKEN_CAP, token],
+          [ANATOMY_PARENT_CAP, (owner: object) => parents.get(owner) ?? null],
+          [ANATOMY_GET_PROTO_CAP, () => proto],
+          [ANATOMY_ROOT_TARGET_CAP, (owner: object) => physical.get(owner) ?? null],
+          [
+            ANATOMY_ORDER_OBSERVER_CAP,
+            (_target: unknown, notify: () => void) => {
+              observers.add(notify);
+              return () => observers.delete(notify);
+            },
+          ],
+        ]);
+        wiring.attach('a11y', [[A11Y_PROJECT_CAP, projector]]);
+      },
+    });
+    sessions.push(session);
+    return {
+      token,
+      element,
+      session,
+      targetListeners,
+      visibleRelations,
+      port: session.caps.getPort<A11yPort>('a11y')!,
+      get commits() {
+        return commits;
+      },
+      setKey(value: string) {
+        session.invokeInCallbackScope(() => key.set(value));
+      },
+      setPresent(value: boolean) {
+        session.invokeInCallbackScope(() => session.kernel.run.lifecycle.setPresent(value));
+      },
+      move(nextParent: object) {
+        parents.set(token, nextParent);
+        for (const notify of [...observers]) notify();
+      },
+    };
+  };
+  return {
+    family,
+    make,
+    observers,
+    async dispose() {
+      for (const session of sessions.reverse()) await session.dispose();
+      for (const element of physical.values()) element.remove();
+    },
+  };
+}
+
+describe('runtime contract: same-domain A11y part relationships', () => {
+  it('T-A11Y-PART-RELATIONSHIP-0001-CASE-STRUCTURED-CARRIER: derives structural identity and exact keys without host IDs in State', async () => {
+    const f = createPartRuntimeFixture();
+    try {
+      const root = f.make('root', null);
+      await root.session.mount();
+      const source = f.make('source', root.token);
+      await source.session.mount();
+      const target = f.make('target', root.token);
+      await target.session.mount();
+      const snapshot = source.port.getSnapshot();
+      expect(snapshot.partRelationships).toEqual([
+        {
+          family: f.family,
+          scope: root.token,
+          source: source.port.getObjectRef(),
+          sourceRole: 'source',
+          targetRole: 'target',
+          relation: 'controls',
+          key: 'exact+key',
+          sourceEpoch: 1,
+          targetEpoch: 1,
+          target: target.port.getObjectRef(),
+        },
+      ]);
+      expect(snapshot.id).toBeUndefined();
+      expect(Object.isFrozen(snapshot.relations.controls)).toBe(true);
+      expect(Object.isFrozen(snapshot.partRelationships)).toBe(true);
+      expect(Object.isFrozen(snapshot.partRelationships?.[0])).toBe(true);
+      expect(source.port.getIR().parts.get(f.family)?.key).toMatchObject({
+        get: expect.any(Function),
+      });
+      expect(source.element.getAttribute('aria-controls')).toBe(target.element.id);
+      expect(target.element.getAttribute('aria-labelledby')).toBe(source.element.id);
+      expect(target.visibleRelations[0]).toBe(source.element.id);
+    } finally {
+      await f.dispose();
+    }
+  });
+
+  it('T-A11Y-PART-RELATIONSHIP-0001-CASE-FAIL-CLOSED-RESOLUTION: handles late, ambiguous, re-keyed and moved members', async () => {
+    const f = createPartRuntimeFixture();
+    try {
+      const root = f.make('root', null),
+        other = f.make('root', null);
+      await root.session.mount();
+      await other.session.mount();
+      const source = f.make('source', root.token);
+      await source.session.mount();
+      expect(source.element.hasAttribute('aria-controls')).toBe(false);
+      expect(source.port.getPartDiagnostics()).toEqual([
+        { relation: 'controls', code: 'missing-target' },
+      ]);
+      const target = f.make('target', root.token);
+      await target.session.mount();
+      const id = target.element.id;
+      expect(source.element.getAttribute('aria-controls')).toBe(id);
+      const duplicate = f.make('target', root.token);
+      expect(source.element.hasAttribute('aria-controls')).toBe(false);
+      expect(source.port.getPartDiagnostics()).toEqual([
+        { relation: 'controls', code: 'ambiguous-target' },
+      ]);
+      duplicate.setKey('exact key');
+      expect(source.element.getAttribute('aria-controls')).toBe(id);
+      target.move(other.token);
+      expect(source.element.hasAttribute('aria-controls')).toBe(false);
+      source.move(other.token);
+      expect(source.element.getAttribute('aria-controls')).toBe(id);
+      target.setKey('exact key');
+      expect(source.element.hasAttribute('aria-controls')).toBe(false);
+      source.setKey('exact key');
+      expect(source.element.getAttribute('aria-controls')).toBe(id);
+      expect(source.port.getPartDiagnostics()).toEqual([]);
+    } finally {
+      await f.dispose();
+    }
+  });
+
+  it('T-A11Y-PART-RELATIONSHIP-0001-CASE-VIEW-EPOCH-LIFECYCLE: withdraws before host intent and restores both endpoint epochs', async () => {
+    const f = createPartRuntimeFixture();
+    try {
+      const root = f.make('root', null);
+      await root.session.mount();
+      const source = f.make('source', root.token);
+      await source.session.mount();
+      const target = f.make('target', root.token);
+      await target.session.mount();
+      const id = target.element.id;
+      const seen: Array<string | null> = [];
+      const off = target.session.viewIntent.subscribe(() =>
+        seen.push(source.element.getAttribute('aria-controls'))
+      );
+      target.setPresent(false);
+      expect(seen).toEqual([null]);
+      target.setPresent(true);
+      expect(source.element.getAttribute('aria-controls')).toBe(id);
+      await target.session.unmount();
+      expect(source.element.hasAttribute('aria-controls')).toBe(false);
+      await target.session.mount();
+      expect(target.element.id).toBe(id);
+      expect(target.visibleRelations.at(-1)).toBe(source.element.id);
+      expect(source.port.getSnapshot().partRelationships?.[0]?.targetEpoch).toBe(2);
+      await source.session.unmount();
+      expect(target.element.hasAttribute('aria-labelledby')).toBe(false);
+      await source.session.mount();
+      expect(source.visibleRelations.at(-1)).toBe(id);
+      expect(source.port.getSnapshot().partRelationships?.[0]?.sourceEpoch).toBe(2);
+      off();
+    } finally {
+      await f.dispose();
+    }
+  });
+
+  it('keeps only the retained identity and current unbound projector during replacement churn', async () => {
+    const f = createPartRuntimeFixture();
+    try {
+      const root = f.make('root', null);
+      await root.session.mount();
+      const source = f.make('source', root.token);
+      await source.session.mount();
+      const target = f.make('target', root.token);
+      await target.session.mount();
+      const id = target.element.id;
+      await target.session.unmount();
+      const disposals: ReturnType<typeof vi.fn>[] = [];
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const pending = createWebA11yProjector(() => null);
+        const dispose = pending.dispose!;
+        const observed = vi.fn(dispose);
+        pending.dispose = observed;
+        disposals.push(observed);
+        target.session.caps.getWiring().attach('a11y', [[A11Y_PROJECT_CAP, pending]]);
+      }
+      expect(disposals.slice(0, -1).every((dispose) => dispose.mock.calls.length === 1)).toBe(true);
+      expect(disposals.at(-1)).not.toHaveBeenCalled();
+      const next = createWebA11yProjector(target.element);
+      target.session.caps.getWiring().attach('a11y', [[A11Y_PROJECT_CAP, next]]);
+      await target.session.mount();
+      expect(disposals.every((dispose) => dispose.mock.calls.length === 1)).toBe(true);
+      expect(target.element.id).toBe(id);
+      expect(source.element.getAttribute('aria-controls')).toBe(id);
+    } finally {
+      await f.dispose();
+    }
+  });
+
+  it('T-A11Y-PART-RELATIONSHIP-0001-CASE-TERMINAL-CLEANUP: removes memberships, observers and dependent leases', async () => {
+    const f = createPartRuntimeFixture();
+    try {
+      const root = f.make('root', null);
+      await root.session.mount();
+      const source = f.make('source', root.token);
+      await source.session.mount();
+      const target = f.make('target', root.token);
+      await target.session.mount();
+      const duplicate = f.make('target', root.token);
+      await duplicate.session.mount();
+      expect(source.element.hasAttribute('aria-controls')).toBe(false);
+      await duplicate.session.dispose();
+      expect(source.element.getAttribute('aria-controls')).toBe(target.element.id);
+      await target.session.dispose();
+      expect(source.element.hasAttribute('aria-controls')).toBe(false);
+      expect(target.targetListeners.size).toBe(0);
+      await source.session.dispose();
+      expect(source.targetListeners.size).toBe(0);
+      expect(source.port.getPartDiagnostics()).toEqual([]);
+      expect(f.observers.size).toBe(0);
+    } finally {
+      await f.dispose();
+    }
+  });
+});
+
+it('undeclared semantic modules preserve authored A11y relationships across L1 detach', async () => {
+  // C-A11Y-0001-DECLARATION-LIFETIME; C-A11Y-PART-RELATIONSHIP-0001-H.
+  const ctx = createHost();
+  const session = createRuntimeSession(
+    definePrototype({
+      name: 'non-table-a11y-label',
+      setup() {
+        asAccessible().relation('labelledBy', { target: 'authored-label' });
+      },
+    }),
+    ctx.host
+  );
+  const port = session.caps.getPort<A11yPort>('a11y')!;
+  try {
+    await session.mount();
+    expect(port.getSnapshot().relations.labelledBy).toBe('authored-label');
+    await session.unmount();
+    expect(port.getSnapshot().relations.labelledBy).toBe('authored-label');
+    await session.mount();
+    expect(ctx.snapshots.at(-1)?.relations.labelledBy).toBe('authored-label');
+  } finally {
+    await session.dispose();
+  }
 });
