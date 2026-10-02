@@ -19,6 +19,7 @@ import {
 } from './collaboration-runtime.mjs';
 import {
   applyGitHubCollaborationMutation,
+  CollaborationMutationUnknown,
   CollaborationPreWriteRejection,
   collectLiveCollaborationState,
   collectLiveThreadRevisionTarget,
@@ -252,34 +253,50 @@ export function runCollaborationCli(argv, dependencies = {}) {
     if (!(error instanceof CollaborationPreWriteRejection)) throw error;
     return rejectedReceipt(request, preState, error.liveState, error.message);
   }
-  return buildCollaborationReceipt({
-    request,
-    preState,
-    postState: applied.postState,
-    actor: preState.viewerLogin,
-    outcome: applied.mutationCount === 0 ? 'no-op' : 'applied',
-    mutationCount: applied.mutationCount,
-    reconciliationCount: applied.reconciliationCount,
-    platformObject: applied.platformObject,
-    verifiedAt: applied.postState.observedAt,
-    verification:
-      request.action === 'post-bounded-reconciliation-comment'
-        ? 'idempotency-marker-present'
-        : 'live-state-matches-desired',
-    note:
-      applied.mutationCount === 0
-        ? 'The exact desired state was already satisfied at the final admission read; no mutation was attempted.'
-        : 'The exact desired state was verified after the single admitted mutation.',
-  });
+  try {
+    return buildCollaborationReceipt({
+      request,
+      preState,
+      postState: applied.postState,
+      actor: preState.viewerLogin,
+      outcome: applied.mutationCount === 0 ? 'no-op' : 'applied',
+      mutationCount: applied.mutationCount,
+      reconciliationCount: applied.reconciliationCount,
+      platformObject: applied.platformObject,
+      verifiedAt: applied.postState.observedAt,
+      verification:
+        request.action === 'post-bounded-reconciliation-comment'
+          ? 'idempotency-marker-present'
+          : 'live-state-matches-desired',
+      note:
+        applied.mutationCount === 0
+          ? 'The exact desired state was already satisfied at the final admission read; no mutation was attempted.'
+          : 'The exact desired state was verified after the single admitted mutation.',
+    });
+  } catch (error) {
+    if (request.action !== 'post-bounded-reconciliation-comment' || applied.mutationCount !== 1)
+      throw error;
+    throw new CollaborationMutationUnknown(
+      request,
+      preState.viewerLogin,
+      applied.rawResponse !== null && applied.rawResponse !== undefined,
+      'comment-post-receipt-unavailable'
+    );
+  }
+}
+
+export function executeCollaborationCli(argv, dependencies = {}, io = process) {
+  try {
+    const output = runCollaborationCli(argv, dependencies);
+    io.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
+    return 0;
+  } catch (error) {
+    if (error instanceof CollaborationMutationUnknown)
+      io.stdout.write(`${JSON.stringify(error.result, null, 2)}\n`);
+    io.stderr.write(`[agent:collaborate] ${error.message}\n`);
+    return 1;
+  }
 }
 
 const direct = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-if (direct) {
-  try {
-    const output = runCollaborationCli(process.argv.slice(2));
-    process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);
-  } catch (error) {
-    process.stderr.write(`[agent:collaborate] ${error.message}\n`);
-    process.exitCode = 1;
-  }
-}
+if (direct) process.exitCode = executeCollaborationCli(process.argv.slice(2));

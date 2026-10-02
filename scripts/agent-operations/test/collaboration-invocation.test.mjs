@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -7,10 +8,14 @@ import test from 'node:test';
 import { runCollaborationCli } from '../collaboration-packet.mjs';
 import {
   authorizeCollaborationMutation,
+  collaborationMarker,
   computeCollaborationRequestDigest,
   validateCollaborationReceipt,
 } from '../collaboration-runtime.mjs';
-import { applyGitHubCollaborationMutation } from '../collect-live-collaboration-state.mjs';
+import {
+  applyGitHubCollaborationMutation,
+  CollaborationMutationUnknown,
+} from '../collect-live-collaboration-state.mjs';
 
 // These fixtures represent independently established launch context. Never
 // construct launcher arguments by reading the task-authored handoff below.
@@ -108,6 +113,7 @@ function fixture(
   writeFileSync(handoffPath, JSON.stringify(handoff));
   return {
     request,
+    requestPath,
     handoff,
     handoffPath,
     live,
@@ -315,3 +321,142 @@ for (const source of ['current-user', 'active-human-loop']) {
     assert.equal(writerCalls, 1);
   });
 }
+
+function commentFixture(t) {
+  const f = fixture(t);
+  f.request.action = 'post-bounded-reconciliation-comment';
+  f.request.expected = { markerAbsent: true };
+  f.request.desired = { body: 'The exact requested reconciliation.' };
+  f.request.requestDigest = computeCollaborationRequestDigest(f.request);
+  f.handoff.artifacts.find((item) => item.type === 'collaboration-request').digest =
+    `sha256:${f.request.requestDigest}`;
+  f.live.action = f.request.action;
+  f.live.current.markerComment = null;
+  writeFileSync(f.requestPath, JSON.stringify(f.request));
+  writeFileSync(f.handoffPath, JSON.stringify(f.handoff));
+  f.response = {
+    id: 271,
+    node_id: 'IC_271',
+    body: `${f.request.desired.body}\n\n${collaborationMarker(f.request)}`,
+    user: { login: f.live.viewerLogin },
+    // The server clock trails both local request and collector clocks.
+    created_at: '2026-10-02T01:00:30.000Z',
+  };
+  f.post = {
+    ...f.live,
+    current: {
+      ...f.live.current,
+      markerComment: {
+        id: '271',
+        nodeId: 'IC_271',
+        body: f.response.body,
+        authorLogin: f.response.user.login,
+        createdAt: f.response.created_at,
+      },
+    },
+  };
+  return f;
+}
+
+for (const scenario of [
+  'lost response',
+  'lost response and read failure',
+  'invalid response JSON',
+  'empty response',
+  'null response',
+  'malformed response',
+  'read failure',
+  'invalid receipt',
+]) {
+  test(`comment CLI library caller can discriminate unknown: ${scenario}`, (t) => {
+    const f = commentFixture(t);
+    if (scenario === 'invalid receipt') f.response.node_id = { private: 'secret upstream stderr' };
+    let reads = 0;
+    let writes = 0;
+    assert.throws(
+      () =>
+        runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...f.args], {
+          loadPolicy: () => ({}),
+          collectState() {
+            reads += 1;
+            if (writes === 0) return f.live;
+            if (scenario.includes('read failure')) throw new Error('secret upstream stderr');
+            return f.post;
+          },
+          runner() {
+            writes += 1;
+            if (scenario.startsWith('lost response')) throw new Error('secret upstream stderr');
+            if (scenario === 'invalid response JSON') return 'secret upstream stderr';
+            if (scenario === 'empty response') return '';
+            if (scenario === 'null response') return 'null';
+            if (scenario === 'malformed response') return '{}';
+            return JSON.stringify(f.response);
+          },
+        }),
+      (error) => {
+        assert.ok(error instanceof CollaborationMutationUnknown);
+        assert.equal(error.result.kind, 'proto-ui.collaboration-unknown');
+        assert.equal(error.result.outcome, 'unknown');
+        assert.equal(error.result.writeAttempts, 1);
+        assert.equal(error.result.reconciliationReadAttempts, 1);
+        assert.equal(
+          error.result.acknowledgementReceived,
+          ![
+            'lost response',
+            'lost response and read failure',
+            'invalid response JSON',
+            'empty response',
+            'null response',
+          ].includes(scenario)
+        );
+        assert.equal(error.result.requestDigest, f.request.requestDigest);
+        assert.deepEqual(error.result.target, f.request.target);
+        assert.doesNotMatch(JSON.stringify(error.result), /secret upstream/);
+        assert.throws(() => validateCollaborationReceipt(error.result, f.request));
+        return true;
+      }
+    );
+    assert.equal(writes, 1);
+    assert.equal(reads, 3);
+  });
+}
+
+test('comment command emits safe unknown JSON and exits unsuccessfully after one POST', (t) => {
+  const f = commentFixture(t);
+  const moduleUrl = new URL('../collaboration-packet.mjs', import.meta.url).href;
+  const program = `
+    import { readFileSync } from 'node:fs';
+    import { executeCollaborationCli } from ${JSON.stringify(moduleUrl)};
+    const f = JSON.parse(readFileSync(0, 'utf8'));
+    let writes = 0;
+    let reads = 0;
+    process.exitCode = executeCollaborationCli(f.args, {
+      loadPolicy: () => ({}),
+      collectState() {
+        reads += 1;
+        if (writes === 0) return f.live;
+        throw new Error('secret upstream stderr');
+      },
+      runner() { writes += 1; return JSON.stringify(f.response); },
+    });
+    if (writes !== 1 || reads !== 3) throw new Error('unexpected mutation/read count');
+  `;
+  const result = spawnSync(process.execPath, ['--input-type=module', '--eval', program], {
+    encoding: 'utf8',
+    input: JSON.stringify({
+      args: ['apply', ...launchArgs(HUMAN_LAUNCH), ...f.args],
+      live: f.live,
+      response: f.response,
+    }),
+  });
+  assert.equal(result.status, 1);
+  const unknown = JSON.parse(result.stdout);
+  assert.equal(unknown.kind, 'proto-ui.collaboration-unknown');
+  assert.equal(unknown.outcome, 'unknown');
+  assert.equal(unknown.reason, 'comment-post-readback-unavailable');
+  assert.equal(unknown.writeAttempts, 1);
+  assert.equal(unknown.reconciliationReadAttempts, 1);
+  assert.match(result.stderr, /unknown; do not retry blindly/);
+  assert.doesNotMatch(result.stdout + result.stderr, /secret upstream/);
+  assert.throws(() => validateCollaborationReceipt(unknown, f.request));
+});

@@ -9,6 +9,7 @@ import {
   collaborationMarker,
   desiredCollaborationStateSatisfied,
   validateCollaborationRequest,
+  verifyAcknowledgedCommentState,
 } from './collaboration-runtime.mjs';
 import { collectThreadRevision } from './thread-revision.mjs';
 
@@ -685,6 +686,82 @@ export class CollaborationPreWriteRejection extends Error {
   }
 }
 
+export class CollaborationMutationUnknown extends Error {
+  constructor(request, actor, acknowledgementReceived, reason) {
+    const message =
+      'The comment write outcome is unknown; do not retry blindly. Re-inspect the exact target before deciding any later action.';
+    super(message);
+    this.name = 'CollaborationMutationUnknown';
+    this.result = {
+      schemaVersion: 1,
+      kind: 'proto-ui.collaboration-unknown',
+      repositoryId: request.repositoryId,
+      authorizationId: request.authorizationId,
+      action: request.action,
+      requestDigest: request.requestDigest,
+      target: structuredClone(request.target),
+      actor,
+      outcome: 'unknown',
+      writeAttempts: 1,
+      // A non-null parsed POST response was received, not necessarily validated.
+      acknowledgementReceived,
+      // The one readback is counted even if collection or validation failed.
+      reconciliationReadAttempts: 1,
+      reason,
+      message,
+    };
+  }
+}
+
+function applyCommentMutation(request, latestState, runner, collectState) {
+  let rawResponse;
+  try {
+    rawResponse = mutationResponse(request, runner);
+  } catch {
+    try {
+      collectState(request, { runner });
+    } catch {
+      // A lost/invalid POST response stays unknown regardless of readback.
+    }
+    throw new CollaborationMutationUnknown(
+      request,
+      latestState.viewerLogin,
+      false,
+      'comment-post-response-unavailable'
+    );
+  }
+  const acknowledgementReceived = rawResponse !== null;
+  let postState;
+  try {
+    postState = collectState(request, { runner });
+  } catch {
+    throw new CollaborationMutationUnknown(
+      request,
+      latestState.viewerLogin,
+      acknowledgementReceived,
+      'comment-post-readback-unavailable'
+    );
+  }
+  try {
+    verifyAcknowledgedCommentState(request, latestState, postState, rawResponse);
+    return {
+      mutationCount: 1,
+      reconciliationCount: 0,
+      reconciled: false,
+      rawResponse,
+      platformObject: platformObject(request, rawResponse, postState),
+      postState,
+    };
+  } catch {
+    throw new CollaborationMutationUnknown(
+      request,
+      latestState.viewerLogin,
+      acknowledgementReceived,
+      'comment-post-provenance-unverified'
+    );
+  }
+}
+
 function noWriteResult(postState) {
   return {
     mutationCount: 0,
@@ -694,29 +771,6 @@ function noWriteResult(postState) {
     platformObject: null,
     postState,
   };
-}
-
-function verifyCommentProvenance(rawResponse, latestState, postState) {
-  const comment = postState.current.markerComment;
-  const createdAt = Date.parse(comment?.createdAt);
-  // GitHub comment timestamps have second precision. The returned object ID,
-  // not this time window, binds a successful response to this invocation.
-  const earliest = Math.floor(Date.parse(latestState.observedAt) / 1000) * 1000;
-  if (
-    !comment?.id ||
-    rawResponse?.id === undefined ||
-    String(rawResponse.id) !== comment.id ||
-    rawResponse.user?.login?.toLowerCase() !== latestState.viewerLogin.toLowerCase() ||
-    comment.authorLogin?.toLowerCase() !== latestState.viewerLogin.toLowerCase() ||
-    rawResponse.created_at !== comment.createdAt ||
-    !Number.isFinite(createdAt) ||
-    createdAt < earliest ||
-    createdAt > Date.parse(postState.observedAt)
-  ) {
-    throw new Error(
-      'comment response provenance does not match the live object; do not retry blindly'
-    );
-  }
 }
 
 export function applyGitHubCollaborationMutation(request, preState, options = {}) {
@@ -765,6 +819,9 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
   }
 
   if (decision.outcome === 'no-op') return noWriteResult(latestState);
+
+  if (request.action === 'post-bounded-reconciliation-comment')
+    return applyCommentMutation(request, latestState, runner, collectState);
 
   try {
     const mutationRequest =
@@ -819,9 +876,6 @@ export function applyGitHubCollaborationMutation(request, preState, options = {}
     failure.raced = true;
     throw failure;
   }
-  if (request.action === 'post-bounded-reconciliation-comment')
-    verifyCommentProvenance(rawResponse, latestState, postState);
-
   return {
     mutationCount: 1,
     reconciliationCount: 0,

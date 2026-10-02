@@ -593,6 +593,58 @@ export function collaborationMarker(request) {
   return `<!-- proto-ui-collaboration:${request.requestDigest} -->`;
 }
 
+function validCommentCreatedAt(value) {
+  if (typeof value !== 'string' || !RFC3339.test(value) || !Number.isFinite(Date.parse(value)))
+    return false;
+  // Date.parse normalizes impossible calendar dates and hour 24. Such values
+  // cannot supply server provenance even when the ACK and readback agree.
+  const [year, month, day, hour, minute, second] = value.match(/\d+/g).slice(0, 6).map(Number);
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const days = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day >= 1 && day <= days[month - 1] && hour < 24 && minute < 60 && second < 60;
+}
+
+function commentMatchesRequestedContent(request, liveState) {
+  const current = liveState.current;
+  const comment = current.markerComment;
+  return (
+    current.kind === request.target.kind &&
+    current.number === request.target.number &&
+    targetHeadMatches(request, current) &&
+    typeof comment?.id === 'string' &&
+    /^[1-9]\d*$/.test(comment.id) &&
+    comment.body === `${request.desired.body}\n\n${collaborationMarker(request)}` &&
+    typeof comment.authorLogin === 'string' &&
+    comment.authorLogin.toLowerCase() === liveState.viewerLogin.toLowerCase() &&
+    validCommentCreatedAt(comment.createdAt)
+  );
+}
+
+export function verifyAcknowledgedCommentState(request, latestState, postState, response) {
+  validateCollaborationRequest(request);
+  validateLiveCommon(postState, request);
+  assert(
+    request.action === 'post-bounded-reconciliation-comment',
+    'comment acknowledgment requires a bounded comment request'
+  );
+  const comment = postState.current.markerComment;
+  // Only a successful POST object can bind this invocation. The server's
+  // creation timestamp must agree with readback, but collector/request clocks
+  // are not synchronized with GitHub and cannot bound that timestamp.
+  assert(
+    commentMatchesRequestedContent(request, postState) &&
+      postState.viewerLogin.toLowerCase() === latestState.viewerLogin.toLowerCase() &&
+      ((Number.isSafeInteger(response?.id) && response.id > 0) ||
+        (typeof response?.id === 'string' && /^[1-9]\d*$/.test(response.id))) &&
+      String(response.id) === comment.id &&
+      typeof response.user?.login === 'string' &&
+      response.user.login.toLowerCase() === latestState.viewerLogin.toLowerCase() &&
+      response.body === comment.body &&
+      response.created_at === comment.createdAt,
+    'comment response provenance does not match the live object; do not retry blindly'
+  );
+}
+
 export function desiredCollaborationStateSatisfied(request, liveState) {
   validateCollaborationRequest(request);
   validateLiveCommon(liveState, request);
@@ -637,11 +689,8 @@ export function desiredCollaborationStateSatisfied(request, liveState) {
       current.attempt > request.target.attempt
     );
   }
-  const marker = collaborationMarker(request);
   return (
-    targetHeadMatches(request, current) &&
-    current.markerComment?.body === `${request.desired.body}\n\n${marker}` &&
-    current.markerComment.authorLogin?.toLowerCase() === liveState.viewerLogin.toLowerCase() &&
+    commentMatchesRequestedContent(request, liveState) &&
     Date.parse(current.markerComment.createdAt) >=
       Math.floor(Date.parse(request.requestedAt) / 1000) * 1000 &&
     Date.parse(current.markerComment.createdAt) <= Date.parse(liveState.observedAt)

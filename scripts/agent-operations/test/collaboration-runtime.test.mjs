@@ -15,6 +15,7 @@ import {
   validateCollaborationRequest,
 } from '../collaboration-runtime.mjs';
 import {
+  CollaborationMutationUnknown,
   applyGitHubCollaborationMutation as applyMutationWithContext,
   collectLiveCollaborationState,
 } from '../collect-live-collaboration-state.mjs';
@@ -176,6 +177,35 @@ function authorize(request, liveState, overrides = {}) {
     selfAssessment: assessment,
     ...overrides,
   });
+}
+
+function assertUnknownComment(callback, request, acknowledgementReceived, reason) {
+  let caught;
+  assert.throws(callback, (error) => {
+    caught = error;
+    assert.ok(error instanceof CollaborationMutationUnknown);
+    assert.equal(error.name, 'CollaborationMutationUnknown');
+    assert.deepEqual(error.result, {
+      schemaVersion: 1,
+      kind: 'proto-ui.collaboration-unknown',
+      repositoryId: request.repositoryId,
+      authorizationId: request.authorizationId,
+      action: request.action,
+      requestDigest: request.requestDigest,
+      target: request.target,
+      actor: 'maintainer',
+      outcome: 'unknown',
+      writeAttempts: 1,
+      acknowledgementReceived,
+      reconciliationReadAttempts: 1,
+      reason,
+      message:
+        'The comment write outcome is unknown; do not retry blindly. Re-inspect the exact target before deciding any later action.',
+    });
+    assert.throws(() => validateCollaborationReceipt(error.result, request));
+    return true;
+  });
+  return caught;
 }
 
 test('request digest binds every purpose and rejects tampering', () => {
@@ -1214,7 +1244,7 @@ test('an unknown comment POST stays ambiguous even when the same credential publ
   };
   let writes = 0;
   let reconciliations = 0;
-  assert.throws(
+  assertUnknownComment(
     () =>
       applyGitHubCollaborationMutation(request, preState, {
         runner() {
@@ -1227,7 +1257,9 @@ test('an unknown comment POST stays ambiguous even when the same credential publ
           return postState;
         },
       }),
-    /ambiguous after one live reconciliation/
+    request,
+    false,
+    'comment-post-response-unavailable'
   );
   assert.equal(writes, 1);
   assert.equal(reconciliations, 1);
@@ -2159,6 +2191,7 @@ function nonMetadataMutationCases() {
         node_id: 'IC_271',
         user: { login: 'maintainer' },
         created_at: '2026-08-27T01:00:09.000Z',
+        body: `${commentRequest.desired.body}\n\n${collaborationMarker(commentRequest)}`,
       }),
       endpoint: 'repos/Proto-UI/Proto-UI/issues/509/comments',
       method: 'POST',
@@ -2255,6 +2288,10 @@ for (const scenario of [
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
+    fixture.response = JSON.stringify({
+      ...JSON.parse(fixture.response),
+      body: postState.current.markerComment.body,
+    });
     const { receipt, reads, writes } = runCollaborationFixture(fixture, [
       preState,
       finalState,
@@ -2340,6 +2377,10 @@ for (const [name, requestedAt, initialAt, finalAt, expectedOutcome, expectedRead
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
+    fixture.response = JSON.stringify({
+      ...JSON.parse(fixture.response),
+      body: postState.current.markerComment.body,
+    });
     const { receipt, reads, writes } = runCollaborationFixture(fixture, [
       preState,
       finalState,
@@ -3089,6 +3130,38 @@ for (const [name, change] of [
   });
 }
 
+for (const createdAt of [
+  '2026-08-27T00:59:30.000Z',
+  '2026-08-27T01:00:01.000Z',
+  '2026-08-27T01:01:30.000Z',
+  '2026-08-27T02:00:09.0001+01:00',
+  '2024-02-29T01:00:09Z',
+]) {
+  test(`acknowledged comment attribution tolerates server clock skew: ${createdAt}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...structuredClone(fixture.after) },
+    };
+    postState.current.markerComment.createdAt = createdAt;
+    fixture.response = JSON.stringify({ ...JSON.parse(fixture.response), created_at: createdAt });
+    // The successful POST ID and exact readback bind this invocation. Collector
+    // and request clocks are deliberately unchanged and are not server clocks.
+    const { receipt, reads, writes } = runCollaborationFixture(fixture, [
+      preState,
+      preState,
+      postState,
+    ]);
+    assert.equal(receipt.outcome, 'applied');
+    assert.equal(receipt.platformObject.id, '271');
+    assert.equal(receipt.mutationCount, 1);
+    assert.equal(reads, 3);
+    assert.equal(writes, 1);
+  });
+}
+
 for (const [name, change] of [
   [
     'a different comment ID',
@@ -3127,11 +3200,23 @@ for (const [name, change] of [
     },
   ],
   [
-    'a comment predating the final read',
-    (raw, post) => {
-      raw.created_at = post.current.markerComment.createdAt = '2026-08-27T01:00:01.000Z';
+    'a different response body',
+    (raw) => {
+      raw.body = 'Different response body';
     },
   ],
+  [
+    'a missing response body',
+    (raw) => {
+      delete raw.body;
+    },
+  ],
+  ...['2026-02-30T01:00:09Z', '2026-08-27T24:00:00Z', '2026-08-27 01:00:09Z'].map((createdAt) => [
+    `an invalid matching timestamp ${createdAt}`,
+    (raw, post) => {
+      raw.created_at = post.current.markerComment.createdAt = createdAt;
+    },
+  ]),
 ]) {
   test(`successful comment POST cannot be attributed with ${name}`, () => {
     const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
@@ -3144,7 +3229,7 @@ for (const [name, change] of [
     const raw = JSON.parse(fixture.response);
     change(raw, postState);
     let writes = 0;
-    assert.throws(
+    assertUnknownComment(
       () =>
         applyGitHubCollaborationMutation(fixture.request, preState, {
           collectState: () => (writes === 0 ? preState : postState),
@@ -3153,9 +3238,98 @@ for (const [name, change] of [
             return JSON.stringify(raw);
           },
         }),
-      /comment.*provenance.*do not retry blindly/
+      fixture.request,
+      true,
+      'comment-post-provenance-unverified'
     );
     assert.equal(writes, 1);
+  });
+}
+
+for (const [name, change] of [
+  ['missing readback', () => null],
+  ['malformed readback', () => ({})],
+  [
+    'read failure',
+    () => {
+      throw new Error('secret upstream stderr');
+    },
+  ],
+  [
+    'changed head',
+    (post) => {
+      post.current.headSha = NEXT_HEAD;
+      return post;
+    },
+  ],
+  [
+    'changed target',
+    (post) => {
+      post.current.number = 510;
+      return post;
+    },
+  ],
+  [
+    'wrong actor',
+    (post) => {
+      post.current.markerComment.authorLogin = 'other';
+      return post;
+    },
+  ],
+  [
+    'missing ID',
+    (post) => {
+      delete post.current.markerComment.id;
+      return post;
+    },
+  ],
+  [
+    'wrong body',
+    (post) => {
+      post.current.markerComment.body = 'another comment';
+      return post;
+    },
+  ],
+  [
+    'invalid timestamp',
+    (post) => {
+      post.current.markerComment.createdAt = 'not-a-date';
+      return post;
+    },
+  ],
+]) {
+  test(`acknowledged comment reports structured unknown for ${name}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'post comment');
+    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+    const postState = {
+      ...preState,
+      observedAt: '2026-08-27T01:00:11.000Z',
+      current: { ...fixture.before, ...structuredClone(fixture.after) },
+    };
+    let writes = 0;
+    let reads = 0;
+    const error = assertUnknownComment(
+      () =>
+        applyGitHubCollaborationMutation(fixture.request, preState, {
+          collectState() {
+            if (writes === 0) return preState;
+            reads += 1;
+            return change(postState);
+          },
+          runner() {
+            writes += 1;
+            return fixture.response;
+          },
+        }),
+      fixture.request,
+      true,
+      name === 'read failure'
+        ? 'comment-post-readback-unavailable'
+        : 'comment-post-provenance-unverified'
+    );
+    assert.equal(writes, 1);
+    assert.equal(reads, 1);
+    assert.doesNotMatch(JSON.stringify(error.result), /secret upstream/);
   });
 }
 
@@ -3202,7 +3376,7 @@ for (const [name, change] of [
     change(postState.current.markerComment);
     let writes = 0;
     let reconciliations = 0;
-    assert.throws(
+    assertUnknownComment(
       () =>
         applyGitHubCollaborationMutation(fixture.request, preState, {
           collectState() {
@@ -3215,7 +3389,9 @@ for (const [name, change] of [
             throw new Error('socket closed');
           },
         }),
-      /ambiguous after one live reconciliation/
+      fixture.request,
+      false,
+      'comment-post-response-unavailable'
     );
     assert.equal(writes, 1);
     assert.equal(reconciliations, 1);
