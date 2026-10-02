@@ -32,6 +32,7 @@ import {
   summarizeLiveDco,
 } from './collect-live-review-input.mjs';
 import {
+  establishExecutionMode,
   evaluateSkillEligibility,
   loadSkillRegistry,
   skillRegistryRoot,
@@ -45,10 +46,12 @@ function usage() {
     '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>]',
     '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
     '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
-    '  pnpm agent:review -- submit-review --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
-    '  pnpm agent:review -- merge-pull-request --packet <packet.json> --input <review-input.json> --published-review-packet <original-approved-packet.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
+    '  pnpm agent:review -- submit-review --mode human-assisted|autonomous --mode-source <source> --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
+    '  pnpm agent:review -- merge-pull-request --mode human-assisted|autonomous --mode-source <source> --packet <packet.json> --input <review-input.json> --published-review-packet <original-approved-packet.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
     '',
     'input-digest, validate, and inspect preserve canonical v3 input for read-only legacy schema v1 COMMENT ingestion. v3 inputs cannot enter submit-review or merge-pull-request; those commands require a freshly collected v5 snapshot. v4 must also be re-collected.',
+    '',
+    'submit-review and merge-pull-request require mode and source declared independently by the launcher/operator before artifact reads, matching the handoff. These arguments are declarations, not runtime attestation. Read-only commands retain their existing arguments.',
     '',
     'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge requires the original --published-review-packet artifact (at most 64 MiB), authenticated by both its complete packet and evidence tokens in the same valid exact-head independent APPROVED review. Re-collection may add only that publication and its newly required reviewer permission; base, scope and other input changes require a new review. The refreshed merge packet may change only reviewInputDigest and observedAt. The supplied file alone provides no authority. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
     '',
@@ -85,6 +88,8 @@ const ALLOWED_OPTIONS = new Map([
   [
     'submit-review',
     new Set([
+      '--mode',
+      '--mode-source',
       '--packet',
       '--input',
       '--handoff',
@@ -97,6 +102,8 @@ const ALLOWED_OPTIONS = new Map([
   [
     'merge-pull-request',
     new Set([
+      '--mode',
+      '--mode-source',
       '--published-review-packet',
       '--packet',
       '--input',
@@ -153,42 +160,48 @@ function loadAssessment(path, policy) {
   return { ...result, validated: true, fresh: isSelfAssessmentFresh(result, snapshot) };
 }
 
-function loadReviewHandoff(path) {
-  if (!path) throw new Error('--handoff is required');
-  const registry = loadSkillRegistry();
-  const handoff = JSON.parse(fs.readFileSync(path, 'utf8'));
-  const result = validateSkillHandoff(handoff, registry);
-  if (result.nextSkill?.id !== 'pui-review') {
-    throw new Error('handoff must select pui-review');
-  }
-  return result.handoff;
+function loadInvocationContext(args) {
+  const executionMode = args.get('--mode');
+  const executionModeSource = args.get('--mode-source');
+  if (!executionMode)
+    throw new Error('--mode is required for submit-review and merge-pull-request');
+  if (!executionModeSource)
+    throw new Error('--mode-source is required for submit-review and merge-pull-request');
+  establishExecutionMode(executionMode, executionModeSource);
+  // Retain the launcher/operator declaration independently of task-authored
+  // artifacts. Matching declarations do not authenticate the caller.
+  return Object.freeze({ executionMode, executionModeSource });
 }
 
-function loadIntegrationHandoff(path) {
+function loadHandoff(path, nextSkillId, invocationContext = null) {
   if (!path) throw new Error('--handoff is required');
-  const registry = loadSkillRegistry();
   const handoff = JSON.parse(fs.readFileSync(path, 'utf8'));
-  const result = validateSkillHandoff(handoff, registry);
-  if (result.nextSkill?.id !== 'pui-integrate') {
-    throw new Error('handoff must select pui-integrate');
+  if (invocationContext) {
+    for (const field of ['executionMode', 'executionModeSource']) {
+      if (handoff?.[field] !== invocationContext[field]) {
+        throw new Error(`handoff ${field} does not match the independent invocation declaration`);
+      }
+    }
+  }
+  const result = validateSkillHandoff(handoff, loadSkillRegistry());
+  if (result.nextSkill?.id !== nextSkillId) {
+    throw new Error(`handoff must select ${nextSkillId}`);
   }
   return result;
 }
 
-function validateExecution(args, packet, policy) {
-  const handoff = loadReviewHandoff(args.get('--handoff'));
+function validateExecution(args, packet, policy, executionMode) {
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
   const eligibility = evaluateReviewEligibility({
-    executionMode: handoff.executionMode,
+    executionMode,
     reviewClass: packet.reviewClass,
     selfAssessment,
     policy,
   });
-  validateReviewPacketEligibility(packet, eligibility, handoff.executionMode);
-  return { handoff, eligibility, selfAssessment };
+  validateReviewPacketEligibility(packet, eligibility, executionMode);
+  return { eligibility, selfAssessment };
 }
-function validateIntegrationExecution(args, packet, input, policy) {
-  const routed = loadIntegrationHandoff(args.get('--handoff'));
+function validateIntegrationExecution(args, packet, input, policy, routed, invocationContext) {
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
   // The reviewed content ceiling was established by the independent reviewer
   // when this packet was sealed; recomputing it against the integrator's
@@ -233,7 +246,7 @@ function validateIntegrationExecution(args, packet, input, policy) {
     );
   }
   const skillEligibility = evaluateSkillEligibility(routed.nextSkill, {
-    executionMode: routed.handoff.executionMode,
+    executionMode: invocationContext.executionMode,
     selfAssessment,
   });
   if (!skillEligibility.eligible) {
@@ -257,7 +270,6 @@ function validateIntegrationExecution(args, packet, input, policy) {
     );
   }
   return {
-    handoff: routed.handoff,
     reviewEligibility,
     selfAssessment,
     skillEligibility,
@@ -287,11 +299,12 @@ try {
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const execution = validateExecution(args, packet, policy);
+    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review');
+    const execution = validateExecution(args, packet, policy, handoff.executionMode);
     output = {
       valid: true,
       key: reviewPacketKey(packet, input),
-      executionMode: execution.handoff.executionMode,
+      executionMode: handoff.executionMode,
       eligibility: execution.eligibility,
     };
   } else if (command === 'inspect') {
@@ -300,7 +313,8 @@ try {
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const execution = validateExecution(args, packet, policy);
+    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review');
+    const execution = validateExecution(args, packet, policy, handoff.executionMode);
     const currentBase = args.get('--current-base');
     const currentHead = args.get('--current-head');
     if (!currentBase || !currentHead)
@@ -328,12 +342,12 @@ try {
         currentBase
       ),
       run: decideReviewRun(packet, input, seenKeys),
-      executionMode: execution.handoff.executionMode,
+      executionMode: handoff.executionMode,
       eligibility: execution.eligibility,
       reconciliationBound,
     };
   } else if (command === 'eligibility') {
-    const handoff = loadReviewHandoff(args.get('--handoff'));
+    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review');
     const reviewClass = args.get('--review-class');
     if (!reviewClass) throw new Error('--review-class is required');
     const policy = loadCapabilityPolicy(
@@ -347,12 +361,14 @@ try {
       policy,
     });
   } else if (command === 'submit-review') {
+    const invocationContext = loadInvocationContext(args);
+    loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
     const input = readInput(args.get('--input'));
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const execution = validateExecution(args, packet, policy);
+    const execution = validateExecution(args, packet, policy, invocationContext.executionMode);
     const externalEvidence = readExternalEvidence(args);
     const priorPath = args.get('--prior-packet');
     const priorPacket = priorPath ? JSON.parse(fs.readFileSync(priorPath, 'utf8')) : null;
@@ -371,8 +387,7 @@ try {
       packet,
       input,
       liveInput: live.input,
-      executionMode: execution.handoff.executionMode,
-      executionModeSource: execution.handoff.executionModeSource,
+      ...invocationContext,
       authorizationId: args.get('--authorization'),
       policy,
       selfAssessment: execution.selfAssessment,
@@ -421,12 +436,21 @@ try {
       };
     }
   } else {
+    const invocationContext = loadInvocationContext(args);
+    const routed = loadHandoff(args.get('--handoff'), 'pui-integrate', invocationContext);
     const input = readInput(args.get('--input'));
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const execution = validateIntegrationExecution(args, packet, input, policy);
+    const execution = validateIntegrationExecution(
+      args,
+      packet,
+      input,
+      policy,
+      routed,
+      invocationContext
+    );
     const publishedPacket = execution.publishedPacket;
     const externalEvidence = readExternalEvidence(args);
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
@@ -436,8 +460,7 @@ try {
       packet,
       publishedPacket,
       input,
-      executionMode: execution.handoff.executionMode,
-      executionModeSource: execution.handoff.executionModeSource,
+      ...invocationContext,
       authorizationId: args.get('--authorization'),
       policy,
       selfAssessment: execution.selfAssessment,

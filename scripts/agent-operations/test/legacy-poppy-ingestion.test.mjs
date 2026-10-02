@@ -295,11 +295,27 @@ test('CLI read-only digest, validate, and inspect retain actual v3/v1 compatibil
 test('CLI legacy write commands reject before live collection or mutation', () => {
   withCliFixtures(({ inputPath, packetPath, handoffPath, options }) => {
     for (const action of ['submit-review', 'merge-pull-request']) {
+      if (action === 'merge-pull-request') {
+        const handoff = JSON.parse(readFileSync(handoffPath, 'utf8'));
+        handoff.fromId = 'pui-review';
+        handoff.nextSkillId = 'pui-integrate';
+        handoff.artifacts = [
+          { type: 'review-input', reference: inputPath },
+          { type: 'review-packet', reference: packetPath },
+          { type: 'published-review-packet', reference: packetPath },
+          { type: 'mutation-authorization', reference: 'explicit-current-user' },
+        ];
+        writeFileSync(handoffPath, JSON.stringify(handoff));
+      }
       const result = spawnSync(
         process.execPath,
         [
           command,
           action,
+          '--mode',
+          'human-assisted',
+          '--mode-source',
+          'current-user',
           '--input',
           inputPath,
           '--packet',
