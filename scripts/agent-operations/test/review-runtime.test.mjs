@@ -2322,3 +2322,142 @@ test('legacy schema v1 packets ingest without evidence but cannot carry disposit
   invalidVersion.schemaVersion = 3;
   assert.throws(() => validateReviewPacket(invalidVersion, input), /schemaVersion/);
 });
+
+test('cloud event provenance cannot borrow local scheduled or current-user review authority', () => {
+  const input = reviewInput();
+  const base = {
+    packet: packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input),
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'autonomous',
+    executionModeSource: 'schedule',
+    authorizationId: 'proto-ui-scheduled-review-v1',
+    policy,
+    selfAssessment: assessment('C4', Object.keys(policy.reviewClasses)),
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+    dcoConclusion: 'success',
+  };
+  // Hold evidence, identity, permission and assessment constant: only the
+  // claimed provenance/authorization changes. These strings are not runtime proof.
+  assert.equal(authorizeReviewSubmission(base).allowed, false);
+  assert.equal(
+    authorizeReviewSubmission({
+      ...base,
+      executionMode: 'human-assisted',
+      executionModeSource: 'current-user',
+      authorizationId: 'explicit-current-user',
+    }).allowed,
+    true
+  );
+  for (const executionMode of ['autonomous', 'human-assisted']) {
+    for (const executionModeSource of ['cloud-event', 'webhook', 'governed-queue']) {
+      for (const authorizationId of [
+        'proto-ui-scheduled-review-v1',
+        'explicit-current-user',
+        'proto-ui-cloud-event-review-v1',
+      ]) {
+        // Repeat with fresh objects: a replay cannot turn unavailable authority
+        // into permission. This is not a distributed replay-store test.
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          const result = authorizeReviewSubmission(
+            structuredClone({
+              ...base,
+              executionMode,
+              executionModeSource,
+              authorizationId,
+            })
+          );
+          assert.equal(result.allowed, false);
+          assert.equal(result.reason, 'review submission authorization is unavailable');
+        }
+      }
+    }
+  }
+  for (const executionModeSource of ['schedule', 'current-user']) {
+    assert.equal(
+      authorizeReviewSubmission({
+        ...base,
+        executionModeSource,
+        authorizationId: 'proto-ui-cloud-event-review-v1',
+      }).allowed,
+      false
+    );
+  }
+});
+
+test('submit-review CLI rejects unsupported cloud provenance before live collection', () => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'pui-cloud-review-'));
+  try {
+    const input = reviewInput();
+    const inputPath = path.join(directory, 'input.json');
+    const packetPath = path.join(directory, 'packet.json');
+    const handoffPath = path.join(directory, 'handoff.json');
+    writeFileSync(inputPath, JSON.stringify(input));
+    writeFileSync(packetPath, JSON.stringify(packet({}, input)));
+    for (const executionModeSource of ['cloud-event', 'webhook']) {
+      writeFileSync(
+        handoffPath,
+        JSON.stringify({
+          schemaVersion: 1,
+          kind: 'proto-ui.skill-handoff',
+          entrypoint: 'development',
+          executionMode: 'autonomous',
+          executionModeSource,
+          fromId: 'pui-validate',
+          nextSkillId: 'pui-review',
+          artifacts: [
+            { type: 'authority-map', reference: 'review authority map' },
+            { type: 'candidate-change', reference: 'bounded candidate change' },
+            { type: 'evidence-report', reference: 'validation evidence' },
+            { type: 'review-input', reference: inputPath },
+          ],
+          humanGates: [],
+          notes: [],
+        })
+      );
+      assert.throws(
+        () =>
+          execFileSync(
+            process.execPath,
+            [
+              path.join(root, 'scripts/agent-operations/review-packet.mjs'),
+              'submit-review',
+              '--mode',
+              'autonomous',
+              '--mode-source',
+              executionModeSource,
+              '--packet',
+              packetPath,
+              '--input',
+              inputPath,
+              '--handoff',
+              handoffPath,
+              '--authorization',
+              'proto-ui-scheduled-review-v1',
+            ],
+            {
+              cwd: root,
+              // No gh executable or credentials are needed for this negative boundary.
+              env: { PATH: '' },
+              stdio: 'pipe',
+            }
+          ),
+        (error) => {
+          assert.equal(error.status, 1);
+          assert.match(
+            error.stderr.toString(),
+            new RegExp(
+              `execution mode autonomous cannot be established from ${executionModeSource}`
+            )
+          );
+          return true;
+        }
+      );
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});

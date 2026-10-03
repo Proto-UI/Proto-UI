@@ -196,6 +196,41 @@ collaborationMutationAuthorizations:
       - security-disclosure
       - provenance-exception
 reviewSubmissionAuthorizations:
+  - id: proto-ui-cloud-owner-review-v1
+    status: active
+    executionMode: autonomous
+    executionModeSource: delegated-owner-event
+    repositoryId: github.com:Proto-UI/Proto-UI
+    mutationClass: conditional-review-submission
+    allowedRecommendations: [REQUEST_CHANGES, APPROVE]
+    principalId: '52768321'
+    principalLogin: guangliang2019
+    requires:
+      [
+        parent-review-packet,
+        initialized-owner-ledger,
+        live-connector-collection,
+        coordinated-writers,
+      ]
+    excludedActions: [merge, close, security, credentials, deletion]
+  - id: proto-ui-cloud-owner-initial-sweep-v1
+    status: active
+    executionMode: autonomous
+    executionModeSource: delegated-owner-initial-sweep
+    initialSweepId: owner-requested-open-pr-sweep-2026-10-03
+    repositoryId: github.com:Proto-UI/Proto-UI
+    mutationClass: conditional-review-submission
+    allowedRecommendations: [REQUEST_CHANGES, APPROVE]
+    principalId: '52768321'
+    principalLogin: guangliang2019
+    requires:
+      [
+        parent-review-packet,
+        initialized-owner-ledger,
+        live-connector-collection,
+        coordinated-writers,
+      ]
+    excludedActions: [merge, close, security, credentials, deletion]
   - id: proto-ui-scheduled-review-v1
     status: pending-runtime-identity
     blockedBy:
