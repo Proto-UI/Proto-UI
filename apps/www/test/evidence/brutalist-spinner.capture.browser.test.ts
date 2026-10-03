@@ -38,7 +38,9 @@ type ColorFacts = {
   opaqueForeground: boolean;
   opaqueBackground: boolean;
 };
-const serializedReader = String(module.exports);
+// Pass the isolated function object. A string is evaluated as an expression,
+// not invoked with Locator elements, and serializes a function result as undefined.
+const styleReader = module.exports as (elements: Element[]) => ColorFacts[];
 vm.runInNewContext(
   transformSync(`module.exports = ${motionReaderSource}`, {
     loader: 'ts',
@@ -47,7 +49,15 @@ vm.runInNewContext(
   }).code,
   { module }
 );
-const serializedMotionReader = String(module.exports);
+const motionReader = module.exports as (
+  elements: Element[],
+  duration: number
+) => Promise<
+  Array<{
+    time: number;
+    roots: Array<{ centerX: number; centerY: number; angle: number }>;
+  }>
+>;
 let browser: Browser;
 beforeAll(async () => {
   browser = await launchBrowser();
@@ -74,7 +84,7 @@ describe('Spinner capture native browser probes', () => {
             roots: Array<{ centerX: number; centerY: number; angle: number }>;
           }>,
           number
-        >(serializedMotionReader, 1100);
+        >(motionReader, 1100);
         expect(frames.at(-1)!.time - frames[0]!.time).toBeGreaterThanOrEqual(1000);
         expect(new Set(frames.map((frame) => Math.floor(frame.roots[0]!.angle / 90))).size).toBe(4);
         for (const axis of ['centerX', 'centerY'] as const) {
@@ -97,7 +107,7 @@ describe('Spinner capture native browser probes', () => {
         body { background: oklch(1 0 0 / .5) }
         span { color: lab(0 0 0); background: transparent }
       </style><span></span>`);
-      const facts = await page.locator('span').evaluateAll<ColorFacts[]>(serializedReader);
+      const facts = await page.locator('span').evaluateAll<ColorFacts[]>(styleReader);
       expect(facts[0].foregroundRgba).toEqual([0, 0, 0, 255]);
       expect(facts[0].backgroundRgba).not.toBeNull();
       const [r, g, b, a] = facts[0].backgroundRgba!;
@@ -117,7 +127,7 @@ describe('Spinner capture native browser probes', () => {
       await page.setContent(
         '<style>html { background: rgba(0, 0, 0, .999) } body, span { background: transparent } span { color: rgba(0, 0, 0, .999) }</style><span></span>'
       );
-      const [facts] = await page.locator('span').evaluateAll<ColorFacts[]>(serializedReader);
+      const [facts] = await page.locator('span').evaluateAll<ColorFacts[]>(styleReader);
       expect(facts.backgroundRgba?.[3]).toBe(255);
       expect(facts.foregroundRgba?.[3]).toBe(255);
       expect(facts.opaqueBackground).toBe(false);
@@ -137,7 +147,7 @@ describe('Spinner capture native browser probes', () => {
         'html, body { background: transparent }',
       ]) {
         await page.setContent(`<style>${css}</style><span></span>`);
-        const [facts] = await page.locator('span').evaluateAll<ColorFacts[]>(serializedReader);
+        const [facts] = await page.locator('span').evaluateAll<ColorFacts[]>(styleReader);
         expect(facts.backgroundRgba === null || facts.backgroundRgba[3] !== 255).toBe(true);
       }
     } finally {
