@@ -32,6 +32,10 @@ jobs:
           corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Configure the official Astro evidence surface
+        run: |
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences list
       - name: Check source tokens and real four-runtime fixture
         env:
           PROTO_UI_FAMILY_EVIDENCE_DIR: ${{ runner.temp }}/projection-family-evidence

@@ -189,10 +189,14 @@ describe.sequential('draft family real Web host evidence', () => {
           ({ key, family }) => {
             (window as any).projectionFamilyFixture.setProps(key, 'primary', {
               variant: family === 'bootstrap-2-3-2' ? 'primary' : 'prominent',
+              disabled: false,
             });
           },
           { key, family }
         );
+        await expect
+          .poll(() => primary.getAttribute('aria-disabled'), { message: `${key}/restored primary` })
+          .toBe('false');
         if (family === 'bootstrap-2-3-2') {
           await button.hover();
           expect(await button.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe('none');
