@@ -1,0 +1,60 @@
+{
+  "revision": "f91f6a85b4a93dcb424c07582cb8ac71bd907679",
+  "purpose": "Revision-bound stabilization evidence; newer homepage task composition and native-link Prototype visuals are still under development",
+  "capturedBy": "GitHub Actions actual Chromium",
+  "runs": {
+    "before": "https://github.com/Proto-UI/Proto-UI/actions/runs/37095494332",
+    "after": "https://github.com/Proto-UI/Proto-UI/actions/runs/37098282715"
+  },
+  "images": [
+    {
+      "path": "evidence/homepage-776/f91f6a85/before-b002-brutalist-mobile-light.png",
+      "sha256": "e8e76136fc7df374609848f1f8c63f586ecf7721a7d47a7fff1fdc69388d30ad",
+      "bytes": 69738,
+      "revision": "b00276a6cbc21807c092c274d2761c96b54de122",
+      "run": "37095494332",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light"
+    },
+    {
+      "path": "evidence/homepage-776/f91f6a85/after-f91-brutalist-mobile-light.png",
+      "sha256": "f5b816f0a91170a600ec865b736d67497012d68680026ea99fce254da1f48a03",
+      "bytes": 69388,
+      "revision": "f91f6a85b4a93dcb424c07582cb8ac71bd907679",
+      "run": "37098282715",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light"
+    },
+    {
+      "path": "evidence/homepage-776/f91f6a85/home-mobile-light-navigation-open.png",
+      "sha256": "b98467b053b245bce757eefc2df94bae707b5499f6c4ab2ea8ad7ed1de80b21a",
+      "bytes": 41133,
+      "revision": "f91f6a85b4a93dcb424c07582cb8ac71bd907679",
+      "run": "37098282715",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light"
+    },
+    {
+      "path": "evidence/homepage-776/f91f6a85/home-desktop-light.png",
+      "sha256": "54e758aa3f06ea0a318a4f42d238f8d7eaa11c68b8132f6067a7fd65bda22de4",
+      "bytes": 93889,
+      "revision": "f91f6a85b4a93dcb424c07582cb8ac71bd907679",
+      "run": "37098282715",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light"
+    }
+  ],
+  "privacy": "Only recaptured public Proto UI website pages. No user reference screenshots, credentials, personal browser chrome or private data."
+}
