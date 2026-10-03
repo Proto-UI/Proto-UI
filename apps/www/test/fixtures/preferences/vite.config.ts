@@ -6,7 +6,6 @@ import {
   renderPrefixedThemeCss,
   renderProtoStyleTokenCss,
 } from '../../../../../packages/cli/src/services/proto-style-css';
-import { SHADCN_THEME_CSS } from '../../../../../packages/cli/src/legacy/type';
 import { SHADCN_STYLE_TOKENS } from '../../../../../packages/cli/src/generated/shadcn-style-tokens';
 
 const root = fileURLToPath(new URL('.', import.meta.url));
@@ -18,7 +17,7 @@ const styles: Plugin = {
   },
   load(id) {
     if (id === '\0virtual:preferences.css') {
-      return `${renderPrefixedThemeCss(SHADCN_THEME_CSS)}\n${renderProtoStyleTokenCss([...SHADCN_STYLE_TOKENS, 'bg-white', 'bg-blue-500', 'text-black', 'px-5', 'py-2', 'rounded-full'])}`;
+      return `${renderPrefixedThemeCss(':root { --background: #ffffff; --foreground: #000000; --primary: #3b82f6; }')}\n${renderProtoStyleTokenCss([...SHADCN_STYLE_TOKENS, 'bg-background', 'bg-primary', 'text-foreground', 'px-5', 'py-2', 'rounded-full'])}`;
     }
     return null;
   },

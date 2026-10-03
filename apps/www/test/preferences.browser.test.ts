@@ -82,7 +82,7 @@ describe.sequential('bounded preferences in real Web hosts', () => {
         ]) {
           const previous = media[key as keyof typeof media];
           await set({ [key]: value });
-          await expect.poll(async () => (await paint()).tokens).not.toContain('bg-blue-500');
+          await expect.poll(async () => (await paint()).tokens).not.toContain('bg-primary');
           facts.push({ state: key, paint: await paint() });
           if (key === 'prefers-reduced-transparency')
             await page.screenshot({ path: path.join(evidence, `${runtime}-reduced.png`) });

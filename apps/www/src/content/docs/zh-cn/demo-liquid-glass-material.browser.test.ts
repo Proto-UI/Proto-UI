@@ -299,7 +299,9 @@ describe.sequential('Liquid Glass bounded material on real Web hosts', () => {
       for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
         const card = page.locator(`.library-card--${family}`);
         const button = card.getByRole('button', { name: 'Back', exact: true });
-        await button.scrollIntoViewIfNeeded();
+        // The SSR card exists before its lazy Prototype is mounted. Scrolling a
+        // not-yet-created Button would wait forever without waking the observer.
+        await card.scrollIntoViewIfNeeded();
         await expect
           .poll(() =>
             card.locator('[data-projection-scope]').getAttribute('data-projection-runtime')

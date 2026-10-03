@@ -21,7 +21,7 @@ const probe = definePrototype({
   name: 'reactive-preference-probe',
   setup(def) {
     asButton();
-    def.feedback.style.use(tw('bg-white text-black px-5 py-2 rounded-full'));
+    def.feedback.style.use(tw('bg-background text-foreground px-5 py-2 rounded-full'));
     def.rule({
       when: (w) =>
         w.all(
@@ -30,7 +30,7 @@ const probe = definePrototype({
           w.meta('preference.contrast').eq('no-preference'),
           w.meta('preference.forcedColors').eq('none')
         ),
-      intent: (i) => i.feedback.style.use(tw('bg-blue-500')),
+      intent: (i) => i.feedback.style.use(tw('bg-primary')),
     });
     def.lifecycle.onMounted(() => {
       mounts++;
