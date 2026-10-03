@@ -14,7 +14,7 @@ import {
   stopServer,
 } from './browser-harness';
 
-/** Brutalist puts a hard offset shadow on the thumb, which is what re-composed the ring. */
+/** Source-aligned Brutalist has a flat Thumb; Root alone owns the focus ring. */
 const BRUTALIST_SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
 /** Shadcn scales the pressed root, which is what the thumb applied a second time. */
 const SHADCN_SWITCH_ROUTE = '/en/ui-libraries/shadcn/switch/';
@@ -167,22 +167,25 @@ describe.sequential('composed style isolation browser regressions', () => {
         await selectRuntime(page, previewer, runtime, '[role="switch"]', 3);
         for (const scheme of COLOR_SCHEMES) {
           await applyColorScheme(page, scheme);
+          await runtimeSelectTrigger(previewer).focus();
+          const resting = await switchShadows(page);
+          expect(paintedLayers(resting.root), `${runtime}/${scheme}/resting-root`).toHaveLength(0);
+          expect(paintedLayers(resting.thumb), `${runtime}/${scheme}/resting-thumb`).toHaveLength(
+            0
+          );
           await focusFirstSwitch(page, previewer);
 
           const shadows = await switchShadows(page);
           const label = `${runtime}/${scheme}`;
           expect(shadows.focusVisible, `${label}/focus-visible`).toBe(true);
 
-          // The focused element keeps its ring: the offset layer, the ring
-          // itself, and the Brutalist hard shadow.
-          expect(paintedLayers(shadows.root), `${label}/root-layers`).toHaveLength(3);
+          // The focused Root paints exactly its offset layer and ring. The
+          // source-aligned Switch has no decorative hard shadow.
+          expect(paintedLayers(shadows.root), `${label}/root-layers`).toHaveLength(2);
 
-          // The Thumb declares one shadow token and no ring, so one painted
-          // layer is all it may have. Anything more is an inherited ring.
-          expect(paintedLayers(shadows.thumb), `${label}/thumb-layers`).toHaveLength(1);
-          expect(paintedLayers(shadows.thumb)[0].value, `${label}/thumb-own-shadow`).toBe(
-            paintedLayers(shadows.root)[2].value
-          );
+          // The flat Thumb owns neither shadow nor ring. Any painted layer
+          // would violate the current projection and focus ownership.
+          expect(paintedLayers(shadows.thumb), `${label}/thumb-layers`).toHaveLength(0);
         }
       }
     } finally {

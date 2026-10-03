@@ -8,6 +8,8 @@ on:
       - 'apps/www/src/content/docs/zh-cn/demo-brutalist-switch.demo.ts'
       - 'apps/www/src/styles/assets/font/dm-sans/**'
       - 'apps/www/test/evidence/brutalist-switch.capture.mts'
+      - 'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts'
       - '.github/workflows/brutalist-design-evidence.yml'
 permissions:
   contents: read
@@ -95,3 +97,12 @@ jobs:
         env:
           ASTRO_TELEMETRY_DISABLED: '1'
         run: corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-brutalist-${{ matrix.suite }}.browser.test.ts --maxWorkers=1 --minWorkers=1
+      - name: Verify composition isolation and projection ownership
+        if: matrix.suite == 'controls'
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1

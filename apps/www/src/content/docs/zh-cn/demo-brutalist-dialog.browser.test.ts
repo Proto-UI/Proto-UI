@@ -176,11 +176,10 @@ describe('Brutalist Dialog overlay geometry', () => {
         expect(geometry.mask.boxShadow, `${runtime}/mask-flat`).toBe('none');
         expect(geometry.mask.borderTopWidth, `${runtime}/mask-borderless`).toBe('0px');
 
-        // P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR: centred square hard-shadowed panel.
+        // P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR: centred 5px-radius hard-shadowed panel.
         expectCentred(geometry, `${runtime}/initial`);
-        // Square corners as rendered. A radius the closure never generated also
-        // resolves to `0px`, so this states the result rather than separating a
-        // conforming `rounded-none` from a token that failed to reach the CSS.
+        // The source-aligned radius must reach actual paint; a missing token
+        // would resolve to the initial 0px and fail this 5px assertion.
         expect(geometry.content.borderRadius, `${runtime}/rounded`).toBe('5px');
         // The arbitrary-value shadow has to survive the token closure to render
         // at all; Tailwind composes it after two empty ring layers.

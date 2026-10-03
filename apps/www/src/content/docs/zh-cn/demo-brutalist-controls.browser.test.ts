@@ -881,7 +881,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       expect(paint.backgroundColor, frame).toBe(resolved.boundary.background);
       expect(paint.color, frame).toBe(resolved.boundary.foreground);
       expect(paint.borderColor, frame).toBe('rgb(0, 0, 0)');
-      // The hard shadow must resolve to the same active foreground token as the border.
+      // The source-aligned popup is flat in either portal location.
       expect(paint.boxShadow, frame).toBe('none');
       expect(paint.fontFamily.toLowerCase(), frame).toContain('dm sans');
       expect(paint.fontSize, frame).toBe('14px');

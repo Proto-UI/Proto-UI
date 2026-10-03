@@ -39,13 +39,13 @@ const selectTrigger = definePrototype<BrutalistSelectTriggerProps, BrutalistSele
     }
     const { disabled, hovered, focusVisible, pressed, placeholder } = state;
 
-    // P-BRUTALIST-SELECT-TRIGGER-VISUAL-GRAMMAR: resting combobox surface (square, border-2 black, role-owned depth, flat bg-main text-main-foreground font-sans font-medium fill).
+    // P-BRUTALIST-SELECT-TRIGGER-VISUAL-GRAMMAR: resting combobox surface (5px radius, border-2 black, no shadow, bg-main with paired ink and DM Sans 500).
     def.feedback.style.use(
       tw(
         'flex items-center justify-between gap-2 rounded-base border-2 border-black bg-main text-main-foreground font-sans font-medium px-3 py-2 text-sm whitespace-nowrap outline-none select-none'
       )
     );
-    // P-BRUTALIST-SELECT-TRIGGER-INTERACTION rules (size→h tokens, placeholder→muted fg, hover feedback, press sink, focus-visible ring, disabled fade).
+    // P-BRUTALIST-SELECT-TRIGGER-INTERACTION rules (size→h tokens, placeholder→paired ink, flat hover/press, focus-visible ring, disabled fade).
     def.rule({
       when: (w) => w.prop('size').eq('default'),
       intent: (i) => i.feedback.style.use(tw('h-9')),

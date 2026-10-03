@@ -330,7 +330,7 @@ function expectExactHardShadow(
 
 /**
  * The active Brutalist Toggle keeps a persistent, color-independent inset ink
- * frame (`inset 0 0 0 2px #000`) beside its resting outset hard shadow. This
+ * frame (`inset 0 0 0 2px #000`) on its otherwise flat surface. This
  * asserts the parsed inset layer's flag, zero-blur geometry, and black ink.
  */
 function expectInsetFrame(boxShadow: string, label: string): void {
