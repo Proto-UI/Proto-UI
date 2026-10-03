@@ -1,3 +1,4 @@
+import { readWebStyleSupport } from './web-style-support-source';
 import { readWebPreference } from './web-preference-source';
 export type WebColorScheme = 'light' | 'dark';
 
@@ -45,6 +46,6 @@ export function createDefaultWebMetaGetter(
       return 'no-preference';
     }
 
-    return readWebPreference(doc, key);
+    return readWebPreference(doc, key) ?? readWebStyleSupport(doc, key);
   };
 }

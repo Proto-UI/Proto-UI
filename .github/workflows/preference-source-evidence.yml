@@ -5,6 +5,7 @@ on:
       - '.github/workflows/preference-source-evidence.yml'
       - 'packages/modules/rule-meta/**'
       - 'packages/adapters/base/src/platform/web-preference*'
+      - 'packages/adapters/base/src/platform/web-style-support*'
       - 'packages/adapters/*/src/adapt.ts'
       - 'packages/adapters/*/src/runtime/modules.ts'
       - 'apps/www/test/preferences.browser.test.ts'
@@ -41,6 +42,8 @@ jobs:
           "$CHROME_PATH" --version > "$PROTO_UI_PREFERENCE_EVIDENCE_DIR/chrome-version.txt"
           corepack pnpm@10.32.1 exec vitest run \
             packages/adapters/base/test/web-preference-source.test.ts \
+            packages/adapters/base/test/web-style-support-source.test.ts \
+            packages/runtime/test/contract/rule.style-support-lifecycle.contract.test.ts \
             packages/runtime/test/contract/rule.preferences-lifecycle.contract.test.ts \
             apps/www/test/preferences.browser.test.ts --maxWorkers=1 --minWorkers=1
           rm -rf "$PROTO_UI_PREFERENCE_EVIDENCE_DIR/cache"

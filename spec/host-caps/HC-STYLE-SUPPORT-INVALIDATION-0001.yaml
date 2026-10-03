@@ -1,0 +1,33 @@
+id: HC-STYLE-SUPPORT-INVALIDATION-0001
+type: host-cap
+title: Host declares finite paired style support
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Draft finite Web pipeline declaration; actual consumer painting and independent admission remain open, with native and Compiler excluded.
+summary: A getter-paired fixed-key source declares the actual host alpha and backdrop-blur pipeline.
+statement: RULE_META_STYLE_SUPPORT_SOURCE_CAP exposes a getter and subscribe(keys, invalidate) for only the two finite styleSupport keys. It returns an independent disposer and must not synchronously notify during subscription. No default source is installed for custom getMeta.
+criteria:
+  - id: HC-STYLE-SUPPORT-INVALIDATION-0001-A
+    text: The default Web provider belongs to the existing token-to-style-to-DOM adapters and checks both concrete and variable color-mix background syntax plus exact backdrop-filter blur(4px). Missing CSS.supports or a thrown check yields unknown; rejected syntax yields false. These checks are necessary filters, not sufficient proof of painting.
+  - id: HC-STYLE-SUPPORT-INVALIDATION-0001-B
+    text: The source is paired with the exact default getter. Its browser facts are constant per Document lifetime, so its subscription needs no observer; runtime capability loss/replacement still requests fresh style evaluation. Native and compiler paths do not install this Web source.
+satisfies:
+  contracts:
+    - id: C-RULE-STYLE-SUPPORT-0001
+      anchors: [C-RULE-STYLE-SUPPORT-0001-B, C-RULE-STYLE-SUPPORT-0001-C]
+relates:
+  modules: [M-RULE-META-0001]
+verifies:
+  tests: [T-RULE-STYLE-SUPPORT-0001]
+openQuestions:
+  - id: HC-STYLE-SUPPORT-INVALIDATION-0001-Q-ADMISSION
+    question: Has actual consumer paint and independent provider admission been established beyond necessary syntax checks?
+    blocks: [activation:HC-STYLE-SUPPORT-INVALIDATION-0001]
+sources:
+  - path: packages/adapters/base/src/platform/web-style-support-source.ts
+  - path: packages/adapters/base/test/web-style-support-source.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Proposed finite Web alpha and 4px backdrop support separately from accessibility preferences.
+tags: [host-capability, web, style, draft]

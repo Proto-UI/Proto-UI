@@ -1,0 +1,50 @@
+id: T-RULE-STYLE-SUPPORT-0001
+type: test
+title: Finite style support pairing and syntax filter evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Unit and runtime tests cover finite facts and lifetime. Actual material consumer paint and independent admission are additional requirements, not inferred from these tests.
+summary: Controlled finite-source and real Rule lifetime evidence without a material fidelity claim.
+cases:
+  - id: T-RULE-STYLE-SUPPORT-0001-CASE-SOURCE
+    title: Exact syntax filters and missing support remain distinguishable
+    covers:
+      [
+        C-RULE-STYLE-SUPPORT-0001-B,
+        HC-STYLE-SUPPORT-INVALIDATION-0001-A,
+        HC-STYLE-SUPPORT-INVALIDATION-0001-B,
+      ]
+    expectation: explicit-true-false-unknown-with-exact-lowering-syntax
+  - id: T-RULE-STYLE-SUPPORT-0001-CASE-LIFETIME
+    title: Getter pairing and source loss control the actual Rule contribution
+    covers: [C-RULE-STYLE-SUPPORT-0001-A, C-RULE-STYLE-SUPPORT-0001-C]
+    expectation: active-lease-only-source-loss-unknown-and-no-late-callback
+implementations:
+  - id: source
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/web-style-support-source.test.ts
+    required: true
+    consumesCases: [T-RULE-STYLE-SUPPORT-0001-CASE-SOURCE]
+  - id: lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.style-support-lifecycle.contract.test.ts
+    required: true
+    consumesCases: [T-RULE-STYLE-SUPPORT-0001-CASE-LIFETIME]
+verifies:
+  contracts: [C-RULE-STYLE-SUPPORT-0001]
+  hostCaps: [HC-STYLE-SUPPORT-INVALIDATION-0001]
+openQuestions:
+  - id: T-RULE-STYLE-SUPPORT-0001-Q-PAINT
+    question: Is the linked Liquid Glass consumer's four-Web alpha/blur negative-control and fallback evidence independently accepted?
+    blocks:
+      [
+        criterion:C-RULE-STYLE-SUPPORT-0001#C-RULE-STYLE-SUPPORT-0001-D,
+        activation:T-RULE-STYLE-SUPPORT-0001,
+      ]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Kept source/lifetime tests separate from required material painting evidence.
+tags: [test, style, capability, draft]

@@ -3,21 +3,21 @@ import { tw, type StyleHandle } from '@proto.ui/core';
 import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import type { RulePort } from '@proto.ui/module-rule';
 import {
-  RULE_META_PREFERENCE_SOURCE_CAP,
+  RULE_META_STYLE_SUPPORT_SOURCE_CAP,
   RULE_META_GET_CAP,
-  type PreferenceInvalidationSource,
-  type PreferenceKey,
+  type StyleSupportInvalidationSource,
+  type StyleSupportKey,
   type RuleMetaFacade,
 } from '@proto.ui/module-rule-meta';
 import { createRuntimeSession } from '../../src';
 
-const KEY = 'preference.reducedTransparency';
-function source(initial = 'no-preference') {
+const KEY = 'styleSupport.alphaFill';
+function source(initial: unknown = true) {
   let value = initial;
   const active = new Set<() => void>();
   const callbacks: Array<() => void> = [];
-  const keys: PreferenceKey[][] = [];
-  const result: PreferenceInvalidationSource = {
+  const keys: StyleSupportKey[][] = [];
+  const result: StyleSupportInvalidationSource = {
     getter: (key) => (key === KEY ? value : key === 'reducedMotion' ? 'reduce' : undefined),
     subscribe(requested, invalidate) {
       keys.push([...requested]);
@@ -33,7 +33,7 @@ function source(initial = 'no-preference') {
     active,
     callbacks,
     keys,
-    set(next: string) {
+    set(next: unknown) {
       value = next;
       for (const fn of active) fn();
     },
@@ -45,12 +45,12 @@ function fixture(options: { key?: string | null; paired?: boolean; mismatch?: bo
   const render = vi.fn();
   const session = createRuntimeSession(
     {
-      name: 'preference-lifetime',
+      name: 'style-support-lifetime',
       setup(def) {
         def.feedback.style.use(tw('bg-white'));
         if (options.key !== null)
           def.rule({
-            when: (w) => w.meta(options.key ?? KEY).eq('no-preference'),
+            when: (w) => w.meta(options.key ?? KEY).eq(true),
             intent: (i) => i.feedback.style.use(tw('bg-blue-500')),
           });
         return (r) => {
@@ -60,7 +60,7 @@ function fixture(options: { key?: string | null; paired?: boolean; mismatch?: bo
       },
     },
     {
-      prototypeName: 'preference-lifetime',
+      prototypeName: 'style-support-lifetime',
       getRawProps: () => ({}),
       schedule: (fn) => fn(),
       commit: (_children, signal) => signal?.done(),
@@ -72,7 +72,7 @@ function fixture(options: { key?: string | null; paired?: boolean; mismatch?: bo
           ],
         ]);
         if (options.paired !== false)
-          wiring.attach('rule-meta', [[RULE_META_PREFERENCE_SOURCE_CAP, provider.source]]);
+          wiring.attach('rule-meta', [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, provider.source]]);
         wiring.attach('feedback', [
           [
             EFFECTS_CAP,
@@ -92,7 +92,7 @@ function fixture(options: { key?: string | null; paired?: boolean; mismatch?: bo
     rule: session.caps.getPort<RulePort<any>>('rule')!,
   };
 }
-describe('bounded reactive preference lifetime', () => {
+describe('bounded style support lifetime', () => {
   it.each([{ paired: false }, { mismatch: true }])(
     'fails closed with an unpaired source: %j',
     async (options) => {
@@ -121,12 +121,12 @@ describe('bounded reactive preference lifetime', () => {
     await f.session.mount();
     await f.session.mount();
     expect(f.provider.keys).toEqual([[KEY]]);
-    expect(f.meta.get(KEY)).toBe('no-preference');
+    expect(f.meta.get(KEY)).toBe(true);
     expect(f.styles.at(-1)?.tokens).toEqual(['bg-blue-500']);
     const renders = f.render.mock.calls.length;
-    f.provider.set('reduce');
+    f.provider.set(false);
     expect(f.styles.at(-1)?.tokens).toEqual(['bg-white']);
-    f.provider.set('no-preference');
+    f.provider.set(true);
     expect(f.styles.at(-1)?.tokens).toEqual(['bg-blue-500']);
     expect(f.render).toHaveBeenCalledTimes(renders);
     await f.session.dispose();
@@ -144,7 +144,7 @@ describe('bounded reactive preference lifetime', () => {
     expect(f.styles).toHaveLength(before);
     f.wiring.attach('rule-meta', [
       [RULE_META_GET_CAP, f.provider.source.getter],
-      [RULE_META_PREFERENCE_SOURCE_CAP, f.provider.source],
+      [RULE_META_STYLE_SUPPORT_SOURCE_CAP, f.provider.source],
     ]);
     expect(f.provider.active.size).toBe(1);
     expect(f.styles.at(-1)?.tokens).toEqual(['bg-blue-500']);
@@ -181,7 +181,7 @@ describe('bounded reactive preference lifetime', () => {
     await f.session.mount();
     f.provider.set('invalid');
     expect(f.meta.get(KEY)).toBe('unknown');
-    expect(f.rule.evaluate({ props: {}, readMeta: () => 'no-preference' })).toMatchObject({
+    expect(f.rule.evaluate({ props: {}, readMeta: () => true })).toMatchObject({
       plan: { tokens: ['bg-blue-500'] },
     });
     await f.session.dispose();
@@ -191,28 +191,13 @@ describe('bounded reactive preference lifetime', () => {
     await f.session.mount();
     expect(f.styles.at(-1)?.tokens).toEqual(['bg-blue-500']);
     const old = f.provider.callbacks[0];
-    f.wiring.attach('rule-meta', [[RULE_META_PREFERENCE_SOURCE_CAP, undefined as any]]);
+    f.wiring.attach('rule-meta', [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, undefined as any]]);
     expect(f.meta.get(KEY)).toBe('unknown');
     expect(f.provider.active.size).toBe(0);
     expect(f.styles.at(-1)?.tokens).toEqual(['bg-white']);
     const before = f.styles.length;
     old();
     expect(f.styles).toHaveLength(before);
-    await f.session.dispose();
-  });
-  it('preserves the legacy absent-getter extension seam for unrelated Meta', async () => {
-    const f = fixture({ key: 'locale', paired: false });
-    f.wiring.reset('rule-meta');
-    const seen: unknown[] = [];
-    f.rule.registerExtension({
-      beforePlan(ctx) {
-        seen.push(ctx.readMeta);
-        return { kind: 'continue' };
-      },
-    });
-    await f.session.mount();
-    expect(seen.length).toBeGreaterThan(0);
-    expect(seen.every((value) => value === undefined)).toBe(true);
     await f.session.dispose();
   });
 });

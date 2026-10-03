@@ -83,6 +83,8 @@ import {
   RULE_META_GET_CAP,
   RULE_META_COLOR_SCHEME_SOURCE_CAP,
   RULE_META_PREFERENCE_SOURCE_CAP,
+  RULE_META_STYLE_SUPPORT_SOURCE_CAP,
+  type StyleSupportInvalidationSource,
   type PreferenceInvalidationSource,
   type ColorSchemeInvalidationSource,
 } from '@proto.ui/module-rule-meta';
@@ -118,6 +120,7 @@ type ReactOwnerModulesArgs<Props extends PropsBaseType> = {
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
+  styleSupportSource?: StyleSupportInvalidationSource;
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
@@ -150,6 +153,7 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
     getMeta,
     colorSchemeSource,
     preferenceSource,
+    styleSupportSource,
     setExposes,
   } = args;
 
@@ -202,6 +206,9 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
         ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
         : []),
       ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
+      ...(styleSupportSource
+        ? [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, styleSupportSource] as const]
+        : []),
     ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
@@ -227,6 +234,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
+  styleSupportSource?: StyleSupportInvalidationSource;
   exposeStateWebMode?: ExposeStateWebMode;
   scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
@@ -247,6 +255,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     getMeta,
     colorSchemeSource,
     preferenceSource,
+    styleSupportSource,
     exposeStateWebMode,
     scrollProjection,
     setExposes,
@@ -393,6 +402,9 @@ export function createReactModules<Props extends PropsBaseType>(args: {
         ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
         : []),
       ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
+      ...(styleSupportSource
+        ? [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, styleSupportSource] as const]
+        : []),
     ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],

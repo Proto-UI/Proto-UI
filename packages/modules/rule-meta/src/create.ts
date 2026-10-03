@@ -7,6 +7,10 @@ import {
   RULE_META_COLOR_SCHEME_SOURCE_CAP,
   RULE_META_GET_CAP,
   RULE_META_PREFERENCE_SOURCE_CAP,
+  RULE_META_STYLE_SUPPORT_SOURCE_CAP,
+  isStyleSupportKey,
+  type StyleSupportInvalidationSource,
+  type StyleSupportKey,
   isPreferenceKey,
   normalizePreferenceValue,
   type PreferenceInvalidationSource,
@@ -22,6 +26,10 @@ class RuleMetaModuleImpl extends ModuleBase {
   private disposed = false;
   private preferenceSource: PreferenceInvalidationSource | null = null;
   private preferenceUnsubscribe: (() => void) | null = null;
+  private styleSupportSource: StyleSupportInvalidationSource | null = null;
+  private styleSupportUnsubscribe: (() => void) | null = null;
+  private styleSupportGeneration = 0;
+  private styleSupportKeys: readonly StyleSupportKey[] = [];
   private preferenceGeneration = 0;
   private preferenceKeys: readonly PreferenceKey[] = [];
 
@@ -31,6 +39,20 @@ class RuleMetaModuleImpl extends ModuleBase {
     this.rulePort.registerExtension({
       beforePlan: (ctx) => {
         if (ctx.readMeta) return { kind: 'continue' };
+        // Preserve the legacy no-getter extension seam; only the new bounded
+        // dependencies need an explicit unknown reader when their source is absent.
+        if (
+          !this.caps.has(RULE_META_GET_CAP) &&
+          !this.rulePort
+            .exportIR()
+            .some((rule) =>
+              rule.deps.some(
+                (dep) =>
+                  dep.kind === 'meta' && (isPreferenceKey(dep.key) || isStyleSupportKey(dep.key))
+              )
+            )
+        )
+          return { kind: 'continue' };
         ctx.readMeta = (key: string) => this.get(key);
         return { kind: 'continue' };
       },
@@ -41,23 +63,27 @@ class RuleMetaModuleImpl extends ModuleBase {
     super.onProtoPhase(phase);
     this.reconcileLease();
     this.reconcilePreferenceLease();
+    this.reconcileStyleSupportLease();
   }
 
   override onInstancePhase(phase: InstancePhase): void {
     super.onInstancePhase(phase);
     this.reconcileLease();
     this.reconcilePreferenceLease();
+    this.reconcileStyleSupportLease();
   }
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
     this.reconcileLease();
     this.reconcilePreferenceLease();
+    this.reconcileStyleSupportLease();
   }
 
   protected override onCapsEpoch(): void {
     this.reconcileLease();
     this.reconcilePreferenceLease();
+    this.reconcileStyleSupportLease();
   }
 
   private canSubscribe(): boolean {
@@ -167,10 +193,72 @@ class RuleMetaModuleImpl extends ModuleBase {
     return changed;
   }
 
+  private reconcileStyleSupportLease(): void {
+    const keys = [
+      ...new Set(
+        this.rulePort
+          .exportIR()
+          .flatMap((rule) =>
+            rule.deps.flatMap((dep) =>
+              dep.kind === 'meta' && isStyleSupportKey(dep.key) ? [dep.key] : []
+            )
+          )
+      ),
+    ].sort();
+    const getter = this.caps.has(RULE_META_GET_CAP) ? this.caps.get(RULE_META_GET_CAP) : null;
+    const source = this.caps.has(RULE_META_STYLE_SUPPORT_SOURCE_CAP)
+      ? this.caps.get(RULE_META_STYLE_SUPPORT_SOURCE_CAP)
+      : null;
+    if (!this.canSubscribe() || keys.length === 0 || !source || source.getter !== getter) {
+      const changed = this.releaseStyleSupportLease();
+      // A lost live source must remove enhancement, even when its sampled getter survives.
+      if (changed && this.canSubscribe()) this.rulePort.requestStyleReevaluation();
+      return;
+    }
+    if (
+      source === this.styleSupportSource &&
+      this.styleSupportUnsubscribe &&
+      keys.join() === this.styleSupportKeys.join()
+    )
+      return;
+    this.releaseStyleSupportLease();
+    this.styleSupportSource = source;
+    this.styleSupportKeys = keys;
+    const generation = this.styleSupportGeneration;
+    const release = source.subscribe(keys, () => {
+      if (
+        generation !== this.styleSupportGeneration ||
+        !this.styleSupportUnsubscribe ||
+        !this.canSubscribe()
+      )
+        return;
+      this.rulePort.requestStyleReevaluation();
+    });
+    // Protect a reentrant replacement/disposal during subscription as well as late callbacks.
+    if (generation !== this.styleSupportGeneration || !this.canSubscribe()) {
+      release();
+      return;
+    }
+    this.styleSupportUnsubscribe = release;
+    this.rulePort.requestStyleReevaluation();
+  }
+
+  private releaseStyleSupportLease(): boolean {
+    const changed = this.styleSupportSource !== null;
+    ++this.styleSupportGeneration;
+    const release = this.styleSupportUnsubscribe;
+    this.styleSupportUnsubscribe = null;
+    this.styleSupportSource = null;
+    this.styleSupportKeys = [];
+    release?.();
+    return changed;
+  }
+
   dispose(): void {
     this.disposed = true;
     this.releaseLease();
     this.releasePreferenceLease();
+    this.releaseStyleSupportLease();
   }
 
   get(key: string): unknown {
@@ -184,6 +272,17 @@ class RuleMetaModuleImpl extends ModuleBase {
       )
         return 'unknown';
       return normalizePreferenceValue(key, getter?.(key));
+    }
+    if (isStyleSupportKey(key)) {
+      if (
+        !this.canSubscribe() ||
+        !this.styleSupportUnsubscribe ||
+        this.styleSupportSource?.getter !== getter ||
+        !this.styleSupportKeys.includes(key)
+      )
+        return 'unknown';
+      const value = getter?.(key);
+      return typeof value === 'boolean' ? value : 'unknown';
     }
     return getter ? getter(key) : undefined;
   }

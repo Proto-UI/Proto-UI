@@ -39,3 +39,21 @@ export type PreferenceInvalidationSource = {
 export const RULE_META_PREFERENCE_SOURCE_CAP = cap<PreferenceInvalidationSource>(
   '@proto.ui/rule-meta/preference-source'
 );
+
+/** Finite pipeline facts, not general optical material support. */
+export const STYLE_SUPPORT_KEYS = [
+  'styleSupport.alphaFill',
+  'styleSupport.backdropBlur4px',
+] as const;
+export type StyleSupportKey = (typeof STYLE_SUPPORT_KEYS)[number];
+export type StyleSupportValue = boolean | 'unknown';
+export function isStyleSupportKey(key: string): key is StyleSupportKey {
+  return (STYLE_SUPPORT_KEYS as readonly string[]).includes(key);
+}
+export type StyleSupportInvalidationSource = {
+  readonly getter: RuleMetaGetter;
+  subscribe(keys: readonly StyleSupportKey[], invalidate: () => void): () => void;
+};
+export const RULE_META_STYLE_SUPPORT_SOURCE_CAP = cap<StyleSupportInvalidationSource>(
+  '@proto.ui/rule-meta/style-support-source'
+);

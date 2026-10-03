@@ -247,6 +247,10 @@ supports:
       role: required-module
 provides:
   hostCaps:
+    - id: HC-STYLE-SUPPORT-INVALIDATION-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Draft finite Web token pipeline facts; necessary syntax filtering does not establish material paint fidelity.
     - id: HC-PREFERENCE-INVALIDATION-0001
       since: 0.3.0-alpha.1
       role: translated-capability

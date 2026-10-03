@@ -1,0 +1,36 @@
+id: C-RULE-STYLE-SUPPORT-0001
+type: contract
+title: Finite live style support facts
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Experimental finite Web lowering facts for issue 793; real consumer painting and independent semantic admission remain required. No full optical material or all-host guarantee is admitted.
+summary: Two getter-paired support facts gate alpha-fill and four-pixel background blur intent.
+statement:
+  en: Rule Meta owns a separate mounted source lease for styleSupport.alphaFill and styleSupport.backdropBlur4px. Values are true, false or unknown. Prototypes own enhancement/fallback policy; source capabilities declare a finite host pipeline responsibility, not an Apple material engine.
+  zh-CN: Rule Meta 为 styleSupport.alphaFill 与 styleSupport.backdropBlur4px 拥有独立 mounted source 租约，值为 true、false 或 unknown。Prototype 拥有增强/回退策略，source capability 声明有限 host pipeline 职责，不是 Apple 材质引擎。
+criteria:
+  - id: C-RULE-STYLE-SUPPORT-0001-A
+    text: Only authored dependencies acquire one exact-getter-paired lease. Missing, mismatched, inactive, invalid-valued or unleased inputs read unknown. Reset, source loss and getter replacement retire old generations before release and immediately reconcile mounted Rules. Detach/dispose revoke leases and remount rereads unchanged values.
+  - id: C-RULE-STYLE-SUPPORT-0001-B
+    text: The alphaFill fact is limited to the Web token pipeline's color-mix(in oklab, var(--pui-secondary) 80%, transparent) background fill; backdropBlur4px is limited to backdrop-filter blur(4px). True requires the provider to implement these lowerings and pass necessary browser syntax checks. CSS.supports alone is not realization or pixel evidence. False is an explicit rejected operation; no provider is unknown.
+  - id: C-RULE-STYLE-SUPPORT-0001-C
+    text: Default Web support is constant within one Document lifetime and needs no observer, while source replacement/loss still invalidates the lease. Other providers must notify changes. Values deliver no DOM objects or cached render output. Compiler and native providers remain absent, and refraction, adaptive luminosity, full glass materials and general blur radii are excluded.
+  - id: C-RULE-STYLE-SUPPORT-0001-D
+    text: Actual consumers must verify alpha and blur painting across supported Web adapters, including a blur-removed negative control, opaque fallback and source-loss/reduced-preference transitions. A finite support fact does not guarantee arbitrary theme contrast or background-dependent readability.
+verifies:
+  tests: [T-RULE-STYLE-SUPPORT-0001]
+relates:
+  contracts: [C-RULE-PREFERENCES-0001]
+  modules: [M-RULE-META-0001]
+openQuestions:
+  - id: C-RULE-STYLE-SUPPORT-0001-Q-ADMISSION
+    question: Have the finite facts, actual four-Web material consumer and independent review met admission? Compiler and native providers remain separate work.
+    blocks: [activation:C-RULE-STYLE-SUPPORT-0001]
+sources:
+  - path: packages/modules/rule-meta/src/caps.ts
+  - path: packages/adapters/base/src/platform/web-style-support-source.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added a separately bounded style-support lease without claiming optical material parity.
+tags: [rule, style, capability, draft]
