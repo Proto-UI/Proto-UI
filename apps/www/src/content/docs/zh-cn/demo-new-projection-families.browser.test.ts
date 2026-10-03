@@ -204,6 +204,7 @@ describe.sequential('draft family real Web host evidence', () => {
 
   it('updates props repeatedly and removes all real hosts on disposal', async () => {
     await open('dark');
+    expect(await page.locator('[data-runtime-host]').getByRole('button').count()).toBe(24);
     for (const family of FAMILIES) {
       for (const runtime of RUNTIMES) {
         const key = `${family}-${runtime}`;
@@ -226,7 +227,21 @@ describe.sequential('draft family real Web host evidence', () => {
       }
     }
     await page.evaluate(() => (window as any).projectionFamilyFixture.dispose());
-    await expect.poll(() => page.getByRole('button').count()).toBe(0);
+    const remaining = await page.getByRole('button').evaluateAll((elements) =>
+      elements.map((el) => ({
+        label: el.getAttribute('aria-label') ?? el.textContent,
+        owner: (el.getRootNode() as ShadowRoot).host?.localName ?? 'document',
+      }))
+    );
+    observations.push({ afterDispose: remaining });
+    // Count the 24 real Prototype controls independently of Astro's service UI.
+    await expect
+      .poll(() => page.locator('[data-runtime-host]').getByRole('button').count())
+      .toBe(0);
+    await expect.poll(() => page.locator('[data-runtime-host] [data-pui-root]').count()).toBe(0);
+    // Retain the page-wide check too: a leftover application control outside
+    // its old host still fails. Only the identified development toolbar may remain.
+    expect(remaining.filter((button) => button.owner !== 'astro-dev-toolbar')).toEqual([]);
   }, 90000);
 
   it('keeps the real fixture readable without mobile overflow', async () => {
