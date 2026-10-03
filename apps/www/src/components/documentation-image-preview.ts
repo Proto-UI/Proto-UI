@@ -1,4 +1,6 @@
 import { isPreviewCandidate, readPreviewSource } from './documentation-image-source';
+import { imageContainRect, imageOriginTransform } from './documentation-image-geometry';
+import { IMAGE_ZOOM_DURATION } from './documentation-image-zoom.proto';
 import {
   makePreviewControl,
   previewFamily,
@@ -33,18 +35,16 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     ? {
         title: '插图预览',
         open: '放大查看',
-        original: '原尺寸',
         close: '关闭预览',
         error: '图片暂时无法加载',
-        hint: '按 Escape 关闭；使用原尺寸查看细节',
+        hint: '按 Escape 或点击图片外的背景关闭',
       }
     : {
         title: 'Image preview',
         open: 'Enlarge image',
-        original: 'Original size',
         close: 'Close preview',
         error: 'This image could not be loaded',
-        hint: 'Press Escape to close; use original size for details',
+        hint: 'Press Escape or press the background outside the image to close',
       };
   let family: PreviewFamily = previewFamily(doc);
   let enhancements: Enhancement[] = [];
@@ -57,11 +57,11 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   let content: PreviewControl;
   let title: PreviewControl;
   let description: PreviewControl;
-  let zoom: PreviewControl;
   let image: HTMLImageElement;
-  let scroll: HTMLElement;
   let status: HTMLElement;
-  let caption: HTMLElement;
+  let activeItem: Enhancement | null = null;
+  let sourceSize = { width: 0, height: 0 };
+  let originWasUnavailable = false;
 
   const releaseSource = () => {
     if (ownedUrl) URL.revokeObjectURL(ownedUrl);
@@ -73,19 +73,55 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       themePreviewControl(control, family, dark);
   };
   const motion = () => {
-    setPreviewProps(mask, {
-      enterDuration: reduced.matches ? 0 : 150,
-      leaveDuration: reduced.matches ? 0 : 150,
-    });
-    setPreviewProps(content, {
-      enterDuration: reduced.matches ? 0 : 200,
-      leaveDuration: reduced.matches ? 0 : 200,
-    });
+    const duration = reduced.matches ? 0 : IMAGE_ZOOM_DURATION;
+    for (const control of [mask, content]) {
+      setPreviewProps(control, { enterDuration: duration, leaveDuration: duration });
+      control.style.setProperty('--docs-image-duration', `${duration}ms`);
+    }
   };
-  const resetZoom = () => {
-    content.removeAttribute('data-original-size');
-    setPreviewProps(zoom, { active: false });
-    scroll.scrollTop = scroll.scrollLeft = 0;
+  const restoreOrigin = () => {
+    if (!activeItem) return;
+    activeItem.trigger.removeAttribute('data-docs-image-origin-hidden');
+    // Commit the visible endpoint while source transitions are disabled, then
+    // restore the author's rules. No timeout or secondary modal clock is used.
+    const sourceSurface = activeItem.media.closest('picture') ?? activeItem.media;
+    void doc.defaultView?.getComputedStyle(sourceSurface).opacity;
+    activeItem.trigger.removeAttribute('data-docs-image-source-instant');
+  };
+  const geometry = () => {
+    if (!activeItem) return;
+    const visual = window.visualViewport;
+    const viewport = {
+      x: visual?.offsetLeft ?? 0,
+      y: visual?.offsetTop ?? 0,
+      width: visual?.width ?? window.innerWidth,
+      height: visual?.height ?? window.innerHeight,
+    };
+    const target = imageContainRect(
+      image.naturalWidth || sourceSize.width,
+      image.naturalHeight || sourceSize.height,
+      viewport
+    );
+    const origin =
+      activeItem.media.isConnected && activeItem.trigger.contains(activeItem.media)
+        ? activeItem.media.getBoundingClientRect()
+        : null;
+    const measuredTransform = imageOriginTransform(origin, target, viewport);
+    // A later focus-restoration scroll must not silently revive a destination
+    // that disappeared while this image was presented. Reset for the next open.
+    if (!measuredTransform) originWasUnavailable = true;
+    const transform = originWasUnavailable ? null : measuredTransform;
+    const values = {
+      '--docs-image-left': `${target.x}px`,
+      '--docs-image-top': `${target.y}px`,
+      '--docs-image-width': `${target.width}px`,
+      '--docs-image-height': `${target.height}px`,
+      '--docs-image-origin-transform': transform ?? 'none',
+      '--docs-image-closed-opacity': transform ? '1' : '0',
+    };
+    for (const [name, value] of Object.entries(values))
+      if (content.style.getPropertyValue(name) !== value) content.style.setProperty(name, value);
+    content.dataset.docsImageReturn = transform ? 'origin' : 'fade';
   };
   const createImage = () => {
     mediaAbort.abort();
@@ -100,8 +136,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         if (nextImage !== image || !nextImage.hasAttribute('src')) return;
         status.hidden = true;
         nextImage.hidden = false;
-        if (nextImage.naturalWidth)
-          nextImage.style.setProperty('--docs-image-width', `${nextImage.naturalWidth}px`);
+        geometry();
       },
       mediaOptions
     );
@@ -124,62 +159,36 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     mask.dataset.docsImageMask = '';
     content = makePreviewControl(family, 'dialogContent');
     content.dataset.docsImageContent = '';
-    const header = doc.createElement('header');
-    header.className = 'docs-image-toolbar';
-    const heading = doc.createElement('div');
-    heading.className = 'docs-image-heading';
     title = makePreviewControl(family, 'dialogTitle');
     title.textContent = labels.title;
+    title.className = 'docs-image-accessible';
     description = makePreviewControl(family, 'dialogDescription');
     description.textContent = labels.hint;
-    description.className = 'docs-image-hint';
-    heading.append(title, description);
-    zoom = makePreviewControl(family, 'toggle', { active: false, variant: 'outline', size: 'sm' });
-    zoom.textContent = labels.original;
-    zoom.dataset.docsImageZoom = '';
+    description.className = 'docs-image-accessible docs-image-accessible-description';
     const close = makePreviewControl(family, 'dialogClose');
     const closeButton = makePreviewControl(family, 'button', { variant: 'ghost', size: 'sm' });
     closeButton.textContent = labels.close;
     closeButton.dataset.docsImageClose = '';
+    closeButton.className = 'docs-image-keyboard-close';
     close.append(closeButton);
-    header.append(heading, zoom, close);
-    const scrollRoot = makePreviewControl(family, 'scrollAreaRoot');
-    scrollRoot.className = 'docs-image-scroll-root';
-    scroll = makePreviewControl(family, 'scrollAreaViewport');
-    scroll.setAttribute('aria-label', labels.title);
-    scroll.className = 'docs-image-viewport';
-    // Browser scrolling/pinch zoom remain native document services.
     image = createImage();
     status = doc.createElement('p');
     status.className = 'docs-image-status';
     status.hidden = true;
     status.setAttribute('role', 'status');
     status.textContent = labels.error;
-    caption = doc.createElement('p');
-    caption.className = 'docs-image-caption';
-    caption.hidden = true;
-    scroll.append(image, status);
-    scrollRoot.append(scroll);
-    content.append(header, scrollRoot, caption);
+    content.append(title, description, image, status, close);
     root.append(mask, content);
     host.append(root);
     motion();
     theme();
-    zoom.addEventListener(
-      'activeChange',
-      (event) => {
-        const active = (event as CustomEvent<{ active: boolean }>).detail?.active === true;
-        setPreviewProps(zoom, { active });
-        content.toggleAttribute('data-original-size', active);
-        scroll.scrollTop = scroll.scrollLeft = 0;
-      },
-      renderOptions
-    );
+    content.addEventListener('beforeLeave', geometry, renderOptions);
     content.addEventListener(
       'afterLeave',
       () => {
         if (epoch !== generation || root.getExposes?.().open?.get?.()) return;
-        resetZoom();
+        restoreOrigin();
+        activeItem = null;
         image.removeAttribute('src');
         releaseSource();
       },
@@ -192,7 +201,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     const source = readPreviewSource(item.media);
     if (!source) return;
     releaseSource();
-    resetZoom();
+    restoreOrigin();
+    activeItem = item;
+    sourceSize = { width: source.width, height: source.height };
+    originWasUnavailable = false;
     const previousImage = image;
     image = createImage();
     previousImage.replaceWith(image);
@@ -200,9 +212,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     image.hidden = false;
     image.alt = source.alt;
     image.dataset.sourceUrl = source.sourceUrl;
-    image.style.setProperty('--docs-image-width', source.width > 0 ? `${source.width}px` : 'auto');
-    caption.textContent = source.caption;
-    caption.hidden = !source.caption;
+    description.textContent = [labels.hint, source.caption].filter(Boolean).join('. ');
+    geometry();
+    item.trigger.setAttribute('data-docs-image-source-instant', '');
+    item.trigger.setAttribute('data-docs-image-origin-hidden', '');
     // Never innerHTML, object/embed, source-document navigation or SVG fetch.
     if (source.svgText)
       ownedUrl = URL.createObjectURL(new Blob([source.svgText], { type: 'image/svg+xml' }));
@@ -284,7 +297,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   };
   createDialog();
   scan();
-  const contentObserver = new MutationObserver(scan);
+  const contentObserver = new MutationObserver(() => {
+    scan();
+    geometry();
+  });
   for (const body of doc.querySelectorAll('[data-doc-flow]'))
     contentObserver.observe(body, { childList: true, subtree: true, attributes: true });
   const themeObserver = new MutationObserver(() => {
@@ -292,6 +308,8 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     if (nextFamily !== family) {
       // Close using the protocol before replacing actual family projections.
       root.getExposes?.().close?.('image.family-change');
+      restoreOrigin();
+      activeItem = null;
       renderAbort.abort();
       mediaAbort.abort();
       renderAbort = new AbortController();
@@ -311,6 +329,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     attributeFilter: ['data-theme', 'data-site-library-family'],
   });
   reduced.addEventListener('change', motion, options);
+  window.addEventListener('resize', geometry, options);
+  window.visualViewport?.addEventListener('resize', geometry, options);
+  window.visualViewport?.addEventListener('scroll', geometry, options);
+  doc.addEventListener('scroll', geometry, { ...options, capture: true });
   const cleanup = () => {
     if (disposed) return;
     disposed = true;
@@ -320,6 +342,8 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     contentObserver.disconnect();
     themeObserver.disconnect();
     abort.abort();
+    restoreOrigin();
+    activeItem = null;
     root.getExposes?.().close?.('image.dispose');
     mask.remove();
     content.remove();

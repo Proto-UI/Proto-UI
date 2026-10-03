@@ -403,7 +403,16 @@ fn brutalist_radius_substitution_reaches_the_map_as_five_pixels() {
         assert_eq!(mapped.refinement.corner_radii.top_right, expected);
         assert_eq!(mapped.refinement.corner_radii.bottom_left, expected);
         assert_eq!(mapped.refinement.corner_radii.bottom_right, expected);
-        assert!(mapped.is_complete());
+        // Radius mapping succeeds without pretending GPUI supports CSS's
+        // implicit static positioning. That existing gap must remain visible.
+        assert_eq!(
+            mapped.unmapped,
+            vec![(
+                "position".to_string(),
+                "static".to_string(),
+                Unmapped::UnsupportedValue,
+            )]
+        );
     }
 
     let shadcn = map(
@@ -430,9 +439,7 @@ fn invalid_radius_arithmetic_is_still_reported_without_painting() {
         assert!(mapped.refinement.corner_radii.bottom_left.is_none());
         assert!(mapped.refinement.corner_radii.bottom_right.is_none());
         assert!(mapped.unmapped.iter().any(|(property, actual, reason)| {
-            property == "border-radius"
-                && actual == value
-                && *reason == Unmapped::UnsupportedValue
+            property == "border-radius" && actual == value && *reason == Unmapped::UnsupportedValue
         }));
     }
 }
@@ -444,9 +451,7 @@ fn text_transform_remains_unknown_when_not_emitted_by_current_prototypes() {
         LengthContext::default(),
     );
     assert!(mapped.unmapped.iter().any(|(property, value, reason)| {
-        property == "text-transform"
-            && value == "uppercase"
-            && *reason == Unmapped::UnknownProperty
+        property == "text-transform" && value == "uppercase" && *reason == Unmapped::UnknownProperty
     }));
     assert!(!mapped.is_complete());
 }

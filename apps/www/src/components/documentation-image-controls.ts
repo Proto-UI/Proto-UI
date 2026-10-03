@@ -4,13 +4,11 @@
  */
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import shadcnButton from '@proto.ui/prototypes-shadcn/button';
-import shadcnToggle from '@proto.ui/prototypes-shadcn/toggle';
 import * as shadcnDialog from '@proto.ui/prototypes-shadcn/dialog';
 import brutalistButton from '@proto.ui/prototypes-brutalist/button';
-import brutalistToggle from '@proto.ui/prototypes-brutalist/toggle';
 import * as brutalistDialog from '@proto.ui/prototypes-brutalist/dialog';
-import { scrollAreaRoot, scrollAreaViewport } from '@proto.ui/prototypes-base/scroll-area';
 import { BRUTALIST_THEME } from '@proto.ui/prototypes-brutalist/theme';
+import { imageZoomContent, imageZoomMask } from './documentation-image-zoom.proto';
 
 export type PreviewFamily = 'shadcn' | 'brutalist';
 export type PreviewControl = HTMLElement & {
@@ -20,25 +18,20 @@ export type PreviewControl = HTMLElement & {
 const propsByHost = new WeakMap<HTMLElement, Record<string, unknown>>();
 const parts = {
   shadcn: {
-    scrollAreaRoot,
-    scrollAreaViewport,
     button: shadcnButton,
-    toggle: shadcnToggle,
     ...shadcnDialog,
+    dialogContent: imageZoomContent,
+    dialogMask: imageZoomMask,
   },
   brutalist: {
-    scrollAreaRoot,
-    scrollAreaViewport,
     button: brutalistButton,
-    toggle: brutalistToggle,
     ...brutalistDialog,
+    dialogContent: imageZoomContent,
+    dialogMask: imageZoomMask,
   },
 };
 const roles = [
-  'scrollAreaRoot',
-  'scrollAreaViewport',
   'button',
-  'toggle',
   'dialogRoot',
   'dialogMask',
   'dialogContent',

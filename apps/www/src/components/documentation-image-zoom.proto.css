@@ -1,0 +1,61 @@
+/* Physical Web projection of the two private media prototypes. These styles
+ * never reset the public Shadcn/Brutalist Dialog or choose logical open state. */
+@layer proto-ui {
+  :where([data-pui-style~='docs-image-zoom-content']) {
+    left: var(--docs-image-left, 0px);
+    top: var(--docs-image-top, 0px);
+    width: var(--docs-image-width, 0px);
+    height: var(--docs-image-height, 0px);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    transform-origin: top left;
+    transform: var(--docs-image-origin-transform, none);
+    opacity: var(--docs-image-closed-opacity, 0);
+    transition-property: transform, opacity;
+    transition-duration: var(--docs-image-duration, 220ms);
+    transition-timing-function: linear;
+  }
+  :where([data-pui-style~='docs-image-zoom-content']):is(
+    [data-transition-state='entering'],
+    [data-transition-state='entered']
+  ) {
+    transform: none;
+    opacity: 1;
+  }
+  :where([data-pui-style~='docs-image-zoom-mask']) {
+    background: rgb(0 0 0 / 80%);
+    opacity: 0;
+    transition: opacity var(--docs-image-duration, 220ms) linear;
+  }
+  :where([data-pui-style~='docs-image-zoom-mask']):is(
+    [data-transition-state='entering'],
+    [data-transition-state='entered']
+  ) {
+    opacity: 1;
+  }
+  @starting-style {
+    :where([data-pui-style~='docs-image-zoom-content']):is(
+      [data-transition-state='entering'],
+      [data-transition-state='entered']
+    ) {
+      transform: var(--docs-image-origin-transform, none);
+      opacity: var(--docs-image-closed-opacity, 0);
+    }
+    :where([data-pui-style~='docs-image-zoom-mask']):is(
+      [data-transition-state='entering'],
+      [data-transition-state='entered']
+    ) {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :where([data-pui-style~='docs-image-zoom-content']),
+    :where([data-pui-style~='docs-image-zoom-mask']) {
+      transition-duration: 0ms;
+    }
+  }
+}
