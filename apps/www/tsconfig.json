@@ -39,7 +39,13 @@
         "packages/adapters/*/src",
         "packages/legacy/*/src"
       ],
-      "@proto.ui/prototypes-brutalist/theme": ["packages/prototypes/brutalist/src/theme.ts"]
+      "@proto.ui/prototypes-brutalist/theme": ["packages/prototypes/brutalist/src/theme.ts"],
+      "@proto.ui/prototypes-bootstrap-2-3-2": ["packages/prototypes/bootstrap-2-3-2/src/index.ts"],
+      "@proto.ui/prototypes-bootstrap-2-3-2/*": [
+        "packages/prototypes/bootstrap-2-3-2/src/*/index.ts"
+      ],
+      "@proto.ui/prototypes-liquid-glass": ["packages/prototypes/liquid-glass/src/index.ts"],
+      "@proto.ui/prototypes-liquid-glass/*": ["packages/prototypes/liquid-glass/src/*/index.ts"]
     }
   }
 }

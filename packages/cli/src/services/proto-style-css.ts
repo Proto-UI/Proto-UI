@@ -174,6 +174,7 @@ const staticUtilities: Record<string, string[]> = {
   'duration-150': ['transition-duration: 150ms;', '--pui-animation-duration: 150ms;'],
   'duration-200': ['transition-duration: 200ms;', '--pui-animation-duration: 200ms;'],
   'ease-in-out': ['transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);'],
+  'font-normal': ['font-weight: 400;'],
   'font-medium': ['font-weight: 500;'],
   'font-black': ['font-weight: 900;'],
   'font-sans': ['font-family: var(--pui-font-sans, ui-sans-serif, system-ui, sans-serif);'],
@@ -184,6 +185,7 @@ const staticUtilities: Record<string, string[]> = {
     'font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;',
   ],
   uppercase: ['text-transform: uppercase;'],
+  'leading-5': ['line-height: 1.25rem;'],
   'leading-6': ['line-height: 1.5rem;'],
   'leading-relaxed': ['line-height: 1.625;'],
   'leading-none': ['line-height: 1;'],
@@ -235,6 +237,7 @@ const staticUtilities: Record<string, string[]> = {
   'right-0': ['right: 0px;'],
   'right-full': ['right: 100%;'],
   'top-auto': ['top: auto;'],
+  'opacity-65': ['opacity: 0.65;'],
   'opacity-70': ['opacity: 0.7;'],
   'opacity-100': ['opacity: 1;'],
   'opacity-0': ['opacity: 0;'],
@@ -246,6 +249,25 @@ const staticUtilities: Record<string, string[]> = {
   'ring-offset-0': ['--pui-ring-offset-width: 0px;'],
   'ring-offset-2': ['--pui-ring-offset-width: 2px;'],
   'ring-offset-background': ['--pui-ring-offset-color: var(--pui-background);'],
+  // Controlled v2.3.2 paint vocabulary: one bg token owns both fallback and image.
+  'bg-[#e6e6e6]': ['background-color: #e6e6e6;', 'background-image: none;'],
+  'bg-[#04c]': ['background-color: #04c;', 'background-image: none;'],
+  'bg-[linear-gradient(#fff,#e6e6e6)]': [
+    'background-color: #f5f5f5;',
+    'background-image: linear-gradient(to bottom, #fff, #e6e6e6);',
+  ],
+  'bg-[linear-gradient(#08c,#04c)]': [
+    'background-color: #006dcc;',
+    'background-image: linear-gradient(to bottom, #08c, #04c);',
+  ],
+  'shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)]': [
+    '--pui-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 1px 2px rgb(0 0 0 / 0.05);',
+    ...composedShadow(),
+  ],
+  'shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]': [
+    '--pui-shadow: inset 0 2px 4px rgb(0 0 0 / 0.15), 0 1px 2px rgb(0 0 0 / 0.05);',
+    ...composedShadow(),
+  ],
   'shadow-xs': ['--pui-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);', ...composedShadow()],
   'shadow-sm': [
     '--pui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);',

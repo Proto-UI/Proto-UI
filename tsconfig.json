@@ -39,7 +39,13 @@
         "packages/modules/*/src",
         "packages/adapters/*/src",
         "packages/legacy/*/src"
-      ]
+      ],
+      "@proto.ui/prototypes-bootstrap-2-3-2": ["packages/prototypes/bootstrap-2-3-2/src/index.ts"],
+      "@proto.ui/prototypes-bootstrap-2-3-2/*": [
+        "packages/prototypes/bootstrap-2-3-2/src/*/index.ts"
+      ],
+      "@proto.ui/prototypes-liquid-glass": ["packages/prototypes/liquid-glass/src/index.ts"],
+      "@proto.ui/prototypes-liquid-glass/*": ["packages/prototypes/liquid-glass/src/*/index.ts"]
     },
     "target": "ES2022",
     "jsx": "react-jsx",

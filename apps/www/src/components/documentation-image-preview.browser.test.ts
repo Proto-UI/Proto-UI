@@ -153,7 +153,8 @@ describe('automatic documentation image preview in real Chromium', () => {
             expect(style.right).toBeLessThanOrEqual(width);
             expect(style.top).toBeGreaterThanOrEqual(0);
             expect(style.bottom).toBeLessThanOrEqual(901);
-            if (family === 'brutalist') expect(style.borderRadius).toBe('0px');
+            // This path is the public Brutalist Dialog surface, not the private frame-free image viewer.
+            if (family === 'brutalist') expect(style.borderRadius).toBe('5px');
             else expect(parseFloat(style.borderRadius)).toBeGreaterThan(0);
             const mask = await page.locator('[data-docs-image-mask]').evaluate((el) => ({
               opacity: getComputedStyle(el).backgroundColor,

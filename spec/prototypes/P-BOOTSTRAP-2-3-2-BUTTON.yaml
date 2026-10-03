@@ -1,0 +1,52 @@
+id: P-BOOTSTRAP-2-3-2-BUTTON
+type: prototype
+title: Bootstrap 2.3.2 Button projection over Base Button
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: A user-directed, independently authored visual foundation. Full family/component coverage, material capability where applicable, generated/native evidence and stable admission remain open; source package availability is not release or conformance admission.
+summary: The default/primary Button uses the archived 2.3.2 vertical gradient and raised/inset shadow grammar, 4px corners, normal weight and 14/20 typography at a 16px root. Scalable spacing, stronger focus ring, omitted text-shadow/border-bottom tint/animated gradient and absent other variants are documented differences. The legacy palette is retained in both host color schemes.
+statement:
+  en: The default/primary Button uses the archived 2.3.2 vertical gradient and raised/inset shadow grammar, 4px corners, normal weight and 14/20 typography at a 16px root. Scalable spacing, stronger focus ring, omitted text-shadow/border-bottom tint/animated gradient and absent other variants are documented differences. The legacy palette is retained in both host color schemes. variant is default | primary, default default; disabled is inherited and defaults false.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-BUTTON-BASE
+    text:
+      en: The Prototype invokes asButton() once, preserves inherited interaction, focus, disabled and click ownership, and consumes only its exposed state handles for visual Rules.
+  - id: P-BOOTSTRAP-2-3-2-BUTTON-API
+    text:
+      en: variant is default | primary, default default; disabled is inherited and defaults false. Removing a prop restores its default.
+  - id: P-BOOTSTRAP-2-3-2-BUTTON-VISUAL
+    text:
+      en: The default/primary Button uses the archived 2.3.2 vertical gradient and raised/inset shadow grammar, 4px corners, normal weight and 14/20 typography at a 16px root. Scalable spacing, stronger focus ring, omitted text-shadow/border-bottom tint/animated gradient and absent other variants are documented differences. The legacy palette is retained in both host color schemes.
+  - id: P-BOOTSTRAP-2-3-2-BUTTON-CLOSURE
+    text:
+      en: Appearance is authored in feedback tokens and state/prop Rules; every token has an explicit physical translation. Standalone Web output must not depend on website component CSS or reset rules.
+  - id: P-BOOTSTRAP-2-3-2-BUTTON-BOUNDARY
+    text:
+      en: The package is private and unreleased. Initial source and Web evidence do not establish general Prototype Compiler, GPUI, Flutter or Qt support. Homepage and full component coverage remain separate work.
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/button/button.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/theme.ts
+  - path: packages/prototypes/bootstrap-2-3-2/README.md
+  - path: https://github.com/Proto-UI/Proto-UI/issues/792
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-PROTOTYPE-STYLE-CLOSURE-0001
+inherits:
+  prototypes:
+    - id: P-BASE-BUTTON
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-BUTTON-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the draft Base-inheriting visual Button foundation with explicit material, release and host limits.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - button
+  - visual
+  - draft-foundation
