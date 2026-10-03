@@ -1,0 +1,32 @@
+{
+  "sourceSha": "8856a7112e86aa974f2ba388c3b8b70417268394",
+  "tree": "5050a2ee34de783dedce4942b7b2bd0a0987048e",
+  "scriptSha256": "1b22245482f28698468385597f11e164dc7e581987a79f67ddbff1f1aa2b9edb",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37138970585",
+  "artifact": 11279214259,
+  "artifactSha256": "243c3c51792639f25b9e47396c00d01ba3af75f71f81fcc6d1fbd745c4aaa2c0",
+  "captureCases": 20,
+  "captureFailures": [],
+  "images": [
+    {
+      "path": "evidence/homepage-777/8856a711/mobile-shadcn-menu-two-selects.png",
+      "sha256": "0fb0942c02f09d34047a7874f408799baf51e4947157ac924b5afbced0885aaa",
+      "gitBlob": "05c995b84155e92d8e8da306a4aae6b0003e81b1"
+    },
+    {
+      "path": "evidence/homepage-777/8856a711/mobile-brutalist-gallery.png",
+      "sha256": "6086e439b5c201925d40d23b3dab8b73b8381629ec765b3f01213ce5e105f447",
+      "gitBlob": "069f188a5abf6b8b3f4ab3fcf81eed2568443b05"
+    },
+    {
+      "path": "evidence/homepage-777/8856a711/desktop-brutalist-gallery.png",
+      "sha256": "9a10e352993f2698a37dd33477b2d5e20878ac44601f62dc878f3ee3b292fbbe",
+      "gitBlob": "4600b8388ef26cb1c4cae466679857081282b90c"
+    }
+  ],
+  "limits": [
+    "These are actual source-bound gallery/mobile-menu captures, not a whole-PR CI pass.",
+    "Known remaining issues include translated link edge hit testing, scroll-slot focus-ring clipping, cold Search readiness, and evidence/type corrections.",
+    "Semantic typography #803 is not included in this source."
+  ]
+}
