@@ -1,3 +1,4 @@
+import { readWebPreference } from './web-preference-source';
 export type WebColorScheme = 'light' | 'dark';
 
 const DARK_MEDIA_QUERY = '(prefers-color-scheme: dark)';
@@ -30,7 +31,9 @@ export function resolveWebColorScheme(): WebColorScheme {
   return 'light';
 }
 
-export function createDefaultWebMetaGetter(): (key: string) => unknown {
+export function createDefaultWebMetaGetter(
+  doc = typeof document === 'undefined' ? undefined : document
+): (key: string) => unknown {
   return (key: string) => {
     if (key === 'colorScheme') return resolveWebColorScheme();
 
@@ -42,6 +45,6 @@ export function createDefaultWebMetaGetter(): (key: string) => unknown {
       return 'no-preference';
     }
 
-    return undefined;
+    return readWebPreference(doc, key);
   };
 }

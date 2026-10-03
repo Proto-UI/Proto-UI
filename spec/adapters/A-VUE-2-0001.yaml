@@ -243,6 +243,10 @@ supports:
       role: required-module
 provides:
   hostCaps:
+    - id: HC-PREFERENCE-INVALIDATION-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Draft fixed preference keys only with the matching default Web getter; custom getter stays unpaired.
     - id: HC-COLOR-SCHEME-INVALIDATION-0001
       since: 0.3.0-alpha.0
       role: translated-capability

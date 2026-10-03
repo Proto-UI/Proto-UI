@@ -43,3 +43,9 @@ npm install @proto.ui/adapter-base@0.3.0-alpha.1
 ## License
 
 MIT
+
+### Draft bounded accessibility preferences
+
+`createDefaultWebPreferenceSource(getter)` is a separate, fixed-key source. It is paired only with the default getter in WC, React, Vue 3 and Vue 2. Authored Rules can read `preference.reducedMotion`, `preference.reducedTransparency`, `preference.contrast` and `preference.forcedColors`. Values follow the explicit media-query alternatives; unavailable, ambiguous, unobservable or unmatched input is `unknown`. Existing `reducedMotion` remains sampled.
+
+Rule Meta exposes the new keys only with a matching active mounted lease. Source loss or getter mismatch immediately removes the current Rule contribution, rather than retaining stale enhancement. Subscriptions are dependency-driven, shared per Document/query and released on detach/disposal. These facts do not claim native/Compiler support or any material rendering fidelity; see `C-RULE-PREFERENCES-0001` and #793.

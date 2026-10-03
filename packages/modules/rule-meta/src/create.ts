@@ -6,6 +6,11 @@ import type { RuleMetaFacade, RuleMetaModule } from './types';
 import {
   RULE_META_COLOR_SCHEME_SOURCE_CAP,
   RULE_META_GET_CAP,
+  RULE_META_PREFERENCE_SOURCE_CAP,
+  isPreferenceKey,
+  normalizePreferenceValue,
+  type PreferenceInvalidationSource,
+  type PreferenceKey,
   type ColorSchemeInvalidationSource,
 } from './caps';
 
@@ -15,6 +20,10 @@ class RuleMetaModuleImpl extends ModuleBase {
   private unsubscribe: (() => void) | null = null;
   private generation = 0;
   private disposed = false;
+  private preferenceSource: PreferenceInvalidationSource | null = null;
+  private preferenceUnsubscribe: (() => void) | null = null;
+  private preferenceGeneration = 0;
+  private preferenceKeys: readonly PreferenceKey[] = [];
 
   constructor(caps: CapsVaultView, deps: ModuleDeps) {
     super(caps);
@@ -22,9 +31,7 @@ class RuleMetaModuleImpl extends ModuleBase {
     this.rulePort.registerExtension({
       beforePlan: (ctx) => {
         if (ctx.readMeta) return { kind: 'continue' };
-        const getter = this.caps.has(RULE_META_GET_CAP) ? this.caps.get(RULE_META_GET_CAP) : null;
-        if (!getter) return { kind: 'continue' };
-        ctx.readMeta = (key: string) => getter(key);
+        ctx.readMeta = (key: string) => this.get(key);
         return { kind: 'continue' };
       },
     });
@@ -33,20 +40,24 @@ class RuleMetaModuleImpl extends ModuleBase {
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
     this.reconcileLease();
+    this.reconcilePreferenceLease();
   }
 
   override onInstancePhase(phase: InstancePhase): void {
     super.onInstancePhase(phase);
     this.reconcileLease();
+    this.reconcilePreferenceLease();
   }
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
     this.reconcileLease();
+    this.reconcilePreferenceLease();
   }
 
   protected override onCapsEpoch(): void {
     this.reconcileLease();
+    this.reconcilePreferenceLease();
   }
 
   private canSubscribe(): boolean {
@@ -95,13 +106,85 @@ class RuleMetaModuleImpl extends ModuleBase {
     unsubscribe?.();
   }
 
+  private reconcilePreferenceLease(): void {
+    const keys = [
+      ...new Set(
+        this.rulePort
+          .exportIR()
+          .flatMap((rule) =>
+            rule.deps.flatMap((dep) =>
+              dep.kind === 'meta' && isPreferenceKey(dep.key) ? [dep.key] : []
+            )
+          )
+      ),
+    ].sort();
+    const getter = this.caps.has(RULE_META_GET_CAP) ? this.caps.get(RULE_META_GET_CAP) : null;
+    const source = this.caps.has(RULE_META_PREFERENCE_SOURCE_CAP)
+      ? this.caps.get(RULE_META_PREFERENCE_SOURCE_CAP)
+      : null;
+    if (!this.canSubscribe() || keys.length === 0 || !source || source.getter !== getter) {
+      const changed = this.releasePreferenceLease();
+      // A lost live source must remove enhancement, even when its sampled getter survives.
+      if (changed && this.canSubscribe()) this.rulePort.requestStyleReevaluation();
+      return;
+    }
+    if (
+      source === this.preferenceSource &&
+      this.preferenceUnsubscribe &&
+      keys.join() === this.preferenceKeys.join()
+    )
+      return;
+    this.releasePreferenceLease();
+    this.preferenceSource = source;
+    this.preferenceKeys = keys;
+    const generation = this.preferenceGeneration;
+    const release = source.subscribe(keys, () => {
+      if (
+        generation !== this.preferenceGeneration ||
+        !this.preferenceUnsubscribe ||
+        !this.canSubscribe()
+      )
+        return;
+      this.rulePort.requestStyleReevaluation();
+    });
+    // Protect a reentrant replacement/disposal during subscription as well as late callbacks.
+    if (generation !== this.preferenceGeneration || !this.canSubscribe()) {
+      release();
+      return;
+    }
+    this.preferenceUnsubscribe = release;
+    this.rulePort.requestStyleReevaluation();
+  }
+
+  private releasePreferenceLease(): boolean {
+    const changed = this.preferenceSource !== null;
+    ++this.preferenceGeneration;
+    const release = this.preferenceUnsubscribe;
+    this.preferenceUnsubscribe = null;
+    this.preferenceSource = null;
+    this.preferenceKeys = [];
+    release?.();
+    return changed;
+  }
+
   dispose(): void {
     this.disposed = true;
     this.releaseLease();
+    this.releasePreferenceLease();
   }
 
   get(key: string): unknown {
     const getter = this.caps.has(RULE_META_GET_CAP) ? this.caps.get(RULE_META_GET_CAP) : null;
+    if (isPreferenceKey(key)) {
+      if (
+        !this.canSubscribe() ||
+        !this.preferenceUnsubscribe ||
+        this.preferenceSource?.getter !== getter ||
+        !this.preferenceKeys.includes(key)
+      )
+        return 'unknown';
+      return normalizePreferenceValue(key, getter?.(key));
+    }
     return getter ? getter(key) : undefined;
   }
 }

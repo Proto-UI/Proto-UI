@@ -1,0 +1,60 @@
+id: T-RULE-PREFERENCES-0001
+type: test
+title: Bounded preference source and lifetime evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Fixed-key unit and Runtime evidence is executable; browser paint and independent admission remain separately recorded requirements.
+summary: Source resources, active-source fallback and real Web painting have separate evidence boundaries.
+cases:
+  - id: T-RULE-PREFERENCES-0001-CASE-SOURCE
+    title: Explicit alternatives, per-key lazy resources and safe notifications
+    covers:
+      [
+        HC-PREFERENCE-INVALIDATION-0001-A,
+        HC-PREFERENCE-INVALIDATION-0001-B,
+        HC-PREFERENCE-INVALIDATION-0001-C,
+      ]
+    expectation: explicit-matches-only-per-document-key-listeners-and-late-callback-rejection
+  - id: T-RULE-PREFERENCES-0001-CASE-LIFETIME
+    title: Paired leases and unknown on source loss preserve sampled compatibility
+    covers:
+      [
+        C-RULE-PREFERENCES-0001-A,
+        C-RULE-PREFERENCES-0001-B,
+        C-RULE-PREFERENCES-0001-C,
+        C-RULE-PREFERENCES-0001-D,
+      ]
+    expectation: one-mounted-lease-source-loss-fallback-no-structural-render
+  - id: T-RULE-PREFERENCES-0001-CASE-WEB
+    title: Four real Web hosts repaint without interaction and fail closed for unavailable or custom sources
+    covers: [C-RULE-PREFERENCES-0001-D, HC-PREFERENCE-INVALIDATION-0001-D]
+    expectation: native-media-query-change-paint-and-unknown-fallback
+implementations:
+  - id: source
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/web-preference-source.test.ts
+    required: true
+    consumesCases: [T-RULE-PREFERENCES-0001-CASE-SOURCE]
+  - id: lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.preferences-lifecycle.contract.test.ts
+    required: true
+    consumesCases: [T-RULE-PREFERENCES-0001-CASE-LIFETIME]
+  - id: browser
+    kind: adapter-test
+    status: needs-review
+    path: apps/www/test/preferences.browser.test.ts
+    required: true
+    consumesCases: [T-RULE-PREFERENCES-0001-CASE-WEB]
+verifies:
+  contracts: [C-RULE-PREFERENCES-0001]
+  hostCaps: [HC-PREFERENCE-INVALIDATION-0001]
+sources:
+  - path: apps/www/test/fixtures/preferences/main.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Separated controlled source, Runtime and native browser evidence for the new fixed-key namespace.
+tags: [test, preferences, lifecycle, web, draft]

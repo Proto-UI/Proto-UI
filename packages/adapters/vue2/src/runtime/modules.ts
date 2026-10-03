@@ -86,6 +86,8 @@ import { RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP } from '@proto.ui/modul
 import {
   RULE_META_GET_CAP,
   RULE_META_COLOR_SCHEME_SOURCE_CAP,
+  RULE_META_PREFERENCE_SOURCE_CAP,
+  type PreferenceInvalidationSource,
   type ColorSchemeInvalidationSource,
 } from '@proto.ui/module-rule-meta';
 import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
@@ -115,6 +117,7 @@ type Vue2OwnerModulesArgs<Props extends PropsBaseType> = {
   rawPropsSource: RawPropsSource<Props>;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
+  preferenceSource?: PreferenceInvalidationSource;
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
@@ -164,7 +167,15 @@ export function createVue2OverlayGlobalMount(
 export function createVue2OwnerModules<Props extends PropsBaseType>(
   args: Vue2OwnerModulesArgs<Props>
 ) {
-  const { instanceToken, emit, rawPropsSource, getMeta, colorSchemeSource, setExposes } = args;
+  const {
+    instanceToken,
+    emit,
+    rawPropsSource,
+    getMeta,
+    colorSchemeSource,
+    preferenceSource,
+    setExposes,
+  } = args;
 
   return createCapsWiring()
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
@@ -214,6 +225,7 @@ export function createVue2OwnerModules<Props extends PropsBaseType>(
       ...(colorSchemeSource
         ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
         : []),
+      ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
     ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
@@ -238,6 +250,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
   effectsPort: EffectsPort;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
+  preferenceSource?: PreferenceInvalidationSource;
   exposeStateWebMode?: ExposeStateWebMode;
   scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
@@ -257,6 +270,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     effectsPort,
     getMeta,
     colorSchemeSource,
+    preferenceSource,
     exposeStateWebMode,
     scrollProjection,
     setExposes,
@@ -410,6 +424,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       ...(colorSchemeSource
         ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
         : []),
+      ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
     ])
     .use('rule-expose-state-web', [
       [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],

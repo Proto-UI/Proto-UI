@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Reactive preference conformance</title>
+    <style>
+      body {
+        font-family: system-ui;
+        margin: 40px;
+        background: #dce4ef;
+        color: #111;
+      }
+      main {
+        max-width: 680px;
+      }
+      article {
+        background: white;
+        padding: 24px;
+        border-radius: 16px;
+        margin: 16px 0;
+      }
+      button {
+        font: inherit;
+      }
+      h1 {
+        font-size: 26px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Reactive preference conformance</h1>
+      <p>Real Base Button through <strong id="runtime"></strong></p>
+      <p>White: safe fallback · Blue: all four live preferences permit the test enhancement</p>
+      <article id="app"></article>
+      <p id="state">Waiting for preferences</p>
+    </main>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>

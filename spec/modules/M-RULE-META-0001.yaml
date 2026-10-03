@@ -13,8 +13,8 @@ statement:
 criteria:
   - id: M-RULE-META-0001-A
     text:
-      en: Existing meta.get(key) reads the current host getter or returns undefined when it is absent. The Rule extension respects an explicit ctx.readMeta override. Other keys, including reducedMotion, retain sampled behavior; the new source does not make them reactive.
-      zh-CN: 既有 meta.get(key) 读取当前 host getter，缺失时返回 undefined。Rule extension 尊重显式 ctx.readMeta override。其它 key（含 reducedMotion）保持 sampled 行为；新 source 不使它们响应式化。
+      en: Existing meta.get(key) reads the current host getter or returns undefined when it is absent. The Rule extension respects an explicit ctx.readMeta override. Other existing keys, including reducedMotion, retain sampled behavior; the colorScheme source does not make them reactive. The separately governed preference.* namespace follows C-RULE-PREFERENCES-0001.
+      zh-CN: 既有 meta.get(key) 读取当前 host getter，缺失时返回 undefined。Rule extension 尊重显式 ctx.readMeta override。其它既有 key（含 reducedMotion）保持 sampled 行为；colorScheme source 不使它们响应式化。独立 preference.* 命名空间遵循 C-RULE-PREFERENCES-0001。
   - id: M-RULE-META-0001-B
     text:
       en: Lease eligibility comes from authored Rule IR meta:colorScheme dependencies, independently of downstream lowering. The alive owner waits for mounted mount/Proto phases before subscribing; setup, mounting, detached and non-consuming instances hold no lease.
@@ -29,10 +29,14 @@ criteria:
       zh-CN: unmounting/detached 与 disposing/disposed 通过真实 mount/instance/caps/dispose hook 撤销租约。迟到回调不能触及已退役 Rule driver。bridge 请求当前 Rule port，不保留 surface，也不实现第二 evaluator 或 contribution owner。
 owns:
   contracts:
+    - id: C-RULE-PREFERENCES-0001
+      since: 0.3.0-alpha.1
     - id: C-RULE-COLOR-SCHEME-0001
       anchors: [C-RULE-COLOR-SCHEME-0001-C, C-RULE-COLOR-SCHEME-0001-D]
 satisfies:
   contracts:
+    - id: C-RULE-PREFERENCES-0001
+      since: 0.3.0-alpha.1
     - id: C-RULE-COLOR-SCHEME-0001
       anchors: [C-RULE-COLOR-SCHEME-0001-C, C-RULE-COLOR-SCHEME-0001-D]
 dependsOn:
@@ -44,6 +48,9 @@ dependsOn:
     - C-LIFECYCLE-0008
 requires:
   hostCaps:
+    - id: HC-PREFERENCE-INVALIDATION-0001
+      since: 0.3.0-alpha.1
+      note: Separate fixed preference namespace; absent or unpaired source yields unknown.
     - id: HC-COLOR-SCHEME-INVALIDATION-0001
       note: Conditional on authored colorScheme Rules and the matching default reader; absence retains sampled Meta behavior.
 relates:
@@ -67,6 +74,9 @@ sources:
   - path: packages/modules/rule-meta/src/types.ts
   - path: packages/runtime/src/instance/session.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added a separate fixed preference namespace lease, retaining existing sampled keys and colorScheme behavior.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged sampled Meta reading and the single mounted colorScheme source lease as a bounded draft Module.
