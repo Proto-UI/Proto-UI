@@ -3,18 +3,11 @@ type: knowledge
 title: The Brutalist style family is a Proto UI-maintained Neo-Brutalist design language, not a third-party compatibility target
 status: draft
 since: 0.2.0-rc.7
-summary: >-
-  The Brutalist style family under `@proto.ui/prototypes-brutalist` is a contributor-authored Proto UI design-language projection. It is not a clone, compatibility wrapper, or certified integration of any third-party Neo-Brutalist design system, and must not claim third-party upstream ownership or certification.
-
+summary: 'Brutalist is a Proto UI-maintained design-language projection with visual recipes aligned to the pinned neobrutalism.dev source. Its protocol implementation and explicit extensions remain Proto UI-owned; no upstream certification or API-compatibility promise is implied.'
 
 statement:
-  en: >-
-    The Brutalist prototypes in this repository are Proto UI's own Neo-Brutalist design-language projection, authored and maintained by Proto UI contributors for this project. They must not be described or represented as a port, clone, compatibility wrapper, or certified integration of an external Neo-Brutalist design system, and must not claim third-party upstream ownership.
-
-
-  zh-CN: >-
-    本仓库中的 Brutalist prototype 是 Proto UI 贡献者自行创作并维护的 Neo-Brutalist design-language 投射。不得将其描述或呈现为任何外部 Neo-Brutalist 设计系统的移植、克隆、兼容包装或认证集成，也不得声称 第三方上游所有权。
-
+  en: Brutalist deliberately follows neobrutalism-components 3306a802 for visual typography, geometry, color and component depth, preserving license attribution for adapted recipes. Proto UI maintains its own semantic implementation, documented extensions and cross-adapter evidence. It must not claim upstream authorship, endorsement, certification or component API compatibility.
+  zh-CN: Brutalist 的字体、几何、颜色与组件层级有意遵循 neobrutalism-components 3306a802，改编 recipe 保留许可署名。Proto UI 维护自己的语义实现、已说明扩展与跨 Adapter 证据；不得声称上游作者身份、背书、认证或组件 API 兼容性。
 
 criteria:
   - id: K-BRUTALIST-0001-A
@@ -28,6 +21,8 @@ criteria:
 
 
 sources:
+  - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
+  - path: packages/prototypes/brutalist/THIRD_PARTY_NOTICES.md
   - path: docs/superpowers/specs/2026-07-24-brutalist-design-system-design.md
   - path: internal/records/2026-07-27-brutalist-button-foundation-review.zh-CN.md
   - path: apps/www/src/content/docs/en/ui-libraries/brutalist/index.mdx
@@ -35,6 +30,9 @@ sources:
 relates:
   prototypes: [P-BRUTALIST-BUTTON]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded explicit source-pinned visual adaptation while retaining Proto UI semantic ownership and the non-certification boundary.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

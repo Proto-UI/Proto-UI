@@ -161,6 +161,11 @@ const staticUtilities: Record<string, string[]> = {
     'transition-duration: 150ms;',
   ],
   'transition-none': ['transition-property: none;'],
+  'transition-transform': [
+    'transition-property: transform;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
   'transition-colors': [
     'transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;',
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
@@ -172,6 +177,7 @@ const staticUtilities: Record<string, string[]> = {
   'font-normal': ['font-weight: 400;'],
   'font-medium': ['font-weight: 500;'],
   'font-black': ['font-weight: 900;'],
+  'font-sans': ['font-family: var(--pui-font-sans, ui-sans-serif, system-ui, sans-serif);'],
   'font-heading': ['font-family: var(--pui-font-heading, ui-sans-serif, system-ui, sans-serif);'],
   'font-semibold': ['font-weight: 600;'],
   'font-bold': ['font-weight: 700;'],
@@ -212,6 +218,7 @@ const staticUtilities: Record<string, string[]> = {
   'border-transparent': ['border-color: transparent;'],
   'bg-transparent': ['background-color: transparent;'],
   'bg-black': ['background-color: #000;'],
+  'bg-white': ['background-color: #fff;'],
   'bg-foreground': ['background-color: var(--pui-foreground);'],
   'bg-canvas': ['background-color: var(--pui-background);'],
   'bg-paper': ['background-color: var(--pui-background);'],
@@ -440,6 +447,14 @@ export function renderProtoStyleTokenCss(tokens: string[]): string {
       reducedMotionBlocks.push({ token: rule.token, css: ['animation: none;'] });
     }
   }
+  // Switch and future transform-only transitions remain instantaneous when
+  // the host requests reduced motion. Keep host media syntax in CSS projection,
+  // never in the prototype's variant-free v0 tokens.
+  for (const rule of rules.filter(
+    (rule) => splitVariants(rule.token).at(-1) === 'transition-transform'
+  )) {
+    reducedMotionBlocks.push({ token: rule.token, css: ['transition-property: none;'] });
+  }
   if (reducedMotionBlocks.length > 0) {
     lines.push(`  @media ${SYSTEM_REDUCED_MOTION_MEDIA_QUERY} {`);
     for (const rule of reducedMotionBlocks) {
@@ -631,6 +646,7 @@ function renderColorUtility(utility: string): string[] | null {
 }
 
 function renderRoundedUtility(utility: string): string[] | null {
+  if (utility === 'rounded-base') return ['border-radius: var(--pui-radius);'];
   if (utility === 'rounded-none') return ['border-radius: 0;'];
   if (utility === 'rounded-full') return ['border-radius: 9999px;'];
   if (utility === 'rounded-xl') return ['border-radius: var(--pui-radius-xl);'];

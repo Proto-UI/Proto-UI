@@ -233,13 +233,13 @@ fn unsupported_flex_basis_does_not_partially_mutate_the_style() {
 #[test]
 fn maps_colour_through_the_theme_of_each_design_language() {
     // The expected values are stated independently of the pipeline: Brutalist
-    // authors `--background: #f5f5f5` and Shadcn authors `lab(100% 0 0)`,
+    // authors `--background: #dcebfe` and Shadcn authors `lab(100% 0 0)`,
     // which is pure white. Landing on them exercises token lookup, theme
     // substitution, colour parsing and the conversion to GPUI in one go.
     let expected_brutalist: gpui::Hsla = gpui::Rgba {
-        r: 245.0 / 255.0,
-        g: 245.0 / 255.0,
-        b: 245.0 / 255.0,
+        r: 220.0 / 255.0,
+        g: 235.0 / 255.0,
+        b: 254.0 / 255.0,
         a: 1.0,
     }
     .into();
@@ -287,7 +287,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 30] = [
+const EXPECTED_UNMAPPED: [&str; 29] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -320,7 +320,6 @@ const EXPECTED_UNMAPPED: [&str; 30] = [
     "letter-spacing",
     "text-align",
     "text-decoration-line",
-    "text-transform",
     "text-underline-offset",
     "white-space",
 ];
@@ -330,7 +329,7 @@ const EXPECTED_UNMAPPED: [&str; 30] = [
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 10] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 8] = [
     (
         "width",
         "fit-content",
@@ -352,18 +351,6 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 10] = [
          inherited text colour. A single surface's declarations do not carry \
          it, so the mapped surface reports the gap rather than inventing a \
          colour.",
-    ),
-    (
-        "border-radius",
-        "max(calc(0 - 2px), 0px)",
-        "Brutalist's `--radius` is `0px`, so `rounded-md` substitutes to an \
-         addition mixing a plain number with a length. That is invalid CSS, \
-         and a browser drops the declaration too.",
-    ),
-    (
-        "border-radius",
-        "min(max(calc(0 - 2px), 0px), 12px)",
-        "The arbitrary-value form of the same Brutalist substitution.",
     ),
     (
         "height",
@@ -396,45 +383,77 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 10] = [
     ),
 ];
 
-/// The end of the Brutalist radius chain, followed through every layer.
-///
-/// `rounded-md` records `max(calc(var(--radius) - 2px), 0px)`; the Brutalist
-/// theme substitutes `--radius` with `0px`; the result subtracts a length from
-/// a plain number, which CSS rejects. The web baseline drops the declaration,
-/// so the mapped surface must carry no radius rather than an invented one.
+/// The source-aligned Brutalist theme gives its ordinary surfaces a 5px radius.
+/// This positive projection check is independent of the invalid-calc negatives.
 #[test]
-fn brutalist_radius_substitution_reaches_the_map_as_invalid() {
-    let resolved = resolve(&["rounded-md"], "brutalist");
-    assert_eq!(
-        resolved
-            .declarations
-            .get("border-radius")
-            .map(String::as_str),
-        Some("max(calc(0 - 2px), 0px)"),
-        "the theme should have substituted --radius before the map sees it"
-    );
+fn brutalist_radius_substitution_reaches_the_map_as_five_pixels() {
+    for token in ["rounded-base", "rounded-md"] {
+        let resolved = resolve(&[token], "brutalist");
+        assert_eq!(
+            resolved
+                .declarations
+                .get("border-radius")
+                .map(String::as_str),
+            Some("5px"),
+            "the theme should have substituted --radius before the map sees it"
+        );
+        let mapped = map(&resolved, LengthContext::default());
+        let expected = Some(AbsoluteLength::Pixels(gpui::px(5.0)));
+        assert_eq!(mapped.refinement.corner_radii.top_left, expected);
+        assert_eq!(mapped.refinement.corner_radii.top_right, expected);
+        assert_eq!(mapped.refinement.corner_radii.bottom_left, expected);
+        assert_eq!(mapped.refinement.corner_radii.bottom_right, expected);
+        // Radius mapping succeeds without pretending GPUI supports CSS's
+        // implicit static positioning. That existing gap must remain visible.
+        assert_eq!(
+            mapped.unmapped,
+            vec![(
+                "position".to_string(),
+                "static".to_string(),
+                Unmapped::UnsupportedValue,
+            )]
+        );
+    }
 
-    let mapped = map(&resolved, LengthContext::default());
-    assert!(
-        mapped.refinement.corner_radii.top_left.is_none(),
-        "an invalid declaration must not paint a radius"
-    );
-    assert!(mapped.unmapped.iter().any(|(property, value, reason)| {
-        property == "border-radius"
-            && value == "max(calc(0 - 2px), 0px)"
-            && *reason == Unmapped::UnsupportedValue
-    }));
-
-    // Shadcn's `--radius` is non-zero, so the same token does paint there.
-    // Without this the assertion above would pass for the wrong reason.
     let shadcn = map(
         &resolve(&["rounded-md"], "shadcn"),
         LengthContext::default(),
     );
-    assert!(
-        shadcn.refinement.corner_radii.top_left.is_some(),
-        "the same token must still map where the substitution is valid"
+    assert!(shadcn.refinement.corner_radii.top_left.is_some());
+}
+
+#[test]
+fn invalid_radius_arithmetic_is_still_reported_without_painting() {
+    // These no longer occur in the current Brutalist theme. Keep synthetic
+    // fail-closed coverage rather than claiming the parser gained support.
+    for value in [
+        "max(calc(0 - 2px), 0px)",
+        "min(max(calc(0 - 2px), 0px), 12px)",
+    ] {
+        let mapped = map(
+            &declared(&[("border-radius", value)]),
+            LengthContext::default(),
+        );
+        assert!(mapped.refinement.corner_radii.top_left.is_none());
+        assert!(mapped.refinement.corner_radii.top_right.is_none());
+        assert!(mapped.refinement.corner_radii.bottom_left.is_none());
+        assert!(mapped.refinement.corner_radii.bottom_right.is_none());
+        assert!(mapped.unmapped.iter().any(|(property, actual, reason)| {
+            property == "border-radius" && actual == value && *reason == Unmapped::UnsupportedValue
+        }));
+    }
+}
+
+#[test]
+fn text_transform_remains_unknown_when_not_emitted_by_current_prototypes() {
+    let mapped = map(
+        &declared(&[("text-transform", "uppercase")]),
+        LengthContext::default(),
     );
+    assert!(mapped.unmapped.iter().any(|(property, value, reason)| {
+        property == "text-transform" && value == "uppercase" && *reason == Unmapped::UnknownProperty
+    }));
+    assert!(!mapped.is_complete());
 }
 
 #[test]
@@ -509,7 +528,7 @@ fn every_token_maps_or_appears_in_the_inventory() {
     );
     assert!(
         gone.is_empty(),
-        "these are now mapped and should leave the inventory: {gone:?}"
+        "these are mapped or no longer emitted by current prototypes: {gone:?}"
     );
     let expected_values: BTreeSet<(String, String)> = EXPECTED_UNMAPPED_VALUES
         .iter()
@@ -526,7 +545,7 @@ fn every_token_maps_or_appears_in_the_inventory() {
     );
     assert!(
         gone_values.is_empty(),
-        "these values now map and should leave the inventory: {gone_values:?}"
+        "these values now map or are no longer emitted by current themes: {gone_values:?}"
     );
 
     // Guards against the loop finding nothing, which would make this vacuous.

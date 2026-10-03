@@ -405,14 +405,30 @@ async function assertSelectFingerprint(
   if (projectionFamilyId === 'brutalist') {
     expect(restingTokens).toEqual(
       expect.arrayContaining([
-        'rounded-none',
+        'rounded-base',
         'border-2',
-        'shadow-[3px_3px_0_0_#000]',
-        'data-[pressed]:translate-x-px',
-        'data-[pressed]:translate-y-px',
-        'data-[pressed]:shadow-none',
+        'border-black',
+        'bg-main',
+        'text-main-foreground',
+        'font-sans',
+        'font-medium',
+        'data-[placeholder]:text-main-foreground',
+        'data-[pressed]:border-black',
       ])
     );
+    expect(restingTokens.some((token) => /shadow-|translate-[xy]/.test(token))).toBe(false);
+    const paint = await trigger.evaluate((element) => {
+      const css = getComputedStyle(element);
+      return {
+        radius: css.borderRadius,
+        border: css.borderTopWidth,
+        shadow: css.boxShadow,
+        font: css.fontFamily,
+        weight: css.fontWeight,
+      };
+    });
+    expect(paint).toMatchObject({ radius: '5px', border: '2px', shadow: 'none', weight: '500' });
+    expect(paint.font).toContain('DM Sans');
   } else {
     expect(restingTokens).toEqual(
       expect.arrayContaining(['rounded-md', 'border-input', 'data-[pressed]:translate-y-px'])
@@ -433,9 +449,8 @@ async function assertSelectFingerprint(
   );
   await page.keyboard.press('Escape');
 
-  // Opening the Brutalist Select leaves its hover lift active under the
-  // pointer. Return to a true resting geometry before measuring the press
-  // delta so both lanes are checked against the same baseline.
+  // Clear the real hover fact before measuring each family's own press
+  // projection: source-aligned Brutalist stays flat, while Shadcn shifts 1px.
   await page.mouse.move(0, 0);
   await expect
     .poll(() => trigger.evaluate((element) => element.hasAttribute('data-hovered')), {
@@ -457,7 +472,8 @@ async function assertSelectFingerprint(
       .toBe(true);
     await expect
       .poll(async () => (await trigger.boundingBox())?.y, { timeout: 10_000 })
-      .toBeCloseTo(restingBounds.y + 1, 3);
+      .toBeCloseTo(restingBounds.y + (projectionFamilyId === 'brutalist' ? 0 : 1), 3);
+    expect((await trigger.boundingBox())?.x).toBeCloseTo(restingBounds.x, 3);
   } finally {
     await page.mouse.up();
   }

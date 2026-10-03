@@ -51,19 +51,21 @@ fn keeps_a_percentage_symbolic_until_a_basis_arrives() {
 
 #[test]
 fn evaluates_the_nested_forms_the_themes_produce() {
-    // The radius ramp after substitution, for both design languages.
+    // Shadcn's radius ramp after substitution.
     assert_eq!(px("max(calc(0.625rem - 2px), 0px)"), 8.0);
     assert_eq!(px("max(calc(0.625rem - 4px), 0px)"), 6.0);
     assert_eq!(px("calc(0.625rem + 4px)"), 14.0);
-    // Brutalist's radius is `0`, so substituting the ramp yields a unitless
-    // number meeting a length. CSS `calc()` is typed and rejects that, in
-    // either direction, so this evaluator does too rather than inventing a
-    // dialect the recorded values were not authored in.
+    // The former Brutalist unitless-zero radius yielded a number meeting a
+    // length. Current themes no longer emit it, but CSS `calc()` still rejects
+    // that arithmetic in either direction. Keep these synthetic negatives
+    // independent of the current-theme inventory below.
     for expression in [
         "calc(0 + 4px)",
         "calc(0 - 4px)",
         "calc(4px + 0)",
         "calc(2 - 4px)",
+        "max(calc(0 - 2px), 0px)",
+        "min(max(calc(0 - 2px), 0px), 12px)",
     ] {
         assert!(
             matches!(
@@ -194,30 +196,12 @@ fn tells_a_length_apart_from_a_keyword() {
     }
 }
 
-/// Completeness: every length-shaped value a theme can produce is either
-/// evaluated or named here as invalid.
-///
-/// The invalid set is not a gap in this evaluator. Those expressions are what
-/// the canonical Web compiler emits after variable substitution, and a browser
-/// rejects them too: CSS `calc()` will not add a `<number>` to a `<length>`.
-/// Brutalist sets `--pui-radius: 0`, so its radius ramp substitutes into
-/// exactly that shape. On the Web the declaration is dropped and the property
-/// falls back to its initial value, which for a radius is also zero — so these
-/// subtract-and-clamp cases look right by coincidence.
-///
-/// The ramp's addition case, `--pui-radius-xl` as `calc(var(--pui-radius) +
-/// 4px)`, is the one where the coincidence does not hold: dropping it leaves a
-/// zero radius where `4px` was meant. It is absent from this list only because
-/// no current token consumes that variable, so nothing reaches a declaration —
-/// `calc(0 + 4px)` is asserted invalid as a unit case instead.
-///
-/// Recording the set here keeps that visible. When the generated ramp is
-/// corrected at the TypeScript source so both hosts consume a valid
-/// expression, this list shrinks and the test says so.
-const INVALID_ON_THE_WEB_TOO: [&str; 2] = [
-    "max(calc(0 - 2px), 0px)",
-    "min(max(calc(0 - 2px), 0px), 12px)",
-];
+/// Completeness: every length-shaped value a current theme can produce is
+/// evaluated or named here as invalid. The source-aligned Brutalist radius
+/// overrides now contain valid pixel lengths, so no emitted expression is
+/// invalid. Synthetic invalid-arithmetic coverage above must remain even when
+/// this observed source inventory is empty.
+const INVALID_ON_THE_WEB_TOO: [&str; 0] = [];
 
 #[test]
 fn evaluates_every_length_a_theme_can_produce() {

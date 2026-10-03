@@ -1,27 +1,40 @@
 id: P-BRUTALIST-TOOLTIP-CONTENT
 type: prototype
-title: Brutalist Tooltip Content visual projection
+title: 'Brutalist Tooltip Content visual projection'
+
 status: draft
 since: 0.3.0-alpha.0
-summary: Brutalist Content preserves Base semantics, presence, portal, dismissal, and positioning while adding a square high-contrast surface.
+summary: 'Brutalist Content preserves Base semantics, presence, portal, dismissal, and positioning while adding a rounded high-contrast surface.'
+
 statement:
-  en: 'Brutalist Content consumes Base Content and adds only feedback style: square geometry, a 2px foreground border, foreground fill, inverse text, mono bold uppercase type, compact spacing, and a hard 4px foreground shadow.'
-  zh-CN: 'Brutalist Content 消费 Base Content，只增加 feedback style：方形 geometry、2px foreground border、foreground fill、inverse text、mono bold uppercase type、紧凑 spacing 与 4px foreground hard shadow。'
+  en: P-BRUTALIST-TOOLTIP-CONTENT preserves its declared semantic, anatomy and API ownership. Its draft visual projection follows the component-specific typography, geometry, fill, depth and state criteria below, aligned with neobrutalism-components 3306a802. This does not admit new Base semantics, host support or upstream API compatibility.
+  zh-CN: P-BRUTALIST-TOOLTIP-CONTENT 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
+
 criteria:
   - id: P-BRUTALIST-TOOLTIP-CONTENT-VISUAL-GRAMMAR
     text:
-      en: 'Content must include rounded-none, border-2 border-foreground, bg-foreground, text-background, font-mono font-bold uppercase text-xs, px-3 py-2, z-50, and shadow-[4px_4px_0_0_var(--pui-foreground)].'
-      zh-CN: 'Content 必须包含 rounded-none、border-2 border-foreground、bg-foreground、text-background、font-mono font-bold uppercase text-xs、px-3 py-2、z-50 与 shadow-[4px_4px_0_0_var(--pui-foreground)]。'
+      en: >-
+        Content uses z-50 rounded-base border-2 border-black bg-secondary-background px-3 py-1.5 font-sans font-medium text-sm text-foreground, with no shadow or forced uppercase. Base portal, placement, state and accessibility ownership remain unchanged.
+
+
+      zh-CN: >-
+        Content 使用 z-50 rounded-base border-2 border-black bg-secondary-background px-3 py-1.5 font-sans font-medium text-sm text-foreground，无阴影或强制大写；Base portal、placement、state 与 accessibility owner 不变。
+
+
   - id: P-BRUTALIST-TOOLTIP-CONTENT-LIGHT-DARK
     text:
-      en: Content border, fill, ink, and hard shadow must resolve through the active `--pui-foreground` and `--pui-background` values in both Light and Dark. Changing the host theme while Content is mounted through the renderer-owned portal must repaint that same Content without introducing another theme or presence owner.
-      zh-CN: Content 的 border、fill、ink 与 hard shadow 必须在 Light 和 Dark 下通过当前 `--pui-foreground` 与 `--pui-background` 值解析。Content 通过 renderer-owned portal 挂载期间切换 host theme 时，必须重绘同一个 Content，且不得引入另一套 theme 或 presence owner。
+      en: 'Content uses a fixed black border with bg-secondary-background and text-foreground, no shadow. A mounted renderer-owned portal repaints the same Content when host theme variables change without another presence/theme owner.'
+      zh-CN: 'Content 使用固定黑边、bg-secondary-background 与 text-foreground，无阴影；host theme variable 变化时，同一个 renderer-owned portal Content 重绘，不新增 presence/theme owner。'
+
   - id: P-BRUTALIST-TOOLTIP-CONTENT-NO-BEHAVIOR-DELTA
     text:
       en: Content must inherit Base tooltip role, open state, presence, Escape dismissal, renderer portal ownership, and positioning without adding a second owner.
       zh-CN: Content 必须继承 Base tooltip role、open state、presence、Escape dismissal、renderer portal ownership 与 positioning，不得增加第二个 owner。
 sources: [{ path: packages/prototypes/brutalist/src/tooltip/content.proto.ts }]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Aligned Content with the interactive Base Tooltip protocol and bound Light/Dark live repaint across its renderer-owned portal.

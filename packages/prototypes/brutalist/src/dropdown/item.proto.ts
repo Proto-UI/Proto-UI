@@ -3,7 +3,7 @@ import { asDropdownItem } from '@proto.ui/prototypes-base/dropdown';
 import type { BrutalistDropdownItemExposes, BrutalistDropdownItemProps } from './types';
 
 const ITEM_BASE_TOKENS =
-  'relative flex w-full cursor-default select-none items-center gap-2 rounded-none bg-secondary-background px-2 py-1.5 text-left font-mono text-sm text-foreground outline-none';
+  'relative flex w-full cursor-default select-none items-center gap-2 rounded-base border-2 border-transparent bg-secondary-background px-2 py-1.5 text-left font-sans font-medium text-sm text-foreground outline-none';
 
 const dropdownItem = definePrototype<BrutalistDropdownItemProps, BrutalistDropdownItemExposes>({
   name: 'brutalist-dropdown-item',
@@ -53,7 +53,7 @@ const dropdownItem = definePrototype<BrutalistDropdownItemProps, BrutalistDropdo
             w.state(pressed).eq(true)
           )
         ),
-      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
     });
 
     // P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT,
@@ -72,7 +72,8 @@ const dropdownItem = definePrototype<BrutalistDropdownItemProps, BrutalistDropdo
             w.state(pressed).eq(true)
           )
         ),
-      intent: (i) => i.feedback.style.use(tw('bg-destructive text-destructive-foreground')),
+      intent: (i) =>
+        i.feedback.style.use(tw('bg-destructive text-destructive-foreground border-black')),
     });
 
     // P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT,

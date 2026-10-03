@@ -14,7 +14,7 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'brutalist-hover-card-content',
-        children: ['A square hard-shadowed preview panel.'],
+        children: ['A rounded, flat preview panel.'],
       },
     ],
   },

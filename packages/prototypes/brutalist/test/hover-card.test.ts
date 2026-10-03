@@ -61,7 +61,7 @@ describe('prototypes/brutalist: hover-card', () => {
     for (const token of ['relative', 'inline-flex', 'items-start']) {
       expect(styleContains(root, token)).toBe(true);
     }
-    for (const token of ['border-2', 'shadow-[3px_3px_0_0_#000]', 'bg-main']) {
+    for (const token of ['border-2', 'shadow-[4px_4px_0_0_#000]', 'bg-main']) {
       expect(styleContains(root, token)).toBe(false);
     }
 
@@ -84,14 +84,12 @@ describe('prototypes/brutalist: hover-card', () => {
     expect(hoverCardTrigger.name).toBe('brutalist-hover-card-trigger');
     for (const token of [
       'inline-flex',
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
       'bg-main',
       'text-main-foreground',
-      'font-bold',
-      'uppercase',
-      'shadow-[3px_3px_0_0_#000]',
+      'font-medium',
     ]) {
       expect(styleContains(trigger, token)).toBe(true);
     }
@@ -100,9 +98,9 @@ describe('prototypes/brutalist: hover-card', () => {
     await advance(0);
     expect(trigger.getExposes().hovered.get()).toBe(true);
     expect(trigger.hasAttribute('data-hovered')).toBe(true);
-    expect(styleContains(trigger, 'data-[hovered]:-translate-x-px')).toBe(true);
-    expect(styleContains(trigger, 'data-[hovered]:-translate-y-px')).toBe(true);
-    expect(styleContains(trigger, 'data-[hovered]:shadow-[4px_4px_0_0_#000]')).toBe(true);
+    expect(styleContains(trigger, 'data-[hovered]:translate-x-1')).toBe(true);
+    expect(styleContains(trigger, 'data-[hovered]:translate-y-1')).toBe(true);
+    expect(styleContains(trigger, 'data-[hovered]:shadow-none')).toBe(true);
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
     const matchesSpy = vi.spyOn(trigger, 'matches').mockReturnValue(true);
@@ -153,12 +151,11 @@ describe('prototypes/brutalist: hover-card', () => {
       'text-sm',
       'leading-6',
       'duration-200',
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
-      'bg-secondary-background',
+      'bg-background',
       'text-foreground',
-      'shadow-[3px_3px_0_0_#000]',
       'data-[open]:animate-in',
       'data-[open]:fade-in-0',
       'data-[open]:zoom-in-95',

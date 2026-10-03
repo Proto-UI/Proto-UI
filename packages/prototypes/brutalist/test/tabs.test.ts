@@ -69,15 +69,14 @@ describe('prototypes/brutalist: tabs', () => {
     }
     for (const token of [
       'inline-flex',
-      'h-11',
+      'h-12',
       'items-center',
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
-      'bg-secondary-background',
+      'bg-background',
       'p-1',
       'text-foreground',
-      'shadow-[3px_3px_0_0_#000]',
     ]) {
       expect(styleContains(list, token)).toBe(true);
     }
@@ -102,7 +101,7 @@ describe('prototypes/brutalist: tabs', () => {
       'data-[selected]:bg-main',
       'data-[selected]:text-main-foreground',
       'data-[selected]:border-black',
-      'data-[selected]:not-[data-pressed]:shadow-[3px_3px_0_0_#000]',
+      'data-[selected]:not-[data-pressed]:border-black',
     ]) {
       expect(styleContains(triggerA, token)).toBe(true);
     }
@@ -122,11 +121,10 @@ describe('prototypes/brutalist: tabs', () => {
     await flush();
 
     for (const token of [
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-transparent',
       'font-bold',
-      'uppercase',
       'text-foreground',
     ]) {
       expect(styleContains(triggerB, token)).toBe(true);
@@ -139,11 +137,8 @@ describe('prototypes/brutalist: tabs', () => {
     // Variant order follows the generated stylesheet, not the authoring order of
     // the rule's conditions; see packages/cli/test/lowered-variant-order.test.ts.
     for (const token of [
-      'data-[hovered]:not-[data-pressed]:not-[data-selected]:bg-background',
+      'data-[hovered]:not-[data-pressed]:not-[data-selected]:bg-secondary-background',
       'data-[hovered]:not-[data-pressed]:not-[data-selected]:border-black',
-      'data-[hovered]:not-[data-pressed]:not-[data-selected]:-translate-x-px',
-      'data-[hovered]:not-[data-pressed]:not-[data-selected]:-translate-y-px',
-      'data-[hovered]:not-[data-pressed]:not-[data-selected]:shadow-[4px_4px_0_0_#000]',
     ]) {
       expect(styleContains(triggerB, token)).toBe(true);
     }
@@ -151,9 +146,9 @@ describe('prototypes/brutalist: tabs', () => {
     triggerB.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
     expect(triggerB.getExposes().pressed.get()).toBe(true);
-    expect(styleContains(triggerB, 'data-[pressed]:translate-x-px')).toBe(true);
-    expect(styleContains(triggerB, 'data-[pressed]:translate-y-px')).toBe(true);
-    expect(styleContains(triggerB, 'data-[pressed]:shadow-none')).toBe(true);
+    expect(styleContains(triggerB, 'data-[pressed]:border-black')).toBe(true);
+    expect(styleContains(triggerB, 'data-[pressed]:border-black')).toBe(true);
+    expect(styleContains(triggerB, 'data-[pressed]:border-black')).toBe(true);
     triggerB.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
@@ -182,19 +177,7 @@ describe('prototypes/brutalist: tabs', () => {
     await flush();
 
     expect(tabsContent.name).toBe('brutalist-tabs-content');
-    for (const token of [
-      'block',
-      'w-full',
-      'min-h-28',
-      'p-4',
-      'text-sm',
-      'rounded-none',
-      'border-2',
-      'border-black',
-      'bg-secondary-background',
-      'text-foreground',
-      'shadow-[3px_3px_0_0_#000]',
-    ]) {
+    for (const token of ['block', 'w-full', 'min-h-28', 'p-4', 'text-sm', 'text-foreground']) {
       expect(styleContains(contentA, token)).toBe(true);
     }
     expect(styleContains(contentB, 'data-[hidden]:hidden')).toBe(true);
@@ -226,10 +209,8 @@ describe('prototypes/brutalist: tabs', () => {
     expect(triggerA.getExposes().pressed.get()).toBe(true);
     expect(triggerA.hasAttribute('data-selected')).toBe(true);
     expect(triggerA.hasAttribute('data-pressed')).toBe(true);
-    expect(
-      styleContains(triggerA, 'data-[selected]:not-[data-pressed]:shadow-[3px_3px_0_0_#000]')
-    ).toBe(true);
-    expect(styleContains(triggerA, 'data-[pressed]:shadow-none')).toBe(true);
+    expect(styleContains(triggerA, 'data-[selected]:not-[data-pressed]:border-black')).toBe(true);
+    expect(styleContains(triggerA, 'data-[pressed]:border-black')).toBe(true);
 
     triggerA.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     await flush();

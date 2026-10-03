@@ -54,7 +54,7 @@ criteria:
   - id: P-BRUTALIST-DROPDOWN-MENU-ITEM-PAIR-INVARIANT
     text:
       en: >-
-        Every interactive branch must co-select an explicit fill+foreground pair, never opacity-only. The base resting row uses `bg-secondary-background` with `text-foreground`. Default variant under any of `active | focused | focusVisible | pressed` uses `bg-main` with `text-main-foreground`. Destructive variant resting uses `text-destructive-ink` (paper base retained), a theme-relative ink rather than the `destructive` fill, which is unreadable on the Light paper row; destructive variant under any of `active | focused | focusVisible | pressed` uses `bg-destructive` with `text-destructive-foreground`. Disabled uses `bg-secondary-background` with `text-muted-foreground` (plus `pointer-events-none`). No rule may replace a branch's foreground with a theme-global text token independently of its background.
+        The row uses font-sans font-medium, rounded-base 5px and a reserved transparent 2px border; each active variant adds border-black without resizing. Every interactive branch must co-select an explicit fill+foreground pair, never opacity-only. The base resting row uses `bg-secondary-background` with `text-foreground`. Default variant under any of `active | focused | focusVisible | pressed` uses `bg-main` with `text-main-foreground`. Destructive variant resting uses `text-destructive-ink` (paper base retained), a theme-relative ink rather than the `destructive` fill, which is unreadable on the Light paper row; destructive variant under any of `active | focused | focusVisible | pressed` uses `bg-destructive` with `text-destructive-foreground`. Disabled uses `bg-secondary-background` with `text-muted-foreground` (plus `pointer-events-none`). No rule may replace a branch's foreground with a theme-global text token independently of its background.
 
 
       zh-CN: >-
@@ -72,6 +72,7 @@ criteria:
 
 
 sources:
+  - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/dropdown/item.proto.ts
   - path: packages/prototypes/brutalist/src/dropdown/types.ts
   - path: packages/prototypes/brutalist/test/dropdown.test.ts
@@ -85,6 +86,9 @@ inherits:
     - id: P-BASE-DROPDOWN-MENU-ITEM
 verifies: { tests: [T-BRUTALIST-DROPDOWN-MENU-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Aligned rows to DM Sans 500, 5px radius and reserved 2px active borders without changing action or state ownership.
   - version: 0.3.0-alpha.0
     change: amended
     summary: >-

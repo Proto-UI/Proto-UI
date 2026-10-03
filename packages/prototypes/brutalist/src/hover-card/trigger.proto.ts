@@ -4,16 +4,16 @@ import type { BrutalistHoverCardTriggerExposes, BrutalistHoverCardTriggerProps }
 
 const TRIGGER_BASE_TOKENS = [
   'inline-flex',
-  'rounded-none',
+  'rounded-base',
   'border-2',
   'border-black',
   'bg-main',
   'px-3',
   'py-1.5',
-  'font-bold',
-  'uppercase',
+  'font-sans',
+  'font-medium',
   'text-main-foreground',
-  'shadow-[3px_3px_0_0_#000]',
+  'shadow-[4px_4px_0_0_#000]',
   'outline-none',
 ].join(' ');
 
@@ -38,8 +38,7 @@ const hoverCardTrigger = definePrototype<
     // P-BRUTALIST-HOVER-CARD-TRIGGER-INTERACTION
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('-translate-x-px -translate-y-px shadow-[4px_4px_0_0_#000]')),
+      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
     });
 
     def.rule({

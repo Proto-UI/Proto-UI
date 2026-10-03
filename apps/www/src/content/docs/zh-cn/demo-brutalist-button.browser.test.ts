@@ -17,7 +17,7 @@ import {
 const BUTTON_ROUTE = '/en/ui-libraries/brutalist/components/button/';
 const BUTTON_SELECTOR = '[data-projection-content] [data-pui-root]';
 const BUTTON_COUNT = 10;
-const BUTTON_RUNTIMES = ['wc', 'react', 'vue'] as const satisfies readonly RuntimeId[];
+const BUTTON_RUNTIMES = ['wc', 'react', 'vue', 'vue2'] as const satisfies readonly RuntimeId[];
 const VIEWPORT = { width: 1440, height: 900 } as const;
 const EVIDENCE_DIR = process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
 
@@ -167,24 +167,25 @@ describe.sequential('Brutalist Button browser regressions', () => {
         const resting = await styleOf(solid);
         expect(resting, `${runtime}/rest`).toMatchObject({
           borderColor: 'rgb(0, 0, 0)',
-          borderRadius: '0px',
+          borderRadius: '5px',
           borderStyle: 'solid',
           borderWidth: '2px',
           transform: 'none',
         });
         expect(resting.boxShadow, `${runtime}/rest-hard-shadow`).toMatch(
-          /(?:^|, )rgb\(0, 0, 0\) 3px 3px 0px 0px$/
+          /(?:^|, )rgb\(0, 0, 0\) 4px 4px 0px 0px$/
         );
         await persistFrame(interactionFrame, runtime, 'rest');
 
         await solid.hover();
         await waitForState(page, 0, 'data-hovered', true);
         const hovered = await styleOf(solid);
-        expect(hovered.boxShadow, `${runtime}/hover-hard-shadow`).toMatch(
-          /(?:^|, )rgb\(0, 0, 0\) 4px 4px 0px 0px$/
-        );
+        expect(
+          hovered.boxShadow === 'none' ||
+            /^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/.test(hovered.boxShadow)
+        ).toBe(true);
         expect(hovered.boxShadow, `${runtime}/hover-shadow-delta`).not.toBe(resting.boxShadow);
-        expect(hovered.transform, `${runtime}/hover-transform`).toBe('matrix(1, 0, 0, 1, -1, -1)');
+        expect(hovered.transform, `${runtime}/hover-transform`).toBe('matrix(1, 0, 0, 1, 4, 4)');
         expect(hovered.transform, `${runtime}/hover-transform-delta`).not.toBe(resting.transform);
         await persistFrame(interactionFrame, runtime, 'hover');
 
@@ -199,9 +200,9 @@ describe.sequential('Brutalist Button browser regressions', () => {
             /^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/.test(pressed.boxShadow),
           `${runtime}/pressed-shadow-cleared`
         ).toBe(true);
-        expect(pressed.boxShadow, `${runtime}/pressed-shadow-delta`).not.toBe(hovered.boxShadow);
-        expect(pressed.transform, `${runtime}/pressed-transform`).toBe('matrix(1, 0, 0, 1, 1, 1)');
-        expect(pressed.transform, `${runtime}/pressed-transform-delta`).not.toBe(hovered.transform);
+        expect(pressed.boxShadow, `${runtime}/pressed-shadow-delta`).toBe(hovered.boxShadow);
+        expect(pressed.transform, `${runtime}/pressed-transform`).toBe('matrix(1, 0, 0, 1, 4, 4)');
+        expect(pressed.transform, `${runtime}/pressed-transform-delta`).toBe(hovered.transform);
         await persistFrame(interactionFrame, runtime, 'pressed');
 
         await page.mouse.up();

@@ -13,16 +13,16 @@ const TRIGGER_BASE_TOKENS = [
   'items-center',
   'justify-center',
   'gap-2',
-  'rounded-none',
+  'rounded-base',
   'border-2',
   'border-black',
   'bg-main',
   'px-3',
   'py-1.5',
-  'font-bold',
-  'uppercase',
+  'font-sans',
+  'font-medium',
   'text-main-foreground',
-  'shadow-[3px_3px_0_0_#000]',
+  'shadow-[4px_4px_0_0_#000]',
   'outline-none',
   'select-none',
 ].join(' ');
@@ -108,13 +108,12 @@ const dropdownTrigger = definePrototype<
     // P-BRUTALIST-DROPDOWN-MENU-TRIGGER-INTERACTION
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('-translate-x-px -translate-y-px shadow-[4px_4px_0_0_#000]')),
+      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
     });
 
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-x-px translate-y-px shadow-none')),
+      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
     });
 
     def.rule({

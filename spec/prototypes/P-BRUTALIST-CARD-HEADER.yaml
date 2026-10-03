@@ -1,18 +1,28 @@
 id: P-BRUTALIST-CARD-HEADER
 type: prototype
-title: Brutalist Card Header styled region
+title: 'Brutalist Card Header styled region'
+
 status: draft
 since: 0.2.0-rc.7
-summary: Direct Card header region with layout and lower separator grammar.
+summary: 'Direct Card header region with layout and lower separator grammar.'
+
 statement:
-  en: Brutalist Card Header is a styled-only region for leading Card content and optional composed controls.
-  zh-CN: Brutalist Card Header 是用于 Card 前置内容及可选组合 control 的 styled-only 区域。
+  en: P-BRUTALIST-CARD-HEADER preserves its declared semantic, anatomy and API ownership. Its draft visual projection follows the component-specific typography, geometry, fill, depth and state criteria below, aligned with neobrutalism-components 3306a802. This does not admit new Base semantics, host support or upstream API compatibility.
+  zh-CN: P-BRUTALIST-CARD-HEADER 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
+
 criteria:
   - id: P-BRUTALIST-CARD-HEADER-VISUAL
     text:
-      en: Header directly owns flex alignment, spacing, horizontal padding, and a 2px lower ink separator while claiming no content semantics or interaction behavior. Its ink must resolve the theme foreground, the same structural color as the Root frame, rather than a fixed black.
-      zh-CN: Header 直接拥有 flex 对齐、间距、水平 padding 与 2px 下方 ink 分隔线，不声明内容语义或交互行为。其 ink 必须解析为主题 foreground，即与 Root frame 相同的结构色，而不是固定黑色。
+      en: >-
+        HEADER directly owns flex alignment, spacing and horizontal padding, without a mandatory section border, shadow or radius. Composed content and controls retain their semantics.
+
+
+      zh-CN: >-
+        HEADER 直接拥有 flex 对齐、间距与水平 padding，不强制分段 border、shadow 或 radius；组合内容与 control 保留自身语义。
+
+
 sources:
+  - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/card/header.proto.ts
 relates:
   knowledge: [K-BRUTALIST-0001]
@@ -20,6 +30,9 @@ relates:
 dependsOn:
   contracts: [C-CORE-SYNTAX-0003, C-FEEDBACK-STYLE-0002, C-FEEDBACK-STYLE-0003]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Introduced the direct Brutalist Card Header region.

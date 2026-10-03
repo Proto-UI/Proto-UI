@@ -141,10 +141,18 @@
   ],
   "files": [
     "dist/",
-    "README.md"
+    "README.md",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "scripts": {
     "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/prototypes-brutalist",
     "prepack": "pnpm run build"
+  },
+  "protoUi": {
+    "release": {
+      "thirdPartyNotices": [
+        "THIRD_PARTY_NOTICES.md"
+      ]
+    }
   }
 }

@@ -31,7 +31,7 @@ export const BrutalistBadgeRoot = definePrototype<
     // P-BRUTALIST-BADGE-VISUAL-GRAMMAR
     def.feedback.style.use(
       tw(
-        'inline-flex w-fit shrink-0 items-center justify-center rounded-none border-2 border-foreground px-2 py-0.5 font-mono text-xs font-bold uppercase shadow-[2px_2px_0_0_var(--pui-foreground)]'
+        'inline-flex w-fit shrink-0 items-center justify-center rounded-base border-2 border-black px-2 py-0.5 font-sans font-medium text-xs'
       )
     );
     // P-BRUTALIST-BADGE-TONES

@@ -1,6 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asTabsContent } from '@proto.ui/prototypes-base/tabs';
-import { BRUTALIST_PANEL_TOKENS } from '../style';
 import type { BrutalistTabsContentExposes, BrutalistTabsContentProps } from './types';
 
 const tabsContent = definePrototype<BrutalistTabsContentProps, BrutalistTabsContentExposes>({
@@ -18,11 +17,9 @@ const tabsContent = definePrototype<BrutalistTabsContentProps, BrutalistTabsCont
 
     // P-BRUTALIST-TABS-CONTENT-FOCUS-INDICATION — do not suppress the native
     // focus-visible outline when Base Tabs Content selects the root fallback.
-    // P-BRUTALIST-TABS-CONTENT-VISUAL-GRAMMAR — square bordered panel: BRUTALIST_PANEL_TOKENS
-    // (rounded-none, border-2 border-black, hard shadow, bg-secondary-background, text-foreground)
-    // over a block w-full min-h-28 p-4 text-sm content surface.
+    // P-BRUTALIST-TABS-CONTENT-VISUAL-GRAMMAR — content without a second compulsory frame.
     def.feedback.style.use(
-      tw(`block w-full min-h-28 p-4 text-sm leading-6 ${BRUTALIST_PANEL_TOKENS}`)
+      tw('block w-full min-h-28 p-4 font-sans font-medium text-sm leading-6 text-foreground')
     );
     // P-BRUTALIST-TABS-CONTENT-HIDDEN-STATE — hidden collapses the panel via the `hidden` token.
     def.rule({

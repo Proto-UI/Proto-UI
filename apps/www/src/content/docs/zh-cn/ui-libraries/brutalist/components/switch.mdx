@@ -10,14 +10,15 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 # Switch
 
-外壳固定，方形 thumb 是执行件。
+[参考 Switch 源码](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/switch.tsx) 使用 24×48px 胶囊轨道与 16px 白色圆形 thumb，两者均为 2px 黑边、无阴影。
 
-- Off：paper 轨道、ink thumb。
-- On：天空蓝轨道、金丝雀黄 thumb；位置仍是 checked 主信号。
-- Pressed：轨道切换为珊瑚红并移除硬阴影，释放后回弹。
-- Focus：硬轮廓；Disabled：降低强调但保留结构。
+- 关闭时为中性轨道，开启时为 main 蓝色；thumb 始终保持白色
+- 只有 thumb 移动，行程 20px，两端外侧留白对称为 6px
+- transform/颜色过渡为 150ms；reduced motion 下 Thumb 位置立即切换
+- press 不闪珊瑚色、不移动轨道，也不增加阴影
+- 键盘 focus 保留 offset ring；disabled 保持形状并阻止 activation
 
-每个 runtime-neutral demo 示例都把可见 caption 放在 Switch root 内。继承的 Base `nameFromContent` 投射因此能在 Web Components、React 与 Vue 中从同一段可见文本派生 accessible name；示例既不需要 host-specific `aria-label`，也不需要无法指向 custom-element host 的原生 `<label for>` 关系。Caption 属于 Switch control surface，因此点击 caption 会沿 Switch activation path 生效，而 disabled 示例保持 inert。
+Prototype 使用物理 left/right 定位，确保 RTL 父级下同样的几何仍居中且不越界；这不代表镜像 RTL switch 语义。可见 caption 位于 Switch Root 内，Base 在四种 Web runtime 中从同一文本推导 accessible name。点击 caption 走同一 activation 路径；disabled 示例保持不可操作。DM Sans 字体由 prototype 拥有，不支持的字形使用宿主 fallback。
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />

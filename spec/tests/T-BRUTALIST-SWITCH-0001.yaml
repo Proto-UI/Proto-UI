@@ -17,13 +17,13 @@ cases:
       - P-BRUTALIST-SWITCH-THUMB-BASE-INHERITANCE
     expectation: p-brutalist-switch-entry-inheritance
   - id: T-BRUTALIST-SWITCH-0001-CASE-2
-    title: Thumb is the sole checked-movement mechanism; root padding stays symmetric
+    title: Thumb is the sole checked-movement mechanism; root padding stays zero
     covers:
       - P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT
       - P-BRUTALIST-SWITCH-CHECKED-PAIR-INVARIANT
     expectation: p-brutalist-switch-single-movement
   - id: T-BRUTALIST-SWITCH-0001-CASE-3
-    title: Checked root swaps fill to bg-sky without geometry change
+    title: Checked root swaps fill to bg-main without geometry change
     covers:
       - P-BRUTALIST-SWITCH-CHECKED-PAIR-INVARIANT
       - P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT
@@ -35,7 +35,7 @@ cases:
       - P-BRUTALIST-SWITCH-BASE-INHERITANCE
     expectation: p-brutalist-switch-interaction
   - id: T-BRUTALIST-SWITCH-0001-CASE-5
-    title: Visual grammar remains square hard-shadow Neo-Brutalist for root and thumb
+    title: Visual grammar remains source-aligned component-specific Neo-Brutalist for root and thumb
     covers:
       - P-BRUTALIST-SWITCH-VISUAL-GRAMMAR
       - P-BRUTALIST-SWITCH-THUMB-VISUAL-GRAMMAR
@@ -87,6 +87,7 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Switch coverage mapped 1:1 to the rc.7 P criteria (entry/inheritance, single-movement, checked pair, interaction, visual grammar). Not present in the immutable rc.6 snapshot.
+
 
   - version: 0.2.0
     change: revised

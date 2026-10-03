@@ -32,7 +32,6 @@ const ROOT_SURFACE_TOKENS = [
   'border-main-foreground',
   'bg-main',
   'text-main-foreground',
-  'shadow-[3px_3px_0_0_#000]',
   'outline-none',
   'select-none',
   'transition-none',

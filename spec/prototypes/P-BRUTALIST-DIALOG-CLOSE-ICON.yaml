@@ -4,16 +4,16 @@ title: Brutalist Dialog Close Icon inherits Base close behavior and layers a def
 status: draft
 since: 0.2.0-rc.7
 summary: >-
-  Brutalist Dialog Close Icon also inherits Base Dialog Close behavior ownership and projects a style-family visual API: a fixed canary fill pair with coral hover, an a11y name 'Close', a trailing X icon, square geometry, hard offset shadows, and explicit interaction states.
+  Brutalist Dialog Close Icon also inherits Base Dialog Close behavior ownership and projects a style-family visual API: a fixed canary fill pair with coral hover, an a11y name 'Close', a trailing X icon, 5px rounded geometry, hard offset shadows, and explicit interaction states.
 
 
 statement:
   en: >-
-    Brutalist Dialog Close Icon is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dialog Close used as a precomposed close-icon variant. It preserves inherited Base protocol semantics (close/disabled/hovered/focusVisible state ownership) and adds visual/style behavior: a fixed `bg-canary` with `text-canary-foreground` resting pair, `bg-coral` with `text-coral-foreground` on hover, an a11y accessible name `Close`, a trailing X SVG icon, zero radius, black structural borders, hard offset shadows, and hover/focus-visible/disabled interaction projection.
+    Brutalist Dialog Close Icon is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Dialog Close used as a precomposed close-icon variant. It preserves inherited Base protocol semantics (close/disabled/hovered/focusVisible state ownership) and adds visual/style behavior: a fixed `bg-canary` with `text-canary-foreground` resting pair, `bg-coral` with `text-coral-foreground` on hover, an a11y accessible name `Close`, a trailing X SVG icon, 5px radius, black structural borders, hard offset shadows, and hover/focus-visible/disabled interaction projection.
 
 
   zh-CN: >-
-    Brutalist Dialog Close Icon 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dialog Close 之上，作为预组合的 close-icon 变体使用。它保留继承的 Base 协议语义（close/disabled/hovered/focusVisible 状态归属），增加视觉/style 行为：固定 `bg-canary` 与 `text-canary-foreground` 静止色对、hover 时 `bg-coral` 与 `text-coral-foreground`、a11y 可访问名称 `Close`、尾部 X SVG 图标、零圆角、黑色结构边框、硬偏移阴影，以及 hover/focus-visible/disabled 交互投射。
+    Brutalist Dialog Close Icon 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Dialog Close 之上，作为预组合的 close-icon 变体使用。它保留继承的 Base 协议语义（close/disabled/hovered/focusVisible 状态归属），增加视觉/style 行为：固定 `bg-canary` 与 `text-canary-foreground` 静止色对、hover 时 `bg-coral` 与 `text-coral-foreground`、a11y 可访问名称 `Close`、尾部 X SVG 图标、5px 圆角、黑色结构边框、硬偏移阴影，以及 hover/focus-visible/disabled 交互投射。
 
 
 criteria:
@@ -54,21 +54,21 @@ criteria:
   - id: P-BRUTALIST-DIALOG-CLOSE-ICON-INTERACTION
     text:
       en: >-
-        Hover swaps the fill to `bg-coral` with a deeper hard shadow. Focus-visible applies `ring-3 ring-ring/50`. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry and the resting fill pair.
+        Hover swaps the fill to `bg-coral` with a same 4px hard shadow. Focus-visible applies `ring-3 ring-ring/50`. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry and the resting fill pair.
 
 
       zh-CN: >-
-        Hover 将填充切换为 `bg-coral` 并加深硬阴影。Focus-visible 应用 `ring-3 ring-ring/50`。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调，同时保留几何与静止填充色对。
+        Hover 将填充切换为 `bg-coral` 并保留同一 4px 硬阴影。Focus-visible 应用 `ring-3 ring-ring/50`。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调，同时保留几何与静止填充色对。
 
 
   - id: P-BRUTALIST-DIALOG-CLOSE-ICON-VISUAL-GRAMMAR
     text:
       en: >-
-        The surface uses `absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-none border-2 border-black bg-canary text-canary-foreground shadow-[3px_3px_0_0_#000] outline-none transition-none` and renders a trailing X icon (two 16×16 SVG paths `M18 6 6 18` and `m6 6 12 12`), preserving square corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+        The surface uses `absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-base border-2 border-black bg-canary text-canary-foreground shadow-[4px_4px_0_0_#000] outline-none transition-none` and renders a trailing X icon (two 16×16 SVG paths `M18 6 6 18` and `m6 6 12 12`), preserving 5px rounded corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, or soft elevation.
 
 
       zh-CN: >-
-        表面使用 `absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-none border-2 border-black bg-canary text-canary-foreground shadow-[3px_3px_0_0_#000] outline-none transition-none`，并渲染尾部 X 图标（两条 16×16 SVG 路径 `M18 6 6 18` 与 `m6 6 12 12`），保持直角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+        表面使用 `absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-base border-2 border-black bg-canary text-canary-foreground shadow-[4px_4px_0_0_#000] outline-none transition-none`，并渲染尾部 X 图标（两条 16×16 SVG 路径 `M18 6 6 18` 与 `m6 6 12 12`），保持5px 圆角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、柔和高度阴影。
 
 
 sources:
@@ -83,6 +83,10 @@ inherits:
     - id: P-BASE-DIALOG-CLOSE
 verifies: { tests: [T-BRUTALIST-DIALOG-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Rounded the existing color-paired Close control to the source-aligned 5px/4px grammar; retained the named precomposed PUI control extension.
+
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

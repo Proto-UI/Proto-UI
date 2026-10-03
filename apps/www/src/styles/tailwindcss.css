@@ -50,6 +50,15 @@
   --color-selection-foreground: var(--pui-selection-foreground);
 }
 
+/* Self-hosted unmodified DM Sans; provenance and SIL OFL in assets/font/dm-sans/. */
+@font-face {
+  font-family: 'DM Sans';
+  src: url('./assets/font/dm-sans/DMSans-Variable.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 1000;
+  font-display: swap;
+}
+
 @font-face {
   font-family: 'GeistSans';
   src: url('./assets/font/GeistVF.woff2') format('woff2-variations');

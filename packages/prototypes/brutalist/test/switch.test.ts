@@ -50,12 +50,12 @@ describe('prototypes/brutalist: switch', () => {
     expect(thumb.hasAttribute('data-checked')).toBe(true);
   });
 
-  it('keeps symmetric Root padding while Thumb owns checked travel', async () => {
+  it('keeps fixed Root padding while Thumb owns checked travel', async () => {
     // T-BRUTALIST-SWITCH-0001-CASE-2
     const { root, thumb } = createSwitch();
     await flush();
 
-    expect(styleContains(root, 'px-0.5')).toBe(true);
+    expect(styleContains(root, 'p-0')).toBe(true);
     expect(styleContains(root, 'pl-0.5')).toBe(false);
     expect(styleContains(root, 'pr-5')).toBe(false);
     expect(styleContains(thumb, 'translate-x-0')).toBe(true);
@@ -65,11 +65,11 @@ describe('prototypes/brutalist: switch', () => {
 
     expect(root.getExposes().checked.get()).toBe(true);
     expect(thumb.getExposes().isChecked()).toBe(true);
-    expect(styleContains(root, 'px-0.5')).toBe(true);
+    expect(styleContains(root, 'p-0')).toBe(true);
     expect(styleContains(root, 'data-[checked]:pl-5')).toBe(false);
     expect(styleContains(root, 'data-[checked]:pr-0.5')).toBe(false);
     expect(styleContains(thumb, 'data-[checked]:translate-x-5')).toBe(true);
-    expect(styleContains(thumb, 'data-[checked]:bg-canary')).toBe(true);
+    expect(styleContains(thumb, 'bg-white')).toBe(true);
   });
 
   it('changes checked fill without changing track geometry', async () => {
@@ -80,9 +80,9 @@ describe('prototypes/brutalist: switch', () => {
     expect(root.getExposes().checked.get()).toBe(true);
     expect(root.getAttribute('aria-checked')).toBe('true');
     expect(thumb.getExposes().isChecked()).toBe(true);
-    expect(styleContains(root, 'data-[checked]:bg-sky')).toBe(true);
-    expect(styleContains(thumb, 'data-[checked]:bg-canary')).toBe(true);
-    for (const token of ['h-7', 'w-12', 'px-0.5']) expect(styleContains(root, token)).toBe(true);
+    expect(styleContains(root, 'data-[checked]:bg-main')).toBe(true);
+    expect(styleContains(thumb, 'bg-white')).toBe(true);
+    for (const token of ['h-6', 'w-12', 'p-0']) expect(styleContains(root, token)).toBe(true);
   });
 
   it('activates press and focus rules and gates disabled changes', async () => {
@@ -94,8 +94,8 @@ describe('prototypes/brutalist: switch', () => {
     await flush();
     expect(root.getExposes().pressed.get()).toBe(true);
     expect(root.hasAttribute('data-pressed')).toBe(true);
-    expect(styleContains(root, 'data-[pressed]:bg-coral')).toBe(true);
-    expect(styleContains(root, 'data-[pressed]:shadow-none')).toBe(true);
+    expect(styleContains(root, 'data-[pressed]:ring-2')).toBe(false);
+    expect(styleContains(root, 'data-[pressed]:ring-ring')).toBe(false);
     root.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     await flush();
     expect(root.getExposes().pressed.get()).toBe(false);
@@ -124,34 +124,37 @@ describe('prototypes/brutalist: switch', () => {
     expect(styleContains(root, 'data-[disabled]:opacity-50')).toBe(true);
   });
 
-  it('keeps square, black-bordered, hard-shadow grammar on Root and Thumb', async () => {
+  it('keeps the reference capsule, centered white disc and reduced-motion grammar', async () => {
     // T-BRUTALIST-SWITCH-0001-CASE-5
     const { root, thumb } = createSwitch();
     await flush();
 
     for (const token of [
-      'h-7',
+      'h-6',
       'w-12',
-      'rounded-none',
+      'rounded-full',
       'border-2',
       'border-black',
       'bg-secondary-background',
-      'shadow-[3px_3px_0_0_#000]',
     ]) {
       expect(styleContains(root, token)).toBe(true);
     }
     for (const token of [
       'block',
-      'size-5',
-      'rounded-none',
+      'absolute',
+      'left-1',
+      'top-1/2',
+      '-translate-y-1/2',
+      'transition-transform',
+      'size-4',
+      'rounded-full',
       'border-2',
       'border-black',
-      'bg-foreground',
-      'shadow-[3px_3px_0_0_#000]',
+      'bg-white',
     ]) {
       expect(styleContains(thumb, token)).toBe(true);
     }
-    for (const forbidden of ['rounded-full', 'shadow-md', 'backdrop-blur']) {
+    for (const forbidden of ['rounded-none', 'shadow-md', 'backdrop-blur']) {
       expect(styleContains(root, forbidden)).toBe(false);
       expect(styleContains(thumb, forbidden)).toBe(false);
     }

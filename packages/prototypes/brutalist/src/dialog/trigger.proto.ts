@@ -8,13 +8,13 @@ const TRIGGER_TOKENS = [
   'shrink-0',
   'items-center',
   'justify-center',
-  'rounded-none',
+  'rounded-base',
   'border-2',
   'border-black',
   'bg-sky',
   'text-sky-foreground',
-  'font-bold',
-  'uppercase',
+  'font-sans',
+  'font-medium',
   'text-sm',
   'whitespace-nowrap',
   'outline-none',
@@ -22,7 +22,7 @@ const TRIGGER_TOKENS = [
   'h-10',
   'gap-2',
   'px-4',
-  'shadow-[3px_3px_0_0_#000]',
+  'shadow-[4px_4px_0_0_#000]',
 ].join(' ');
 
 const dialogTrigger = definePrototype<BrutalistDialogTriggerProps, BrutalistDialogTriggerExposes>({
@@ -34,17 +34,16 @@ const dialogTrigger = definePrototype<BrutalistDialogTriggerProps, BrutalistDial
       throw new Error('[brutalist-dialog-trigger] missing Dialog Trigger state handles.');
     }
     const { disabled, hovered, focusVisible, pressed } = state;
-    // P-BRUTALIST-DIALOG-TRIGGER-VISUAL-GRAMMAR + P-BRUTALIST-DIALOG-TRIGGER-PAIR-INVARIANT: fixed bg-sky / text-sky-foreground surface, square, border-2 black, hard shadow-3, bold uppercase.
+    // P-BRUTALIST-DIALOG-TRIGGER-VISUAL-GRAMMAR + P-BRUTALIST-DIALOG-TRIGGER-PAIR-INVARIANT: fixed bg-sky / text-sky-foreground surface, rounded, border-2 black, role-owned depth, bold.
     def.feedback.style.use(tw(TRIGGER_TOKENS));
-    // P-BRUTALIST-DIALOG-TRIGGER-INTERACTION rules: hover lift, press sink, focus-visible ring, disabled fade (preserves sky pair).
+    // P-BRUTALIST-DIALOG-TRIGGER-INTERACTION rules: hover feedback, press sink, focus-visible ring, disabled fade (preserves sky pair).
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('-translate-x-px -translate-y-px shadow-[4px_4px_0_0_#000]')),
+      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
     });
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-x-px translate-y-px shadow-none')),
+      intent: (i) => i.feedback.style.use(tw('translate-x-1 translate-y-1 shadow-none')),
     });
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),

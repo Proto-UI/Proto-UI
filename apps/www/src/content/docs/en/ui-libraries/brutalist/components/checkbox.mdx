@@ -10,7 +10,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 This draft family contains a Root and an Indicator. Base Checkbox owns controlled and uncontrolled `checked`, the author-controlled `indeterminate` display state, effective disabled behavior, pointer and Space activation, focus, and the accessible `checkbox` role including `aria-checked="mixed"`.
 
-The Brutalist layer owns presentation only: a square two-pixel ink border, hard offset shadow, paired state fills, and an accessibility-hidden hard-stroke tick or dash. Indicator derives its state from the nearest Root and owns no value, focus, event, form, or accessibility control surface. When checked and indeterminate are both true, the mixed dash wins.
+The Brutalist layer owns presentation only: a square two-pixel ink border, paired state fills, and an accessibility-hidden hard-stroke tick or dash. Indicator derives its state from the nearest Root and owns no value, focus, event, form, or accessibility control surface. When checked and indeterminate are both true, the mixed dash wins.
 
 Import Root and Indicator from the already-public `@proto.ui/prototypes-brutalist` package or its `@proto.ui/prototypes-brutalist/checkbox` anatomy subpath. This family intentionally has no `proto-ui add brutalist-checkbox` registry entry and creates no separate publication or release promise.
 

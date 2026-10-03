@@ -1,45 +1,61 @@
 ---
 title: 'Brutalist Design Contract'
-description: 'Visual grammar for the contributor-authored Brutalist style family'
+description: 'Source-aligned Neo-Brutalist typography, geometry, surfaces and interaction'
 ---
 
 # Brutalist Design Contract
 
-This document describes the visual grammar used by the Brutalist foundation and reference Button projection. Base contracts remain authoritative for semantics, keyboard behavior, ARIA, and command wiring.
+The current draft visual system follows [neobrutalism.dev](https://www.neobrutalism.dev/), pinned to [neobrutalism-components 3306a802](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4). Proto UI maintains its own implementation and Base semantics; this is not an upstream certification or component API compatibility promise.
 
-## Geometry
+## Typography
 
-- Controls and surfaces use square geometry.
-- Structural borders are 2px solid ink.
-- Small informational surfaces may use a 2px radius only when explicitly cataloged for that family.
+DM Sans is the reference default, not universal monospace or forced uppercase. The prototype owns its font role through generated style tokens:
 
-## Depth and motion
+- Ordinary controls, menu items, descriptions and content: `font-sans font-medium`, DM Sans 500
+- Dialog title, Tabs triggers and Toggle: `font-heading font-bold`, DM Sans 700
+- Default labels: 14px/20px; Badge: 12px/16px; Dialog title: 18px with unit line-height and tight tracking
+- Preserve authored casing. Code and keyboard notation may use their own mono role
 
-| State   | Translation  | Hard shadow |
-| ------- | ------------ | ----------- |
-| Rest    | none         | `3px 3px`   |
-| Hover   | `-1px, -1px` | `4px 4px`   |
-| Pressed | `1px, 1px`   | none        |
+The package theme declares `"DM Sans", ui-sans-serif, system-ui, sans-serif` through `--pui-font-sans` and `--pui-font-heading`. The docs self-host an unmodified variable DM Sans font under SIL OFL 1.1. Application consumers supply their own font loading; prototypes do not make network requests. A missing font uses the system sans fallback. Chinese glyphs use the host CJK fallback, so a Latin font-family declaration alone does not prove the actual font used for every glyph.
 
-Persistent active state is not transient press feedback. Toggle keeps its outer `3px 3px` elevation and adds a 2px inset ink frame while active; pressing preserves that inset frame, translates the control, and clears only the outer elevation until release. The inset frame uses box shadow, so state changes do not alter layout geometry.
+## Geometry and nested surfaces
 
-## Color
+- Ordinary controls and panels: 5px `rounded-base`, 2px black structural border
+- Switch track/Thumb and Scroll Area Thumb: full-round geometry; Checkbox stays square
+- Tabs List and nested Trigger each own their radius; the inset spacing separates them
+- Card Header/Content/Footer and Tabs Content do not create mandatory nested frames
+- Scroll Area Root owns rounded overflow clipping; its viewport stays square and the host retains track/Thumb geometry
+- Spinner retains its centered circular open ring
 
-The base palette is paper plus ink. Flat accent colors carry semantic emphasis: canary for decisive actions, mint for confirmation, lavender for annotation, coral for warning and press feedback, and sky for discovery or selected tracks. Gradients, glass, blur, and soft glow are excluded.
+Rounded corners are part of this design language. Do not apply a blanket square-corner override or make every inner surface another bordered panel.
 
-Position, labels, geometry, and state are primary signals; color is supplementary.
+## Depth and interaction
 
-Each accent fill is shipped as a fixed background/foreground pair (for example `bg-main` with `text-main-foreground`). Accent foregrounds stay ink in both Light and Dark. Theme-dependent surfaces such as paper panels resolve through CSS variables so a host theme change repaints mounted controls without a pointer refresh.
+| Surface | Rest | Hover / transient press |
+| --- | --- | --- |
+| Button and Button-like triggers | 4px 4px zero-blur black shadow | +4px,+4px and no outer shadow |
+| Card / Dialog Content | 4px hard shadow | No invented control state |
+| Menus, Select, Hover Card, Tooltip, Badge, Textarea | No shadow | Existing paired states and reserved borders |
+| Tabs / Toggle / Switch | Flat | Existing state signals, no default Button displacement |
 
-## Preset delivery
+The upstream reverse Button variant is separate; the current PUI API does not claim it. Toggle keeps a 2px inset active marker through press as a non-color PUI extension. Base continues to own active versus pressed, selection, keyboard behavior, ARIA and command wiring. Existing popup transitions and Spinner reduced-motion behavior remain intact; Skeleton remains static.
 
-The package-owned `BRUTALIST_THEME` manifest is the authoring source for Light and Dark semantic values. Documentation pages and the CLI preset consume generated projections of the same complete key set; examples do not maintain local palette subsets.
+## Palette and dark mode
 
-Proto UI config v1 enables one project-wide style preset. Start a Brutalist project with `proto-ui init --prototypes brutalist`. Adding a Brutalist component to a project with another enabled preset fails before installation or generated-file changes; the CLI does not replace the application's theme automatically. With `--no-styles`, `add` succeeds with an ownership note and the application explicitly supplies every required `--pui-*` semantic token.
+The default follows the reference's blue palette: main `#5294ff`, pale blue background `#dcebfe`, white neutral surfaces, black text and structure. Named PUI accent pairs retain canary, mint, lavender, coral and sky roles with black accent ink. Color supplements labels, position and persistent state signals.
 
-## Accessibility
+The inspected upstream style registry has no dark palette. Proto UI's dark paper/panels, light text, readable destructive ink and theme-relative focus ring are explicitly maintained extensions. The same mounted controls repaint from theme variables; a paired foreground is never replaced independently of its fill.
 
-- Focus uses a visible hard outline with offset. The theme `ring` resolves to the foreground color in each mode and keeps at least 3:1 contrast against both page and panel backgrounds; a Tabs panel used as the fallback entry target preserves the browser's native focus-visible outline rather than suppressing it.
-- Disabled controls preserve border and geometry while reducing emphasis.
-- Interactive targets retain accessible names and Base keyboard behavior.
-- Portaled surfaces inherit page-level theme variables.
+## Delivery and accessibility
+
+`BRUTALIST_THEME` is the package-owned source for Light/Dark values, font roles and radii. CLI and docs scopes consume generated projections of the complete manifest. Start a project with `proto-ui init --prototypes brutalist`; config v1 permits one enabled style preset. With `--no-styles`, applications supply the required semantic tokens and font loading themselves.
+
+Focus retains a visible offset ring and at least 3:1 adjacent-color contrast. Tabs Content retains native fallback focus indication. Disabled controls retain geometry and Base gates; portaled surfaces retain theme/font variables. PUI uses the reference 24×48px Switch frame and single 20px Thumb movement, Checkbox mixed-state precedence and parent-owned loading semantics.
+
+Adapted component recipes retain the upstream MIT notice, copyright Samuel Breznjak; redistributed DM Sans retains its SIL OFL notice. Current styled criteria remain draft, and visual alignment does not expand native-host support or introduce a new Base subject.
+
+Select placeholders on the main blue fill retain paired black ink rather than neutral muted ink: the latter measures only 2.62:1 in Light and 2.01:1 in Dark. This deliberate readability adaptation must retain at least 4.5:1 text contrast in both modes.
+
+The full [DM Sans copyright and OFL license](/fonts/dm-sans-OFL.txt) is served alongside this site's font assets. Textarea retains a theme-foreground border so its editable boundary has at least 3:1 contrast against both adjacent surfaces, including Dark.
+
+Button-like controls currently retain PUI's instant snap; the reference's 150ms transition-all is not claimed. Switch owns the measured 150ms Thumb transition separately.

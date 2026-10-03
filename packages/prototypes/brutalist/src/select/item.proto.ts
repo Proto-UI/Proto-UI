@@ -32,10 +32,10 @@ const selectItem = definePrototype<BrutalistSelectItemProps, BrutalistSelectItem
     if (!state) throw new Error('[brutalist-select-item] Select Item must project option states.');
     const { disabled, hovered, focused, focusVisible, pressed, active, selected } = state;
 
-    // P-BRUTALIST-SELECT-ITEM-VISUAL-GRAMMAR: resting mono full-width item surface (font-mono text-sm, rounded-none, gap-2).
+    // P-BRUTALIST-SELECT-ITEM-VISUAL-GRAMMAR: resting sans full-width item surface (font-sans font-medium text-sm, rounded-base, gap-2).
     def.feedback.style.use(
       tw(
-        'relative flex w-full cursor-default items-center justify-between gap-2 rounded-none px-2 py-1.5 font-mono text-sm outline-none select-none'
+        'relative flex w-full cursor-default items-center justify-between gap-2 rounded-base border-2 border-transparent px-2 py-1.5 font-sans font-medium text-sm outline-none select-none'
       )
     );
     // P-BRUTALIST-SELECT-ITEM-INTERACTION (active/hovered/focused/focusVisible/pressed → bg-main text-main-foreground; disabled → opacity-50 pointer-events-none) and SELECTED-PAIR-INVARIANT below.
@@ -47,11 +47,11 @@ const selectItem = definePrototype<BrutalistSelectItemProps, BrutalistSelectItem
           w.state(focused).eq(true),
           w.state(focusVisible).eq(true)
         ),
-      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
     });
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
@@ -61,7 +61,7 @@ const selectItem = definePrototype<BrutalistSelectItemProps, BrutalistSelectItem
     // P-BRUTALIST-SELECT-ITEM-SELECTED-PAIR-INVARIANT: selected → bg-main text-main-foreground.
     def.rule({
       when: (w) => w.state(selected).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
     });
 
     let renderTask: { cancel(): void } | null = null;

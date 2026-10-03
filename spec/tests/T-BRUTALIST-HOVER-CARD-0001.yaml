@@ -33,7 +33,7 @@ cases:
       - P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR
     expectation: p-brutalist-hover-card-content-transition-panel
   - id: T-BRUTALIST-HOVER-CARD-0001-CASE-BROWSER
-    title: Rendered Hover Card trigger and panel preserve square hard-shadow surfaces across official runtimes
+    title: Rendered Hover Card trigger and panel preserve source-aligned component-specific surfaces across official runtimes
     covers:
       - P-BRUTALIST-HOVER-CARD-TRIGGER-VISUAL-GRAMMAR
       - P-BRUTALIST-HOVER-CARD-CONTENT-VISUAL-GRAMMAR

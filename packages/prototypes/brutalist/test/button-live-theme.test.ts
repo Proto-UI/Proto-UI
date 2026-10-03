@@ -93,7 +93,7 @@ describe('prototypes/brutalist: button live-theme DOM', () => {
 
     // Light: secondary-background = #ffffff, foreground = #171717.
     expect(cssVar(el, 'background-color')).toBe('#ffffff');
-    expect(cssVar(el, 'color')).toBe('#171717');
+    expect(cssVar(el, 'color')).toBe('#000000');
 
     // Flip host scope to Dark — no pointer interaction involved.
     applyTheme(wrapper, DARK_VARS);
@@ -107,7 +107,7 @@ describe('prototypes/brutalist: button live-theme DOM', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(cssVar(el, 'background-color')).toBe('#ffffff');
-    expect(cssVar(el, 'color')).toBe('#171717');
+    expect(cssVar(el, 'color')).toBe('#000000');
   });
 
   it('keeps accent foreground ink in both themes (solid/main) while mounted', async () => {
@@ -118,14 +118,14 @@ describe('prototypes/brutalist: button live-theme DOM', () => {
     await Promise.resolve();
 
     // Accent pair is theme-invariant: canary (#fef08a) with black text.
-    expect(cssVar(el, 'background-color')).toBe('#fef08a');
+    expect(cssVar(el, 'background-color')).toBe('#5294ff');
     expect(cssVar(el, 'color')).toBe('#000000');
 
     // Flipping the host scope does not change the accent pair.
     applyTheme(wrapper, DARK_VARS);
     await Promise.resolve();
     await Promise.resolve();
-    expect(cssVar(el, 'background-color')).toBe('#fef08a');
+    expect(cssVar(el, 'background-color')).toBe('#5294ff');
     expect(cssVar(el, 'color')).toBe('#000000');
   });
 

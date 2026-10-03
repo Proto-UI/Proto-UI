@@ -165,14 +165,12 @@ describe('prototypes/brutalist: dropdown menu', () => {
     expect(trigger.getAttribute('aria-haspopup')).toBe('menu');
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     for (const token of [
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
       'bg-main',
       'text-main-foreground',
-      'font-bold',
-      'uppercase',
-      'shadow-[3px_3px_0_0_#000]',
+      'font-medium',
     ]) {
       expect(styleContains(trigger, token)).toBe(true);
     }
@@ -187,7 +185,7 @@ describe('prototypes/brutalist: dropdown menu', () => {
     trigger.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().hovered.get()).toBe(true);
-    expect(styleContains(trigger, 'data-[hovered]:-translate-x-px')).toBe(true);
+    expect(styleContains(trigger, 'data-[hovered]:translate-x-1')).toBe(true);
     trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().pressed.get()).toBe(true);
@@ -232,12 +230,11 @@ describe('prototypes/brutalist: dropdown menu', () => {
       'overflow-y-auto',
       'p-1',
       'duration-150',
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
-      'bg-secondary-background',
+      'bg-background',
       'text-foreground',
-      'shadow-[3px_3px_0_0_#000]',
       'animate-in',
       'fade-in-0',
       'zoom-in-95',

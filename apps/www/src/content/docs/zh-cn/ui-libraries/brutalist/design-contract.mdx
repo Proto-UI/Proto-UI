@@ -1,45 +1,61 @@
 ---
-title: 'Brutalist 设计合约'
-description: '贡献者原创 Brutalist 风格族使用的视觉语法'
+title: 'Brutalist 设计契约'
+description: '对齐官方来源的新粗野主义字体、圆角、层级与交互视觉'
 ---
 
-# Brutalist 设计合约
+# Brutalist 设计契约
 
-本文档描述 Brutalist 基础切片与参考 Button projection 使用的视觉语法。语义、键盘、ARIA 和命令连接继续以 Base 合约为准。
+当前 draft 视觉系统向 [neobrutalism.dev](https://www.neobrutalism.dev/) 对齐，参考固定为 [neobrutalism-components 3306a802](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4)。Proto UI 维护自己的实现与 Base 语义；这不意味着上游认证或组件 API 兼容承诺。
 
-## 几何
+## 字体
 
-- 控件和表面使用方角几何。
-- 结构边框固定为 2px 实线 ink。
-- 小型信息 surface 只有在对应 family 明确编目时才允许 2px 圆角。
+参考站默认使用 DM Sans，不是全部等宽或全部大写。字体角色由真实 prototype 的生成式样式 token 拥有：
 
-## 深度与运动
+- 普通控件、菜单项、描述与内容：`font-sans font-medium`，DM Sans 500
+- Dialog 标题、Tabs Trigger 与 Toggle：`font-heading font-bold`，DM Sans 700
+- 默认标签 14px/20px；Badge 12px/16px；Dialog 标题 18px、line-height 1 与紧凑 tracking
+- 保留作者写入的大小写；代码与键盘标记可以拥有独立的 mono 角色
 
-| 状态 | 位移         | 硬阴影    |
-| ---- | ------------ | --------- |
-| 默认 | 无           | `3px 3px` |
-| 悬停 | `-1px, -1px` | `4px 4px` |
-| 按下 | `1px, 1px`   | 无        |
+包内主题通过 `--pui-font-sans` 与 `--pui-font-heading` 声明 `"DM Sans", ui-sans-serif, system-ui, sans-serif`。文档应用自托管未经修改的 DM Sans variable font，并保留 SIL OFL 1.1 许可。其他应用负责自己的字体加载；prototype 不发起网络字体请求。字体缺失时使用系统 sans fallback。中文字符由宿主 CJK fallback 渲染，因此只检查拉丁 font-family 声明不能证明所有字符实际使用了同一种字体。
 
-持续 active state 不等于瞬时 press feedback。Toggle 在 active 时保留外部 `3px 3px` 高度并增加 2px inset ink frame；按下时保留该 inset frame、平移控件，并只清除外部高度直到释放。Inset frame 使用 box shadow，因此状态变化不会改变布局几何。
+## 几何与嵌套表面
 
-## 配色
+- 普通控件与面板：5px `rounded-base`、2px 黑色结构边框
+- Switch track/Thumb 与 Scroll Area Thumb：完整胶囊或圆形；Checkbox 保持方形
+- Tabs List 与内层 Trigger 分别拥有自己的圆角，由内缩间距分隔
+- Card Header/Content/Footer 与 Tabs Content 不强制产生嵌套边框
+- Scroll Area Root 拥有圆角 overflow clipping；Viewport 保持方形，宿主仍拥有 track/Thumb 几何
+- Spinner 保留居中的圆形开口 ring
 
-基础色为 paper/ink。平涂强调色承担语义：金丝雀黄用于明确动作、薄荷绿用于确认、薰衣草紫用于批注、珊瑚红用于警示与按压、天空蓝用于发现或选中轨道。禁止渐变、玻璃、模糊和柔光。
+圆角本来就是这套设计语言的一部分。不要全局强制直角，也不要把每个内部区域都变成另一个带边框的面板。
 
-位置、标签、几何和状态是主要信号；颜色只是辅助。
+## 层级与交互
 
-每一种强调填充都以固定的背景/前景色对交付（例如 `bg-main` 配 `text-main-foreground`）。强调前景在 Light 与 Dark 下都保持墨色。纸面等主题相关表面通过 CSS 变量解析，使宿主主题切换时已挂载控件无需指针交互即可重绘。
+| 表面 | 静止 | hover / 瞬时 press |
+| --- | --- | --- |
+| Button 与 Button-like Trigger | 4px 4px 零模糊黑影 | +4px,+4px 下沉并移除外影 |
+| Card / Dialog Content | 4px 硬阴影 | 不虚构 control state |
+| Menu、Select、Hover Card、Tooltip、Badge、Textarea | 无阴影 | 保留现有色对与预留边框 |
+| Tabs / Toggle / Switch | 平面 | 保留状态信号，不套用 Button 位移 |
 
-## Preset 交付
+上游 reverse Button 是独立 variant，当前 PUI API 不声称提供它。Toggle 在 press 中保留 2px inset active marker，作为 PUI 的非颜色状态扩展。Base 继续拥有 active 与 pressed 的区分、selection、键盘、ARIA 与 command wiring。保留已有 popup transition 与 Spinner reduced-motion 行为；Skeleton 仍为静态。
 
-Package-owned `BRUTALIST_THEME` manifest 是 Light 与 Dark semantic values 的 authoring source。文档页面与 CLI preset 消费同一完整 key set 的 generated projection；示例不再维护局部 palette subset。
+## 调色与暗色模式
 
-Proto UI config v1 只启用一个项目级 style preset。Brutalist 项目应使用 `proto-ui init --prototypes brutalist` 初始化。若项目已启用另一 preset，添加 Brutalist component 会在安装或修改 generated files 前失败；CLI 不会自动替换应用主题。使用 `--no-styles` 时，`add` 会成功并给出 ownership note，应用显式提供全部必需的 `--pui-*` semantic tokens。
+默认对齐参考站蓝色 palette：main `#5294ff`、浅蓝背景 `#dcebfe`、白色中性表面、黑色文本与结构。PUI 现有 canary、mint、lavender、coral、sky 色对仍可用，accent ink 保持黑色。颜色补充标签、位置与持续状态信号。
 
-## 无障碍
+本次检查的上游 style registry 没有 dark palette。Proto UI 的暗色 paper/panel、浅色正文、可读 destructive ink 与随主题变化的 focus ring 是明确的项目扩展。已挂载组件直接通过主题变量重绘；不得脱离 fill 单独覆盖配对 foreground。
 
-- Focus 使用有偏移的可见硬轮廓。主题 `ring` 在每个模式中解析为 foreground color，并与页面及面板背景都保持至少 3:1 对比度；当 Tabs panel 作为 fallback entry target 时，保留浏览器原生 focus-visible outline 而不抑制它。
-- Disabled 保留边框和结构，同时降低强调。
-- 交互目标保留可访问名称和 Base 键盘行为。
-- Portal surface 继承页面级主题变量。
+## 交付与无障碍
+
+`BRUTALIST_THEME` 是 Light/Dark 值、字体角色与 radius 的包内单一来源。CLI 与文档 scope 消费完整 manifest 的生成投射。使用 `proto-ui init --prototypes brutalist` 创建项目；config v1 只允许一个已启用的 style preset。`--no-styles` 消费者自行提供所需 semantic token 与字体加载。
+
+Focus 保留可见 offset ring，与相邻背景至少 3:1 对比。Tabs Content 保留原生 fallback focus indication。Disabled 保留几何与 Base gate；portal 表面保留 theme/font 变量。PUI 使用参考的 24×48px Switch frame 与唯一 20px Thumb movement、Checkbox mixed-state precedence，以及由父级拥有的 loading 语义。
+
+改编的组件 recipe 保留 Samuel Breznjak 的 MIT 版权与许可；分发的 DM Sans 保留 SIL OFL 许可。当前 styled criteria 仍为 draft；视觉对齐不扩展 native-host 支持，也不引入新的 Base 主体。
+
+Select 蓝色 main fill 上的 placeholder 保留配对黑色 ink，不使用中性 muted ink：后者在 Light 仅 2.62:1、Dark 仅 2.01:1。这是明确的可读性适配；两种主题的文本对比度都必须至少 4.5:1。
+
+本站字体产物同时提供完整 [DM Sans 版权与 OFL 许可](/fonts/dm-sans-OFL.txt)。Textarea 保留 theme-foreground 边框，使编辑区域边界与两侧相邻表面均至少有 3:1 对比，包括 Dark。
+
+Button-like 控件目前保留 PUI 的即时 snap，不声称已对齐参考站的 150ms transition-all；Switch 的 150ms Thumb transition 单独定义与验证。

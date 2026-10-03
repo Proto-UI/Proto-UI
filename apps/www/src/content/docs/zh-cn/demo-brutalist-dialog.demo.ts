@@ -22,7 +22,7 @@ export default {
               {
                 kind: 'proto',
                 prototypeId: 'brutalist-dialog-description',
-                children: ['Flat overlay, hard panel shadow, zero radius.'],
+                children: ['Flat overlay, hard panel shadow, 5px rounded corners.'],
               },
             ],
           },

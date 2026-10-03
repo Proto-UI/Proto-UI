@@ -24,7 +24,7 @@ cases:
       - P-BRUTALIST-CARD-FOOTER-VISUAL
     expectation: p-brutalist-card-visual-regions-contract
   - id: T-BRUTALIST-CARD-0001-CASE-BROWSER
-    title: Rendered Card Root remains a passive square hard-shadow panel across official runtimes
+    title: Rendered Card Root remains a passive source-aligned component-specific panel across official runtimes
     covers:
       - P-BRUTALIST-CARD-PASSIVE-BOUNDARY
       - P-BRUTALIST-CARD-ROOT-VISUAL

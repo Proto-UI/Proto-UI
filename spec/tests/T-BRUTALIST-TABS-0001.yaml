@@ -9,7 +9,7 @@ summary: >-
 
 cases:
   - id: T-BRUTALIST-TABS-0001-CASE-1
-    title: Root and List entry, Base inheritance, and square ruled strip
+    title: Root and List entry, Base inheritance, and rounded flat strip
     covers:
       - P-BRUTALIST-TABS-ENTRY
       - P-BRUTALIST-TABS-BASE-INHERITANCE
@@ -33,7 +33,7 @@ cases:
       - P-BRUTALIST-TABS-TRIGGER-BASE-INHERITANCE
     expectation: p-brutalist-tabs-trigger-interaction
   - id: T-BRUTALIST-TABS-0001-CASE-4
-    title: Content entry, Base inheritance, hidden-state collapse, and square panel
+    title: Content entry, Base inheritance, hidden-state collapse, and unframed content
     covers:
       - P-BRUTALIST-TABS-CONTENT-ENTRY
       - P-BRUTALIST-TABS-CONTENT-BASE-INHERITANCE
@@ -110,6 +110,7 @@ revisions:
     change: introduced
     summary: >-
       Introduced draft Brutalist Tabs coverage mapped 1:1 to the rc.7 P criteria (list+root entry, trigger selected pair, trigger interaction, content hidden). Not present in the immutable rc.6 snapshot.
+
 
   - version: 0.2.0
     change: revised

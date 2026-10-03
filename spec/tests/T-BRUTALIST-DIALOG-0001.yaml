@@ -50,7 +50,7 @@ cases:
       - P-BRUTALIST-DIALOG-TITLE-VISUAL-GRAMMAR
     expectation: p-brutalist-dialog-title-typography
   - id: T-BRUTALIST-DIALOG-0001-CASE-6
-    title: Description mono typography
+    title: Description sans typography
     covers:
       - P-BRUTALIST-DIALOG-DESCRIPTION-ENTRY
       - P-BRUTALIST-DIALOG-DESCRIPTION-BASE-INHERITANCE

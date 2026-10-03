@@ -1,20 +1,14 @@
 id: P-BRUTALIST-TOGGLE
 type: prototype
-title: Brutalist Toggle inherits Base Toggle and layers a square active-control surface
+title: 'Brutalist Toggle inherits Base Toggle and layers a rounded active-control surface'
+
 status: draft
 since: 0.2.0-rc.7
-summary: >-
-  Brutalist Toggle inherits Base Toggle interaction semantics and projects a style-family visual API: a constrained size enum, square geometry, hard offset shadows, flat paired fills, and an active accent pair reinforced by a persistent non-color inset frame.
-
+summary: 'Brutalist Toggle inherits Base Toggle interaction semantics and projects a style-family visual API: a constrained size enum, component-owned rounded geometry, hard offset shadows, flat paired fills, and an active accent pair reinforced by a persistent non-color inset frame.'
 
 statement:
-  en: >-
-    Brutalist Toggle is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Toggle. It preserves inherited Base protocol semantics (active/defaultActive/disabled) and adds only visual/style behavior: zero radius, black structural borders, hard offset shadows, a `default | sm | lg` size enum, and a main accent pair plus persistent inset ink frame when active.
-
-
-  zh-CN: >-
-    Brutalist Toggle 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Toggle 之上。它保留继承的 Base 协议语义（active/defaultActive/disabled），仅增加视觉/style 行为：零圆角、黑色结构边框、硬偏移阴影、`default | sm | lg` size 枚举，以及 active 时的 main 强调色对与持续 inset ink frame。
-
+  en: P-BRUTALIST-TOGGLE preserves its declared semantic, anatomy and API ownership. Its draft visual projection follows the component-specific typography, geometry, fill, depth and state criteria below, aligned with neobrutalism-components 3306a802. This does not admit new Base semantics, host support or upstream API compatibility.
+  zh-CN: P-BRUTALIST-TOGGLE 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
   - id: P-BRUTALIST-TOGGLE-BASE-INHERITANCE
@@ -58,34 +52,35 @@ criteria:
   - id: P-BRUTALIST-TOGGLE-ACTIVE-SIGNAL
     text:
       en: >-
-        Active must remain distinguishable without color by adding a persistent 2px inset ink frame while retaining the resting 3px outer hard shadow. The inset frame must not change layout geometry or translate the control. During transient press, the inset frame remains while the outer shadow clears and the press translation applies; release restores the outer shadow. This visual rule must not redefine Base `active`, `pressed`, activation, or `aria-pressed` ownership.
+        Active retains a persistent 2px inset ink frame independently of color, including during press. The inset does not change layout, translation or Base active/pressed/aria-pressed ownership. This non-color marker is an explicit Proto UI accessibility extension.
 
 
       zh-CN: >-
-        Active 必须通过持续的 2px inset ink frame 在不依赖颜色时仍可区分，同时保留静止态 3px 外部硬阴影。Inset frame 不得改变布局几何或平移控件。瞬时 press 期间 inset frame 保留，外部阴影清除并应用 press 位移；释放后恢复外部阴影。该视觉规则不得重定义 Base 的 `active`、`pressed`、activation 或 `aria-pressed` 所有权。
+        active 保留独立于颜色的持续 2px inset ink frame，press 时仍保留；inset 不改变布局、translation 或 Base active/pressed/aria-pressed owner。这一非颜色 marker 是明确的 Proto UI 无障碍扩展。
 
 
   - id: P-BRUTALIST-TOGGLE-INTERACTION
     text:
       en: >-
-        Hover only while inactive and not pressed lifts the control. Press takes precedence over hover, translates into the shadow axis, and clears outer elevation while preserving the active inset frame. Focus-visible applies a hard ring with offset. Disabled reduces emphasis with `opacity-50` and `pointer-events-none` while preserving geometry and the active marker.
+        Hover and press preserve the flat frame with no translation or outer shadow; active inset persists. Focus-visible retains the offset ring, and disabled retains opacity-50/pointer-events-none with geometry and marker preserved.
 
 
       zh-CN: >-
-        Hover 仅在 inactive 且未 pressed 时抬升控件。Press 优先于 hover，沿阴影轴压入并清除外部高度，同时保留 active inset frame。Focus-visible 使用带 offset 的硬 ring。Disabled 以 `opacity-50` 与 `pointer-events-none` 降低强调，同时保留几何与 active marker。
+        hover/press 保持 flat frame，无 translation 或外侧阴影；active inset 持续存在。focus-visible 保留 offset ring；disabled 保留 opacity-50/pointer-events-none 以及几何与 marker。
 
 
   - id: P-BRUTALIST-TOGGLE-VISUAL-GRAMMAR
     text:
       en: >-
-        The visual surface must preserve square corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+        Toggle uses rounded-base 5px, 2px black frame, neutral bg-secondary-background/text-foreground and font-heading font-bold text-sm with authored casing. No outer elevation or movement is applied.
 
 
       zh-CN: >-
-        视觉表面必须保持直角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+        Toggle 使用 rounded-base 5px、2px 黑边、中性 bg-secondary-background/text-foreground、font-heading font-bold text-sm 与作者大小写，不施加外侧 elevation 或 movement。
 
 
 sources:
+  - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/toggle/toggle.proto.ts
   - path: packages/prototypes/brutalist/src/toggle/types.ts
   - path: packages/prototypes/brutalist/test/toggle.test.ts
@@ -99,10 +94,14 @@ inherits:
     - id: P-BASE-TOGGLE
 verifies: { tests: [T-BRUTALIST-TOGGLE-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-
       Introduced the draft Brutalist Toggle projection with real public-API criteria (size enum, defaults, active pair invariant, interaction states) on the rc.7 release train. Not present in the immutable rc.6 snapshot.
+
 
   - version: 0.2.0
     change: revised
