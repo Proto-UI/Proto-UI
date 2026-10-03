@@ -61,6 +61,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   let status: HTMLElement;
   let activeItem: Enhancement | null = null;
   let sourceSize = { width: 0, height: 0 };
+  let originWasUnavailable = false;
 
   const releaseSource = () => {
     if (ownedUrl) URL.revokeObjectURL(ownedUrl);
@@ -99,7 +100,11 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       activeItem.media.isConnected && activeItem.trigger.contains(activeItem.media)
         ? activeItem.media.getBoundingClientRect()
         : null;
-    const transform = imageOriginTransform(origin, target, viewport);
+    const measuredTransform = imageOriginTransform(origin, target, viewport);
+    // A later focus-restoration scroll must not silently revive a destination
+    // that disappeared while this image was presented. Reset for the next open.
+    if (!measuredTransform) originWasUnavailable = true;
+    const transform = originWasUnavailable ? null : measuredTransform;
     const values = {
       '--docs-image-left': `${target.x}px`,
       '--docs-image-top': `${target.y}px`,
@@ -193,6 +198,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     restoreOrigin();
     activeItem = item;
     sourceSize = { width: source.width, height: source.height };
+    originWasUnavailable = false;
     const previousImage = image;
     image = createImage();
     previousImage.replaceWith(image);
@@ -284,7 +290,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   };
   createDialog();
   scan();
-  const contentObserver = new MutationObserver(scan);
+  const contentObserver = new MutationObserver(() => {
+    scan();
+    geometry();
+  });
   for (const body of doc.querySelectorAll('[data-doc-flow]'))
     contentObserver.observe(body, { childList: true, subtree: true, attributes: true });
   const themeObserver = new MutationObserver(() => {

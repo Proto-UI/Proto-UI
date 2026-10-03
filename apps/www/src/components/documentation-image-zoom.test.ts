@@ -1,10 +1,11 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mountDocumentationImagePreview } from './documentation-image-preview';
 import type { PreviewControl } from './documentation-image-controls';
 
 let dispose: (() => void) | undefined;
 afterEach(() => {
   dispose?.();
+  vi.restoreAllMocks();
   document.body.innerHTML = '';
 });
 async function settle() {
@@ -75,5 +76,22 @@ describe('borderless image presentation / maintainer request #796', () => {
     expect(content.dataset.docsImageReturn).toBe('fade');
     expect(content.style.getPropertyValue('--docs-image-origin-transform')).toBe('none');
     expect(content.style.getPropertyValue('--docs-image-closed-opacity')).toBe('0');
+  });
+  it('does not recover an invalid return rectangle merely because focus scrolls the source back', async () => {
+    let sourceTop = 40;
+    vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(
+      () => new DOMRect(20, sourceTop, 400, 200)
+    );
+    const { trigger, root, content } = await fixture();
+    expect(content.dataset.docsImageReturn).toBe('origin');
+    sourceTop = 4000;
+    trigger.style.transform = 'translateY(4000px)';
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(content.dataset.docsImageReturn).toBe('fade');
+    // Test-injected geometry models a subsequent native focus-restoration scroll.
+    sourceTop = 40;
+    root.getExposes?.().close('test.focus-return');
+    await settle();
+    expect(content.dataset.docsImageReturn).toBe('fade');
   });
 });

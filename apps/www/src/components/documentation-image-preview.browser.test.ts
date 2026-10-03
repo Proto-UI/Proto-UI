@@ -32,6 +32,11 @@ async function capture(page: Page, name: string) {
       text: el.textContent,
       alt: el.querySelector('img')?.alt,
       label: el.getAttribute('aria-label'),
+      inertAncestor: Boolean(el.closest('[inert]')),
+      hiddenAncestor: Boolean(el.closest('[aria-hidden="true"], [hidden]')),
+      mediaVisibility: el.querySelector('img')
+        ? getComputedStyle(el.querySelector('img')!).visibility
+        : null,
     })),
     panels: Array.from(document.querySelectorAll('[data-docs-image-content]')).map((el) => ({
       tag: el.localName,
@@ -417,7 +422,31 @@ describe('automatic documentation image preview in real Chromium', () => {
       await sourceOwner.evaluate((el) => {
         (el as HTMLElement).style.transform = 'translateY(4000px)';
       });
+      await page.waitForFunction(
+        () =>
+          document.querySelector('[data-docs-image-trigger] img')!.getBoundingClientRect().top >=
+          innerHeight
+      );
+      const beforeClose = await sourceOwner.evaluate((el) => ({
+        source: el.querySelector('img')!.getBoundingClientRect().toJSON(),
+        scrollY,
+        viewport: {
+          width: innerWidth,
+          height: innerHeight,
+          x: visualViewport?.offsetLeft,
+          y: visualViewport?.offsetTop,
+        },
+        returnMode: document.querySelector<HTMLElement>('[data-docs-image-content]')!.dataset
+          .docsImageReturn,
+      }));
       await page.keyboard.press('Escape');
+      const afterClose = await sourceOwner.evaluate((el) => ({
+        source: el.querySelector('img')!.getBoundingClientRect().toJSON(),
+        scrollY,
+        returnMode: document.querySelector<HTMLElement>('[data-docs-image-content]')!.dataset
+          .docsImageReturn,
+      }));
+      records.push({ invalidOrigin: { beforeClose, afterClose } });
       expect(
         await page.locator('[data-docs-image-content]').getAttribute('data-docs-image-return')
       ).toBe('fade');
@@ -526,6 +555,17 @@ describe('automatic documentation image preview in real Chromium', () => {
         expect(await page.locator('.docs-image-full').getAttribute('src')).toContain(
           `whitepaper-conditional-consistency.${locale}.svg`
         );
+        const canvas = await page.locator('.docs-image-full').evaluate((el) => ({
+          background: getComputedStyle(el).backgroundColor,
+          padding: getComputedStyle(el).padding,
+          border: getComputedStyle(el).borderTopWidth,
+          shadow: getComputedStyle(el).boxShadow,
+        }));
+        expect(canvas.background).not.toBe('rgba(0, 0, 0, 0)');
+        expect(canvas.padding).toBe('0px');
+        expect(canvas.border).toBe('0px');
+        expect(canvas.shadow).toBe('none');
+        records.push({ whitepaper: locale, width, colorScheme, canvas });
         await capture(page, `whitepaper-${locale}-${width}-${colorScheme}`);
         await page.keyboard.press('Escape');
         await closed(page);

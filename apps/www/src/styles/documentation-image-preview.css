@@ -32,6 +32,9 @@ documentation-image-preview,
   margin: 0;
   object-fit: contain;
   color-scheme: light;
+  /* Composite transparent image pixels on their theme canvas, with no extra
+   * panel, padding, border or shadow. This preserves diagram text contrast. */
+  background-color: var(--color-background, Canvas);
 }
 [data-theme='dark'] .docs-image-full {
   color-scheme: dark;
