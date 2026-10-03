@@ -40,6 +40,12 @@ jobs:
         run: |
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Install public CJK font fixtures
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          mkdir -p "$IMAGE_PREVIEW_EVIDENCE_DIR"
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk > "$IMAGE_PREVIEW_EVIDENCE_DIR/fonts.txt"
       - name: Identify renderer and exact revision
         run: |
           set -euo pipefail
@@ -56,7 +62,7 @@ jobs:
       - name: Run exact-head image preview matrix
         run: |
           set -o pipefail
-          corepack pnpm@10.32.1 exec vitest run apps/www/src/components/documentation-image-preview.browser.test.ts --maxWorkers=1 --minWorkers=1 2>&1 | tee "$IMAGE_PREVIEW_EVIDENCE_DIR/browser.log"
+          corepack pnpm@10.32.1 exec vitest run apps/www/src/components/documentation-image-preview.browser.test.ts --maxWorkers=1 --minWorkers=1 --bail=1 2>&1 | tee "$IMAGE_PREVIEW_EVIDENCE_DIR/browser.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

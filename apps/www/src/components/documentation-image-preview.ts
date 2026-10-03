@@ -12,6 +12,7 @@ import {
 type Enhancement = {
   trigger: PreviewControl;
   original: Element;
+  label: HTMLElement;
   media: HTMLImageElement | SVGSVGElement;
 };
 
@@ -186,7 +187,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     );
   };
   const open = (item: Enhancement) => {
-    const body = item.media.closest('.sl-markdown-content');
+    const body = item.media.closest('[data-doc-flow]');
     if (!body || !isPreviewCandidate(item.media, body, item.trigger)) return;
     const source = readPreviewSource(item.media);
     if (!source) return;
@@ -211,7 +212,8 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     image.src = ownedUrl ?? source.sourceUrl;
     root.getExposes?.().openDialog?.('image.preview');
   };
-  const restoreTrigger = ({ trigger, original }: Enhancement) => {
+  const restoreTrigger = ({ trigger, original, label }: Enhancement) => {
+    label.remove();
     if (original.localName === 'button') {
       original.append(...Array.from(trigger.childNodes));
       if (trigger.parentNode) trigger.replaceWith(original);
@@ -227,7 +229,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   const scan = () => {
     if (disposed) return;
     enhancements = enhancements.filter((item) => {
-      const body = item.media.closest('.sl-markdown-content');
+      const body = item.media.closest('[data-doc-flow]');
       if (
         body &&
         isPreviewCandidate(item.media, body, item.trigger) &&
@@ -237,7 +239,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
       restoreTrigger(item);
       return false;
     });
-    for (const body of doc.querySelectorAll<HTMLElement>('.sl-markdown-content')) {
+    for (const body of doc.querySelectorAll<HTMLElement>('[data-doc-flow]')) {
       for (const media of body.querySelectorAll<HTMLImageElement | SVGSVGElement>('img, svg')) {
         if (
           !(media instanceof HTMLImageElement || media instanceof SVGSVGElement) ||
@@ -257,12 +259,17 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
         const trigger = makePreviewControl(family, 'button', { variant: 'ghost' });
         trigger.dataset.docsImageTrigger = '';
         const name = `${labels.open}: ${readPreviewSource(media)!.alt}`;
-        trigger.setAttribute('aria-label', name);
         trigger.title = name;
+        // Button owns nameFromContent. Supply real label content instead of
+        // writing an aria-label that its accessibility projection clears.
+        const label = doc.createElement('span');
+        label.className = 'docs-image-trigger-label';
+        label.textContent = `${labels.open}: `;
         original.replaceWith(trigger);
         if (legacy) trigger.append(...Array.from(legacy.childNodes));
         else trigger.append(original);
-        const item = { trigger, original, media };
+        trigger.prepend(label);
+        const item = { trigger, original, media, label };
         enhancements.push(item);
         themePreviewControl(trigger, family, doc.documentElement.dataset.theme === 'dark');
         trigger.addEventListener(
@@ -278,7 +285,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
   createDialog();
   scan();
   const contentObserver = new MutationObserver(scan);
-  for (const body of doc.querySelectorAll('.sl-markdown-content'))
+  for (const body of doc.querySelectorAll('[data-doc-flow]'))
     contentObserver.observe(body, { childList: true, subtree: true, attributes: true });
   const themeObserver = new MutationObserver(() => {
     const nextFamily = previewFamily(doc);

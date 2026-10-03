@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mountDocumentationImagePreview } from './documentation-image-preview';
 import type { PreviewControl } from './documentation-image-controls';
@@ -13,8 +14,12 @@ async function settle() {
   for (let i = 0; i < 12; i++) await Promise.resolve();
 }
 async function fixture() {
+  const wrapper = readFileSync('apps/www/src/components/override/MarkdownContent.astro', 'utf8');
   document.body.innerHTML =
-    '<main class="sl-markdown-content"><figure><img src="https://example.com/diagram.svg" alt="Example diagram"/><figcaption>Caption</figcaption></figure><p><a href="/destination"><img src="/linked.png" alt="Linked"/></a><img src="/decorative.png" alt=""/></p></main><div id="viewer"></div>';
+    wrapper.replace(
+      '<slot />',
+      '<figure><img src="https://example.com/diagram.svg" alt="Example diagram"/><figcaption>Caption</figcaption></figure><p><a href="/destination"><img src="/linked.png" alt="Linked"/></a><img src="/decorative.png" alt=""/></p>'
+    ) + '<div id="viewer"></div>';
   dispose = mountDocumentationImagePreview(document.querySelector('#viewer')! as HTMLElement);
   await settle();
   return {
@@ -32,6 +37,14 @@ describe('documentation image viewer PUI integration', () => {
     await settle();
     expect(document.querySelector('figure > img')).not.toBeNull();
     expect(document.querySelector('[data-docs-image-trigger]')).toBeNull();
+  });
+  it('provides the preview action name through PUI-owned content naming', async () => {
+    const { trigger } = await fixture();
+    expect(trigger.textContent).toContain('Enlarge image:');
+    expect(trigger.getAttribute('aria-label')).toBeNull();
+    dispose?.();
+    await settle();
+    expect(document.querySelector('[data-doc-flow]')!.textContent).not.toContain('Enlarge image:');
   });
   it('opens through Button semantic activation, closes through Dialog, restores focus and resets zoom', async () => {
     const { trigger, root } = await fixture();

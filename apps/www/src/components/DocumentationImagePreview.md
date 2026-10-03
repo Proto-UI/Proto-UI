@@ -12,7 +12,7 @@ This site composition advances [#780](https://github.com/Proto-UI/Proto-UI/issue
 
 ## Automatic eligibility
 
-All rendered `img` and top-level static SVG elements in `.sl-markdown-content` are considered, including Markdown output and MDX-native HTML. A `picture` remains intact and its selected `currentSrc` is reused. Authored `figure` and `figcaption` are not reconstructed. Only standalone Markdown image paragraphs receive the historical enhanced-image figure styling.
+All rendered `img` and top-level static SVG elements in `[data-doc-flow]` are considered, including Markdown output and MDX-native HTML. A `picture` remains intact and its selected `currentSrc` is reused. Authored `figure` and `figcaption` are not reconstructed. Only standalone Markdown image paragraphs receive the historical enhanced-image figure styling.
 
 Images inside links, native controls, custom elements/demos, contenteditable regions, role/tabindex owners, image maps/native image controls, code or pre blocks are not enhanced. Empty `alt`, hidden/inert/editable/presentational media and `data-image-preview="off"` opt out. Known whitepaper `button[data-diagram-open]` wrappers are migrated only when they contain one image and no other interactive controls. Native click handlers in the authored attributes are not taken over. DOM listeners installed by other application code cannot generally be inferred; such owners must declare an interactive boundary or explicit opt-out.
 
