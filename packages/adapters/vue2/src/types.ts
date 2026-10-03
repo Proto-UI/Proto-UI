@@ -25,9 +25,15 @@ export type Vue2HostStyle = Record<string, string> | string | Array<Record<strin
 
 export type ProtoVue2EventProps<TProto extends ProtoLike> = ProtoEventProps<ExposeOf<TProto>>;
 
-export type ProtoVue2Props<TProto extends ProtoLike> = (PropsOf<TProto> extends PropsBaseType
-  ? PropsOf<TProto>
-  : never) & {
+// Empty portable props must not turn the Adapter's host fields into `never`.
+type Vue2PortableProps<TProto extends ProtoLike> =
+  PropsOf<TProto> extends PropsBaseType
+    ? PropsOf<TProto> extends Record<string, never>
+      ? Record<never, never>
+      : PropsOf<TProto>
+    : never;
+
+export type ProtoVue2Props<TProto extends ProtoLike> = Vue2PortableProps<TProto> & {
   class?: Vue2HostClass;
   hostClass?: Vue2HostClass;
   surfaceClass?: Vue2HostClass;

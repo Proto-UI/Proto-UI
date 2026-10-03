@@ -1,9 +1,21 @@
 ---
 title: 'Table（Draft）'
-description: 'Base Table draft structural protocol、已实现的 host-neutral topology、accessibility 边界与待补 Adapter 证据。'
+description: 'Base Table draft structural protocol、有界 Web Adapter projection、CLI facade 与静态预览。'
 ---
 
-Base Table 是**已有 Checkpoint B host-neutral 实现的 draft protocol**，不是已发布的 Adapter conformance 声明。当前切片由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001`、`M-TABLE-STRUCTURE-0001`、五个 `P-BASE-TABLE*` identity 与 `T-TABLE-STRUCTURE-0001` 治理。React、Vue 与 Vue 2 Adapter profile 证据、CLI facade 注册、可用 runtime preview 与 design-language 工作仍由 #621 Checkpoint C 继续完成。
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Table 仍是**draft protocol**，不是稳定版功能或 assistive-technology certification。当前切片由 `D-BASE-TABLE-STRUCTURE-0001`、`C-TABLE-STRUCTURE-0001`、`M-TABLE-STRUCTURE-0001`、五个 `P-BASE-TABLE*` identity 与 `T-TABLE-STRUCTURE-0001` 治理。当前 workspace 已包含 Web Components、React 18/19、Vue 3 与 Vue 2 的有界 Web DOM projection 证据、`base-table` CLI facade，以及下方静态 preview。design-language 工作仍不属于这个切片。
+
+<div>
+  <PrototypePreviewer
+    demoId="demo-base-table"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+这个 preview 在四种 Web runtime 中使用同一组 authored Base Table family。示例只展示静态结构：Table 本身不增加 sorting、selection、editing、data operations 或 keyboard-grid behavior。runtime picker 属于文档 previewer，不属于 Table protocol。
 
 ## 为什么 Table 是协议
 
@@ -19,7 +31,7 @@ Maker-authored parts、spans 与 header keys
   -> User 可观察的 table relationships
 ```
 
-当前定义已有 portable Module、Base family 与有界的 Web Component host-projection 证据；它不声明完整 Adapter conformance。
+当前定义已有 portable Module、Base family 与四种 Adapter profile 的有界 Web DOM projection 证据；它不声明完整 Web 或 assistive-technology conformance。
 
 ## 已实现的 host-neutral family
 
@@ -51,7 +63,7 @@ Insert、remove 与 reorder 会根据 actual parts 重算 snapshot。暂时无�
 
 Base Table 复用 draft 的通用 A11y 方向与 `HC-A11Y-0001`，不创建 `HC-TABLE`。Table Structure 不请求 physical widget、measurement、input、resource 或 system service。
 
-通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。Web Component 证据现已验证 one-based ARIA row/column count、index、span、caption naming，以及保留各 cell authored content 的显式 header label。React、Vue 与 Vue 2 的 Table projection tests 仍为 planned；通过的 Web Component 切片不表示完整的 cross-Adapter 或 assistive-technology conformance。
+通用 A11y path 已通过合入的 #625 prerequisite 支持 opaque semantic-object references 与有序 multi-target relationships。Web Component、React、Vue 3 与 Vue 2 证据验证 Web DOM roles、one-based ARIA row/column count、index/span、caption naming、有序 header refs，以及结构 invalidation/recovery，同时保留 authored content。这些是有界 Adapter 与 browser observations，不认证 assistive-technology behavior，也不覆盖所有 browser/platform 组合。
 
 外部 host 对照只证明 shared information shape：
 
@@ -83,7 +95,11 @@ Later Data Table composition 可以消费 passive structure，同时组合分别
 
 ## 证据状态
 
-Host-neutral reference probe 与 Module/Base tests 已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy、passive negative boundaries、generic A11y emission 与 projection cleanup。Web Component Adapter test 覆盖 count、index、span、caption identity 与保留内容的 header identity ARIA materialization。新增 `@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 仍为 draft；React、Vue 与 Vue 2 Adapter tests 仍为 `planned`，本页也暂不提供交互式 Table preview。
+Host-neutral reference probe 与 Module/Base tests 已覆盖 deterministic placement、multiple-header resolution、diagnostics、nearest-domain isolation、authored-fact churn、exact anatomy、passive negative boundaries、generic A11y emission 与 projection cleanup。四个 Web profile 的 Adapter integration tests 已加入；public browser case 会在每种 runtime 中运行同一个静态示例。workspace CLI facade `base-table` 为 React、Vue 3、Vue 2 或 Web Components 生成五个 Table authoring parts。`@proto.ui/module-table-structure` 与 `@proto.ui/prototypes-base/table` exports 及其语义仍为 draft。
+
+React unit case 使用 synthetic hook runtime，上方 public preview 加载的是 React 18。独立的 `table-react19.browser.test.ts` consumer 使用公共 Adapter 与 Table exports，在真实 React 19.2.6 和 ReactDOM 19.2.6 中运行并断言两个版本。它验证 count、index、row/column span、caption naming、有序 opaque headers、响应式 invalidation/recovery、cell content 保留与 unmount。此检查从 esm.sh 加载固定版本 browser modules，需要网络访问。两个 Table browser suite 都进入 sequential shared-server test bucket。
+
+这些通过的 DOM 检查不等于 Checkpoint C 独立验收或 lifecycle promotion。Table family 仍为 draft，等待独立 review 与明确 admission；不宣称 assistive-technology 或 non-Web conformance。
 
 ## 参考
 

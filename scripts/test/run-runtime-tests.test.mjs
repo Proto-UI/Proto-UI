@@ -1,9 +1,21 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
-import { BROWSER_SUITES, createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { BROWSER_SUITES, createRuntimeTestPlan, READY_ROUTES } from './runtime-test-plan.mjs';
 
 describe('runtime test plan', () => {
+  it('warms both Table locales before shared-server browser navigation', () => {
+    for (const route of ['/en/ui-libraries/base/table/', '/zh-cn/ui-libraries/base/table/']) {
+      assert.ok(READY_ROUTES.includes(route), `Missing readiness route: ${route}`);
+    }
+  });
+  it('runs both Table browser suites in the sequential shared-server bucket', () => {
+    for (const suite of [
+      'apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts',
+      'apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts',
+    ])
+      assert.ok(BROWSER_SUITES.includes(suite), suite);
+  });
   it('preserves focused Vitest arguments without starting the documentation server', () => {
     assert.deepEqual(
       createRuntimeTestPlan(['--', 'packages/spec/fixtures/test/context-fixtures.test.ts']),

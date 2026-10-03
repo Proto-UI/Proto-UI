@@ -127,6 +127,26 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/image');
     registerPrototype('base-image-root', mod.imageRoot);
   },
+  'base-table-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/table');
+    registerPrototype('base-table-root', mod.tableRoot);
+  },
+  'base-table-caption': async () => {
+    const mod = await import('@proto.ui/prototypes-base/table');
+    registerPrototype('base-table-caption', mod.tableCaption);
+  },
+  'base-table-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/table');
+    registerPrototype('base-table-row', mod.tableRow);
+  },
+  'base-table-header-cell': async () => {
+    const mod = await import('@proto.ui/prototypes-base/table');
+    registerPrototype('base-table-header-cell', mod.tableHeaderCell);
+  },
+  'base-table-cell': async () => {
+    const mod = await import('@proto.ui/prototypes-base/table');
+    registerPrototype('base-table-cell', mod.tableCell);
+  },
   'brutalist-textarea-root': async () => {
     const mod = await import('@proto.ui/prototypes-brutalist/textarea');
     registerPrototype('brutalist-textarea-root', mod.brutalistTextareaRoot);

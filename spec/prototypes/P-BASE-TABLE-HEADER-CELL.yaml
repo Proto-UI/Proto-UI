@@ -4,8 +4,8 @@ title: Base Table HeaderCell declares one keyed row or column header
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Real source, header-graph evidence and bounded Web Component HeaderCell materialization exist; React, Vue and Vue 2 remain planned.
-  zh-CN: 已有真实 source、header-graph 证据与有界 Web Component HeaderCell materialization；React、Vue 与 Vue 2 仍为 planned。
+  en: Real source, header-graph evidence and bounded passing HeaderCell materialization exist for Web Component, React, Vue 3 and Vue 2, including a real React 19 consumer. Independent Checkpoint C review and explicit semantic/lifecycle admission remain incomplete; assistive-technology and non-Web support are not claimed.
+  zh-CN: 已有真实 source、header-graph 证据与通过的有界 Web Component、React、Vue 3、Vue 2 HeaderCell materialization，包括真实 React 19 consumer。尚未完成 Checkpoint C 独立 review 与明确 semantic/lifecycle admission；不宣称 assistive-technology 或 non-Web support。
 summary: HeaderCell contributes a unique protocol key, header kind, spans and optional upstream header keys to its nearest Table domain.
 statement:
   en: Base Table HeaderCell owns only authored structural facts and App-owned slot content; Table Structure computes its coordinates and opaque relationships.
@@ -31,8 +31,8 @@ verifies: { tests: [T-TABLE-STRUCTURE-0001] }
 openQuestions:
   - id: P-BASE-TABLE-HEADER-CELL-Q-ADAPTERS
     question:
-      en: Are HeaderCell roles, spans and relationships proven across official Adapter profiles?
-      zh-CN: HeaderCell roles、spans 与 relationships 是否已在 official Adapter profiles 中取证？
+      en: Has the bounded four-Web-Adapter HeaderCell evidence received independent Checkpoint C review and explicit admission?
+      zh-CN: 有界四 Web Adapter HeaderCell 证据是否已完成 Checkpoint C 独立 review 与明确 admission？
     blocks: [activation:P-BASE-TABLE-HEADER-CELL]
 sources:
   - path: packages/prototypes/base/src/table/header-cell.proto.ts
@@ -44,4 +44,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Recorded content-preserving Web Component HeaderCell relationships while retaining three planned Adapter paths.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Recorded bounded HeaderCell projection evidence across four Web Adapters, including real React 19, while retaining independent Checkpoint C review and explicit admission as the draft boundary.
 tags: [table, header-cell, base, prototype, accessibility, draft]

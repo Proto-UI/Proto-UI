@@ -726,6 +726,33 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   'base-transition': base('base-transition', 'base Transition', 'transition', 'BaseTransition'),
   'base-textarea': base('base-textarea', 'Base Textarea', 'textareaRoot', 'BaseTextareaRoot'),
   'base-image': base('base-image', 'Base Image', 'imageRoot', 'BaseImageRoot'),
+  'base-table': baseCompound('base-table', 'Base Table', [
+    {
+      prototypeImport: 'tableRoot',
+      exportBaseName: 'BaseTableRoot',
+      elementName: 'proto-ui-base-table-root',
+    },
+    {
+      prototypeImport: 'tableCaption',
+      exportBaseName: 'BaseTableCaption',
+      elementName: 'proto-ui-base-table-caption',
+    },
+    {
+      prototypeImport: 'tableRow',
+      exportBaseName: 'BaseTableRow',
+      elementName: 'proto-ui-base-table-row',
+    },
+    {
+      prototypeImport: 'tableHeaderCell',
+      exportBaseName: 'BaseTableHeaderCell',
+      elementName: 'proto-ui-base-table-header-cell',
+    },
+    {
+      prototypeImport: 'tableCell',
+      exportBaseName: 'BaseTableCell',
+      elementName: 'proto-ui-base-table-cell',
+    },
+  ]),
 
   'base-switch': baseCompound('base-switch', 'base Switch', [
     {

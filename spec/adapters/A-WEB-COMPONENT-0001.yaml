@@ -200,10 +200,14 @@ supports:
       since: 0.3.0-alpha.0
       role: required-module
       note: Existing family/domain/order slice; no A11y relationship or new author query policy admission.
+    - id: M-A11Y-0001
+      since: 0.3.0-alpha.1
+      role: required-module
+      note: Standard Runtime installs the semantic-object projector; Table evidence covers same-domain opaque header refs and Web DOM projection, while broader A11y coverage remains bounded by T-A11Y-0001.
     - id: M-TABLE-STRUCTURE-0001
       since: 0.3.0-alpha.1
       role: required-module
-      note: Installed by the standard Runtime; bounded Web Component evidence covers ARIA materialization only, while React, Vue and Vue 2 remain uncataloged for Table support.
+      note: Installed by the standard Runtime; this profile's bounded ARIA materialization evidence is T-TABLE-STRUCTURE-0001. React, Vue 3 and Vue 2 have separately cataloged Table paths, not support inferred from Web Component evidence; no assistive-technology certification is claimed.
     - id: M-RULE-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -254,6 +258,10 @@ supports:
       role: required-module
 provides:
   hostCaps:
+    - id: HC-A11Y-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Web Component binds the bounded Table semantic-object graph to current Web DOM targets and clears owned attributes on invalidation; this does not certify assistive-technology behavior.
     - id: HC-COLOR-SCHEME-INVALIDATION-0001
       since: 0.3.0-alpha.0
       role: translated-capability
@@ -527,5 +535,8 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Provides the draft Focus navigation order through document order within one tree, with roving evidence where document and registration order differ.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Recorded the bounded M-A11Y required-module and HC-A11Y translated-capability relations used by Table, and reconciled the Table support note with the separately cataloged React, Vue 3 and Vue 2 evidence; existing Web Component criterion and T mapping remain bounded DOM evidence without assistive-technology or cross-profile inference.
 tags:
   [adapter, web-component, custom-elements, web, props, event, lifecycle, state, expose, official]

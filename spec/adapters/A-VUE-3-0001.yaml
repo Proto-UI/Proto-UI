@@ -164,6 +164,10 @@ criteria:
     text:
       en: Within C-RULE-COLOR-SCHEME-0001's bounded draft default same-document light-DOM domain, actual mixed and eligible lowered recipes must follow explicit/system changes through existing presentation/reveal. Custom/subtree/ShadowRoot/cross-document equivalence, generic Meta reactivity and Transition retiming are not added; full browser cases are tracked separately from token integration.
       zh-CN: 在 C-RULE-COLOR-SCHEME-0001 的有界 draft 默认同文档 light-DOM 域内，实际 mixed 与 eligible lowered 配方须经既有 presentation/reveal 跟随显式/system 变化。不新增 custom/subtree/ShadowRoot/跨文档等价、通用 Meta 响应或 Transition retiming；完整 browser case 与 token integration 分开跟踪。
+  - id: A-VUE-3-0001-TABLE
+    text:
+      en: The Vue 3 Web profile materializes the draft Table Structure graph as Web table, row, header and cell semantics, one-based counts/indices/spans, caption naming and ordered explicit header references. Invalid structure clears owned Table projection and recovery restores current facts. This is bounded Web DOM evidence, not native-platform or assistive-technology certification.
+      zh-CN: Vue 3 Web profile 将 draft Table Structure graph 投射为 Web table、row、header、cell semantics、one-based count/index/span、caption naming 与有序显式 header refs。结构无效时清理所拥有的 Table 投射，恢复后重建当前 facts。此为有界 Web DOM 证据，不认证 native platform 或 assistive technology。
 supports:
   modules:
     - id: M-RULE-META-0001
@@ -197,6 +201,14 @@ supports:
       since: 0.3.0-alpha.0
       role: required-module
       note: Existing family/domain/order slice; no A11y relationship or new author query policy admission.
+    - id: M-A11Y-0001
+      since: 0.3.0-alpha.1
+      role: required-module
+      note: Standard Runtime installs the semantic-object projector; Table evidence covers same-domain opaque header refs and Web DOM projection, while broader A11y coverage remains bounded by T-A11Y-0001.
+    - id: M-TABLE-STRUCTURE-0001
+      since: 0.3.0-alpha.1
+      role: required-module
+      note: Standard Runtime installs Table Structure; this profile's bounded Web projection and invalidation/recovery evidence is T-TABLE-STRUCTURE-0001.
     - id: M-RULE-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -247,6 +259,10 @@ supports:
       role: required-module
 provides:
   hostCaps:
+    - id: HC-A11Y-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Vue 3 binds the bounded Table semantic-object graph to current Web DOM targets and clears owned attributes on invalidation; this does not certify assistive-technology behavior.
     - id: HC-COLOR-SCHEME-INVALIDATION-0001
       since: 0.3.0-alpha.0
       role: translated-capability
@@ -359,6 +375,9 @@ verifies:
       since: 0.3.0-alpha.0
     - id: T-ANATOMY-0004
       since: 0.3.0-alpha.0
+    - id: T-TABLE-STRUCTURE-0001
+      since: 0.3.0-alpha.1
+      anchors: [T-TABLE-STRUCTURE-0001-CASE-A11Y-BOUNDARY]
     - id: T-RULE-0002
       since: 0.3.0-alpha.0
     - id: T-FEEDBACK-0001
@@ -502,4 +521,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Provides the draft Focus navigation order through document order within one tree, with roving evidence where document and registration order differ.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Recorded the bounded Table criterion, required M-A11Y/M-TABLE-STRUCTURE support, translated HC-A11Y provision and T-TABLE-STRUCTURE evidence mapping for counts, coordinates, spans, caption, ordered headers and invalidation/recovery; draft semantics and native-platform/assistive-technology limits remain unchanged.
 tags: [adapter, vue, web, props, event, lifecycle, state, expose, official]

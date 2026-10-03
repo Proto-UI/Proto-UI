@@ -22,9 +22,16 @@ type ProtoEventProps<TExposes> = {
 
 export type ProtoReactEventProps<TProto extends ProtoLike> = ProtoEventProps<ExposeOf<TProto>>;
 
-export type ProtoReactProps<TProto extends ProtoLike> = (PropsOf<TProto> extends PropsBaseType
-  ? PropsOf<TProto>
-  : never) & {
+// An empty portable-props index must not intersect Adapter-owned host fields
+// into `never`; unknown business props are still rejected by the host shape.
+type ReactPortableProps<TProto extends ProtoLike> =
+  PropsOf<TProto> extends PropsBaseType
+    ? PropsOf<TProto> extends Record<string, never>
+      ? Record<never, never>
+      : PropsOf<TProto>
+    : never;
+
+export type ProtoReactProps<TProto extends ProtoLike> = ReactPortableProps<TProto> & {
   children?: any;
   className?: string;
   hostClassName?: string;
