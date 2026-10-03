@@ -1,0 +1,92 @@
+id: C-VISUAL-TRANSACTION-0001
+type: contract
+title: Visual result transactions bind style and material to one current surface
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: A pure transaction-state-machine can specify replacement, invalidation and stale-completion rejection, but no current style-only sink proves atomic style/material host commit. Real Adapter scheduling, owned resource cleanup, source leases and protocol negotiation remain activation blockers.
+  zh-CN: 纯 transaction-state-machine 可定义替换、失效和过期完成拒绝，但现有 style-only sink 不证明 style/material 宿主原子提交。 真实 Adapter scheduling、owned resource 清理、source lease 与协议协商仍阻塞 activation。
+summary: A complete visual snapshot carries final style or explicit clear, material result or tombstone, shared geometry and distinct freshness identities.
+statement:
+  en: A visual transaction is one complete generation-bound snapshot for a resolved presentation surface. Final style, material or opaque fallback, shared geometry and all freshness identities are validated together before publication. Omission is not a clear operation. Resource retirement and source loss cannot leave transparent intermediate paint or revive obsolete material. Pure state-machine evidence establishes logical acceptance only; atomic physical host application must be proved independently for each admitted Adapter/profile, without inferring support from existing EffectsPort flush timing.
+  zh-CN: visual transaction 是绑定 generation 与 resolved presentation surface 的完整 snapshot。 最终 style、material/opaque fallback、共享 geometry 与独立 freshness identity 必须一起校验后才可发布。 省略不等于 clear；资源退役或 source 丢失不得留下透明中间帧，也不得复活过期 material。 纯 state-machine 仅证明逻辑接受；各获准 Adapter/profile 的物理宿主原子应用须独立证明，不能从既有 EffectsPort flush 时机推断。
+criteria:
+  - id: C-VISUAL-TRANSACTION-0001-SNAPSHOT
+    text:
+      en: Every proposed snapshot explicitly contains final post-patch style replacement or style clear, a resolved material result or material tombstone, and shared resolved surface geometry. The complete set is checked together; missing fields are not inherited from an unrelated snapshot. Empty style must be an explicit clear and material absence an explicit tombstone. A rejected competing style fill cannot accompany the material fallback; clearing/replacing owned output is explicit rather than relying on accidental host precedence. A retained slot carries explicit clearPaint for fill/background-image/backdrop/coat and removes only their normalized owned token contributions; a material tombstone instead restores current legal style without that clear.
+      zh-CN: 每个候选 snapshot 显式包含 post-patch 最终 style replacement 或 style clear、resolved material result 或 material tombstone， 以及共享 resolved surface geometry；整组一起校验，缺失字段不得从无关 snapshot 继承。 空 style 必须显式 clear，material 缺席必须显式 tombstone。 已拒绝的竞争 style fill 不得伴随 material fallback；owned output 的清除/替换须显式表达，不依赖偶然宿主优先级。 保留 slot 时显式 clearPaint 覆盖 fill/background-image/backdrop/coat，仅移除其 normalized owned token 贡献； material tombstone 则恢复当前合法 style，不继续该 clear。
+  - id: C-VISUAL-TRANSACTION-0001-IDENTITY
+    text:
+      en: Track authored target generation, source lease generation, surface identity with view lifetime and binding incarnation, geometry revision and frame sequence separately. Equal frame sequence does not imply equal target or lease; a fresh frame cannot validate an obsolete surface or geometry. Admission compares each identity with its current owner and rejects malformed, stale or mismatched values. Frames within a live source/view lease never move backwards when the author target changes; a new target may use the same current frame but cannot rehabilitate an older frame. A same-view surface identity change advances its binding revision, so returning to a previously used host node cannot reuse its retired binding. These are distinct from the author target ordering.
+      zh-CN: authored target generation、source lease generation、带 view lifetime/binding incarnation 的 surface identity、geometry revision 与 frame sequence 分别追踪。 相同 frame sequence 不代表相同 target/lease；新 frame 不能使旧 surface/geometry 有效。 admission 对每项与当前 owner 分别比较，拒绝无效、过期或不匹配值；同一 source/view lease 内 frame 不因新 author target 而倒退；新 target 可复用当前 frame，不得让更早 frame 重新有效。 同 view 的 surface identity 更换须推进 binding revision，返回旧 host node 也不得复用已退役 binding；它们独立于 author target 排序。
+  - id: C-VISUAL-TRANSACTION-0001-STALE
+    text:
+      en: A newer authored target, source replacement/loss, surface rebind, geometry revision, detach or terminal disposal invalidates the affected outstanding work before it can publish. Late, out-of-order, duplicate or invalid completions cannot restore retired style/material resources, advance accepted state, or overwrite a newer fallback/tombstone. Reacquisition starts from the current target and current identities rather than replaying an obsolete press or frame.
+      zh-CN: 新 authored target、source replacement/loss、surface rebind、geometry revision、detach 或终止 dispose 必须在相关未完成任务发布前使其失效。迟到、乱序、重复或无效 completion 不得恢复已退役 style/material 资源、 推进 accepted state 或覆盖更新 fallback/tombstone。重新获取从当前 target/identity 开始，不重放旧 press/frame。
+  - id: C-VISUAL-TRANSACTION-0001-LEASE
+    text:
+      en: The Adapter/backend alone owns source leases and material resources. A lease is bound to provider and scope, instance and surface/view lifetime, lease generation, geometry/coordinate revision, source kind, color/alpha profile and, when frame-based, frame identity/freshness. It must account for host bounds, rounded clip, sampling transform, DPR and sampling margin. A prototype neither reads backdrop pixels nor supplies arbitrary external capture URLs; self-capture and recursive material feedback are not admitted. The private resolver validates supplied facts and acquires nothing.
+      zh-CN: 仅 Adapter/backend 拥有 source lease 与 material 资源。Lease 绑定 provider/scope、instance、surface/view lifetime、 lease generation、geometry/coordinate revision、source kind、color/alpha profile，frame 来源还须绑定 frame identity/freshness。 必须覆盖 host bounds、rounded clip、sampling transform、DPR 与 sampling margin。 Prototype 不读取 backdrop pixels，也不提供任意外部 capture URL；不接受 self-capture 或递归 material feedback。 私有 resolver 仅验证传入事实，不获取任何资源。
+  - id: C-VISUAL-TRANSACTION-0001-FALLBACK
+    text:
+      en: Source loss/staleness, unsupported profile or a safety veto revokes enhanced ownership and publishes the already resolved opaque fallback with matching final style and geometry in one visual transaction. The transition cannot wait for a later semantic Rule evaluation. Recovery requires a current valid lease and target; the slot remains declared while its fallback is shown.
+      zh-CN: source loss/staleness、不支持 profile 或 safety veto 撤销 enhanced ownership，并在同一 visual transaction 发布已解析 opaque fallback 及匹配的最终 style/geometry，不得等待后续 semantic Rule evaluation。 恢复须有当前有效 lease/target；显示 fallback 时 slot 仍存在。
+  - id: C-VISUAL-TRANSACTION-0001-REMOVE
+    text:
+      en: Slot removal commits a material tombstone, retires all resources owned by that material slot and restores the current legal style-owned presentation. It is different from zero active candidates, which retain the slot and its opaque fallback. Surface replacement clears owned output on the retired surface and replays only the current complete result on the replacement. Cleanup is idempotent and preserves unrelated host/consumer presentation.
+      zh-CN: slot 移除提交 material tombstone、退役该 slot 拥有的全部资源并恢复当前合法 style presentation。 这不同于零 active candidate，后者保留 slot 及其 opaque fallback。 Surface replacement 清除旧 surface 的 owned output，只向新 surface 重放当前完整结果；清理幂等且保留无关 host/consumer presentation。
+  - id: C-VISUAL-TRANSACTION-0001-ATOMIC
+    text:
+      en: 'An admitted host sink applies one accepted snapshot at an observable paint/commit boundary: style clear/replacement, material/fallback/tombstone and shared geometry cannot expose transparent intermediate paint, double fill or a mixed-generation clip. React setHostStyle/state setters, Vue shallowRef, synchronous calls or the current immediate Feedback requestFlush do not prove this property. A provider without demonstrated atomic realization cannot claim this contract.'
+      zh-CN: 获准 host sink 在一个可观察 paint/commit boundary 应用完整 accepted snapshot；style clear/replacement、 material/fallback/tombstone 与共享 geometry 不得暴露透明中间帧、double fill 或混代 clip。 React setHostStyle/state setter、Vue shallowRef、同步调用或当前立即 Feedback requestFlush 均不证明该属性。 未证明原子实现的 provider 不得声称符合本契约。
+  - id: C-VISUAL-TRANSACTION-0001-BOUNDARY
+    text:
+      en: Visual transactions target the presentation surface, preserve the existing logical boundary, and never trigger prototype structural render, input dispatch, activation or semantic state ownership. Host-private primitives are translation artifacts. A private state-machine, a Rust map test or a finite backend generator is neither real host integration nor complete Prototype Compiler support; native protocol changes require explicit negotiation and negative-vector evidence.
+      zh-CN: visual transaction 面向 presentation surface，保留既有 logical boundary，不触发 prototype structural render、 input dispatch、activation 或 semantic state ownership。Host-private primitive 属于翻译产物。 私有 state-machine、Rust map test 或有限 backend generator 不等于真实宿主集成或完整 Prototype Compiler； native 协议变更须显式协商并有 negative-vector 证据。
+openQuestions:
+  - id: C-VISUAL-TRANSACTION-0001-Q-MACHINE
+    question: Do executable private state-machine tests establish explicit clear/tombstone, independent identities and stale-completion rejection?
+    blocks:
+      - activation:C-VISUAL-TRANSACTION-0001
+      - implementation:T-MATERIAL-VISUAL-RESULT-0001#material-visual-result-unit
+  - id: C-VISUAL-TRANSACTION-0001-Q-HOST
+    question: Which exact host/profile proves atomic physical commit, complete resource retirement and retained-instance recovery under interrupted lifecycle transitions?
+    context: Existing style-only EffectsPorts and framework setter timing are not proof of atomic visual commit; no material host capability or provider relation is claimed here.
+    blocks:
+      - activation:C-VISUAL-TRANSACTION-0001
+      - criterion:C-VISUAL-TRANSACTION-0001#C-VISUAL-TRANSACTION-0001-LEASE
+      - criterion:C-VISUAL-TRANSACTION-0001#C-VISUAL-TRANSACTION-0001-ATOMIC
+      - criterion:C-VISUAL-TRANSACTION-0001#C-VISUAL-TRANSACTION-0001-BOUNDARY
+      - implementation:T-MATERIAL-VISUAL-RESULT-0001#material-host-atomic-integration
+dependsOn:
+  contracts:
+    - C-FEEDBACK-MATERIAL-0001
+    - C-FEEDBACK-STYLE-0005
+    - C-HOST-SURFACE-PROJECTION-0001
+relates:
+  hostCaps:
+    - HC-FEEDBACK-STYLE-SINK-0001
+references:
+  tests:
+    - T-MATERIAL-VISUAL-RESULT-0001
+sources:
+  - path: packages/core/src/effects/types.ts
+    label: Current style-only port; no material transaction support
+  - path: packages/modules/feedback/src/create.ts
+    label: Existing immediate style flush does not establish atomic visual commit
+  - path: packages/adapters/react/src/runtime/effects-port.ts
+  - path: packages/adapters/vue/src/runtime/effects-port.ts
+  - path: packages/adapters/vue2/src/runtime/effects-port.ts
+  - path: packages/adapters/web-component/src/runtime/effects-port.ts
+  - path: native/gpui/crates/proto-ui-host-protocol/src/wire.rs
+    label: Existing protocol boundary; not material or native paint evidence
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Drafted complete visual snapshots, independent freshness identities, removal and stale-resource rejection with separate host atomicity admission.
+tags:
+  - feedback
+  - material
+  - transaction
+  - lifecycle
+  - draft
