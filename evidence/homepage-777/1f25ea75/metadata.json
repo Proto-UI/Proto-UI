@@ -1,0 +1,52 @@
+{
+  "sourceRevision": "1f25ea75a8894a86e4243a3343e6e1d81f66016b",
+  "sourceTree": "11a0e558d1dba2c2cee6d96f037d890ed33a533a",
+  "runId": 37113817884,
+  "artifactId": 11270678123,
+  "artifactSha256": "cf7fdfb886c375781d9b4a897b5170bc2839c67efebcb5c4af09f36d0fc90e5c",
+  "family": "shadcn",
+  "state": "initial",
+  "note": "Actual public-site candidate captures. Not final visual acceptance. Eight homepage journeys subsequently failed the immediate Dialog entry-focus assertion; first four runtime gallery journeys completed before the second React cycle. Brutalist homepage captures are pending a bounded readiness repair.",
+  "images": [
+    {
+      "file": "zh-cn-desktop-light-initial-viewport.png",
+      "size": 122313,
+      "sha256": "b0a845b2721b0b6e6c2869d7a23cbaa68be5b005aed05de7035cb1e78bb45db4",
+      "blob": "de7743ae6e1f0008521a4e8c8ccf5481b5efdbdf",
+      "dimensions": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "file": "en-mobile-light-initial-viewport.png",
+      "size": 51773,
+      "sha256": "651083ffb1903a72c511825fd0824217c9038e2f1a0bda4a9892c622416c39d5",
+      "blob": "d192233be8eba86c978cad0618af675a795290b8",
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "file": "zh-cn-mobile-light-initial-full.png",
+      "size": 113253,
+      "sha256": "01042fa6b1c1ec3ffbcca698ac117a79ce019585b9807d5bb9f61ba53ad9aa35",
+      "blob": "963a3586852bca948ee673893017e50cad93fa9a",
+      "dimensions": [
+        390,
+        2394
+      ]
+    },
+    {
+      "file": "en-desktop-light-initial-viewport.png",
+      "size": 129830,
+      "sha256": "88292740d7ec2cf8efa978c07ce1df54f9fc4c0174f5eb56f1aca70d585cfec0",
+      "blob": "d9ac91a71e625f3d3cdbf2d8b3ded474f2fd905a",
+      "dimensions": [
+        1440,
+        1000
+      ]
+    }
+  ]
+}
