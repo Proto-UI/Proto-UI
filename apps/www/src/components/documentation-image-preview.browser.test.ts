@@ -37,6 +37,9 @@ async function capture(page: Page, name: string) {
       mediaVisibility: el.querySelector('img')
         ? getComputedStyle(el.querySelector('img')!).visibility
         : null,
+      mediaOpacity: el.querySelector('img')
+        ? getComputedStyle(el.querySelector('img')!).opacity
+        : null,
     })),
     panels: Array.from(document.querySelectorAll('[data-docs-image-content]')).map((el) => ({
       tag: el.localName,
@@ -379,8 +382,8 @@ describe('automatic documentation image preview in real Chromium', () => {
     const page = track(await context.newPage());
     try {
       await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
-      // Dialog makes the background inert. This DOM locator is solely for
-      // explicit fixture mutations, not a claim of native hidden interaction.
+      // This DOM locator is solely for explicit fixture mutations, not a claim
+      // of native background interaction while the modal is present.
       const sourceOwner = page.locator(
         '[data-docs-image-trigger]:has(img[alt="Raster comparison diagram"])'
       );
@@ -465,6 +468,87 @@ describe('automatic documentation image preview in real Chromium', () => {
       expect(failuresByPage.get(page)).toEqual([]);
     } finally {
       await capture(page, 'interrupted-last-observed');
+      await context.close();
+    }
+  }, 90_000);
+  it('preserves source alt and action name while open, leaving and restored without background input leakage', async () => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = track(await context.newPage());
+    try {
+      await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
+      const name = 'Enlarge image: Raster comparison diagram';
+      const trigger = page.getByRole('button', { name, exact: true });
+      const source = page.locator('[data-docs-image-trigger] img[alt="Raster comparison diagram"]');
+      const originalSrc = await source.getAttribute('src');
+      const states: object[] = [];
+      const sourceFact = async (phase: string) => {
+        const count = await trigger.count();
+        const facts = await source.evaluate((el) => ({
+          alt: el.getAttribute('alt'),
+          src: el.getAttribute('src'),
+          opacity: getComputedStyle(el).opacity,
+          visibility: getComputedStyle(el).visibility,
+          phase: document
+            .querySelector('[data-docs-image-content]')
+            ?.getAttribute('data-transition-state'),
+        }));
+        states.push({ stage: phase, count, ...facts });
+        expect(count).toBe(1);
+        expect(facts.alt).toBe('Raster comparison diagram');
+        expect(facts.src).toBe(originalSrc);
+        expect(facts.visibility).toBe('visible');
+        return facts;
+      };
+      await sourceFact('before');
+      await open(page, 'Raster comparison diagram');
+      expect((await sourceFact('open')).opacity).toBe('0');
+      for (let i = 0; i < 3; i++) {
+        await page.keyboard.press('Tab');
+        expect(
+          await page
+            .locator('[data-docs-image-content]')
+            .evaluate((el) => el.contains(document.activeElement))
+        ).toBe(true);
+      }
+      await page.keyboard.press('Escape');
+      const leaving = await sourceFact('leaving');
+      expect(leaving.phase).toBe('leaving');
+      expect(leaving.opacity).toBe('0');
+      expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
+      expect(await trigger.getAttribute('data-focus-visible')).not.toBeNull();
+      await closed(page);
+      expect((await sourceFact('restored')).opacity).toBe('1');
+      await page.evaluate(() => {
+        (window as any).__docsSourceClicks = 0;
+        document.querySelector('[data-docs-image-trigger]')!.addEventListener('click', (event) => {
+          if (event.isTrusted) (window as any).__docsSourceClicks++;
+        });
+      });
+      await trigger.click();
+      await entered(page);
+      expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
+      const originalBox = (await source.boundingBox())!;
+      const imageBox = (await page.locator('.docs-image-full').boundingBox())!;
+      const point = {
+        x: originalBox.x + originalBox.width / 2,
+        y: originalBox.y + originalBox.height / 2,
+      };
+      expect(point.x).toBeGreaterThan(imageBox.x);
+      expect(point.x).toBeLessThan(imageBox.x + imageBox.width);
+      expect(point.y).toBeGreaterThan(imageBox.y);
+      expect(point.y).toBeLessThan(imageBox.y + imageBox.height);
+      await page.mouse.click(point.x, point.y);
+      expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
+      expect(
+        await page.locator('[data-docs-image-content]').getAttribute('data-transition-state')
+      ).toBe('entered');
+      await page.mouse.click(1, 1);
+      await closed(page);
+      expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
+      records.push({ sourceNaming: states });
+      expect(failuresByPage.get(page)).toEqual([]);
+    } finally {
+      await capture(page, 'source-name-last-observed');
       await context.close();
     }
   }, 90_000);

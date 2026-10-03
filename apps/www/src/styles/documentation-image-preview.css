@@ -21,7 +21,9 @@ documentation-image-preview,
   max-width: 100%;
 }
 [data-docs-image-origin-hidden] > :is(img, svg, picture) {
-  visibility: hidden;
+  /* Suppress duplicate pixels without removing alt/nameFromContent from the
+   * accessibility tree or hiding the trigger's focus feedback during return. */
+  opacity: 0;
 }
 .docs-image-full {
   display: block;
