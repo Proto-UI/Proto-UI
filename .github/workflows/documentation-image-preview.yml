@@ -46,6 +46,8 @@ jobs:
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk
           mkdir -p "$IMAGE_PREVIEW_EVIDENCE_DIR"
           dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk > "$IMAGE_PREVIEW_EVIDENCE_DIR/fonts.txt"
+      - name: Install browser video encoder
+        run: corepack pnpm@10.32.1 --filter apps-www exec playwright-core install ffmpeg
       - name: Identify renderer and exact revision
         run: |
           set -euo pipefail
