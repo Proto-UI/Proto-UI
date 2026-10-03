@@ -1,0 +1,239 @@
+{
+  "sourceSha": "1afeb4c31601740087f98a16e7a83f7368095d6d",
+  "route": "/en/test/liquid-glass-material/",
+  "node": "v24.21.0",
+  "browser": "154.0.8037.57",
+  "runtimes": [
+    "wc",
+    "react",
+    "vue",
+    "vue2"
+  ],
+  "scope": "Regular functional Button: 80% source color + 4px backdrop blur, live preference fallback. No refraction, native Apple engine, Compiler or non-Web claim.",
+  "observations": [
+    {
+      "theme": "light",
+      "runtime": "wc",
+      "facts": {
+        "background": "oklab(0.999994 0.0000455677 0.0000200868 / 0.8)",
+        "secondary": "#ffffff",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4962
+    },
+    {
+      "theme": "light",
+      "runtime": "react",
+      "facts": {
+        "background": "oklab(0.999994 0.0000455677 0.0000200868 / 0.8)",
+        "secondary": "#ffffff",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4963
+    },
+    {
+      "theme": "light",
+      "runtime": "vue",
+      "facts": {
+        "background": "oklab(0.999994 0.0000455677 0.0000200868 / 0.8)",
+        "secondary": "#ffffff",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4962
+    },
+    {
+      "theme": "light",
+      "runtime": "vue2",
+      "facts": {
+        "background": "oklab(0.999994 0.0000455677 0.0000200868 / 0.8)",
+        "secondary": "#ffffff",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4963
+    },
+    {
+      "theme": "light",
+      "missingStylesheetNegativeControl": "paint absent until source CSS restored"
+    },
+    {
+      "theme": "light",
+      "preference": "prefers-reduced-transparency",
+      "value": "reduce",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "theme": "light",
+      "preference": "prefers-reduced-motion",
+      "value": "reduce",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "theme": "light",
+      "preference": "prefers-contrast",
+      "value": "more",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "theme": "light",
+      "preference": "forced-colors",
+      "value": "active",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "theme": "dark",
+      "runtime": "wc",
+      "facts": {
+        "background": "oklab(0.293899 0.00101122 -0.00343381 / 0.8)",
+        "secondary": "#2c2c2e",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4963
+    },
+    {
+      "theme": "dark",
+      "runtime": "react",
+      "facts": {
+        "background": "oklab(0.293899 0.00101122 -0.00343381 / 0.8)",
+        "secondary": "#2c2c2e",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4964
+    },
+    {
+      "theme": "dark",
+      "runtime": "vue",
+      "facts": {
+        "background": "oklab(0.293899 0.00101122 -0.00343381 / 0.8)",
+        "secondary": "#2c2c2e",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4963
+    },
+    {
+      "theme": "dark",
+      "runtime": "vue2",
+      "facts": {
+        "background": "oklab(0.293899 0.00101122 -0.00343381 / 0.8)",
+        "secondary": "#2c2c2e",
+        "blur": "blur(4px)",
+        "animation": "none",
+        "transition": "0s",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary/80 text-secondary-foreground backdrop-blur-xs",
+        "alphaSyntax": true,
+        "backdropSyntax": true
+      },
+      "negativeControlChangedPixels": 4964
+    },
+    {
+      "theme": "dark",
+      "missingStylesheetNegativeControl": "paint absent until source CSS restored"
+    },
+    {
+      "theme": "dark",
+      "preference": "prefers-reduced-transparency",
+      "value": "reduce",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "theme": "dark",
+      "preference": "prefers-reduced-motion",
+      "value": "reduce",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "theme": "dark",
+      "preference": "prefers-contrast",
+      "value": "more",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "theme": "dark",
+      "preference": "forced-colors",
+      "value": "active",
+      "fallback": "opaque",
+      "restored": true,
+      "sameHosts": true
+    },
+    {
+      "runtime": "wc",
+      "unavailablePreferenceApi": true,
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary text-secondary-foreground"
+      }
+    },
+    {
+      "runtime": "react",
+      "unavailablePreferenceApi": true,
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary text-secondary-foreground"
+      }
+    },
+    {
+      "runtime": "vue",
+      "unavailablePreferenceApi": true,
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary text-secondary-foreground"
+      }
+    },
+    {
+      "runtime": "vue2",
+      "unavailablePreferenceApi": true,
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "tokens": "inline-flex shrink-0 items-center justify-center rounded-full border border-border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm data-[pressed]:shadow-xs data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2 data-[focus-visible]:ring-offset-background data-[disabled]:opacity-50 data-[disabled]:pointer-events-none data-[disabled]:cursor-default bg-secondary text-secondary-foreground"
+      }
+    }
+  ]
+}
