@@ -32,6 +32,14 @@ async function capture(page: Page, name: string) {
       text: el.textContent,
       alt: el.querySelector('img')?.alt,
       label: el.getAttribute('aria-label'),
+      inertAncestor: Boolean(el.closest('[inert]')),
+      hiddenAncestor: Boolean(el.closest('[aria-hidden="true"], [hidden]')),
+      mediaVisibility: el.querySelector('img')
+        ? getComputedStyle(el.querySelector('img')!).visibility
+        : null,
+      mediaOpacity: el.querySelector('img')
+        ? getComputedStyle(el.querySelector('img')!).opacity
+        : null,
     })),
     panels: Array.from(document.querySelectorAll('[data-docs-image-content]')).map((el) => ({
       tag: el.localName,
@@ -48,11 +56,29 @@ async function capture(page: Page, name: string) {
   await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: false });
 }
 async function entered(page: Page) {
-  await page.waitForFunction(
-    () =>
-      document.querySelector('[data-docs-image-content]')?.getAttribute('data-transition-state') ===
-      'entered'
-  );
+  // PUI's logical phase and the browser's first painted transition frame have
+  // distinct clocks. Observe both; do not treat a phase label as settled pixels.
+  const content = await page.locator('[data-docs-image-content]').elementHandle();
+  const media = await page.locator('.docs-image-full').elementHandle();
+  try {
+    // Bind the current render/media identity, then sample its live animations.
+    // No stale finished promise can accept a canceled or replaced generation.
+    await page.waitForFunction(
+      ({ content, media }) =>
+        content?.isConnected &&
+        media?.isConnected &&
+        content === document.querySelector('[data-docs-image-content]') &&
+        media === document.querySelector('.docs-image-full') &&
+        content.getAttribute('data-transition-state') === 'entered' &&
+        content
+          .getAnimations()
+          .every((animation) => !animation.pending && animation.playState !== 'running'),
+      { content, media }
+    );
+  } finally {
+    await content?.dispose();
+    await media?.dispose();
+  }
 }
 async function closed(page: Page) {
   await page.waitForFunction(
@@ -70,6 +96,64 @@ async function open(page: Page, alt: string) {
     return Boolean(img?.complete && img.naturalWidth);
   });
   return trigger;
+}
+type MotionFrame = {
+  time: number;
+  phase: string | null;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  opacity: number;
+  sourceOpacity: number | null;
+};
+async function recordNextMotion(page: Page, input: 'pointerdown' | 'keydown') {
+  // Instrumentation records real frames after the next native input. It neither
+  // changes application state nor slows the requested 220ms motion.
+  await page.evaluate((input) => {
+    const record = { frames: [] as MotionFrame[], done: false };
+    (window as any).__docsImageMotion = record;
+    window.addEventListener(
+      input,
+      () => {
+        let start = -1;
+        const sample = (time: number) => {
+          if (start < 0) start = time;
+          const content = document.querySelector<HTMLElement>('[data-docs-image-content]');
+          const mask = document.querySelector<HTMLElement>('[data-docs-image-mask]');
+          if (content && mask && !content.hasAttribute('data-pui-view-detached')) {
+            const rect = content.getBoundingClientRect();
+            const source = document.querySelector(
+              '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
+            );
+            record.frames.push({
+              time: time - start,
+              phase: content.getAttribute('data-transition-state'),
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+              opacity: Number(getComputedStyle(mask).opacity),
+              sourceOpacity: source ? Number(getComputedStyle(source).opacity) : null,
+            });
+          }
+          if (time - start < 550) requestAnimationFrame(sample);
+          else record.done = true;
+        };
+        requestAnimationFrame(sample);
+      },
+      { once: true, capture: true }
+    );
+  }, input);
+}
+async function motionFrames(page: Page, name: string): Promise<MotionFrame[]> {
+  await page.waitForFunction(() => (window as any).__docsImageMotion?.done);
+  const frames = (await page.evaluate(
+    () => (window as any).__docsImageMotion.frames
+  )) as MotionFrame[];
+  if (evidence)
+    await writeFile(path.join(evidence, `${name}-frames.json`), JSON.stringify(frames, null, 2));
+  return frames;
 }
 describe('automatic documentation image preview in real Chromium', () => {
   beforeAll(async () => {
@@ -99,7 +183,7 @@ describe('automatic documentation image preview in real Chromium', () => {
   for (const width of [320, 390, 1280])
     for (const colorScheme of ['light', 'dark'] as const)
       for (const family of ['shadcn', 'brutalist'] as const) {
-        it(`${width}px ${colorScheme} ${family}: raster fit/original, keyboard, focus, animation and overlay`, async () => {
+        it(`${width}px ${colorScheme} ${family}: borderless raster contain, keyboard, focus and linear motion`, async () => {
           const context = await browser.newContext({
             viewport: { width, height: 900 },
             colorScheme,
@@ -129,17 +213,17 @@ describe('automatic documentation image preview in real Chromium', () => {
               exact: true,
             });
             if (width < 500) await trigger.tap();
-            else {
-              await trigger.focus();
-              await page.keyboard.press('Enter');
-            }
+            else await trigger.click();
             await entered(page);
             const panel = page.locator('[data-docs-image-content]');
             expect(await panel.getAttribute('role')).toBe('dialog');
             expect(await panel.getAttribute('aria-modal')).toBe('true');
             const style = await panel.evaluate((el) => ({
               animation: getComputedStyle(el).animationName,
-              duration: getComputedStyle(el).animationDuration,
+              duration: getComputedStyle(el).transitionDuration,
+              easing: getComputedStyle(el).transitionTimingFunction,
+              border: getComputedStyle(el).borderTopWidth,
+              background: getComputedStyle(el).backgroundColor,
               borderRadius: getComputedStyle(el).borderRadius,
               shadow: getComputedStyle(el).boxShadow,
               x: el.getBoundingClientRect().x,
@@ -147,40 +231,44 @@ describe('automatic documentation image preview in real Chromium', () => {
               bottom: el.getBoundingClientRect().bottom,
               top: el.getBoundingClientRect().top,
             }));
-            expect(style.animation).not.toBe('none');
-            expect(style.duration).not.toBe('0s');
+            expect(style.animation).toBe('none');
+            expect(style.duration.split(',').map((s) => s.trim())).toContain('0.22s');
+            expect(style.easing.split(',').every((s) => s.trim() === 'linear')).toBe(true);
+            expect(style.border).toBe('0px');
+            expect(style.shadow).toBe('none');
+            expect(style.background).toBe('rgba(0, 0, 0, 0)');
             expect(style.x).toBeGreaterThanOrEqual(0);
             expect(style.right).toBeLessThanOrEqual(width);
             expect(style.top).toBeGreaterThanOrEqual(0);
             expect(style.bottom).toBeLessThanOrEqual(901);
-            if (family === 'brutalist') expect(style.borderRadius).toBe('0px');
-            else expect(parseFloat(style.borderRadius)).toBeGreaterThan(0);
+            expect(style.borderRadius).toBe('0px');
             const mask = await page.locator('[data-docs-image-mask]').evaluate((el) => ({
               opacity: getComputedStyle(el).backgroundColor,
               backdropFilter: getComputedStyle(el).backdropFilter,
             }));
-            expect(mask.opacity).not.toBe('rgba(0, 0, 0, 0)');
-            await capture(page, `${width}-${colorScheme}-${family}-fit`);
-            await page.getByRole('button', { name: 'Original size', exact: true }).click();
-            expect(await panel.getAttribute('data-original-size')).not.toBeNull();
-            await page.waitForFunction(() => {
-              const viewport = document.querySelector<HTMLElement>('.docs-image-viewport');
-              return Boolean(viewport && viewport.scrollWidth > viewport.clientWidth);
-            });
-            await page.locator('.docs-image-viewport').focus();
-            const before = await page
-              .locator('.docs-image-viewport')
-              .evaluate((el) => el.scrollLeft);
-            await page.keyboard.press('ArrowRight');
-            await page.waitForFunction(
-              (before) => document.querySelector('.docs-image-viewport')!.scrollLeft > before,
-              before
+            expect(mask.opacity).toBe('rgba(0, 0, 0, 0.8)');
+            expect(mask.backdropFilter).toBe('none');
+            expect(await page.locator('[data-docs-image-zoom], .docs-image-toolbar').count()).toBe(
+              0
             );
+            expect(
+              await page
+                .locator('[data-docs-image-close]')
+                .evaluate((el) => getComputedStyle(el).clipPath)
+            ).toBe('inset(50%)');
+            await capture(page, `${width}-${colorScheme}-${family}-fit`);
+            await page.locator('.docs-image-full').click();
+            expect(await panel.getAttribute('data-transition-state')).toBe('entered');
             for (let count = 0; count < 5; count++) {
               await page.keyboard.press('Tab');
               expect(await panel.evaluate((el) => el.contains(document.activeElement))).toBe(true);
             }
-            await capture(page, `${width}-${colorScheme}-${family}-original`);
+            expect(
+              await page
+                .locator('[data-docs-image-close]')
+                .evaluate((el) => getComputedStyle(el).clipPath)
+            ).toBe('none');
+            await capture(page, `${width}-${colorScheme}-${family}-keyboard-close`);
             await page.keyboard.press('Escape');
             await closed(page);
             expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
@@ -205,6 +293,295 @@ describe('automatic documentation image preview in real Chromium', () => {
           }
         }, 90_000);
       }
+  for (const width of [390, 1280]) {
+    it(`${width}px real intermediate frames follow linear forward/reverse motion`, async () => {
+      if (evidence) await mkdir(path.join(evidence, 'videos'), { recursive: true });
+      const context = await browser.newContext({
+        viewport: { width, height: 900 },
+        ...(evidence
+          ? { recordVideo: { dir: path.join(evidence, 'videos'), size: { width, height: 900 } } }
+          : {}),
+      });
+      const page = track(await context.newPage());
+      const video = page.video();
+      try {
+        await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
+        const trigger = page.getByRole('button', {
+          name: 'Enlarge image: Raster comparison diagram',
+          exact: true,
+        });
+        await trigger.scrollIntoViewIfNeeded();
+        const origin = (await trigger.locator('img').boundingBox())!;
+        await recordNextMotion(page, 'pointerdown');
+        await trigger.click();
+        await page.waitForFunction(
+          () => {
+            const mask = document.querySelector('[data-docs-image-mask]');
+            const opacity = mask && Number(getComputedStyle(mask).opacity);
+            return opacity && opacity > 0.1 && opacity < 0.8;
+          },
+          undefined,
+          { polling: 'raf' }
+        );
+        await capture(page, `linear-${width}-opening`);
+        await entered(page);
+        const target = (await page.locator('[data-docs-image-content]').boundingBox())!;
+        const opening = await motionFrames(page, `linear-${width}-opening`);
+        expect(
+          opening.filter((f) => f.phase === 'entering').every((f) => f.sourceOpacity === 0)
+        ).toBe(true);
+        const mid = opening.filter((f) => f.opacity > 0.1 && f.opacity < 0.9);
+        expect(mid.length).toBeGreaterThanOrEqual(2);
+        for (const frame of mid) {
+          for (const key of ['x', 'y', 'width', 'height'] as const)
+            expect(
+              Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * frame.opacity))
+            ).toBeLessThan(4);
+        }
+        for (let i = 1; i < mid.length; i++)
+          expect(
+            Math.abs(mid[i].opacity - mid[i - 1].opacity - (mid[i].time - mid[i - 1].time) / 220)
+          ).toBeLessThan(0.025);
+        await capture(page, `linear-${width}-contained`);
+        await recordNextMotion(page, 'keydown');
+        await page.keyboard.press('Escape');
+        await page.waitForFunction(
+          () => {
+            const mask = document.querySelector('[data-docs-image-mask]');
+            const opacity = mask && Number(getComputedStyle(mask).opacity);
+            return opacity && opacity > 0.1 && opacity < 0.8;
+          },
+          undefined,
+          { polling: 'raf' }
+        );
+        await capture(page, `linear-${width}-closing`);
+        const closing = await motionFrames(page, `linear-${width}-closing`);
+        expect(
+          closing.filter((f) => f.phase === 'leaving').every((f) => f.sourceOpacity === 0)
+        ).toBe(true);
+        const closingMid = closing.filter((f) => f.opacity > 0.1 && f.opacity < 0.9);
+        expect(closingMid.length).toBeGreaterThanOrEqual(2);
+        for (const frame of closingMid)
+          for (const key of ['x', 'y', 'width', 'height'] as const)
+            expect(
+              Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * frame.opacity))
+            ).toBeLessThan(4);
+        for (let i = 1; i < closingMid.length; i++)
+          expect(
+            Math.abs(
+              closingMid[i].opacity -
+                closingMid[i - 1].opacity +
+                (closingMid[i].time - closingMid[i - 1].time) / 220
+            )
+          ).toBeLessThan(0.025);
+        await closed(page);
+        expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
+        expect(await trigger.locator('img').evaluate((el) => getComputedStyle(el).visibility)).toBe(
+          'visible'
+        );
+        expect(failuresByPage.get(page)).toEqual([]);
+        records.push({ motion: width, origin, target, opening, closing });
+      } finally {
+        await capture(page, `linear-${width}-last-observed`);
+        await context.close();
+        if (evidence && video) await video.saveAs(path.join(evidence, `linear-${width}.webm`));
+      }
+    }, 90_000);
+  }
+  it('reverses a native interrupted close and safely handles resized, offscreen or removed sources', async () => {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    const page = track(await context.newPage());
+    try {
+      await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
+      // This DOM locator is solely for explicit fixture mutations, not a claim
+      // of native background interaction while the modal is present.
+      const sourceOwner = page.locator(
+        '[data-docs-image-trigger]:has(img[alt="Raster comparison diagram"])'
+      );
+      const originWidth = (await sourceOwner.locator('img').boundingBox())!.width;
+      await open(page, 'Raster comparison diagram');
+      const initial = (await page.locator('[data-docs-image-content]').boundingBox())!;
+      await recordNextMotion(page, 'keydown');
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(
+        () => {
+          const mask = document.querySelector('[data-docs-image-mask]');
+          const opacity = mask && Number(getComputedStyle(mask).opacity);
+          return opacity && opacity > 0.5 && opacity < 0.8;
+        },
+        undefined,
+        { polling: 'raf' }
+      );
+      expect(
+        await page.locator('[data-docs-image-content]').getAttribute('data-transition-state')
+      ).toBe('leaving');
+      await page.keyboard.press('Enter');
+      await entered(page);
+      const interrupted = await motionFrames(page, 'interrupted-reopen');
+      expect(Math.min(...interrupted.map((f) => f.width))).toBeLessThan(initial.width - 20);
+      expect(interrupted.at(-1)!.width).toBeCloseTo(initial.width, 0);
+      for (let i = 1; i < interrupted.length; i++)
+        expect(Math.abs(interrupted[i].width - interrupted[i - 1].width)).toBeLessThan(
+          (Math.abs(initial.width - originWidth) *
+            (interrupted[i].time - interrupted[i - 1].time)) /
+            220 +
+            2
+        );
+      await page.setViewportSize({ width: 390, height: 700 });
+      await page.waitForFunction(() => {
+        const r = document.querySelector('[data-docs-image-content]')!.getBoundingClientRect();
+        return r.x >= 0 && r.right <= innerWidth && r.y >= 0 && r.bottom <= innerHeight;
+      });
+      await capture(page, 'interrupted-resized');
+      await sourceOwner.evaluate((el) => {
+        (el as HTMLElement).style.transform = 'translateY(4000px)';
+      });
+      await page.waitForFunction(
+        () =>
+          document.querySelector('[data-docs-image-trigger] img')!.getBoundingClientRect().top >=
+          innerHeight
+      );
+      const beforeClose = await sourceOwner.evaluate((el) => ({
+        source: el.querySelector('img')!.getBoundingClientRect().toJSON(),
+        scrollY,
+        viewport: {
+          width: innerWidth,
+          height: innerHeight,
+          x: visualViewport?.offsetLeft,
+          y: visualViewport?.offsetTop,
+        },
+        returnMode: document.querySelector<HTMLElement>('[data-docs-image-content]')!.dataset
+          .docsImageReturn,
+      }));
+      await page.keyboard.press('Escape');
+      const afterClose = await sourceOwner.evaluate((el) => ({
+        source: el.querySelector('img')!.getBoundingClientRect().toJSON(),
+        scrollY,
+        returnMode: document.querySelector<HTMLElement>('[data-docs-image-content]')!.dataset
+          .docsImageReturn,
+      }));
+      records.push({ invalidOrigin: { beforeClose, afterClose } });
+      expect(
+        await page.locator('[data-docs-image-content]').getAttribute('data-docs-image-return')
+      ).toBe('fade');
+      await closed(page);
+      await sourceOwner.evaluate((el) => {
+        (el as HTMLElement).style.removeProperty('transform');
+      });
+      await open(page, 'Raster comparison diagram');
+      await sourceOwner.evaluate((el) => el.remove());
+      await page.keyboard.press('Escape');
+      expect(
+        await page.locator('[data-docs-image-content]').getAttribute('data-docs-image-return')
+      ).toBe('fade');
+      await closed(page);
+      expect(await page.evaluate(() => document.body.style.overflow)).toBe('');
+      expect(failuresByPage.get(page)).toEqual([]);
+    } finally {
+      await capture(page, 'interrupted-last-observed');
+      await context.close();
+    }
+  }, 90_000);
+  it('preserves source alt and action name while open, leaving and restored without background input leakage', async () => {
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    const page = track(await context.newPage());
+    try {
+      await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
+      const name = 'Enlarge image: Raster comparison diagram';
+      const trigger = page.getByRole('button', { name, exact: true });
+      const source = page.locator('[data-docs-image-trigger] img[alt="Raster comparison diagram"]');
+      const originalSrc = await source.getAttribute('src');
+      const states: object[] = [];
+      const sourceFact = async (phase: string) => {
+        const count = await trigger.count();
+        const facts = await source.evaluate((el) => ({
+          alt: el.getAttribute('alt'),
+          src: el.getAttribute('src'),
+          opacity: getComputedStyle(el).opacity,
+          visibility: getComputedStyle(el).visibility,
+          transition: getComputedStyle(el).transition,
+          inlineTransition: {
+            value: (el as HTMLElement).style.getPropertyValue('transition'),
+            priority: (el as HTMLElement).style.getPropertyPriority('transition'),
+          },
+          inlineOpacity: {
+            value: (el as HTMLElement).style.getPropertyValue('opacity'),
+            priority: (el as HTMLElement).style.getPropertyPriority('opacity'),
+          },
+          phase: document
+            .querySelector('[data-docs-image-content]')
+            ?.getAttribute('data-transition-state'),
+        }));
+        states.push({ stage: phase, count, ...facts });
+        expect(count).toBe(1);
+        expect(facts.alt).toBe('Raster comparison diagram');
+        expect(facts.src).toBe(originalSrc);
+        expect(facts.visibility).toBe('visible');
+        return facts;
+      };
+      const before = await sourceFact('before');
+      await open(page, 'Raster comparison diagram');
+      const opened = await sourceFact('open');
+      expect(opened.opacity).toBe('0');
+      expect(opened.inlineTransition).toEqual(before.inlineTransition);
+      expect(opened.inlineOpacity).toEqual(before.inlineOpacity);
+      for (let i = 0; i < 3; i++) {
+        await page.keyboard.press('Tab');
+        expect(
+          await page
+            .locator('[data-docs-image-content]')
+            .evaluate((el) => el.contains(document.activeElement))
+        ).toBe(true);
+      }
+      await page.keyboard.press('Escape');
+      const leaving = await sourceFact('leaving');
+      expect(leaving.phase).toBe('leaving');
+      expect(leaving.opacity).toBe('0');
+      expect(leaving.inlineTransition).toEqual(before.inlineTransition);
+      expect(leaving.inlineOpacity).toEqual(before.inlineOpacity);
+      expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
+      expect(await trigger.getAttribute('data-focus-visible')).not.toBeNull();
+      await closed(page);
+      const restored = await sourceFact('restored');
+      expect(restored.opacity).toBe('1');
+      expect(restored.transition).toBe(before.transition);
+      expect(restored.inlineTransition).toEqual(before.inlineTransition);
+      expect(restored.inlineOpacity).toEqual(before.inlineOpacity);
+      expect(await trigger.getAttribute('data-docs-image-source-instant')).toBeNull();
+      await page.evaluate(() => {
+        (window as any).__docsSourceClicks = 0;
+        document.querySelector('[data-docs-image-trigger]')!.addEventListener('click', (event) => {
+          if (event.isTrusted) (window as any).__docsSourceClicks++;
+        });
+      });
+      await trigger.click();
+      await entered(page);
+      expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
+      const originalBox = (await source.boundingBox())!;
+      const imageBox = (await page.locator('.docs-image-full').boundingBox())!;
+      const point = {
+        x: originalBox.x + originalBox.width / 2,
+        y: originalBox.y + originalBox.height / 2,
+      };
+      expect(point.x).toBeGreaterThan(imageBox.x);
+      expect(point.x).toBeLessThan(imageBox.x + imageBox.width);
+      expect(point.y).toBeGreaterThan(imageBox.y);
+      expect(point.y).toBeLessThan(imageBox.y + imageBox.height);
+      await page.mouse.click(point.x, point.y);
+      expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
+      expect(
+        await page.locator('[data-docs-image-content]').getAttribute('data-transition-state')
+      ).toBe('entered');
+      await page.mouse.click(1, 1);
+      await closed(page);
+      expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
+      records.push({ sourceNaming: states });
+      expect(failuresByPage.get(page)).toEqual([]);
+    } finally {
+      await capture(page, 'source-name-last-observed');
+      await context.close();
+    }
+  }, 90_000);
   it('preserves authored MDX picture/alt/caption, safe SVG, links and error recovery', async () => {
     const context = await browser.newContext({ viewport: { width: 1100, height: 900 } });
     const page = track(await context.newPage());
@@ -226,7 +603,7 @@ describe('automatic documentation image preview in real Chromium', () => {
       expect(await page.locator('.docs-image-full').getAttribute('src')).toContain(
         '/images/preview-fixture/raster.png'
       );
-      expect(await page.locator('.docs-image-caption').textContent()).toBe(
+      expect(await page.locator('.docs-image-accessible-description').textContent()).toContain(
         'Authored picture caption'
       );
       await page.keyboard.press('Escape');
@@ -292,6 +669,17 @@ describe('automatic documentation image preview in real Chromium', () => {
         expect(await page.locator('.docs-image-full').getAttribute('src')).toContain(
           `whitepaper-conditional-consistency.${locale}.svg`
         );
+        const canvas = await page.locator('.docs-image-full').evaluate((el) => ({
+          background: getComputedStyle(el).backgroundColor,
+          padding: getComputedStyle(el).padding,
+          border: getComputedStyle(el).borderTopWidth,
+          shadow: getComputedStyle(el).boxShadow,
+        }));
+        expect(canvas.background).not.toBe('rgba(0, 0, 0, 0)');
+        expect(canvas.padding).toBe('0px');
+        expect(canvas.border).toBe('0px');
+        expect(canvas.shadow).toBe('none');
+        records.push({ whitepaper: locale, width, colorScheme, canvas });
         await capture(page, `whitepaper-${locale}-${width}-${colorScheme}`);
         await page.keyboard.press('Escape');
         await closed(page);
@@ -391,7 +779,7 @@ describe('automatic documentation image preview in real Chromium', () => {
       await new Promise<void>((resolve) => server.close(() => resolve()));
     }
   }, 90_000);
-  it('keeps the native focus and panel boundary visible in forced colors', async () => {
+  it('keeps keyboard focus visible without adding an image frame in forced colors', async () => {
     const context = await browser.newContext({
       viewport: { width: 390, height: 844 },
       forcedColors: 'active',
@@ -404,7 +792,11 @@ describe('automatic documentation image preview in real Chromium', () => {
         await page
           .locator('[data-docs-image-content]')
           .evaluate((el) => parseFloat(getComputedStyle(el).borderTopWidth))
-      ).toBeGreaterThan(0);
+      ).toBe(0);
+      await page.keyboard.press('Tab');
+      expect(
+        await page.locator('[data-docs-image-close]').getAttribute('data-focus-visible')
+      ).not.toBeNull();
       await capture(page, 'forced-colors-vector');
       await page.keyboard.press('Escape');
       await closed(page);
@@ -427,8 +819,8 @@ describe('automatic documentation image preview in real Chromium', () => {
       expect(
         await page
           .locator('[data-docs-image-content]')
-          .evaluate((el) => getComputedStyle(el).animationName)
-      ).toBe('none');
+          .evaluate((el) => getComputedStyle(el).transitionDuration)
+      ).toBe('0s');
       await capture(page, 'reduced-motion-vector');
       await page.keyboard.press('Escape');
       await closed(page);

@@ -51,7 +51,7 @@ describe('documentation image viewer PUI integration', () => {
     const thumbnailRule = css.match(/\[data-docs-image-trigger\]\s*\{([^}]+)\}/)![1];
     expect(thumbnailRule).not.toMatch(/box-shadow\s*:/);
   });
-  it('opens through Button semantic activation, closes through Dialog, restores focus and resets zoom', async () => {
+  it('opens through Button semantic activation, closes through Dialog, restores focus and reopens the contain presentation', async () => {
     const { trigger, root } = await fixture();
     trigger.focus();
     trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
@@ -63,10 +63,7 @@ describe('documentation image viewer PUI integration', () => {
     expect(document.querySelector<HTMLImageElement>('.docs-image-full')!.alt).toBe(
       'Example diagram'
     );
-    const toggle = document.querySelector('[data-docs-image-zoom]')! as PreviewControl;
-    toggle.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    await settle();
-    expect(content.hasAttribute('data-original-size')).toBe(true);
+    expect(document.querySelector('[data-docs-image-zoom]')).toBeNull();
     root.getExposes?.().close('test.close');
     await settle();
     content.getExposes?.().complete();
