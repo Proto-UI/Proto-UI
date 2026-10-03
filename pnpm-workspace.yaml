@@ -1,8 +1,0 @@
-packages:
-  - 'packages/*'
-  - 'packages/*/*'
-  - 'apps/*'
-  - 'internal'
-allowBuilds:
-  esbuild: true
-  sharp: true

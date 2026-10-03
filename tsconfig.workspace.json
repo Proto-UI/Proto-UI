@@ -1,4 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "exclude": ["apps/www", "node_modules", "dist", "scripts/release/consumer-smoke"]
-}

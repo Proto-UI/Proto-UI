@@ -1,6 +1,0 @@
-Public development calibration material only.
-Source: https://github.com/Proto-UI/Proto-UI/blob/f5bae261491368b586959f1d8b353cf372775221/spec/prototypes/P-BASE-SELECT.yaml
-Entity: P-BASE-SELECT; lifecycle: draft. Draft direction is not a stable guarantee.
-
-P-BASE-SELECT-ROLE-SELECT-ONLY
-Select must represent a select-only control that commits one persistent value from a finite option set and must not disguise an action menu, free-form combobox, or multi-select as this protocol.

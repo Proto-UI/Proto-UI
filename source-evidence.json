@@ -1,0 +1,39 @@
+{
+  "sourceSha": "043876f4613188678e1cf4874d19bb896bcc94ea",
+  "sourceTree": "b306f4d87f2a362c25d1c8120026cf73bb0a458c",
+  "pr": "https://github.com/Proto-UI/Proto-UI/pull/808",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37148871788",
+  "artifactId": 11282934545,
+  "artifactZipSha256": "51bdff5e730b241d7cfa7b4fda39bae00702a9fcf6999dd2f675ba21381b9b5f",
+  "browserResult": {
+    "passed": 11,
+    "failed": 4,
+    "total": 15,
+    "boundary": "Four editor cases fail at the initial multiline Textarea fill with three exposed requests versus expected one. Native event attribution is pending. No all-green, native or general Compiler claim."
+  },
+  "retention": "Public PR evidence retained in this evidence-only branch; never merge it into product branches.",
+  "images": [
+    {
+      "path": "bootstrap-controls-light.png",
+      "sha256": "ea4960694bbfb25c822d6df4ec5c502f075f72344ede220da3773678284669c2",
+      "gitBlobSha": "4ec6ebc6a03bec4045e07db546e9bc5eb317a5d3",
+      "bytes": 97965,
+      "base64Length": 130620
+    },
+    {
+      "path": "bootstrap-controls-dark.png",
+      "sha256": "5afb4550874e563f27719f3bad86ab60e6659f38ad8ae52fa676c1e3ffa6cfcf",
+      "gitBlobSha": "088a675d2a3704e181b14f481efe5edf33602bd9",
+      "bytes": 99248,
+      "base64Length": 132332
+    },
+    {
+      "path": "failure-11.png",
+      "sha256": "2f351e6f742d93cec203e160a6ce0102e5ff84f31b0534a50be6491448528e19",
+      "gitBlobSha": "6d9d90dc80e3e53f1c88e22071f571f63f709589",
+      "bytes": 111701,
+      "base64Length": 148936
+    }
+  ],
+  "attribution": "Co-author by OpenAI Dots"
+}
