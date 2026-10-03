@@ -1,0 +1,147 @@
+// @vitest-environment node
+import fs from 'node:fs';
+import vm from 'node:vm';
+import { transformSync } from 'esbuild';
+import ts from 'typescript';
+import type { Browser } from 'playwright-core';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { launchBrowser } from '../../src/content/docs/zh-cn/browser-harness';
+
+const source = fs.readFileSync(new URL('./brutalist-spinner.capture.mts', import.meta.url), 'utf8');
+const parsed = ts.createSourceFile('capture.mts', source, ts.ScriptTarget.Latest, true);
+let styleReaderSource = '';
+let motionReaderSource = '';
+function visit(node: ts.Node): void {
+  if (
+    ts.isCallExpression(node) &&
+    ts.isPropertyAccessExpression(node.expression) &&
+    node.expression.name.text === 'evaluateAll'
+  ) {
+    if (!styleReaderSource) styleReaderSource = node.arguments[0]!.getText(parsed);
+    else motionReaderSource = node.arguments[0]!.getText(parsed);
+  }
+  ts.forEachChild(node, visit);
+}
+visit(parsed);
+const module = { exports: undefined as unknown };
+vm.runInNewContext(
+  transformSync(`module.exports = ${styleReaderSource}`, {
+    loader: 'ts',
+    target: 'es2022',
+    keepNames: true,
+  }).code,
+  { module }
+);
+type ColorFacts = {
+  foregroundRgba: number[] | null;
+  backgroundRgba: number[] | null;
+  opaqueForeground: boolean;
+  opaqueBackground: boolean;
+};
+const serializedReader = String(module.exports);
+vm.runInNewContext(
+  transformSync(`module.exports = ${motionReaderSource}`, {
+    loader: 'ts',
+    target: 'es2022',
+    keepNames: true,
+  }).code,
+  { module }
+);
+const serializedMotionReader = String(module.exports);
+let browser: Browser;
+beforeAll(async () => {
+  browser = await launchBrowser();
+});
+afterAll(async () => {
+  await browser.close();
+});
+
+describe('Spinner capture native browser probes', () => {
+  it('distinguishes a stable center from an off-center pivot over a complete rotation', async () => {
+    const page = await browser.newPage();
+    try {
+      for (const origin of ['center', '0 0']) {
+        await page.setContent(`<style>
+          div { display: flex; align-items: center; justify-content: center; width: 80px; height: 80px }
+          span { display: block; box-sizing: border-box; width: 16px; height: 16px;
+            border: 2px solid; border-top-color: transparent; border-radius: 9999px;
+            transform-origin: ${origin}; animation: control-spin 1s linear infinite }
+          @keyframes control-spin { to { transform: rotate(360deg) } }
+        </style><div><span></span></div>`);
+        const frames = await page.locator('span').evaluateAll<
+          Array<{
+            time: number;
+            roots: Array<{ centerX: number; centerY: number; angle: number }>;
+          }>,
+          number
+        >(serializedMotionReader, 1100);
+        expect(frames.at(-1)!.time - frames[0]!.time).toBeGreaterThanOrEqual(1000);
+        expect(new Set(frames.map((frame) => Math.floor(frame.roots[0]!.angle / 90))).size).toBe(4);
+        for (const axis of ['centerX', 'centerY'] as const) {
+          const coordinates = frames.map((frame) => frame.roots[0]![axis]);
+          const span = Math.max(...coordinates) - Math.min(...coordinates);
+          if (origin === 'center') expect(span).toBeLessThanOrEqual(0.25);
+          else expect(span).toBeGreaterThan(4);
+        }
+      }
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('uses the actual callback to convert CSS4 and composite translucent ancestors', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.setContent(`<style>
+        html { background: lab(0 0 0) }
+        body { background: oklch(1 0 0 / .5) }
+        span { color: lab(0 0 0); background: transparent }
+      </style><span></span>`);
+      const facts = await page.locator('span').evaluateAll<ColorFacts[]>(serializedReader);
+      expect(facts[0].foregroundRgba).toEqual([0, 0, 0, 255]);
+      expect(facts[0].backgroundRgba).not.toBeNull();
+      const [r, g, b, a] = facts[0].backgroundRgba!;
+      expect(r).toBeGreaterThanOrEqual(127);
+      expect(r).toBeLessThanOrEqual(128);
+      expect(g).toBe(r);
+      expect(b).toBe(r);
+      expect(a).toBe(255);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('retains near-opaque CSS alpha as unmeasured even when 8-bit readback rounds up', async () => {
+    const page = await browser.newPage();
+    try {
+      await page.setContent(
+        '<style>html { background: rgba(0, 0, 0, .999) } body, span { background: transparent } span { color: rgba(0, 0, 0, .999) }</style><span></span>'
+      );
+      const [facts] = await page.locator('span').evaluateAll<ColorFacts[]>(serializedReader);
+      expect(facts.backgroundRgba?.[3]).toBe(255);
+      expect(facts.foregroundRgba?.[3]).toBe(255);
+      expect(facts.opaqueBackground).toBe(false);
+      expect(facts.opaqueForeground).toBe(false);
+    } finally {
+      await page.close();
+    }
+  });
+
+  it('leaves images, group opacity, and a transparent final canvas unmeasured', async () => {
+    const page = await browser.newPage();
+    try {
+      for (const css of [
+        'html { background: white } body { opacity: .5 }',
+        'html { background: white } body { background-image: linear-gradient(black, white) }',
+        'html { background: white } body { backdrop-filter: blur(2px) }',
+        'html, body { background: transparent }',
+      ]) {
+        await page.setContent(`<style>${css}</style><span></span>`);
+        const [facts] = await page.locator('span').evaluateAll<ColorFacts[]>(serializedReader);
+        expect(facts.backgroundRgba === null || facts.backgroundRgba[3] !== 255).toBe(true);
+      }
+    } finally {
+      await page.close();
+    }
+  });
+});

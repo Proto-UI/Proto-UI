@@ -54,8 +54,57 @@ try {
               elements.map((element) => {
                 const css = getComputedStyle(element);
                 const backgroundColors: string[] = [];
+                let supportedPaint = true;
                 for (let node: Element | null = element; node; node = node.parentElement) {
-                  backgroundColors.push(getComputedStyle(node).backgroundColor);
+                  const ancestor = getComputedStyle(node);
+                  backgroundColors.push(ancestor.backgroundColor);
+                  supportedPaint &&=
+                    ancestor.backgroundImage === 'none' &&
+                    ancestor.opacity === '1' &&
+                    ancestor.filter === 'none' &&
+                    ancestor.backdropFilter === 'none' &&
+                    ancestor.mixBlendMode === 'normal';
+                }
+                // Use Chromium's own CSS Color parser and source-over painter.
+                // This detached color probe never changes the component's DOM,
+                // styling, animation, or screenshot. Unsupported paint stays null.
+                // Prove opacity before 8-bit canvas readback: alpha=.999 can
+                // round to 255. A known opaque ancestor makes source-over's
+                // final background opaque; unknown computed syntax stays false.
+                const opaquePaint = [css.color, ...backgroundColors].map((color) => {
+                  const match = /^(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\(([^()]*)\)$/.exec(
+                    color.trim()
+                  );
+                  if (!match) return false;
+                  const body = match[1]!;
+                  const alpha = body.includes('/')
+                    ? body.split('/')[1]!.trim()
+                    : body.split(',').length === 4
+                      ? body.split(',')[3]!.trim()
+                      : null;
+                  return alpha === null || /^(?:1(?:\.0+)?|100(?:\.0+)?%)$/.test(alpha);
+                });
+                const opaqueForeground = opaquePaint[0] === true;
+                const opaqueBackground = opaquePaint.slice(1).some(Boolean);
+                const canvas = new OffscreenCanvas(1, 1);
+                const painter = canvas.getContext('2d', { colorSpace: 'srgb' });
+                let foregroundRgba: number[] | null = null;
+                let backgroundRgba: number[] | null = null;
+                if (
+                  painter &&
+                  supportedPaint &&
+                  CSS.supports('color', css.color) &&
+                  backgroundColors.every((color) => CSS.supports('color', color))
+                ) {
+                  for (const color of [...backgroundColors].reverse()) {
+                    painter.fillStyle = color;
+                    painter.fillRect(0, 0, 1, 1);
+                  }
+                  backgroundRgba = Array.from(painter.getImageData(0, 0, 1, 1).data);
+                  painter.clearRect(0, 0, 1, 1);
+                  painter.fillStyle = css.color;
+                  painter.fillRect(0, 0, 1, 1);
+                  foregroundRgba = Array.from(painter.getImageData(0, 0, 1, 1).data);
                 }
                 return {
                   ref: element.getAttribute('data-demo-ref'),
@@ -68,7 +117,16 @@ try {
                   gapColor: css.borderTopColor,
                   animationName: css.animationName,
                   animationDuration: css.animationDuration,
+                  animationTimingFunction: css.animationTimingFunction,
+                  animationIterationCount: css.animationIterationCount,
+                  animationPlayState: css.animationPlayState,
                   backgroundColors,
+                  opaqueForeground,
+                  opaqueBackground,
+                  colorProbe: 'native-offscreen-canvas-srgb',
+                  foregroundRgba,
+                  backgroundRgba,
+                  supportedPaint,
                   ariaHidden: element.getAttribute('aria-hidden'),
                   role: element.getAttribute('role'),
                 };
@@ -76,63 +134,85 @@ try {
             );
             // Color math stays in Node: tsx's keepNames helpers must never be
             // captured inside a function that Playwright serializes to the page.
-            const rgb = (color: string) => {
-              const match =
-                /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/.exec(
-                  color
-                );
-              if (!match) return null;
-              const channels = match.slice(1, 4).map(Number);
-              const alpha = Number(match[4] ?? 1);
-              if (
-                channels.some((value) => !Number.isFinite(value) || value < 0 || value > 255) ||
-                !Number.isFinite(alpha) ||
-                alpha < 0 ||
-                alpha > 1
-              )
-                return null;
-              return { channels, alpha };
-            };
             const luminance = (channels: number[]) =>
               channels
                 .map((channel) => channel / 255)
                 .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
                 .reduce((sum, value, i) => sum + value * [0.2126, 0.7152, 0.0722][i]!, 0);
             const facts = surfaces.map((surface) => {
-              const foreground = rgb(surface.color);
-              let background: number[] | null = null;
-              for (const color of surface.backgroundColors) {
-                const parsed = rgb(color);
-                if (parsed?.alpha === 0) continue;
-                if (parsed?.alpha === 1) background = parsed.channels;
-                // Unknown formats and partial alpha are unmeasured, not an
-                // excuse to skip a painted layer and claim passing contrast.
-                break;
-              }
-              const fg = foreground?.alpha === 1 ? luminance(foreground.channels) : null;
-              const bg = background && luminance(background);
+              const fg =
+                surface.opaqueForeground && surface.foregroundRgba?.[3] === 255
+                  ? luminance(surface.foregroundRgba.slice(0, 3))
+                  : null;
+              const bg =
+                surface.opaqueBackground && surface.backgroundRgba?.[3] === 255
+                  ? luminance(surface.backgroundRgba.slice(0, 3))
+                  : null;
               const contrast =
                 fg !== null && bg !== null
                   ? (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
                   : null;
               return { ...surface, contrast };
             });
-            // Sample naturally rendered animation frames. Reduced motion must
-            // stay still; motion-enabled output must genuinely advance.
-            const frames = await previewer
-              .locator(selector)
-              .first()
-              .evaluate(async (element) => {
-                const samples: { time: number; transform: string }[] = [];
-                for (let i = 0; i < 20; i++) {
+            // Observe all five real roots through a complete natural turn.
+            // This never pauses/seeks animation or injects an expected position.
+            const frames = await previewer.locator(selector).evaluateAll(
+              async (elements, duration) => {
+                const samples: Array<{
+                  time: number;
+                  roots: Array<{
+                    transform: string;
+                    angle: number;
+                    centerX: number;
+                    centerY: number;
+                    originX: number;
+                    originY: number;
+                    width: number;
+                    height: number;
+                    parentCenterY: number;
+                    parentAlignItems: string;
+                  }>;
+                }> = [];
+                let started = 0;
+                do {
                   const time = await new Promise<number>((resolve) =>
                     requestAnimationFrame(resolve)
                   );
-                  samples.push({ time, transform: getComputedStyle(element).transform });
-                }
+                  if (!samples.length) started = time;
+                  samples.push({
+                    time,
+                    roots: elements.map((element) => {
+                      const style = getComputedStyle(element);
+                      const rect = element.getBoundingClientRect();
+                      const parent =
+                        element.closest(
+                          '[data-demo-ref="saving-button"], [data-demo-ref="busy-region"]'
+                        ) ?? element.parentElement!;
+                      const parentRect = parent.getBoundingClientRect();
+                      const origin = style.transformOrigin.split(' ').map(Number.parseFloat);
+                      const matrix =
+                        style.transform === 'none' ? null : new DOMMatrixReadOnly(style.transform);
+                      return {
+                        transform: style.transform,
+                        angle: matrix
+                          ? ((Math.atan2(matrix.b, matrix.a) * 180) / Math.PI + 360) % 360
+                          : 0,
+                        centerX: (rect.left + rect.right) / 2,
+                        centerY: (rect.top + rect.bottom) / 2,
+                        originX: origin[0]!,
+                        originY: origin[1]!,
+                        width: (element as HTMLElement).offsetWidth,
+                        height: (element as HTMLElement).offsetHeight,
+                        parentCenterY: (parentRect.top + parentRect.bottom) / 2,
+                        parentAlignItems: getComputedStyle(parent).alignItems,
+                      };
+                    }),
+                  });
+                } while (samples.at(-1)!.time - started < duration);
                 return samples;
-              });
-            const transforms = new Set(frames.map((frame) => frame.transform));
+              },
+              motion === 'reduce' ? 200 : 1100
+            );
             const file = `${name}-${runtime}-${theme}-${motion}.png`;
             await previewer.screenshot({ path: path.join(output, file), animations: 'allow' });
             const overflow = await page.evaluate(
@@ -160,8 +240,50 @@ try {
               assert.equal(fact.role, null);
               assert(fact.contrast !== null && fact.contrast >= 3, JSON.stringify(fact));
               assert.equal(fact.animationName, motion === 'reduce' ? 'none' : 'pui-spin');
+              if (motion !== 'reduce') {
+                assert.equal(fact.animationDuration, '1s');
+                assert.equal(fact.animationTimingFunction, 'linear');
+                assert.equal(fact.animationIterationCount, 'infinite');
+                assert.equal(fact.animationPlayState, 'running');
+              }
             }
-            assert(motion === 'reduce' ? transforms.size === 1 : transforms.size > 1);
+            assert(frames.at(-1)!.time - frames[0]!.time >= (motion === 'reduce' ? 200 : 1000));
+            for (let index = 0; index < 5; index++) {
+              const initial = frames[0]!.roots[index]!;
+              const transforms = new Set(frames.map((frame) => frame.roots[index]!.transform));
+              assert(motion === 'reduce' ? transforms.size === 1 : transforms.size > 1);
+              if (motion !== 'reduce') {
+                const quadrants = new Set(
+                  frames.map((frame) => Math.floor(frame.roots[index]!.angle / 90))
+                );
+                assert.equal(quadrants.size, 4, 'a whole rotation must sample every quadrant');
+                let angularTravel = 0;
+                for (let frame = 1; frame < frames.length; frame++) {
+                  const previous = frames[frame - 1]!;
+                  const current = frames[frame]!;
+                  assert(current.time - previous.time < 500, 'a half-turn sample gap is unproven');
+                  const delta =
+                    (current.roots[index]!.angle - previous.roots[index]!.angle + 360) % 360;
+                  assert(delta < 180, 'ambiguous angular sample');
+                  angularTravel += delta;
+                }
+                assert(angularTravel >= 360, 'every Root must actually complete a whole turn');
+              }
+              for (const frame of frames) {
+                const root = frame.roots[index]!;
+                assert.equal(root.width, [16, 24, 32, 24, 16][index]);
+                assert.equal(root.height, root.width);
+                assert(Math.abs(root.originX - root.width / 2) <= 0.25, 'rotation origin x');
+                assert(Math.abs(root.originY - root.height / 2) <= 0.25, 'rotation origin y');
+                assert(Math.abs(root.centerX - initial.centerX) <= 0.25, 'center x drift');
+                assert(Math.abs(root.centerY - initial.centerY) <= 0.25, 'center y drift');
+                assert.equal(root.parentAlignItems, 'center');
+                assert(
+                  Math.abs(root.centerY - root.parentCenterY) <= 0.25,
+                  'parent/inline vertical center'
+                );
+              }
+            }
             assert.equal(overflow, false, `${name}/${runtime}/${theme}/${motion} page overflow`);
           }
         }
