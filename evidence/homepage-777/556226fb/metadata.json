@@ -1,0 +1,30 @@
+{
+  "sourceSha": "556226fbaba4520383a7cc16f02d9b6d2d1ba172",
+  "sourceTree": "282c5947712b2e2dc0ddf5d87ec89b2927f4a996",
+  "scriptSha": "556226fbaba4520383a7cc16f02d9b6d2d1ba172",
+  "scriptSha256": "1b22245482f28698468385597f11e164dc7e581987a79f67ddbff1f1aa2b9edb",
+  "runId": 37143762089,
+  "artifactId": 11281472788,
+  "artifactSha256": "57338287e595708b6a768cd57b71f041c2b5e412fa75c0704117c006b9ab0214",
+  "captureCases": 20,
+  "captureFailures": [],
+  "renderer": "Real Chromium with repository Astro development harness",
+  "limitations": [
+    "First Typography coverage slice only; actual CJK glyph and selection acceptance still pending",
+    "Does not include later Select elevation or native anchor sizing repair",
+    "Source-bound screenshots are not complete CI or aesthetic acceptance"
+  ],
+  "description": "First real typography projection and Shadcn Header ghost command images. Co-author by OpenAI Dots",
+  "images": [
+    {
+      "path": "desktop-brutalist-typography.png",
+      "sourceFile": "zh-cn-desktop-light-brutalist-vue2-saved-viewport.png",
+      "sha256": "d0592b6b68c9e8d05ce5d7352db15be15405a7de0f7d37a922d0a5c134c34a07"
+    },
+    {
+      "path": "mobile-shadcn-ghost-menu.png",
+      "sourceFile": "zh-cn-mobile-light-navigation-open-viewport.png",
+      "sha256": "44161c582f61cf3e21a4f6f6340c766f8f6f16d032339b093dd0463b1ce7cf5e"
+    }
+  ]
+}
