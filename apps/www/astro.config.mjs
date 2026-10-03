@@ -14,6 +14,7 @@ import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
 import { whitepaperRedirectFragments } from './src/utils/whitepaper-redirect-fragments.mjs';
 import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
 import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
+import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';
 
 const PROTO_UI_PREFIX = '@proto.ui/';
 const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url));
@@ -925,7 +926,13 @@ export default defineConfig({
       // 允许 dev server 读取到仓库根（否则访问 workspace 包会被拦）
       fs: { allow: ['../..'] },
     },
-    plugins: [protoUiSourcePlugin, tailwindcss()],
+    plugins: [
+      ...(process.env.PROTO_UI_CONTRAST_AUDIT === '1'
+        ? [contrastProvenancePlugin(repositoryRoot)]
+        : []),
+      protoUiSourcePlugin,
+      tailwindcss(),
+    ],
     optimizeDeps: {
       exclude: [
         '@proto.ui/core',

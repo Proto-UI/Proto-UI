@@ -55,7 +55,6 @@ describe('runtime test plan', () => {
     ]);
   });
 });
-
 it('runs the Brutalist Spinner only in the shared sequential browser phase', () => {
   const spinner = 'apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts';
   const plan = createRuntimeTestPlan([]);

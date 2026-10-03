@@ -542,6 +542,21 @@ const BRUTALIST_MANIFEST = {
         },
       },
     },
+    checkbox: {
+      baseFamilyId: 'P-BASE-CHECKBOX',
+      recipeId: 'demo-brutalist-checkbox',
+      recipePrototypeIds: ['brutalist-checkbox-root', 'brutalist-checkbox-indicator'],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-CHECKBOX',
+          prototypeId: 'brutalist-checkbox-root',
+        },
+        indicator: {
+          basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
+          prototypeId: 'brutalist-checkbox-indicator',
+        },
+      },
+    },
     badge: {
       baseFamilyId: null,
       recipeId: 'demo-brutalist-badge',
