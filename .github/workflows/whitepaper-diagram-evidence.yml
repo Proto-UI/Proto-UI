@@ -27,7 +27,7 @@ jobs:
     timeout-minutes: 20
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
-      DIAGRAM_EVIDENCE_DIR: ${{ runner.temp }}/whitepaper-diagram-evidence
+      DIAGRAM_EVIDENCE_DIR: /tmp/whitepaper-diagram-evidence
       ASTRO_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@v4
