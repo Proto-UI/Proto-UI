@@ -315,6 +315,11 @@ jobs:
       - name: Install
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
 
+      - name: Disable the development toolbar before public-page browser tests
+        run: |
+          corepack pnpm@"${PROTO_PNPM_VERSION}" --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@"${PROTO_PNPM_VERSION}" --filter apps-www exec astro preferences get devToolbar.enabled
+
       - name: Public documentation gate and repository tests
         env:
           SPEC_AUTHORING_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}

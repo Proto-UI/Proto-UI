@@ -13,6 +13,8 @@ Brutalist Scroll Area preserves the Base host-owned scrolling surface, normalize
 
 Use it for ChatUI conversation history, conversation lists, command results, logs, and dense SaaS panels. Surrounding layout must give Root an explicit size. The reference demo keeps the 12rem height and caps its responsive width at 20rem, preserving the desktop composition while keeping the complete Root and visual scrollbar inside phone preview frames.
 
+In the Web composed projection, the two tracks reserve a lower-right intersection that contains neither track nor Thumb. A missing or display-hidden opposite track releases that space; a track without overflow retains its authored surface while its Thumb hides. This is host-local presentation, not a separate Corner control.
+
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
 </div>

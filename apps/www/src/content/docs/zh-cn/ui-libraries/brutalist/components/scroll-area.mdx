@@ -13,6 +13,8 @@ Brutalist Scroll Area 保留 Base 的宿主滚动面、归一化 viewport facts�
 
 用于 ChatUI conversation history、会话列表、命令结果、日志和密集 SaaS 面板。外围 layout 必须给 Root 明确尺寸。参考 demo 保留 12rem 高度，并把响应式宽度上限设为 20rem：桌面 composition 不变，同时完整 Root 与 visual scrollbar 在手机 preview frame 内保持可见。
 
+Web composed projection 的两条 track 会避让右下交点，该区域不包含 track 或 Thumb。另一条 track 缺失或 display 隐藏时释放避让；没有 overflow 时仍保留 track 表面，仅隐藏 Thumb。这属于 host-local presentation，不是独立 Corner control。
+
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-scroll-area" initialRuntime="wc" />
 </div>

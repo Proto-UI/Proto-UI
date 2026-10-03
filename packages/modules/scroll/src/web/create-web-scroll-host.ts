@@ -29,6 +29,8 @@ export type WebScrollSurfaceHostOptions = Readonly<{
 }>;
 
 type DisplayStyle = Readonly<{ value: string; priority: string }>;
+// An opt-in styling sink for edge-aligned composed tracks, not a portable fact.
+const TRACK_END_INSET = '--proto-ui-scroll-track-end-inset';
 const hiddenDisplay: DisplayStyle = { value: 'none', priority: 'important' };
 const readDisplay = (target: HTMLElement): DisplayStyle => ({
   value: target.style.getPropertyValue('display'),
@@ -197,6 +199,33 @@ function measureControl(control: WebScrollControl, axis: ScrollAxis): ControlGeo
   });
 }
 
+function measureTrackThickness(control: WebScrollControl): number {
+  const track = control.trackTarget;
+  const vertical = control.getAxis() === 'vertical';
+  const outer = vertical ? track.offsetWidth : track.offsetHeight;
+  if (!track.isConnected || outer <= 0) return 0;
+  const style = track.ownerDocument.defaultView?.getComputedStyle(track);
+  if (!style || style.display === 'none') return 0;
+  const extent = Number.parseFloat(vertical ? style.width : style.height);
+  if (!Number.isFinite(extent)) return outer;
+  // Computed used lengths retain fractions and are not scaled by transforms.
+  return Math.max(
+    0,
+    extent +
+      (style.boxSizing === 'border-box'
+        ? 0
+        : vertical
+          ? px(style.paddingLeft) +
+            px(style.paddingRight) +
+            px(style.borderLeftWidth) +
+            px(style.borderRightWidth)
+          : px(style.paddingTop) +
+            px(style.paddingBottom) +
+            px(style.borderTopWidth) +
+            px(style.borderBottomWidth))
+  );
+}
+
 export function createWebScrollSurfaceHost(
   target: HTMLElement,
   options: WebScrollSurfaceHostOptions
@@ -232,6 +261,7 @@ export function createWebScrollSurfaceHost(
       let chromeHidden = false;
       const thumbStyles = new Map<HTMLElement, ThumbStyleSnapshot>();
       const trackStyles = new Map<HTMLElement, DisplayStyle>();
+      const trackInsets = new Map<HTMLElement, DisplayStyle>();
       const moveLeases = new Map<HTMLElement, MoveGestureHostLease>();
       const dragGrabOffsets = new Map<HTMLElement, number>();
       const original = {
@@ -314,8 +344,47 @@ export function createWebScrollSurfaceHost(
         writeDisplay(track, original);
         trackStyles.delete(track);
       };
+      const restoreTrackInsets = (active: ReadonlySet<HTMLElement>) => {
+        for (const [track, original] of trackInsets) {
+          if (active.has(track)) continue;
+          if (original.value)
+            track.style.setProperty(TRACK_END_INSET, original.value, original.priority);
+          else track.style.removeProperty(TRACK_END_INSET);
+          trackInsets.delete(track);
+        }
+      };
+      const projectTrackInsets = () => {
+        const controls = (connection.composedChrome?.controls ?? []).filter(isWebControl);
+        const thickness = { vertical: 0, horizontal: 0 };
+        // Measure every cross-axis thickness before changing either long axis.
+        // Empty-overflow tracks retain their authored paint, so they still reserve
+        // the corner; removing/hiding a track releases its reservation.
+        for (const control of controls) {
+          const axis = control.getAxis();
+          thickness[axis] = Math.max(thickness[axis], measureTrackThickness(control));
+        }
+        const active = new Set<HTMLElement>();
+        for (const control of controls) {
+          const track = control.trackTarget;
+          active.add(track);
+          if (!trackInsets.has(track))
+            trackInsets.set(track, {
+              value: track.style.getPropertyValue(TRACK_END_INSET),
+              priority: track.style.getPropertyPriority(TRACK_END_INSET),
+            });
+          const value = `${thickness[control.getAxis() === 'vertical' ? 'horizontal' : 'vertical']}px`;
+          if (
+            track.style.getPropertyValue(TRACK_END_INSET) !== value ||
+            track.style.getPropertyPriority(TRACK_END_INSET)
+          ) {
+            track.style.setProperty(TRACK_END_INSET, value);
+          }
+        }
+        restoreTrackInsets(active);
+      };
       const projectComposedChrome = (facts: ScrollSurfaceSnapshot) => {
         if (connection.projection !== 'composed') {
+          restoreTrackInsets(new Set());
           // Hide authored Scrollbar/Thumb chrome while the host projects the
           // system scrollbar. Reconciled against the current controls on every
           // pass so controls attached or replaced after the fallback starts
@@ -357,6 +426,7 @@ export function createWebScrollSurfaceHost(
           // the thumb is no longer active, or by the composed projection
           // loop when the thumb is active.
         }
+        projectTrackInsets();
         for (const control of connection.composedChrome?.controls ?? []) {
           if (!isWebControl(control)) continue;
           const axis = control.getAxis();
@@ -1005,6 +1075,7 @@ export function createWebScrollSurfaceHost(
           moveLeases.clear();
           dragGrabOffsets.clear();
           restoreInactiveThumbs(new Set());
+          restoreTrackInsets(new Set());
           for (const track of Array.from(trackStyles.keys())) {
             restoreTrackDisplay(track);
           }

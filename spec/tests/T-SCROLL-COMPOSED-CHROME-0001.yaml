@@ -38,6 +38,16 @@ cases:
       - C-SCROLL-COMPOSED-CHROME-0001-F
     expectation: passive-thumb-has-no-focus-or-scrollbar-role
 implementations:
+  - id: web-scroll-track-inset-lifetime
+    kind: adapter-test
+    status: passing
+    path: packages/modules/scroll/test/web-scroll-corner.test.ts
+    required: true
+    consumesCases:
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-GEOMETRY
+      - T-SCROLL-COMPOSED-CHROME-0001-CASE-LIFETIME
+    notes:
+      - Mocked track extents test inset-derived Thumb travel, unchanged-write idempotence, no-overflow tracks, single/hidden controls and exact value/priority restoration. Real layout and hit testing remain the separate family browser journey.
   - id: web-scroll-chrome-real-cascade
     kind: adapter-test
     status: passing

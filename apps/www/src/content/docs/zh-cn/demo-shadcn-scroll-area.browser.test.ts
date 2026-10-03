@@ -3,6 +3,7 @@
 import type { Browser, Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RUNTIMES, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
+import { documentRect } from './browser-geometry';
 
 const ROUTE = '/zh-cn/ui-libraries/shadcn/scroll-area/';
 const EPSILON = 1;
@@ -21,6 +22,21 @@ async function bounds(locator: Locator, label: string) {
   const box = await locator.boundingBox();
   if (!box) throw new Error(`${label}: expected rendered geometry.`);
   return box;
+}
+
+async function focusGeometry(locator: Locator, label: string) {
+  // Capture both values atomically: focus can scroll the document between samples.
+  const measurement = await locator.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return {
+      viewportRect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      scrollOffset: { x: window.scrollX, y: window.scrollY },
+    };
+  });
+  if (measurement.viewportRect.width <= 0 || measurement.viewportRect.height <= 0) {
+    throw new Error(`${label}: expected rendered geometry.`);
+  }
+  return { ...measurement, documentRect: documentRect(measurement) };
 }
 
 function expectClose(actual: number, expected: number, label: string): void {
@@ -116,7 +132,10 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           facts.clientHeight
         );
 
-        const viewportBeforeFocus = await bounds(viewport, `${runtime}/viewport-before-focus`);
+        const viewportBeforeFocus = await focusGeometry(
+          viewport,
+          `${runtime}/viewport-before-focus`
+        );
         await page.keyboard.press('Tab');
         await viewport.focus();
         await page.waitForFunction(
@@ -141,11 +160,15 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
         expect(focusPaint.ringInset, `${runtime}/focus-ring-inset-token`).toBe('inset');
         expect(focusPaint.ringWidth, `${runtime}/focus-ring-width`).toBe('3px');
         expect(focusPaint.outlineWidth, `${runtime}/focus-outline`).toBe('1px');
-        const viewportAfterFocus = await bounds(viewport, `${runtime}/viewport-after-focus`);
+        const viewportAfterFocus = await focusGeometry(viewport, `${runtime}/viewport-after-focus`);
+        console.info(
+          'Scroll Area focus geometry',
+          JSON.stringify({ runtime, before: viewportBeforeFocus, after: viewportAfterFocus })
+        );
         for (const property of ['x', 'y', 'width', 'height'] as const) {
           expectClose(
-            viewportAfterFocus[property],
-            viewportBeforeFocus[property],
+            viewportAfterFocus.documentRect[property],
+            viewportBeforeFocus.documentRect[property],
             `${runtime}/focus-geometry/${property}`
           );
         }
@@ -206,14 +229,22 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           viewportBox.x + viewportBox.width,
           `${runtime}/vertical-right`
         );
-        expectClose(verticalBox.height, viewportBox.height, `${runtime}/vertical-height`);
+        expectClose(
+          verticalBox.height + horizontalBox.height,
+          viewportBox.height,
+          `${runtime}/vertical-height`
+        );
         expectClose(horizontalBox.x, viewportBox.x, `${runtime}/horizontal-left`);
         expectClose(
           horizontalBox.y + horizontalBox.height,
           viewportBox.y + viewportBox.height,
           `${runtime}/horizontal-bottom`
         );
-        expectClose(horizontalBox.width, viewportBox.width, `${runtime}/horizontal-width`);
+        expectClose(
+          horizontalBox.width + verticalBox.width,
+          viewportBox.width,
+          `${runtime}/horizontal-width`
+        );
         expectClose(verticalBox.y - rootBox.y, 1, `${runtime}/vertical-root-border-inset`);
         expectClose(
           rootBox.x + rootBox.width - (verticalBox.x + verticalBox.width),

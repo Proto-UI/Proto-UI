@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { documentRect, type GeometryRect } from './browser-geometry';
 
 import { spawn, type ChildProcess } from 'node:child_process';
 import { access } from 'node:fs/promises';
@@ -335,7 +336,9 @@ type ViewportRing = {
   focusVisible: boolean;
   layers: string[];
   insetLayers: string[];
-  bounds: { x: number; y: number; width: number; height: number };
+  bounds: GeometryRect;
+  viewportRect: GeometryRect;
+  scrollOffset: { x: number; y: number };
   scrollTop: number;
   scrollLeft: number;
 };
@@ -369,7 +372,7 @@ async function waitForScrollBeyond(
 }
 
 async function viewportRing(page: Page): Promise<ViewportRing> {
-  return page.evaluate(() => {
+  const measurement = await page.evaluate(() => {
     const viewport = document.querySelector<HTMLElement>(
       '[data-previewer-id] [data-demo-ref="scrollViewport"]'
     );
@@ -396,11 +399,13 @@ async function viewportRing(page: Page): Promise<ViewportRing> {
       focusVisible: viewport.hasAttribute('data-focus-visible'),
       layers: parts,
       insetLayers: parts.filter((layer) => layer.includes('inset')),
-      bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      viewportRect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      scrollOffset: { x: window.scrollX, y: window.scrollY },
       scrollTop: viewport.scrollTop,
       scrollLeft: viewport.scrollLeft,
     };
   });
+  return { ...measurement, bounds: documentRect(measurement) };
 }
 
 /** Every Button fill this suite reads, paired with the theme variable it names. */
@@ -1331,7 +1336,23 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
             expect(layer, `${label}/outward`).toMatch(/(?:0px 0px 0px 0px$|^rgba\(0, 0, 0, 0\))/);
           }
 
-          // Taking focus must not move or resize the surface.
+          console.info(
+            'Brutalist Scroll Area focus geometry',
+            JSON.stringify({
+              label,
+              before: {
+                viewportRect: resting.viewportRect,
+                scrollOffset: resting.scrollOffset,
+                documentRect: resting.bounds,
+              },
+              after: {
+                viewportRect: focused.viewportRect,
+                scrollOffset: focused.scrollOffset,
+                documentRect: focused.bounds,
+              },
+            })
+          );
+          // Taking focus must not move or resize the surface in document layout.
           expect(focused.bounds, `${label}/geometry`).toEqual(resting.bounds);
 
           // Both axes still scroll while the ring is up. Scrolling is smooth and

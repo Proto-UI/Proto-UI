@@ -190,12 +190,19 @@ describe('prototypes/shadcn: scroll-area', () => {
       expect(styleContains(vertical, token), `vertical/common/${token}`).toBe(true);
       expect(styleContains(horizontal, token), `horizontal/common/${token}`).toBe(true);
     }
-    for (const token of ['h-full', 'w-2.5', 'top-0', 'right-0', 'border-2', 'border-transparent']) {
+    for (const token of [
+      'h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',
+      'w-2.5',
+      'top-0',
+      'right-0',
+      'border-2',
+      'border-transparent',
+    ]) {
       const projected = `data-[orientation=vertical]:${token}`;
       expect(styleContains(vertical, projected), projected).toBe(true);
     }
     for (const token of [
-      'w-full',
+      'w-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',
       'h-2.5',
       'flex-col',
       'bottom-0',

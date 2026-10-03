@@ -11,6 +11,8 @@ Viewport 通过 privileged Scroll surface 请求 `composed` design-language pref
 
 比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/scroll-area.tsx`。其中 Web DOM 与 Radix details 仅为 comparison evidence，不构成 portable guarantees。从 `@proto.ui/prototypes-shadcn/scroll-area` 导入该 family，或使用 `proto-ui add react shadcn-scroll-area` 生成 React facade。
 
+Web composed projection 的两条 track 会避让右下交点，该区域不包含 track 或 Thumb。另一条 track 缺失或 display 隐藏时释放避让；没有 overflow 时仍保留 track 表面，仅隐藏 Thumb。这属于 host-local presentation，不是独立 Corner control。
+
 <PrototypePreviewer demoId="demo-shadcn-scroll-area" initialRuntime="wc" />
 
 ## 建议验收路径

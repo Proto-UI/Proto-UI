@@ -24,13 +24,17 @@ criteria:
   - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-ORIENTED-GEOMETRY
     text:
       en: >-
-        Vertical must project h-full w-2.5 top-0 right-0 border-2 border-transparent. Horizontal must project w-full h-2.5 flex-col bottom-0 left-0 border-2 border-transparent. These tracks remain composed chrome around the same host-owned Viewport.
+        Vertical must project h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))] w-2.5 top-0 right-0 border-2 border-transparent. Horizontal must project w-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))] h-2.5 flex-col bottom-0 left-0 border-2 border-transparent. These tracks remain composed chrome around the same host-owned Viewport.
 
 
       zh-CN: >-
-        vertical 必须投射 h-full w-2.5 top-0 right-0 border-2 border-transparent；horizontal 必须投射 w-full h-2.5 flex-col bottom-0 left-0 border-2 border-transparent。两条 track 继续作为同一个 host-owned Viewport 周围的 composed chrome。
+        vertical 必须投射 h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))] w-2.5 top-0 right-0 border-2 border-transparent；horizontal 必须投射 w-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))] h-2.5 flex-col bottom-0 left-0 border-2 border-transparent。两条 track 继续作为同一个 host-owned Viewport 周围的 composed chrome。
 
 
+  - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-CORNER
+    text:
+      en: In the Web composed projection, each track reserves the measured outer thickness of the other bound rendered track at its long-axis end. The lower-right intersection contains neither track nor Thumb; no separate Corner control or Base identity is created. A missing or display-hidden opposite track reserves zero. Tracks with no overflow keep their existing authored surface while their Thumb is hidden. The CSS inset is host-local and does not extend portable facts or RTL normalization.
+      zh-CN: Web composed projection 中，每条 track 在长轴末端避让另一条已绑定且渲染的 track 的实测外厚度。右下交点不包含 track 或 Thumb，不创建独立 Corner control 或 Base identity。另一条 track 缺失或 display 隐藏时避让为零；无 overflow 时保留既有 authored track surface，仅隐藏 Thumb。CSS inset 属于 host-local geometry，不扩展 portable facts 或 RTL normalization。
 sources:
   - path: packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts
   - path: packages/prototypes/shadcn/test/scroll-area.test.ts
@@ -45,6 +49,9 @@ relates:
 verifies:
   tests: [T-SHADCN-SCROLL-AREA-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Refined the requested dual-track presentation with a host-local opposite-track end inset; preserved draft lifecycle, physical edge placement, and Base ownership.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the common and orientation-specific shadcn Scrollbar track surface.

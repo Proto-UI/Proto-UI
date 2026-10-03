@@ -8,6 +8,14 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it('lowers both Scroll Area track inset dimensions to valid spaced CSS math', () => {
+    const css = renderProtoStyleTokenCss([
+      'data-[orientation=vertical]:h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',
+      'data-[orientation=horizontal]:w-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',
+    ]);
+    expect(css).toContain('height: calc(100% - var(--proto-ui-scroll-track-end-inset,0px));');
+    expect(css).toContain('width: calc(100% - var(--proto-ui-scroll-track-end-inset,0px));');
+  });
   it('gives Proto UI styled elements a scoped border-box baseline without a global reset', () => {
     // T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT
     const css = renderProtoStyleTokenCss(['h-6', 'w-11', 'border']);
