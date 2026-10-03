@@ -80,7 +80,13 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     }
   };
   const restoreOrigin = () => {
-    activeItem?.trigger.removeAttribute('data-docs-image-origin-hidden');
+    if (!activeItem) return;
+    activeItem.trigger.removeAttribute('data-docs-image-origin-hidden');
+    // Commit the visible endpoint while source transitions are disabled, then
+    // restore the author's rules. No timeout or secondary modal clock is used.
+    const sourceSurface = activeItem.media.closest('picture') ?? activeItem.media;
+    void doc.defaultView?.getComputedStyle(sourceSurface).opacity;
+    activeItem.trigger.removeAttribute('data-docs-image-source-instant');
   };
   const geometry = () => {
     if (!activeItem) return;
@@ -208,6 +214,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     image.dataset.sourceUrl = source.sourceUrl;
     description.textContent = [labels.hint, source.caption].filter(Boolean).join('. ');
     geometry();
+    item.trigger.setAttribute('data-docs-image-source-instant', '');
     item.trigger.setAttribute('data-docs-image-origin-hidden', '');
     // Never innerHTML, object/embed, source-document navigation or SVG fetch.
     if (source.svgText)

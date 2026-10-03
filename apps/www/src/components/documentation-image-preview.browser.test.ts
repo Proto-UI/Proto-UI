@@ -105,6 +105,7 @@ type MotionFrame = {
   width: number;
   height: number;
   opacity: number;
+  sourceOpacity: number | null;
 };
 async function recordNextMotion(page: Page, input: 'pointerdown' | 'keydown') {
   // Instrumentation records real frames after the next native input. It neither
@@ -122,6 +123,9 @@ async function recordNextMotion(page: Page, input: 'pointerdown' | 'keydown') {
           const mask = document.querySelector<HTMLElement>('[data-docs-image-mask]');
           if (content && mask && !content.hasAttribute('data-pui-view-detached')) {
             const rect = content.getBoundingClientRect();
+            const source = document.querySelector(
+              '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
+            );
             record.frames.push({
               time: time - start,
               phase: content.getAttribute('data-transition-state'),
@@ -130,6 +134,7 @@ async function recordNextMotion(page: Page, input: 'pointerdown' | 'keydown') {
               width: rect.width,
               height: rect.height,
               opacity: Number(getComputedStyle(mask).opacity),
+              sourceOpacity: source ? Number(getComputedStyle(source).opacity) : null,
             });
           }
           if (time - start < 550) requestAnimationFrame(sample);
@@ -322,6 +327,9 @@ describe('automatic documentation image preview in real Chromium', () => {
         await entered(page);
         const target = (await page.locator('[data-docs-image-content]').boundingBox())!;
         const opening = await motionFrames(page, `linear-${width}-opening`);
+        expect(
+          opening.filter((f) => f.phase === 'entering').every((f) => f.sourceOpacity === 0)
+        ).toBe(true);
         const mid = opening.filter((f) => f.opacity > 0.1 && f.opacity < 0.9);
         expect(mid.length).toBeGreaterThanOrEqual(2);
         for (const frame of mid) {
@@ -348,6 +356,9 @@ describe('automatic documentation image preview in real Chromium', () => {
         );
         await capture(page, `linear-${width}-closing`);
         const closing = await motionFrames(page, `linear-${width}-closing`);
+        expect(
+          closing.filter((f) => f.phase === 'leaving').every((f) => f.sourceOpacity === 0)
+        ).toBe(true);
         const closingMid = closing.filter((f) => f.opacity > 0.1 && f.opacity < 0.9);
         expect(closingMid.length).toBeGreaterThanOrEqual(2);
         for (const frame of closingMid)
@@ -488,6 +499,15 @@ describe('automatic documentation image preview in real Chromium', () => {
           src: el.getAttribute('src'),
           opacity: getComputedStyle(el).opacity,
           visibility: getComputedStyle(el).visibility,
+          transition: getComputedStyle(el).transition,
+          inlineTransition: {
+            value: (el as HTMLElement).style.getPropertyValue('transition'),
+            priority: (el as HTMLElement).style.getPropertyPriority('transition'),
+          },
+          inlineOpacity: {
+            value: (el as HTMLElement).style.getPropertyValue('opacity'),
+            priority: (el as HTMLElement).style.getPropertyPriority('opacity'),
+          },
           phase: document
             .querySelector('[data-docs-image-content]')
             ?.getAttribute('data-transition-state'),
@@ -499,9 +519,12 @@ describe('automatic documentation image preview in real Chromium', () => {
         expect(facts.visibility).toBe('visible');
         return facts;
       };
-      await sourceFact('before');
+      const before = await sourceFact('before');
       await open(page, 'Raster comparison diagram');
-      expect((await sourceFact('open')).opacity).toBe('0');
+      const opened = await sourceFact('open');
+      expect(opened.opacity).toBe('0');
+      expect(opened.inlineTransition).toEqual(before.inlineTransition);
+      expect(opened.inlineOpacity).toEqual(before.inlineOpacity);
       for (let i = 0; i < 3; i++) {
         await page.keyboard.press('Tab');
         expect(
@@ -514,10 +537,17 @@ describe('automatic documentation image preview in real Chromium', () => {
       const leaving = await sourceFact('leaving');
       expect(leaving.phase).toBe('leaving');
       expect(leaving.opacity).toBe('0');
+      expect(leaving.inlineTransition).toEqual(before.inlineTransition);
+      expect(leaving.inlineOpacity).toEqual(before.inlineOpacity);
       expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
       expect(await trigger.getAttribute('data-focus-visible')).not.toBeNull();
       await closed(page);
-      expect((await sourceFact('restored')).opacity).toBe('1');
+      const restored = await sourceFact('restored');
+      expect(restored.opacity).toBe('1');
+      expect(restored.transition).toBe(before.transition);
+      expect(restored.inlineTransition).toEqual(before.inlineTransition);
+      expect(restored.inlineOpacity).toEqual(before.inlineOpacity);
+      expect(await trigger.getAttribute('data-docs-image-source-instant')).toBeNull();
       await page.evaluate(() => {
         (window as any).__docsSourceClicks = 0;
         document.querySelector('[data-docs-image-trigger]')!.addEventListener('click', (event) => {

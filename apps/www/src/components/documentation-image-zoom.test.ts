@@ -43,12 +43,14 @@ describe('borderless image presentation / maintainer request #796', () => {
   it('keeps the source in place but suppresses its duplicate while present, then restores it', async () => {
     const { trigger, root, content } = await fixture();
     expect(trigger.hasAttribute('data-docs-image-origin-hidden')).toBe(true);
+    expect(trigger.hasAttribute('data-docs-image-source-instant')).toBe(true);
     root.getExposes?.().close('test.close');
     await settle();
     expect(trigger.hasAttribute('data-docs-image-origin-hidden')).toBe(true);
     content.getExposes?.().complete();
     await settle();
     expect(trigger.hasAttribute('data-docs-image-origin-hidden')).toBe(false);
+    expect(trigger.hasAttribute('data-docs-image-source-instant')).toBe(false);
     expect(document.activeElement).toBe(trigger);
   });
   it('retains the current source through interrupted close/reopen and restores it on route cleanup', async () => {
@@ -66,6 +68,8 @@ describe('borderless image presentation / maintainer request #796', () => {
     document.dispatchEvent(new Event('astro:before-swap'));
     await settle();
     expect(document.querySelector('[data-docs-image-origin-hidden]')).toBeNull();
+    expect(document.querySelector('[data-docs-image-source-instant]')).toBeNull();
+    expect(trigger.hasAttribute('data-docs-image-source-instant')).toBe(false);
     expect(document.querySelector('figure > img')).not.toBeNull();
   });
   it('uses the safe fade fallback when the source is removed before closing', async () => {

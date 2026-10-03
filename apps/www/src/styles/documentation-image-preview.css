@@ -25,6 +25,11 @@ documentation-image-preview,
    * accessibility tree or hiding the trigger's focus feedback during return. */
   opacity: 0;
 }
+[data-docs-image-source-instant] > :is(img, svg, picture) {
+  /* The source must not retain Markdown's own 300ms opacity fade underneath
+   * the moving duplicate. This scoped guard is removed after restoration. */
+  transition: none;
+}
 .docs-image-full {
   display: block;
   width: 100%;
