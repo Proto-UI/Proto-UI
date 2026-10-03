@@ -6,7 +6,7 @@
 //! harness and read the resulting bounds back, so a mapping that is wrong
 //! about GPUI's own semantics fails here rather than at a screenshot.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use gpui::prelude::*;
@@ -38,6 +38,7 @@ struct Probe {
     tokens: Vec<String>,
     language: String,
     observed: Rc<RefCell<Option<Bounds<Pixels>>>>,
+    painted: Rc<Cell<bool>>,
 }
 
 impl Render for Probe {
@@ -48,10 +49,11 @@ impl Render for Probe {
             LengthContext::default(),
         );
         let observed = self.observed.clone();
+        let painted = self.painted.clone();
 
         let mut subject = canvas(
             move |bounds, _, _| *observed.borrow_mut() = Some(bounds),
-            |_, _, _, _| {},
+            move |_, _, _, _| painted.set(true),
         );
         // The refinement goes on the measured element itself, so the bounds
         // read back are that element's own layout box.
@@ -72,8 +74,18 @@ impl Render for Probe {
 
 /// Lays `tokens` out in a real GPUI window and returns the resulting box.
 fn lay_out(cx: &mut gpui::TestAppContext, tokens: &[&str], language: &str) -> Bounds<Pixels> {
+    lay_out_with_paint(cx, tokens, language).0
+}
+
+fn lay_out_with_paint(
+    cx: &mut gpui::TestAppContext,
+    tokens: &[&str],
+    language: &str,
+) -> (Bounds<Pixels>, bool) {
     let observed = Rc::new(RefCell::new(None));
     let captured = observed.clone();
+    let painted = Rc::new(Cell::new(false));
+    let painted_in_window = painted.clone();
     let owned: Vec<String> = tokens.iter().map(|t| t.to_string()).collect();
     let language = language.to_string();
 
@@ -81,13 +93,14 @@ fn lay_out(cx: &mut gpui::TestAppContext, tokens: &[&str], language: &str) -> Bo
         tokens: owned,
         language,
         observed: captured,
+        painted: painted_in_window,
     });
     let window = AnyWindowHandle::from(window);
     cx.update_window(window, |_, window, cx| window.draw(cx).clear(cx))
         .expect("the window draws");
 
     let bounds = observed.borrow().expect("prepaint reported bounds");
-    bounds
+    (bounds, painted.get())
 }
 
 #[gpui::test]
@@ -159,4 +172,39 @@ fn the_cascade_order_survives_into_layout(cx: &mut gpui::TestAppContext) {
         vocabulary.cascade_position("size-4") > vocabulary.cascade_position("h-9"),
         "the assertions above assume `size-4` is the later rule"
     );
+}
+
+#[gpui::test]
+fn the_new_family_geometry_runs_through_layout_and_paint(cx: &mut gpui::TestAppContext) {
+    // Content-free geometry pins padding plus the two 1px borders. This is
+    // bounded host geometry evidence, not complete native Button conformance.
+    // The fixture explicitly owns relative placement; #719 still owns the
+    // unresolved implicit-position policy for real Feedback roots.
+    let (bootstrap, bootstrap_painted) = lay_out_with_paint(
+        cx,
+        &[
+            "relative", "px-3", "py-1", "border", "rounded-[4px]", "bg-primary",
+        ],
+        "bootstrap-2-3-2",
+    );
+    assert!(
+        bootstrap_painted,
+        "Bootstrap geometry completed the paint callback"
+    );
+    assert_eq!(bootstrap.size.width, px(26.));
+    assert_eq!(bootstrap.size.height, px(10.));
+
+    let (liquid, liquid_painted) = lay_out_with_paint(
+        cx,
+        &[
+            "relative", "px-5", "py-2", "border", "rounded-full", "bg-secondary",
+        ],
+        "liquid-glass",
+    );
+    assert!(
+        liquid_painted,
+        "Liquid fallback geometry completed the paint callback"
+    );
+    assert_eq!(liquid.size.width, px(42.));
+    assert_eq!(liquid.size.height, px(18.));
 }

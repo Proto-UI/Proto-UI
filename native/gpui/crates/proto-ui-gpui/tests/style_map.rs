@@ -287,10 +287,12 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 29] = [
+const EXPECTED_UNMAPPED: [&str; 30] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
+    // Bootstrap's recorded gradient has a flat fallback, but no image lowering.
+    "background-image",
     "border-top-color",
     "outline",
     "outline-color",
@@ -635,4 +637,75 @@ fn a_pure_percentage_and_a_pure_length_still_map() {
             AbsoluteLength::Pixels(gpui::px(4.))
         )))
     );
+}
+
+#[test]
+fn bootstrap_gradient_keeps_the_mapped_fill_and_reports_the_missing_image() {
+    let expected: gpui::Hsla = gpui::rgb(0x006dcc).into();
+    let mapped = map(
+        &resolve(
+            &["bg-[linear-gradient(#08c,#04c)]", "rounded-[4px]", "opacity-65"],
+            "bootstrap-2-3-2",
+        ),
+        LengthContext::default(),
+    );
+    assert_eq!(
+        mapped.refinement.background,
+        Some(gpui::Fill::Color(expected.into()))
+    );
+    assert_eq!(mapped.refinement.opacity, Some(0.65));
+    assert_eq!(
+        mapped.refinement.corner_radii.top_left,
+        Some(AbsoluteLength::Pixels(gpui::px(4.)))
+    );
+    assert!(mapped.unmapped.iter().any(|(property, value, reason)| {
+        property == "background-image"
+            && value == "linear-gradient(to bottom, #08c, #04c)"
+            && *reason == Unmapped::UnknownProperty
+    }));
+    assert!(!mapped.is_complete());
+}
+
+#[test]
+fn liquid_fallback_uses_its_palette_without_claiming_a_material() {
+    let expected: gpui::Hsla = gpui::rgb(0xffffff).into();
+    let mapped = map(
+        &resolve(&["bg-secondary", "rounded-full", "shadow-sm"], "liquid-glass"),
+        LengthContext::default(),
+    );
+    assert_eq!(
+        mapped.refinement.background,
+        Some(gpui::Fill::Color(expected.into()))
+    );
+    assert!(mapped.refinement.corner_radii.top_left.is_some());
+    assert!(mapped.unmapped.iter().any(|(property, _, reason)| {
+        property == "box-shadow" && *reason == Unmapped::UnknownProperty
+    }));
+    assert!(!mapped.is_complete());
+}
+
+#[test]
+fn liquid_alpha_maps_but_the_recorded_blur_remains_explicitly_unsupported() {
+    // These are the current source's enhancement inputs, not evidence that
+    // the native Runtime selects them or that a material reaches native paint.
+    let expected: gpui::Hsla = gpui::Rgba {
+        r: 1.0,
+        g: 1.0,
+        b: 1.0,
+        a: 0.8,
+    }
+    .into();
+    let resolved = resolve(&["bg-secondary/80", "backdrop-blur-xs"], "liquid-glass");
+    assert!(resolved.unknown.is_empty());
+    let mapped = map(&resolved, LengthContext::default());
+    assert_eq!(
+        mapped.refinement.background,
+        Some(gpui::Fill::Color(expected.into()))
+    );
+    assert!(mapped.unmapped.iter().any(|(property, value, reason)| {
+        property == "backdrop-filter"
+            && value == "blur(4px)"
+            && *reason == Unmapped::UnknownProperty
+    }));
+    assert!(!mapped.is_complete());
 }

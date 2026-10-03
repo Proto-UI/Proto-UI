@@ -4,9 +4,12 @@
 use proto_ui_style::{themes, vocabulary, ColorScheme, Substitution};
 
 #[test]
-fn records_both_design_languages_in_both_schemes() {
+fn records_all_source_design_languages_in_both_schemes() {
     let catalog = themes();
-    assert_eq!(catalog.names(), vec!["brutalist", "shadcn"]);
+    assert_eq!(
+        catalog.names(),
+        vec!["bootstrap-2-3-2", "brutalist", "liquid-glass", "shadcn"]
+    );
 
     for name in catalog.names() {
         for scheme in [ColorScheme::Light, ColorScheme::Dark] {
@@ -35,7 +38,7 @@ fn records_both_design_languages_in_both_schemes() {
 #[test]
 fn schemes_differ_where_the_design_language_says_they_do() {
     let catalog = themes();
-    for name in ["shadcn", "brutalist"] {
+    for name in ["shadcn", "brutalist", "liquid-glass"] {
         let light = catalog.get(name, ColorScheme::Light).unwrap();
         let dark = catalog.get(name, ColorScheme::Dark).unwrap();
         assert_ne!(
@@ -138,4 +141,24 @@ fn resolves_the_composed_shadow_a_ring_token_produces() {
         }
         other => panic!("unexpected: {other:?}"),
     }
+}
+
+#[test]
+fn new_family_variables_preserve_the_source_policies() {
+    let catalog = themes();
+    for scheme in [ColorScheme::Light, ColorScheme::Dark] {
+        let bootstrap = catalog.get("bootstrap-2-3-2", scheme).unwrap();
+        assert_eq!(bootstrap.variable("--pui-background"), Some("#ffffff"));
+        assert_eq!(bootstrap.variable("--pui-primary"), Some("#0044cc"));
+        assert_eq!(bootstrap.variable("--pui-radius"), Some("4px"));
+        assert_eq!(
+            bootstrap.substitute("var(--pui-radius-md)"),
+            Substitution::Resolved("max(calc(4px - 2px), 0px)".to_string())
+        );
+    }
+    let light = catalog.get("liquid-glass", ColorScheme::Light).unwrap();
+    let dark = catalog.get("liquid-glass", ColorScheme::Dark).unwrap();
+    assert_eq!(light.variable("--pui-secondary"), Some("#ffffff"));
+    assert_eq!(dark.variable("--pui-secondary"), Some("#2c2c2e"));
+    assert_eq!(dark.variable("--pui-radius"), Some("9999px"));
 }

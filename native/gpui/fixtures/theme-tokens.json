@@ -3,6 +3,8 @@
   "sources": {
     "shadcn": "packages/cli/src/legacy/type.ts (SHADCN_THEME_CSS)",
     "brutalist": "packages/cli/src/generated/brutalist-theme.ts (BRUTALIST_THEME_CSS)",
+    "bootstrap-2-3-2": "packages/prototypes/bootstrap-2-3-2/src/theme.ts (renderThemeCss)",
+    "liquid-glass": "packages/prototypes/liquid-glass/src/theme.ts (renderThemeCss)",
     "renderer": "packages/cli/src/services/proto-style-css.ts (renderPrefixedThemeCss)"
   },
   "counts": {
@@ -13,6 +15,14 @@
     "brutalist": {
       "light": 43,
       "dark": 43
+    },
+    "bootstrap-2-3-2": {
+      "light": 14,
+      "dark": 14
+    },
+    "liquid-glass": {
+      "light": 14,
+      "dark": 14
     }
   },
   "themes": {
@@ -202,6 +212,74 @@
         "--pui-coral-foreground": "#000000",
         "--pui-sky": "#5294FF",
         "--pui-sky-foreground": "#000000"
+      }
+    },
+    "bootstrap-2-3-2": {
+      "light": {
+        "--pui-background": "#ffffff",
+        "--pui-foreground": "#333333",
+        "--pui-secondary": "#f5f5f5",
+        "--pui-secondary-foreground": "#333333",
+        "--pui-primary": "#0044cc",
+        "--pui-primary-foreground": "#ffffff",
+        "--pui-border": "#cccccc",
+        "--pui-muted": "#e6e6e6",
+        "--pui-ring": "#0055aa",
+        "--pui-radius": "4px",
+        "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
+        "--pui-radius-lg": "var(--pui-radius)",
+        "--pui-radius-md": "max(calc(var(--pui-radius) - 2px), 0px)",
+        "--pui-radius-sm": "max(calc(var(--pui-radius) - 4px), 0px)"
+      },
+      "dark": {
+        "--pui-background": "#ffffff",
+        "--pui-foreground": "#333333",
+        "--pui-secondary": "#f5f5f5",
+        "--pui-secondary-foreground": "#333333",
+        "--pui-primary": "#0044cc",
+        "--pui-primary-foreground": "#ffffff",
+        "--pui-border": "#cccccc",
+        "--pui-muted": "#e6e6e6",
+        "--pui-ring": "#0055aa",
+        "--pui-radius": "4px",
+        "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
+        "--pui-radius-lg": "var(--pui-radius)",
+        "--pui-radius-md": "max(calc(var(--pui-radius) - 2px), 0px)",
+        "--pui-radius-sm": "max(calc(var(--pui-radius) - 4px), 0px)"
+      }
+    },
+    "liquid-glass": {
+      "light": {
+        "--pui-background": "#f5f5f7",
+        "--pui-foreground": "#1d1d1f",
+        "--pui-secondary": "#ffffff",
+        "--pui-secondary-foreground": "#1d1d1f",
+        "--pui-primary": "#0061cc",
+        "--pui-primary-foreground": "#ffffff",
+        "--pui-border": "#c7c7cc",
+        "--pui-muted": "#e8e8ed",
+        "--pui-ring": "#0061cc",
+        "--pui-radius": "9999px",
+        "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
+        "--pui-radius-lg": "var(--pui-radius)",
+        "--pui-radius-md": "max(calc(var(--pui-radius) - 2px), 0px)",
+        "--pui-radius-sm": "max(calc(var(--pui-radius) - 4px), 0px)"
+      },
+      "dark": {
+        "--pui-background": "#1c1c1e",
+        "--pui-foreground": "#f5f5f7",
+        "--pui-secondary": "#2c2c2e",
+        "--pui-secondary-foreground": "#f5f5f7",
+        "--pui-primary": "#0a6cdb",
+        "--pui-primary-foreground": "#ffffff",
+        "--pui-border": "#636366",
+        "--pui-muted": "#3a3a3c",
+        "--pui-ring": "#78b7ff",
+        "--pui-radius": "9999px",
+        "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
+        "--pui-radius-lg": "var(--pui-radius)",
+        "--pui-radius-md": "max(calc(var(--pui-radius) - 2px), 0px)",
+        "--pui-radius-sm": "max(calc(var(--pui-radius) - 4px), 0px)"
       }
     }
   }
