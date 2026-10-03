@@ -322,9 +322,21 @@ describe('automatic documentation image preview in real Chromium', () => {
         );
         await capture(page, `linear-${width}-closing`);
         const closing = await motionFrames(page, `linear-${width}-closing`);
-        expect(
-          closing.filter((f) => f.opacity > 0.1 && f.opacity < 0.9).length
-        ).toBeGreaterThanOrEqual(2);
+        const closingMid = closing.filter((f) => f.opacity > 0.1 && f.opacity < 0.9);
+        expect(closingMid.length).toBeGreaterThanOrEqual(2);
+        for (const frame of closingMid)
+          for (const key of ['x', 'y', 'width', 'height'] as const)
+            expect(
+              Math.abs(frame[key] - (origin[key] + (target[key] - origin[key]) * frame.opacity))
+            ).toBeLessThan(4);
+        for (let i = 1; i < closingMid.length; i++)
+          expect(
+            Math.abs(
+              closingMid[i].opacity -
+                closingMid[i - 1].opacity +
+                (closingMid[i].time - closingMid[i - 1].time) / 220
+            )
+          ).toBeLessThan(0.025);
         await closed(page);
         expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
         expect(await trigger.locator('img').evaluate((el) => getComputedStyle(el).visibility)).toBe(
@@ -344,20 +356,47 @@ describe('automatic documentation image preview in real Chromium', () => {
     const page = track(await context.newPage());
     try {
       await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
-      let trigger = await open(page, 'Raster comparison diagram');
+      // Dialog makes the background inert. This DOM locator is solely for
+      // explicit fixture mutations, not a claim of native hidden interaction.
+      const sourceOwner = page.locator(
+        '[data-docs-image-trigger]:has(img[alt="Raster comparison diagram"])'
+      );
+      const originWidth = (await sourceOwner.locator('img').boundingBox())!.width;
+      await open(page, 'Raster comparison diagram');
+      const initial = (await page.locator('[data-docs-image-content]').boundingBox())!;
+      await recordNextMotion(page, 'keydown');
       await page.keyboard.press('Escape');
+      await page.waitForFunction(
+        () => {
+          const mask = document.querySelector('[data-docs-image-mask]');
+          const opacity = mask && Number(getComputedStyle(mask).opacity);
+          return opacity && opacity > 0.5 && opacity < 0.8;
+        },
+        undefined,
+        { polling: 'raf' }
+      );
       expect(
         await page.locator('[data-docs-image-content]').getAttribute('data-transition-state')
       ).toBe('leaving');
       await page.keyboard.press('Enter');
       await entered(page);
+      const interrupted = await motionFrames(page, 'interrupted-reopen');
+      expect(Math.min(...interrupted.map((f) => f.width))).toBeLessThan(initial.width - 20);
+      expect(interrupted.at(-1)!.width).toBeCloseTo(initial.width, 0);
+      for (let i = 1; i < interrupted.length; i++)
+        expect(Math.abs(interrupted[i].width - interrupted[i - 1].width)).toBeLessThan(
+          (Math.abs(initial.width - originWidth) *
+            (interrupted[i].time - interrupted[i - 1].time)) /
+            220 +
+            2
+        );
       await page.setViewportSize({ width: 390, height: 700 });
       await page.waitForFunction(() => {
         const r = document.querySelector('[data-docs-image-content]')!.getBoundingClientRect();
         return r.x >= 0 && r.right <= innerWidth && r.y >= 0 && r.bottom <= innerHeight;
       });
       await capture(page, 'interrupted-resized');
-      await trigger.evaluate((el) => {
+      await sourceOwner.evaluate((el) => {
         (el as HTMLElement).style.transform = 'translateY(4000px)';
       });
       await page.keyboard.press('Escape');
@@ -365,11 +404,11 @@ describe('automatic documentation image preview in real Chromium', () => {
         await page.locator('[data-docs-image-content]').getAttribute('data-docs-image-return')
       ).toBe('fade');
       await closed(page);
-      await trigger.evaluate((el) => {
+      await sourceOwner.evaluate((el) => {
         (el as HTMLElement).style.removeProperty('transform');
       });
-      trigger = await open(page, 'Raster comparison diagram');
-      await trigger.evaluate((el) => el.remove());
+      await open(page, 'Raster comparison diagram');
+      await sourceOwner.evaluate((el) => el.remove());
       await page.keyboard.press('Escape');
       expect(
         await page.locator('[data-docs-image-content]').getAttribute('data-docs-image-return')
