@@ -1,5 +1,7 @@
 # Liquid Glass projection (draft)
 
+The current visual implementation is ordinary translucency and blur. It does not yet implement Apple Liquid Glass’s defining lensing, adaptive optical layers or liquid shape transitions; a blur-removal pixel test cannot prove those effects. The full material remains open under #793.
+
 This private, unreleased source package projects Base Button into a functional-control visual language informed by Apple's [Materials HIG](https://developer.apple.com/design/human-interface-guidelines/materials). It is independently implemented, not Apple's native material engine or an Apple-endorsed library. No Apple font, icon, private asset or shader is redistributed.
 
 `liquid-glass-button` genuinely invokes `asButton()` once. Base owns activation, keyboard, focus and disabled behavior. Visual props:
@@ -8,7 +10,7 @@ This private, unreleased source package projects Base Button into a functional-c
 - `material: auto | opaque`, default `auto`
 - inherited `disabled`, default `false`
 
-## Bounded material
+## Stage-0 translucent fallback
 
 A regular functional surface uses `bg-secondary/80` and `backdrop-blur-xs` only when all four live `preference.*` values explicitly permit enhancement and both paired `styleSupport.alphaFill` and `styleSupport.backdropBlur4px` facts are true. These are fixed draft contracts from #793, not arbitrary browser reads inside a Prototype. The Web provider's syntax filter is necessary but insufficient: actual paint must be verified in the consumer fixture.
 

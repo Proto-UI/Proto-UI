@@ -213,8 +213,8 @@ const cards: LibraryCard[] = [
     type: isZh ? '风格组件库' : 'Styled components',
     status: isZh ? 'Button 已登记 · 扩展中' : 'Button available · expanding',
     description: isZh
-      ? '按实时偏好和能力增强的透明功能面，带确定性不透明回退。'
-      : 'Preference- and capability-gated translucent functional surfaces with an opaque fallback.',
+      ? '初阶段半透明与模糊回退；Apple Liquid Glass 的折射与自适应光学仍在实现。'
+      : 'Stage-0 translucency and blur fallback; Liquid Glass lensing and adaptive optics are still pending.',
     bestFor: isZh
       ? '重视层次和可读性的功能层'
       : 'Layered functional controls with readable content',
@@ -563,6 +563,11 @@ const cards: LibraryCard[] = [
     margin-inline: 0.75rem;
     overflow: hidden;
     border-radius: 0.62rem;
+  }
+
+  /* Live controls must receive native input above the stretched navigation link. */
+  .library-card__preview:not([aria-hidden='true']) {
+    z-index: 2;
   }
 
   .library-card__body {

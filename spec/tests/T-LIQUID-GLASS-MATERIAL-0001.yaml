@@ -1,6 +1,6 @@
 id: T-LIQUID-GLASS-MATERIAL-0001
 type: test
-title: Liquid Glass bounded material and live fallback evidence
+title: Liquid Glass family stage-0 translucent fallback evidence
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale: Bounded material policy is experimental. Unit evidence does not establish optical or cross-host conformance; actual four-Web consumer evidence must be collected.

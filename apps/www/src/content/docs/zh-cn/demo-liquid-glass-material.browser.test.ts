@@ -307,8 +307,23 @@ describe.sequential('Liquid Glass bounded material on real Web hosts', () => {
             card.locator('[data-projection-scope]').getAttribute('data-projection-runtime')
           )
           .toBe('react');
+        expect(
+          await button.evaluate((element) => {
+            const bounds = element.getBoundingClientRect();
+            const hit = document.elementFromPoint(
+              bounds.x + bounds.width / 2,
+              bounds.y + bounds.height / 2
+            );
+            return !!hit && (hit === element || element.contains(hit));
+          })
+        ).toBe(true);
+        const galleryUrl = page.url();
         await button.click();
         await expect.poll(() => card.getByRole('status').textContent()).toBe('1 activations');
+        await button.focus();
+        await page.keyboard.press('Space');
+        await expect.poll(() => card.getByRole('status').textContent()).toBe('2 activations');
+        expect(page.url()).toBe(galleryUrl);
         expect(await card.locator(`a[href="./${family}/"]`).count()).toBe(1);
       }
       // Both mounted cards follow the same page event on an actual control change.
