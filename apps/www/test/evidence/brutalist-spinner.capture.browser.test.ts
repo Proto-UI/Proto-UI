@@ -33,6 +33,8 @@ vm.runInNewContext(
   { module }
 );
 type ColorFacts = {
+  color: string;
+  backgroundColors: string[];
   foregroundRgba: number[] | null;
   backgroundRgba: number[] | null;
   opaqueForeground: boolean;
@@ -111,10 +113,12 @@ describe('Spinner capture native browser probes', () => {
       expect(facts[0].foregroundRgba).toEqual([0, 0, 0, 255]);
       expect(facts[0].backgroundRgba).not.toBeNull();
       const [r, g, b, a] = facts[0].backgroundRgba!;
-      expect(r).toBeGreaterThanOrEqual(127);
-      expect(r).toBeLessThanOrEqual(128);
-      expect(g).toBe(r);
-      expect(b).toBe(r);
+      // CSS4 conversion can straddle the half-byte rounding boundary per
+      // channel. Apply the same 127.5 -> {127,128} range to every channel.
+      for (const channel of [r, g, b]) {
+        expect(channel).toBeGreaterThanOrEqual(127);
+        expect(channel).toBeLessThanOrEqual(128);
+      }
       expect(a).toBe(255);
     } finally {
       await page.close();
@@ -127,7 +131,26 @@ describe('Spinner capture native browser probes', () => {
       await page.setContent(
         '<style>html { background: rgba(0, 0, 0, .999) } body, span { background: transparent } span { color: rgba(0, 0, 0, .999) }</style><span></span>'
       );
+      const [legacy] = await page.locator('span').evaluateAll<ColorFacts[]>(styleReader);
+      // Report what CSSOM retained; do not claim to recover authored precision
+      // after a legacy color has already been quantized/serialized by the UA.
+      console.info(
+        'Legacy near-opaque CSSOM observation',
+        JSON.stringify({
+          color: legacy.color,
+          backgroundColors: legacy.backgroundColors,
+          foregroundRgba: legacy.foregroundRgba,
+          backgroundRgba: legacy.backgroundRgba,
+        })
+      );
+      await page.setContent(
+        '<style>html { background: color(srgb 0 0 0 / .999) } body, span { background: transparent } span { color: color(srgb 0 0 0 / .999) }</style><span></span>'
+      );
       const [facts] = await page.locator('span').evaluateAll<ColorFacts[]>(styleReader);
+      // The negative control is valid only if the input to the actual probe
+      // still contains the non-opaque alpha before 8-bit canvas readback.
+      expect(facts.color).toMatch(/\/\s*0?\.999\s*\)$/);
+      expect(facts.backgroundColors.some((color) => /\/\s*0?\.999\s*\)$/.test(color))).toBe(true);
       expect(facts.backgroundRgba?.[3]).toBe(255);
       expect(facts.foregroundRgba?.[3]).toBe(255);
       expect(facts.opaqueBackground).toBe(false);
