@@ -1,0 +1,36 @@
+{
+  "sourceCommit": "d2c4e7e79edf1480531245ee4e0777c5b5eb1464",
+  "sourceTree": "e8c8bc12e993b33683b56b9d5e8c6d5972186584",
+  "kind": "SVG raster layout review, not browser page screenshots",
+  "renderer": "Sharp 0.34.5 / libvips; local derived fonts registered; declared theme variables resolved for librsvg",
+  "sourceFiles": [
+    "apps/www/public/diagrams/whitepaper-switch-activation.zh-cn.svg",
+    "apps/www/public/diagrams/whitepaper-switch-activation.en.svg"
+  ],
+  "limits": [
+    "Not proof of browser font shaping or article layout",
+    "Not interactive Dialog/zoom/keyboard evidence"
+  ],
+  "files": [
+    {
+      "path": "evidence/issue-782/d2c4e7e79edf1480531245ee4e0777c5b5eb1464/activation-zh-cn-light.png",
+      "sha256": "db366cf65121150aa2f0e81ee7c26c8ca3776b63f97f8411b3dcd424881bb914",
+      "size": 126354
+    },
+    {
+      "path": "evidence/issue-782/d2c4e7e79edf1480531245ee4e0777c5b5eb1464/activation-zh-cn-dark.png",
+      "sha256": "bf398f08226788feb83fe8555d0fd0aaae57642f6eabec71873cc8b017c9d09b",
+      "size": 135861
+    },
+    {
+      "path": "evidence/issue-782/d2c4e7e79edf1480531245ee4e0777c5b5eb1464/activation-en-light.png",
+      "sha256": "011fd2c84790238fd3f5d92cec233da57782c6eb148d2b41db81234cac94dca2",
+      "size": 131118
+    },
+    {
+      "path": "evidence/issue-782/d2c4e7e79edf1480531245ee4e0777c5b5eb1464/activation-en-dark.png",
+      "sha256": "8d2e67f8e2971d8ea3d801825f0338add4a6e6aba2013c79fcf118d7b3a22515",
+      "size": 140278
+    }
+  ]
+}
