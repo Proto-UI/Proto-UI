@@ -48,11 +48,29 @@ async function capture(page: Page, name: string) {
   await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: false });
 }
 async function entered(page: Page) {
-  await page.waitForFunction(
-    () =>
-      document.querySelector('[data-docs-image-content]')?.getAttribute('data-transition-state') ===
-      'entered'
-  );
+  // PUI's logical phase and the browser's first painted transition frame have
+  // distinct clocks. Observe both; do not treat a phase label as settled pixels.
+  const content = await page.locator('[data-docs-image-content]').elementHandle();
+  const media = await page.locator('.docs-image-full').elementHandle();
+  try {
+    // Bind the current render/media identity, then sample its live animations.
+    // No stale finished promise can accept a canceled or replaced generation.
+    await page.waitForFunction(
+      ({ content, media }) =>
+        content?.isConnected &&
+        media?.isConnected &&
+        content === document.querySelector('[data-docs-image-content]') &&
+        media === document.querySelector('.docs-image-full') &&
+        content.getAttribute('data-transition-state') === 'entered' &&
+        content
+          .getAnimations()
+          .every((animation) => !animation.pending && animation.playState !== 'running'),
+      { content, media }
+    );
+  } finally {
+    await content?.dispose();
+    await media?.dispose();
+  }
 }
 async function closed(page: Page) {
   await page.waitForFunction(
