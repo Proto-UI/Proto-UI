@@ -163,7 +163,9 @@ async function separatorGeometry(locator: Locator): Promise<SeparatorGeometry> {
 }
 
 function roots(previewer: Locator): Locator {
-  return previewer.locator('[data-projection-content] [data-pui-root]');
+  return previewer.locator(
+    '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+  );
 }
 
 async function expectVisibility(locator: Locator, visible: boolean, label: string): Promise<void> {
@@ -753,6 +755,47 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
       for (const runtime of TEST_RUNTIMES) {
         await selectRuntime(opened.page, opened.previewer, runtime, '[data-pui-root]', 4);
         const toggles = roots(opened.previewer);
+        // Closing the runtime menu can leave the pointer over a newly mounted
+        // Toggle. Preserve that real input state before establishing the resting
+        // precondition; the exact resting shadow assertions below stay unchanged.
+        const inputStateAfterRuntimeSelection = await toggles.evaluateAll((elements) =>
+          elements.map((element, index) => {
+            const rect = element.getBoundingClientRect();
+            return {
+              index,
+              label: element.textContent?.trim(),
+              hovered: element.getAttribute('data-hovered'),
+              pressed: element.getAttribute('data-pressed'),
+              focusVisible: element.getAttribute('data-focus-visible'),
+              pointerOverSurface: element.matches(':hover'),
+              boxShadow: getComputedStyle(element).boxShadow,
+              bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+            };
+          })
+        );
+        console.log(
+          '[Brutalist Toggle before resting measurement]',
+          JSON.stringify({ runtime, surfaces: inputStateAfterRuntimeSelection })
+        );
+        await opened.page.mouse.move(0, 0);
+        await opened.page.waitForFunction(
+          () => {
+            const controls = document.querySelectorAll(
+              '[data-previewer-id] [data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+            );
+            return (
+              controls.length === 4 &&
+              [...controls].every(
+                (element) =>
+                  !element.hasAttribute('data-hovered') &&
+                  !element.hasAttribute('data-pressed') &&
+                  !element.matches(':hover')
+              )
+            );
+          },
+          undefined,
+          { timeout: 10_000 }
+        );
         const factsBefore = await toggles.evaluateAll((elements) =>
           elements.map((element) => {
             const style = getComputedStyle(element);
@@ -997,7 +1040,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
           '[data-pui-root]',
           3
         );
-        const nodes = opened.previewer.locator('[data-projection-content] [data-pui-root]');
+        const nodes = opened.previewer.locator(
+          '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+        );
         const trigger = nodes.nth(1);
         await opened.page.mouse.move(5, 5);
         const triggerElement = await trigger.elementHandle();
@@ -1105,7 +1150,9 @@ describe.sequential('remaining Brutalist component browser coverage', () => {
         await expectVisibility(panelText, false, `${runtime}/hover-focus-close`);
         await applyColorScheme(opened.page, 'dark');
         const darkTrigger = opened.previewer
-          .locator('[data-projection-content] [data-pui-root]')
+          .locator(
+            '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+          )
           .nth(1);
         const darkTriggerElement = await darkTrigger.elementHandle();
         if (!darkTriggerElement) throw new Error('Dark Hover Card trigger was not materialized.');

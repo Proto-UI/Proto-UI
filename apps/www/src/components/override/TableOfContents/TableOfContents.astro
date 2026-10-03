@@ -8,7 +8,9 @@ const { toc } = Astro.locals.starlightRoute;
   toc && (
     <sl-toc data-min-h={toc.minHeadingLevel} data-max-h={toc.maxHeadingLevel}>
       <nav aria-labelledby="starlight__on-this-page">
-        <h2 id="starlight__on-this-page">{Astro.locals.t('tableOfContents.onThisPage')}</h2>
+        <h2 data-site-typography="label" id="starlight__on-this-page">
+          {Astro.locals.t('tableOfContents.onThisPage')}
+        </h2>
         <TableOfContentsList toc={toc.items} />
       </nav>
     </sl-toc>

@@ -42,10 +42,11 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
 <section
   class:list={['code-example', className]}
   data-code-example
+  data-site-code-surface="frame"
   data-initial-host={activeHost}
   aria-label={label}
 >
-  <div class="code-example__strip">
+  <div class="code-example__strip" data-code-toolbar data-site-code-surface="toolbar">
     <div class="code-example__tabs" role="tablist" aria-label="Host" data-code-host-tabs>
       {
         hosts.map((host, hostIndex) => {
@@ -83,7 +84,11 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
           aria-labelledby={`${instanceId}-host-tab-${hostIndex}`}
           hidden={!hostSelected}
         >
-          <div class="code-example__strip code-example__strip--files">
+          <div
+            class="code-example__strip code-example__strip--files"
+            data-code-toolbar
+            data-site-code-surface="toolbar"
+          >
             <div
               class="code-example__tabs"
               role="tablist"
@@ -112,6 +117,7 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
               labelledBy={`${instanceId}-${hostIndex}-file-tab-${fileIndex}`}
               hidden={fileIndex !== 0}
               fileIndex={fileIndex}
+              framed={false}
               code={file.code}
               lang={file.lang}
             />
@@ -139,13 +145,6 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
     max-width: 100%;
   }
 
-  .code-example {
-    overflow: hidden;
-    border: 1px solid var(--docs-code-border);
-    border-radius: var(--docs-code-radius);
-    background: color-mix(in oklch, var(--color-muted) 20%, transparent);
-  }
-
   .code-example__host-panel[hidden],
   :global([data-code-example] [data-code-file-panel][hidden]) {
     display: none;
@@ -154,11 +153,6 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
   .code-example__strip {
     max-width: 100%;
     overflow-x: auto;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .code-example__strip--files {
-    background: color-mix(in oklch, var(--color-muted) 45%, transparent);
   }
 
   .code-example__tabs {
@@ -167,13 +161,14 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
     min-width: 100%;
     align-items: center;
     gap: 0.25rem;
-    padding: 0.375rem;
+    padding: 0;
   }
 
   .code-example__tabs button {
     flex: none;
     border: 0;
     border-radius: 0.375rem;
+    min-height: 2.75rem;
     padding: 0.375rem 0.625rem;
     background: transparent;
     color: var(--color-muted-foreground);

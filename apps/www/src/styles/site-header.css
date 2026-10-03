@@ -1,0 +1,599 @@
+/* One website-owned layout for the homepage and documentation. Actual PUI
+   Button/Select surfaces still belong to the selected library and runtime. */
+.site-header {
+  --site-header-row-height: 4rem;
+  --site-control-height: 2.75rem;
+  box-sizing: border-box;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) 10rem minmax(12.5rem, 15rem) 2.75rem 2.75rem;
+  grid-template-areas: 'brand navigation . context search theme menu';
+  align-items: center;
+  column-gap: 0.25rem;
+  width: 100%;
+  min-height: var(--site-header-row-height);
+  max-width: 82.5rem;
+  padding-inline: 1.5rem;
+  margin-inline: auto;
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+.site-header :is(button, a, select) {
+  font-family: inherit;
+}
+.site-header-brand {
+  grid-area: brand;
+}
+.site-header .site-header-brand a {
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 650;
+  letter-spacing: -0.025em;
+  text-transform: none;
+}
+.site-header-panel {
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+.site-header-panel [data-site-header-panel-content] {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.site-header[data-site-menu-ready] .site-header-panel {
+  position: absolute;
+  /* Absolute geometry uses the Header padding box, not its grid track area. */
+  grid-area: auto;
+  z-index: 70;
+  top: var(--site-header-panel-top, 100%);
+  left: var(--site-header-panel-left, 0);
+  width: 22rem;
+  max-width: var(--site-header-panel-max-width, calc(100vw - 1rem));
+  max-height: var(--site-header-panel-max-height, calc(100svh - 5rem));
+  overflow: visible;
+}
+/* Initial projection failure retains the readable native disclosure too. */
+.site-header[data-site-menu-ready] .site-header-panel:not(:has(.site-header-popup-surface)) {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.site-header .site-header-popup-navigation {
+  display: none;
+}
+.site-header-navigation {
+  grid-area: navigation;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-inline-start: 1.5rem;
+}
+.site-header-navigation :is(.home-actions-fallback, .home-runtime-actions) {
+  flex-wrap: nowrap;
+  gap: 1.5rem;
+}
+.site-header .site-header-navigation a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0;
+  border: 0;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  text-transform: none;
+  white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+.site-header-search {
+  grid-area: search;
+  min-width: 0;
+  margin-inline-start: 0.5rem;
+}
+.site-header-theme {
+  grid-area: theme;
+}
+.site-header-menu {
+  grid-area: menu;
+}
+.site-header :is(.site-header-theme, .site-header-menu) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+}
+.site-header :is(.site-header-theme, .site-header-menu) svg,
+.site-header .site-header-search [data-open-modal] svg {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: none;
+}
+/* Responsive layout inputs consumed by Search's actual family Button. */
+.site-header-search site-search {
+  --site-search-trigger-width: 100%;
+  --site-search-trigger-padding: 0.75rem;
+  --site-search-trigger-justify: flex-start;
+}
+.site-header .site-header-search [data-open-modal] .site-search-label {
+  display: inline;
+}
+.site-header .site-header-search [data-open-modal] .site-search-shortcut {
+  display: inline-flex;
+}
+.site-header-context {
+  grid-area: context;
+  min-width: 0;
+}
+.site-header-runtime {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.site-header-runtime-label {
+  display: none;
+  flex: none;
+}
+.site-header-runtime :is(.adapter-select-wrapper, .home-actions, .pui-projection-controls) {
+  min-width: 0;
+  width: 10rem;
+  max-width: 100%;
+  flex: 0 1 10rem;
+}
+.site-header-runtime :is(.pui-projection-scope, .pui-projection-control) {
+  min-width: 0;
+  width: 100%;
+}
+.site-header-runtime .pui-projection-content:empty {
+  display: none;
+}
+.site-header .pui-projection-scope {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.site-header .pui-projection-content {
+  min-width: 0;
+}
+.site-header .home-runtime-actions,
+.site-header .home-actions-fallback {
+  align-items: center;
+}
+.site-header-settings {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 1rem;
+  padding-block: 0;
+}
+
+.site-header-setting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+.site-header-setting-label {
+  color: var(--color-muted-foreground);
+  font-size: 0.8125rem;
+}
+.site-header-setting a {
+  min-height: 2.75rem;
+}
+.site-header-setting a {
+  font-size: 0.875rem;
+}
+.site-header-setting [aria-label='GitHub'],
+.site-header-setting [aria-label='Discord'],
+.site-header-setting [aria-label='X'],
+.site-header-setting [aria-label='Bluesky'] {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  width: auto;
+  height: auto;
+  padding: 0;
+}
+.site-header-setting svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+.site-header-docs-navigation {
+  display: none;
+}
+.site-header-menu-icon,
+.site-header-theme-icon {
+  display: block;
+  width: 1.125rem;
+  height: 1.125rem;
+  position: relative;
+}
+.site-header-menu-icon::before,
+.site-header-menu-icon::after {
+  content: '';
+  position: absolute;
+  left: 0.0625rem;
+  right: 0.0625rem;
+  top: 0.3125rem;
+  height: 1.5px;
+  background: currentColor;
+}
+.site-header-menu-icon::after {
+  top: 0.75rem;
+}
+[data-site-menu-open='true'] .site-header-menu-icon::before {
+  top: 0.53125rem;
+  transform: rotate(45deg);
+}
+[data-site-menu-open='true'] .site-header-menu-icon::after {
+  top: 0.53125rem;
+  transform: rotate(-45deg);
+}
+.site-header-theme-icon {
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.site-header-theme-icon::after {
+  content: '';
+  display: block;
+  width: 50%;
+  height: 100%;
+  background: currentColor;
+}
+.site-header:not([data-site-menu-ready]) .site-header-menu {
+  visibility: hidden;
+}
+.site-header [hidden] {
+  display: none !important;
+}
+.home-runtime-status,
+.site-header .pui-projection-control-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.home-runtime-header[data-runtime-state='error'] .home-runtime-status {
+  position: static;
+  grid-column: 1 / -1;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0.5rem 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  color: var(--color-destructive);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+@media (max-width: 68.749rem) {
+  .site-header {
+    grid-template-columns: auto auto minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
+    grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
+    grid-template-rows: var(--site-header-row-height) 3rem;
+  }
+  .site-header-context {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    height: 3rem;
+    border-top: 1px solid var(--color-border);
+  }
+  .site-header-runtime-label {
+    display: inline;
+    font-size: 0.75rem;
+    color: var(--color-muted-foreground);
+    white-space: nowrap;
+  }
+  .site-header-search {
+    margin-inline-start: 0;
+  }
+  .site-header-search site-search {
+    --site-search-trigger-width: 2.75rem;
+    --site-search-trigger-padding: 0;
+    --site-search-trigger-justify: center;
+  }
+  .site-header
+    .site-header-search
+    [data-open-modal]
+    :is(.site-search-label, .site-search-shortcut) {
+    display: none !important;
+  }
+  .site-header-docs-navigation {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+  }
+
+  .site-header-docs-navigation svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+@media (min-width: 64rem) {
+  .site-header-docs-navigation {
+    display: none;
+  }
+}
+@media (max-width: 47.999rem) {
+  .site-header {
+    --site-header-row-height: 3.5rem;
+    grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
+    grid-template-areas: 'brand search theme menu' 'context context context context';
+    padding-inline: 1rem;
+  }
+  .site-header [data-site-header-desktop-navigation] {
+    display: none;
+  }
+  .site-header .site-header-popup-navigation {
+    display: grid;
+  }
+  .site-header-navigation {
+    grid-area: auto;
+    display: grid;
+    gap: 0;
+    margin-inline-start: 0;
+  }
+  .site-header-navigation :is(.home-actions-fallback, .home-runtime-actions) {
+    display: grid;
+    gap: 0;
+  }
+  .site-header .site-header-navigation a {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .site-header-settings {
+    grid-column: auto;
+    width: auto;
+    padding: 0;
+  }
+  .site-header-runtime {
+    gap: 0.5rem;
+  }
+  .site-header-runtime-label {
+    font-size: 0.6875rem;
+  }
+  .site-header-runtime :is(.adapter-select-wrapper, .home-actions, .pui-projection-controls) {
+    width: 9.5rem;
+    flex-basis: 9.5rem;
+  }
+}
+
+@media (max-width: 24.999rem) {
+  .site-header-docs-navigation > span {
+    display: none;
+  }
+}
+
+/* The homepage's two independent settings share one context group. Control
+   visual surfaces remain PUI-owned; these are layout/label dimensions only. */
+.home-runtime-header {
+  grid-template-columns: auto auto minmax(0, 1fr) 21rem minmax(10rem, 13rem) 2.75rem 2.75rem;
+}
+.home-runtime-header .home-runtime-preferences,
+.home-runtime-header .home-runtime-preferences .home-actions,
+.home-runtime-header .home-runtime-preferences .pui-projection-controls {
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.home-runtime-header .home-runtime-preferences .pui-projection-controls {
+  display: grid;
+  grid-template-columns: minmax(12rem, 1.45fr) minmax(7.5rem, 1fr);
+  gap: 0.75rem;
+}
+.home-runtime-header .home-runtime-preferences .pui-projection-control {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.home-runtime-header .home-runtime-preferences .pui-projection-control-label {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  color: var(--color-muted-foreground);
+}
+@media (max-width: 79.999rem) {
+  .home-runtime-header {
+    grid-template-columns: auto auto minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
+    grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
+    grid-template-rows: var(--site-header-row-height) auto;
+  }
+  .home-runtime-header .site-header-context {
+    height: auto;
+    padding-block: 0.5rem 0.75rem;
+  }
+}
+@media (max-width: 47.999rem) {
+  .home-runtime-header {
+    grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
+    grid-template-areas: 'brand search theme menu' 'context context context context';
+    padding-inline: 0.25rem;
+  }
+  .home-runtime-header .home-runtime-preferences .pui-projection-controls {
+    grid-template-columns: minmax(12rem, 1.45fr) minmax(7.5rem, 1fr);
+  }
+}
+@media (max-width: 359px) {
+  .home-runtime-header .home-runtime-preferences .pui-projection-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Labels occupy the line above the shared control baseline. */
+@media (min-width: 80rem) {
+  .home-runtime-header {
+    align-items: end;
+    padding-block-end: 0.5rem;
+  }
+}
+
+/* Docs gives its longest Runtime value real space. Text can wrap through the
+   Select's public surface inputs when enlargement needs more than one line. */
+@media (min-width: 68.75rem) {
+  .site-header[data-docs-site-header] {
+    grid-template-columns: auto auto minmax(0, 1fr) 12rem minmax(12.5rem, 15rem) 2.75rem 2.75rem;
+  }
+}
+.site-header[data-docs-site-header] .site-header-runtime .adapter-select-wrapper {
+  width: 12rem;
+  flex-basis: 12rem;
+}
+@media (max-width: 68.749rem) {
+  .site-header[data-docs-site-header] {
+    grid-template-rows: minmax(var(--site-header-row-height), auto) auto;
+  }
+  .site-header[data-docs-site-header] .site-header-context {
+    box-sizing: border-box;
+    height: auto;
+    min-height: 5rem;
+    padding-block: 0.5rem;
+    align-items: end;
+  }
+  .site-header[data-docs-site-header] .site-header-runtime {
+    display: grid;
+    gap: 0.25rem;
+    flex: 1 1 0;
+  }
+  .site-header[data-docs-site-header] .site-header-runtime-label {
+    line-height: 1rem;
+    white-space: normal;
+  }
+  .site-header[data-docs-site-header] .site-header-runtime .adapter-select-wrapper {
+    width: 100%;
+  }
+}
+@container docs-page (max-width: 15rem) {
+  .site-header[data-docs-site-header] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: 'brand brand brand' 'search theme menu' 'context context context';
+    grid-template-rows: auto auto auto;
+    padding-inline: 0.25rem;
+    row-gap: 0.25rem;
+  }
+  .site-header[data-docs-site-header] .site-header-context {
+    flex-wrap: wrap;
+  }
+  .site-header[data-docs-site-header] .site-header-runtime {
+    flex-basis: 100%;
+  }
+}
+
+/* The passive surface must fill the same box that is anchored to the Button.
+   Restrict this to its direct scope; nested Select owners keep their layout. */
+[data-site-header-surface-mount] > .pui-projection-generation > .pui-projection-scope {
+  display: block;
+  width: 100%;
+}
+[data-site-header-surface-mount]
+  > .pui-projection-generation
+  > .pui-projection-scope
+  > .pui-projection-controls:empty {
+  display: none;
+}
+[data-site-header-surface-mount]
+  > .pui-projection-generation
+  > .pui-projection-scope
+  > .pui-projection-content {
+  width: 100%;
+}
+/* Keep the actual popup frame fixed to the Button while only its native slot
+   scrolls. The family Prototype still owns frame, padding, radius and paint. */
+.site-header[data-site-menu-ready] .site-header-popup-surface {
+  display: flex;
+  flex-direction: column;
+  max-height: var(--site-header-panel-max-height, none);
+}
+.site-header[data-site-menu-ready] .site-header-native-slot {
+  min-height: 0;
+  /* Public Select focus paint extends at most 4px (ring plus offset).
+     Reserve that space inside this scroll viewport without moving content. */
+  margin: -4px;
+  padding: 4px;
+  scroll-padding: 4px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+[data-site-header-compact-context]:empty {
+  display: none;
+}
+@media (max-width: 47.999rem) {
+  .site-header[data-site-menu-ready] {
+    grid-template-areas: 'brand search theme menu';
+    grid-template-rows: minmax(var(--site-header-row-height), auto);
+  }
+  .site-header[data-site-menu-ready] > .site-header-context {
+    display: contents;
+  }
+  .site-header[data-docs-site-header][data-site-menu-ready]:has(.site-header-docs-navigation) {
+    grid-template-columns: minmax(0, 1fr) repeat(4, 2.75rem);
+    grid-template-areas: 'brand contents search theme menu';
+  }
+  .site-header[data-site-menu-ready] .site-header-docs-navigation {
+    grid-area: contents;
+    justify-content: center;
+    width: 2.75rem;
+  }
+  .site-header[data-site-menu-ready] .site-header-docs-navigation > span {
+    display: none;
+  }
+  .site-header [data-site-header-compact-context] .site-header-runtime {
+    display: grid;
+    gap: 0.25rem;
+    width: 100%;
+  }
+  .site-header
+    [data-site-header-compact-context]
+    .site-header-runtime
+    :is(.adapter-select-wrapper, .home-actions, .pui-projection-controls) {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+  .home-runtime-header
+    [data-site-header-compact-context]
+    .home-runtime-preferences
+    .pui-projection-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* Text enlargement may reflow the toolbar itself. It must never bring back a
+   second settings row or shrink the real PUI touch targets to fit. */
+@container docs-page (max-width: 15rem) {
+  .site-header[data-site-menu-ready] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: 'brand brand brand' 'search theme menu';
+    grid-template-rows: auto auto;
+    padding-inline: 0.25rem;
+    row-gap: 0.25rem;
+  }
+  .site-header[data-docs-site-header][data-site-menu-ready]:has(.site-header-docs-navigation) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas: 'brand brand contents' 'search theme menu';
+  }
+}

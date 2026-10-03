@@ -4,7 +4,14 @@ import {
   PROJECTION_FOCUS_KEYS,
   type ProjectionCompositionControls,
 } from './projection-composition';
-import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
+import {
+  PROJECTION_FAMILY_MANIFESTS,
+  type ProjectionComponentId,
+  type ProjectionFamilyId,
+  type ProjectionFamilyManifest,
+} from './projection-families';
+import { loadDemo } from './demo-modules';
+import { createRuntimePreviewSurface, runtimePreviewRecipe } from './runtime-preview-surface';
 import {
   materializeProjectionCandidate,
   restoreProjectionControlFocus,
@@ -113,7 +120,6 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
     const detail = error instanceof Error ? error.stack || error.message : String(error);
     pre.textContent = `[Preview Error]\n${detail}`;
     pre.style.whiteSpace = 'pre-wrap';
-    pre.style.color = 'crimson';
     initialErrorSurface = pre;
     mount.replaceChildren(pre);
   };
@@ -259,12 +265,22 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
         }
       }
       const intentRevision = desiredIntentRevision;
+      const originalDemo = await loadDemo(
+        (PROJECTION_FAMILY_MANIFESTS[projectionFamilyId] as ProjectionFamilyManifest).families[
+          componentId
+        ]!.recipeId
+      );
+      const surface = createRuntimePreviewSurface(originalDemo, projectionFamilyId);
       const candidate = await materializeProjectionCandidate(request, {
         mount,
         ownerId,
         componentId,
         controls: controls(),
         controlIds: toolbar ? ['runtime'] : [],
+        content: {
+          demo: surface.demo,
+          recipe: runtimePreviewRecipe(projectionFamilyId, componentId),
+        },
       });
       if (
         !destroyed &&

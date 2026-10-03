@@ -18,7 +18,7 @@ const { toc, isMobile = false, depth = 0 } = Astro.props;
   {
     toc.map((heading) => (
       <li>
-        <a href={'#' + heading.slug}>
+        <a href={'#' + heading.slug} data-site-native-link data-site-link-appearance="toc">
           <span>{heading.text}</span>
         </a>
         {heading.children.length > 0 && (
@@ -35,7 +35,7 @@ const { toc, isMobile = false, depth = 0 } = Astro.props;
       padding: 0;
       list-style: none;
     }
-    a {
+    a:not([data-site-link-enhanced]) {
       --pad-inline: 0.5rem;
       display: block;
       border-radius: 0.25rem;
@@ -43,10 +43,10 @@ const { toc, isMobile = false, depth = 0 } = Astro.props;
       padding-inline: calc(1rem * var(--depth) + var(--pad-inline)) var(--pad-inline);
       line-height: 1.25;
     }
-    a[aria-current='true'] {
+    a:not([data-site-link-enhanced])[aria-current='true'] {
       color: var(--sl-color-text-accent);
     }
-    .isMobile a {
+    .isMobile a:not([data-site-link-enhanced]) {
       --pad-inline: 1rem;
       display: flex;
       justify-content: space-between;
@@ -59,16 +59,16 @@ const { toc, isMobile = false, depth = 0 } = Astro.props;
       text-decoration: none;
       outline-offset: var(--sl-outline-offset-inside);
     }
-    .isMobile:first-child > li:first-child > a {
+    .isMobile:first-child > li:first-child > a:not([data-site-link-enhanced]) {
       border-top: 0;
     }
-    .isMobile a[aria-current='true'],
-    .isMobile a[aria-current='true']:hover,
-    .isMobile a[aria-current='true']:focus {
+    .isMobile a:not([data-site-link-enhanced])[aria-current='true'],
+    .isMobile a:not([data-site-link-enhanced])[aria-current='true']:hover,
+    .isMobile a:not([data-site-link-enhanced])[aria-current='true']:focus {
       color: var(--sl-color-white);
       background-color: unset;
     }
-    .isMobile a[aria-current='true']::after {
+    .isMobile a:not([data-site-link-enhanced])[aria-current='true']::after {
       content: '';
       width: 1rem;
       background-color: var(--sl-color-text-accent);

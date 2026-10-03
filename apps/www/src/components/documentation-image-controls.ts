@@ -8,7 +8,11 @@ import * as shadcnDialog from '@proto.ui/prototypes-shadcn/dialog';
 import brutalistButton from '@proto.ui/prototypes-brutalist/button';
 import * as brutalistDialog from '@proto.ui/prototypes-brutalist/dialog';
 import { BRUTALIST_THEME } from '@proto.ui/prototypes-brutalist/theme';
-import { imageZoomContent, imageZoomMask } from './documentation-image-zoom.proto';
+import {
+  imageZoomContent,
+  imageZoomMask,
+  imageZoomTrigger,
+} from './documentation-image-zoom.proto';
 
 export type PreviewFamily = 'shadcn' | 'brutalist';
 export type PreviewControl = HTMLElement & {
@@ -19,12 +23,14 @@ const propsByHost = new WeakMap<HTMLElement, Record<string, unknown>>();
 const parts = {
   shadcn: {
     button: shadcnButton,
+    imageTrigger: imageZoomTrigger,
     ...shadcnDialog,
     dialogContent: imageZoomContent,
     dialogMask: imageZoomMask,
   },
   brutalist: {
     button: brutalistButton,
+    imageTrigger: imageZoomTrigger,
     ...brutalistDialog,
     dialogContent: imageZoomContent,
     dialogMask: imageZoomMask,
@@ -32,6 +38,7 @@ const parts = {
 };
 const roles = [
   'button',
+  'imageTrigger',
   'dialogRoot',
   'dialogMask',
   'dialogContent',

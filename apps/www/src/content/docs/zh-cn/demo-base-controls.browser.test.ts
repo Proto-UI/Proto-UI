@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { spawn, type ChildProcess } from 'node:child_process';
+import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
 import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import {
@@ -81,20 +82,18 @@ async function chromeExecutable(): Promise<string> {
 }
 
 async function waitForServer(url: string): Promise<void> {
-  const deadline = Date.now() + 120_000;
-  while (Date.now() < deadline) {
-    if (devServer && devServer.exitCode !== null) {
-      throw new Error(`Documentation dev server exited early.\n${serverOutput}`);
-    }
-    try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
-      if (response.ok) return;
-    } catch {
-      // The dev server is still starting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 250));
+  try {
+    await waitForServerReadiness(url, {
+      timeoutMs: 120_000,
+      server: devServer,
+      readOutput: () => serverOutput,
+    });
+  } catch (error) {
+    console.error(
+      `[browser-harness] readiness failed: ${error instanceof Error ? error.message : String(error)}`
+    );
+    throw error;
   }
-  throw new Error(`Timed out waiting for ${url}.\n${serverOutput}`);
 }
 
 function recordServerOutput(chunk: Buffer): void {

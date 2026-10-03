@@ -1,10 +1,11 @@
 import { loadDemo } from './demo-modules';
 import { prepareDemoRuntime, renderDemo } from './demo-renderer';
-import { collectPrototypeIds } from './demo-types';
+import { collectPrototypeIds, type DemoSpec } from './demo-types';
 import {
   createProjectionComposition,
   PROJECTION_FOCUS_KEYS,
   type ProjectionControlId,
+  type ProjectionContentRecipe,
   type ProjectionCompositionControls,
   type ProjectionFocusKey,
 } from './projection-composition';
@@ -33,6 +34,8 @@ export type ProjectionMaterializerOptions = Readonly<{
   componentId: ProjectionComponentId;
   controls: ProjectionCompositionControls;
   controlIds?: readonly ProjectionControlId[];
+  /** Website-owned host composition, checked against an explicit recipe. */
+  content?: Readonly<{ demo: DemoSpec; recipe: ProjectionContentRecipe }>;
 }>;
 
 export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
@@ -133,11 +136,15 @@ function externalProjectionPortalRoots(
     mount.ownerDocument.querySelectorAll<HTMLElement>(
       '[data-projection-owner][data-projection-generation]'
     )
-  ).filter((element) => !mount.contains(element) && ownsGeneration(element));
+  ).filter(
+    (element) => !mount.contains(element) && !element.contains(mount) && ownsGeneration(element)
+  );
 
   return externalSurfaces.filter((surface) => {
     let ancestor = surface.parentElement;
-    while (ancestor && !mount.contains(ancestor)) {
+    // Consumer shells may publish the same owner/generation as their mount.
+    // They are never external portals, nor roots of a genuine sibling portal.
+    while (ancestor && !mount.contains(ancestor) && !ancestor.contains(mount)) {
       if (sameOwnedGeneration(surface, ancestor)) return false;
       ancestor = ancestor.parentElement;
     }
@@ -349,7 +356,7 @@ export async function materializeProjectionCandidate(
   }
 
   const themeSurfaceStyle = resolveProjectionThemeSurfaceStyle(projectionFamilyId, options.mount);
-  const childDemo = await loadDemo(componentManifest.recipeId);
+  const childDemo = options.content?.demo ?? (await loadDemo(componentManifest.recipeId));
   const composition = createProjectionComposition({
     ownerId: options.ownerId,
     runtimeId,
@@ -357,6 +364,7 @@ export async function materializeProjectionCandidate(
     generation: request.generation,
     componentId: options.componentId,
     childDemo,
+    contentRecipe: options.content?.recipe,
     controls: options.controls,
     controlIds: options.controlIds,
     themeSurfaceStyle,

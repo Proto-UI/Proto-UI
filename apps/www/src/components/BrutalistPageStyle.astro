@@ -11,12 +11,4 @@ const themeCss = renderBrutalistThemeCss({
 
 <style is:inline set:html={themeCss}></style>
 
-<style is:global>
-  .brutalist-demo-frame {
-    padding: 1rem;
-    color: var(--pui-foreground);
-    background: var(--pui-background);
-    border: 2px solid var(--pui-border);
-    box-shadow: 3px 3px 0 var(--pui-foreground);
-  }
-</style>
+<!-- Theme boundary only. RuntimeBox canvas paint belongs to SitePreviewSurface. -->

@@ -1,6 +1,14 @@
 ---
-import '@pagefind/default-ui/css/ui.css';
 import project from 'virtual:starlight/project-context';
+import { localizedUrl } from '../../utils/localizedUrl';
+import { resolveSiteLibraryFamily } from '../site-library-family';
+
+const documentationUrl = localizedUrl(
+  new URL('/ui-libraries/', Astro.url),
+  Astro.locals.starlightRoute.locale || 'en',
+  project.trailingSlash
+).pathname;
+const family = resolveSiteLibraryFamily(Astro.url.pathname);
 
 const pagefindTranslations = {
   placeholder: Astro.locals.t('search.label'),
@@ -25,33 +33,19 @@ const retryLabel = isChinese ? '重试' : 'Retry';
 const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
 ---
 
-<site-search class={Astro.props.class} {...dataAttributes}>
-  <button
-    data-open-modal
-    disabled
-    aria-label={Astro.locals.t('search.label')}
-    aria-keyshortcuts="Control+K"
+<site-search
+  class={Astro.props.class}
+  {...dataAttributes}
+  data-search-initial-family={family}
+  data-open-label={Astro.locals.t('search.label')}
+  data-close-label={Astro.locals.t('search.cancelLabel')}
+  data-retry-label={retryLabel}
+  data-ctrl-label={Astro.locals.t('search.ctrlKey')}
+>
+  <div data-search-command-mount="open"></div>
+  <noscript
+    ><a href={documentationUrl}>{isChinese ? '浏览文档' : 'Browse documentation'}</a></noscript
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="16"
-      height="16"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.3-4.3"></path>
-    </svg>
-    <span class="sl-hidden md:sl-block" aria-hidden="true">{Astro.locals.t('search.label')}</span>
-    <kbd class="sl-hidden md:sl-flex" style="display: none;">
-      <kbd>{Astro.locals.t('search.ctrlKey')}</kbd><kbd>K</kbd>
-    </kbd>
-  </button>
 
   <dialog style="padding:0" aria-labelledby="search-dialog-title">
     <div class="dialog-frame sl-flex">
@@ -59,34 +53,15 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
         <h2 id="search-dialog-title" class="search-toolbar__title">
           {Astro.locals.t('search.label')}
         </h2>
-        <button
-          data-close-modal
-          class="search-toolbar__close"
-          type="button"
-          aria-label={Astro.locals.t('search.cancelLabel')}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            aria-hidden="true"
-          >
-            <path d="M18 6 6 18"></path>
-            <path d="m6 6 12 12"></path>
-          </svg>
-          <span class="search-toolbar__close-label">{Astro.locals.t('search.cancelLabel')}</span>
-        </button>
+        <div data-search-command-mount="close"></div>
       </div>
       {
         import.meta.env.DEV ? (
           <div style="margin: auto; text-align: center; white-space: pre-line;" dir="ltr">
             <p>{Astro.locals.t('search.devWarning')}</p>
+            <div hidden>
+              <div data-search-command-mount="retry" />
+            </div>
           </div>
         ) : (
           <>
@@ -117,9 +92,7 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
               </svg>
               <p class="search-failure__title">{failureTitle}</p>
               <p class="search-failure__body">{failureBody}</p>
-              <button type="button" class="search-failure__retry">
-                {retryLabel}
-              </button>
+              <div data-search-command-mount="retry" />
             </div>
           </>
         )
@@ -128,48 +101,67 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
   </dialog>
 </site-search>
 
-{
-  /**
-   * Use User-Agent Client Hints when available and the user-agent fallback elsewhere.
-   * The fallback keeps the shortcut correct in Safari and browsers without the hint API.
-   */
-}
-<script is:inline>
-  (() => {
-    const openBtn = document.querySelector('button[data-open-modal]');
-    const shortcut = openBtn?.querySelector('kbd');
-    if (!openBtn || !(shortcut instanceof HTMLElement)) return;
-    const platformKey = shortcut.querySelector('kbd');
-    const userAgentData = navigator['userAgentData'];
-    const platform = userAgentData?.platform || navigator.userAgent;
-    if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(platform)) {
-      platformKey.textContent = '⌘';
-      openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
-    }
-    shortcut.style.display = '';
-  })();
-</script>
-
 <script>
   import { pagefindUserConfig } from 'virtual:starlight/pagefind-config';
+  import {
+    searchCommandParticipant,
+    initDocumentationSearchCommands,
+  } from '../site-search-commands';
 
   class SiteSearch extends HTMLElement {
-    constructor() {
-      super();
-      const openBtn = this.querySelector<HTMLButtonElement>('button[data-open-modal]')!;
-      const closeBtn = this.querySelector<HTMLButtonElement>('button[data-close-modal]')!;
+    private cleanup?: () => void;
+    private refreshCommands?: () => unknown;
+    connectedCallback() {
+      if (this.cleanup) {
+        this.refreshCommands?.();
+        return;
+      }
+      let alive = true;
+      let stopPending!: () => void;
+      const disposed = new Promise<never>((_, reject) => {
+        stopPending = () => reject(new Error('Search disposed'));
+      });
+      disposed.catch(() => {});
+      const commands = searchCommandParticipant(this);
+      const openMount = this.querySelector<HTMLElement>('[data-search-command-mount="open"]')!;
       const dialog = this.querySelector('dialog')!;
       const dialogFrame = this.querySelector('.dialog-frame')!;
       const searchContainer = this.querySelector<HTMLElement>('.search-container');
       const initializingEl = this.querySelector<HTMLElement>('.search-initializing');
       const searchRoot = this.querySelector<HTMLElement>('#starlight__search');
       const failureEl = this.querySelector<HTMLElement>('.search-failure');
-      const retryBtn = this.querySelector<HTMLButtonElement>('.search-failure__retry');
+      let probeController: AbortController | undefined;
+      const pendingTimers = new Set<number>();
+      const later = (callback: () => void, delay: number) => {
+        const timer = window.setTimeout(() => {
+          pendingTimers.delete(timer);
+          if (alive) callback();
+        }, delay);
+        pendingTimers.add(timer);
+        return timer;
+      };
+      const cancelLater = (timer?: number) => {
+        if (timer !== undefined) {
+          window.clearTimeout(timer);
+          pendingTimers.delete(timer);
+        }
+      };
+      const pendingFrames = new Set<number>();
+      const nextFrame = (callback: () => void) => {
+        const frame = window.requestAnimationFrame(() => {
+          pendingFrames.delete(frame);
+          if (alive) callback();
+        });
+        pendingFrames.add(frame);
+      };
       const baseUrl = import.meta.env.BASE_URL;
       const bundlePath = baseUrl.replace(/\/$/, '') + '/pagefind/';
 
       /** Close the modal if a user clicks on a link or outside of the modal. */
       const onClick = (event: MouseEvent) => {
+        // Browsers may run the queued command between native listener
+        // callbacks. Its originating click must never become backdrop input.
+        if (event.target instanceof Node && openMount.contains(event.target)) return;
         const isLink = 'href' in (event.target || {});
         if (
           isLink ||
@@ -186,10 +178,12 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
       let probePromise: Promise<boolean> | null = null;
       let initPromise: Promise<void> | null = null;
       let loadingWatchdog: number | undefined;
-      let previouslyFocused: HTMLElement | null = null;
+      let restoreTrigger = false;
+      let retrying = false;
       let searchBlocked = false;
       const focusSearchInput = () => {
-        this.querySelector<HTMLElement>('.pagefind-ui__search-input')?.focus();
+        if (alive && dialog.open)
+          this.querySelector<HTMLElement>('.pagefind-ui__search-input')?.focus();
       };
 
       const showInitializing = () => {
@@ -206,12 +200,13 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
         searchRoot.hidden = false;
       };
       const showFailure = () => {
+        if (!alive) return;
         if (!failureEl || !searchContainer) return;
         searchBlocked = true;
         initializingEl && (initializingEl.hidden = true);
         failureEl.hidden = false;
         searchContainer.hidden = true;
-        if (dialog.open) retryBtn?.focus();
+        if (alive && dialog.open) commands.focus('retry');
       };
       const hideFailure = () => {
         if (!failureEl || !searchContainer) return;
@@ -242,20 +237,23 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
 
         const currentProbe = (async (): Promise<boolean> => {
           const controller = new AbortController();
-          const timeout = window.setTimeout(() => controller.abort(), 5000);
+          probeController = controller;
+          const timeout = later(() => controller.abort(), 5000);
           try {
             const res = await fetch(bundlePath + 'pagefind.js', {
               method: 'HEAD',
               cache: 'no-store',
               signal: controller.signal,
             });
+            if (!alive) return false;
             indexAvailable = res.ok;
             return indexAvailable;
           } catch {
             indexAvailable = false;
             return false;
           } finally {
-            window.clearTimeout(timeout);
+            cancelLater(timeout);
+            pendingTimers.delete(timeout);
           }
         })();
 
@@ -280,17 +278,22 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
             try {
               await Promise.race([
                 runtimeImport,
+                disposed,
                 new Promise<never>((_, reject) => {
-                  runtimeTimeout = window.setTimeout(
+                  runtimeTimeout = later(
                     () => reject(new Error('Pagefind runtime import timed out')),
                     5000
                   );
                 }),
               ]);
             } finally {
-              if (runtimeTimeout !== undefined) window.clearTimeout(runtimeTimeout);
+              if (runtimeTimeout !== undefined) {
+                cancelLater(runtimeTimeout);
+                pendingTimers.delete(runtimeTimeout);
+              }
               runtimeImport.catch(() => {});
             }
+            if (!alive) return;
             // @ts-expect-error — Missing types for @pagefind/default-ui package.
             const defaultUIImport = import('@pagefind/default-ui');
             let defaultUITimeout: number | undefined;
@@ -298,17 +301,22 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
             try {
               defaultUI = await Promise.race([
                 defaultUIImport,
+                disposed,
                 new Promise<never>((_, reject) => {
-                  defaultUITimeout = window.setTimeout(
+                  defaultUITimeout = later(
                     () => reject(new Error('Pagefind UI import timed out')),
                     5000
                   );
                 }),
               ]);
             } finally {
-              if (defaultUITimeout !== undefined) window.clearTimeout(defaultUITimeout);
+              if (defaultUITimeout !== undefined) {
+                cancelLater(defaultUITimeout);
+                pendingTimers.delete(defaultUITimeout);
+              }
               defaultUIImport.catch(() => {});
             }
+            if (!alive) return;
             const { PagefindUI } = defaultUI;
             pagefindUI = new PagefindUI({
               ...pagefindUserConfig,
@@ -344,6 +352,7 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
       };
 
       const ensureSearchReady = async () => {
+        if (!alive) return;
         if (import.meta.env.DEV) {
           hideInitializing();
           return;
@@ -357,7 +366,9 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
           return;
         }
         showInitializing();
-        if (!(await probeIndex())) {
+        const available = await probeIndex();
+        if (!alive) return;
+        if (!available) {
           showFailure();
           return;
         }
@@ -373,8 +384,8 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
        * without producing a result list.
        */
       const watchForStalledSearch = () => {
-        window.clearTimeout(loadingWatchdog);
-        loadingWatchdog = window.setTimeout(() => {
+        cancelLater(loadingWatchdog);
+        loadingWatchdog = later(() => {
           const drawer = searchContainer?.querySelector('.pagefind-ui__drawer');
           const stuck =
             drawer &&
@@ -387,35 +398,39 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
           }
         }, 8000);
       };
-      searchContainer?.addEventListener('input', (event) => {
+      const onInput = (event: Event) => {
         const target = event.target as HTMLInputElement;
         if (target.matches('.pagefind-ui__search-input')) {
           if (target.value) {
             watchForStalledSearch();
           } else {
-            window.clearTimeout(loadingWatchdog);
+            cancelLater(loadingWatchdog);
           }
         }
-      });
+      };
+      searchContainer?.addEventListener('input', onInput);
 
-      const openModal = async (event?: MouseEvent) => {
-        previouslyFocused = openBtn;
+      const openModal = async () => {
+        if (!alive || dialog.open) return;
+        restoreTrigger = true;
         dialog.showModal();
         document.documentElement.toggleAttribute('data-search-modal-open', true);
         document.body.toggleAttribute('data-search-modal-open', true);
-        event?.stopPropagation();
         window.addEventListener('click', onClick);
         await ensureSearchReady();
         if (dialog.open) focusSearchInput();
       };
 
       const cleanupModal = () => {
+        // Native close is queued as a task. A previous session's notification
+        // must not clear listeners or return-focus ownership after a reopen.
+        if (dialog.open) return;
         document.documentElement.toggleAttribute('data-search-modal-open', false);
         document.body.toggleAttribute('data-search-modal-open', false);
         window.removeEventListener('click', onClick);
-        window.clearTimeout(loadingWatchdog);
-        if (previouslyFocused?.isConnected) previouslyFocused.focus();
-        previouslyFocused = null;
+        cancelLater(loadingWatchdog);
+        if (alive && restoreTrigger && this.isConnected) commands.focus('open');
+        restoreTrigger = false;
       };
 
       const closeModal = () => {
@@ -423,46 +438,58 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
         cleanupModal();
       };
 
-      openBtn.addEventListener('click', openModal);
-      openBtn.disabled = false;
-      closeBtn.addEventListener('click', closeModal);
-      dialog.addEventListener('cancel', (event) => {
+      const onCancel = (event: Event) => {
         event.preventDefault();
         closeModal();
-      });
-
-      retryBtn?.addEventListener('click', async () => {
-        retryBtn.disabled = true;
+      };
+      dialog.addEventListener('cancel', onCancel);
+      const retry = async () => {
+        if (!alive || retrying) return;
+        retrying = true;
+        commands.setRetryDisabled(true);
         try {
           resetPagefindUI();
           indexAvailable = null;
           showInitializing();
           const ok = await probeIndex();
+          if (!alive) return;
           if (ok) {
             hideFailure();
             await initPagefindUI();
-            if (uiInitialized) {
+            if (uiInitialized && alive) {
               hideInitializing();
-              window.requestAnimationFrame(focusSearchInput);
+              nextFrame(focusSearchInput);
             }
-          } else {
-            showFailure();
-          }
+          } else showFailure();
         } finally {
-          retryBtn.disabled = false;
-          if (dialog.open && failureEl && !failureEl.hidden) retryBtn.focus();
+          retrying = false;
+          if (alive) {
+            commands.setRetryDisabled(false);
+            if (dialog.open && failureEl && !failureEl.hidden)
+              queueMicrotask(() => commands.focus('retry'));
+          }
         }
-      });
-
+      };
+      commands.bind({ open: openModal, close: closeModal, retry });
+      const docs = this.closest('[data-homepage-runtime]')
+        ? null
+        : initDocumentationSearchCommands(commands);
+      this.refreshCommands = () => docs?.refresh();
       dialog.addEventListener('close', cleanupModal);
 
       // Listen for `ctrl + k` and `cmd + k` keyboard shortcuts.
-      window.addEventListener('keydown', (e) => {
+      const onKeydown = (e: KeyboardEvent) => {
+        // The Button opens on keydown and can focus an already-loaded Pagefind
+        // input before this key's native default action. Consume the opener's
+        // Enter so it cannot submit the newly focused form's Clear button.
+        if (e.key === 'Enter' && e.target instanceof Node && openMount.contains(e.target))
+          e.preventDefault();
         if ((e.metaKey === true || e.ctrlKey === true) && e.key === 'k') {
           dialog.open ? closeModal() : openModal();
           e.preventDefault();
         }
-      });
+      };
+      window.addEventListener('keydown', onKeydown);
 
       let translations = {};
       try {
@@ -473,13 +500,36 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
       const stripTrailingSlash = (path: string) => path.replace(/(.)\/(#.*)?$/, '$1$2');
       const formatURL = shouldStrip ? stripTrailingSlash : (path: string) => path;
 
-      window.addEventListener('DOMContentLoaded', () => {
-        if (import.meta.env.DEV) return;
-        const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-        onIdle(async () => {
-          await ensureSearchReady();
-        });
-      });
+      // The service is lazy. A view switch never probes or rebuilds Pagefind.
+      this.cleanup = () => {
+        alive = false;
+        stopPending();
+        restoreTrigger = false;
+        if (dialog.open) dialog.close();
+        cleanupModal();
+        probeController?.abort();
+        for (const timer of pendingTimers) cancelLater(timer);
+        pendingTimers.clear();
+        for (const frame of pendingFrames) window.cancelAnimationFrame(frame);
+        pendingFrames.clear();
+        window.removeEventListener('keydown', onKeydown);
+        dialog.removeEventListener('cancel', onCancel);
+        dialog.removeEventListener('close', cleanupModal);
+        searchContainer?.removeEventListener('input', onInput);
+        document.removeEventListener('astro:before-swap', onBeforeSwap);
+        commands.dispose();
+        void docs
+          ?.destroy()
+          .catch((error) => console.error('[SiteSearch] command cleanup failed.', error));
+        resetPagefindUI();
+        this.cleanup = undefined;
+        this.refreshCommands = undefined;
+      };
+      const onBeforeSwap = () => this.cleanup?.();
+      document.addEventListener('astro:before-swap', onBeforeSwap);
+    }
+    disconnectedCallback() {
+      this.cleanup?.();
     }
   }
   customElements.define('site-search', SiteSearch);
@@ -490,50 +540,12 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
     site-search {
       display: contents;
     }
-    button[data-open-modal] {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      border: 0;
-      background-color: transparent;
-      color: var(--sl-color-gray-1);
-      cursor: pointer;
-      height: 2.5rem;
-      font-size: var(--sl-text-xl);
-    }
-
-    @media (min-width: 50rem) {
-      button[data-open-modal] {
-        border: 1px solid var(--sl-color-gray-5);
-        border-radius: 0.5rem;
-        padding-inline-start: 0.75rem;
-        padding-inline-end: 0.5rem;
-        background-color: var(--sl-color-black);
-        color: var(--sl-color-gray-2);
-        font-size: var(--sl-text-sm);
-        width: 100%;
-        max-width: 22rem;
-      }
-      button[data-open-modal]:hover {
-        border-color: var(--sl-color-gray-2);
-        color: var(--sl-color-white);
-      }
-
-      button[data-open-modal] > :last-child {
-        margin-inline-start: auto;
-      }
-    }
-
-    button > kbd {
-      border-radius: 0.25rem;
-      font-size: var(--sl-text-2xs);
-      gap: 0.25em;
-      padding-inline: 0.375rem;
-      background-color: var(--sl-color-gray-6);
+    [data-open-modal] > kbd {
+      margin-inline-start: auto;
     }
 
     kbd {
-      font-family: var(--__sl-font);
+      font-family: inherit;
     }
 
     dialog {
@@ -563,19 +575,6 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
       flex-grow: 1;
       gap: 1rem;
       padding: 1rem;
-    }
-
-    button[data-close-modal] {
-      position: absolute;
-      z-index: 1;
-      align-items: center;
-      align-self: flex-end;
-      height: calc(64px * var(--pagefind-ui-scale));
-      padding: 0.25rem;
-      border: 0;
-      background: transparent;
-      cursor: pointer;
-      color: var(--sl-color-text-accent);
     }
 
     #starlight__search {
@@ -616,6 +615,8 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
 </style>
 
 <style is:global>
+  @import url('@pagefind/default-ui/css/ui.css') layer(starlight.core);
+
   @layer starlight.core {
     [data-search-modal-open] {
       overflow: hidden;

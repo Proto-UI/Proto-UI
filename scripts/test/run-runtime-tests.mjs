@@ -7,10 +7,18 @@
 // server exits and its suite fails. One server for the whole run removes that.
 
 import { spawn } from 'node:child_process';
+import { readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { runtimeSelection, assertVitestReport, writeJson, ciContext } from './runtime-ci.mjs';
+import { waitForServerReadiness } from './server-readiness.mjs';
+import {
+  observeReadinessFailures,
+  observeRuntimeServer,
+  runtimeServerSnapshot,
+} from './runtime-server-diagnostics.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 // Astro dev compiles a route on first request, so a suite probing a cold route
@@ -53,10 +61,39 @@ const READY_ROUTES = [
 ];
 const READY_TIMEOUT_MS = 180_000;
 
-const testPlan = createRuntimeTestPlan(process.argv.slice(2));
+const phase = process.env.PROTO_UI_RUNTIME_PHASE;
+const shard = process.env.PROTO_UI_RUNTIME_SHARD;
+const testPlan = createRuntimeTestPlan(process.argv.slice(2), { phase, shard });
+const context = phase ? ciContext() : undefined;
+const selection = phase ? runtimeSelection(phase, shard) : undefined;
+if (selection && selection.checkoutSha !== context.checkoutSha)
+  throw new Error('Runtime checkout changed during selection');
+const evidenceDirectory = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+if (selection && !evidenceDirectory)
+  throw new Error('A CI runtime phase requires PROTO_UI_RUNTIME_EVIDENCE_DIR');
+const evidenceId = selection
+  ? `${phase}${shard ? `-${shard.replace('/', '-of-')}` : ''}`
+  : undefined;
+const reportPath = selection
+  ? path.resolve(evidenceDirectory, `vitest-${evidenceId}.json`)
+  : undefined;
+if (selection) {
+  // Clear only this invocation's result: stale evidence must never satisfy a rerun.
+  rmSync(reportPath, { force: true });
+  rmSync(path.join(evidenceDirectory, `result-${evidenceId}.json`), { force: true });
+  writeJson(path.join(evidenceDirectory, `selection-${evidenceId}.json`), selection);
+  console.log(`[test:runtime] selection ${JSON.stringify(selection)}`);
+}
 let devServer = null;
 let serverOutput = '';
 let shuttingDown = false;
+const reportedSnapshots = new Set();
+
+function reportServerSnapshot(reason) {
+  if (!devServer || reportedSnapshots.has(reason)) return;
+  reportedSnapshots.add(reason);
+  console.error(runtimeServerSnapshot(devServer, reason, serverOutput));
+}
 
 function recordOutput(chunk) {
   serverOutput = `${serverOutput}${chunk.toString()}`.slice(-20_000);
@@ -80,20 +117,11 @@ async function availablePort() {
 }
 
 async function waitForServer(url) {
-  const deadline = Date.now() + READY_TIMEOUT_MS;
-  while (Date.now() < deadline) {
-    if (devServer && devServer.exitCode !== null) {
-      throw new Error(`Documentation dev server exited early.\n${serverOutput}`);
-    }
-    try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
-      if (response.ok) return;
-    } catch {
-      // Still starting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 250));
-  }
-  throw new Error(`Timed out waiting for ${url}.\n${serverOutput}`);
+  await waitForServerReadiness(url, {
+    timeoutMs: READY_TIMEOUT_MS,
+    server: devServer,
+    readOutput: () => serverOutput,
+  });
 }
 
 async function startServer() {
@@ -125,6 +153,11 @@ async function startServer() {
 
   const url = `http://127.0.0.1:${port}`;
   for (const route of READY_ROUTES) await waitForServer(`${url}${route}`);
+  observeRuntimeServer(devServer, {
+    isShuttingDown: () => shuttingDown,
+    readOutput: () => serverOutput,
+    report: (message) => console.error(message),
+  });
   return url;
 }
 
@@ -176,14 +209,38 @@ async function runVitest(args, baseUrl) {
       process.platform === 'win32' ? 'vitest.cmd' : 'vitest'
     );
     const env = baseUrl ? { ...process.env, PROTO_UI_BROWSER_BASE_URL: baseUrl } : process.env;
-    const child = spawn(vitestBin, ['run', ...args], {
+    const reportArgs = reportPath
+      ? ['--reporter=default', '--reporter=json', `--outputFile=${reportPath}`]
+      : [];
+    const child = spawn(vitestBin, ['run', ...args, ...reportArgs], {
       cwd: root,
       env,
       shell: process.platform === 'win32',
-      stdio: 'inherit',
+      stdio: ['inherit', 'pipe', 'pipe'],
+    });
+    const inspect = observeReadinessFailures(() =>
+      reportServerSnapshot('browser readiness failed while the server wrapper may still be running')
+    );
+    child.stdout.on('data', (chunk) => {
+      process.stdout.write(chunk);
+      inspect(chunk);
+    });
+    child.stderr.on('data', (chunk) => {
+      process.stderr.write(chunk);
+      inspect(chunk);
     });
     child.on('error', reject);
-    child.on('exit', (code, signal) => resolve(signal ? 1 : (code ?? 1)));
+    child.on('close', async (code, signal) => {
+      if (signal || code !== 0)
+        reportServerSnapshot(`Vitest exited: code=${code}; signal=${signal}`);
+      // Wait for both captured pipes and their forwarded writes before the
+      // runner can exit, so its diagnostic tap cannot truncate Vitest output.
+      await Promise.all([
+        new Promise((done) => process.stdout.write('', done)),
+        new Promise((done) => process.stderr.write('', done)),
+      ]);
+      resolve(signal ? 1 : (code ?? 1));
+    });
   });
 }
 
@@ -191,6 +248,7 @@ async function runVitest(args, baseUrl) {
 // process only has to make sure the dev server does not outlive the run.
 for (const signal of ['SIGINT', 'SIGTERM', 'SIGHUP']) {
   process.on(signal, () => {
+    reportServerSnapshot(`runner received ${signal}`);
     void stopServer().finally(() => {
       process.exit(signal === 'SIGINT' ? 130 : 143);
     });
@@ -206,9 +264,18 @@ try {
     }
     exitCode = await runVitest(phase.args, baseUrl);
     if (exitCode !== 0) break;
+    if (selection) {
+      const report = JSON.parse(readFileSync(reportPath, 'utf8'));
+      assertVitestReport(report, selection);
+      writeJson(path.join(evidenceDirectory, `result-${evidenceId}.json`), {
+        ...selection,
+        report,
+      });
+    }
   }
 } catch (error) {
   console.error(`[test:runtime] ${error instanceof Error ? error.message : String(error)}`);
+  reportServerSnapshot('runtime test runner failed');
   exitCode = 1;
 } finally {
   await stopServer();

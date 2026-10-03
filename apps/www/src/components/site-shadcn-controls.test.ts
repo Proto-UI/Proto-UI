@@ -224,3 +224,157 @@ describe('site Shadcn control bridge', () => {
     expect(button.querySelector('.sr-only')?.textContent).toBe('Copy code');
   });
 });
+
+describe('site family projections', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    registerSiteShadcnControls();
+  });
+
+  it('uses real Brutalist Button grammar rather than recoloring Shadcn', async () => {
+    const button = document.createElement('wc-brutalist-button');
+    button.dataset.siteButton = '1';
+    button.dataset.variant = 'ghost';
+    button.dataset.size = 'icon';
+    button.textContent = 'Theme';
+    document.body.append(button);
+    initSiteShadcnControls(document);
+    await settle();
+    expect(button.getAttribute('role')).toBe('button');
+    expect(button.dataset.siteControlFamily).toBe('brutalist');
+    expect(button.getAttribute('data-pui-style')).toContain('border-2');
+    expect(button.getAttribute('data-pui-style')).toContain('rounded-base');
+    expect(button.getAttribute('data-pui-style')).toContain('bg-secondary-background');
+    expect(button.getAttribute('data-pui-style')).not.toContain('rounded-md');
+  });
+
+  it('keeps Brutalist Select semantics, selected label and portal theme together', async () => {
+    document.body.innerHTML = `
+      <wc-brutalist-select-root data-site-select-root data-site-initial-value="vue">
+        <wc-brutalist-select-trigger><wc-brutalist-select-value></wc-brutalist-select-value></wc-brutalist-select-trigger>
+        <wc-brutalist-select-content>
+          <wc-brutalist-select-item data-value="vue" data-text-value="Vue">Vue</wc-brutalist-select-item>
+          <wc-brutalist-select-item data-value="react" data-text-value="React">React</wc-brutalist-select-item>
+        </wc-brutalist-select-content>
+      </wc-brutalist-select-root>`;
+    const root = document.querySelector<SiteSelectRoot>('[data-site-select-root]')!;
+    const trigger = root.querySelector<HTMLElement>('wc-brutalist-select-trigger')!;
+    const content = root.querySelector<HTMLElement>('wc-brutalist-select-content')!;
+    initSiteShadcnControls(document);
+    await settle();
+    expect(selectValue(root)).toBe('vue');
+    expect(root.querySelector('wc-brutalist-select-value')?.textContent).toBe('Vue');
+    expect(trigger.getAttribute('data-pui-style')).toContain('rounded-base');
+    expect(content.dataset.siteControlFamily).toBe('brutalist');
+    trigger.click();
+    await settle();
+    expect(root.getExposes?.().open?.get?.()).toBe(true);
+    const requestValue = root.getExposes?.().requestValue as (request: {
+      value: string;
+      textValue: string;
+      reason: string;
+    }) => boolean;
+    root.addEventListener('valueChange', (event) => {
+      setSelectValue(root, (event as CustomEvent<{ value: string }>).detail.value);
+    });
+    requestValue({ value: 'react', textValue: 'React', reason: 'pointer' });
+    await settle();
+    expect(selectValue(root)).toBe('react');
+    expect(root.getExposes?.().open?.get?.()).toBe(false);
+    expect(content.dataset.siteControlFamily).toBe('brutalist');
+    expect(document.activeElement).toBe(trigger);
+  });
+  it.each(['shadcn', 'brutalist'] as const)(
+    'projects header-only %s density through normalized surfaceStyle without changing other controls',
+    async (family) => {
+      const header = document.createElement('header');
+      header.dataset.siteHeader = '';
+      const button = document.createElement(`wc-${family}-button`);
+      button.dataset.siteButton = '';
+      button.dataset.size = 'icon';
+      button.dataset.variant = family === 'shadcn' ? 'ghost' : 'surface';
+      const root = document.createElement(`wc-${family}-select-root`) as SiteSelectRoot;
+      root.dataset.siteSelectRoot = '';
+      root.dataset.siteInitialValue = 'wc';
+      const trigger = document.createElement(`wc-${family}-select-trigger`);
+      const value = document.createElement(`wc-${family}-select-value`);
+      trigger.setAttribute('aria-labelledby', 'header-runtime-label');
+      trigger.append(value);
+      const content = document.createElement(`wc-${family}-select-content`);
+      const item = document.createElement(`wc-${family}-select-item`);
+      item.dataset.value = 'wc';
+      item.dataset.textValue = 'Web Components';
+      item.textContent = 'Web Components';
+      content.append(item);
+      root.append(trigger, content);
+      const outside = document.createElement(`wc-${family}-button`);
+      outside.dataset.siteButton = '';
+      header.append(button, root);
+      document.body.append(header, outside);
+      initSiteShadcnControls(document);
+      await settle();
+      expect(button.style.width).toBe('2.75rem');
+      expect(button.style.height).toBe('2.75rem');
+      expect(button.style.padding).toBe('0px');
+      expect(root.style.width).toBe('100%');
+      expect(root.style.minWidth).toBe('0');
+      expect(root.style.maxWidth).toBe('100%');
+      expect(trigger.style.width).toBe('100%');
+      expect(trigger.style.minWidth).toBe('0');
+      expect(trigger.style.maxWidth).toBe('100%');
+      expect(trigger.style.minHeight).toBe('var(--site-control-height, 2.75rem)');
+      expect(value.style.minWidth).toBe('0');
+      expect(value.style.flex).toBe('1 1 auto');
+      expect(value.style.overflow).toBe('hidden');
+      expect(value.style.textOverflow).toBe('ellipsis');
+      expect(value.style.whiteSpace).toBe('nowrap');
+      expect(value.textContent).toBe('Web Components');
+      expect(selectValue(root)).toBe('wc');
+      expect(item.textContent).toBe('Web Components');
+      expect(trigger.getAttribute('aria-labelledby')).toBe('header-runtime-label');
+      expect(outside.style.width).not.toBe('2.75rem');
+      setSelectValue(root, 'react');
+      setSiteSelectDisabled(root, true);
+      await settle();
+      expect(root.style.width).toBe('100%');
+      expect(root.style.minWidth).toBe('0');
+      expect(value.style.textOverflow).toBe('ellipsis');
+    }
+  );
+});
+
+it.each(['shadcn', 'brutalist'] as const)(
+  'allows Docs %s runtime values to wrap through supported surface inputs and keeps full props',
+  async (family) => {
+    registerSiteShadcnControls();
+    document.body.innerHTML = `<header data-site-header data-docs-site-header><div data-adapter-select>
+      <wc-${family}-select-root data-site-select-root data-site-initial-value="wc">
+        <wc-${family}-select-trigger data-size="sm" data-appearance="elevated"><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger>
+        <wc-${family}-select-content><wc-${family}-select-item data-value="wc" data-text-value="Web Components">Web Components</wc-${family}-select-item></wc-${family}-select-content>
+      </wc-${family}-select-root></div></header>`;
+    initSiteShadcnControls(document);
+    await settle();
+    const trigger = document.querySelector<HTMLElement>(`wc-${family}-select-trigger`)!;
+    const value = document.querySelector<HTMLElement>(`wc-${family}-select-value`)!;
+    expect(trigger.getAttribute('role')).toBe('combobox');
+    expect(trigger.style.height).toBe('auto');
+    expect(trigger.style.minHeight).toBe('var(--site-control-height, 2.75rem)');
+    expect(trigger.style.fontSize).toBe('0.875rem');
+    expect(trigger.getAttribute('data-pui-style')).toContain('h-8');
+    expect(trigger.getAttribute('data-pui-style')?.includes('shadow-[4px_4px_0_0_#000]')).toBe(
+      family === 'brutalist'
+    );
+    expect(value.style.whiteSpace).toBe('normal');
+    expect(value.style.overflow).toBe('visible');
+    expect(value.style.overflowWrap).toBe('anywhere');
+    expect(value.textContent).toBe('Web Components');
+    initSiteShadcnControls(document);
+    await settle();
+    expect(trigger.getAttribute('role')).toBe('combobox');
+    expect(value.textContent).toBe('Web Components');
+    expect(value.style.whiteSpace).toBe('normal');
+    expect(trigger.getAttribute('data-pui-style')?.includes('shadow-[4px_4px_0_0_#000]')).toBe(
+      family === 'brutalist'
+    );
+  }
+);

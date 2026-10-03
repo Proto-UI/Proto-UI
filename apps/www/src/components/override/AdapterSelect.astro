@@ -1,9 +1,14 @@
 ---
+import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
+const family = resolveSiteLibraryFamily(Astro.url.pathname);
+const { SelectRoot, SelectTrigger, SelectValue, SelectContent, SelectItem } =
+  siteControlTags(family);
 interface Props {
   id?: string;
+  brutalistTriggerAppearance?: 'flat' | 'elevated';
 }
 
-const { id = 'adapter-select' } = Astro.props;
+const { id = 'adapter-select', brutalistTriggerAppearance } = Astro.props;
 const labelId = `${id}-label-${Math.random().toString(36).slice(2)}`;
 
 // 适配器选项
@@ -17,54 +22,62 @@ const options = [
 
 <div class="adapter-select-wrapper relative inline-flex items-center" data-adapter-select>
   <span id={labelId} class="sr-only">选择适配器</span>
-  <wc-shadcn-select-root
+  <SelectRoot
+    data-site-control-family={family}
     id={id}
     data-site-select-root
     data-adapter-select-root
     data-site-initial-value="wc"
   >
-    <wc-shadcn-select-trigger
+    <SelectTrigger
+      data-site-select-trigger
       aria-labelledby={labelId}
       data-size="sm"
-      class="adapter-select inline-flex h-8 min-w-36 items-center justify-between rounded-md border-transparent bg-transparent px-3 text-sm font-medium text-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50"
+      data-appearance={family === 'brutalist' ? brutalistTriggerAppearance : undefined}
+      class="adapter-select min-w-36"
     >
-      <wc-shadcn-select-value data-placeholder="选择适配器"></wc-shadcn-select-value>
-    </wc-shadcn-select-trigger>
-    <wc-shadcn-select-content data-position="popper" data-align="end">
+      <SelectValue data-placeholder="选择适配器" />
+    </SelectTrigger>
+    <SelectContent
+      data-site-select-content
+      data-site-control-family={family}
+      data-position="popper"
+      data-align="end"
+    >
       {
         options.map((opt) => (
-          <wc-shadcn-select-item data-value={opt.value} data-text-value={opt.label}>
+          <SelectItem data-value={opt.value} data-text-value={opt.label}>
             {opt.label}
-          </wc-shadcn-select-item>
+          </SelectItem>
         ))
       }
-    </wc-shadcn-select-content>
-  </wc-shadcn-select-root>
+    </SelectContent>
+  </SelectRoot>
   <script>
-    import { initSiteShadcnControls } from '../site-shadcn-controls';
+    import { initSiteControls } from '../site-shadcn-controls';
     import { initAdapterSelects } from '../adapter-preference';
 
-    initSiteShadcnControls(document);
+    initSiteControls(document);
     initAdapterSelects(document);
     document.addEventListener('astro:page-load', () => {
-      initSiteShadcnControls(document);
+      initSiteControls(document);
       initAdapterSelects(document);
     });
   </script>
 </div>
 
 <style>
-  .adapter-select-wrapper wc-shadcn-select-root {
+  .adapter-select-wrapper [data-site-select-root] {
     display: inline-flex;
   }
 
-  .adapter-select-wrapper wc-shadcn-select-trigger {
+  .adapter-select-wrapper [data-site-select-trigger] {
     min-width: 9rem;
   }
 
   /* Keep server-rendered chrome compact until the custom elements upgrade so
      the projected option list never flashes inline in the header. */
-  .adapter-select-wrapper wc-shadcn-select-content:not(:defined) {
+  .adapter-select-wrapper [data-site-select-content]:not(:defined) {
     display: none;
   }
 </style>

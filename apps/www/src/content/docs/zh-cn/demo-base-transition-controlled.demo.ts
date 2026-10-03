@@ -60,7 +60,7 @@ export default {
   },
   root: {
     kind: 'box',
-    className: 'flex flex-col items-center gap-6 p-8',
+    className: 'flex w-full min-w-0 max-w-full flex-col items-center gap-6 p-4 sm:p-8',
     children: [
       {
         kind: 'proto',
@@ -70,13 +70,13 @@ export default {
           open: false,
           appear: false,
         },
-        className: 'transition-wrapper',
+        className: 'transition-wrapper min-w-0 max-w-full',
         children: [
           {
             kind: 'box',
             ref: 'box',
             className:
-              'w-64 h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box cursor-pointer select-none',
+              'w-64 max-w-full h-40 rounded-xl flex flex-col items-center justify-center text-background shadow-xl transition-box cursor-pointer select-none',
             children: [
               {
                 kind: 'box',
@@ -115,7 +115,7 @@ export default {
       },
       {
         kind: 'box',
-        className: 'flex gap-4 text-xs',
+        className: 'flex max-w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs',
         children: [
           {
             kind: 'box',

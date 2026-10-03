@@ -7,8 +7,9 @@ const runtimeSpies = vi.hoisted(() => ({
 const hostMountSpies = vi.hoisted(() => ({
   release: vi.fn(),
 }));
+const prototypeSpies = vi.hoisted(() => ({ loadMany: vi.fn(async (_ids: string[]) => {}) }));
 const demoSpies = vi.hoisted(() => ({
-  render: vi.fn(async () => ({ destroy: vi.fn() })),
+  render: vi.fn(),
 }));
 
 vi.mock('./runtimes/registry', () => ({
@@ -32,11 +33,24 @@ vi.mock('./runtimes/registry', () => ({
 vi.mock('./registry', () => ({ getPrototype: () => ({}) }));
 vi.mock('./prototype-modules', () => ({
   loadPrototype: async () => {},
-  loadPrototypes: async () => {},
+  loadPrototypes: prototypeSpies.loadMany,
 }));
-vi.mock('./demo-modules', () => ({ loadDemo: async () => ({}) }));
+vi.mock('./demo-modules', () => ({
+  loadDemo: async () => ({ type: 'demo', root: { kind: 'box', children: ['Custom demo'] } }),
+}));
+vi.mock('./projection-theme', () => ({
+  resolveProjectionThemeSurfaceStyle: () => ({ '--pui-background': '#fff' }),
+  applyProjectionThemeSurfaceStyle: () => {},
+  watchProjectionThemeSurfaceStyle: (
+    _family: string,
+    _root: HTMLElement,
+    callback: (theme: unknown) => void
+  ) => {
+    callback({ '--pui-background': '#fff' });
+    return vi.fn();
+  },
+}));
 vi.mock('./demo-renderer', () => ({ renderDemo: demoSpies.render }));
-vi.mock('./demo-types', () => ({ collectPrototypeIds: () => {} }));
 vi.mock('./runtimes/host-mount', () => ({
   releaseHostMount: (host: HTMLElement) => hostMountSpies.release(host),
 }));
@@ -85,10 +99,16 @@ function createProjectedPreviewerRoot() {
 
 describe('PrototypePreviewer adapter preference synchronization', () => {
   beforeEach(() => {
+    prototypeSpies.loadMany.mockReset().mockResolvedValue(undefined);
     runtimeSpies.mount.mockReset();
     runtimeSpies.unmount.mockReset();
     hostMountSpies.release.mockReset();
-    demoSpies.render.mockClear();
+    demoSpies.render
+      .mockReset()
+      .mockImplementation(async ({ runtime, host }: { runtime: string; host: HTMLElement }) => {
+        await runtimeSpies.mount(runtime, host);
+        return { destroy: () => runtimeSpies.unmount(runtime, host) };
+      });
     localStorage.clear();
     document.body.innerHTML = '';
   });
@@ -108,10 +128,52 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     expect(demoSpies.render).toHaveBeenCalledWith(
       expect.objectContaining({ runtime: 'wc', host: root.querySelector('.host') })
     );
-    expect(runtimeSpies.mount).not.toHaveBeenCalled();
+    expect(demoSpies.render.mock.calls[0]![0].demo.root.prototypeId).toBe('site-preview-surface');
+    expect(demoSpies.render.mock.calls[0]![0].demo.root.children[0]).toEqual({
+      kind: 'box',
+      children: ['Custom demo'],
+    });
     expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc');
 
     await (root as any).__previewer__.destroy();
+  });
+
+  it('does not demand a static module loader again after a direct custom loader succeeds', async () => {
+    const root = createPreviewerRoot();
+    const prototypeId = 'custom-loader-only-prototype';
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    prototypeSpies.loadMany.mockImplementation(async (ids: string[]) => {
+      if (ids.includes(prototypeId))
+        throw new Error('Custom Prototype has no static module loader');
+    });
+    const loader =
+      'data:text/javascript,' +
+      encodeURIComponent('document.documentElement.dataset.runtimeCustomLoader = "loaded";');
+    initPreviewer({
+      root,
+      prototypeId,
+      loader,
+      initialRuntime: 'wc',
+      demoProps: { label: 'Original props' },
+      runtimeList: ['wc'],
+    });
+    try {
+      await vi.waitFor(() =>
+        expect(document.documentElement.dataset.runtimeCustomLoader).toBe('loaded')
+      );
+      await vi.waitFor(() => expect(prototypeSpies.loadMany).toHaveBeenCalled());
+      expect(prototypeSpies.loadMany).toHaveBeenCalledWith(['site-preview-surface']);
+      await vi.waitFor(() => expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc'));
+      expect(demoSpies.render.mock.calls[0]![0].demo.root.children[0]).toEqual({
+        kind: 'proto',
+        prototypeId,
+        props: { label: 'Original props' },
+      });
+    } finally {
+      await (root as any).__previewer__.destroy();
+      delete document.documentElement.dataset.runtimeCustomLoader;
+      consoleError.mockRestore();
+    }
   });
 
   it('uses the persisted page-level adapter preference for its first mount', async () => {
@@ -214,6 +276,36 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     expect((root.querySelector('select') as HTMLSelectElement).value).toBe('vue2');
     await (root as any).__previewer__.destroy();
     root.remove();
+  });
+
+  it('commits the latest generic family when it changes while the renderer is pending', async () => {
+    let finish!: () => void;
+    runtimeSpies.mount.mockImplementation(
+      () =>
+        new Promise<void>((resolve) => {
+          finish = resolve;
+        })
+    );
+    const root = createPreviewerRoot();
+    root.dataset.siteLibraryFamily = 'shadcn';
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+    await vi.waitFor(() => expect(demoSpies.render).toHaveBeenCalledTimes(1));
+    const surface = demoSpies.render.mock.calls[0]![0].demo.root;
+    expect(surface.props.family).toBe('shadcn');
+    root.dataset.siteLibraryFamily = 'brutalist';
+    finish();
+    try {
+      await vi.waitFor(() => expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc'));
+      expect(surface.props.family).toBe('brutalist');
+    } finally {
+      await (root as any).__previewer__.destroy();
+    }
   });
 
   it('does not let a stale runtime completion replace the current runtime', async () => {

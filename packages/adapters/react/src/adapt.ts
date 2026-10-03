@@ -473,8 +473,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           },
           // A child of a detached ancestor still mounts and attaches its own
           // view, so readiness has to consult the subtree, not just this host.
+          // A pending update also gates host events. Native focus must wait
+          // until its observer is effective, or DOM focus can apply without
+          // updating the Focus facts used by keyboard navigation.
           isViewReady: () =>
             viewEffectsTargetReadyRef.current &&
+            eventGate.isEnabled() &&
             !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
           getCurrentElement: () => rootRef.current,
           subscribeTargetReady: (listener) => {

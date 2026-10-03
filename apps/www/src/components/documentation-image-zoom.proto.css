@@ -1,6 +1,20 @@
 /* Physical Web projection of the two private media prototypes. These styles
  * never reset the public Shadcn/Brutalist Dialog or choose logical open state. */
 @layer proto-ui {
+  :where([data-pui-style~='docs-image-zoom-trigger']) {
+    display: inline-block;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    white-space: normal;
+    cursor: zoom-in;
+    vertical-align: middle;
+    outline: none;
+  }
   :where([data-pui-style~='docs-image-zoom-content']) {
     left: var(--docs-image-left, 0px);
     top: var(--docs-image-top, 0px);
@@ -56,6 +70,12 @@
     :where([data-pui-style~='docs-image-zoom-content']),
     :where([data-pui-style~='docs-image-zoom-mask']) {
       transition-duration: 0ms;
+    }
+  }
+  @media (forced-colors: active) {
+    :where([data-pui-style~='docs-image-zoom-trigger'])[data-focus-visible] {
+      outline: 2px solid Highlight;
+      outline-offset: 2px;
     }
   }
 }

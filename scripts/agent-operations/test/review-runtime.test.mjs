@@ -882,6 +882,34 @@ test('canonical review input is insensitive to top-level comment connection orde
   );
 });
 
+test('completing an existing commit-progress comment invalidates same-head review evidence', () => {
+  const progress = {
+    id: 'IC_PROGRESS',
+    author: 'contributor',
+    body: `<!-- agent-commit-progress:Proto-UI/Proto-UI#487:${sha('b')} -->\nUI capture pending: preview startup failed.`,
+    updatedAt: '2026-08-23T02:00:00.000Z',
+  };
+  const pending = reviewInput({ comments: [progress] });
+  const previousPacket = packet({}, pending);
+  assert.equal(verifyLiveReviewInput(previousPacket, structuredClone(pending)), true);
+
+  const completed = reviewInput({
+    comments: [
+      {
+        ...progress,
+        body: `${progress.body}\nCompletion update: startup repaired; synthetic fixture capture https://example.com/commit-b.png; Web Component, 1280x800, light theme.`,
+      },
+    ],
+  });
+  // The comment ID, timestamp, and head are unchanged; its evidence body alone changed.
+  assert.notEqual(computeReviewInputDigest(completed), computeReviewInputDigest(pending));
+  assert.throws(
+    () => verifyLiveReviewInput(previousPacket, completed),
+    /live canonical review input does not match/
+  );
+  assert.equal(verifyLiveReviewInput(packet({}, completed), completed), true);
+});
+
 test('review input v5 binds identities, changed files, and check provenance while classifying spec entities', () => {
   const ordinary = reviewInput();
   assert.equal(reviewChangesSpecEntities(ordinary), false);

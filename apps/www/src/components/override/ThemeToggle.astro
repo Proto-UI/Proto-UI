@@ -1,14 +1,16 @@
 ---
-// const labelLight = Astro.locals?.t?.('themeSelect.light') ?? 'Light theme';
-// const labelDark = Astro.locals?.t?.('themeSelect.dark') ?? 'Dark theme';
+import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
+const family = resolveSiteLibraryFamily(Astro.url.pathname);
+const { Button } = siteControlTags(family);
 ---
 
-<wc-shadcn-button
-  data-site-shadcn-button
+<Button
+  data-site-button
+  data-site-control-family={family}
   data-theme-toggle
-  data-variant="ghost"
+  data-variant={family === 'brutalist' ? 'surface' : 'ghost'}
   data-size="icon"
-  class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 group/toggle extend-touch-target size-8"
+  class="group/toggle extend-touch-target shrink-0 [&_svg]:pointer-events-none"
   type="button"
   aria-label="Toggle color theme"
   aria-pressed="false"
@@ -16,13 +18,13 @@
 >
   <!-- 初始占位，避免布局跳动；首帧由 hydrate 脚本替换为对应图标 -->
   <span class="sr-only">Toggle theme</span>
-</wc-shadcn-button>
+</Button>
 
 <script>
-  import { initSiteShadcnControls } from '../site-shadcn-controls';
+  import { initSiteControls } from '../site-shadcn-controls';
 
-  initSiteShadcnControls(document);
-  document.addEventListener('astro:page-load', () => initSiteShadcnControls(document));
+  initSiteControls(document);
+  document.addEventListener('astro:page-load', () => initSiteControls(document));
 </script>
 
 <script is:inline>
@@ -76,8 +78,11 @@
     });
 
     // 响应全局变更（来自其它控件）
-    document.addEventListener('starlight-theme:change', (e) => {
-      render(e.detail.theme);
+    document.addEventListener('starlight-theme:change', () => {
+      // A projected click runs inside the native click dispatch. Keep that
+      // event's descendant target attached until the global router has seen
+      // it, rather than making it resemble an out-of-root portal click.
+      queueMicrotask(() => render(current()));
     });
 
     // Provider 主动触发的首帧对齐（可选）

@@ -23,6 +23,26 @@ function getPrototypeIdFromPath(path: string): string | null {
  * value: 动态导入函数
  */
 const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
+  'site-typography': async () => {
+    const mod = await import('../../prototypes/site-typography.proto');
+    registerPrototype('site-typography', mod.default);
+  },
+  'site-copy-feedback-icon': async () => {
+    const mod = await import('../../prototypes/site-copy-feedback-icon.proto');
+    registerPrototype('site-copy-feedback-icon', mod.default);
+  },
+  'site-code-surface': async () => {
+    const mod = await import('../../prototypes/site-code-surface.proto');
+    registerPrototype('site-code-surface', mod.default);
+  },
+  'site-preview-surface': async () => {
+    const mod = await import('../../prototypes/site-preview-surface.proto');
+    registerPrototype('site-preview-surface', mod.default);
+  },
+  'site-link-surface': async () => {
+    const mod = await import('../../prototypes/site-link-surface.proto');
+    registerPrototype('site-link-surface', mod.default);
+  },
   'bootstrap-2-3-2-button': async () => {
     const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/button');
     registerPrototype('bootstrap-2-3-2-button', mod.default);
@@ -318,6 +338,18 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'lucide-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icon/index');
     registerPrototype('lucide-icon', mod.default);
+  },
+  'lucide-search-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/search');
+    registerPrototype('lucide-search-icon', mod.default);
+  },
+  'lucide-list-icon': async () => {
+    const mod = await import('@proto.ui/prototypes-lucide/icons/list');
+    registerPrototype('lucide-list-icon', mod.default);
+  },
+  'lucide-x-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/x');
+    registerPrototype('lucide-x-icon', mod.default);
   },
   'shadcn-separator-root': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/separator');

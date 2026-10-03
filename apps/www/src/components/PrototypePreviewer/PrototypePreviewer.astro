@@ -135,10 +135,11 @@ if (prototypeId && demoId) {
 assertJsonLike(protoProps);
 
 const rid = `pp-${Math.random().toString(36).slice(2)}`;
+const isZh = Astro.url.pathname.startsWith('/zh-cn/');
 ---
 
 <div
-  class:list={['proto-previewer', className]}
+  class:list={['proto-previewer', 'pui-runtime-box', className]}
   data-previewer-id={rid}
   data-prototype-id={prototypeId || ''}
   data-demo-id={demoId || ''}
@@ -174,7 +175,14 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
   >
     <div class="proto-previewer__preview" role="region" aria-live="polite">
       <div class="host">
-        {lazy && <span class="proto-previewer__skeleton" aria-hidden="true" />}
+        <span class="proto-previewer__skeleton">{isZh ? '交互示例' : 'Interactive preview'}</span>
+        <noscript
+          >{
+            isZh
+              ? '交互示例需要 JavaScript；正文和源码仍可阅读。'
+              : 'Interactive previews require JavaScript; the article and source remain readable.'
+          }</noscript
+        >
       </div>
     </div>
   </div>
@@ -187,53 +195,61 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
 
   <style>
     .proto-previewer {
-      --proto-previewer-radius: var(--docs-code-radius);
-      --proto-previewer-border: 1px solid var(--docs-code-border);
-      --proto-previewer-bg: color-mix(in oklch, var(--color-muted) 30%, transparent);
-      border: var(--proto-previewer-border);
-      border-radius: var(--proto-previewer-radius);
-      overflow: hidden;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.75rem;
+      min-width: 0;
     }
 
     .proto-previewer__header {
       display: flex;
+      min-width: 0;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.5rem 1rem;
-      border-bottom: var(--proto-previewer-border);
-      background: color-mix(in oklch, var(--color-muted) 12%, transparent);
+      padding: var(--runtime-box-toolbar-padding);
     }
 
     .proto-previewer__toolbar {
       display: flex;
+      min-width: 0;
+      max-width: 100%;
+      flex-wrap: wrap;
       align-items: center;
       gap: 0.5rem;
     }
 
     .proto-previewer__label {
-      font-size: 0.8125rem;
+      font-size: 0.75rem;
       color: var(--color-muted-foreground);
     }
 
     .proto-previewer__preview-panel {
       display: block;
+      min-width: 0;
     }
 
     .proto-previewer__preview {
-      padding: 1.5rem;
-      min-height: 16rem;
+      padding: 0;
+      min-height: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: var(--proto-previewer-bg);
     }
 
     .proto-previewer__preview .host {
-      min-height: 9rem;
+      min-width: 0;
+      max-width: 100%;
+      min-height: 7rem;
       width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .proto-previewer[data-projection-mode='fixed-family'] .proto-previewer__preview {
+      padding: 0;
+      display: block;
     }
 
     .proto-previewer[data-projection-mode='fixed-family'] .proto-previewer__preview .host {
@@ -248,14 +264,17 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
 
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-projection-scope) {
       display: grid;
-      gap: 1rem;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0;
     }
 
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-projection-controls) {
       display: flex;
-      align-items: end;
+      min-width: 0;
+      align-items: center;
       flex-wrap: wrap;
-      gap: 0.75rem;
+      gap: 0.875rem;
+      padding: var(--runtime-box-toolbar-padding);
     }
 
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-projection-controls:empty) {
@@ -263,13 +282,15 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
     }
 
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-projection-control) {
-      display: grid;
-      gap: 0.375rem;
-      min-width: min(100%, 12rem);
+      display: flex;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 0.75rem;
+      min-width: 0;
     }
 
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-projection-content) {
-      min-height: 7rem;
+      padding: 0;
       min-width: 0;
       max-width: 100%;
       width: 100%;
@@ -279,131 +300,23 @@ const rid = `pp-${Math.random().toString(36).slice(2)}`;
     }
 
     .proto-previewer__skeleton {
-      width: min(9rem, 58%);
-      height: 2.5rem;
-      border-radius: 0.5rem;
-      background: linear-gradient(
-        100deg,
-        color-mix(in oklch, var(--color-muted) 55%, transparent) 30%,
-        color-mix(in oklch, var(--color-muted) 85%, transparent) 48%,
-        color-mix(in oklch, var(--color-muted) 55%, transparent) 66%
-      );
-      background-size: 260% 100%;
-      animation: proto-previewer-skeleton 1.5s ease-in-out infinite;
-    }
-
-    @keyframes proto-previewer-skeleton {
-      from {
-        background-position: 100% 0;
-      }
-      to {
-        background-position: 0 0;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .proto-previewer__skeleton {
-        animation: none;
-      }
+      font-size: 0.875rem;
+      line-height: 1.5;
     }
 
     @media (max-width: 640px) {
       .proto-previewer__preview {
-        padding: 1.1rem;
-        min-height: 14rem;
+        padding: 0;
       }
 
       .proto-previewer__preview .host {
-        min-height: 8rem;
+        min-height: 7rem;
       }
     }
   </style>
 
   <script>
-    import type { RuntimeId } from './runtimes/registry';
-    import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
-    const defaultRuntimeIds: RuntimeId[] = ['wc', 'react', 'vue', 'vue2'];
-
-    async function mount(root: HTMLElement) {
-      if (root.dataset.inited === '1' || root.dataset.mounting === '1') return;
-      root.dataset.mounting = '1';
-      const prototypeId = root.dataset.prototypeId || '';
-      const demoId = root.dataset.demoId || '';
-      const initialRuntime = (root.dataset.initialRuntime || 'wc') as RuntimeId;
-      const demoProps = root.dataset.props ? JSON.parse(root.dataset.props) : {};
-      const runtimeList = root.dataset.runtimes
-        ? JSON.parse(root.dataset.runtimes)
-        : defaultRuntimeIds;
-      const loader = root.dataset.loader || '';
-      const projectionFamilyId = (root.dataset.projectionFamily || undefined) as
-        | ProjectionFamilyId
-        | undefined;
-      const projectionComponentId = (root.dataset.projectionComponent || undefined) as
-        | ProjectionComponentId
-        | undefined;
-      const projectionToolbar = root.dataset.projectionToolbar !== 'false';
-
-      if (!prototypeId && !demoId) {
-        console.error('[PrototypePreviewer] missing prototypeId or demoId', root);
-        delete root.dataset.mounting;
-        return;
-      }
-
-      try {
-        const { initPreviewer } = await import('./previewer-client');
-        if (!root.isConnected) return;
-        initPreviewer({
-          root,
-          prototypeId,
-          demoId,
-          initialRuntime,
-          demoProps,
-          runtimeList,
-          loader,
-          projectionFamilyId,
-          projectionComponentId,
-          projectionToolbar,
-        });
-      } finally {
-        delete root.dataset.mounting;
-      }
-    }
-
-    function init() {
-      document
-        .querySelectorAll<HTMLElement>('.proto-previewer[data-previewer-id]:not([data-inited])')
-        .forEach((root) => {
-          if (root.dataset.lazy !== 'true') {
-            void mount(root);
-            return;
-          }
-
-          if (root.dataset.lazyObserved === '1') return;
-          root.dataset.lazyObserved = '1';
-
-          if (typeof IntersectionObserver === 'undefined') {
-            void mount(root);
-            return;
-          }
-
-          const observer = new IntersectionObserver(
-            (entries) => {
-              if (!entries.some((entry) => entry.isIntersecting)) return;
-              observer.disconnect();
-              void mount(root);
-            },
-            { rootMargin: '360px 0px' }
-          );
-          observer.observe(root);
-        });
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-
-    document.addEventListener('astro:page-load', init);
+    import { initPreviewerBootstrap } from './previewer-bootstrap';
+    initPreviewerBootstrap(document);
   </script>
 </div>

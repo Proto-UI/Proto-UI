@@ -6,6 +6,7 @@ import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from '../content/docs/zh-cn/browser-harness';
+import { sharedImageHitPoint } from './documentation-image-preview.test-utils';
 const MD = '/en/test/image-preview-markdown/';
 const MDX = '/en/test/image-preview-mdx/';
 let browser: Browser;
@@ -48,6 +49,10 @@ async function capture(page: Page, name: string) {
       display: getComputedStyle(el).display,
       animation: getComputedStyle(el).animationName,
     })),
+    activeElement: document.activeElement?.localName,
+    sourceFocused: document.activeElement?.hasAttribute('data-docs-image-trigger') ?? false,
+    triggerFrames: (window as any).__docsTriggerFrames ?? [],
+    focusTimeline: (window as any).__docsFocusTimeline ?? [],
   }));
   await writeFile(
     path.join(evidence, `${name}.json`),
@@ -201,17 +206,30 @@ describe('automatic documentation image preview in real Chromium', () => {
               },
               { family, colorScheme }
             );
-            await page.waitForFunction(
-              (family) =>
-                document.querySelector('[data-docs-image-trigger]')?.localName ===
-                `docs-preview-${family}-button`,
-              family
-            );
+            await page.waitForFunction((family) => {
+              const triggers = [
+                ...document.querySelectorAll<HTMLElement>('[data-docs-image-trigger]'),
+              ];
+              return (
+                triggers.length === 2 &&
+                triggers.every(
+                  (trigger) =>
+                    trigger.localName === `docs-preview-${family}-image-trigger` &&
+                    trigger.dataset.docsPreviewFamily === family &&
+                    trigger.getAttribute('role') === 'button' &&
+                    trigger.tabIndex === 0 &&
+                    trigger.getAttribute('aria-disabled') !== 'true' &&
+                    !trigger.closest('[hidden], [inert]')
+                )
+              );
+            }, family);
             expect(await page.locator('[data-docs-image-trigger]').count()).toBe(2);
             const trigger = page.getByRole('button', {
               name: 'Enlarge image: Raster comparison diagram',
               exact: true,
             });
+            expect(await trigger.count(), 'exact source image accessible name').toBe(1);
+            expect(await trigger.isEnabled(), 'private semantic trigger is usable').toBe(true);
             if (width < 500) await trigger.tap();
             else await trigger.click();
             await entered(page);
@@ -275,6 +293,32 @@ describe('automatic documentation image preview in real Chromium', () => {
             expect(await trigger.getAttribute('data-focus-visible')).not.toBeNull();
             expect(await trigger.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
             await capture(page, `${width}-${colorScheme}-${family}-keyboard-focus`);
+            if (width === 390 && family === 'brutalist') {
+              await page.evaluate(() => {
+                const trigger = document.querySelector('[data-docs-image-trigger]')!;
+                const frames: object[] = [];
+                (window as any).__docsTriggerFrames = frames;
+                const sample = (time: number) => {
+                  const rect = trigger.getBoundingClientRect();
+                  const style = getComputedStyle(trigger);
+                  frames.push({
+                    time,
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height,
+                    hovered: trigger.hasAttribute('data-hovered'),
+                    pressed: trigger.hasAttribute('data-pressed'),
+                    focused: document.activeElement === trigger,
+                    transform: style.transform,
+                    translate: style.translate,
+                    tokens: trigger.getAttribute('data-pui-style'),
+                  });
+                  if (frames.length < 240) requestAnimationFrame(sample);
+                };
+                requestAnimationFrame(sample);
+              });
+            }
             for (let count = 0; count < 2; count++) {
               await trigger.click();
               await entered(page);
@@ -488,6 +532,49 @@ describe('automatic documentation image preview in real Chromium', () => {
     try {
       await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
       const name = 'Enlarge image: Raster comparison diagram';
+      await page.evaluate(() => {
+        const timeline: object[] = [];
+        (window as any).__docsFocusTimeline = timeline;
+        const label = (node: EventTarget | null) =>
+          node instanceof Element
+            ? node.hasAttribute('data-docs-image-trigger')
+              ? 'source-trigger'
+              : node.hasAttribute('data-docs-image-mask')
+                ? 'image-mask'
+                : node.classList.contains('docs-image-full')
+                  ? 'preview-image'
+                  : node.localName
+            : null;
+        for (const type of [
+          'pointerdown',
+          'mousedown',
+          'pointerup',
+          'mouseup',
+          'click',
+          'focusin',
+          'focusout',
+        ]) {
+          for (const capture of [true, false])
+            document.addEventListener(
+              type,
+              (event) => {
+                timeline.push({
+                  time: performance.now(),
+                  type,
+                  capture,
+                  trusted: event.isTrusted,
+                  target: label(event.target),
+                  active: label(document.activeElement),
+                  defaultPrevented: event.defaultPrevented,
+                  phase: document
+                    .querySelector('[data-docs-image-content]')
+                    ?.getAttribute('data-transition-state'),
+                });
+              },
+              { capture }
+            );
+        }
+      });
       const trigger = page.getByRole('button', { name, exact: true });
       const source = page.locator('[data-docs-image-trigger] img[alt="Raster comparison diagram"]');
       const originalSrc = await source.getAttribute('src');
@@ -557,17 +644,102 @@ describe('automatic documentation image preview in real Chromium', () => {
       await trigger.click();
       await entered(page);
       expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
-      const originalBox = (await source.boundingBox())!;
-      const imageBox = (await page.locator('.docs-image-full').boundingBox())!;
-      const point = {
-        x: originalBox.x + originalBox.width / 2,
-        y: originalBox.y + originalBox.height / 2,
-      };
-      expect(point.x).toBeGreaterThan(imageBox.x);
-      expect(point.x).toBeLessThan(imageBox.x + imageBox.width);
-      expect(point.y).toBeGreaterThan(imageBox.y);
-      expect(point.y).toBeLessThan(imageBox.y + imageBox.height);
+      await page.waitForFunction(() => {
+        const source = document.querySelector<HTMLImageElement>(
+          '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
+        );
+        const preview = document.querySelector<HTMLImageElement>('.docs-image-full');
+        const content = preview?.closest('[data-docs-image-content]');
+        const owner = source?.closest('[data-docs-image-trigger]');
+        return Boolean(
+          source?.complete &&
+          preview?.complete &&
+          preview.naturalWidth &&
+          content &&
+          owner &&
+          content.getAttribute('data-transition-state') === 'entered' &&
+          [content, owner].every((el) =>
+            el
+              .getAnimations({ subtree: true })
+              .every((animation) => !animation.pending && animation.playState !== 'running')
+          )
+        );
+      });
+      const geometry = await page.evaluate(async () => {
+        const source = document.querySelector<HTMLElement>(
+          '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
+        )!;
+        const preview = document.querySelector<HTMLElement>('.docs-image-full')!;
+        const rect = (el: Element) => {
+          const { x, y, width, height } = el.getBoundingClientRect();
+          return { x, y, width, height };
+        };
+        const read = () => {
+          const scroll = [[window.scrollX, window.scrollY]];
+          for (let owner = source.parentElement; owner; owner = owner.parentElement)
+            scroll.push([owner.scrollLeft, owner.scrollTop]);
+          return { source: rect(source), preview: rect(preview), scroll };
+        };
+        // Read both boxes in one frame, then prove layout/scroll stability in
+        // the next frame. There is no timer or relaxed coordinate tolerance.
+        const before = read();
+        await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+        return { before, after: read() };
+      });
+      expect(geometry.after).toEqual(geometry.before);
+      const point = sharedImageHitPoint(geometry.after.source, geometry.after.preview);
+      expect(
+        point,
+        'source and foreground image must have a shared painted interior'
+      ).not.toBeNull();
+      if (!point) throw new Error('No shared source/preview hit point');
+      for (const box of [geometry.after.source, geometry.after.preview]) {
+        expect(point.x).toBeGreaterThan(box.x);
+        expect(point.x).toBeLessThan(box.x + box.width);
+        expect(point.y).toBeGreaterThan(box.y);
+        expect(point.y).toBeLessThan(box.y + box.height);
+      }
+      const hitPreview = await page.evaluate((point) => {
+        const preview = document.querySelector('.docs-image-full')!;
+        const source = document.querySelector(
+          '[data-docs-image-trigger] img[alt="Raster comparison diagram"]'
+        )!;
+        const rect = (el: Element) => {
+          const { x, y, width, height } = el.getBoundingClientRect();
+          return { x, y, width, height };
+        };
+        (window as any).__docsPreviewPointer = null;
+        document.addEventListener(
+          'pointerdown',
+          (event) => {
+            (window as any).__docsPreviewPointer = {
+              trusted: event.isTrusted,
+              preview: event.target === preview,
+              x: event.clientX,
+              y: event.clientY,
+              source: rect(source),
+              foreground: rect(preview),
+            };
+          },
+          { capture: true, once: true }
+        );
+        return document.elementFromPoint(point.x, point.y) === preview;
+      }, point);
+      expect(hitPreview).toBe(true);
       await page.mouse.click(point.x, point.y);
+      const pointer = await page.evaluate(() => (window as any).__docsPreviewPointer);
+      expect(pointer).toMatchObject({
+        trusted: true,
+        preview: true,
+        source: geometry.after.source,
+        foreground: geometry.after.preview,
+      });
+      for (const box of [pointer.source, pointer.foreground]) {
+        expect(pointer.x).toBeGreaterThan(box.x);
+        expect(pointer.x).toBeLessThan(box.x + box.width);
+        expect(pointer.y).toBeGreaterThan(box.y);
+        expect(pointer.y).toBeLessThan(box.y + box.height);
+      }
       expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
       expect(
         await page.locator('[data-docs-image-content]').getAttribute('data-transition-state')
@@ -575,7 +747,11 @@ describe('automatic documentation image preview in real Chromium', () => {
       await page.mouse.click(1, 1);
       await closed(page);
       expect(await page.evaluate(() => (window as any).__docsSourceClicks)).toBe(1);
-      records.push({ sourceNaming: states });
+      expect(await trigger.evaluate((el) => document.activeElement === el)).toBe(true);
+      records.push({
+        sourceNaming: states,
+        sourceHitProbe: { ...geometry, point, hitPreview, pointer },
+      });
       expect(failuresByPage.get(page)).toEqual([]);
     } finally {
       await capture(page, 'source-name-last-observed');
@@ -815,7 +991,7 @@ describe('automatic documentation image preview in real Chromium', () => {
     const page = track(await context.newPage());
     try {
       await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
-      await open(page, 'Vector landscape');
+      const trigger = await open(page, 'Vector landscape');
       expect(
         await page
           .locator('[data-docs-image-content]')
@@ -824,7 +1000,14 @@ describe('automatic documentation image preview in real Chromium', () => {
       await capture(page, 'reduced-motion-vector');
       await page.keyboard.press('Escape');
       await closed(page);
+      expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
+      await trigger.click();
+      await entered(page);
+      await page.mouse.click(1, 1);
+      await closed(page);
+      expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
     } finally {
+      await capture(page, 'reduced-motion-pointer-return');
       await context.close();
     }
     const noJs = await browser.newContext({ javaScriptEnabled: false });

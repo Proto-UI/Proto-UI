@@ -1,3 +1,4 @@
+import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
 // Shared server/browser plumbing for documentation browser regressions.
 // Extracted so a third suite does not need a third inline copy; the two existing
 // suites still carry their own and can migrate once their PRs land.
@@ -74,20 +75,20 @@ export async function chromeExecutable(): Promise<string> {
 }
 
 async function waitForServer(url: string): Promise<void> {
-  const deadline = Date.now() + 120_000;
-  while (Date.now() < deadline) {
-    if (devServer && devServer.exitCode !== null) {
-      throw new Error(`Documentation dev server exited early.\n${serverOutput}`);
-    }
-    try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
-      if (response.ok) return;
-    } catch {
-      // The dev server is still starting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 250));
+  try {
+    await waitForServerReadiness(url, {
+      timeoutMs: 120_000,
+      server: devServer,
+      readOutput: () => serverOutput,
+    });
+  } catch (error) {
+    // Vitest defers failed-hook details. Keep the immediate diagnostic so the
+    // runner captures the shared server state before CI cancellation.
+    console.error(
+      `[browser-harness] readiness failed: ${error instanceof Error ? error.message : String(error)}`
+    );
+    throw error;
   }
-  throw new Error(`Timed out waiting for ${url}.\n${serverOutput}`);
 }
 
 function recordServerOutput(chunk: Buffer): void {
@@ -207,7 +208,7 @@ export async function openRoute(
 export function runtimeSelectTrigger(previewer: Locator): Locator {
   return previewer
     .locator(
-      '[data-projection-control="runtime"] [role="combobox"], [data-adapter-select-root] wc-shadcn-select-trigger'
+      '[data-projection-control="runtime"] [role="combobox"], [data-adapter-select-root] [role="combobox"]'
     )
     .first();
 }
@@ -247,10 +248,27 @@ export async function selectRuntime(
       const fixed = root?.dataset.projectionMode === 'fixed-family';
       const content = fixed ? scope?.querySelector<HTMLElement>('[data-projection-content]') : host;
       const selectedValue = fixed ? scope?.dataset.projectionRuntime : legacySelect?.dataset.value;
-      const firstRoot = content?.querySelector<HTMLElement>('[data-pui-root]');
       if (!root || !host || !content || selectedValue !== selectedRuntime) return false;
       if (fixed && scope?.dataset.projectionState !== 'ready') return false;
-      if (content.querySelectorAll(selector).length !== count || !firstRoot) return false;
+      const surfaces = content.querySelectorAll<HTMLElement>(
+        '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
+      );
+      if (surfaces.length > 1) return false;
+      const surface = surfaces[0];
+      if (
+        surface &&
+        (!surface.hasAttribute('data-pui-root') ||
+          Array.from(content.querySelectorAll('[data-pui-root]')).some(
+            (element) => element !== surface && !surface.contains(element)
+          ))
+      )
+        return false;
+      // RuntimeBox owns this one reserved passive boundary. Count and inspect
+      // the original demonstrated slot, not that additional Website Prototype.
+      // No arbitrary Prototype root is filtered, including extra real siblings.
+      const demonstrated = surface ?? content;
+      const firstRoot = demonstrated.querySelector<HTMLElement>('[data-pui-root]');
+      if (demonstrated.querySelectorAll(selector).length !== count || !firstRoot) return false;
       if (selectedRuntime === 'wc') return firstRoot.tagName.startsWith('WC-');
       if (selectedRuntime === 'vue') {
         return host.hasAttribute('data-v-app') || firstRoot.closest('[data-v-app]') != null;

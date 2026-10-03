@@ -69,13 +69,15 @@ The current upstream source ships no dark-mode palette. PUI keeps its establishe
 ## Interaction-state matrix
 
 - Elevated default Button-like controls: rest at zero translation / 4px hard shadow; hover and transient press at +4px,+4px / no outer shadow. Press does not add another 4px. Button-like controls currently retain PUI's instantaneous snap rather than the reference's 150ms transition-all; endpoint alignment does not claim timing identity. Upstream reverse is the separate negative-displacement variant; PUI does not claim to expose that API in this slice
-- Flat controls (Select, Tabs, Toggle): keep geometry stable through hover/press; use their existing paired color, reserved border and persistent selected/active signals
+- Flat controls (default Select, Tabs, Toggle): keep geometry stable through hover/press; use their existing paired color, reserved border and persistent selected/active signals
 - Focus: existing theme-relative hard ring with offset; retained Tabs Content fallback-native focus indication
 - Disabled: preserve shape and paired surface while retaining existing opacity, pointer gate and Base disabled behavior
 - Overlay enter/exit: retain current governed fade/zoom/side transitions, timing, present-state and portal ownership; the reference is not authority to remove lifecycle semantics
 - Reduced motion: keep the accepted Spinner static fallback; no new automatic Skeleton pulse or compulsory motion is introduced
 
 ## Explicit PUI extensions and unchanged semantics
+
+Select Trigger additionally supports an explicitly selected `appearance="elevated"` Proto UI extension for raised command groups: the default remains `flat`, while the elevated Trigger uses the same rest/hover/press endpoints as Button. Select Content stays flat.
 
 Existing public variants, color/size props, controlled/uncontrolled states, accessible names, focus, events and anatomy remain PUI contracts. In particular: Switch adopts the reference 24×48px frame and 16px disc with one 20px Thumb movement and 150ms transform/color transitions, with spatial movement disabled by reduced motion. The equivalent physical placement remains bounded under RTL ancestors but does not claim mirrored RTL semantics; Checkbox retains its mixed-precedence contrast protocol; Toggle keeps its non-color active inset; Skeleton remains passive and static; Spinner remains size-only/parent-owned; Scroll Area corner work remains #779/#788. A new Base subject or host guarantee requires a separate governed decision.
 

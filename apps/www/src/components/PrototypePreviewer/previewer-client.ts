@@ -1,10 +1,13 @@
 // src/next-www/src/components/PrototypePreviewer/previewer-client.ts
-import { runtimeLoaders } from './runtimes/registry';
-import { getPrototype } from './registry';
 import { loadPrototype, loadPrototypes } from './prototype-modules';
 import { loadDemo } from './demo-modules';
 import { renderDemo } from './demo-renderer';
-import { collectPrototypeIds } from './demo-types';
+import { collectPrototypeIds, type DemoSpec } from './demo-types';
+import { createRuntimePreviewSurface, runtimePreviewFamily } from './runtime-preview-surface';
+import {
+  resolveProjectionThemeSurfaceStyle,
+  watchProjectionThemeSurfaceStyle,
+} from './projection-theme';
 import { releaseHostMount } from './runtimes/host-mount';
 import type { RuntimeId } from './runtimes/registry';
 import { refreshCodePanel } from './code-panel-client';
@@ -89,11 +92,15 @@ export function initPreviewer(options: PreviewerOptions) {
   const selectedInitialRuntime = preferredRuntime();
   const nativeSelectUsesPagePreference = Boolean(nativeSelect?.closest('[data-adapter-select]'));
 
-  let current: { id: string; api: any } | null = null;
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
   let requestedRuntime: RuntimeId | null = null;
   let version = 0;
   let destroyed = false;
+  let mounted = false;
+  let stopThemeWatcher: (() => void) | null = null;
+  let activeSurface: ReturnType<typeof createRuntimePreviewSurface> | null = null;
+  let stopFamilyObserver: (() => void) | null = null;
+  let destroyPromise: Promise<void> | null = null;
 
   const codeHighlights: Record<string, string> = root.dataset.codeHighlights
     ? JSON.parse(root.dataset.codeHighlights)
@@ -188,7 +195,7 @@ export function initPreviewer(options: PreviewerOptions) {
   async function switchTo(id: string, options: { force?: boolean } = {}) {
     if (destroyed) return;
     const runtime = id as RuntimeId;
-    const activeRuntime = current?.id ?? currentDemo?.id ?? null;
+    const activeRuntime = currentDemo?.id ?? null;
     if (
       !options.force &&
       (requestedRuntime === runtime || (requestedRuntime === null && activeRuntime === runtime))
@@ -204,56 +211,82 @@ export function initPreviewer(options: PreviewerOptions) {
     setPreviewerSelectDisabled(true);
 
     try {
-      // 卸载旧 runtime / demo
-      if (currentDemo) {
-        await currentDemo.destroy();
-        currentDemo = null;
-      }
-      const previous = current;
-      current = null;
-      if (previous?.api?.unmount) await previous.api.unmount(host);
-      else host.innerHTML = '';
+      stopThemeWatcher?.();
+      stopThemeWatcher = null;
+      stopFamilyObserver?.();
+      stopFamilyObserver = null;
+      activeSurface = null;
+      const previous = currentDemo;
+      currentDemo = null;
+      if (previous) await previous.destroy();
+      else host.replaceChildren();
+      if (destroyed || myVersion !== version) return;
 
+      let demo: DemoSpec;
       if (demoId) {
-        const demo = await loadDemo(demoId);
-        const ids = new Set<string>();
-        collectPrototypeIds(demo.root, ids);
-        await loadPrototypes(Array.from(ids));
-
-        const { destroy } = await renderDemo({
-          runtime,
-          demo,
-          host,
-          isCurrent: () => !destroyed && myVersion === version,
-        });
-        if (destroyed || myVersion !== version) return;
-        currentDemo = { id, destroy };
-        updateCodePanel(runtime);
-        dispatch('runtime:changed', { id: runtime });
+        demo = await loadDemo(demoId);
+      } else {
+        if (!prototypeId) throw new Error('[PrototypePreviewer] missing prototypeId');
+        await ensurePrototypeLoaded();
+        demo = { type: 'demo', root: { kind: 'proto', prototypeId, props: { ...demoProps } } };
+      }
+      if (destroyed || myVersion !== version) return;
+      let family = runtimePreviewFamily(root);
+      const surface = createRuntimePreviewSurface(
+        demo,
+        family,
+        resolveProjectionThemeSurfaceStyle(family, root)
+      );
+      const ids = new Set<string>();
+      collectPrototypeIds(surface.demo.root, ids);
+      // The direct Prototype was already loaded above, including a caller's
+      // custom loader. Only newly composed parts require this module table.
+      if (!demoId && prototypeId) ids.delete(prototypeId);
+      await loadPrototypes(Array.from(ids));
+      if (destroyed || myVersion !== version) return;
+      const result = await renderDemo({
+        runtime,
+        demo: surface.demo,
+        host,
+        isCurrent: () => !destroyed && myVersion === version,
+      });
+      if (destroyed || myVersion !== version) {
+        await result.destroy();
         return;
       }
-
-      if (!prototypeId) {
-        throw new Error('[PrototypePreviewer] missing prototypeId');
+      currentDemo = { id, destroy: result.destroy };
+      activeSurface = surface;
+      // Page family may change while the renderer is awaiting its framework.
+      // Commit the latest consumer input before publishing this active view.
+      family = runtimePreviewFamily(root);
+      const watchTheme = () =>
+        watchProjectionThemeSurfaceStyle(family, root, (theme) => {
+          if (!destroyed && myVersion === version && activeSurface === surface) {
+            surface.setAppearance(family, theme);
+          }
+        });
+      stopThemeWatcher = watchTheme();
+      const familyObserver = new MutationObserver(() => {
+        if (destroyed || myVersion !== version || activeSurface !== surface) return;
+        const nextFamily = runtimePreviewFamily(root);
+        if (nextFamily === family) return;
+        family = nextFamily;
+        stopThemeWatcher?.();
+        stopThemeWatcher = watchTheme();
+      });
+      for (let scope: HTMLElement | null = root; scope; scope = scope.parentElement) {
+        familyObserver.observe(scope, {
+          attributes: true,
+          attributeFilter: ['data-site-library-family', 'data-projection-family', 'class'],
+        });
       }
-
-      // 确保原型已加载（如果有 loader）
-      await ensurePrototypeLoaded();
-
-      // 并行加载：运行时 API + 原型对象引用
-      const [api, proto] = await Promise.all([
-        runtimeLoaders[runtime](),
-        Promise.resolve().then(() => getPrototype(prototypeId)),
-      ]);
-
-      // 竞态保护
-      if (myVersion !== version || destroyed) return;
-
-      await api.mount(host, proto, { props: demoProps });
-      if (destroyed || myVersion !== version) return;
-      current = { id, api };
+      stopFamilyObserver = () => familyObserver.disconnect();
       updateCodePanel(runtime);
       dispatch('runtime:changed', { id: runtime });
+      if (!mounted) {
+        mounted = true;
+        dispatch('previewer:mounted', { runtime });
+      }
     } catch (err) {
       if (destroyed || myVersion !== version) return;
       // 如果是原型未找到的错误，不需要重试（动态加载应该已经处理了）
@@ -265,7 +298,6 @@ export function initPreviewer(options: PreviewerOptions) {
       pre.textContent =
         '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
       pre.style.whiteSpace = 'pre-wrap';
-      pre.style.color = 'crimson';
       host.appendChild(pre);
       console.error(err);
       dispatch('error', { error: err });
@@ -278,9 +310,7 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   // 首次挂载（统一走 runtime 生命周期，避免 WC 单走一套）
-  switchTo(selectedInitialRuntime).then(() =>
-    dispatch('previewer:mounted', { runtime: selectedInitialRuntime })
-  );
+  void switchTo(selectedInitialRuntime);
 
   // AdapterSelect synchronizes all selector instances and broadcasts the selected
   // runtime. Listen on document so the page-level selector also remounts every
@@ -315,34 +345,45 @@ export function initPreviewer(options: PreviewerOptions) {
   (root as any).__previewer__ = {
     switchRuntime: (id: string) => switchTo(id),
     reload: () => {
-      if (current) return switchTo(current.id, { force: true });
       if (currentDemo) return switchTo(currentDemo.id, { force: true });
       return null;
     },
-    getCurrentRuntime: () => current?.id ?? currentDemo?.id ?? null,
+    getCurrentRuntime: () => currentDemo?.id ?? null,
     setProps: (nextProps: Record<string, unknown>) => {
       if (demoId) {
         console.warn('[PrototypePreviewer] setProps is not supported in demo mode.');
         return;
       }
       Object.assign(demoProps, nextProps || {});
-      if (current) switchTo(current.id, { force: true });
+      if (currentDemo) switchTo(currentDemo.id, { force: true });
     },
-    destroy: async () => {
+    destroy: () => {
+      if (destroyPromise) return destroyPromise;
       destroyed = true;
       version++;
+      stopThemeWatcher?.();
+      stopFamilyObserver?.();
+      stopThemeWatcher = null;
+      stopFamilyObserver = null;
+      activeSurface = null;
+      ro.disconnect();
       releaseHostMount(host);
       document.removeEventListener('proto-adapter:change', onAdapterChange);
-      if (currentDemo) await currentDemo.destroy();
-      if (current?.api?.unmount) await current.api.unmount(host);
-      host.innerHTML = '';
-      current = null;
-      currentDemo = null;
       if (selectRoot && !usesSharedAdapterSelect) {
         selectRoot.removeEventListener('valueChange', onSelectChange);
       } else if (nativeSelect && !nativeSelectUsesPagePreference) {
         nativeSelect.removeEventListener('change', onSelectChange);
       }
+      const previous = currentDemo;
+      currentDemo = null;
+      destroyPromise = (async () => {
+        try {
+          await previous?.destroy();
+        } finally {
+          host.replaceChildren();
+        }
+      })();
+      return destroyPromise;
     },
   };
 

@@ -1,0 +1,118 @@
+---
+import config from 'virtual:starlight/user-config';
+import context from 'virtual:starlight/project-context';
+import { localizedUrl } from '../../utils/localizedUrl';
+import HomeActions from './HomeActions.astro';
+const locale = Astro.locals.starlightRoute.locale || 'en';
+const zh = locale === 'zh-cn';
+const path = (pathname: string) =>
+  localizedUrl(new URL(pathname, Astro.url), locale, context.trailingSlash).pathname;
+const otherLocale = Object.keys(config.locales ?? {}).find((key) => key !== locale);
+const actions = [
+  {
+    text: zh ? '文档' : 'Docs',
+    link: path('/start-here/what-you-saw/'),
+    variant: 'minimal' as const,
+  },
+  { text: zh ? '组件库' : 'Libraries', link: path('/ui-libraries/'), variant: 'minimal' as const },
+  {
+    text: zh ? '白皮书' : 'Whitepaper',
+    link: path('/whitepaper/0-preface/'),
+    variant: 'minimal' as const,
+  },
+];
+const localeActions = otherLocale
+  ? [
+      {
+        text: config.locales![otherLocale].label || otherLocale,
+        link: localizedUrl(Astro.url, otherLocale, context.trailingSlash).pathname,
+        variant: 'minimal' as const,
+        attrs: { 'data-home-locale': otherLocale, hreflang: otherLocale },
+      },
+    ]
+  : [];
+---
+
+<div
+  class="site-header home-runtime-header"
+  data-site-header
+  data-homepage-runtime
+  data-runtime-state="loading"
+  data-family-label={zh ? '整页组件库' : 'Page library'}
+  data-runtime-label={zh ? '整页 Runtime' : 'Page runtime'}
+  data-status-ready={zh ? '页面控件已就绪' : 'Page controls ready'}
+  data-status-loading={zh ? '准备页面控件' : 'Preparing page controls'}
+  data-status-error={zh ? '切换失败，已保留可用页面' : 'Switch failed; usable page retained'}
+>
+  <div class="site-header-brand">
+    <HomeActions
+      id="home-brand"
+      actions={[
+        {
+          text: 'Proto UI',
+          attrs: { 'data-home-brand': '' },
+          link: Astro.locals.starlightRoute.siteTitleHref,
+          variant: 'minimal',
+        },
+      ]}
+    />
+  </div>
+  <nav
+    class="site-header-navigation"
+    data-site-header-desktop-navigation
+    aria-label={zh ? '主导航' : 'Primary navigation'}
+  >
+    <HomeActions id="home-navigation-desktop" {actions} />
+  </nav>
+  <div class="site-header-panel" id="site-header-panel" data-site-header-panel>
+    <div data-site-header-surface-mount></div>
+    <div data-site-header-panel-content>
+      <nav
+        class="site-header-navigation site-header-popup-navigation"
+        data-site-header-navigation
+        aria-label={zh ? '主导航' : 'Primary navigation'}
+      >
+        <HomeActions id="home-navigation-mobile" {actions} />
+      </nav>
+      <div data-site-header-compact-context></div>
+      <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
+        {
+          localeActions.length > 0 && (
+            <div class="site-header-setting">
+              <span class="site-header-setting-label">{zh ? '语言' : 'Language'}</span>
+              <HomeActions id="home-language" actions={localeActions} />
+            </div>
+          )
+        }
+        <div class="site-header-setting">
+          <span class="site-header-setting-label">{zh ? '社区' : 'Community'}</span>
+          <slot name="social" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="site-header-context" data-site-header-context>
+    <div class="site-header-runtime home-runtime-preferences" data-site-header-preferences>
+      <HomeActions id="home-preferences" actions={[]} runtimeControl />
+    </div>
+  </div>
+  <div class="site-header-search" data-homepage-shell-tools><slot name="search" /></div>
+  <div class="site-header-theme">
+    <HomeActions id="home-theme-controls" actions={[]} themeButton themeIcon />
+  </div>
+  <div class="site-header-menu">
+    <HomeActions id="home-menu-control" actions={[]} menuButton />
+  </div>
+  <output class="home-runtime-status" data-homepage-runtime-status aria-live="polite">
+    {zh ? '原生链接可用 · Runtime 加载中' : 'Native links ready · runtime loading'}
+  </output>
+</div>
+<script>
+  import { initHomepageRuntime } from './homepage-runtime-client';
+  const initialize = () =>
+    document.querySelectorAll<HTMLElement>('[data-homepage-runtime]').forEach(initHomepageRuntime);
+  if (document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', initialize, { once: true });
+  else initialize();
+  document.addEventListener('astro:page-load', initialize);
+</script>

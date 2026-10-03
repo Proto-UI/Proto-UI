@@ -59,6 +59,13 @@ cases:
       - P-BRUTALIST-SELECT-ITEM-SELECTED-INDICATOR
       - P-BRUTALIST-SELECT-ITEM-VISUAL-GRAMMAR
     expectation: p-brutalist-select-item-selected-indicator
+  - id: T-BRUTALIST-SELECT-0001-CASE-8
+    title: Explicit elevated appearance uses Button feedback and restores the flat default
+    covers:
+      - P-BRUTALIST-SELECT-TRIGGER-APPEARANCE
+      - P-BRUTALIST-SELECT-TRIGGER-DEFAULTS
+      - P-BRUTALIST-SELECT-CONTENT-VISUAL-GRAMMAR
+    expectation: p-brutalist-select-trigger-opt-in-elevation
 implementations:
   - id: prototypes-brutalist-select-contract
     kind: module-test
@@ -73,6 +80,7 @@ implementations:
       - T-BRUTALIST-SELECT-0001-CASE-5
       - T-BRUTALIST-SELECT-0001-CASE-6
       - T-BRUTALIST-SELECT-0001-CASE-7
+      - T-BRUTALIST-SELECT-0001-CASE-8
     exercises:
       - P-BASE-SELECT
       - P-BASE-SELECT-CONTENT
@@ -84,6 +92,21 @@ implementations:
       - P-BRUTALIST-SELECT-ITEM
       - P-BRUTALIST-SELECT-TRIGGER
       - P-BRUTALIST-SELECT-VALUE
+  - id: website-header-select-elevation-runtime
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/header-select-elevation.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SELECT-0001-CASE-8]
+    exercises: [P-BRUTALIST-SELECT-TRIGGER, P-BRUTALIST-SELECT-CONTENT]
+  - id: website-header-select-elevation-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts
+    required: false
+    consumesCases: [T-BRUTALIST-SELECT-0001-CASE-8]
+    exercises: [P-BRUTALIST-SELECT-TRIGGER, P-BRUTALIST-SELECT-CONTENT]
+
 verifies:
   prototypes:
     - id: P-BRUTALIST-SELECT
@@ -104,6 +127,9 @@ exercises:
     - P-BRUTALIST-SELECT-TRIGGER
     - P-BRUTALIST-SELECT-VALUE
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added flat/elevated prop transitions and four-runtime Header ownership evidence; native browser captures remain planned until exact-head Actions execution.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

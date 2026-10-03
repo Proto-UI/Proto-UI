@@ -1,0 +1,89 @@
+name: Header Select elevation evidence
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/header-select-elevation-evidence.yml'
+      - 'packages/prototypes/brutalist/src/select/**'
+      - 'apps/www/src/components/PrototypePreviewer/projection-composition.ts'
+      - 'apps/www/src/components/Homepage/homepage-runtime-client.ts'
+      - 'apps/www/src/components/override/AdapterSelect.astro'
+      - 'apps/www/src/components/site-shadcn-controls.ts'
+      - 'apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts'
+  workflow_dispatch:
+
+# Actual public Header pages only. No deployment, secrets, write permissions,
+# CSS injection or manufactured screenshots. The baseline keeps its real API.
+permissions:
+  contents: read
+
+concurrency:
+  group: header-select-elevation-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASELINE_SHA: 8856a7112e86aa974f2ba388c3b8b70417268394
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        appearance: [flat, elevated]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.appearance == 'flat' && env.BASELINE_SHA || env.CANDIDATE_SHA }}
+          path: subject
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and fonts
+        working-directory: subject
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Bind the candidate probe to the unmodified subject implementation
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/header-select-elevation"
+          PROBE=apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts
+          cp "candidate/$PROBE" "subject/$PROBE"
+          git -C subject rev-parse HEAD > "$RUNNER_TEMP/header-select-elevation/subject-sha.txt"
+          git -C candidate rev-parse HEAD > "$RUNNER_TEMP/header-select-elevation/probe-sha.txt"
+          sha256sum "subject/$PROBE" > "$RUNNER_TEMP/header-select-elevation/probe-sha256.txt"
+          printf '%s\n' 'The candidate test probe is copied to the exact subject checkout; production sources are unchanged.' > "$RUNNER_TEMP/header-select-elevation/procedure.txt"
+      - name: Native input and rendered Header capture
+        working-directory: subject
+        env:
+          PROTO_UI_HEADER_SELECT_APPEARANCE: ${{ matrix.appearance }}
+          PROTO_UI_HEADER_SELECT_SUBJECT_SHA: ${{ matrix.appearance == 'flat' && env.BASELINE_SHA || env.CANDIDATE_SHA }}
+          PROTO_UI_HEADER_SELECT_EVIDENCE_DIR: ${{ runner.temp }}/header-select-elevation
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 900s \
+            corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts \
+            2>&1 | tee "$RUNNER_TEMP/header-select-elevation/browser.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: header-select-${{ matrix.appearance }}-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/header-select-elevation
+          if-no-files-found: warn
+          retention-days: 30

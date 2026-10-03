@@ -480,7 +480,11 @@ export function createProjectionScopeController(
     currentStart = trackMaterialization(() =>
       materializeGeneration(desiredSelection, generation)
     ).finally(() => {
-      if (startPromise === currentStart && committedGeneration === 0) startPromise = null;
+      // A superseding request may still be preparing its first commit when
+      // this stale start settles. Keep admission to that started controller;
+      // only an idle, uncommitted failure needs a fresh start attempt.
+      if (startPromise === currentStart && committedGeneration === 0 && phase === 'idle')
+        startPromise = null;
     });
     startPromise = currentStart;
     return currentStart;

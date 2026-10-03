@@ -2,10 +2,10 @@
  * Search (Pagefind) experience — deliberate design layer.
  *
  * Lives in `@layer components` so it wins over Starlight's `@layer starlight.core`
- * skin and Pagefind's default UI styles. Structure and semantics come from
- * `apps/www/src/components/override/Search.astro`; this file is the visual
- * system for the trigger, dialog, field, result hierarchy, and every state:
- * idle, loading, empty, populated, load-more, and failure.
+ * skin and Pagefind's default UI styles. Search trigger, close and retry are
+ * actual family Buttons; their recipes/states come from those prototypes.
+ * The dialog/backdrop, Pagefind field, clear/load-more commands and results
+ * remain CSS-owned and are not covered by this command-only migration.
  */
 
 @layer components {
@@ -13,35 +13,45 @@
     display: contents;
   }
 
+  site-search [data-search-command-mount] {
+    min-width: 0;
+  }
+  site-search .pui-projection-controls:empty {
+    display: none;
+  }
+  site-search
+    [data-search-command-mount='open']
+    :is(.pui-projection-scope, .pui-projection-content) {
+    width: 100%;
+    min-width: 0;
+  }
+
   /* ------------------------------------------------------------------ */
   /* Trigger                                                            */
   /* ------------------------------------------------------------------ */
 
-  /* Mobile (< md): icon-only square button. */
-  site-search > button[data-open-modal] {
-    @apply relative inline-flex h-8 w-8 shrink-0 items-center justify-center gap-2 rounded-md border border-border bg-surface text-foreground/70 outline-none transition-all select-none;
-    @apply hover:border-foreground/25 hover:bg-secondary/80 hover:text-foreground;
-    @apply focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
+  /* Layout only; the projected Button owns all command appearance. */
+  site-search {
+    --site-search-trigger-width: 2.75rem;
+    --site-search-trigger-padding: 0;
+    --site-search-trigger-justify: center;
   }
 
-  /* Desktop (>= md): input-looking field with label and shortcut chip. */
   @media (min-width: 48rem) {
-    site-search > button[data-open-modal] {
-      @apply w-40 justify-start pl-3 pr-2 text-sm font-normal shadow-none;
-      @apply lg:w-56 xl:w-64;
+    site-search {
+      --site-search-trigger-width: 14rem;
+      --site-search-trigger-padding: 0.75rem;
+      --site-search-trigger-justify: flex-start;
     }
   }
 
-  site-search kbd {
-    background-color: transparent;
+  site-search [data-open-modal] svg {
+    flex: none;
   }
 
-  site-search > button[data-open-modal] kbd {
-    @apply ml-auto;
-  }
-
-  site-search kbd kbd {
-    @apply pointer-events-none flex h-5 shrink-0 items-center justify-center gap-1 rounded-[5px] border border-border/70 bg-secondary/70 px-1.5 font-sans text-[0.7rem] font-medium text-muted-foreground select-none [&_svg:not([class*='size-'])]:size-3;
+  site-search [data-open-modal] .site-search-shortcut {
+    margin-inline-start: auto;
+    gap: 0.25em;
   }
 
   /* ------------------------------------------------------------------ */
@@ -87,12 +97,6 @@
 
   site-search dialog .search-toolbar__title {
     @apply m-0 text-sm font-semibold text-foreground;
-  }
-
-  site-search dialog .search-toolbar__close {
-    @apply static inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border border-transparent px-2 text-sm font-medium text-muted-foreground outline-none transition-colors;
-    @apply hover:bg-secondary hover:text-foreground;
-    @apply focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
   }
 
   @media (min-width: 48rem) {
@@ -460,11 +464,6 @@
     @apply m-0 max-w-xs text-xs text-muted-foreground;
   }
   site-search dialog .search-failure__retry {
-    @apply mt-2 inline-flex h-8 items-center rounded-md border border-border bg-secondary px-3 text-sm font-medium text-secondary-foreground outline-none transition-colors;
-    @apply hover:bg-secondary/75;
-    @apply focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50;
-  }
-  site-search dialog .search-failure__retry:disabled {
-    @apply pointer-events-none opacity-50;
+    margin-top: 0.5rem;
   }
 }

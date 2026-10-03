@@ -1,6 +1,7 @@
 // @vitest-environment node
 
-import { mkdir } from 'node:fs/promises';
+import { execFileSync } from 'node:child_process';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -15,7 +16,8 @@ import {
 } from './browser-harness';
 
 const BUTTON_ROUTE = '/en/ui-libraries/brutalist/components/button/';
-const BUTTON_SELECTOR = '[data-projection-content] [data-pui-root]';
+const BUTTON_SELECTOR =
+  '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]';
 const BUTTON_COUNT = 10;
 const BUTTON_RUNTIMES = ['wc', 'react', 'vue', 'vue2'] as const satisfies readonly RuntimeId[];
 const VIEWPORT = { width: 1440, height: 900 } as const;
@@ -248,6 +250,149 @@ describe.sequential('Brutalist Button browser regressions', () => {
         );
         expect(disabled.color, `${runtime}/disabled-foreground`).toBe(resting.color);
         expect(geometryOf(disabled), `${runtime}/disabled-geometry`).toEqual(geometryOf(resting));
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+  }
+});
+
+describe.sequential('Brutalist Button consumer reflow', () => {
+  for (const runtime of BUTTON_RUNTIMES) {
+    it(`wraps all labels at 320px and 200% text without reducing targets in ${runtime}`, async () => {
+      const { context, page, previewer } = await openRoute(
+        browser,
+        baseUrl,
+        BUTTON_ROUTE,
+        VIEWPORT
+      );
+      try {
+        await selectRuntime(page, previewer, runtime, BUTTON_SELECTOR, BUTTON_COUNT);
+        await page.mouse.move(0, 0);
+        const buttons = previewer.locator(BUTTON_SELECTOR);
+        const dimensions = () =>
+          buttons.evaluateAll((elements) =>
+            elements.map((element) => {
+              const rect = element.getBoundingClientRect();
+              return { width: rect.width, height: rect.height };
+            })
+          );
+        const desktop = await dimensions();
+        const initialRootFont = await page.evaluate(
+          () => getComputedStyle(document.documentElement).fontSize
+        );
+        const evidenceRoot = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? EVIDENCE_DIR;
+        await page.setViewportSize({ width: 320, height: 1000 });
+        for (const fontScale of [1, 2]) {
+          await page.evaluate(
+            (size) => {
+              document.documentElement.style.fontSize = size;
+            },
+            `${parseFloat(initialRootFont) * fontScale}px`
+          );
+          await page.evaluate(() => document.fonts.ready);
+          const facts = await buttons.evaluateAll((elements) =>
+            elements.map((element) => {
+              const button = element as HTMLElement;
+              const rect = button.getBoundingClientRect();
+              const style = getComputedStyle(button);
+              const canvas = button.closest<HTMLElement>('.pui-runtime-preview-surface')!;
+              const frame = canvas.getBoundingClientRect();
+              const frameStyle = getComputedStyle(canvas);
+              const range = document.createRange();
+              range.selectNodeContents(button);
+              return {
+                text: button.textContent?.trim(),
+                left: rect.left,
+                right: rect.right,
+                top: rect.top,
+                bottom: rect.bottom,
+                height: rect.height,
+                clientWidth: button.clientWidth,
+                scrollWidth: button.scrollWidth,
+                whiteSpace: style.whiteSpace,
+                overflowX: style.overflowX,
+                overflowY: style.overflowY,
+                contentLeft:
+                  frame.left +
+                  parseFloat(frameStyle.borderLeftWidth) +
+                  parseFloat(frameStyle.paddingLeft),
+                contentRight:
+                  frame.right -
+                  parseFloat(frameStyle.borderRightWidth) -
+                  parseFloat(frameStyle.paddingRight),
+                textRects: Array.from(range.getClientRects(), (line) => ({
+                  left: line.left,
+                  right: line.right,
+                  top: line.top,
+                  bottom: line.bottom,
+                })),
+              };
+            })
+          );
+          if (evidenceRoot) {
+            const directory = join(evidenceRoot, 'brutalist-button-reflow');
+            await mkdir(directory, { recursive: true });
+            const name = `${runtime}-320-font-${fontScale * 100}`;
+            await previewer.locator('.host').screenshot({ path: join(directory, `${name}.png`) });
+            await writeFile(
+              join(directory, `${name}.json`),
+              JSON.stringify(
+                {
+                  schemaVersion: 1,
+                  source: {
+                    sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+                    dirty: !!execFileSync(
+                      'git',
+                      ['status', '--porcelain', '--untracked-files=all'],
+                      { encoding: 'utf8' }
+                    ).trim(),
+                  },
+                  capturedAt: new Date().toISOString(),
+                  screenshot: `${name}.png`,
+                  viewport: page.viewportSize(),
+                  runtime,
+                  fontScale,
+                  facts,
+                },
+                null,
+                2
+              )
+            );
+          }
+          expect(facts).toHaveLength(BUTTON_COUNT);
+          expect(facts.at(-1)?.text).toBe('Disabled surface');
+          for (const [index, fact] of facts.entries()) {
+            const label = `${runtime}/${fontScale * 100}%/${fact.text}`;
+            // Browser subpixel rounding is separate from the unchanged strict
+            // page scrollWidth assertion below.
+            expect(fact.left, label).toBeGreaterThanOrEqual(fact.contentLeft - 0.5);
+            expect(fact.right, label).toBeLessThanOrEqual(fact.contentRight + 0.5);
+            expect(fact.height, label).toBeGreaterThanOrEqual(
+              desktop[index]!.height * fontScale - 0.5
+            );
+            expect(fact.scrollWidth, label).toBeLessThanOrEqual(fact.clientWidth);
+            expect(['hidden', 'clip'].includes(fact.overflowX), label).toBe(false);
+            expect(['hidden', 'clip'].includes(fact.overflowY), label).toBe(false);
+            for (const line of fact.textRects) {
+              expect(line.left, label).toBeGreaterThanOrEqual(fact.left - 0.5);
+              expect(line.right, label).toBeLessThanOrEqual(fact.right + 0.5);
+              expect(line.top, label).toBeGreaterThanOrEqual(fact.top - 0.5);
+              expect(line.bottom, label).toBeLessThanOrEqual(fact.bottom + 0.5);
+            }
+          }
+          expect(
+            await page.evaluate(
+              () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+            )
+          ).toBeLessThanOrEqual(0);
+        }
+        await page.evaluate(() => {
+          document.documentElement.style.removeProperty('font-size');
+        });
+        await page.setViewportSize(VIEWPORT);
+        const restored = await dimensions();
+        expect(restored).toEqual(desktop);
       } finally {
         await context.close();
       }

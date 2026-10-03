@@ -1,0 +1,130 @@
+---
+import { SITE_LINK_ICONS, type SiteLinkIcon } from '../../prototypes/site-link-icons';
+import '../../styles/site-native-links.css';
+export interface HomeAction {
+  text: string;
+  link: string;
+  variant?: 'primary' | 'secondary' | 'minimal' | 'link';
+  attrs?: Record<string, unknown>;
+  icon?: unknown;
+  siteIcon?: SiteLinkIcon;
+}
+interface Props {
+  id: string;
+  actions: HomeAction[];
+  class?: string;
+  runtimeControl?: boolean;
+  themeButton?: boolean;
+  themeIcon?: boolean;
+  menuButton?: boolean;
+}
+const {
+  id,
+  actions,
+  class: className,
+  runtimeControl = false,
+  themeButton = false,
+  themeIcon = false,
+  menuButton = false,
+} = Astro.props;
+const locale = Astro.locals.starlightRoute.locale;
+const themeLabel = locale === 'zh-cn' ? '切换主题' : 'Toggle theme';
+const menuLabel = locale === 'zh-cn' ? '导航与设置' : 'Navigation and settings';
+---
+
+<div
+  id={id}
+  class:list={['home-actions', className]}
+  data-homepage-actions
+  data-homepage-controls={runtimeControl ? 'runtime' : undefined}
+  data-homepage-theme-label={themeLabel}
+  data-homepage-theme-icon={themeIcon ? 'true' : undefined}
+  data-homepage-menu-label={menuButton ? menuLabel : undefined}
+>
+  <div class="home-actions-fallback" data-homepage-fallback>
+    {
+      actions.map(({ text, link, variant = 'primary', attrs = {}, siteIcon: icon }) => (
+        <a
+          {...attrs}
+          href={link}
+          class="site-native-link"
+          data-home-action-variant={variant}
+          data-site-link-icon={icon}
+          data-site-link-appearance={icon ? 'icon' : undefined}
+        >
+          {icon ? (
+            <svg viewBox={SITE_LINK_ICONS[icon].viewBox} width="18" height="18" aria-hidden="true">
+              <path fill="currentColor" d={SITE_LINK_ICONS[icon].path} />
+            </svg>
+          ) : (
+            text
+          )}
+        </a>
+      ))
+    }
+    {
+      themeButton && (
+        <button type="button" data-homepage-theme aria-label={themeLabel}>
+          {themeIcon ? <span class="site-header-theme-icon" aria-hidden="true" /> : themeLabel}
+        </button>
+      )
+    }
+    {
+      menuButton && (
+        <span data-homepage-menu hidden>
+          {menuLabel}
+        </span>
+      )
+    }
+    {runtimeControl && <span class="site-header-runtime-placeholder">Web Components</span>}
+  </div>
+  <div data-homepage-mount></div>
+</div>
+
+<style is:global>
+  .home-actions {
+    min-width: 0;
+    position: relative;
+  }
+  .home-actions-fallback,
+  .home-runtime-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+  }
+  .home-actions [data-homepage-fallback][hidden] {
+    display: none;
+  }
+  /* Fallback anchors retain readable native destinations until the
+     page-owned Prototype composition is ready. No second visual recipe. */
+  .home-actions-fallback a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+  .home-theme-accessible-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .home-actions .pui-projection-controls:empty {
+    display: none;
+  }
+  .home-actions .pui-projection-content {
+    min-width: 0;
+  }
+  .home-actions [data-homepage-mount] {
+    min-width: 0;
+    position: relative;
+  }
+  .home-actions .pui-projection-generation {
+    min-width: 0;
+  }
+</style>

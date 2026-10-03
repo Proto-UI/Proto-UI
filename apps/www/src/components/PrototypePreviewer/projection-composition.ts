@@ -40,6 +40,10 @@ export type ProjectionControlOption<Value extends string = string> = Readonly<{
 export type ProjectionControlConfig<Value extends string> = Readonly<{
   label: string;
   placeholder?: string;
+  /** Consumer opt-in for full selected values under narrow/text-enlarged layout. */
+  wrapValue?: boolean;
+  /** Explicit Brutalist Trigger presentation; other families keep their own recipe. */
+  brutalistTriggerAppearance?: 'flat' | 'elevated';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
@@ -50,6 +54,12 @@ export type ProjectionCompositionControls = Readonly<{
   component: ProjectionControlConfig<ProjectionComponentId>;
 }>;
 
+export type ProjectionContentRecipe = Readonly<{
+  id: string;
+  prototypeIds: readonly string[];
+  rootPrototypeId: string | null;
+}>;
+
 export type ProjectionCompositionOptions = Readonly<{
   ownerId: string;
   runtimeId: RuntimeId;
@@ -57,6 +67,8 @@ export type ProjectionCompositionOptions = Readonly<{
   generation: number;
   componentId: ProjectionComponentId;
   childDemo: DemoSpec;
+  /** Explicit Website-consumer recipe; not a new library/Base guarantee. */
+  contentRecipe?: ProjectionContentRecipe;
   controls: ProjectionCompositionControls;
   /** Scope-owned controls to materialize. Defaults to all three controls. */
   controlIds?: readonly ProjectionControlId[];
@@ -428,7 +440,7 @@ function cloneProjectedChild(
   coordinateAttrs: DemoBoxAttrs,
   themeSurfaceStyle: DemoSurfaceStyle | undefined,
   allowedPrototypeIds: ReadonlySet<string>,
-  componentRootPrototypeId: string
+  componentRootPrototypeId: string | null
 ): DemoChild {
   if (typeof node === 'string') return node;
   if (node.kind === 'text') return { ...node };
@@ -487,14 +499,44 @@ function createSelectControl<Value extends string>(
       ...coordinateAttrs,
       'data-projection-control-label': id,
     },
-    children: [config.label],
+    children: [
+      createProjectedProto('site-typography', coordinateAttrs, themeSurfaceStyle, {
+        rootTag: 'span',
+        props: { family: coordinateAttrs['data-projection-family'], role: 'label', compact: false },
+        children: [config.label],
+      }),
+    ],
   } satisfies DemoBoxNode;
   const value = createProjectedProto(selectParts.value, coordinateAttrs, themeSurfaceStyle, {
     props: { placeholder: config.placeholder ?? config.label },
+    // Preview controls retain their default truncation. A consumer such as
+    // compact Header settings may explicitly request full-value wrapping.
+    surfaceStyle: {
+      display: 'block',
+      minWidth: '0',
+      flex: '1 1 auto',
+      overflow: config.wrapValue ? 'visible' : 'hidden',
+      textOverflow: config.wrapValue ? 'clip' : 'ellipsis',
+      whiteSpace: config.wrapValue ? 'normal' : 'nowrap',
+      ...(config.wrapValue ? { overflowWrap: 'anywhere' } : {}),
+    },
   });
   const trigger = createProjectedProto(selectParts.trigger, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.trigger,
-    props: { 'aria-label': config.label },
+    props: {
+      'aria-label': config.label,
+      ...(selectParts.trigger === 'brutalist-select-trigger' && config.brutalistTriggerAppearance
+        ? { appearance: config.brutalistTriggerAppearance }
+        : {}),
+    },
+    // The website owns control density, through the Adapter's normalized surface channel.
+    surfaceStyle: {
+      width: '100%',
+      minWidth: '0',
+      maxWidth: '100%',
+      minHeight: 'var(--site-control-height, 2.25rem)',
+      ...(config.wrapValue ? { height: 'auto' } : {}),
+    },
     children: [value],
   });
   const content = createProjectedProto(selectParts.content, coordinateAttrs, themeSurfaceStyle, {
@@ -516,7 +558,7 @@ function createSelectControl<Value extends string>(
     // Width is a host-owned normalized surface input projected by every
     // Adapter. Website CSS must not reach through the wrapper to style the
     // physical combobox surface.
-    surfaceStyle: { width: '100%' },
+    surfaceStyle: { width: '100%', minWidth: '0', maxWidth: '100%' },
     children: [trigger, content],
   });
 
@@ -600,17 +642,36 @@ export function createProjectionComposition(
       `[PrototypePreviewer] projection family ${options.projectionFamilyId} has no component ${options.componentId}.`
     );
   }
+  if (options.contentRecipe) {
+    const recipe = options.contentRecipe;
+    if (
+      !recipe.id.trim() ||
+      recipe.prototypeIds.some((id) => !id.trim()) ||
+      new Set(recipe.prototypeIds).size !== recipe.prototypeIds.length
+    ) {
+      throw new Error(
+        '[PrototypePreviewer] content recipe requires an id and unique nonempty Prototype identities.'
+      );
+    }
+    if (recipe.rootPrototypeId === null && recipe.prototypeIds.length > 0) {
+      throw new Error(
+        '[PrototypePreviewer] only a native-only content recipe may omit its Prototype root.'
+      );
+    }
+  }
   assertProjectionRecipeClosure(
     options.childDemo.root,
-    componentFamily.recipePrototypeIds,
-    componentFamily.recipeId
+    options.contentRecipe?.prototypeIds ?? componentFamily.recipePrototypeIds,
+    options.contentRecipe?.id ?? componentFamily.recipeId
   );
-  const allowedPrototypeIds = new Set(componentFamily.recipePrototypeIds);
-  const componentRootPrototypeId = resolveProjectionPart(
-    options.projectionFamilyId,
-    options.componentId,
-    'root'
-  ).prototypeId;
+  const allowedPrototypeIds = new Set(
+    options.contentRecipe?.prototypeIds ?? componentFamily.recipePrototypeIds
+  );
+  const componentRootPrototypeId = options.contentRecipe
+    ? options.contentRecipe.rootPrototypeId
+    : resolveProjectionPart(options.projectionFamilyId, options.componentId, 'root').prototypeId;
+  if (componentRootPrototypeId !== null && !allowedPrototypeIds.has(componentRootPrototypeId))
+    throw new Error('[PrototypePreviewer] content recipe root must be declared.');
   const coordinateAttrs = createCoordinateAttrs(options);
   const selectParts = Object.fromEntries(
     // A fixed-family, toolbar-free preview needs only its real component parts.
@@ -686,7 +747,11 @@ export function createProjectionComposition(
     const ownerMarker = markerClass('owner', options.ownerId);
     const generationMarker = markerClass('generation', String(options.generation));
     const prototypeMarkers = new Map<string, string>();
-    for (const prototypeId of new Set([...allowedPrototypeIds, ...Object.values(selectParts)])) {
+    for (const prototypeId of new Set([
+      ...allowedPrototypeIds,
+      ...Object.values(selectParts),
+      ...(controlIds.length ? ['site-typography'] : []),
+    ])) {
       prototypeMarkers.set(markerClass('prototype', prototypeId), prototypeId);
     }
     const stampProjectionSurfaces = () => {
@@ -848,8 +913,10 @@ export function createProjectionComposition(
           attrs: {
             ...coordinateAttrs,
             'data-projection-content': '',
-            'data-projection-id': options.componentId,
-            'data-projection-prototype': componentRootPrototypeId,
+            'data-projection-id': options.contentRecipe?.id ?? options.componentId,
+            ...(componentRootPrototypeId
+              ? { 'data-projection-prototype': componentRootPrototypeId }
+              : {}),
           },
           children: [projectedChild],
         },

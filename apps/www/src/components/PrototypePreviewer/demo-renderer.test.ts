@@ -112,3 +112,137 @@ describe('Previewer demo renderer cleanup', () => {
     expect(unmount).toHaveBeenCalledTimes(1);
   });
 });
+
+// The doubles below hold owner effects until the renderer's commit boundary.
+// The Search suite separately exercises real React + Proto Button activation.
+describe('React demo props commit and deferred refresh ownership', () => {
+  async function mountPropsHarness(synchronousCommit: boolean) {
+    const host = document.createElement('div');
+    const button = document.createElement('div');
+    document.body.appendChild(host);
+    const frames = new Map<number, FrameRequestCallback>();
+    let nextFrame = 0;
+    let captureFrames = false;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      const id = ++nextFrame;
+      if (captureFrames) frames.set(id, callback);
+      else queueMicrotask(() => callback(0));
+      return id;
+    });
+    const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+      frames.delete(id);
+    });
+    const effects: Array<() => void> = [];
+    let currentProps: Record<string, unknown> = {};
+    const update = vi.fn(() => {
+      button.removeAttribute('role');
+      effects.push(() => {
+        button.setAttribute('role', 'button');
+        button.setAttribute('aria-disabled', String(currentProps.disabled));
+      });
+    });
+    const unmount = vi.fn(() => button.remove());
+    const render = vi.fn((tree: { props: Record<string, unknown> }) => {
+      currentProps = tree.props;
+      (currentProps.ref as (instance: { update(): void }) => void)({ update });
+      host.append(button);
+    });
+    react.createAdapter.mockReturnValue(function DeferredButton() {});
+    react.load.mockResolvedValue({
+      React: {
+        createElement: (type: unknown, props: unknown, ...children: unknown[]) => ({
+          type,
+          props,
+          children,
+        }),
+      },
+      ReactDOM: {
+        createRoot: () => ({ render, unmount }),
+        ...(synchronousCommit
+          ? {
+              flushSync(callback: () => unknown) {
+                const result = callback();
+                for (const effect of effects.splice(0)) effect();
+                return result;
+              },
+            }
+          : {}),
+      },
+    });
+    let api!: import('./demo-types').DemoRuntimeApi;
+    const rendered = await renderDemo({
+      runtime: 'react',
+      host,
+      demo: {
+        type: 'demo',
+        root: {
+          kind: 'proto',
+          prototypeId: 'deferred-button',
+          ref: 'button',
+          props: { disabled: true },
+        },
+        setup(context) {
+          api = context.api;
+        },
+      },
+    });
+    captureFrames = true;
+    return { host, button, frames, update, render, cancel, rendered, api };
+  }
+
+  it('commits owner effects before setProps returns without reopening an asynchronous refresh gap', async () => {
+    const h = await mountPropsHarness(true);
+    try {
+      h.api.setProps('button', { disabled: false });
+      expect(h.button.getAttribute('role')).toBe('button');
+      expect(h.button.getAttribute('aria-disabled')).toBe('false');
+      expect(h.frames.size).toBe(0);
+      h.api.setProps('button', { disabled: true });
+      expect(h.button.getAttribute('aria-disabled')).toBe('true');
+      expect(h.frames.size).toBe(0);
+    } finally {
+      h.rendered.destroy();
+    }
+  });
+
+  it('cancels fallback refresh and rejects stale props after destroying the owner', async () => {
+    const h = await mountPropsHarness(false);
+    h.api.setProps('button', { disabled: false });
+    expect(h.frames.size).toBe(1);
+    const [frame, lateDelivery] = [...h.frames.entries()][0]!;
+    h.rendered.destroy();
+    expect(h.cancel).toHaveBeenCalledWith(frame);
+    expect(h.frames.size).toBe(0);
+    h.update.mockClear();
+    h.render.mockClear();
+    // Model a callback already dequeued when cancellation occurs.
+    lateDelivery(0);
+    h.api.setProps('button', { disabled: true });
+    expect(h.update).not.toHaveBeenCalled();
+    expect(h.render).not.toHaveBeenCalled();
+    expect(h.host.childNodes).toHaveLength(0);
+  });
+
+  it('does not refresh an old owner after another renderer claims its host', async () => {
+    const h = await mountPropsHarness(false);
+    h.api.setProps('button', { disabled: false });
+    const lateDelivery = [...h.frames.values()][0]!;
+    const replacement = await renderDemo({
+      runtime: 'wc',
+      host: h.host,
+      demo: { type: 'demo', root: { kind: 'box', children: ['Current generation'] } },
+    });
+    try {
+      h.update.mockClear();
+      h.render.mockClear();
+      lateDelivery(0);
+      h.api.setProps('button', { disabled: true });
+      expect(h.update).not.toHaveBeenCalled();
+      expect(h.render).not.toHaveBeenCalled();
+      expect(h.host.textContent).toBe('Current generation');
+      expect(h.frames.size).toBe(0);
+    } finally {
+      replacement.destroy();
+    }
+  });
+});

@@ -1,32 +1,38 @@
 ---
-import context from 'virtual:starlight/project-context';
-import { localizedUrl } from '../../utils/localizedUrl';
 import '../../styles/global.css';
-import AdapterSelect from './AdapterSelect.astro';
+import SiteLibraryStyle from '../SiteLibraryStyle.astro';
+import { resolveSiteLibraryFamily } from '../site-library-family';
+const siteLibraryFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 import DocumentationImagePreview from '../DocumentationImagePreview.astro';
 
-const { hasSidebar, locale } = Astro.locals.starlightRoute;
-const localizedPath = (path: string) =>
-  localizedUrl(new URL(path, Astro.url), locale || 'en', context.trailingSlash).pathname;
+const { hasSidebar } = Astro.locals.starlightRoute;
 ---
 
+<SiteLibraryStyle />
 <DocumentationImagePreview />
 
 <div
-  class="bg-background text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] [--header-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
+  data-site-family-scope
+  data-site-library-family={siteLibraryFamily}
+  class="site-page-frame bg-background text-foreground group/body overscroll-none font-sans antialiased [--footer-height:calc(var(--spacing)*14)] xl:[--footer-height:calc(var(--spacing)*24)]"
 >
   <script>
     import '../../scripts/proto-concept';
   </script>
   <div
     class:list={[
-      'bg-background container-wrapper flex flex-1 flex-col px-2',
+      'bg-background container-wrapper flex flex-1 flex-col',
       { 'docs-shell': hasSidebar },
     ]}
   >
     <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
     <noscript>
       <style is:inline>
+        /* Without measurements, keep document navigation in normal flow so
+           enlarged headings cannot scroll behind an estimated sticky header. */
+        .site-page-frame > .container-wrapper > header:has([data-docs-site-header]) {
+          position: static !important;
+        }
         @media (max-width: 63.999rem) {
           [data-page-frame-layout] {
             flex-direction: column !important;
@@ -49,7 +55,7 @@ const localizedPath = (path: string) =>
             width: 100% !important;
           }
 
-          starlight-menu-button {
+          [data-site-contents-command] {
             display: none !important;
           }
         }
@@ -68,14 +74,6 @@ const localizedPath = (path: string) =>
             >
               <div id="starlight__sidebar" class="mobile-sidebar-pane sidebar-pane">
                 <div class="mobile-sidebar-content sidebar-content sl-flex">
-                  <div class="mobile-preferences">
-                    <AdapterSelect id="adapter-select-mobile" />
-                  </div>
-                  <div class="mobile-primary-links" aria-label="Primary">
-                    <a href={localizedPath('/start-here/what-you-saw/')}>Docs</a>
-                    <a href={localizedPath('/ui-libraries/')}>Prototypes</a>
-                    <a href={localizedPath('/whitepaper/0-preface/')}>Whitepaper</a>
-                  </div>
                   <slot name="sidebar" />
                 </div>
               </div>
@@ -90,20 +88,6 @@ const localizedPath = (path: string) =>
     {
       !hasSidebar && (
         <>
-          <nav class="docs-sidebar primary-only-sidebar" aria-label="Primary navigation">
-            <div id="starlight__sidebar" class="mobile-sidebar-pane sidebar-pane">
-              <div class="mobile-sidebar-content sidebar-content sl-flex">
-                <div class="mobile-preferences">
-                  <AdapterSelect id="adapter-select-mobile" />
-                </div>
-                <div class="mobile-primary-links" aria-label="Primary">
-                  <a href={localizedPath('/start-here/what-you-saw/')}>Docs</a>
-                  <a href={localizedPath('/ui-libraries/')}>Prototypes</a>
-                  <a href={localizedPath('/whitepaper/0-preface/')}>Whitepaper</a>
-                </div>
-              </div>
-            </div>
-          </nav>
           <div class="main-frame min-w-0 w-full">
             <slot />
           </div>
@@ -114,44 +98,46 @@ const localizedPath = (path: string) =>
 </div>
 
 <script>
-  const menuHost = document.querySelector('starlight-menu-button');
-  const menuControl = menuHost?.querySelector('button');
+  import { applySiteLibraryFamily, resolveSiteLibraryFamily } from '../site-library-family';
+  const syncLibraryRoute = () =>
+    applySiteLibraryFamily(document, resolveSiteLibraryFamily(location.pathname));
+  syncLibraryRoute();
+  document.addEventListener('astro:page-load', syncLibraryRoute);
 
-  if (menuHost && menuControl) {
-    const syncExpandedState = () => {
-      menuControl.setAttribute(
-        'aria-expanded',
-        menuHost.getAttribute('aria-expanded') === 'true' ? 'true' : 'false'
-      );
-    };
-    const collapseMenu = (restoreFocus = false) => {
-      menuHost.setAttribute('aria-expanded', 'false');
-      document.body.removeAttribute('data-mobile-menu-expanded');
-      syncExpandedState();
-      if (restoreFocus) menuControl.focus();
-    };
-    const desktopQuery = window.matchMedia('(min-width: 64rem)');
-    const collapseOnDesktop = () => {
-      if (desktopQuery.matches) collapseMenu();
-    };
+  import { initSiteSidebarCurrentVisibility } from '../site-sidebar-current-visibility';
+  const revealCurrentArticle = () => initSiteSidebarCurrentVisibility(document);
+  revealCurrentArticle();
+  document.addEventListener('astro:page-load', revealCurrentArticle);
 
-    new MutationObserver(syncExpandedState).observe(menuHost, {
-      attributes: true,
-      attributeFilter: ['aria-expanded'],
-    });
-    desktopQuery.addEventListener('change', collapseOnDesktop);
-    syncExpandedState();
-    collapseOnDesktop();
-
-    document.addEventListener('keyup', (event) => {
-      if (event.key !== 'Escape') return;
-      if (!document.body.hasAttribute('data-mobile-menu-expanded')) return;
-      collapseMenu(true);
-    });
-  }
+  import { initSiteContentsNavigation } from '../site-header-disclosure';
+  const initializeContents = () => initSiteContentsNavigation(document);
+  initializeContents();
+  document.addEventListener('astro:page-load', initializeContents);
 </script>
 
 <style>
+  .site-page-frame {
+    --header-height: 4rem;
+    --sl-nav-height: var(--header-height);
+  }
+  @media (max-width: 68.749rem) {
+    .site-page-frame {
+      --header-height: 7rem;
+    }
+  }
+  @media (max-width: 47.999rem) {
+    .site-page-frame {
+      --header-height: 6.5rem;
+    }
+  }
+  :global(.site-page-frame > .container-wrapper > header:has([data-site-header])) {
+    container: docs-page / inline-size;
+  }
+  :global(
+    .site-page-frame:has([data-docs-site-header]) [data-doc-flow] :is(h1, h2, h3, h4, h5, h6)[id]
+  ) {
+    scroll-margin-top: calc(var(--header-height) + 1rem);
+  }
   /* Keep the header and all three documentation columns on one centered canvas. */
   .docs-shell {
     max-width: 85rem;
@@ -193,55 +179,6 @@ const localizedPath = (path: string) =>
     gap: 1rem;
   }
 
-  .mobile-primary-links {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.5rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .mobile-preferences {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.5rem;
-  }
-
-  .mobile-preferences :global(.adapter-select-wrapper),
-  .mobile-preferences :global(select) {
-    width: 100%;
-  }
-
-  .mobile-preferences :global(select) {
-    border-color: var(--color-border);
-    text-align: left;
-  }
-
-  @media (min-width: 48rem) {
-    .mobile-preferences {
-      display: none;
-    }
-  }
-
-  .mobile-primary-links a {
-    display: inline-flex;
-    min-height: 2.5rem;
-    align-items: center;
-    justify-content: center;
-    padding-inline: 0.5rem;
-    border-radius: var(--radius-md);
-    color: var(--color-foreground);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    text-decoration: none;
-  }
-
-  .mobile-primary-links a:hover,
-  .mobile-primary-links a:focus-visible {
-    background: var(--color-accent);
-    color: var(--color-accent-foreground);
-  }
-
   @media (min-width: 64rem) {
     .docs-sidebar {
       position: sticky;
@@ -249,7 +186,7 @@ const localizedPath = (path: string) =>
       top: calc(var(--header-height) + 1px);
       display: flex;
       width: var(--sidebar-width);
-      height: calc(100svh - var(--header-height));
+      height: calc(100svh - var(--header-height) - 1px);
       flex-direction: column;
       overflow-y: auto;
       background: transparent;
@@ -268,14 +205,6 @@ const localizedPath = (path: string) =>
 
     .mobile-sidebar-content {
       padding: 0;
-    }
-
-    .mobile-primary-links {
-      display: none;
-    }
-
-    .docs-sidebar.primary-only-sidebar {
-      display: none;
     }
   }
 </style>

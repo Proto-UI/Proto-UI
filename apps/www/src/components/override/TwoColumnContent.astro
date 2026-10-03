@@ -2,8 +2,8 @@
 const { hasSidebar, entry } = Astro.locals.starlightRoute;
 const isSplash = entry.data.template === 'splash';
 const mainPaneClass = isSplash
-  ? 'main-pane mx-auto flex w-full max-w-[88rem] min-w-0 flex-1 flex-col gap-10 px-4 py-6 text-neutral-800 md:px-6 lg:py-10 dark:text-neutral-200'
-  : 'main-pane mx-auto flex w-full max-w-2xl min-w-0 flex-1 flex-col gap-8 px-4 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-200';
+  ? 'main-pane mx-auto flex w-full max-w-[88rem] min-w-0 flex-1 flex-col gap-8 px-1 py-6 text-foreground md:px-6 lg:gap-10 lg:py-10'
+  : 'main-pane mx-auto flex w-full max-w-2xl min-w-0 flex-1 flex-col gap-8 px-5 py-6 text-neutral-800 md:px-0 lg:py-8 dark:text-neutral-200';
 ---
 
 <div class="lg:sl-flex">

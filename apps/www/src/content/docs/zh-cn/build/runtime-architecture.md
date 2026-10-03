@@ -116,3 +116,13 @@ corepack pnpm@10.32.1 check:types
 `T-LIFECYCLE-0003`、`T-LIFECYCLE-0005` 与 `T-LIFECYCLE-0006` 把共享 lifecycle criteria 连接到 Runtime 和官方 Adapter evidence。
 
 接下来阅读 [Host Caps](/zh-cn/build/host-caps/)理解 capability wiring，阅读 [Adapter 指南](/zh-cn/build/adapter-guide/)理解当前贡献边界，或阅读[契约与测试](/zh-cn/build/contracts-and-tests/)理解证据追踪。
+
+## 首页组件展示
+
+`website-component-gallery` 是网站使用十一类现有 Prototype 编排的组合：Button、Toggle、Checkbox、Switch、Select、Textarea、Tabs、Dialog、Dropdown Menu、Hover Card 和 Separator。控件直接展示，并组成偏好设置、文本编辑/预览与浮层任务。六个展示表面由站点实验性被动 `SitePreviewSurface` 拥有视觉，不冒称已有官方 Shadcn Card，也不新增 Base 行为。
+
+全局 Runtime 与组件库偏好通过 Web Components、React、Vue 或 Vue 2 重新实现已登记的首页参与者，并在同一 generation 提交；两种偏好正交。Astro 拥有内容与布局，Pagefind 拥有搜索基础设施，其 UI 仍有独立迁移义务。单组件示例继续保留在文档中。
+
+偏好只保存在本次挂载的示例内。文本编辑会更新真实预览；Tabs 通过已支持的 `keepMounted` 保留未激活面板内的受控草稿。Dialog、Dropdown 与 HoverCard 拥有自己的交互和焦点语义。全局切换成功后重置示例状态，替换失败时保留原可用 generation；没有服务器或持久存储承诺。
+
+源码：[homepage-showcase.ts](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/components/Homepage/homepage-showcase.ts) 与 [homepage-gallery-parts.ts](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/components/Homepage/homepage-gallery-parts.ts)。Flutter、Qt 和 GPUI 浏览器/WASM runner 仍是研究方向，不代表可用 Adapter 或一致性支持。

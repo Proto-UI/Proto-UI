@@ -26,9 +26,9 @@ function supportsAdapter(control: AdapterSelectControl, adapter: PublicRuntimeId
   if (isNativeSelect(control)) {
     return Array.from(control.options).some((option) => option.value === adapter);
   }
-  return Array.from(control.querySelectorAll<HTMLElement>('wc-shadcn-select-item')).some(
-    (item) => item.dataset.value === adapter
-  );
+  return Array.from(
+    control.querySelectorAll<HTMLElement>('wc-shadcn-select-item, wc-brutalist-select-item')
+  ).some((item) => item.dataset.value === adapter);
 }
 
 function readControlValue(control: AdapterSelectControl): string {
@@ -97,7 +97,7 @@ function synchronizeAdapterSelects(doc: Document, adapter: PublicRuntimeId): voi
   const selects: AdapterSelectControl[] = [
     ...doc.querySelectorAll<HTMLSelectElement>('[data-adapter-select] select'),
     ...doc.querySelectorAll<SiteSelectRoot>(
-      '[data-adapter-select] wc-shadcn-select-root[data-adapter-select-root]'
+      '[data-adapter-select] [data-site-select-root][data-adapter-select-root]'
     ),
   ];
   for (const select of selects) {
@@ -118,7 +118,7 @@ export function initAdapterSelects(root: ParentNode): void {
   const selects: AdapterSelectControl[] = [
     ...root.querySelectorAll<HTMLSelectElement>('[data-adapter-select] select'),
     ...root.querySelectorAll<SiteSelectRoot>(
-      '[data-adapter-select] wc-shadcn-select-root[data-adapter-select-root]'
+      '[data-adapter-select] [data-site-select-root][data-adapter-select-root]'
     ),
   ];
   for (const select of selects) initializeAdapterSelect(select);

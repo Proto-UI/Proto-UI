@@ -1,5 +1,14 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { initAdapterSelects, isRuntimeId } from '../adapter-preference';
+
+afterEach(async () => {
+  // Disconnect real WC trees while Happy DOM still owns their document. Their
+  // nested async unmount chain must finish before the environment is destroyed.
+  document.body.replaceChildren();
+  await new Promise<void>((resolve) => setTimeout(resolve, 0));
+  delete document.documentElement.dataset.siteLibraryFamily;
+  vi.restoreAllMocks();
+});
 
 const adapterSelect = (id: string) => `
   <div data-adapter-select>
@@ -44,5 +53,37 @@ describe('documentation adapter selector', () => {
     expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('react');
     expect(setItem).toHaveBeenCalledTimes(1);
     expect(changeListener).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('family-independent adapter preference', () => {
+  it('synchronizes the actual Brutalist controls without changing the document family', async () => {
+    const { initSiteControls, registerSiteControls, selectValue } =
+      await import('../site-shadcn-controls');
+    registerSiteControls();
+    localStorage.clear();
+    document.documentElement.dataset.siteLibraryFamily = 'brutalist';
+    const control = (family: string) => `<div data-adapter-select>
+      <wc-${family}-select-root data-site-select-root data-adapter-select-root data-site-initial-value="wc">
+        <wc-${family}-select-trigger><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger>
+        <wc-${family}-select-content>
+          <wc-${family}-select-item data-value="wc">Web Components</wc-${family}-select-item>
+          <wc-${family}-select-item data-value="vue2">Vue 2</wc-${family}-select-item>
+        </wc-${family}-select-content>
+      </wc-${family}-select-root></div>`;
+    document.body.innerHTML = control('brutalist') + control('shadcn');
+    initSiteControls(document);
+    initAdapterSelects(document);
+    await Promise.resolve();
+    await Promise.resolve();
+    const controls = document.querySelectorAll<HTMLElement>('[data-adapter-select-root]');
+    controls[0].dispatchEvent(
+      new CustomEvent('valueChange', { detail: { value: 'vue2' }, bubbles: true })
+    );
+    await Promise.resolve();
+    await Promise.resolve();
+    expect([...controls].map(selectValue)).toEqual(['vue2', 'vue2']);
+    expect(document.documentElement.dataset.siteLibraryFamily).toBe('brutalist');
+    expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('vue2');
   });
 });

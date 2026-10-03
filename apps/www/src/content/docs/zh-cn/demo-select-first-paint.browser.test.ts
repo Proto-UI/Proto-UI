@@ -70,8 +70,20 @@ type ClosedSelect = {
 
 async function readClosedSelect(page: Page): Promise<ClosedSelect> {
   return page.evaluate(() => {
-    const content = document.querySelector('[data-previewer-id] [data-projection-content]');
-    if (!content) throw new Error('The Select demo must render projected content.');
+    const host = document.querySelector('[data-previewer-id] [data-projection-content]');
+    if (!host) throw new Error('The Select demo must render projected content.');
+    const boundaries = host.querySelectorAll(
+      '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
+    );
+    if (boundaries.length !== 1)
+      throw new Error('The Select demo requires one exact runtime surface boundary.');
+    const content = boundaries[0];
+    if (
+      Array.from(host.querySelectorAll('[data-pui-root]')).some(
+        (node) => node !== content && !content.contains(node)
+      )
+    )
+      throw new Error('An unexpected Prototype is outside the original Select slot.');
     const trigger = Array.from(content.querySelectorAll('*')).find(
       (element) => element.getAttribute('role') === 'combobox'
     );

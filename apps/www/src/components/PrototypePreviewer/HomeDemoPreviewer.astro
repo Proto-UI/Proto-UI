@@ -1,381 +1,227 @@
 ---
-import type { RuntimeId } from './runtimes/registry';
-
-type DemoOption = {
-  id: string;
-  label: string;
-  description?: string;
-};
-
-type RuntimeOption = {
-  id: RuntimeId;
-  label: string;
-};
-
-type BrowserRunnerResearchOption = {
-  id: 'flutter-wasm' | 'qt-wasm' | 'gpui-wasm';
-  label: string;
-};
-
 interface Props {
-  demos: DemoOption[];
-  initialDemoId?: string;
-  initialRuntime?: RuntimeId;
-  runtimes?: RuntimeOption[];
-  browserRunnerResearch?: BrowserRunnerResearchOption[];
   id?: string;
   class?: string;
-  pickerLabel?: string;
-  runtimeLabel?: string;
-  familyLabel?: string;
 }
-
-const locale = Astro.locals.starlightRoute.locale;
+const locale = Astro.locals.starlightRoute.locale === 'en' ? 'en' : 'zh-cn';
+const { id = 'home-demo-previewer', class: className = '' } = Astro.props;
 const copy =
   locale === 'en'
     ? {
-        eyebrow: 'Homepage Preview',
-        title: 'One component lineage, projected as a coherent browser generation.',
-        lead: 'Runtime, component library, controls, behavior, and visual style switch together.',
+        title: 'Interactive components',
+        family: 'Page style',
         loading: 'Preparing',
         ready: 'Ready',
         error: 'Error',
-        researchTitle: 'Browser WASM lane',
-        researchLead:
-          'Reserved for presenting Proto UI through future Flutter, Qt, and GPUI runners. Research only; no Adapter or conformance claim.',
       }
-    : {
-        eyebrow: '首页预览',
-        title: '同一组件谱系，在浏览器中投影为一个完整 generation',
-        lead: 'Runtime、组件库、控制器、行为与视觉样式会一起切换。',
-        loading: '准备中',
-        ready: '就绪',
-        error: '错误',
-        researchTitle: '浏览器 WASM 通道',
-        researchLead:
-          '为未来通过 Flutter、Qt 与 GPUI runner 在浏览器中展示 Proto UI 预留。仅表示研究方向，不代表 Adapter 或一致性支持。',
-      };
-
-const {
-  demos,
-  initialDemoId,
-  initialRuntime = 'wc',
-  runtimes = [
-    { id: 'wc', label: 'Web Components' },
-    { id: 'react', label: 'React' },
-    { id: 'vue', label: 'Vue' },
-    { id: 'vue2', label: 'Vue 2' },
-  ],
-  browserRunnerResearch = [
-    { id: 'flutter-wasm', label: 'Flutter' },
-    { id: 'qt-wasm', label: 'Qt' },
-    { id: 'gpui-wasm', label: 'GPUI' },
-  ],
-  id = 'home-demo-previewer',
-  class: className = '',
-  pickerLabel = 'Component',
-  runtimeLabel = 'Runtime',
-  familyLabel = locale === 'en' ? 'Component Library' : '组件库',
-} = Astro.props;
-
-if (!Array.isArray(demos) || demos.length === 0) {
-  throw new Error('[HomeDemoPreviewer] "demos" must include at least one demo option.');
-}
-
-const initialDemo = demos.find((demo) => demo.id === initialDemoId) ?? demos[0];
-const researchOptions = browserRunnerResearch.map((option) => ({
-  ...option,
-  status: 'research' as const,
-}));
-const initialRuntimeLabel =
-  runtimes.find((runtime) => runtime.id === initialRuntime)?.label ?? initialRuntime;
-const instanceToken = Math.random().toString(36).slice(2);
-const projectionOwner = `${id}-projection-${instanceToken}`;
+    : { title: '交互组件', family: '页面风格', loading: '准备中', ready: '就绪', error: '错误' };
+const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}`;
 ---
 
 <section
   id={id}
   class:list={['home-demo-previewer', className]}
-  data-home-demo-options={JSON.stringify(demos)}
-  data-runtime-options={JSON.stringify(runtimes)}
-  data-browser-runner-research={JSON.stringify(researchOptions)}
-  data-initial-demo-id={initialDemo.id}
-  data-initial-runtime={initialRuntime}
+  aria-label={copy.title}
+  data-home-showcase="website-component-gallery"
+  data-locale={locale}
   data-projection-owner={projectionOwner}
-  data-picker-label={pickerLabel}
-  data-runtime-label={runtimeLabel}
-  data-family-label={familyLabel}
+  data-family-label={copy.family}
   data-runner-state="loading"
-  data-runner-runtime={initialRuntime}
+  data-runner-runtime="wc"
   data-status-loading={copy.loading}
   data-status-ready={copy.ready}
   data-status-error={copy.error}
 >
-  <div class="home-demo-previewer__panel">
-    <div class="home-demo-previewer__header">
-      <div class="home-demo-previewer__intro">
-        <p class="home-demo-previewer__intro-eyebrow">{copy.eyebrow}</p>
-        <h2 class="home-demo-previewer__intro-title">{copy.title}</h2>
-        <p class="home-demo-previewer__description" data-home-demo-description>
-          {initialDemo.description ?? copy.lead}
-        </p>
-      </div>
-      <output class="home-demo-previewer__status" data-home-demo-status aria-live="polite">
-        {initialRuntimeLabel} · {copy.loading}
-      </output>
-    </div>
-
-    <div class="home-demo-previewer__host" data-home-demo-host aria-busy="true"></div>
-
-    <div class="home-demo-previewer__research">
-      <div class="home-demo-previewer__research-copy">
-        <p class="home-demo-previewer__research-title">{copy.researchTitle}</p>
-        <p class="home-demo-previewer__research-lead">{copy.researchLead}</p>
-      </div>
-      <ul class="home-demo-previewer__research-targets" aria-label={copy.researchTitle}>
-        {
-          researchOptions.map((option) => (
-            <li data-browser-runner-research-id={option.id}>{option.label}</li>
-          ))
-        }
-      </ul>
-    </div>
-  </div>
-
-  <script>
-    import { initHomeDemoPreviewer } from './home-demo-client';
-
-    function init() {
-      document
-        .querySelectorAll<HTMLElement>(
-          '.home-demo-previewer[data-home-demo-options]:not([data-inited])'
-        )
-        .forEach((root) => initHomeDemoPreviewer(root));
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', init);
-    } else {
-      init();
-    }
-    document.addEventListener('astro:page-load', init);
-  </script>
+  <div class="home-demo-previewer__host" data-home-demo-host aria-busy="true"></div>
+  <output class="home-demo-previewer__status" data-home-demo-status aria-live="polite">
+    {copy.loading}
+  </output>
 </section>
 
 <style>
+  /* App-owned layout and type only. Interactive surfaces belong to the selected PUI library. */
   .home-demo-previewer {
-    width: min(100%, 68rem);
+    width: min(100%, 78rem);
     margin: 0 auto;
-    padding: 0 1rem 2.5rem;
-    scroll-margin-block: 18vh;
+    padding: 0 0 3rem;
+    scroll-margin-block: 8rem;
+    font-family: var(--font-sans);
   }
-
-  .home-demo-previewer__panel {
-    overflow: hidden;
-    color: var(--color-card-foreground);
-    background: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg, 0.625rem);
-    box-shadow: 0 1px 2px color-mix(in oklch, black 8%, transparent);
-  }
-
-  .home-demo-previewer__header {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 1rem;
-    align-items: start;
-    padding: 1.125rem 1.25rem;
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .home-demo-previewer__intro {
-    display: grid;
-    gap: 0.25rem;
-    min-width: 0;
-  }
-
-  .home-demo-previewer__intro-eyebrow,
-  .home-demo-previewer__intro-title,
-  .home-demo-previewer__description {
-    margin: 0;
-  }
-
-  .home-demo-previewer__intro-eyebrow,
-  .home-demo-previewer__status,
-  .home-demo-previewer__research-lead {
-    color: var(--color-muted-foreground);
-    font-size: 0.75rem;
-    line-height: 1.125rem;
-  }
-
-  .home-demo-previewer__intro-title {
-    color: var(--color-foreground);
-    font-size: 0.98rem;
-    font-weight: 600;
-    line-height: 1.35;
-  }
-
-  .home-demo-previewer__description {
-    max-width: 46rem;
-    overflow: hidden;
-    color: var(--color-muted-foreground);
-    font-size: 0.875rem;
-    line-height: 1.35;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .home-demo-previewer__status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
-    padding-top: 0.125rem;
-    white-space: nowrap;
-  }
-
-  .home-demo-previewer__status::before {
-    width: 0.4rem;
-    height: 0.4rem;
-    content: '';
-    background: var(--color-muted-foreground);
-    border-radius: 50%;
-  }
-
-  .home-demo-previewer[data-runner-state='ready'] .home-demo-previewer__status::before {
-    background: var(--color-primary);
-  }
-
-  .home-demo-previewer[data-runner-state='error'] .home-demo-previewer__status::before {
-    background: var(--color-destructive);
-  }
-
   .home-demo-previewer__host {
     position: relative;
-    min-height: 24rem;
-    width: 100%;
-    border: 0;
-    border-radius: 0;
-    box-shadow: none;
-  }
-
-  .home-demo-previewer :global(.pui-projection-generation) {
-    width: 100%;
-  }
-
-  .home-demo-previewer :global(.pui-projection-scope) {
-    display: grid;
-    width: 100%;
-  }
-
-  .home-demo-previewer :global(.pui-projection-controls) {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.75rem;
-    padding: 0.875rem 1.25rem;
-    background: var(--color-card);
-  }
-
-  .home-demo-previewer :global(.pui-projection-control) {
-    display: grid;
-    gap: 0.375rem;
-    min-width: 0;
-  }
-
-  .home-demo-previewer :global(.pui-projection-control-label) {
-    color: var(--color-muted-foreground);
-    font-size: 0.75rem;
-    font-weight: 500;
-    line-height: 1rem;
-  }
-
-  .home-demo-previewer :global(.pui-projection-content) {
     min-height: 20rem;
-    min-width: 0;
-    max-width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 100%;
-    padding: 2rem 1.5rem;
-    overflow: hidden;
-    background: color-mix(in oklch, var(--color-muted) 24%, var(--color-card) 76%);
-    border-top: 1px solid var(--color-border);
   }
-
-  .home-demo-previewer__research {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 1rem;
-    align-items: center;
-    padding: 0.875rem 1.25rem;
-    background: var(--color-card);
-    border-top: 1px solid var(--color-border);
-  }
-
-  .home-demo-previewer__research-copy {
+  .home-demo-previewer :global(.pui-projection-generation),
+  .home-demo-previewer :global(.pui-projection-scope),
+  .home-demo-previewer :global(.pui-projection-content) {
+    width: 100%;
     min-width: 0;
   }
-
-  .home-demo-previewer__research-title,
-  .home-demo-previewer__research-lead {
-    margin: 0;
+  .home-demo-previewer :global(.pui-projection-controls:empty) {
+    display: none;
   }
-
-  .home-demo-previewer__research-title {
-    color: var(--color-foreground);
-    font-size: 0.8125rem;
-    font-weight: 500;
-    line-height: 1.25rem;
-  }
-
-  .home-demo-previewer__research-targets {
-    display: flex;
-    gap: 0;
-    align-items: center;
+  .home-demo-previewer__status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
     padding: 0;
-    margin: 0;
-    color: var(--color-muted-foreground);
-    font-size: 0.75rem;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
     white-space: nowrap;
-    list-style: none;
   }
-
-  .home-demo-previewer__research-targets li + li::before {
-    margin-inline: 0.5rem;
-    color: color-mix(in oklch, var(--color-muted-foreground) 48%, transparent);
-    content: '/';
+  .home-demo-previewer[data-runner-state='error'] .home-demo-previewer__status,
+  .home-demo-previewer[data-runner-state='loading'] .home-demo-previewer__status {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    margin: 0.75rem 0 0;
+    clip: auto;
+    white-space: normal;
+    font-size: 0.8125rem;
+    line-height: 1.5;
   }
-
-  @media (max-width: 720px) {
-    .home-demo-previewer {
-      padding-inline: 0.75rem;
-      padding-bottom: 1.5rem;
-    }
-
-    .home-demo-previewer__header,
-    .home-demo-previewer__research {
-      grid-template-columns: 1fr;
-      gap: 0.625rem;
-    }
-
-    .home-demo-previewer :global(.pui-projection-controls) {
+  .home-demo-previewer :global(.home-settings) {
+    display: grid;
+    gap: 1.5rem;
+  }
+  .home-demo-previewer :global(.home-settings__title) {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+  }
+  .home-demo-previewer :global(.home-settings__fields) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+  .home-demo-previewer :global(.home-settings__preferences) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-settings__field) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-settings__label) {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+  .home-demo-previewer :global(.home-settings__switch-row) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .home-demo-previewer :global(.home-settings__muted) {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    text-align: right;
+  }
+  .home-demo-previewer :global(.home-settings__footer) {
+    display: grid;
+    gap: 0.875rem;
+  }
+  .home-demo-previewer :global(.home-settings__actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .home-demo-previewer :global(.home-settings__feedback) {
+    min-height: 1.5em;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .home-demo-previewer :global(.home-gallery) {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+    align-items: start;
+  }
+  .home-demo-previewer :global(.home-gallery__column),
+  .home-demo-previewer :global(.home-gallery__card-body),
+  .home-demo-previewer :global(.home-gallery__stack) {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__column) {
+    gap: 1rem;
+  }
+  .home-demo-previewer :global(.home-gallery__item) {
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__card-heading) {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .home-demo-previewer :global(.home-gallery__title) {
+    font-size: 1rem;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+  .home-demo-previewer :global(.home-gallery__caption) {
+    font-size: 0.6875rem;
+    line-height: 1.5;
+    color: var(--color-muted-foreground);
+  }
+  .home-demo-previewer :global(.home-gallery__copy),
+  .home-demo-previewer :global(.home-gallery__status),
+  .home-demo-previewer :global(.home-gallery__choice-label) {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+  .home-demo-previewer :global(.home-gallery__row) {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .home-demo-previewer :global(.home-gallery__choice) {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    min-width: 0;
+  }
+  .home-demo-previewer :global(.home-gallery__text-preview) {
+    min-height: 8rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+  .home-demo-previewer :global(.home-settings),
+  .home-demo-previewer :global(.home-settings__fields),
+  .home-demo-previewer :global(.home-settings__preferences) {
+    gap: 1rem;
+  }
+  .home-demo-previewer :global(.home-settings__field) {
+    gap: 0.5rem;
+  }
+  .home-demo-previewer :global(.home-settings__actions) {
+    gap: 0.5rem;
+  }
+  .home-demo-previewer :global(.home-settings__label) {
+    font-size: 0.8125rem;
+  }
+  @media (max-width: 1199px) {
+    .home-demo-previewer :global(.home-gallery) {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      padding-inline: 1rem;
-    }
-
-    .home-demo-previewer :global(.pui-projection-content) {
-      min-height: 16rem;
-      padding: 1.25rem 1rem;
     }
   }
-
-  @media (max-width: 480px) {
-    .home-demo-previewer :global(.pui-projection-controls) {
-      grid-template-columns: 1fr;
-    }
-
-    .home-demo-previewer__description {
-      white-space: normal;
+  @media (max-width: 639px) {
+    .home-demo-previewer :global(.home-gallery) {
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 </style>

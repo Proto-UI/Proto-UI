@@ -1,0 +1,12 @@
+---
+import '../styles/site-copy-command.css';
+---
+
+<script>
+  import { initSiteCopyCommands } from './site-copy-client';
+  import { initSiteCodeSurfaces } from './site-code-surface';
+  initSiteCodeSurfaces(document);
+  document.addEventListener('astro:page-load', () => initSiteCodeSurfaces(document));
+  initSiteCopyCommands(document);
+  document.addEventListener('astro:page-load', () => initSiteCopyCommands(document));
+</script>

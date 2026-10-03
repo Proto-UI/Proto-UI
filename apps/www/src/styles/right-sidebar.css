@@ -7,11 +7,11 @@
     @apply sticky z-30 w-72 flex-col gap-4 overflow-hidden overscroll-none pb-8 xl:flex;
   }
 
-  .right-sidebar a {
+  .right-sidebar a:not([data-site-link-enhanced]) {
     @apply text-muted-foreground hover:text-foreground text-[0.8rem] no-underline transition-colors data-[depth=3]:pl-4 data-[depth=4]:pl-6;
   }
 
-  .right-sidebar a[in-view] {
+  .right-sidebar a:not([data-site-link-enhanced])[in-view] {
     @apply text-foreground/80;
   }
 

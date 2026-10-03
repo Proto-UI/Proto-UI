@@ -154,7 +154,7 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
     return;
   }
   if (node.kind === 'box') {
-    const el = document.createElement('div');
+    const el = document.createElement(node.tag ?? 'div');
     for (const [name, value] of Object.entries(node.attrs ?? {})) {
       el.setAttribute(name, value);
     }
@@ -287,8 +287,8 @@ async function renderDemoReact(
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
-    if (node.kind === 'proto' && node.ref && node.props) {
-      propsMap.set(node.ref, { ...node.props });
+    if (node.kind === 'proto' && node.ref) {
+      propsMap.set(node.ref, { ...(node.props ?? {}) });
     }
     for (const child of node.children ?? []) initProps(child);
   }
@@ -300,7 +300,7 @@ async function renderDemoReact(
     if (node.kind === 'box') {
       const kids = (node.children ?? []).map((child) => renderNode(child));
       return React.createElement(
-        'div',
+        node.tag ?? 'div',
         { ...node.attrs, className: node.className, 'data-demo-ref': node.ref },
         ...kids
       );
@@ -308,10 +308,11 @@ async function renderDemoReact(
 
     const proto = getPrototype(node.prototypeId);
     const scopedCache = getScopedComponentCache(reactComponentCache, adapter);
-    let Component = scopedCache.get(node.prototypeId);
+    const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
+    let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>);
-      scopedCache.set(node.prototypeId, Component);
+      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child));
     const mergedProps: Record<string, unknown> = { ...(node.props ?? {}) };
@@ -336,8 +337,11 @@ async function renderDemoReact(
     }
   ).createRoot(host);
   let cleanup: void | (() => void);
+  const pendingRefreshFrames = new Set<number>();
   if (
     !lease.commit(() => {
+      for (const frame of pendingRefreshFrames) cancelAnimationFrame(frame);
+      pendingRefreshFrames.clear();
       const currentCleanup = cleanup;
       cleanup = undefined;
       runCleanupSteps([
@@ -351,10 +355,9 @@ async function renderDemoReact(
     return EMPTY_DEMO_RENDER;
   }
 
-  const flushReact = <T>(fn: () => T): T => {
-    const flushSync = (ReactDOM as { flushSync?: <R>(callback: () => R) => R }).flushSync;
-    return typeof flushSync === 'function' ? flushSync(fn) : fn();
-  };
+  const flushSync = (ReactDOM as { flushSync?: <R>(callback: () => R) => R }).flushSync;
+  const flushReact = <T>(fn: () => T): T =>
+    typeof flushSync === 'function' ? flushSync(fn) : fn();
 
   function renderTree() {
     return renderNode(demo.root);
@@ -388,14 +391,24 @@ async function renderDemoReact(
       return inst?.getExposes?.();
     },
     setProps(ref, next) {
+      if (!ownsLease(opt, lease)) return;
       const current = propsMap.get(ref);
       if (!current) return;
       Object.assign(current, next);
       flushReact(() => root.render(renderTree()));
-      componentRefs.get(ref)?.update?.();
-      // React root rendering may commit asynchronously. Refresh the retained
-      // Proto owner only after the adapter has received the new props.
-      requestAnimationFrame(() => componentRefs.get(ref)?.update?.());
+      // An owner refresh can close its event gate until React commits the
+      // resulting effects. Finish that commit before a materializer may
+      // expose this generation, just as public calls above already do.
+      flushReact(() => componentRefs.get(ref)?.update?.());
+      if (typeof flushSync !== 'function') {
+        // Older renderers without a synchronous commit still need the retained
+        // owner refreshed after props delivery. This frame belongs to the lease.
+        const frame = requestAnimationFrame(() => {
+          pendingRefreshFrames.delete(frame);
+          if (ownsLease(opt, lease)) componentRefs.get(ref)?.update?.();
+        });
+        pendingRefreshFrames.add(frame);
+      }
     },
   };
 
@@ -423,8 +436,8 @@ async function renderDemoVue(
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
-    if (node.kind === 'proto' && node.ref && node.props) {
-      propsMap[node.ref] = { ...node.props };
+    if (node.kind === 'proto' && node.ref) {
+      propsMap[node.ref] = { ...(node.props ?? {}) };
     }
     for (const child of node.children ?? []) initProps(child);
   }
@@ -436,7 +449,7 @@ async function renderDemoVue(
     if (node.kind === 'box') {
       const kids = (node.children ?? []).map((child) => renderNode(child));
       return Vue.h(
-        'div',
+        node.tag ?? 'div',
         {
           ...node.attrs,
           class: node.className,
@@ -453,10 +466,11 @@ async function renderDemoVue(
 
     const proto = getPrototype(node.prototypeId);
     const scopedCache = getScopedComponentCache(vueComponentCache, adapter);
-    let Component = scopedCache.get(node.prototypeId);
+    const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
+    let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>);
-      scopedCache.set(node.prototypeId, Component);
+      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child));
     const mergedProps: Record<string, unknown> = { ...(node.props ?? {}) };
@@ -518,9 +532,9 @@ async function renderDemoVue(
       if (propsMap[ref]) {
         Object.assign(propsMap[ref], next);
       }
-      // Wait until reactive props/attrs have reached the adapter. Calling the
-      // controller in the same stack would re-read the previous attrs value.
-      void Vue.nextTick(() => componentRefs.get(ref)?.update?.());
+      // The actual Vue adapter reconciles changed host props after its commit.
+      // An additional controller update can replace that pending feedback
+      // commit with an unchanged one and lose a later controlled prop's paint.
     },
   };
 
@@ -570,7 +584,7 @@ async function renderDemoVue2(
     if (node.kind === 'box') {
       const kids = (node.children ?? []).map((child) => renderNode(child, h));
       return h(
-        'div',
+        node.tag ?? 'div',
         {
           class: node.className,
           attrs: {
@@ -584,10 +598,11 @@ async function renderDemoVue2(
 
     const proto = getPrototype(node.prototypeId);
     const scopedCache = getScopedComponentCache(vueComponentCache, adapter);
-    let Component = scopedCache.get(node.prototypeId);
+    const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
+    let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>);
-      scopedCache.set(node.prototypeId, Component);
+      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child, h));
     const mergedProps: Record<string, unknown> = { ...(node.props ?? {}) };
@@ -666,10 +681,8 @@ async function renderDemoVue2(
         setReactive(propsMap[ref], key, value);
       }
       app.$forceUpdate?.();
-      void nextVue2(Vue).then(() => {
-        refreshComponentRefs(app);
-        componentRefs.get(ref)?.update?.();
-      });
+      // Vue2's adapter owns host-prop notification and the resulting update.
+      // Public call/getExposes refresh component refs when they are consumed.
     },
   };
 

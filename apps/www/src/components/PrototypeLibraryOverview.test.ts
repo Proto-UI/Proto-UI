@@ -75,6 +75,26 @@ describe('PrototypeLibraryOverview Brutalist theme projection', () => {
       }
     }
   );
+
+  it('keeps the article and preview ancestor free of competing frame paint', () => {
+    const { scope } = mountOverview('light');
+    const article = document.createElement('article');
+    article.className = 'prototype-card';
+    scope.append(article);
+    const style = getComputedStyle(article);
+    // Executed CSS fixture, not a claim about browser pixels. The old outer
+    // Brutalist frame fails here even if an inner class says "surface".
+    expect(style.borderTopStyle).not.toBe('solid');
+    expect(style.boxShadow === '' || style.boxShadow === 'none').toBe(true);
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync(overviewCss!);
+    const innerRule = Array.from(sheet.cssRules).find(
+      (rule) =>
+        (rule as CSSStyleRule).selectorText === '.prototype-card__demo :global(.proto-previewer)'
+    ) as CSSStyleRule;
+    expect(innerRule.style.borderRadius).toBe('');
+    expect(innerRule.style.getPropertyValue('--runtime-box-content-padding')).toBe('1rem');
+  });
 });
 
 it('distinguishes the workspace-only Spinner, npm packages and draft ecosystem train', () => {

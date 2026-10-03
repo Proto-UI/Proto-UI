@@ -231,8 +231,11 @@ describe.sequential('shadcn control documentation browser regressions', () => {
       const mountScope = await previewer.evaluate((root) => ({
         previewerRoots: root.querySelectorAll('[data-pui-root]').length,
         demoRoots:
-          root.querySelector('[data-projection-content]')?.querySelectorAll('[data-pui-root]')
-            .length ?? 0,
+          root
+            .querySelector(
+              '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
+            )
+            ?.querySelectorAll('[data-pui-root]').length ?? 0,
         runtimeControlRoots:
           root
             .querySelector('[data-projection-control="runtime"]')

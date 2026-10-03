@@ -56,6 +56,160 @@ function prepareCommit(
 }
 
 describe('Website Prototype projection scope controller', () => {
+  for (const retryWith of ['start', 'request'] as const) {
+    it(`recovers through ${retryWith} after a newer initial request fails after the stale start settled`, async () => {
+      const initialPreparation = deferred<ProjectionScopeCandidate>();
+      const newerPreparation = deferred<ProjectionScopeCandidate>();
+      const initial = candidate('stale-initial');
+      const recovered = candidate('recovered');
+      const failure = new Error('newer initial generation failed');
+      const materialize = vi
+        .fn<(request: ProjectionScopeMaterializeRequest) => Promise<ProjectionScopeCandidate>>()
+        .mockReturnValueOnce(initialPreparation.promise)
+        .mockReturnValueOnce(newerPreparation.promise)
+        .mockResolvedValueOnce(recovered);
+      const controller = createProjectionScopeController({
+        initialSelection: selection('wc', 'shadcn'),
+        materialize,
+      });
+      const starting = controller.start();
+      const requested = controller.request({ runtimeId: 'react' });
+      const rejected = expect(requested).rejects.toBe(failure);
+      initialPreparation.resolve(initial);
+      await starting;
+      expect(controller.getSnapshot()).toMatchObject({ generation: 0, phase: 'preparing' });
+      newerPreparation.reject(failure);
+      await rejected;
+      expect(controller.getSnapshot()).toMatchObject({ generation: 0, phase: 'idle' });
+      // Failure retains the established rollback contract. start retries the
+      // committed coordinate; request accepts the consumer's current full intent.
+      const expected =
+        retryWith === 'start' ? selection('wc', 'shadcn') : selection('vue', 'brutalist');
+      const retry = retryWith === 'start' ? controller.start() : controller.request(expected);
+      await expect(retry).resolves.toMatchObject({
+        generation: 3,
+        phase: 'ready',
+        selection: expected,
+      });
+      expect(materialize.mock.calls.at(-1)?.[0].selection).toEqual(expected);
+      expect(initial.activate).not.toHaveBeenCalled();
+      expect(initial.dispose).toHaveBeenCalledTimes(1);
+      expect(recovered.activate).toHaveBeenCalledTimes(1);
+      await controller.destroy();
+      expect(recovered.dispose).toHaveBeenCalledTimes(1);
+    });
+  }
+
+  it('does not reopen admission when disposal interleaves with a stale start and pending request', async () => {
+    const initialPreparation = deferred<ProjectionScopeCandidate>();
+    const newerPreparation = deferred<ProjectionScopeCandidate>();
+    const initial = candidate('initial');
+    const newer = candidate('newer');
+    const materialize = vi
+      .fn<(request: ProjectionScopeMaterializeRequest) => Promise<ProjectionScopeCandidate>>()
+      .mockReturnValueOnce(initialPreparation.promise)
+      .mockReturnValueOnce(newerPreparation.promise);
+    const controller = createProjectionScopeController({
+      initialSelection: selection('wc', 'shadcn'),
+      materialize,
+    });
+    const starting = controller.start();
+    const requested = controller.request({ runtimeId: 'react' });
+    initialPreparation.resolve(initial);
+    await starting;
+    const destroying = controller.destroy();
+    await expect(controller.request({ projectionFamilyId: 'brutalist' })).rejects.toThrow(
+      'destroyed'
+    );
+    await expect(controller.start()).rejects.toThrow('destroyed');
+    newerPreparation.resolve(newer);
+    await Promise.all([requested, destroying]);
+    await expect(controller.request({ runtimeId: 'vue' })).rejects.toThrow('destroyed');
+    expect(controller.getSnapshot().phase).toBe('destroyed');
+    expect(materialize).toHaveBeenCalledTimes(2);
+    expect(initial.activate).not.toHaveBeenCalled();
+    expect(newer.activate).not.toHaveBeenCalled();
+    expect(initial.dispose).toHaveBeenCalledTimes(1);
+    expect(newer.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('still requires start admission and permits a fresh start after an idle initial failure', async () => {
+    const failure = new Error('current initial loader failed');
+    const recovered = candidate('recovered');
+    const materialize = vi
+      .fn<(request: ProjectionScopeMaterializeRequest) => Promise<ProjectionScopeCandidate>>()
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValueOnce(recovered);
+    const controller = createProjectionScopeController({
+      initialSelection: selection('wc', 'shadcn'),
+      materialize,
+    });
+    await expect(controller.request({ runtimeId: 'react' })).rejects.toThrow(
+      'start() must be called before request()'
+    );
+    expect(materialize).not.toHaveBeenCalled();
+    await expect(controller.start()).rejects.toBe(failure);
+    expect(controller.getSnapshot()).toMatchObject({ generation: 0, phase: 'idle' });
+    await expect(controller.request({ runtimeId: 'react' })).rejects.toThrow(
+      'start() must be called before request()'
+    );
+    await expect(controller.start()).resolves.toMatchObject({ generation: 2, phase: 'ready' });
+    expect(materialize).toHaveBeenCalledTimes(2);
+    await controller.destroy();
+    expect(recovered.dispose).toHaveBeenCalledTimes(1);
+  });
+
+  for (const initialOutcome of ['fulfill', 'reject'] as const) {
+    for (const requestPhase of ['preparing', 'ready'] as const) {
+      it(`keeps request admission when a stale initial start ${initialOutcome}s before a newer ${requestPhase} generation`, async () => {
+        const initialPreparation = deferred<ProjectionScopeCandidate>();
+        const newerPreparation = deferred<ProjectionScopeCandidate>();
+        const initial = candidate('stale-initial');
+        const newer = candidate('newer');
+        const final = candidate('final');
+        const materialize = vi
+          .fn<(request: ProjectionScopeMaterializeRequest) => Promise<ProjectionScopeCandidate>>()
+          .mockReturnValueOnce(initialPreparation.promise)
+          .mockReturnValueOnce(newerPreparation.promise)
+          .mockResolvedValueOnce(final);
+        const controller = createProjectionScopeController({
+          initialSelection: selection('wc', 'shadcn'),
+          materialize,
+        });
+        const starting = controller.start();
+        const requested = controller.request({ runtimeId: 'react' });
+        try {
+          await vi.waitFor(() => expect(materialize).toHaveBeenCalledTimes(2));
+          if (initialOutcome === 'fulfill') initialPreparation.resolve(initial);
+          else initialPreparation.reject(new Error('stale initial loader failed'));
+          await starting;
+          expect(controller.getSnapshot()).toMatchObject({ generation: 0, phase: 'preparing' });
+          expect(initial.activate).not.toHaveBeenCalled();
+          if (requestPhase === 'ready') {
+            newerPreparation.resolve(newer);
+            await requested;
+            expect(controller.getSnapshot()).toMatchObject({ generation: 2, phase: 'ready' });
+          }
+          await expect(
+            controller.request({ projectionFamilyId: 'brutalist' })
+          ).resolves.toMatchObject({
+            generation: 3,
+            phase: 'ready',
+            selection: selection('react', 'brutalist'),
+          });
+          expect(final.activate).toHaveBeenCalledTimes(1);
+        } finally {
+          newerPreparation.resolve(newer);
+          await requested;
+          await controller.destroy();
+        }
+        if (requestPhase === 'preparing') expect(newer.activate).not.toHaveBeenCalled();
+        expect(newer.dispose).toHaveBeenCalledTimes(1);
+        expect(final.dispose).toHaveBeenCalledTimes(1);
+      });
+    }
+  }
+
   it('switches Runtime and projection family as orthogonal coordinates', async () => {
     const events: string[] = [];
     const materialize = vi.fn(async ({ selection: target, generation }) => {

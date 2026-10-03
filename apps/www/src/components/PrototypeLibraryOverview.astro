@@ -600,10 +600,6 @@ const copy = isZh
     min-width: 0;
     scroll-margin-top: 5rem;
     padding: 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: 0.9rem;
-    background: var(--sl-color-bg);
-    box-shadow: 0 1px 0 color-mix(in oklab, var(--color-foreground) 6%, transparent);
   }
 
   .prototype-card__header {
@@ -661,23 +657,12 @@ const copy = isZh
   }
 
   .prototype-card__demo :global(.proto-previewer) {
-    border-radius: 0.65rem;
-  }
-
-  .prototype-card__demo :global(.proto-previewer__preview) {
-    min-height: 12rem;
-    padding: 1rem;
+    --runtime-box-content-min: 12rem;
+    --runtime-box-content-padding: 1rem;
   }
 
   .prototype-card__demo :global(.proto-previewer__preview .host) {
     min-height: 7rem;
-  }
-
-  .prototype-library--brutalist .prototype-card {
-    border: 2px solid #000;
-    border-radius: 0;
-    background: var(--sl-color-bg);
-    box-shadow: 3px 3px 0 #000;
   }
 
   @media (max-width: 48rem) {

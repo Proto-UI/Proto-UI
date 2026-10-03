@@ -113,6 +113,70 @@ describe('prototypes/brutalist: select', () => {
     expect(styleContains(trigger, 'h-8')).toBe(false);
   });
 
+  it('opts into elevated Trigger feedback and restores flat on prop removal without elevating Content', async () => {
+    // T-BRUTALIST-SELECT-0001-CASE-8
+    vi.useFakeTimers();
+    const { root, trigger, content } = createSelect();
+    await settle();
+    const depth = 'shadow-[4px_4px_0_0_#000]';
+    expect(styleContains(trigger, depth)).toBe(false);
+    for (const state of ['hovered', 'pressed']) {
+      expect(styleContains(trigger, `data-[${state}]:translate-x-1`)).toBe(false);
+      expect(styleContains(trigger, `data-[${state}]:shadow-none`)).toBe(false);
+    }
+    trigger.setProps({ appearance: 'elevated', size: 'sm' });
+    await flush();
+    expect(styleContains(trigger, depth)).toBe(true);
+    expect(styleContains(trigger, 'h-8')).toBe(true);
+    trigger.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    await flush();
+    expect(trigger.getExposes().hovered.get()).toBe(true);
+    for (const token of ['translate-x-1', 'translate-y-1', 'shadow-none']) {
+      expect(styleContains(trigger, token)).toBe(true);
+    }
+    expect(styleContains(trigger, depth)).toBe(false);
+    trigger.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+    await flush();
+    expect(styleContains(trigger, depth)).toBe(true);
+    expect(styleContains(trigger, 'translate-x-1')).toBe(false);
+    trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    await flush();
+    expect(trigger.getExposes().pressed.get()).toBe(true);
+    for (const token of ['translate-x-1', 'translate-y-1', 'shadow-none']) {
+      expect(styleContains(trigger, token)).toBe(true);
+    }
+    trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+    trigger.click();
+    await settle();
+    expect(root.getExposes().open.get()).toBe(true);
+    expect(styleContains(content, depth)).toBe(false);
+    expect(content.getAttribute('data-pui-style')).not.toContain('translate-x-1');
+    trigger.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+    await flush();
+    expect(trigger.getExposes().hovered.get()).toBe(true);
+    trigger.setProps({});
+    await flush();
+    expect(trigger.getExposes().hovered.get()).toBe(true);
+    expect(styleContains(trigger, depth)).toBe(false);
+    expect(styleContains(trigger, 'translate-x-1')).toBe(false);
+    expect(styleContains(trigger, 'translate-y-1')).toBe(false);
+    trigger.setProps({ appearance: 'elevated', disabled: true });
+    await settle();
+    expect(trigger.getExposes().disabled.get()).toBe(true);
+    expect(styleContains(trigger, 'data-[disabled]:pointer-events-none')).toBe(true);
+    trigger.setProps({});
+    await settle();
+    expect(styleContains(trigger, depth)).toBe(false);
+    expect(styleContains(trigger, 'h-9')).toBe(true);
+    expect(trigger.getExposes().disabled.get()).toBe(false);
+    expect(styleContains(trigger, 'translate-x-1')).toBe(false);
+    expect(styleContains(trigger, 'translate-y-1')).toBe(false);
+    for (const state of ['hovered', 'pressed']) {
+      expect(styleContains(trigger, `data-[${state}]:translate-x-1`)).toBe(false);
+      expect(styleContains(trigger, `data-[${state}]:shadow-none`)).toBe(false);
+    }
+  });
+
   it('renders inherited placeholder text, muted state, and trailing chevron', async () => {
     // T-BRUTALIST-SELECT-0001-CASE-3
     const { trigger, value } = createSelect({

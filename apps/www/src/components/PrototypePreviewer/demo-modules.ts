@@ -12,6 +12,7 @@ function getDemoIdFromPath(path: string): string | null {
 
 const demoModuleLoaders = import.meta.glob('../../content/**/*.demo.ts');
 const demoModules: Record<string, DemoModuleLoader> = {};
+const demoSourcePaths: Record<string, string> = {};
 
 for (const [path, loader] of Object.entries(demoModuleLoaders)) {
   const id = getDemoIdFromPath(path);
@@ -24,6 +25,7 @@ for (const [path, loader] of Object.entries(demoModuleLoaders)) {
     );
   }
   demoModules[id] = loader as DemoModuleLoader;
+  demoSourcePaths[id] = path.replace('../../content/', 'apps/www/src/content/');
 }
 
 export async function loadDemo(demoId: string) {
@@ -42,4 +44,11 @@ export async function loadDemo(demoId: string) {
 
 export function getAvailableDemos(): string[] {
   return Object.keys(demoModules);
+}
+
+/** Exact repository path from the same glob that loads the executable recipe. */
+export function getDemoSourcePath(demoId: string): string {
+  const path = demoSourcePaths[demoId];
+  if (!path) throw new Error(`[PrototypePreviewer] missing source path for demo ${demoId}.`);
+  return path;
 }

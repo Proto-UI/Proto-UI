@@ -1,0 +1,80 @@
+/* Host composition and target layout only. SiteLinkSurface owns every
+   family shape, fill, border, shadow and interaction feedback. */
+.site-native-link {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+.site-social-links {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+/* Starlight's scoped fallback selectors still match the original a and label
+   nodes. Neutralize only opted-in, enhanced navigation roots so the real Proto
+   child is the sole painted surface. No-JS anchors keep upstream fallback and
+   native focus. These are reset/slot-layout rules, never family recipes. */
+a[data-site-link-enhanced]:is(
+    [data-site-link-appearance='brand'],
+    [data-site-link-appearance='sidebar'],
+    [data-site-link-appearance='toc'],
+    [data-site-link-appearance='pagination']
+  ) {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: none;
+  outline: none;
+}
+a[data-site-link-enhanced][data-site-link-appearance='sidebar'] {
+  display: flex;
+  width: 100%;
+}
+a[data-site-link-enhanced][data-site-link-appearance='toc'] {
+  display: flex;
+  margin-inline-start: calc(1rem * var(--depth, 0));
+  width: calc(100% - 1rem * var(--depth, 0));
+}
+a[data-site-link-enhanced] > [data-site-link-content] {
+  max-width: 100%;
+}
+.sidebar-pane a[data-site-link-enhanced] > [data-site-link-content] > span:first-child {
+  min-width: 0;
+}
+.pagination-links a[data-site-link-enhanced] {
+  flex: 0 1 auto;
+  width: fit-content;
+  max-width: calc(50% - 0.25rem);
+}
+.pagination-links a[data-site-link-enhanced]:only-child {
+  max-width: 100%;
+}
+.pagination-links a[data-site-link-enhanced][rel='next'] > [data-site-link-content] {
+  flex-direction: row-reverse;
+  text-align: end;
+}
+.pagination-links a[data-site-link-enhanced] .link-title {
+  color: inherit;
+  font: inherit;
+}
+/* Keep the localized Previous/Next text and original br in the link's name,
+   without depending on the old a > span direct-child/font-size-zero trick. */
+[data-site-pagination-caption] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

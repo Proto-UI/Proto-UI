@@ -1,4 +1,8 @@
 ---
+import SiteCopyBootstrap from './SiteCopyBootstrap.astro';
+import { resolveSiteLibraryFamily, siteControlTags } from './site-library-family';
+const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
+const { Button } = siteControlTags(siteFamily);
 // <InstallCommandCard
 //   manager="npm"
 //   commands={{
@@ -49,36 +53,30 @@ const activeManager =
   normalizedEntries[0]?.manager;
 ---
 
+<SiteCopyBootstrap />
 <figure
   class="install-command-card"
   data-install-command-card
+  data-site-code-surface="frame"
   data-active-manager={activeManager}
   id={shellId}
 >
-  <div class="install-command-card__toolbar">
-    <span class="install-command-card__prompt" aria-hidden="true">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M8 9l-3 3 3 3"></path>
-        <path d="M13 15h6"></path>
-      </svg>
-    </span>
-
+  <div class="install-command-card__toolbar" data-code-toolbar data-site-code-surface="toolbar">
     <div class="install-command-card__managers" aria-label="Package manager">
       {
         normalizedEntries.map((entry) => (
-          <wc-shadcn-button
-            data-site-shadcn-button
-            data-variant="ghost"
+          <Button
+            data-site-button
+            data-site-control-family={siteFamily}
+            data-variant={
+              siteFamily === 'brutalist'
+                ? entry.manager === activeManager
+                  ? 'solid'
+                  : 'surface'
+                : entry.manager === activeManager
+                  ? 'secondary'
+                  : 'ghost'
+            }
             data-size="sm"
             type="button"
             class:list={[
@@ -89,39 +87,18 @@ const activeManager =
             aria-pressed={entry.manager === activeManager ? 'true' : 'false'}
           >
             {entry.manager}
-          </wc-shadcn-button>
+          </Button>
         ))
       }
     </div>
 
-    <wc-shadcn-button
-      data-site-shadcn-button
-      data-variant="ghost"
-      data-size="icon"
-      type="button"
-      class="install-command-card__copy docs-code-copy"
-      title="Copy command"
-      aria-label="Copy command"
+    <div
+      class="install-command-card__copy"
       data-copy-button
+      data-site-copy
+      data-copy-label="Copy command"
     >
-      <span data-copy-icon>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-        </svg>
-      </span>
-      <span class="sr-only">Copy command</span>
-    </wc-shadcn-button>
+    </div>
   </div>
 
   {
@@ -131,6 +108,8 @@ const activeManager =
           'install-command-card__body',
           entry.manager === activeManager || 'install-command-card__body--hidden',
         ]}
+        tabindex="0"
+        aria-label="Install command"
         data-command-panel={entry.manager}
         hidden={entry.manager !== activeManager}
       >
@@ -141,40 +120,16 @@ const activeManager =
 </figure>
 
 <script>
+  import { setElementProps } from '@proto.ui/adapter-web-component';
+
   (() => {
     document.querySelectorAll<HTMLElement>('[data-install-command-card]').forEach((card) => {
       if (card.dataset.installCommandInit === '1') return;
       card.dataset.installCommandInit = '1';
 
-      const copyButton = card.querySelector<HTMLElement>('[data-copy-button]');
-      const copyIcon = card.querySelector<HTMLElement>('[data-copy-icon]');
       const tabs = Array.from(card.querySelectorAll<HTMLElement>('[data-manager-tab]'));
       const panels = Array.from(card.querySelectorAll<HTMLElement>('[data-command-panel]'));
-      if (!copyButton || !copyIcon || tabs.length === 0 || panels.length === 0) return;
-
-      const defaultIcon = copyIcon.innerHTML;
-      const successIcon = `
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="18"
-          height="18"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path d="M20 6 9 17l-5-5"></path>
-        </svg>
-      `;
-
-      function getCommandNode() {
-        const activeManager = card.dataset.activeManager;
-        return card.querySelector<HTMLElement>(
-          `[data-command-panel="${activeManager}"] [data-command]`
-        );
-      }
+      if (tabs.length === 0 || panels.length === 0) return;
 
       function setActiveManager(nextManager: string) {
         card.dataset.activeManager = nextManager;
@@ -182,6 +137,17 @@ const activeManager =
           const active = tab.dataset.managerTab === nextManager;
           tab.classList.toggle('install-command-card__manager--active', active);
           tab.setAttribute('aria-pressed', active ? 'true' : 'false');
+          setElementProps(tab, {
+            variant:
+              tab.dataset.siteControlFamily === 'brutalist'
+                ? active
+                  ? 'solid'
+                  : 'surface'
+                : active
+                  ? 'secondary'
+                  : 'ghost',
+            size: 'sm',
+          });
         });
         panels.forEach((panel) => {
           const active = panel.dataset.commandPanel === nextManager;
@@ -192,141 +158,61 @@ const activeManager =
 
       tabs.forEach((tab) => {
         tab.addEventListener('click', (event) => {
-          if (tab.matches('wc-shadcn-button') && !(event instanceof CustomEvent)) return;
+          if (
+            tab.matches('wc-shadcn-button, wc-brutalist-button') &&
+            !(event instanceof CustomEvent)
+          )
+            return;
           const nextManager = tab.dataset.managerTab;
           if (!nextManager) return;
           setActiveManager(nextManager);
         });
-      });
-
-      copyButton.addEventListener('click', async (event) => {
-        if (copyButton.matches('wc-shadcn-button') && !(event instanceof CustomEvent)) return;
-        try {
-          await navigator.clipboard.writeText(getCommandNode()?.textContent ?? '');
-          copyIcon.innerHTML = successIcon;
-          window.setTimeout(() => {
-            copyIcon.innerHTML = defaultIcon;
-          }, 1500);
-        } catch {
-          copyIcon.innerHTML = defaultIcon;
-        }
       });
     });
   })();
 </script>
 
 <script>
-  import { initSiteShadcnControls } from './site-shadcn-controls';
+  import { initSiteControls } from './site-shadcn-controls';
 
-  initSiteShadcnControls(document);
-  document.addEventListener('astro:page-load', () => initSiteShadcnControls(document));
+  initSiteControls(document);
+  document.addEventListener('astro:page-load', () => initSiteControls(document));
 </script>
 
 <style>
   .install-command-card {
     margin: 1.5rem 0 0;
-    border: 1px solid var(--docs-code-border);
-    border-radius: var(--docs-code-radius);
-    overflow: hidden;
-    background: var(--docs-code-background);
-    box-shadow: 0 1px 0 color-mix(in oklch, var(--color-foreground) 4%, transparent);
   }
-
-  .install-command-card__toolbar {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: 3rem;
-    padding: 0.85rem 0.95rem;
-    border-bottom: 1px solid color-mix(in oklch, var(--color-border) 88%, transparent);
-  }
-
-  .install-command-card__prompt {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.4rem;
-    height: 1.4rem;
-    border-radius: 0.28rem;
-    background: color-mix(in oklch, var(--color-foreground) 72%, var(--color-background) 28%);
-    color: var(--color-background);
-    flex: none;
-  }
-
   .install-command-card__managers {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    flex-wrap: wrap;
+    gap: 0.25rem;
+    min-width: 0;
+    overflow-x: auto;
   }
-
   .install-command-card__manager {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2rem;
-    padding: 0.15rem 0.8rem;
-    border-radius: 0.8rem;
-    color: var(--color-muted-foreground);
-    font-size: 1rem;
-    line-height: 1;
-    font-weight: 500;
-    border: 1px solid transparent;
-    background: transparent;
-    cursor: pointer;
+    flex: none;
+    min-height: 2.75rem;
   }
-
-  .install-command-card__manager--active {
-    background: var(--color-background);
-    color: var(--color-foreground);
-    border-color: color-mix(in oklch, var(--color-border) 90%, transparent);
-    box-shadow:
-      0 1px 2px color-mix(in oklch, var(--color-foreground) 5%, transparent),
-      inset 0 1px 0 color-mix(in oklch, white 50%, transparent);
-  }
-
   .install-command-card__copy {
-    margin-left: auto;
+    margin-inline-start: auto;
+    flex: none;
   }
-
   .install-command-card__body {
     margin: 0;
-    padding: 0.6rem 1rem 0.7rem;
-    overflow-x: auto;
-    color: var(--docs-code-foreground);
-    font-family: var(--docs-code-font);
-    font-size: var(--docs-code-size);
-    line-height: var(--docs-code-line-height);
-    text-align: left;
-    /* Preserve the command below, not whitespace around the template child. */
+    padding: var(--docs-code-padding);
+    overflow: auto;
     white-space: normal;
+    text-align: start;
   }
-
   .install-command-card__body--hidden {
     display: none;
   }
-
   .install-command-card__body code {
     display: block;
-    font-family: inherit;
+    font: inherit;
     width: max-content;
     min-width: 100%;
     white-space: pre;
-    text-align: left;
-  }
-
-  :global([data-theme='dark']) .install-command-card {
-    box-shadow: 0 1px 0 color-mix(in oklch, white 3%, transparent);
-  }
-
-  :global([data-theme='dark']) .install-command-card__prompt {
-    background: color-mix(in oklch, white 24%, #2b2b2b 76%);
-    color: white;
-  }
-
-  :global([data-theme='dark']) .install-command-card__manager--active {
-    box-shadow:
-      0 1px 1px color-mix(in oklch, black 30%, transparent),
-      inset 0 1px 0 color-mix(in oklch, white 8%, transparent);
   }
 </style>

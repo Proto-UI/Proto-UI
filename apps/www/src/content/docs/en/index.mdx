@@ -5,9 +5,9 @@ template: splash
 hero:
   tagline: Defined once — not rebuilt per framework.
   actions:
-    - text: View Docs
-      link: /en/start-here/what-you-saw/
-    - text: Try Demo
+    - text: Get started
+      link: /en/start-here/quick-start/
+    - text: Try the components
       link: '#home-demo-previewer'
       icon: external
       variant: minimal
@@ -15,74 +15,4 @@ hero:
 
 import { HomeDemoPreviewer } from '@/components/PrototypePreviewer';
 
-export const homeDemos = [
-  {
-    id: 'demo-shadcn-button',
-    label: 'Button',
-    description:
-      'One semantic button model, shown across runtimes without redefining variants and interaction states per host.',
-  },
-  {
-    id: 'demo-shadcn-switch',
-    label: 'Switch',
-    description:
-      'Checked state and switch behavior stay aligned across runtimes instead of being re-expressed per framework.',
-  },
-  {
-    id: 'demo-shadcn-toggle',
-    label: 'Toggle',
-    description:
-      'Style variants, default state, and disabled behavior remain one protocol-level shape even when the host changes.',
-  },
-  {
-    id: 'demo-shadcn-hover-card',
-    label: 'Hover Card',
-    description:
-      'Overlay-like components show the value more clearly because open and close orchestration is not tied to one framework.',
-  },
-  {
-    id: 'demo-shadcn-tabs',
-    label: 'Tabs',
-    description:
-      'Compound components such as root, list, trigger, and content can still share the same semantic structure across runtimes.',
-  },
-  {
-    id: 'demo-shadcn-dropdown-menu',
-    label: 'Dropdown Menu',
-    description:
-      'Menu triggers, portaled content, items, and dismissal behavior remain one coherent component across runtimes.',
-  },
-  {
-    id: 'demo-shadcn-select',
-    label: 'Select',
-    description:
-      'The trigger, value, portaled list, and option behavior switch together without borrowing page-level styles.',
-  },
-  {
-    id: 'demo-shadcn-dialog',
-    label: 'Dialog',
-    description:
-      'Modal dialogs demonstrate how open/close orchestration, focus trapping, and overlay dismissal stay consistent across frameworks.',
-  },
-  {
-    id: 'demo-shadcn-separator',
-    label: 'Separator',
-    description:
-      'Even a small visual primitive keeps its semantic orientation and Prototype-owned presentation across hosts.',
-  },
-  {
-    id: 'demo-shadcn-textarea',
-    label: 'Textarea',
-    description:
-      'Editable state, disabled behavior, and focus presentation stay attached to the component rather than the page shell.',
-  },
-];
-
-<HomeDemoPreviewer
-  id="home-demo-previewer"
-  demos={homeDemos}
-  initialDemoId="demo-shadcn-button"
-  initialRuntime="wc"
-  pickerLabel="Component Demo"
-  runtimeLabel="Runtime"
-/>
+<HomeDemoPreviewer id="home-demo-previewer" />

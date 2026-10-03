@@ -24,6 +24,12 @@ Passing checks establish technical evidence, not product correctness, review app
 
 Include the Agent-only soft-gate disposition from `internal/agent-operations/visual-evidence.md` in the evidence report. Verify request paraphrase, uploaded visuals and exact reproduction/head scope; mark unavailable evidence and the next Agent action. Humans may submit plain descriptions. Do not fabricate captures, count local files as uploaded, or convert missing images into a blanket intake/merge blocker. Upload mechanisms are documented in `internal/agent-operations/github-evidence-upload.md`; this validation leaf does not gain external-write authority.
 
+For UI work, inspect the final rendered captures rather than only producing files or reading layout values. Apply the policy's design-review method: identify the actual region, observed issue or successful relationship, user consequence, and proposed correction. Account for the supported viewport, theme, locale, and interaction-state scope; separate visual judgment, accessibility checks, and functional results. Recapture after relevant changes and keep unresolved findings visible.
+
+Where reuse or dogfood is claimed, trace the rendered control or surface to the actual component or Prototype and its supported inputs, then exercise its behavior. Identify native recipes, page layout, and brand artwork separately. Visual similarity and component-shaped markup alone do not verify that claim.
+
+For per-commit reporting, reconcile newly pushed development SHAs with their change summaries, validation, remaining work, and comment receipts or publication debt. UI evidence binds the revision, viewport, and theme; purely internal work uses applicable executable evidence. Missing captures or running checks remain `pending`. Return this evidence without posting or uploading from this leaf. Adding or updating a progress comment changes the canonical review input even on the same head; recollect before relying on an earlier packet.
+
 Apply these principles to every validation round; they are methodology, not a checklist of known bugs:
 
 1. Bind visual assertions to actual rendered output: computed geometry, paint, positioning and component captures. Internal facts alone do not prove a visible defect. For purely internal claims, require executed variable/state observations and a source-bound causal walkthrough under the visual-evidence policy; do not invent a UI or substitute a prose/log screenshot.

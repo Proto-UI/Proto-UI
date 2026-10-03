@@ -261,6 +261,71 @@ describe('Website projection materializer', () => {
     expect(otherOwnerPortal.isConnected).toBe(true);
   });
 
+  it('never seals or removes an owned mount ancestor while still managing sibling portals', async () => {
+    const owner = document.createElement('section');
+    owner.dataset.projectionOwner = 'ancestor-owner';
+    owner.dataset.projectionGeneration = '1';
+    const mount = document.createElement('div');
+    mount.dataset.projectionOwner = 'ancestor-owner';
+    owner.appendChild(mount);
+    document.body.appendChild(owner);
+    const portal = document.createElement('section');
+    portal.dataset.projectionOwner = 'ancestor-owner';
+    portal.dataset.projectionGeneration = '2';
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+      setThemeSurfaceStyle: vi.fn(),
+    });
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('section');
+      scope.dataset.projectionScope = 'ancestor-owner';
+      host.appendChild(scope);
+      owner.appendChild(portal);
+      return { destroy: fakes.destroyRender };
+    });
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      queueMicrotask(() => callback(0));
+      return 1;
+    });
+
+    const candidate = await materializeProjectionCandidate(
+      { selection: { runtimeId: 'react', projectionFamilyId: 'shadcn' }, generation: 2 },
+      { mount, ownerId: 'ancestor-owner', componentId: 'button', controls: controls() }
+    );
+    expect(portal.inert).toBe(true);
+    expect(portal.style.visibility).toBe('hidden');
+    candidate.activate();
+    expect(owner.inert).toBe(false);
+    expect(owner.hasAttribute('aria-hidden')).toBe(false);
+    expect(owner.style.visibility).toBe('');
+    expect(computedInitial(candidate.scope, 'visibility')).toBe('visible');
+    expect(portal.inert).toBe(false);
+    expect(portal.style.visibility).toBe('');
+
+    // The enclosing consumer publishes its coordinate after activation. It is
+    // still a mount ancestor, not a portal root that can absorb sibling portals.
+    owner.dataset.projectionGeneration = '2';
+    candidate.setLocked?.(true);
+    expect(owner.inert).toBe(false);
+    expect(owner.style.visibility).toBe('');
+    expect(portal.inert).toBe(true);
+    expect(portal.style.visibility).toBe('hidden');
+    candidate.setLocked?.(false);
+    expect(portal.inert).toBe(false);
+    expect(portal.style.visibility).toBe('');
+
+    await candidate.dispose();
+    expect(owner.isConnected).toBe(true);
+    expect(mount.isConnected).toBe(true);
+    expect(owner.inert).toBe(false);
+    expect(owner.hasAttribute('aria-hidden')).toBe(false);
+    expect(owner.style.visibility).toBe('');
+    expect(candidate.host.isConnected).toBe(false);
+    expect(portal.isConnected).toBe(false);
+  });
+
   it('shares one owner-filtered document portal observer across candidates', async () => {
     fakes.createComposition.mockImplementation(() => ({
       demo: childDemo,

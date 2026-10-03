@@ -1,0 +1,5 @@
+<script>
+  import { initDocumentationTypography } from './site-typography-client';
+  initDocumentationTypography(document);
+  document.addEventListener('astro:page-load', () => initDocumentationTypography(document));
+</script>

@@ -62,7 +62,9 @@ test('release preparation and changed-entity CI invoke the lifecycle tools', () 
   const workflow = parse(
     readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
   );
-  const steps = workflow.jobs.test.steps;
+  const steps = workflow.jobs['test-general'].steps;
+  assert.ok(workflow.jobs.test.needs.includes('test-general'));
+  assert.equal(workflow.jobs.test.if, 'always()');
   assert.equal(
     steps.find((step) => step.uses?.startsWith('actions/checkout')).with['fetch-depth'],
     0

@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { readCopyText } from '../site-copy-client';
+import { createCopyController } from '../site-copy-controller';
 import { initCodePanels, refreshCodePanel } from './code-panel-client';
 
 function panelMarkup(id: string, raw = 'const exact = "<&";', projected = false): string {
@@ -61,8 +63,12 @@ describe('CodePanel client', () => {
     const shell = document.querySelector<HTMLElement>('[data-code-shell]')!;
     setMeasurements(shell, { fullHeight: 48 });
     initCodePanels(document);
-    shell.querySelector<HTMLButtonElement>('[data-copy]')!.click();
-    await Promise.resolve();
+    const owner = createCopyController({
+      readText: () => readCopyText(shell.querySelector('[data-copy]')!),
+      writeText: (text) => navigator.clipboard.writeText(text),
+    });
+    await owner.copy();
+    owner.dispose();
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('const exact = "<&";');
   });
 

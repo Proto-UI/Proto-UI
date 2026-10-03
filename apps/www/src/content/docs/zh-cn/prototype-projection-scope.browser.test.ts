@@ -12,32 +12,78 @@ import {
 
 const HOME_ROUTE = '/zh-cn/';
 const PROJECTION_FAMILIES = ['shadcn', 'brutalist'] as const;
-const COMPONENT_IDS = ['button', 'switch', 'select'] as const;
-const EXPECTED_ROOT_PROTOTYPES = {
+// The approved homepage displays directly usable prototype compositions in one
+// coordinated content slot. Every declared gallery part must survive each
+// Runtime/family transaction. The wrapper marker cannot substitute for the
+// actual controls or for projected portal content.
+const TASK_ID = 'website-component-gallery';
+const EXPECTED_TASK_PROTOTYPES = {
   shadcn: {
-    button: 'shadcn-button',
-    switch: 'shadcn-switch-root',
     select: 'shadcn-select-root',
-  },
-  brutalist: {
-    button: 'brutalist-button',
-    switch: 'brutalist-switch-root',
-    select: 'brutalist-select-root',
-  },
-} as const;
-const EXPECTED_SELECT_PROTOTYPES = {
-  shadcn: {
-    root: 'shadcn-select-root',
     trigger: 'shadcn-select-trigger',
+    value: 'shadcn-select-value',
     content: 'shadcn-select-content',
     item: 'shadcn-select-item',
+    switch: 'shadcn-switch-root',
+    thumb: 'shadcn-switch-thumb',
+    textarea: 'shadcn-textarea-root',
+    button: 'shadcn-button',
   },
   brutalist: {
-    root: 'brutalist-select-root',
+    select: 'brutalist-select-root',
     trigger: 'brutalist-select-trigger',
+    value: 'brutalist-select-value',
     content: 'brutalist-select-content',
     item: 'brutalist-select-item',
+    switch: 'brutalist-switch-root',
+    thumb: 'brutalist-switch-thumb',
+    textarea: 'brutalist-textarea-root',
+    button: 'brutalist-button',
   },
+} as const;
+const GALLERY_PART_COUNTS = {
+  'button': 11,
+  'separator-root': 2,
+  'toggle': 4,
+  'checkbox-root': 4,
+  'checkbox-indicator': 4,
+  'switch-root': 2,
+  'switch-thumb': 2,
+  'hover-card-root': 1,
+  'hover-card-trigger': 1,
+  'hover-card-content': 1,
+  'select-root': 1,
+  'select-trigger': 1,
+  'select-value': 1,
+  'select-content': 1,
+  'select-item': 3,
+  'textarea-root': 2,
+  'tabs-root': 1,
+  'tabs-list': 1,
+  'tabs-trigger': 2,
+  'tabs-content': 2,
+  'dialog-root': 1,
+  'dialog-trigger': 1,
+  'dialog-mask': 1,
+  'dialog-content': 1,
+  'dialog-header': 1,
+  'dialog-title': 1,
+  'dialog-description': 1,
+  'dialog-footer': 1,
+  'dialog-close': 2,
+  'dialog-close-icon': 1,
+  'dropdown-root': 1,
+  'dropdown-trigger': 1,
+  'dropdown-content': 1,
+  'dropdown-item': 2,
+} as const;
+const TASK_PART_REFS = {
+  'settings-view': 'select',
+  'settings-view-trigger': 'trigger',
+  'settings-summary': 'switch',
+  'settings-note': 'textarea',
+  'settings-save': 'button',
+  'settings-reset': 'button',
 } as const;
 const THEME_TOKEN_NAMES = [
   '--pui-background',
@@ -56,18 +102,6 @@ const CONTROL_OPTION_LABELS = {
   family: {
     shadcn: 'Shadcn',
     brutalist: 'Brutalist',
-  },
-  component: {
-    button: 'Button',
-    toggle: 'Toggle',
-    switch: 'Switch',
-    tabs: 'Tabs',
-    'hover-card': 'Hover Card',
-    'dropdown-menu': 'Dropdown Menu',
-    select: 'Select',
-    dialog: 'Dialog',
-    separator: 'Separator',
-    textarea: 'Textarea',
   },
 } as const;
 
@@ -97,9 +131,11 @@ function attributeEquals(name: string, value: string): string {
 }
 
 async function projectionScope(page: Page): Promise<Locator> {
-  const scopes = page.locator('[data-projection-scope]');
+  const scopes = page.locator(
+    '[data-home-demo-host] [data-projection-generation-state="active"] [data-projection-scope]'
+  );
   await scopes.first().waitFor({ state: 'attached', timeout: 15_000 });
-  expect(await scopes.count(), 'one homepage projection scope').toBe(1);
+  expect(await scopes.count(), 'one active live-example participant scope').toBe(1);
 
   const scope = scopes.first();
   expect(
@@ -244,11 +280,14 @@ function expectPortalSealed(sample: PortalSealSample, label: string): void {
 
 async function chooseControl(
   page: Page,
-  scope: Locator,
-  control: 'runtime' | 'family' | 'component',
+  _scope: Locator,
+  control: 'runtime' | 'family',
   value: string
 ) {
-  const controlSurface = scope.locator(`[data-projection-control="${control}"]`);
+  const controlOwner = page.locator(
+    '[data-homepage-runtime] [data-projection-generation-state="active"]'
+  );
+  const controlSurface = controlOwner.locator(`[data-projection-control="${control}"]`);
   expect(await controlSurface.count(), `${control} projection control`).toBe(1);
 
   const trigger = controlSurface.locator('[role="combobox"]');
@@ -341,43 +380,126 @@ async function assertCoherentGeneration(
   expect(await ownedSurfaces.count(), 'scope-owned projection surfaces').toBeGreaterThanOrEqual(4);
   await assertSurfacesShareCoordinate(ownedSurfaces, expected, 'scope-owned coordinate');
 
-  for (const control of ['runtime', 'family', 'component'] as const) {
-    const surface = scope.locator(`[data-projection-control="${control}"]`);
+  for (const control of ['runtime', 'family'] as const) {
+    const controlOwner = page.locator(
+      '[data-homepage-runtime] [data-projection-generation-state="active"]'
+    );
+    const surface = controlOwner.locator(`[data-projection-control="${control}"]`);
     expect(await surface.count(), `${control} control surface`).toBe(1);
     await assertSurfacesShareCoordinate(surface, expected, `${control} control coordinate`);
   }
 
-  const content = scope.locator('[data-projection-content]');
-  expect(await content.count(), 'one active projection content slot').toBe(1);
-  expect(
-    await content.getAttribute('data-projection-id'),
-    'active component identity'
-  ).toBeTruthy();
-  await assertSurfacesShareCoordinate(content, expected, 'active content coordinate');
-
-  const projectedPrototypes = content.locator('[data-projection-prototype]');
-  expect(
-    await projectedPrototypes.count(),
-    'active projected component Prototype surfaces'
-  ).toBeGreaterThan(0);
-  await assertSurfacesShareCoordinate(
-    projectedPrototypes,
-    expected,
-    'projected component coordinate'
+  // Each Website participant has independent ownership, but the page transaction
+  // must commit identical runtime/family/generation coordinates everywhere.
+  const participants = page.locator(
+    '[data-homepage-mount] [data-projection-generation-state="active"] [data-projection-scope], [data-home-demo-host] [data-projection-generation-state="active"] [data-projection-scope]'
   );
+  expect(await participants.count()).toBe(
+    (await page.locator('[data-homepage-actions]').count()) + 1
+  );
+  await assertSurfacesShareCoordinate(participants, expected, 'page participant coordinate');
+
+  await workspaceTask(scope, expected);
 }
 
-async function chooseComponent(
+async function workspaceTask(
+  scope: Locator,
+  expected: ProjectionCoordinate
+): Promise<{ content: Locator; selectRoot: Locator }> {
+  const content = scope.locator('[data-projection-content]');
+  expect(await content.count(), 'one active projection content slot').toBe(1);
+  expect(await content.getAttribute('data-projection-id'), 'active task identity').toBe(TASK_ID);
+  await assertSurfacesShareCoordinate(content, expected, 'active task coordinate');
+  await assertSurfacesShareCoordinate(
+    content.locator('.pui-projection-prototype'),
+    expected,
+    'all instantiated task part coordinates'
+  );
+  expect(
+    await scope.locator('[data-projection-control="component"]').count(),
+    'the approved homepage has no component picker'
+  ).toBe(0);
+  expect(
+    await content.locator('[data-home-settings]').count(),
+    'one real notification composition'
+  ).toBe(1);
+
+  const family = expected.projectionFamilyId as ProjectionFamilyId;
+  const prototypes = EXPECTED_TASK_PROTOTYPES[family];
+  expect(prototypes, 'declared task projection family').toBeTruthy();
+  for (const [ref, part] of Object.entries(TASK_PART_REFS)) {
+    const refSelector = attributeEquals('data-demo-ref', ref);
+    const surface = content.locator(
+      part === 'textarea'
+        ? `textarea${refSelector}.pui-projection-prototype, ${refSelector} > textarea.pui-projection-prototype`
+        : refSelector
+    );
+    expect(await surface.count(), `actual task part ${ref}`).toBe(1);
+    expect(await surface.getAttribute('data-projection-prototype'), `${ref} Prototype`).toBe(
+      prototypes[part]
+    );
+    await assertSurfacesShareCoordinate(surface, expected, `${ref} coordinate`);
+  }
+  return { content, selectRoot: content.locator('[data-demo-ref="settings-view"]') };
+}
+
+async function assertTaskPartInventory(
+  scope: Locator,
+  _content: Locator,
+  portal: Locator,
+  expected: ProjectionCoordinate
+): Promise<void> {
+  // These are the renderer's actual Prototype marker surfaces, not the content
+  // wrapper (which also carries the recipe root identity). The union deduplicates
+  // any still-in-tree portal and includes the content root after it is portaled.
+  const ownerId = await scope.getAttribute('data-projection-scope');
+  const parts = scope
+    .page()
+    .locator(
+      `${attributeEquals('data-projection-owner', ownerId!)}${attributeEquals('data-projection-generation', expected.generation)}.pui-projection-prototype`
+    );
+  const family = expected.projectionFamilyId;
+  const expectedIds = [
+    ...Object.entries(GALLERY_PART_COUNTS).flatMap(([suffix, count]) =>
+      Array(suffix === 'button' && family === 'brutalist' ? count - 1 : count).fill(
+        `${family}-${suffix}`
+      )
+    ),
+    ...Array(6).fill('site-preview-surface'),
+  ].sort();
+  const actualIds = await parts.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-projection-prototype')).sort()
+  );
+  expect(actualIds, 'all declared gallery instances, including closed/portaled parts').toEqual(
+    expectedIds
+  );
+  expect(new Set(actualIds).size, 'complete declared task recipe').toBe(35);
+  await assertSurfacesShareCoordinate(parts, expected, 'every actual task part coordinate');
+  const owners = await parts.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-projection-owner'))
+  );
+  expect(owners, 'every task part retains scope ownership').toEqual(expectedIds.map(() => ownerId));
+  expect(
+    await portal.evaluate((element) => element.closest('[data-projection-content]') === null),
+    'task Select content actually escapes the content DOM through its portal'
+  ).toBe(true);
+}
+
+async function assertOpenTaskProjection(
   page: Page,
   scope: Locator,
-  componentId: (typeof COMPONENT_IDS)[number]
-): Promise<{ coordinate: ProjectionCoordinate; root: Locator }> {
-  await chooseControl(page, scope, 'component', componentId);
-  const root = scope.locator(`[data-projection-content][data-projection-id="${componentId}"]`);
-  await expect.poll(() => root.count(), { timeout: 30_000 }).toBe(1);
-  const coordinate = await waitForAnyReady(scope);
-  await assertCoherentGeneration(page, scope, coordinate);
-  return { coordinate, root };
+  expected: ProjectionCoordinate
+): Promise<void> {
+  const { content, selectRoot } = await workspaceTask(scope, expected);
+  const trigger = selectRoot.locator('[data-demo-ref="settings-view-trigger"][role="combobox"]');
+  expect(await trigger.count(), 'actual task Select trigger').toBe(1);
+  await trigger.click();
+  try {
+    const portal = await portalControlledBy(page, trigger);
+    await assertTaskPartInventory(scope, content, portal, expected);
+  } finally {
+    await page.keyboard.press('Escape');
+  }
 }
 
 async function dataPuiStyleTokens(surface: Locator): Promise<string[]> {
@@ -387,15 +509,17 @@ async function dataPuiStyleTokens(surface: Locator): Promise<string[]> {
 async function assertSelectFingerprint(
   page: Page,
   projectionFamilyId: ProjectionFamilyId,
+  scope: Locator,
+  content: Locator,
   selectRoot: Locator,
   coordinate: ProjectionCoordinate
 ): Promise<void> {
-  const expected = EXPECTED_SELECT_PROTOTYPES[projectionFamilyId];
+  const expected = EXPECTED_TASK_PROTOTYPES[projectionFamilyId];
   expect(await selectRoot.getAttribute('data-projection-prototype'), 'Select root Prototype').toBe(
-    expected.root
+    expected.select
   );
 
-  const trigger = selectRoot.locator('[role="combobox"]');
+  const trigger = selectRoot.locator('[data-demo-ref="settings-view-trigger"][role="combobox"]');
   expect(await trigger.count(), 'Select trigger').toBe(1);
   expect(await trigger.getAttribute('data-projection-prototype'), 'Select trigger Prototype').toBe(
     expected.trigger
@@ -437,6 +561,7 @@ async function assertSelectFingerprint(
 
   await trigger.click();
   const portal = await portalControlledBy(page, trigger);
+  await assertTaskPartInventory(scope, content, portal, coordinate);
   await assertSurfacesShareCoordinate(portal, coordinate, 'Select content coordinate');
   expect(await portal.getAttribute('data-projection-prototype'), 'Select content Prototype').toBe(
     expected.content
@@ -511,16 +636,27 @@ async function readWebsiteThemeTokens(page: Page) {
   );
 }
 
-async function expectSemanticFocus(scope: Locator, control: 'runtime' | 'family'): Promise<void> {
+async function expectSemanticFocus(
+  page: Page,
+  _scope: Locator,
+  control: 'runtime' | 'family'
+): Promise<void> {
+  const owner = page.locator('[data-homepage-runtime] [data-projection-generation-state="active"]');
   await expect
     .poll(
       () =>
-        scope
+        owner
           .locator(`[data-projection-control="${control}"] [role="combobox"]`)
           .evaluate((element) => document.activeElement === element),
       { timeout: 10_000 }
     )
     .toBe(true);
+}
+
+function observePageErrors(page: Page): string[] {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  return errors;
 }
 
 let browser: Browser;
@@ -540,6 +676,7 @@ describe.sequential('Homepage Prototype projection scope', () => {
   it('commits one coherent generation across four Runtimes and both projection lanes', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+    const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
     try {
@@ -559,17 +696,20 @@ describe.sequential('Homepage Prototype projection scope', () => {
             ).not.toBe(previous.generation);
           }
           await assertCoherentGeneration(page, scope, current);
+          await assertOpenTaskProjection(page, scope, current);
           previous = current;
         }
       }
     } finally {
       await context.close();
+      expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }
   }, 240_000);
 
-  it('projects one WC component slot at a time with exact lane-owned Select fingerprints', async () => {
+  it('projects the WC gallery with every concrete part and exact Select fingerprints', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+    const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
     try {
@@ -577,22 +717,21 @@ describe.sequential('Homepage Prototype projection scope', () => {
       await waitForAnyReady(scope);
 
       for (const projectionFamilyId of PROJECTION_FAMILIES) {
-        await setCoordinates(page, scope, 'wc', projectionFamilyId);
-
-        for (const componentId of COMPONENT_IDS) {
-          const { coordinate, root } = await chooseComponent(page, scope, componentId);
-          expect(
-            await root.getAttribute('data-projection-prototype'),
-            `${projectionFamilyId}/${componentId} root Prototype`
-          ).toBe(EXPECTED_ROOT_PROTOTYPES[projectionFamilyId][componentId]);
-
-          if (componentId === 'select') {
-            await assertSelectFingerprint(page, projectionFamilyId, root, coordinate);
-          }
-        }
+        const coordinate = await setCoordinates(page, scope, 'wc', projectionFamilyId);
+        await assertCoherentGeneration(page, scope, coordinate);
+        const { content, selectRoot } = await workspaceTask(scope, coordinate);
+        await assertSelectFingerprint(
+          page,
+          projectionFamilyId,
+          scope,
+          content,
+          selectRoot,
+          coordinate
+        );
       }
     } finally {
       await context.close();
+      expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }
   }, 180_000);
 
@@ -603,6 +742,7 @@ describe.sequential('Homepage Prototype projection scope', () => {
         colorScheme,
       });
       const page = await context.newPage();
+      const errors = observePageErrors(page);
       await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
       await applyColorScheme(page, colorScheme);
 
@@ -612,18 +752,16 @@ describe.sequential('Homepage Prototype projection scope', () => {
         const websiteTokens = await readWebsiteThemeTokens(page);
 
         for (const projectionFamilyId of PROJECTION_FAMILIES) {
-          await setCoordinates(page, scope, 'wc', projectionFamilyId);
-          const { coordinate: current, root: selectRoot } = await chooseComponent(
-            page,
-            scope,
-            'select'
-          );
+          const current = await setCoordinates(page, scope, 'wc', projectionFamilyId);
+          await assertCoherentGeneration(page, scope, current);
+          const { content, selectRoot } = await workspaceTask(scope, current);
 
           const selectTrigger = selectRoot.locator('[role="combobox"]');
           expect(await selectTrigger.count(), 'demo Select combobox').toBe(1);
           await selectTrigger.click();
           const portal = await portalControlledBy(page, selectTrigger);
 
+          await assertTaskPartInventory(scope, content, portal, current);
           await assertSurfacesShareCoordinate(portal, current, 'demo Select portal coordinate');
           expect(await portal.getAttribute('data-projection-owner')).toBe(
             await scope.getAttribute('data-projection-scope')
@@ -646,6 +784,7 @@ describe.sequential('Homepage Prototype projection scope', () => {
         }
       } finally {
         await context.close();
+        expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
       }
     }
   }, 180_000);
@@ -653,6 +792,7 @@ describe.sequential('Homepage Prototype projection scope', () => {
   it('restores semantic control focus and disconnects the replaced generation portal', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+    const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
     try {
@@ -666,7 +806,7 @@ describe.sequential('Homepage Prototype projection scope', () => {
       const oldFamilyGeneration = current.generation;
       const familySwitch = await chooseControl(page, scope, 'family', nextProjectionFamilyId);
       current = await waitForReady(scope, current.runtimeId, nextProjectionFamilyId);
-      await expectSemanticFocus(scope, 'family');
+      await expectSemanticFocus(page, scope, 'family');
       expect(await familySwitch.oldPortal?.evaluate((element) => element.isConnected)).toBe(false);
       expect(
         await page
@@ -684,7 +824,7 @@ describe.sequential('Homepage Prototype projection scope', () => {
       const oldRuntimeGeneration = current.generation;
       const runtimeSwitch = await chooseControl(page, scope, 'runtime', nextRuntimeId);
       current = await waitForReady(scope, nextRuntimeId, nextProjectionFamilyId);
-      await expectSemanticFocus(scope, 'runtime');
+      await expectSemanticFocus(page, scope, 'runtime');
       expect(await runtimeSwitch.oldPortal?.evaluate((element) => element.isConnected)).toBe(false);
       expect(
         await page
@@ -700,24 +840,28 @@ describe.sequential('Homepage Prototype projection scope', () => {
       await assertCoherentGeneration(page, scope, current);
     } finally {
       await context.close();
+      expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }
   }, 120_000);
 
   it('atomically seals an open child portal during programmatic lane and Runtime switches', async () => {
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await context.newPage();
+    const errors = observePageErrors(page);
     await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
 
     try {
       const scope = await projectionScope(page);
       await waitForAnyReady(scope);
-      await setCoordinates(page, scope, 'wc', 'shadcn');
-      await chooseComponent(page, scope, 'select');
-
-      const shadcnSelect = scope.locator('[data-projection-content][data-projection-id="select"]');
+      const initial = await setCoordinates(page, scope, 'wc', 'shadcn');
+      const { content: shadcnContent, selectRoot: shadcnSelect } = await workspaceTask(
+        scope,
+        initial
+      );
       const shadcnTrigger = shadcnSelect.locator('[role="combobox"]');
       await shadcnTrigger.click();
       const shadcnPortal = await portalControlledBy(page, shadcnTrigger);
+      await assertTaskPartInventory(scope, shadcnContent, shadcnPortal, initial);
       const familyProbe = await startPortalSealProbe(shadcnPortal, {
         control: 'family',
         value: 'brutalist',
@@ -737,12 +881,14 @@ describe.sequential('Homepage Prototype projection scope', () => {
         .toBe(false);
       await assertCoherentGeneration(page, scope, current);
 
-      const brutalistSelect = scope.locator(
-        '[data-projection-content][data-projection-id="select"]'
+      const { content: brutalistContent, selectRoot: brutalistSelect } = await workspaceTask(
+        scope,
+        current
       );
       const brutalistTrigger = brutalistSelect.locator('[role="combobox"]');
       await brutalistTrigger.click();
       const brutalistPortal = await portalControlledBy(page, brutalistTrigger);
+      await assertTaskPartInventory(scope, brutalistContent, brutalistPortal, current);
       const runtimeProbe = await startPortalSealProbe(brutalistPortal, {
         control: 'runtime',
         value: 'react',
@@ -763,6 +909,7 @@ describe.sequential('Homepage Prototype projection scope', () => {
       await assertCoherentGeneration(page, scope, current);
     } finally {
       await context.close();
+      expect(errors, 'no uncaught page errors, including transaction cleanup').toEqual([]);
     }
   }, 120_000);
 });

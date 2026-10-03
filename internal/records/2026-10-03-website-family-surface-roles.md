@@ -1,0 +1,21 @@
+# Website family surfaces after the source-aligned Brutalist revision
+
+The accepted #800 family revision is the source for this app-only alignment. `P-BRUTALIST-CARD` and `P-BRUTALIST-BUTTON` remain draft; the website does not create public Card/Link protocols or change Base behavior. The old square/3px preview-shell and negative-hover-lift observations in the earlier RuntimeBox and native-link records are historical, not the current paint prescription.
+
+`SitePreviewSurface` now has an explicit website-owned appearance: `card` is the default elevated grouping, while `popup` and `canvas` are flat framed surfaces. Brutalist reuses `BRUTALIST_PANEL_TOKENS` for its 5px radius, 2px black border, paper fill and font-sans/500 text, and adds `BRUTALIST_STRUCTURE_TOKENS` only for a card's 4px black hard shadow. Shadcn retains its own `rounded-xl` family geometry and card-only small shadow. Header chooses popup, RuntimeBox chooses canvas, and gallery tiles choose card except the Brutalist text editor's flat canvas. The editor keeps real Tabs and Textarea; accepted main already removed the compulsory Tabs Content frame.
+
+`SiteLinkSurface` reuses the canonical Brutalist control and state tokens only for framed action/icon/pagination appearances with primary or secondary emphasis. Hover and press both settle at +4px/+4px with no elevation; pressing an already-hovered control does not add a second displacement. Minimal/link emphasis and document navigation do not acquire control elevation. The native anchor remains the sole hit, navigation, focus and activation owner, and its complete controlled-props/event lease is unchanged. Social hit targets remain 44px. Every Brutalist link appearance emits its own font-sans/500 typography: theme custom properties alone cannot replace an ancestor's already-computed system font. Brand and current-link weight emphasis remains explicit.
+
+The local evidence distinguishes card elevation from flat canvas/popup paint. Tests exercise real adapters, native content/focus identity, original uncontrolled state, complete gallery props, role switching, passive semantics and compiler token closure. Browser predicates require the corresponding actual role-specific geometry. Copy evidence is updated separately from Copy production: the old negative-lift/growing-shadow expectation contradicted #800. Its mutation fixtures now reject wrong displacement, doubled press offset, retained elevation and absent state recipes while retaining focus-ring isolation checks.
+
+Source/Happy DOM and token compilation do not establish browser visual acceptance. Exact integrated-SHA hosted browser execution, screenshots and visual inspection remain required evidence debt; no local browser or socket execution was used for this slice. Clipboard production, Search, public components and runtime transaction controllers are unchanged.
+
+Co-author by OpenAI Dots
+
+## Partial-family main integration
+
+Normal integration of #801 exposed a consumer mismatch: `RuntimeBox` passed the real `bootstrap-2-3-2` or `liquid-glass` selection to a private surface whose enum still accepted only the two complete site families. Both real WC samples therefore took the Shadcn default surface. Two retained red controls demonstrate that alias.
+
+The private surface now explicitly owns the Bootstrap palette/4px canvas and an opaque, square, neutral Liquid Glass stage-0 content canvas. The latter follows #801's existing neutral-content-panel boundary; it neither applies Button's pill radius to a large canvas nor claims blur, refraction, a complete Liquid Glass family, or a public Card. The original Button recipe, slot identity, setup and cleanup remain unchanged. The family manifests still reject unsupported Selects, and unknown canvas-family input fails before mounting or changing the current appearance. Header/homepage family selection remains limited to its two complete families.
+
+Eight real renderer cases cover the two partial families across WC/React/Vue/Vue2: original child identity, native activation exactly once, focus/state through a theme update, no semantic frame role or tab stop, exact content closure, and one cleanup. The WC test uses the same semantic CustomEvent bridge as the registered documentation demo; framework callbacks are not assumed to be the WC event API. Actual hosted paint remains pending.

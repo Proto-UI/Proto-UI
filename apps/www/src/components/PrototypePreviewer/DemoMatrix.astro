@@ -220,9 +220,9 @@ function getPreviewerClass(demoId: string) {
     color: var(--color-muted-foreground);
   }
 
-  :global(.demo-matrix__previewer .proto-previewer__preview) {
-    min-height: 11rem;
-    padding: 1rem;
+  :global(.demo-matrix__previewer) {
+    --runtime-box-content-min: 11rem;
+    --runtime-box-content-padding: 1rem;
   }
 
   :global(.demo-matrix__previewer .proto-previewer__preview .host) {

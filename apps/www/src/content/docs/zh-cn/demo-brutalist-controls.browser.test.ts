@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { spawn, type ChildProcess } from 'node:child_process';
+import { waitForServerReadiness } from '../../../../../../scripts/test/server-readiness.mjs';
 import { access } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import {
@@ -102,20 +103,18 @@ async function chromeExecutable(): Promise<string> {
 }
 
 async function waitForServer(url: string): Promise<void> {
-  const deadline = Date.now() + 120_000;
-  while (Date.now() < deadline) {
-    if (devServer && devServer.exitCode !== null) {
-      throw new Error(`Documentation dev server exited early.\n${serverOutput}`);
-    }
-    try {
-      const response = await fetch(url, { signal: AbortSignal.timeout(2_000) });
-      if (response.ok) return;
-    } catch {
-      // The dev server is still starting.
-    }
-    await new Promise((resolve) => setTimeout(resolve, 250));
+  try {
+    await waitForServerReadiness(url, {
+      timeoutMs: 120_000,
+      server: devServer,
+      readOutput: () => serverOutput,
+    });
+  } catch (error) {
+    console.error(
+      `[browser-harness] readiness failed: ${error instanceof Error ? error.message : String(error)}`
+    );
+    throw error;
   }
-  throw new Error(`Timed out waiting for ${url}.\n${serverOutput}`);
 }
 
 function recordServerOutput(chunk: Buffer): void {
@@ -235,7 +234,9 @@ type TextareaFocusSnapshot = {
 
 async function wcTextareaFocusSnapshot(previewer: Locator): Promise<TextareaFocusSnapshot> {
   return previewer.evaluate((root) => {
-    const host = root.querySelector<HTMLElement>('[data-projection-content] [data-pui-root]');
+    const host = root.querySelector<HTMLElement>(
+      '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+    );
     const textarea = root.querySelector<HTMLTextAreaElement>('textarea');
     if (!host || !textarea) throw new Error('Web Component Textarea projection is missing.');
     const exposes = (
@@ -728,7 +729,11 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     try {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[role="tab"]', 2);
-        const root = previewer.locator('[data-projection-content] > [data-pui-root]').first();
+        const root = previewer
+          .locator(
+            '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+          )
+          .first();
         const before = await root.boundingBox();
         expect(before, runtime).not.toBeNull();
 
@@ -761,7 +766,11 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     try {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-pui-root]', 5);
-        const trigger = previewer.locator('[data-projection-content] [data-pui-root]').nth(1);
+        const trigger = previewer
+          .locator(
+            '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+          )
+          .nth(1);
         await trigger.click();
         await expect.poll(() => page.getByRole('menu').count(), { message: runtime }).toBe(1);
         await page.waitForTimeout(200);
@@ -906,7 +915,9 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await applyHostTheme(page, 'light');
         // Scoped to the rendered host: the previewer chrome is Proto UI too, so
         // a previewer-wide count is not evidence about this demo.
-        const roots = previewer.locator('[data-projection-content] [data-pui-root]');
+        const roots = previewer.locator(
+          '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+        );
         expect(await roots.count(), runtime).toBe(7);
         expect(await roots.nth(0).getAttribute('data-pui-root'), runtime).toBe('');
         const firstTrigger = roots.filter({ hasText: 'Hover or focus for details' }).last();
@@ -1043,24 +1054,118 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       width: viewportWidth,
       height: 844,
     });
-    const widths: number[] = [];
+    const widths: Array<{ runtime: RuntimeId; width: number }> = [];
 
     try {
       for (const runtime of RUNTIMES) {
         await selectRuntime(page, previewer, runtime, '[data-demo-ref="scrollbar"]', 1);
-        const root = previewer.locator('[data-projection-content] [data-pui-root]').first();
+        const root = previewer
+          .locator(
+            '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
+          )
+          .first();
         const scrollbar = previewer.locator('[data-demo-ref="scrollbar"]').first();
         const rootBox = await root.boundingBox();
         const scrollbarBox = await scrollbar.boundingBox();
         expect(rootBox, runtime).not.toBeNull();
         expect(scrollbarBox, runtime).not.toBeNull();
 
-        widths.push(rootBox!.width);
+        widths.push({ runtime, width: rootBox!.width });
+        const layoutChain = await previewer.evaluate((element) => {
+          const selectors = [
+            '[data-projection-generation-state="active"]',
+            '[data-projection-scope]',
+            '.pui-projection-controls',
+            '[data-projection-control="runtime"]',
+            '[data-projection-control="runtime"] [role="combobox"]',
+            '[data-projection-control="runtime"] [data-projection-prototype$="select-value"]',
+            '[data-projection-content]',
+            '[data-projection-content] > div',
+            '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]',
+          ];
+          return {
+            viewportWidth: innerWidth,
+            documentWidth: document.documentElement.scrollWidth,
+            nodes: selectors.map((selector) => {
+              const node = element.querySelector<HTMLElement>(selector);
+              if (!node) return { selector, missing: true } as const;
+              const rect = node.getBoundingClientRect();
+              const style = getComputedStyle(node);
+              return {
+                selector,
+                tag: node.tagName,
+                text: node.textContent?.trim().slice(0, 100),
+                x: rect.x,
+                width: rect.width,
+                contentLeft:
+                  rect.x + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft),
+                contentRight:
+                  rect.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight),
+                clientWidth: node.clientWidth,
+                scrollWidth: node.scrollWidth,
+                display: style.display,
+                cssWidth: style.width,
+                minWidth: style.minWidth,
+                maxWidth: style.maxWidth,
+                boxSizing: style.boxSizing,
+                padding: style.padding,
+                flex: style.flex,
+                gridTemplateColumns: style.gridTemplateColumns,
+                runtime: node.dataset.projectionRuntime,
+                generation: node.dataset.projectionGeneration,
+                state: node.dataset.projectionState,
+                prototype: node.dataset.projectionPrototype,
+              };
+            }),
+          };
+        });
+        console.info('Scroll Area 320px layout chain', JSON.stringify({ runtime, ...layoutChain }));
+        const layoutBox = (selector: string) => {
+          const node = layoutChain.nodes.find((entry) => entry.selector === selector);
+          if (!node || node.missing === true) {
+            throw new Error(`${runtime}/${selector}: expected rendered layout node.`);
+          }
+          return node;
+        };
+        const scopeBox = layoutBox('[data-projection-scope]');
+        const controlsBox = layoutBox('.pui-projection-controls');
+        const contentBox = layoutBox('[data-projection-content]');
+        const runtimeControlBox = layoutBox('[data-projection-control="runtime"]');
+        // Document overflow alone cannot detect children clipped by the preview frame.
+        for (const [name, box] of [
+          ['toolbar', controlsBox],
+          ['content', contentBox],
+        ] as const) {
+          expect(box.x, `${runtime}/${name}/scope-left`).toBeGreaterThanOrEqual(
+            scopeBox.contentLeft - GEOMETRY_EPSILON
+          );
+          expect(box.x + box.width, `${runtime}/${name}/scope-right`).toBeLessThanOrEqual(
+            scopeBox.contentRight + GEOMETRY_EPSILON
+          );
+        }
+        expect(
+          runtimeControlBox.x,
+          `${runtime}/runtime-control/toolbar-left`
+        ).toBeGreaterThanOrEqual(controlsBox.contentLeft - GEOMETRY_EPSILON);
+        expect(
+          runtimeControlBox.x + runtimeControlBox.width,
+          `${runtime}/runtime-control/toolbar-right`
+        ).toBeLessThanOrEqual(controlsBox.contentRight + GEOMETRY_EPSILON);
+        expect(rootBox!.x, `${runtime}/root/content-left`).toBeGreaterThanOrEqual(
+          contentBox.contentLeft - GEOMETRY_EPSILON
+        );
+        expect(rootBox!.x + rootBox!.width, `${runtime}/root/content-right`).toBeLessThanOrEqual(
+          contentBox.contentRight + GEOMETRY_EPSILON
+        );
         expect(rootBox!.x, runtime).toBeGreaterThanOrEqual(-GEOMETRY_EPSILON);
         expect(rootBox!.x + rootBox!.width, runtime).toBeLessThanOrEqual(
           viewportWidth + GEOMETRY_EPSILON
         );
         expect(scrollbarBox!.x, runtime).toBeGreaterThanOrEqual(rootBox!.x);
+        expect(
+          scrollbarBox!.x + scrollbarBox!.width,
+          `${runtime}/scrollbar/root-right`
+        ).toBeLessThanOrEqual(rootBox!.x + rootBox!.width + GEOMETRY_EPSILON);
         expect(scrollbarBox!.x + scrollbarBox!.width, runtime).toBeLessThanOrEqual(
           viewportWidth + GEOMETRY_EPSILON
         );
@@ -1072,7 +1177,11 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         ).toBe(0);
       }
 
-      expect(Math.max(...widths) - Math.min(...widths)).toBeLessThanOrEqual(GEOMETRY_EPSILON);
+      const measuredWidths = widths.map(({ width }) => width);
+      expect(
+        Math.max(...measuredWidths) - Math.min(...measuredWidths),
+        `Scroll Area width parity: ${JSON.stringify(widths)}`
+      ).toBeLessThanOrEqual(GEOMETRY_EPSILON);
     } finally {
       await context.close();
     }
@@ -1102,7 +1211,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await page.waitForFunction(
           () => {
             const root = document.querySelector<HTMLElement>(
-              '[data-previewer-id] [data-projection-content] [data-pui-root]'
+              '[data-previewer-id] [data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
             );
             return (
               root?.hasAttribute('data-focused') === true && root.hasAttribute('data-focus-visible')
@@ -1131,7 +1240,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           () =>
             !document
               .querySelector<HTMLElement>(
-                '[data-previewer-id] [data-projection-content] [data-pui-root]'
+                '[data-previewer-id] [data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
               )
               ?.hasAttribute('data-focused')
         );
@@ -1144,7 +1253,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           () =>
             document
               .querySelector<HTMLElement>(
-                '[data-previewer-id] [data-projection-content] [data-pui-root]'
+                '[data-previewer-id] [data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
               )
               ?.hasAttribute('data-focused') === true
         );

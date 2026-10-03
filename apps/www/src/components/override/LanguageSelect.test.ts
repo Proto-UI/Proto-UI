@@ -12,10 +12,10 @@ if (!inlineScript) {
   throw new Error('LanguageSelect.astro must include an inline initialization script');
 }
 
-const languageSelect = () => `
+const languageSelect = (family = 'shadcn') => `
   <div class="language-select-wrapper">
     <span>Select language</span>
-    <wc-shadcn-select-root
+    <wc-${family}-select-root
       data-site-select-root
       data-language-select-root
       data-language-select
@@ -23,9 +23,9 @@ const languageSelect = () => `
       data-value="en"
       data-locale-paths='{"en":"/en/docs/","zh-cn":"/zh-cn/docs/"}'
     >
-      <wc-shadcn-select-item data-value="en" data-text-value="English">English</wc-shadcn-select-item>
-      <wc-shadcn-select-item data-value="zh-cn" data-text-value="简体中文">简体中文</wc-shadcn-select-item>
-    </wc-shadcn-select-root>
+      <wc-${family}-select-item data-value="en" data-text-value="English">English</wc-${family}-select-item>
+      <wc-${family}-select-item data-value="zh-cn" data-text-value="简体中文">简体中文</wc-${family}-select-item>
+    </wc-${family}-select-root>
   </div>
 `;
 
@@ -34,8 +34,8 @@ describe('documentation language selector', () => {
     localStorage.clear();
     document.cookie = 'preferred-locale=; Max-Age=0; path=/';
     window.history.replaceState(null, '', '/en/docs/');
-    document.body.innerHTML = `${languageSelect()}${languageSelect()}`;
-    document.querySelectorAll<HTMLElement>('wc-shadcn-select-root').forEach((element) => {
+    document.body.innerHTML = `${languageSelect()}${languageSelect('brutalist')}`;
+    document.querySelectorAll<HTMLElement>('[data-language-select-root]').forEach((element) => {
       const root = element as HTMLElement & {
         getExposes?: () => Record<string, unknown>;
         setProps?: (next: { value?: string }) => void;
@@ -54,7 +54,7 @@ describe('documentation language selector', () => {
     window.eval(inlineScript);
     window.eval(inlineScript);
 
-    const selects = document.querySelectorAll<HTMLElement>('wc-shadcn-select-root');
+    const selects = document.querySelectorAll<HTMLElement>('[data-language-select-root]');
     expect(selects).toHaveLength(2);
     expect(
       [...selects].every((select) => select.dataset.languageSelectInitialized === 'true')

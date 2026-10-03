@@ -32,49 +32,56 @@ export function refreshCodePanel(shell: HTMLElement, options: RefreshCodePanelOp
   setExpanded(shell, fullHeight <= content.clientHeight + COLLAPSED_CLIP_EPSILON);
 }
 
-function scheduleRefresh(shell: HTMLElement): void {
-  requestAnimationFrame(() => requestAnimationFrame(() => refreshCodePanel(shell)));
-}
+const panels = new Map<HTMLElement, () => void>();
 
 function initCodePanel(shell: HTMLElement): void {
-  if (shell.dataset.codePanelInit === '1') return;
+  if (panels.has(shell)) return;
   shell.dataset.codePanelInit = '1';
   setExpanded(shell, false);
-
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
   const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]');
-  const copyButton = shell.querySelector<HTMLElement>('[data-copy]');
-  const copyText = shell.querySelector<HTMLElement>('[data-copy-text]');
-
-  toggle?.addEventListener('click', (event) => {
+  let alive = true;
+  let first = 0;
+  let second = 0;
+  const view = shell.ownerDocument.defaultView!;
+  const scheduleRefresh = () => {
+    view.cancelAnimationFrame(first);
+    view.cancelAnimationFrame(second);
+    first = view.requestAnimationFrame(() => {
+      second = view.requestAnimationFrame(() => {
+        if (alive) refreshCodePanel(shell);
+      });
+    });
+  };
+  const onToggle = (event: Event) => {
     if (!isSiteButtonActivation(event)) return;
     setExpanded(shell, shell.dataset.codeExpanded !== 'true');
+  };
+  toggle?.addEventListener('click', onToggle);
+  const observer =
+    panel && typeof view.ResizeObserver !== 'undefined'
+      ? new view.ResizeObserver(scheduleRefresh)
+      : null;
+  if (panel) observer?.observe(panel);
+  const dispose = () => {
+    if (!alive) return;
+    alive = false;
+    panels.delete(shell);
+    delete shell.dataset.codePanelInit;
+    observer?.disconnect();
+    removal.disconnect();
+    view.cancelAnimationFrame(first);
+    view.cancelAnimationFrame(second);
+    toggle?.removeEventListener('click', onToggle);
+    shell.ownerDocument.removeEventListener('astro:before-swap', dispose);
+  };
+  const removal = new view.MutationObserver(() => {
+    if (!shell.isConnected) dispose();
   });
-
-  if (copyButton && copyText) {
-    const copyIconHtml = copyText.innerHTML;
-    const checkIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="size-4.5"><path d="M20 6 9 17l-5-5"/></svg>`;
-    copyButton.addEventListener('click', async (event) => {
-      if (!isSiteButtonActivation(event)) return;
-      const code = shell.querySelector<HTMLElement>('.proto-previewer__code code');
-      const text = code?.dataset.rawCode ?? code?.textContent ?? '';
-      try {
-        await navigator.clipboard.writeText(text);
-        copyText.innerHTML = checkIconHtml;
-        setTimeout(() => {
-          copyText.innerHTML = copyIconHtml;
-        }, 1500);
-      } catch {
-        copyText.innerHTML = copyIconHtml;
-      }
-    });
-  }
-
-  if (panel && typeof ResizeObserver !== 'undefined') {
-    const observer = new ResizeObserver(() => scheduleRefresh(shell));
-    observer.observe(panel);
-  }
-  scheduleRefresh(shell);
+  removal.observe(shell.ownerDocument.body, { childList: true, subtree: true });
+  shell.ownerDocument.addEventListener('astro:before-swap', dispose);
+  panels.set(shell, dispose);
+  scheduleRefresh();
 }
 
 export function initCodePanels(root: ParentNode = document): void {

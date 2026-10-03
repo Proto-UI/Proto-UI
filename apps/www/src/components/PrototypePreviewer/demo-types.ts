@@ -14,6 +14,8 @@ export type DemoNode =
   | DemoTextNode
   | {
       kind: 'box';
+      /** Website host composition only; never forwarded into Proto Template. */
+      tag?: 'div' | 'a' | 'span';
       className?: string;
       attrs?: DemoBoxAttrs;
       ref?: string;
@@ -22,6 +24,8 @@ export type DemoNode =
   | {
       kind: 'proto';
       prototypeId: string;
+      /** Host-only passive inline carrier; not a Proto Template tag. */
+      rootTag?: 'div' | 'span';
       className?: string;
       surfaceStyle?: DemoSurfaceStyle;
       ref?: string;
@@ -178,6 +182,31 @@ export function assertDemoSpec(demo: DemoSpec) {
       return;
     }
     if (node.kind === 'box') {
+      if (node.tag !== undefined && node.tag !== 'div' && node.tag !== 'a' && node.tag !== 'span') {
+        throw new Error('[PrototypePreviewer] host box tag must be div, a or span.');
+      }
+      if (node.tag === 'a') {
+        const href = node.attrs?.href;
+        if (!href || /^(?:javascript|data|vbscript):/i.test(href.replace(/[\u0000-\u0020]/g, ''))) {
+          throw new Error('[PrototypePreviewer] native anchor requires a safe href.');
+        }
+        const allowed = new Set([
+          'href',
+          'target',
+          'rel',
+          'title',
+          'download',
+          'hreflang',
+          'id',
+          'role',
+          'tabindex',
+        ]);
+        for (const name of Object.keys(node.attrs ?? {})) {
+          if (!allowed.has(name) && !/^(?:aria|data)-[a-z0-9-]+$/.test(name)) {
+            throw new Error(`[PrototypePreviewer] unsupported native anchor attribute "${name}".`);
+          }
+        }
+      }
       assertClassName((node as any).className, [...path, 'className']);
       assertBoxAttrs((node as any).attrs, [...path, 'attrs']);
       if ((node as any).surfaceStyle !== undefined) {
@@ -190,6 +219,8 @@ export function assertDemoSpec(demo: DemoSpec) {
         throw new Error(`[PrototypePreviewer] demo ref 必须是字符串：${path.join('.')}`);
       }
     } else if (node.kind === 'proto') {
+      if (node.rootTag !== undefined && node.rootTag !== 'div' && node.rootTag !== 'span')
+        throw new Error('[PrototypePreviewer] Proto rootTag must be div or span.');
       const protoId = (node as any).prototypeId;
       if (!protoId || typeof protoId !== 'string') {
         throw new Error(`[PrototypePreviewer] demo 节点缺少 prototypeId：${path.join('.')}`);

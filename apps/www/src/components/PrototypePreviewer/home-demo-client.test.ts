@@ -640,6 +640,38 @@ describe('Homepage Prototype projection scope', () => {
     }
   });
 
+  it.each(['bootstrap-2-3-2', 'liquid-glass'] as const)(
+    'rejects an initial partial %s family before mutating the SSR mount, allowing corrected re-init',
+    async (family) => {
+      const root = createHomeRoot();
+      const originalOptions = root.dataset.homeDemoOptions!;
+      root.dataset.homeDemoOptions = JSON.stringify([
+        { id: `demo-${family}-button`, label: 'Actual partial Button' },
+      ]);
+      root.dataset.initialDemoId = `demo-${family}-button`;
+      const mount = root.querySelector<HTMLElement>('[data-home-demo-host]')!;
+      const source = document.createTextNode('Original SSR content');
+      mount.append(source);
+      const before = root.innerHTML;
+      expect(() => initHomeDemoPreviewer(root)).toThrow(/unsupported whole-site family/);
+      expect(root.innerHTML).toBe(before);
+      expect(mount.firstChild).toBe(source);
+      expect(root.dataset.inited).toBeUndefined();
+      expect(mount.dataset.projectionOwner).toBeUndefined();
+      expect(homeApi(root)).toBeUndefined();
+      expect(projection.materialize).not.toHaveBeenCalled();
+      root.dataset.homeDemoOptions = originalOptions;
+      root.dataset.initialDemoId = 'demo-shadcn-button';
+      initHomeDemoPreviewer(root);
+      await vi.waitFor(() => expect(root.dataset.runnerState).toBe('ready'));
+      const controls = latestControls();
+      await homeApi(root).destroy();
+      const calls = projection.materialize.mock.calls.length;
+      expect(() => controls.family.onValueChange(family)).not.toThrow();
+      expect(projection.materialize.mock.calls).toHaveLength(calls);
+    }
+  );
+
   it('updates the active generation theme in place instead of remounting it', async () => {
     const root = createHomeRoot();
     initHomeDemoPreviewer(root);

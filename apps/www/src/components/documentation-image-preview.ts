@@ -166,7 +166,10 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
     description.textContent = labels.hint;
     description.className = 'docs-image-accessible docs-image-accessible-description';
     const close = makePreviewControl(family, 'dialogClose');
-    const closeButton = makePreviewControl(family, 'button', { variant: 'ghost', size: 'sm' });
+    const closeButton = makePreviewControl(family, 'button', {
+      variant: family === 'brutalist' ? 'surface' : 'ghost',
+      size: 'sm',
+    });
     closeButton.textContent = labels.close;
     closeButton.dataset.docsImageClose = '';
     closeButton.className = 'docs-image-keyboard-close';
@@ -269,7 +272,7 @@ export function mountDocumentationImagePreview(host: HTMLElement): () => void {
             legacy.querySelector('a,button,input,select,textarea'))
         )
           continue;
-        const trigger = makePreviewControl(family, 'button', { variant: 'ghost' });
+        const trigger = makePreviewControl(family, 'imageTrigger');
         trigger.dataset.docsImageTrigger = '';
         const name = `${labels.open}: ${readPreviewSource(media)!.alt}`;
         trigger.title = name;

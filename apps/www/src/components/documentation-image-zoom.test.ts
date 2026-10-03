@@ -28,6 +28,19 @@ async function fixture() {
 }
 
 describe('borderless image presentation / maintainer request #796', () => {
+  it('prevents mask pointer defaults while Content remains the outside-close owner', async () => {
+    const { trigger, root } = await fixture();
+    const requests: any[] = [];
+    root.addEventListener('openChange', (event) => requests.push((event as CustomEvent).detail));
+    const mask = document.querySelector<HTMLElement>('[data-docs-image-mask]')!;
+    const pointer = new PointerEvent('pointerdown', { bubbles: true, cancelable: true });
+    mask.dispatchEvent(pointer);
+    await settle();
+    expect(pointer.defaultPrevented).toBe(true);
+    expect(root.getExposes?.().open.get()).toBe(false);
+    expect(requests.at(-1)).toMatchObject({ reason: 'outside.press', focusReason: 'pointer' });
+    expect(document.activeElement).toBe(trigger);
+  });
   it('uses a private Base Dialog projection without an original-size toolbar', async () => {
     const { content } = await fixture();
     expect(content.getAttribute('role')).toBe('dialog');

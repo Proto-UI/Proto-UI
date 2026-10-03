@@ -23,6 +23,13 @@ vi.mock('./projection-theme', () => ({
   watchProjectionThemeSurfaceStyle: projection.watchTheme,
 }));
 
+vi.mock('./demo-modules', () => ({
+  loadDemo: async () => ({
+    type: 'demo',
+    root: { kind: 'proto', prototypeId: 'shadcn-button', children: ['Demo'] },
+  }),
+}));
+
 vi.mock('./code-panel-client', () => ({ refreshCodePanel: codePanel.refresh }));
 
 import { initProjectedPreviewer } from './projected-previewer-client';

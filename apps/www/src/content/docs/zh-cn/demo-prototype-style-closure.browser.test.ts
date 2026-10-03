@@ -2,7 +2,7 @@
 
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser, BrowserContext, Page } from 'playwright-core';
+import type { Browser, BrowserContext, Page, Response } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   COLOR_SCHEMES,
@@ -32,31 +32,88 @@ let context: BrowserContext;
 let page: Page;
 let baseUrl = '';
 
-async function openStandaloneTheme(colorScheme: ColorScheme): Promise<void> {
-  await page.emulateMedia({ colorScheme });
-  await page.goto(`${baseUrl}${ROUTE}?theme=${colorScheme}`, { waitUntil: 'networkidle' });
-  await page.waitForFunction(
-    () =>
-      document.documentElement.dataset.styleIsolationReady === 'true' ||
-      document.documentElement.dataset.styleIsolationReady === 'error',
-    undefined,
-    { timeout: 90_000 }
-  );
-  const fixture = await page.evaluate(() => ({
-    error: document.documentElement.dataset.styleIsolationError ?? null,
-    theme: document.documentElement.dataset.theme ?? null,
-  }));
-  if (fixture.error) throw new Error(`Style-isolation fixture failed to mount:\n${fixture.error}`);
-  expect(fixture.theme, 'consumer theme must be active before Adapter mount').toBe(colorScheme);
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-      )
-  );
-  // Textarea and Button intentionally transition color for 150ms. This suite
-  // verifies stable endpoints, not an arbitrary in-flight interpolation.
-  await page.waitForTimeout(200);
+type ThemeJourneyBudget = { navigationMs: number; readyMs: number };
+
+async function openStandaloneTheme(
+  colorScheme: ColorScheme,
+  budget?: ThemeJourneyBudget
+): Promise<void> {
+  const started = performance.now();
+  const requestedUrl = `${baseUrl}${ROUTE}?theme=${colorScheme}`;
+  let httpStatus: number | null = null;
+  const responseObserved = (response: Response) => {
+    if (response.request().isNavigationRequest() && response.frame() === page.mainFrame()) {
+      httpStatus = response.status();
+    }
+  };
+  const stage = async <T>(name: string, action: () => Promise<T>): Promise<T> => {
+    if (!budget) return action();
+    const stageStarted = performance.now();
+    const report = (state: string, error?: unknown) =>
+      console.info(
+        '[style-endpoint-journey]',
+        JSON.stringify({
+          colorScheme,
+          stage: name,
+          state,
+          requestedUrl,
+          route: page.url(),
+          httpStatus,
+          stageElapsedMs: Math.round(performance.now() - stageStarted),
+          totalElapsedMs: Math.round(performance.now() - started),
+          ...(error === undefined ? {} : { error: String(error) }),
+        })
+      );
+    report('started');
+    try {
+      const result = await action();
+      report('passed');
+      return result;
+    } catch (error) {
+      report('failed', error);
+      throw error;
+    }
+  };
+  if (budget) page.on('response', responseObserved);
+  try {
+    await stage('emulate-media', () => page.emulateMedia({ colorScheme }));
+    await stage('navigation', async () => {
+      const response = await page.goto(requestedUrl, {
+        waitUntil: 'networkidle',
+        ...(budget ? { timeout: budget.navigationMs } : {}),
+      });
+      httpStatus = response?.status() ?? httpStatus;
+    });
+    await stage('ready', async () => {
+      await page.waitForFunction(
+        () =>
+          document.documentElement.dataset.styleIsolationReady === 'true' ||
+          document.documentElement.dataset.styleIsolationReady === 'error',
+        undefined,
+        { timeout: budget?.readyMs ?? 90_000 }
+      );
+      const fixture = await page.evaluate(() => ({
+        error: document.documentElement.dataset.styleIsolationError ?? null,
+        theme: document.documentElement.dataset.theme ?? null,
+      }));
+      if (fixture.error)
+        throw new Error(`Style-isolation fixture failed to mount:\n${fixture.error}`);
+      expect(fixture.theme, 'consumer theme must be active before Adapter mount').toBe(colorScheme);
+    });
+    await stage('stable-paint', async () => {
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
+      // Existing endpoint settling for the intentional 150ms color transition.
+      // No extra sleep or retry is added by the bounded journey diagnostics.
+      await page.waitForTimeout(200);
+    });
+  } finally {
+    if (budget) page.off('response', responseObserved);
+  }
 }
 
 type TokenPaint = {
@@ -402,9 +459,9 @@ describe.sequential('Prototype style closure without Website CSS', () => {
   }, 90_000);
 
   it('activates distinct Light and Dark token endpoints', async () => {
-    await openStandaloneTheme('light');
+    await openStandaloneTheme('light', { navigationMs: 10_000, readyMs: 10_000 });
     const light = await readTokenPaint();
-    await openStandaloneTheme('dark');
+    await openStandaloneTheme('dark', { navigationMs: 10_000, readyMs: 10_000 });
     const dark = await readTokenPaint();
 
     expect(light.foreground, 'foreground theme delta').not.toBe(dark.foreground);
@@ -422,7 +479,7 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         colorScheme: getComputedStyle(document.documentElement).colorScheme,
       }))
     ).toEqual({ theme: 'dark', colorScheme: 'dark' });
-  });
+  }, 30_000);
 
   for (const colorScheme of COLOR_SCHEMES) {
     it(`keeps Textarea and Button presentation closed in ${colorScheme} mode`, async () => {

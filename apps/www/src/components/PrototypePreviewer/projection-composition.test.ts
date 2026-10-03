@@ -90,6 +90,95 @@ afterEach(() => {
 });
 
 describe('Website projection composition', () => {
+  it.each(
+    (['shadcn', 'brutalist'] as const).flatMap((projectionFamilyId) =>
+      (['wc', 'react', 'vue', 'vue2'] as const).map((runtimeId) => ({
+        projectionFamilyId,
+        runtimeId,
+      }))
+    )
+  )(
+    'keeps $projectionFamilyId $runtimeId control values shrinkable without shortening their accessible text',
+    ({ projectionFamilyId, runtimeId }) => {
+      const composition = createProjectionComposition({
+        ownerId: 'compact-runtime-control',
+        runtimeId,
+        projectionFamilyId,
+        generation: 1,
+        componentId: 'button',
+        childDemo: {
+          type: 'demo',
+          root: { kind: 'proto', prototypeId: `${projectionFamilyId}-button` },
+        },
+        controls: controls(),
+        controlIds: ['runtime'],
+      });
+      const part = (name: string) =>
+        findNode(
+          composition.demo,
+          (node) =>
+            node.kind === 'proto' && node.prototypeId === `${projectionFamilyId}-select-${name}`
+        );
+      expect(part('root')).toMatchObject({
+        surfaceStyle: { width: '100%', minWidth: '0', maxWidth: '100%' },
+      });
+      expect(part('trigger')).toMatchObject({
+        props: { 'aria-label': 'Runtime' },
+        surfaceStyle: {
+          width: '100%',
+          minWidth: '0',
+          maxWidth: '100%',
+          minHeight: 'var(--site-control-height, 2.25rem)',
+        },
+      });
+      expect(part('value')).toMatchObject({
+        surfaceStyle: {
+          minWidth: '0',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        },
+      });
+      expect(part('item')).toMatchObject({
+        props: { value: 'wc', textValue: 'Web Components' },
+        children: ['Web Components'],
+      });
+    }
+  );
+
+  it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+    '%s routes the explicit Header appearance only into the Brutalist Trigger',
+    (runtimeId) => {
+      for (const family of ['brutalist', 'shadcn'] as const) {
+        const config = controls();
+        const composition = createProjectionComposition({
+          ownerId: 'header-appearance',
+          runtimeId,
+          projectionFamilyId: family,
+          generation: 1,
+          componentId: 'button',
+          childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: `${family}-button` } },
+          controls: {
+            ...config,
+            runtime: { ...config.runtime, brutalistTriggerAppearance: 'elevated' },
+            family: { ...config.family, brutalistTriggerAppearance: 'elevated' },
+          },
+          controlIds: ['runtime', 'family'],
+        });
+        let triggers = 0;
+        walk(composition.demo.root, (node) => {
+          if (node.kind !== 'proto') return;
+          if (node.prototypeId.endsWith('-select-trigger')) {
+            triggers++;
+            expect(node.props?.appearance).toBe(family === 'brutalist' ? 'elevated' : undefined);
+            expect(node.surfaceStyle).not.toHaveProperty('boxShadow');
+          } else expect(node.props?.appearance).toBeUndefined();
+        });
+        expect(triggers).toBe(2);
+      }
+    }
+  );
+
   it('clones the child tree and closes style plus identity markers over every Proto surface', () => {
     const childDemo = {
       type: 'demo',
@@ -163,7 +252,15 @@ describe('Website projection composition', () => {
       kind: 'box',
       className: 'pui-projection-control-label',
       attrs: { 'data-projection-control-label': 'runtime' },
-      children: ['Runtime'],
+      children: [
+        {
+          kind: 'proto',
+          prototypeId: 'site-typography',
+          rootTag: 'span',
+          props: { family: 'shadcn', role: 'label', compact: false },
+          children: ['Runtime'],
+        },
+      ],
     });
     const runtimeSelectRoot = findNode(
       composition.demo,
@@ -681,6 +778,35 @@ describe('Website projection composition', () => {
     }
   });
 
+  it('stamps the exact private caption Prototype identity with its control coordinate', () => {
+    const composition = createProjectionComposition({
+      ownerId: 'caption-owner',
+      runtimeId: 'react',
+      projectionFamilyId: 'shadcn',
+      generation: 9,
+      componentId: 'button',
+      childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
+      controls: controls(),
+      controlIds: ['runtime'],
+    });
+    const { host, refs } = mountDemoTree(composition.demo);
+    const api: DemoRuntimeApi = {
+      call: () => undefined,
+      getExposes: () => undefined,
+      setProps: () => undefined,
+    };
+    const cleanup = composition.demo.setup?.({ host, refs, api });
+    try {
+      const caption = host.querySelector(
+        '[data-projection-control-label] .pui-projection-prototype'
+      )!;
+      expect(caption.getAttribute('data-projection-prototype')).toBe('site-typography');
+      expect(caption.getAttribute('data-projection-owner')).toBe('caption-owner');
+      expect(caption.getAttribute('data-projection-generation')).toBe('9');
+    } finally {
+      (cleanup as () => void)();
+    }
+  });
   it('stamps SVG Prototype surfaces with generation identity and theme values', async () => {
     const componentFamily = PROJECTION_FAMILY_MANIFESTS.shadcn.families.toggle;
     const childDemo = await loadDemo(componentFamily.recipeId);
@@ -765,6 +891,62 @@ describe('Website projection composition', () => {
   });
 });
 
+describe('Website native-only content recipes', () => {
+  const nativeDemo = {
+    type: 'demo',
+    root: { kind: 'box', tag: 'a', attrs: { href: '/docs/' }, children: ['Documentation'] },
+  } satisfies DemoSpec;
+  const options = {
+    ownerId: 'native-links',
+    runtimeId: 'wc' as const,
+    projectionFamilyId: 'shadcn' as const,
+    generation: 1,
+    componentId: 'button' as const,
+    childDemo: nativeDemo,
+    controls: controls(),
+    controlIds: [],
+  };
+  it('preserves anchor host semantics without claiming a Link or Button Prototype', () => {
+    const composition = createProjectionComposition({
+      ...options,
+      contentRecipe: { id: 'native-actions', prototypeIds: [], rootPrototypeId: null },
+    });
+    const anchor = findNode(composition.demo, (node) => node.kind === 'box' && node.tag === 'a');
+    expect(anchor.kind === 'box' && anchor.attrs?.href).toBe('/docs/');
+    const prototypes: string[] = [];
+    walk(composition.demo.root, (node) => {
+      if (node.kind === 'proto') prototypes.push(node.prototypeId);
+    });
+    expect(prototypes).toEqual([]);
+    const content = findNode(
+      composition.demo,
+      (node) => node.kind === 'box' && node.attrs?.['data-projection-content'] === ''
+    );
+    expect(content.kind === 'box' && content.attrs?.['data-projection-prototype']).toBeUndefined();
+    expect(content.kind === 'box' && content.attrs?.['data-projection-id']).toBe('native-actions');
+  });
+  it('rejects missing, duplicate, or falsely omitted declared Prototype identity', () => {
+    expect(() =>
+      createProjectionComposition({
+        ...options,
+        contentRecipe: { id: 'native-actions', prototypeIds: [], rootPrototypeId: 'shadcn-button' },
+      })
+    ).toThrow('root must be declared');
+    expect(() =>
+      createProjectionComposition({
+        ...options,
+        contentRecipe: { id: '', prototypeIds: [], rootPrototypeId: null },
+      })
+    ).toThrow('requires an id');
+    expect(() =>
+      createProjectionComposition({
+        ...options,
+        contentRecipe: { id: 'bad', prototypeIds: ['shadcn-button'], rootPrototypeId: null },
+      })
+    ).toThrow('native-only');
+  });
+});
+
 describe('toolbar-free partial-family compositions', () => {
   for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
     it(`${family} needs no Select when controls are absent, but refuses requested controls`, () => {
@@ -795,5 +977,48 @@ describe('toolbar-free partial-family compositions', () => {
         /no family select/
       );
     });
+  }
+});
+
+it('keeps full-value wrapping an explicit consumer opt-in rather than changing preview defaults', () => {
+  for (const wrapValue of [false, true]) {
+    const settings = controls();
+    const composition = createProjectionComposition({
+      ownerId: 'wrap-settings',
+      runtimeId: 'wc',
+      projectionFamilyId: 'shadcn',
+      generation: 1,
+      componentId: 'button',
+      childDemo: { type: 'demo', root: { kind: 'box', children: [] } },
+      contentRecipe: { id: 'empty-settings', prototypeIds: [], rootPrototypeId: null },
+      controlIds: ['runtime'],
+      controls: { ...settings, runtime: { ...settings.runtime, wrapValue } },
+    });
+    const value = findNode(
+      composition.demo,
+      (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-value'
+    );
+    const trigger = findNode(
+      composition.demo,
+      (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-trigger'
+    );
+    expect(value).toMatchObject({
+      surfaceStyle: {
+        whiteSpace: wrapValue ? 'normal' : 'nowrap',
+        textOverflow: wrapValue ? 'clip' : 'ellipsis',
+      },
+    });
+    expect(trigger).toMatchObject({
+      surfaceStyle: { minHeight: 'var(--site-control-height, 2.25rem)' },
+    });
+    if (wrapValue) {
+      expect(value).toMatchObject({
+        surfaceStyle: { overflowWrap: 'anywhere', overflow: 'visible' },
+      });
+      expect(trigger).toMatchObject({ surfaceStyle: { height: 'auto' } });
+    } else
+      expect((trigger as Extract<DemoNode, { kind: 'proto' }>).surfaceStyle).not.toHaveProperty(
+        'height'
+      );
   }
 });

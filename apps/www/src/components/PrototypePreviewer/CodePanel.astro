@@ -1,4 +1,8 @@
 ---
+import SiteCopyBootstrap from '../SiteCopyBootstrap.astro';
+import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
+const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
+const { Button } = siteControlTags(siteFamily);
 import { highlightCode, type CodeLang } from './code-highlight';
 
 export type { CodeLang } from './code-highlight';
@@ -10,12 +14,14 @@ interface Props {
   labelledBy?: string;
   hidden?: boolean;
   fileIndex?: number;
+  framed?: boolean;
 }
 
-const { code, lang = 'tsx', id, labelledBy, hidden, fileIndex } = Astro.props;
+const { code, lang = 'tsx', id, labelledBy, hidden, fileIndex, framed = true } = Astro.props;
 const highlighted = await highlightCode(code, lang);
 ---
 
+<SiteCopyBootstrap />
 <figure
   id={id}
   class="relative min-w-0 max-w-full"
@@ -25,77 +31,37 @@ const highlighted = await highlightCode(code, lang);
   data-code-file-panel={labelledBy ? '' : undefined}
   data-code-file-index={fileIndex}
   data-code-shell
+  data-site-code-surface={framed ? 'frame' : undefined}
 >
-  <div class="group relative min-w-0 max-w-full min-h-12 p-2" data-code-inner>
-    <wc-shadcn-button
-      data-site-shadcn-button
-      data-variant="outline"
-      data-size="icon"
-      type="button"
-      class="docs-code-copy absolute top-2 right-2 z-10"
-      hidden
-      title="Copy code"
-      aria-label="Copy code"
-      data-copy
-      aria-expanded="false"
-    >
-      <span data-copy-text>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="size-4.5 light"
-        >
-          <path
-            fill-rule="evenodd"
-            clip-rule="evenodd"
-            d="M7 7m0 2.667a2.667 2.667 0 0 1 2.667 -2.667h8.666a2.667 2.667 0 0 1 2.667 2.667v8.666a2.667 2.667 0 0 1 -2.667 2.667h-8.666a2.667 2.667 0 0 1 -2.667 -2.667z"
-          ></path>
-          <path
-            d="M4.012 16.737a2.005 2.005 0 0 1 -1.012 -1.737v-10c0 -1.1 .9 -2 2 -2h10c.75 0 1.158 .385 1.5 1"
-          ></path>
-        </svg>
-      </span>
-      <span class="sr-only">Copy code</span>
-    </wc-shadcn-button>
+  <div class="group relative min-w-0 max-w-full min-h-12" data-code-inner>
+    <div class="site-code-copy-overlay" hidden data-copy data-site-copy data-copy-label="Copy code">
+    </div>
 
     <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
 
-    <div
-      class="absolute inset-x-0 bottom-0 h-16 z-9 pointer-events-none bg-gradient-to-b from-transparent to-muted group-data-[code-expanded=true]:hidden"
-      data-code-fade
-      aria-hidden="true"
-    >
-    </div>
-
-    <wc-shadcn-button
-      data-site-shadcn-button
+    <Button
+      data-site-button
+      data-site-control-family={siteFamily}
       data-variant="outline"
       data-size="sm"
-      class="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-10 py-1.5 px-4 text-[0.8125rem] font-medium rounded-lg border border-border bg-background text-foreground cursor-pointer inline-flex items-center gap-1.5 shadow-sm transition-colors duration-150 hover:bg-muted"
+      class="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-10"
       data-code-toggle
       aria-expanded="false"
       aria-label="展开代码"
     >
       View code
-    </wc-shadcn-button>
+    </Button>
   </div>
 </figure>
 
 <script>
-  import { initSiteShadcnControls } from '../site-shadcn-controls';
+  import { initSiteControls } from '../site-shadcn-controls';
   import { initCodePanels } from './code-panel-client';
 
-  initSiteShadcnControls(document);
+  initSiteControls(document);
   initCodePanels(document);
   document.addEventListener('astro:page-load', () => {
-    initSiteShadcnControls(document);
+    initSiteControls(document);
     initCodePanels(document);
   });
 </script>

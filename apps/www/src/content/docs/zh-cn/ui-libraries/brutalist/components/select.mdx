@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Select'
-description: '基于 Base Select 的方角选择器投影'
+description: '基于 Base Select 的默认扁平圆角选择器投影'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -13,3 +13,9 @@ Select 在 Neo-Brutalist 表面语言下保留 Base 的 value-class presentation
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-select" initialRuntime="wc" />
 </div>
+
+## Trigger 外观
+
+默认 Trigger 遵循上游 Select：5px 圆角、2px 黑边、DM Sans 500，保持扁平。`appearance="elevated"` 是显式 Proto UI 扩展，供与有硬影命令同组的 Trigger 使用，例如 Header 的 Runtime 与 Style 控件。静止态为向右/下 4px 黑色硬影；hover 或 press 将 Trigger 向右/下移动 4px 并去除硬影，press 不叠加第二次位移。
+
+此 prop 设置在 `brutalist-select-trigger`，不设在 Root 或 Content。`appearance="flat"`、缺省或移除 prop 都恢复扁平默认值。`size="sm" | "default"`、配对 fill/ink、焦点 ring、键盘选择及 disabled 行为不变；两种外观的 Content 都保持扁平。页面 CSS 不应另外补影。

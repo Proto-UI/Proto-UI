@@ -46,7 +46,7 @@
   }
 
   main[data-pagefind-body] {
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.625;
   }
 
@@ -65,11 +65,11 @@
   }
 
   main[data-pagefind-body] h1 {
-    @apply scroll-m-20 text-4xl font-semibold tracking-tight sm:text-3xl xl:text-4xl;
+    @apply scroll-m-20 text-[2rem] leading-[2.5rem] font-semibold tracking-tight md:text-[2.25rem] md:leading-[2.75rem];
   }
 
   main[data-pagefind-body] h2 {
-    @apply scroll-m-20 text-3xl font-semibold tracking-tight;
+    @apply scroll-m-20 text-[1.625rem] leading-[2.125rem] font-semibold tracking-tight md:text-[1.75rem] md:leading-9;
   }
 
   main[data-pagefind-body] .sl-heading-wrapper {
@@ -172,8 +172,8 @@
   main[data-pagefind-body] footer .pagination-links {
     @apply mt-6 flex items-center justify-between gap-2;
   }
-  footer .pagination-links a,
-  main[data-pagefind-body] footer .pagination-links a {
+  footer .pagination-links a:not([data-site-link-enhanced]),
+  main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]) {
     @apply inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-colors;
     @apply bg-secondary text-secondary-foreground hover:bg-secondary/80;
     @apply h-7 rounded-md gap-1.5 px-3 shadow-none;
@@ -189,24 +189,33 @@
     height: 0.95rem;
   }
   /* Hide "Previous/Next" label line, keep link title */
-  footer .pagination-links a > span:first-of-type,
-  main[data-pagefind-body] footer .pagination-links a > span:first-of-type {
+  footer .pagination-links a:not([data-site-link-enhanced]) > span:first-of-type,
+  main[data-pagefind-body]
+    footer
+    .pagination-links
+    a:not([data-site-link-enhanced])
+    > span:first-of-type {
     font-size: 0;
     line-height: 0;
   }
-  footer .pagination-links a > span:first-of-type .link-title,
-  main[data-pagefind-body] footer .pagination-links a > span:first-of-type .link-title {
+  footer .pagination-links a:not([data-site-link-enhanced]) > span:first-of-type .link-title,
+  main[data-pagefind-body]
+    footer
+    .pagination-links
+    a:not([data-site-link-enhanced])
+    > span:first-of-type
+    .link-title {
     @apply block;
     font-size: 0.8125rem;
     line-height: 1.25rem;
   }
-  main[data-pagefind-body] .pagination-links a:hover {
+  main[data-pagefind-body] .pagination-links a:not([data-site-link-enhanced]):hover {
     @apply shadow-none;
   }
 
   @media (max-width: 40rem) {
-    footer .pagination-links a,
-    main[data-pagefind-body] footer .pagination-links a {
+    footer .pagination-links a:not([data-site-link-enhanced]),
+    main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]) {
       width: auto;
       min-width: 0;
       max-width: calc(50% - 0.25rem);
@@ -215,13 +224,18 @@
       white-space: normal;
     }
 
-    footer .pagination-links a:only-child,
-    main[data-pagefind-body] footer .pagination-links a:only-child {
+    footer .pagination-links a:not([data-site-link-enhanced]):only-child,
+    main[data-pagefind-body] footer .pagination-links a:not([data-site-link-enhanced]):only-child {
       max-width: 100%;
     }
 
-    footer .pagination-links a > span:first-of-type .link-title,
-    main[data-pagefind-body] footer .pagination-links a > span:first-of-type .link-title {
+    footer .pagination-links a:not([data-site-link-enhanced]) > span:first-of-type .link-title,
+    main[data-pagefind-body]
+      footer
+      .pagination-links
+      a:not([data-site-link-enhanced])
+      > span:first-of-type
+      .link-title {
       overflow-wrap: anywhere;
     }
   }
@@ -268,7 +282,7 @@
 
   /* 仅对行内 code 应用样式，排除 pre>code 代码块（如 Shiki 高亮），避免暗色模式下黑色矩形 */
   main[data-pagefind-body] :not(pre) > code {
-    @apply bg-muted relative rounded-sm px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold;
+    @apply bg-muted relative rounded-sm px-[0.25rem] py-[0.1rem] font-mono text-sm font-normal;
   }
 
   main[data-pagefind-body] .sl-heading-wrapper {
