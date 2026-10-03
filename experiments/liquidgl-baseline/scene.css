@@ -1,0 +1,191 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: #172135;
+  background: #eef1f5;
+  font:
+    16px/1.4 system-ui,
+    sans-serif;
+}
+header {
+  padding: 20px 30px 16px;
+  height: 148px;
+}
+header > p:first-child {
+  margin: 0;
+  color: #526176;
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+h1 {
+  margin: 3px 0;
+  font-size: 28px;
+  font-weight: 550;
+  letter-spacing: -0.035em;
+}
+#status {
+  margin: 0;
+  color: #526176;
+  font-size: 12px;
+}
+#scene {
+  width: 760px;
+  height: 560px;
+  position: relative;
+  overflow: hidden;
+  /* The vendor canvas is attached to body. Keep foreground z-index in that context. */
+  user-select: none;
+}
+.backdrop {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #d9e5ef;
+}
+.color {
+  position: absolute;
+  width: 600px;
+  height: 580px;
+  transform: rotate(-26deg);
+}
+.color-a {
+  left: -190px;
+  top: -170px;
+  background: linear-gradient(135deg, #163e64, #e09166);
+}
+.color-b {
+  left: 345px;
+  top: -80px;
+  background: linear-gradient(35deg, #f6d69a, #8da392);
+}
+.color-c {
+  left: 260px;
+  top: 405px;
+  background: #647989;
+}
+.paper {
+  position: absolute;
+  top: 36px;
+  left: 52px;
+  width: 300px;
+  height: 426px;
+  padding: 25px;
+  background: #f5efe2;
+  color: #244259;
+  transform: rotate(-7deg);
+}
+.paper span {
+  font-size: 10px;
+  letter-spacing: 0.13em;
+}
+.paper h2 {
+  font-family: Georgia, serif;
+  font-weight: 400;
+  font-size: 52px;
+  line-height: 0.96;
+  letter-spacing: -0.03em;
+}
+.paper p {
+  font-size: 12px;
+  width: 190px;
+}
+.lines {
+  height: 74px;
+  width: 180px;
+  background: repeating-linear-gradient(0deg, #314c59 0 1px, transparent 1px 11px);
+}
+.marker {
+  position: absolute;
+  background: #b42844;
+}
+.marker-x {
+  left: 205px;
+  top: 0;
+  width: 3px;
+  height: 560px;
+}
+.marker-y {
+  left: 0;
+  top: 318px;
+  width: 760px;
+  height: 3px;
+  background: #123d7b;
+}
+#live-text {
+  position: absolute;
+  left: 388px;
+  top: 250px;
+  margin: 0;
+  color: #21394d;
+  font:
+    700 43px/1 system-ui,
+    sans-serif;
+}
+.fine-type {
+  position: absolute;
+  left: 385px;
+  top: 393px;
+  width: 290px;
+  color: #172e4a;
+  font-size: 15px;
+}
+.lens {
+  position: absolute;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 28px;
+}
+.capsule {
+  left: 132px;
+  top: 94px;
+  width: 172px;
+  height: 60px;
+  border-radius: 30px;
+}
+.panel {
+  left: 381px;
+  top: 123px;
+  width: 292px;
+  height: 260px;
+  border-radius: 34px;
+}
+.caption {
+  position: absolute;
+  z-index: 3;
+  color: #172d43;
+  pointer-events: none;
+}
+.caption-capsule {
+  left: 132px;
+  top: 94px;
+  width: 172px;
+  height: 60px;
+  display: grid;
+  place-items: center;
+  font-size: 19px;
+  font-weight: 500;
+}
+.caption-panel {
+  left: 407px;
+  top: 142px;
+  width: 248px;
+}
+.caption h3 {
+  margin: 0 0 22px;
+  font-size: 21px;
+  font-weight: 550;
+}
+.caption p {
+  margin: 15px 0;
+  font-size: 15px;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 24px;
+  gap: 15px;
+  font-size: 10px;
+  color: #526176;
+}

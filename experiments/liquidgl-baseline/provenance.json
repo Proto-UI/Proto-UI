@@ -1,0 +1,31 @@
+{
+  "repository": "naughtyduk/liquidGL",
+  "commit": "88f681ab7035fd55b04f63edff1841e32c4199e9",
+  "version": "3.0.0",
+  "sourceKind": "reconstructed-scene",
+  "files": [
+    {
+      "local": "vendor/liquidGL.js",
+      "upstream": "scripts/liquidGL.js",
+      "gitBlob": "b76e6872bf1c93ecacff646d09a77f5ce5f24ddb",
+      "sha256": "1025e58436096a8d66ba787fac840ebd2e211c29835cd4c356f4d268f58b8926",
+      "bytes": 297029,
+      "modifications": "none"
+    },
+    {
+      "local": "vendor/LICENSE",
+      "upstream": "LICENSE",
+      "gitBlob": "f07191544e6d052afe52c41f65da521ed6c01e92",
+      "sha256": "b0a6dd5a8ecb67e51faa7c4f66988be318a53dfcc024ccdad0a261707b2f65aa",
+      "modifications": "none"
+    }
+  ],
+  "excluded": [
+    "assets/**",
+    "package duplication",
+    "upstream demo HTML/CSS/media",
+    "helper script",
+    "unrelated UI packages"
+  ],
+  "execution": "authorized-isolated-browser-baseline-only"
+}
