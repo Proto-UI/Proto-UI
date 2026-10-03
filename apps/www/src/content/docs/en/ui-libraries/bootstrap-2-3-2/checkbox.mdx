@@ -1,0 +1,31 @@
+---
+title: 'Bootstrap 2.3.2 Checkbox'
+description: 'Custom Root and Indicator over Base Checkbox.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+The custom Root / Indicator anatomy adapts the Bootstrap 2.3.2 visual language. It is not the archived native checkbox implementation, and it does not bundle legacy Bootstrap JavaScript or Glyphicons.
+
+Base Checkbox owns controlled and uncontrolled `checked` and `indeterminate`, pointer and Space activation, disabled behavior, focus, and the `checkbox` role with its `mixed` state. Indicator derives its tick or dash from the nearest Root and owns no second value or activation. Mixed takes precedence over checked.
+
+Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2. Toggle the unchecked, checked, and mixed examples; Tab to the final control for keyboard focus.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-checkbox"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## API
+
+- Root: `checked` / `defaultChecked`, `indeterminate` / `defaultIndeterminate`, and `disabled`
+- Root emits inherited `checkedChange` and `indeterminateChange` signals
+- Indicator: derived display only; place it inside its Root
+
+This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).

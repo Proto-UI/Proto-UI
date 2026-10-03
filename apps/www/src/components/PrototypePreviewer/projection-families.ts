@@ -15,6 +15,7 @@ export type SharedBaseFamilyId = (typeof SHARED_BASE_FAMILY_IDS)[number];
 export type ProjectionComponentId =
   | SharedBaseFamilyId
   | 'checkbox'
+  | 'input'
   | 'radio-group'
   | 'badge'
   | 'card'
@@ -72,6 +73,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   ],
   separator: ['root'],
   textarea: ['root'],
+  input: ['root'],
   checkbox: ['root', 'indicator'],
   'radio-group': ['root', 'item', 'indicator'],
   badge: ['root'],
@@ -658,6 +660,65 @@ const BOOTSTRAP_232_MANIFEST = {
       recipeId: 'demo-bootstrap-2-3-2-button',
       recipePrototypeIds: ['bootstrap-2-3-2-button'],
       parts: { root: { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' } },
+    },
+    'checkbox': {
+      baseFamilyId: 'P-BASE-CHECKBOX',
+      recipeId: 'demo-bootstrap-2-3-2-checkbox',
+      recipePrototypeIds: ['bootstrap-2-3-2-checkbox-root', 'bootstrap-2-3-2-checkbox-indicator'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'bootstrap-2-3-2-checkbox-root' },
+        indicator: {
+          basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
+          prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
+        },
+      },
+    },
+    'switch': {
+      baseFamilyId: 'P-BASE-SWITCH',
+      recipeId: 'demo-bootstrap-2-3-2-switch',
+      recipePrototypeIds: ['bootstrap-2-3-2-switch-root', 'bootstrap-2-3-2-switch-thumb'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'bootstrap-2-3-2-switch-root' },
+        thumb: {
+          basePrototypeId: 'P-BASE-SWITCH-THUMB',
+          prototypeId: 'bootstrap-2-3-2-switch-thumb',
+        },
+      },
+    },
+    'toggle': {
+      baseFamilyId: 'P-BASE-TOGGLE',
+      recipeId: 'demo-bootstrap-2-3-2-toggle',
+      recipePrototypeIds: ['bootstrap-2-3-2-toggle'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-TOGGLE', prototypeId: 'bootstrap-2-3-2-toggle' },
+      },
+    },
+    'input': {
+      baseFamilyId: 'P-BASE-INPUT',
+      recipeId: 'demo-bootstrap-2-3-2-input',
+      recipePrototypeIds: ['bootstrap-2-3-2-input-root'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'bootstrap-2-3-2-input-root' },
+      },
+    },
+    'textarea': {
+      baseFamilyId: 'P-BASE-TEXTAREA',
+      recipeId: 'demo-bootstrap-2-3-2-textarea',
+      recipePrototypeIds: ['bootstrap-2-3-2-textarea-root'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'bootstrap-2-3-2-textarea-root' },
+      },
+    },
+    'separator': {
+      baseFamilyId: 'P-BASE-SEPARATOR',
+      recipeId: 'demo-bootstrap-2-3-2-separator',
+      recipePrototypeIds: ['bootstrap-2-3-2-separator-root'],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-SEPARATOR',
+          prototypeId: 'bootstrap-2-3-2-separator-root',
+        },
+      },
     },
   },
 } as const satisfies ProjectionFamilyManifest;

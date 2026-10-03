@@ -1,0 +1,32 @@
+---
+title: 'Bootstrap 2.3.2 Input'
+description: 'Archived field styling over the Base single-line text protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Input applies the Bootstrap 2.3.2 field language to one Base Input Root. The current Web profile materializes one native `input[type=text]`; the visual layer adds only field presentation.
+
+Base owns controlled and uncontrolled values, normalized editing and IME events, native hints, disabled and read-only behavior, accessible naming, and physical focus. This contentless prototype does not accept arbitrary input types or add form submission, search commands, validation UI, or a second editor.
+
+Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2. Edit Project name, focus the read-only field, and compare the disabled field.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## API
+
+- `value` / `defaultValue`, `disabled`, `readOnly`, and `placeholder`
+- `name`, `required`, `autoComplete`, `minLength`, `maxLength`, `inputMode`, and `enterKeyHint`
+- `ariaLabel`, `labelledBy`, and `describedBy`
+- Inherited `valueChange`, `change`, composition events, `focusSelf`, and `blurSelf`
+
+This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).

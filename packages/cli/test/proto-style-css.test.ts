@@ -379,4 +379,20 @@ describe('proto style css renderer', () => {
     expect(css).toContain('--pui-translate-y: -0.5rem;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
+  it('renders the Bootstrap 2.3.2 field inset and alignment without losing current shared tokens', () => {
+    const css = renderProtoStyleTokenCss([
+      'justify-start',
+      'font-sans',
+      'rounded-base',
+      'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]',
+    ]);
+    expect(css).toContain('justify-content: flex-start;');
+    expect(css).toContain(
+      'font-family: var(--pui-font-sans, ui-sans-serif, system-ui, sans-serif);'
+    );
+    expect(css).toContain('border-radius: var(--pui-radius);');
+    expect(css).toContain('--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075);');
+    expect(css).toContain('var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000)');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
 });

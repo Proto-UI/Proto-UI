@@ -711,12 +711,18 @@ describe('Website projection-family manifests', () => {
 
 describe('partial new projection families', () => {
   for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
-    it(`${family} declares only its real Button and rejects every missing kind`, () => {
+    it(`${family} declares only its real parts and rejects every missing kind`, () => {
       const manifest = PROJECTION_FAMILY_MANIFESTS[family];
-      expect(Object.keys(manifest.families)).toEqual(['button']);
+      expect(Object.keys(manifest.families)).toEqual(
+        family === 'bootstrap-2-3-2'
+          ? ['button', 'checkbox', 'switch', 'toggle', 'input', 'textarea', 'separator']
+          : ['button']
+      );
       expect(() => validateProjectionFamilyManifest(manifest)).not.toThrow();
       expect(resolveProjectionPart(family, 'button', 'root').prototypeId).toBe(`${family}-button`);
-      for (const kind of ['select', 'switch', 'dialog', 'tabs', 'checkbox']) {
+      for (const kind of family === 'bootstrap-2-3-2'
+        ? ['select', 'dialog', 'tabs', 'radio-group', 'tooltip']
+        : ['select', 'switch', 'dialog', 'tabs', 'checkbox']) {
         expect(() => resolveProjectionPart(family, kind, 'root')).toThrow(
           /no family.*fallback is forbidden/
         );

@@ -21,6 +21,30 @@
     "./theme": {
       "types": "./src/theme.ts",
       "default": "./src/theme.ts"
+    },
+    "./checkbox": {
+      "types": "./src/checkbox/index.ts",
+      "default": "./src/checkbox/index.ts"
+    },
+    "./switch": {
+      "types": "./src/switch/index.ts",
+      "default": "./src/switch/index.ts"
+    },
+    "./toggle": {
+      "types": "./src/toggle/index.ts",
+      "default": "./src/toggle/index.ts"
+    },
+    "./input": {
+      "types": "./src/input/index.ts",
+      "default": "./src/input/index.ts"
+    },
+    "./textarea": {
+      "types": "./src/textarea/index.ts",
+      "default": "./src/textarea/index.ts"
+    },
+    "./separator": {
+      "types": "./src/separator/index.ts",
+      "default": "./src/separator/index.ts"
     }
   },
   "dependencies": {
