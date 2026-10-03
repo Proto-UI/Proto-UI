@@ -25,7 +25,7 @@ import {
 } from './projection-theme';
 import { loadPrototypes } from './prototype-modules';
 import { releaseHostMount } from './runtimes/host-mount';
-import { isRuntimeId, type RuntimeId } from './runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './runtimes/ids';
 
 export type ProjectionMaterializerOptions = Readonly<{
   mount: HTMLElement;

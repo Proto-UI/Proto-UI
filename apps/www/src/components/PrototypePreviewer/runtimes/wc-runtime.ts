@@ -1,5 +1,5 @@
 import { setElementProps } from '@proto.ui/adapter-web-component';
-import type { RuntimeAPI } from './registry';
+import type { RuntimeAPI } from './ids';
 import { ensurePreviewWcRegistered } from '../wc-registry';
 import { claimHostMount, releaseHostMount } from './host-mount';
 

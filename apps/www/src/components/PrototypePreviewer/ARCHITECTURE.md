@@ -108,12 +108,13 @@ ensurePrototypeLoaded() 完成
 
 ### 辅助文件
 
-| 文件                        | 职责                  |
-| --------------------------- | --------------------- |
-| `runtimes/registry.ts`      | 运行时加载器注册      |
-| `runtimes/wc-runtime.ts`    | Web Components 适配器 |
-| `runtimes/react-runtime.ts` | React 适配器          |
-| `runtimes/vue-runtime.ts`   | Vue 适配器            |
+| 文件                        | 职责                             |
+| --------------------------- | -------------------------------- |
+| `runtimes/ids.ts`           | 静态运行时标识；不引入适配器代码 |
+| `runtimes/registry.ts`      | 仅供预览器使用的懒加载运行时注册 |
+| `runtimes/wc-runtime.ts`    | Web Components 适配器            |
+| `runtimes/react-runtime.ts` | React 适配器                     |
+| `runtimes/vue-runtime.ts`   | Vue 适配器                       |
 
 ### 文档文件
 

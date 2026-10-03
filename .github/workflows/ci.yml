@@ -269,11 +269,23 @@ jobs:
           grep -Eq "test result: ok\. [1-9][0-9]* passed" button_t0.log
 
   test:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # Linux memfd and the distro FFmpeg 6.1 line form the video evidence baseline.
+    runs-on: ubuntu-24.04
+    # 913009ef: setup/real-decoder gate took 9m13s; the prior repository
+    # suite took 17m27s. Run 36889476980 exhausted the former 20m budget.
+    # This total-job allowance does not change decoder resource limits.
+    timeout-minutes: 30
+    env:
+      COVERAGE_BASE_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
+      COVERAGE_HEAD_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      COVERAGE_MERGE_REVISION: ${{ github.event_name == 'pull_request' && github.sha || '' }}
     steps:
       - uses: actions/checkout@v4
         with:
+          # Keep GitHub's default synthetic merge checkout for pull requests so
+          # the full suite exercises the feature together with the current base.
+          # Coverage evidence remains bound separately to the exact base/head
+          # revisions supplied above; the merge SHA is never retained evidence.
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
@@ -314,6 +326,21 @@ jobs:
 
       - name: Install
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" install --frozen-lockfile
+
+      - name: Install and identify the bounded video evidence toolchain
+        run: |
+          set -euo pipefail
+          /usr/bin/sudo /usr/bin/apt-get update
+          /usr/bin/sudo /usr/bin/apt-get install --no-install-recommends -y ffmpeg python3
+          /usr/bin/dpkg-query --show --showformat='${Package}=${Version}\n' ffmpeg python3
+          /usr/bin/python3 --version
+          /usr/bin/ffmpeg -version
+          /usr/bin/ffprobe -version
+          /usr/bin/ffmpeg -version | /usr/bin/grep -E '^ffmpeg version 6\.1\.'
+          /usr/bin/ffprobe -version | /usr/bin/grep -E '^ffprobe version 6\.1\.'
+          # Real fixture decoding proves fd seek/seal and codec capabilities;
+          # inventory or version strings alone do not satisfy this gate.
+          node --test scripts/coverage-matrices/test/decode-video-evidence.test.mjs
 
       - name: Public documentation gate and repository tests
         env:

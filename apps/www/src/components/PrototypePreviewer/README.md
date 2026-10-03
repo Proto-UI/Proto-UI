@@ -94,14 +94,7 @@ export default {
 
 ### 手动注册（可选）
 
-如果你不想使用 `*.demo.proto.ts` 规则，仍可在 `prototype-modules.ts` 中手动注册：
-
-```typescript
-// src/components/PrototypePreviewer/prototype-modules.ts
-const manualPrototypeModules = {
-  'button-demo': () => import('../../content/docs/zh-cn/components/button-demo'),
-};
-```
+`PrototypePreviewer` 不接受逐实例 `loader` prop。若原型不在 `*.demo.proto.ts` 自动扫描范围内，或需要额外加载步骤，应在 [`prototype-modules.ts`](./prototype-modules.ts) 的 `manualPrototypeModules` 中注册，并用对应的 `prototypeId` 调用预览器。现有 `base-button` 映射展示了实际模式：从 `@proto.ui/prototypes-base` 进行显式动态导入，再注册该 ID。
 
 ## 🔧 技术细节
 
@@ -295,9 +288,9 @@ const prototypeId = userPrefersDarkMode ? 'dark-theme-demo' : 'light-theme-demo'
 <PrototypePreviewer prototypeId={prototypeId} />
 ```
 
-### 自定义加载器
+### 在注册表中自定义加载逻辑
 
-如果需要更复杂的加载逻辑：
+自定义加载步骤属于 [`prototype-modules.ts`](./prototype-modules.ts) 中某个 `prototypeId` 映射；它不会恢复已移除的逐实例 `loader` prop。可在注册表 loader 中执行额外工作，并返回默认导出原型或自行注册原型：
 
 ```typescript
 // prototype-modules.ts

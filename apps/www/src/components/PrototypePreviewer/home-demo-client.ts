@@ -23,7 +23,7 @@ import {
   resolveProjectionThemeSurfaceStyle,
   watchProjectionThemeSurfaceStyle,
 } from './projection-theme';
-import { isRuntimeId, type RuntimeId } from './runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './runtimes/ids';
 
 type DemoOption = Readonly<{
   id: string;

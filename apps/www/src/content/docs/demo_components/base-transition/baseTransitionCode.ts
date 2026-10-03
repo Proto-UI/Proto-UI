@@ -1,5 +1,5 @@
 import { formatCode } from '@/utils/conversionUtils';
-import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/registry';
+import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/ids';
 
 const cssSnippet = `
 /* 宿主通过 data-transition-state 属性驱动样式 */

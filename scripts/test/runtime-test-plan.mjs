@@ -1,57 +1,100 @@
-export const BROWSER_SUITES = Object.freeze([
-  'apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts',
-  'apps/www/test/evidence/brutalist-fonts.browser.test.ts',
-  'apps/www/src/components/documentation-image-preview.browser.test.ts',
-  'apps/www/test/message-composition.browser.test.ts',
-  'apps/www/test/color-scheme.browser.test.ts',
-  'apps/www/test/preferences.browser.test.ts',
-  'apps/www/test/button-view-lifetime.browser.test.ts',
-  'apps/www/test/radio-group-entry.browser.test.ts',
-  'apps/workspace/test/lifecycle.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
-]);
+import { globSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-export function createRuntimeTestPlan(rawArgs) {
-  const args = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;
-  if (args.length > 0) return [{ needsServer: false, args }];
+const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+// Match the complete runtime Vitest include roots. Keep automatic discovery
+// without losing component, package or contract suites introduced on main.
+export const BROWSER_SUITES = Object.freeze(
+  [
+    ...new Set(
+      globSync(
+        [
+          'packages/**/*.browser.test.ts',
+          'internal/contracts/__tests__/**/*.browser.test.ts',
+          'apps/**/test/**/*.browser.test.ts',
+          'apps/www/src/**/*.browser.test.ts',
+        ],
+        { cwd: REPOSITORY_ROOT, exclude: ['**/node_modules/**', '**/dist/**'] }
+      ).map((suite) => suite.replaceAll('\\', '/'))
+    ),
+  ].sort()
+);
+export function corepackInvocation(platform = process.platform) {
+  return {
+    executable: platform === 'win32' ? 'corepack.cmd' : 'corepack',
+    shell: platform === 'win32',
+  };
+}
 
+function fullRuntimeTestPlan(forwardedArgs = []) {
   return [
     {
       needsServer: false,
-      args: BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
+      // Bound process fan-out so a large core count cannot starve the 5s
+      // fixture timeouts or the CLI subprocess tests on developer machines.
+      // Vitest derives a CPU-count-based minimum unless both bounds are
+      // provided; on high-core machines that minimum can exceed maxWorkers.
+      args: [
+        '--minWorkers=1',
+        '--maxWorkers=2',
+        ...forwardedArgs,
+        ...BROWSER_SUITES.flatMap((suite) => ['--exclude', suite]),
+      ],
     },
     {
       needsServer: true,
       // One dev server compiles for every suite, so running the files in
       // parallel makes them queue behind each other and blow their own
-      // readiness timeouts. Keep the browser matrix sequential so every
-      // route receives a complete, reproducible evidence pass.
-      args: ['--no-file-parallelism', ...BROWSER_SUITES],
+      // readiness timeouts. Measured on five suites: 75s sequential against
+      // 102s parallel, with the parallel run intermittently timing out.
+      args: ['--no-file-parallelism', ...forwardedArgs, ...BROWSER_SUITES],
     },
   ];
+}
+
+function normalizeTestFilter(argument) {
+  const absoluteFilter = path.resolve(REPOSITORY_ROOT, argument);
+  const relativeFilter = path.relative(REPOSITORY_ROOT, absoluteFilter);
+  if (!relativeFilter.startsWith('..') && !path.isAbsolute(relativeFilter)) {
+    return relativeFilter.replaceAll('\\', '/');
+  }
+  return argument.replaceAll('\\', '/').replace(/^\.\//, '');
+}
+
+export function createRuntimeTestPlan(rawArgs) {
+  const args = rawArgs[0] === '--' ? rawArgs.slice(1) : rawArgs;
+  if (args.length > 0) {
+    const positionalFilters = args
+      .filter((argument) => !argument.startsWith('-'))
+      .map(normalizeTestFilter);
+    // Vitest accepts file filters after options. `--name=value` is
+    // self-contained, but an option without `=` may consume the following
+    // token. Keep that ambiguous form behind the shared server instead of
+    // mistaking an option value for an exact browser-suite filter.
+    const hasAmbiguousOptionValue = args.some(
+      (argument) => argument.startsWith('-') && !argument.includes('=')
+    );
+    if (positionalFilters.length === 0 || hasAmbiguousOptionValue) {
+      return [{ needsServer: true, args: ['--no-file-parallelism', ...args] }];
+    }
+
+    const selectsExactlyOneBrowserSuite =
+      positionalFilters.length === 1 && BROWSER_SUITES.includes(positionalFilters[0]);
+    if (selectsExactlyOneBrowserSuite) {
+      // Every browser suite can start and warm its own documentation server.
+      // Keep that focused path standalone so it does not wait for the shared
+      // runner's full cross-suite READY_ROUTES inventory.
+      return [{ needsServer: false, args }];
+    }
+
+    const canSelectBrowserSuite = positionalFilters.some((argument) =>
+      BROWSER_SUITES.some((suite) => suite.includes(argument) || argument.includes(suite))
+    );
+    if (canSelectBrowserSuite) {
+      return [{ needsServer: true, args: ['--no-file-parallelism', ...args] }];
+    }
+    return [{ needsServer: false, args }];
+  }
+  return fullRuntimeTestPlan();
 }

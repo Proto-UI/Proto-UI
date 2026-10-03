@@ -2,7 +2,7 @@
 
 This private test package runs scenario-level fixtures once against every official Web adapter through their shared DOM platform. It complements adapter unit tests and runtime contract tests; it does not prove host-capability correctness by itself.
 
-The current adapter matrix must match `AdapterIds` from the Demo Matrix runtime registry. A new official Web adapter therefore fails the suite until it is explicitly connected to each shared journey.
+The current adapter matrix must match `AdapterIds` from `apps/www/src/components/PrototypePreviewer/runtimes/ids.ts`. A new official Web adapter therefore fails the suite until it is explicitly connected to each shared journey.
 
 Run the category with:
 

@@ -1,4 +1,10 @@
-import type { ImageViewStatusChange } from '@proto.ui/core';
+// Website demos stay behind the #420 consumer wall: the status-change payload
+// is typed structurally here instead of importing a raw Proto UI package.
+type ImageViewStatusChange = Readonly<{
+  status: 'idle' | 'loading' | 'loaded' | 'error';
+  previousStatus: 'idle' | 'loading' | 'loaded' | 'error';
+  source: string;
+}>;
 import type {
   DemoNode,
   DemoSetupContext,
