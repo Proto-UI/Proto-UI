@@ -4,16 +4,16 @@ title: Brutalist Hover Card inherits Base Hover Card and layers a relative inlin
 status: draft
 since: 0.2.0-rc.7
 summary: >-
-  Brutalist Hover Card Root inherits Base Hover Card ownership and projects a style-family visual API: a relative inline-flex container that anchors trigger and content, square geometry and hard-shadow surfaces through the Brutalist visual grammar.
+  Brutalist Hover Card Root inherits Base Hover Card ownership and projects a style-family visual API: an unframed relative inline-flex container that anchors trigger and content; child projections own their surface geometry and depth.
 
 
 statement:
   en: >-
-    Brutalist Hover Card is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Hover Card. It preserves inherited Base protocol semantics where an inherited prototype is declared and adds only visual/style behavior: a relative inline-flex root container, zero radius, black structural borders, hard offset shadows, and flat theme-token fills.
+    Brutalist Hover Card is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Hover Card. It preserves inherited Base protocol semantics where an inherited prototype is declared and adds only visual/style behavior: an unframed relative inline-flex root container. Surface radius, border, fill, and shadow belong to the relevant child projections.
 
 
   zh-CN: >-
-    Brutalist Hover Card 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Hover Card 之上。它在声明继承关系的位置保留 Base protocol 语义，仅增加视觉/style 行为：relative inline-flex 根容器、零圆角、黑色结构边框、硬偏移阴影与平面主题 token 填充。
+    Brutalist Hover Card 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Hover Card 之上。它在声明继承关系的位置保留 Base protocol 语义，仅增加视觉/style 行为：无框的 relative inline-flex 根容器；表面的圆角、边框、填充与阴影由对应子投射负责。
 
 
 criteria:
@@ -34,11 +34,11 @@ criteria:
   - id: P-BRUTALIST-HOVER-CARD-VISUAL-GRAMMAR
     text:
       en: >-
-        The root projects a `relative inline-flex items-start` container so trigger and content anchor without reflow, and must preserve square corners, black structural borders, hard zero-blur offset shadows, and flat theme-token fills without gradients, glass, rounded cards, or soft elevation.
+        The root projects a `relative inline-flex items-start` container so trigger and content retain their anchor. It adds no visible frame, border, radius, fill, or shadow; the relevant child projections own those surfaces under the source-aligned Brutalist visual grammar.
 
 
       zh-CN: >-
-        根投射 `relative inline-flex items-start` 容器，使 trigger 与 content 锚定而不回流，且必须保持直角、黑色结构边框、零模糊硬偏移阴影和平面主题 token 填充，不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+        根投射 `relative inline-flex items-start` 容器，保持 trigger 与 content 的锚定关系。根不增加可见外框、边框、圆角、填充或阴影；这些表面由对应子投射按与上游源码对齐的新粗野主义视觉规则负责。
 
 
 sources:
@@ -55,6 +55,10 @@ inherits:
     - id: P-BASE-HOVER-CARD
 verifies: { tests: [T-BRUTALIST-HOVER-CARD-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: >-
+      Clarified that the unframed root does not force square geometry or hard-shadow surfaces on children; visual surfaces follow their own source-aligned projections. Base ownership and root style output are unchanged.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

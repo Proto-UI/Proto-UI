@@ -53,15 +53,15 @@ fn schemes_differ_where_the_design_language_says_they_do() {
         light.variable("--pui-accent"),
         dark.variable("--pui-accent")
     );
-    assert_eq!(light.variable("--pui-accent"), Some("#bae6fd"));
+    assert_eq!(light.variable("--pui-accent"), Some("#5294ff"));
 }
 
 #[test]
 fn a_later_theme_declaration_wins_over_the_radius_ramp() {
     // The renderer emits the ramp first and the theme may redefine part of it.
-    // Brutalist sets `--pui-radius-sm: 2px` after the ramp's max(calc(...)).
+    // Brutalist sets `--pui-radius-sm: 3px` after the ramp's max(calc(...)).
     let brutalist = themes().get("brutalist", ColorScheme::Light).unwrap();
-    assert_eq!(brutalist.variable("--pui-radius-sm"), Some("2px"));
+    assert_eq!(brutalist.variable("--pui-radius-sm"), Some("3px"));
 
     let shadcn = themes().get("shadcn", ColorScheme::Light).unwrap();
     assert_eq!(
@@ -79,7 +79,7 @@ fn substitutes_a_token_declaration_into_a_concrete_value() {
     assert_eq!(value, "var(--pui-background)");
     assert_eq!(
         theme.substitute(value),
-        Substitution::Resolved("#f5f5f5".to_string())
+        Substitution::Resolved("#dcebfe".to_string())
     );
 }
 

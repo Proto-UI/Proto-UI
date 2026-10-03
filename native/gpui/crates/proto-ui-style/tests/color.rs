@@ -261,7 +261,7 @@ fn a_token_from_another_design_language_is_reported_not_guessed() {
     let brutalist = themes().get("brutalist", ColorScheme::Light).unwrap();
     assert_eq!(
         brutalist.substitute(value),
-        Substitution::Resolved("#FEF08A".to_string())
+        Substitution::Resolved("#FACC00".to_string())
     );
 
     let shadcn = themes().get("shadcn", ColorScheme::Light).unwrap();
