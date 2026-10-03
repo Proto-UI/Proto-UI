@@ -1,0 +1,43 @@
+{
+  "runId": 37109952149,
+  "artifactId": 11269262262,
+  "archiveSha256": "d08ce5a35b6b6e71860dfc151e765b37166f4d78b44f02c4b572f2c53a6e690d",
+  "scopes": [
+    {
+      "side": "baseline",
+      "sha": "42aaca074eb4c1532545fe554d1ee9bc3d0a8891",
+      "browser": "154.0.8037.57",
+      "driverSha256": "dadd190c43af92d3dfd17b66cfb88664a2b77fb279fdb7c1f9853182310cb4e5",
+      "cases": 32,
+      "contrastMin": 15.798838034779152,
+      "centerMaxDX": 1.52587890625e-05,
+      "centerMaxDY": 3.0517578125e-05,
+      "parentCenterMaxDY": 3.0517578125e-05,
+      "originMaxDifference": 0,
+      "normalRootWindows": 80,
+      "staticRootWindows": 80,
+      "rotationDegreesMin": 395.9999640449255,
+      "rotationDegreesMax": 401.9760146527608,
+      "exceptions": 0,
+      "overflowCount": 0
+    },
+    {
+      "side": "candidate",
+      "sha": "57f48cf67e7fa6eee411814a2830d205275a7d46",
+      "browser": "154.0.8037.57",
+      "driverSha256": "dadd190c43af92d3dfd17b66cfb88664a2b77fb279fdb7c1f9853182310cb4e5",
+      "cases": 32,
+      "contrastMin": 15.798838034779152,
+      "centerMaxDX": 3.0517578125e-05,
+      "centerMaxDY": 3.0517578125e-05,
+      "parentCenterMaxDY": 3.0517578125e-05,
+      "originMaxDifference": 0,
+      "normalRootWindows": 80,
+      "staticRootWindows": 80,
+      "rotationDegreesMin": 395.99997741082456,
+      "rotationDegreesMax": 402.00052050829123,
+      "exceptions": 0,
+      "overflowCount": 0
+    }
+  ]
+}
