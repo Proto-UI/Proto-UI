@@ -115,6 +115,9 @@ const themeCss =
                     kind: 'proto',
                     prototypeId: `${family}-button`,
                     ref: 'default',
+                    // The existing demo API initializes mutable props records
+                    // only for declared props; exercise that supported path.
+                    props: {},
                     children: ['Back'],
                   },
                   {

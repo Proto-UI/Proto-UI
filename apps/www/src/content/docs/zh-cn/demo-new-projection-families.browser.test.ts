@@ -147,7 +147,9 @@ describe.sequential('draft family real Web host evidence', () => {
         await expect
           .poll(() => button.evaluate((el) => getComputedStyle(el).boxShadow))
           .toBe(beforePress);
-        await expect.poll(() => output.innerText()).toBe('1 activations');
+        await expect
+          .poll(() => output.innerText(), { message: `${key}/pointer activation` })
+          .toBe('1 activations');
         await button.press('Enter');
         await expect.poll(() => output.innerText()).toBe('2 activations');
         await button.press('Space');
@@ -216,7 +218,9 @@ describe.sequential('draft family real Web host evidence', () => {
             { key, disabled }
           );
           await expect
-            .poll(() => button.getAttribute('aria-disabled'))
+            .poll(() => button.getAttribute('aria-disabled'), {
+              message: `${key}/disabled=${disabled}`,
+            })
             .toBe(disabled ? 'true' : 'false');
         }
       }
