@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Experimental refractive and liquid surfaces</title>
+  <style>
+    body {
+      margin: 0;
+      background: #11182b;
+      color: #f0f4ff;
+      font: 16px system-ui;
+    }
+    main {
+      width: 720px;
+      margin: 32px auto;
+    }
+    h1 {
+      font-size: 27px;
+      margin: 0 0 12px;
+    }
+    p {
+      color: #b8c5df;
+      line-height: 1.55;
+    }
+    button {
+      font: inherit;
+      color: #11182b;
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 15px;
+      cursor: pointer;
+    }
+    #stage {
+      position: relative;
+      width: 680px;
+      height: 390px;
+      overflow: hidden;
+      border-radius: 28px;
+      margin-top: 24px;
+      background: #6abedd;
+    }
+    #backdrop {
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(
+          100deg,
+          transparent 0 31px,
+          #fff8 32px 34px,
+          transparent 35px 83px
+        ),
+        linear-gradient(125deg, #3066c9 0%, #6cdac9 38%, #eea284 74%, #d462a9 100%);
+    }
+    #backdrop[data-calibration] {
+      background: conic-gradient(#10233c 25%, #f4f8ff 0 50%, #10233c 0 75%, #f4f8ff 0) 0 0 / 16px
+        16px;
+    }
+    #backdrop h2 {
+      font-size: 48px;
+      line-height: 1;
+      letter-spacing: -3px;
+      color: #fff9;
+      position: absolute;
+      left: 32px;
+      top: 34px;
+      margin: 0;
+    }
+    #backdrop p {
+      position: absolute;
+      top: 252px;
+      left: 34px;
+      color: #163564;
+      font-weight: 600;
+    }
+    #lens {
+      position: absolute;
+      left: 40px;
+      top: 65px;
+      width: 600px;
+      height: 264px;
+      backdrop-filter: url(#lens-filter);
+    }
+    #shine {
+      position: absolute;
+      inset: 0;
+      width: 600px;
+      height: 264px;
+      pointer-events: none;
+    }
+    #label {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 116px;
+      text-align: center;
+      color: #12294d;
+      font-size: 17px;
+      font-weight: 500;
+      text-shadow: 0 1px 1px #fff9;
+      pointer-events: none;
+    }
+    #label span {
+      position: absolute;
+      width: 122px;
+      text-align: center;
+    }
+    #liquid-trigger {
+      position: absolute;
+      left: 227px;
+      top: 102px;
+      width: 146px;
+      height: 60px;
+      opacity: 0;
+      background: transparent;
+      padding: 0;
+    }
+    #menu-copy {
+      position: absolute;
+      left: 189px;
+      top: 66px;
+      color: #123052;
+      font-weight: 450;
+      line-height: 2.4;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #status {
+      font-size: 13px;
+      color: #a6b8d5;
+    }
+    #toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .note {
+      font-size: 13px;
+    }
+  </style>
+  <main>
+    <h1>Liquid material study</h1>
+    <p>
+      Independent experimental model on the real, live DOM backdrop. Shape-driven lensing and
+      highlights, press deformation, fusion and menu morphing.
+    </p>
+    <div id="toolbar">
+      <button id="single-mode">Button/menu example</button
+      ><button id="fusion-mode">Fusion example</button>
+      <button id="press-demo">Press & release</button
+      ><button id="merge-demo">Join / separate</button><button id="menu-demo">Button / menu</button
+      ><button id="cancel-demo">Cancel motion</button><button id="light-demo">Move light</button
+      ><button id="background-demo">Move real background</button>
+    </div>
+    <div id="stage">
+      <div id="backdrop">
+        <h2>Flow<br />with the light.</h2>
+        <p>LIVE DOM CONTENT · 0123 / A</p>
+      </div>
+      <div id="lens">
+        <canvas id="shine" width="600" height="264"></canvas>
+        <div id="label">
+          <span id="left-label">Edit</span><span id="right-label">Share</span
+          ><span id="menu-label">Options</span>
+        </div>
+        <div id="menu-copy">Save to collection<br />Share with someone<br />Create new item</div>
+        <button id="liquid-trigger" aria-label="Press the refractive surface"></button>
+      </div>
+    </div>
+    <p id="status">
+      Experimental optical model; not Apple's native engine or cross-platform conformance.
+    </p>
+    <p class="note">
+      The displayed backdrop is ordinary DOM. Only the generated normal/highlight field is an image.
+      Prototype/Adapter/Compiler admission follows separate review.
+    </p>
+  </main>
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <defs>
+      <filter
+        id="lens-filter"
+        x="0"
+        y="0"
+        width="600"
+        height="264"
+        filterUnits="userSpaceOnUse"
+        primitiveUnits="userSpaceOnUse"
+        color-interpolation-filters="sRGB"
+      >
+        <feImage
+          id="field"
+          x="0"
+          y="0"
+          width="600"
+          height="264"
+          preserveAspectRatio="none"
+          result="normal"
+        />
+        <feGaussianBlur
+          id="scatter"
+          in="SourceGraphic"
+          stdDeviation="0.15"
+          result="soft-background"
+        />
+        <feDisplacementMap
+          id="lens-displacement"
+          in="SourceGraphic"
+          in2="normal"
+          scale="40"
+          xChannelSelector="R"
+          yChannelSelector="G"
+          result="sharp-refracted"
+        />
+        <feImage
+          id="weights"
+          x="0"
+          y="0"
+          width="600"
+          height="264"
+          preserveAspectRatio="none"
+          result="weights"
+        />
+        <feColorMatrix
+          in="weights"
+          type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0"
+          result="rim-mask"
+        />
+        <feColorMatrix
+          in="weights"
+          type="matrix"
+          values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 1 0 0 0"
+          result="body-mask"
+        />
+        <feComposite in="sharp-refracted" in2="rim-mask" operator="in" result="rim" />
+        <feComposite in="soft-background" in2="body-mask" operator="in" result="body" />
+        <feComposite
+          in="rim"
+          in2="body"
+          operator="arithmetic"
+          k1="0"
+          k2="1"
+          k3="1"
+          k4="0"
+          result="masked"
+        />
+        <feMerge>
+          <feMergeNode in="SourceGraphic" />
+          <feMergeNode in="masked" />
+        </feMerge>
+      </filter>
+    </defs>
+  </svg>
+  <script type="module">
+    import { makeField, advanceSpring } from './heightfield.mjs';
+    const state = {
+      merge: 0,
+      press: 0,
+      morph: 0,
+      energy: 0,
+      mode: 'menu',
+      anchorX: 300,
+      anchorY: 132,
+      light: [-0.45, -0.65],
+    };
+    const normal = document.createElement('canvas');
+    normal.width = 600;
+    normal.height = 264;
+    const weights = document.createElement('canvas');
+    weights.width = 600;
+    weights.height = 264;
+    const weightsContext = weights.getContext('2d');
+    const ctx = normal.getContext('2d'),
+      shine = document.querySelector('#shine').getContext('2d');
+    let generation = 0,
+      frame = 0,
+      mergeExpanded = false,
+      menuExpanded = false;
+    const samples = [],
+      renderStates = [],
+      velocity = {};
+    const motion = matchMedia('(prefers-reduced-motion: reduce)');
+    document.body.dataset.reducedMotion = String(motion.matches);
+    function render() {
+      const f = makeField(state);
+      ctx.putImageData(new ImageData(f.normal, f.width, f.height), 0, 0);
+      weightsContext.putImageData(new ImageData(f.weights, f.width, f.height), 0, 0);
+      shine.putImageData(new ImageData(f.shine, f.width, f.height), 0, 0);
+      document.querySelector('#field').setAttribute('href', normal.toDataURL());
+      document.querySelector('#weights').setAttribute('href', weights.toDataURL());
+      document
+        .querySelector('#scatter')
+        .setAttribute(
+          'stdDeviation',
+          String(
+            state.bodyScatter === false
+              ? 0
+              : (0.4 + 4 * state.morph) *
+                  (1 - 0.4 * (state.opticalPress === false ? 0 : state.press))
+          )
+        );
+      const menu = state.mode === 'menu',
+        offset = 105 - state.merge * 58;
+      document.querySelector('#lens').dataset.effectId = menu ? 'regular-control' : 'fusion-group';
+      for (const [id, center] of [
+        ['left-label', 300 - offset],
+        ['right-label', 300 + offset],
+      ]) {
+        const label = document.getElementById(id);
+        label.style.left = `${center - 61}px`;
+        label.hidden = menu;
+      }
+      const label = document.querySelector('#menu-label');
+      label.style.left = '239px';
+      label.hidden = !menu;
+      label.style.opacity = String(Math.max(0, 1 - state.morph * 1.8));
+      label.style.transform = `translateY(${-18 * state.morph}px)`;
+      const content = document.querySelector('#menu-copy');
+      content.style.opacity = String(
+        menu ? Math.max(0, Math.min(1, (state.morph - 0.15) / 0.85)) : 0
+      );
+      content.style.transform = `translateY(${(1 - state.morph) * 14}px)`;
+      document.querySelector('#merge-demo').disabled = menu;
+      document.querySelector('#menu-demo').disabled = !menu;
+      frame++;
+      renderStates.push({ frame, state: { ...state } });
+      document.body.dataset.frame = String(frame);
+    }
+    function animate(patch, duration = 850) {
+      const current = ++generation;
+      let last = performance.now();
+      if (motion.matches) {
+        Object.assign(state, patch);
+        for (const key of Object.keys(patch)) velocity[key] = 0;
+        render();
+        document.body.dataset.animating = 'false';
+        return Promise.resolve(true);
+      }
+      document.body.dataset.animating = 'true';
+      return new Promise((resolve) => {
+        function tick(now) {
+          if (current !== generation) return resolve(false);
+          const dt = Math.max(0, (now - last) / 1000);
+          last = now;
+          let done = true;
+          for (const key of Object.keys(patch)) {
+            const next = advanceSpring(
+              state[key],
+              velocity[key] ?? 0,
+              patch[key],
+              dt,
+              (18 * 850) / duration
+            );
+            state[key] = next.value;
+            velocity[key] = next.velocity;
+            if (Math.abs(state[key] - patch[key]) > 0.001 || Math.abs(next.velocity) > 0.02)
+              done = false;
+          }
+          if (done) {
+            Object.assign(state, patch);
+            for (const key of Object.keys(patch)) velocity[key] = 0;
+          }
+          render();
+          samples.push({ frame, dt, state: { ...state }, velocity: { ...velocity } });
+          if (!done) requestAnimationFrame(tick);
+          else {
+            document.body.dataset.animating = 'false';
+            resolve(true);
+          }
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+    function cancel() {
+      ++generation;
+      for (const key of Object.keys(velocity)) velocity[key] = 0;
+      state.press = state.energy = 0;
+      document.body.dataset.animating = 'false';
+      render();
+    }
+    function reset(mode = 'menu') {
+      cancel();
+      mergeExpanded = menuExpanded = false;
+      Object.assign(state, { merge: 0, press: 0, morph: 0, energy: 0, mode });
+      render();
+    }
+    async function press() {
+      if (motion.matches) {
+        const current = ++generation;
+        state.energy = 1;
+        render();
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            if (current === generation) {
+              state.energy = 0;
+              render();
+            }
+          })
+        );
+        return;
+      }
+      if (!(await animate({ press: 1, energy: 1 }, 300))) return;
+      await animate({ press: 0, energy: 0 }, 650);
+    }
+    document.querySelector('#single-mode').onclick = () => reset('menu');
+    document.querySelector('#fusion-mode').onclick = () => reset('pair');
+    document.querySelector('#press-demo').onclick = press;
+    document.querySelector('#merge-demo').onclick = () => {
+      mergeExpanded = !mergeExpanded;
+      animate({ merge: mergeExpanded ? 1 : 0, press: 0, energy: 0 });
+    };
+    document.querySelector('#menu-demo').onclick = () => {
+      menuExpanded = !menuExpanded;
+      animate({ morph: menuExpanded ? 1 : 0, press: 0, energy: 0 }, 1000);
+    };
+    document.querySelector('#cancel-demo').onclick = cancel;
+    motion.addEventListener('change', () => {
+      document.body.dataset.reducedMotion = String(motion.matches);
+      if (motion.matches) {
+        cancel();
+        state.merge = mergeExpanded ? 1 : 0;
+        state.morph = menuExpanded ? 1 : 0;
+        render();
+      }
+    });
+    document.querySelector('#light-demo').onclick = () => {
+      state.light = state.light[0] < 0 ? [0.65, -0.45] : [-0.45, -0.65];
+      render();
+    };
+    document.querySelector('#background-demo').onclick = () => {
+      document.querySelector('#backdrop').style.transform = 'translateX(13px)';
+      document.querySelector('#backdrop p').textContent = 'LIVE DOM CONTENT · 4567 / B';
+    };
+    const trigger = document.querySelector('#liquid-trigger');
+    function anchor(event) {
+      const box = document.querySelector('#lens').getBoundingClientRect();
+      state.anchorX = event.clientX - box.left;
+      state.anchorY = event.clientY - box.top;
+    }
+    trigger.onpointerdown = (event) => {
+      anchor(event);
+      trigger.setPointerCapture(event.pointerId);
+      animate(motion.matches ? { energy: 1 } : { press: 1, energy: 1 }, 300);
+    };
+    trigger.onpointermove = (event) => {
+      if (event.buttons) {
+        anchor(event);
+        render();
+      }
+    };
+    trigger.onpointerup = () => animate({ press: 0, energy: 0 }, 650);
+    trigger.onpointercancel = cancel;
+    window.liquidExperiment = {
+      state,
+      samples,
+      renderStates,
+      render,
+      reset,
+      set(patch) {
+        Object.assign(state, patch);
+        render();
+      },
+      get frame() {
+        return frame;
+      },
+    };
+    render();
+    document.body.dataset.ready = 'true';
+  </script>
+</html>
