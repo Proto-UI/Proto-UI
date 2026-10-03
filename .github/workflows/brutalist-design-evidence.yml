@@ -1,0 +1,97 @@
+name: Brutalist source-aligned design evidence
+on:
+  pull_request:
+    paths:
+      - 'packages/prototypes/brutalist/**'
+      - 'packages/cli/src/services/proto-style-css.ts'
+      - 'apps/www/src/content/docs/**/brutalist/**'
+      - 'apps/www/src/content/docs/zh-cn/demo-brutalist-switch.demo.ts'
+      - 'apps/www/src/styles/assets/font/dm-sans/**'
+      - 'apps/www/test/evidence/brutalist-switch.capture.mts'
+      - '.github/workflows/brutalist-design-evidence.yml'
+permissions:
+  contents: read
+concurrency:
+  group: brutalist-design-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  switch-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and capture encoder
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          node apps/www/node_modules/playwright-core/cli.js install ffmpeg
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Capture baseline Switch
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/brutalist-base"
+          git worktree add --detach "$BASE" "$BASE_SHA"
+          mkdir -p "$BASE/apps/www/test/evidence"
+          cp apps/www/test/evidence/brutalist-switch.capture.mts "$BASE/apps/www/test/evidence/"
+          cd "$BASE"
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          ASTRO_TELEMETRY_DISABLED=1 PROTO_UI_SWITCH_BASELINE=1 PROTO_UI_SWITCH_EVIDENCE_DIR="$RUNNER_TEMP/brutalist-evidence/baseline" \
+            corepack pnpm@10.32.1 exec tsx apps/www/test/evidence/brutalist-switch.capture.mts
+      - name: Capture and verify candidate Switch
+        if: ${{ !cancelled() }}
+        run: |
+          ASTRO_TELEMETRY_DISABLED=1 PROTO_UI_SWITCH_EVIDENCE_DIR="$RUNNER_TEMP/brutalist-evidence/candidate" \
+            corepack pnpm@10.32.1 exec tsx apps/www/test/evidence/brutalist-switch.capture.mts
+      - name: Verify candidate Button states and font/geometry closure
+        if: ${{ !cancelled() }}
+        env:
+          PROTO_UI_FONT_EVIDENCE_DIR: ${{ runner.temp }}/brutalist-evidence/fonts
+          PROTO_UI_BROWSER_EVIDENCE_DIR: ${{ runner.temp }}/brutalist-evidence/buttons
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts \
+            apps/www/test/evidence/brutalist-fonts.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
+      - name: Retain public component captures only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brutalist-design-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/brutalist-evidence
+          if-no-files-found: warn
+          retention-days: 30
+  family-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [dialog, remaining, controls, checkbox]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Verify actual family component regression suite
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+        run: corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-brutalist-${{ matrix.suite }}.browser.test.ts --maxWorkers=1 --minWorkers=1

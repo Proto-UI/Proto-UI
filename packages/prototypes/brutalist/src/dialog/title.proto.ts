@@ -6,9 +6,11 @@ const dialogTitle = definePrototype<BrutalistDialogTitleProps, BrutalistDialogTi
   name: 'brutalist-dialog-title',
   setup(def) {
     // P-BRUTALIST-DIALOG-TITLE-BASE-INHERITANCE: inherit Base Dialog Title relations once.
-    // P-BRUTALIST-DIALOG-TITLE-VISUAL-GRAMMAR: font-bold uppercase tracking-tight text-foreground heading typography.
+    // P-BRUTALIST-DIALOG-TITLE-VISUAL-GRAMMAR: font-heading text-lg font-bold leading-none tracking-tight text-foreground heading typography.
     asDialogTitle();
-    def.feedback.style.use(tw('font-bold uppercase tracking-tight text-foreground'));
+    def.feedback.style.use(
+      tw('font-heading text-lg font-bold leading-none tracking-tight text-foreground')
+    );
   },
 });
 

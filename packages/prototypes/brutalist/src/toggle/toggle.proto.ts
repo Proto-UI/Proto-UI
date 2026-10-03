@@ -1,34 +1,32 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asToggle } from '@proto.ui/prototypes-base/toggle';
-import {
-  BRUTALIST_CONTROL_TOKENS,
-  BRUTALIST_DISABLED_TOKENS,
-  BRUTALIST_FOCUS_TOKENS,
-  BRUTALIST_HOVER_LIFT_TOKENS,
-  BRUTALIST_PRESS_TOKENS,
-} from '../style';
+import { BRUTALIST_DISABLED_TOKENS, BRUTALIST_FOCUS_TOKENS } from '../style';
 import type { BrutalistToggleExposes, BrutalistToggleProps, BrutalistToggleSize } from './types';
 
 const TOGGLE_BASE_TOKENS = [
   'group/brutalist-toggle',
+  'rounded-base',
+  'border-2',
+  'border-black',
+  'bg-secondary-background',
+  'text-foreground',
   'inline-flex',
   'items-center',
   'justify-center',
   'gap-1',
+  'font-heading',
   'font-bold',
-  'uppercase',
   'whitespace-nowrap',
   'select-none',
-  BRUTALIST_CONTROL_TOKENS,
 ].join(' ');
 
 const SIZE_TOKENS: Record<BrutalistToggleSize, string> = {
-  default: `${BRUTALIST_CONTROL_TOKENS} h-10 min-w-10 px-3 text-sm`,
-  sm: `${BRUTALIST_CONTROL_TOKENS} h-9 min-w-9 px-2.5 text-xs`,
-  lg: `${BRUTALIST_CONTROL_TOKENS} h-12 min-w-12 px-4 text-base`,
+  default: `${TOGGLE_BASE_TOKENS} h-10 min-w-10 px-3 text-sm`,
+  sm: `${TOGGLE_BASE_TOKENS} h-9 min-w-9 px-2.5 text-xs`,
+  lg: `${TOGGLE_BASE_TOKENS} h-12 min-w-12 px-4 text-base`,
 };
 
-const ACTIVE_FRAME_TOKENS = 'shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]';
+const ACTIVE_FRAME_TOKENS = 'shadow-[inset_0_0_0_2px_#000]';
 const ACTIVE_PRESSED_FRAME_TOKENS = 'shadow-[inset_0_0_0_2px_#000]';
 
 const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
@@ -72,16 +70,16 @@ const toggle = definePrototype<BrutalistToggleProps, BrutalistToggleExposes>({
       when: (w) => w.all(w.state(active).eq(true), w.state(pressed).eq(false)),
       intent: (i) => i.feedback.style.use(tw(ACTIVE_FRAME_TOKENS)),
     });
-    // P-BRUTALIST-TOGGLE-INTERACTION — hover lift (non-active)
+    // P-BRUTALIST-TOGGLE-INTERACTION — hover feedback (non-active)
     def.rule({
       when: (w) =>
         w.all(w.state(hovered).eq(true), w.state(active).eq(false), w.state(pressed).eq(false)),
-      intent: (i) => i.feedback.style.use(tw(BRUTALIST_HOVER_LIFT_TOKENS)),
+      intent: (i) => i.feedback.style.use(tw('border-black')),
     });
     // P-BRUTALIST-TOGGLE-INTERACTION — press
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw(BRUTALIST_PRESS_TOKENS)),
+      intent: (i) => i.feedback.style.use(tw('border-black')),
     });
     // Keep the active inset marker while pressed; only the outer elevation collapses.
     def.rule({

@@ -1,5 +1,7 @@
 # 2026-07-24 Neo-Brutalist design-language prototype library
 
+> Historical design: its square-only geometry, mono/display pairing and depth rules are superseded by [the 2026-10-03 source-aligned design](2026-10-03-neobrutalism-source-aligned-design.md). The original approval history below is retained; it is not current visual direction.
+
 > Spec. Unified UI/UX design system and implementation design for a Brutalist preset parallel to Base / Shadcn in Proto UI. Not normative project catalog truth; promote stabilized protocol into `spec/**` entities during implementation.
 
 ---

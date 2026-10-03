@@ -96,6 +96,23 @@ describe('prototypes/brutalist: canonical theme manifest', () => {
     ).toBeLessThan(4.5);
   });
 
+  it('keeps Select placeholder ink readable on the main-filled trigger in both modes', () => {
+    for (const mode of [BRUTALIST_THEME.light, BRUTALIST_THEME.dark]) {
+      expect(contrastRatio(mode.main, mode['main-foreground'])).toBeGreaterThanOrEqual(4.5);
+      // Guard the exact rejected substitution: neutral muted ink on main blue.
+      expect(contrastRatio(mode.main, mode['muted-foreground'])).toBeLessThan(4.5);
+    }
+  });
+
+  it('keeps the Textarea boundary distinct from both adjacent neutral surfaces', () => {
+    for (const mode of [BRUTALIST_THEME.light, BRUTALIST_THEME.dark]) {
+      expect(contrastRatio(mode.foreground, mode['secondary-background'])).toBeGreaterThanOrEqual(
+        3
+      );
+      expect(contrastRatio(mode.foreground, mode.background)).toBeGreaterThanOrEqual(3);
+    }
+  });
+
   it('renders deterministic selectors and variable prefixes', () => {
     const css = renderBrutalistThemeCss({
       variablePrefix: 'pui-',
@@ -105,7 +122,7 @@ describe('prototypes/brutalist: canonical theme manifest', () => {
 
     expect(css).toContain('.light-scope {');
     expect(css).toContain('.dark-scope {');
-    expect(css).toContain('--pui-background: #f5f5f5;');
+    expect(css).toContain('--pui-background: #dcebfe;');
     expect(css).toContain('--pui-secondary-background: #262626;');
     expect(css).toContain('--pui-mint-foreground: #000000;');
     expect(css).not.toContain(':root');

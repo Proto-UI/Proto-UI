@@ -9,9 +9,9 @@ const dialogDescription = definePrototype<
   name: 'brutalist-dialog-description',
   setup(def) {
     // P-BRUTALIST-DIALOG-DESCRIPTION-BASE-INHERITANCE: inherit Base Dialog Description relations once.
-    // P-BRUTALIST-DIALOG-DESCRIPTION-VISUAL-GRAMMAR: font-mono text-sm text-foreground description typography.
+    // P-BRUTALIST-DIALOG-DESCRIPTION-VISUAL-GRAMMAR: font-sans font-medium text-sm text-foreground description typography.
     asDialogDescription();
-    def.feedback.style.use(tw('font-mono text-sm text-foreground'));
+    def.feedback.style.use(tw('font-sans font-medium text-sm text-foreground'));
   },
 });
 

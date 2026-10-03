@@ -13,7 +13,7 @@ const selectContent = definePrototype<BrutalistSelectContentProps, BrutalistSele
     const { open } = select.stateHandles;
     const { transitionState } = select.asTransition;
 
-    // P-BRUTALIST-SELECT-CONTENT-VISUAL-GRAMMAR: anchored hard-shadowed square listbox panel (BRUTALIST_PANEL_TOKENS).
+    // P-BRUTALIST-SELECT-CONTENT-VISUAL-GRAMMAR: anchored flat rounded listbox panel (BRUTALIST_PANEL_TOKENS).
     def.feedback.style.use(
       tw(
         `relative z-50 w-[var(--proto-ui-anchor-width)] min-w-[var(--proto-ui-anchor-width)] max-h-[var(--proto-ui-available-height)] overflow-x-hidden overflow-y-auto p-1 outline-none transition-none duration-150 ${BRUTALIST_PANEL_TOKENS}`

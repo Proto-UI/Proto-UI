@@ -35,7 +35,7 @@ cases:
       - P-BRUTALIST-BUTTON-PAIR-INVARIANT
     expectation: p-brutalist-button-variant-fills
   - id: T-BRUTALIST-BUTTON-0001-CASE-5
-    title: Visual grammar remains square hard-shadow Neo-Brutalist
+    title: Visual grammar remains source-aligned component-specific Neo-Brutalist
     covers:
       - P-BRUTALIST-BUTTON-VISUAL-GRAMMAR
     expectation: p-brutalist-button-visual-grammar

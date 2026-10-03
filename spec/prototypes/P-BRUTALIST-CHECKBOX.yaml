@@ -52,11 +52,11 @@ criteria:
   - id: P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
     text:
       en: >-
-        Root must project inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 bg-main text-main-foreground border-main-foreground shadow-[3px_3px_0_0_#000] outline-none select-none transition-none. The resting fill, content ink, and frame ink form one surface-paired bundle. It must use no gradient, glass, rounded-card, or soft-elevation treatment.
+        Root must project inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 bg-main text-main-foreground border-main-foreground outline-none select-none transition-none. The resting fill, content ink, and frame ink form one surface-paired bundle. It must use no gradient, glass, rounded-card, or soft-elevation treatment.
 
 
       zh-CN: >-
-        Root 必须投射 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 bg-main text-main-foreground border-main-foreground shadow-[3px_3px_0_0_#000] outline-none select-none transition-none。静止态 fill、内容 ink 与 frame ink 构成同一个 surface-paired bundle。不得使用 gradient、glass、rounded-card 或 soft-elevation 处理。
+        Root 必须投射 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 bg-main text-main-foreground border-main-foreground outline-none select-none transition-none。静止态 fill、内容 ink 与 frame ink 构成同一个 surface-paired bundle。不得使用 gradient、glass、rounded-card 或 soft-elevation 处理。
 
 
   - id: P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
@@ -101,6 +101,9 @@ inherits:
 verifies:
   tests: [T-BRUTALIST-CHECKBOX-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Updated source-aligned presentation without changing semantic or geometry ownership.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft Brutalist Checkbox Root projection with its public-package/no-CLI boundary.

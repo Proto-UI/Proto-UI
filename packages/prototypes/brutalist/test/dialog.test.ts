@@ -124,27 +124,26 @@ describe('prototypes/brutalist: dialog', () => {
       expect(styleContains(root, token)).toBe(true);
     }
     expect(styleContains(root, 'border-2')).toBe(false);
-    expect(styleContains(root, 'shadow-[3px_3px_0_0_#000]')).toBe(false);
+    expect(styleContains(root, 'shadow-[4px_4px_0_0_#000]')).toBe(false);
 
     expect(dialogTrigger.name).toBe('brutalist-dialog-trigger');
     expect(trigger.getAttribute('role')).toBe('button');
     for (const token of [
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
       'bg-sky',
       'text-sky-foreground',
-      'font-bold',
-      'uppercase',
+      'font-medium',
       'h-10',
-      'shadow-[3px_3px_0_0_#000]',
+      'shadow-[4px_4px_0_0_#000]',
     ]) {
       expect(styleContains(trigger, token)).toBe(true);
     }
     trigger.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().hovered.get()).toBe(true);
-    expect(styleContains(trigger, 'data-[hovered]:-translate-x-px')).toBe(true);
+    expect(styleContains(trigger, 'data-[hovered]:translate-x-1')).toBe(true);
     trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().pressed.get()).toBe(true);
@@ -212,12 +211,12 @@ describe('prototypes/brutalist: dialog', () => {
       'grid',
       'max-w-lg',
       'p-6',
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
-      'bg-secondary-background',
+      'bg-background',
       'text-foreground',
-      'shadow-[3px_3px_0_0_#000]',
+      'shadow-[4px_4px_0_0_#000]',
       'data-[open]:animate-in',
       'data-[open]:fade-in-0',
       'data-[open]:zoom-in-95',
@@ -280,10 +279,16 @@ describe('prototypes/brutalist: dialog', () => {
     });
     await flush();
 
-    for (const token of ['font-bold', 'uppercase', 'tracking-tight', 'text-foreground']) {
+    for (const token of [
+      'font-heading',
+      'font-bold',
+      'text-lg',
+      'tracking-tight',
+      'text-foreground',
+    ]) {
       expect(styleContains(title, token)).toBe(true);
     }
-    for (const token of ['font-mono', 'text-sm', 'text-foreground']) {
+    for (const token of ['font-sans', 'text-sm', 'text-foreground']) {
       expect(styleContains(description, token)).toBe(true);
     }
 
@@ -318,12 +323,12 @@ describe('prototypes/brutalist: dialog', () => {
       'right-4',
       'top-4',
       'size-9',
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
       'bg-canary',
       'text-canary-foreground',
-      'shadow-[3px_3px_0_0_#000]',
+      'shadow-[4px_4px_0_0_#000]',
     ]) {
       expect(styleContains(closeIcon, token)).toBe(true);
     }
@@ -372,7 +377,7 @@ describe('prototypes/brutalist: dialog', () => {
     expect(dialogHeader.name).toBe('brutalist-dialog-header');
     expect(header.contains(title)).toBe(true);
     expect(header.contains(description)).toBe(true);
-    for (const token of ['grid', 'gap-1', 'border-b-2', 'border-foreground', 'pb-3', 'text-left']) {
+    for (const token of ['grid', 'gap-1', 'pb-3', 'text-left']) {
       expect(
         styleContains(header, token),
         `${token} :: ${header.getAttribute('data-pui-style')}`
@@ -385,15 +390,7 @@ describe('prototypes/brutalist: dialog', () => {
 
     expect(dialogFooter.name).toBe('brutalist-dialog-footer');
     expect(footer.contains(close)).toBe(true);
-    for (const token of [
-      'flex',
-      'flex-col-reverse',
-      'gap-2',
-      'border-t-2',
-      'border-foreground',
-      'pt-3',
-      'justify-end',
-    ]) {
+    for (const token of ['flex', 'flex-col-reverse', 'gap-2', 'pt-3', 'justify-end']) {
       expect(styleContains(footer, token)).toBe(true);
     }
     expect(styleContains(footer, 'border-black')).toBe(false);
@@ -418,7 +415,7 @@ describe('prototypes/brutalist: dialog', () => {
     expect(close.tabIndex).toBe(-1);
     expect(button.getAttribute('role')).toBe('button');
     expect(button.tabIndex).toBe(0);
-    for (const token of ['border-2', 'shadow-[3px_3px_0_0_#000]', 'data-[focus-visible]:ring-2']) {
+    for (const token of ['border-2', 'shadow-[4px_4px_0_0_#000]', 'data-[focus-visible]:ring-2']) {
       expect(styleContains(button, token)).toBe(true);
     }
 

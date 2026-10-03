@@ -8,11 +8,11 @@ const tabsList = definePrototype<BrutalistTabsListProps, BrutalistTabsListExpose
   setup(def) {
     // P-BRUTALIST-TABS-LIST-BASE-INHERITANCE
     asTabsList();
-    // P-BRUTALIST-TABS-LIST-VISUAL-GRAMMAR — square strip panel: rounded-none, border-2
-    // border-black, hard shadow, bg-secondary-background fill, text-foreground, h-11, p-1.
+    // P-BRUTALIST-TABS-LIST-VISUAL-GRAMMAR — rounded flat strip panel: rounded-base, border-2
+    // border-black, hard shadow, bg-background fill, text-foreground, h-12, p-1.
     def.feedback.style.use(
       tw(
-        'inline-flex h-11 items-center rounded-none border-2 border-black bg-secondary-background p-1 text-foreground shadow-[3px_3px_0_0_#000]'
+        'inline-flex h-12 items-center rounded-base border-2 border-black bg-background p-1 text-foreground'
       )
     );
   },

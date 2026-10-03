@@ -13,11 +13,7 @@ export const BrutalistSkeletonRoot = definePrototype<
     accessible.tree({ hidden: true });
     // P-BRUTALIST-SKELETON-CONSUMER-SIZE — the consuming composition owns dimensions.
     // P-BRUTALIST-SKELETON-VISUAL-GRAMMAR
-    def.feedback.style.use(
-      tw(
-        'block rounded-none border-2 border-foreground bg-lavender shadow-[2px_2px_0_0_var(--pui-foreground)]'
-      )
-    );
+    def.feedback.style.use(tw('block rounded-base border-2 border-black bg-secondary-background'));
     return () => null;
   },
 });

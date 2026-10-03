@@ -31,7 +31,7 @@ cases:
       - P-BRUTALIST-TOGGLE-SIZE-PROP
     expectation: p-brutalist-toggle-defaults
   - id: T-BRUTALIST-TOGGLE-0001-CASE-5
-    title: Visual grammar remains square hard-shadow Neo-Brutalist
+    title: Visual grammar remains source-aligned component-specific Neo-Brutalist
     covers:
       - P-BRUTALIST-TOGGLE-VISUAL-GRAMMAR
     expectation: p-brutalist-toggle-visual-grammar

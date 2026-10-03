@@ -21,8 +21,8 @@ const RESIZED_VIEWPORT = { width: 900, height: 640 } as const;
 /** Half a device pixel: a centred panel may land on a subpixel boundary. */
 const GEOMETRY_EPSILON = 0.5;
 
-/** `BRUTALIST_PANEL_TOKENS` carries `shadow-[3px_3px_0_0_#000]`. */
-const HARD_PANEL_SHADOW = 'rgb(0, 0, 0) 3px 3px 0px 0px';
+/** `BRUTALIST_PANEL_TOKENS` carries `shadow-[4px_4px_0_0_#000]`. */
+const HARD_PANEL_SHADOW = 'rgb(0, 0, 0) 4px 4px 0px 0px';
 
 /** The mask and the content, both portalled out of the demo host. */
 const PRESENT_ROOT_COUNT = 2;
@@ -181,7 +181,7 @@ describe('Brutalist Dialog overlay geometry', () => {
         // Square corners as rendered. A radius the closure never generated also
         // resolves to `0px`, so this states the result rather than separating a
         // conforming `rounded-none` from a token that failed to reach the CSS.
-        expect(geometry.content.borderRadius, `${runtime}/square`).toBe('0px');
+        expect(geometry.content.borderRadius, `${runtime}/rounded`).toBe('5px');
         // The arbitrary-value shadow has to survive the token closure to render
         // at all; Tailwind composes it after two empty ring layers.
         expect(geometry.content.boxShadow, `${runtime}/hard-shadow`).toContain(HARD_PANEL_SHADOW);

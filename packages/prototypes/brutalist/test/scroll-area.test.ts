@@ -130,7 +130,7 @@ describe('prototypes/brutalist: scroll-area', () => {
     const el = document.createElement('brutalist-scroll-area-root') as any;
     document.body.appendChild(el);
     await flush();
-    expect(styleContains(el, 'rounded-none')).toBe(true);
+    expect(styleContains(el, 'rounded-base')).toBe(true);
     expect(styleContains(el, 'border-2')).toBe(true);
     expect(styleContains(el, 'block')).toBe(true);
     expect(styleContains(el, 'border-foreground')).toBe(true);
@@ -355,7 +355,7 @@ describe('prototypes/brutalist: scroll-area', () => {
     document.body.appendChild(root);
     await flush();
 
-    expect(styleContains(thumb, 'rounded-none')).toBe(true);
+    expect(styleContains(thumb, 'rounded-full')).toBe(true);
     expect(styleContains(thumb, 'bg-lavender-foreground')).toBe(true);
     expect(styleContains(thumb, 'relative')).toBe(true);
   });

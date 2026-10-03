@@ -86,3 +86,9 @@ The package is admitted to the 0.2 launch-commitment set. Long-term family owner
 ## License
 
 MIT
+
+## Visual reference and fonts
+
+The current draft visual grammar follows neobrutalism.dev at `3306a802724874a85f93079702b2795370a279d4`: DM Sans (500 base / 700 heading), component-owned 5px or full-round geometry, and role-specific hard shadows. See [third-party notices](THIRD_PARTY_NOTICES.md) and the [source-aligned design](../../../docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md). Base semantics remain Proto UI-owned.
+
+Consumers load DM Sans themselves (SIL OFL 1.1) and provide the generated theme variables. Prototypes emit `font-sans` or `font-heading`; the CSS renderer reads `--pui-font-sans` / `--pui-font-heading`. No prototype makes a network font request. The system sans fallback remains functional; a fallback rendering is not a verified DM Sans capture. CJK glyphs use the host fallback. The documentation app self-hosts the font with its full license.

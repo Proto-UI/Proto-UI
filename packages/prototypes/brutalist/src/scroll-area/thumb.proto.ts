@@ -10,7 +10,7 @@ export const BrutalistScrollAreaThumb = definePrototype<
     asScrollAreaThumb();
     // The track is a fixed lavender accent that does not flip with the theme, so
     // the fill has to be its paired foreground rather than the theme-global one.
-    def.feedback.style.use(tw('relative h-full w-full rounded-none bg-lavender-foreground'));
+    def.feedback.style.use(tw('relative h-full w-full rounded-full bg-lavender-foreground'));
     return (renderer) => [renderer.r.slot()];
   },
 });

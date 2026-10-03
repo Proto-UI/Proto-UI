@@ -10,7 +10,7 @@ export const BrutalistTooltipContent = definePrototype<
     asTooltipContent();
     def.feedback.style.use(
       tw(
-        'z-50 rounded-none border-2 border-foreground bg-foreground px-3 py-2 font-mono text-xs font-bold uppercase text-background shadow-[4px_4px_0_0_var(--pui-foreground)]'
+        'z-50 rounded-base border-2 border-black bg-secondary-background px-3 py-1.5 font-sans font-medium text-sm text-foreground'
       )
     );
     return (renderer) => [renderer.r.slot()];

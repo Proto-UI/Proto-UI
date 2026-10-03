@@ -21,7 +21,7 @@ cases:
       - P-BRUTALIST-BADGE-VISUAL-GRAMMAR
     expectation: p-brutalist-badge-visual-contract
   - id: T-BRUTALIST-BADGE-0001-CASE-BROWSER
-    title: Rendered Badge surfaces preserve passive square hard-shadow grammar across official runtimes
+    title: Rendered Badge surfaces preserve passive source-aligned component-specific grammar across official runtimes
     covers:
       - P-BRUTALIST-BADGE-PASSIVE-BOUNDARY
       - P-BRUTALIST-BADGE-VISUAL-GRAMMAR

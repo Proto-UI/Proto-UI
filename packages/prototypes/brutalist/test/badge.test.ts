@@ -89,10 +89,10 @@ describe('prototypes/brutalist: badge', () => {
     updateProps(element, { variant: 'outline' });
     await flush();
 
-    expect(styleContains(element, 'rounded-none')).toBe(true);
+    expect(styleContains(element, 'rounded-base')).toBe(true);
     expect(styleContains(element, 'border-2')).toBe(true);
-    expect(styleContains(element, 'border-foreground')).toBe(true);
-    expect(styleContains(element, 'font-mono')).toBe(true);
+    expect(styleContains(element, 'border-black')).toBe(true);
+    expect(styleContains(element, 'font-sans')).toBe(true);
     expect(styleContains(element, 'bg-background')).toBe(false);
     expect(styleContains(element, 'bg-canary')).toBe(true);
 

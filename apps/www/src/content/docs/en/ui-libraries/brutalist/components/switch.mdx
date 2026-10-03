@@ -10,15 +10,15 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 # Switch
 
-The housing stays fixed. The square thumb is the actuator.
+The [reference Switch](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/switch.tsx) uses a 24×48px capsule and a 16px white circular thumb, each with a 2px black border and no shadow.
 
-- **Off:** paper track and ink thumb.
-- **On:** sky-blue track and canary-yellow thumb; position remains the primary checked signal.
-- **Pressed:** the track switches to coral and loses its hard shadow. Release restores the full structure.
-- **Focus:** hard offset outline.
-- **Disabled:** structure remains visible at reduced emphasis.
+- Off: neutral track; On: main blue track. The thumb stays white
+- Only the thumb moves, 20px between endpoints with symmetric 6px outer insets
+- The 150ms spatial Thumb transition becomes instantaneous under reduced motion
+- Press does not flash coral, shift the track, or add an extra shadow
+- Keyboard focus retains an offset ring; disabled preserves shape and blocks activation
 
-Each runtime-neutral demo example keeps its visible caption inside the Switch root. Inherited Base `nameFromContent` projection therefore derives the accessible name from the same visible text in Web Components, React, and Vue; the examples need neither a host-specific `aria-label` nor a native `<label for>` relationship that cannot target a custom-element host. The caption is part of the Switch control surface, so clicking it follows the Switch activation path while the disabled example remains inert.
+The prototype uses physical left/right placement so the same measured geometry remains bounded in an RTL parent; this is not a claim of mirrored RTL switch semantics. The visible caption is inside the Switch root, so Base derives its accessible name from the same text across all four Web runtimes. Clicking the caption follows the same activation path; the disabled example remains inert. DM Sans typography comes from the prototype, with host fallback for unsupported glyphs.
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-switch" initialRuntime="wc" />

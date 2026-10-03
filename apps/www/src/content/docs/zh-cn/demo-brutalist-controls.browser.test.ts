@@ -847,7 +847,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
       expect(paint.text, frame).toContain(expectedText);
       expect(paint.tabIndex, frame).toBe(-1);
       expect(paint.interactive, frame).toBe(0);
-      expect(paint.borderRadius, frame).toBe('0px');
+      expect(paint.borderRadius, frame).toBe('5px');
       expect(paint.borderWidth, frame).toBe('2px');
       // The preview frame and the renderer-owned body portal must resolve one shared theme.
       const resolved = await page.evaluate(() => {
@@ -862,7 +862,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         const readPaint = (parent: HTMLElement) => {
           const probe = document.createElement('div');
           probe.style.color = 'var(--pui-foreground)';
-          probe.style.backgroundColor = 'var(--pui-background)';
+          probe.style.backgroundColor = 'var(--pui-secondary-background)';
           parent.appendChild(probe);
           const style = getComputedStyle(probe);
           const result = {
@@ -878,18 +878,17 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         };
       });
       expect(resolved.boundary, frame).toEqual(resolved.portal);
-      expect(paint.backgroundColor, frame).toBe(resolved.boundary.foreground);
-      expect(paint.color, frame).toBe(resolved.boundary.background);
-      expect(paint.borderColor, frame).toBe(resolved.boundary.foreground);
+      expect(paint.backgroundColor, frame).toBe(resolved.boundary.background);
+      expect(paint.color, frame).toBe(resolved.boundary.foreground);
+      expect(paint.borderColor, frame).toBe('rgb(0, 0, 0)');
       // The hard shadow must resolve to the same active foreground token as the border.
-      expect(paint.boxShadow, frame).toContain(resolved.boundary.foreground);
-      expect(paint.boxShadow, frame).toContain('4px 4px 0px');
-      expect(paint.fontFamily.toLowerCase(), frame).toContain('mono');
-      expect(paint.fontSize, frame).toBe('12px');
-      expect(Number(paint.fontWeight), frame).toBeGreaterThanOrEqual(700);
-      expect(paint.textTransform, frame).toBe('uppercase');
+      expect(paint.boxShadow, frame).toBe('none');
+      expect(paint.fontFamily.toLowerCase(), frame).toContain('dm sans');
+      expect(paint.fontSize, frame).toBe('14px');
+      expect(Number(paint.fontWeight), frame).toBe(500);
+      expect(paint.textTransform, frame).toBe('none');
       expect(paint.paddingInline, frame).toBe('12px');
-      expect(paint.paddingBlock, frame).toBe('8px');
+      expect(paint.paddingBlock, frame).toBe('6px');
       expect(paint.width, frame).toBeGreaterThan(20);
       expect(paint.height, frame).toBeGreaterThan(20);
       return paint;

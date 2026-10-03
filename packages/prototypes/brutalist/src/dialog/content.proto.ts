@@ -13,10 +13,10 @@ const dialogContent = definePrototype<BrutalistDialogContentProps, BrutalistDial
     dialog.asTransition.configure({ enterDuration: 200, leaveDuration: 200 });
     const dialogState = dialog.stateHandles;
     const { open } = dialogState;
-    // P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR: centered hard-shadowed square modal panel (BRUTALIST_PANEL_TOKENS, fixed translate).
+    // P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR: centered hard-shadowed rounded modal panel (BRUTALIST_PANEL_TOKENS, fixed translate).
     def.feedback.style.use(
       tw(
-        `fixed left-1/2 top-1/2 grid w-full max-w-lg gap-4 -translate-x-1/2 -translate-y-1/2 p-6 outline-none duration-200 ${BRUTALIST_PANEL_TOKENS}`
+        `fixed left-1/2 top-1/2 grid w-full max-w-lg gap-4 -translate-x-1/2 -translate-y-1/2 p-6 outline-none duration-200 ${BRUTALIST_PANEL_TOKENS} shadow-[4px_4px_0_0_#000]`
       )
     );
 

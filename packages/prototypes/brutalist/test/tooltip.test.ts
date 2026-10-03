@@ -125,11 +125,11 @@ describe('prototypes/brutalist: tooltip', () => {
     expect(content.getExposes().open.get()).toBe(true);
     expect(trigger.getAttribute('aria-describedby')).toBe(content.id);
     expect(content.getAttribute('role')).toBe('tooltip');
-    expect(styleContains(content, 'rounded-none')).toBe(true);
+    expect(styleContains(content, 'rounded-base')).toBe(true);
     expect(styleContains(content, 'border-2')).toBe(true);
-    expect(styleContains(content, 'bg-foreground')).toBe(true);
-    expect(styleContains(content, 'font-mono')).toBe(true);
-    expect(styleContains(content, 'shadow-[4px_4px_0_0_var(--pui-foreground)]')).toBe(true);
+    expect(styleContains(content, 'bg-secondary-background')).toBe(true);
+    expect(styleContains(content, 'font-sans')).toBe(true);
+    expect(styleContains(content, 'shadow-[4px_4px_0_0_var(--pui-foreground)]')).toBe(false);
 
     trigger.dispatchEvent(new Event('pointerleave'));
     await flush();

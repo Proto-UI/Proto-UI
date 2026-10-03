@@ -156,7 +156,7 @@ describe('prototypes/brutalist: toggle', () => {
     const tokens = controller.getRuleStyleTokens();
 
     expect(context.getExposes().active.get()).toBe(true);
-    expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]');
+    expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000]');
 
     invokeUnmounted();
   });
@@ -210,12 +210,11 @@ describe('prototypes/brutalist: toggle', () => {
 
     expect(tokens).toEqual(
       expect.arrayContaining([
-        'rounded-none',
+        'rounded-base',
         'border-2',
         'border-black',
         'bg-secondary-background',
         'text-foreground',
-        'shadow-[3px_3px_0_0_#000]',
       ])
     );
     for (const forbidden of ['rounded-lg', 'shadow-lg', 'backdrop-blur', 'bg-gradient-to-r']) {
@@ -232,16 +231,12 @@ describe('prototypes/brutalist: toggle', () => {
     context.rootTarget.dispatchEvent(new CustomEvent('pointer.enter'));
     let tokens = controller.getRuleStyleTokens();
     expect(context.getExposes().hovered.get()).toBe(true);
-    expect(tokens).toEqual(
-      expect.arrayContaining(['-translate-x-px', '-translate-y-px', 'shadow-[4px_4px_0_0_#000]'])
-    );
+    expect(tokens).toEqual(expect.arrayContaining(['border-black']));
 
     context.rootTarget.dispatchEvent(new CustomEvent('pointer.down'));
     tokens = controller.getRuleStyleTokens();
     expect(context.getExposes().pressed.get()).toBe(true);
-    expect(tokens).toEqual(
-      expect.arrayContaining(['translate-x-px', 'translate-y-px', 'shadow-none'])
-    );
+    expect(tokens).toEqual(expect.arrayContaining(['border-black']));
     context.rootTarget.dispatchEvent(new CustomEvent('pointer.up'));
     expect(context.getExposes().pressed.get()).toBe(false);
 
@@ -265,7 +260,7 @@ describe('prototypes/brutalist: toggle', () => {
     expect(context.getExposes().pressed.get()).toBe(false);
     expect(context.activeChanges).toHaveLength(eventCount);
     expect(tokens).toEqual(
-      expect.arrayContaining(['pointer-events-none', 'opacity-50', 'rounded-none'])
+      expect.arrayContaining(['pointer-events-none', 'opacity-50', 'rounded-base'])
     );
 
     invokeUnmounted();
@@ -280,11 +275,9 @@ describe('prototypes/brutalist: toggle', () => {
     let tokens = controller.getRuleStyleTokens();
     expect(context.getExposes().hovered.get()).toBe(true);
     expect(context.getExposes().pressed.get()).toBe(true);
-    expect(tokens).toEqual(
-      expect.arrayContaining(['translate-x-px', 'translate-y-px', 'shadow-none'])
-    );
-    expect(tokens).not.toContain('-translate-x-px');
-    expect(tokens).not.toContain('-translate-y-px');
+    expect(tokens).toEqual(expect.arrayContaining(['border-black']));
+    expect(tokens).not.toContain('translate-x-1');
+    expect(tokens).not.toContain('translate-y-1');
     expect(tokens).not.toContain('shadow-[4px_4px_0_0_#000]');
 
     context.rootTarget.dispatchEvent(new CustomEvent('pointer.leave'));
@@ -297,11 +290,11 @@ describe('prototypes/brutalist: toggle', () => {
     expect(context.getExposes().active.get()).toBe(true);
     expect(context.getExposes().pressed.get()).toBe(true);
     expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000]');
-    expect(tokens).not.toContain('shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]');
+    expect(tokens).not.toContain('shadow-[4px_4px_0_0_#000]');
 
     context.rootTarget.dispatchEvent(new CustomEvent('pointer.leave'));
     tokens = controller.getRuleStyleTokens();
-    expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000,3px_3px_0_0_#000]');
+    expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000]');
 
     invokeUnmounted();
   });

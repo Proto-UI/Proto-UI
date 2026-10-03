@@ -1,20 +1,14 @@
 id: P-BRUTALIST-TABS-LIST
 type: prototype
-title: Brutalist Tabs List inherits Base Tabs List and layers a square ruled tab strip
+title: 'Brutalist Tabs List inherits Base Tabs List and layers a rounded ruled tab strip'
+
 status: draft
 since: 0.2.0-rc.7
-summary: >-
-  Brutalist Tabs List inherits Base Tabs List coordination semantics and projects a style-family panel surface: a square horizontal strip with a fixed height, black structural borders, a hard offset shadow, and a flat theme-token fill.
-
+summary: 'Brutalist Tabs List inherits Base Tabs List coordination semantics and projects a style-family panel surface: a rounded horizontal strip with a fixed height, black structural borders, a hard offset shadow, and a flat theme-token fill.'
 
 statement:
-  en: >-
-    Brutalist Tabs List is a draft Proto UI-maintained Neo-Brutalist design-language projection over Base Tabs List. It preserves inherited Base protocol semantics (trigger activation/rendering) and adds only visual/style behavior: zero radius, black structural borders, a hard zero-blur offset shadow, and a flat `bg-secondary-background` resting fill. The list is the single panel that frames the trigger row.
-
-
-  zh-CN: >-
-    Brutalist Tabs List 是 Proto UI 维护的 draft Neo-Brutalist design-language 投射，建立在 Base Tabs List 之上。它保留继承的 Base 协议语义（trigger activation/rendering），仅增加视觉/style 行为：零圆角、黑色结构边框、零模糊硬偏移阴影与平面 `bg-secondary-background` 静止填充。list 是框住 trigger 行的单一面板。
-
+  en: P-BRUTALIST-TABS-LIST preserves its declared semantic, anatomy and API ownership. Its draft visual projection follows the component-specific typography, geometry, fill, depth and state criteria below, aligned with neobrutalism-components 3306a802. This does not admit new Base semantics, host support or upstream API compatibility.
+  zh-CN: P-BRUTALIST-TABS-LIST 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
   - id: P-BRUTALIST-TABS-LIST-BASE-INHERITANCE
@@ -34,14 +28,15 @@ criteria:
   - id: P-BRUTALIST-TABS-LIST-VISUAL-GRAMMAR
     text:
       en: >-
-        The strip surface must preserve a square `rounded-none` panel of fixed `h-11`, a black structural `border-2 border-black`, a hard zero-blur offset shadow (`shadow-[3px_3px_0_0_#000]`), and a flat `bg-secondary-background` fill with `text-foreground`, laid out as `inline-flex items-center p-1`. No gradients, glass, rounded cards, or soft elevation.
+        List is an h-12 rounded-base 5px strip with border-2 border-black, bg-background/text-foreground, inline-flex items-center p-1 and no shadow. Nested Trigger owns its own rounded-base radius.
 
 
       zh-CN: >-
-        strip 表面必须保持直角 `rounded-none` 固定 `h-11` 面板、黑色结构边框 `border-2 border-black`、零模糊硬偏移阴影（`shadow-[3px_3px_0_0_#000]`）与平面 `bg-secondary-background` 填充及 `text-foreground`，以 `inline-flex items-center p-1` 布局。不得使用渐变、玻璃拟态、圆角卡片或柔和高度阴影。
+        List 是 h-12、rounded-base 5px strip，带 border-2 border-black、bg-background/text-foreground、inline-flex items-center p-1，无阴影；嵌套 Trigger 独立拥有 rounded-base radius。
 
 
 sources:
+  - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/tabs/list.proto.ts
   - path: packages/prototypes/brutalist/src/tabs/types.ts
   - path: packages/prototypes/brutalist/test/tabs.test.ts
@@ -55,6 +50,9 @@ inherits:
     - id: P-BASE-TABS-LIST
 verifies: { tests: [T-BRUTALIST-TABS-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

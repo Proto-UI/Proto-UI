@@ -39,13 +39,13 @@ const selectTrigger = definePrototype<BrutalistSelectTriggerProps, BrutalistSele
     }
     const { disabled, hovered, focusVisible, pressed, placeholder } = state;
 
-    // P-BRUTALIST-SELECT-TRIGGER-VISUAL-GRAMMAR: resting combobox surface (square, border-2 black, hard shadow-3, flat bg-secondary-background fill).
+    // P-BRUTALIST-SELECT-TRIGGER-VISUAL-GRAMMAR: resting combobox surface (square, border-2 black, role-owned depth, flat bg-main text-main-foreground font-sans font-medium fill).
     def.feedback.style.use(
       tw(
-        'flex items-center justify-between gap-2 rounded-none border-2 border-black bg-secondary-background px-3 py-2 text-sm whitespace-nowrap shadow-[3px_3px_0_0_#000] outline-none select-none'
+        'flex items-center justify-between gap-2 rounded-base border-2 border-black bg-main text-main-foreground font-sans font-medium px-3 py-2 text-sm whitespace-nowrap outline-none select-none'
       )
     );
-    // P-BRUTALIST-SELECT-TRIGGER-INTERACTION rules (size→h tokens, placeholder→muted fg, hover lift, press sink, focus-visible ring, disabled fade).
+    // P-BRUTALIST-SELECT-TRIGGER-INTERACTION rules (size→h tokens, placeholder→muted fg, hover feedback, press sink, focus-visible ring, disabled fade).
     def.rule({
       when: (w) => w.prop('size').eq('default'),
       intent: (i) => i.feedback.style.use(tw('h-9')),
@@ -54,19 +54,18 @@ const selectTrigger = definePrototype<BrutalistSelectTriggerProps, BrutalistSele
       when: (w) => w.prop('size').eq('sm'),
       intent: (i) => i.feedback.style.use(tw('h-8')),
     });
-    // P-BRUTALIST-SELECT-TRIGGER-PLACEHOLDER-STATE: placeholder active → text-muted-foreground.
+    // P-BRUTALIST-SELECT-TRIGGER-PLACEHOLDER-STATE: placeholder keeps paired ink on the main fill (muted ink fails 4.5:1 in both themes).
     def.rule({
       when: (w) => w.state(placeholder).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
+      intent: (i) => i.feedback.style.use(tw('text-main-foreground')),
     });
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('-translate-x-px -translate-y-px shadow-[4px_4px_0_0_#000]')),
+      intent: (i) => i.feedback.style.use(tw('border-black')),
     });
     def.rule({
       when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-x-px translate-y-px shadow-none')),
+      intent: (i) => i.feedback.style.use(tw('border-black')),
     });
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),

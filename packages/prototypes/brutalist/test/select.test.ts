@@ -123,7 +123,7 @@ describe('prototypes/brutalist: select', () => {
 
     expect(trigger.getExposes().placeholder.get()).toBe(true);
     expect(trigger.hasAttribute('data-placeholder')).toBe(true);
-    expect(styleContains(trigger, 'data-[placeholder]:text-muted-foreground')).toBe(true);
+    expect(styleContains(trigger, 'data-[placeholder]:text-main-foreground')).toBe(true);
     expect(value.getExposes().displayValue.get()).toBe('Pick one');
     expect(value.textContent).toBe('Pick one');
     const chevron = trigger.querySelector('svg');
@@ -139,14 +139,13 @@ describe('prototypes/brutalist: select', () => {
     await flush();
 
     for (const token of [
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
-      'bg-secondary-background',
+      'bg-main',
       'px-3',
       'py-2',
       'text-sm',
-      'shadow-[3px_3px_0_0_#000]',
     ]) {
       expect(styleContains(trigger, token)).toBe(true);
     }
@@ -154,11 +153,11 @@ describe('prototypes/brutalist: select', () => {
     trigger.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().hovered.get()).toBe(true);
-    expect(styleContains(trigger, 'data-[hovered]:-translate-x-px')).toBe(true);
+    expect(styleContains(trigger, 'data-[hovered]:border-black')).toBe(true);
     trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().pressed.get()).toBe(true);
-    expect(styleContains(trigger, 'data-[pressed]:shadow-none')).toBe(true);
+    expect(styleContains(trigger, 'data-[pressed]:border-black')).toBe(true);
     trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
@@ -218,12 +217,11 @@ describe('prototypes/brutalist: select', () => {
       'w-[var(--proto-ui-anchor-width)]',
       'min-w-[var(--proto-ui-anchor-width)]',
       'duration-150',
-      'rounded-none',
+      'rounded-base',
       'border-2',
       'border-black',
-      'bg-secondary-background',
+      'bg-background',
       'text-foreground',
-      'shadow-[3px_3px_0_0_#000]',
       'animate-in',
       'fade-in-0',
       'zoom-in-95',
@@ -272,7 +270,7 @@ describe('prototypes/brutalist: select', () => {
       'm20 6-11 11-5-5'
     );
     expect(beta.querySelector('svg')).toBeNull();
-    for (const token of ['rounded-none', 'w-full', 'font-mono', 'text-sm', 'justify-between']) {
+    for (const token of ['rounded-base', 'w-full', 'font-sans', 'text-sm', 'justify-between']) {
       expect(styleContains(alpha, token)).toBe(true);
     }
 

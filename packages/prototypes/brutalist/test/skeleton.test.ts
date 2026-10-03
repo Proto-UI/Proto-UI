@@ -47,11 +47,10 @@ describe('prototypes/brutalist: skeleton', () => {
     expect(el.childNodes).toHaveLength(0);
     for (const token of [
       'block',
-      'rounded-none',
+      'rounded-base',
       'border-2',
-      'border-foreground',
-      'bg-lavender',
-      'shadow-[2px_2px_0_0_var(--pui-foreground)]',
+      'border-black',
+      'bg-secondary-background',
     ]) {
       expect(styleContains(el, token)).toBe(true);
     }

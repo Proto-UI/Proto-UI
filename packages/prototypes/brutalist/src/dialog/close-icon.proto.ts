@@ -14,10 +14,10 @@ const dialogCloseIcon = definePrototype<BrutalistDialogCloseProps, BrutalistDial
 
     // P-BRUTALIST-DIALOG-CLOSE-ICON-A11Y-NAME: a11y accessible name 'Close'.
     accessible.name('Close');
-    // P-BRUTALIST-DIALOG-CLOSE-ICON-VISUAL-GRAMMAR + P-BRUTALIST-DIALOG-CLOSE-ICON-PAIR-INVARIANT: fixed bg-canary/text-canary-foreground surface, square border-2 black, hard shadow-3, trailing X icon.
+    // P-BRUTALIST-DIALOG-CLOSE-ICON-VISUAL-GRAMMAR + P-BRUTALIST-DIALOG-CLOSE-ICON-PAIR-INVARIANT: fixed bg-canary/text-canary-foreground surface, 5px rounded border-2 black, hard shadow-4, trailing X icon.
     def.feedback.style.use(
       tw(
-        'absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-none border-2 border-black bg-canary text-canary-foreground shadow-[3px_3px_0_0_#000] outline-none transition-none'
+        'absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-base border-2 border-black bg-canary text-canary-foreground shadow-[4px_4px_0_0_#000] outline-none transition-none'
       )
     );
     // P-BRUTALIST-DIALOG-CLOSE-ICON-INTERACTION: hover → bg-coral with its own paired foreground and deeper shadow; focus-visible → ring-3; disabled → opacity-50 pointer-events-none.

@@ -25,9 +25,8 @@ const BUTTON_BASE_TOKENS = [
   'gap-2',
   'whitespace-nowrap',
   'select-none',
-  'font-bold',
-  'uppercase',
-  'tracking-tight',
+  'font-sans',
+  'font-medium',
   BRUTALIST_STRUCTURE_TOKENS,
 ].join(' ');
 
@@ -126,7 +125,7 @@ const button = definePrototype<BrutalistButtonProps, BrutalistButtonExposes>({
       });
     });
 
-    // P-BRUTALIST-BUTTON-INTERACTION — hover lift
+    // P-BRUTALIST-BUTTON-INTERACTION — hover feedback
     def.rule({
       when: (w) => w.state(hovered).eq(true),
       intent: (i) => i.feedback.style.use(tw(BRUTALIST_HOVER_LIFT_TOKENS)),

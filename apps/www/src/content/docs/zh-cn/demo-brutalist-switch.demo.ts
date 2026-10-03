@@ -1,7 +1,7 @@
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
 const LABEL_CLASS =
-  'absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap font-mono text-sm font-bold text-foreground';
+  'absolute left-full top-1/2 -translate-y-1/2 ml-3 whitespace-nowrap text-sm text-foreground';
 
 export default {
   type: 'demo',

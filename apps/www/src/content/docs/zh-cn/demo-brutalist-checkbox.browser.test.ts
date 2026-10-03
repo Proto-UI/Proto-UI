@@ -258,7 +258,7 @@ describe.sequential('Brutalist Checkbox browser acceptance', () => {
             expect(paint.border, `${label}/${state}/border`).toBe(paint.variables.border);
             expect(paint.borderWidth, `${label}/${state}/border-width`).toBe('2px');
             expect(paint.borderRadius, `${label}/${state}/border-radius`).toBe('0px');
-            expect(paint.boxShadow, `${label}/${state}/hard-shadow`).toContain('3px 3px 0px');
+            expect(paint.boxShadow, `${label}/${state}/flat-surface`).toBe('none');
 
             const box = await geometry(surface, `${label}/${state}/geometry`);
             expect(Math.abs(box.width - 20), `${label}/${state}/width`).toBeLessThanOrEqual(
