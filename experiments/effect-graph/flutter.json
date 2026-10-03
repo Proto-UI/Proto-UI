@@ -1,0 +1,469 @@
+{
+  "schemaVersion": 1,
+  "id": "flutter-geometry-live-render-inspection",
+  "purpose": "Model default premium live compositor path; captured-image path remains a distinct source variant",
+  "kernels": [
+    {
+      "id": "geometry",
+      "upstream": {
+        "repo": "sdegenaar/liquid_glass_widgets",
+        "commit": "c35d7e115a52e05389dd8d98c6b32d4582931c33",
+        "path": "shaders/liquid_glass_geometry_blended.frag",
+        "gitBlob": "3d9457df92f56079d48846613ba3df7ca4c18aa0"
+      },
+      "license": "MIT-Tim-Lehmann-and-Sebastian-Degenaar-notices-required",
+      "execution": "not-admitted",
+      "entryPoint": "main",
+      "stage": "fragment",
+      "uniformBlocks": ["geometry"]
+    },
+    {
+      "id": "render",
+      "upstream": {
+        "repo": "sdegenaar/liquid_glass_widgets",
+        "commit": "c35d7e115a52e05389dd8d98c6b32d4582931c33",
+        "path": "shaders/liquid_glass_render.frag",
+        "gitBlob": "03b27d53d670b6642fdbf92783175d5e96c9155d"
+      },
+      "license": "MIT-Tim-Lehmann-and-Sebastian-Degenaar-notices-required",
+      "execution": "not-admitted",
+      "entryPoint": "main",
+      "stage": "fragment",
+      "uniformBlocks": ["render"],
+      "samplers": [
+        {
+          "name": "uBackgroundTexture",
+          "ownership": "host-injected",
+          "slot": 0,
+          "sourceKind": "host-compositor-backdrop"
+        },
+        {
+          "name": "uGeometryTexture",
+          "ownership": "application-bound",
+          "slot": 1,
+          "resourceKind": "data-texture"
+        }
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "backdrop",
+      "kind": "host-compositor-backdrop",
+      "provider": "flutter-impeller-ImageFilter.shader",
+      "format": "host-managed",
+      "space": "filter-local-physical-pixels",
+      "alpha": "host-premultiplied",
+      "freshness": "compositor-frame",
+      "reservedSampler": 0,
+      "colorSpace": {
+        "status": "unresolved",
+        "obligation": "target/source profile must declare transfer and data-versus-color conversion"
+      },
+      "orientation": {
+        "status": "unresolved",
+        "obligation": "verify local/physical/UV axes and transforms for the target variant"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": "geometry",
+      "kind": "data-texture",
+      "format": "host-managed-ui-image",
+      "extent": {
+        "basis": "geometry-local-bounds",
+        "policy": "budgeted-matte",
+        "dprBinding": "matte-dpr",
+        "pixelBudgetBinding": "geometry-pixel-budget",
+        "marginLogicalPixels": 2
+      },
+      "space": "geometry-local-pixels",
+      "alpha": "encoded-SDF-coverage",
+      "filter": "Flutter-FilterQuality.medium",
+      "encoding": {
+        "RG": "unit-normal-xy mapped -1..1 to 0..1",
+        "B": "height normalized by thickness",
+        "A": "edge coverage"
+      },
+      "physicalChannelPreservation": "unverified-provider-obligation",
+      "clear": "kernel-neutral",
+      "coordinateBindings": [
+        "geometry-local-bounds",
+        "matte-transform",
+        "enclosing-filter-pass-rect"
+      ],
+      "colorSpace": {
+        "status": "unresolved",
+        "obligation": "target/source profile must declare transfer and data-versus-color conversion"
+      },
+      "orientation": {
+        "status": "unresolved",
+        "obligation": "verify local/physical/UV axes and transforms for the target variant"
+      }
+    }
+  ],
+  "data": [],
+  "passes": [
+    {
+      "id": "geometry-pass",
+      "kind": "fragment",
+      "kernel": "geometry",
+      "reads": [],
+      "writes": "geometry",
+      "dependsOn": [],
+      "bindings": {},
+      "update": "geometry-or-layout-or-optical-profile-dirty",
+      "uniformBlocks": ["geometry"]
+    },
+    {
+      "id": "render-pass",
+      "kind": "host-image-filter",
+      "kernel": "render",
+      "reads": ["backdrop", "geometry"],
+      "writes": "presentation",
+      "dependsOn": ["geometry-pass"],
+      "bindings": {
+        "uBackgroundTexture": "backdrop",
+        "uGeometryTexture": "geometry"
+      },
+      "update": "compositor-or-uniform-frame",
+      "blend": "premultiplied-source-over",
+      "uniformBlocks": ["render"]
+    }
+  ],
+  "uniformBlocks": [
+    {
+      "id": "geometry",
+      "abi": "flutter-reflected-float-slots",
+      "fields": [
+        {
+          "name": "uSize",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uSize"
+          }
+        },
+        {
+          "name": "uOpticalProps",
+          "type": "vec4<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uOpticalProps"
+          }
+        },
+        {
+          "name": "uShapeSettings",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uShapeSettings"
+          }
+        },
+        {
+          "name": "uShapeData",
+          "type": "f32",
+          "count": 112,
+          "binding": {
+            "kind": "frame-value",
+            "id": "uShapeData"
+          }
+        },
+        {
+          "name": "uNativeEdge",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uNativeEdge"
+          }
+        }
+      ]
+    },
+    {
+      "id": "render",
+      "abi": "flutter-reflected-float-slots",
+      "fields": [
+        {
+          "name": "uSize",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "host-injected",
+            "id": "ImageFilter.shader.inputSize",
+            "floatSlots": [0, 1]
+          }
+        },
+        {
+          "name": "uGeometryOffset",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uGeometryOffset"
+          }
+        },
+        {
+          "name": "uGeometrySize",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uGeometrySize"
+          }
+        },
+        {
+          "name": "uGlassColor",
+          "type": "vec4<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uGlassColor"
+          }
+        },
+        {
+          "name": "uOpticalProps",
+          "type": "vec4<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uOpticalProps"
+          }
+        },
+        {
+          "name": "uLightConfig",
+          "type": "vec3<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uLightConfig"
+          }
+        },
+        {
+          "name": "uLightDirection",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uLightDirection"
+          }
+        },
+        {
+          "name": "uWhiten",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uWhiten"
+          }
+        },
+        {
+          "name": "uWhitenGated",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uWhitenGated"
+          }
+        },
+        {
+          "name": "uPinchStrength",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uPinchStrength"
+          }
+        },
+        {
+          "name": "uBackgroundFallback",
+          "type": "vec4<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uBackgroundFallback"
+          }
+        },
+        {
+          "name": "uCaptureOffset",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "constant",
+            "value": [0, 0]
+          }
+        },
+        {
+          "name": "uEdgeConfig",
+          "type": "vec4<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uEdgeConfig"
+          }
+        },
+        {
+          "name": "uPlatformViewMode",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uPlatformViewMode"
+          }
+        },
+        {
+          "name": "uBodyMode",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uBodyMode"
+          }
+        },
+        {
+          "name": "uTouchPosition",
+          "type": "vec2<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uTouchPosition"
+          }
+        },
+        {
+          "name": "uTouchIntensity",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uTouchIntensity"
+          }
+        },
+        {
+          "name": "uRimConfig",
+          "type": "vec3<f32>",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uRimConfig"
+          }
+        },
+        {
+          "name": "uLensModel",
+          "type": "f32",
+          "binding": {
+            "kind": "frame-value",
+            "id": "uLensModel"
+          }
+        },
+        {
+          "name": "uFrost",
+          "type": "vec4<f32>",
+          "binding": {
+            "kind": "constant",
+            "value": [0, 0, 0, 0]
+          }
+        }
+      ],
+      "reservedAutoInputs": ["uSize", "uBackgroundTexture"]
+    }
+  ],
+  "requirements": [
+    "live-compositor-image-filter",
+    "fragment-program",
+    "geometry-data-channel-preservation",
+    "same-frame-source-geometry-coherence"
+  ],
+  "limits": {
+    "passes": 2,
+    "maxShapes": 16,
+    "shapeStrideFloats": 7,
+    "historyFrames": 0,
+    "storageWrites": false
+  },
+  "variants": [
+    {
+      "id": "captured-image",
+      "status": "not-modeled",
+      "sourceKind": "application-owned-captured-texture",
+      "requiredChanges": [
+        "replace host-image-filter with direct application fragment draw",
+        "manually bind uSize and sampler0 instead of live host injection",
+        "provide capture-to-filter transform and explicit frame freshness"
+      ],
+      "qualityChange": "distinct-from-live-compositor"
+    }
+  ],
+  "extensionsNotYetModeled": [
+    "optional scoped backdrop blur",
+    "frost weight/dstIn/alternate-row compositing",
+    "foreground placement stages",
+    "morph controller state/velocity producer"
+  ],
+  "caveats": [
+    "Physical ui.Image format is not asserted to be RGBA8/RGBA16F",
+    "Skia/Web availability does not follow from Impeller support",
+    "PlatformView/capture behavior remains a provider limitation",
+    "This two-pass core is not the full widget suite or a compiled execution result",
+    "Dynamic matte DPR/budget and FilterQuality.medium are source facts; frame producer/reflection/transform correctness is unexecuted"
+  ],
+  "frameInputs": [
+    {
+      "id": "matte-dpr",
+      "type": "f32",
+      "owner": "adapter-geometry-budget",
+      "range": "finite-positive-target-bounded"
+    },
+    {
+      "id": "geometry-pixel-budget",
+      "type": "u32",
+      "owner": "adapter-resource-budget",
+      "range": "finite-positive-target-bounded"
+    },
+    {
+      "id": "geometry-local-bounds",
+      "type": "rect<f32>",
+      "space": "group-local-logical-pixels",
+      "owner": "layout"
+    },
+    {
+      "id": "matte-transform",
+      "type": "mat4<f32>",
+      "from": "group-local-logical-pixels",
+      "to": "screen-logical-pixels",
+      "owner": "adapter-layout"
+    },
+    {
+      "id": "enclosing-filter-pass-rect",
+      "type": "rect<f32>",
+      "space": "screen-physical-pixels",
+      "owner": "host-compositor"
+    },
+    {
+      "id": "screen-device-pixel-ratio",
+      "type": "f32",
+      "owner": "view",
+      "distinctFrom": "matte-dpr"
+    }
+  ],
+  "featurePreconditions": [
+    {
+      "feature": "frost-preprocessing",
+      "mode": "excluded",
+      "requires": {
+        "uniformBlock": "render",
+        "field": "uFrost",
+        "value": [0, 0, 0, 0]
+      }
+    },
+    {
+      "feature": "live-compositor-input",
+      "requiredHostUniforms": ["uSize"],
+      "requiredHostSamplers": {
+        "uBackgroundTexture": 0
+      }
+    },
+    {
+      "feature": "captured-background-coordinate-offset",
+      "mode": "excluded",
+      "requires": {
+        "uniformBlock": "render",
+        "field": "uCaptureOffset",
+        "value": [0, 0]
+      },
+      "reason": "This core models only the live BackdropFilter path; upstream live render writes Offset.zero"
+    }
+  ],
+  "coordinateMapping": {
+    "geometryBounds": [
+      "stored geometry-local-bounds",
+      "apply matte-transform to screen-logical-pixels",
+      "multiply screen-device-pixel-ratio to screen-physical-pixels",
+      "subtract enclosing-filter-pass-rect origin to filter-local-physical-pixels"
+    ],
+    "geometrySize": "transformed logical bounds size multiplied by screen-device-pixel-ratio",
+    "matteRasterDpr": "controls geometry texture extent/resampling only; never substitutes for screen positioning",
+    "source": "lib/src/engine/rendering/liquid_glass_render_object.dart:491-562"
+  }
+}
