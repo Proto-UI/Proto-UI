@@ -28,3 +28,13 @@ The capture suite stores the pending launch promise before awaiting it. Teardown
 No production, style, public documentation, spec lifecycle, contrast threshold, centering tolerance, four native-control assertions or Scroll behavior changes. The source-bound phase and resource transitions above are the appropriate internal evidence; no unchanged UI screenshot is relabeled as a new visual result.
 
 Co-author by OpenAI Dots
+
+## First repair-head aggregate execution and bounded diagnosis
+
+Head `72d2eee98d98156cb1dadf2412c6e9d3ca3ac112` completed [CI 37113894402](https://github.com/Proto-UI/Proto-UI/actions/runs/37113894402) with the general phase passing 2796 tests (34 todo), followed by all 31 registered browser suites. Spinner native capture passed 4/4, Scroll end-follow 6/6 and documentation-image-preview 20/20. The original launch/teardown failure did not recur. Separately, Spinner evidence run 37113894391 passed 11/11 tests and captured 32 baseline plus 32 candidate states.
+
+The aggregate browser result was still **170 passed / 1 failed**: Base Image's Vue 2, dark, 1280px case timed out at the unchanged 20-second `selectRuntime` predicate. The first failure lacked renderer/selected-value state, so neither a deterministic regression nor an intermittent trigger is established. This is not the homepage lane's HTTP readiness failure and has not been assigned the same cause.
+
+The follow-up adds diagnostics only in Base Image's test. It retains the original native selection, expected five images, renderer predicate and deadline. Failure facts are read only after the original wait fails, so no pre-click observation can delay the user journey into passing. It reports selector/projection values, image count, renderer marks, theme/viewport and page errors observed during selection; an optional public preview screenshot supplements those facts. Diagnostics cannot replace the original exception. The controlled diagnostic tests verify a successful journey adds no state read and both successful and failed diagnostic collection preserve the original failure. An initial unit attempt used a matcher unavailable in the installed Vitest 2; replacing it with the equivalent call-count and argument assertions repairs the test API usage without changing the expectation.
+
+A read-only exact-head evidence workflow runs the unchanged Base Image 17 cases, Scroll six cases and Spinner four native controls sequentially on Chromium. Its captures retain the checked-out source SHA. Both this focused observation and a new full CI run are required; a passing repeat alone would not prove that the unidentified intermittent readiness issue has been fixed.

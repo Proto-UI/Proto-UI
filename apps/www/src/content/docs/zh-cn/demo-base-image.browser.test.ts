@@ -18,6 +18,70 @@ const RUNTIMES = ['wc', 'react', 'vue', 'vue2'] as const;
 let browser: Browser;
 let baseUrl = '';
 
+async function selectImageRuntime(
+  page: Page,
+  previewer: Locator,
+  runtime: (typeof RUNTIMES)[number]
+): Promise<void> {
+  const pageErrors: string[] = [];
+  const onPageError = (error: Error) => pageErrors.push(error.message);
+  page.on('pageerror', onPageError);
+  try {
+    // Preserve the shared helper's native control journey, exact count,
+    // renderer identity predicate and 20-second deadline.
+    await selectRuntime(page, previewer, runtime, 'img', 5);
+  } catch (error) {
+    // Collect only after failure so observation cannot turn an initial-mount
+    // race into a passing selection by inserting an extra pre-click await.
+    try {
+      const facts = await previewer.evaluate((root) => {
+        const host = root.querySelector<HTMLElement>('.host');
+        const select = root.querySelector<HTMLElement>('[data-adapter-select-root]');
+        const scope = root.querySelector<HTMLElement>('[data-projection-scope]');
+        const roots = Array.from(host?.querySelectorAll<HTMLElement>('[data-pui-root]') ?? []);
+        return {
+          inited: (root as HTMLElement).dataset.inited,
+          demoId: (root as HTMLElement).dataset.demoId,
+          projectionMode: (root as HTMLElement).dataset.projectionMode,
+          selectedValue: select?.dataset.value,
+          projectionRuntime: scope?.dataset.projectionRuntime,
+          projectionState: scope?.dataset.projectionState,
+          hostImages: host?.querySelectorAll('img').length,
+          hostVue3: host?.hasAttribute('data-v-app'),
+          roots: roots.slice(0, 12).map((element) => ({
+            tag: element.tagName,
+            vue2: Boolean((element as HTMLElement & { __vue__?: unknown }).__vue__),
+            vue3: element.closest('[data-v-app]') != null,
+          })),
+          previewError: host?.querySelector('pre')?.textContent?.slice(0, 2000),
+          theme: document.documentElement.dataset.theme,
+          viewport: { width: innerWidth, height: innerHeight },
+        };
+      });
+      console.error(
+        'Base Image runtime readiness failure',
+        JSON.stringify({ runtime, facts, pageErrors })
+      );
+      const directory = process.env.PROTO_UI_IMAGE_SCREENSHOT_DIR;
+      if (directory) {
+        await mkdir(directory, { recursive: true });
+        await previewer.screenshot({
+          path: path.join(
+            directory,
+            `${runtime}-${facts.theme}-${facts.viewport.width}-readiness-failed.png`
+          ),
+          timeout: 2_000,
+        });
+      }
+    } catch (diagnosticError) {
+      console.error('Base Image readiness diagnostic unavailable', diagnosticError);
+    }
+    throw error;
+  } finally {
+    page.off('pageerror', onPageError);
+  }
+}
+
 function physicalImage(previewer: Locator, ref: string): Locator {
   return previewer.locator(`img[data-demo-ref="${ref}"], [data-demo-ref="${ref}"] img`);
 }
@@ -60,7 +124,7 @@ describe.sequential('Base Image public consumer browser evidence', () => {
           let release: (() => void) | undefined;
           try {
             await applyColorScheme(page, scheme);
-            await selectRuntime(page, previewer, runtime, 'img', 5);
+            await selectImageRuntime(page, previewer, runtime);
             await state(previewer, 'idle');
             expect(await previewer.locator('.host img').count()).toBe(5);
 
@@ -193,7 +257,7 @@ describe.sequential('Base Image public consumer browser evidence', () => {
       { width: 390, height: 900 }
     );
     try {
-      await selectRuntime(page, previewer, 'vue2', 'img', 5);
+      await selectImageRuntime(page, previewer, 'vue2');
       expect(
         await page.getByRole('heading', { name: 'Props 与 Exposes', exact: true }).count()
       ).toBe(1);
