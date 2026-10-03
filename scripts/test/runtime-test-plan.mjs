@@ -1,4 +1,5 @@
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/src/components/documentation-image-preview.browser.test.ts',
   'apps/www/test/message-composition.browser.test.ts',
   'apps/www/test/color-scheme.browser.test.ts',
   'apps/www/test/button-view-lifetime.browser.test.ts',

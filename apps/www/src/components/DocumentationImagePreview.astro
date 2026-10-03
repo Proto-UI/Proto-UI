@@ -1,0 +1,21 @@
+---
+import '../styles/documentation-image-preview.css';
+---
+
+<documentation-image-preview></documentation-image-preview>
+<script>
+  import { mountDocumentationImagePreview } from './documentation-image-preview';
+  class DocumentationImagePreview extends HTMLElement {
+    dispose?: () => void;
+    connectedCallback() {
+      this.dispose?.();
+      this.dispose = mountDocumentationImagePreview(this);
+    }
+    disconnectedCallback() {
+      this.dispose?.();
+      this.dispose = undefined;
+    }
+  }
+  if (!customElements.get('documentation-image-preview'))
+    customElements.define('documentation-image-preview', DocumentationImagePreview);
+</script>
