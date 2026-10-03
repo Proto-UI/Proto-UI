@@ -18,6 +18,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // Warm every route the suites wait on.
 const READY_ROUTES = [
   '/en/test/style-isolation/',
+  '/en/test/new-projection-families/',
   '/en/ui-libraries/base/image/',
   '/en/start-here/quick-start/',
   '/en/ui-libraries/shadcn/select/',
