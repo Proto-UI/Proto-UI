@@ -9,7 +9,9 @@
   "files": [
     "dist/",
     "bin/",
-    "README.md"
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "LICENSE-BOOTSTRAP"
   ],
   "dependencies": {
     "prompts": "^2.4.2",
@@ -48,6 +50,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    }
+  },
+  "protoUi": {
+    "release": {
+      "thirdPartyNotices": [
+        "THIRD_PARTY_NOTICES.md",
+        "LICENSE-BOOTSTRAP"
+      ]
     }
   }
 }

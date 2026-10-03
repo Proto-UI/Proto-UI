@@ -42,7 +42,9 @@
     "tailwindcss": "^4.1.11",
     "remark-directive": "^4.0.0",
     "unist-util-visit": "^5.0.0",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "@proto.ui/prototypes-bootstrap-2-3-2": "workspace:*",
+    "@proto.ui/prototypes-liquid-glass": "workspace:*"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",

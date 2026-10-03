@@ -1,0 +1,30 @@
+{
+  "name": "@proto.ui/prototypes-bootstrap-2-3-2",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "protoUi": {
+    "release": {
+      "scan": false
+    }
+  },
+  "description": "Draft Bootstrap 2.3.2 prototype projection source. Not published; see #792 for remaining material/host/compiler work.",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./button": {
+      "types": "./src/button/index.ts",
+      "default": "./src/button/index.ts"
+    },
+    "./theme": {
+      "types": "./src/theme.ts",
+      "default": "./src/theme.ts"
+    }
+  },
+  "dependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/prototypes-base": "workspace:*"
+  }
+}

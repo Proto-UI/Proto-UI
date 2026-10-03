@@ -1,0 +1,273 @@
+---
+import { renderProtoStyleTokenCss } from '../../../../../../packages/cli/src/services/proto-style-css';
+import { DRAFT_FAMILY_STYLE_TOKENS } from '../../../../../../packages/cli/src/generated/draft-family-style-tokens';
+import { renderThemeCss as bootstrapTheme } from '../../../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
+import { renderThemeCss as glassTheme } from '../../../../../../packages/prototypes/liquid-glass/src/theme';
+const families = ['bootstrap-2-3-2', 'liquid-glass'];
+const tokens = [...new Set(Object.values(DRAFT_FAMILY_STYLE_TOKENS).flat())];
+const themeCss =
+  bootstrapTheme({
+    lightSelector: '[data-family="bootstrap-2-3-2"]',
+    darkSelector: '[data-theme="dark"] [data-family="bootstrap-2-3-2"]',
+  }) +
+  glassTheme({
+    lightSelector: '[data-family="liquid-glass"]',
+    darkSelector: '[data-theme="dark"] [data-family="liquid-glass"]',
+  });
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Draft projection families: real Adapter fixture</title>
+    <style is:global set:html={themeCss + renderProtoStyleTokenCss(tokens)}></style>
+    <script is:inline>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
+    </script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="eyebrow">Prototype foundations · #792</p>
+        <h1>One Button protocol. Two new visual directions.</h1>
+        <p>
+          Real Base Button projections through four Web adapters. No website reset or component CSS.
+        </p>
+        <p class="scope">
+          Bootstrap 2.3.2: default/primary raised controls. Liquid Glass: opaque accessibility
+          fallback only; translucent material remains pending #793. Neither row establishes native
+          or Prototype Compiler support.
+        </p>
+      </header>
+      {
+        families.map((family) => (
+          <section data-family={family}>
+            <h2>
+              {family === 'liquid-glass'
+                ? 'Liquid Glass · opaque fallback'
+                : 'Bootstrap 2.3.2 · classic raised controls'}
+            </h2>
+            <div class="runtime-grid">
+              {['wc', 'react', 'vue', 'vue2'].map((runtime) => (
+                <article>
+                  <h3>
+                    {runtime === 'wc'
+                      ? 'Web Components'
+                      : runtime === 'vue'
+                        ? 'Vue 3'
+                        : runtime === 'vue2'
+                          ? 'Vue 2'
+                          : 'React'}
+                  </h3>
+                  <div data-runtime-host={`${family}-${runtime}`} />
+                  <output data-count={`${family}-${runtime}`} aria-live="polite">
+                    0 activations
+                  </output>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </main>
+    <script>
+      import bootstrapButton from '@proto.ui/prototypes-bootstrap-2-3-2/button';
+      import glassButton from '@proto.ui/prototypes-liquid-glass/button';
+      import { registerPrototype } from '../../../components/PrototypePreviewer/registry';
+      import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer';
+      import type {
+        DemoSpec,
+        DemoRenderResult,
+      } from '../../../components/PrototypePreviewer/demo-types';
+      import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/registry';
+
+      const records: DemoRenderResult[] = [];
+      const updates = new Map<string, (ref: string, props: Record<string, unknown>) => void>();
+      (window as unknown as { projectionFamilyFixture: unknown }).projectionFamilyFixture = {
+        setProps(key: string, ref: string, props: Record<string, unknown>) {
+          updates.get(key)?.(ref, props);
+        },
+        async dispose() {
+          for (const record of records.splice(0).reverse()) await record.destroy();
+          updates.clear();
+        },
+      };
+      const families = ['bootstrap-2-3-2', 'liquid-glass'];
+      registerPrototype('bootstrap-2-3-2-button', bootstrapButton);
+      registerPrototype('liquid-glass-button', glassButton);
+      async function mount() {
+        for (const family of families) {
+          for (const runtime of ['wc', 'react', 'vue', 'vue2'] as RuntimeId[]) {
+            const key = `${family}-${runtime}`;
+            const host = document.querySelector<HTMLElement>(`[data-runtime-host="${key}"]`)!;
+            const isBootstrap = family === 'bootstrap-2-3-2';
+            const demo: DemoSpec = {
+              type: 'demo',
+              root: {
+                kind: 'box',
+                className: 'control-row',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: `${family}-button`,
+                    ref: 'default',
+                    children: ['Back'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: `${family}-button`,
+                    ref: 'primary',
+                    props: { variant: isBootstrap ? 'primary' : 'prominent' },
+                    children: ['Continue'],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: `${family}-button`,
+                    ref: 'disabled',
+                    props: { disabled: true },
+                    children: ['Unavailable'],
+                  },
+                ],
+              },
+              setup({ refs, api }) {
+                let count = 0;
+                const update = () => {
+                  document.querySelector<HTMLOutputElement>(`[data-count="${key}"]`)!.value =
+                    `${++count} activations`;
+                };
+                const setProps = (ref: string, props: Record<string, unknown>) =>
+                  api.setProps(ref, { ...props, onClick: update });
+                updates.set(key, setProps);
+                setProps('default', {});
+                setProps('primary', { variant: isBootstrap ? 'primary' : 'prominent' });
+                setProps('disabled', { disabled: true });
+                const onClick = (event: Event) => {
+                  if (event instanceof CustomEvent) update();
+                };
+                for (const ref of ['default', 'primary', 'disabled'])
+                  refs[ref].addEventListener('click', onClick);
+                return () => {
+                  for (const ref of ['default', 'primary', 'disabled'])
+                    refs[ref].removeEventListener('click', onClick);
+                };
+              },
+            };
+            records.push(await renderDemo({ runtime, demo, host }));
+            host.dataset.mounted = 'true';
+          }
+        }
+        document.documentElement.dataset.familyFixtureReady = 'true';
+      }
+      window.addEventListener(
+        'pagehide',
+        () => {
+          for (const record of records.reverse()) void record.destroy();
+        },
+        { once: true }
+      );
+      void mount().catch((error) => {
+        document.documentElement.dataset.familyFixtureError = String(error?.stack ?? error);
+        document.documentElement.dataset.familyFixtureReady = 'error';
+        console.error(error);
+      });
+    </script>
+    <style is:global>
+      /* Only consumer page layout/typography. No selectors reach a prototype surface. */
+      body {
+        margin: 0;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background: #f3f4f6;
+        color: #1d1d1f;
+      }
+      main {
+        max-width: 1100px;
+        padding: 48px 28px;
+        margin: auto;
+      }
+      header {
+        max-width: 760px;
+        margin-bottom: 36px;
+      }
+      h1 {
+        font-size: 34px;
+        line-height: 1.16;
+        letter-spacing: -0.025em;
+        margin: 10px 0 16px;
+      }
+      h2 {
+        font-size: 21px;
+        margin: 0 0 24px;
+      }
+      h3 {
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        margin: 0 0 18px;
+      }
+      p {
+        line-height: 1.55;
+      }
+      .eyebrow {
+        font-size: 12px;
+        color: #5e6370;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+      }
+      .scope {
+        font-size: 13px;
+        color: #5e6370;
+      }
+      section {
+        background: var(--pui-background);
+        color: var(--pui-foreground);
+        border: 1px solid #d6d8dd;
+        padding: 28px;
+        margin-bottom: 24px;
+        border-radius: 16px;
+      }
+      .runtime-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+      }
+      .control-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      output {
+        display: block;
+        font-size: 12px;
+        margin-top: 14px;
+        color: #72757b;
+      }
+      [data-theme='dark'] body {
+        background: #101012;
+        color: #f5f5f7;
+      }
+      [data-theme='dark'] .scope,
+      [data-theme='dark'] .eyebrow {
+        color: #adaeb5;
+      }
+      @media (max-width: 700px) {
+        .runtime-grid {
+          grid-template-columns: 1fr;
+        }
+        main {
+          padding: 28px 16px;
+        }
+        section {
+          padding: 20px;
+        }
+        h1 {
+          font-size: 29px;
+        }
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+id: T-BOOTSTRAP-2-3-2-BUTTON-0001
+type: test
+title: Bootstrap 2.3.2 Button evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Tests cover the bounded visual foundation; stable and cross-host admission are not implied.
+summary: Unit state/token closure plus a planned real-four-Web rendering fixture; native/compiler remain outside this slice.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-INHERITANCE
+    title: Identity, inherited Base states and restored defaults
+    covers:
+      - P-BOOTSTRAP-2-3-2-BUTTON-BASE
+      - P-BOOTSTRAP-2-3-2-BUTTON-API
+    expectation: base-inherited-state-and-defaults
+  - id: T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-TOKENS
+    title: Source-extracted finite style vocabulary and theme closure
+    covers:
+      - P-BOOTSTRAP-2-3-2-BUTTON-VISUAL
+      - P-BOOTSTRAP-2-3-2-BUTTON-CLOSURE
+    expectation: source-token-physical-closure
+  - id: T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-BROWSER
+    title: Real four-Web-adapter rendering and activation
+    covers:
+      - P-BOOTSTRAP-2-3-2-BUTTON-BASE
+      - P-BOOTSTRAP-2-3-2-BUTTON-VISUAL
+      - P-BOOTSTRAP-2-3-2-BUTTON-CLOSURE
+    expectation: real-web-host-button-appearance-and-interaction
+implementations:
+  - id: bootstrap-2-3-2-button-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/bootstrap-2-3-2/test/button.test.ts
+    required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-INHERITANCE
+      - T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-TOKENS
+  - id: bootstrap-2-3-2-button-browser
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BOOTSTRAP-2-3-2-BUTTON-0001-CASE-BROWSER
+    notes:
+      - This is a Web-only fixture; it does not establish native or Prototype Compiler parity.
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-BUTTON
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/test/button.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded family-state and physical-token closure cases; browser evidence remains explicitly planned until run.
+tags:
+  - test
+  - bootstrap-2-3-2
+  - button

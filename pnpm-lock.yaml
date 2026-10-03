@@ -114,9 +114,15 @@ importers:
       '@proto.ui/prototypes-base':
         specifier: workspace:*
         version: link:../../packages/prototypes/base
+      '@proto.ui/prototypes-bootstrap-2-3-2':
+        specifier: workspace:*
+        version: link:../../packages/prototypes/bootstrap-2-3-2
       '@proto.ui/prototypes-brutalist':
         specifier: workspace:*
         version: link:../../packages/prototypes/brutalist
+      '@proto.ui/prototypes-liquid-glass':
+        specifier: workspace:*
+        version: link:../../packages/prototypes/liquid-glass
       '@proto.ui/prototypes-lucide':
         specifier: workspace:*
         version: link:../../packages/prototypes/lucide
@@ -1118,6 +1124,15 @@ importers:
         specifier: workspace:*
         version: link:../../runtime
 
+  packages/prototypes/bootstrap-2-3-2:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../base
+
   packages/prototypes/brutalist:
     dependencies:
       '@proto.ui/core':
@@ -1154,6 +1169,15 @@ importers:
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
+
+  packages/prototypes/liquid-glass:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/prototypes-base':
+        specifier: workspace:*
+        version: link:../base
 
   packages/prototypes/lucide:
     dependencies:
