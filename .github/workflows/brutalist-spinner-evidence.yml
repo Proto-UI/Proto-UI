@@ -9,6 +9,7 @@ on:
       - 'apps/www/src/content/docs/**/spinner.mdx'
       - 'apps/www/src/content/docs/zh-cn/demo-brutalist-spinner*'
       - 'apps/www/test/evidence/brutalist-spinner.capture.mts'
+      - 'apps/www/test/evidence/brutalist-spinner.capture.test.ts'
       - 'spec/prototypes/P-BRUTALIST-SPINNER.yaml'
       - 'spec/tests/T-BRUTALIST-SPINNER-0001.yaml'
       - 'spec/decisions/D-BRUTALIST-STYLED-ONLY-ADMISSION-0001.yaml'
@@ -59,6 +60,7 @@ jobs:
           set -euo pipefail
           corepack pnpm@10.32.1 exec vitest run \
             apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts \
+            apps/www/test/evidence/brutalist-spinner.capture.test.ts \
             --maxWorkers=1 --minWorkers=1
       - name: Capture actual candidate components
         if: ${{ !cancelled() }}

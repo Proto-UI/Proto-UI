@@ -50,31 +50,13 @@ try {
           for (const motion of ['no-preference', 'reduce'] as const) {
             await page.emulateMedia({ reducedMotion: motion });
             await previewer.scrollIntoViewIfNeeded();
-            const facts = await previewer.locator(selector).evaluateAll((elements) =>
+            const surfaces = await previewer.locator(selector).evaluateAll((elements) =>
               elements.map((element) => {
                 const css = getComputedStyle(element);
-                const rgb = (color: string) => {
-                  const values = color.match(/[\d.]+/g)?.map(Number);
-                  if (!values || values.length < 3 || (values[3] ?? 1) !== 1) return null;
-                  return values.slice(0, 3);
-                };
-                let background: number[] | null = null;
+                const backgroundColors: string[] = [];
                 for (let node: Element | null = element; node; node = node.parentElement) {
-                  background = rgb(getComputedStyle(node).backgroundColor);
-                  if (background) break;
+                  backgroundColors.push(getComputedStyle(node).backgroundColor);
                 }
-                const foreground = rgb(css.color);
-                const luminance = (channels: number[]) =>
-                  channels
-                    .map((channel) => channel / 255)
-                    .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
-                    .reduce((sum, value, i) => sum + value * [0.2126, 0.7152, 0.0722][i]!, 0);
-                const fg = foreground && luminance(foreground);
-                const bg = background && luminance(background);
-                const contrast =
-                  fg !== null && bg !== null
-                    ? (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
-                    : null;
                 return {
                   ref: element.getAttribute('data-demo-ref'),
                   width: css.width,
@@ -86,12 +68,55 @@ try {
                   gapColor: css.borderTopColor,
                   animationName: css.animationName,
                   animationDuration: css.animationDuration,
-                  contrast,
+                  backgroundColors,
                   ariaHidden: element.getAttribute('aria-hidden'),
                   role: element.getAttribute('role'),
                 };
               })
             );
+            // Color math stays in Node: tsx's keepNames helpers must never be
+            // captured inside a function that Playwright serializes to the page.
+            const rgb = (color: string) => {
+              const match =
+                /^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/.exec(
+                  color
+                );
+              if (!match) return null;
+              const channels = match.slice(1, 4).map(Number);
+              const alpha = Number(match[4] ?? 1);
+              if (
+                channels.some((value) => !Number.isFinite(value) || value < 0 || value > 255) ||
+                !Number.isFinite(alpha) ||
+                alpha < 0 ||
+                alpha > 1
+              )
+                return null;
+              return { channels, alpha };
+            };
+            const luminance = (channels: number[]) =>
+              channels
+                .map((channel) => channel / 255)
+                .map((v) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+                .reduce((sum, value, i) => sum + value * [0.2126, 0.7152, 0.0722][i]!, 0);
+            const facts = surfaces.map((surface) => {
+              const foreground = rgb(surface.color);
+              let background: number[] | null = null;
+              for (const color of surface.backgroundColors) {
+                const parsed = rgb(color);
+                if (parsed?.alpha === 0) continue;
+                if (parsed?.alpha === 1) background = parsed.channels;
+                // Unknown formats and partial alpha are unmeasured, not an
+                // excuse to skip a painted layer and claim passing contrast.
+                break;
+              }
+              const fg = foreground?.alpha === 1 ? luminance(foreground.channels) : null;
+              const bg = background && luminance(background);
+              const contrast =
+                fg !== null && bg !== null
+                  ? (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05)
+                  : null;
+              return { ...surface, contrast };
+            });
             // Sample naturally rendered animation frames. Reduced motion must
             // stay still; motion-enabled output must genuinely advance.
             const frames = await previewer
