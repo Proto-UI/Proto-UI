@@ -4,13 +4,15 @@ title: Brutalist Spinner projects a contentless open-edge ring indicator
 status: draft
 lifecycleRationale: The admitted styled-only Spinner carrier remains a draft visual-only prototype; direct-ownership and reduced-motion evidence do not independently admit a stable design-language surface, and no Base Spinner counterpart is cataloged.
 since: 0.3.0-alpha.1
-summary: Brutalist Spinner is a direct styled-only prototype that owns one contentless square open-edge ring with three sizes, a 1000ms rotation, and a reduced-motion fallback while every loading and accessibility fact stays parent-owned.
+summary: Brutalist Spinner is a direct styled-only prototype that owns one contentless circular open-edge ring with three sizes, a 1000ms rotation, and a reduced-motion fallback while every loading and accessibility fact stays parent-owned.
 statement:
   en: >-
-    Brutalist Spinner directly materializes without a Base Spinner hook and owns only its visual contract: one contentless Root, one public `size` prop (sm | md | lg resolving to 16, 24, or 32 CSS pixels, default md), a 2px `currentColor` square ring with one open leading edge, a 1000ms linear infinite rotation when motion is allowed, and a static open-edge fallback under `prefers-reduced-motion: reduce`. It is always aria-hidden, roleless, non-focusable, and empty-exposed; loading, busy, progress, completion, announcement, activation, event, focus, placement, and layout ownership remain with the parent composition, Base Async Region, Base Live Region, or authored control.
+    Brutalist Spinner directly materializes without a Base Spinner hook and owns only its visual contract: one contentless Root, one public `size` prop (sm | md | lg resolving to 16, 24, or 32 CSS pixels, default md), a 2px `currentColor` circular ring with one open leading edge, a 1000ms linear infinite rotation when motion is allowed, and a static open-edge fallback under `prefers-reduced-motion: reduce`. It is always aria-hidden, roleless, non-focusable, and empty-exposed; loading, busy, progress, completion, announcement, activation, event, focus, placement, and layout ownership remain with the parent composition, Base Async Region, Base Live Region, or authored control.
+
 
   zh-CN: >-
-    Brutalist Spinner 无 Base Spinner hook 直接 materialize，仅拥有其视觉合同：单一 contentless Root、一个公开 `size` prop（sm | md | lg 分别解析为 16、24 或 32 CSS pixel，默认 md）、2px `currentColor` 方形 ring 与一个开口 leading edge、允许运动时 1000ms 线性无限旋转，以及 `prefers-reduced-motion: reduce` 下的静态开口 edge fallback。它始终 aria-hidden、无 role、不可聚焦且 exposes 为空；loading、busy、progress、completion、announcement、activation、event、focus、placement 与 layout 所有权保留给父级组合、Base Async Region、Base Live Region 或 authored control。
+    Brutalist Spinner 无 Base Spinner hook 直接 materialize，仅拥有其视觉合同：单一 contentless Root、一个公开 `size` prop（sm | md | lg 分别解析为 16、24 或 32 CSS pixel，默认 md）、2px `currentColor` 圆形 ring 与一个开口 leading edge、允许运动时 1000ms 线性无限旋转，以及 `prefers-reduced-motion: reduce` 下的静态开口 edge fallback。它始终 aria-hidden、无 role、不可聚焦且 exposes 为空；loading、busy、progress、completion、announcement、activation、event、focus、placement 与 layout 所有权保留给父级组合、Base Async Region、Base Live Region 或 authored control。
+
 
 criteria:
   - id: P-BRUTALIST-SPINNER-DIRECT-OWNERSHIP
@@ -23,17 +25,21 @@ criteria:
       zh-CN: 公开 `size` prop 接受 sm、md 与 lg，默认 md，prop 移除后恢复默认值，并分别映射 16、24 与 32 CSS pixel 方形 Root 尺寸；它不拥有 tone、loading、busy、label、delay 或 replacement API。
   - id: P-BRUTALIST-SPINNER-VISUAL-GRAMMAR
     text:
-      en: The Root projects a square 2px `currentColor` ring with one open leading edge and no fill, radius, gradient, blur, glow, or soft shadow; the ring geometry is structural grammar rather than a variant.
-      zh-CN: Root 投射 2px `currentColor` 方形 ring 与一个开口 leading edge，不使用 fill、radius、gradient、blur、glow 或 soft shadow；ring 几何是结构语法而不是 variant。
+      en: The Root projects a circular 2px `currentColor` ring with one open leading edge and no fill, gradient, blur, glow, or soft shadow; the circular geometry avoids diagonal corner overshoot during rotation and is structural grammar rather than a variant.
+      zh-CN: Root 投射 2px `currentColor` 圆形 ring 与一个开口 leading edge，不使用 fill、gradient、blur、glow 或 soft shadow；圆环几何避免旋转时直角向对角方向突出，属于结构语法而不是 variant。
   - id: P-BRUTALIST-SPINNER-MOTION-REDUCED-MOTION
     text:
       en: >-
         The Root rotates linearly once per 1000ms only when reduced motion is not requested; `prefers-reduced-motion: reduce` removes the animation while retaining the open edge as a non-color orientation cue.
 
+
       zh-CN: >-
         仅在未请求 reduced motion 时 Root 以 1000ms 一周线性旋转；`prefers-reduced-motion: reduce` 移除 animation，同时保留开口 edge 作为非颜色 orientation cue。
 
+
 sources:
+  - path: https://www.neobrutalism.dev/docs/spinner
+    label: Neo-Brutalist circular Spinner and inline Button reference observed 2026-10-03; visual observation only, no code or assets copied
   - path: packages/prototypes/brutalist/src/spinner/root.proto.ts
   - path: packages/prototypes/brutalist/test/spinner.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/7c9eaba1c0a6404c990c144a654792e3313c650d/apps/v4/registry/new-york-v4/ui/spinner.tsx
@@ -50,4 +56,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Introduced the admitted Brutalist styled-only Spinner carrier with direct ownership, three sizes, 1000ms rotation, and reduced-motion fallback.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Refined only the draft Spinner silhouette to an open circular ring for recognizable, stable rotation; retained size, stroke, timing, reduced-motion, and parent-owned semantic boundaries.
 tags: [prototype, brutalist, spinner, styled-only, visual, reduced-motion, indicator]

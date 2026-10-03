@@ -43,6 +43,22 @@ describe('cli: proto-style-css spinner surface', () => {
     expect(css).not.toContain('border-color: transparent currentColor');
   });
 
+  it('projects a circular ring without changing its stroke, size, or motion', () => {
+    const css = renderProtoStyleTokenCss([
+      'rounded-full',
+      'border-2',
+      'border-[transparent_currentColor_currentColor_currentColor]',
+      'h-4',
+      'w-4',
+      'animate-spin',
+    ]);
+    expect(css).toContain('border-radius: 9999px;');
+    expect(css).toContain('border-width: 2px;');
+    expect(css).toContain('border-top-color: transparent;');
+    expect(css).toContain('animation-duration: 1000ms;');
+    expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+  });
+
   it('keeps pui-enter emission independent of pui-spin', () => {
     const css = renderProtoStyleTokenCss(['animate-spin']);
     expect(css).not.toContain('@keyframes pui-enter');

@@ -83,19 +83,19 @@ describe('prototypes/brutalist: spinner', () => {
   });
 
   // T-BRUTALIST-SPINNER-0001-CASE-VISUAL
-  it('projects the square open-edge ring grammar without fill or soft effects', async () => {
+  it('projects the circular open-edge ring grammar without fill or soft effects', async () => {
     const element = new BrutalistSpinnerElement();
     document.body.appendChild(element);
     await flush();
 
-    expect(styleContains(element, 'rounded-none')).toBe(true);
+    expect(styleContains(element, 'rounded-full')).toBe(true);
     expect(styleContains(element, 'border-2')).toBe(true);
     expect(
       styleContains(element, 'border-[transparent_currentColor_currentColor_currentColor]')
     ).toBe(true);
     expect(styleContains(element, 'bg-transparent')).toBe(true);
     expect(styleContains(element, 'animate-spin')).toBe(true);
-    expect(styleContains(element, 'rounded-full')).toBe(false);
+    expect(styleContains(element, 'rounded-none')).toBe(false);
     expect(styleContains(element, 'shadow-')).toBe(false);
     expect(styleContains(element, 'blur')).toBe(false);
 

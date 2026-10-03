@@ -4,7 +4,7 @@ title: Brutalist Spinner direct-ownership and visual contract tests
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale: New draft test entity delivering the admitted Spinner carrier's executable evidence; module-test coverage proves direct ownership, semantic absence, size mapping, ring grammar, and reduced-motion retention without promoting any entity to active.
-summary: Covers direct ownership without a Base Spinner hook, semantic absence, size mapping and default restoration, open-edge ring grammar, and reduced-motion fallback retention.
+summary: Covers direct ownership without a Base Spinner hook, semantic absence, size mapping and default restoration, circular open-edge ring grammar, and reduced-motion fallback retention.
 cases:
   - id: T-BRUTALIST-SPINNER-0001-CASE-DIRECT-OWNERSHIP
     title: Spinner owns the visual-only prototype directly without a Base Spinner hook
@@ -19,7 +19,7 @@ cases:
     covers: [P-BRUTALIST-SPINNER-SIZE-PROP]
     expectation: spinner-size-mapping-and-default-restoration
   - id: T-BRUTALIST-SPINNER-0001-CASE-VISUAL
-    title: Root projects the open-edge ring grammar without fill or soft effects
+    title: Root projects the circular open-edge ring grammar without fill or soft effects
     covers: [P-BRUTALIST-SPINNER-VISUAL-GRAMMAR]
     expectation: spinner-open-edge-ring-grammar
   - id: T-BRUTALIST-SPINNER-0001-CASE-REDUCED-MOTION
@@ -78,4 +78,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Mapped four-runtime parent-composition browser evidence and rendered reduced-motion coverage without lifecycle promotion.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Updated the draft circular ring expectation and added source-bound visual, contrast, and motion evidence across all four Web runtimes without semantic or lifecycle expansion.
 tags: [prototype, brutalist, spinner, test, styled-only, reduced-motion]

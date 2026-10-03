@@ -9,11 +9,11 @@ summary: >-
 
 statement:
   en: >-
-    Brutalist direct styled-only admission follows the candidate's owned visual contract rather than a component-name checklist. Alert is deferred until passive surface, announcement, action, dismiss, tone, and anatomy ownership converge. Spinner may advance as one contentless Root that owns only a square open-edge silhouette, three sizes, one-second rotation, and a reduced-motion fallback while every loading and accessibility fact remains parent-owned. Kbd remains native `kbd` content plus shared styling and does not create a Prototype, spec, CLI, or implementation identity.
+    Brutalist direct styled-only admission follows the candidate's owned visual contract rather than a component-name checklist. Alert is deferred until passive surface, announcement, action, dismiss, tone, and anatomy ownership converge. Spinner may advance as one contentless Root that owns only a circular open-edge silhouette, three sizes, one-second rotation, and a reduced-motion fallback while every loading and accessibility fact remains parent-owned. Kbd remains native `kbd` content plus shared styling and does not create a Prototype, spec, CLI, or implementation identity.
 
 
   zh-CN: >-
-    Brutalist direct styled-only 准入依据候选自身拥有的视觉合同，而不是组件名称清单。Alert 延后，直到 passive surface、announcement、action、dismiss、tone 与 anatomy 的所有权收敛。Spinner 可以作为单一 contentless Root 推进，仅拥有方形开口轮廓、三档尺寸、1 秒旋转与 reduced-motion fallback；所有 loading 与 accessibility 事实仍由父级拥有。Kbd 保持为原生 `kbd` 内容加共享样式，不创建 Prototype、spec、CLI 或实施身份。
+    Brutalist direct styled-only 准入依据候选自身拥有的视觉合同，而不是组件名称清单。Alert 延后，直到 passive surface、announcement、action、dismiss、tone 与 anatomy 的所有权收敛。Spinner 可以作为单一 contentless Root 推进，仅拥有圆形开口轮廓、三档尺寸、1 秒旋转与 reduced-motion fallback；所有 loading 与 accessibility 事实仍由父级拥有。Kbd 保持为原生 `kbd` 内容加共享样式，不创建 Prototype、spec、CLI 或实施身份。
 
 
 criteria:
@@ -86,11 +86,11 @@ criteria:
   - id: D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-VISUAL
     text:
       en: >-
-        Spinner owns a square 2px `currentColor` ring with one open leading edge and no fill, radius, gradient, blur, glow, or soft shadow. It rotates linearly once per 1000ms only when reduced motion is not requested; `prefers-reduced-motion: reduce` removes animation while retaining the open edge as a non-color orientation cue.
+        Spinner owns a circular 2px `currentColor` ring with one open leading edge and no fill, gradient, blur, glow, or soft shadow. It rotates linearly once per 1000ms only when reduced motion is not requested; `prefers-reduced-motion: reduce` removes animation while retaining the open edge as a non-color orientation cue.
 
 
       zh-CN: >-
-        Spinner 拥有一个 2px `currentColor` 方形 ring，保留一个开口 leading edge，且不使用 fill、radius、gradient、blur、glow 或 soft shadow。仅在未请求 reduced motion 时以 1000ms 一周线性旋转；`prefers-reduced-motion: reduce` 移除 animation，同时保留开口 edge 作为非颜色 orientation cue。
+        Spinner 拥有一个 2px `currentColor` 圆形 ring，保留一个开口 leading edge，且不使用 fill、gradient、blur、glow 或 soft shadow。仅在未请求 reduced motion 时以 1000ms 一周线性旋转；`prefers-reduced-motion: reduce` 移除 animation，同时保留开口 edge 作为非颜色 orientation cue。
 
 
     references:
@@ -171,6 +171,8 @@ openQuestions:
 
     blocks: [Alert identity, Alert implementation carrier]
 sources:
+  - path: https://www.neobrutalism.dev/docs/spinner
+    label: Neo-Brutalist circular Spinner and inline Button reference observed 2026-10-03; visual observation only, no code or assets copied
   - path: https://github.com/Proto-UI/Proto-UI/issues/386
     label: Issue 386 admission checkpoint and evidence discussion
   - path: internal/records/2026-08-13-v0.3-prototype-coverage-and-shadcn-parity.zh-CN.md
@@ -226,4 +228,7 @@ revisions:
       Recorded the Issue 386 candidate-specific admission result without creating empty Alert or Kbd identities or implementing Spinner.
 
 
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Refined only the draft Spinner silhouette to an open circular ring for recognizable, stable rotation; retained size, stroke, timing, reduced-motion, and parent-owned semantic boundaries.
 tags: [decision, brutalist, styled-only, admission, alert, spinner, kbd]

@@ -14,9 +14,10 @@ const SPINNER_SIZE_TOKENS: Record<BrutalistSpinnerSize, string> = {
 };
 
 // D-BRUTALIST-STYLED-ONLY-ADMISSION-0001-SPINNER-VISUAL
-// Keep the open edge and other sides in one v0 border-color intent.
+// A circular ring avoids diagonal corner overshoot while rotating.
+// Keep the open arc and other sides in one v0 border-color intent.
 const SPINNER_VISUAL_TOKENS =
-  'inline-block shrink-0 rounded-none border-2 border-[transparent_currentColor_currentColor_currentColor] bg-transparent animate-spin will-change-transform';
+  'inline-block shrink-0 rounded-full border-2 border-[transparent_currentColor_currentColor_currentColor] bg-transparent animate-spin will-change-transform';
 
 export const BrutalistSpinnerRoot = definePrototype<
   BrutalistSpinnerRootProps,

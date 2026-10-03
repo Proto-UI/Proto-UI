@@ -147,7 +147,7 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
     }
   });
 
-  it('keeps Spinner contentless, hidden, square, and open-edged across runtimes and themes', async () => {
+  it('keeps Spinner contentless, hidden, circular, and open-edged across runtimes and themes', async () => {
     const opened = await openRoute(browser, baseUrl, SPINNER_ROUTE, NARROW_VIEWPORT);
     try {
       for (const runtime of TEST_RUNTIMES) {
@@ -183,6 +183,7 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
                   style.borderBottomRightRadius,
                   style.borderBottomLeftRadius,
                 ],
+                color: style.color,
                 backgroundColor: style.backgroundColor,
                 backgroundImage: style.backgroundImage,
                 boxShadow: style.boxShadow,
@@ -242,8 +243,12 @@ describe.sequential('Brutalist Spinner documentation browser regressions', () =>
               (color) => color === 'rgba(0, 0, 0, 0)'
             ).length;
             expect(transparentEdges, `${label}/open-edge`).toBe(1);
-            // No radius, fill, or soft effects.
-            expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('0px'));
+            expect(
+              surface.borderColors.filter((color) => color !== 'rgba(0, 0, 0, 0)'),
+              `${label}/inherited-currentColor`
+            ).toEqual(Array(3).fill(surface.color));
+            // The circular silhouette has no fill or soft effects.
+            expect(surface.borderRadii, `${label}/radius`).toEqual(Array(4).fill('9999px'));
             expect(surface.backgroundImage, `${label}/no-fill-image`).toBe('none');
             expect(surface.boxShadow, `${label}/no-shadow`).toBe('none');
           }

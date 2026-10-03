@@ -199,6 +199,7 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'ring-offset-background',
   'ring-ring',
   'ring-ring/50',
+  'rounded-full',
   'rounded-none',
   'select-none',
   'shadow-[2px_2px_0_0_var(--pui-foreground)]',

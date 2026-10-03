@@ -1,0 +1,76 @@
+name: Brutalist Spinner evidence
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/brutalist-spinner-evidence.yml'
+      - 'packages/prototypes/brutalist/src/spinner/**'
+      - 'packages/prototypes/brutalist/test/spinner.test.ts'
+      - 'apps/www/src/content/docs/**/spinner.mdx'
+      - 'apps/www/src/content/docs/zh-cn/demo-brutalist-spinner*'
+      - 'apps/www/test/evidence/brutalist-spinner.capture.mts'
+      - 'spec/prototypes/P-BRUTALIST-SPINNER.yaml'
+      - 'spec/tests/T-BRUTALIST-SPINNER-0001.yaml'
+      - 'spec/decisions/D-BRUTALIST-STYLED-ONLY-ADMISSION-0001.yaml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: spinner-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and video encoder
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          node apps/www/node_modules/playwright-core/cli.js install ffmpeg
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Capture actual baseline components
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          BASE="$RUNNER_TEMP/spinner-base"
+          git worktree add --detach "$BASE" "$BASE_SHA"
+          mkdir -p "$BASE/apps/www/test/evidence"
+          cp apps/www/test/evidence/brutalist-spinner.capture.mts "$BASE/apps/www/test/evidence/"
+          cd "$BASE"
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          PROTO_UI_SPINNER_EVIDENCE_DIR="$RUNNER_TEMP/spinner-evidence/baseline" \
+            corepack pnpm@10.32.1 exec tsx apps/www/test/evidence/brutalist-spinner.capture.mts
+      - name: Verify candidate browser contract
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
+      - name: Capture actual candidate components
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          PROTO_UI_SPINNER_EVIDENCE_DIR="$RUNNER_TEMP/spinner-evidence/candidate" \
+            corepack pnpm@10.32.1 exec tsx apps/www/test/evidence/brutalist-spinner.capture.mts
+      - name: Retain only public Spinner captures and measured metadata
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: brutalist-spinner-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/spinner-evidence
+          if-no-files-found: warn
+          retention-days: 30
