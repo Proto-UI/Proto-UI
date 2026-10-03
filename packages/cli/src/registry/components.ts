@@ -505,6 +505,12 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     'brutalistSkeletonRoot',
     'BrutalistSkeletonRoot'
   ),
+  'brutalist-spinner': brutalist(
+    'brutalist-spinner',
+    'Brutalist Spinner',
+    'brutalistSpinnerRoot',
+    'BrutalistSpinnerRoot'
+  ),
   'brutalist-textarea': brutalist(
     'brutalist-textarea',
     'Brutalist Textarea',

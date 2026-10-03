@@ -76,3 +76,31 @@ describe('PrototypeLibraryOverview Brutalist theme projection', () => {
     }
   );
 });
+
+it('distinguishes the workspace-only Spinner, npm packages and draft ecosystem train', () => {
+  const spinner = source.match(/id: 'spinner',[\s\S]*?href: '[^']*'/)?.[0];
+  expect(spinner).toBeDefined();
+  expect(spinner).toContain(
+    '仅工作区可用的 Spinner draft；npm 单包 0.2.0 和 0.3.0-alpha.1 均不含此组件，0.3 生态发行仍为 draft'
+  );
+  expect(spinner).toContain(
+    'Workspace-only Spinner draft, absent from npm package versions 0.2.0 and 0.3.0-alpha.1; the 0.3 ecosystem train remains draft'
+  );
+  expect(source).toContain('<p>{entry.description}</p>');
+  for (const locale of ['en', 'zh-cn']) {
+    const page = readFileSync(
+      resolve(
+        process.cwd(),
+        `apps/www/src/content/docs/${locale}/ui-libraries/brutalist/components/spinner.mdx`
+      ),
+      'utf8'
+    );
+    expect(page).toContain('`./spinner`');
+    expect(page).toContain('V-PROTO-UI-0010');
+    expect(page).toContain(locale === 'en' ? 'remains `draft`' : '仍为 `draft`');
+    expect(page).toContain(locale === 'en' ? 'do not export' : '均不导出');
+    expect(page).not.toContain(
+      locale === 'en' ? '@0.3.0-alpha.1` is unpublished' : '@0.3.0-alpha.1` 尚未发布'
+    );
+  }
+});

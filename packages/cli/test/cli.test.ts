@@ -119,6 +119,7 @@ describe('@proto.ui/cli', () => {
       'brutalist-select',
       'brutalist-separator',
       'brutalist-skeleton',
+      'brutalist-spinner',
       'brutalist-switch',
       'brutalist-tabs',
       'brutalist-textarea',

@@ -55,6 +55,11 @@
       "import": "./dist/skeleton/index.js",
       "default": "./dist/skeleton/index.js"
     },
+    "./spinner": {
+      "types": "./dist/spinner/index.d.ts",
+      "import": "./dist/spinner/index.js",
+      "default": "./dist/spinner/index.js"
+    },
     "./toggle": {
       "types": "./dist/toggle/index.d.ts",
       "import": "./dist/toggle/index.js",

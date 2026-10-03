@@ -95,6 +95,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-brutalist/skeleton');
     registerPrototype('brutalist-skeleton-root', mod.BrutalistSkeletonRoot);
   },
+  'brutalist-spinner-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/spinner');
+    registerPrototype('brutalist-spinner-root', mod.BrutalistSpinnerRoot);
+  },
   'base-separator-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/separator');
     registerPrototype('base-separator-root', mod.default);

@@ -49,7 +49,7 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 | `poppy-preview-bootstrap.yml` | trusted default-branch 安装/更新（仅 `push`） | `actions: write`、`contents: write`、`pull-requests: read`；枚举 live PR、调度 secret-free exact-head build，再发出 `poppy_preview_build_completed` repository-dispatch。 |
 | `poppy-preview-deploy.yml` | build 完成的 `workflow_run` 或 `poppy_preview_build_completed` `repository_dispatch` | 由平台选择 default-branch code，`actions: read`、`contents: read`、`pull-requests: write`；无 manual dispatch entry；复核 live PR/head/workflow/artifact，不执行贡献者代码地净化，部署 Cloudflare，向私有 Poppy 报告 lifecycle，并更新唯一 sticky comment。 |
 | `poppy-preview-close.yml` | `pull_request_target: closed` | trusted default-branch cleanup，`contents: read`、`pull-requests: write`；删除每 PR Cloudflare project，并向 Poppy 报告 Closed。 |
-| `poppy-preview-security.yml` | preview workflow/integration 在 PR 或 `main` 变化 | 只读 Node 22 证据 lane；运行 sanitizer/Worker/lifecycle/browser focused tests、固定 checksum 的 actionlint、installed/template workflow byte-for-byte lockstep。它是仓库 CI 证据，但**当前不是平台 required status check**。 |
+| `poppy-preview-security.yml` | preview workflow/integration 在 PR 或 `main` 变化 | 只读 Node 24 证据 lane；运行 sanitizer/Worker/lifecycle/browser focused tests、固定 checksum 的 actionlint、installed/template workflow byte-for-byte lockstep。它是仓库 CI 证据，但**当前不是平台 required status check**。 |
 
 贡献者 artifact 永不获得 Cloudflare/Poppy secrets。Deploy/cleanup 只执行 trusted repository code，并调用私有外部 control-plane API；exact endpoint、tuple binding、access policy 与 post-merge E2E 要求记录在 `integrations/proto-ui-preview/README.md`。合并前绿色检查不能端到端证明 default-branch `workflow_run`、bootstrap、live OAuth identities、failure convergence 或 close cleanup；这些仍是 post-merge production acceptance gates。
 

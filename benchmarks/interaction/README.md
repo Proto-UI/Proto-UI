@@ -34,6 +34,8 @@ Local browser actions have explicit bounds (10-second launch, 1.2-second action,
 
 The result schema intentionally supports **calibration results only**. The run manifest records a future model-evaluation shape for design/review, but schema acceptance is not authorization, secure isolation, a working model adapter, or complete formal-result support. `run` and all non-calibration execution requests fail closed.
 
+The separate [Round0 exchange contract](round0-exchange.md) provides bounded public synthetic packet/submission snapshots and inspection receipts. It copies inert bytes and reports contract validity with execution blocked. It neither changes historical calibration archives nor admits real model candidates. A [semantic-oracle follow-up plan](round0-semantic-oracle-plan.md) records the remaining independent evaluation work.
+
 ### Exposure and isolation
 
 ```sh

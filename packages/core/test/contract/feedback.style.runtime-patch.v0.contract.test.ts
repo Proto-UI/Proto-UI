@@ -51,6 +51,31 @@ describe('core: feedback.style runtime patch v0 contract', () => {
     expect(recorder.export().tokens).toEqual(['opacity-50', 'bg-blue-500', 'text-white']);
   });
 
+  it('keeps directional colors in the v0 border-color group for patch and suppression', () => {
+    for (const direction of ['t', 'r', 'b', 'l', 'x', 'y']) {
+      const recorder = new FeedbackStyleRecorder();
+      const token = `border-${direction}-transparent`;
+      recorder.use(tw(`border-2 ${token}`));
+      recorder.patch(tw('border-foreground'));
+      expect(recorder.export().tokens).toEqual(['border-2', 'border-foreground']);
+      recorder.suppress(tw('border-foreground'));
+      expect(recorder.export().tokens).toEqual(['border-2']);
+      recorder.clearPatch();
+      expect(recorder.export().tokens).toEqual(['border-2', token]);
+    }
+  });
+
+  it('keeps a four-side arbitrary border color in that same v0 group', () => {
+    const recorder = new FeedbackStyleRecorder();
+    const token = 'border-[transparent_currentColor_currentColor_currentColor]';
+    recorder.use(tw(`border-2 ${token}`));
+    expect(recorder.export().tokens).toEqual(['border-2', token]);
+    recorder.patch(tw('border-foreground'));
+    expect(recorder.export().tokens).toEqual(['border-2', 'border-foreground']);
+    recorder.suppress(tw('border-current'));
+    expect(recorder.export().tokens).toEqual(['border-2']);
+  });
+
   it('validates runtime patch inputs as author-side feedback.style token handles', () => {
     const recorder = new FeedbackStyleRecorder();
 

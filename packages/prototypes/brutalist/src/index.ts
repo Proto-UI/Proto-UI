@@ -161,6 +161,7 @@ export {
 } from './dialog';
 
 export * from './scroll-area';
+export * from './spinner';
 export * from './tooltip';
 export * from './checkbox';
 export type {

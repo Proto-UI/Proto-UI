@@ -287,10 +287,11 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 28] = [
+const EXPECTED_UNMAPPED: [&str; 30] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
+    "border-top-color",
     "outline",
     "outline-color",
     "outline-offset",
@@ -309,6 +310,7 @@ const EXPECTED_UNMAPPED: [&str; 28] = [
     // The animation driver is its own slice.
     "animation-duration",
     "animation-fill-mode",
+    "animation-iteration-count",
     "animation-name",
     "animation-timing-function",
     "transition-duration",
@@ -328,7 +330,7 @@ const EXPECTED_UNMAPPED: [&str; 28] = [
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 9] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 10] = [
     (
         "width",
         "fit-content",
@@ -342,6 +344,14 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 9] = [
         "Resolves against the inherited text colour, which a single surface's \
          declarations do not carry. Reported as `NeedsInheritedColor` so the \
          caller can substitute and re-map.",
+    ),
+    (
+        "border-color",
+        "currentColor",
+        "Brutalist Spinner's open-edge ring resolves its border against the \
+         inherited text colour. A single surface's declarations do not carry \
+         it, so the mapped surface reports the gap rather than inventing a \
+         colour.",
     ),
     (
         "border-radius",
