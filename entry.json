@@ -1,1 +1,1 @@
-{"type":"enqueue","deliveryId":"trial-773-synthetic-1","pullRequest":999999999,"eventKind":"synchronize","materialDigest":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"type":"claim","owner":"6e39d9b45a2be1d771902037c1aa0cc8","pullRequest":999999999}
