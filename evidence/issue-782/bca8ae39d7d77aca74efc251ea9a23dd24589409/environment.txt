@@ -1,0 +1,4 @@
+bca8ae39d7d77aca74efc251ea9a23dd24589409
+v24.21.0
+Google Chrome 154.0.8037.57 
+fonts-noto-cjk 1:20230817+repack1-3

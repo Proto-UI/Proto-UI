@@ -1,0 +1,1098 @@
+{
+  "revision": "bca8ae39d7d77aca74efc251ea9a23dd24589409",
+  "renderer": "built Astro documentation / Chromium",
+  "cases": [
+    {
+      "id": "zh-cn-light-1440",
+      "route": "/zh-cn/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "svgSha256": "11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4",
+      "errors": [],
+      "screenshots": [
+        "zh-cn-light-1440-article.png",
+        "zh-cn-light-1440-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "非受控 Switch 激活后，Root 保存 State、发出 Expose、更新 Context 并刷新 Feedback，Thumb 随后更新派生展示状态。",
+        "complete": true,
+        "x": 360,
+        "y": 221.515625,
+        "width": 672,
+        "height": 644.078125,
+        "scheme": "light"
+      }
+    },
+    {
+      "id": "zh-cn-light-390",
+      "route": "/zh-cn/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "svgSha256": "11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4",
+      "errors": [],
+      "screenshots": [
+        "zh-cn-light-390-article.png",
+        "zh-cn-light-390-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "非受控 Switch 激活后，Root 保存 State、发出 Expose、更新 Context 并刷新 Feedback，Thumb 随后更新派生展示状态。",
+        "complete": true,
+        "x": 32,
+        "y": 329.5625,
+        "width": 326,
+        "height": 312.5,
+        "scheme": "light"
+      }
+    },
+    {
+      "id": "zh-cn-dark-1440",
+      "route": "/zh-cn/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "dark",
+      "svgSha256": "11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4",
+      "errors": [],
+      "screenshots": [
+        "zh-cn-dark-1440-article.png",
+        "zh-cn-dark-1440-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "非受控 Switch 激活后，Root 保存 State、发出 Expose、更新 Context 并刷新 Feedback，Thumb 随后更新派生展示状态。",
+        "complete": true,
+        "x": 360,
+        "y": 221.515625,
+        "width": 672,
+        "height": 644.078125,
+        "scheme": "dark"
+      }
+    },
+    {
+      "id": "zh-cn-dark-390",
+      "route": "/zh-cn/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "svgSha256": "11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4",
+      "errors": [],
+      "screenshots": [
+        "zh-cn-dark-390-article.png",
+        "zh-cn-dark-390-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "非受控 Switch 激活后，Root 保存 State、发出 Expose、更新 Context 并刷新 Feedback，Thumb 随后更新派生展示状态。",
+        "complete": true,
+        "x": 32,
+        "y": 329.5625,
+        "width": 326,
+        "height": 312.5,
+        "scheme": "dark"
+      }
+    },
+    {
+      "id": "en-light-1440",
+      "route": "/en/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "svgSha256": "3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232",
+      "errors": [],
+      "screenshots": [
+        "en-light-1440-article.png",
+        "en-light-1440-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "An uncontrolled Switch activation stores Root state, emits Expose, updates Context and refreshes Feedback, followed by Thumb derived display state.",
+        "complete": true,
+        "x": 360,
+        "y": 221.515625,
+        "width": 672,
+        "height": 644.078125,
+        "scheme": "light"
+      }
+    },
+    {
+      "id": "en-light-390",
+      "route": "/en/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "svgSha256": "3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232",
+      "errors": [],
+      "screenshots": [
+        "en-light-390-article.png",
+        "en-light-390-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "An uncontrolled Switch activation stores Root state, emits Expose, updates Context and refreshes Feedback, followed by Thumb derived display state.",
+        "complete": true,
+        "x": 32,
+        "y": 330.125,
+        "width": 326,
+        "height": 312.5,
+        "scheme": "light"
+      }
+    },
+    {
+      "id": "en-dark-1440",
+      "route": "/en/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "dark",
+      "svgSha256": "3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232",
+      "errors": [],
+      "screenshots": [
+        "en-dark-1440-article.png",
+        "en-dark-1440-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "An uncontrolled Switch activation stores Root state, emits Expose, updates Context and refreshes Feedback, followed by Thumb derived display state.",
+        "complete": true,
+        "x": 360,
+        "y": 221.515625,
+        "width": 672,
+        "height": 644.078125,
+        "scheme": "dark"
+      }
+    },
+    {
+      "id": "en-dark-390",
+      "route": "/en/whitepaper/4-semantics-beyond-channels/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "dark",
+      "svgSha256": "3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232",
+      "errors": [],
+      "screenshots": [
+        "en-dark-390-article.png",
+        "en-dark-390-figure.png"
+      ],
+      "outcome": "passed",
+      "image": {
+        "naturalWidth": 960,
+        "naturalHeight": 920,
+        "alt": "An uncontrolled Switch activation stores Root state, emits Expose, updates Context and refreshes Feedback, followed by Thumb derived display state.",
+        "complete": true,
+        "x": 32,
+        "y": 330.125,
+        "width": 326,
+        "height": 312.5,
+        "scheme": "dark"
+      }
+    }
+  ],
+  "fonts": [
+    {
+      "locale": "zh-cn",
+      "theme": "light",
+      "svgSha256": "11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4",
+      "faces": [
+        {
+          "family": "Proto Diagram Hand Latin",
+          "status": "loaded"
+        },
+        {
+          "family": "Proto Diagram Hand CJK",
+          "status": "loaded"
+        }
+      ],
+      "text": [
+        {
+          "text": "一次 Switch 激活",
+          "x": 48,
+          "y": 38,
+          "width": 255.46875,
+          "height": 40
+        },
+        {
+          "text": "非受控、未禁用 · 本章伪代码的执行关系",
+          "x": 48,
+          "y": 84,
+          "width": 378,
+          "height": 27
+        },
+        {
+          "text": "User",
+          "x": 285.109375,
+          "y": 143,
+          "width": 58.060028076171875,
+          "height": 33
+        },
+        {
+          "text": "Event · activate",
+          "x": 334,
+          "y": 192,
+          "width": 165.609375,
+          "height": 27
+        },
+        {
+          "text": "Switch Root",
+          "x": 76,
+          "y": 255,
+          "width": 170.03125,
+          "height": 35
+        },
+        {
+          "text": "checked 的唯一 owner",
+          "x": 76,
+          "y": 293,
+          "width": 207.85983276367188,
+          "height": 25
+        },
+        {
+          "text": "1",
+          "x": 87.515625,
+          "y": 344,
+          "width": 8.96875,
+          "height": 27
+        },
+        {
+          "text": "读取 checked",
+          "x": 126,
+          "y": 344,
+          "width": 148.5,
+          "height": 30
+        },
+        {
+          "text": "nextChecked = !checked",
+          "x": 126,
+          "y": 377,
+          "width": 243.26397705078125,
+          "height": 27
+        },
+        {
+          "text": "2",
+          "x": 84.6484375,
+          "y": 434,
+          "width": 14.703125,
+          "height": 27
+        },
+        {
+          "text": "保存 State",
+          "x": 126,
+          "y": 434,
+          "width": 125.89566040039062,
+          "height": 30
+        },
+        {
+          "text": "checked ← nextChecked",
+          "x": 126,
+          "y": 467,
+          "width": 246.11996459960938,
+          "height": 27
+        },
+        {
+          "text": "3",
+          "x": 85.609375,
+          "y": 524,
+          "width": 12.78125,
+          "height": 27
+        },
+        {
+          "text": "发出 checkedChange",
+          "x": 126,
+          "y": 524,
+          "width": 229.9593505859375,
+          "height": 31
+        },
+        {
+          "text": "4",
+          "x": 85.8515625,
+          "y": 614,
+          "width": 12.296875,
+          "height": 27
+        },
+        {
+          "text": "更新 Context",
+          "x": 126,
+          "y": 614,
+          "width": 153.34375,
+          "height": 30
+        },
+        {
+          "text": "请求 Root 的 Feedback 重新求值",
+          "x": 126,
+          "y": 647,
+          "width": 326.703125,
+          "height": 27
+        },
+        {
+          "text": "Expose",
+          "x": 625.0859375,
+          "y": 500,
+          "width": 73.828125,
+          "height": 27
+        },
+        {
+          "text": "App Maker",
+          "x": 774,
+          "y": 522,
+          "width": 119.4876708984375,
+          "height": 30
+        },
+        {
+          "text": "Context",
+          "x": 602.109375,
+          "y": 590,
+          "width": 83.78125,
+          "height": 27
+        },
+        {
+          "text": "Switch Thumb",
+          "x": 738,
+          "y": 591,
+          "width": 169.328125,
+          "height": 31
+        },
+        {
+          "text": "5",
+          "x": 717.5078125,
+          "y": 643,
+          "width": 13,
+          "height": 27
+        },
+        {
+          "text": "接收 Context",
+          "x": 751,
+          "y": 637,
+          "width": 134.171875,
+          "height": 27
+        },
+        {
+          "text": "保存派生展示状态",
+          "x": 751,
+          "y": 668,
+          "width": 168,
+          "height": 27
+        },
+        {
+          "text": "checked / disabled",
+          "x": 751,
+          "y": 696,
+          "width": 180.765625,
+          "height": 25
+        },
+        {
+          "text": "请求自己的",
+          "x": 751,
+          "y": 730,
+          "width": 105,
+          "height": 27
+        },
+        {
+          "text": "Feedback 重新求值",
+          "x": 751,
+          "y": 758,
+          "width": 186.234375,
+          "height": 27
+        },
+        {
+          "text": "State 只保存事实；对外效果由 Root 与 Thumb 分别显式发起。",
+          "x": 48,
+          "y": 819,
+          "width": 619.921875,
+          "height": 27
+        },
+        {
+          "text": "跨组件箭头表示信息通路，不规定 callback 的同步时序。",
+          "x": 48,
+          "y": 853,
+          "width": 535.46875,
+          "height": 27
+        }
+      ]
+    },
+    {
+      "locale": "zh-cn",
+      "theme": "dark",
+      "svgSha256": "11c193fd5aeb9132422d0ac6af69c99f2cf718d01201c60d794e53dadae8cce4",
+      "faces": [
+        {
+          "family": "Proto Diagram Hand Latin",
+          "status": "loaded"
+        },
+        {
+          "family": "Proto Diagram Hand CJK",
+          "status": "loaded"
+        }
+      ],
+      "text": [
+        {
+          "text": "一次 Switch 激活",
+          "x": 48,
+          "y": 38,
+          "width": 255.46875,
+          "height": 40
+        },
+        {
+          "text": "非受控、未禁用 · 本章伪代码的执行关系",
+          "x": 48,
+          "y": 84,
+          "width": 378,
+          "height": 27
+        },
+        {
+          "text": "User",
+          "x": 285.109375,
+          "y": 143,
+          "width": 58.060028076171875,
+          "height": 33
+        },
+        {
+          "text": "Event · activate",
+          "x": 334,
+          "y": 192,
+          "width": 165.609375,
+          "height": 27
+        },
+        {
+          "text": "Switch Root",
+          "x": 76,
+          "y": 255,
+          "width": 170.03125,
+          "height": 35
+        },
+        {
+          "text": "checked 的唯一 owner",
+          "x": 76,
+          "y": 293,
+          "width": 207.85983276367188,
+          "height": 25
+        },
+        {
+          "text": "1",
+          "x": 87.515625,
+          "y": 344,
+          "width": 8.96875,
+          "height": 27
+        },
+        {
+          "text": "读取 checked",
+          "x": 126,
+          "y": 344,
+          "width": 148.5,
+          "height": 30
+        },
+        {
+          "text": "nextChecked = !checked",
+          "x": 126,
+          "y": 377,
+          "width": 243.26397705078125,
+          "height": 27
+        },
+        {
+          "text": "2",
+          "x": 84.6484375,
+          "y": 434,
+          "width": 14.703125,
+          "height": 27
+        },
+        {
+          "text": "保存 State",
+          "x": 126,
+          "y": 434,
+          "width": 125.89566040039062,
+          "height": 30
+        },
+        {
+          "text": "checked ← nextChecked",
+          "x": 126,
+          "y": 467,
+          "width": 246.11996459960938,
+          "height": 27
+        },
+        {
+          "text": "3",
+          "x": 85.609375,
+          "y": 524,
+          "width": 12.78125,
+          "height": 27
+        },
+        {
+          "text": "发出 checkedChange",
+          "x": 126,
+          "y": 524,
+          "width": 229.9593505859375,
+          "height": 31
+        },
+        {
+          "text": "4",
+          "x": 85.8515625,
+          "y": 614,
+          "width": 12.296875,
+          "height": 27
+        },
+        {
+          "text": "更新 Context",
+          "x": 126,
+          "y": 614,
+          "width": 153.34375,
+          "height": 30
+        },
+        {
+          "text": "请求 Root 的 Feedback 重新求值",
+          "x": 126,
+          "y": 647,
+          "width": 326.703125,
+          "height": 27
+        },
+        {
+          "text": "Expose",
+          "x": 625.0859375,
+          "y": 500,
+          "width": 73.828125,
+          "height": 27
+        },
+        {
+          "text": "App Maker",
+          "x": 774,
+          "y": 522,
+          "width": 119.4876708984375,
+          "height": 30
+        },
+        {
+          "text": "Context",
+          "x": 602.109375,
+          "y": 590,
+          "width": 83.78125,
+          "height": 27
+        },
+        {
+          "text": "Switch Thumb",
+          "x": 738,
+          "y": 591,
+          "width": 169.328125,
+          "height": 31
+        },
+        {
+          "text": "5",
+          "x": 717.5078125,
+          "y": 643,
+          "width": 13,
+          "height": 27
+        },
+        {
+          "text": "接收 Context",
+          "x": 751,
+          "y": 637,
+          "width": 134.171875,
+          "height": 27
+        },
+        {
+          "text": "保存派生展示状态",
+          "x": 751,
+          "y": 668,
+          "width": 168,
+          "height": 27
+        },
+        {
+          "text": "checked / disabled",
+          "x": 751,
+          "y": 696,
+          "width": 180.765625,
+          "height": 25
+        },
+        {
+          "text": "请求自己的",
+          "x": 751,
+          "y": 730,
+          "width": 105,
+          "height": 27
+        },
+        {
+          "text": "Feedback 重新求值",
+          "x": 751,
+          "y": 758,
+          "width": 186.234375,
+          "height": 27
+        },
+        {
+          "text": "State 只保存事实；对外效果由 Root 与 Thumb 分别显式发起。",
+          "x": 48,
+          "y": 819,
+          "width": 619.921875,
+          "height": 27
+        },
+        {
+          "text": "跨组件箭头表示信息通路，不规定 callback 的同步时序。",
+          "x": 48,
+          "y": 853,
+          "width": 535.46875,
+          "height": 27
+        }
+      ]
+    },
+    {
+      "locale": "en",
+      "theme": "light",
+      "svgSha256": "3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232",
+      "faces": [
+        {
+          "family": "Proto Diagram Hand Latin",
+          "status": "loaded"
+        }
+      ],
+      "text": [
+        {
+          "text": "One Switch activation",
+          "x": 48,
+          "y": 38,
+          "width": 341.890625,
+          "height": 40
+        },
+        {
+          "text": "Uncontrolled and enabled · relations in this chapter’s pseudocode",
+          "x": 48,
+          "y": 84,
+          "width": 665.765625,
+          "height": 27
+        },
+        {
+          "text": "User",
+          "x": 285.109375,
+          "y": 143,
+          "width": 58.060028076171875,
+          "height": 33
+        },
+        {
+          "text": "Event · activate",
+          "x": 334,
+          "y": 192,
+          "width": 165.609375,
+          "height": 27
+        },
+        {
+          "text": "Switch Root",
+          "x": 76,
+          "y": 255,
+          "width": 170.03125,
+          "height": 35
+        },
+        {
+          "text": "The sole owner of checked",
+          "x": 76,
+          "y": 293,
+          "width": 262.375,
+          "height": 25
+        },
+        {
+          "text": "1",
+          "x": 87.515625,
+          "y": 344,
+          "width": 8.96875,
+          "height": 27
+        },
+        {
+          "text": "Read checked",
+          "x": 126,
+          "y": 344,
+          "width": 159.390625,
+          "height": 30
+        },
+        {
+          "text": "nextChecked = !checked",
+          "x": 126,
+          "y": 377,
+          "width": 243.26397705078125,
+          "height": 27
+        },
+        {
+          "text": "2",
+          "x": 84.6484375,
+          "y": 434,
+          "width": 14.703125,
+          "height": 27
+        },
+        {
+          "text": "Store State",
+          "x": 126,
+          "y": 434,
+          "width": 142.7916259765625,
+          "height": 30
+        },
+        {
+          "text": "checked ← nextChecked",
+          "x": 126,
+          "y": 467,
+          "width": 246.12005615234375,
+          "height": 27
+        },
+        {
+          "text": "3",
+          "x": 85.609375,
+          "y": 524,
+          "width": 12.78125,
+          "height": 27
+        },
+        {
+          "text": "Emit checkedChange",
+          "x": 126,
+          "y": 524,
+          "width": 233.96734619140625,
+          "height": 31
+        },
+        {
+          "text": "4",
+          "x": 85.8515625,
+          "y": 614,
+          "width": 12.296875,
+          "height": 27
+        },
+        {
+          "text": "Update Context",
+          "x": 126,
+          "y": 614,
+          "width": 190.25,
+          "height": 30
+        },
+        {
+          "text": "Request Root’s Feedback refresh",
+          "x": 126,
+          "y": 647,
+          "width": 345.16351318359375,
+          "height": 28
+        },
+        {
+          "text": "Expose",
+          "x": 625.0859375,
+          "y": 500,
+          "width": 73.828125,
+          "height": 27
+        },
+        {
+          "text": "App Maker",
+          "x": 774,
+          "y": 522,
+          "width": 119.4876708984375,
+          "height": 30
+        },
+        {
+          "text": "Context",
+          "x": 602.109375,
+          "y": 590,
+          "width": 83.78125,
+          "height": 27
+        },
+        {
+          "text": "Switch Thumb",
+          "x": 738,
+          "y": 591,
+          "width": 169.328125,
+          "height": 31
+        },
+        {
+          "text": "5",
+          "x": 717.5078125,
+          "y": 643,
+          "width": 13,
+          "height": 27
+        },
+        {
+          "text": "Receive Context",
+          "x": 751,
+          "y": 637,
+          "width": 168.203125,
+          "height": 27
+        },
+        {
+          "text": "Store derived state",
+          "x": 751,
+          "y": 668,
+          "width": 204.78125,
+          "height": 27
+        },
+        {
+          "text": "checked / disabled",
+          "x": 751,
+          "y": 696,
+          "width": 180.765625,
+          "height": 25
+        },
+        {
+          "text": "Request its own",
+          "x": 751,
+          "y": 730,
+          "width": 167,
+          "height": 28
+        },
+        {
+          "text": "Feedback refresh",
+          "x": 751,
+          "y": 758,
+          "width": 175.08526611328125,
+          "height": 27
+        },
+        {
+          "text": "State stores facts. Root and Thumb request their effects explicitly.",
+          "x": 48,
+          "y": 819,
+          "width": 712.84375,
+          "height": 28
+        },
+        {
+          "text": "Cross-component arrows show channels, not synchronous callback timing.",
+          "x": 48,
+          "y": 853,
+          "width": 739.609375,
+          "height": 28
+        }
+      ]
+    },
+    {
+      "locale": "en",
+      "theme": "dark",
+      "svgSha256": "3552003db261bc795a2ff74976334563b9be4293dbbf14a7b2e853479d9a1232",
+      "faces": [
+        {
+          "family": "Proto Diagram Hand Latin",
+          "status": "loaded"
+        }
+      ],
+      "text": [
+        {
+          "text": "One Switch activation",
+          "x": 48,
+          "y": 38,
+          "width": 341.890625,
+          "height": 40
+        },
+        {
+          "text": "Uncontrolled and enabled · relations in this chapter’s pseudocode",
+          "x": 48,
+          "y": 84,
+          "width": 665.765625,
+          "height": 27
+        },
+        {
+          "text": "User",
+          "x": 285.109375,
+          "y": 143,
+          "width": 58.060028076171875,
+          "height": 33
+        },
+        {
+          "text": "Event · activate",
+          "x": 334,
+          "y": 192,
+          "width": 165.609375,
+          "height": 27
+        },
+        {
+          "text": "Switch Root",
+          "x": 76,
+          "y": 255,
+          "width": 170.03125,
+          "height": 35
+        },
+        {
+          "text": "The sole owner of checked",
+          "x": 76,
+          "y": 293,
+          "width": 262.375,
+          "height": 25
+        },
+        {
+          "text": "1",
+          "x": 87.515625,
+          "y": 344,
+          "width": 8.96875,
+          "height": 27
+        },
+        {
+          "text": "Read checked",
+          "x": 126,
+          "y": 344,
+          "width": 159.390625,
+          "height": 30
+        },
+        {
+          "text": "nextChecked = !checked",
+          "x": 126,
+          "y": 377,
+          "width": 243.26397705078125,
+          "height": 27
+        },
+        {
+          "text": "2",
+          "x": 84.6484375,
+          "y": 434,
+          "width": 14.703125,
+          "height": 27
+        },
+        {
+          "text": "Store State",
+          "x": 126,
+          "y": 434,
+          "width": 142.7916259765625,
+          "height": 30
+        },
+        {
+          "text": "checked ← nextChecked",
+          "x": 126,
+          "y": 467,
+          "width": 246.12005615234375,
+          "height": 27
+        },
+        {
+          "text": "3",
+          "x": 85.609375,
+          "y": 524,
+          "width": 12.78125,
+          "height": 27
+        },
+        {
+          "text": "Emit checkedChange",
+          "x": 126,
+          "y": 524,
+          "width": 233.96734619140625,
+          "height": 31
+        },
+        {
+          "text": "4",
+          "x": 85.8515625,
+          "y": 614,
+          "width": 12.296875,
+          "height": 27
+        },
+        {
+          "text": "Update Context",
+          "x": 126,
+          "y": 614,
+          "width": 190.25,
+          "height": 30
+        },
+        {
+          "text": "Request Root’s Feedback refresh",
+          "x": 126,
+          "y": 647,
+          "width": 345.16351318359375,
+          "height": 28
+        },
+        {
+          "text": "Expose",
+          "x": 625.0859375,
+          "y": 500,
+          "width": 73.828125,
+          "height": 27
+        },
+        {
+          "text": "App Maker",
+          "x": 774,
+          "y": 522,
+          "width": 119.4876708984375,
+          "height": 30
+        },
+        {
+          "text": "Context",
+          "x": 602.109375,
+          "y": 590,
+          "width": 83.78125,
+          "height": 27
+        },
+        {
+          "text": "Switch Thumb",
+          "x": 738,
+          "y": 591,
+          "width": 169.328125,
+          "height": 31
+        },
+        {
+          "text": "5",
+          "x": 717.5078125,
+          "y": 643,
+          "width": 13,
+          "height": 27
+        },
+        {
+          "text": "Receive Context",
+          "x": 751,
+          "y": 637,
+          "width": 168.203125,
+          "height": 27
+        },
+        {
+          "text": "Store derived state",
+          "x": 751,
+          "y": 668,
+          "width": 204.78125,
+          "height": 27
+        },
+        {
+          "text": "checked / disabled",
+          "x": 751,
+          "y": 696,
+          "width": 180.765625,
+          "height": 25
+        },
+        {
+          "text": "Request its own",
+          "x": 751,
+          "y": 730,
+          "width": 167,
+          "height": 28
+        },
+        {
+          "text": "Feedback refresh",
+          "x": 751,
+          "y": 758,
+          "width": 175.08526611328125,
+          "height": 27
+        },
+        {
+          "text": "State stores facts. Root and Thumb request their effects explicitly.",
+          "x": 48,
+          "y": 819,
+          "width": 712.84375,
+          "height": 28
+        },
+        {
+          "text": "Cross-component arrows show channels, not synchronous callback timing.",
+          "x": 48,
+          "y": 853,
+          "width": 739.609375,
+          "height": 28
+        }
+      ]
+    }
+  ],
+  "failures": [],
+  "browser": "154.0.8037.57"
+}

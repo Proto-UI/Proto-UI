@@ -1,0 +1,55 @@
+{
+  "sourceCommit": "bca8ae39d7d77aca74efc251ea9a23dd24589409",
+  "artifactId": 11269821204,
+  "workflowRun": 37110289033,
+  "artifactSha256": "72a2977b68051482227ec2b67b08d5b777f951baa52b1813c25e649be591531d",
+  "kind": "Actual Chromium production article screenshots",
+  "cases": 8,
+  "fontProbes": 4,
+  "limits": [
+    "Existing dialog/zoom/keyboard behavior not tested",
+    "Mobile fit is proven; fine text uses the existing full-size image affordance"
+  ],
+  "images": [
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/zh-cn-light-1440-article.png",
+      "sha256": "091680b05cb32090fcdccb97f9d5e2b6702fa2b7904c1c6bf2cc5b445963381c",
+      "size": 210064
+    },
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/zh-cn-light-390-article.png",
+      "sha256": "024f3a68304a0102dc5d11b707bd4ecab04693e7f1bb51b8856b36735cd11814",
+      "size": 88997
+    },
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/zh-cn-dark-1440-article.png",
+      "sha256": "23f19e941f893da83eda6cc9cde1d64e257ca17b6f709180819973b0d8c475d3",
+      "size": 212855
+    },
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/zh-cn-dark-390-article.png",
+      "sha256": "65262727a0f3f0b5d5a63840fb97f3881e70d5d6e6fc1c32ee36547430fe8016",
+      "size": 90940
+    },
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/en-light-1440-article.png",
+      "sha256": "8bb39531694fc1d85c8457e4cc0ca4106a05875cee8cb96a944ee2c66fb335be",
+      "size": 208138
+    },
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/en-light-390-article.png",
+      "sha256": "0978294cb28b6f782b12c0aa90ad2591540bc768bc5ce7ede0fac10205ccc141",
+      "size": 75295
+    },
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/en-dark-1440-article.png",
+      "sha256": "3705962012d339d73d06215570af37b1629d640b6cf30748d8fe9e46ccff8343",
+      "size": 210806
+    },
+    {
+      "path": "evidence/issue-782/bca8ae39d7d77aca74efc251ea9a23dd24589409/en-dark-390-article.png",
+      "sha256": "fa0ae1dfd324126d56743cc1c7f0d53c0b99b3921e9d9c4adf2b272ee0f96b21",
+      "size": 76043
+    }
+  ]
+}
