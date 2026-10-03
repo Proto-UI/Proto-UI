@@ -1,0 +1,57 @@
+{
+  "revision": "eb735696868fea3c9ad5a2c5789c403f4fad1f48",
+  "tree": "bb941f3cae67c63aa37eadad98d5136e3c415fab",
+  "workflowRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/37115404211",
+  "capture": {
+    "job": 111181154469,
+    "result": "success",
+    "candidateCasesPassed": 20,
+    "candidateCasesTotal": 20,
+    "coreBrowserTestsPassed": 20,
+    "coreBrowserFiles": 5
+  },
+  "codeSurfaces": {
+    "job": 111181154621,
+    "result": "success",
+    "testsPassed": 7
+  },
+  "limitations": [
+    "Aggregate visual workflow failed: native links 4/8 failed; Copy 11/14 failed. Those observations remain open pending candidate repairs.",
+    "Full CI 37115404182 test job ended cancelled after general 530 files / 2970 tests; eleven other jobs succeeded.",
+    "Screenshots are original Chromium-rendered public project pages. They do not show the unpushed RuntimeBox or Search candidates.",
+    "Brutalist editor nested frames and Header menu family shell remain design debt; user requested a separate upstream-aligned Brutalist typography/radius revision.",
+    "Copy-specific artifact recorded a synthetic merge SHA. These code-surface screenshots come from the independently verified exact-head checkout/code-surfaces job, not from the Copy-specific artifact."
+  ],
+  "files": [
+    {
+      "file": "PR777-eb735-Brutalist-zh-cn-desktop-light-brutalist-wc-saved-viewport.png",
+      "bytes": 115196,
+      "sha256": "3672a03ab72c5fabf8ca13e843ddfc60b3b9f249714154f134015458ec784b2f",
+      "blob": "8e966f4a02c0bec760add50af97920f7859360d1"
+    },
+    {
+      "file": "PR777-eb735-Brutalist-en-mobile-light-brutalist-wc-saved-viewport.png",
+      "bytes": 48050,
+      "sha256": "5e5f9f7924a647684dbd42863378fa97c371fd5a82e622a2988d172572c75682",
+      "blob": "5b4d52550c680ce828f5fafa054718706a5c556e"
+    },
+    {
+      "file": "PR777-eb735-Brutalist-zh-cn-mobile-dark-brutalist-wc-saved-viewport.png",
+      "bytes": 48093,
+      "sha256": "9e37727f161e7729d6b8bf8df3baecb7562d068e50749643eab4d0f1c0dbea71",
+      "blob": "c5223d7cd050737ae05e41754934a660084b6df0"
+    },
+    {
+      "file": "PR777-eb735-code-1440-light-expanded.png",
+      "bytes": 139628,
+      "sha256": "dc6215679753050e2caed884143cfd0c87fb7acbd2a7ea5a4da4bd910eca548c",
+      "blob": "6a181b6a8cd4994b629f5a2136b83ca98404306c"
+    },
+    {
+      "file": "PR777-eb735-code-390-dark-install.png",
+      "bytes": 44351,
+      "sha256": "2fa77629c1da30f1d758caf3fc40046d628a534c44ec26a7d8eed21a4a9b6bb5",
+      "blob": "a31a4f2ecb9526f2c50e71f0db414e2ae0d79858"
+    }
+  ]
+}
