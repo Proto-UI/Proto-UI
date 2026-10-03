@@ -1,0 +1,34 @@
+{
+  "source": "fbbc3368827b2ecfba3b3b11a2fb1fa51efad62e",
+  "run": 37108118618,
+  "artifact": 11268613104,
+  "artifactSha256": "1cfd43dc4e63d5c11e6b20f6ea7b0df62f28392cf9c6bff72520b8d26a1e111f",
+  "capture": "20/20 passed; both families and four runtime tasks; final browser regressions pending",
+  "visualReview": "New composition shown for review; not final aesthetic acceptance",
+  "files": [
+    {
+      "file": "zh-cn-desktop-light-initial-viewport.png",
+      "sha256": "a55ddc53def16244b188d2894361d2a1747313d4862b14c05dcbcc004e0eb800",
+      "source": "fbbc3368827b2ecfba3b3b11a2fb1fa51efad62e",
+      "run": 37108118618
+    },
+    {
+      "file": "zh-cn-desktop-light-brutalist-wc-saved-viewport.png",
+      "sha256": "99b04fcfc6d31153936e8e3baeeb8383bfb3b5f800f7ca8c599526bc2d491987",
+      "source": "fbbc3368827b2ecfba3b3b11a2fb1fa51efad62e",
+      "run": 37108118618
+    },
+    {
+      "file": "en-mobile-light-initial-viewport.png",
+      "sha256": "3f5b0dbf2e06141b9d2cf921b821a88bc60e4536be54ef5b5444874b0cc1cb0e",
+      "source": "fbbc3368827b2ecfba3b3b11a2fb1fa51efad62e",
+      "run": 37108118618
+    },
+    {
+      "file": "en-mobile-light-brutalist-wc-saved-full.png",
+      "sha256": "4f18e903f02eac9e1c5186f9b3cc0f8f2dd1c9394fa96effdb0009fab3344cf1",
+      "source": "fbbc3368827b2ecfba3b3b11a2fb1fa51efad62e",
+      "run": 37108118618
+    }
+  ]
+}
