@@ -228,6 +228,10 @@ describe('automatic documentation image preview in real Chromium', () => {
       );
       await page.keyboard.press('Escape');
       await closed(page);
+      expect(await page.locator('[data-fixture="inline-svg"] svg text').allTextContents()).toEqual([
+        'Source',
+        'Result',
+      ]);
       await open(page, 'Static inline diagram');
       expect(await page.locator('.docs-image-full').getAttribute('src')).toMatch(/^blob:/);
       expect(await page.locator('[data-docs-image-content] svg').count()).toBe(0);
@@ -341,7 +345,22 @@ describe('automatic documentation image preview in real Chromium', () => {
           return Boolean(image?.complete && image.naturalWidth);
         }, `Policy ${crossOrigin}`);
         await open(page, `Policy ${crossOrigin}`);
-        expect(requests.length).toBeGreaterThanOrEqual(2);
+        // HTML may reuse the document's already-decoded image even with no-store.
+        // Verify the preview policy itself, plus every request actually emitted.
+        const previewPolicy = await page.locator('.docs-image-full').evaluate((element) => {
+          const image = element as HTMLImageElement;
+          return {
+            crossOrigin: image.crossOrigin,
+            referrerPolicy: image.referrerPolicy,
+            src: image.src,
+          };
+        });
+        expect(previewPolicy).toEqual({
+          crossOrigin,
+          referrerPolicy,
+          src: `${imageOrigin}/policy.png?${crossOrigin}`,
+        });
+        expect(requests.length).toBeGreaterThanOrEqual(1);
         for (const request of requests) {
           expect(request.origin).toBe(baseUrl);
           expect(request.referer).toBe(referrerPolicy === 'no-referrer' ? '' : `${baseUrl}/`);
@@ -351,6 +370,8 @@ describe('automatic documentation image preview in real Chromium', () => {
         }
         records.push({
           network: crossOrigin,
+          requestCount: requests.length,
+          previewPolicy,
           referrerPolicy,
           requests: requests.map((request) => ({
             origin: request.origin,
