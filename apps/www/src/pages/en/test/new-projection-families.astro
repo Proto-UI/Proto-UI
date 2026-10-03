@@ -89,7 +89,10 @@ const themeCss =
       const updates = new Map<string, (ref: string, props: Record<string, unknown>) => void>();
       (window as unknown as { projectionFamilyFixture: unknown }).projectionFamilyFixture = {
         setProps(key: string, ref: string, props: Record<string, unknown>) {
-          updates.get(key)?.(ref, props);
+          updates.get(key)?.(
+            ref,
+            key.startsWith('liquid-glass-') ? { ...props, material: 'opaque' } : props
+          );
         },
         async dispose() {
           for (const record of records.splice(0).reverse()) await record.destroy();
@@ -117,21 +120,24 @@ const themeCss =
                     ref: 'default',
                     // The existing demo API initializes mutable props records
                     // only for declared props; exercise that supported path.
-                    props: {},
+                    props: isBootstrap ? {} : { material: 'opaque' },
                     children: ['Back'],
                   },
                   {
                     kind: 'proto',
                     prototypeId: `${family}-button`,
                     ref: 'primary',
-                    props: { variant: isBootstrap ? 'primary' : 'prominent' },
+                    props: {
+                      variant: isBootstrap ? 'primary' : 'prominent',
+                      ...(isBootstrap ? {} : { material: 'opaque' }),
+                    },
                     children: ['Continue'],
                   },
                   {
                     kind: 'proto',
                     prototypeId: `${family}-button`,
                     ref: 'disabled',
-                    props: { disabled: true },
+                    props: { disabled: true, ...(isBootstrap ? {} : { material: 'opaque' }) },
                     children: ['Unavailable'],
                   },
                 ],
@@ -143,7 +149,11 @@ const themeCss =
                     `${++count} activations`;
                 };
                 const setProps = (ref: string, props: Record<string, unknown>) =>
-                  api.setProps(ref, { ...props, onClick: update });
+                  api.setProps(ref, {
+                    ...props,
+                    ...(isBootstrap ? {} : { material: 'opaque' }),
+                    onClick: update,
+                  });
                 updates.set(key, setProps);
                 setProps('default', {});
                 setProps('primary', { variant: isBootstrap ? 'primary' : 'prominent' });

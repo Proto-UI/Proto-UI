@@ -509,6 +509,38 @@ export default defineConfig({
               ],
             },
             {
+              label: 'Bootstrap 2.3.2',
+              translations: { en: 'Bootstrap 2.3.2', 'zh-CN': 'Bootstrap 2.3.2' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/bootstrap-2-3-2',
+                },
+                {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/button',
+                },
+              ],
+            },
+            {
+              label: 'Liquid Glass',
+              translations: { en: 'Liquid Glass', 'zh-CN': 'Liquid Glass' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/liquid-glass',
+                },
+                {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/liquid-glass/button',
+                },
+              ],
+            },
+            {
               label: 'Brutalist',
               translations: { en: 'Brutalist', 'zh-CN': 'Brutalist' },
               items: [

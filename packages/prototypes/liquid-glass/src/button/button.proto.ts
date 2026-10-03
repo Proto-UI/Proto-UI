@@ -4,16 +4,19 @@ import { asButton, type ButtonExposes } from '@proto.ui/prototypes-base/button';
 export interface ButtonProjectionProps {
   variant?: 'regular' | 'prominent';
   disabled?: boolean;
+  /** Auto enhances only when all live preference/support inputs are affirmative. */
+  material?: 'auto' | 'opaque';
 }
 
-// The deterministic opaque, non-moving accessibility fallback only.
-// #793 gates the reactive preference/support boundary before enabling blur or
-// alpha. This is not Apple's material engine and does not complete #792.
+// Regular functional surfaces may use a bounded translucent/4px-blur treatment.
+// Unknown/lost/reduced inputs remain opaque. No refraction, moving highlight,
+// background-adaptive luminosity or Apple-native material parity is claimed.
 const FILLS = {
   regular: 'bg-secondary text-secondary-foreground',
   prominent: 'bg-primary text-primary-foreground',
 };
-const HOVER = { regular: 'bg-muted', prominent: 'bg-primary' };
+// Elevation changes on hover without replacing a translucent surface with an opaque fill.
+const HOVER = { regular: 'shadow-md', prominent: 'bg-primary' };
 
 export default definePrototype<ButtonProjectionProps, ButtonExposes>({
   name: 'liquid-glass-button',
@@ -21,8 +24,9 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
     def.props.define({
       variant: { type: 'enum', options: ['regular', 'prominent'], empty: 'fallback' },
       disabled: { type: 'boolean', empty: 'fallback' },
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
     });
-    def.props.setDefaults({ variant: 'regular', disabled: false });
+    def.props.setDefaults({ variant: 'regular', disabled: false, material: 'auto' });
     const state = asButton().stateHandles;
     if (!state) throw new Error('[liquid-glass-button] Base Button states are required.');
     const { hovered, pressed, focusVisible, disabled } = state;
@@ -41,6 +45,22 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
         when: (w) => w.all(w.prop('variant').eq(variant), w.state(hovered).eq(true)),
         intent: (i) => i.feedback.style.use(tw(HOVER[variant])),
       });
+    });
+    // Live source leases own these fixed Meta inputs. The Prototype owns
+    // only this visual policy; it never observes a browser or native API.
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('variant').eq('regular'),
+          w.prop('material').eq('auto'),
+          w.meta('preference.reducedTransparency').eq('no-preference'),
+          w.meta('preference.reducedMotion').eq('no-preference'),
+          w.meta('preference.contrast').eq('no-preference'),
+          w.meta('preference.forcedColors').eq('none'),
+          w.meta('styleSupport.alphaFill').eq(true),
+          w.meta('styleSupport.backdropBlur4px').eq(true)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-secondary/80 backdrop-blur-xs')),
     });
     def.rule({
       when: (w) => w.state(pressed).eq(true),

@@ -764,3 +764,36 @@ describe('Website projection composition', () => {
     expect(composition.restoreFocus(PROJECTION_FOCUS_KEYS.runtime)).toBe(false);
   });
 });
+
+describe('toolbar-free partial-family compositions', () => {
+  for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
+    it(`${family} needs no Select when controls are absent, but refuses requested controls`, () => {
+      const options = {
+        ownerId: `partial-${family}`,
+        runtimeId: 'wc' as const,
+        projectionFamilyId: family,
+        generation: 1,
+        componentId: 'button' as const,
+        childDemo: {
+          type: 'demo' as const,
+          root: {
+            kind: 'proto' as const,
+            prototypeId: `${family}-button`,
+            props: {},
+            children: ['Actual Button'],
+          },
+        },
+        controls: controls(),
+      };
+      const composition = createProjectionComposition({ ...options, controlIds: [] });
+      const ids: string[] = [];
+      walk(composition.demo.root, (node) => {
+        if (node.kind === 'proto') ids.push(node.prototypeId);
+      });
+      expect(ids).toEqual([`${family}-button`]);
+      expect(() => createProjectionComposition({ ...options, controlIds: ['runtime'] })).toThrow(
+        /no family select/
+      );
+    });
+  }
+});

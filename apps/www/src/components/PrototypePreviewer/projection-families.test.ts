@@ -484,7 +484,12 @@ function withoutPart(
 describe('Website projection-family manifests', () => {
   it('explicitly catalogs the same ten Base families in the Shadcn and Brutalist lanes', () => {
     expect(SHARED_BASE_FAMILY_IDS).toEqual(EXPECTED_SHARED_BASE_FAMILY_IDS);
-    expect(Object.keys(PROJECTION_FAMILY_MANIFESTS).sort()).toEqual(['brutalist', 'shadcn']);
+    expect(Object.keys(PROJECTION_FAMILY_MANIFESTS).sort()).toEqual([
+      'bootstrap-2-3-2',
+      'brutalist',
+      'liquid-glass',
+      'shadcn',
+    ]);
 
     for (const projectionFamilyId of ['shadcn', 'brutalist'] as const) {
       const manifest = PROJECTION_FAMILY_MANIFESTS[projectionFamilyId];
@@ -702,4 +707,24 @@ describe('Website projection-family manifests', () => {
       expect(() => validateProjectionFamilyManifest(invalid)).toThrow(/recipe Prototype set/i);
     }
   });
+});
+
+describe('partial new projection families', () => {
+  for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
+    it(`${family} declares only its real Button and rejects every missing kind`, () => {
+      const manifest = PROJECTION_FAMILY_MANIFESTS[family];
+      expect(Object.keys(manifest.families)).toEqual(['button']);
+      expect(() => validateProjectionFamilyManifest(manifest)).not.toThrow();
+      expect(resolveProjectionPart(family, 'button', 'root').prototypeId).toBe(`${family}-button`);
+      for (const kind of ['select', 'switch', 'dialog', 'tabs', 'checkbox']) {
+        expect(() => resolveProjectionPart(family, kind, 'root')).toThrow(
+          /no family.*fallback is forbidden/
+        );
+      }
+      expect(resolveProjectionRecipe(`demo-${family}-button`)).toEqual({
+        projectionFamilyId: family,
+        familyId: 'button',
+      });
+    });
+  }
 });

@@ -211,3 +211,23 @@ describe('Website projection theme inputs', () => {
     }
   });
 });
+
+describe('source-owned partial family themes', () => {
+  it('preserves Bootstrap historical palette and distinct Liquid dark values', () => {
+    document.documentElement.dataset.theme = 'light';
+    const bootstrap = resolveProjectionThemeSurfaceStyle(
+      'bootstrap-2-3-2',
+      document.documentElement
+    );
+    const glass = resolveProjectionThemeSurfaceStyle('liquid-glass', document.documentElement);
+    expect(bootstrap['--pui-primary']).toBe('#0044cc');
+    expect(glass['--pui-secondary']).toBe('#ffffff');
+    document.documentElement.dataset.theme = 'dark';
+    expect(resolveProjectionThemeSurfaceStyle('bootstrap-2-3-2', document.documentElement)).toEqual(
+      bootstrap
+    );
+    const dark = resolveProjectionThemeSurfaceStyle('liquid-glass', document.documentElement);
+    expect(dark['--pui-secondary']).toBe('#2c2c2e');
+    expect(Object.keys(dark).sort()).toEqual(Object.keys(glass).sort());
+  });
+});

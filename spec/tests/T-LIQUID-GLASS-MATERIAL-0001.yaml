@@ -1,0 +1,56 @@
+id: T-LIQUID-GLASS-MATERIAL-0001
+type: test
+title: Liquid Glass bounded material and live fallback evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Bounded material policy is experimental. Unit evidence does not establish optical or cross-host conformance; actual four-Web consumer evidence must be collected.
+summary: Source-policy and lease-loss tests plus planned real Web alpha/blur, pixel negative controls and live preference fallback.
+cases:
+  - id: T-LIQUID-GLASS-MATERIAL-0001-CASE-POLICY
+    title: Affirmative finite inputs, opt-out, unknown/source-loss and restoration
+    covers:
+      - P-LIQUID-GLASS-BUTTON-MATERIAL
+      - P-LIQUID-GLASS-BUTTON-API
+    expectation: source-rule-safe-material-policy
+  - id: T-LIQUID-GLASS-MATERIAL-0001-CASE-PAINT
+    title: Actual same-control blur pixels and live four-host fallback
+    covers:
+      - P-LIQUID-GLASS-BUTTON-MATERIAL
+      - P-LIQUID-GLASS-BUTTON-VISUAL
+      - P-LIQUID-GLASS-BUTTON-CLOSURE
+    expectation: real-web-bounded-alpha-blur-and-live-fallback
+implementations:
+  - id: liquid-glass-material-policy
+    kind: module-test
+    status: passing
+    path: packages/prototypes/liquid-glass/test/material.test.ts
+    required: true
+    consumesCases:
+      - T-LIQUID-GLASS-MATERIAL-0001-CASE-POLICY
+    notes:
+      - Twelve focused cases on the real Prototype and Runtime; prop intent is observed separately from the minimal host effects sink. No browser result is inferred.
+  - id: liquid-glass-material-browser
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts
+    required: true
+    consumesCases:
+      - T-LIQUID-GLASS-MATERIAL-0001-CASE-PAINT
+    notes:
+      - Must run on the exact combined source head after primitive review. Captures and decodes real screenshots for a same-control blur-removed negative control.
+      - Source-loss/rebind is covered in the real Runtime unit path; native browser preference changes are covered across all four Web adapters. No native Apple, GPUI, Compiler, Flutter or Qt claim.
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-BUTTON
+sources:
+  - path: packages/prototypes/liquid-glass/test/material.test.ts
+  - path: .github/workflows/liquid-material-evidence.yml
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added finite material policy evidence and planned actual-Web consumer capture without promoting the draft.
+tags:
+  - test
+  - liquid-glass
+  - material
+  - draft

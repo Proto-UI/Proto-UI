@@ -1,3 +1,5 @@
+import { THEME as BOOTSTRAP_THEME } from '../../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
+import { THEME as LIQUID_GLASS_THEME } from '../../../../../packages/prototypes/liquid-glass/src/theme';
 import { BRUTALIST_THEME } from '../../../../../packages/prototypes/brutalist/src/theme';
 
 import type { ProjectionFamilyId } from './projection-families';
@@ -108,6 +110,13 @@ export function resolveProjectionThemeSurfaceStyle(
 ): ProjectionThemeSurfaceStyle {
   if (projectionFamilyId === 'shadcn') return readWebsiteShadcnTheme(scope);
   if (projectionFamilyId === 'brutalist') return readBrutalistTheme(scope);
+  if (projectionFamilyId === 'bootstrap-2-3-2' || projectionFamilyId === 'liquid-glass') {
+    const palette = projectionFamilyId === 'bootstrap-2-3-2' ? BOOTSTRAP_THEME : LIQUID_GLASS_THEME;
+    const mode = isDarkTheme(scope) ? palette.dark : palette.light;
+    return Object.freeze(
+      Object.fromEntries(Object.entries(mode).map(([name, value]) => [`--pui-${name}`, value]))
+    ) as ProjectionThemeSurfaceStyle;
+  }
   const exhaustive: never = projectionFamilyId;
   throw new Error(`[PrototypePreviewer] unsupported projection theme ${String(exhaustive)}.`);
 }

@@ -1,0 +1,17 @@
+---
+title: 'Liquid Glass'
+description: 'Liquid Glass prototype library and current implemented coverage.'
+---
+
+import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+独立实现的功能层玻璃方向：明确支持透明混合和 4px 背景模糊、且实时偏好允许时才增强。未知、减弱透明度、减弱动态效果或对比度偏好立即使用不透明回退。不是 Apple 原生材质引擎。
+
+目前已登记 Button。其他 Base 部件正在逐项补齐，不会借用其他族冒充；通用 Compiler 与 GPUI/Flutter/Qt 完整呈现尚未验证。源码包仍为 private/unreleased。
+
+<PrototypeLibraryOverview library="liquid-glass" locale="zh-cn" />
+
+[完整覆盖进度](https://github.com/Proto-UI/Proto-UI/issues/792)

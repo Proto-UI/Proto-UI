@@ -2,7 +2,7 @@
 import PrototypePreviewer from './PrototypePreviewer/PrototypePreviewer.astro';
 
 type Locale = 'en' | 'zh-cn';
-type LibraryId = 'base' | 'shadcn' | 'brutalist';
+type LibraryId = 'base' | 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
 
 interface Props {
   library: LibraryId;
@@ -21,6 +21,28 @@ const { library, locale = 'en' } = Astro.props as Props;
 const isZh = locale === 'zh-cn';
 
 const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
+  'bootstrap-2-3-2': [
+    {
+      id: 'button',
+      name: 'Button',
+      demoId: 'demo-bootstrap-2-3-2-button',
+      description: isZh
+        ? '2.3.2 渐变与内阴影，继承 Base Button。'
+        : '2.3.2 raised gradients and inset shadows over Base Button.',
+      href: './button/',
+    },
+  ],
+  'liquid-glass': [
+    {
+      id: 'button',
+      name: 'Button',
+      demoId: 'demo-liquid-glass-button',
+      description: isZh
+        ? '按实时偏好与宿主能力选择透明模糊或不透明回退。'
+        : 'Live preference/support-gated translucency and blur, with an opaque fallback.',
+      href: './button/',
+    },
+  ],
   base: [
     {
       id: 'button',
@@ -505,7 +527,6 @@ const copy = isZh
               demoId={entry.demoId}
               initialRuntime="wc"
               toolbar={false}
-              runtimes={['wc']}
               codePanel={false}
               lazy
             />

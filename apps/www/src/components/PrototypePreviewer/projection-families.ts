@@ -22,7 +22,7 @@ export type ProjectionComponentId =
   | 'spinner'
   | 'scroll-area'
   | 'tooltip';
-export type ProjectionFamilyId = 'shadcn' | 'brutalist';
+export type ProjectionFamilyId = 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
 
 export type ProjectionPartManifest = Readonly<{
   /**
@@ -647,9 +647,41 @@ const BRUTALIST_MANIFEST = {
   },
 } as const satisfies ProjectionFamilyManifest;
 
+const BOOTSTRAP_232_MANIFEST = {
+  projectionFamilyId: 'bootstrap-2-3-2',
+  themeArtifactId: 'prototype-bootstrap-2-3-2-theme',
+  themeInputId: 'website-bootstrap-2-3-2-theme-mode',
+  // Partial by design: no missing kind may borrow an implementation.
+  families: {
+    button: {
+      baseFamilyId: 'P-BASE-BUTTON',
+      recipeId: 'demo-bootstrap-2-3-2-button',
+      recipePrototypeIds: ['bootstrap-2-3-2-button'],
+      parts: { root: { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' } },
+    },
+  },
+} as const satisfies ProjectionFamilyManifest;
+
+const LIQUID_GLASS_MANIFEST = {
+  projectionFamilyId: 'liquid-glass',
+  themeArtifactId: 'prototype-liquid-glass-theme',
+  themeInputId: 'website-liquid-glass-theme-mode',
+  // Partial by design: no missing kind may borrow an implementation.
+  families: {
+    button: {
+      baseFamilyId: 'P-BASE-BUTTON',
+      recipeId: 'demo-liquid-glass-button',
+      recipePrototypeIds: ['liquid-glass-button'],
+      parts: { root: { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' } },
+    },
+  },
+} as const satisfies ProjectionFamilyManifest;
+
 export const PROJECTION_FAMILY_MANIFESTS = Object.freeze({
   shadcn: SHADCN_MANIFEST,
   brutalist: BRUTALIST_MANIFEST,
+  'bootstrap-2-3-2': BOOTSTRAP_232_MANIFEST,
+  'liquid-glass': LIQUID_GLASS_MANIFEST,
 }) satisfies ProjectionFamilyManifestRegistry;
 
 const hasOwn = (value: object, key: string): boolean =>

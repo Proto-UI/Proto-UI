@@ -1,8 +1,10 @@
 ---
 import StaticLucideIcon from './StaticLucideIcon.astro';
+import PrototypePreviewer from './PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from './DraftProjectionStyle.astro';
 
 type Locale = 'en' | 'zh-cn';
-type LibraryId = 'base' | 'shadcn' | 'lucide' | 'brutalist';
+type LibraryId = 'base' | 'shadcn' | 'lucide' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
 
 interface Props {
   locale?: Locale;
@@ -32,8 +34,8 @@ const copy =
   locale === 'zh-cn'
     ? {
         aria: '选择一个 UI 原型库',
-        count: '4 个可选库',
-        componentCount: '3 个组件库',
+        count: '6 个可选库',
+        componentCount: '5 个组件库',
         iconCount: '1 个图标库',
         bestFor: '适合',
         prototypeAuthor: '原型实现',
@@ -106,8 +108,8 @@ const copy =
       }
     : {
         aria: 'Choose a UI prototype library',
-        count: '4 libraries',
-        componentCount: '3 component libraries',
+        count: '6 libraries',
+        componentCount: '5 component libraries',
         iconCount: '1 icon library',
         bestFor: 'Best for',
         prototypeAuthor: 'Prototype implementation',
@@ -182,8 +184,52 @@ const copy =
           },
         ] satisfies LibraryCard[],
       };
+
+const isZh = locale === 'zh-cn';
+const cards: LibraryCard[] = [
+  ...copy.cards,
+  {
+    id: 'bootstrap-2-3-2',
+    name: 'Bootstrap 2.3.2',
+    mark: '2.3',
+    type: isZh ? '风格组件库' : 'Styled components',
+    status: isZh ? 'Button 已登记 · 扩展中' : 'Button available · expanding',
+    description: isZh
+      ? '经典渐变、4px 圆角与内阴影，真实继承 Base 协议。'
+      : 'Classic gradients, 4px corners and inset shadows over real Base protocols.',
+    bestFor: isZh ? '经典桌面 Web 风格与旧版设计语言复现' : 'Classic desktop-Web visual language',
+    sourceLabel: isZh ? '设计来源' : 'Design source',
+    source: 'Bootstrap v2.3.2',
+    sourceHref: 'https://getbootstrap.com/2.3.2/',
+    author: 'Proto UI contributors',
+    authorHref: 'https://github.com/Proto-UI/Proto-UI',
+    cta: isZh ? '浏览 Bootstrap 2.3.2' : 'Explore Bootstrap 2.3.2',
+    href: './bootstrap-2-3-2/',
+  },
+  {
+    id: 'liquid-glass',
+    name: 'Liquid Glass',
+    mark: 'LG',
+    type: isZh ? '风格组件库' : 'Styled components',
+    status: isZh ? 'Button 已登记 · 扩展中' : 'Button available · expanding',
+    description: isZh
+      ? '按实时偏好和能力增强的透明功能面，带确定性不透明回退。'
+      : 'Preference- and capability-gated translucent functional surfaces with an opaque fallback.',
+    bestFor: isZh
+      ? '重视层次和可读性的功能层'
+      : 'Layered functional controls with readable content',
+    sourceLabel: isZh ? '设计参考' : 'Design reference',
+    source: 'Apple Materials HIG',
+    sourceHref: 'https://developer.apple.com/design/human-interface-guidelines/materials',
+    author: 'Proto UI contributors',
+    authorHref: 'https://github.com/Proto-UI/Proto-UI',
+    cta: isZh ? '浏览 Liquid Glass' : 'Explore Liquid Glass',
+    href: './liquid-glass/',
+  },
+];
 ---
 
+<DraftProjectionStyle />
 <section class="library-gallery" aria-label={copy.aria}>
   <div class="library-gallery__summary" aria-label={copy.count}>
     <span>{copy.count}</span>
@@ -193,7 +239,7 @@ const copy =
 
   <div class="library-gallery__grid">
     {
-      copy.cards.map((library) => (
+      cards.map((library) => (
         <article class:list={['library-card', `library-card--${library.id}`]}>
           <header class="library-card__header">
             <span class="library-card__logo" aria-hidden="true">
@@ -206,7 +252,21 @@ const copy =
             {library.status && <span class="library-card__status">{library.status}</span>}
           </header>
 
-          <div class="library-card__preview" aria-hidden="true">
+          <div
+            class="library-card__preview"
+            aria-hidden={
+              library.id === 'bootstrap-2-3-2' || library.id === 'liquid-glass' ? undefined : 'true'
+            }
+          >
+            {(library.id === 'bootstrap-2-3-2' || library.id === 'liquid-glass') && (
+              <PrototypePreviewer
+                demoId={`demo-${library.id}-button`}
+                initialRuntime="wc"
+                toolbar={false}
+                codePanel={false}
+                lazy
+              />
+            )}
             {library.id === 'base' && (
               <div class="base-preview">
                 <span class="base-preview__watermark">{copy.unstyledMark}</span>

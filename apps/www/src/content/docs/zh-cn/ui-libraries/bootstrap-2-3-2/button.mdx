@@ -1,0 +1,61 @@
+---
+title: 'Bootstrap 2.3.2 Button'
+description: 'Real Base Button projection through four Web adapters.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+固定 2.3.2 的经典渐变和内阴影，交互仍由 Base 协议统一拥有。
+
+用页面顶部的运行时选择器切换同一真实原型。点击 Back 可观察事件计数。
+
+<div data-adapter-panel="wc">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-button"
+    initialRuntime="wc"
+    toolbar={false}
+    runtimes={['wc']}
+    codePanel={false}
+  />
+</div>
+<div data-adapter-panel="react" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-button"
+    initialRuntime="react"
+    toolbar={false}
+    runtimes={['react']}
+    codePanel={false}
+  />
+</div>
+<div data-adapter-panel="vue" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-button"
+    initialRuntime="vue"
+    toolbar={false}
+    runtimes={['vue']}
+    codePanel={false}
+  />
+</div>
+<div data-adapter-panel="vue2" style="display:none;">
+  <PrototypePreviewer
+    demoId="demo-bootstrap-2-3-2-button"
+    initialRuntime="vue2"
+    toolbar={false}
+    runtimes={['vue2']}
+    codePanel={false}
+  />
+</div>
+
+<AdapterPanelScript />
+
+## API
+
+- variant: default / primary
+- disabled: boolean, default false
+- 激活、焦点、键盘与禁用逻辑继承 Base Button，视觉层没有第二个状态拥有者。
+
+目前已登记 Button。其他 Base 部件正在逐项补齐，不会借用其他族冒充；通用 Compiler 与 GPUI/Flutter/Qt 完整呈现尚未验证。源码包仍为 private/unreleased。
