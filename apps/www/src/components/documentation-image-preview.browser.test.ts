@@ -184,6 +184,9 @@ describe('automatic documentation image preview in real Chromium', () => {
             await page.keyboard.press('Escape');
             await closed(page);
             expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
+            expect(await trigger.getAttribute('data-focus-visible')).not.toBeNull();
+            expect(await trigger.evaluate((el) => getComputedStyle(el).boxShadow)).not.toBe('none');
+            await capture(page, `${width}-${colorScheme}-${family}-keyboard-focus`);
             for (let count = 0; count < 2; count++) {
               await trigger.click();
               await entered(page);
@@ -386,6 +389,30 @@ describe('automatic documentation image preview in real Chromium', () => {
       await context.close();
       server.closeAllConnections();
       await new Promise<void>((resolve) => server.close(() => resolve()));
+    }
+  }, 90_000);
+  it('keeps the native focus and panel boundary visible in forced colors', async () => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      forcedColors: 'active',
+    });
+    const page = track(await context.newPage());
+    try {
+      await page.goto(`${baseUrl}${MD}`, { waitUntil: 'networkidle' });
+      const trigger = await open(page, 'Vector landscape');
+      expect(
+        await page
+          .locator('[data-docs-image-content]')
+          .evaluate((el) => parseFloat(getComputedStyle(el).borderTopWidth))
+      ).toBeGreaterThan(0);
+      await capture(page, 'forced-colors-vector');
+      await page.keyboard.press('Escape');
+      await closed(page);
+      expect(await trigger.evaluate((el) => el === document.activeElement)).toBe(true);
+      expect(await trigger.evaluate((el) => getComputedStyle(el).outlineStyle)).not.toBe('none');
+      await capture(page, 'forced-colors-keyboard-focus');
+    } finally {
+      await context.close();
     }
   }, 90_000);
   it('honors reduced motion and preserves no-JavaScript media/link content', async () => {

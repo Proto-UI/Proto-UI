@@ -13,7 +13,6 @@ documentation-image-preview,
   border: 0;
   border-radius: var(--radius-sm);
   background: transparent;
-  box-shadow: none;
   white-space: normal;
   cursor: zoom-in;
   vertical-align: middle;

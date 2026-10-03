@@ -46,6 +46,11 @@ describe('documentation image viewer PUI integration', () => {
     await settle();
     expect(document.querySelector('[data-doc-flow]')!.textContent).not.toContain('Enlarge image:');
   });
+  it('does not erase the prototype-owned focus-ring shadow with unlayered thumbnail CSS', () => {
+    const css = readFileSync('apps/www/src/styles/documentation-image-preview.css', 'utf8');
+    const thumbnailRule = css.match(/\[data-docs-image-trigger\]\s*\{([^}]+)\}/)![1];
+    expect(thumbnailRule).not.toMatch(/box-shadow\s*:/);
+  });
   it('opens through Button semantic activation, closes through Dialog, restores focus and resets zoom', async () => {
     const { trigger, root } = await fixture();
     trigger.focus();
