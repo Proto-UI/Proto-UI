@@ -1,0 +1,28 @@
+{
+  "sourceSha": "42aaca074eb4c1532545fe554d1ee9bc3d0a8891",
+  "harnessSha": "b9cd3884591b033b39e07db1cebf4e63c7b125bb",
+  "mode": "baseline-capture-only",
+  "family": "shadcn",
+  "runtime": "wc",
+  "state": "initial",
+  "facts": {
+    "vertical": {
+      "x": 819,
+      "y": 692,
+      "width": 10,
+      "height": 190
+    },
+    "horizontal": {
+      "x": 511,
+      "y": 872,
+      "width": 318,
+      "height": 10
+    },
+    "viewport": {
+      "x": 511,
+      "y": 692,
+      "width": 318,
+      "height": 190
+    }
+  }
+}

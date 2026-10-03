@@ -1,0 +1,28 @@
+{
+  "sourceSha": "42aaca074eb4c1532545fe554d1ee9bc3d0a8891",
+  "harnessSha": "b9cd3884591b033b39e07db1cebf4e63c7b125bb",
+  "mode": "baseline-capture-only",
+  "family": "brutalist",
+  "runtime": "vue",
+  "state": "initial",
+  "facts": {
+    "vertical": {
+      "x": 812,
+      "y": 674.375,
+      "width": 16,
+      "height": 188
+    },
+    "horizontal": {
+      "x": 512,
+      "y": 846.375,
+      "width": 316,
+      "height": 16
+    },
+    "viewport": {
+      "x": 512,
+      "y": 674.375,
+      "width": 316,
+      "height": 188
+    }
+  }
+}

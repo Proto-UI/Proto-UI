@@ -1,0 +1,41 @@
+{
+  "sourceSha": "b9cd3884591b033b39e07db1cebf4e63c7b125bb",
+  "harnessSha": "b9cd3884591b033b39e07db1cebf4e63c7b125bb",
+  "mode": "candidate-regression",
+  "family": "shadcn",
+  "runtime": "wc",
+  "state": "end-focused",
+  "facts": {
+    "end": {
+      "vertical": {
+        "x": 819,
+        "y": 797,
+        "width": 10,
+        "height": 180
+      },
+      "horizontal": {
+        "x": 511,
+        "y": 977,
+        "width": 308,
+        "height": 10
+      },
+      "viewport": {
+        "x": 511,
+        "y": 797,
+        "width": 318,
+        "height": 190
+      },
+      "hit": {
+        "found": true,
+        "inRoot": true,
+        "isControl": false
+      }
+    },
+    "focused": {
+      "x": 511,
+      "y": 797,
+      "width": 318,
+      "height": 190
+    }
+  }
+}

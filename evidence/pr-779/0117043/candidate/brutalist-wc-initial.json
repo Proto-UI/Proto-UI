@@ -1,0 +1,33 @@
+{
+  "sourceSha": "0117043eb88ece2f72c2ec94de4c244981901558",
+  "harnessSha": "0117043eb88ece2f72c2ec94de4c244981901558",
+  "mode": "candidate-regression",
+  "family": "brutalist",
+  "runtime": "wc",
+  "state": "initial",
+  "facts": {
+    "vertical": {
+      "x": 812,
+      "y": 806.375,
+      "width": 16,
+      "height": 172
+    },
+    "horizontal": {
+      "x": 512,
+      "y": 978.375,
+      "width": 300,
+      "height": 16
+    },
+    "viewport": {
+      "x": 512,
+      "y": 806.375,
+      "width": 316,
+      "height": 188
+    },
+    "hit": {
+      "found": true,
+      "inRoot": true,
+      "isControl": false
+    }
+  }
+}
