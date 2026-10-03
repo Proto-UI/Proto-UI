@@ -11,7 +11,7 @@ description: Update Proto UI human documentation, localized pages, contributor g
 4. Write for the intended reader. Use direct sentences, define necessary terms, remove stale relative time and mutable counts, and avoid defensive or promotional prose.
 5. Keep locales semantically aligned without forcing identical phrasing. Keep identifiers and API names canonical.
 6. Use real public exports and routes for demos. Do not add page-level behavior that pretends to be package behavior.
-7. Change generated docs through their generator.
+7. Change generated docs through their generator. For illustrations, use `internal/agent-operations/diagram-design.md` to inventory existing assets, preserve source-grounded meaning, choose a suitable topology, and inspect actual localized/theme renders before publication.
 8. Record the proportional validation boundary and propose `pui-validate` in the handoff without loading it.
 
 Stop if the text requires a new guarantee, public API advice, compatibility promise, unresolved Adapter path, or hidden implementation fix.

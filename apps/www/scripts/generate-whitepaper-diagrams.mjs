@@ -1,9 +1,12 @@
 // Editorial illustrations for whitepaper chapters 3–7, not normative diagrams.
-// Run with Node 22: node apps/www/scripts/generate-whitepaper-diagrams.mjs
+// Run with Node 24: node apps/www/scripts/generate-whitepaper-diagrams.mjs
 // Edit this source and regenerate the SVGs; user-authored diagrams are not touched.
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const output = new URL('../public/diagrams/', import.meta.url);
+const handFonts = JSON.parse(
+  await readFile(new URL('./whitepaper-diagram-fonts.json', import.meta.url), 'utf8')
+).fonts;
 const esc = (s) =>
   String(s)
     .replaceAll('&', '&amp;')
@@ -114,53 +117,110 @@ function anatomy() {
 }
 
 function activation() {
-  heading(
-    '05',
-    tr('一次 Switch 激活如何展开', 'How one Switch activation unfolds'),
+  // One main sequence belongs to Root. Horizontal arrows cross owner boundaries;
+  // their position is not a promise of synchronous Context callback delivery.
+  parts.push(
+    `<desc id="description">${esc(
+      tr(
+        '非受控、未禁用的 Switch：User 通过 Event 激活 Root；Root 读取 checked、计算并保存新值，再通过 Expose 通知 App Maker，并显式更新 Context 与请求自己的 Feedback 重新求值。Thumb 接收 Context，保存派生展示状态，并请求自己的 Feedback 重新求值。Root 始终是 checked 的唯一 owner；跨组件箭头不规定 callback 的同步时序。',
+        'An uncontrolled, enabled Switch: User activates Root through Event. Root reads checked, computes and stores the new value, emits checkedChange to App Maker through Expose, and explicitly updates Context and requests its own Feedback refresh. Thumb receives Context, stores derived display state, and requests its own Feedback refresh. Root remains the sole checked owner. Cross-component arrows do not prescribe synchronous callback timing.'
+      )
+    )}</desc>`
+  );
+  parts.push(`<style>
+${handFonts
+  .filter((font) => !en || font.family.endsWith('Latin'))
+  .map(
+    (font) =>
+      `@font-face{font-family:"${font.family}";src:url(data:font/woff2;base64,${font.woff2}) format("woff2");unicode-range:${font.unicodeRange};font-weight:400;font-style:normal;}`
+  )
+  .join('\n')}
+text{font-family:"Proto Diagram Hand Latin","Proto Diagram Hand CJK",sans-serif;font-weight:400}.strong{font-weight:400}.hand-stroke{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.hand-echo{opacity:.45;stroke-width:1}.hand-muted{stroke:var(--muted)}
+</style><defs><marker id="hand-arrow" viewBox="0 0 12 12" refX="10" refY="6" markerWidth="10" markerHeight="10" orient="auto-start-reverse"><path d="M2 1 Q6 4 10 6 Q6 7 1 11" fill="none" stroke="var(--ink)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>`);
+  const pen = (d, cls = '') => parts.push(`<path d="${d}" class="hand-stroke ${cls}"/>`);
+  const arrow = (id, d) =>
+    parts.push(
+      `<path data-edge="${id}" d="${d}" class="hand-stroke" marker-end="url(#hand-arrow)"/>`
+    );
+  const index = (n, x, y) => {
+    pen(
+      `M${x - 13} ${y - 6} C${x - 10} ${y - 20} ${x + 13} ${y - 18} ${x + 14} ${y - 3} C${x + 17} ${y + 14} ${x - 11} ${y + 18} ${x - 14} ${y + 3} Q${x - 16} ${y - 2} ${x - 13} ${y - 6}`
+    );
+    text(x, y + 6, String(n), 21);
+  };
+  text(48, 66, tr('一次 Switch 激活', 'One Switch activation'), 32, 'start', 'strong');
+  text(
+    48,
+    103,
     tr(
-      '非受控、未禁用的情形 · 对应本章伪代码',
-      'Uncontrolled and enabled · an illustration of this chapter’s pseudocode'
+      '非受控、未禁用 · 本章伪代码的执行关系',
+      'Uncontrolled and enabled · relations in this chapter’s pseudocode'
+    ),
+    21,
+    'start',
+    'muted'
+  );
+
+  text(314, 166, 'User', 26, 'middle', 'strong');
+  arrow('event-to-root', 'M314 181 C311 199 317 218 314 235');
+  text(334, 211, 'Event · activate', 21, 'start', 'muted');
+
+  parts.push('<g data-owner="root">');
+  pen(
+    'M55 238 C207 234 410 240 573 236 Q581 237 579 248 C583 393 576 535 580 679 Q581 689 569 687 C405 692 231 684 56 689 Q47 688 49 677 C46 529 51 385 47 247 Q46 236 55 238'
+  );
+  pen(
+    'M52 240 C211 237 411 241 572 239 M577 248 C580 404 575 548 578 680 M568 690 C404 693 225 687 57 691 M46 677 C44 532 49 384 46 249',
+    'hand-echo'
+  );
+  text(76, 280, 'Switch Root', 28, 'start', 'strong');
+  text(76, 311, tr('checked 的唯一 owner', 'The sole owner of checked'), 20, 'start', 'muted');
+  const step = (n, y, label, detail) => {
+    index(n, 92, y - 8);
+    text(126, y, label, 24, 'start', 'strong');
+    if (detail) text(126, y + 31, detail, 21, 'start', 'muted');
+  };
+  step(1, 365, tr('读取 checked', 'Read checked'), 'nextChecked = !checked');
+  step(2, 455, tr('保存 State', 'Store State'), 'checked ← nextChecked');
+  step(3, 545, tr('发出 checkedChange', 'Emit checkedChange'));
+  step(
+    4,
+    635,
+    tr('更新 Context', 'Update Context'),
+    tr('请求 Root 的 Feedback 重新求值', 'Request Root’s Feedback refresh')
+  );
+  [391, 481, 571].forEach((y, i) =>
+    arrow(`root-step-${i + 1}-to-${i + 2}`, `M92 ${y} C90 ${y + 10} 95 ${y + 24} 92 ${y + 35}`)
+  );
+  parts.push('</g>');
+
+  arrow('expose-to-maker', 'M580 536 C631 532 693 539 747 536');
+  text(662, 519, 'Expose', 21, 'middle', 'muted');
+  text(774, 543, 'App Maker', 24, 'start', 'strong');
+
+  arrow('context-to-thumb', 'M580 626 C622 623 663 629 708 626');
+  text(644, 609, 'Context', 21, 'middle', 'muted');
+  text(738, 613, 'Switch Thumb', 25, 'start', 'strong');
+  pen('M724 631 Q723 635 724 637 M724 675 C724 706 727 750 724 797 Q812 801 936 797', 'hand-muted');
+  index(5, 724, 656);
+  text(751, 656, tr('接收 Context', 'Receive Context'), 21, 'start');
+  text(751, 687, tr('保存派生展示状态', 'Store derived state'), 21, 'start');
+  text(751, 714, 'checked / disabled', 20, 'start', 'muted');
+  text(751, 749, tr('请求自己的', 'Request its own'), 21, 'start');
+  text(751, 777, tr('Feedback 重新求值', 'Feedback refresh'), 21, 'start');
+
+  foot(
+    838,
+    tr(
+      'State 只保存事实；对外效果由 Root 与 Thumb 分别显式发起。',
+      'State stores facts. Root and Thumb request their effects explicitly.'
     )
   );
-  box(48, 174, 864, 64, 'User → Event activate → Switch Root', 'blue', 26);
-  rect(48, 266, 864, 405, 'scope');
-  text(74, 309, 'Switch Root', 26, 'start', 'strong');
-  const rows = [
-    [336, tr('01  读取 checked，计算 nextChecked', '01  Read checked; compute nextChecked')],
-    [418, tr('02  保存新的 State', '02  Store the new State')],
-    [500, '03  Expose checkedChange → App Maker'],
-    [
-      582,
-      tr(
-        '04  更新 Context；请求 Feedback 重新求值',
-        '04  Update Context; request Feedback refresh'
-      ),
-    ],
-  ];
-  rows.forEach(([y, label], i) => {
-    box(88, y, 784, 58, label, i === 3 ? 'blue' : 'panel', 24);
-    if (i < rows.length - 1) path(`M480 ${y + 58} V${y + 82}`);
-  });
-  path('M480 238 V266');
-  path('M480 671 V720');
-  text(515, 703, 'Context', 22, 'start', 'muted');
-  box(
-    48,
-    720,
-    864,
-    108,
-    tr(
-      '05  Thumb 接收 Context，保存派生展示状态|并请求自己的 Feedback 重新求值',
-      '05  Thumb receives Context and stores derived display state|then requests its own Feedback refresh'
-    ),
-    'green',
-    24
-  );
   foot(
-    877,
+    872,
     tr(
-      'State 不会自动发布这些效果；Root 仍是 checked 的唯一 owner。',
-      'State does not publish these effects automatically; Root owns checked.'
+      '跨组件箭头表示信息通路，不规定 callback 的同步时序。',
+      'Cross-component arrows show channels, not synchronous callback timing.'
     )
   );
   return 920;
@@ -320,9 +380,9 @@ for (const locale of ['zh-cn', 'en']) {
   for (const [name, render] of Object.entries(figures)) {
     parts = [];
     const height = render();
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="${height}" viewBox="0 0 960 ${height}" role="img" aria-labelledby="title" xml:lang="${locale}">
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="${height}" viewBox="0 0 960 ${height}" role="img" aria-labelledby="title"${name === 'switch-activation' ? ' aria-describedby="description"' : ''} xml:lang="${locale}">
 <!-- Generated by apps/www/scripts/generate-whitepaper-diagrams.mjs. -->
-<title id="title">${esc(name.replaceAll('-', ' '))}</title>
+<title id="title">${esc(name === 'switch-activation' ? tr('一次 Switch 激活', 'One Switch activation') : name.replaceAll('-', ' '))}</title>
 <defs><style>
   :root { --ink:#24313d; --muted:#596875; --line:#94a3ae; --panel:#f7f9fb; --blue:#eaf2fc; --green:#eaf5ee; --amber:#fbf2e2; }
   @media(prefers-color-scheme:dark) { :root { --ink:#e1e8ed; --muted:#a6b5c0; --line:#667986; --panel:#161c22; --blue:#192d43; --green:#1a3028; --amber:#362d1c; } }
