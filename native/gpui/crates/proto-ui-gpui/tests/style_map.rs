@@ -644,7 +644,11 @@ fn bootstrap_gradient_keeps_the_mapped_fill_and_reports_the_missing_image() {
     let expected: gpui::Hsla = gpui::rgb(0x006dcc).into();
     let mapped = map(
         &resolve(
-            &["bg-[linear-gradient(#08c,#04c)]", "rounded-[4px]", "opacity-65"],
+            &[
+                "bg-[linear-gradient(#08c,#04c)]",
+                "rounded-[4px]",
+                "opacity-65",
+            ],
             "bootstrap-2-3-2",
         ),
         LengthContext::default(),
@@ -670,7 +674,10 @@ fn bootstrap_gradient_keeps_the_mapped_fill_and_reports_the_missing_image() {
 fn liquid_fallback_uses_its_palette_without_claiming_a_material() {
     let expected: gpui::Hsla = gpui::rgb(0xffffff).into();
     let mapped = map(
-        &resolve(&["bg-secondary", "rounded-full", "shadow-sm"], "liquid-glass"),
+        &resolve(
+            &["bg-secondary", "rounded-full", "shadow-sm"],
+            "liquid-glass",
+        ),
         LengthContext::default(),
     );
     assert_eq!(
