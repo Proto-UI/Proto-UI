@@ -63,11 +63,33 @@ enum InsetMode {
     Unsupported,
 }
 
+enum StyleTarget {
+    TemplateSurface,
+    ExistingHostRoot,
+}
+
 /// Maps one resolved declaration set.
 pub fn map(resolved: &ResolvedStyle, context: LengthContext) -> MappedStyle {
+    map_for_target(resolved, context, StyleTarget::TemplateSurface)
+}
+
+fn map_for_target(
+    resolved: &ResolvedStyle,
+    context: LengthContext,
+    target: StyleTarget,
+) -> MappedStyle {
     let mut mapped = MappedStyle::default();
+    // No declarations means no style intent, not a request to reproduce CSS's
+    // implicit static containing block. Leave the host's presentation alone.
+    // Token/substitution failures remain diagnostics in style_for_tokens.
+    if resolved.declarations.is_empty() {
+        return mapped;
+    }
     let style = &mut mapped.refinement;
     let inset_mode = match resolved.declarations.get("position").map(String::as_str) {
+        // Feedback refines an existing host-owned root. Without an authored
+        // position, do not guess how an inset relates to that root's layout.
+        None if matches!(target, StyleTarget::ExistingHostRoot) => InsetMode::Unsupported,
         None | Some("static") => InsetMode::Inert,
         Some("relative" | "absolute") => InsetMode::Positioned,
         Some(_) => InsetMode::Unsupported,
@@ -75,7 +97,9 @@ pub fn map(resolved: &ResolvedStyle, context: LengthContext) -> MappedStyle {
     // CSS defaults to static, but GPUI Style defaults to Relative, which also
     // establishes a containing block for absolute descendants. Do not claim a
     // complete mapping when this host cannot express the CSS default.
-    if !resolved.declarations.contains_key("position") {
+    if matches!(target, StyleTarget::TemplateSurface)
+        && !resolved.declarations.contains_key("position")
+    {
         mapped.unmapped.push((
             "position".into(),
             "static".into(),
@@ -478,6 +502,28 @@ pub fn style_for_tokens<'a>(
     theme: Option<&proto_ui_style::Theme>,
     context: LengthContext,
 ) -> TokenStyle {
+    tokens_for_target(tokens, theme, context, StyleTarget::TemplateSurface)
+}
+
+/// Maps Feedback's partial refinement of the application's existing root.
+///
+/// Missing position does not request a new CSS-static containing block. Other
+/// unsupported declarations still reject the result; insets need an explicit
+/// supported position rather than an assumption about the application's root.
+pub fn style_for_feedback_tokens<'a>(
+    tokens: impl IntoIterator<Item = &'a str>,
+    theme: Option<&proto_ui_style::Theme>,
+    context: LengthContext,
+) -> TokenStyle {
+    tokens_for_target(tokens, theme, context, StyleTarget::ExistingHostRoot)
+}
+
+fn tokens_for_target<'a>(
+    tokens: impl IntoIterator<Item = &'a str>,
+    theme: Option<&proto_ui_style::Theme>,
+    context: LengthContext,
+    target: StyleTarget,
+) -> TokenStyle {
     let mut resolved = proto_ui_style::vocabulary().resolve_all(tokens);
     let mut issues: Vec<StyleIssue> = resolved
         .unknown
@@ -517,7 +563,7 @@ pub fn style_for_tokens<'a>(
         resolved.declarations.remove(&property);
     }
 
-    let mapped = map(&resolved, context);
+    let mapped = map_for_target(&resolved, context, target);
     issues.extend(
         mapped
             .unmapped
@@ -532,5 +578,32 @@ pub fn style_for_tokens<'a>(
     TokenStyle {
         refinement: mapped.refinement,
         issues,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn feedback_cannot_map_explicit_static_or_fixed_position() {
+        // Inject both values at the declaration boundary: static is absent
+        // from the checked vocabulary, and this check must not depend on it.
+        for value in ["static", "fixed"] {
+            let resolved = ResolvedStyle {
+                declarations: [("position".into(), value.into())].into(),
+                unknown: Vec::new(),
+            };
+            let mapped = map_for_target(
+                &resolved,
+                LengthContext::default(),
+                StyleTarget::ExistingHostRoot,
+            );
+            assert_eq!(mapped.refinement.position, None);
+            assert_eq!(
+                mapped.unmapped,
+                [("position".into(), value.into(), Unmapped::UnsupportedValue)]
+            );
+        }
     }
 }

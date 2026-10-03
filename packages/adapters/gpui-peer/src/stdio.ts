@@ -11,7 +11,7 @@
 import { format } from 'node:util';
 import { pathToFileURL } from 'node:url';
 
-import type { HostToPeerMessage, PeerToHostMessage } from '@proto.ui/host-protocol';
+import type { HostToPeerMessage, PeerToHostMessage, WireRecord } from '@proto.ui/host-protocol';
 
 import { createBaseBundle, type PrototypeBundle } from './bundle';
 import { createPeerSession, type PeerSession } from './session';
@@ -36,13 +36,19 @@ export type PeerProcessOptions = {
 export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
   const decoder = createFrameDecoder<HostToPeerMessage>();
   const sessions = new Map<string, PeerSession>();
+  // The environment the host last reported, which every session's rules read.
+  let meta: WireRecord = {};
   const log = options.log ?? (() => {});
   // Messages are handled strictly in arrival order. Opening a session awaits a
   // lazy import and a mount, and a message for that session must not overtake
   // it.
   let queue: Promise<void> = Promise.resolve();
 
-  const send = (message: PeerToHostMessage) => options.write(encodeFrame(message));
+  const send = (message: PeerToHostMessage) => {
+    // A session also ends with the one it was opened inside.
+    if (message.kind === 'session.disposed') sessions.delete(message.sessionId);
+    options.write(encodeFrame(message));
+  };
   const diagnose = (sessionId: string | null, code: string, message: string) =>
     send({ kind: 'diagnostic', sessionId, diagnostic: { code, message } });
 
@@ -68,6 +74,9 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
     switch (message.kind) {
       case 'host.hello':
         return;
+      case 'meta.set':
+        meta = message.meta;
+        return;
       case 'session.open': {
         if (sessions.has(message.sessionId)) {
           diagnose(message.sessionId, 'session-exists', 'session.open for an open session');
@@ -88,13 +97,47 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
           });
           return;
         }
-        const opened = createPeerSession({
-          sessionId: message.sessionId,
-          instanceId: message.instanceId,
-          prototype: await load(),
-          props: message.props,
-          send,
-        });
+        // A part opens inside the instance it belongs to, which must be open.
+        const parent =
+          message.parentSessionId === undefined ? undefined : sessions.get(message.parentSessionId);
+        if (message.parentSessionId !== undefined && !parent) {
+          send({
+            kind: 'session.opened',
+            sessionId: message.sessionId,
+            status: 'failed',
+            diagnostics: [
+              {
+                code: 'unknown-parent',
+                message: `no open session ${message.parentSessionId} to open inside`,
+              },
+            ],
+          });
+          return;
+        }
+        const prototype = await load();
+        let opened: PeerSession;
+        try {
+          opened = createPeerSession({
+            sessionId: message.sessionId,
+            instanceId: message.instanceId,
+            prototype,
+            props: message.props,
+            send,
+            parent,
+            getMeta: (key) => meta[key],
+          });
+        } catch (error) {
+          // Setup runs as the instance is created. A part opened inside an
+          // instance that provides nothing it needs fails here, and the host
+          // hears so instead of waiting for a session that will never open.
+          send({
+            kind: 'session.opened',
+            sessionId: message.sessionId,
+            status: 'failed',
+            diagnostics: [{ code: 'setup-failed', message: String(error) }],
+          });
+          return;
+        }
         sessions.set(message.sessionId, opened);
         send({
           kind: 'session.opened',

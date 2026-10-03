@@ -1,6 +1,11 @@
-import { beforeEach, describe, expect, it } from 'vitest';
-import type { WireRecord } from '@proto.ui/host-protocol';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { definePrototype, tw } from '@proto.ui/core';
+import type { PeerToHostMessage, WireRecord } from '@proto.ui/host-protocol';
 import button from '@proto.ui/prototypes-base/button';
+import toggle from '@proto.ui/prototypes-base/toggle';
+import { switchRoot, switchThumb } from '@proto.ui/prototypes-base/switch';
+import { tabsContent, tabsList, tabsRoot, tabsTrigger } from '@proto.ui/prototypes-base/tabs';
+import transition from '@proto.ui/prototypes-base/transition';
 
 import { createPeerSession, type PeerSession } from '../src/session';
 import { ScriptedHost } from './scripted-host';
@@ -119,6 +124,17 @@ describe('gpui peer: projection cycle', () => {
 });
 
 describe('gpui peer: interaction', () => {
+  it('declares its click event as a signal, not as something unsupported', async () => {
+    // Base Button declares `click` with `def.expose.event`. The declaration
+    // is recognised by the Expose module's predicate; it carries no `kind`.
+    const { host, peer } = createHarness();
+    await peer.mount();
+    const exposes = host.last('expose.descriptor');
+    expect(exposes?.signals).toEqual(['click']);
+    expect(exposes?.unsupported).toEqual([]);
+    await peer.dispose();
+  });
+
   it('tracks pointer state and emits one click per press commit', async () => {
     const { host, peer } = createHarness();
     await peer.mount();
@@ -333,5 +349,628 @@ describe('gpui peer: readiness follows the current projection', () => {
     expect(host.of('projection.activate').map((message) => message.commitId)).toEqual([1, 2, 3]);
 
     await peer.dispose();
+  });
+});
+
+describe('gpui peer: Base Toggle', () => {
+  it('flips active on every commit, announces the new value and projects it as pressed', async () => {
+    const host = new ScriptedHost(SESSION);
+    const peer = createPeerSession({
+      sessionId: SESSION,
+      instanceId: INSTANCE,
+      prototype: toggle,
+      props: {},
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+    });
+    host.bind((message) => peer.handle(message));
+    await peer.mount();
+    expect(host.last('expose.descriptor')?.signals).toEqual(['activeChange']);
+
+    host.input('press.commit');
+    expect(host.exposeState('active')).toBe(true);
+    expect(host.last('a11y.snapshot')?.snapshot?.states.pressed).toBe(true);
+
+    host.input('press.commit');
+    expect(host.exposeState('active')).toBe(false);
+    expect(host.last('a11y.snapshot')?.snapshot?.states.pressed).toBe(false);
+
+    expect(host.of('expose.signal').map((signal) => [signal.name, signal.payload])).toEqual([
+      ['activeChange', { active: true }],
+      ['activeChange', { active: false }],
+    ]);
+    await peer.dispose();
+  });
+});
+
+describe('gpui peer: instances composed into one another', () => {
+  function open(
+    sessionId: string,
+    prototype: Parameters<typeof createPeerSession>[0]['prototype'],
+    parent?: PeerSession,
+    sent?: PeerToHostMessage[]
+  ) {
+    const host = new ScriptedHost(sessionId);
+    const peer = createPeerSession({
+      sessionId,
+      instanceId: `${sessionId}:instance`,
+      prototype,
+      props: {},
+      send: (message) => {
+        sent?.push(message);
+        host.receive(message);
+      },
+      schedule: (task) => task(),
+      parent,
+    });
+    host.bind((message) => peer.handle(message));
+    return { host, peer };
+  }
+
+  it('lets a Switch thumb follow its root through context', async () => {
+    const root = open('switch-root', switchRoot);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer);
+    await thumb.peer.mount();
+    expect(thumb.host.exposeState('checked')).toBe(false);
+
+    root.host.input('press.commit');
+    expect(root.host.exposeState('checked')).toBe(true);
+    expect(thumb.host.exposeState('checked')).toBe(true);
+
+    await thumb.peer.dispose();
+    await root.peer.dispose();
+  });
+
+  it('names the trigger group an instance belongs to, and none for a part that is not one', async () => {
+    const root = open('switch-root', switchRoot);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer);
+    await thumb.peer.mount();
+
+    expect(root.host.last('projection.install')?.transaction.events.trigger).toEqual({
+      anchor: 'switch-root',
+    });
+    expect(thumb.host.last('projection.install')?.transaction.events.trigger).toBeUndefined();
+
+    await thumb.peer.dispose();
+    await root.peer.dispose();
+  });
+
+  it('ends the thumb before the root when the root ends first', async () => {
+    const sent: PeerToHostMessage[] = [];
+    const root = open('switch-root', switchRoot, undefined, sent);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer, sent);
+    await thumb.peer.mount();
+
+    await root.peer.dispose();
+    expect(
+      sent.flatMap((message) => (message.kind === 'session.disposed' ? [message.sessionId] : []))
+    ).toEqual(['switch-thumb', 'switch-root']);
+    // The ended root is no longer an instance anything can belong to.
+    expect(() => open('switch-thumb-2', switchThumb, root.peer)).toThrow(/switch-root has ended/);
+  });
+
+  it('keeps the root running when its thumb ends first', async () => {
+    const root = open('switch-root', switchRoot);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer);
+    await thumb.peer.mount();
+
+    await thumb.peer.dispose();
+    root.host.input('press.commit');
+    expect(root.host.exposeState('checked')).toBe(true);
+
+    await root.peer.dispose();
+    expect(thumb.host.of('session.disposed')).toHaveLength(1);
+    expect(root.host.of('session.disposed')).toHaveLength(1);
+  });
+
+  it('carries Tabs relationships by the target semantic identity, not an authored host id', async () => {
+    const root = open('tabs-root', tabsRoot);
+    root.peer.setProps({ defaultValue: 'overview' });
+    await root.peer.mount();
+    const trigger = open('tabs-trigger', tabsTrigger, root.peer);
+    trigger.peer.setProps({ value: 'overview' });
+    await trigger.peer.mount();
+    const panel = open('tabs-panel', tabsContent, root.peer);
+    panel.peer.setProps({ value: 'overview' });
+    await panel.peer.mount();
+
+    const triggerA11y = trigger.host.lastA11y();
+    const panelA11y = panel.host.lastA11y();
+    expect(triggerA11y?.role).toBe('tab');
+    expect(panelA11y?.role).toBe('tabpanel');
+    // C-A11Y-PART-RELATIONSHIP-0001-B: match keys are not host IDs.
+    expect(triggerA11y?.id).toBeUndefined();
+    expect(panelA11y?.id).toBeUndefined();
+    expect(triggerA11y?.semanticObjectId).toMatch(/:a11y:\d+$/);
+    expect(panelA11y?.semanticObjectId).toMatch(/:a11y:\d+$/);
+    expect(triggerA11y?.semanticObjectId).not.toBe(panelA11y?.semanticObjectId);
+    expect(triggerA11y?.relations.controls).toEqual([panelA11y?.semanticObjectId]);
+    expect(panelA11y?.relations.labelledBy).toEqual([triggerA11y?.semanticObjectId]);
+
+    await panel.peer.dispose();
+    await trigger.peer.dispose();
+    await root.peer.dispose();
+  });
+
+  it('does not cross-match equal Tabs keys in independent composition trees', async () => {
+    const first = open('tabs-first-root', tabsRoot);
+    const second = open('tabs-second-root', tabsRoot);
+    const pairs = [];
+    for (const root of [first, second]) {
+      root.peer.setProps({ defaultValue: 'same' });
+      await root.peer.mount();
+      const trigger = open(`${root.peer.sessionId}-trigger`, tabsTrigger, root.peer);
+      trigger.peer.setProps({ value: 'same' });
+      await trigger.peer.mount();
+      const panel = open(`${root.peer.sessionId}-panel`, tabsContent, root.peer);
+      panel.peer.setProps({ value: 'same' });
+      await panel.peer.mount();
+      pairs.push({ root, trigger, panel });
+    }
+
+    const ids = new Set<string>();
+    for (const { trigger, panel } of pairs) {
+      const source = trigger.host.lastA11y()!;
+      const target = panel.host.lastA11y()!;
+      expect(source.semanticObjectId).toMatch(/:a11y:\d+$/);
+      expect(target.semanticObjectId).toMatch(/:a11y:\d+$/);
+      expect(source.relations.controls).toEqual([target.semanticObjectId]);
+      expect(target.relations.labelledBy).toEqual([source.semanticObjectId]);
+      ids.add(source.semanticObjectId);
+      ids.add(target.semanticObjectId);
+    }
+    expect(ids.size).toBe(4);
+
+    await first.peer.dispose();
+    const surviving = pairs[1]!;
+    expect(surviving.trigger.host.lastA11y()!.relations.controls).toEqual([
+      surviving.panel.host.lastA11y()!.semanticObjectId,
+    ]);
+    await second.peer.dispose();
+  });
+
+  it('ends the other parts and reports each failure when one part fails to end', async () => {
+    // A part whose teardown throws.
+    const failing = definePrototype({
+      name: 'failing-part',
+      setup(def) {
+        def.lifecycle.onBeforeDispose(() => {
+          throw new Error('teardown failed');
+        });
+        return (r) => r.slot();
+      },
+    });
+    const sent: PeerToHostMessage[] = [];
+    const root = open('switch-root', switchRoot, undefined, sent);
+    await root.peer.mount();
+    const thumb = open('switch-thumb', switchThumb, root.peer, sent);
+    await thumb.peer.mount();
+    const broken = open('broken-part', failing, root.peer, sent);
+    await broken.peer.mount();
+
+    const ending = root.peer.dispose();
+    await expect(ending).rejects.toThrow(/switch-root did not end/);
+    // The other part still ended; neither the failed part nor the root
+    // claims to have.
+    expect(
+      sent.flatMap((message) => (message.kind === 'session.disposed' ? [message.sessionId] : []))
+    ).toEqual(['switch-thumb']);
+    // Each failure is reported against the session it happened in.
+    expect(
+      sent.flatMap((message) =>
+        message.kind === 'diagnostic' && message.diagnostic.code === 'dispose-failed'
+          ? [message.sessionId]
+          : []
+      )
+    ).toEqual(['broken-part', 'switch-root']);
+    // The root released its host listeners all the same.
+    expect(root.peer.snapshot().leases).toEqual([]);
+    // Asking again is the same failed disposal, not a finished one.
+    expect(root.peer.dispose()).toBe(ending);
+  });
+
+  it('cannot set a thumb up without the root it belongs to', () => {
+    // Setup runs as the session is created, and the thumb's context has no
+    // provider to subscribe to.
+    expect(() => open('switch-thumb', switchThumb)).toThrow(/provider missing/);
+  });
+});
+
+describe('gpui peer: feedback style', () => {
+  // A Prototype of the test's own, hidden while it is off, as an inactive
+  // Tabs panel is.
+  const panel = definePrototype({
+    name: 'test-feedback-panel',
+    setup(def) {
+      const on = def.state.bool('on', false);
+      def.feedback.style.use(tw('rounded-md'));
+      def.rule({
+        when: (w) => w.state(on).eq(false),
+        intent: (i) => i.feedback.style.use(tw('hidden')),
+      });
+      def.event.on('press.commit', () => {
+        on.set(!on.get(), 'reason: test panel press.commit');
+      });
+    },
+  });
+
+  it('carries the root style on the projection, then sends each change whole', async () => {
+    const host = new ScriptedHost(SESSION);
+    const peer = createPeerSession({
+      sessionId: SESSION,
+      instanceId: INSTANCE,
+      prototype: panel,
+      props: {},
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+    });
+    host.bind((message) => peer.handle(message));
+    await peer.mount();
+
+    // The first frame's style arrives with the projection, not after it.
+    expect(host.last('projection.install')?.transaction.style).toEqual(['rounded-md', 'hidden']);
+    expect(host.of('style.apply')).toHaveLength(0);
+
+    // Each change is the whole list, not a difference from the last one.
+    host.input('press.commit');
+    expect(host.last('style.apply')?.tokens).toEqual(['rounded-md']);
+    host.input('press.commit');
+    expect(host.last('style.apply')?.tokens).toEqual(['rounded-md', 'hidden']);
+    expect(host.of('style.apply')).toHaveLength(2);
+
+    await peer.dispose();
+  });
+
+  it('sends nothing for a Prototype with no feedback style', async () => {
+    const { host, peer } = createHarness();
+    await peer.mount();
+    expect(host.last('projection.install')?.transaction.style).toEqual([]);
+    host.input('press.commit');
+    expect(host.of('style.apply')).toHaveLength(0);
+    await peer.dispose();
+  });
+});
+
+describe('gpui peer: view intent', () => {
+  function open(
+    sessionId: string,
+    prototype: Parameters<typeof createPeerSession>[0]['prototype'],
+    props: WireRecord,
+    parent?: PeerSession
+  ) {
+    const host = new ScriptedHost(sessionId);
+    const peer = createPeerSession({
+      sessionId,
+      instanceId: `${sessionId}:instance`,
+      prototype,
+      props,
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+      parent,
+    });
+    host.bind((message) => peer.handle(message));
+    return { host, peer };
+  }
+
+  /** Lets reconciliation, which runs on its own promise chain, finish. */
+  const settle = async () => {
+    for (let turn = 0; turn < 20; turn++) await new Promise((resolve) => setTimeout(resolve, 0));
+  };
+
+  /** The views a session installed and detached, in order. */
+  const views = (host: ScriptedHost) =>
+    host.sent.flatMap((message) =>
+      message.kind === 'projection.install'
+        ? [`install ${message.transaction.viewEpoch}`]
+        : message.kind === 'projection.detach'
+          ? [`detach ${message.viewEpoch}`]
+          : []
+    );
+
+  it('gives only the current Tabs panel a view, and moves it as the value changes', async () => {
+    const root = open('tabs-root', tabsRoot, { value: 'overview' });
+    await root.peer.mount();
+    const overview = open('panel-overview', tabsContent, { value: 'overview' }, root.peer);
+    await overview.peer.mount();
+    const settings = open('panel-settings', tabsContent, { value: 'settings' }, root.peer);
+    await settings.peer.mount();
+    await settle();
+    // The inactive panel is detached from its creation, so it never renders.
+    expect(views(overview.host)).toEqual(['install 1']);
+    expect(views(settings.host)).toEqual([]);
+
+    root.peer.setProps({ value: 'settings' });
+    await settle();
+    expect(views(overview.host)).toEqual(['install 1', 'detach 1']);
+    expect(views(settings.host)).toEqual(['install 1']);
+    // Its listeners are released before the host hears that the view went.
+    const kinds = overview.host.sent.map((message) => message.kind);
+    expect(kinds.lastIndexOf('lease.release')).toBeLessThan(kinds.indexOf('projection.detach'));
+
+    root.peer.setProps({ value: 'overview' });
+    await settle();
+    // The view comes back in a new epoch; the instance itself was kept.
+    expect(views(overview.host)).toEqual(['install 1', 'detach 1', 'install 2']);
+    expect(views(settings.host)).toEqual(['install 1', 'detach 1']);
+    expect(overview.host.exposeState('current')).toBe(true);
+
+    await settings.peer.dispose();
+    await overview.peer.dispose();
+    await root.peer.dispose();
+    expect(views(settings.host)).toEqual(['install 1', 'detach 1']);
+    expect(settings.host.of('session.disposed')).toHaveLength(1);
+  });
+
+  it('does not make live a view whose intent went while it attached', async () => {
+    const leaving = definePrototype({
+      name: 'test-view-leaving',
+      setup(def) {
+        def.lifecycle.onMounted((run) => run.lifecycle.setPresent(false));
+        return (r) => r.el('div', 'leaving');
+      },
+    });
+    // The host answers the install only after the view was detached again.
+    const host = new ScriptedHost('leaving', { autoAck: false });
+    const peer = createPeerSession({
+      sessionId: 'leaving',
+      instanceId: 'leaving:instance',
+      prototype: leaving,
+      props: {},
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+    });
+    host.bind((message) => peer.handle(message));
+    await peer.mount();
+    await settle();
+    host.acknowledge();
+    await settle();
+    expect(views(host)).toEqual(['install 1', 'detach 1']);
+    expect(host.of('projection.activate')).toHaveLength(0);
+    await peer.dispose();
+  });
+
+  it('does not report a detach that a newer intent superseded while it ran', async () => {
+    let returned = false;
+    const returning = definePrototype({
+      name: 'test-view-returning',
+      setup(def) {
+        def.props.define({ open: { type: 'boolean', empty: 'fallback' } });
+        def.props.setDefaults({ open: true });
+        def.props.watch(['open'], (run, next) => run.lifecycle.setPresent(!!next.open));
+        // Only the first unmount turns back; disposal must not.
+        def.lifecycle.onUnmounted((run) => {
+          if (returned) return;
+          returned = true;
+          run.lifecycle.setPresent(true);
+        });
+        return (r) => r.el('div', 'returning');
+      },
+    });
+    const { host, peer } = open('returning', returning, { open: true });
+    await peer.mount();
+    await settle();
+    peer.setProps({ open: false });
+    await settle();
+    // No detach: the view came back in a new epoch instead.
+    expect(views(host)).not.toContain('detach 1');
+    expect(views(host).at(-1)).toBe('install 2');
+    await peer.dispose();
+  });
+
+  it('reports the detach when the intent came back and went again while it ran', async () => {
+    let wavered = false;
+    const wavering = definePrototype({
+      name: 'test-view-wavering',
+      setup(def) {
+        def.props.define({ open: { type: 'boolean', empty: 'fallback' } });
+        def.props.setDefaults({ open: true });
+        def.props.watch(['open'], (run, next) => run.lifecycle.setPresent(!!next.open));
+        // Only the first unmount wavers; disposal must not.
+        def.lifecycle.onUnmounted((run) => {
+          if (wavered) return;
+          wavered = true;
+          run.lifecycle.setPresent(true);
+          run.lifecycle.setPresent(false);
+        });
+        return (r) => r.el('div', 'wavering');
+      },
+    });
+    const { host, peer } = open('wavering', wavering, { open: true });
+    await peer.mount();
+    await settle();
+    peer.setProps({ open: false });
+    await settle();
+    // Unwanted in the end: the host hears the old view go, once, and shows
+    // nothing.
+    expect(views(host).filter((view) => view === 'detach 1')).toHaveLength(1);
+    expect(host.model.snapshot().currentEpoch).toBeNull();
+    // The instance is alive: a view comes back in a new epoch.
+    peer.setProps({ open: true });
+    await settle();
+    expect(views(host).at(-1)).toBe('install 2');
+    await peer.dispose();
+  });
+
+  it('keeps reconciling after an attach fails', async () => {
+    let failing = true;
+    const fragile = definePrototype({
+      name: 'test-view-fragile',
+      setup(def) {
+        def.props.define({ open: { type: 'boolean', empty: 'fallback' } });
+        def.props.setDefaults({ open: true });
+        def.props.watch(['open'], (run, next) => run.lifecycle.setPresent(!!next.open));
+        return (r) => {
+          if (failing) throw new Error('render failed');
+          return r.el('div', 'fragile');
+        };
+      },
+    });
+    const { host, peer } = open('fragile', fragile, { open: true });
+    await peer.mount();
+    await settle();
+    expect(views(host)).toEqual([]);
+    expect(host.of('diagnostic').map((message) => message.diagnostic.code)).toContain(
+      'view-reconcile-failed'
+    );
+
+    failing = false;
+    peer.setProps({ open: false });
+    peer.setProps({ open: true });
+    await settle();
+    expect(host.of('projection.install')).toHaveLength(1);
+    await expect(peer.dispose()).resolves.toBeUndefined();
+    expect(host.of('session.disposed')).toHaveLength(1);
+  });
+
+  it('does nothing for an intent that a newer one replaced', async () => {
+    const flicker = definePrototype({
+      name: 'test-view-flicker',
+      setup(def) {
+        def.event.on('press.commit', (run) => {
+          run.lifecycle.setPresent(false);
+          run.lifecycle.setPresent(true);
+        });
+        return (r) => r.el('div', 'flicker');
+      },
+    });
+    const { host, peer } = open('flicker', flicker, {});
+    await peer.mount();
+    await settle();
+    host.input('press.commit');
+    await settle();
+    expect(views(host)).toEqual(['install 1']);
+    await peer.dispose();
+  });
+});
+
+describe('gpui peer: focus plan', () => {
+  function open(
+    sessionId: string,
+    prototype: Parameters<typeof createPeerSession>[0]['prototype'],
+    props: WireRecord,
+    parent?: PeerSession
+  ) {
+    const host = new ScriptedHost(sessionId);
+    const peer = createPeerSession({
+      sessionId,
+      instanceId: `${sessionId}:instance`,
+      prototype,
+      props,
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+      parent,
+    });
+    host.bind((message) => peer.handle(message));
+    return { host, peer };
+  }
+
+  /** Whether the host was last told the root is a tab stop. */
+  const sequential = (host: ScriptedHost) =>
+    host.sent.flatMap((message) =>
+      message.kind === 'projection.install'
+        ? [message.transaction.focus.targets[0]?.sequential]
+        : message.kind === 'focus.plan'
+          ? [message.focus.targets[0]?.sequential]
+          : []
+    );
+
+  it('moves a Tabs list tab stop to the tab selected outside a commit', async () => {
+    const root = open('tabs-root', tabsRoot, { defaultValue: 'a' });
+    await root.peer.mount();
+    const list = open('tabs-list', tabsList, {}, root.peer);
+    await list.peer.mount();
+    const alpha = open('tab-a', tabsTrigger, { value: 'a' }, list.peer);
+    await alpha.peer.mount();
+    const beta = open('tab-b', tabsTrigger, { value: 'b' }, list.peer);
+    await beta.peer.mount();
+    // Mounting sends the plan with each projection, and nothing on its own.
+    expect(sequential(alpha.host)).toEqual([true]);
+    expect(sequential(beta.host)).toEqual([false]);
+
+    beta.host.input('press.commit');
+    expect(sequential(alpha.host)).toEqual([true, false]);
+    expect(sequential(beta.host)).toEqual([false, true]);
+
+    for (const { peer } of [beta, alpha, list, root]) await peer.dispose();
+  });
+});
+
+describe('gpui peer: Base Transition timers', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  function open(props: WireRecord) {
+    const host = new ScriptedHost('transition');
+    const peer = createPeerSession({
+      sessionId: 'transition',
+      instanceId: 'transition:instance',
+      prototype: transition,
+      props,
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+    });
+    host.bind((message) => peer.handle(message));
+    return { host, peer };
+  }
+
+  const signals = (host: ScriptedHost) => host.of('expose.signal').map((message) => message.name);
+
+  const call = (peer: PeerSession, name: string) =>
+    peer.handle({ kind: 'expose.call', sessionId: 'transition', callId: name, name, args: [] });
+
+  it('lets no timer of an earlier leave end the leave that came after it', async () => {
+    const leaving = (open: boolean) => ({ open, leaveDuration: 1000, enterDuration: 1000 });
+    const { host, peer } = open(leaving(true));
+    await peer.mount();
+    await vi.advanceTimersByTimeAsync(0);
+    // Leave, turn back, and leave again before the first leave would end.
+    peer.setProps(leaving(false));
+    await vi.advanceTimersByTimeAsync(100);
+    peer.setProps(leaving(true));
+    await vi.advanceTimersByTimeAsync(100);
+    peer.setProps(leaving(false));
+
+    // Past where the first leave would have ended: nothing ends yet.
+    await vi.advanceTimersByTimeAsync(900);
+    expect(signals(host)).toEqual(['beforeLeave', 'beforeEnter', 'beforeLeave']);
+    expect(host.of('projection.detach')).toEqual([]);
+
+    // The second leave ends once, on its own time.
+    await vi.advanceTimersByTimeAsync(200);
+    expect(signals(host)).toEqual(['beforeLeave', 'beforeEnter', 'beforeLeave', 'afterLeave']);
+    expect(host.of('projection.detach')).toHaveLength(1);
+    await peer.dispose();
+  });
+
+  it('lets no timer end again an enter the host completed', async () => {
+    const { host, peer } = open({ defaultOpen: false, enterDuration: 1000 });
+    await peer.mount();
+    await vi.advanceTimersByTimeAsync(0);
+    call(peer, 'enter');
+    await vi.advanceTimersByTimeAsync(0);
+    call(peer, 'complete');
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(signals(host)).toEqual(['beforeEnter', 'afterEnter']);
+    await peer.dispose();
+  });
+
+  it('runs no timer of a phase its disposal cut short', async () => {
+    const { host, peer } = open({ open: true, leaveDuration: 1000 });
+    await peer.mount();
+    await vi.advanceTimersByTimeAsync(0);
+    peer.setProps({ open: false, leaveDuration: 1000 });
+    await vi.advanceTimersByTimeAsync(100);
+    await peer.dispose();
+    const sent = host.sent.length;
+    await vi.advanceTimersByTimeAsync(5000);
+    expect(host.sent).toHaveLength(sent);
   });
 });

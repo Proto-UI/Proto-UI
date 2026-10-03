@@ -217,6 +217,9 @@ importers:
       '@proto.ui/module-a11y':
         specifier: workspace:*
         version: link:../../modules/a11y
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../../modules/anatomy
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
@@ -226,15 +229,24 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
+      '@proto.ui/module-expose':
+        specifier: workspace:*
+        version: link:../../modules/expose
       '@proto.ui/module-expose-event':
         specifier: workspace:*
         version: link:../../modules/expose-event
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
+      '@proto.ui/module-feedback':
+        specifier: workspace:*
+        version: link:../../modules/feedback
       '@proto.ui/module-focus':
         specifier: workspace:*
         version: link:../../modules/focus
+      '@proto.ui/module-rule-meta':
+        specifier: workspace:*
+        version: link:../../modules/rule-meta
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime

@@ -11,12 +11,14 @@ use std::fs;
 use std::path::Path;
 use std::rc::Rc;
 
+use gpui::prelude::*;
 use gpui::{
-    point, px, size, AnyWindowHandle, Modifiers, MouseButton, StyleRefinement, TestAppContext,
+    div, point, px, size, AnyWindowHandle, Modifiers, MouseButton, StyleRefinement, TestAppContext,
     VisualTestContext, WindowHandle,
 };
+use proto_ui_gpui::a11y::A11yIssue;
 use proto_ui_gpui::host::{FocusResultStatus, InputBridge, ProtoHostView, SurfaceChild};
-use proto_ui_gpui::hub::{HubNote, SessionConfig};
+use proto_ui_gpui::hub::{ExposedSignal, HubNote, SessionConfig};
 use proto_ui_host_protocol::messages::{HostToPeerMessage, PeerToHostMessage, WireRecord};
 use proto_ui_host_protocol::wire::{ProjectionAckStatus, ProjectionTransaction};
 use serde_json::{json, Value};
@@ -72,6 +74,11 @@ struct Hub {
 
 impl Hub {
     fn open(cx: &mut TestAppContext) -> Self {
+        Self::open_with_root_style(cx, StyleRefinement::default())
+    }
+
+    /// Opens the session with the application's own style for its root.
+    fn open_with_root_style(cx: &mut TestAppContext, root_style: StyleRefinement) -> Self {
         let bridge = Rc::new(RefCell::new(InputBridge::new()));
         let window = cx.open_window(size(px(300.), px(100.)), move |window, cx| {
             let mut view = ProtoHostView::new(bridge, Vec::new(), window, cx);
@@ -86,8 +93,9 @@ impl Hub {
                         "slot-default".to_string(),
                         vec![SurfaceChild::Text("Save".into())],
                     )]),
-                    root_style: StyleRefinement::default(),
+                    root_style,
                     theme: None,
+                    parent: None,
                 },
                 cx,
             );
@@ -133,6 +141,21 @@ impl Hub {
             .expect("the view drains")
     }
 
+    /// Subscribes the way a host application would, collecting every signal
+    /// the view emits from now on.
+    fn listen(&mut self) -> Rc<RefCell<Vec<ExposedSignal>>> {
+        let heard = Rc::new(RefCell::new(Vec::new()));
+        let view = self.window.entity(&self.cx).expect("the view");
+        let sink = heard.clone();
+        self.cx.update(|_, cx| {
+            cx.subscribe(&view, move |_, signal: &ExposedSignal, _| {
+                sink.borrow_mut().push(signal.clone())
+            })
+            .detach();
+        });
+        heard
+    }
+
     fn click(&mut self) {
         let inside = point(px(5.), px(5.));
         self.cx
@@ -160,8 +183,9 @@ fn samples(outbox: &[HostToPeerMessage]) -> Vec<(String, Vec<String>)> {
 fn opening_a_session_asks_the_peer_to_run_the_prototype(cx: &mut TestAppContext) {
     let mut hub = Hub::open(cx);
     let outbox = hub.outbox();
-    assert_eq!(outbox.len(), 1);
-    match &outbox[0] {
+    // After the environment, see below.
+    assert_eq!(outbox.len(), 2);
+    match &outbox[1] {
         HostToPeerMessage::SessionOpen(open) => {
             assert_eq!(open.session_id, SESSION);
             assert_eq!(open.instance_id, format!("{SESSION}:instance"));
@@ -169,6 +193,37 @@ fn opening_a_session_asks_the_peer_to_run_the_prototype(cx: &mut TestAppContext)
         }
         other => panic!("expected session.open, got {}", other.kind()),
     }
+}
+
+/// Every environment in an outbox the hub told the peer its rules read.
+fn meta(outbox: &[HostToPeerMessage]) -> Vec<Value> {
+    outbox
+        .iter()
+        .filter_map(|message| match message {
+            HostToPeerMessage::MetaSet(set) => Some(Value::Object(set.meta.clone())),
+            _ => None,
+        })
+        .collect()
+}
+
+#[gpui::test]
+fn the_peer_hears_reduce_motion_before_the_first_session_and_when_it_changes(
+    cx: &mut TestAppContext,
+) {
+    let mut hub = Hub::open(cx);
+    let outbox = hub.outbox();
+    assert_eq!(outbox[0].kind(), "meta.set");
+    assert_eq!(meta(&outbox), [json!({ "reducedMotion": "no-preference" })]);
+
+    // The application changes the setting, and GPUI redraws the window.
+    hub.cx.update(|_, cx| cx.set_reduce_motion(true));
+    hub.draw();
+    assert_eq!(meta(&hub.outbox()), [json!({ "reducedMotion": "reduce" })]);
+    hub.draw();
+    assert!(
+        meta(&hub.outbox()).is_empty(),
+        "unchanged, it is not sent again"
+    );
 }
 
 #[gpui::test]
@@ -185,6 +240,7 @@ fn opening_an_open_session_again_is_refused_and_leaves_nothing_behind(cx: &mut T
                     slots: HashMap::new(),
                     root_style: StyleRefinement::default(),
                     theme: None,
+                    parent: None,
                 },
                 cx,
             )
@@ -411,6 +467,90 @@ fn exposed_states_and_the_snapshot_follow_the_peer(cx: &mut TestAppContext) {
     assert_eq!(states.get("pressed"), Some(&json!(false)));
     assert_eq!(states.get("disabled"), Some(&json!(false)));
     assert_eq!(role.as_deref(), Some("button"));
+}
+
+#[gpui::test]
+fn the_snapshot_projects_onto_the_root_and_a_later_one_replaces_it(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded());
+    let projection = |hub: &mut Hub| {
+        hub.window
+            .update(&mut hub.cx, |view, _, _| {
+                view.a11y_projection(SESSION).cloned()
+            })
+            .expect("the view reads")
+    };
+    let installed = projection(&mut hub).expect("the recorded snapshot projects");
+    assert_eq!(installed.role, gpui::Role::Button);
+    assert!(!installed.disabled);
+    assert!(!hub
+        .notes()
+        .iter()
+        .any(|note| matches!(note, HubNote::A11y { .. })));
+
+    // A snapshot for the installed view replaces the projection, and a state
+    // the host does not project is noted rather than dropped.
+    hub.receive([peer(json!({
+        "kind": "a11y.snapshot",
+        "sessionId": SESSION,
+        "viewEpoch": recorded_transaction().view_epoch,
+        "snapshot": {
+            "semanticObjectId": "button-enabled:a11y:1",
+            "role": "button",
+            "name": { "kind": "content" },
+            "states": { "disabled": true, "busy": true },
+            "actions": { "activate": { "event": "click" } },
+            "relations": {},
+        },
+    }))]);
+    assert!(projection(&mut hub).expect("still projected").disabled);
+    assert!(hub.notes().contains(&HubNote::A11y {
+        session_id: SESSION.into(),
+        issue: A11yIssue::State {
+            name: "busy".into(),
+            value: json!(true),
+        },
+    }));
+}
+
+#[gpui::test]
+fn a_signal_is_emitted_as_it_arrives_and_never_kept(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded());
+    let signal = |session: &str, payload: Value| {
+        peer(json!({
+            "kind": "expose.signal",
+            "sessionId": session,
+            "name": "click",
+            "payload": payload,
+        }))
+    };
+
+    // Nobody is listening yet: the signal goes nowhere, and is not held back
+    // for a listener that subscribes later.
+    hub.receive([signal(SESSION, json!({ "detail": 1 }))]);
+    let heard = hub.listen();
+    assert!(heard.borrow().is_empty());
+
+    hub.receive([
+        signal(SESSION, Value::Null),
+        signal(SESSION, json!({ "detail": 2 })),
+        signal("ghost", Value::Null),
+    ]);
+    let click = |payload: Value| ExposedSignal {
+        session_id: SESSION.into(),
+        name: "click".into(),
+        payload,
+    };
+    assert_eq!(
+        *heard.borrow(),
+        [click(Value::Null), click(json!({ "detail": 2 }))]
+    );
+    // A signal for a session the host never opened is noted, not emitted.
+    assert!(hub.notes().contains(&HubNote::UnknownSession {
+        session_id: "ghost".into(),
+        kind: "expose.signal".into(),
+    }));
 }
 
 #[gpui::test]
@@ -686,4 +826,256 @@ fn a_projection_with_a_style_the_host_cannot_resolve_is_refused_not_applied(
     );
     hub.click();
     assert!(samples(&hub.outbox()).is_empty());
+}
+
+/// The recording, its projection wearing `tokens` as the root's feedback style.
+fn recorded_with_style(tokens: &[&str]) -> Vec<PeerToHostMessage> {
+    recorded()
+        .into_iter()
+        .map(|message| match message {
+            PeerToHostMessage::ProjectionInstall(mut install) => {
+                install.transaction.style = tokens.iter().map(ToString::to_string).collect();
+                PeerToHostMessage::ProjectionInstall(install)
+            }
+            other => other,
+        })
+        .collect()
+}
+
+fn style_apply(view_epoch: u64, tokens: &[&str]) -> PeerToHostMessage {
+    peer(json!({
+        "kind": "style.apply",
+        "sessionId": SESSION,
+        "viewEpoch": view_epoch,
+        "tokens": tokens,
+    }))
+}
+
+/// Whether a click on the Button reaches it as a commit.
+fn commits_on_click(hub: &mut Hub) -> bool {
+    hub.outbox();
+    hub.click();
+    samples(&hub.outbox())
+        .iter()
+        .any(|(kind, _)| kind == "press.commit")
+}
+
+#[gpui::test]
+fn a_hidden_feedback_style_takes_the_instance_out_until_it_is_cleared(cx: &mut TestAppContext) {
+    // The style arrives with the projection: the first frame is hidden.
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded_with_style(&["hidden"]));
+    assert!(!commits_on_click(&mut hub));
+
+    // The Prototype clears it outside a commit; the view shows again.
+    hub.receive([style_apply(recorded_transaction().view_epoch, &[])]);
+    assert!(commits_on_click(&mut hub));
+}
+
+#[gpui::test]
+fn the_applications_root_style_wins_over_the_feedback_style(cx: &mut TestAppContext) {
+    // The consumer's style is layered over the Prototype's, as the Web's
+    // `@layer proto-ui` puts the Prototype under every consumer rule.
+    let mut shown = div().block();
+    let mut hub = Hub::open_with_root_style(cx, shown.style().clone());
+    hub.receive(recorded_with_style(&["hidden"]));
+    assert!(commits_on_click(&mut hub));
+}
+
+#[gpui::test]
+fn a_feedback_style_for_another_view_is_refused(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded_with_style(&["hidden"]));
+    hub.notes();
+    let installed = recorded_transaction().view_epoch;
+    hub.receive([style_apply(installed + 1, &[])]);
+
+    assert!(hub.notes().contains(&HubNote::StyleRefused {
+        session_id: SESSION.into(),
+        view_epoch: installed + 1,
+        installed: Some(installed),
+    }));
+    assert!(
+        !commits_on_click(&mut hub),
+        "the installed view keeps its style"
+    );
+}
+
+#[gpui::test]
+fn a_feedback_style_the_host_cannot_render_leaves_the_last_one_in_place(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded_with_style(&["hidden"]));
+    hub.notes();
+    hub.receive([style_apply(
+        recorded_transaction().view_epoch,
+        &["not-a-proto-token"],
+    )]);
+
+    // There is no acknowledgement to refuse it with: the host notes why, and
+    // the view keeps the last style it could show whole.
+    assert!(hub
+        .notes()
+        .iter()
+        .any(|note| matches!(note, HubNote::Build { session_id, .. } if session_id == SESSION)));
+    assert!(!commits_on_click(&mut hub));
+}
+
+#[gpui::test]
+fn after_a_style_it_could_not_render_the_host_recovers_on_the_next_whole_one(
+    cx: &mut TestAppContext,
+) {
+    // The application makes the root taller than the Button's content, and
+    // that holds through every step.
+    let mut tall = div().h(px(40.));
+    let mut hub = Hub::open_with_root_style(cx, tall.style().clone());
+    let epoch = recorded_transaction().view_epoch;
+    hub.receive(recorded_with_style(&["hidden"]));
+    assert!(!commits_on_click(&mut hub));
+
+    // Not renderable: noted, and the last whole style stays.
+    hub.notes();
+    hub.receive([style_apply(epoch, &["not-a-proto-token"])]);
+    assert!(hub
+        .notes()
+        .iter()
+        .any(|note| matches!(note, HubNote::Build { session_id, .. } if session_id == SESSION)));
+    assert!(!commits_on_click(&mut hub));
+
+    // The next whole style clears it: the view shows and takes input again,
+    // as tall as the application made it.
+    hub.receive([style_apply(epoch, &[])]);
+    hub.outbox();
+    let far = point(px(5.), px(30.));
+    hub.cx
+        .simulate_mouse_down(far, MouseButton::Left, Modifiers::default());
+    hub.cx
+        .simulate_mouse_up(far, MouseButton::Left, Modifiers::default());
+    assert!(samples(&hub.outbox())
+        .iter()
+        .any(|(kind, _)| kind == "press.commit"));
+
+    // A new view wearing the same style is hidden from its first frame, and
+    // shows once that style is cleared.
+    let mut remount = remount_named("Save");
+    remount.style = vec!["hidden".into()];
+    let (view_epoch, commit_id) = (remount.view_epoch, remount.commit_id);
+    hub.receive([
+        peer(json!({ "kind": "projection.install", "transaction": remount })),
+        peer(json!({
+            "kind": "projection.activate",
+            "sessionId": SESSION,
+            "viewEpoch": view_epoch,
+            "commitId": commit_id
+        })),
+    ]);
+    assert!(!commits_on_click(&mut hub));
+    hub.receive([style_apply(view_epoch, &[])]);
+    assert!(commits_on_click(&mut hub));
+}
+
+#[gpui::test]
+fn a_projection_whose_feedback_style_the_host_cannot_render_is_refused(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.outbox();
+    hub.receive(recorded_with_style(&["not-a-proto-token"]));
+    let ack = hub
+        .outbox()
+        .into_iter()
+        .find_map(|message| match message {
+            HostToPeerMessage::ProjectionAck(ack) => Some(ack.ack),
+            _ => None,
+        })
+        .expect("an acknowledgement");
+    assert_eq!(ack.status, ProjectionAckStatus::Unsupported);
+    assert_eq!(ack.diagnostics[0].code, "style-not-rendered");
+    assert_eq!(
+        ack.diagnostics[0]
+            .data
+            .as_ref()
+            .and_then(|data| data["surface"].as_str()),
+        Some(format!("{SESSION}/proto-surface").as_str())
+    );
+}
+
+#[gpui::test]
+fn a_detached_view_leaves_the_window_until_a_greater_epoch_installs_another(
+    cx: &mut TestAppContext,
+) {
+    let mut hub = Hub::open(cx);
+    hub.receive(recorded());
+    let epoch = recorded_transaction().view_epoch;
+    hub.outbox();
+    hub.click();
+    assert!(
+        !samples(&hub.outbox()).is_empty(),
+        "the installed view hears input"
+    );
+
+    // The instance's view intent no longer wants a view.
+    hub.receive([peer(json!({
+        "kind": "projection.detach",
+        "sessionId": SESSION,
+        "viewEpoch": epoch,
+    }))]);
+    let read = |hub: &mut Hub| {
+        hub.window
+            .update(&mut hub.cx, |view, _, _| {
+                (view.rendered_sessions(), view.reported_a11y(SESSION))
+            })
+            .expect("the view reads")
+    };
+    assert_eq!(read(&mut hub), (Vec::<String>::new(), None));
+    hub.click();
+    assert!(samples(&hub.outbox()).is_empty(), "no view, no input");
+
+    // Nothing for the retired view brings it back.
+    let snapshot = recorded_transaction().a11y;
+    hub.receive([
+        peer(json!({
+            "kind": "a11y.snapshot",
+            "sessionId": SESSION,
+            "viewEpoch": epoch,
+            "snapshot": snapshot,
+        })),
+        peer(json!({
+            "kind": "projection.detach",
+            "sessionId": SESSION,
+            "viewEpoch": epoch,
+        })),
+    ]);
+    let notes = hub.notes();
+    assert!(notes.contains(&HubNote::DetachRefused {
+        session_id: SESSION.into(),
+        view_epoch: epoch,
+        status: "Stale".into(),
+    }));
+    assert!(notes.iter().any(
+        |note| matches!(note, HubNote::SnapshotRefused { view_epoch, .. } if *view_epoch == epoch)
+    ));
+    assert_eq!(read(&mut hub), (Vec::<String>::new(), None));
+
+    // A greater epoch attaches a new view to the same instance.
+    let remount = remount_named("Save");
+    let (view_epoch, commit_id) = (remount.view_epoch, remount.commit_id);
+    hub.receive([
+        peer(json!({ "kind": "projection.install", "transaction": remount })),
+        peer(json!({
+            "kind": "projection.activate",
+            "sessionId": SESSION,
+            "viewEpoch": view_epoch,
+            "commitId": commit_id,
+        })),
+    ]);
+    let (rendered, reported) = read(&mut hub);
+    assert_eq!(rendered, [SESSION]);
+    assert_eq!(
+        reported.map(|projection| projection.role),
+        Some(gpui::Role::Button)
+    );
+    hub.outbox();
+    hub.click();
+    assert!(
+        !samples(&hub.outbox()).is_empty(),
+        "the new view hears input"
+    );
 }
