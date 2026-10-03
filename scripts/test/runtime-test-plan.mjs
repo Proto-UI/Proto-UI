@@ -1,4 +1,5 @@
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts',
   'apps/www/src/components/documentation-image-preview.browser.test.ts',
   'apps/www/test/message-composition.browser.test.ts',
   'apps/www/test/color-scheme.browser.test.ts',
@@ -21,6 +22,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/scroll-chrome-display.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',

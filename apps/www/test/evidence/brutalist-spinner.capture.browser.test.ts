@@ -61,12 +61,20 @@ const motionReader = module.exports as (
   }>
 >;
 let browser: Browser;
+let browserLaunch: Promise<Browser> | undefined;
 beforeAll(async () => {
-  browser = await launchBrowser();
+  browserLaunch = launchBrowser();
+  browser = await browserLaunch;
 });
 afterAll(async () => {
-  await browser.close();
-});
+  // Keep ownership of an in-flight launch after a setup timeout. This
+  // continuation also closes a late browser if the cleanup hook times out;
+  // the runner's watchdog does not cancel the underlying promise.
+  // A launch rejection is already reported by beforeAll. Do not replace it
+  // with an undefined-browser error, and do not swallow a close failure.
+  const launchedBrowser = await browserLaunch?.catch(() => undefined);
+  await launchedBrowser?.close();
+}, 60_000);
 
 describe('Spinner capture native browser probes', () => {
   it('distinguishes a stable center from an off-center pivot over a complete rotation', async () => {

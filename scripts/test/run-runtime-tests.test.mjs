@@ -1,7 +1,32 @@
 import assert from 'node:assert/strict';
+import { globSync } from 'node:fs';
 import { describe, it } from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 import { BROWSER_SUITES, createRuntimeTestPlan } from './runtime-test-plan.mjs';
+
+it('registers every discovered browser suite exactly once in the sequential phase', () => {
+  // Mirror the runtime Vitest include roots, retaining newly added browser suites.
+  const root = fileURLToPath(new URL('../../', import.meta.url));
+  const discovered = globSync(
+    [
+      'packages/**/*.browser.test.ts',
+      'internal/contracts/__tests__/**/*.browser.test.ts',
+      'apps/**/test/**/*.browser.test.ts',
+      'apps/www/src/**/*.browser.test.ts',
+    ],
+    { cwd: root, exclude: ['**/node_modules/**', '**/dist/**'] }
+  ).map((suite) => suite.replaceAll('\\', '/'));
+  assert.deepEqual([...BROWSER_SUITES].sort(), [...new Set(discovered)].sort());
+  const [general, browser] = createRuntimeTestPlan([]);
+  assert.equal(browser.needsServer, true);
+  assert.ok(browser.args.includes('--no-file-parallelism'));
+  for (const suite of discovered) {
+    assert.equal(general.args.filter((arg) => arg === suite).length, 1);
+    assert.equal(general.args[general.args.indexOf(suite) - 1], '--exclude');
+    assert.equal(browser.args.filter((arg) => arg === suite).length, 1);
+  }
+});
 
 describe('runtime test plan', () => {
   it('preserves focused Vitest arguments without starting the documentation server', () => {
