@@ -1,0 +1,49 @@
+{
+  "revision": "b3cd7c862befd1a796f6dfd1b13969aaa4b259d5",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37101940005",
+  "artifact": 11265933328,
+  "artifactSha256": "e7e64127cfe0e4614dd6b1116b61ab1d2ffa4030615a6ee895decd04818a4ca2",
+  "outcome": "Failed: 8 homepage cases have two uncaught Context errors each; 12 documentation cases passed. Images are not acceptance.",
+  "images": [
+    {
+      "name": "zh-cn-desktop-light-initial-viewport.png",
+      "path": "evidence/homepage-777/b3cd7c86/zh-cn-desktop-light-initial-viewport.png",
+      "sha": "53e3a3bd79cab257ec8a74ee893837e6ded0bc67",
+      "sha256": "eccd270bdd633b212572687a6b7b5a6a713ac678fdacb1db7c248e9256b62def",
+      "bytes": 66110,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "locale": "zh-cn"
+    },
+    {
+      "name": "en-mobile-light-initial-viewport.png",
+      "path": "evidence/homepage-777/b3cd7c86/en-mobile-light-initial-viewport.png",
+      "sha": "0716bc57b30c1e83fd7cf0a02d4d28efd0f7d82e",
+      "sha256": "7c974ed0e75d6cc0f69291932d6c4c13d2ba518cf67286ec588643935f3b98f3",
+      "bytes": 47192,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "locale": "en"
+    },
+    {
+      "name": "zh-cn-desktop-light-navigation-open-viewport.png",
+      "path": "evidence/homepage-777/b3cd7c86/zh-cn-desktop-light-navigation-open-viewport.png",
+      "sha": "8d8a46ca8e762d693be5a8e4c4d01cf03790f3cb",
+      "sha256": "d2d477f410b633f47749554e963c700631d31b02b0b632923702d54a0ab940b9",
+      "bytes": 72017,
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "theme": "light",
+      "locale": "zh-cn"
+    }
+  ],
+  "privacy": "Only exact-head actual Chromium captures of public Proto UI pages; no private user references, credentials or unrelated desktop content."
+}
