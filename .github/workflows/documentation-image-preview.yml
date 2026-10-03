@@ -26,7 +26,7 @@ jobs:
     timeout-minutes: 20
     env:
       CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-      IMAGE_PREVIEW_EVIDENCE_DIR: ${{ runner.temp }}/documentation-image-preview
+      IMAGE_PREVIEW_EVIDENCE_DIR: /tmp/documentation-image-preview
       ASTRO_TELEMETRY_DISABLED: '1'
     steps:
       - uses: actions/checkout@v4
