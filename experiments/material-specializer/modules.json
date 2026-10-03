@@ -1,0 +1,66 @@
+[
+  {
+    "id": "liquidgl-3.0.0-vertex",
+    "sourceRepository": "naughtyduk/liquidGL",
+    "upstreamCommit": "88f681ab7035fd55b04f63edff1841e32c4199e9",
+    "upstreamPath": "scripts/liquidGL.js",
+    "containerGitBlob": "b76e6872bf1c93ecacff646d09a77f5ce5f24ddb",
+    "range": {
+      "startLine": 2955,
+      "endLine": 2961
+    },
+    "sourceLiteralSha256": "c61427a859d0a9e4c8ce0bed53ba989b4c8f2cd33be07400ae163d400ba515d9",
+    "bytes": 188,
+    "target": "glsl-es-100",
+    "entryPoint": "main",
+    "modification": "none planned; copied original template literal bytes",
+    "uniforms": [],
+    "execution": "not-admitted-extracted-module"
+  },
+  {
+    "id": "liquidgl-3.0.0-lens-fragment",
+    "sourceRepository": "naughtyduk/liquidGL",
+    "upstreamCommit": "88f681ab7035fd55b04f63edff1841e32c4199e9",
+    "upstreamPath": "scripts/liquidGL.js",
+    "containerGitBlob": "b76e6872bf1c93ecacff646d09a77f5ce5f24ddb",
+    "range": {
+      "startLine": 2963,
+      "endLine": 3159
+    },
+    "sourceLiteralSha256": "bfff4f7c27c5dff34bd8f491e544a837b3f600696f9c54da9f87a86b6089c7f1",
+    "bytes": 8386,
+    "target": "glsl-es-100",
+    "entryPoint": "main",
+    "modification": "none planned; copied original template literal bytes",
+    "uniforms": [
+      ["sampler2D", "u_tex"],
+      ["vec2", "u_resolution"],
+      ["vec2", "u_textureResolution"],
+      ["vec4", "u_bounds"],
+      ["float", "u_refraction"],
+      ["float", "u_aberration"],
+      ["float", "u_bevelDepth"],
+      ["float", "u_bevelWidth"],
+      ["float", "u_frost"],
+      ["float", "u_radius"],
+      ["float", "u_time"],
+      ["bool", "u_specular"],
+      ["float", "u_revealProgress"],
+      ["int", "u_revealType"],
+      ["float", "u_tiltX"],
+      ["float", "u_tiltY"],
+      ["float", "u_magnify"],
+      ["vec2", "u_subpixel"],
+      ["vec2", "u_boxSize"],
+      ["vec4", "u_tint"],
+      ["sampler2D", "u_stack"],
+      ["vec4", "u_stackMapping"],
+      ["vec4", "u_stackRegion"],
+      ["vec4", "u_interaction"],
+      ["float", "u_interactionRadius"],
+      ["sampler2D", "u_shadow"],
+      ["vec4", "u_shadowMapping"]
+    ],
+    "execution": "not-admitted-extracted-module"
+  }
+]

@@ -1,0 +1,34 @@
+name: Material source specialization
+on:
+  pull_request:
+    paths:
+      - 'experiments/material-specializer/**'
+      - '.github/workflows/material-source-specializer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/material-specializer/**'
+      - '.github/workflows/material-source-specializer.yml'
+permissions:
+  contents: read
+jobs:
+  source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install repository-locked test tools
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+      - name: Check source generation, exact modules and Base state ownership
+        run: |
+          git rev-parse HEAD
+          node --version
+          node --import tsx --test experiments/material-specializer/source.test.mjs
