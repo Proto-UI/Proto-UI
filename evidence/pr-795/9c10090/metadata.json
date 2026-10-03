@@ -1,0 +1,454 @@
+{
+  "sourceSha": "9c10090bd497b73890a4599459bebf3c828aa157",
+  "route": "/en/test/new-projection-families/",
+  "node": "v24.21.0",
+  "browser": "154.0.8037.57",
+  "viewport": {
+    "width": 1440,
+    "height": 1050
+  },
+  "runtimes": [
+    "wc",
+    "react",
+    "vue",
+    "vue2"
+  ],
+  "scope": "Bootstrap 2.3.2 default/primary Button and Liquid Glass opaque fallback only. No native/Compiler/material parity.",
+  "observations": [
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "wc",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "react",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue2",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "wc",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "image": "none",
+        "color": "rgb(29, 29, 31)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "react",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "image": "none",
+        "color": "rgb(29, 29, 31)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "image": "none",
+        "color": "rgb(29, 29, 31)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue2",
+      "theme": "light",
+      "facts": {
+        "background": "rgb(255, 255, 255)",
+        "image": "none",
+        "color": "rgb(29, 29, 31)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "wc",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "react",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue2",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "wc",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(44, 44, 46)",
+        "image": "none",
+        "color": "rgb(245, 245, 247)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "react",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(44, 44, 46)",
+        "image": "none",
+        "color": "rgb(245, 245, 247)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(44, 44, 46)",
+        "image": "none",
+        "color": "rgb(245, 245, 247)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue2",
+      "theme": "dark",
+      "facts": {
+        "background": "rgb(44, 44, 46)",
+        "image": "none",
+        "color": "rgb(245, 245, 247)",
+        "radius": "9999px",
+        "padding": "8px 20px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "500",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "opacity": "1",
+        "animation": "none"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "wc",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.15) 0px 2px 4px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "wc",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": "2px"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "react",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.15) 0px 2px 4px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "react",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": "2px"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.15) 0px 2px 4px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": "2px"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue2",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.15) 0px 2px 4px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "runtime": "vue2",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "width": "2px"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "wc",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "wc",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(245, 245, 247) 0px 0px 0px 2px, rgb(0, 97, 204) 0px 0px 0px 4px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": "2px"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "react",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "react",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(245, 245, 247) 0px 0px 0px 2px, rgb(0, 97, 204) 0px 0px 0px 4px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": "2px"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(245, 245, 247) 0px 0px 0px 2px, rgb(0, 97, 204) 0px 0px 0px 4px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": "2px"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue2",
+      "beforePress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+      "duringPress": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px"
+    },
+    {
+      "family": "liquid-glass",
+      "runtime": "vue2",
+      "beforeFocus": {
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": ""
+      },
+      "focused": {
+        "shadow": "rgb(245, 245, 247) 0px 0px 0px 2px, rgb(0, 97, 204) 0px 0px 0px 4px, rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.1) 0px 1px 2px -1px",
+        "width": "2px"
+      }
+    },
+    {
+      "afterDispose": []
+    }
+  ]
+}
