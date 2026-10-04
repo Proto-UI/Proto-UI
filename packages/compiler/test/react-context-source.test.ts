@@ -19,6 +19,12 @@ type Handle = {
   getExposes(): { count: { get(): number }; value(): number };
 };
 type Component = React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<Handle>>;
+type SSRExports = {
+  renderGeneratedToString(props: Record<string, unknown>): { html: string; carrier: Record<string, unknown> };
+  hydrateGeneratedRoot(host: Element, props: Record<string, unknown>, carrier: Record<string, unknown>): {
+    root: Root; getHandle(): Handle; render(props: Record<string, unknown>): void;
+  };
+};
 type Scope = {
   provide(key: object, value: unknown): void;
   subscribe(key: object, mode: 'required' | 'optional', callback?: (next: { value: number } | null, prev: { value: number } | null) => void): () => void;
@@ -81,12 +87,12 @@ export default definePrototype({name:'optional-${key}',setup(def){
   return r=>r.el('output',r.read.context.tryRead(${key})?.value ?? 'missing');
 }});`;
 
-async function loadProject(sources: Readonly<Record<string, string>>) {
+async function loadProject(sources: Readonly<Record<string, string>>, files: Readonly<Record<string, string>> = { 'keys.ts': keySource }, ssr = false) {
   const artifacts = new Map<string, OutputArtifact>();
   for (const [name, source] of Object.entries(sources)) {
-    const parsed = parsePrototype(source, { fileName: `${name}.proto.ts`, files: { 'keys.ts': keySource } });
+    const parsed = parsePrototype(source, { fileName: `${name}.proto.ts`, files });
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    const emitted = emitReactSource(parsed.value, { componentName: name });
+    const emitted = emitReactSource(parsed.value, { componentName: name, ssr });
     if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
     artifacts.set(`${name}.tsx`, { path: `${name}.tsx`, contents: emitted.value.code, kind: 'source' });
     for (const file of emitted.value.supportingFiles ?? []) {
@@ -100,14 +106,16 @@ async function loadProject(sources: Readonly<Record<string, string>>) {
   if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
   directories.push(directory);
   const components: Record<string, Component> = {};
+  const modules: Record<string, Record<string, unknown>> = {};
   // The generated temporary directory and module specifiers are selected at runtime.
   for (const name of Object.keys(sources)) {
     const filename = path.join(directory, `${name}.tsx`);
-    components[name] = (await import(/* @vite-ignore */ filename) as Record<string, Component>)[name];
+    modules[name] = await import(/* @vite-ignore */ filename) as Record<string, unknown>;
+    components[name] = modules[name][name] as Component;
   }
   const helperFilename = path.join(directory, '.proto-ui/context/scope-v1.ts');
   const helpers = await import(/* @vite-ignore */ helperFilename) as Helpers;
-  return { components, helpers };
+  return { components, helpers, modules };
 }
 function mount() {
   const host = document.createElement('div');
@@ -119,6 +127,70 @@ function mount() {
 
 
 describe('native React Context scope ownership', () => {
+  it('rejects absent initial projections and preserves Context for fresh post-adoption children', async () => {
+    const { components: { Consumer }, modules: { Provider: exports } } = await loadProject({ Provider: provider, Consumer: consumer }, undefined, true);
+    const generated = exports as unknown as SSRExports;
+    const childRef = React.createRef<Handle>();
+    const props = { seed: 7, children: React.createElement(Consumer, { ref: childRef }) };
+    const server = generated.renderGeneratedToString(props);
+    const host = document.createElement('div');
+    host.innerHTML = server.html;
+    document.body.append(host);
+    const originalRoot = host.firstElementChild;
+    expect(() => {
+      const invalid = generated.hydrateGeneratedRoot(host, props, { ...server.carrier, projections: {} });
+      roots.push(invalid.root);
+    }).toThrow();
+    expect(host.firstElementChild).toBe(originalRoot);
+    let hydrated!: ReturnType<SSRExports['hydrateGeneratedRoot']>;
+    await React.act(async () => {
+      hydrated = generated.hydrateGeneratedRoot(host, props, server.carrier);
+      roots.push(hydrated.root);
+    });
+    hydrated.getHandle();
+    expect(childRef.current!.getExposes().count.get()).toBe(7);
+    expect(host.querySelector('output')?.textContent).toBe('7');
+    const originalChild = host.querySelector('output');
+    await React.act(async () => { hydrated.render({ seed: 7, children: null }); });
+    expect(childRef.current).toBeNull();
+    expect(host.querySelector('output')).toBeNull();
+    await React.act(async () => { hydrated.render(props); });
+    expect(childRef.current!.getExposes().count.get()).toBe(7);
+    expect(host.querySelector('output')?.textContent).toBe('7');
+    expect(host.querySelector('output')).not.toBe(originalChild);
+    expect(host.firstElementChild).toBe(originalRoot);
+  });
+
+  it('preserves nominal Anatomy callback parts across child attachment and removal', async () => {
+    const files = { 'family.ts': `import {createAnatomyFamily} from '@proto.ui/core';
+      export const FAMILY=createAnatomyFamily('callback-parts',{roles:{root:{cardinality:{min:1,max:1}},item:{cardinality:{min:0,max:'*'}}}});` };
+    const parentSource = `import {definePrototype} from '@proto.ui/core';import {FAMILY} from './family';
+      export default definePrototype({name:'callback-parent',setup(def){
+        def.anatomy.claim(FAMILY,{role:'root'});
+        const count=def.state.numberDiscrete('count',0);const role=def.state.string('role','none');const focusable=def.state.bool('focusable',false);
+        def.expose.state('count',count);def.expose.state('role',role);def.expose.state('focusable',focusable);
+        def.anatomy.subscribeParts(FAMILY,'item',(run,parts)=>{
+          count.set(parts.length);const first=parts[0]??null;
+          if(first!==null){role.set(first.role);focusable.set(first.hasHook('asFocusable'));}
+          else{role.set('none');focusable.set(false);}
+        });return r=>r.el('section',[r.el('span','stamp:'+count.get()),r.slot()]);
+      }});`;
+    const childSource = `import {definePrototype} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';import {FAMILY} from './family';
+      export default definePrototype({name:'callback-item',setup(def){def.anatomy.claim(FAMILY,{role:'item'});asFocusable();return ()=>'item';}});`;
+    const { components: { Parent, Child } } = await loadProject({ Parent: parentSource, Child: childSource }, files);
+    const { host, root } = mount();
+    const ref = React.createRef<Handle>();
+    await React.act(async () => { root.render(React.createElement(Parent, { ref }, React.createElement(Child))); });
+    const exposed = ref.current!.getExposes() as unknown as {
+      count: { get(): number }; role: { get(): string }; focusable: { get(): boolean };
+    };
+    expect([exposed.count.get(), exposed.role.get(), exposed.focusable.get()]).toEqual([1, 'item', true]);
+    expect(host.querySelector('span')?.textContent).toBe('stamp:0');
+    await React.act(async () => { root.render(React.createElement(Parent, { ref })); });
+    expect([exposed.count.get(), exposed.role.get(), exposed.focusable.get()]).toEqual([0, 'none', false]);
+    expect(host.querySelector('span')?.textContent).toBe('stamp:0');
+  });
+
   it('shares declaration references through native wrappers and portals, resolves nearest scopes, and requires explicit rendering', async () => {
     const { components: { Provider, Consumer, Other, Optional } } = await loadProject({
       Provider: provider, Consumer: consumer, Other: optional('OTHER'), Optional: optional('KEY'),

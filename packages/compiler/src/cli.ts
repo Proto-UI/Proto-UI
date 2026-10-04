@@ -22,6 +22,7 @@ interface Options {
   export?: string;
   output?: string;
   profile?: string;
+  nativeSdkPath?: string;
   json?: boolean;
 }
 interface ParsedArguments {
@@ -52,12 +53,14 @@ Options:
                      diff: existing owned artifact directory (never written).
   --profile <id>     ${Object.values(TARGET_PROFILES).filter((target) => target.implemented).map((target) => target.id).join(', ')}.
                      Default: react-runtime-v1; no implicit target fallback.
+  --native-sdk-path <dir>  GPUI SDK source crate shared by composed prototypes.
+                     Omit to bundle the editable SDK in the output directory.
   --config <file>    Explicit JSON configuration file; no automatic discovery.
   --json             Machine-readable result and diagnostics on stdout.
   --help             Print this help.
 
 Configuration is a JSON object with only these fields:
-  entry, root, export, output, profile: non-empty strings; json: boolean.
+  entry, root, export, output, profile, nativeSdkPath: non-empty strings; json: boolean.
 Paths in configuration are relative to the configuration file's directory.
 Command-line paths are relative to cwd; command-line values override configuration.
 check/inspect/explain ignore configured output and never write.
@@ -114,7 +117,7 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
     const flag = equals < 0 ? token : token.slice(0, equals);
     const attached = equals < 0 ? undefined : token.slice(equals + 1);
     const name = flag.slice(2);
-    if (!['--entry', '--root', '--export', '--output', '--profile', '--config', '--json', '--help'].includes(flag))
+    if (!['--entry', '--root', '--export', '--output', '--profile', '--native-sdk-path', '--config', '--json', '--help'].includes(flag))
       throw new CliUsageError(`Unknown flag ${JSON.stringify(flag)}`);
     if (seen.has(name)) throw new CliUsageError(`Repeated flag ${flag}`);
     seen.add(name);
@@ -134,6 +137,7 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
       case 'export': result.options.export = checked; break;
       case 'output': result.options.output = checked; break;
       case 'profile': result.options.profile = checked; break;
+      case 'native-sdk-path': result.options.nativeSdkPath = checked; break;
       case 'config': result.config = checked; break;
     }
   }
@@ -153,7 +157,7 @@ async function readConfiguration(filename: string): Promise<Options> {
   const options: Options = {};
   for (const [key, value] of Object.entries(data)) {
     switch (key) {
-      case 'entry': case 'root': case 'output':
+      case 'entry': case 'root': case 'output': case 'nativeSdkPath':
         options[key] = path.resolve(path.dirname(filename), nonEmptyString(value, key, filename));
         break;
       case 'export': options.export = nonEmptyString(value, key, filename); break;
@@ -263,8 +267,8 @@ async function runWatch(
         return;
       }
       if (stopping || revision !== latest) return;
-      if (JSON.stringify([reloaded.entry, reloaded.root, reloaded.export, reloaded.output, reloaded.profile]) !==
-          JSON.stringify([options.entry, options.root, options.export, options.output, options.profile])) {
+      if (JSON.stringify([reloaded.entry, reloaded.root, reloaded.export, reloaded.output, reloaded.profile, reloaded.nativeSdkPath]) !==
+          JSON.stringify([options.entry, options.root, options.export, options.output, options.profile, options.nativeSdkPath])) {
         restart = reloaded;
         await controller?.stop();
         return;
@@ -313,6 +317,7 @@ async function runWatch(
         entries: [path.resolve(cwd, options.entry!)],
         exportName: options.export,
         profile: options.profile,
+        nativeSdkPath: options.nativeSdkPath === undefined ? undefined : path.resolve(cwd, options.nativeSdkPath),
         configFiles: config ? [config] : undefined,
         onReport(report) {
           const revision = ++latest;
@@ -390,6 +395,7 @@ export async function runCompilerCli(argv: readonly string[], environment: Compi
       root: path.resolve(cwd, options.root ?? cwd),
       exportName: options.export,
       profile: selected.value.id,
+      nativeSdkPath: options.nativeSdkPath === undefined ? undefined : path.resolve(cwd, options.nativeSdkPath),
     };
     const result = await compileFile(entry, compilationOptions);
     if (!result.ok) return fail(result.diagnostics, result.diagnostics.some((diagnostic) => diagnostic.category === 'compiler-defect') ? 3 : 1);

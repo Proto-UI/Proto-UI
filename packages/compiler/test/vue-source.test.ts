@@ -1,10 +1,15 @@
 // @vitest-environment happy-dom
 import { posix } from 'node:path';
+import { createRequire } from 'node:module';
+import { fileURLToPath, URL as NodeURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import ts from 'typescript';
 import * as Vue from 'vue';
 import { parsePrototype } from '../src/parser';
 import { emitVueSource } from '../src/vue-source';
+
+const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+const vueServerRenderer = createRequire(fileURLToPath(new NodeURL('../package.json', import.meta.url)))('vue/server-renderer');
 
 interface PublicState<T> {
   get(): T;
@@ -82,10 +87,10 @@ export default definePrototype({name:'numeric-panel',setup(def){
   return (render)=>render.el('section',{},[counter.get(),render.slot()]);
 }});`;
 
-function component(source: string, files?: Record<string, string>): Vue.Component {
+function moduleExports(source: string, files?: Record<string, string>, ssr = false): Record<string, unknown> {
   const parsed = parsePrototype(source, { fileName: 'fixture.proto.ts', files });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-  const emitted = emitVueSource(parsed.value);
+  const emitted = emitVueSource(parsed.value, {ssr});
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
   const filesByPath = new Map((emitted.value.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents]));
   filesByPath.set('component.ts', emitted.value.code);
@@ -103,12 +108,18 @@ function component(source: string, files?: Record<string, string>): Vue.Componen
     // Execute only emitted native modules. Any hidden Proto bridge fails here.
     new Function('require', 'exports', javascript)((specifier: string) => {
       if (specifier === 'vue') return Vue;
+      if (specifier === 'vue/server-renderer') return vueServerRenderer;
+      if (specifier === '@floating-ui/dom') return floatingUi;
       if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency: ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);
     return exports;
   }
-  const exports = load('component.ts');
+  return load('component.ts');
+}
+
+function component(source: string, files?: Record<string, string>): Vue.Component {
+  const exports = moduleExports(source, files);
   if (!exports.default || typeof exports.default !== 'object') throw new Error('No generated Vue component');
   // The object came from the generated defineComponent call, not an external input.
   const generated = exports.default as Vue.Component;
@@ -123,6 +134,37 @@ async function settle(): Promise<void> {
 }
 
 describe('Vue 3 native source', () => {
+  it('uses the SSR projection only for adoption, retaining changed State across later view epochs', async () => {
+    const generated = moduleExports(counterSource, undefined, true);
+    const renderToString = generated.renderToString as (props: {seed: number; visible: boolean}) => Promise<{html: string; handoff: unknown}>;
+    const hydrate = generated.hydrate as (host: Element, handoff: unknown, options: {props: object}) => Vue.App;
+    const server = await renderToString({seed: 2, visible: true});
+    const host = document.createElement('div'); document.body.append(host); host.innerHTML = server.html;
+    const initialRoot = host.firstElementChild;
+    const reference = Vue.shallowRef<CounterHandle>();
+    const input = Vue.shallowReactive({seed: 2, visible: true, ref: reference});
+    const app = hydrate(host, server.handoff, {props: input});
+    let owner: CounterHandle | undefined;
+    try {
+      await settle(); await settle();
+      owner = reference.value!;
+      const held = owner.getExposes().counter, write = owner.getExposes().write;
+      expect(host.firstElementChild).toBe(initialRoot);
+      expect(held.get()).toBe(2);
+      input.visible = false; await settle(); await settle();
+      expect(host.firstElementChild).toBeNull();
+      write(9); owner.update(); await settle();
+      expect(held.get()).toBe(9);
+      expect(host.firstElementChild).toBeNull();
+      input.visible = true; await settle(); await settle();
+      expect(owner.getExposes().counter).toBe(held);
+      expect(host.querySelector('section')?.textContent).toBe('9');
+    } finally {
+      app.unmount(); host.remove();
+    }
+    expect(() => owner!.getExposes()).toThrow();
+  });
+
   it('projects focus facts and A11y without updating templates, and retires stale presence Roots', async () => {
     const Generated = component(interactionSource), handle = Vue.shallowRef<InteractionHandle>();
     const input = Vue.shallowRef({ visible: true, disabled: false });

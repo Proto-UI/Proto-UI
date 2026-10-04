@@ -7,6 +7,8 @@ import { describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitVue2Source } from './vue2-source';
 
+const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+
 interface State { get(): number }
 interface VM {
   seed: number; visible: boolean; show: boolean; write: number; optionalWrite: number;
@@ -63,6 +65,7 @@ function project(): (source: string, name: string) => unknown {
     cache.set(path, exports);
     const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
     new Function('require', 'exports', javascript)((specifier: string) => {
+      if (specifier === '@floating-ui/dom') return floatingUi;
       if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);

@@ -16,6 +16,8 @@ import { emitVue2Source } from '../src/vue2-source';
 import { emitWebComponentSource } from '../src/web-component-source';
 import type { GeneratedModule } from '../src/ir';
 
+const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 interface State {
@@ -75,6 +77,7 @@ function evaluate(module: GeneratedModule): Record<string, unknown> {
     }).outputText;
     new Function('require', 'exports', program)((specifier: string) => {
       if (specifier === 'vue') return Vue;
+      if (specifier === '@floating-ui/dom') return floatingUi;
       if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency: ${specifier}`);
       const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier));
       const target = [resolved, `${resolved}.ts`, `${resolved}.js`].find((candidate) => files.has(candidate));
@@ -403,7 +406,7 @@ interface Element extends HTMLElement, Handle {
 }
 let nextTag = 0;
 function customElement(): Element {
-  const emitted = emitWebComponentSource(parsed());
+  const emitted = emitWebComponentSource(parsed(), { shadow: true });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
   const exports = evaluate(emitted.value) as { register(name: string): void };
   const tag = `x-owner-stress-${++nextTag}`;

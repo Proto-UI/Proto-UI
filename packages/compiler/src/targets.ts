@@ -1,5 +1,6 @@
 import { OPERATION_RULES } from './operations';
 import { validateNativeInteraction } from './native-interaction';
+import { GPUI_NATIVE_SDK_VERSION } from './gpui-native-sdk';
 import type {
   CompileResult,
   CompilerDiagnostic,
@@ -21,7 +22,11 @@ export type TargetProfileId =
   | 'web-component-source-v1'
   | 'gpui-source-v1'
   | 'qt-source-v1'
-  | 'flutter-source-v1';
+  | 'flutter-source-v1'
+  | 'react-dom-ssr-v1'
+  | 'vue-ssr-v1'
+  | 'vue2-ssr-v1'
+  | 'web-component-ssr-v1';
 export type HostCapability = 'view-render' | 'input-events' | 'focus-target' | 'accessibility-tree' | 'style-projection' | 'context-scope';
 
 export interface TargetDependency {
@@ -61,13 +66,49 @@ const nativeOperations: readonly Operation[] = Object.freeze([
   'run.update',
   'style.tw', 'rule.declare', 'rule.dispose',
   'feedback.style.use', 'feedback.style.release', 'feedback.style.patch', 'feedback.style.suppress', 'feedback.style.clearPatch',
+  'subscription.release', 'binding.release', 'transitionAction.call',
   'props.define', 'props.setDefaults', 'props.watch', 'props.get', 'props.getRaw', 'props.isProvided',
   'hook.asTrigger', 'hook.asFocusable', 'hook.asAccessible',
+  'hook.asFocusEntry', 'hook.asFocusScope', 'hook.asFocusRoving',
+  'hook.asOverlay', 'hook.asScrollSurface', 'hook.asTextControl', 'hook.asImageView',
+  'hook.asTableStructure', 'hook.asBoundary', 'hook.asHitParticipation',
+  'hook.asCollection', 'hook.asCollectionItem', 'hook.asTransition',
   'event.on', 'event.onGlobal', 'event.requestDefaultActionPrevention',
   'focus.configure', 'focus.setDisabled', 'focus.focusSelf',
+  'focus.focus', 'focus.blur', 'focus.setNavParticipation', 'focus.setRovingStatus',
+  'focus.focusFirst', 'focus.focusLast', 'focus.focusNext', 'focus.focusPrev',
+  'focus.focusSelected', 'focus.restoreFocus', 'focus.activate', 'focus.deactivate',
+  'focus.setLoop', 'focus.setOrientation', 'focus.isActive',
+  'focus.isFocused', 'focusScope.getRoving', 'focusEntry.configure', 'focusEntry.focus', 'focusEntry.setDisabled',
+  'focusScope.configure', 'focusRoving.configure', 'focusRoving.focusFirst', 'focusRoving.focusLast',
+  'focusRoving.focusNext', 'focusRoving.focusPrev', 'focusRoving.focusSelected',
   'accessible.state', 'accessible.action', 'accessible.role', 'accessible.nameFromContent',
-  'state.bool', 'state.string', 'state.numberDiscrete', 'state.numberRange', 'state.get', 'state.set',
-  'expose.state', 'expose.event', 'expose.method', 'expose.emit',
+  'accessible.id', 'accessible.name', 'accessible.description',
+  'accessible.relation', 'accessible.tree', 'accessible.level',
+  'anatomy.claim', 'anatomy.subscribeParts',
+  'anatomy.has', 'anatomy.parts', 'anatomy.partsOf',
+  'anatomy.order.version', 'anatomy.order.parts', 'anatomy.order.partsOf',
+  'anatomy.order.indexOfSelf', 'anatomy.order.prevOfSelf', 'anatomy.order.nextOfSelf',
+  'anatomyPart.hasExpose', 'anatomyPart.getExpose', 'anatomyPart.hasHook',
+  'tableStructure.configure', 'tableStructure.getObjectRef', 'tableStructure.getSnapshot', 'host.get',
+  'transition.configure', 'transitionControls.enter', 'transitionControls.leave', 'transitionControls.complete',
+  'collection.configure', 'collection.getItems', 'collection.getCount',
+  'collectionItem.configure', 'collectionItem.getSnapshot',
+  'boundary.configure', 'boundary.observe', 'boundary.setStackActive',
+  'boundary.registerRegion', 'boundary.unregisterRegion', 'boundary.classify',
+  'boundary.notify', 'boundary.subscribeOutside',
+  'hitParticipation.configure', 'hitParticipation.registerRegion', 'hitParticipation.unregisterRegion',
+  'overlay.isOpen', 'overlay.openOverlay', 'overlay.close', 'overlay.toggle', 'overlay.configure',
+  'overlay.updatePosition', 'overlay.registerTrigger', 'overlay.registerAnchor',
+  'overlay.registerAnchorPart', 'overlay.registerContent', 'overlay.getPositionSnapshot',
+  'overlay.keepMounted', 'overlay.bindPresence',
+  'scroll.configure', 'scroll.bindComposedChrome', 'scroll.request', 'scroll.getSnapshot',
+  'textControl.on', 'textControl.sync', 'textControl.snapshot',
+  'imageView.on', 'imageView.sync', 'imageView.snapshot',
+  'positioning.connect', 'positioning.update', 'positioning.requestUpdate',
+  'positioning.disconnect', 'positioning.getSnapshot',
+  'state.bool', 'state.string', 'state.enum', 'state.numberDiscrete', 'state.numberRange', 'state.get', 'state.set', 'state.setDefault', 'state.watch',
+  'expose.state', 'expose.event', 'expose.method', 'expose.emit', 'expose.value',
   'lifecycle.setPresent', 'lifecycle.onCreated', 'lifecycle.onMounted', 'lifecycle.onUpdated',
   'lifecycle.onUnmounted', 'lifecycle.onBeforeDispose',
   'render.el', 'render.slot',
@@ -84,6 +125,10 @@ const nativeSharedHelpers: readonly TargetHelper[] = Object.freeze([
   { name: '.proto-ui/context/scope-v1.ts', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
   { name: '.proto-ui/style/native-v1.ts', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
   { name: '.proto-ui/interaction/native-v1.ts', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
+  { name: '.proto-ui/interaction/adapter-modules-v1.ts', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
+]);
+const floatingUiDependency: readonly TargetDependency[] = Object.freeze([
+  Object.freeze({ name: '@floating-ui/dom', version: '1.8.0', role: 'target' as const }),
 ]);
 const nativeHostCapabilities: readonly HostCapability[] = Object.freeze([
   'view-render', 'context-scope', 'style-projection', 'input-events', 'focus-target', 'accessibility-tree',
@@ -125,7 +170,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   'react-dom-source-v1': freezeProfile({
     id: 'react-dom-source-v1', framework: 'react', version: '19.2.6', mode: 'source',
     implemented: true, operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
-    dependencies: reactDependencies,
+    dependencies: [...reactDependencies, ...floatingUiDependency],
     helpers: [
       { name: 'createOwner', version: '1', classification: 'native-lowering', delivery: 'inline' },
       { name: 'resolveProps', version: '1', classification: 'native-lowering', delivery: 'inline' },
@@ -137,24 +182,56 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   'vue-source-v1': freezeProfile({
     id: 'vue-source-v1', framework: 'vue', version: '3.5.31', mode: 'source', implemented: true,
     operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
-    dependencies: [{name:'vue',version:'3.5.31',role:'target'}],
+    dependencies: [{name:'vue',version:'3.5.31',role:'target'}, ...floatingUiDependency],
     helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
   'vue2-source-v1': freezeProfile({
     id: 'vue2-source-v1', framework: 'vue2', version: '2.6.14', mode: 'source', implemented: true,
     operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
-    dependencies: [{name:'vue',version:'2.6.14',role:'target'}],
+    dependencies: [{name:'vue',version:'2.6.14',role:'target'}, ...floatingUiDependency],
     helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
   'web-component-source-v1': freezeProfile({
     id: 'web-component-source-v1', framework: 'web-component', version: 'custom-elements-v1', mode: 'source', implemented: true,
     operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
-    dependencies: [],
+    dependencies: floatingUiDependency,
     helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
-  'gpui-source-v1': unimplemented('gpui'),
+  'gpui-source-v1': freezeProfile({
+    id: 'gpui-source-v1', framework: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', mode: 'source', implemented: true,
+    operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
+    dependencies: [
+      { name: 'gpui', version: 'git:62e5991dd0f0c8a3af8d5e7e9c4652490d468db8', role: 'target' },
+      { name: 'serde', version: '1.0', role: 'target' },
+      { name: 'serde_json', version: '1.0', role: 'target' },
+      { name: 'proto-ui-gpui-native', version: GPUI_NATIVE_SDK_VERSION, role: 'host-bridge' },
+      { name: 'unicode-segmentation', version: '=1.13.3', role: 'target' },
+      { name: 'data-url', version: '=0.3.2', role: 'target' },
+      { name: 'image', version: '=0.25.10', role: 'target' },
+    ],
+    helpers: [
+      { name: 'proto-ui-gpui-native', version: GPUI_NATIVE_SDK_VERSION, classification: 'native-lowering', delivery: 'supporting-file' },
+      { name: 'prototype-style-vocabulary', version: '1', classification: 'native-lowering', delivery: 'supporting-file' },
+    ],
+  }),
   'qt-source-v1': unimplemented('qt'),
   'flutter-source-v1': unimplemented('flutter'),
+  'react-dom-ssr-v1': freezeProfile({
+    id:'react-dom-ssr-v1',framework:'react',version:'19.2.6',mode:'source',implemented:false,
+    operations:nativeOperations,hostCapabilities:nativeHostCapabilities,dependencies:[...reactDependencies,...floatingUiDependency],helpers:nativeSharedHelpers,
+  }),
+  'vue-ssr-v1': freezeProfile({
+    id:'vue-ssr-v1',framework:'vue',version:'3.5.31',mode:'source',implemented:false,
+    operations:nativeOperations,hostCapabilities:nativeHostCapabilities,dependencies:[{name:'vue',version:'3.5.31',role:'target'},{name:'@vue/server-renderer',version:'3.5.31',role:'target'},...floatingUiDependency],helpers:nativeSharedHelpers,
+  }),
+  'vue2-ssr-v1': freezeProfile({
+    id:'vue2-ssr-v1',framework:'vue2',version:'2.6.14',mode:'source',implemented:false,
+    operations:nativeOperations,hostCapabilities:nativeHostCapabilities,dependencies:[{name:'vue',version:'2.6.14',role:'target'},{name:'vue-server-renderer',version:'2.6.14',role:'target'},...floatingUiDependency],helpers:nativeSharedHelpers,
+  }),
+  'web-component-ssr-v1': freezeProfile({
+    id:'web-component-ssr-v1',framework:'web-component',version:'custom-elements-v1',mode:'source',implemented:false,
+    operations:nativeOperations,hostCapabilities:nativeHostCapabilities,dependencies:floatingUiDependency,helpers:nativeSharedHelpers,
+  }),
 });
 
 const selectionSpan: SourceSpan = {

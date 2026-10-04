@@ -20,6 +20,7 @@ export interface CompileProjectOptions {
   profile?: string;
   exportName?: string;
   componentName?: string;
+  nativeSdkPath?: string;
   /** Explicit identity/watch inputs; the project compiler does not interpret configuration files. */
   configFiles?: readonly string[];
 }
@@ -199,6 +200,7 @@ export class CompilerProject {
     const configIdentity = hash(JSON.stringify({
       schema: PROJECT_CACHE_SCHEMA, ir: IR_VERSION, profile: options.profile ?? 'react-runtime-v1',
       exportName: options.exportName ?? 'default', componentName: options.componentName ?? null,
+      nativeSdkPath: options.nativeSdkPath ?? null,
       configuration,
     }));
 
@@ -238,7 +240,7 @@ export class CompilerProject {
             for (const name of names) files[name] = closure.get(name)!.text;
             result = await compileFile(absolute, {
               root: this.root, profile: options.profile, exportName: options.exportName,
-              componentName: options.componentName, sourceSnapshot: { entry, files },
+              componentName: options.componentName, nativeSdkPath: options.nativeSdkPath, sourceSnapshot: { entry, files },
             });
           }
           if (!result.ok) { diagnostics.push(...result.diagnostics); continue; }

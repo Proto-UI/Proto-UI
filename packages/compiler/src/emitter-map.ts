@@ -2,8 +2,12 @@ import { buildSourceMap, type SourceMapMapping } from './source-map';
 import type { GeneratedModule, PrototypeIR, SourceSpan } from './ir';
 
 export function generatedSourcePath(profile: GeneratedModule['profile']): string {
-  if (profile === 'vue2-source-v1') return 'Component.js';
-  if (profile === 'vue-source-v1' || profile === 'web-component-source-v1') return 'Component.ts';
+  if (profile === 'gpui-source-v1') return 'Component.rs';
+  if (profile === 'qt-source-v1') return 'Component.qml';
+  if (profile === 'flutter-source-v1') return 'Component.dart';
+  if (profile === 'vue2-source-v1' || profile === 'vue2-ssr-v1') return 'Component.js';
+  if (profile === 'vue-source-v1' || profile === 'web-component-source-v1' ||
+      profile === 'vue-ssr-v1' || profile === 'web-component-ssr-v1') return 'Component.ts';
   return 'Component.tsx';
 }
 

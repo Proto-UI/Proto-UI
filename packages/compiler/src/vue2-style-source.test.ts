@@ -7,6 +7,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitVue2Source } from './vue2-source';
 
+const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+
 interface StyleExposes {
   pressed: { get(): boolean };
   press(value: boolean): void;
@@ -90,6 +92,7 @@ function build(): unknown {
       compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, allowJs: true },
     }).outputText;
     new Function('require', 'exports', javascript)((specifier: string) => {
+      if (specifier === '@floating-ui/dom') return floatingUi;
       if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);

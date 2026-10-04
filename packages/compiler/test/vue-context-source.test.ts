@@ -1,10 +1,14 @@
 // @vitest-environment happy-dom
 import { posix } from 'node:path';
 import ts from 'typescript';
+import { createRequire } from 'node:module';
+import { fileURLToPath, URL as NodeURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import * as Vue from 'vue';
 import { parsePrototype } from '../src/parser';
 import { emitVueSource } from '../src/vue-source';
+
+const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
 
 interface State { get(): number }
 interface Handle { getExposes(): { value: State }; update(): void }
@@ -53,6 +57,7 @@ function project(): (source: string, name: string) => Vue.Component {
     const javascript = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS } }).outputText;
     new Function('require', 'exports', javascript)((specifier: string) => {
       if (specifier === 'vue') return Vue;
+      if (specifier === '@floating-ui/dom') return floatingUi;
       if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);

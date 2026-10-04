@@ -1,0 +1,32 @@
+// Native regions are retained owner identities, never DOM-shaped JSON placeholders.
+export const gpuiNativeBoundarySource = String.raw`
+#[derive(Clone)]
+pub struct NativeRegion{owner:OwnerWeak,active:Rc<Cell<bool>>,options:Value}
+#[derive(Default)]
+pub struct BoundaryModule{pub config:BTreeMap<String,Value>,pub regions:Vec<NativeRegion>,pub callbacks:Vec<(Rc<Cell<bool>>,Value)>,pub observing:bool,pub active:bool,pub stack_order:u64}
+#[derive(Default)]
+pub struct HitModule{pub config:BTreeMap<String,Value>,pub regions:Vec<NativeRegion>}
+thread_local!{static BOUNDARY_ORDER:Cell<u64>=Cell::new(0);}
+pub fn boundary_setup(owner:&OwnerWeak,hit:bool)->Value{module_handle(owner,if hit{"hit-participation"}else{"boundary"})}
+pub fn boundary_configure(owner:&OwnerWeak,patch:Value,hit:bool)->Value{let owner=setup(owner);if hit{let mode=patch.member("mode",false);if !mode.nullish(){assert!(["participating","disabled","passthrough"].contains(&mode.text().as_str()),"invalid hit participation mode");}merge_config(&mut owner.borrow_mut().modules.hit.config,patch);}else{merge_config(&mut owner.borrow_mut().modules.boundary.config,patch);}Value::Undefined}
+pub fn boundary_observe(owner:&OwnerWeak,observation:Value)->Value{assert!(observation.text()=="pointer.press","unsupported Boundary observation");setup(owner).borrow_mut().modules.boundary.observing=true;Value::Undefined}
+pub fn boundary_active(owner:&OwnerWeak,value:Value)->Value{let owner=runtime(owner);let active=value.bool();let mut o=owner.borrow_mut();o.modules.boundary.active=active;if active{BOUNDARY_ORDER.with(|n|{let next=n.get()+1;n.set(next);o.modules.boundary.stack_order=next;});}Value::Undefined}
+pub fn boundary_register(owner:&OwnerWeak,target:Value,options:Value,hit:bool)->Value{let owner_ref=ensure(owner);assert!(owner_ref.borrow().phase!="render"&&owner_ref.borrow().phase!="before-dispose","binding phase required");let target=target.owner();ensure(&target);let active=Rc::new(Cell::new(true));let region=NativeRegion{owner:target,active:active.clone(),options};if hit{owner_ref.borrow_mut().modules.hit.regions.push(region)}else{owner_ref.borrow_mut().modules.boundary.regions.push(region)}disposer(owner_ref,active,false)}
+pub fn boundary_unregister(owner:&OwnerWeak,target:Value,hit:bool)->Value{let owner=runtime(owner);let target=target.owner();let mut o=owner.borrow_mut();let regions=if hit{&mut o.modules.hit.regions}else{&mut o.modules.boundary.regions};for region in regions.iter(){if Weak::ptr_eq(&region.owner,&target){region.active.set(false)}}regions.retain(|region|region.active.get());Value::Undefined}
+pub fn boundary_subscribe(owner:&OwnerWeak,callback:Value)->Value{let owner_ref=ensure(owner);let active=Rc::new(Cell::new(true));owner_ref.borrow_mut().modules.boundary.callbacks.push((active.clone(),callback));disposer(owner_ref,active,false)}
+fn classify_boundary(owner:&OwnerRef,sample:&Value)->&'static str{if !ready(owner){return "unknown"}let target=sample.member("target",true);let target=match target{Value::HostTarget(owner)|Value::Part(owner,_)=>owner.upgrade(),Value::Undefined|Value::Json(Json::Null)=>None,_=>panic!("Boundary target requires a native HostTarget")};let Some(target)=target else{return "unknown"};if descendant(&target,owner){return "inside"}let owner=owner.borrow();if owner.modules.boundary.regions.iter().any(|region|region.active.get()&&region.owner.upgrade().is_some_and(|region|ready(&region)&&descendant(&target,&region))){return "inside"}for region in [&owner.modules.overlay.trigger,&owner.modules.overlay.anchor,&owner.modules.overlay.content]{if region.upgrade().is_some_and(|region|ready(&region)&&descendant(&target,&region)){return "inside"}}"outside"}
+pub fn boundary_classify(owner:&OwnerWeak,sample:Value,notify:bool)->Value{let owner=runtime(owner);let classification=classify_boundary(&owner,&sample);if notify&&classification=="outside"{let callbacks=owner.borrow().modules.boundary.callbacks.clone();let event=record(vec![("classification",Value::string("outside")),("sample",sample)]);for(active,callback)in callbacks{if active.get(){invoke(&owner,"event",&callback,vec![event.clone()]);}}}Value::string(classification)}
+pub fn native_host_hit(owner:&OwnerRef,position:gpui::Point<Pixels>,window:&Window)->bool{ready(owner)&&hit_participates(owner)&&owner.borrow().native_hitbox.as_ref().is_some_and(|hitbox|hitbox.is_hovered_at(position,window))}
+pub fn native_boundary_press(position:gpui::Point<Pixels>,window:&mut Window,cx:&mut App){
+    let owners=owners_in(window);let target=owners.iter().filter(|owner|native_host_hit(owner,position,window)).max_by_key(|owner|owner.borrow().modules.topology.order).cloned();
+    let mut candidates:Vec<_>=owners.into_iter().filter(|owner|owner.borrow().modules.boundary.observing).collect();
+    let active=candidates.iter().filter(|owner|owner.borrow().modules.boundary.active).max_by_key(|owner|owner.borrow().modules.boundary.stack_order).cloned();if let Some(active)=active{candidates.retain(|owner|Rc::ptr_eq(owner,&active));}
+    for owner in candidates{
+        let inside=native_host_hit(&owner,position,window)||{let owner=owner.borrow();owner.modules.boundary.regions.iter().any(|region|region.active.get()&&region.owner.upgrade().is_some_and(|region|native_host_hit(&region,position,window)))||[&owner.modules.overlay.trigger,&owner.modules.overlay.anchor,&owner.modules.overlay.content].iter().any(|region|region.upgrade().is_some_and(|region|native_host_hit(&region,position,window)))};if inside{continue}
+        let sample=record(vec![("type",Value::string("pointer.press")),("target",target.as_ref().map(|target|Value::HostTarget(Rc::downgrade(target))).unwrap_or(Value::Json(Json::Null)))]);
+        overlay_outside(&owner);let callbacks=owner.borrow().modules.boundary.callbacks.clone();let event=record(vec![("classification",Value::string("outside")),("sample",sample)]);
+        for(active,callback)in callbacks{if active.get(){invoke(&owner,"event",&callback,vec![event.clone()]);}}
+    }drive_owners(window,cx);
+}
+pub fn hit_participates(owner:&OwnerRef)->bool{for participant in all_owners(){let p=participant.borrow();let mode=text_or(field(&p.modules.hit.config,"mode"),"participating");if mode!="participating"&&Rc::ptr_eq(&participant,owner){return false}for region in &p.modules.hit.regions{if region.active.get()&&region.owner.upgrade().is_some_and(|target|descendant(owner,&target)){let mode=text_or(region.options.member("mode",true),&mode);if mode!="participating"{return false}}}}true}
+`;

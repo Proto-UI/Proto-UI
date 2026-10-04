@@ -1,9 +1,13 @@
 // @vitest-environment happy-dom
 import path from 'node:path';
 import ts from 'typescript';
+import { createRequire } from 'node:module';
+import { fileURLToPath, URL as NodeURL } from 'node:url';
 import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitWebComponentSource } from './web-component-source';
+
+const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
 
 interface StateProjection<T> {
   get(): T;
@@ -37,7 +41,7 @@ afterEach(() => {
 function create(source: string): NativeElement {
   const parsed = parsePrototype(source, { fileName: 'independent.proto.ts' });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-  const emitted = emitWebComponentSource(parsed.value);
+  const emitted = emitWebComponentSource(parsed.value, { shadow: true });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
   // Execute the generated consumer, not authored input and not an IR interpreter.
   const sources = new Map((emitted.value.supportingFiles ?? []).map((file) => [file.path, file.contents]));
@@ -56,6 +60,7 @@ function create(source: string): NativeElement {
       compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS },
     }).outputText;
     new Function('exports', 'require', program)(exports, (specifier: string) => {
+      if (specifier === '@floating-ui/dom') return floatingUi;
       if (!specifier.startsWith('.')) throw new Error(`Unexpected native dependency: ${specifier}`);
       const target = path.posix.join(path.posix.dirname(name), specifier);
       return load(target.endsWith('.ts') ? target : `${target}.ts`);

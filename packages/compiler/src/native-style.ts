@@ -50,6 +50,7 @@ export interface NativeStyle {
   mount(): void;
   unmount(): void;
   tokens(): readonly string[];
+  serverTokens(): readonly string[];
   dispose(): void;
 }
 type Chunk = { handles: readonly NativeStyleHandle[]; active: boolean };
@@ -74,7 +75,7 @@ export function createNativeStyle(options: {
   const patches = new Map<string, Patch>();
   let mounted = false, disposed = false, nextRuleId = 1;
   let projected: readonly string[] = [];
-  function snapshot(): string[] {
+  function snapshot(includeRules = mounted): string[] {
     const merged = new Map<string, string>();
     function append(handles: readonly NativeStyleHandle[]): void {
       for (const handle of handles) {
@@ -83,7 +84,7 @@ export function createNativeStyle(options: {
       }
     }
     for (const chunk of chunks) if (chunk.active) append(chunk.handles);
-    if (mounted) for (const rule of rules) if (rule.active && rule.test()) append(rule.handles);
+    if (includeRules) for (const rule of rules) if (rule.active && rule.test()) append(rule.handles);
     for (const group of patches.keys()) merged.delete(group);
     for (const [group, patch] of patches) if (patch.token !== undefined) merged.set(group, patch.token);
     return [...merged.values()];
@@ -147,7 +148,11 @@ export function createNativeStyle(options: {
     refresh,
     mount(): void { mounted = true; const next = snapshot(); options.project(next); projected = next; },
     unmount(): void { mounted = false; projected = []; },
-    tokens: snapshot,
+    tokens(): readonly string[] { return snapshot(); },
+    serverTokens(): readonly string[] {
+      if (disposed || !options.isAlive()) throw new Error('[Style] owner is terminally disposed');
+      return snapshot(true);
+    },
     dispose(): void { disposed = true; mounted = false; chunks.length = 0; rules.length = 0; patches.clear(); projected = []; },
   };
   return style;

@@ -3,10 +3,13 @@ import type { DataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { FOCUS_OPTIONS_TYPE, OPERATION_RULES } from './operations';
 import { checkTargetOperations, resolveTargetProfile } from './targets';
-import { isDataValueType } from './ir';
+import { isDataValueType, isPublicValueType } from './ir';
 import { buildNativeContextArtifacts, emitNativeContextValidation } from './native-context';
 import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './native-style';
 import { nativeInteractionArtifact } from './native-interaction';
+import { nativeAdapterModulesArtifact } from './native-adapter-modules';
+import { buildNativeStaticDeclarations } from './native-static-declarations';
+import { emitReactSSRSupport, reactSSRTransportArtifact } from './react-ssr-source';
 import type {
   CompileResult,
   ExpressionIR,
@@ -21,26 +24,27 @@ import type {
 /** Native DOM lowering. The generated program executes checked functions, never an IR interpreter. */
 export function emitReactSource(
   input: PrototypeIR,
-  options: { componentName?: string } = {}
+  options: { componentName?: string; ssr?: boolean } = {}
 ): CompileResult<GeneratedModule> {
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  const ssr = options.ssr === true;
+  const profile = ssr ? 'react-dom-ssr-v1' : 'react-dom-source-v1';
   const selected = resolveTargetProfile('react-dom-source-v1');
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
   const unsupportedMethods = ir.exposes.filter((value) => value.kind === 'method' &&
-    [value.returnType, ...value.parameters.map((parameter) => parameter.type)].some((type) => !isDataValueType(type)));
+    !isPublicValueType(value.returnType) || value.kind === 'method' && value.parameters.some(parameter => !isDataValueType(parameter.type)));
   if (unsupportedMethods.length) return {
     ok: false,
     diagnostics: unsupportedMethods.map((value) => ({ code: 'PUI4003', category: 'unsupported-input',
       message: 'react-dom-source-v1 exposed methods require checked serializable parameter and return types, not semantic capabilities or unknown.', span: value.span })),
   };
   const reachedFunctions = new Set(admitted.value.functions);
-  const interaction = admitted.value.operations.some((operation) =>
-    operation.startsWith('hook.') || operation.startsWith('event.') ||
-    operation.startsWith('focus.') || operation.startsWith('accessible.'));
+  const interaction = ir.moduleDeclarations.length > 0 || admitted.value.operations.some((operation) =>
+    /^(hook\.|event\.|focus\.|accessible\.|anatomy\.|collection\.|collectionItem\.|boundary\.|hitParticipation\.|positioning\.|overlay\.|scroll\.|textControl\.|imageView\.|transition\.|tableStructure\.)/.test(operation));
   const unsupportedTemplates: ExpressionIR[] = [];
   function inspectTemplate(value: unknown): void {
     if (Array.isArray(value)) for (const item of value) inspectTemplate(item);
@@ -72,7 +76,13 @@ export function emitReactSource(
     GeneratedProps: true, GeneratedExposes: true, GeneratedHandle: true, GeneratedComponentProps: true,
     Object: true, Array: true, Number: true, Math: true, Set: true, WeakMap: true, Reflect: true,
     JSON: true, Error: true, TypeError: true, Infinity: true, queueMicrotask: true,
+    console: true,
   };
+  if (ssr) Object.assign(reservedNames, {
+    AggregateError: true, Map: true, WeakSet: true, GeneratedTemplateProjection: true, GeneratedInitialData: true,
+    GeneratedRenderProjection: true, GeneratedHydrationCarrier: true, GeneratedServerResult: true,
+    GeneratedHydratedRoot: true, renderGeneratedToString: true, hydrateGeneratedRoot: true,
+  });
   if (
     !validIdentifier(componentName) ||
     Object.hasOwn(reservedNames, componentName)
@@ -98,6 +108,11 @@ export function emitReactSource(
   while ([...names].some((name) => name.startsWith(p))) p += '_';
   const hooks = new Map(ir.hooks.map((hook, index) => [hook.id, `${p}Hook${index}`]));
   const contextArtifacts = buildNativeContextArtifacts(ir);
+  const staticArtifacts = buildNativeStaticDeclarations(ir.staticDeclarations, ir.moduleDeclarations);
+  const staticCapabilities = new Map(ir.staticDeclarations.map((declaration, index) => [declaration.id, `${p}Declaration${index}`]));
+  const staticImports = ir.staticDeclarations.map(declaration =>
+    `import { declaration as ${staticCapabilities.get(declaration.id)} } from ${JSON.stringify('./' + staticArtifacts.capabilities.get(declaration.id)!.file.replace(/\.ts$/, ''))};`
+  ).join('\n');
   const contextKeys = new Map(ir.contextKeys.map((key, index) => [key.id, `${p}ContextKey${index}`]));
   const contextImports = ir.contextKeys.map((key) =>
     `import { key as ${contextKeys.get(key.id)} } from ${JSON.stringify(contextArtifacts.keys.get(key.id)!.file.replace(/\.ts$/, ''))};`
@@ -108,6 +123,12 @@ export function emitReactSource(
   function typeName(type: ValueType): string {
     if (typeof type !== 'string') return interaction && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
       ? `${p}NativeFocusOptions` : formatDataType(type as DataType);
+    if (type.startsWith('nullable:')) return `${typeName(type.slice(9) as ValueType)} | null`;
+    if (type.startsWith('optional:')) return `${typeName(type.slice(9) as ValueType)} | undefined`;
+    if (type.startsWith('borrowed:')) return `${p}State<${type.slice(9)}> & { watch(callback: (run: ${p}Run, event: ${p}StateEvent<${type.slice(9)}>) => void): () => void }`;
+    if (type.startsWith('state-event:')) return `${p}StateEvent<${type.slice(12)}>`;
+    if (type.startsWith('state-next:')) return `Extract<${p}StateEvent<${type.slice(11)}>, {type:'next'}>`;
+    if (type === 'state-disconnect') return `{type:'disconnect';reason:'unmount'}`;
     if (type === 'def') return `typeof ${p}Def`;
     if (type === 'run') return `${p}Run`;
     if (type === 'render') return `typeof ${p}Renderer`;
@@ -116,7 +137,7 @@ export function emitReactSource(
     if (type === 'accessible') return `${p}NativeAccessible`;
     if (type === 'event') return `${p}NativeInput`;
     if (type === 'host-event') return 'Event';
-    if (type === 'observed:boolean') return `${p}NativeObservedState<boolean>`;
+    if (type.startsWith('observed:')) return `${p}NativeObservedState<${type.slice(9)}>`;
     if (type.startsWith('state:')) return `${p}State<${type.slice(6)}>`;
     if (['boolean', 'number', 'string', 'null', 'void', 'unknown'].includes(type)) return type;
     if (type === 'array') return 'readonly unknown[]';
@@ -126,6 +147,7 @@ export function emitReactSource(
     if (type === 'template-props') return `{ readonly style?: ${p}NativeStyleHandle }`;
     if (type === 'rule-handle') return `${p}NativeRuleHandle`;
     if (type === 'style-disposer') return '() => void';
+    if (interaction) return `${p}NativeModuleCapability<${JSON.stringify(type)}, ${p}Run>`;
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
@@ -139,6 +161,7 @@ export function emitReactSource(
       case 'literal': return JSON.stringify(value.value);
       case 'reference': return value.name;
       case 'context-key': return contextKeys.get(value.keyId)!;
+      case 'static-capability': return staticCapabilities.get(value.declarationId)!;
       case 'style-handle': return emitNativeStyleHandle(value.handle);
       case 'rule': return emitNativeRule(value, (item) => expression(item, depth), `${p}Style`, 'resolved');
       case 'member': return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
@@ -151,7 +174,9 @@ export function emitReactSource(
       case 'authored-hook': return `${hooks.get(value.hookId)}()`;
       case 'operation': {
         const rule = OPERATION_RULES[value.operation];
-        if (value.operation.startsWith('hook.'))
+        if (rule.path === 'call') return `${expression(value.receiver!, depth)}(${value.arguments.map(item => expression(item, depth)).join(', ')})`;
+        if (value.operation === 'host.get') return '(mounted && connected ? (root as HTMLElement) : null)';
+        if (value.operation.startsWith('hook.') || value.operation.startsWith('anatomy.'))
           return `${p}Interaction.${rule.path}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
         const type = ['context.read', 'context.tryRead', 'render.read.context.read', 'render.read.context.tryRead'].includes(value.operation)
           ? `<${typeName(value.type)}>` : '';
@@ -177,6 +202,7 @@ export function emitReactSource(
   const props = ir.props.map((value) => `  ${JSON.stringify(value.name)}?: ${formatDataType(value.type as DataType)} | null;`).join('\n');
   const exposed = ir.exposes.map((value) => {
     const type = value.kind === 'state' ? `${p}ExternalState<${formatDataType(value.type as DataType)}>`
+      : value.kind === 'value' ? typeName(value.type)
       : value.kind === 'event' ? `{ readonly kind: 'event'; readonly payload: ${JSON.stringify(value.payload)} }`
       : `(${parameters(value.parameters)}) => ${typeName(value.returnType)}`;
     return `  ${JSON.stringify(value.name)}: ${type};`;
@@ -185,7 +211,7 @@ export function emitReactSource(
     `  ${JSON.stringify(`on${value.name.charAt(0).toUpperCase()}${value.name.slice(1)}`)}?: (${value.payload === 'void' ? '' : `payload: ${formatDataType(value.payload as DataType)}`}) => void;`
   ).join('\n');
   const methodSchemas = ir.exposes.filter((value) => value.kind === 'method').map((value) =>
-    `    ${JSON.stringify(value.name)}: { parameters: ${JSON.stringify(value.parameters.map((parameter) => ({ type: parameter.type, ...(parameter.optional ? { optional: true } : {}) })))}, result: ${JSON.stringify(value.returnType)} },`
+    `    ${JSON.stringify(value.name)}: { parameters: ${JSON.stringify(value.parameters.map((parameter) => ({ type: parameter.type, ...(parameter.optional ? { optional: true } : {}) })))}, result: ${JSON.stringify(isDataValueType(value.returnType) ? value.returnType : null)} },`
   ).join('\n');
   const eventSchemas = ir.exposes.filter((value) => value.kind === 'event').map((value) =>
     `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.payload)},`
@@ -197,16 +223,22 @@ export function emitReactSource(
     (${fn(hook.setup, 2)})(${p}Def);
   };`).join('\n');
 
-  const code = `// Editable generated React DOM source. Profile: react-dom-source-v1.
+  const code = `// Editable generated React DOM source. Profile: ${profile}.
 // Inline owner lowering and emitted shared checked-data/Context helpers v1; no Proto-UI Runtime/Core/Adapter dependencies.
 // Source graph SHA-256: ${ir.source.sha256}
 import * as ${p}React from 'react';
+${interaction ? `import { createPortal as ${p}CreatePortal } from 'react-dom';` : ''}
+${ssr ? `import { renderToString as ${p}RenderToString } from 'react-dom/server';
+import { hydrateRoot as ${p}HydrateRoot, type HydrationOptions as ${p}HydrationOptions, type Root as ${p}ReactRoot } from 'react-dom/client';` : ''}
+${ssr ? `import { ServerTransport as ${p}SharedServerTransport, HydrationTransport as ${p}SharedHydrationTransport, OwnerReady as ${p}SharedOwnerReady } from './.proto-ui/context/react-ssr-v1';` : ''}
 import { createContextScope as ${p}CreateContextScope, acceptsContextValue as ${p}Accepts } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
 import type { ContextScope as ${p}ContextScope } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
 import { ContextTransport as ${p}ContextTransport } from './.proto-ui/context/react-v1';
 import { createNativeStyle as ${p}CreateNativeStyle, templateStyleTokens as ${p}TemplateStyleTokens, type NativeStyle as ${p}NativeStyle, type NativeStyleHandle as ${p}NativeStyleHandle, type NativeRuleHandle as ${p}NativeRuleHandle } from './.proto-ui/style/native-v1';
 ${interaction ? `import { createNativeInteraction as ${p}CreateNativeInteraction, type NativeInteraction as ${p}NativeInteraction, type NativeFocus as ${p}NativeFocus, type NativeAccessible as ${p}NativeAccessible, type NativeObservedState as ${p}NativeObservedState, type NativeInput as ${p}NativeInput, type NativeFocusOptions as ${p}NativeFocusOptions } from './.proto-ui/interaction/native-v1';` : ''}
+${interaction ? `import type { NativeModuleCapability as ${p}NativeModuleCapability } from './.proto-ui/interaction/adapter-modules-v1';` : ''}
 ${contextImports}
+${staticImports}
 
 export type GeneratedProps = {
 ${props}
@@ -232,8 +264,8 @@ type ${p}ExternalState<T> = {
   unsubscribe(off: () => void): void;
   readonly spec: Readonly<${p}StateSpec>;
 };
-type ${p}State<T> = { get(): T; set(value: T, reason?: unknown): void };
-type ${p}StateSpec = { kind: 'bool' | 'string' | 'number.discrete' | 'number.range'; options?: readonly (string | number)[]; min?: number; max?: number; step?: number; clamp?: boolean };
+type ${p}State<T> = { get(): T; setDefault(value: T): void; set(value: T, reason?: unknown): void };
+type ${p}StateSpec = { kind: 'bool' | 'enum' | 'string' | 'number.discrete' | 'number.range'; options?: readonly (string | number)[]; min?: number; max?: number; step?: number; clamp?: boolean };
 type ${p}DataSchema = string | { kind: string; fields?: readonly { name: string; type: ${p}DataSchema; optional?: boolean }[]; element?: ${p}DataSchema; members?: readonly ${p}DataSchema[]; value?: unknown };
 type ${p}PropSpec = { type: ${p}DataSchema; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; options?: readonly string[]; range?: { min?: number; max?: number } };
 type ${p}Run = {
@@ -253,13 +285,65 @@ type ${p}Frame = { revision: number; epoch: number; kind: 'mount' | 'update' | '
 type ${p}Owner = {
   handle: GeneratedHandle;
   scope: ${p}ContextScope;
-  bindRoot(root: HTMLDivElement | null): void;
+  getHostProjection(): { tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; portalTarget: HTMLElement | null };
+  bindRoot(root: HTMLElement | null): void;
   connect(): void;
-${interaction ? '  connectView(): void;\n  disconnectView(): void;\n' : ''}  start(): void;
+${interaction ? '  connectView(): void;\n  disconnectView(): void;\n' : ''}  start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}): void;
   applyProps(props: GeneratedComponentProps): void;
-  accept(frame: ${p}Frame): void;
+  accept(frame: ${p}Frame): boolean;
   disconnect(): void;
+${ssr ? `  prepareServer(): GeneratedRenderProjection;
+  disposeNow(): void;
+` : ''}
 };
+
+const ${p}Slots = new WeakSet<object>();
+function ${p}BindSlots(node: ${p}React.ReactNode, slot: ${p}React.ReactNode): ${p}React.ReactNode {
+  if (Array.isArray(node)) {
+    let result: ${p}React.ReactNode[] | null = null;
+    for (let index = 0; index < node.length; index++) {
+      const child = ${p}BindSlots(node[index], slot);
+      if (child !== node[index]) { result ??= node.slice(); result[index] = child; }
+    }
+    return result ?? node;
+  }
+  if (!${p}React.isValidElement(node)) return node;
+  const element = node as ${p}React.ReactElement<{ children?: ${p}React.ReactNode }>;
+  if (${p}Slots.has(element)) return ${p}React.createElement(${p}React.Fragment, { key: element.key }, slot);
+  const previous = element.props.children, next = ${p}BindSlots(previous, slot);
+  return previous === next ? node : ${p}React.cloneElement(element, undefined, next);
+}
+function ${p}RootProperties(properties: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...properties };
+  // Native TextControl owns subsequent value writes and IME restoration. React
+  // supplies only the initial value, avoiding a competing controlled writer.
+  if (Object.hasOwn(result, 'value')) { result.defaultValue = result.value; delete result.value; }
+  if (typeof result.style === 'string') {
+    const style: Record<string, string> = {};
+    for (const declaration of result.style.split(';')) {
+      const colon = declaration.indexOf(':');
+      if (colon < 1) continue;
+      const name = declaration.slice(0, colon).trim();
+      style[name.startsWith('--') ? name : name.replace(/-([a-z])/g, (_match, letter: string) => letter.toUpperCase())] = declaration.slice(colon + 1).trim();
+    }
+    result.style = style;
+  }
+  return result;
+}
+function ${p}HasRootContent(node: ${p}React.ReactNode): boolean {
+  if (node === null || node === undefined || typeof node === 'boolean' || node === '') return false;
+  if (Array.isArray(node)) return node.some(${p}HasRootContent);
+  if (${p}React.isValidElement(node) && node.type === ${p}React.Fragment)
+    return ${p}HasRootContent((node.props as { children?: ${p}React.ReactNode }).children);
+  return true;
+}
+function ${p}RenderRoot(tag: string, attributes: Record<string, unknown>, children: ${p}React.ReactNode): ${p}React.ReactElement {
+  if (tag === 'input' || tag === 'textarea' || tag === 'img') {
+    if (${p}HasRootContent(children)) throw new TypeError('[Template] this physical control Root cannot contain semantic children.');
+    return ${p}React.createElement(tag, attributes);
+  }
+  return ${p}React.createElement(tag, attributes, children);
+}
 
 function ${p}ResolveProps(
   specs: Readonly<Record<string, ${p}PropSpec>>,
@@ -304,28 +388,31 @@ function ${p}ResolveProps(
   return Object.freeze(next) as ${p}ResolvedProps;
 }
 
-function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null): ${p}Owner {
+function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}Frame) => void, getParent: () => ${p}ContextScope | null, publishHost: () => void${ssr ? ', server = false' : ''}): ${p}Owner {
   let phase: 'setup' | 'callback' | 'render' | 'idle' = 'setup';
   let lifetime: 'alive' | 'disposing' | 'disposed' = 'alive';
   let connected = true;
   let cleanupVersion = 0;
   let desiredPresent = true;
   let mounted = false;
-${interaction ? '  let viewConnected = false;\n' : ''}  let epoch = 0;
+${interaction ? `  let viewConnected = false;
+${ssr ? '  let hydrationAttributes: Readonly<Record<string, string | null>> | null = null;\n' : ''}` : ''}  let epoch = 0;
   let revision = 0;
   let acceptedRevision = 0;
   let latest: ${p}Frame | null = null;
   let dirty = false;
   let updateQueued = false;
   let scheduled = false;
+  let hostScheduled = false;
   let callbackDepth = 0;
   let slotUsed = false;
   let elementSequence = 0;
   let hostProps = initial;
-  let root: HTMLDivElement | null = null;
+  let root: HTMLElement | null = null;
   let raw: Readonly<Record<string, unknown>> = Object.freeze({});
   let resolved: ${p}ResolvedProps;
   let hydrated = false;
+${ssr ? '  let serverPrepared = false;\n' : ''}  let propsWindow: { raw: Readonly<Record<string, unknown>>; resolved: ${p}ResolvedProps } | null = null;
   const specs: Record<string, ${p}PropSpec> = Object.create(null);
   const defaults: Readonly<Record<string, unknown>>[] = [];
   const previousValid: Record<string, unknown> = Object.create(null);
@@ -333,10 +420,14 @@ ${interaction ? '  let viewConnected = false;\n' : ''}  let epoch = 0;
   const ${p}HookNames = new Set<string>();
   const stateSubscribers = new Set<Set<(event: ${p}StateEvent<unknown>) => void>>();
   const pendingStateEvents: (() => void)[] = [];
+  const authorStateWatchCleanups: (() => void)[] = [];
   let emittingState = false;
-  const watchers: { active: boolean; keys: readonly string[]; callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: Readonly<Record<string, unknown>>) => void }[] = [];
+  type ${p}ResolvedWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: Readonly<Record<string, unknown>>) => void };
+  type ${p}RawWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: Readonly<Record<string, unknown>>, prev: Readonly<Record<string, unknown>>, info: Readonly<Record<string, unknown>>) => void };
+  const watchers: ${p}ResolvedWatcher[] = [];
+  const rawWatchers: ${p}RawWatcher[] = [], rawAllWatchers: ${p}RawWatcher[] = [];
   const exposes: Record<string, unknown> = Object.create(null);
-  const methodSchemas: Record<string, { parameters: readonly { type: ${p}DataSchema; optional?: boolean }[]; result: ${p}DataSchema }> = {
+  const methodSchemas: Record<string, { parameters: readonly { type: ${p}DataSchema; optional?: boolean }[]; result: ${p}DataSchema | null }> = {
 ${methodSchemas}
   };
   const eventSchemas: Record<string, ${p}DataSchema> = {
@@ -389,7 +480,7 @@ ${propSchemas}
     invoke(() => { for (const callback of list) callback(${p}RunHandle); });
   }
   function schedule() {
-    if (scheduled || callbackDepth || !connected || lifetime !== 'alive') return;
+${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !connected || lifetime !== 'alive') return;
     if (!updateQueued && desiredPresent === mounted && !(!desiredPresent && root) && !(latest && latest.revision > acceptedRevision)) return;
     scheduled = true;
     queueMicrotask(() => {
@@ -466,14 +557,16 @@ ${propSchemas}
       ensurePhase('render');
       if (slotUsed) throw new Error('[Template] multiple anonymous slots are not supported.');
       slotUsed = true;
-      return ${p}React.createElement(${p}React.Fragment, { key: elementSequence++ }, hostProps.children);
+      const slot = ${p}React.createElement(${p}React.Fragment, { key: elementSequence++ });
+      ${p}Slots.add(slot);
+      return slot;
     },
   };
   function ${p}CreateState<T extends boolean | string | number>(name: string, initialValue: T, spec: ${p}StateSpec): ${p}State<T> {
     ensurePhase('setup');
     if (typeof name !== 'string' || name.length === 0 || stateNames.has(name)) throw new Error('[State] illegal or duplicate state name: ' + name);
     spec = Object.freeze({ ...spec, ...(spec.options ? { options: Object.freeze([...spec.options]) } : {}) });
-    const type = spec.kind === 'bool' ? 'boolean' : spec.kind === 'string' ? 'string' : 'number';
+    const type = spec.kind === 'bool' ? 'boolean' : spec.kind === 'string' || spec.kind === 'enum' ? 'string' : 'number';
     if (spec.options?.some((option) => typeof option !== type || typeof option === 'number' && !Number.isFinite(option)))
       throw new Error('[State] invalid state options: ' + name);
     if (spec.kind === 'number.range' && (!Number.isFinite(spec.min) || !Number.isFinite(spec.max))
@@ -484,7 +577,8 @@ ${propSchemas}
     function validate(next: T) {
       if (typeof next !== type || typeof next === 'number' && !Number.isFinite(next))
         throw new TypeError('[State] invalid state value: ' + name);
-      if (spec.options?.length && (spec.kind === 'string' || spec.kind === 'number.discrete')) {
+      if (spec.kind === 'enum' && !spec.options?.includes(next as string)) throw new Error('[State] enum value outside options: ' + name);
+      if (spec.options?.length && (spec.kind === 'enum' || spec.kind === 'string' || spec.kind === 'number.discrete')) {
         if (!spec.options.includes(next as string | number)) throw new Error('[State] state value outside options: ' + name);
         return;
       }
@@ -505,6 +599,7 @@ ${propSchemas}
     stateSubscribers.add(subscribers as Set<(event: ${p}StateEvent<unknown>) => void>);
     const state = {
       get() { ensureAlive(); return value; },
+      setDefault(next: T) { ensurePhase('setup'); validate(next); value = next; },
       set(next: T, reason?: unknown) {
         ensurePhase('callback');
         validate(next);
@@ -532,8 +627,8 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}        pendingState
   }
   const externalStates = new WeakMap<object, unknown>();
 ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
-  function registerObservedState(state: ${p}NativeObservedState<boolean>) {
-    const subscribers = new Set<(event: ${p}StateEvent<boolean>) => void>();
+  function registerObservedState<T extends boolean | string | number>(state: ${p}NativeObservedState<T>) {
+    const subscribers = new Set<(event: ${p}StateEvent<T>) => void>();
     stateSubscribers.add(subscribers as Set<(event: ${p}StateEvent<unknown>) => void>);
     observedStateCleanups.push(state.subscribe((event) => {
       ${p}Style.refresh();
@@ -544,13 +639,14 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
       try { while (pendingStateEvents.length) pendingStateEvents.shift()!(); }
       finally { emittingState = false; }
     }));
-    const external: ${p}ExternalState<boolean> = Object.freeze({
+    const kind = typeof state.get();
+    const external: ${p}ExternalState<T> = Object.freeze({
       get() { ensureExternal(); return state.get(); },
-      subscribe(callback: (event: ${p}StateEvent<boolean>) => void) {
+      subscribe(callback: (event: ${p}StateEvent<T>) => void) {
         ensureExternal(); subscribers.add(callback); return () => { subscribers.delete(callback); };
       },
       unsubscribe(off: () => void) { off(); },
-      spec: Object.freeze({ kind: 'bool' as const }),
+      spec: Object.freeze({ kind: kind === 'boolean' ? 'bool' as const : kind === 'number' ? 'number.discrete' as const : 'string' as const }),
     });
     externalStates.set(state, external);
   }
@@ -559,16 +655,51 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
     ensureRuntime: () => ensurePhase('callback'),
     ensureEvent: () => ensurePhase('callback'),
     isAlive: () => lifetime !== 'disposed',
-    isReady: () => phase !== 'setup',
+    isReady: () => phase !== 'setup' && mounted && viewConnected && desiredPresent && connected && lifetime === 'alive',
     invoke,
     getRun: () => ${p}RunHandle,
     getResolvedProps: () => resolved,
+    subscribeState(state, callback) { return (externalStates.get(state) as ${p}ExternalState<unknown> | undefined)?.subscribe(callback) ?? (state as ${p}NativeObservedState<unknown>).subscribe(callback); },
     getRoot: () => viewConnected ? root : null,
-    registerObservedState,
+    identity: context,
+    getLogicalParent: getParent,
+    declarations: ${JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config })))},
+    tableFamily: ${staticCapabilities.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined'},
+    getExposes: () => exposes,
+    registerExpose(key, value) {
+      const state = value && typeof value === 'object' ? externalStates.get(value) : undefined;
+      if (state) registerExpose(key, state);
+      else if (typeof value === 'function') registerExpose(key, (...args: unknown[]) => { ensureExternal(); return invoke(() => value(...args)); });
+      else if (key === 'controls' && value && typeof value === 'object') registerExpose(key, Object.fromEntries(Object.entries(value).map(([name, action]) => [name, (...args: unknown[]) => { ensureExternal(); return invoke(() => (action as Function)(...args)); }])));
+      else registerExpose(key, value);
+    },
+    createOwnedState: <T extends boolean | string | number>(name: string, value: T, spec?: ${p}StateSpec) => ${p}CreateState(name, value, spec ?? { kind: typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string' }),
+    watchState<T>(state: {get(): T}, callback: (run: ${p}Run, event: ${p}StateEvent<T>) => void) {
+      ensurePhase('setup');
+      const external = externalStates.get(state) as ${p}ExternalState<T>;
+      if (!external) throw new Error('[State] foreign watch target');
+      const off = external.subscribe(event => invoke(() => callback(${p}RunHandle, event)));
+      authorStateWatchCleanups.push(off); return off;
+    },
+    isPropProvided: key => Object.hasOwn(raw, key),
+    declareTransition(hooks) {
+      ${p}Def.props.define({ open: {type:'boolean'}, defaultOpen: {type:'boolean',default:false}, appear: {type:'boolean',default:false}, enterDuration: {type:'number',default:300}, leaveDuration: {type:'number',default:200}, interrupt: {type:'string',default:'reverse'} });
+      for (const name of ['beforeEnter','afterEnter','beforeLeave','afterLeave']) ${p}Def.expose.event(name);
+      callbacks.created.push(hooks.created); callbacks.mounted.push(hooks.mounted); callbacks.unmounted.push(hooks.unmounted); callbacks.beforeDispose.push(hooks.beforeDispose);
+      ${p}Def.props.watch(['open','interrupt','enterDuration','leaveDuration'], hooks.propsChanged);
+    },
+    setPresent: value => ${p}RunHandle.lifecycle.setPresent(value),
+    requestHostUpdate() {
+      if (hostScheduled || lifetime !== 'alive'${ssr ? ' || server' : ''}) return;
+      hostScheduled = true;
+      queueMicrotask(() => { hostScheduled = false; if (connected && lifetime === 'alive') publishHost(); });
+    },
+    registerGenericObservedState: registerObservedState,
+    emit: key => ${p}RunHandle.expose.emit(key),
   });
   function disposeInteraction() {
     try { ${p}Interaction.dispose(); }
-    finally { for (const off of observedStateCleanups.splice(0)) off(); }
+    finally { for (const off of observedStateCleanups.splice(0)) off(); for (const off of authorStateWatchCleanups.splice(0)) off(); }
   }
 ` : ''}  const ${p}RunHandle: ${p}Run = {
     feedback: { style: ${p}Style },
@@ -580,9 +711,9 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
       schedule();
     },
     props: {
-      get() { ensureAlive(); return resolved; },
-      getRaw() { ensureAlive(); return raw; },
-      isProvided(key: string) { ensureAlive(); return Object.hasOwn(raw, key); },
+      get() { ensureAlive(); return propsWindow?.resolved ?? resolved; },
+      getRaw() { ensureAlive(); return propsWindow?.raw ?? raw; },
+      isProvided(key: string) { ensureAlive(); return Object.hasOwn(propsWindow?.raw ?? raw, key); },
     },
     context: Object.freeze({
       read<T>(key: object): T { ensurePhase('callback'); return context.read<T>(key); },
@@ -657,14 +788,35 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
         watchers.push(watcher);
         return () => { watcher.active = false; };
       },
+      watchAll(callback: ${p}ResolvedWatcher['callback']) {
+        ensurePhase('setup');
+        const watcher: ${p}ResolvedWatcher = { keys: null, callback, active: true };
+        watchers.push(watcher);
+        return () => { watcher.active = false; };
+      },
+      watchRaw(keys: readonly string[], callback: ${p}RawWatcher['callback']) {
+        ensurePhase('setup');
+        if (!keys.length || keys.some(key => typeof key !== 'string' || !key.length)) throw new Error('[Props] raw watchers require nonempty keys.');
+        const watcher: ${p}RawWatcher = { keys: [...keys], callback, active: true };
+        rawWatchers.push(watcher);
+        return () => { watcher.active = false; };
+      },
+      watchRawAll(callback: ${p}RawWatcher['callback']) {
+        ensurePhase('setup');
+        const watcher: ${p}RawWatcher = { keys: null, callback, active: true };
+        rawAllWatchers.push(watcher);
+        return () => { watcher.active = false; };
+      },
     },
     state: {
       bool: (name: string, value: boolean) => ${p}CreateState(name, value, { kind: 'bool' }),
       string: (name: string, value: string, spec: Omit<${p}StateSpec, 'kind'> = {}) => ${p}CreateState(name, value, { kind: 'string', ...spec }),
+      enum: (name: string, value: string, spec: { options: readonly string[] }) => ${p}CreateState(name, value, { kind: 'enum', ...spec }),
       numberDiscrete: (name: string, value: number, spec: Omit<${p}StateSpec, 'kind'> = {}) => ${p}CreateState(name, value, { kind: 'number.discrete', ...spec }),
       numberRange: (name: string, value: number, spec: Omit<${p}StateSpec, 'kind'>) => ${p}CreateState(name, value, { kind: 'number.range', ...spec }),
     },
     expose: {
+      value: registerExpose,
       state(key: string, state: object) {
         const external = externalStates.get(state);
         if (!external) throw new Error('[Expose] state must belong to this instance.');
@@ -683,7 +835,7 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
             !(parameter.optional && args[index] === undefined) && !${p}Accepts(parameter.type, args[index])))
             throw new TypeError('[Expose] invalid method arguments: ' + key);
           const result = callback(...args);
-          if (!${p}Accepts(schema.result, result)) throw new TypeError('[Expose] invalid method result: ' + key);
+          if (schema.result !== null && !${p}Accepts(schema.result, result)) throw new TypeError('[Expose] invalid method result: ' + key);
           return result;
           });
         });
@@ -715,17 +867,33 @@ ${hookDefinitions}
     if (hydrated && Object.keys(raw).length === Object.keys(nextRaw).length
       && Object.keys(nextRaw).every((key) => Object.hasOwn(raw, key) && Object.is(raw[key], nextRaw[key]))) return;
     const previous = resolved;
+    const previousRaw = raw;
     raw = Object.freeze(nextRaw);
     resolved = ${p}ResolveProps(specs, defaults, previousValid, raw, true);
     ${p}Style.refresh();
 ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hydrated = true; return; }
+    const nextResolved = resolved, nextRawSnapshot = raw;
     invoke(() => {
-      const changedKeysAll = Object.keys(specs).filter((key) => !Object.is(previous[key as keyof GeneratedProps], resolved[key as keyof GeneratedProps]));
+      const previousWindow = propsWindow;
+      propsWindow = { raw: nextRawSnapshot, resolved: nextResolved };
+      try {
+      if (rawAllWatchers.length || rawWatchers.length) {
+        const changedRaw = [...new Set([...Object.keys(previousRaw), ...Object.keys(nextRawSnapshot)])].filter(key => Object.hasOwn(previousRaw, key) !== Object.hasOwn(nextRawSnapshot, key) || !Object.is(previousRaw[key], nextRawSnapshot[key]));
+        if (changedRaw.length) for (let groupIndex = 0; groupIndex < 2; ++groupIndex) for (const watcher of groupIndex === 0 ? rawAllWatchers : rawWatchers) {
+          if (!watcher.active) continue;
+          const changedKeysMatched = watcher.keys ? watcher.keys.filter(key => changedRaw.includes(key)) : changedRaw;
+          if (!changedKeysMatched.length) continue;
+          console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+          watcher.callback(${p}RunHandle, nextRawSnapshot, previousRaw, { changedKeysAll: changedRaw, changedKeysMatched });
+        }
+      }
+      const changedKeysAll = Object.keys(specs).filter((key) => !Object.is(previous[key as keyof GeneratedProps], nextResolved[key as keyof GeneratedProps]));
       for (const watcher of watchers) {
         if (!watcher.active) continue;
-        const changedKeysMatched = watcher.keys.filter((key) => changedKeysAll.includes(key));
-        if (changedKeysMatched.length) watcher.callback(${p}RunHandle, resolved, previous, { changedKeysAll, changedKeysMatched });
+        const changedKeysMatched = watcher.keys ? watcher.keys.filter((key) => changedKeysAll.includes(key)) : changedKeysAll;
+        if (changedKeysMatched.length) watcher.callback(${p}RunHandle, nextResolved, previous, { changedKeysAll, changedKeysMatched });
       }
+      } finally { propsWindow = previousWindow; }
     });
   }
   const handle: GeneratedHandle = Object.freeze({
@@ -733,9 +901,45 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
     getExposes() { ensureExternal(); return exposes as GeneratedExposes; },
     invokeInCallbackScope<T>(callback: () => T): T { ensureExternal(); return invoke(callback); },
   });
-  return {
+${ssr ? `  function disposeNow() {
+    if (lifetime !== 'alive') return;
+    lifetime = 'disposing'; phase = 'callback';
+    let failure: unknown;
+    try { dispatch(callbacks.beforeDispose); } catch (error) { failure = error; }
+    finally {
+${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= error; }\n` : ''}      try { ${p}Style.dispose(); } catch (error) { failure ??= error; }
+      try { context.dispose(); } catch (error) { failure ??= error; }
+      lifetime = 'disposed'; phase = 'idle'; connected = false;
+      for (const subscribers of stateSubscribers) subscribers.clear();
+      pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
+      for (const list of Object.values(callbacks)) list.length = 0;
+      for (const key of Object.keys(exposes)) delete exposes[key];
+    }
+    if (failure !== undefined) throw failure;
+  }
+` : ''}  return {
     handle,
     scope: context,
+    getHostProjection() { return { tag: ${interaction ? `${p}Interaction.rootTag() ?? 'div'` : "'div'"}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, portalTarget: ${interaction ? `${p}Interaction.portalTarget()` : 'null'} }; },
+${ssr ? `    disposeNow,
+    prepareServer() {
+      if (!server) throw new Error('[SSR] preparation requires a request-owned server instance.');
+      try {
+        if (!serverPrepared) { applyProps(initial); dispatch(callbacks.created); serverPrepared = true; }
+${interaction ? `        ${p}Interaction.projectAttributes();\n` : ''}        slotUsed = false; elementSequence = 0;
+        let node: ${p}React.ReactNode = null;
+        if (desiredPresent) {
+          phase = 'render';
+          try { node = normalize(render(${p}Renderer)); } finally { phase = 'idle'; }
+        }
+        const tokens = ${p}Style.serverTokens();
+        return { source: ${JSON.stringify(ir.source.sha256)}, present: desiredPresent, rootTag: ${interaction ? `${p}Interaction.rootTag() ?? 'div'` : "'div'"}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, template: ${p}EncodeTemplate(node),
+          attributes: { 'data-pui-root': '',
+            ...(tokens.length ? { 'data-pui-style': tokens.join(' ') } : {}),
+${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}          }, raw: ${p}EncodeData(raw) };
+      } catch (error) { try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[SSR] preparation and disposal failed.'); } throw error; }
+    },
+` : ''}
     bindRoot(nextRoot) {
       if (root === nextRoot) return;
 ${interaction ? `      ${p}Interaction.unmount();\n` : ''}      root?.removeAttribute('data-pui-style');
@@ -745,16 +949,27 @@ ${interaction ? `      if (mounted && desiredPresent && viewConnected) ${p}Inter
     connect() { connected = true; ++cleanupVersion; },
 ${interaction ? `    connectView() {
       viewConnected = true;
-      if (mounted && desiredPresent) ${p}Interaction.mount();
+${ssr ? `      if (root && hydrationAttributes) {
+        ${p}Interaction.adoptAttributes(hydrationAttributes);
+        hydrationAttributes = null;
+      }
+` : ''}      if (mounted && desiredPresent) ${p}Interaction.mount();
     },
     disconnectView() { viewConnected = false; ${p}Interaction.unmount(); },
-` : ''}    start() {
-      try { applyProps(initial); dispatch(callbacks.created); schedule(); }
-      catch (error) { ${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${p}Style.dispose(); context.dispose(); lifetime = 'disposed'; connected = false; throw error; }
+` : ''}    start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}) {
+      try {
+        applyProps(initial); dispatch(callbacks.created);
+${ssr ? `        if (expected && expected.present !== desiredPresent)
+          throw new Error('[Hydration] client initial presence disagrees with the server projection.');
+${interaction ? `        if (expected) hydrationAttributes = Object.fromEntries(Object.entries(expected.attributes).filter(([key]) => key !== 'data-pui-root' && key !== 'data-pui-style'));
+` : ''}
+` : ''}        schedule();
+      }
+      catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${p}Style.dispose(); context.dispose(); lifetime = 'disposed'; connected = false;`} throw error; }
     },
     applyProps,
     accept(frame: ${p}Frame) {
-      if (!connected || lifetime !== 'alive' || frame.revision <= acceptedRevision || frame !== latest) return;
+      if (!connected || lifetime !== 'alive' || frame.revision <= acceptedRevision || frame !== latest) return false;
       acceptedRevision = frame.revision;
       if (frame.kind === 'detach') {
 ${interaction ? `        ${p}Interaction.unmount();\n` : ''}        ${p}Style.unmount();
@@ -762,12 +977,15 @@ ${interaction ? `        ${p}Interaction.unmount();\n` : ''}        ${p}Style.un
       } else if (!desiredPresent) {
         // Physical materialization is not a published mount. Remove the obsolete
         // Root without manufacturing mounted/unmounted for a never-mounted epoch.
+        schedule();
+        return false;
       } else if (frame.kind === 'mount') {
         mounted = true;
         ${p}Style.mount();
 ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callbacks.mounted);
       } else if (mounted && frame.epoch === epoch) dispatch(callbacks.updated);
       schedule();
+      return true;
     },
     disconnect() {
       connected = false;
@@ -793,6 +1011,7 @@ ${interaction ? `          try { disposeInteraction(); } catch (error) { failure
           for (const subscribers of stateSubscribers) subscribers.clear();
           pendingStateEvents.length = 0;
           watchers.length = 0;
+          rawWatchers.length = 0; rawAllWatchers.length = 0;
           for (const list of Object.values(callbacks)) list.length = 0;
           for (const key of Object.keys(exposes)) delete exposes[key];
         }
@@ -802,38 +1021,95 @@ ${interaction ? `          try { disposeInteraction(); } catch (error) { failure
   };
 }
 
+${ssr ? emitReactSSRSupport(p, componentName, ir) : ''}
 export const ${componentName} = ${p}React.forwardRef<GeneratedHandle, GeneratedComponentProps>(function ${componentName}(props, ref) {
   const ownerRef = ${p}React.useRef<${p}Owner | null>(null);
   const parentScope = ${p}React.useContext(${p}ContextTransport);
   const parentRef = ${p}React.useRef<${p}ContextScope | null>(null);
   const [frame, setFrame] = ${p}React.useState<${p}Frame | null>(null);
-  const bindRoot = ${p}React.useCallback((root: HTMLDivElement | null) => { ownerRef.current?.bindRoot(root); }, []);
-  // All irreversible work begins after an accepted shell commit, never during React render.
+  const [, publishHost] = ${p}React.useReducer((version: number) => version + 1, 0);
+${ssr ? `  const shellId = ${p}React.useId();
+  const [started, setStarted] = ${p}React.useState(false);
+  const serverRequest = ${p}React.useContext(${p}ServerTransport);
+  const session = ${p}React.useContext(${p}HydrationTransport);
+  const parentReady = ${p}React.useContext(${p}OwnerReady);
+  // Carrier metadata validates initial adoption, not owners created after bootstrap.
+  // Freeze that decision for this logical shell, including retained view re-entry.
+  const [projection] = ${p}React.useState(() => {
+    if (!session || session.pending.size === 0) return undefined;
+    const initial = session.carrier.projections[shellId];
+    if (!initial || initial.source !== ${JSON.stringify(ir.source.sha256)})
+      throw new Error('[Hydration] missing/mismatched source-bound component projection.');
+    return initial;
+  });
+  const rootRef = ${p}React.useRef<HTMLElement | null>(null);
+  const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => { rootRef.current = root; ownerRef.current?.bindRoot(root); }, []);
+` : `  const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => { ownerRef.current?.bindRoot(root); }, []);
+`}  // All irreversible work begins after an accepted shell commit, never during React render.
   ${p}React.useLayoutEffect(() => {
-    parentRef.current = parentScope;
+${ssr ? `    if (serverRequest || !parentReady) return;
+` : ''}    parentRef.current = parentScope;
     let owner = ownerRef.current;
     if (!owner) {
-      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current);
-      ownerRef.current = owner;
-      owner.start();
-    } else owner.connect();
+${ssr ? `      const initial: GeneratedComponentProps = projection ? { ...${p}DecodeData(projection.raw) as GeneratedProps, children: props.children } : props;
+      if (projection) for (const [key, value] of Object.entries(props)) if (key.startsWith('on') && typeof value === 'function') initial[key as \`on\${string}\`] = value;
+      let first = projection?.present ?? true;
+      owner = ${p}CreateOwner(initial, next => {
+        if (first && projection && next.kind !== 'detach') {
+          first = false;
+          const host = owner!.getHostProjection();
+          if (!projection.present || host.tag !== projection.rootTag || JSON.stringify(host.properties) !== JSON.stringify(projection.properties)
+            || JSON.stringify(${p}EncodeTemplate(next.node)) !== JSON.stringify(projection.template)) {
+            owner!.disposeNow();
+            throw new Error('[Hydration] client initial execution disagrees with the source-bound server projection.');
+          }
+        }
+        setFrame(next);
+      }, () => parentRef.current, publishHost);
+` : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost);
+`}      ownerRef.current = owner;
+      owner.start(${ssr ? 'projection' : ''});
+${ssr ? `      owner.bindRoot(rootRef.current);
+      if (projection && !projection.present) session!.pending.delete(shellId);
+      setStarted(true);
+` : ''}    } else owner.connect();
 ${interaction ? `    owner.connectView();
     return () => { owner.disconnectView(); };
-` : ''}  }, []);
+` : ''}  }, [${ssr ? 'parentReady' : ''}]);
   ${p}React.useLayoutEffect(() => { parentRef.current = parentScope; }, [parentScope]);
   // Suspense can disconnect layout effects without unmounting the owner shell.
   // Passive cleanup identifies shell unmount; same-turn StrictMode replay cancels disposal.
   ${p}React.useEffect(() => {
-    const owner = ownerRef.current!;
+    const owner = ownerRef.current${ssr ? ';\n    if (!owner) return' : '!'};
     owner.connect();
     return () => { owner.disconnect(); };
-  }, []);
-  ${p}React.useLayoutEffect(() => { ownerRef.current!.applyProps(props); }, [props]);
-  ${p}React.useLayoutEffect(() => { if (frame) ownerRef.current!.accept(frame); }, [frame]);
-  ${p}React.useImperativeHandle(ref, () => ownerRef.current!.handle, []);
-  const view = frame && frame.kind !== 'detach'
-    ? ${p}React.createElement('div', { 'data-pui-root': '', ref: bindRoot }, frame.node) : null;
-  return ${p}React.createElement(${p}ContextTransport.Provider, { value: ownerRef.current?.scope ?? null }, view);
+  }, [${ssr ? 'parentReady' : ''}]);
+  ${p}React.useLayoutEffect(() => { ${ssr ? 'if (projection && (!started || projection.present && !frame)) return; ownerRef.current?.' : 'ownerRef.current!.'}applyProps(props); }, [props${ssr ? ', parentReady, started, !!frame' : ''}]);
+  ${p}React.useLayoutEffect(() => { if (frame${ssr ? ` && ownerRef.current!.accept(frame) && projection && frame.kind !== 'detach'` : ''}) ${ssr ? 'session!.pending.delete(shellId)' : 'ownerRef.current!.accept(frame)'}; }, [frame]);
+  ${p}React.useImperativeHandle(ref, () => ${ssr ? `({
+    update() { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); ownerRef.current.handle.update(); },
+    getExposes() { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); return ownerRef.current.handle.getExposes(); },
+    invokeInCallbackScope<T>(callback: () => T): T { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); return ownerRef.current.handle.invokeInCallbackScope(callback); },
+  })` : 'ownerRef.current!.handle'}, []);
+  const template = ${p}React.useMemo(() => ${p}BindSlots(frame?.node, props.children), [frame?.node, props.children]);
+${ssr ? `  if (serverRequest) {
+    const entry = serverRequest.prepare(shellId, () => {
+      const owner = ${p}CreateOwner(props, () => { throw new Error('[SSR] server cannot publish a physical commit.'); }, () => parentScope, () => {}, true);
+      return { owner, projection: owner.prepareServer() };
+    });
+    const view = entry.projection.present ? ${p}RenderRoot(entry.projection.rootTag, ${p}RootAttributes(entry.projection),
+      ${p}DecodeTemplate(entry.projection.template, props.children)) : null;
+    return ${p}React.createElement(${p}ContextTransport.Provider, { value: entry.owner.scope }, view);
+  }
+` : ''}  const host = ownerRef.current?.getHostProjection();
+  const rootView = frame && frame.kind !== 'detach'
+    ? ${p}RenderRoot(host!.tag, { ${ssr ? '...(projection ? ' + p + 'RootAttributes(projection) : {}), ' : ''}...${p}RootProperties(host!.properties), 'data-pui-root': '', ref: bindRoot }, template)${ssr ? ` : !frame && projection?.present
+      ? ${p}RenderRoot(projection.rootTag, { ...${p}RootAttributes(projection), ref: bindRoot }, ${p}DecodeTemplate(projection.template, props.children))` : ''} : null;
+  const view = ${interaction ? `rootView && host?.portalTarget ? ${p}CreatePortal(rootView, host.portalTarget) : rootView` : 'rootView'};
+${ssr ? `  return ${p}React.createElement(${p}OwnerReady.Provider, { value: started },
+    ${p}React.createElement(${p}ContextTransport.Provider, { value: ownerRef.current?.scope ?? null }, view));
+` : `  return ${p}React.createElement(${p}ContextTransport.Provider, { value: ownerRef.current?.scope ?? null }, view);
+`}
 });
 ${componentName}.displayName = ${JSON.stringify(ir.name)};
 `;
@@ -841,13 +1117,13 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
     ok: true,
     value: {
       code,
-      profile: 'react-dom-source-v1',
-      supportingFiles: [...contextArtifacts.files, nativeStyleArtifact, ...(interaction ? [nativeInteractionArtifact] : []), {
+      profile,
+      supportingFiles: [...contextArtifacts.files, ...staticArtifacts.files, nativeStyleArtifact, ...(interaction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []), ...(ssr ? [reactSSRTransportArtifact] : []), {
         path: transportFile, kind: 'source',
         contents: `import { createContext } from 'react';\nimport type { ContextScope } from './scope-v1';\nexport const ContextTransport = createContext<ContextScope | null>(null);\n`,
       }],
       dependencies: selected.value.dependencies.map((dependency) => ({ ...dependency })),
-      provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: 'react-dom-source-v1' },
+      provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
     },
   };
 }

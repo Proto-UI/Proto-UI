@@ -1,24 +1,25 @@
 import { createHash } from 'node:crypto';
 import { CompilerRejection, reject } from './diagnostics';
 import {
-  IR_VERSION, isDataValueType, type CompileResult, type FunctionContext,
-  type FunctionIR, type Phase, type PrototypeIR, type SourceSpan, type ValueType,
+  IR_VERSION, MODULE_CAPABILITY_TYPES, isDataValueType, isPublicValueType, isCapabilityAssignable, type CompileResult, type FunctionContext,
+  type ExpressionIR, type FunctionIR, type ModuleDeclarationIR, type Phase, type PrototypeIR,
+  type SourceSpan, type StaticCapabilityIR, type ValueType,
 } from './ir';
 import {
-  OPERATION_RULES, operationCallbackRule, operationResultType,
-  validateOperationArguments, validateOperationPhase, isTemplateChildType,
-  type CallbackContext, type OperationBindings, type OperationRule, type SemanticOperation,
+  OPERATION_RULES, operationCallbackRule, operationArgumentRule, operationResultType,
+  validateOperationArguments, validateOperationPhase, isTemplateChildType, capabilityMemberType, capabilityBinaryType, stateValue,
+  type ArgumentRule, type CallbackContext, type OperationBindings, type OperationRule, type SemanticOperation,
 } from './operations';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
-import { inferBinaryType, inferUnaryType, memberDataType } from './expression-types';
+import { inferBinaryType, inferUnaryType, memberDataType, conditionRefinements } from './expression-types';
 import { sourceName } from './source-resolution';
 import { lowerRulePlan } from './rule-plan';
 import { assertTwTokenV0 } from '../../core/src/spec/feedback/tokens';
 import { acceptsValue } from './data-types';
 import type { RuleCondition, RuleDeclarationIR } from './rule-declarations';
 
-const CAPABILITIES = new Set(['unknown','def','run','render','event','host-event','props','focus','accessible','context-key','style-handle','style-disposer','template-props','rule-handle','function','record','array','template','state:boolean','observed:boolean','state:number','state:string']);
-const CONTEXTS = new Set(['setup','render','helper','event','props-watch','context-watch','context-update','created','mounted','updated','unmounted','before-dispose','expose-method']);
+const CAPABILITIES = new Set(['unknown','def','run','render','event','host-event','props','focus','accessible','context-key','style-handle','style-disposer','template-props','rule-handle','function','record','array','template','state:boolean','observed:boolean','state:number','state:string', ...MODULE_CAPABILITY_TYPES]);
+const CONTEXTS = new Set(['setup','render','helper','event','props-watch','context-watch','context-update','state-watch','collection-meta','positioning','created','mounted','updated','unmounted','before-dispose','expose-method']);
 const RESERVED = new Set('await break case catch class const continue debugger default delete do else enum export extends false finally for function if import in instanceof let new null return super switch this throw true try typeof var void while with yield'.split(' '));
 const FALLBACK: SourceSpan = { file: '<ir>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 };
 
@@ -26,11 +27,11 @@ export function validIdentifier(value: unknown): value is string {
   return typeof value === 'string' && /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(value) && !RESERVED.has(value);
 }
 function bad(message: string, location: SourceSpan = FALLBACK): never { return reject('PUI2002', message, location, 'invalid-ir'); }
-function object(value: unknown, allowed: readonly string[]): Record<string, unknown> {
+function object(value: unknown, allowed?: readonly string[]): Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value) ||
       (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) bad('IR requires plain data records.');
   for (const key of Reflect.ownKeys(value)) {
-    if (typeof key !== 'string' || !allowed.includes(key)) bad('Unknown IR field.');
+    if (typeof key !== 'string' || allowed && !allowed.includes(key)) bad('Unknown IR field.');
     const descriptor = Object.getOwnPropertyDescriptor(value, key)!;
     if (!('value' in descriptor) || !descriptor.enumerable) bad('IR accessors/non-data fields are forbidden.');
   }
@@ -38,6 +39,7 @@ function object(value: unknown, allowed: readonly string[]): Record<string, unkn
 }
 function array(value: unknown): unknown[] {
   if (!Array.isArray(value) || Object.keys(value).length !== value.length) bad('IR requires a dense array.');
+  if (Object.getPrototypeOf(value) !== Array.prototype && Object.getPrototypeOf(value) !== null) bad('IR array subclasses are forbidden.');
   for (const key of Reflect.ownKeys(value)) {
     if (key === 'length') continue;
     if (typeof key !== 'string' || !/^(0|[1-9]\d*)$/.test(key)) bad('IR arrays cannot have custom properties.');
@@ -46,6 +48,79 @@ function array(value: unknown): unknown[] {
   }
   for (let i = 0; i < value.length; i++) if (!Object.hasOwn(value, i)) bad('IR arrays cannot be sparse.');
   return value;
+}
+function staticRecord(value: unknown, location: SourceSpan): Record<string, unknown> {
+  const active = new Set<object>(), checked = new Set<object>();
+  function visit(item: unknown): void {
+    if (item === null || typeof item === 'string' || typeof item === 'boolean') return;
+    if (typeof item === 'number' && Number.isFinite(item)) return;
+    if (!item || typeof item !== 'object') bad('Static declarations require finite JSON data.',location);
+    if (active.has(item)) bad('Static declarations cannot contain cycles.',location);
+    if (checked.has(item)) return;
+    active.add(item);
+    const children = Array.isArray(item) ? array(item) : Object.values(object(item));
+    for (const child of children) visit(child);
+    active.delete(item); checked.add(item);
+  }
+  const result = object(value);
+  visit(result);
+  return result;
+}
+function validateStaticConfig(kind: string, config: Record<string, unknown>, location: SourceSpan): void {
+  if (kind === 'a11y-ref') {
+    if (Object.keys(config).length) bad('A11y semantic references have no configuration.',location);
+    return;
+  }
+  if (kind === 'focus-scope-key' || kind === 'focus-roving-key') {
+    if (Object.entries(config).some(([key,value]) => !['kind','debugLabel'].includes(key) || typeof value !== 'string'))
+      bad('Focus key metadata supports only kind and debugLabel strings.',location);
+    return;
+  }
+  object(config,['roles','relations','profiles']);
+  const roles = object(config.roles);
+  if (!Object.hasOwn(roles,'root')) bad('Anatomy family must define a root role.',location);
+  function cardinality(value: unknown, base?: Record<string,unknown>): Record<string,unknown> {
+    const declaration = object(value,['min','max']);
+    const min = declaration.min ?? base?.min, max = declaration.max ?? base?.max;
+    if (typeof min !== 'number' || min < 0 || max !== '*' && (typeof max !== 'number' || max < min))
+      bad('Invalid Anatomy role cardinality.',location);
+    if (base && (min < Number(base.min) || base.max !== '*' && (max === '*' || Number(max) > Number(base.max))))
+      bad('Anatomy profile cannot relax family cardinality.',location);
+    return {min,max};
+  }
+  function requires(value: unknown): void {
+    if (value === undefined) return;
+    for (const item of array(value)) {
+      const requirement = object(item,['kind','name']);
+      if (requirement.kind !== 'hook' || typeof requirement.name !== 'string' || !requirement.name)
+        bad('Anatomy requirements need a nonempty hook name.',location);
+    }
+  }
+  function relations(value: unknown): void {
+    if (value === undefined) return;
+    for (const item of array(value)) {
+      const relation = object(item,['kind','parent','child']);
+      if (relation.kind !== 'contains' || typeof relation.parent !== 'string' || typeof relation.child !== 'string' ||
+          !Object.hasOwn(roles,relation.parent) || !Object.hasOwn(roles,relation.child))
+        bad('Anatomy relations must contain declared roles.',location);
+    }
+  }
+  const limits = new Map<string,Record<string,unknown>>();
+  for (const [name,value] of Object.entries(roles)) {
+    const role = object(value,['cardinality','requires']);
+    limits.set(name,cardinality(role.cardinality)); requires(role.requires);
+  }
+  relations(config.relations);
+  if (config.profiles !== undefined) for (const value of Object.values(object(config.profiles))) {
+    const profile = object(value,['roles','relations']);
+    if (profile.roles !== undefined) for (const [name,value] of Object.entries(object(profile.roles))) {
+      if (!limits.has(name)) bad('Anatomy profile references an undeclared role.',location);
+      const role = object(value,['cardinality','requires']);
+      if (role.cardinality !== undefined) cardinality(role.cardinality,limits.get(name));
+      requires(role.requires);
+    }
+    relations(profile.relations);
+  }
 }
 function text(value: unknown): string { if (typeof value !== 'string' || !value) bad('IR requires a nonempty string.'); return value; }
 function safeFile(value: unknown): string {
@@ -67,25 +142,27 @@ function span(value: unknown): SourceSpan {
 }
 function valueType(value: unknown, location = FALLBACK): ValueType {
   if (typeof value === 'string' && CAPABILITIES.has(value)) return value as ValueType;
+  if (typeof value === 'string' && /^(nullable|optional):/.test(value) &&
+      (MODULE_CAPABILITY_TYPES as readonly string[]).includes(value.slice(value.indexOf(':')+1))) return value as ValueType;
   try { return parseDataType(value); } catch (error) { if (error instanceof TypeError) bad(error.message, location); throw error; }
 }
 function sameType(a: ValueType, b: ValueType): boolean {
   return a === b || (isDataValueType(a) && isDataValueType(b) && dataTypeEqual(a, b));
 }
 function assignable(a: ValueType, b: ValueType): boolean {
-  return sameType(a,b) || (isDataValueType(a) && isDataValueType(b) && isAssignable(a,b));
+  return sameType(a,b) || b === 'template' && isTemplateChildType(a) || isCapabilityAssignable(a,b) || (isDataValueType(a) && isDataValueType(b) && isAssignable(a,b));
 }
 function dataAction(location: SourceSpan, action: () => DataType): DataType {
   try { return action(); } catch (error) { if (error instanceof TypeError) bad(error.message, location); throw error; }
 }
-const EXPRESSION_FIELDS = ['kind','type','span','value','name','object','property','optional','operator','operand','left','right','elements','entries','operation','receiver','arguments','hookId','keyId','function','handle','declaration','states'];
+const EXPRESSION_FIELDS = ['kind','type','span','value','name','object','property','optional','operator','operand','left','right','elements','entries','operation','receiver','arguments','hookId','keyId','declarationId','function','handle','declaration','states'];
 interface Parameter { name: string; type: ValueType; optional?: boolean }
 interface Binding { type: ValueType; helper?: FunctionIR; keyId?: string }
 type Scope = Map<string, Binding>;
 
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
-    const root = object(input,['schemaVersion','name','source','sourceFiles','setup','hooks','contextKeys','props','exposes','requirements']);
+    const root = object(input,['schemaVersion','name','source','sourceFiles','setup','hooks','contextKeys','staticDeclarations','moduleDeclarations','props','exposes','requirements']);
     if (root.schemaVersion !== IR_VERSION) reject('PUI2001','Unsupported private IR schema version.',FALLBACK,'invalid-ir');
     text(root.name);
     const source = object(root.source,['file','exportName','sha256']);
@@ -126,13 +203,44 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (exposures.has(name)) bad('Duplicate expose metadata.',location);
       if (exposure.kind === 'state') {
         if (!['boolean','number','string'].includes(String(exposure.type))) bad('Invalid exposed state type.',location);
+      } else if (exposure.kind === 'value') {
+        if (!isPublicValueType(valueType(exposure.type,location))) bad('Invalid public Expose value boundary.',location);
       } else if (exposure.kind === 'event') {
         if (!isDataValueType(valueType(exposure.payload,location))) bad('Outward event payload must be serializable data.',location);
       } else if (exposure.kind === 'method') {
         parameters(exposure.parameters);
-        if (!isDataValueType(valueType(exposure.returnType,location))) bad('Exposed methods cannot return semantic capabilities.',location);
+        if (!isPublicValueType(valueType(exposure.returnType,location))) bad('Exposed methods cannot return setup or execution-scope capabilities.',location);
       } else bad('Invalid exposure kind.',location);
       exposures.set(name,exposure);
+    }
+    const staticCapabilities = new Map<string,StaticCapabilityIR>();
+    for (const value of array(root.staticDeclarations)) {
+      const capability = object(value,['id','kind','name','config','span']);
+      const id = text(capability.id), location = span(capability.span);
+      if (!['anatomy-family','focus-scope-key','focus-roving-key','a11y-ref'].includes(String(capability.kind))) bad('Invalid static capability kind.',location);
+      text(capability.name);
+      const config = staticRecord(capability.config,location);
+      if (staticCapabilities.has(id)) bad('Duplicate static capability declaration.',location);
+      validateStaticConfig(String(capability.kind),config,location);
+      staticCapabilities.set(id,capability as unknown as StaticCapabilityIR);
+    }
+    const moduleDeclarations = new Map<string,ModuleDeclarationIR>();
+    for (const value of array(root.moduleDeclarations)) {
+      const declaration = object(value,['id','config','span']);
+      const id = text(declaration.id), location = span(declaration.span);
+      if (moduleDeclarations.has(id)) bad('Duplicate Module declaration.',location);
+      const config = staticRecord(declaration.config,location);
+      if (id === '@proto.ui/text-control/declaration') {
+        if (Object.keys(config).some((key) => !['content','lineMode','engine'].includes(key)) ||
+          config.content !== 'plain-text' || !['single','multiline'].includes(String(config.lineMode)) || config.engine !== 'host')
+          bad('Text Control requires content plain-text, lineMode single or multiline, and engine host.',location);
+      } else if (id === '@proto.ui/image-view/declaration') {
+        if (Object.keys(config).some((key) => !['source','alternativeText','a11yMode','fit'].includes(key)) ||
+          typeof config.source !== 'string' || typeof config.alternativeText !== 'string' ||
+          !['informative','decorative'].includes(String(config.a11yMode)) || !['contain','cover','fill'].includes(String(config.fit)))
+          bad('Image View requires source/alternativeText strings, informative or decorative a11yMode, and contain/cover/fill fit.',location);
+      } else bad('Unknown Module declaration.',location);
+      moduleDeclarations.set(id,declaration as unknown as ModuleDeclarationIR);
     }
     const hooks = array(root.hooks).map((value) => object(value,['id','name','setup','span']));
     const hookIds = new Set<string>();
@@ -184,7 +292,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       };
       inspect(helper.body);
     }
-    function expression(value: unknown, scope: Scope, phase: Phase, context: FunctionContext, allowFunction = false): ValueType {
+    function expression(value: unknown, scope: Scope, phase: Phase, context: FunctionContext, allowFunction = false, argumentRule?: ArgumentRule): ValueType {
       const node = object(value,EXPRESSION_FIELDS), location = span(node.span);
       if (active.has(node)) bad('Cyclic IR expression.',location);
       active.add(node);
@@ -197,6 +305,10 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'reference':
             if (!validIdentifier(node.name) || !scope.has(node.name)) bad('Unbound IR reference.',location);
             type = scope.get(node.name)!.type; break;
+          case 'static-capability':
+            const declarationId = text(node.declarationId);
+            if (!staticCapabilities.has(declarationId)) bad('Unknown static capability declaration.',location);
+            type = staticCapabilities.get(declarationId)!.kind; break;
           case 'context-key':
             if (!keys.has(text(node.keyId))) bad('Unknown context declaration identity.',location);
             type = 'context-key'; break;
@@ -219,8 +331,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             for (const item of array(node.states)) {
               const state = object(item,['id','value']), id = text(state.id);
               const handleType = expression(state.value,scope,phase,context);
-              if (stateTypes.has(id) || typeof handleType !== 'string' || !(handleType.startsWith('state:') || handleType === 'observed:boolean')) bad('Invalid Rule state reference.',location);
-              stateTypes.set(id,handleType === 'observed:boolean' ? 'boolean' : handleType.slice(6) as DataType);
+              const primitive = stateValue(handleType);
+              if (stateTypes.has(id) || !primitive) bad('Invalid Rule state reference.',location);
+              stateTypes.set(id,primitive);
             }
             for (const dependency of declaration.deps) {
               if (dependency.kind === 'prop' ? !props.has(dependency.key) : !stateTypes.has(dependency.id)) bad('Rule dependency does not resolve to a declared source.',dependency.span);
@@ -238,40 +351,48 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           case 'array': {
             const types = array(node.elements).map((item) => expression(item,scope,phase,context));
             if (types.every(isDataValueType)) type = {kind:'array',element:parseDataType({kind:'union',members:types})};
+            else if (types.every((type) => type === 'a11y-ref')) type = 'a11y-ref-list';
             else if (types.every(isTemplateChildType)) type = 'array';
             else bad('Data arrays cannot contain semantic handles.',location);
             break;
           }
           case 'record': {
             const fields: {name:string;type:DataType}[] = [], names = new Set<string>();
-            let templateProps = false;
+            let templateProps = false, moduleConfig = false;
             for (const item of array(node.entries)) {
               const entry = object(item,['key','value']), name = text(entry.key);
               if (names.has(name)) bad('Duplicate IR record key.',location);
               names.add(name);
-              const field = expression(entry.value,scope,phase,context);
+              const fieldRule = argumentRule?.fields?.[name];
+              const field = expression(entry.value,scope,phase,context,!!fieldRule?.callback,fieldRule);
               if (!isDataValueType(field)) {
-                if (phase !== 'render' || name !== 'style' || field !== 'style-handle') bad('Records cannot leak semantic handles.',location);
-                templateProps = true;
+                if (phase === 'render' && name === 'style' && field === 'style-handle') templateProps = true;
+                else if (['def', 'run', 'render'].includes(String(field)) || field === 'function' && !fieldRule?.callback) bad('Configuration records cannot contain execution-scope handles or escaping callbacks.',location);
+                else moduleConfig = true;
               } else fields.push({name,type:field});
             }
             if (templateProps && names.size !== 1) bad('TemplateProps supports only one style handle.',location);
-            type = templateProps ? 'template-props' : {kind:'record',fields}; break;
+            type = moduleConfig ? 'module-config' : templateProps ? 'template-props' : {kind:'record',fields}; break;
           }
           case 'unary': {
             const operand = expression(node.operand,scope,phase,context);
+            if (node.operator === '!' && !isDataValueType(operand)) { type='boolean'; break; }
             if (!isDataValueType(operand)) bad('Unary operators require data.',location);
             type = dataAction(location,() => inferUnaryType(String(node.operator),operand)); break;
           }
           case 'binary': {
             const left = expression(node.left,scope,phase,context), right = expression(node.right,scope,phase,context);
+            const capabilityType = capabilityBinaryType(String(node.operator),left,right);
+            if (capabilityType) {type=capabilityType;break;}
+            if ((node.operator === '===' || node.operator === '!==') && (!isDataValueType(left) || !isDataValueType(right))) { type='boolean'; break; }
             if (!isDataValueType(left) || !isDataValueType(right)) bad('Binary operators require data.',location);
             type = dataAction(location,() => inferBinaryType(String(node.operator),left,right)); break;
           }
           case 'member': {
             const owner = expression(node.object,scope,phase,context), key = text(node.property);
             if (typeof node.optional !== 'boolean') bad('IR member optionality must be explicit.',location);
-            if (owner === 'focus' && ['focused','focusVisible','focusable'].includes(key)) type = 'observed:boolean';
+            const capabilityType = capabilityMemberType(owner,key,node.optional as boolean);
+            if (capabilityType !== undefined) type = capabilityType;
             else if (owner === 'props' && props.has(key)) type = props.get(key)!;
             else if (owner === 'event' && ['key','type','control'].includes(key)) type = key === 'control' ? 'event' : key === 'type' ? 'string' : parseDataType({kind:'union',members:['string','void']});
             else if (owner === 'event' && ['shiftKey','ctrlKey','altKey','metaKey','repeat'].includes(key)) type = parseDataType({kind:'union',members:['boolean','void']});
@@ -302,7 +423,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const issues = validateOperationPhase(operation,phase,phase === 'callback' ? context as CallbackContext : undefined);
             if (issues.length && !(context === 'helper' && issues.every((issue) => issue.code === 'context'))) bad(issues[0].message,location);
             const receiver = node.receiver === undefined ? undefined : expression(node.receiver,scope,phase,context);
-            const args = array(node.arguments), bindings: OperationBindings = {propNames:new Set(props.keys()), ...(phase === 'callback' ? {callbackContext:context as CallbackContext}: {})};
+            const args = array(node.arguments), bindings: OperationBindings = {propNames:new Set(props.keys()),stateValueType:stateValue(receiver), ...(phase === 'callback' ? {callbackContext:context as CallbackContext}: {})};
             const first = args[0] ? object(args[0],EXPRESSION_FIELDS):undefined;
             if (first?.kind === 'context-key') bindings.contextValueType = keys.get(text(first.keyId));
             if (operation === 'event.on' || operation === 'event.onGlobal') {
@@ -329,14 +450,20 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
                 const checked = fn(record.function,scope,callback.phase);
                 const expectedContext = callback.contextFrom === 'caller' ? context:callback.context;
                 if (checked.context !== expectedContext) bad('Callback origin cannot grant another lifecycle authority.',location);
-              } else expression(argument,scope,phase,context);
+              } else expression(argument,scope,phase,context,false,operationArgumentRule(operation,index));
             });
             const argumentIssues = validateOperationArguments(operation,args as never,receiver,bindings);
             if (argumentIssues.length) bad(argumentIssues[0].message,location);
             if (operation === 'expose.state') {
               const exposure = first?.kind === 'literal' ? exposures.get(String(first.value)):undefined;
               const handle = args[1] ? object(args[1],EXPRESSION_FIELDS):undefined;
-              if (!exposure || exposure.kind !== 'state' || !(handle?.type === `state:${String(exposure.type)}` || exposure.type === 'boolean' && handle?.type === 'observed:boolean')) bad('Exposed state metadata does not match declared source.',location);
+              if (!exposure || exposure.kind !== 'state' || !handle || stateValue(valueType(handle.type,location)) !== exposure.type) bad('Exposed state metadata does not match declared source.',location);
+            }
+            if (operation === 'expose.value') {
+              const exposure = first?.kind === 'literal' ? exposures.get(String(first.value)) : undefined;
+              const value = args[1] ? object(args[1],EXPRESSION_FIELDS) : undefined;
+              if (!exposure || exposure.kind !== 'value' || !value || !sameType(valueType(exposure.type,location),valueType(value.type,location)))
+                bad('Exposed value metadata does not match its declared source.',location);
             }
             type = operationResultType(operation,receiver,bindings)!;
             if (type === undefined) bad('Semantic operation has unresolved result type.',location);
@@ -366,7 +493,15 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             case 'effect': expression(node.expression,scope,phase,context); break;
             case 'if': {
               expression(node.condition,scope,phase,context);
-              const a = statements(node.then,new Map(scope),phase,context,returns), b = statements(node.otherwise,new Map(scope),phase,context,returns);
+              const branch = (truth: boolean): Scope => {
+                const next = new Map(scope);
+                for (const [name,type] of conditionRefinements(node.condition as ExpressionIR,truth)) if (next.has(name)) next.set(name,{...next.get(name)!,type});
+                return next;
+              };
+              const thenScope = branch(true), elseScope = branch(false);
+              const a = statements(node.then,thenScope,phase,context,returns), b = statements(node.otherwise,elseScope,phase,context,returns);
+              const continuing = a ? elseScope : b ? thenScope : undefined;
+              if (continuing) for (const name of scope.keys()) scope.set(name,continuing.get(name)!);
               terminal ||= a && b; break;
             }
             case 'return':

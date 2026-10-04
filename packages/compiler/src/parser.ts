@@ -2,33 +2,41 @@ import ts from 'typescript';
 import { createHash } from 'node:crypto';
 import { CompilerRejection } from './diagnostics';
 import {
-  OPERATION_RULES, operationCallbackRule, operationResultType,
-  validateOperationArguments, validateOperationPhase, isTemplateChildType, FOCUS_OPTIONS_TYPE,
-  type CallbackContext, type OperationBindings, type OperationRule, type SemanticOperation,
+  OPERATION_RULES, PACKAGED_HOOKS, operationCallbackRule, operationArgumentRule, operationResultType,
+  validateOperationArguments, validateOperationPhase, isTemplateChildType, capabilityMemberType, capabilityBinaryType, stateValue, FOCUS_OPTIONS_TYPE,
+  type ArgumentRule, type CallbackContext, type OperationBindings, type OperationRule, type SemanticOperation,
 } from './operations';
 import {
   SourceGraph, identifier, propertyName, rejectNode, sourceName, sourceSpan,
   type FunctionNode, type SourceModule,
 } from './parser-module';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
-import { inferBinaryType, inferUnaryType, memberDataType } from './expression-types';
+import { inferBinaryType, inferUnaryType, memberDataType, conditionRefinements } from './expression-types';
 import { extractContextKeyDeclaration, type ContextKeyIR } from './context-declarations';
 import { parseSourceDataType } from './source-types';
+import { extractStaticCapability, extractModuleDeclaration, tableStructureFamily } from './static-declarations';
 import { extractRuleDeclaration, extractRuleStyleHandle } from './rule-declarations';
 import { lowerRulePlan } from './rule-plan';
 import type { StyleTokenHandle } from './style-plan';
 import {
-  IR_VERSION, isDataValueType,
+  IR_VERSION, isDataValueType, isPublicValueType, isCapabilityAssignable,
   type AuthoredHookIR, type CompileResult, type ExposureIR, type ExpressionIR,
   type FunctionContext, type FunctionIR, type Operation, type ParameterIR,
   type ParseOptions, type Phase, type PrimitiveType, type PropIR,
   type PrototypeIR, type StatementIR, type ValueType,
+  type StaticCapabilityIR, type ModuleDeclarationIR,
 } from './ir';
 
 interface Binding { type: ValueType; helper?: FunctionIR; phase?: Phase; keyId?: string; stateId?: string; style?: StyleTokenHandle }
 type Scope = Map<string, Binding>;
 const HOOKS: Readonly<Record<string, Operation>> = {
   asTrigger: 'hook.asTrigger', asFocusable: 'hook.asFocusable', asAccessible: 'hook.asAccessible',
+  asFocusEntry: 'hook.asFocusEntry', asFocusScope: 'hook.asFocusScope', asFocusRoving: 'hook.asFocusRoving',
+  asOverlay: 'hook.asOverlay', asScrollSurface: 'hook.asScrollSurface',
+  asTextControl: 'hook.asTextControl', asImageView: 'hook.asImageView',
+  asTableStructure: 'hook.asTableStructure', asBoundary: 'hook.asBoundary',
+  asHitParticipation: 'hook.asHitParticipation', asCollection: 'hook.asCollection',
+  asCollectionItem: 'hook.asCollectionItem',
 };
 const CAPABILITY_ANNOTATIONS: Readonly<Record<string, string>> = {
   def: 'DefHandle', run: 'RunHandle', render: 'RendererHandle', event: 'ProtoEventPayload',
@@ -38,11 +46,12 @@ function sameType(a: ValueType, b: ValueType): boolean {
   return a === b || (isDataValueType(a) && isDataValueType(b) && dataTypeEqual(a, b));
 }
 function assignable(actual: ValueType, expected: ValueType): boolean {
-  return sameType(actual, expected) || (isDataValueType(actual) && isDataValueType(expected) && isAssignable(actual, expected));
+  return sameType(actual, expected) || expected === 'template' && isTemplateChildType(actual) || isCapabilityAssignable(actual,expected) || (isDataValueType(actual) && isDataValueType(expected) && isAssignable(actual, expected));
 }
 function union(types: readonly ValueType[], node: ts.Node): ValueType {
   if (!types.length) return 'void';
   if (types.every((type) => sameType(type, types[0]))) return types[0];
+  if (!types.every(isDataValueType) && types.every(isTemplateChildType)) return 'template';
   if (!types.every(isDataValueType)) rejectNode(node, 'PUI1006', 'Branches return incompatible semantic capabilities.');
   return parseDataType({ kind: 'union', members: types });
 }
@@ -53,10 +62,13 @@ class Frontend {
   readonly props = new Map<string, PropIR>();
   readonly exposes = new Map<string, ExposureIR>();
   readonly contextKeys = new Map<string, ContextKeyIR>();
+  readonly staticDeclarations = new Map<string, StaticCapabilityIR>();
+  readonly moduleDeclarations = new Map<string, ModuleDeclarationIR>();
   readonly requirements = new Set<string>();
   readonly activeHooks = new Set<string>();
   readonly activeHelpers = new Set<string>();
   readonly usedFunctions = new Set<FunctionNode>();
+  private readonly builtinHooks = new Set<Operation>();
   readonly eventKinds = new Map<string, 'void' | 'json' | 'any'>();
   readonly eventPayloads = new Map<string, DataType[]>();
   private context: FunctionContext = 'setup';
@@ -71,7 +83,7 @@ class Frontend {
       if (ts.isCallExpression(part)) {
         if (ts.isIdentifier(part.expression) && module.imports.has(part.expression.text)) {
           const imported = this.graph.resolveBinding(module, part.expression.text);
-          if (imported.module === null && imported.imported.module === '@proto.ui/hooks') phase = 'setup';
+          if (imported.module === null && (imported.imported.module === '@proto.ui/hooks' || Object.hasOwn(PACKAGED_HOOKS,imported.imported.module))) phase = 'setup';
         } else if (ts.isPropertyAccessExpression(part.expression)) {
           const paths: string[] = [];
           let root: ts.Expression = part.expression;
@@ -190,7 +202,7 @@ class Frontend {
             const alias = value.kind === 'reference' ? scope.get(value.name) : undefined;
             const stateId = value.kind === 'operation' && value.operation.startsWith('state.') &&
               OPERATION_RULES[value.operation].receiver === 'def' && value.arguments[0]?.kind === 'literal'
-              ? String(value.arguments[0].value) : value.type === 'observed:boolean' && value.kind === 'member'
+              ? String(value.arguments[0].value) : stateValue(value.type) && value.kind === 'member'
                 ? `#observed:${value.span.file}:${value.span.start}` : alias?.stateId;
             scope.set(name, { ...alias, type: value.type, stateId,
               ...(value.kind === 'context-key' ? { keyId: value.keyId } : {}),
@@ -199,11 +211,21 @@ class Frontend {
           output.push({ kind: 'const', name, value, span: sourceSpan(declaration) });
         }
       } else if (ts.isExpressionStatement(node)) output.push({ kind: 'effect', expression: this.expression(module, node.expression, scope, phase), span });
-      else if (ts.isIfStatement(node)) output.push({
-        kind: 'if', condition: this.expression(module, node.expression, scope, phase),
-        then: this.statements(module, ts.isBlock(node.thenStatement) ? node.thenStatement.statements : [node.thenStatement], new Map(scope), phase),
-        otherwise: node.elseStatement ? this.statements(module, ts.isBlock(node.elseStatement) ? node.elseStatement.statements : [node.elseStatement], new Map(scope), phase) : [], span,
-      });
+      else if (ts.isIfStatement(node)) {
+        const condition = this.expression(module,node.expression,scope,phase);
+        const branch = (truth: boolean): Scope => {
+          const next = new Map(scope);
+          for (const [name,type] of conditionRefinements(condition,truth)) if (next.has(name)) next.set(name,{...next.get(name)!,type});
+          return next;
+        };
+        const thenScope = branch(true), elseScope = branch(false);
+        const then = this.statements(module,ts.isBlock(node.thenStatement) ? node.thenStatement.statements : [node.thenStatement],thenScope,phase);
+        const otherwise = node.elseStatement ? this.statements(module,ts.isBlock(node.elseStatement) ? node.elseStatement.statements : [node.elseStatement],elseScope,phase) : [];
+        output.push({kind:'if',condition,then,otherwise,span});
+        const terminal = (items: readonly StatementIR[]): boolean => items.some((item) => item.kind === 'return' || item.kind === 'if' && terminal(item.then) && terminal(item.otherwise));
+        const continuing = terminal(then) ? elseScope : terminal(otherwise) ? thenScope : undefined;
+        if (continuing) for (const name of scope.keys()) scope.set(name,continuing.get(name)!);
+      }
       else if (ts.isReturnStatement(node)) {
         if (!node.expression) output.push({ kind: 'return', span });
         else if (phase === 'setup' && (ts.isArrowFunction(node.expression) || ts.isFunctionExpression(node.expression))) {
@@ -216,13 +238,18 @@ class Frontend {
   }
 
   private key(module: SourceModule, name: string, node: ts.Node): ExpressionIR {
+    const declaration = extractStaticCapability(module, name);
+    if (declaration) {
+      this.staticDeclarations.set(declaration.id, declaration);
+      return { kind: 'static-capability', declarationId: declaration.id, type: declaration.kind, span: sourceSpan(node) };
+    }
     const key = extractContextKeyDeclaration(module, name);
     this.contextKeys.set(key.id, key);
     return { kind: 'context-key', keyId: key.id, type: 'context-key', span: sourceSpan(node) };
   }
 
-  expression(module: SourceModule, node: ts.Expression, scope: Scope, phase: Phase): ExpressionIR {
-    if (ts.isParenthesizedExpression(node)) return this.expression(module, node.expression, scope, phase);
+  expression(module: SourceModule, node: ts.Expression, scope: Scope, phase: Phase, argumentRule?: ArgumentRule): ExpressionIR {
+    if (ts.isParenthesizedExpression(node)) return this.expression(module, node.expression, scope, phase,argumentRule);
     const span = sourceSpan(node);
     if (node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword)
       return { kind: 'literal', value: node.kind === ts.SyntaxKind.TrueKeyword, type: 'boolean', span };
@@ -249,6 +276,7 @@ class Frontend {
       const elements = node.elements.map((element) => this.expression(module, element, scope, phase));
       const elementTypes = elements.map((element) => element.type);
       if (!elementTypes.every(isDataValueType)) {
+        if (elementTypes.every((type) => type === 'a11y-ref')) return {kind:'array',type:'a11y-ref-list',elements,span};
         if (elementTypes.every(isTemplateChildType)) return { kind: 'array', type: 'array', elements, span };
         rejectNode(node, 'PUI1006', 'Arrays cannot leak semantic handles into data.');
       }
@@ -261,12 +289,21 @@ class Frontend {
         const key = propertyName(property.name);
         if (keys.has(key)) rejectNode(property, 'PUI1006', `Duplicate object key ${key}.`);
         keys.add(key);
-        return { key, value: this.expression(module, ts.isPropertyAssignment(property) ? property.initializer : property.name, scope, phase) };
+        const initializer = ts.isPropertyAssignment(property) ? property.initializer : property.name;
+        const field = argumentRule?.fields?.[key];
+        if (field?.callback && (ts.isArrowFunction(initializer) || ts.isFunctionExpression(initializer))) {
+          const callback = field.callback;
+          const fn = this.function(module,initializer,scope,callback.phase,callback.parameters,callback.context);
+          return {key,value:{kind:'function',type:'function',function:fn,span:sourceSpan(initializer)} as ExpressionIR};
+        }
+        return { key, value: this.expression(module,initializer,scope,phase,field) };
       });
       if (entries.some((entry) => !isDataValueType(entry.value.type))) {
         if (phase === 'render' && entries.length === 1 && entries[0].key === 'style' && entries[0].value.type === 'style-handle')
           return {kind:'record',type:'template-props',entries,span};
-        rejectNode(node, 'PUI1006', 'Records cannot leak semantic handles into data.');
+        if (entries.some((entry) => ['def', 'run', 'render'].includes(String(entry.value.type)) || entry.value.type === 'function' && !argumentRule?.fields?.[entry.key]?.callback))
+          rejectNode(node, 'PUI1006', 'Configuration records cannot capture execution-scope handles or escaping callbacks.');
+        return { kind: 'record', type: 'module-config', entries, span };
       }
       return { kind: 'record', type: { kind: 'record', fields: entries.map((entry) => ({ name: entry.key, type: entry.value.type as DataType })) }, entries, span };
     }
@@ -274,6 +311,7 @@ class Frontend {
       const operator = ts.tokenToString(node.operator);
       if (operator !== '!' && operator !== '-' && operator !== '+') rejectNode(node, 'PUI1004', 'Mutation unary operators are unsupported.');
       const operand = this.expression(module, node.operand, scope, phase);
+      if (operator === '!' && !isDataValueType(operand.type)) return {kind:'unary',operator,operand,type:'boolean',span};
       if (!isDataValueType(operand.type)) rejectNode(node, 'PUI1006', 'Unary operators require data values.');
       const type = this.checkedData(node, () => inferUnaryType(operator, operand.type as DataType));
       return { kind: 'unary', operator, operand, type, span };
@@ -281,23 +319,32 @@ class Frontend {
     if (ts.isBinaryExpression(node)) {
       const operator = ts.tokenToString(node.operatorToken.kind) ?? '';
       const left = this.expression(module, node.left, scope, phase), right = this.expression(module, node.right, scope, phase);
+      const capabilityType = capabilityBinaryType(operator,left.type,right.type);
+      if (capabilityType) return {kind:'binary',operator:'??',left,right,type:capabilityType,span};
+      if ((operator === '===' || operator === '!==') && (!isDataValueType(left.type) || !isDataValueType(right.type)))
+        return {kind:'binary',operator,left,right,type:'boolean',span};
       if (!isDataValueType(left.type) || !isDataValueType(right.type)) rejectNode(node, 'PUI1006', 'Binary operators require data values.');
       const type = this.checkedData(node, () => inferBinaryType(operator, left.type as DataType, right.type as DataType));
       return { kind: 'binary', operator: operator as Extract<ExpressionIR, { kind: 'binary' }>['operator'], left, right, type, span };
     }
-    if (ts.isPropertyAccessExpression(node)) {
-      const object = this.expression(module, node.expression, scope, phase), property = node.name.text;
+    if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
+      if (ts.isElementAccessExpression(node) && !ts.isStringLiteral(node.argumentExpression) && !ts.isNumericLiteral(node.argumentExpression))
+        rejectNode(node,'PUI1004','Member access requires a checked static string or index.');
+      const property = ts.isPropertyAccessExpression(node) ? node.name.text : (node.argumentExpression as ts.StringLiteral | ts.NumericLiteral).text;
+      const object = this.expression(module, node.expression, scope, phase);
+      const optional = ts.isPropertyAccessChain(node) || ts.isElementAccessChain(node);
       let type: ValueType;
-      if (object.type === 'focus' && ['focused', 'focusVisible', 'focusable'].includes(property)) type = 'observed:boolean';
+      const capabilityType = capabilityMemberType(object.type, property, optional);
+      if (capabilityType !== undefined) type = capabilityType;
       else if (object.type === 'props') {
         const prop = this.props.get(property);
         if (!prop) rejectNode(node, 'PUI1006', `Read of undeclared prop ${property}.`);
         type = prop.type;
       } else if (object.type === 'event' && ['key', 'type', 'control'].includes(property)) type = property === 'control' ? 'event' : property === 'type' ? 'string' : parseDataType({kind:'union',members:['string','void']});
       else if (object.type === 'event' && ['shiftKey', 'ctrlKey', 'altKey', 'metaKey', 'repeat'].includes(property)) type = parseDataType({kind:'union',members:['boolean','void']});
-      else if (isDataValueType(object.type)) type = this.checkedData(node, () => memberDataType(object.type as DataType, property, { optional: !!node.questionDotToken }));
+      else if (isDataValueType(object.type)) type = this.checkedData(node, () => memberDataType(object.type as DataType, property, { optional }));
       else rejectNode(node, 'PUI1004', `Unsupported member ${property} on ${String(object.type)}.`);
-      return { kind: 'member', object, property, optional: !!node.questionDotToken, type, span };
+      return { kind: 'member', object, property, optional, type, span };
     }
     if (ts.isCallExpression(node)) return this.call(module, node, scope, phase);
     rejectNode(node, 'PUI1004', `Unsupported expression ${ts.SyntaxKind[node.kind]}; no input code is executed.`);
@@ -329,15 +376,16 @@ class Frontend {
     if (ts.isIdentifier(node.expression)) {
       const name = node.expression.text, binding = scope.get(name);
       if (binding) {
-        if (binding.type === 'style-disposer') {
+        if (['style-disposer','subscription-disposer','binding-disposer','transition-action'].includes(String(binding.type))) {
+          const release: SemanticOperation = binding.type === 'style-disposer' ? 'feedback.style.release' : binding.type === 'subscription-disposer' ? 'subscription.release' : binding.type === 'binding-disposer' ? 'binding.release' : 'transitionAction.call';
           const arguments_ = node.arguments.map((argument) => this.expression(module, argument, scope, phase));
           const issues = [
-            ...validateOperationPhase('feedback.style.release', phase, phase === 'callback' ? this.context as CallbackContext : undefined),
-            ...validateOperationArguments('feedback.style.release', arguments_, binding.type),
+            ...validateOperationPhase(release, phase, phase === 'callback' ? this.context as CallbackContext : undefined),
+            ...validateOperationArguments(release, arguments_, binding.type),
           ];
           if (issues.length) rejectNode(node, 'PUI1007', issues[0].message);
-          this.requirements.add('feedback');
-          return { kind: 'operation', operation: 'feedback.style.release', receiver: this.expression(module,node.expression,scope,phase), arguments: arguments_, type:'void', span };
+          this.requirements.add(release.split('.')[0]);
+          return { kind: 'operation', operation: release, receiver: this.expression(module,node.expression,scope,phase), arguments: arguments_, type:'void', span };
         }
         if (this.activeHelpers.has(name)) rejectNode(node, 'PUI1008', `Recursive helper ${name} is unsupported.`);
         if (!binding.helper || binding.type !== 'function') rejectNode(node, 'PUI1004', `Calling ${name} is not an admitted static helper.`);
@@ -354,6 +402,7 @@ class Frontend {
       if (resolved.module === null && resolved.imported.module === '@proto.ui/core' && resolved.name === 'tw')
         return {kind:'style-handle',handle:extractRuleStyleHandle(module,node),type:'style-handle',span};
       if (resolved.module === null && resolved.imported.module === '@proto.ui/hooks') operation = HOOKS[resolved.name] as SemanticOperation;
+      else if (resolved.module === null && Object.hasOwn(PACKAGED_HOOKS,resolved.imported.module)) operation = PACKAGED_HOOKS[resolved.imported.module][resolved.name];
       else if (resolved.module !== null && ts.isCallExpression(resolved.node)) {
         if (phase !== 'setup' || node.arguments.length) rejectNode(node, 'PUI1007', 'Authored hooks require a static no-argument setup call.');
         if (!ts.isIdentifier(resolved.node.expression) ||
@@ -365,6 +414,7 @@ class Frontend {
         if (!this.hooks.has(id)) {
           this.activeHooks.add(id);
           const descriptor = this.graph.descriptor(definition.module, definition.node);
+          this.addModuleDeclarations(descriptor.modules);
           const setup = this.function(definition.module, descriptor.setup, new Map(), 'setup', ['def']);
           this.hooks.set(id, { id, name: descriptor.name, setup, span: descriptor.span });
           this.activeHooks.delete(id);
@@ -380,15 +430,16 @@ class Frontend {
       if (ts.isIdentifier(root) && scope.has(root.text)) {
         const value = scope.get(root.text)!;
         const fullPath = paths.join('.');
-        const family = value.type === 'observed:boolean' || typeof value.type === 'string' && value.type.startsWith('state:') ? 'state:boolean' : value.type;
+        const family = stateValue(value.type) ? 'state:boolean' : value.type;
         const match = Object.entries(OPERATION_RULES).find(([, rule]) => rule.path === fullPath && sameType(rule.receiver, family));
         if (match) { operation = match[0] as SemanticOperation; receiver = this.expression(module, root, scope, phase); }
       }
       if (!operation) {
         receiver = this.expression(module, node.expression.expression, scope, phase);
-        const family = receiver.type === 'observed:boolean' || typeof receiver.type === 'string' && receiver.type.startsWith('state:') ? 'state' : receiver.type;
-        const candidate = `${String(family)}.${node.expression.name.text}`;
-        if (Object.hasOwn(OPERATION_RULES, candidate)) operation = candidate as SemanticOperation;
+        const family = stateValue(receiver.type) ? 'state:boolean' : receiver.type;
+        const path = node.expression.name.text;
+        const match = Object.entries(OPERATION_RULES).find(([,rule]) => rule.path === path && sameType(rule.receiver,family));
+        if (match) operation = match[0] as SemanticOperation;
       }
     }
     if (!operation) rejectNode(node, 'PUI1004', 'Call is outside the supported semantic operation set.');
@@ -407,10 +458,10 @@ class Frontend {
         resolveState:(expression) => {
           if (!ts.isIdentifier(expression)) return undefined;
           const binding = scope.get(expression.text);
-          if (!binding?.stateId || typeof binding.type !== 'string' || !(binding.type.startsWith('state:') || binding.type === 'observed:boolean')) return undefined;
+          if (!binding?.stateId || !stateValue(binding.type)) return undefined;
           const value = this.expression(module,expression,scope,phase);
           states.set(binding.stateId,value);
-          return {id:binding.stateId,type:binding.type === 'observed:boolean' ? 'boolean' : binding.type.slice(6) as DataType};
+          return {id:binding.stateId,type:stateValue(binding.type)!};
         },
         resolveStyle:(expression) => ts.isIdentifier(expression) && scope.get(expression.text)?.style
           ? scope.get(expression.text)!.style : extractRuleStyleHandle(module,expression),
@@ -419,7 +470,7 @@ class Frontend {
       if (!plan.ok) throw new CompilerRejection(plan.diagnostics[0]);
       return {kind:'rule',declaration,receiver:receiver!,states:[...states].map(([id,value]) => ({id,value})),type:'rule-handle',span};
     }
-    const bindings: OperationBindings = { propNames: new Set(this.props.keys()), ...(phase === 'callback' ? { callbackContext: this.context as CallbackContext } : {}) };
+    const bindings: OperationBindings = { propNames: new Set(this.props.keys()), stateValueType: stateValue(receiver?.type), ...(phase === 'callback' ? { callbackContext: this.context as CallbackContext } : {}) };
     const args: ExpressionIR[] = [];
     for (const [index, argument] of node.arguments.entries()) {
       const callback = operationCallbackRule(operation, index);
@@ -433,11 +484,15 @@ class Frontend {
           expected = ['run', item, item];
         } else if (callback.parameterPolicy === 'context-updater') expected = [bindings.contextValueType!];
         else if (callback.parameterPolicy === 'input-payload') expected = ['run',bindings.inputPayloadType!];
+        else if (callback.parameterPolicy === 'state-value') {
+          if (!bindings.stateValueType) rejectNode(argument,'PUI1006','State watcher needs an Observed or Borrowed primitive State.');
+          expected = ['run',`state-event:${bindings.stateValueType}`];
+        }
         const context = callback.contextFrom === 'caller' ? this.context : callback.context;
         const fn = this.function(module, argument, scope, callback.phase, expected, context);
         if (callback.parameterPolicy === 'declared-method') { bindings.methodParameters = fn.parameters; bindings.methodReturnType = fn.returnType; }
         args.push({ kind: 'function', type: 'function', function: fn, span: sourceSpan(argument) });
-      } else args.push(this.expression(module, argument, scope, phase));
+      } else args.push(this.expression(module, argument, scope, phase,operationArgumentRule(operation,index)));
       if (index === 0) {
         bindings.contextValueType = this.contextType(args[0]);
         if (operation === 'event.on' || operation === 'event.onGlobal') {
@@ -470,6 +525,48 @@ class Frontend {
 
   metadata(operation: Operation, node: ts.CallExpression, args: ExpressionIR[], receiver?: ExpressionIR): void {
     const span = sourceSpan(node);
+    if (operation === 'hook.asTableStructure') {
+      const family = tableStructureFamily(span);
+      if (!this.staticDeclarations.has(family.id)) this.staticDeclarations.set(family.id,family);
+    }
+    if (operation === 'hook.asTransition' && !this.builtinHooks.has(operation)) {
+      this.builtinHooks.add(operation);
+      for (const [name,type] of Object.entries({open:'boolean',defaultOpen:'boolean',appear:'boolean',enterDuration:'number',leaveDuration:'number',interrupt:'string'})) {
+        const prior = this.props.get(name);
+        if (prior && !sameType(prior.type,type as DataType)) rejectNode(node,'PUI1006',`Transition prop ${name} conflicts with the existing schema.`);
+        this.props.set(name,{name,type:type as DataType,span});
+      }
+      for (const name of ['beforeEnter','afterEnter','beforeLeave','afterLeave']) {
+        this.exposes.set(name,{name,kind:'event',payload:'void',span}); this.eventKinds.set(name,'void'); this.eventPayloads.set(name,[]);
+      }
+      this.exposes.set('transitionState',{name:'transitionState',kind:'state',type:'string',span});
+      this.exposes.set('isPresent',{name:'isPresent',kind:'state',type:'boolean',span});
+      for (const name of ['enter','leave','complete']) this.exposes.set(name,{name,kind:'method',parameters:[],returnType:'void',span});
+      this.exposes.set('controls',{name:'controls',kind:'value',type:'transition-controls',span});
+    }
+    if (operation === 'collection.configure' || operation === 'collectionItem.configure') {
+      if (args[0].kind !== 'record') rejectNode(node,'PUI1006','Collection configuration requires a checked literal record so its public interface is explicit.');
+      const name = (key: string, fallback: string): string => {
+        const value = args[0].kind === 'record' ? args[0].entries.find((entry) => entry.key === key)?.value : undefined;
+        return value ? this.literalString(value,node) : fallback;
+      };
+      const exposeState = (key: string, fallback: string, type: PrimitiveType) => {
+        const resolved = name(key,fallback); this.exposes.set(resolved,{name:resolved,kind:'state',type,span});
+      };
+      const exposeMethod = (key: string, fallback: string, returnType: ValueType) => {
+        const resolved = name(key,fallback); this.exposes.set(resolved,{name:resolved,kind:'method',parameters:[],returnType,span});
+      };
+      if (operation === 'collection.configure') {
+        exposeState('exposeCountStateKey','count','number');
+        exposeMethod('exposeItemsMethodKey','getCollectionItems','collection-snapshot-list');
+        exposeMethod('exposeCountMethodKey','getCollectionCount','number');
+      } else {
+        exposeState('exposeIndexStateKey','collectionIndex','number'); exposeState('exposeTotalStateKey','collectionTotal','number');
+        exposeState('exposeFirstStateKey','collectionFirst','boolean'); exposeState('exposeLastStateKey','collectionLast','boolean');
+        exposeMethod('exposeSnapshotMethodKey','getCollectionItem','collection-snapshot');
+        exposeMethod('metaExposeKey','__collectionItem','collection-snapshot');
+      }
+    }
     if (operation === 'props.define') {
       if (args[0].kind !== 'record') rejectNode(node, 'PUI1006', 'Props declarations must be literal records.');
       for (const entry of args[0].entries) {
@@ -482,12 +579,13 @@ class Frontend {
         this.props.set(entry.key, { name: entry.key, type, span: entry.value.span });
       }
     }
-    if (operation === 'expose.state' || operation === 'expose.event' || operation === 'expose.method') {
+    if (operation === 'expose.state' || operation === 'expose.event' || operation === 'expose.method' || operation === 'expose.value') {
       const name = this.literalString(args[0], node.arguments[0]);
       let exposure: ExposureIR;
       if (operation === 'expose.state') {
-        if (typeof args[1].type !== 'string' || !(args[1].type.startsWith('state:') || args[1].type === 'observed:boolean')) rejectNode(node.arguments[1], 'PUI1006', 'Expose state requires a state handle.');
-        exposure = { name, kind: 'state', type: args[1].type === 'observed:boolean' ? 'boolean' : args[1].type.slice(6) as PrimitiveType, span };
+        const valueType = stateValue(args[1].type);
+        if (!valueType) rejectNode(node.arguments[1], 'PUI1006', 'Expose state requires a state handle.');
+        exposure = { name, kind: 'state', type: valueType, span };
       } else if (operation === 'expose.event') {
         if (args[1] && args[1].kind !== 'record') rejectNode(node, 'PUI1006', 'Outward event declaration must be a literal spec.');
         const payload = args[1]?.kind === 'record' ? args[1].entries.find((item) => item.key === 'payload')?.value : undefined;
@@ -496,9 +594,12 @@ class Frontend {
         this.eventKinds.set(name, kind);
         this.eventPayloads.set(name, []);
         exposure = { name, kind: 'event', payload: kind === 'void' ? 'void' : { kind: 'union', members: [] }, span };
+      } else if (operation === 'expose.value') {
+        if (!isPublicValueType(args[1].type)) rejectNode(node,'PUI1006','Expose values require data or a concrete public snapshot/control capability.');
+        exposure = {name,kind:'value',type:args[1].type,span};
       } else {
         if (args[1].kind !== 'function') rejectNode(node, 'PUI1006', 'Expose method needs a checked callback.');
-        if (!isDataValueType(args[1].function.returnType)) rejectNode(node, 'PUI1006', 'Exposed methods cannot return semantic capabilities.');
+        if (!isPublicValueType(args[1].function.returnType)) rejectNode(node, 'PUI1006', 'Exposed methods cannot return setup or execution-scope capabilities.');
         exposure = { name, kind: 'method', parameters: args[1].function.parameters, returnType: args[1].function.returnType, span };
       }
       const prior = this.exposes.get(name);
@@ -513,6 +614,15 @@ class Frontend {
     return expression.value;
   }
 
+  private addModuleDeclarations(declarations: readonly ModuleDeclarationIR[]): void {
+    for (const declaration of declarations) {
+      const previous = this.moduleDeclarations.get(declaration.id);
+      if (previous && JSON.stringify(previous.config) !== JSON.stringify(declaration.config))
+        throw new CompilerRejection({ code: 'PUI1025', category: 'unsupported-input', message: `Conflicting Module requirements ${declaration.id}.`, span: declaration.span });
+      this.moduleDeclarations.set(declaration.id, declaration);
+    }
+  }
+
   compile(): PrototypeIR {
     const fileName = sourceName(this.options.fileName ?? 'input.proto.ts');
     const module = this.graph.load(fileName);
@@ -521,6 +631,7 @@ class Frontend {
     const definition = this.graph.definition(module, exportName);
     if (definition.factory !== 'definePrototype') rejectNode(definition.node, 'PUI1002', 'A subjectless asHook requires a caller prototype.');
     const descriptor = this.graph.descriptor(definition.module, definition.node);
+    this.addModuleDeclarations(descriptor.modules);
     const setup = this.function(definition.module, descriptor.setup, new Map(), 'setup', ['def']);
     for (const loaded of this.graph.modules.values()) for (const [name, declaration] of loaded.declarations) {
       if (ts.isCallExpression(declaration)) {
@@ -528,7 +639,11 @@ class Frontend {
           const key = extractContextKeyDeclaration(loaded, name); this.contextKeys.set(key.id, key);
         } else if (ts.isIdentifier(declaration.expression) && this.graph.resolveCoreImport(loaded,declaration.expression.text) === 'tw') {
           extractRuleStyleHandle(loaded,declaration);
-        } else this.graph.descriptor(loaded, declaration);
+        } else {
+          const capability = extractStaticCapability(loaded, name);
+          if (capability) this.staticDeclarations.set(capability.id, capability);
+          else if (!extractModuleDeclaration(loaded, declaration)) this.graph.descriptor(loaded, declaration);
+        }
       } else if (ts.isFunctionDeclaration(declaration) && !this.usedFunctions.has(declaration)) rejectNode(declaration, 'PUI1004', 'Unreachable runtime function is outside this admitted source unit.');
     }
     for (const [name, values] of this.eventPayloads) {
@@ -540,6 +655,7 @@ class Frontend {
       schemaVersion: IR_VERSION, name: descriptor.name,
       source: { file: fileName, exportName, sha256: createHash('sha256').update(JSON.stringify(sourceFiles.map((file) => [file.file, file.content]))).digest('hex') },
       sourceFiles, setup, hooks: [...this.hooks.values()], contextKeys: [...this.contextKeys.values()],
+      staticDeclarations: [...this.staticDeclarations.values()], moduleDeclarations: [...this.moduleDeclarations.values()],
       props: [...this.props.values()], exposes: [...this.exposes.values()], requirements: [...this.requirements].sort(),
     };
   }

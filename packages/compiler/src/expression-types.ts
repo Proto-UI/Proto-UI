@@ -1,4 +1,5 @@
 import { dataTypeEqual, type DataType } from './data-types';
+import type { ExpressionIR, ValueType } from './ir';
 
 export type UnaryOperator = '!' | '-' | '+';
 export type BinaryOperator =
@@ -154,4 +155,48 @@ export function memberDataType(
     else throw new TypeError(`Unsupported array member ${String(key)}.`);
   }
   return union(results);
+}
+
+/** Refine only immutable lexical values; calls and mutable State reads are never narrowed. */
+export function conditionRefinements(condition: ExpressionIR, truth: boolean): readonly [string, ValueType][] {
+  if (condition.kind === 'unary' && condition.operator === '!') return conditionRefinements(condition.operand,!truth);
+  if (condition.kind === 'binary' && (condition.operator === '&&' && truth || condition.operator === '||' && !truth))
+    return [...conditionRefinements(condition.left,truth),...conditionRefinements(condition.right,truth)];
+  let target: ExpressionIR = condition, literal: string | number | boolean | null | undefined;
+  let equality = truth;
+  if (condition.kind === 'binary' && (condition.operator === '===' || condition.operator === '!==')) {
+    const constant = condition.right.kind === 'literal' ? condition.right : condition.left.kind === 'literal' ? condition.left : undefined;
+    if (!constant) return [];
+    target = constant === condition.right ? condition.left : condition.right;
+    literal = constant.value; equality = condition.operator === '===' ? truth : !truth;
+  }
+  const reference = target.kind === 'reference' ? target : target.kind === 'member' && target.object.kind === 'reference' ? target.object : undefined;
+  if (!reference) return [];
+  const type = reference.type;
+  if (typeof type === 'string') {
+    if (type.startsWith('state-event:') && target.kind === 'member' && target.property === 'type' && (literal === 'next' || literal === 'disconnect')) {
+      const next = literal === 'next' ? equality : !equality;
+      return [[reference.name,next ? `state-next:${type.slice('state-event:'.length)}` as ValueType : 'state-disconnect']];
+    }
+    if (target.kind !== 'reference' || !/^(nullable|optional):/.test(type)) return [];
+    if (literal !== undefined && literal !== null) return [];
+    if (literal === null && type.startsWith('optional:')) return [];
+    const absent = type.startsWith('nullable:') ? 'null' : 'void';
+    const present = literal === null ? !equality : truth;
+    return [[reference.name,present ? type.slice(type.indexOf(':')+1) as ValueType : absent]];
+  }
+  const members = alternatives(type);
+  const kept = members.filter((member) => {
+    if (target.kind === 'reference') {
+      if (literal === null) return isNullish(member) && primitive(member) === 'null' ? equality : !equality;
+      if (literal === undefined) return truth ? truthy(member) !== undefined : falsy(member) !== undefined;
+      if (typeof member !== 'string' && member.kind === 'literal') return (member.value === literal) === equality;
+      return true;
+    }
+    if (target.kind !== 'member' || literal === undefined || typeof member === 'string' || member.kind !== 'record') return true;
+    const field = member.fields.find((field) => field.name === target.property);
+    if (!field || typeof field.type === 'string' || field.type.kind !== 'literal') return true;
+    return (field.type.value === literal) === equality;
+  });
+  return [[reference.name,union(kept)]];
 }

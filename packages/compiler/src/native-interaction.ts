@@ -16,8 +16,9 @@ const stateAttributes: Record<string, string> = {
   rowSpan: 'aria-rowspan', columnSpan: 'aria-colspan', readOnly: 'aria-readonly',
   selected: 'aria-selected', modal: 'aria-modal', hidden: 'aria-hidden',
 };
+export const nativeAccessibleStateKeys: readonly string[] = Object.freeze(Object.keys(stateAttributes));
 
-/** Native v1 has one active DOM Root. No focus scopes/roving groups, portals or semantic-object relations. */
+/** Validate checked interaction declarations before direct native helper emission. */
 export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet<FunctionIR>): CompilerDiagnostic[] {
   const diagnostics: CompilerDiagnostic[] = [];
   function reject(expression: ExpressionIR, message: string) {
@@ -55,10 +56,12 @@ export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet
           shape(args[2], ['capture', 'once', 'passive'], value);
         }
         if (value.operation === 'focus.configure') {
-          shape(args[0], ['autoFocus', 'disabled', 'navParticipation', 'meta'], value);
+          shape(args[0], ['scopeKey', 'groupKey', 'autoFocus', 'disabled', 'navParticipation', 'meta'], value);
           const patch = args[0] && resolve(args[0]);
           if (patch?.kind === 'record') for (const entry of patch.entries) {
             const setting = resolve(entry.value);
+            if (entry.key === 'scopeKey' && setting.type !== 'focus-scope-key') reject(entry.value,'Focus scopeKey requires a declared scope identity.');
+            if (entry.key === 'groupKey' && setting.type !== 'focus-roving-key') reject(entry.value,'Focus groupKey requires a declared roving identity.');
             if (entry.key === 'navParticipation' && !(setting.kind === 'literal' && ['auto', 'none'].includes(String(setting.value))))
               reject(entry.value, 'Native focus navParticipation must be the static value auto or none.');
             if (['autoFocus', 'disabled'].includes(entry.key) && setting.type !== 'boolean')
@@ -81,11 +84,6 @@ export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet
           const spec = args[1] && resolve(args[1]);
           if (spec?.kind === 'record' && spec.entries.some((entry) => entry.value.type !== 'string'))
             reject(value, 'Accessible action event must be an outward Expose event name.');
-        }
-        if (value.operation === 'accessible.state') {
-          const key = args[0] && resolve(args[0]);
-          if (!key || key.kind !== 'literal' || typeof key.value !== 'string' || !Object.hasOwn(stateAttributes, key.value))
-            reject(value, 'Native accessibility v1 supports only the declared DOM ARIA state vocabulary and hidden.');
         }
         if (value.receiver) expression(value.receiver);
         for (const arg of args) expression(arg);
@@ -117,22 +115,25 @@ export const nativeInteractionArtifact = { path: interactionFile, kind: 'source'
 
 function nativeInteractionSource(): string {
   return `// Native DOM interaction v1. No Proto package, interpreter or template rendering dependency.
+import { createNativeAdapterModules, type NativeAccessibleExtension, type NativeModuleCapabilities, type NativeAdapterModuleOptions, type NativeStateEvent, type NativeOwnedState, type NativeOwnedStateSpec, type NativeTransitionHooks } from './adapter-modules-v1';
+export type { NativeModuleCapability, NativeAnatomy, NativeAnatomyFamily, NativeAnatomyPart, NativeAnatomyOrder, NativeAnatomy as NativeAnatomyChannel } from './adapter-modules-v1';
 export type NativeState<T = unknown> = { get(): T };
-export type NativeObservedState<T> = NativeState<T> & { subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
+export type NativeObservedState<T> = NativeState<T> & { watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
 export type NativeInput = Readonly<{ type: string; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean; control: Readonly<{ requestDefaultActionPrevention(options?: { reason?: string; source?: string }): void }> }>;
 export type NativeHostOptions = Readonly<{ capture?: boolean; once?: boolean; passive?: boolean }>;
 export type NativeFocusOptions = Readonly<{ reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean }>;
 export type NativeFocus = {
   focused: NativeObservedState<boolean>; focusVisible: NativeObservedState<boolean>; focusable: NativeObservedState<boolean>;
-  configure(patch: { autoFocus?: boolean; disabled?: boolean; navParticipation?: 'auto' | 'none'; meta?: Readonly<Record<string, unknown>> }): void;
-  setDisabled(disabled: boolean): void; focusSelf(options?: NativeFocusOptions): void;
+  configure(patch: { scopeKey?: object; groupKey?: object; autoFocus?: boolean; disabled?: boolean; navParticipation?: 'auto' | 'none'; meta?: Readonly<Record<string, unknown>> }): void;
+  setDisabled(disabled: boolean): void; focus(options?: NativeFocusOptions): void; focusSelf(options?: NativeFocusOptions): void;
+  blur(): void; isFocused(): boolean; setNavParticipation(value: 'auto' | 'none'): void; setRovingStatus(status: { selected?: boolean; active?: boolean }): void;
 };
 export type NativeAccessible = {
   state(key: string, state: NativeState): void;
   action(key: string, spec?: { event?: string }): void;
   role(role: string | NativeState<string>): void;
   nameFromContent(): void;
-};
+} & NativeAccessibleExtension;
 export type NativeListenerToken = { readonly id: string; readonly meta: { kind: 'root' | 'global'; type: string; options?: NativeHostOptions; label?: string }; desc(text: string): NativeListenerToken };
 export type NativeEventChannel<Run> = {
   on<Type extends string>(type: Type, callback: (run: Run, event: Type extends \`host:\${string}\` ? Event : NativeInput) => void, options?: NativeHostOptions): NativeListenerToken;
@@ -141,16 +142,17 @@ export type NativeEventChannel<Run> = {
 export type NativeInteraction<Run = unknown> = {
   event: NativeEventChannel<Run>;
   asTrigger(): void; asFocusable(): NativeFocus; asAccessible(): NativeAccessible;
+  projectAttributes(): Readonly<Record<string, string | null>>;
+  adoptAttributes(snapshot: Readonly<Record<string, string | null>>, baselines?: Readonly<Record<string, string | null>>): void;
   refresh(): void; mount(): void; unmount(): void; dispose(): void;
-};
+} & Omit<NativeModuleCapabilities<Run>, 'projectAttributes' | 'refresh' | 'mount' | 'unmount' | 'dispose' | 'setFocusDisabled' | 'canFocus' | 'adoptControlState'>;
 type Registration<Run> = { type: string; kind: 'root' | 'global'; callback: (run: Run, event: NativeInput | Event) => void; options?: NativeHostOptions };
 const semanticEvents: Record<string, true> = ${JSON.stringify(Object.fromEntries(semanticEvents.map((type) => [type, true])))};
 const stateAttributes: Record<string, string> = ${JSON.stringify(stateAttributes)};
-// All emitted components import this same artifact. Native owner roots form the
-// supported DOM containment topology (not arbitrary ProtoRef/portal composition).
-type RootOwner = { identity: object; trigger(): boolean };
+// Canonical logical owners survive view epochs; native targets identify physical input.
+type RootOwner = { identity: object; parent(): object | null; trigger(): boolean; target: HTMLElement };
 const rootOwners = new WeakMap<HTMLElement, RootOwner>();
-const mountedRoots = new Set<HTMLElement>();
+const logicalOwners = new Map<object, RootOwner>();
 const exposeSignals = new WeakSet<Event>();
 /** Mark ONLY an outward Expose signal before dispatching it on the host. */
 export function markNativeExposeEvent<T extends Event>(event: T): T { exposeSignals.add(event); return event; }
@@ -158,7 +160,8 @@ export function markNativeExposeEvent<T extends Event>(event: T): T { exposeSign
 /**
  * The emitter owns execution/lifetime: guards use its exact callback scopes, invoke enters
  * its owner scope, getRun/getResolvedProps return current stable runtime/resolved props,
- * and getRoot returns ONLY the active host Root (never a child template element).
+ * and getRoot returns the active physical Root. getHost is the canonical owner
+ * boundary when a custom element realizes a separate native control target.
  * Call mount after Root binding and before mounted callbacks; unmount before Root removal
  * and unmounted callbacks; dispose on terminal or failed setup. Call refresh synchronously
  * after owned-state and resolved-props transitions, not through run.update. subscribeState
@@ -169,15 +172,30 @@ export function markNativeExposeEvent<T extends Event>(event: T): T { exposeSign
 export function createNativeInteraction<Run>(options: {
   ensureSetup(operation: string): void; ensureRuntime(operation: string): void; ensureEvent(operation: string): void;
   isAlive(): boolean; isReady?(): boolean; invoke<T>(callback: () => T): T;
-  getRun(): Run; getResolvedProps(): Readonly<Record<string, unknown>>; getRoot(): HTMLElement | null;
+  getRun(): Run; getResolvedProps(): Readonly<Record<string, unknown>>; getRoot(): HTMLElement | null; getHost?(): HTMLElement | null;
   subscribeState?(state: NativeState, callback: () => void): () => void;
   registerObservedState?(state: NativeObservedState<boolean>): void;
+  declarations?: readonly { id: string; config: Readonly<Record<string, unknown>> }[];
+  identity?: object;
+  getLogicalParent?(): object | null;
+  tableFamily?: import('./adapter-modules-v1').NativeAnatomyFamily;
+  getExposes?(): Readonly<Record<string, unknown>>;
+  setPresent?(value: boolean): void;
+  requestHostUpdate?(): void;
+  emit?(key: string): void;
+  createOwnedState?<T extends boolean | string | number>(name: string, initial: T, spec?: NativeOwnedStateSpec): NativeOwnedState<T>;
+  watchState?<T>(state: { get(): T }, callback: (run: Run, event: NativeStateEvent<T>) => void): () => void;
+  declareTransition?(hooks: NativeTransitionHooks): void;
+  isPropProvided?(key: string): boolean;
+  getMeta?(key: string): unknown;
+  registerExpose?(key: string, value: unknown): void;
+  registerGenericObservedState?<T extends boolean | string | number>(state: NativeObservedState<T>): void;
 }): NativeInteraction<Run> {
-  let disposed = false, root: HTMLElement | null = null, generation = 0, trigger = false, focusDeclared = false;
+  let disposed = false, root: HTMLElement | null = null, host: HTMLElement | null = null, generation = 0, trigger = false, focusDeclared = false;
   let disabled = false, autoFocus = false, navParticipation: 'auto' | 'none' = 'auto', keyboard = false;
-  let pendingFocus: NativeFocusOptions | undefined, hasPendingFocus = false;
+  let pendingFocus: NativeFocusOptions | undefined, hasPendingFocus = false, didAutoFocus = false;
   let role: string | NativeState<string> | undefined, contentName = false;
-  const identity = {}, registrations: Registration<Run>[] = [], removals: (() => void)[] = [], subscriptions: (() => void)[] = [];
+  const identity = options.identity ?? {}, registrations: Registration<Run>[] = [], removals: (() => void)[] = [], subscriptions: (() => void)[] = [];
   const states = new Map<string, NativeState>(), actions = new Map<string, { event?: string }>();
   const attributes = new Map<string, { baseline: string | null; projected: string | null }>();
   let sequence = 0, suppressKeyboardClick = false, pressKey: string | null = null, pointer: number | null = null;
@@ -185,14 +203,16 @@ export function createNativeInteraction<Run>(options: {
   let pointerCancelled = false;
   function alive() { if (disposed || !options.isAlive()) throw new Error('[Interaction] invalid after terminal disposal.'); }
   function active(epoch = generation, target = root) { return !disposed && options.isAlive() && !!target && target === root && options.getRoot() === target && generation === epoch && rootOwners.get(target)?.identity === identity; }
+  function deliverable(epoch = generation, target = root) { return active(epoch, target) && (options.isReady?.() ?? true); }
   function observed(initial: boolean): { handle: NativeObservedState<boolean>; set(next: boolean): void; clear(): void } {
     let value = initial;
     const callbacks = new Set<(event: { type: 'next'; prev: boolean; next: boolean; reason?: unknown }) => void>();
     const handle: NativeObservedState<boolean> = Object.freeze({
       get() { alive(); return value; },
+      watch<R>(callback: (run: R, event: NativeStateEvent<boolean>) => void) { alive(); options.ensureSetup('state.watch'); const listener = (event: { type: 'next'; prev: boolean; next: boolean; reason?: unknown }) => callback(options.getRun() as unknown as R, event); callbacks.add(listener); return () => { callbacks.delete(listener); }; },
       subscribe(callback: (event: { type: 'next'; prev: boolean; next: boolean; reason?: unknown }) => void) { alive(); callbacks.add(callback); return () => { callbacks.delete(callback); }; },
     });
-    return { handle, set(next) { if (value === next) return; const prev = value; value = next; if (!disposed && options.isAlive() && (options.isReady?.() ?? true)) for (const callback of [...callbacks]) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-focus' })); }, clear() { callbacks.clear(); } };
+    return { handle, set(next) { if (value === next) return; const prev = value; value = next; for (const callback of [...callbacks]) { if (disposed || !options.isAlive()) break; if (callbacks.has(callback)) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-focus' })); } }, clear() { callbacks.clear(); } };
   }
   const focused = observed(false), focusVisible = observed(false), focusable = observed(false);
   function project(name: string, value: string | null) {
@@ -218,20 +238,49 @@ export function createNativeInteraction<Run>(options: {
     if (['rowIndex', 'columnIndex', 'rowSpan', 'columnSpan'].includes(key)) return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? String(value) : null;
     return String(value);
   }
+  function visitProjection(write: (name: string, value: string | null) => void): void {
+    if (focusDeclared) write('tabindex', disabled || navParticipation === 'none' ? '-1' : '0');
+    if (role !== undefined) write('role', read(role) || null);
+    if (contentName) write('aria-label', null);
+    for (const [key, state] of states) {
+      if (!Object.hasOwn(stateAttributes, key)) continue;
+      const value = state.get();
+      write(stateAttributes[key], scalar(key, value));
+      if (key === 'hidden') write('hidden', value === true ? '' : null);
+    }
+    if (actions.size) write('data-pui-a11y-actions', [...actions.keys()].sort().join(' '));
+  }
+  function projectAttributes(): Readonly<Record<string, string | null>> {
+    alive();
+    const result: Record<string, string | null> = Object.create(null);
+    visitProjection((name, value) => { result[name] = value; });
+    return result;
+  }
+  function adoptAttributes(snapshot: Readonly<Record<string, string | null>>, baselines?: Readonly<Record<string, string | null>>): void {
+    alive();
+    if (root || attributes.size) throw new Error('[Interaction] hydration attributes must be adopted before first projection.');
+    const target = options.getRoot();
+    if (!target) throw new Error('[Interaction] hydration requires the adopted current Root.');
+    for (const name of Object.keys(snapshot)) {
+      const value = snapshot[name];
+      if (target.getAttribute(name) !== value) continue;
+      const baseline = baselines && Object.hasOwn(baselines, name) ? baselines[name] : null;
+      attributes.set(name, { baseline, projected: value });
+    }
+    modules.adoptControlState();
+  }
   function refresh() {
     if (!active()) return;
-    if (focusDeclared) project('tabindex', disabled || navParticipation === 'none' ? '-1' : '0');
-    if (role !== undefined) project('role', read(role) || null);
-    if (contentName) project('aria-label', null);
-    for (const [key, state] of states) {
-      const value = state.get();
-      project(stateAttributes[key], scalar(key, value));
-      if (key === 'hidden') project('hidden', value === true ? '' : null);
+    const next = combinedProjectAttributes();
+    for (const [name, ownership] of attributes) if (!Object.hasOwn(next, name)) {
+      if (root!.getAttribute(name) === ownership.projected) { if (ownership.baseline === null) root!.removeAttribute(name); else root!.setAttribute(name, ownership.baseline); }
+      attributes.delete(name);
     }
-    if (actions.size) project('data-pui-a11y-actions', [...actions.keys()].sort().join(' '));
+    for (const [name, value] of Object.entries(next)) project(name, value);
   }
   function watch(state: NativeState) {
     if (options.subscribeState) subscriptions.push(options.subscribeState(state, refresh));
+    else if ('subscribe' in state && typeof state.subscribe === 'function') subscriptions.push((state as NativeObservedState<unknown>).subscribe(refresh));
   }
   function register<Type extends string>(kind: 'root' | 'global', type: Type, callback: (run: Run, event: Type extends \`host:\${string}\` ? Event : NativeInput) => void, hostOptions?: NativeHostOptions): NativeListenerToken {
     options.ensureSetup('event.' + (kind === 'root' ? 'on' : 'onGlobal'));
@@ -247,12 +296,12 @@ export function createNativeInteraction<Run>(options: {
   }
   function emit(kind: 'root' | 'global', type: string, native: Event, epoch: number, target: HTMLElement) {
     for (const registration of registrations) {
-      if (registration.kind !== kind || registration.type !== type || !active(epoch, target)) continue;
+      if (registration.kind !== kind || registration.type !== type || !deliverable(epoch, target)) continue;
       let deadline = true;
       const payload: { type: string; control: NativeInput['control']; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean } = { type, control: Object.freeze({
         requestDefaultActionPrevention(_request?: { reason?: string; source?: string }) {
           options.ensureEvent('event.control.requestDefaultActionPrevention');
-          if (!deadline || !active(epoch, target)) throw new Error('[Event] default-action control is outside its callback window.');
+          if (!deadline || !deliverable(epoch, target)) throw new Error('[Event] default-action control is outside its callback window.');
           native.preventDefault();
         },
       }) };
@@ -270,33 +319,41 @@ export function createNativeInteraction<Run>(options: {
       if (patch.autoFocus !== undefined) autoFocus = patch.autoFocus;
       if (patch.disabled !== undefined) disabled = patch.disabled;
       if (patch.navParticipation !== undefined) navParticipation = patch.navParticipation;
+      modules.configureFocusable(patch);
       focusable.set(!disabled); refresh();
     },
     setDisabled(next) {
-      options.ensureRuntime('focus.setDisabled'); disabled = next; focusable.set(!next);
+      alive(); options.ensureRuntime('focus.setDisabled'); disabled = next; modules.setFocusDisabled(next); focusable.set(!next);
       if (next) { hasPendingFocus = false; if (root && root.ownerDocument.activeElement === root) root.blur(); focused.set(false); focusVisible.set(false); }
       refresh();
     },
     focusSelf(request) {
-      options.ensureRuntime('focus.focusSelf');
-      if (disabled) return;
+      alive(); options.ensureRuntime('focus.focusSelf');
+      if (disabled || !modules.canFocus()) return;
       if (request?.reason === 'keyboard') keyboard = true;
       else if (request?.reason === 'pointer') keyboard = false;
-      if (!active()) { pendingFocus = request; hasPendingFocus = true; return; }
+      if (!deliverable() || !root!.isConnected || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { pendingFocus = request; hasPendingFocus = true; return; }
       root!.focus({ preventScroll: request?.preventScroll });
     },
+    focus(request) { modules.focus(request); },
+    blur() { alive(); options.ensureRuntime('focus.blur'); hasPendingFocus = false; modules.blur(); focused.set(false); focusVisible.set(false); },
+    isFocused() { alive(); return focused.handle.get(); },
+    setNavParticipation(value) { modules.setNavParticipation(value); navParticipation = value; refresh(); },
+    setRovingStatus(status) { modules.setRovingStatus(status); },
   };
-  const accessible: NativeAccessible = {
-    state(key, state) { options.ensureSetup('accessible.state'); if (!Object.hasOwn(stateAttributes, key)) throw new Error('[A11y] unsupported state.'); states.set(key, state); watch(state); refresh(); },
+  const accessibleBase: Omit<NativeAccessible, keyof NativeAccessibleExtension> = {
+    state(key, state) { options.ensureSetup('accessible.state'); states.set(key, state); watch(state); refresh(); },
     action(key, spec = {}) { options.ensureSetup('accessible.action'); actions.set(key, { ...spec }); refresh(); },
     role(value) { options.ensureSetup('accessible.role'); role = value; if (typeof value !== 'string') watch(value); refresh(); },
-    nameFromContent() { options.ensureSetup('accessible.nameFromContent'); contentName = true; refresh(); },
+    nameFromContent() { options.ensureSetup('accessible.nameFromContent'); contentName = true; modules.accessible.name(''); refresh(); },
   };
   function unmount() {
     // Invalidate first: even a retained callback or a failing physical removal is inert.
     generation++;
-    const previous = root; root = null;
-    if (previous && rootOwners.get(previous)?.identity === identity) { rootOwners.delete(previous); mountedRoots.delete(previous); }
+    const previous = root, previousHost = host; root = null; host = null;
+    if (previous && rootOwners.get(previous)?.identity === identity) rootOwners.delete(previous);
+    if (previousHost && rootOwners.get(previousHost)?.identity === identity) rootOwners.delete(previousHost);
+    logicalOwners.delete(identity);
     let failure: unknown;
     for (const remove of removals.splice(0)) { try { remove(); } catch (error) { failure ??= error; } }
     if (previous) clearProjection(previous);
@@ -313,9 +370,11 @@ export function createNativeInteraction<Run>(options: {
     alive();
     if (!candidate) return;
     const target: HTMLElement = candidate;
-    root = target; rootOwners.set(target, { identity, trigger: () => trigger }); mountedRoots.add(target);
+    root = target; host = options.getHost?.() ?? target;
+    const rootOwner = { identity, parent: options.getLogicalParent ?? (() => null), trigger: () => trigger, target };
+    rootOwners.set(target, rootOwner); rootOwners.set(host, rootOwner); logicalOwners.set(identity, rootOwner);
     const epoch = generation, global = target.ownerDocument.defaultView ?? target.ownerDocument;
-    const valid = () => active(epoch, target);
+    const valid = () => deliverable(epoch, target);
     function listen<E extends Event>(where: EventTarget, name: string, callback: (event: E) => void, hostOptions?: NativeHostOptions) {
       let live = true;
       // DOM dispatch guarantees each built-in event's shape for its registered native name.
@@ -336,22 +395,23 @@ export function createNativeInteraction<Run>(options: {
         while (node) { if (rootOwners.has(node as HTMLElement)) { nearest = node as HTMLElement; break; } node = node.parentNode; }
       }
       if (nearest) {
-        if (!trigger) return nearest === target;
+        if (!trigger) return rootOwners.get(nearest)?.identity === identity;
         if (!rootOwners.get(nearest)?.trigger()) return false;
         // A trigger group exposes its deepest active surface only. An ancestor
         // surface hit is rejected rather than translated into a child action.
-        for (const descendant of mountedRoots) {
-          if (descendant === nearest || !nearest.contains(descendant) || !rootOwners.get(descendant)?.trigger()) continue;
-          let node: Node | null = descendant.parentNode;
-          while (node && node !== nearest) { if (rootOwners.has(node as HTMLElement) && !rootOwners.get(node as HTMLElement)!.trigger()) break; node = node.parentNode; }
-          if (node === nearest) return false;
+        const nearestOwner = rootOwners.get(nearest)!;
+        for (const descendant of logicalOwners.values()) {
+          if (descendant === nearestOwner || !descendant.trigger()) continue;
+          const visited = new Set<object>();
+          let current: RootOwner | undefined = descendant;
+          while (current && !visited.has(current.identity)) { visited.add(current.identity); const parent = current.parent(); current = parent ? logicalOwners.get(parent) : undefined; if (current === nearestOwner) return false; if (current && !current.trigger()) break; }
         }
-        if (nearest === target) return true;
-        let node: Node | null = nearest.parentNode;
-        while (node) {
-          const owner = rootOwners.get(node as HTMLElement);
-          if (owner) { if (!owner.trigger()) return false; if (owner.identity === identity) return true; }
-          node = node.parentNode;
+        if (nearestOwner.identity === identity) return true;
+        let current: RootOwner | undefined = nearestOwner;
+        const visited = new Set<object>();
+        while (current && !visited.has(current.identity)) {
+          visited.add(current.identity); const parent = current.parent(); current = parent ? logicalOwners.get(parent) : undefined;
+          if (current) { if (!current.trigger()) return false; if (current.identity === identity) return true; }
         }
         return false;
       }
@@ -366,7 +426,7 @@ export function createNativeInteraction<Run>(options: {
       for (const registration of registrations) {
         if (!registration.type.startsWith('host:')) continue;
         const hostType = registration.type.slice(5);
-        const where = registration.kind === 'root' ? target : global;
+        const where = registration.kind === 'root' ? host! : global;
         // Only events delivered by the DOM host reach raw host:* callbacks. Portable
         // payloads and outward CustomEvent Expose signals are never fed to this route.
         listen(where, hostType, (native: Event) => options.invoke(() => registration.callback(options.getRun(), native)), registration.options);
@@ -453,7 +513,11 @@ export function createNativeInteraction<Run>(options: {
         if (registrations.some((entry) => entry.kind === 'global' && entry.type === semantic)) listen(global, name, (native: Event) => globalEmit(semantic, native));
       }
       refresh();
-      if (focusDeclared && !disabled && (autoFocus || hasPendingFocus)) { const request = hasPendingFocus ? pendingFocus : undefined; hasPendingFocus = false; if (request?.reason === 'keyboard') keyboard = true; target.focus({ preventScroll: request?.preventScroll }); }
+      if (focusDeclared && !disabled && (!didAutoFocus && autoFocus || hasPendingFocus)) {
+        didAutoFocus = true;
+        if (deliverable(epoch, target)) { const request = hasPendingFocus ? pendingFocus : undefined; hasPendingFocus = false; options.invoke(() => focus.focusSelf(request)); }
+        else hasPendingFocus = true;
+      }
       if (focusDeclared) {
         const activeFocus = !disabled && target.ownerDocument.activeElement === target;
         focused.set(activeFocus);
@@ -461,17 +525,66 @@ export function createNativeInteraction<Run>(options: {
       }
     } catch (error) { try { unmount(); } catch {} throw error; }
   }
+  const modules: NativeModuleCapabilities<Run> = createNativeAdapterModules<Run>({
+    ensureSetup: options.ensureSetup, ensureRuntime: options.ensureRuntime, ensureEvent: options.ensureEvent,
+    isAlive: () => !disposed && options.isAlive(), isReady: options.isReady, invoke: options.invoke, getRun: options.getRun,
+    getResolvedProps: options.getResolvedProps, getRoot: options.getRoot, getHost: options.getHost,
+    declarations: options.declarations ?? [],
+    identity,
+    getLogicalParent: options.getLogicalParent ?? (() => null),
+    tableFamily: options.tableFamily,
+    registerObservedState: options.registerGenericObservedState,
+    getExposes: options.getExposes,
+    setPresent: options.setPresent,
+    requestHostUpdate: options.requestHostUpdate,
+    emit: options.emit,
+    createOwnedState: options.createOwnedState,
+    watchState: options.watchState,
+    declareTransition: options.declareTransition,
+    isPropProvided: options.isPropProvided,
+    getMeta: options.getMeta,
+    registerExpose: options.registerExpose,
+    baseFocus: () => focus,
+    getAccessibleRole: () => role === undefined ? null : read(role) || null,
+    requestAttributeRefresh: refresh,
+    getAttributeBaseline: (name) => attributes.has(name) ? attributes.get(name)!.baseline : root?.getAttribute(name) ?? null,
+    subscribeState: options.subscribeState,
+  } satisfies NativeAdapterModuleOptions<Run>);
+  function combinedProjectAttributes(): Readonly<Record<string, string | null>> {
+    const base = projectAttributes();
+    const extended = modules.projectAttributes();
+    return Object.freeze({ ...base, ...extended });
+  }
+  const accessible: NativeAccessible = Object.freeze({ ...accessibleBase, ...modules.accessible });
   return {
     event: { on: (type, callback, hostOptions) => register('root', type, callback, hostOptions), onGlobal: (type, callback, hostOptions) => register('global', type, callback, hostOptions) },
     asTrigger() { options.ensureSetup('hook.asTrigger'); trigger = true; },
-    asFocusable() { options.ensureSetup('hook.asFocusable'); if (!focusDeclared) { focusDeclared = true; focusable.set(!disabled); options.registerObservedState?.(focused.handle); options.registerObservedState?.(focusVisible.handle); options.registerObservedState?.(focusable.handle); } return focus; },
+    asFocusable() { options.ensureSetup('hook.asFocusable'); if (!focusDeclared) { focusDeclared = true; focusable.set(!disabled); const register = options.registerGenericObservedState ?? options.registerObservedState; register?.(focused.handle); register?.(focusVisible.handle); register?.(focusable.handle); } modules.configureFocusable({}); return focus; },
     asAccessible() { options.ensureSetup('hook.asAccessible'); return accessible; },
-    refresh, mount, unmount,
+    anatomy: modules.anatomy, accessible: modules.accessible,
+    positioning: modules.positioning,
+    asFocusEntry: () => modules.asFocusEntry(), asFocusRoving: () => modules.asFocusRoving(), asFocusScope: () => modules.asFocusScope(),
+    asCollection: () => modules.asCollection(), asCollectionItem: () => modules.asCollectionItem(),
+    asBoundary: () => modules.asBoundary(), asHitParticipation: () => modules.asHitParticipation(),
+    asOverlay: () => modules.asOverlay(), asScrollSurface: () => modules.asScrollSurface(),
+    asTextControl: () => modules.asTextControl(), asImageView: () => modules.asImageView(),
+    asTableStructure: (partRole: string) => modules.asTableStructure(partRole), asTransition: () => modules.asTransition(),
+    configureFocusable: (config) => modules.configureFocusable(config),
+    setNavParticipation: (value) => modules.setNavParticipation(value),
+    setRovingStatus: (status) => modules.setRovingStatus(status),
+    focus: (request) => modules.focus(request), blur: () => modules.blur(),
+    rootTag: () => modules.rootTag(), rootProperties: () => modules.rootProperties(), portalTarget: () => modules.portalTarget(),
+    projectAttributes: combinedProjectAttributes, adoptAttributes,
+    refresh() { modules.refresh(); refresh(); if (hasPendingFocus && deliverable() && root!.isConnected && !disabled) { const request = pendingFocus; hasPendingFocus = false; options.invoke(() => focus.focusSelf(request)); } },
+    mount() { mount(); modules.mount(); },
+    unmount() { try { modules.unmount(); } finally { unmount(); } },
     dispose() {
       if (disposed) return;
-      let failure: unknown;
-      try { unmount(); } catch (error) { failure = error; }
       disposed = true;
+      let failure: unknown;
+      try { modules.unmount(); } catch (error) { failure = error; }
+      try { unmount(); } catch (error) { failure ??= error; }
+      try { modules.dispose(); } catch (error) { failure ??= error; }
       for (const off of subscriptions.splice(0)) { try { off(); } catch (error) { failure ??= error; } }
       registrations.length = 0; states.clear(); actions.clear(); focused.clear(); focusVisible.clear(); focusable.clear(); hasPendingFocus = false;
       if (failure) throw failure;

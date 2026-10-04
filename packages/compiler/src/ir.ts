@@ -6,7 +6,7 @@ import type { RuleDeclarationIR } from './rule-declarations';
 import type { StyleTokenHandle } from './style-plan';
 
 /** Portable semantic IR. No TypeScript nodes, executable source snippets or live handles. */
-export const IR_VERSION = 4 as const;
+export const IR_VERSION = 5 as const;
 
 export interface SourceSpan {
   file: string;
@@ -20,8 +20,47 @@ export interface SourceSpan {
 
 export type Primitive = string | number | boolean | null;
 export type PrimitiveType = 'boolean' | 'number' | 'string';
+export type StaticValue = Primitive | readonly StaticValue[] | { readonly [key: string]: StaticValue };
+export type AnatomyFamilyIR = {
+  debugName: string;
+  roles: Readonly<Record<string, { cardinality: { min: number; max: number | '*' }; requires?: readonly { kind: string; name: string }[] }>>;
+  relations?: readonly { kind: string; parent: string; child: string }[];
+};
+export interface ModuleDeclarationIR {
+  id: string;
+  config: Readonly<Record<string, StaticValue>>;
+  span: SourceSpan;
+}
+export interface StaticCapabilityIR {
+  id: string;
+  kind: 'anatomy-family' | 'focus-scope-key' | 'focus-roving-key' | 'a11y-ref';
+  name: string;
+  config: Readonly<Record<string, StaticValue>>;
+  span: SourceSpan;
+}
+export const MODULE_CAPABILITY_TYPES = [
+  'focus-entry', 'focus-roving', 'focus-scope', 'focus-scope-key', 'focus-roving-key',
+  'anatomy-family', 'anatomy-part', 'anatomy-parts', 'anatomy-order',
+  'collection', 'collection-item', 'boundary', 'hit-participation', 'positioning',
+  'overlay', 'scroll', 'text-control', 'image-view', 'table-structure', 'transition',
+  'scroll-axis', 'scroll-follow', 'table-states',
+  'table-snapshot', 'table-row', 'table-cell', 'table-diagnostic',
+  'table-row-list', 'table-cell-list', 'table-diagnostic-list', 'a11y-ref-list',
+  'collection-snapshot', 'collection-snapshot-list',
+  'a11y-ref', 'subscription-disposer', 'binding-disposer', 'host-target', 'module-config',
+  'boundary-outside-event', 'boundary-sample',
+  'borrowed:boolean', 'borrowed:number', 'borrowed:string',
+  'state-event:boolean', 'state-event:number', 'state-event:string',
+  'state-next:boolean', 'state-next:number', 'state-next:string', 'state-disconnect',
+  'transition-controls', 'transition-action',
+  'observed:number', 'observed:string',
+] as const;
+export type ModuleCapabilityType = typeof MODULE_CAPABILITY_TYPES[number];
 export type ValueType =
   | DataType
+  | ModuleCapabilityType
+  | `nullable:${ModuleCapabilityType}`
+  | `optional:${ModuleCapabilityType}`
   | 'unknown'
   | 'def'
   | 'run'
@@ -51,10 +90,30 @@ export type CompilerProfile =
   | 'react-dom-source-v1'
   | 'vue-source-v1'
   | 'vue2-source-v1'
-  | 'web-component-source-v1';
+  | 'web-component-source-v1'
+  | 'gpui-source-v1'
+  | 'qt-source-v1'
+  | 'flutter-source-v1'
+  | 'react-dom-ssr-v1'
+  | 'vue-ssr-v1'
+  | 'vue2-ssr-v1'
+  | 'web-component-ssr-v1';
 
 export function isDataValueType(type: ValueType): type is DataType {
   return typeof type !== 'string' || ['boolean', 'number', 'string', 'null', 'void'].includes(type);
+}
+
+/** Public identity-bearing snapshots are not JSON and do not grant setup or Run authority. */
+export function isPublicValueType(type: ValueType): boolean {
+  if (isDataValueType(type)) return true;
+  const name = type.replace(/^(nullable|optional):/,'');
+  return ['a11y-ref','a11y-ref-list','table-snapshot','table-row','table-cell','table-diagnostic',
+    'table-row-list','table-cell-list','table-diagnostic-list','collection-snapshot','collection-snapshot-list','transition-controls','transition-action'].includes(name);
+}
+
+export function isCapabilityAssignable(actual: ValueType, expected: ValueType): boolean {
+  if (typeof expected !== 'string' || !/^(nullable|optional):/.test(expected)) return false;
+  return actual === expected.slice(expected.indexOf(':')+1) || actual === (expected.startsWith('nullable:') ? 'null' : 'void');
 }
 
 export type Operation = SemanticOperation;
@@ -81,6 +140,7 @@ export type ExpressionIR = ExpressionBase &
     | { kind: 'literal'; value: Primitive }
     | { kind: 'reference'; name: string }
     | { kind: 'context-key'; keyId: string }
+    | { kind: 'static-capability'; declarationId: string }
     | { kind: 'style-handle'; handle: StyleTokenHandle }
     | { kind: 'rule'; declaration: RuleDeclarationIR; receiver: ExpressionIR; states: readonly { id: string; value: ExpressionIR }[] }
     | { kind: 'member'; object: ExpressionIR; property: string; optional: boolean }
@@ -137,6 +197,7 @@ export interface PropIR {
 }
 export type ExposureIR =
   | { name: string; kind: 'state'; type: PrimitiveType; span: SourceSpan }
+  | { name: string; kind: 'value'; type: ValueType; span: SourceSpan }
   | { name: string; kind: 'event'; payload: DataType; span: SourceSpan }
   | { name: string; kind: 'method'; parameters: ParameterIR[]; returnType: ValueType; span: SourceSpan };
 
@@ -155,6 +216,8 @@ export interface PrototypeIR {
   setup: FunctionIR;
   hooks: AuthoredHookIR[];
   contextKeys: ContextKeyIR[];
+  staticDeclarations: StaticCapabilityIR[];
+  moduleDeclarations: ModuleDeclarationIR[];
   props: PropIR[];
   exposes: ExposureIR[];
   /** Required semantic operation families, not an inferred full Adapter support matrix. */

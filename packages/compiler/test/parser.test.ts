@@ -181,9 +181,10 @@ export default definePrototype({name:'style-phase',setup(def){
     expect(
       parsePrototype(source, { files: { 'effect.ts': 'globalThis.changed = true;' } })
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
-    expect(
-      parsePrototype(simple.replace('setup(def) {}', 'modules: [], setup(def) {}'))
-    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
+    // An explicitly empty requirements array is now a checked no-op, not a silent discard.
+    expect(parsePrototype(simple.replace('setup(def) {}', 'modules: [], setup(def) {}'))).toMatchObject({
+      ok: true, value: { moduleDeclarations: [] },
+    });
   });
 
   it('rejects a missing module reached only through an unselected re-export', () => {

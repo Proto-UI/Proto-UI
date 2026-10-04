@@ -8,6 +8,9 @@ import { emitReactSource } from './react-source';
 import { emitVueSource } from './vue-source';
 import { emitVue2Source } from './vue2-source';
 import { emitWebComponentSource } from './web-component-source';
+import { emitGpuiSource } from './gpui-source';
+import { emitQtSource } from './qt-source';
+import { emitFlutterSource } from './flutter-source';
 import { resolveTargetProfile, checkTargetOperations, type TargetSelection } from './targets';
 import { diffArtifactSet, writeArtifactSet, type ArtifactDiff, type ExclusiveOutputFile, type OutputArtifact } from './artifact-output';
 import { isLocalSourceSpecifier, resolveLocalSource, runtimeSourceEdges, sourceName } from './source-resolution';
@@ -20,12 +23,15 @@ export interface Compilation { ir: PrototypeIR; output: GeneratedModule }
 export interface CompileOptions extends ParseOptions {
   componentName?: string;
   profile?: string | TargetSelection;
+  /** GPUI source dependency shared by composed prototypes; omission bundles the editable SDK. */
+  nativeSdkPath?: string;
 }
 export interface FileCompileOptions {
   root?: string;
   exportName?: string;
   componentName?: string;
   profile?: string | TargetSelection;
+  nativeSdkPath?: string;
   /** Closed, already-read source input used by project compilation; no second filesystem read. */
   sourceSnapshot?: { entry: string; files: Readonly<Record<string,string>> };
 }
@@ -45,6 +51,13 @@ export function compilePrototype(source: string, options: CompileOptions = {}): 
     case 'vue-source-v1': emitted = emitVueSource(parsed.value, emitOptions); break;
     case 'vue2-source-v1': emitted = emitVue2Source(parsed.value, emitOptions); break;
     case 'web-component-source-v1': emitted = emitWebComponentSource(parsed.value, { className: options.componentName }); break;
+    case 'gpui-source-v1': emitted = emitGpuiSource(parsed.value, { componentName: options.componentName, nativeSdkPath: options.nativeSdkPath }); break;
+    case 'qt-source-v1': emitted = emitQtSource(parsed.value, { componentName: options.componentName }); break;
+    case 'flutter-source-v1': emitted = emitFlutterSource(parsed.value, { componentName: options.componentName }); break;
+    case 'react-dom-ssr-v1': emitted = emitReactSource(parsed.value, {...emitOptions,ssr:true}); break;
+    case 'vue-ssr-v1': emitted = emitVueSource(parsed.value, {...emitOptions,ssr:true}); break;
+    case 'vue2-ssr-v1': emitted = emitVue2Source(parsed.value, {...emitOptions,ssr:true}); break;
+    case 'web-component-ssr-v1': emitted = emitWebComponentSource(parsed.value, {className:options.componentName,ssr:true}); break;
     default: return {ok:false,diagnostics:[{code:'PUI4001',category:'unsupported-input',message:`No emitter is implemented for ${profile.value.id}.`,span:parsed.value.setup.span}]};
   }
   if (!emitted.ok) return emitted;
@@ -63,7 +76,7 @@ export async function compileFile(entry: string, options: FileCompileOptions = {
       const fileName = sourceName(options.sourceSnapshot.entry);
       const source = options.sourceSnapshot.files[fileName];
       if (typeof source !== 'string') throw new Error(`Closed source snapshot has no entry ${fileName}.`);
-      return compilePrototype(source, {fileName,files:options.sourceSnapshot.files,exportName:options.exportName,componentName:options.componentName,profile:options.profile});
+      return compilePrototype(source, {fileName,files:options.sourceSnapshot.files,exportName:options.exportName,componentName:options.componentName,profile:options.profile,nativeSdkPath:options.nativeSdkPath});
     }
     const root = await realpath(options.root ?? process.cwd());
     const files: Record<string,string> = Object.create(null);
@@ -83,7 +96,7 @@ export async function compileFile(entry: string, options: FileCompileOptions = {
       return identity;
     }
     const fileName = await load(path.isAbsolute(entry) ? entry : path.resolve(root,entry));
-    return compilePrototype(files[fileName], {fileName,files,exportName:options.exportName,componentName:options.componentName,profile:options.profile});
+    return compilePrototype(files[fileName], {fileName,files,exportName:options.exportName,componentName:options.componentName,profile:options.profile,nativeSdkPath:options.nativeSdkPath});
   } catch (error) {
     if (error instanceof CompilerRejection) return {ok:false,diagnostics:[error.diagnostic]};
     return {ok:false,diagnostics:[{code:'PUI1003',category:'invalid-input',message:error instanceof Error ? error.message:String(error),span:fallback}]};

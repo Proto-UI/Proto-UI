@@ -1,8 +1,10 @@
-import type { Phase, ValueType, FunctionContext } from './ir';
+import type { Phase, ValueType, FunctionContext, ModuleCapabilityType } from './ir';
+import { isCapabilityAssignable } from './ir';
 import { dataTypeEqual, isAssignable, parseDataType, type DataType } from './data-types';
 
 export type CallbackContext =
   | 'helper' | 'event' | 'props-watch' | 'context-watch' | 'context-update'
+  | 'state-watch' | 'collection-meta' | 'positioning'
   | 'created' | 'mounted' | 'updated' | 'unmounted' | 'before-dispose' | 'expose-method';
 export type SemanticResource =
   | 'props-schema' | 'props' | 'raw-props' | 'state' | 'expose' | 'context'
@@ -23,17 +25,18 @@ export interface CallbackRule {
   /** Synchronous value updaters retain their caller's origin; they cannot launder disposal authority. */
   contextFrom?: 'caller';
   /** A declared method signature, or parameterized context-key data, overrides coarse legacy types. */
-  parameterPolicy?: 'declared-method' | 'context-value' | 'nullable-context-value' | 'context-updater' | 'input-payload';
+  parameterPolicy?: 'declared-method' | 'context-value' | 'nullable-context-value' | 'context-updater' | 'input-payload' | 'state-value';
   acceptsValue?: boolean;
 }
 export type ArgumentRole =
   | 'value' | 'static-key' | 'static-keys' | 'prop-key' | 'declared-prop-keys'
   | 'state-handle' | 'receiver-value' | 'context-key' | 'context-value' | 'context-next'
-  | 'callback' | 'event-payload' | 'template-argument';
+  | 'callback' | 'event-payload' | 'template-argument' | 'host-target';
 export interface ArgumentRule {
   role: ArgumentRole;
   types?: readonly ValueType[];
   optional?: boolean;
+  fields?: Readonly<Record<string, ArgumentRule>>;
   /** Fields are checked structurally; this is a data contract, not a TypeScript AST schema. */
   schema?: DataType;
   callback?: Omit<CallbackRule, 'at'>;
@@ -56,11 +59,12 @@ export interface OperationRule {
 
 const setup: readonly Phase[] = ['setup'];
 const callbackPhase: readonly Phase[] = ['callback'];
+const bindingPhase: readonly Phase[] = ['setup', 'callback'];
 const runtime: readonly Phase[] = ['callback', 'render'];
 const render: readonly Phase[] = ['render'];
 const aliveContexts: readonly CallbackContext[] = [
   'event', 'props-watch', 'context-watch', 'created', 'mounted',
-  'updated', 'unmounted', 'expose-method',
+  'updated', 'unmounted', 'expose-method', 'state-watch', 'collection-meta', 'positioning',
 ];
 const key: ArgumentRule = { role: 'static-key', types: ['string'] };
 const record: ArgumentRule = { role: 'value', types: ['record'] };
@@ -118,17 +122,53 @@ function styleRule(receiver: ValueType, path: string, phases: readonly Phase[], 
 const watchParameters: readonly ValueType[] = ['run', 'props', 'props', 'record'];
 const rawWatchParameters: readonly ValueType[] = ['run', 'record', 'record', 'record'];
 const optionalRecord: ArgumentRule = { ...record, optional: true };
+const capabilityConfig: ArgumentRule = { role: 'value', types: ['record', 'module-config'] };
+const textSnapshot: DataType = { kind: 'record', fields: [
+  { name: 'value', type: 'string' }, { name: 'composing', type: 'boolean' },
+] };
+const textEvent: DataType = { kind: 'record', fields: [
+  { name: 'type', type: 'string' }, { name: 'value', type: 'string' }, { name: 'composing', type: 'boolean' },
+  { name: 'data', type: { kind: 'union', members: ['string', 'null'] } },
+  { name: 'inputType', type: { kind: 'union', members: ['string', 'null'] } },
+] };
+const imageSnapshot: DataType = { kind: 'record', fields: [
+  { name: 'source', type: 'string' }, { name: 'loadingStatus', type: 'string' }, { name: 'fit', type: 'string' },
+] };
+const imageEvent: DataType = { kind: 'record', fields: [
+  { name: 'status', type: 'string' }, { name: 'previousStatus', type: 'string' }, { name: 'source', type: 'string' },
+] };
+const positionSnapshot: DataType = { kind: 'record', fields: [
+  { name: 'side', type: 'string' }, { name: 'align', type: 'string' }, { name: 'strategy', type: 'string' },
+] };
+const scrollAxisSnapshot: DataType = { kind: 'record', fields: [
+  { name: 'position', type: 'number' }, { name: 'visibleRatio', type: 'number' },
+  { name: 'canScrollBefore', type: 'boolean' }, { name: 'canScrollAfter', type: 'boolean' }, { name: 'atEnd', type: 'boolean' },
+] };
+const scrollSnapshot: DataType = { kind: 'record', fields: [
+  { name: 'axes', type: 'string' }, { name: 'horizontal', type: scrollAxisSnapshot }, { name: 'vertical', type: scrollAxisSnapshot },
+  { name: 'scrolling', type: 'boolean' }, { name: 'projection', type: 'string' },
+  { name: 'endFollow', type: { kind: 'record', fields: [{ name: 'state', type: 'string' }, { name: 'requestStatus', type: 'string' }] } },
+] };
 export const FOCUS_OPTIONS_TYPE: DataType = { kind: 'record', fields: [
   { name: 'reason', optional: true, type: { kind: 'union', members: [
     { kind: 'literal', value: 'programmatic' }, { kind: 'literal', value: 'keyboard' }, { kind: 'literal', value: 'pointer' },
   ] } },
   { name: 'preventScroll', optional: true, type: 'boolean' },
 ] };
+const rovingOptions: ArgumentRule = { role:'value', optional:true, schema: { kind: 'record', fields: [
+  ...FOCUS_OPTIONS_TYPE.fields, { name: 'defer', type: 'boolean', optional: true },
+] } };
 const contextNext: ArgumentRule = { role: 'context-next', callback: {
   phase: 'callback', context: 'context-update', parameters: ['record'],
   minParameters: 0, maxParameters: 1, returnType: 'record',
   parameterPolicy: 'context-updater', acceptsValue: true, contextFrom: 'caller',
 } };
+
+export const PACKAGED_HOOKS: Readonly<Record<string, Readonly<Record<string, SemanticOperation>>>> = {
+  '@proto.ui/prototypes-base': {asTransition:'hook.asTransition'},
+  '@proto.ui/prototypes-base/tools': {asTransition:'hook.asTransition'},
+  '@proto.ui/prototypes-base/transition': {asTransition:'hook.asTransition'},
+};
 
 /** The single admission/emission vocabulary. Paths are exact public handle names. */
 export const OPERATION_RULES = {
@@ -137,6 +177,9 @@ export const OPERATION_RULES = {
   'rule.dispose': rule('rule-handle', 'dispose', setup, 'void', [], [effect('write','style')], {requiredCapabilities:['style-projection']}),
   'feedback.style.use': styleRule('def','feedback.style.use',setup,'style-disposer'),
   'feedback.style.release': rule('style-disposer', 'call', setup, 'void', [], [effect('write','style')], {requiredCapabilities:['style-projection']}),
+  'subscription.release': rule('subscription-disposer', 'call', setup, 'void', [], [effect('write','view','subscription')]),
+  'binding.release': rule('binding-disposer', 'call', bindingPhase, 'void', [], [effect('write','view','subscription')]),
+  'transitionAction.call': rule('transition-action', 'call', callbackPhase, 'void', [], [effect('write','view-intent')]),
   'feedback.style.patch': styleRule('run','feedback.style.patch',callbackPhase,'void'),
   'feedback.style.suppress': styleRule('run','feedback.style.suppress',callbackPhase,'void'),
   'feedback.style.clearPatch': rule('run', 'feedback.style.clearPatch', callbackPhase, 'void', [], [effect('write','style')], {requiredCapabilities:['style-projection']}),
@@ -160,9 +203,15 @@ export const OPERATION_RULES = {
   'state.string': rule('def', 'state.string', setup, 'state:string', [key, { role: 'value', types: ['string'] }, { ...optionalRecord, schema: stringSpec }], [effect('declare', 'state')]),
   'state.numberDiscrete': rule('def', 'state.numberDiscrete', setup, 'state:number', [key, { role: 'value', types: ['number'] }, { ...optionalRecord, schema: discreteSpec }], [effect('declare', 'state')]),
   'state.numberRange': rule('def', 'state.numberRange', setup, 'state:number', [key, { role: 'value', types: ['number'] }, { ...record, schema: rangeSpec }], [effect('declare', 'state')]),
+  'state.enum': rule('def', 'state.enum', setup, 'state:string', [key, { role: 'value', types: ['string'] }, { ...record, schema: {
+    kind: 'record', fields: [{ name: 'options', type: { kind: 'array', element: 'string' } }],
+  } }], [effect('declare', 'state')]),
   'state.get': rule('state:boolean', 'get', ['setup', 'callback', 'render'], 'unknown', [], [effect('read', 'state')], { resultFrom: 'receiver-value' }),
   'state.set': rule('state:boolean', 'set', callbackPhase, 'void', [{ role: 'receiver-value' }, { role: 'value', optional: true }], [effect('write', 'state')]),
+  'state.setDefault': rule('state:boolean', 'setDefault', setup, 'void', [{ role: 'receiver-value' }], [effect('write', 'state')]),
+  'state.watch': rule('state:boolean', 'watch', setup, 'binding-disposer', [cb('state-watch', ['run','record'], {parameterPolicy:'state-value'})], [effect('subscribe','state','subscription')]),
   'expose.state': rule('def', 'expose.state', setup, 'void', [key, { role: 'state-handle' }], [effect('declare', 'expose')]),
+  'expose.value': rule('def', 'expose.value', setup, 'void', [key, {role:'value'}], [effect('declare','expose')]),
   'expose.event': rule('def', 'expose.event', setup, 'void', [key, { ...optionalRecord, schema: exposeEventSpec }], [effect('declare', 'expose')]),
   'expose.method': rule('def', 'expose.method', setup, 'void', [key, cb('expose-method', [], { parameterPolicy: 'declared-method', maxParameters: Number.MAX_SAFE_INTEGER, returnType: 'unknown' })], [effect('declare', 'expose')]),
   'expose.emit': rule('run', 'expose.emit', callbackPhase, 'void', [key, { role: 'event-payload', optional: true }, optionalRecord], [effect('signal', 'expose')]),
@@ -177,12 +226,12 @@ export const OPERATION_RULES = {
   'event.requestDefaultActionPrevention': rule('event', 'control.requestDefaultActionPrevention', callbackPhase, 'void', [{ ...optionalRecord, schema: { kind: 'record', fields: [
     { name: 'reason', type: 'string', optional: true }, { name: 'source', type: 'string', optional: true },
   ] } }], [effect('write', 'event-route', 'view')], { contexts: ['event'], requiredCapabilities: ['input-events'] }),
-  'focus.configure': rule('focus', 'configure', setup, 'void', [record], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
+  'focus.configure': rule('focus', 'configure', setup, 'void', [capabilityConfig], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
   'focus.setDisabled': rule('focus', 'setDisabled', callbackPhase, 'void', [boolean], [effect('write', 'focus')], { requiredCapabilities: ['focus-target'] }),
   'focus.focusSelf': rule('focus', 'focusSelf', callbackPhase, 'void', [{ role: 'value', schema: FOCUS_OPTIONS_TYPE, optional: true }], [effect('signal', 'focus', 'view')], { requiredCapabilities: ['focus-target'] }),
   'accessible.state': rule('accessible', 'state', setup, 'void', [key, { role: 'state-handle' }], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
   'accessible.action': rule('accessible', 'action', setup, 'void', [key, optionalRecord], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
-  'accessible.role': rule('accessible', 'role', setup, 'void', [{ role: 'value', types: ['string', 'state:string'] }], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
+  'accessible.role': rule('accessible', 'role', setup, 'void', [{ role: 'value', types: ['string', 'state:string', 'observed:string'] }], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
   'accessible.nameFromContent': rule('accessible', 'nameFromContent', setup, 'void', [], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
   'render.el': rule('render', 'el', render, 'template', [key, { role: 'template-argument', optional: true }, { role: 'template-argument', optional: true }], [effect('write', 'view', 'view')], { requiredCapabilities: ['view-render'] }),
   'render.slot': rule('render', 'slot', render, 'template', [], [effect('write', 'view', 'view')], { requiredCapabilities: ['view-render'] }),
@@ -195,6 +244,119 @@ export const OPERATION_RULES = {
   'context.tryUpdate': rule('run', 'context.tryUpdate', callbackPhase, 'boolean', [contextKey, contextNext], [effect('write', 'context')]),
   'render.read.context.read': rule('render', 'read.context.read', render, 'record', [contextKey], [effect('read', 'context')], { resultFrom: 'context-value' }),
   'render.read.context.tryRead': rule('render', 'read.context.tryRead', render, 'unknown', [contextKey], [effect('read', 'context')], { resultFrom: 'context-value-or-null' }),
+  // Full Adapter module families: setup-time hook admission and runtime handle operations.
+  'hook.asFocusEntry': rule('void', 'asFocusEntry', setup, 'focus-entry', [], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
+  'hook.asFocusScope': rule('void', 'asFocusScope', setup, 'focus-scope', [], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
+  'hook.asFocusRoving': rule('void', 'asFocusRoving', setup, 'focus-roving', [], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
+  'hook.asOverlay': rule('void', 'asOverlay', setup, 'overlay', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asScrollSurface': rule('void', 'asScrollSurface', setup, 'scroll', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asTextControl': rule('void', 'asTextControl', setup, 'text-control', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asImageView': rule('void', 'asImageView', setup, 'image-view', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asTableStructure': rule('void', 'asTableStructure', setup, 'table-structure', [{ role: 'value', types: ['string'] }], [effect('declare', 'accessibility')], { requiredCapabilities: ['accessibility-tree'] }),
+  'hook.asBoundary': rule('void', 'asBoundary', setup, 'boundary', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asHitParticipation': rule('void', 'asHitParticipation', setup, 'hit-participation', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asCollection': rule('void', 'asCollection', setup, 'collection', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asCollectionItem': rule('void', 'asCollectionItem', setup, 'collection-item', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'hook.asTransition': rule('void', 'asTransition', setup, 'transition', [], [effect('declare', 'view')], { requiredCapabilities: ['view-render'] }),
+  'transition.configure': rule('transition', 'configure', setup, 'void', [record], [effect('declare','view-intent')]),
+  'transitionControls.enter': rule('transition-controls', 'enter', callbackPhase, 'void', [], [effect('write','view-intent')]),
+  'transitionControls.leave': rule('transition-controls', 'leave', callbackPhase, 'void', [], [effect('write','view-intent')]),
+  'transitionControls.complete': rule('transition-controls', 'complete', callbackPhase, 'void', [], [effect('write','view-intent')]),
+  'focusEntry.configure': rule('focus-entry', 'configure', setup, 'void', [capabilityConfig], [effect('declare', 'focus')]),
+  'focusEntry.focus': rule('focus-entry', 'focus', callbackPhase, 'void', [{ role:'value', optional:true, schema: FOCUS_OPTIONS_TYPE }], [effect('write', 'focus')]),
+  'focusEntry.setDisabled': rule('focus-entry', 'setDisabled', callbackPhase, 'void', [boolean], [effect('write', 'focus')]),
+  'focusScope.configure': rule('focus-scope', 'configure', setup, 'void', [capabilityConfig], [effect('declare', 'focus')]),
+  'focusRoving.configure': rule('focus-roving', 'configure', setup, 'void', [capabilityConfig], [effect('declare', 'focus')]),
+  'focusRoving.focusFirst': rule('focus-roving', 'focusFirst', callbackPhase, 'void', [rovingOptions], [effect('write', 'focus')]),
+  'focusRoving.focusLast': rule('focus-roving', 'focusLast', callbackPhase, 'void', [rovingOptions], [effect('write', 'focus')]),
+  'focusRoving.focusNext': rule('focus-roving', 'focusNext', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focusRoving.focusPrev': rule('focus-roving', 'focusPrev', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focusRoving.focusSelected': rule('focus-roving', 'focusSelected', callbackPhase, 'void', [rovingOptions], [effect('write', 'focus')]),
+  'focus.focus': rule('focus', 'focus', callbackPhase, 'void', [{ role: 'value', optional: true, schema: FOCUS_OPTIONS_TYPE }], [effect('write', 'focus')]),
+  'focus.blur': rule('focus', 'blur', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focus.setNavParticipation': rule('focus', 'setNavParticipation', callbackPhase, 'void', [{ role: 'value', types: ['string'] }], [effect('write', 'focus')]),
+  'focus.setRovingStatus': rule('focus', 'setRovingStatus', callbackPhase, 'void', [record], [effect('write', 'focus')]),
+  'focus.focusFirst': rule('focus-scope', 'focusFirst', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focus.focusLast': rule('focus-scope', 'focusLast', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focus.focusNext': rule('focus-scope', 'focusNext', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focus.focusPrev': rule('focus-scope', 'focusPrev', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focus.focusSelected': rule('focus-scope', 'focusSelected', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focus.restoreFocus': rule('focus-scope', 'restoreFocus', callbackPhase, 'void', [], [effect('write', 'focus')]),
+  'focus.activate': rule('focus-scope', 'activate', callbackPhase, 'void', [{ role: 'value', optional: true, schema: FOCUS_OPTIONS_TYPE }], [effect('write', 'focus')]),
+  'focus.deactivate': rule('focus-scope', 'deactivate', callbackPhase, 'void', [{ role: 'value', optional: true, schema: FOCUS_OPTIONS_TYPE }], [effect('write', 'focus')]),
+  'focus.setLoop': rule('focus-roving', 'setLoop', callbackPhase, 'void', [boolean], [effect('write', 'focus')]),
+  'focus.setOrientation': rule('focus-roving', 'setOrientation', callbackPhase, 'void', [{ role: 'value', types: ['string'] }], [effect('write', 'focus')]),
+  'focus.isActive': rule('focus-scope', 'isActive', runtime, 'boolean', [], [effect('read', 'focus')]),
+  'focus.isFocused': rule('focus', 'isFocused', runtime, 'boolean', [], [effect('read', 'focus')]),
+  'focusScope.getRoving': rule('focus-scope', 'getRoving', bindingPhase, 'nullable:focus-roving', [], [effect('declare', 'focus')]),
+  'accessible.id': rule('accessible', 'id', setup, 'void', [{ role: 'value', types: ['string', 'state:string', 'observed:string'] }], [effect('declare', 'accessibility')]),
+  'accessible.name': rule('accessible', 'name', setup, 'void', [{ role: 'value', types: ['string', 'state:string', 'observed:string'] }], [effect('declare', 'accessibility')]),
+  'accessible.description': rule('accessible', 'description', setup, 'void', [{ role: 'value', types: ['string', 'state:string', 'observed:string'] }], [effect('declare', 'accessibility')]),
+  'accessible.relation': rule('accessible', 'relation', setup, 'void', [key, capabilityConfig], [effect('declare', 'accessibility')]),
+  'accessible.tree': rule('accessible', 'tree', setup, 'void', [capabilityConfig], [effect('declare', 'accessibility')]),
+  'accessible.level': rule('accessible', 'level', setup, 'void', [{ role: 'value', types: ['number', 'state:number', 'observed:number'] }], [effect('declare', 'accessibility')]),
+  'anatomy.claim': rule('def', 'anatomy.claim', setup, 'void', [{ role: 'value', types: ['anatomy-family'] }, record], [effect('declare', 'view')]),
+  'anatomy.subscribeParts': rule('def', 'anatomy.subscribeParts', setup, 'subscription-disposer', [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }, cb('mounted', ['run', 'anatomy-parts'])], [effect('subscribe', 'view', 'subscription')]),
+  'anatomy.has': rule('run', 'anatomy.has', runtime, 'boolean', [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }], [effect('read', 'view')]),
+  'anatomy.parts': rule('run', 'anatomy.parts', runtime, 'anatomy-parts', [{ role: 'value', types: ['anatomy-family'] }], [effect('read', 'view')]),
+  'anatomy.partsOf': rule('run', 'anatomy.partsOf', runtime, 'anatomy-parts', [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }], [effect('read', 'view')]),
+  'anatomy.order.version': rule('run', 'anatomy.order.version', runtime, 'number', [{ role: 'value', types: ['anatomy-family'] }], [effect('read', 'view')]),
+  'anatomy.order.parts': rule('run', 'anatomy.order.parts', runtime, 'anatomy-parts', [{ role: 'value', types: ['anatomy-family'] }], [effect('read', 'view')]),
+  'anatomy.order.partsOf': rule('run', 'anatomy.order.partsOf', runtime, 'anatomy-parts', [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }], [effect('read', 'view')]),
+  'anatomy.order.indexOfSelf': rule('run', 'anatomy.order.indexOfSelf', runtime, 'number', [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }], [effect('read', 'view')]),
+  'anatomy.order.prevOfSelf': rule('run', 'anatomy.order.prevOfSelf', runtime, 'nullable:anatomy-part', [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }], [effect('read', 'view')]),
+  'anatomy.order.nextOfSelf': rule('run', 'anatomy.order.nextOfSelf', runtime, 'nullable:anatomy-part', [{ role: 'value', types: ['anatomy-family'] }, { role: 'static-key' }], [effect('read', 'view')]),
+  'anatomyPart.hasExpose': rule('anatomy-part', 'hasExpose', runtime, 'boolean', [key], [effect('read', 'expose')]),
+  'anatomyPart.getExpose': rule('anatomy-part', 'getExpose', runtime, 'unknown', [key], [effect('read', 'expose')]),
+  'anatomyPart.hasHook': rule('anatomy-part', 'hasHook', runtime, 'boolean', [key], [effect('read', 'view')]),
+  'tableStructure.configure': rule('table-structure', 'configure', callbackPhase, 'void', [record], [effect('write', 'accessibility')]),
+  'tableStructure.getObjectRef': rule('table-structure', 'getObjectRef', ['setup','callback','render'], 'a11y-ref', [], [effect('read', 'accessibility')]),
+  'tableStructure.getSnapshot': rule('table-structure', 'getSnapshot', runtime, 'nullable:table-snapshot', [], [effect('read', 'accessibility')]),
+  'host.get': rule('run', 'host.get', callbackPhase, 'nullable:host-target', [], [effect('read', 'view')]),
+  'collection.configure': rule('collection', 'configure', setup, 'void', [capabilityConfig], [effect('declare', 'view')]),
+  'collection.getItems': rule('collection', 'getItems', runtime, 'collection-snapshot-list', [], [effect('read', 'view')]),
+  'collection.getCount': rule('collection', 'getCount', runtime, 'number', [], [effect('read', 'view')]),
+  'collectionItem.configure': rule('collection-item', 'configure', setup, 'void', [{...capabilityConfig,fields:{getMeta:cb('collection-meta',['run'],{returnType:'record'})}}], [effect('declare', 'view')]),
+  'collectionItem.getSnapshot': rule('collection-item', 'getSnapshot', runtime, 'collection-snapshot', [], [effect('read', 'view')]),
+  'boundary.configure': rule('boundary', 'configure', setup, 'void', [record], [effect('declare', 'view')]),
+  'boundary.observe': rule('boundary', 'observe', setup, 'void', [{ role: 'value', types: ['string'] }], [effect('write', 'view')]),
+  'boundary.setStackActive': rule('boundary', 'setStackActive', callbackPhase, 'void', [boolean], [effect('write', 'view')]),
+  'boundary.registerRegion': rule('boundary', 'registerRegion', bindingPhase, 'binding-disposer', [{ role: 'host-target' }, { ...record, optional: true }], [effect('subscribe', 'view', 'subscription')]),
+  'boundary.unregisterRegion': rule('boundary', 'unregisterRegion', callbackPhase, 'void', [{ role: 'host-target' }], [effect('write', 'view')]),
+  'boundary.classify': rule('boundary', 'classify', callbackPhase, 'string', [{ ...record, optional: true }], [effect('read', 'view')]),
+  'boundary.notify': rule('boundary', 'notify', callbackPhase, 'string', [{ ...record, optional: true }], [effect('signal', 'view')]),
+  'boundary.subscribeOutside': rule('boundary', 'subscribeOutside', bindingPhase, 'binding-disposer', [cb('event', ['boundary-outside-event'])], [effect('subscribe', 'view', 'subscription')]),
+  'hitParticipation.configure': rule('hit-participation', 'configure', setup, 'void', [record], [effect('declare', 'view')]),
+  'hitParticipation.registerRegion': rule('hit-participation', 'registerRegion', bindingPhase, 'binding-disposer', [{ role: 'host-target' }, { ...record, optional: true }], [effect('subscribe', 'view', 'subscription')]),
+  'hitParticipation.unregisterRegion': rule('hit-participation', 'unregisterRegion', callbackPhase, 'void', [{ role: 'host-target' }], [effect('write', 'view')]),
+  'overlay.isOpen': rule('overlay', 'isOpen', ['setup', 'callback', 'render'], 'boolean', [], [effect('read', 'view')]),
+  'overlay.openOverlay': rule('overlay', 'openOverlay', callbackPhase, 'void', [{ role: 'value', types: ['string'], optional: true }], [effect('write', 'view')]),
+  'overlay.close': rule('overlay', 'close', callbackPhase, 'void', [{ role: 'value', types: ['string'], optional: true }], [effect('write', 'view')]),
+  'overlay.toggle': rule('overlay', 'toggle', callbackPhase, 'void', [{ role: 'value', types: ['string'], optional: true }], [effect('write', 'view')]),
+  'overlay.configure': rule('overlay', 'configure', setup, 'void', [record], [effect('declare', 'view')]),
+  'overlay.updatePosition': rule('overlay', 'updatePosition', callbackPhase, 'void', [record], [effect('write', 'view')]),
+  'overlay.registerTrigger': rule('overlay', 'registerTrigger', bindingPhase, 'void', [{ role: 'host-target' }], [effect('declare', 'view')]),
+  'overlay.registerAnchor': rule('overlay', 'registerAnchor', bindingPhase, 'void', [{ role: 'host-target' }], [effect('declare', 'view')]),
+  'overlay.registerAnchorPart': rule('overlay', 'registerAnchorPart', bindingPhase, 'void', [{ role: 'value', types: ['anatomy-part', 'nullable:anatomy-part', 'null'] }], [effect('declare', 'view')]),
+  'overlay.registerContent': rule('overlay', 'registerContent', bindingPhase, 'void', [{ role: 'host-target' }], [effect('declare', 'view')]),
+  'overlay.getPositionSnapshot': rule('overlay', 'getPositionSnapshot', runtime, { kind: 'union', members: [positionSnapshot, 'null'] }, [], [effect('read', 'view')]),
+  'overlay.keepMounted': rule('overlay', 'keepMounted', setup, 'void', [], [effect('write', 'view')]),
+  'overlay.bindPresence': rule('overlay', 'bindPresence', setup, 'void', [capabilityConfig], [effect('subscribe', 'view', 'subscription')]),
+  'scroll.configure': rule('scroll', 'configure', setup, 'void', [record], [effect('declare', 'view')]),
+  'scroll.bindComposedChrome': rule('scroll', 'bindComposedChrome', setup, 'void', [capabilityConfig], [effect('declare', 'view')]),
+  'scroll.request': rule('scroll', 'request', callbackPhase, 'void', [record], [effect('write', 'view')]),
+  'scroll.getSnapshot': rule('scroll', 'getSnapshot', runtime, scrollSnapshot, [], [effect('read', 'view')]),
+  'textControl.on': rule('text-control', 'on', setup, 'subscription-disposer', [{ role: 'static-key' }, cb('event', ['run', textEvent])], [effect('subscribe', 'view', 'subscription')]),
+  'textControl.sync': rule('text-control', 'sync', callbackPhase, 'void', [record], [effect('write', 'view')]),
+  'textControl.snapshot': rule('text-control', 'snapshot', runtime, { kind: 'union', members: [textSnapshot, 'null'] }, [], [effect('read', 'view')]),
+  'imageView.on': rule('image-view', 'on', setup, 'subscription-disposer', [{ role: 'static-key' }, cb('event', ['run', imageEvent])], [effect('subscribe', 'view', 'subscription')]),
+  'imageView.sync': rule('image-view', 'sync', callbackPhase, 'void', [record], [effect('write', 'view')]),
+  'imageView.snapshot': rule('image-view', 'snapshot', runtime, { kind: 'union', members: [imageSnapshot, 'null'] }, [], [effect('read', 'view')]),
+  'positioning.connect': rule('positioning', 'connect', bindingPhase, 'void', [{...capabilityConfig,fields:{onResolved:cb('positioning',[positionSnapshot])}}], [effect('declare', 'view')]),
+  'positioning.update': rule('positioning', 'update', callbackPhase, 'void', [record], [effect('write', 'view')]),
+  'positioning.requestUpdate': rule('positioning', 'requestUpdate', callbackPhase, 'void', [], [effect('write', 'view')]),
+  'positioning.disconnect': rule('positioning', 'disconnect', callbackPhase, 'void', [], [effect('write', 'view')]),
+  'positioning.getSnapshot': rule('positioning', 'getSnapshot', runtime, { kind: 'union', members: [positionSnapshot, 'null'] }, [], [effect('read', 'view')]),
 } satisfies Record<string, OperationRule>;
 
 export type SemanticOperation = keyof typeof OPERATION_RULES;
@@ -209,6 +371,7 @@ export interface OperationBindings {
   callbackContext?: CallbackContext;
   propNames?: ReadonlySet<string>;
   contextValueType?: DataType;
+  stateValueType?: 'boolean' | 'number' | 'string';
   eventPayloadType?: DataType;
   inputPayloadType?: 'event' | 'host-event';
   methodParameters?: readonly { type: ValueType; optional?: boolean }[];
@@ -241,7 +404,7 @@ function data(type: ValueType): DataType | undefined {
   }
 }
 function assignable(actual: ValueType, expected: ValueType): boolean {
-  if (actual === expected) return true;
+  if (actual === expected || isCapabilityAssignable(actual,expected)) return true;
   const a = data(actual);
   const e = data(expected);
   if (a && e) return isAssignable(a, e);
@@ -261,11 +424,74 @@ export function isTemplateChildType(type: ValueType): boolean {
 function templateProps(type: ValueType): boolean {
   return type === 'template-props' || typeof type !== 'string' && type.kind === 'record' && type.fields.length === 0;
 }
-function stateValue(receiver?: ValueType): ValueType | undefined {
-  if (receiver === 'state:boolean' || receiver === 'observed:boolean') return 'boolean';
-  if (receiver === 'state:number') return 'number';
-  if (receiver === 'state:string') return 'string';
+export function stateValue(receiver?: ValueType): 'boolean' | 'number' | 'string' | undefined {
+  if (receiver === 'state:boolean' || receiver === 'observed:boolean' || receiver === 'borrowed:boolean') return 'boolean';
+  if (receiver === 'state:number' || receiver === 'observed:number' || receiver === 'borrowed:number') return 'number';
+  if (receiver === 'state:string' || receiver === 'observed:string' || receiver === 'borrowed:string') return 'string';
   return undefined;
+}
+const capabilityMembers: Readonly<Record<string, Readonly<Record<string, ValueType>>>> = {
+  focus: { focused: 'observed:boolean', focusVisible: 'observed:boolean', focusable: 'observed:boolean' },
+  'focus-scope': { active: 'observed:boolean', hasFocused: 'observed:boolean' },
+  'focus-roving': { active: 'observed:boolean', hasFocused: 'observed:boolean' },
+  'anatomy-part': { role: 'string' },
+  collection: { count: 'state:number' },
+  'collection-item': { collectionIndex: 'state:number', collectionTotal: 'state:number', collectionFirst: 'state:boolean', collectionLast: 'state:boolean' },
+  'collection-snapshot': { index: 'number', total: 'number', first: 'boolean', last: 'boolean' },
+  overlay: { open: 'observed:boolean' },
+  scroll: { axes: 'observed:string', horizontal: 'scroll-axis', vertical: 'scroll-axis', scrolling: 'observed:boolean', projection: 'observed:string', endFollow: 'scroll-follow' },
+  'scroll-axis': { position: 'observed:number', visibleRatio: 'observed:number', canScrollBefore: 'observed:boolean', canScrollAfter: 'observed:boolean', atEnd: 'observed:boolean' },
+  'scroll-follow': { state: 'observed:string', requestStatus: 'observed:string' },
+  'table-structure': { role: 'string', states: 'table-states' },
+  'table-states': { a11yRole: 'state:string', rowCount: 'state:number', columnCount: 'state:number', row: 'state:number', column: 'state:number', rowSpan: 'state:number', columnSpan: 'state:number' },
+  transition: { transitionState: 'borrowed:string', isPresent: 'borrowed:boolean', controls: 'transition-controls' },
+  'transition-controls': { enter: 'transition-action', leave: 'transition-action', complete: 'transition-action' },
+  'boundary-outside-event': { classification: {kind:'literal',value:'outside'}, sample: 'optional:boundary-sample' },
+  'boundary-sample': { type: {kind:'union',members:['string','void']}, target: 'optional:host-target', nativeEvent: 'unknown', meta: 'record' },
+  'table-snapshot': { root: 'a11y-ref', caption: 'optional:a11y-ref', rowCount: 'number', columnCount: 'number', rows: 'table-row-list', valid: 'boolean', diagnostics: 'table-diagnostic-list' },
+  'table-row': { ref: 'a11y-ref', index: 'number', cells: 'table-cell-list' },
+  'table-cell': { ref: 'a11y-ref', kind: 'string', row: 'number', column: 'number', rowSpan: 'number', columnSpan: 'number', columnHeaders: 'a11y-ref-list', rowHeaders: 'a11y-ref-list', orderedHeaders: 'a11y-ref-list' },
+  'table-diagnostic': { code: 'string', ref: 'optional:a11y-ref', row: {kind:'union',members:['number','void']}, headerKey: {kind:'union',members:['string','void']} },
+};
+const capabilityListMembers: Readonly<Record<string, ModuleCapabilityType>> = {
+  'anatomy-parts': 'anatomy-part', 'a11y-ref-list': 'a11y-ref',
+  'collection-snapshot-list': 'collection-snapshot',
+  'table-row-list': 'table-row', 'table-cell-list': 'table-cell', 'table-diagnostic-list': 'table-diagnostic',
+};
+export function capabilityBinaryType(operator: string, left: ValueType, right: ValueType): ValueType | undefined {
+  if (operator !== '??' || typeof left !== 'string' || !/^(nullable|optional):/.test(left)) return undefined;
+  const base = left.slice(left.indexOf(':')+1) as ModuleCapabilityType;
+  if (right === base || right === `nullable:${base}` || right === `optional:${base}`) return right;
+  if (right === 'null') return `nullable:${base}`;
+  if (right === 'void') return `optional:${base}`;
+  return undefined;
+}
+export function capabilityMemberType(owner: ValueType, property: string, optional = false): ValueType | undefined {
+  if (typeof owner !== 'string') return undefined;
+  if (/^state-(event|next):(boolean|number|string)$/.test(owner)) {
+    const next = owner.startsWith('state-next:');
+    if (property === 'type') return next ? {kind:'literal',value:'next'} : {kind:'union',members:[{kind:'literal',value:'next'},{kind:'literal',value:'disconnect'}]};
+    if (property === 'reason') return 'unknown';
+    if (property === 'next' || property === 'prev') {
+      const primitive = owner.slice(owner.indexOf(':')+1) as 'boolean' | 'number' | 'string';
+      return next ? primitive : {kind:'union',members:[primitive,'void']};
+    }
+  }
+  if (owner === 'state-disconnect') return property === 'type' ? {kind:'literal',value:'disconnect'} : property === 'reason' ? {kind:'literal',value:'unmount'} : undefined;
+  if (/^(nullable|optional):/.test(owner)) {
+    if (!optional) return undefined;
+    const member = capabilityMemberType(owner.slice(owner.indexOf(':')+1) as ValueType,property);
+    if (member === undefined) return undefined;
+    const memberData = data(member);
+    if (memberData) return parseDataType({kind:'union',members:[memberData,'void']});
+    return typeof member === 'string' && member.startsWith('optional:') ? member : `optional:${member}` as ValueType;
+  }
+  if (Object.hasOwn(capabilityListMembers,owner)) {
+    if (property === 'length') return 'number';
+    if (/^(0|[1-9]\d*)$/.test(property) && Number(property) < 0xffffffff) return `optional:${capabilityListMembers[owner]}`;
+  }
+  return Object.hasOwn(capabilityMembers, owner) && Object.hasOwn(capabilityMembers[owner], property)
+    ? capabilityMembers[owner][property] : undefined;
 }
 function nullable(type: DataType): DataType {
   return { kind: 'union', members: [type, 'null'] };
@@ -283,6 +509,9 @@ export function operationResultType(operation: string, receiver?: ValueType, bin
 export function operationCallbackRule(operation: string, index: number): CallbackRule | undefined {
   const signature = lookup(operation)?.arguments[index]?.callback;
   return signature ? { at: index, ...signature } : undefined;
+}
+export function operationArgumentRule(operation: string, index: number): ArgumentRule | undefined {
+  return lookup(operation)?.arguments[index];
 }
 export function validateOperationPhase(operation: string, phase: Phase, context?: CallbackContext): readonly OperationContractIssue[] {
   const contract = lookup(operation);
@@ -310,6 +539,9 @@ export function validateOperationCallback(callback: OperationCallback, signature
   } else if (signature.parameterPolicy === 'input-payload') {
     if (!bindings.inputPayloadType) return [{code:'missing-signature',message:'Input callbacks require a resolved portable or raw-host payload boundary.'}];
     parameters = [{type:'run'},{type:bindings.inputPayloadType}];
+  } else if (signature.parameterPolicy === 'state-value') {
+    if (!bindings.stateValueType) return [{code:'missing-signature',message:'State watchers require a resolved primitive State value type.'}];
+    parameters = [{type:'run'},{type:`state-event:${bindings.stateValueType}`}];
   } else if (signature.parameterPolicy) {
     if (!bindings.contextValueType)
       return [{ code: 'missing-signature', message: 'Context callbacks require a resolved key value type.' }];
@@ -334,7 +566,7 @@ export function validateOperationCallback(callback: OperationCallback, signature
   });
   // Like the public void callback signature, unused return values are allowed for registration
   // callbacks. Exposed methods and context updaters have observable return contracts instead.
-  if ((signature.parameterPolicy === 'declared-method' || signature.parameterPolicy === 'context-updater') &&
+  if ((signature.parameterPolicy === 'declared-method' || signature.parameterPolicy === 'context-updater' || signature.returnType !== 'void') &&
       (callback.returnType === undefined || !assignable(callback.returnType, result)))
     issues.push({ code: 'callback-return', message: 'Callback return type does not match its semantic signature.' });
   return issues;
@@ -372,8 +604,10 @@ export function validateOperationArguments(operation: string, args: readonly Ope
   const issues: OperationContractIssue[] = [];
   if (contract.receiver === 'state:boolean' ? !stateValue(receiver) : (receiver ?? 'void') !== contract.receiver)
     issues.push({ code: 'receiver', message: `${operation} has an incompatible receiver.` });
-  if (operation === 'state.set' && receiver === 'observed:boolean')
-    issues.push({ code: 'receiver', message: 'Observed focus facts have no write authority.' });
+  if ((operation === 'state.set' || operation === 'state.setDefault') && typeof receiver === 'string' && receiver.startsWith('observed:'))
+    issues.push({ code: 'receiver', message: 'Observed facts have no write authority.' });
+  if (operation === 'state.watch' && typeof receiver === 'string' && receiver.startsWith('state:'))
+    issues.push({code:'receiver',message:'Owned State has no watch authority; only Borrowed and Observed handles may register watchers.'});
   if (args.length < contract.min || args.length > contract.max)
     issues.push({ code: 'arity', message: `${operation} requires ${contract.min}..${contract.max} arguments.` });
   if ((operation === 'event.on' || operation === 'event.onGlobal') && args.length > 2 &&
@@ -392,6 +626,9 @@ export function validateOperationArguments(operation: string, args: readonly Ope
       if (!actual || !isAssignable(actual, expected)) reject('argument-type', `Argument ${index + 1} does not satisfy its data schema.`);
     }
     switch (requirement.role) {
+      case 'host-target':
+        if (!['host-target','nullable:host-target','optional:host-target','null','void'].includes(String(argument.type))) reject('argument-type', 'A target-native opaque host reference or null is required.');
+        break;
       case 'static-key':
       case 'prop-key':
         if (!staticKey(argument)) reject('static-key', 'A nonempty static string key is required.');
@@ -439,6 +676,15 @@ export function validateOperationArguments(operation: string, args: readonly Ope
         reject('argument-type', 'An inline checked callback is required.');
       else for (const issue of validateOperationCallback(argument.function, { at: index, ...requirement.callback }, bindings))
         issues.push({ ...issue, argument: index });
+    }
+    if (requirement.fields && argument.kind === 'record') for (const entry of argument.entries ?? []) {
+      const field = requirement.fields[entry.key];
+      if (!field) continue;
+      if (field.types && !field.types.some((type) => assignable(entry.value.type,type))) reject('argument-type',`Configuration field ${entry.key} has an incompatible type.`);
+      if (field.callback) {
+        if (entry.value.kind !== 'function' || !entry.value.function) reject('argument-type',`Configuration field ${entry.key} requires a checked callback.`);
+        else for (const issue of validateOperationCallback(entry.value.function,{at:index,...field.callback},bindings)) issues.push({...issue,argument:index});
+      }
     }
   });
   if (operation === 'expose.emit' && args.length < 2) {

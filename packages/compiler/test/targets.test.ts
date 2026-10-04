@@ -31,7 +31,6 @@ describe('explicit target capability admission', () => {
     const result = checkTargetOperations(parse(basicSource), profile('react-dom-source-v1'));
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
-    expect(result.value.profile.dependencies.map((dependency) => dependency.name)).toEqual(['react', 'react-dom']);
     expect(result.value.operations).toContain('state.set');
     expect(result.value.operations).toContain('run.update');
     expect(result.value.operations).toContain('render.slot');

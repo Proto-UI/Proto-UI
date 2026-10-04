@@ -59,6 +59,7 @@ type CreateElement = (tag: unknown, dataOrChildren?: unknown, children?: unknown
 const requireVue2 = createRequire(fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url)));
 // Resolve the concrete consumer through its existing package, not the root Vue3 dependency.
 const Vue2 = requireVue2('vue') as Vue2Runtime;
+const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
 const hosts: { vm: HostInstance; host: HTMLElement }[] = [];
 afterEach(() => {
   for (const mounted of hosts.splice(0)) {
@@ -92,6 +93,7 @@ function loadGenerated(module: GeneratedModule): unknown {
     }).outputText;
     // Only checked output and its emitted artifacts execute; authored modules remain parsed data.
     new Function('require', 'exports', program)((specifier: string) => {
+      if (specifier === '@floating-ui/dom') return floatingUi;
       if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);

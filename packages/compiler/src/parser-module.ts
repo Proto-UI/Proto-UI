@@ -9,6 +9,9 @@ import {
   sourceName,
   type SourceEdge,
 } from './source-resolution';
+import { STATIC_CAPABILITY_FACTORIES, STATIC_MODULE_FACTORIES, STATIC_PACKAGE_CAPABILITIES, extractModuleDeclaration } from './static-declarations';
+import type { ModuleDeclarationIR } from './ir';
+import { PACKAGED_HOOKS } from './operations';
 
 export { sourceName } from './source-resolution';
 
@@ -37,8 +40,17 @@ export interface SourceModule {
   readonly typeEdges: readonly SourceEdge[];
 }
 const FACTORIES: Record<string, true> = { definePrototype: true, defineAsHook: true };
-const CORE_DECLARATIONS: Record<string, true> = { createContextKey: true, tw: true };
-const HOOKS: Record<string, true> = { asTrigger: true, asFocusable: true, asAccessible: true };
+const CORE_DECLARATIONS: Record<string, true> = {
+  createContextKey: true, tw: true,
+  ...Object.fromEntries(Object.keys(STATIC_CAPABILITY_FACTORIES).map((name) => [name, true as const])),
+};
+const HOOKS: Record<string, true> = {
+  asTrigger: true, asFocusable: true, asAccessible: true,
+  asFocusEntry: true, asFocusScope: true, asFocusRoving: true,
+  asOverlay: true, asScrollSurface: true, asTextControl: true, asImageView: true,
+  asTableStructure: true, asBoundary: true, asHitParticipation: true,
+  asCollection: true, asCollectionItem: true,
+};
 
 export function sourceSpan(node: ts.Node): SourceSpan {
   const file = node.getSourceFile();
@@ -192,6 +204,9 @@ export class SourceGraph {
         if (
           specifier !== '@proto.ui/core' &&
           specifier !== '@proto.ui/hooks' &&
+          !Object.hasOwn(PACKAGED_HOOKS,specifier) &&
+          !Object.hasOwn(STATIC_MODULE_FACTORIES, specifier) &&
+          !Object.hasOwn(STATIC_PACKAGE_CAPABILITIES, specifier) &&
           !isLocalSourceSpecifier(specifier)
         )
           rejectNode(statement, 'PUI1003', `Unsupported source package ${specifier}.`);
@@ -201,6 +216,12 @@ export class SourceGraph {
               ? !Object.hasOwn(FACTORIES, exported) && !Object.hasOwn(CORE_DECLARATIONS, exported)
               : specifier === '@proto.ui/hooks'
                 ? !Object.hasOwn(HOOKS, exported)
+                : Object.hasOwn(PACKAGED_HOOKS,specifier)
+                  ? !Object.hasOwn(PACKAGED_HOOKS[specifier],exported)
+                : Object.hasOwn(STATIC_MODULE_FACTORIES, specifier)
+                  ? !Object.hasOwn(STATIC_MODULE_FACTORIES[specifier], exported)
+                  : Object.hasOwn(STATIC_PACKAGE_CAPABILITIES, specifier)
+                    ? !STATIC_PACKAGE_CAPABILITIES[specifier].includes(exported)
                 : false
           )
             rejectNode(node, 'PUI1003', `Unsupported import ${exported} from ${specifier}.`);
@@ -233,11 +254,9 @@ export class SourceGraph {
               'Top-level runtime bindings must be admitted static core declarations.'
             );
           const imported = result.imports.get(value.expression.text);
-          if (
-            imported?.module !== '@proto.ui/core' ||
-            (!Object.hasOwn(FACTORIES, imported.exported) &&
-              !Object.hasOwn(CORE_DECLARATIONS, imported.exported))
-          )
+          if (!imported || !(imported.module === '@proto.ui/core'
+            ? Object.hasOwn(FACTORIES, imported.exported) || Object.hasOwn(CORE_DECLARATIONS, imported.exported)
+            : Object.hasOwn(STATIC_MODULE_FACTORIES[imported.module] ?? {}, imported.exported)))
             rejectNode(value, 'PUI1004', 'Top-level source execution is not admitted.');
           if (
             imported.exported === 'tw' &&
@@ -519,11 +538,12 @@ export class SourceGraph {
   descriptor(
     module: SourceModule,
     node: ts.CallExpression
-  ): { name: string; setup: FunctionNode; span: SourceSpan } {
+  ): { name: string; setup: FunctionNode; modules: ModuleDeclarationIR[]; span: SourceSpan } {
     if (node.arguments.length !== 1 || !ts.isObjectLiteralExpression(node.arguments[0]))
       rejectNode(node, 'PUI1006', 'Definition requires one literal object.');
     let name: string | undefined;
     let setup: FunctionNode | undefined;
+    const modules: ModuleDeclarationIR[] = [];
     const keys = new Set<string>();
     for (const property of node.arguments[0].properties) {
       if (!ts.isPropertyAssignment(property) && !ts.isMethodDeclaration(property) && !ts.isShorthandPropertyAssignment(property))
@@ -537,7 +557,17 @@ export class SourceGraph {
         ts.isStringLiteral(property.initializer)
       )
         name = property.initializer.text;
-      else if (key === 'setup') {
+      else if (key === 'modules' && ts.isPropertyAssignment(property)) {
+        if (!ts.isArrayLiteralExpression(property.initializer))
+          rejectNode(property.initializer, 'PUI1025', 'Module requirements must be a checked literal declaration array.');
+        const ids = new Set<string>();
+        for (const expression of property.initializer.elements) {
+          const declaration = extractModuleDeclaration(module, expression);
+          if (!declaration) rejectNode(expression, 'PUI1025', 'Use an admitted static Module declaration factory.');
+          if (ids.has(declaration.id)) rejectNode(expression, 'PUI1025', `Duplicate Module declaration ${declaration.id}.`);
+          ids.add(declaration.id); modules.push(declaration);
+        }
+      } else if (key === 'setup') {
         const value = ts.isMethodDeclaration(property) ? property
           : ts.isShorthandPropertyAssignment(property) ? property.name : property.initializer;
         if (
@@ -560,6 +590,6 @@ export class SourceGraph {
     }
     if (!name || !setup)
       rejectNode(node, 'PUI1006', 'Definition requires a nonempty name and static setup.');
-    return { name, setup, span: sourceSpan(node) };
+    return { name, setup, modules, span: sourceSpan(node) };
   }
 }
