@@ -1,0 +1,64 @@
+{
+  "sourceSha": "833460b21ae32b40e1981509db828a7a19db39d5",
+  "sourceDirty": false,
+  "sourceSnapshotSha256": "602881f4ddc4c2613955b7df4a8fbed52f8a24af5165ed7fefd7a0a43658f0b4",
+  "runId": "2026-10-04T08-40-18.193Z-2541",
+  "route": "/en/ui-libraries/shadcn/text/",
+  "runtime": "wc",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "theme": "light",
+  "facts": [
+    {
+      "text": "A reusable Text atom",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 37.5,
+      "size": 30,
+      "decoration": "none",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Authored content stays readable and selectable. Text adds no extra interaction.",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 52,
+      "size": 16,
+      "decoration": "none",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Supporting text uses the same input vocabulary.",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 21,
+      "size": 14,
+      "decoration": "none",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "font: mono · tracking: tight",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 24,
+      "size": 16,
+      "decoration": "underline",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    }
+  ],
+  "errors": []
+}

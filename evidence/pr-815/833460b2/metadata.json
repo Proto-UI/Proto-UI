@@ -1,0 +1,10 @@
+{
+  "sourceHead": "833460b21ae32b40e1981509db828a7a19db39d5",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37189520452",
+  "artifactId": 11299000026,
+  "scope": "This Text/WC case passed; the overall suite had 61 passed and 3 failed transient duplicate-slot observations. This image does not prove those three cases pass.",
+  "files": {
+    "en-shadcn-text-wc.json": "f1a595072331336ba6a6b7e9fd2c50c0a32346fd3ad0be11a96632b26b1d9bfb",
+    "en-shadcn-text-wc.png": "4e91108cfbff46c442492eb3d7c70544abc966878d64a376ab18e9de0fcdde7d"
+  }
+}
