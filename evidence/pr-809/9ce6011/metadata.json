@@ -1,0 +1,22 @@
+{
+  "source": "9ce6011b50c4ab6792bd1261142d03a87f5b9471",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37186882384",
+  "artifact_id": 11296769949,
+  "capture": "original unmodified Chromium PNGs from owned test scene",
+  "scope": "Base-derived Prototype -> Feedback -> private WC owned-scene host; no arbitrary DOM capture or stable/native parity claim",
+  "retention_owner": "Proto-UI project owner; evidence branch is not for product merge",
+  "files": {
+    "NOTICE": "3fa1d2c6306f00277ba83be23b7b9b497ce80e4373588cc5cda4080813dde65d",
+    "LICENSE": "b0a6dd5a8ecb67e51faa7c4f66988be318a53dfcc024ccdad0a261707b2f65aa",
+    "source.json": "93e2768be681c9f612a8d1aa7134e1ddbaacf2aa50a909d40bdffabd05f74860",
+    "result.json": "d92e42f35855420a1bb1d6884fb7e49e317fd896d890e119970e6f9f0fccc1cd",
+    "08-remounted.png": "ba1e29ce31d8c76cddd7e1b4566aa84bd63503a8538e3ad18a861faed1c37d5b",
+    "07-context-loss.png": "2f5dca3e64535de67b2d9cc613aa7807d767b0e2e5ce02d5fb80af1b9769da26",
+    "06-source-loss.png": "2f5dca3e64535de67b2d9cc613aa7807d767b0e2e5ce02d5fb80af1b9769da26",
+    "05-preference-fallback.png": "2f5dca3e64535de67b2d9cc613aa7807d767b0e2e5ce02d5fb80af1b9769da26",
+    "04-disabled.png": "ba1e29ce31d8c76cddd7e1b4566aa84bd63503a8538e3ad18a861faed1c37d5b",
+    "03-keyboard-activation.png": "37ee9fbc2fc3fa437f1d6f4d1f2a4fa02ea21746aa205b6fe0e7b9ba2d39c428",
+    "02-pointer-pressed.png": "108f0968f546c7e9f72a6124171c0ed0b8a7d299d1779bee75b47c4d8255951c",
+    "01-rest.png": "e14c8c5665da3696a921d278cabad0c434ffbc839112044bd34b7c60a833c8aa"
+  }
+}
