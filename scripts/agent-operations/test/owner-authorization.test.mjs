@@ -20,6 +20,7 @@ function fixture(t) {
   fs.writeFileSync(publicKeyPath, publicKey.export({ type: 'spki', format: 'pem' }));
   const grant = {
     id: 'owner-test',
+    generation: 1,
     status: 'active',
     grantor: { login: 'cyjin-yl', id: 19223209 },
     actor: 'cyjin-yl',
@@ -426,7 +427,15 @@ function reviewCliFiles(f) {
         reviewInputDigest: packet.reviewInputDigest,
       },
       artifacts: ['authority-map', 'candidate-change', 'evidence-report', 'review-input'].map(
-        (type) => ({ type, reference: 'fixture:' + type })
+        (type) =>
+          type === 'review-input'
+            ? {
+                type,
+                reference: inputPath,
+                digest: 'sha256:' + packet.reviewInputDigest,
+                revision: input.headSha,
+              }
+            : { type, reference: 'fixture:' + type }
       ),
       humanGates: [],
       notes: [],
@@ -698,4 +707,71 @@ test('ordinary owner delegation does not bypass governed maintenance ceilings or
     }),
     null
   );
+});
+
+test('observed revocation or narrowing permanently invalidates an already loaded owner proof', (t) => {
+  for (const changed of ['revoked', 'narrowed']) {
+    const f = fixture(t),
+      p = f.load();
+    assert.equal(ownerAuthorizationAllows(p, context), true);
+    f.save(
+      {
+        ...f.grant,
+        ...(changed === 'revoked' ? { status: 'revoked' } : { scopeIds: ['pull-request:999'] }),
+      },
+      2
+    );
+    assert.equal(ownerAuthorizationAllows(p, context), false);
+    f.save(f.grant, 3);
+    assert.equal(ownerAuthorizationAllows(p, context), false);
+    assert.equal(ownerAuthorizationAllows(f.load(), context), true);
+  }
+});
+test('grant generations prevent missed revocation ABA without expiring an unchanged grant on unrelated state revisions', (t) => {
+  const f = fixture(t),
+    p = f.load();
+  f.save({ ...f.grant, generation: 2, status: 'revoked' }, 2);
+  f.save({ ...f.grant, generation: 3 }, 3);
+  assert.equal(ownerAuthorizationAllows(p, context), false);
+  assert.equal(ownerAuthorizationAllows(f.load(), context), true);
+  const q = f.load();
+  f.save({ ...f.grant, generation: 3 }, 4);
+  assert.equal(ownerAuthorizationAllows(q, context), true);
+});
+test('v2 review CLI rejects cross-repository/scope/head/input binding and mismatched input artifacts', (t) => {
+  for (const change of [
+    (h) => (h.binding.repositoryId = 'github.com:other/repo'),
+    (h) => (h.binding.scopeId = 'pull-request:488'),
+    (h) => (h.binding.headSha = 'e'.repeat(40)),
+    (h) => (h.binding.reviewInputDigest = 'e'.repeat(64)),
+    (h) =>
+      (h.artifacts.find((a) => a.type === 'review-input').reference = 'fixture:unrelated-input'),
+  ]) {
+    const f = fixture(t),
+      x = reviewCliFiles(f),
+      h = JSON.parse(fs.readFileSync(x.handoffPath, 'utf8'));
+    change(h);
+    fs.writeFileSync(x.handoffPath, JSON.stringify(h));
+    assert.throws(() =>
+      execFileSync(
+        process.execPath,
+        [
+          'scripts/agent-operations/review-packet.mjs',
+          'validate',
+          '--packet',
+          x.packetPath,
+          '--input',
+          x.inputPath,
+          '--handoff',
+          x.handoffPath,
+          '--mode',
+          'autonomous',
+          '--mode-source',
+          'schedule',
+          ...ownerFlags(f),
+        ],
+        { cwd: new URL('../../../', import.meta.url), stdio: 'pipe' }
+      )
+    );
+  }
 });

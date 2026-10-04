@@ -3,6 +3,7 @@ import { ownerAuthorizationAllows } from './owner-authorization.mjs';
 import {
   authorizePullRequestMerge,
   authorizeReviewSubmission,
+  computeReviewInputDigest,
   renderReviewBody,
   isExternalPreviewAuthorizationFailure,
   reviewerPermissionSubjects,
@@ -564,6 +565,38 @@ export function authorizeLiveReviewSubmission(context, live) {
   });
 }
 
+function reviewBoundaryPublicationDelta(context, live, event, body) {
+  const known = new Set(context.input.reviews.map((review) => review.id));
+  const state = { APPROVE: 'APPROVED', REQUEST_CHANGES: 'CHANGES_REQUESTED', COMMENT: 'COMMENTED' }[
+    event
+  ];
+  const matches = live.input.reviews.filter(
+    (review) =>
+      !known.has(review.id) &&
+      review.author?.toLowerCase() === context.actor.toLowerCase() &&
+      review.commitSha === context.packet.headSha &&
+      review.state === state &&
+      review.body === body
+  );
+  if (!matches.length) return { live, duplicate: false };
+  const ids = new Set(matches.map((review) => review.id));
+  const input = structuredClone(live.input);
+  input.reviews = input.reviews.filter((review) => !ids.has(review.id));
+  if (state === 'APPROVED') {
+    const priorPermissions = new Set(
+      context.input.reviewerPermissions.map((permission) => permission.login.toLowerCase())
+    );
+    input.reviewerPermissions = input.reviewerPermissions.filter(
+      (permission) =>
+        permission.login.toLowerCase() !== context.actor.toLowerCase() ||
+        priorPermissions.has(permission.login.toLowerCase())
+    );
+  }
+  if (computeReviewInputDigest(input) !== computeReviewInputDigest(context.input))
+    throw Error('live changes exceed the exact review publication delta; no POST attempted');
+  return { live: { ...live, input }, duplicate: true };
+}
+
 export function submitGitHubReview(
   repositoryId,
   pullRequest,
@@ -617,15 +650,16 @@ export function submitGitHubReview(
       finalLive.viewerPermission !== context.viewerPermission
     )
       throw Error('review identity or permission changed at the final boundary; no POST attempted');
-    const finalAuthorization = authorizeLiveReviewSubmission(context, finalLive);
+    const publicationDelta = reviewBoundaryPublicationDelta(context, finalLive, event, body);
+    const finalAuthorization = authorizeLiveReviewSubmission(context, publicationDelta.live);
+    if (finalAuthorization.duplicate || (publicationDelta.duplicate && finalAuthorization.allowed))
+      return { status: 'duplicate', invocationId, commitId, event, reconciled: false };
     if (!finalAuthorization.allowed)
       throw Error(
         'review eligibility changed at the final boundary: ' +
           finalAuthorization.reason +
           '; no POST attempted'
       );
-    if (finalAuthorization.duplicate)
-      return { status: 'duplicate', invocationId, commitId, event, reconciled: false };
   }
 
   const expectedState = {

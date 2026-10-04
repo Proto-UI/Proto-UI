@@ -328,3 +328,21 @@ test('resume preserves a routed diagnose/repair/validate chain without flattenin
   skipped.continuation = [ci, validation];
   assert.throws(() => resumeSkillHandoff(skipped, registry), /skips a routed leaf/);
 });
+
+test('resume strips mutation and standing authorization artifacts from interrupted and every continuation input', () => {
+  for (const location of ['interrupted', 'continuation']) {
+    const x = resumeArgs();
+    x[location].artifacts.push(
+      a('mutation-authorization', 'fixture:injected-mutation'),
+      a('standing-user-authorization', 'fixture:injected-standing')
+    );
+    const result = resumeSkillHandoff(x, registry);
+    assert.equal(
+      result.artifacts.some((a) =>
+        ['mutation-authorization', 'standing-user-authorization'].includes(a.type)
+      ),
+      false
+    );
+    assert.equal(accepted(result).nextSkill.id, 'pui-review');
+  }
+});

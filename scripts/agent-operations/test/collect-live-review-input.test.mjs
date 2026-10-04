@@ -2466,6 +2466,7 @@ function writerOwner(t, actions = ['integrate']) {
   writeFileSync(publicKeyPath, keys.publicKey.export({ type: 'spki', format: 'pem' }));
   const grant = {
     id: 'owner-merge-boundary',
+    generation: 1,
     status: 'active',
     grantor: { id: 19223209, login: 'cyjin-yl' },
     actor: 'cyjin-yl',
@@ -2592,5 +2593,99 @@ test('owner review writer rechecks grant, target and permission before its singl
       assert.throws(invoke, /boundary|no POST attempted|live canonical/);
       assert.equal(writes, 0);
     }
+  }
+});
+
+test('review writer treats an exact newly published review as duplicate but never hides other live drift', (t) => {
+  for (const drift of [false, true]) {
+    const owner = writerOwner(t, ['review']),
+      a = mergeAuthorizationFixture();
+    a.raw.data.viewer.login = 'cyjin-yl';
+    const packet = { ...a.authorizationContext.packet, recommendedAction: 'COMMENT' },
+      body = renderReviewBody(packet),
+      context = {
+        ...a.authorizationContext,
+        packet,
+        actor: 'cyjin-yl',
+        executionMode: 'autonomous',
+        executionModeSource: 'schedule',
+        authorizationId: owner.id,
+        ownerAuthorization: owner.proof,
+      };
+    let writes = 0;
+    const runner = (command, args, options) => {
+      if (args.includes('graphql')) {
+        a.raw.data.repository.pullRequest.reviews.nodes.push({
+          id: 'PRR_race_duplicate',
+          author: { login: 'cyjin-yl' },
+          state: 'COMMENTED',
+          commit: { oid: sha('b') },
+          submittedAt: '2026-08-23T06:05:00Z',
+          body,
+        });
+        if (drift) a.raw.data.repository.pullRequest.body += ' changed independently';
+      }
+      if (args.includes('POST')) writes++;
+      return a.runner(command, args, options);
+    };
+    const invoke = () =>
+      submitGitHubReview(
+        repositoryId,
+        487,
+        { commitId: sha('b'), event: 'COMMENT', body },
+        runner,
+        { reviewerLogin: 'cyjin-yl', authorizationContext: context }
+      );
+    if (drift) assert.throws(invoke);
+    else assert.equal(invoke().status, 'duplicate');
+    assert.equal(writes, 0);
+  }
+});
+
+test('APPROVE publication delta may add only the bound reviewer permission and remains blocked by revocation or other material', (t) => {
+  for (const failure of ['none', 'revoked', 'material']) {
+    const owner = writerOwner(t, ['review']),
+      a = mergeAuthorizationFixture();
+    a.raw.data.viewer.login = 'cyjin-yl';
+    const packet = a.authorizationContext.packet,
+      body = renderReviewBody(packet),
+      context = {
+        ...a.authorizationContext,
+        actor: 'cyjin-yl',
+        executionMode: 'autonomous',
+        executionModeSource: 'schedule',
+        authorizationId: owner.id,
+        ownerAuthorization: owner.proof,
+      };
+    let writes = 0;
+    const runner = (command, args, options) => {
+      if (args.includes('graphql')) {
+        a.raw.data.repository.pullRequest.reviews.nodes.push({
+          id: 'PRR_owner_duplicate_approval',
+          author: { login: 'cyjin-yl' },
+          state: 'APPROVED',
+          commit: { oid: sha('b') },
+          submittedAt: '2026-08-23T06:05:00Z',
+          body,
+        });
+        if (failure === 'revoked') owner.save('revoked');
+        if (failure === 'material') a.raw.data.repository.pullRequest.body += ' material drift';
+      }
+      if (args.includes('repos/Proto-UI/Proto-UI/collaborators/cyjin-yl/permission'))
+        return JSON.stringify({ user: { login: 'cyjin-yl' }, permission: 'write' });
+      if (args.includes('POST')) writes++;
+      return a.runner(command, args, options);
+    };
+    const invoke = () =>
+      submitGitHubReview(
+        repositoryId,
+        487,
+        { commitId: sha('b'), event: 'APPROVE', body },
+        runner,
+        { reviewerLogin: 'cyjin-yl', authorizationContext: context }
+      );
+    if (failure === 'none') assert.equal(invoke().status, 'duplicate');
+    else assert.throws(invoke);
+    assert.equal(writes, 0);
   }
 });

@@ -65,6 +65,10 @@ function readGrant(statePath, key, grantId) {
   );
   fail(new Set(state.grants.map((g) => g.id)).size === state.grants.length, 'duplicate grant IDs');
   const grant = state.grants.find((g) => g.id === grantId);
+  fail(
+    Number.isSafeInteger(grant?.generation) && grant.generation > 0,
+    'grant generation is required'
+  );
   fail(grant?.status === 'active', 'grant is absent or revoked');
   fail(
     grant.grantor?.login === 'cyjin-yl' && grant.grantor.id === 19223209,
@@ -115,7 +119,14 @@ export function loadOwnerAuthorization({ statePath, publicKeyPath, grantId }) {
     repositoryId: initial.grant.repositoryId,
     actor: initial.grant.actor,
   });
-  proofs.set(proof, { statePath, key, grantId, initial });
+  proofs.set(proof, {
+    statePath,
+    key,
+    grantId,
+    initial,
+    invalidated: false,
+    seenRevision: initial.revision,
+  });
   return proof;
 }
 export function ownerAuthorizationFromArgs(args) {
@@ -130,16 +141,22 @@ export function ownerAuthorizationAllows(
   { repositoryId, scopeId, action, actor, authorizationId, executionModeSource, executionMode } = {}
 ) {
   const context = proofs.get(proof);
-  if (!context) return false;
+  if (!context || context.invalidated) return false;
   try {
     const current = readGrant(context.statePath, context.key, context.grantId);
-    if (current.revision < context.initial.revision) return false;
+    if (current.revision < context.seenRevision) {
+      context.invalidated = true;
+      return false;
+    }
+    context.seenRevision = current.revision;
     const grant = current.grant;
     // A scope/profile change requires a fresh invocation; revocation stops this one immediately.
     if (
       !ownerDelegationSigningBytes(grant).equals(ownerDelegationSigningBytes(context.initial.grant))
-    )
+    ) {
+      context.invalidated = true;
       return false;
+    }
     return (
       sources.has(executionModeSource) &&
       (executionMode === undefined ||
@@ -157,6 +174,7 @@ export function ownerAuthorizationAllows(
       (authorizationId === undefined || authorizationId === grant.id)
     );
   } catch {
+    context.invalidated = true;
     return false;
   }
 }

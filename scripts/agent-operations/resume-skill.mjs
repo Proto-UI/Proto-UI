@@ -74,6 +74,8 @@ export function resumeSkillHandoff(
         'published-review-packet',
         'interruption-receipt',
         'prior-review-input',
+        'mutation-authorization',
+        'standing-user-authorization',
       ].includes(artifact.type) ||
       replaceTypes.has(artifact.type)
     )

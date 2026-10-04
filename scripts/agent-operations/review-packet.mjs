@@ -228,6 +228,34 @@ function loadHandoff(path, nextSkillId, invocationContext = null) {
   return result;
 }
 
+function validateReviewHandoffTarget(handoff, packet, input, inputPath) {
+  if (handoff.schemaVersion !== 2) return;
+  const digest =
+    input.schemaVersion === 3
+      ? computeReviewIngestionInputDigest(input)
+      : computeReviewInputDigest(input);
+  const binding = handoff.binding;
+  if (
+    binding.repositoryId !== packet.repositoryId ||
+    binding.repositoryId !== input.repositoryId ||
+    binding.scopeId !== 'pull-request:' + packet.pullRequest ||
+    packet.pullRequest !== input.pullRequest ||
+    binding.headSha !== packet.headSha ||
+    binding.headSha !== input.headSha ||
+    binding.reviewInputDigest !== digest ||
+    packet.reviewInputDigest !== digest
+  )
+    throw Error('v2 review handoff target binding differs from supplied packet/input');
+  const artifacts = handoff.artifacts.filter((a) => a.type === 'review-input');
+  if (
+    artifacts.length !== 1 ||
+    artifacts[0].reference !== inputPath ||
+    artifacts[0].digest !== 'sha256:' + digest ||
+    artifacts[0].revision !== input.headSha
+  )
+    throw Error('v2 review-input artifact does not bind supplied input path, digest and revision');
+}
+
 function validateExecution(args, packet, policy, executionMode, invocationContext = {}) {
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
   const eligibility = evaluateReviewEligibility({
@@ -244,6 +272,7 @@ function validateExecution(args, packet, policy, executionMode, invocationContex
   return { eligibility, selfAssessment };
 }
 function validateIntegrationExecution(args, packet, input, policy, routed, invocationContext) {
+  validateReviewHandoffTarget(routed.handoff, packet, input, args.get('--input'));
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
   // The reviewed content ceiling was established by the independent reviewer
   // when this packet was sealed; recomputing it against the integrator's
@@ -348,6 +377,7 @@ try {
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
     const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    validateReviewHandoffTarget(handoff, packet, input, args.get('--input'));
     const execution = validateExecution(
       args,
       packet,
@@ -369,6 +399,7 @@ try {
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
     const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    validateReviewHandoffTarget(handoff, packet, input, args.get('--input'));
     const execution = validateExecution(
       args,
       packet,
@@ -429,12 +460,13 @@ try {
     });
   } else if (command === 'submit-review') {
     const invocationContext = loadInvocationContext(args);
-    loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
     const input = readInput(args.get('--input'));
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
+    validateReviewHandoffTarget(handoff, packet, input, args.get('--input'));
     const execution = validateExecution(
       args,
       packet,
