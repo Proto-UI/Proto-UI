@@ -14,7 +14,7 @@
     "candidatePngFactPairs": 40,
     "zeroWidthReservations": 8,
     "fractional22_5pxReservations": 8,
-    "strictHitDragFocusAssertions": "passed in both baseline/candidate workflow including retained focus checks"
+    "strictHitDragFocusAssertions": "Candidate passed strict hit, drag and focus assertions plus the retained focus checks. Baseline is capture-only."
   },
   "files": [
     {
