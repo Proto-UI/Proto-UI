@@ -127,6 +127,27 @@ const ALLOWED_OPTIONS = new Map([
   ],
 ]);
 
+for (const command of ['validate', 'inspect', 'eligibility'])
+  for (const option of [
+    '--mode',
+    '--mode-source',
+    '--owner-authorization',
+    '--owner-key',
+    '--owner-grant',
+  ])
+    ALLOWED_OPTIONS.get(command).add(option);
+
+function loadReadOnlyInvocationContext(args) {
+  const declared = [
+    '--mode',
+    '--mode-source',
+    '--owner-authorization',
+    '--owner-key',
+    '--owner-grant',
+  ].some((name) => args.has(name));
+  return declared ? loadInvocationContext(args) : null;
+}
+
 function parse(argv) {
   if (argv[0] === '--') argv = argv.slice(1);
   const command = argv.shift();
@@ -319,13 +340,20 @@ try {
     const input = readInput(args.get('--input'), { readOnly: true });
     output = { valid: true, reviewInputDigest: computeReviewIngestionInputDigest(input) };
   } else if (command === 'validate') {
+    const invocationContext = loadReadOnlyInvocationContext(args);
     const input = readInput(args.get('--input'), { readOnly: true });
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review');
-    const execution = validateExecution(args, packet, policy, handoff.executionMode);
+    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    const execution = validateExecution(
+      args,
+      packet,
+      policy,
+      handoff.executionMode,
+      invocationContext ?? {}
+    );
     output = {
       valid: true,
       key: reviewPacketKey(packet, input),
@@ -333,13 +361,20 @@ try {
       eligibility: execution.eligibility,
     };
   } else if (command === 'inspect') {
+    const invocationContext = loadReadOnlyInvocationContext(args);
     const input = readInput(args.get('--input'), { readOnly: true });
     const packet = readPacket(args.get('--packet'), input);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review');
-    const execution = validateExecution(args, packet, policy, handoff.executionMode);
+    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    const execution = validateExecution(
+      args,
+      packet,
+      policy,
+      handoff.executionMode,
+      invocationContext ?? {}
+    );
     const currentBase = args.get('--current-base');
     const currentHead = args.get('--current-head');
     if (!currentBase || !currentHead)
@@ -372,7 +407,8 @@ try {
       reconciliationBound,
     };
   } else if (command === 'eligibility') {
-    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review');
+    const invocationContext = loadReadOnlyInvocationContext(args);
+    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
     const reviewClass = args.get('--review-class');
     if (!reviewClass) throw new Error('--review-class is required');
     const policy = loadCapabilityPolicy(
@@ -384,6 +420,11 @@ try {
       reviewClass,
       selfAssessment,
       policy,
+      ownerAuthorization: invocationContext?.ownerAuthorization,
+      executionModeSource: invocationContext?.executionModeSource,
+      repositoryId:
+        handoff.binding?.repositoryId ?? invocationContext?.ownerAuthorization?.repositoryId,
+      scopeId: handoff.binding?.scopeId,
     });
   } else if (command === 'submit-review') {
     const invocationContext = loadInvocationContext(args);

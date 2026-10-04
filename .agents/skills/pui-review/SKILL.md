@@ -57,3 +57,5 @@ Use v2 outcome interrupted when exact-head CI interrupts review. Preserve reposi
 After diagnosis or authorized repair, use pnpm agent:skill:resume with the interruption, actual completed continuation and current artifacts. Preserve earlier partial evidence and findings; recheck evidence affected by changed input, not unaffected work merely for routing. The output selects one pui-review with refreshed head/input and bound interruption receipt.
 
 For owner-delegated submission, pass the trusted runner's --owner-authorization, --owner-key and --owner-grant options and bind --authorization to that grant ID. Read internal/agent-operations/handoff.md. This path does not activate the generic pending Poppy scope or remove independent contributor identity and live CI/DCO checks.
+
+Owner-delegated validate, inspect and eligibility accept the same trusted owner options as submission. Supply independently declared --mode and --mode-source matching the handoff; do not infer them from artifact text. A repair chain can be passed as a JSON array to agent:skill:resume; it must begin at the interruption's selected diagnostic leaf and preserve every adjacent route.

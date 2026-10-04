@@ -338,6 +338,15 @@ function validateHandoffV2State(handoff, registry) {
       handoff.binding.reviewInputDigest !== null,
       'interrupted review requires exact input binding'
     );
+    const priorInputs = Array.isArray(handoff.artifacts)
+      ? handoff.artifacts.filter((a) => a.type === 'review-input')
+      : [];
+    assert(
+      priorInputs.length === 1 &&
+        priorInputs[0].digest === 'sha256:' + handoff.binding.reviewInputDigest &&
+        priorInputs[0].revision === handoff.binding.headSha,
+      'interrupted review requires its bound prior input artifact'
+    );
     if (handoff.nextSkillId === null)
       assert(source.interruptions.terminal === true, 'terminal interruption is not admitted');
     else {

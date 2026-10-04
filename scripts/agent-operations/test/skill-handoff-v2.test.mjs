@@ -256,3 +256,75 @@ test('resume rejects mode/scope drift, missing fresh input and injected approval
     assert.throws(() => resumeSkillHandoff(x, registry));
   }
 });
+
+test('resume cannot skip the specifically routed diagnostic producer', () => {
+  const x = resumeArgs();
+  x.continuation = base({
+    fromId: 'pui-validate',
+    nextSkillId: null,
+    binding: x.continuation.binding,
+  });
+  assert.throws(() => resumeSkillHandoff(x, registry), /routed|continuation/);
+});
+test('interrupted review requires its auditable exact-head input artifact', () => {
+  for (const mutate of [
+    (h) => (h.artifacts = h.artifacts.filter((a) => a.type !== 'review-input')),
+    (h) => (h.artifacts.find((a) => a.type === 'review-input').revision = 'e'.repeat(40)),
+    (h) => (h.artifacts.find((a) => a.type === 'review-input').digest = 'sha256:' + 'e'.repeat(64)),
+  ]) {
+    const h = interrupted();
+    mutate(h);
+    assert.throws(() => validateSkillHandoff(h), /input/);
+  }
+});
+
+test('resume preserves a routed diagnose/repair/validate chain without flattening away provenance', () => {
+  const x = resumeArgs(),
+    current = x.continuation.binding,
+    review = x.currentArtifacts.find((a) => a.type === 'review-input');
+  const authority = a('authority-map'),
+    semantic = a('semantic-authorization');
+  const ci = base({
+    fromId: 'pui-ci',
+    nextSkillId: 'pui-spec',
+    binding,
+    artifacts: [a('ci-report', 'fixture:diagnosis', { result: 'failed' }), authority, semantic],
+  });
+  const repair = base({
+    fromId: 'pui-spec',
+    nextSkillId: 'pui-validate',
+    binding: current,
+    artifacts: [
+      authority,
+      semantic,
+      a('candidate-change', 'fixture:repair', { revision: current.headSha }),
+    ],
+  });
+  const validation = base({
+    fromId: 'pui-validate',
+    nextSkillId: 'pui-review',
+    binding: current,
+    artifacts: [
+      authority,
+      repair.artifacts[2],
+      a('evidence-report', 'fixture:fixed', { revision: current.headSha, result: 'passed' }),
+      review,
+    ],
+  });
+  x.continuation = [ci, repair, validation];
+  const result = resumeSkillHandoff(x, registry);
+  assert.equal(accepted(result).nextSkill.id, 'pui-review');
+  assert.equal(result.fromId, 'pui-validate');
+  assert.equal(result.artifacts.filter((a) => a.reference === 'fixture:repair').length, 1);
+  assert.equal(
+    result.artifacts.some((a) => a.reference === 'fixture:diagnosis' && a.result === 'failed'),
+    true
+  );
+  assert.equal(
+    result.artifacts.some((a) => a.reference === 'fixture:prior' && a.result === 'partial'),
+    true
+  );
+  const skipped = structuredClone(x);
+  skipped.continuation = [ci, validation];
+  assert.throws(() => resumeSkillHandoff(skipped, registry), /skips a routed leaf/);
+});

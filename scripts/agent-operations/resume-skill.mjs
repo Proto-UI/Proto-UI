@@ -12,21 +12,31 @@ export function resumeSkillHandoff(
 ) {
   validateSkillHandoff(interrupted, registry);
   if (interrupted.outcome !== 'interrupted') throw Error('resume requires an interrupted source');
-  requireCompletedHandoff(continuation);
-  validateSkillHandoff(continuation, registry);
-  for (const key of ['entrypoint', 'executionMode', 'executionModeSource'])
-    if (continuation[key] !== interrupted[key]) throw Error('resume cannot change ' + key);
-  if (continuation.schemaVersion !== 2 || continuation.resume)
-    throw Error('resume requires a completed v2 continuation');
-  for (const key of ['repositoryId', 'scopeId'])
-    if (continuation.binding[key] !== interrupted.binding[key])
-      throw Error('resume cannot change ' + key);
+  const chain = Array.isArray(continuation) ? continuation : [continuation];
+  if (!chain.length || chain[0]?.fromId !== interrupted.nextSkillId)
+    throw Error('continuation must begin at the routed interruption leaf');
+  for (const [index, step] of chain.entries()) {
+    requireCompletedHandoff(step);
+    validateSkillHandoff(step, registry);
+    if (step.schemaVersion !== 2 || step.resume)
+      throw Error('resume requires completed v2 continuation steps');
+    for (const key of ['entrypoint', 'executionMode', 'executionModeSource'])
+      if (step[key] !== interrupted[key]) throw Error('resume cannot change ' + key);
+    for (const key of ['repositoryId', 'scopeId'])
+      if (step.binding[key] !== interrupted.binding[key])
+        throw Error('resume cannot change ' + key);
+    if (index && chain[index - 1].nextSkillId !== step.fromId)
+      throw Error('continuation chain skips a routed leaf');
+  }
+  const final = chain.at(-1);
+  if (final.nextSkillId !== null && final.nextSkillId !== interrupted.interruption.resumeSkillId)
+    throw Error('continuation has another pending routed leaf');
   if (!Array.isArray(currentArtifacts)) throw Error('current resume inputs are missing');
   const refreshed = currentArtifacts.filter((a) => a.type === 'review-input');
   if (
     refreshed.length !== 1 ||
-    refreshed[0].digest !== 'sha256:' + continuation.binding.reviewInputDigest ||
-    refreshed[0].revision !== continuation.binding.headSha
+    refreshed[0].digest !== 'sha256:' + final.binding.reviewInputDigest ||
+    refreshed[0].revision !== final.binding.headSha
   )
     throw Error('resume requires digest- and revision-bound current review input');
   if (
@@ -43,12 +53,21 @@ export function resumeSkillHandoff(
   )
     throw Error('resume refresh cannot introduce approval or authorization');
   const materials = [];
+  const add = (artifact) => {
+    const previous = materials.find(
+      (a) => a.type === artifact.type && a.reference === artifact.reference
+    );
+    if (previous) {
+      if (JSON.stringify(previous) !== JSON.stringify(artifact))
+        throw Error('resume has conflicting provenance for ' + artifact.reference);
+    } else materials.push(structuredClone(artifact));
+  };
   const replaceTypes = new Set(
     currentArtifacts
       .map((a) => a.type)
       .filter((t) => !['candidate-change', 'evidence-report'].includes(t))
   );
-  for (const artifact of [...interrupted.artifacts, ...continuation.artifacts]) {
+  for (const artifact of [...interrupted.artifacts, ...chain.flatMap((step) => step.artifacts)]) {
     if (
       [
         'review-packet',
@@ -59,36 +78,35 @@ export function resumeSkillHandoff(
       replaceTypes.has(artifact.type)
     )
       continue;
-    const previous = materials.find(
-      (a) => a.type === artifact.type && a.reference === artifact.reference
-    );
-    if (previous) {
-      if (JSON.stringify(previous) !== JSON.stringify(artifact))
-        throw Error('resume has conflicting provenance for ' + artifact.reference);
-    } else materials.push(structuredClone(artifact));
+    add(artifact);
   }
   const receiptDigest =
     'sha256:' + createHash('sha256').update(JSON.stringify(interrupted)).digest('hex');
   const oldInput = interrupted.artifacts.find((a) => a.type === 'review-input');
-  if (oldInput) materials.push({ ...oldInput, type: 'prior-review-input' });
-  materials.push({
-    type: 'interruption-receipt',
-    reference: interruptedReference,
-    digest: receiptDigest,
-  });
+  add({ ...oldInput, type: 'prior-review-input' });
+  add({ type: 'interruption-receipt', reference: interruptedReference, digest: receiptDigest });
+  for (const artifact of currentArtifacts) add(artifact);
   const result = {
     schemaVersion: 2,
     kind: 'proto-ui.skill-handoff',
     entrypoint: interrupted.entrypoint,
     executionMode: interrupted.executionMode,
     executionModeSource: interrupted.executionModeSource,
-    fromId: continuation.fromId,
+    fromId: final.fromId,
     nextSkillId: interrupted.interruption.resumeSkillId,
     outcome: 'completed',
-    binding: structuredClone(continuation.binding),
-    artifacts: [...materials, ...structuredClone(currentArtifacts)],
-    humanGates: [...new Set([...interrupted.humanGates, ...continuation.humanGates])],
-    notes: [...new Set([...interrupted.notes, ...continuation.notes])],
+    binding: structuredClone(final.binding),
+    artifacts: materials,
+    humanGates: [
+      ...new Set([...interrupted.humanGates, ...chain.flatMap((step) => step.humanGates)]),
+    ],
+    notes: [
+      ...new Set([
+        ...interrupted.notes,
+        ...chain.flatMap((step) => step.notes),
+        'Validated continuation route: ' + chain.map((step) => step.fromId).join(' -> '),
+      ]),
+    ],
     resume: {
       interruptedHandoffReference: interruptedReference,
       interruptedHandoffDigest: receiptDigest,
@@ -109,7 +127,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const [i, c, a] = paths;
     if (!i || !c || !a)
       throw Error(
-        'Usage: pnpm agent:skill:resume -- <interruption.json> <completed-continuation.json> <current-artifacts.json>'
+        'Usage: pnpm agent:skill:resume -- <interruption.json> <completed-continuation-or-chain.json> <current-artifacts.json>'
       );
     const read = (p) => JSON.parse(fs.readFileSync(p, 'utf8'));
     process.stdout.write(

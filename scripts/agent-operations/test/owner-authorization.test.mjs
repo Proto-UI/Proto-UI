@@ -396,3 +396,280 @@ test('delegation never permits runtime mode/source drift or an invented mode', (
   assert.equal(ownerAuthorizationAllows(p, { ...context, executionMode: 'human-assisted' }), false);
   assert.equal(ownerAuthorizationAllows(p, { ...context, executionMode: 'autonomous' }), true);
 });
+
+import * as ownerModule from '../owner-authorization.mjs';
+import { applyGitHubCollaborationMutation } from '../collect-live-collaboration-state.mjs';
+function reviewCliFiles(f) {
+  const dir = path.dirname(f.statePath),
+    input = reviewSnapshot(),
+    packet = reviewPacket(input);
+  const inputPath = path.join(dir, 'input.json'),
+    packetPath = path.join(dir, 'packet.json'),
+    handoffPath = path.join(dir, 'review-handoff.json');
+  fs.writeFileSync(inputPath, JSON.stringify(input));
+  fs.writeFileSync(packetPath, JSON.stringify(packet));
+  fs.writeFileSync(
+    handoffPath,
+    JSON.stringify({
+      schemaVersion: 2,
+      kind: 'proto-ui.skill-handoff',
+      entrypoint: 'development',
+      executionMode: 'autonomous',
+      executionModeSource: 'schedule',
+      fromId: 'pui-dev',
+      nextSkillId: 'pui-review',
+      outcome: 'completed',
+      binding: {
+        repositoryId: input.repositoryId,
+        scopeId: 'pull-request:' + input.pullRequest,
+        headSha: input.headSha,
+        reviewInputDigest: packet.reviewInputDigest,
+      },
+      artifacts: ['authority-map', 'candidate-change', 'evidence-report', 'review-input'].map(
+        (type) => ({ type, reference: 'fixture:' + type })
+      ),
+      humanGates: [],
+      notes: [],
+    })
+  );
+  return { dir, input, packet, inputPath, packetPath, handoffPath };
+}
+const ownerFlags = (f) => [
+  '--owner-authorization',
+  f.statePath,
+  '--owner-key',
+  f.publicKeyPath,
+  '--owner-grant',
+  f.grant.id,
+];
+test('owner read-only validate, inspect and eligibility are reachable through actual CLI without assessment', (t) => {
+  const f = fixture(t),
+    x = reviewCliFiles(f),
+    root = new URL('../../../', import.meta.url),
+    contextFlags = ['--mode', 'autonomous', '--mode-source', 'schedule', ...ownerFlags(f)];
+  for (const command of ['validate', 'inspect', 'eligibility']) {
+    const args = [
+      'scripts/agent-operations/review-packet.mjs',
+      command,
+      '--handoff',
+      x.handoffPath,
+      ...contextFlags,
+    ];
+    if (command === 'eligibility') args.push('--review-class', x.packet.reviewClass);
+    else args.push('--packet', x.packetPath, '--input', x.inputPath);
+    if (command === 'inspect')
+      args.push('--current-base', x.input.baseSha, '--current-head', x.input.headSha);
+    const output = JSON.parse(
+      execFileSync(process.execPath, args, {
+        cwd: root,
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
+    );
+    assert.equal((output.eligibility ?? output).eligible, true);
+  }
+});
+test('delegated resolver handoff requires independent mode/source and rejects drift', (t) => {
+  const f = fixture(t),
+    x = reviewCliFiles(f),
+    root = new URL('../../../', import.meta.url),
+    common = [
+      'scripts/agent-operations/resolve-skill.mjs',
+      '--handoff',
+      x.handoffPath,
+      ...ownerFlags(f),
+    ];
+  assert.throws(() => execFileSync(process.execPath, common, { cwd: root, stdio: 'pipe' }));
+  const good = JSON.parse(
+    execFileSync(
+      process.execPath,
+      [...common, '--mode', 'autonomous', '--mode-source', 'schedule'],
+      { cwd: root, encoding: 'utf8' }
+    )
+  );
+  assert.equal(good.blocked, false);
+  assert.throws(() =>
+    execFileSync(
+      process.execPath,
+      [...common, '--mode', 'human-assisted', '--mode-source', 'current-user'],
+      { cwd: root, stdio: 'pipe' }
+    )
+  );
+});
+test('owner skill eligibility does not implicitly activate dedicated evidence publication', (t) => {
+  const f = fixture(t),
+    skill = loadSkillRegistry().byId.get('pui-evidence-publish');
+  assert.equal(
+    ownerSkillEligibility(skill, {
+      ownerAuthorization: f.load(),
+      ...context,
+      executionMode: 'autonomous',
+    }),
+    null
+  );
+});
+test('exact workflow and thread scopes use stable identifiers rather than undefined or PR-wide scope', (t) => {
+  const f = fixture(t);
+  assert.equal(typeof ownerModule.ownerCollaborationScope, 'function');
+  const run = { target: { kind: 'workflow-run', runId: 123 } },
+    otherRun = { target: { kind: 'workflow-run', runId: 124 } },
+    thread = { target: { kind: 'review-thread', number: 813, threadId: 'PRRT_a' } },
+    otherThread = { target: { ...thread.target, threadId: 'PRRT_b' } };
+  assert.equal(ownerModule.ownerCollaborationScope(run), 'workflow-run:123');
+  assert.notEqual(
+    ownerModule.ownerCollaborationScope(run),
+    ownerModule.ownerCollaborationScope(otherRun)
+  );
+  assert.notEqual(
+    ownerModule.ownerCollaborationScope(thread),
+    ownerModule.ownerCollaborationScope(otherThread)
+  );
+  f.save({ ...f.grant, scopeIds: ['workflow-run:123'] }, 2);
+  const p = f.load();
+  assert.equal(
+    ownerAuthorizationAllows(p, { ...context, scopeId: ownerModule.ownerCollaborationScope(run) }),
+    true
+  );
+  assert.equal(
+    ownerAuthorizationAllows(p, {
+      ...context,
+      scopeId: ownerModule.ownerCollaborationScope(otherRun),
+    }),
+    false
+  );
+  assert.throws(() => ownerModule.ownerCollaborationScope({ target: { kind: 'workflow-run' } }));
+});
+test('real owner-delegated mutation adapter reaches exactly one write and rechecks revocation before it', (t) => {
+  for (const revoke of [false, true]) {
+    const f = fixture(t),
+      { request, liveState } = collaboration(),
+      proof = f.load();
+    let writes = 0,
+      reads = 0;
+    const options = {
+      authorizationContext: {
+        executionMode: 'autonomous',
+        executionModeSource: 'schedule',
+        policy,
+        ownerAuthorization: proof,
+        selfAssessment: null,
+      },
+      runner() {
+        writes++;
+        return JSON.stringify({ id: 813, node_id: 'PR_test', html_url: liveState.current.url });
+      },
+      collectState() {
+        reads++;
+        if (revoke) f.save({ ...f.grant, status: 'revoked' }, 2);
+        return reads === 1
+          ? liveState
+          : {
+              ...liveState,
+              current: {
+                ...liveState.current,
+                title: 'Corrected',
+                updatedAt: '2026-10-04T10:00:05.000Z',
+              },
+            };
+      },
+    };
+    if (revoke) {
+      assert.throws(
+        () => applyGitHubCollaborationMutation(request, liveState, options),
+        /owner delegation/
+      );
+      assert.equal(writes, 0);
+    } else {
+      const result = applyGitHubCollaborationMutation(request, liveState, options);
+      assert.equal(result.mutationCount, 1);
+      assert.equal(writes, 1);
+      assert.equal(reads, 2);
+    }
+  }
+});
+
+test('actual delegated collaboration apply CLI uses the real adapter and never writes after revocation', (t) => {
+  for (const [mode, source] of [
+    ['autonomous', 'schedule'],
+    ['human-assisted', 'current-user'],
+  ])
+    for (const revoke of [false, true]) {
+      const f = fixture(t),
+        { request, liveState } = collaboration(),
+        dir = path.dirname(f.statePath),
+        rp = path.join(dir, 'request.json'),
+        hp = path.join(dir, 'handoff.json');
+      f.save({ ...f.grant, scopeIds: ['pull-request:813'] }, 2);
+      fs.writeFileSync(rp, JSON.stringify(request));
+      fs.writeFileSync(
+        hp,
+        JSON.stringify({
+          schemaVersion: 1,
+          kind: 'proto-ui.skill-handoff',
+          entrypoint: 'development',
+          executionMode: mode,
+          executionModeSource: source,
+          fromId: 'pui-dev',
+          nextSkillId: 'pui-collaborate',
+          artifacts: [
+            { type: 'capability-envelope', reference: 'fixture:context' },
+            { type: 'github-snapshot', reference: 'fixture:live' },
+            { type: 'mutation-authorization', reference: f.grant.id },
+            {
+              type: 'collaboration-request',
+              reference: rp,
+              digest: 'sha256:' + request.requestDigest,
+            },
+          ],
+          humanGates: [],
+          notes: [],
+        })
+      );
+      let writes = 0,
+        reads = 0;
+      const post = {
+        ...liveState,
+        observedAt: '2026-10-04T10:00:10.000Z',
+        current: {
+          ...liveState.current,
+          title: 'Corrected',
+          updatedAt: '2026-10-04T10:00:05.000Z',
+        },
+      };
+      const result = runCollaborationCli(
+        [
+          'apply',
+          '--mode',
+          mode,
+          '--mode-source',
+          source,
+          '--request',
+          rp,
+          '--handoff',
+          hp,
+          ...ownerFlags(f),
+        ],
+        {
+          collectState() {
+            reads++;
+            if (revoke && reads === 2)
+              f.save({ ...f.grant, scopeIds: ['pull-request:813'], status: 'revoked' }, 3);
+            return reads < 3 ? liveState : post;
+          },
+          runner(_command, _args, options) {
+            writes++;
+            assert.deepEqual(JSON.parse(options.input), { title: 'Corrected' });
+            return JSON.stringify({
+              id: 813,
+              number: 813,
+              node_id: 'PR_test',
+              html_url: post.current.url,
+            });
+          },
+        }
+      );
+      assert.equal(result.outcome, revoke ? 'rejected' : 'applied');
+      assert.equal(result.mutationCount, revoke ? 0 : 1);
+      assert.equal(writes, revoke ? 0 : 1);
+    }
+});

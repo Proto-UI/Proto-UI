@@ -1,5 +1,6 @@
 import {
   ownerAuthorizationFromArgs,
+  ownerCollaborationScope,
   ownerAuthorizationAllows,
   ownerSkillEligibility,
 } from './owner-authorization.mjs';
@@ -179,7 +180,7 @@ function validateExecution(request, args, policy, invocationContext, routed) {
     ownerAuthorization: invocationContext.ownerAuthorization,
     executionModeSource: invocationContext.executionModeSource,
     repositoryId: request.repositoryId,
-    scopeId: request.target.kind + ':' + request.target.number,
+    scopeId: ownerCollaborationScope(request),
   });
   if (!eligibility.eligible) throw new Error(eligibility.reason);
   if (

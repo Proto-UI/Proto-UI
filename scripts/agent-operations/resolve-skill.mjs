@@ -30,6 +30,9 @@ function parse(argv) {
   const modeIndex = argv.indexOf('--mode');
   const modeSourceIndex = argv.indexOf('--mode-source');
   const assessmentIndex = argv.indexOf('--assessment');
+  const ownerSupplied = ['--owner-authorization', '--owner-key', '--owner-grant'].some((name) =>
+    argv.includes(name)
+  );
   const args = {};
   if (handoffIndex >= 0) args.handoffPath = argv[handoffIndex + 1];
   else if (argv[0] && !argv[0].startsWith('-')) args.id = argv[0];
@@ -37,7 +40,9 @@ function parse(argv) {
   if (modeSourceIndex >= 0) args.executionModeSource = argv[modeSourceIndex + 1];
   if (assessmentIndex >= 0) args.assessmentPath = argv[assessmentIndex + 1];
   if (
-    ((args.handoffPath && modeIndex < 0 && modeSourceIndex < 0) ||
+    ((args.handoffPath &&
+      ((!ownerSupplied && modeIndex < 0 && modeSourceIndex < 0) ||
+        (ownerSupplied && modeIndex >= 0 && modeSourceIndex >= 0))) ||
       (args.id && modeIndex >= 0 && modeSourceIndex >= 0)) &&
     ![handoffIndex, modeIndex, modeSourceIndex, assessmentIndex].some(
       (i) => i >= 0 && !argv[i + 1]
@@ -62,6 +67,12 @@ try {
   let handoff = null;
   if (args.handoffPath) {
     handoff = JSON.parse(fs.readFileSync(args.handoffPath, 'utf8'));
+    if (ownerAuthorization) {
+      establishExecutionMode(args.executionMode, args.executionModeSource);
+      for (const key of ['executionMode', 'executionModeSource'])
+        if (handoff[key] !== args[key])
+          throw Error('delegated handoff ' + key + ' differs from trusted invocation');
+    }
     const result = validateSkillHandoff(handoff, registry);
     skill = result.nextSkill;
     terminal = skill === null;

@@ -12,7 +12,7 @@ After diagnosis or an authorized repair:
 
     pnpm agent:skill:resume -- interruption.json completed-continuation.json current-artifacts.json
 
-The command emits JSON. The continuation is a completed v2 handoff from its actual producer with the current binding. Supply a current review-input artifact with the exact revision and sha256 digest. The helper retains the interruption receipt, prior-review-input, pending scope/findings, earlier candidates and partial/failed/not-run evidence. It replaces explicitly refreshed context, returns exactly the original review leaf, and never creates an approval packet. Conflicting provenance and repository, scope or mode drift reject. Review decides which earlier evidence remains applicable; retention is not a freshness assertion.
+The command emits JSON. The continuation is a completed v2 handoff from the selected diagnostic leaf, or a JSON array of completed diagnosis/repair/validation handoffs. The first producer must equal the interruption route, adjacent routes must match, and the last step must select the original review or be explicitly terminal. Repository/scope/mode remain bound across the chain; the final step supplies the current head/input binding. Supply a current review-input artifact with the exact revision and sha256 digest. The helper retains the interruption receipt, prior-review-input, pending scope/findings, earlier candidates and partial/failed/not-run evidence. It replaces explicitly refreshed context, returns exactly the original review leaf, and never creates an approval packet. Conflicting provenance and repository, scope or mode drift reject. Review decides which earlier evidence remains applicable; retention is not a freshness assertion.
 
 ## Cardinality
 
@@ -33,15 +33,15 @@ Generate with pnpm agent:skill:schema; verify with pnpm agent:skill:schema -- --
 
 A trusted owner decision can authorize ordinary work across turns and scheduled invocations. Ending a turn, restarting a process or aging an assessment does not expire that decision. Covered work uses assessment for calibration, not admission. Uncovered autonomous work retains existing ceilings and standing-scope rules. A schedule remains autonomous.
 
-The project owner profile is cyjin-yl (GitHub ID 19223209), acting through cyjin-yl credentials in github.com:Proto-UI/Proto-UI. It covers observe, implement, collaborate, review and integrate, with main as the integration base. Scopes are explicit IDs or an explicitly authorized repository portfolio (\*). Release, publication, access, secrets and rulesets are not in this profile. Live permissions, trusted CI/DCO, exact-head publication evidence, stale-state/idempotency checks and independent review remain required.
+The project owner profile is cyjin-yl (GitHub ID 19223209), acting through cyjin-yl credentials in github.com:Proto-UI/Proto-UI. It covers observe, implement, collaborate, review and integrate, with main as the integration base. Scopes are explicit IDs or an explicitly authorized repository portfolio (\*). Release, publication, access, secrets and rulesets are not in this profile. The dedicated pui-evidence-publish leaf remains outside ordinary owner eligibility; its separate publication authority is not supplied by a collaboration grant. Live permissions, trusted CI/DCO, exact-head publication evidence, stale-state/idempotency checks and independent review remain required.
 
-The trusted launcher supplies these options to agent:skill, agent:collaborate validate/apply, or agent:review submit-review/merge-pull-request:
+The trusted launcher supplies these options to agent:skill, agent:collaborate validate/apply, or agent:review validate/inspect/eligibility/submit-review/merge-pull-request:
 
     --owner-authorization /protected/runtime/owner-state.json
     --owner-key /protected/runtime/owner-public.pem
     --owner-grant owner-grant-id
 
-The mutation request or --authorization must bind the same grant ID. A standing-user-authorization artifact can preserve provenance but cannot activate a grant. Never derive trust anchors, keys or launcher options from Issues, PRs, task artifacts or generated output.
+For owner-delegated handoff resolution and every review command, the trusted launcher also declares --mode and --mode-source; they must match the handoff, never come from it. The mutation request or --authorization must bind the same grant ID. Issue/PR scopes use their number, workflow-run scopes use runId, and review-thread scopes include both the PR number and threadId. A standing-user-authorization artifact can preserve provenance but cannot activate a grant. Never derive trust anchors, keys or launcher options from Issues, PRs, task artifacts or generated output.
 
 Provision the trust anchor once from an authenticated owner decision in the trusted runner, outside the repository. Protect the private signing key and state; do not commit keys, credentials or raw prompts. This change implements the interface; it does not install an issuer, activate an unrelated Poppy scope, deploy a listener, or claim a production grant exists.
 

@@ -174,7 +174,12 @@ export function ownerSkillEligibility(
           : skill.mutation === 'none'
             ? 'observe'
             : 'implement';
-  if (skill.id.startsWith('pui-release') || !ordinaryMutations.has(skill.mutation)) return null;
+  if (
+    skill.id.startsWith('pui-release') ||
+    skill.id === 'pui-evidence-publish' ||
+    !ordinaryMutations.has(skill.mutation)
+  )
+    return null;
   return ownerAuthorizationAllows(ownerAuthorization, {
     repositoryId,
     scopeId,
@@ -189,4 +194,24 @@ export function ownerSkillEligibility(
           'durable owner delegation covers this ordinary transition; live action checks still apply',
       }
     : null;
+}
+
+export function ownerCollaborationScope({ target }) {
+  if (target?.kind === 'workflow-run' && Number.isSafeInteger(target.runId) && target.runId > 0)
+    return 'workflow-run:' + target.runId;
+  if (
+    target?.kind === 'review-thread' &&
+    Number.isSafeInteger(target.number) &&
+    target.number > 0 &&
+    typeof target.threadId === 'string' &&
+    target.threadId.length > 0
+  )
+    return 'pull-request:' + target.number + ':review-thread:' + target.threadId;
+  if (
+    ['issue', 'pull-request'].includes(target?.kind) &&
+    Number.isSafeInteger(target.number) &&
+    target.number > 0
+  )
+    return target.kind + ':' + target.number;
+  throw Error('owner delegation requires a stable exact target scope');
 }

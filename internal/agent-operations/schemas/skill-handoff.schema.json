@@ -892,6 +892,19 @@
                 "properties": {
                   "reviewInputDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
                 }
+              },
+              "artifacts": {
+                "contains": {
+                  "type": "object",
+                  "required": ["type", "digest", "revision"],
+                  "properties": {
+                    "type": { "const": "review-input" },
+                    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+                    "revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
+                  }
+                },
+                "minContains": 1,
+                "maxContains": 1
               }
             }
           },

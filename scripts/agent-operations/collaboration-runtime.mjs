@@ -1,4 +1,4 @@
-import { ownerAuthorizationAllows } from './owner-authorization.mjs';
+import { ownerAuthorizationAllows, ownerCollaborationScope } from './owner-authorization.mjs';
 import { createHash } from 'node:crypto';
 
 const SHA = /^[a-f0-9]{40,64}$/;
@@ -384,7 +384,7 @@ export function validateCollaborationHandoffBinding(
   );
   const delegated = ownerAuthorizationAllows(ownerAuthorization, {
     repositoryId: request.repositoryId,
-    scopeId: request.target.kind + ':' + request.target.number,
+    scopeId: ownerCollaborationScope(request),
     action: 'collaborate',
     executionMode: handoff.executionMode,
     authorizationId: request.authorizationId,
@@ -544,7 +544,7 @@ function validateAuthority({
   if (ownerAuthorization) {
     return ownerAuthorizationAllows(ownerAuthorization, {
       repositoryId: request.repositoryId,
-      scopeId: request.target.kind + ':' + request.target.number,
+      scopeId: ownerCollaborationScope(request),
       action: 'collaborate',
       executionMode,
       actor,

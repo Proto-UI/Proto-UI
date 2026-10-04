@@ -105,6 +105,19 @@ v2.allOf.push({
       fromId: { const: 'pui-review' },
       nextSkillId: { enum: ['pui-ci', null] },
       binding: { properties: { reviewInputDigest: inputDigest } },
+      artifacts: {
+        contains: {
+          type: 'object',
+          required: ['type', 'digest', 'revision'],
+          properties: {
+            type: { const: 'review-input' },
+            digest: legacy.properties.artifacts.items.properties.digest,
+            revision: sha,
+          },
+        },
+        minContains: 1,
+        maxContains: 1,
+      },
     },
   },
   else: { properties: { interruption: false } },
