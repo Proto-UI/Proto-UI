@@ -19,3 +19,13 @@ Retention owner: PR #816 contributor. Keep this small evidence-only branch and i
 The follow-up run https://github.com/Proto-UI/Proto-UI/actions/runs/37204472736 provides `code-before-ec6e5710-390x844.png` and `code-after-9e06e181-390x844.png`, both Chinese/light/normal-size 390×844 views of the same Transition example. Native expanded source viewport height is 144px before and 549px after; code retains its own horizontal scrolling and the whole page has zero horizontal overflow. The candidate screenshot includes the actual keyboard source-focus outline. Copy remains visible outside that scroll region.
 
 These captures completed before an evidence assertion incorrectly read Copy state from its passive wrapper. That later assertion failure is retained, not labeled a successful clipboard test. Commit 833a789a fixes only the probe to read the actual public Button state. The images stay labeled with 9e06e181, their actual captured source.
+
+## Corrected single-toggle menu (supersedes the first menu)
+
+The `menu-after-70a2ff89-390.png` frame is retained as rejected historical evidence: it has duplicate close controls and unnecessary forced blank space. The user explicitly rejected both. `menu-corrected-ceb447d2-390.png` shows the corrected natural-height panel with only the original Header X. Captured at ceb447d298c9aeacaf428ed375e147e0dc9ab8c4, same 390×844 zh/light normal-text environment; run37205663893. Full eight normal viewport/locale/theme cases and two menu-pressure cases passed, with separate manual pixel review; dark Copy transparency found in that review remained a later fix.
+
+## Actual sidebar density before/after
+
+`sidebar-before-ec6e5710-1440-zh-dark.png` and `sidebar-after-ae6de7b6-1440-zh-dark.png` show the same `/zh-cn/start-here/what-you-saw/` page at 1440×1000 CSS pixels, dark theme, normal font size. Candidate is ae6de7b6ce8ef0b2a512c4c720a7c917545a70b8, baseline ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31; run https://github.com/Proto-UI/Proto-UI/actions/runs/37207936466. Both images have been manually viewed. The candidate reduces desktop sidebar rows and weights, aligns the right TOC density, and reserves strong current styling for native aria-current. Column widths and body text are unchanged.
+
+Important limitation: screenshot capture succeeded before the new measurement callback failed with `ReferenceError: __name is not defined` in both baseline and candidate. That TSX serialization defect is being fixed with explicit executable regression coverage. These actual images are not an all-green evidence claim. Header Select measured38/40 instead of36 is also recorded for repair, and 320px/200% code pressure still needs work.
