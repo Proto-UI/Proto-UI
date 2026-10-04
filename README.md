@@ -29,3 +29,19 @@ The `menu-after-70a2ff89-390.png` frame is retained as rejected historical evide
 `sidebar-before-ec6e5710-1440-zh-dark.png` and `sidebar-after-ae6de7b6-1440-zh-dark.png` show the same `/zh-cn/start-here/what-you-saw/` page at 1440×1000 CSS pixels, dark theme, normal font size. Candidate is ae6de7b6ce8ef0b2a512c4c720a7c917545a70b8, baseline ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31; run https://github.com/Proto-UI/Proto-UI/actions/runs/37207936466. Both images have been manually viewed. The candidate reduces desktop sidebar rows and weights, aligns the right TOC density, and reserves strong current styling for native aria-current. Column widths and body text are unchanged.
 
 Important limitation: screenshot capture succeeded before the new measurement callback failed with `ReferenceError: __name is not defined` in both baseline and candidate. That TSX serialization defect is being fixed with explicit executable regression coverage. These actual images are not an all-green evidence claim. Header Select measured38/40 instead of36 is also recorded for repair, and 320px/200% code pressure still needs work.
+
+## Header/directory and documentation rhythm: reviewed source-bound frames
+
+The2a5592c11c383d19c92e01f208cb5cff02c9a802 Header/directory frame shows the restored public Brutalist structural atoms, aligned outer gaps and compact native directory projection. Capture run37215896823;1440×1000, zh-CN/dark, normal font. Both implementation author and coordinating reviewer visually inspected it.
+
+The Quick Start pair is ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31 before and20b64cda52261010c5757cbfbc8ee1c140936f14 after, run37216294687, same1440×1000 zh-CN/dark. Only public Text hierarchy and layout rhythm change; original authored prose, notices, commands and ordering remain. The390px dark code frame shows the same20b6 source with real React code tab, local horizontal overflow and opaque Copy. These original PNGs were manually inspected. They are historical source-bound evidence, not images of later performance or pressure-reflow commits.
+
+The `failed-text200` frame is deliberately retained as FAILED pressure evidence, not accepted output:1440 CSSpx, rootfont32px/200%, English/light. Manual inspection caught an extremely narrow TOC, word fragmentation, unused right space and displaced Header commands despite the older probe passing.4894ddc8adfca944ddeaedd08a36eeec152abca9 attempts the container-reflow correction; its new capture/manual acceptance remains pending when this evidence entry is added. Normal size evidence must not imply pressure acceptance.
+
+These are public project pages only, without browser chrome, private user feedback images or credentials. This dedicated evidence branch is never merged. Original capture files are unedited; SHA256 values follow.
+
+- `header-directory-2a5592c1-1440-zh-dark.png`: `ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a`
+- `quick-start-before-ec6e5710-1440-zh-dark.png`: `2056a7c1500301c97cd1c5a2c7a09ee2ff8475fd646f6d6b06bbc2b1955e9961`
+- `quick-start-20b64cda-1440-zh-dark.png`: `6f225488f38c0d74921b809a4fc752b1441adad6232009bfcbbcb61a7203c228`
+- `quick-start-code-20b64cda-390-zh-dark.png`: `ebf39c05e5a71c801dc1249184528e1315ab49b886bbfdcc03b686edf326f4df`
+- `failed-text200-20b64cda-1440-en-light.png`: `d010e0d431fe85525d3380fecf74fcd59b9ba3b51bc5d50764da680723f60079`
