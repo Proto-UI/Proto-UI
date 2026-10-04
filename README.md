@@ -13,3 +13,9 @@ Source: https://github.com/Proto-UI/Proto-UI/actions/runs/37203687650 . The code
 The primary images are mobile browser simulations, not physical device captures. No pixels were generated or altered. These images remain bound to their captured revisions even when later source-only/evidence-only commits exist. The new menu's measured bounds are left8/top61/right382/bottom836, with a 44px public Close target and 685px independently scrollable body; page horizontal overflow is zero.
 
 Retention owner: PR #816 contributor. Keep this small evidence-only branch and immutable links for review; product changes remain on `fix/mobile-navigation-reading`.
+
+## Matched code viewport comparison
+
+The follow-up run https://github.com/Proto-UI/Proto-UI/actions/runs/37204472736 provides `code-before-ec6e5710-390x844.png` and `code-after-9e06e181-390x844.png`, both Chinese/light/normal-size 390×844 views of the same Transition example. Native expanded source viewport height is 144px before and 549px after; code retains its own horizontal scrolling and the whole page has zero horizontal overflow. The candidate screenshot includes the actual keyboard source-focus outline. Copy remains visible outside that scroll region.
+
+These captures completed before an evidence assertion incorrectly read Copy state from its passive wrapper. That later assertion failure is retained, not labeled a successful clipboard test. Commit 833a789a fixes only the probe to read the actual public Button state. The images stay labeled with 9e06e181, their actual captured source.
