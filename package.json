@@ -10,6 +10,7 @@
   "devDependencies": {
     "@proto.ui/types": "workspace:*",
     "@types/node": "^25.6.2",
+    "ajv": "8.18.0",
     "esbuild": "0.25.12",
     "happy-dom": "^15.0.0",
     "husky": "^9.1.7",
@@ -60,6 +61,8 @@
     "check:autonomous-maintenance": "node scripts/autonomous-maintenance/check-review-packets.mjs && node scripts/autonomous-maintenance/check-runs.mjs && node --test scripts/autonomous-maintenance/test/*.test.mjs",
     "check:agent-operations": "node scripts/agent-operations/check-agent-operations.mjs && node scripts/agent-operations/check-contributor-skills.mjs && node --test scripts/agent-operations/test/*.test.mjs",
     "agent:skill": "node scripts/agent-operations/resolve-skill.mjs",
+    "agent:skill:resume": "node scripts/agent-operations/resume-skill.mjs",
+    "agent:skill:schema": "node scripts/agent-operations/generate-handoff-schema.mjs",
     "agent:review": "node scripts/agent-operations/review-packet.mjs",
     "agent:collaborate": "node scripts/agent-operations/collaboration-packet.mjs",
     "agent:event-shadow": "node scripts/agent-operations/event-shadow-cli.mjs",

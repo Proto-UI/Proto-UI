@@ -1,3 +1,8 @@
+import {
+  ownerAuthorizationFromArgs,
+  ownerAuthorizationAllows,
+  ownerSkillEligibility,
+} from './owner-authorization.mjs';
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 
@@ -1231,7 +1236,16 @@ export function decideReviewRun(packet, input, existingPacketKeys = []) {
   return { shouldRun: !duplicate, duplicate, key };
 }
 
-export function evaluateReviewEligibility({ executionMode, selfAssessment, reviewClass, policy }) {
+export function evaluateReviewEligibility({
+  executionMode,
+  selfAssessment,
+  reviewClass,
+  policy,
+  ownerAuthorization = null,
+  repositoryId = null,
+  scopeId = null,
+  executionModeSource = null,
+}) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
   assert(REVIEW_CLASSES.includes(reviewClass), 'review class is invalid');
   const requiredBand = policy?.reviewClasses?.[reviewClass]?.autonomousMinimumBand;
@@ -1239,7 +1253,16 @@ export function evaluateReviewEligibility({ executionMode, selfAssessment, revie
   const band = selfAssessment?.capability?.band ?? 'U0';
   const withinSelfAssessedDepth =
     BANDS.includes(band) && BANDS.indexOf(band) >= BANDS.indexOf(requiredBand);
-  if (executionMode === 'human-assisted') {
+  if (
+    executionMode === 'human-assisted' ||
+    ownerAuthorizationAllows(ownerAuthorization, {
+      repositoryId,
+      scopeId,
+      action: 'review',
+      executionMode,
+      executionModeSource,
+    })
+  ) {
     return {
       eligible: true,
       reviewDepth: 'full',
@@ -1360,6 +1383,7 @@ export function authorizeReviewSubmission({
   reviewer,
   ciConclusion,
   dcoConclusion,
+  ownerAuthorization = null,
   priorPacket = null,
 }) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
@@ -1400,7 +1424,16 @@ export function authorizeReviewSubmission({
   ) {
     return { allowed: false, reason: 'review submission exceeds the autonomous ceiling' };
   }
-  if (!explicitCurrentUser && !activeStandingAuthorization) {
+  const delegated = ownerAuthorizationAllows(ownerAuthorization, {
+    repositoryId: packet.repositoryId,
+    scopeId: 'pull-request:' + packet.pullRequest,
+    action: 'review',
+    executionMode,
+    actor: reviewer,
+    authorizationId,
+    executionModeSource,
+  });
+  if (!explicitCurrentUser && !activeStandingAuthorization && !delegated) {
     return { allowed: false, reason: 'review submission authorization is unavailable' };
   }
   if (!credentialCanReview)
@@ -1609,6 +1642,7 @@ export function authorizePullRequestMerge({
   dcoConclusion,
   mergeable,
   mergeStateStatus,
+  ownerAuthorization = null,
 }) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
   validateReviewMutationInput(input);
@@ -1637,7 +1671,16 @@ export function authorizePullRequestMerge({
   ) {
     return { allowed: false, reason: 'pull-request merge exceeds the autonomous ceiling' };
   }
-  if (!explicitCurrentUser && !activeStandingAuthorization) {
+  const delegated = ownerAuthorizationAllows(ownerAuthorization, {
+    repositoryId: packet.repositoryId,
+    scopeId: 'pull-request:' + packet.pullRequest,
+    action: 'integrate',
+    executionMode,
+    actor,
+    authorizationId,
+    executionModeSource,
+  });
+  if (!explicitCurrentUser && !activeStandingAuthorization && !delegated) {
     return { allowed: false, reason: 'pull-request merge authorization is unavailable' };
   }
   if (!credentialCanMerge) {

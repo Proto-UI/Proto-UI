@@ -736,6 +736,7 @@ export function authorizeLivePullRequestMerge(context, live) {
     executionMode: context.executionMode,
     executionModeSource: context.executionModeSource,
     authorizationId: context.authorizationId,
+    ownerAuthorization: context.ownerAuthorization,
     policy,
     selfAssessment: context.selfAssessment,
     credentialCanMerge: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),

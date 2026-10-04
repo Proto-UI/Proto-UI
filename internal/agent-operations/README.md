@@ -166,3 +166,7 @@ corepack pnpm@10.32.1 agent:review -- merge-pull-request --mode human-assisted -
 ## Capability activation
 
 Keep intake credentials minimal and activate mutations through exact-purpose downstream primitives. Accumulated shadow evidence can enable one reversible action class at a time through an evidence-backed policy change with zero unauthorized or duplicate mutations, complete decision-boundary recall, live reconciliation, and a disable path. This grows useful automation without turning the intake event itself into authority.
+
+## Composable continuation
+
+See [handoff.md](handoff.md) for v2 interruption/resume, repeatable materials and durable owner delegation. This owner-bound path is separate from generic scheduled scopes and preserves live action checks.

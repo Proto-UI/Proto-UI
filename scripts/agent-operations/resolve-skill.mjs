@@ -1,3 +1,8 @@
+import {
+  ownerAuthorizationFromArgs,
+  ownerAuthorizationAllows,
+  ownerSkillEligibility,
+} from './owner-authorization.mjs';
 import fs from 'node:fs';
 import process from 'node:process';
 import {
@@ -45,6 +50,12 @@ function parse(argv) {
 
 try {
   const args = parse(process.argv.slice(2));
+  const ownerArgs = new Map();
+  for (const name of ['--owner-authorization', '--owner-key', '--owner-grant']) {
+    const i = process.argv.indexOf(name);
+    if (i >= 0) ownerArgs.set(name, process.argv[i + 1]);
+  }
+  const ownerAuthorization = ownerAuthorizationFromArgs(ownerArgs);
   const registry = loadSkillRegistry();
   let skill;
   let terminal = false;
@@ -72,11 +83,19 @@ try {
     const fresh = isSelfAssessmentFresh(result, snapshot);
     selfAssessment = { ...result, fresh, validated: true };
   }
+  const ownerContext = {
+    ownerAuthorization,
+    executionMode,
+    repositoryId: handoff?.binding?.repositoryId ?? ownerAuthorization?.repositoryId,
+    scopeId: handoff?.binding?.scopeId,
+    executionModeSource: args.executionModeSource ?? handoff?.executionModeSource,
+  };
   const directAutonomousTransition =
     !args.handoffPath &&
     executionMode === 'autonomous' &&
     skill &&
-    !['pui-orient', 'pui-assess'].includes(skill.id);
+    !['pui-orient', 'pui-assess'].includes(skill.id) &&
+    !ownerSkillEligibility(skill, ownerContext);
   const eligibility = directAutonomousTransition
     ? {
         eligible: false,
@@ -84,7 +103,7 @@ try {
         reason: 'autonomous transitions must arrive through a validated pui-orient handoff',
       }
     : executionMode && skill
-      ? evaluateSkillEligibility(skill, { executionMode, selfAssessment })
+      ? evaluateSkillEligibility(skill, { executionMode, selfAssessment, ...ownerContext })
       : null;
   const blocked = eligibility?.eligible === false;
   const output = terminal

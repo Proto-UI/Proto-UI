@@ -49,3 +49,11 @@ Submit exactly the `recommendedAction` only when preflight returns `allowed: tru
 Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry the validated `review-packet` and canonical `review-input` artifacts by reference and digest, and include every artifact this leaf produces according to `skills.yaml`. Set `nextSkillId` to `pui-integrate` only when the distinct original `published-review-packet` and separate exact `mutation-authorization` artifacts are also present; otherwise use `null`. A local or unpublished review remains a valid terminal handoff without a `published-review-packet`; never manufacture a publication to satisfy integration's requirements.
 
 Communicate with the user in the user's current language. Keep review references exact.
+
+## Interrupted review and continuation
+
+Use v2 outcome interrupted when exact-head CI interrupts review. Preserve repository/scope/head/input binding, reason, pending scope/findings, original resume leaf and existing evidence. Select pui-ci or null without a completed review-packet. Never manufacture a packet; interruption is not review disposition or integration evidence.
+
+After diagnosis or authorized repair, use pnpm agent:skill:resume with the interruption, actual completed continuation and current artifacts. Preserve earlier partial evidence and findings; recheck evidence affected by changed input, not unaffected work merely for routing. The output selects one pui-review with refreshed head/input and bound interruption receipt.
+
+For owner-delegated submission, pass the trusted runner's --owner-authorization, --owner-key and --owner-grant options and bind --authorization to that grant ID. Read internal/agent-operations/handoff.md. This path does not activate the generic pending Poppy scope or remove independent contributor identity and live CI/DCO checks.

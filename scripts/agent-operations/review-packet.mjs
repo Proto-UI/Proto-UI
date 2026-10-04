@@ -1,3 +1,8 @@
+import {
+  ownerAuthorizationFromArgs,
+  ownerAuthorizationAllows,
+  ownerSkillEligibility,
+} from './owner-authorization.mjs';
 import fs from 'node:fs';
 import process from 'node:process';
 import { readPublishedReviewPacket } from './published-review-packet.mjs';
@@ -37,6 +42,7 @@ import {
   loadSkillRegistry,
   skillRegistryRoot,
   validateSkillHandoff,
+  requireCompletedHandoff,
 } from './skill-registry.mjs';
 
 function usage() {
@@ -95,6 +101,9 @@ const ALLOWED_OPTIONS = new Map([
       '--handoff',
       '--assessment',
       '--authorization',
+      '--owner-authorization',
+      '--owner-key',
+      '--owner-grant',
       '--external-evidence-file',
       '--prior-packet',
     ]),
@@ -110,6 +119,9 @@ const ALLOWED_OPTIONS = new Map([
       '--handoff',
       '--assessment',
       '--authorization',
+      '--owner-authorization',
+      '--owner-key',
+      '--owner-grant',
       '--external-evidence-file',
     ]),
   ],
@@ -170,7 +182,11 @@ function loadInvocationContext(args) {
   establishExecutionMode(executionMode, executionModeSource);
   // Retain the launcher/operator declaration independently of task-authored
   // artifacts. Matching declarations do not authenticate the caller.
-  return Object.freeze({ executionMode, executionModeSource });
+  return Object.freeze({
+    executionMode,
+    executionModeSource,
+    ownerAuthorization: ownerAuthorizationFromArgs(args),
+  });
 }
 
 function loadHandoff(path, nextSkillId, invocationContext = null) {
@@ -183,6 +199,7 @@ function loadHandoff(path, nextSkillId, invocationContext = null) {
       }
     }
   }
+  requireCompletedHandoff(handoff);
   const result = validateSkillHandoff(handoff, loadSkillRegistry());
   if (result.nextSkill?.id !== nextSkillId) {
     throw new Error(`handoff must select ${nextSkillId}`);
@@ -190,13 +207,17 @@ function loadHandoff(path, nextSkillId, invocationContext = null) {
   return result;
 }
 
-function validateExecution(args, packet, policy, executionMode) {
+function validateExecution(args, packet, policy, executionMode, invocationContext = {}) {
   const selfAssessment = loadAssessment(args.get('--assessment'), policy);
   const eligibility = evaluateReviewEligibility({
     executionMode,
     reviewClass: packet.reviewClass,
     selfAssessment,
     policy,
+    ownerAuthorization: invocationContext.ownerAuthorization,
+    executionModeSource: invocationContext.executionModeSource,
+    repositoryId: packet.repositoryId,
+    scopeId: 'pull-request:' + packet.pullRequest,
   });
   validateReviewPacketEligibility(packet, eligibility, executionMode);
   return { eligibility, selfAssessment };
@@ -248,6 +269,10 @@ function validateIntegrationExecution(args, packet, input, policy, routed, invoc
   const skillEligibility = evaluateSkillEligibility(routed.nextSkill, {
     executionMode: invocationContext.executionMode,
     selfAssessment,
+    ownerAuthorization: invocationContext.ownerAuthorization,
+    executionModeSource: invocationContext.executionModeSource,
+    repositoryId: packet.repositoryId,
+    scopeId: 'pull-request:' + packet.pullRequest,
   });
   if (!skillEligibility.eligible) {
     throw new Error(skillEligibility.reason);
@@ -368,7 +393,13 @@ try {
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const execution = validateExecution(args, packet, policy, invocationContext.executionMode);
+    const execution = validateExecution(
+      args,
+      packet,
+      policy,
+      invocationContext.executionMode,
+      invocationContext
+    );
     const externalEvidence = readExternalEvidence(args);
     const priorPath = args.get('--prior-packet');
     const priorPacket = priorPath ? JSON.parse(fs.readFileSync(priorPath, 'utf8')) : null;

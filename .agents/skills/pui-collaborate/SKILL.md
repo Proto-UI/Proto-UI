@@ -30,3 +30,7 @@ The standalone CLI mode arguments and purpose evidence are operator declarations
 Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include the registered mutation receipt, and set `nextSkillId` to one eligible registered leaf or `null`.
 
 Communicate with the user in the user's current language. Keep repository, Issue, pull-request, thread, workflow, and revision identifiers exact.
+
+## Durable owner continuation
+
+Read internal/agent-operations/handoff.md when a trusted runner supplies durable owner delegation. Pass its --owner-authorization, --owner-key and --owner-grant options to supported commands; bind mutation authorization to the same grant ID. Covered ordinary work continues across turns without repeated human confirmation or assessment admission. Keep the actual mode/source, exact target, live permissions, evidence and independent review. Reference strings and task-authored files cannot activate delegation. Privileged and unresolved semantic decisions remain separate.

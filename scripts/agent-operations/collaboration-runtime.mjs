@@ -1,3 +1,4 @@
+import { ownerAuthorizationAllows } from './owner-authorization.mjs';
 import { createHash } from 'node:crypto';
 
 const SHA = /^[a-f0-9]{40,64}$/;
@@ -357,7 +358,7 @@ export function validateCollaborationRequest(request) {
 export function validateCollaborationHandoffBinding(
   request,
   handoff,
-  { selfAssessment = null } = {}
+  { selfAssessment = null, ownerAuthorization = null } = {}
 ) {
   validateCollaborationRequest(request);
   assert(isObject(handoff), 'collaboration handoff must be an object');
@@ -381,7 +382,15 @@ export function validateCollaborationHandoffBinding(
     authorizationArtifact.reference === request.authorizationId,
     'mutation-authorization artifact does not bind authorizationId'
   );
-  if (handoff.executionMode === 'human-assisted') {
+  const delegated = ownerAuthorizationAllows(ownerAuthorization, {
+    repositoryId: request.repositoryId,
+    scopeId: request.target.kind + ':' + request.target.number,
+    action: 'collaborate',
+    executionMode: handoff.executionMode,
+    authorizationId: request.authorizationId,
+    executionModeSource: handoff.executionModeSource,
+  });
+  if (handoff.executionMode === 'human-assisted' && !delegated) {
     assert(
       request.evidence.some((artifact) => artifact.type === 'current-user-instruction'),
       'human-assisted collaboration requires current-user-instruction purpose evidence for the current user instruction'
@@ -422,7 +431,7 @@ export function validateCollaborationHandoffBinding(
       `${requiredEvidenceType} artifact does not bind the request evidence`
     );
   }
-  if (handoff.executionMode === 'autonomous') {
+  if (handoff.executionMode === 'autonomous' && !delegated) {
     assert(
       selfAssessment?.kind === 'proto-ui.agent-capability-self-result' &&
         HEX64.test(selfAssessment.resultDigest ?? ''),
@@ -529,7 +538,22 @@ function validateAuthority({
   executionModeSource,
   policy,
   selfAssessment,
+  ownerAuthorization,
+  actor,
 }) {
+  if (ownerAuthorization) {
+    return ownerAuthorizationAllows(ownerAuthorization, {
+      repositoryId: request.repositoryId,
+      scopeId: request.target.kind + ':' + request.target.number,
+      action: 'collaborate',
+      executionMode,
+      actor,
+      authorizationId: request.authorizationId,
+      executionModeSource,
+    })
+      ? null
+      : 'owner delegation does not cover the current actor, target or action';
+  }
   if (executionMode === 'human-assisted') {
     if (!['current-user', 'active-human-loop'].includes(executionModeSource)) {
       return 'human-assisted collaboration source is invalid';
@@ -746,6 +770,7 @@ export function authorizeCollaborationMutation({
   executionModeSource,
   policy,
   selfAssessment = null,
+  ownerAuthorization = null,
 }) {
   validateCollaborationRequest(request);
   validateLiveCommon(liveState, request);
@@ -755,6 +780,8 @@ export function authorizeCollaborationMutation({
     executionModeSource,
     policy,
     selfAssessment,
+    ownerAuthorization,
+    actor: liveState.viewerLogin,
   });
   if (authorityFailure) return rejected(request, authorityFailure);
 

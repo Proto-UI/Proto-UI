@@ -364,6 +364,12 @@ try {
   fail('scheduled-scope projection lockstep is not executable: ' + error.message);
 }
 
+execFileSync(
+  process.execPath,
+  [resolve(root, 'scripts/agent-operations/generate-handoff-schema.mjs'), '--check'],
+  { cwd: root, stdio: 'inherit' }
+);
+
 for (const schemaName of [
   'skill-handoff.schema.json',
   'capability-challenge.schema.json',

@@ -184,6 +184,9 @@ skills:
     mutation: none
     requires: [authority-map, candidate-change, evidence-report, review-input]
     produces: [review-packet]
+    interruptions:
+      destinations: [pui-ci]
+      terminal: true
   - id: pui-integrate
     entrypoints: [development]
     loadPath: .agents/skills/pui-integrate/SKILL.md

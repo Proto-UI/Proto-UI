@@ -17,3 +17,5 @@ Remain read-only. Do not rerun, cancel, dispatch, approve an environment, expose
 Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-ci`, the registered CI report artifact, and at most one `nextSkillId`.
 
 Communicate with the user in the user's current language. Keep workflow and job identifiers exact.
+
+When entered from interrupted v2 review, preserve pending scope/findings and material references. Diagnose without requiring a finished review packet. After diagnosis or authorized repair, pnpm agent:skill:resume returns to the original review with refreshed head/input. See internal/agent-operations/handoff.md; never recast old or failed evidence as current success.
