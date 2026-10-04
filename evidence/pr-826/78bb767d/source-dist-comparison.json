@@ -1,0 +1,112 @@
+{
+  "results": [
+    {
+      "path": "/tmp/glass-combined-78bb-evidence/pui-material-packed-evidence/result.json",
+      "status": "passed",
+      "source": "78bb767dbadd51a9b1cf7427e85395cb771e2cd9",
+      "errors": [],
+      "externalRequests": 0
+    },
+    {
+      "path": "/tmp/glass-combined-78bb-evidence/pui-material-evidence/result.json",
+      "status": "passed",
+      "source": "78bb767dbadd51a9b1cf7427e85395cb771e2cd9",
+      "errors": [],
+      "externalRequests": 0
+    }
+  ],
+  "pairs": [
+    {
+      "name": "visual-text-rest.png",
+      "equal": true
+    },
+    {
+      "name": "visual-text-pressed.png",
+      "equal": true
+    },
+    {
+      "name": "visual-solid-rest.png",
+      "equal": true
+    },
+    {
+      "name": "visual-light-rest.png",
+      "equal": true
+    },
+    {
+      "name": "visual-dark-rest.png",
+      "equal": true
+    },
+    {
+      "name": "visual-checker-rest.png",
+      "equal": true
+    },
+    {
+      "name": "visual-checker-pressed.png",
+      "equal": true
+    },
+    {
+      "name": "preparation-transparent-fallback.png",
+      "equal": true
+    },
+    {
+      "name": "preparation-throw-fallback.png",
+      "equal": true
+    },
+    {
+      "name": "preparation-short-fallback.png",
+      "equal": true
+    },
+    {
+      "name": "control-157-text.png",
+      "equal": true
+    },
+    {
+      "name": "control-157-solid.png",
+      "equal": true
+    },
+    {
+      "name": "control-157-light.png",
+      "equal": true
+    },
+    {
+      "name": "control-157-dark.png",
+      "equal": true
+    },
+    {
+      "name": "control-157-checker.png",
+      "equal": true
+    },
+    {
+      "name": "08-remounted.png",
+      "equal": true
+    },
+    {
+      "name": "07-context-loss.png",
+      "equal": true
+    },
+    {
+      "name": "06-source-loss.png",
+      "equal": true
+    },
+    {
+      "name": "05-preference-fallback.png",
+      "equal": true
+    },
+    {
+      "name": "04-disabled.png",
+      "equal": true
+    },
+    {
+      "name": "03-keyboard-activation.png",
+      "equal": true
+    },
+    {
+      "name": "02-pointer-pressed.png",
+      "equal": true
+    },
+    {
+      "name": "01-rest.png",
+      "equal": true
+    }
+  ]
+}

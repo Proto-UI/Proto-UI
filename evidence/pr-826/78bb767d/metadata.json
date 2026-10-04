@@ -1,0 +1,13 @@
+{
+  "source": "78bb767dbadd51a9b1cf7427e85395cb771e2cd9",
+  "sourceVector": [
+    "d05d1a00a353b9e72326a05569233d5bb54456a9",
+    "47382598a7bb47fcbe008c84b2edc8b5c0d69124",
+    "13a7e5593dc3046c58150201f22b870059718785",
+    "32b44d6b7f179a0940df9d979f7ff70897573eee"
+  ],
+  "gpuRun": 37218900157,
+  "gpuArtifact": 11309726200,
+  "imageSha256": "159b1a0c677e37eb6619e7b22bb3a90e5dfbd4028c914328204063ab5fcd76d1",
+  "scope": "Validation-only branch, not main or a release. Actual emitted-package capture;23 source/dist PNG pairs identical. Subjective visual acceptance not established."
+}

@@ -1,0 +1,186 @@
+[
+  {
+    "pullRequest": 826,
+    "head": "78bb767dbadd51a9b1cf7427e85395cb771e2cd9",
+    "runnerMerge": "f95032de05c2d44ccbd69453927966eec13ab2e7",
+    "environment": {
+      "node": "v24.21.0",
+      "zlib": "1.3.2.1-motley-8002e91",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "results": [
+      {
+        "name": "lucide/icons/x",
+        "gzipBytes": 1735,
+        "budget": 3000,
+        "minifiedBytes": 4669,
+        "minifiedSha256": "36ab7f4c59923289b3e24077f675be5fc872bd414b09f78a9fa170d81de17499"
+      },
+      {
+        "name": "lucide root",
+        "gzipBytes": 635820,
+        "budget": 700000,
+        "minifiedBytes": 4082850,
+        "minifiedSha256": "b3c1de783d0da55654e474e6b9334d1d6012b9b2ff4aed12b14b70b2ae4974f5"
+      },
+      {
+        "name": "core root",
+        "gzipBytes": 5153,
+        "budget": 6600,
+        "minifiedBytes": 16219,
+        "minifiedSha256": "3b031bbb45928539207ad1aba1313b4dcf84d874142b401e29321b98aba790f2"
+      },
+      {
+        "name": "runtime root",
+        "gzipBytes": 67550,
+        "budget": 68000,
+        "minifiedBytes": 266239,
+        "minifiedSha256": "1836757d4f19d2b46c2143cf08273c96df4e75eeaa9ce6ff5ecbe807a1c23614"
+      },
+      {
+        "name": "adapter-react root",
+        "gzipBytes": 88458,
+        "budget": 89000,
+        "minifiedBytes": 331784,
+        "minifiedSha256": "6f38ddd5fddd64c632e4200f2c2a976f8c2e022a9f4ce9404b2f6c45dfb5c5a4"
+      },
+      {
+        "name": "adapter-vue root",
+        "gzipBytes": 87860,
+        "budget": 88500,
+        "minifiedBytes": 329655,
+        "minifiedSha256": "81a9d1f58e02dbc3c66c84f1e2f128246fe18adb98becae7bb83603a859b8a94"
+      },
+      {
+        "name": "adapter-web-component root",
+        "gzipBytes": 95350,
+        "budget": 104500,
+        "minifiedBytes": 353638,
+        "minifiedSha256": "3f6b19568415ab6eeeee554562db3e1f683196597a85c3fb1d1dae2aa2f3ef5f"
+      },
+      {
+        "name": "prototypes-base/button",
+        "gzipBytes": 3779,
+        "budget": 6000,
+        "minifiedBytes": 12787,
+        "minifiedSha256": "4221a9bb097f64c7dae0c74f04d49533c50708f2470f4cc2fba7f2a7c9790ea1"
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "gzipBytes": 4625,
+        "budget": 7000,
+        "minifiedBytes": 16420,
+        "minifiedSha256": "05094d372cfa4fadef2a2fdc16d05a3b0faa755595ebe77c8ba77619dddd1603"
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "consumer light-dom button",
+        "gzipBytes": 99441,
+        "minifiedBytes": 369788,
+        "minifiedSha256": "3c8c4f9474440e5885e580558f9d952c63cec2772387f44d7ec375479e1ca382"
+      },
+      {
+        "name": "consumer direct-shadow button",
+        "gzipBytes": 99445,
+        "minifiedBytes": 369799,
+        "minifiedSha256": "9e3bcb8c0ad1acd9aa9545b33e96af1aaeaf2b8a88413630a7409d54676a80a8"
+      }
+    ],
+    "allElevenLocalCanonicalArtifactsMatch": true
+  },
+  {
+    "pullRequest": 824,
+    "head": "32b44d6b7f179a0940df9d979f7ff70897573eee",
+    "runnerMerge": "e21c0a4c7c3db31300b8ac5d696407cbc9747edd",
+    "environment": {
+      "node": "v24.21.0",
+      "zlib": "1.3.2.1-motley-8002e91",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "results": [
+      {
+        "name": "lucide/icons/x",
+        "gzipBytes": 1735,
+        "budget": 3000,
+        "minifiedBytes": 4669,
+        "minifiedSha256": "36ab7f4c59923289b3e24077f675be5fc872bd414b09f78a9fa170d81de17499"
+      },
+      {
+        "name": "lucide root",
+        "gzipBytes": 635820,
+        "budget": 700000,
+        "minifiedBytes": 4082850,
+        "minifiedSha256": "b3c1de783d0da55654e474e6b9334d1d6012b9b2ff4aed12b14b70b2ae4974f5"
+      },
+      {
+        "name": "core root",
+        "gzipBytes": 5153,
+        "budget": 6600,
+        "minifiedBytes": 16219,
+        "minifiedSha256": "3b031bbb45928539207ad1aba1313b4dcf84d874142b401e29321b98aba790f2"
+      },
+      {
+        "name": "runtime root",
+        "gzipBytes": 66880,
+        "budget": 68000,
+        "minifiedBytes": 264131,
+        "minifiedSha256": "1d892078f17ed84c547a1c0e974a54a3bec16a9fbb9c0e8d2fa6bc9c6e96e446"
+      },
+      {
+        "name": "adapter-react root",
+        "gzipBytes": 87425,
+        "budget": 89000,
+        "minifiedBytes": 328776,
+        "minifiedSha256": "095f79de11e0fe43c91b93e602f18a94bc38a6859e76bb2278640c855a15851f"
+      },
+      {
+        "name": "adapter-vue root",
+        "gzipBytes": 87147,
+        "budget": 88500,
+        "minifiedBytes": 327547,
+        "minifiedSha256": "f6502bf930bdbd4b1b86c780c70d9e906602551c6d7f8d4d1de77caf0b59c835"
+      },
+      {
+        "name": "adapter-web-component root",
+        "gzipBytes": 90595,
+        "budget": 104500,
+        "minifiedBytes": 340692,
+        "minifiedSha256": "a4ba1496d982da006470e720c91366c5e9ba20fae86bb78473101a4b469110da"
+      },
+      {
+        "name": "prototypes-base/button",
+        "gzipBytes": 3779,
+        "budget": 6000,
+        "minifiedBytes": 12787,
+        "minifiedSha256": "4221a9bb097f64c7dae0c74f04d49533c50708f2470f4cc2fba7f2a7c9790ea1"
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "gzipBytes": 4625,
+        "budget": 7000,
+        "minifiedBytes": 16420,
+        "minifiedSha256": "05094d372cfa4fadef2a2fdc16d05a3b0faa755595ebe77c8ba77619dddd1603"
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "consumer light-dom button",
+        "gzipBytes": 94703,
+        "minifiedBytes": 356842,
+        "minifiedSha256": "2c92c467790e349d6923fabe46ded8784404bc6512d67a28c0ea7cb1ee086a95"
+      },
+      {
+        "name": "consumer direct-shadow button",
+        "gzipBytes": 94707,
+        "minifiedBytes": 356853,
+        "minifiedSha256": "f16d9f5ec28e17e29b7510145ec77a88d689c78b959cd9e78381519b0867ee75"
+      }
+    ],
+    "allElevenLocalCanonicalArtifactsMatch": true
+  }
+]
