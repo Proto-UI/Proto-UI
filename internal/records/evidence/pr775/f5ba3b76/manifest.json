@@ -1,0 +1,141 @@
+{
+  "sourceSha": "f5ba3b763e9663abb12d4ab4bc383a066607cd2d",
+  "focusDependencySha": "cdc46e63c2d6e9a167f3c8956c55b07240c1e0f8",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37230214377",
+  "summary": {
+    "collectedFrames": 192,
+    "pngFactMatchedFrames": 192,
+    "achievedTargetPredicates": 192,
+    "unresolvedRuntimeThemeCases": 0,
+    "distinctUnresolvedFamilies": 0,
+    "caseCoverage": [
+      {
+        "family": "dropdown-menu",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue2",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue2",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue2",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue2",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      }
+    ],
+    "conformance": "not evaluated; frame count and target predicate count are not full conformance"
+  },
+  "files": [
+    {
+      "path": "select-react-light-item-focus-last.png",
+      "sha256": "f24e7a3d50fb2c89bbe4229148fb2ac553553fd3327ff382670b275c40a79eb2"
+    },
+    {
+      "path": "select-react-dark-item-focus-last.png",
+      "sha256": "4ffd855f69d4a14852cc3c7e4d33e88dba83831f3a0cef4c1c7655f6a4bf0cda"
+    },
+    {
+      "path": "select-react-light-item-unselected-pointer-held.png",
+      "sha256": "f24e7a3d50fb2c89bbe4229148fb2ac553553fd3327ff382670b275c40a79eb2"
+    }
+  ]
+}
