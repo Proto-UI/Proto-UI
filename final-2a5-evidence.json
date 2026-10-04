@@ -1,0 +1,66 @@
+{
+  "candidate": "2a511832577bfd5b310330f34110b7c57eb8d1a6",
+  "wholePrBaseline": "ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31",
+  "latestFeedbackBaseline": "fbd90df092369e6d2aab73c66848f4236ba83a29",
+  "workflowRun": 37234786522,
+  "conditions": "Unedited public project Chromium CSS-pixel captures. Normal zh-CN light/dark. Desktop 1440x1000; QuickStart phone 390x1000; Menu closing journey 390x844. Not a physical device.",
+  "reviewCounts": {
+    "density": {
+      "images": 74,
+      "exactHashReusedReview": 64,
+      "individuallyViewedNewOrChanged": 10
+    },
+    "mobile": {
+      "images": 62,
+      "exactHashReusedReview": 38,
+      "individuallyViewedNewOrChanged": 24
+    }
+  },
+  "browserCases": {
+    "density": 28,
+    "mobile": 10
+  },
+  "browserFailures": [],
+  "mainCI": {
+    "run": 37234786514,
+    "result": "failure in browser shard5; diagnosis pending"
+  },
+  "images": [
+    {
+      "file": "quickstart-after-2a5-1440-zh-light.png",
+      "sha256": "cba1a4897829baa44b91d11569ec6a27402c670fbf190173b2ebc79a16f414aa",
+      "sourceSha": "2a511832577bfd5b310330f34110b7c57eb8d1a6",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "review": "Exact byte hash match to the previously reviewed 6c2 frame; actual new2a capture"
+    },
+    {
+      "file": "quickstart-after-2a5-390-zh-dark.png",
+      "sha256": "87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da",
+      "sourceSha": "2a511832577bfd5b310330f34110b7c57eb8d1a6",
+      "dimensions": [
+        390,
+        1000
+      ],
+      "review": "Exact byte hash match to the previously reviewed 6c2 frame; actual new2a capture"
+    },
+    {
+      "file": "toc-unlinked-heading-2a5-1440-en-light.png",
+      "sha256": "e0b3930c56a653e965882863f45448521b9fa077877c324a5df7831932376a97",
+      "sourceSha": "2a511832577bfd5b310330f34110b7c57eb8d1a6",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "review": "Exact byte hash match to the previously reviewed 6c2 frame; actual new2a capture"
+    }
+  ],
+  "limitations": [
+    "Static pixel review is distinct from actual interaction and state assertions, which are supplied by the browser metrics.",
+    "390/430 CSS-pixel simulation is not physical OnePlus13T;320px/200% and1440/200% are explicit stress.",
+    "Faint dark borders/unchecked outlines, home bottom whitespace, pressure reflow spacing, narrow320+200 source and adjacent pre-existing Base Transition dark status contrast remain observations.",
+    "Some filenames retain original case width1440 while a journey resizes to1024/1279/390. Each row records actual PNG dimensions."
+  ]
+}

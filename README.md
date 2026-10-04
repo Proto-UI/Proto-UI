@@ -98,3 +98,15 @@ The evidence-only branch is never merged. Existing stress/layout observations re
 - `quickstart-after-6c2-390-zh-dark.png`: `87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da`
 - `header-brutalist-after-6c2-1440-zh-dark.png`: `ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a`
 - `menu-click-only-closed-6c2-390-zh-light.png`: `8e86cbebc9172ff3ecdf78c307f571d44762604bf8215c877719633a88cd7ccc`
+
+## Generated TOC destination follow-up: 2a511832
+
+These are actual new2a511832577bfd5b310330f34110b7c57eb8d1a6 captures from run37234786522. Full Homepage and the other eight specialized workflows pass. Main CI has a browser-shard5 failure under diagnosis, so these images do not imply all-current-CI success.
+
+The136 candidate frames have34new/different individual inspections and102exact-byte matches to reviewed6c2 captures. The new labelled hidden-gallery-heading fixture passes four normal1440 Shadcn docs anchor journeys across zh-CN/en and light/dark. Its h3 has no generated TOC link; only actual linked headings now participate in current/visible-section calculations. The fixture is removed before subsequent stress screenshots. Authored page words are untouched.
+
+The selected TOC capture shows the actual current public Surface/Text state after native anchor navigation with that hidden heading present. Current source labels, dimensions and hashes are retained; prior6c2/4c2 files remain historical. Normal390/430CSS-pixel simulation is not a physical phone. No claim of cross-runtime pixel identity or complete accessibility conformance is made. The evidence-only branch is never merged.
+
+- `quickstart-after-2a5-1440-zh-light.png`: `cba1a4897829baa44b91d11569ec6a27402c670fbf190173b2ebc79a16f414aa`
+- `quickstart-after-2a5-390-zh-dark.png`: `87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da`
+- `toc-unlinked-heading-2a5-1440-en-light.png`: `e0b3930c56a653e965882863f45448521b9fa077877c324a5df7831932376a97`
