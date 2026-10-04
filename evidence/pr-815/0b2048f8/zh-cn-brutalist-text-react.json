@@ -1,0 +1,226 @@
+{
+  "sourceSha": "0b2048f8e606f6a185b9f03cddd3da371bbfd000",
+  "sourceDirty": false,
+  "sourceSnapshotSha256": "93ee21f3a39357b38b2b202420dff35d9469aeeeec64f138d3a99dcedda8fd3d",
+  "runId": "2026-10-04T09-09-53.783Z-2707",
+  "route": "/zh-cn/ui-libraries/brutalist/components/text/",
+  "runtime": "react",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "theme": "light",
+  "facts": [
+    {
+      "text": "A reusable Text atom",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 37.5,
+      "size": 30,
+      "decoration": "none",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Authored content stays readable and selectable. Text adds no extra interaction.",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 52,
+      "size": 16,
+      "decoration": "none",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Supporting text uses the same input vocabulary.",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 21,
+      "size": 14,
+      "decoration": "none",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "font: mono · tracking: tight",
+      "role": null,
+      "tabIndex": -1,
+      "width": 576,
+      "height": 24,
+      "size": 16,
+      "decoration": "underline",
+      "background": "rgba(0, 0, 0, 0)",
+      "shadow": "none",
+      "transform": "none"
+    }
+  ],
+  "shellEvidence": {
+    "traces": [
+      {
+        "atMs": 263.5,
+        "slots": []
+      },
+      {
+        "atMs": 1945.9000000000233,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": true,
+            "hostInert": false,
+            "hostDisplay": "none",
+            "blockedByAncestor": true,
+            "borrowedContent": false,
+            "prototypeCount": 0,
+            "active": false
+          }
+        ]
+      },
+      {
+        "atMs": 1948.7999999999884,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      },
+      {
+        "atMs": 2280.0999999999767,
+        "slots": []
+      },
+      {
+        "atMs": 2493.7000000000116,
+        "slots": [
+          {
+            "generation": null,
+            "phase": null,
+            "runtime": null,
+            "hostHidden": true,
+            "hostInert": false,
+            "hostDisplay": "none",
+            "blockedByAncestor": true,
+            "borrowedContent": false,
+            "prototypeCount": 0,
+            "active": false
+          }
+        ]
+      },
+      {
+        "atMs": 2516.2000000000116,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "react",
+            "hostHidden": true,
+            "hostInert": false,
+            "hostDisplay": "none",
+            "blockedByAncestor": true,
+            "borrowedContent": false,
+            "prototypeCount": 0,
+            "active": false
+          }
+        ]
+      },
+      {
+        "atMs": 2517.7000000000116,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "react",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "runtime:changed",
+        "atMs": 1950.5,
+        "detail": {
+          "id": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      },
+      {
+        "name": "previewer:mounted",
+        "atMs": 1950.5999999999767,
+        "detail": {
+          "runtime": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      },
+      {
+        "name": "runtime:changed",
+        "atMs": 2518.7000000000116,
+        "detail": {
+          "id": "react"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "react",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

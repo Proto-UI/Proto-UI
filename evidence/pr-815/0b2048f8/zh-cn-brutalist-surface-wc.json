@@ -1,0 +1,150 @@
+{
+  "sourceSha": "0b2048f8e606f6a185b9f03cddd3da371bbfd000",
+  "sourceDirty": false,
+  "sourceSnapshotSha256": "93ee21f3a39357b38b2b202420dff35d9469aeeeec64f138d3a99dcedda8fd3d",
+  "runId": "2026-10-04T09-09-53.783Z-2707",
+  "route": "/zh-cn/ui-libraries/brutalist/components/surface/",
+  "runtime": "wc",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "theme": "light",
+  "facts": [
+    {
+      "text": "Outline · rest",
+      "role": null,
+      "tabIndex": -1,
+      "width": 220.28125,
+      "height": 62,
+      "size": 16,
+      "decoration": "none",
+      "background": "rgb(220, 235, 254)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Muted · no border",
+      "role": null,
+      "tabIndex": -1,
+      "width": 220.28125,
+      "height": 58,
+      "size": 16,
+      "decoration": "none",
+      "background": "rgb(229, 229, 229)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Solid · supplied focus",
+      "role": null,
+      "tabIndex": -1,
+      "width": 220.28125,
+      "height": 62,
+      "size": 16,
+      "decoration": "none",
+      "background": "rgb(82, 148, 255)",
+      "shadow": "rgb(220, 235, 254) 0px 0px 0px 2px, rgb(0, 0, 0) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+      "transform": "none"
+    },
+    {
+      "text": "Raised · supplied press",
+      "role": null,
+      "tabIndex": -1,
+      "width": 220.28125,
+      "height": 62,
+      "size": 16,
+      "decoration": "none",
+      "background": "rgb(82, 148, 255)",
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+      "transform": "matrix(1, 0, 0, 1, 4, 4)"
+    }
+  ],
+  "shellEvidence": {
+    "traces": [
+      {
+        "atMs": 450.70000000001164,
+        "slots": []
+      },
+      {
+        "atMs": 2101.2999999999884,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": true,
+            "hostInert": false,
+            "hostDisplay": "none",
+            "blockedByAncestor": true,
+            "borrowedContent": false,
+            "prototypeCount": 0,
+            "active": false
+          }
+        ]
+      },
+      {
+        "atMs": 2104,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "runtime:changed",
+        "atMs": 2105.2000000000116,
+        "detail": {
+          "id": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      },
+      {
+        "name": "previewer:mounted",
+        "atMs": 2105.2999999999884,
+        "detail": {
+          "runtime": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

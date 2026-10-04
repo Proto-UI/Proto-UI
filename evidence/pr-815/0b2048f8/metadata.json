@@ -1,0 +1,12 @@
+{
+  "sourceHead": "0b2048f8e606f6a185b9f03cddd3da371bbfd000",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37191245429",
+  "artifactId": 11298897954,
+  "result": "64 passed; all64 JSON sourceDirty false; 0 page errors; max raw and active slots both1;176 runtime-matched ready events",
+  "files": {
+    "zh-cn-brutalist-surface-wc.json": "b7ada332e247baeccca3759503c6d1ce1f1524f56ff9b178cd6335dd9c7697f9",
+    "zh-cn-brutalist-surface-wc.png": "aedeedbb5788d3988d9261cf8586d8581f6026624562e5d4c7b632db1b5724a6",
+    "zh-cn-brutalist-text-react.json": "96a4b8082ef34bb7b5eff258d5f21a00281fb5ada5ab0c9a860f6d8dd014ac24",
+    "zh-cn-brutalist-text-react.png": "0817fb41a72f9682830ba8af4bac13ef5f86d272506e273ef1989feb1aea8a8a"
+  }
+}
