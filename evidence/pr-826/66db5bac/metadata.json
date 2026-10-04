@@ -1,0 +1,11 @@
+{
+  "source": "66db5bac8142571966d64e1a15e5f4a941bd9cf0",
+  "tree": "393b35bc4eb62b1920173e52ef5a8263e0ed5cf9",
+  "run": 37238273690,
+  "artifact": 11316706264,
+  "sourcePackedPngPairs": 31,
+  "allPairsByteEqual": true,
+  "errors": 0,
+  "externalRequests": 0,
+  "scope": "owned-scene experimental material, regular-readable-v3; no optical-profile change; validation-only PR never merge"
+}
