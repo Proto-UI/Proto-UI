@@ -6,6 +6,10 @@ Translates Proto UI prototypes into React component functions for use with Proto
 
 Translates Proto UI prototypes into React component functions that run through the Proto UI adapter contracts.
 
+## View and Focus readiness
+
+Physical target and A11y projection binding are independent of native focus-event admission. A committed target remains available for one-shot blur and entry effects during an update, and a retained semantic object keeps its referenced identity across view replay. Native-only Focus requests wait for the current view to finish revealing and its event gate to open; rejected applications remain with the Focus Module's existing pending-request policy rather than synthesizing native facts. Detached or disposed views are not current targets. This realizes the draft [HC-FOCUS-TARGET-0001](../../../spec/host-caps/HC-FOCUS-TARGET-0001.yaml) and the active React Adapter lifecycle boundary.
+
 ## Document theme
 
 The default `colorScheme` reader follows root `class` / `data-theme` markers and then the system preference. Mounted colorScheme Rule consumers update their existing style contribution when that effective value changes; view detach and terminal disposal release their subscription.

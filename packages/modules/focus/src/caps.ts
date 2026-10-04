@@ -15,9 +15,13 @@ export type FocusSetFocusable = (
   options?: { programmatic?: boolean }
 ) => void;
 
+/** Native requests rely on host-observed facts; entry does not own target facts. */
+export type FocusRequestKind = 'programmatic' | 'native' | 'entry';
+
 export type FocusRequestFocus = (
   target: HTMLElement,
-  options?: FocusRequestOptions
+  options: FocusRequestOptions | undefined,
+  kind: FocusRequestKind
 ) => void | boolean;
 
 export type FocusBlur = (target: HTMLElement) => void;

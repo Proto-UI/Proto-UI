@@ -60,6 +60,7 @@ import {
   FOCUS_RUN_IN_CALLBACK_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
+  type FocusRequestKind,
 } from '@proto.ui/module-focus';
 import {
   createWebHitParticipationHostBridge,
@@ -240,6 +241,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
+  isNativeFocusReady: () => boolean;
   getCurrentElement: () => HTMLElement | null;
   subscribeTargetReady: (listener: () => void) => () => void;
   retryTargetReady: () => void;
@@ -335,8 +337,10 @@ export function createReactModules<Props extends PropsBaseType>(args: {
       ],
       [
         FOCUS_REQUEST_FOCUS_CAP,
-        (target: HTMLElement, options?: FocusRequestOptions) => {
-          if (!target.isConnected) return false;
+        (target: HTMLElement, options: FocusRequestOptions | undefined, kind: FocusRequestKind) => {
+          if (!target.isConnected || (kind === 'native' && !args.isNativeFocusReady())) {
+            return false;
+          }
           target.focus(
             typeof options?.preventScroll === 'boolean'
               ? { preventScroll: options.preventScroll }

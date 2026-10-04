@@ -12,6 +12,10 @@ Current Adapter evidence covers Web hosts. Each navigation takes one total order
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.
 
+## Host requests
+
+The privileged `FOCUS_REQUEST_FOCUS_CAP` receives `(target, options, kind)`. `kind` is required: `programmatic` requests synchronize target facts, `native` requests rely on host-observed focus events, and `entry` requests delegate focus without owning the descendant's target facts. Adapters may reject an application with `false`; the Module retains target requests under the existing Focus policy. This distinction does not change the author-facing Focus facades.
+
 ## Install
 
 ```bash

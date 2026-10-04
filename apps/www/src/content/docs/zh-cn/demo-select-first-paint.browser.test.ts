@@ -155,3 +155,59 @@ describe.sequential('Select first paint with the popup never opened', () => {
     }
   }, 180_000);
 });
+
+describe.sequential('React Select retained native entry focus', () => {
+  it('observes selected entry and native End/Home without committing selection', async () => {
+    const { context, page, previewer } = await openRoute(browser, baseUrl, SELECT_ROUTE, {
+      width: 1440,
+      height: 900,
+    });
+
+    try {
+      await previewer.scrollIntoViewIfNeeded();
+      await showRuntime(page, previewer, 'react');
+      const trigger = previewer.locator('[data-projection-content] [role="combobox"]');
+      await trigger.click();
+      const controlledId = await trigger.getAttribute('aria-controls');
+      if (!controlledId) throw new Error('The open Select must identify its option surface.');
+      const content = page.locator(`[id=${JSON.stringify(controlledId)}]`);
+      const paper = content.getByRole('option', { name: AUTHORED_LABEL, exact: true });
+      const ink = content.getByRole('option', { name: 'Ink', exact: true });
+      const readFocus = (option: Locator) =>
+        option.evaluate((element) => ({
+          nativeFocused: element.ownerDocument.activeElement === element,
+          observedFocused: element.hasAttribute('data-focused'),
+        }));
+
+      // Only the component requests entry focus. Reading both DOM focus and
+      // the public fact projection catches focus applied behind a closed gate.
+      await expect
+        .poll(() => readFocus(paper), { message: 'react/selected-entry' })
+        .toEqual({
+          nativeFocused: true,
+          observedFocused: true,
+        });
+      // Use page input: locator.press() would focus the option first and mask
+      // a missing native entry event by injecting the fact navigation needs.
+      await page.keyboard.press('End');
+      await expect
+        .poll(() => readFocus(ink), { message: 'react/End' })
+        .toEqual({
+          nativeFocused: true,
+          observedFocused: true,
+        });
+      // Home must move from a non-first member; an ignored Home cannot pass.
+      await page.keyboard.press('Home');
+      await expect
+        .poll(() => readFocus(paper), { message: 'react/Home' })
+        .toEqual({
+          nativeFocused: true,
+          observedFocused: true,
+        });
+      expect(await paper.getAttribute('aria-selected')).toBe('true');
+      expect(await ink.getAttribute('aria-selected')).toBe('false');
+    } finally {
+      await context.close();
+    }
+  }, 180_000);
+});
