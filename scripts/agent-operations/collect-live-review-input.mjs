@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { ownerAuthorizationAllows } from './owner-authorization.mjs';
 import {
   authorizePullRequestMerge,
   isExternalPreviewAuthorizationFailure,
@@ -787,8 +788,7 @@ export function submitGitHubMerge(
   if (typeof baseRefName !== 'string' || baseRefName.length === 0)
     throw new Error('merge base ref is required');
   if (mergeMethod !== 'squash') throw new Error('merge method must be squash');
-  if (!['explicit-current-user', 'proto-ui-scheduled-merge-v1'].includes(authorizationId))
-    throw new Error('merge authorization is invalid');
+
   const maxAttempts = options.verificationAttempts ?? 12;
   const delayMs = options.verificationDelayMs ?? 1_000;
   const wait = options.wait ?? waitForMergeRead;
@@ -823,6 +823,19 @@ export function submitGitHubMerge(
     !['ADMIN', 'MAINTAIN', 'WRITE'].includes(authorizationContext.viewerPermission)
   )
     throw new Error('merge authorization context target binding is invalid; no PUT attempted');
+  if (
+    !['explicit-current-user', 'proto-ui-scheduled-merge-v1'].includes(authorizationId) &&
+    !ownerAuthorizationAllows(authorizationContext.ownerAuthorization, {
+      repositoryId,
+      scopeId: 'pull-request:' + pullRequest,
+      action: 'integrate',
+      actor: authorizationContext.actor,
+      authorizationId,
+      executionMode: authorizationContext.executionMode,
+      executionModeSource: authorizationContext.executionModeSource,
+    })
+  )
+    throw new Error('merge owner authorization is invalid; no PUT attempted');
   validateReviewInputSnapshot(input);
   validateReviewPacket(packet, input);
   validatePublishedReviewPacket(packet, authorizationContext.publishedPacket);

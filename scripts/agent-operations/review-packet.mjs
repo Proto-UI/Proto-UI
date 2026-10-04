@@ -290,6 +290,7 @@ function validateIntegrationExecution(args, packet, input, policy, routed, invoc
   const skillEligibility = evaluateSkillEligibility(routed.nextSkill, {
     executionMode: invocationContext.executionMode,
     selfAssessment,
+    entrypoint: routed.handoff.entrypoint,
     ownerAuthorization: invocationContext.ownerAuthorization,
     executionModeSource: invocationContext.executionModeSource,
     repositoryId: packet.repositoryId,

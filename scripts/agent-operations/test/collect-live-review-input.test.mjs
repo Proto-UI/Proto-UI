@@ -2451,3 +2451,89 @@ for (const [name, mutate] of [
     assert.equal(reads, 0);
   });
 }
+
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { generateKeyPairSync, sign } from 'node:crypto';
+import { loadOwnerAuthorization, ownerDelegationSigningBytes } from '../owner-authorization.mjs';
+function writerOwner(t) {
+  const dir = mkdtempSync(path.join(tmpdir(), 'pui-owner-merge-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const keys = generateKeyPairSync('ed25519'),
+    statePath = path.join(dir, 'state.json'),
+    publicKeyPath = path.join(dir, 'key.pub');
+  writeFileSync(publicKeyPath, keys.publicKey.export({ type: 'spki', format: 'pem' }));
+  const grant = {
+    id: 'owner-merge-boundary',
+    status: 'active',
+    grantor: { id: 19223209, login: 'cyjin-yl' },
+    actor: 'cyjin-yl',
+    repositoryId,
+    actions: ['integrate'],
+    scopeIds: ['pull-request:487'],
+    baseRefName: 'main',
+    decisionReference: 'fixture:trusted-decision',
+  };
+  const save = (status = 'active') => {
+    const payload = {
+      schemaVersion: 1,
+      kind: 'proto-ui.owner-delegation-state',
+      revision: status === 'active' ? 1 : 2,
+      grants: [{ ...grant, status }],
+    };
+    writeFileSync(
+      statePath,
+      JSON.stringify({
+        payload,
+        signature: sign(null, ownerDelegationSigningBytes(payload), keys.privateKey).toString(
+          'base64'
+        ),
+      })
+    );
+  };
+  save();
+  return {
+    save,
+    proof: loadOwnerAuthorization({ statePath, publicKeyPath, grantId: grant.id }),
+    id: grant.id,
+  };
+}
+test('bound owner grant reaches actual merge writer once and is revalidated before PUT', (t) => {
+  for (const revoke of [false, true]) {
+    const owner = writerOwner(t),
+      f = mergeFixture({
+        alterAuthorization(x) {
+          x.raw.data.viewer.login = 'cyjin-yl';
+          Object.assign(x.authorizationContext, {
+            actor: 'cyjin-yl',
+            executionMode: 'autonomous',
+            executionModeSource: 'schedule',
+            authorizationId: owner.id,
+            ownerAuthorization: owner.proof,
+            selfAssessment: null,
+          });
+        },
+      });
+    const runner = (command, args, options) => {
+      if (revoke && args.includes('graphql')) owner.save('revoked');
+      return f.runner(command, args, options);
+    };
+    const opts = {
+      ...mergeOptions,
+      authorizationId: owner.id,
+      authorizationContext: f.authorizationContext,
+    };
+    if (revoke) {
+      assert.throws(
+        () => submitGitHubMerge(repositoryId, 487, opts, runner, fastVerification),
+        /owner|authorization|eligibility/
+      );
+      assert.equal(f.writes, 0);
+    } else {
+      const result = submitGitHubMerge(repositoryId, 487, opts, runner, fastVerification);
+      assert.equal(result.merged, true);
+      assert.equal(f.writes, 1);
+    }
+  }
+});

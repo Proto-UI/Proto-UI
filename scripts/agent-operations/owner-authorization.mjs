@@ -162,7 +162,14 @@ export function ownerAuthorizationAllows(
 }
 export function ownerSkillEligibility(
   skill,
-  { ownerAuthorization, repositoryId, scopeId, executionModeSource, executionMode } = {}
+  {
+    ownerAuthorization,
+    repositoryId,
+    scopeId,
+    executionModeSource,
+    executionMode,
+    entrypoint = null,
+  } = {}
 ) {
   const action =
     skill.id === 'pui-integrate'
@@ -175,6 +182,8 @@ export function ownerSkillEligibility(
             ? 'observe'
             : 'implement';
   if (
+    !skill.entrypoints.includes('development') ||
+    entrypoint === 'maintenance' ||
     skill.id.startsWith('pui-release') ||
     skill.id === 'pui-evidence-publish' ||
     !ordinaryMutations.has(skill.mutation)

@@ -634,6 +634,7 @@ export function evaluateSkillEligibility(
     repositoryId = null,
     scopeId = null,
     executionModeSource = null,
+    entrypoint = null,
   } = {}
 ) {
   assert(EXECUTION_MODES.includes(executionMode), 'execution mode is invalid');
@@ -651,6 +652,7 @@ export function evaluateSkillEligibility(
     repositoryId,
     scopeId,
     executionModeSource,
+    entrypoint,
   });
   if (delegated) return delegated;
   if (['pui-orient', 'pui-assess'].includes(skill.id)) {

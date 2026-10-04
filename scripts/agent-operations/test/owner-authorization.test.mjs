@@ -673,3 +673,29 @@ test('actual delegated collaboration apply CLI uses the real adapter and never w
       assert.equal(writes, revoke ? 0 : 1);
     }
 });
+
+test('ordinary owner delegation does not bypass governed maintenance ceilings or shared maintenance entrypoints', (t) => {
+  const f = fixture(t),
+    r = loadSkillRegistry();
+  for (const id of ['pui-remediate', 'pui-maintenance-review', 'pui-maintenance-close']) {
+    const skill = r.byId.get(id);
+    assert.equal(
+      ownerSkillEligibility(skill, {
+        ownerAuthorization: f.load(),
+        ...context,
+        executionMode: 'autonomous',
+        entrypoint: 'maintenance',
+      }),
+      null
+    );
+  }
+  assert.equal(
+    ownerSkillEligibility(r.byId.get('pui-orient'), {
+      ownerAuthorization: f.load(),
+      ...context,
+      executionMode: 'autonomous',
+      entrypoint: 'maintenance',
+    }),
+    null
+  );
+});

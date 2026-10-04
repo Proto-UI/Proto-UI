@@ -96,6 +96,7 @@ try {
   }
   const ownerContext = {
     ownerAuthorization,
+    entrypoint: handoff?.entrypoint ?? 'development',
     executionMode,
     repositoryId: handoff?.binding?.repositoryId ?? ownerAuthorization?.repositoryId,
     scopeId: handoff?.binding?.scopeId,

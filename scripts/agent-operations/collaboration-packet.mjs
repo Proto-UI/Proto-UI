@@ -177,6 +177,7 @@ function validateExecution(request, args, policy, invocationContext, routed) {
   const eligibility = evaluateSkillEligibility(routed.nextSkill, {
     executionMode: invocationContext.executionMode,
     selfAssessment,
+    entrypoint: routed.handoff.entrypoint,
     ownerAuthorization: invocationContext.ownerAuthorization,
     executionModeSource: invocationContext.executionModeSource,
     repositoryId: request.repositoryId,
