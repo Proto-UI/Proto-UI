@@ -129,11 +129,15 @@ node scripts/compiler/build-browser.mjs
 
 Vite consumer 将生成的 `compiler.js` 作为 text、`build.json` 作为 data 加载，再调用 `createBrowserCompilerClient(bundle, build)`。Request 是 `{ format: 1, revision, source, options: { fileName, profile, files?, exportName?, componentName? } }`；`files` 是 virtual path 到 source text 的 closed map。必须显式选择 target，不会静默替换。成功 response 包含 canonical generated source、supporting file、dependency version、provenance、source map，以及 source identity、compiler-bundle identity 和 request revision。它**不负责挂载或执行生成的 target code**。
 
-Source rejection 返回 `phase: 'compile'` 和正常 diagnostic code/category/file/span；host rejection 返回独立的 `phase: 'host'`。Worker initialization / transport error 会 reject client promise。重叠编辑只保留一个 running request 和最新一个 queued request；被取代的 request 以 `AbortError` 拒绝。导航或 owner terminal teardown 时调用 `dispose()`；它终止 Worker，并拒绝尚未完成的工作。
+可信 bundle 使用 Vite `?raw` import，或未经 transform 的 public asset。直接 fetch Vite transform 后的 JavaScript 可能附带 source map，改变字节；build-identity 校验会正确拒绝该 response。不能通过替换 manifest digest 接受变更后的 delivery。
+
+Source rejection 返回 `phase: 'compile'` 和正常 diagnostic code/category/file/span；host rejection 返回独立的 `phase: 'host'`。Worker construction / initialization / transport error 都会 reject client promise。重叠编辑只保留一个 running request 和最新一个 queued request；被取代的 request 以 `AbortError` 拒绝。导航或 owner terminal teardown 时调用 `dispose()`；它终止 Worker，并拒绝尚未完成的工作。
 
 配置边界是 UTF-8 serialized input 256 KiB、WASM heap 128 MiB、VM stack 2 MiB、output 8,388,608 字符、initialization 30 秒、VM compilation 5 秒、Worker response 10 秒。这些是 resource / failure boundary，不是已经准入的即时预览性能预算，也不代表 whole-browser memory 测量。
 
 真实 Chromium module Worker 已通过 WASM 编译仓库的 canonical Base Button；记录的 artifact 与普通 Node compilation、直接 WASM execution 一致。另行比较了四个 Web source emitter、Unicode source/graph identity、source-located rejection 和 graph insertion order。一次本地观察中，初始化 2.83 秒、编译 116 毫秒；可信 compiler JavaScript 是 5,035,825 uncompressed UTF-8 byte，QuickJS WASM asset 是 503,134 byte。单次样本不构成 cold/warm distribution、mobile 支持或 startup budget。永久 WASM regression 还在**可信 entry** 内注入非终止调用，验证 interruption、后续 canonical compilation 和 terminal disposal；不会 evaluate 作者 input。
+
+审查修复将真实 Chromium Worker result 与 Node 对照，覆盖十二个已登记 profile identity，并另行验证 Unicode GPUI field 和 embedded-NUL source。GPUI Rust artifact（包括 Cargo package identity）已在不提供 Node `Buffer` global 的情况下保持一致；SHA-256 bridge 保留 NUL separator。Qt、Flutter 与四个 SSR profile 仍返回 canonical unsupported-target diagnostic。这些是 compiler-artifact 对照，不是 native widget 执行、generated-preview sandbox 或新的 target admission。Source-bound 修复 receipt 记录在 `internal/compiler/browser-wasm-evidence.json`；上面的早期时间样本保留为历史观察。
 
 ### 全站 Demo 迁移清单
 

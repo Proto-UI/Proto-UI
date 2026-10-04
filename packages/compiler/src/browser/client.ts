@@ -25,8 +25,8 @@ export function createBrowserCompilerClient(
   bundle: string,
   build: BrowserCompilerBuild
 ): Promise<BrowserCompilerClient> {
-  const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
   return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
     let disposed = false,
       nextId = 0,
       running: number | null = null;

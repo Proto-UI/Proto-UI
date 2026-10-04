@@ -110,10 +110,10 @@ export async function createBrowserCompiler(
       hashes.set(id, sha256.create());
       return vm.newNumber(id);
     });
-    bind('__puiHashUpdate', (id, text) => {
+    bind('__puiHashUpdate', (id, serialized) => {
       const hash = hashes.get(vm.getNumber(id));
       if (!hash) throw new TypeError('Unknown compiler digest handle.');
-      hash.update(encoder.encode(vm.getString(text)));
+      hash.update(encoder.encode(JSON.parse(vm.getString(serialized))));
     });
     bind('__puiHashDigest', (id) => {
       const key = vm.getNumber(id),

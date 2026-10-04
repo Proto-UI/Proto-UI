@@ -1,5 +1,5 @@
 declare function __puiHashCreate(): number;
-declare function __puiHashUpdate(id: number, value: string): void;
+declare function __puiHashUpdate(id: number, serialized: string): void;
 declare function __puiHashDigest(id: number): string;
 
 /** Only the canonical compiler's synchronous SHA-256 interface is bound to the host. */
@@ -11,7 +11,9 @@ export function createHash(algorithm: string) {
       if (id < 0) throw new TypeError('Compiler digest has already been consumed.');
       if (typeof value !== 'string')
         throw new TypeError('Compiler digests require UTF-8 string input.');
-      __puiHashUpdate(id, value);
+      // QuickJS's host string accessor is NUL-terminated. JSON transports every
+      // UTF-16 code unit before the host applies the canonical UTF-8 encoding.
+      __puiHashUpdate(id, JSON.stringify(value));
       return this;
     },
     digest(encoding: string) {

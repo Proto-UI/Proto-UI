@@ -302,6 +302,485 @@
     ],
     "scope": "Existing ordinary documentation/Adapter preview rendered after extracting the shared source resolver. No WASM preview or native activation claim."
   },
+  "reviewRepair": {
+    "reviewedHead": "3a3c731286dd025de8595ddb0c2af1167415640d",
+    "reviewThreads": [
+      {
+        "id": "PRRT_kwDOMhQZjc6o1H13",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/829#discussion_r4178743270",
+        "finding": "GPUI identifiers require a Node-only Buffer global",
+        "repair": "Shared portable UTF-8 hex encoder preserves the canonical native artifacts without a Buffer shim or target rejection."
+      },
+      {
+        "id": "PRRT_kwDOMhQZjc6o1H17",
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/829#discussion_r4178743275",
+        "finding": "Worker constructor errors escape synchronously from the promised client factory",
+        "repair": "Construct the Worker inside the existing Promise executor; capability/security constructor errors reject the advertised promise."
+      }
+    ],
+    "preFixRegression": {
+      "observedAt": "2026-10-04T18:57:00.252Z",
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test/browser-wasm.test.ts -t 'emits complete native|rejects initialization'",
+      "filesFailed": 1,
+      "testsFailed": 2,
+      "testsSkipped": 3,
+      "gpui": {
+        "phase": "host",
+        "code": "wasm-execution",
+        "message": "'Buffer' is not defined"
+      },
+      "client": {
+        "name": "ReferenceError",
+        "message": "Worker is not defined",
+        "behavior": "Synchronous throw before the returned Promise exists"
+      }
+    },
+    "additionalHashRepair": {
+      "cause": "QuickJS 0.32.0 getString uses NUL-terminated UTF8ToString; raw hash-update arguments lost embedded NUL bytes, including the canonical GPUI package-name separators.",
+      "repair": "JSON-encode the hash argument inside the VM and decode it in the shared host bridge before UTF-8 hashing; no producer-specific package-name workaround.",
+      "intermediateFailure": {
+        "nodeCargoPackage": "generated-gpui-9f7e11a0c1408d6921802999fb2a68d1",
+        "wasmCargoPackage": "generated-gpui-06ba1e1242131419c305986f035a3dd3"
+      }
+    },
+    "portability": {
+      "observedAt": "2026-10-04T19:04:10.813Z",
+      "scope": "Node artifact identity against the actual pre-fix GPUI output; portable UTF-8 encoding oracle; not native widget execution or new target admission",
+      "node": "v24.21.0",
+      "sourceSha256": "c540d45fea3e3c53f1f69fe673ed3859d69cbed1ea5f8f244bc04f3e40d491ab",
+      "utf8Comparisons": 1114115,
+      "nodeArtifacts": [
+        {
+          "profile": "gpui-source-v1",
+          "ok": true,
+          "outputSha256": "f09a99d08610580e188db46bf8c433a61acb93375a2bfd0a16360ba20b44b329"
+        },
+        {
+          "profile": "qt-source-v1",
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI4001",
+              "category": "unsupported-input",
+              "message": "Target profile qt-source-v1 identifies qt, but no working emitter is implemented. Choose an implemented profile explicitly.",
+              "span": {
+                "file": "<target>",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        },
+        {
+          "profile": "flutter-source-v1",
+          "ok": false,
+          "diagnostics": [
+            {
+              "code": "PUI4001",
+              "category": "unsupported-input",
+              "message": "Target profile flutter-source-v1 identifies flutter, but no working emitter is implemented. Choose an implemented profile explicitly.",
+              "span": {
+                "file": "<target>",
+                "start": 0,
+                "end": 0,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 1
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "sourceBindings": [
+      {
+        "revision": "react-runtime-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "react-runtime-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "6292d5307fdc9820bac470c27aa4745cce6545817d565f43e87832c5679fc932",
+        "nodeResultSha256": "c2854db8cd7ed1a2a16c684793d4569bc44732dbb3d72f514bee2915e3433763",
+        "admission": "generated"
+      },
+      {
+        "revision": "react-dom-source-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "react-dom-source-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "aedfe6de2bfcf473635c035c0f47b5a27d42713ffa25bd7cd67cc07bd248d9e6",
+        "nodeResultSha256": "eb3c35d0a5971cd76130558644cebc74f1ed4df9a8a7e96b7878b305c16c24f7",
+        "admission": "generated"
+      },
+      {
+        "revision": "vue-source-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "vue-source-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "96fa7798f182e72b90d2e19f809faa95a7d878d61cc40d977049b38e3552b250",
+        "nodeResultSha256": "c1dde2d569eff916cde53656bd9cb401e2b2074a448a089c95405814c9bcdfd0",
+        "admission": "generated"
+      },
+      {
+        "revision": "vue2-source-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "vue2-source-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "4221e7b38a20a372cc1fb737d3aa529128957f9b119349ecdd32e7a80a232d9c",
+        "nodeResultSha256": "aa8f37d23a2a5a4eb7c4cd4754b36bc8d896fdbd0ee41520d66df3c7cb7feebc",
+        "admission": "generated"
+      },
+      {
+        "revision": "web-component-source-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "web-component-source-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "d42df8668c6a35350d9476daa35553223e9b22ebdc07ed4f1c0a4450e8434d97",
+        "nodeResultSha256": "ceb648be9da36ef1413f5e1d0e034ece3731735d974199c27fa83131b4ba10f4",
+        "admission": "generated"
+      },
+      {
+        "revision": "gpui-source-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "gpui-source-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "846951df41b7c244cb3b094066c8292fcfb833ea30cd253413c10afedffe7a01",
+        "nodeResultSha256": "3baba3dd58fc147a358a17a32133dc462d72cd01b769c483d6146f5c7502ffb2",
+        "admission": "generated"
+      },
+      {
+        "revision": "qt-source-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "qt-source-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "138ba7ad7056df9529855335068ebf3bad49475b04b828fa251941dcb313769e",
+        "nodeResultSha256": "fc5e2f521cbaf4cc43638142329bcb4a2e7429368858f045abfacdb2f4d8940a",
+        "admission": "rejected"
+      },
+      {
+        "revision": "flutter-source-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "flutter-source-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "c814c7a42146e802389376dbee442612c3d9baa4e6b12436ae8106b4397b28c3",
+        "nodeResultSha256": "127fb074d0583bb639727ad77aaa28954fafb9bf0fbde578ebc9423c230c5eab",
+        "admission": "rejected"
+      },
+      {
+        "revision": "react-dom-ssr-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "react-dom-ssr-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "a39d566f7e39d3ca06dc484e34dbaa38ed8942691bb3e10cbfd9bb7a07fb04b2",
+        "nodeResultSha256": "10f9657f2f432237d27c2b1f77671d4d68ca3e62b6d3b9968f75fb64340bd820",
+        "admission": "rejected"
+      },
+      {
+        "revision": "vue-ssr-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "vue-ssr-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "30eade95dd52ae03fd3ada23dba4f3c6efa2a35fa1f773f1e2f9c7e76d2f285a",
+        "nodeResultSha256": "065299312f626daa3f9e0cbfeb19d726e225231375c8873aa9620fe4c66df4cf",
+        "admission": "rejected"
+      },
+      {
+        "revision": "vue2-ssr-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "vue2-ssr-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "40a72fe0072d8ba1aba27ac655a2a4a5244e7eb57d6b346f1b2e0c54c0174bce",
+        "nodeResultSha256": "f41bf39fa7828d1cc7fa9937fa121eaa1413a385becde025e910ae6529b05480",
+        "admission": "rejected"
+      },
+      {
+        "revision": "web-component-ssr-v1",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "web-component-ssr-v1",
+        "sourceUtf8Sha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+        "requestSha256": "4eac8f3cc220934f5ee52d029e950d6305c2a84ed3690678c4bbd7292a84fd19",
+        "nodeResultSha256": "6ce786ede5891c5dc20f99bf0452ca3be674cc89db2430290ef4955a565f98dc",
+        "admission": "rejected"
+      },
+      {
+        "revision": "native-unicode",
+        "fileName": "native.proto.ts",
+        "profile": "gpui-source-v1",
+        "sourceUtf8Sha256": "c540d45fea3e3c53f1f69fe673ed3859d69cbed1ea5f8f244bc04f3e40d491ab",
+        "requestSha256": "570e00a6e3925494b2851bef8ff62a1fa20790bf135b84dd218639d0e1e9f9d6",
+        "nodeResultSha256": "203cda22a467c8e6a59a1c542e720be1a3b53baf0b73731bc1dddb1ff4814477",
+        "admission": "generated",
+        "source": "import {definePrototype} from '@proto.ui/core';\nexport default definePrototype({name:'NativeUnicode',setup(def){\n  def.props.define({'标签雪😀':{type:'string'}});\n  def.props.setDefaults({'标签雪😀':'默认'});\n  const ready=def.state.bool('ready',false);\n  def.expose.state('状态😀',ready);\n}});"
+      },
+      {
+        "revision": "embedded-nul",
+        "fileName": "packages/prototypes/base/src/button/button.proto.ts",
+        "profile": "web-component-source-v1",
+        "sourceUtf8Sha256": "4935fc279fc14ac27bb6e2ec21ebd4d01ac79338ba0d00642112e9447b83477b",
+        "requestSha256": "773290134a73a73a2f0824e0a93a55f44ea1c2f212eca095ceadab30f157a023",
+        "nodeResultSha256": "4b5afc9118ade7f1c045e9bc018a154ffa091f58a5fdbfb7906b8f6d32551304",
+        "admission": "generated",
+        "appendedCanonicalSource": "\n/* embedded\u0000编译 */"
+      }
+    ],
+    "sourceBindingEncoding": "SHA-256 of raw UTF-8 source and JSON-serialized request; distinct from the canonical compiler closed-graph source hash",
+    "nodeWorkerParity": {
+      "status": "passed",
+      "observedAt": "2026-10-04T19:21:20.511Z",
+      "scope": "Actual Chromium module Worker canonical artifacts, unavailable-Worker fault injection and revision/disposal transitions; not generated preview execution",
+      "build": {
+        "format": 1,
+        "compilerSha256": "af36cf355380fd4e7bd4b3a5c6f1b1e907f464558d20c63f3918d22441718d54",
+        "typescriptVersion": "5.9.3",
+        "execution": "quickjs-wasm"
+      },
+      "initializationMs": 2676.699999988079,
+      "constructorFailure": {
+        "name": "ReferenceError",
+        "message": "Worker is not defined"
+      },
+      "rows": [
+        {
+          "revision": "react-runtime-v1",
+          "profile": "react-runtime-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "c2854db8cd7ed1a2a16c684793d4569bc44732dbb3d72f514bee2915e3433763",
+          "elapsedMs": 105.5
+        },
+        {
+          "revision": "react-dom-source-v1",
+          "profile": "react-dom-source-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "eb3c35d0a5971cd76130558644cebc74f1ed4df9a8a7e96b7878b305c16c24f7",
+          "elapsedMs": 108.89999997615814
+        },
+        {
+          "revision": "vue-source-v1",
+          "profile": "vue-source-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "c1dde2d569eff916cde53656bd9cb401e2b2074a448a089c95405814c9bcdfd0",
+          "elapsedMs": 92.09999996423721
+        },
+        {
+          "revision": "vue2-source-v1",
+          "profile": "vue2-source-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "aa8f37d23a2a5a4eb7c4cd4754b36bc8d896fdbd0ee41520d66df3c7cb7feebc",
+          "elapsedMs": 90.90000003576279
+        },
+        {
+          "revision": "web-component-source-v1",
+          "profile": "web-component-source-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "ceb648be9da36ef1413f5e1d0e034ece3731735d974199c27fa83131b4ba10f4",
+          "elapsedMs": 92.59999996423721
+        },
+        {
+          "revision": "gpui-source-v1",
+          "profile": "gpui-source-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "3baba3dd58fc147a358a17a32133dc462d72cd01b769c483d6146f5c7502ffb2",
+          "elapsedMs": 221.60000002384186
+        },
+        {
+          "revision": "qt-source-v1",
+          "profile": "qt-source-v1",
+          "ok": false,
+          "phase": "compile",
+          "resultSha256": "fc5e2f521cbaf4cc43638142329bcb4a2e7429368858f045abfacdb2f4d8940a",
+          "elapsedMs": 48.5
+        },
+        {
+          "revision": "flutter-source-v1",
+          "profile": "flutter-source-v1",
+          "ok": false,
+          "phase": "compile",
+          "resultSha256": "127fb074d0583bb639727ad77aaa28954fafb9bf0fbde578ebc9423c230c5eab",
+          "elapsedMs": 46.89999997615814
+        },
+        {
+          "revision": "react-dom-ssr-v1",
+          "profile": "react-dom-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "resultSha256": "10f9657f2f432237d27c2b1f77671d4d68ca3e62b6d3b9968f75fb64340bd820",
+          "elapsedMs": 47.09999996423721
+        },
+        {
+          "revision": "vue-ssr-v1",
+          "profile": "vue-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "resultSha256": "065299312f626daa3f9e0cbfeb19d726e225231375c8873aa9620fe4c66df4cf",
+          "elapsedMs": 47.30000001192093
+        },
+        {
+          "revision": "vue2-ssr-v1",
+          "profile": "vue2-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "resultSha256": "f41bf39fa7828d1cc7fa9937fa121eaa1413a385becde025e910ae6529b05480",
+          "elapsedMs": 46.90000003576279
+        },
+        {
+          "revision": "web-component-ssr-v1",
+          "profile": "web-component-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "resultSha256": "6ce786ede5891c5dc20f99bf0452ca3be674cc89db2430290ef4955a565f98dc",
+          "elapsedMs": 50.5
+        },
+        {
+          "revision": "native-unicode",
+          "profile": "gpui-source-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "203cda22a467c8e6a59a1c542e720be1a3b53baf0b73731bc1dddb1ff4814477",
+          "elapsedMs": 68.19999998807907
+        },
+        {
+          "revision": "embedded-nul",
+          "profile": "web-component-source-v1",
+          "ok": true,
+          "phase": "generated",
+          "resultSha256": "4b5afc9118ade7f1c045e9bc018a154ffa091f58a5fdbfb7906b8f6d32551304",
+          "elapsedMs": 93.29999995231628
+        }
+      ],
+      "edits": {
+        "older": {
+          "status": "rejected",
+          "name": "AbortError"
+        },
+        "middle": {
+          "status": "rejected",
+          "name": "AbortError"
+        },
+        "newest": {
+          "status": "fulfilled",
+          "revision": "newest",
+          "ok": true,
+          "resultSha256": "883184ec557b270d4b620e086238380075ccdda3f694d66315bd6ef943c1c373"
+        }
+      },
+      "disposed": {
+        "status": "rejected",
+        "name": "AbortError"
+      },
+      "after": {
+        "status": "rejected",
+        "name": "AbortError"
+      }
+    },
+    "currentBundleBytes": 5036180,
+    "quickjsWasmBytes": 503134,
+    "renderedDocs": {
+      "observedAt": "2026-10-04T19:41:43.145Z",
+      "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
+      "captures": [
+        "evidence/compiler-guide-en-wasm-repair.webp",
+        "evidence/compiler-guide-zh-wasm-repair.webp"
+      ],
+      "ordinaryProse": [
+        "Untransformed Vite ?raw delivery",
+        "Promised Worker-construction errors",
+        "All registered profile identities plus Unicode GPUI and embedded-NUL parity; unchanged unsupported-target boundary"
+      ],
+      "scope": "Actual Astro-rendered repaired documentation, not generated preview or native-widget execution"
+    }
+  },
+  "ciRegression": {
+    "reviewedHead": "3a3c731286dd025de8595ddb0c2af1167415640d",
+    "originalRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/37223003657",
+    "originalJob": "https://github.com/Proto-UI/Proto-UI/actions/runs/37223003657/job/111496936575",
+    "originalFailure": {
+      "file": "apps/www/test/proto-ui-source.test.ts",
+      "failed": 2,
+      "error": "ReferenceError: protoUiSourcePlugin is not defined",
+      "cause": "Legacy test evaluated a source slice of Astro configuration instead of the extracted resolver."
+    },
+    "repair": "Exercise the exported source resolver through a real Vite SSR consumer; package and physical core imports observe the same active RuntimeDelayContext and terminal cleanup. Remove source slicing and mocked filesystem assertions.",
+    "validation": {
+      "runtime": {
+        "command": "corepack pnpm@10.32.1 -s test:runtime",
+        "result": "failed",
+        "unit": {
+          "filesPassed": 564,
+          "filesSkipped": 3,
+          "testsPassed": 3297,
+          "testsTodo": 34
+        },
+        "browser": {
+          "filesFailed": 9,
+          "filesPassed": 27,
+          "testsFailed": 12,
+          "testsPassed": 184,
+          "sharedServer": true,
+          "sequentialSuites": 36,
+          "failureBoundary": "Existing documentation Runtime switches/readiness; no full-suite-green claim",
+          "observedExternalFailure": "Shadcn Input/vue: net::ERR_CONNECTION_CLOSED and failed dynamic import https://esm.sh/vue@3",
+          "otherTimeoutCauses": "Not established by the captured output; do not attribute all failures to the external network."
+        }
+      },
+      "workspaceTypes": {
+        "command": "corepack pnpm@10.32.1 -s check:types:workspace",
+        "result": "passed"
+      },
+      "astroTypes": {
+        "command": "corepack pnpm@10.32.1 -s check:types:docs",
+        "files": 268,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 1,
+        "additionalLogWarnings": [
+          "Content loader reported duplicate en/build/compiler-guide and zh-cn/build/compiler-guide IDs during resync; both actual routes rendered the repaired ordinary prose."
+        ],
+        "hintScope": "Existing capture-whitepaper-diagram-evidence.mjs entry.error annotation"
+      },
+      "publicDocs": {
+        "command": "corepack pnpm@10.32.1 -s check:public-docs",
+        "result": "passed",
+        "bilingualPrimaryRoutes": 116,
+        "libraryInventories": 4
+      },
+      "ordinaryUiObservation": {
+        "observedAt": "2026-10-04T19:49:44.619Z",
+        "route": "/zh-cn/ui-libraries/shadcn/input/",
+        "action": "Select Vue through actual WC Runtime combobox using keyboard Enter",
+        "runtime": "vue",
+        "state": "ready",
+        "inputs": [
+          {
+            "value": "Guang",
+            "disabled": false,
+            "readOnly": false
+          },
+          {
+            "value": "Unavailable",
+            "disabled": true,
+            "readOnly": false
+          },
+          {
+            "value": "Base keeps this focusable.",
+            "disabled": false,
+            "readOnly": true
+          }
+        ],
+        "scope": "One ordinary existing Adapter UI switch, not a full-suite repair or compiled RuntimeBox observation"
+      }
+    },
+    "deploymentBoundary": "The Vercel status reports a build-rate limit, not the permitted preview-authorization exception. No CI/deployment waiver, independent approval or merge is claimed."
+  },
   "debt": [
     "No RuntimeBox migration, generated preview sandbox, in-page editor or full-source admission claim; #817 remains open.",
     "142 selected-target source admission rejections remain in-scope with explicit diagnostics in website-demo-migrations.json.",

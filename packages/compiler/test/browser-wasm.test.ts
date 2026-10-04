@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createBrowserCompiler, type BrowserCompiler } from '../src/browser/engine';
+import { createBrowserCompilerClient } from '../src/browser/client';
 import {
   BROWSER_COMPILER_LIMITS,
   type BrowserCompileRequest,
@@ -83,6 +84,11 @@ describe('canonical compiler in actual QuickJS WASM', () => {
       })
     ).toEqual(result);
 
+    const embeddedNul = { ...request, source: request.source + '\n/* embedded\0编译 */' };
+    const expectedNul = canonical(embeddedNul);
+    expect(expectedNul.ok).toBe(true);
+    expect(compiler!.compile(embeddedNul)).toEqual(expectedNul);
+
     const effect = {
       ...request,
       revision: 'effectful-import',
@@ -101,6 +107,33 @@ describe('canonical compiler in actual QuickJS WASM', () => {
       phase: 'compile',
       diagnostics: [{ code: 'PUI1004', span: { file: '演示/hook.ts', line: 1, column: 1 } }],
     });
+  });
+
+  it('emits complete GPUI artifacts without Node globals, including Unicode public fields', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'NativeUnicode',setup(def){
+  def.props.define({'标签雪😀':{type:'string'}});
+  def.props.setDefaults({'标签雪😀':'默认'});
+  const ready=def.state.bool('ready',false);
+  def.expose.state('状态😀',ready);
+}});`;
+    const input: BrowserCompileRequest = {
+      format: 1,
+      revision: 'native-gpui',
+      source,
+      options: { fileName: 'native.proto.ts', profile: 'gpui-source-v1' },
+    };
+    const expected = canonical(input);
+    expect(expected.ok).toBe(true);
+    const result = compiler!.compile(input);
+    expect(result.ok, JSON.stringify(result.ok ? null : result)).toBe(true);
+    expect(result).toEqual(expected);
+  });
+
+  it('rejects initialization through the promised API when Worker construction is unavailable', async () => {
+    // The Node fixture has no browser Worker; no timers or fabricated transport are needed.
+    const initialization = createBrowserCompilerClient(bundle, build);
+    await expect(initialization).rejects.toBeInstanceOf(ReferenceError);
   });
 
   it('rejects mismatched trusted bundles and distinguishes host limits from source diagnostics', async () => {
