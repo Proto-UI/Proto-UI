@@ -27,6 +27,7 @@ export function createBrowserCompilerClient(
   build: BrowserCompilerBuild
 ): Promise<BrowserCompilerClient> {
   return new Promise((resolve, reject) => {
+    const compilerSha256 = build.compilerSha256;
     const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
     let disposed = false,
       nextId = 0,
@@ -114,7 +115,7 @@ export function createBrowserCompilerClient(
         latest = null;
         if (
           message.result.revision !== item.revision ||
-          message.build.compilerSha256 !== build.compilerSha256
+          message.build.compilerSha256 !== compilerSha256
         )
           item.reject(
             new Error('Compiler response does not match the requested revision and build.')

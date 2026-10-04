@@ -37,7 +37,7 @@ export type BrowserCompileResult =
 
 export interface BrowserCompilerBuild {
   format: 1;
-  /** Digest of the actual trusted compiler bundle, distinct from authored source identity. */
+  /** Bundle/manifest consistency digest, not an authentication root; distinct from source identity. */
   compilerSha256: string;
   typescriptVersion: string;
   execution: 'quickjs-wasm';

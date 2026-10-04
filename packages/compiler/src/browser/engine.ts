@@ -23,7 +23,7 @@ function hostError(
   return { ok: false, revision, phase: 'host', error: { code, message } };
 }
 
-/** Only the trusted compiler bundle executes; request source is passed as a string argument. */
+/** Caller-trusted bundle execution; the digest checks consistency, not authenticity. Source is data. */
 export async function createBrowserCompiler(
   bundle: string,
   build: BrowserCompilerBuild,

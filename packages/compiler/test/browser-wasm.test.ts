@@ -137,7 +137,7 @@ export default definePrototype({name:'NativeUnicode',setup(def){
     await expect(initialization).rejects.toBeInstanceOf(ReferenceError);
   });
 
-  it('binds running revisions and queued source graphs to the submitted edit in a real Worker', async () => {
+  it('binds requests and build identity to submitted snapshots in a real Worker', async () => {
     const fixture = await startBrowserFixture('wasm-request-snapshot');
     try {
       const page = await fixture.browser.newPage();
@@ -161,7 +161,8 @@ globalThis.__wasmCompilerClient = createBrowserCompilerClient;`,
               __wasmCompilerClient: typeof createBrowserCompilerClient;
             }
           ).__wasmCompilerClient;
-          const client = await factory(bundle, build);
+          const callerBuild = { ...build };
+          const client = await factory(bundle, callerBuild);
           const outcome = (promise: Promise<{ result: unknown }>) =>
             promise.then(
               (response) => ({ result: response.result }),
@@ -183,7 +184,15 @@ globalThis.__wasmCompilerClient = createBrowserCompilerClient;`,
             queued.source = queued.source.replace('Unicode编译😀', 'ChangedAfterSubmit');
             queued.options.files!['演示/hook.ts'] =
               `throw new Error('Mutated graph must not compile');`;
-            return { running: first, superseded: await superseded, queued: await queuedResult };
+            const queuedSnapshot = await queuedResult;
+            callerBuild.compilerSha256 = '0'.repeat(64);
+            const buildSnapshot = await outcome(client.compile(structuredClone(input)));
+            return {
+              running: first,
+              superseded: await superseded,
+              queued: queuedSnapshot,
+              buildSnapshot,
+            };
           } finally {
             client.dispose();
           }
@@ -193,6 +202,7 @@ globalThis.__wasmCompilerClient = createBrowserCompilerClient;`,
       expect(observed.running).toEqual({ result: canonical(request) });
       expect(observed.superseded).toMatchObject({ error: 'AbortError' });
       expect(observed.queued).toEqual({ result: canonical(request) });
+      expect(observed.buildSnapshot).toEqual({ result: canonical(request) });
     } finally {
       await fixture.close();
     }

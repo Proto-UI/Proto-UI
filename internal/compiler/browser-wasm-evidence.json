@@ -1070,6 +1070,69 @@
     },
     "scope": "These three review repairs only. No new source admission, native/SSR target admission, RuntimeBox migration or generated preview sandbox claim."
   },
+  "thirdReviewRepair": {
+    "observedAt": "2026-10-04T21:41:02.339Z",
+    "baselineSha": "b538520fad437beaf7bd67205ea047a428aa6785",
+    "findings": [
+      {
+        "commentId": 4179354366,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/829#discussion_r4179354366",
+        "case": "mutable caller build identity"
+      },
+      {
+        "commentId": 4179354371,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/829#discussion_r4179354371",
+        "case": "bundle/manifest consistency versus authenticity"
+      }
+    ],
+    "buildSnapshot": {
+      "before": {
+        "environment": "Actual Chromium module Worker / QuickJS WASM",
+        "callerMutation": "After initialization and the request/graph controls, set callerBuild.compilerSha256 to 64 zeroes.",
+        "promiseError": "Compiler response does not match the requested revision and build.",
+        "resultPayload": "The rejected baseline promise did not expose the Worker result."
+      },
+      "change": "Capture the expected compiler digest as a scalar in the initialization Promise before Worker construction; do not read the mutable caller manifest when validating responses.",
+      "after": "The same actual Worker regression returns complete canonical Node-equal results after caller-manifest mutation, while preserving running revision, queued source/files and superseded AbortError controls."
+    },
+    "trustBoundary": {
+      "decision": "Correct the public/API claim to the implemented consistency-only check instead of inventing an independent signature verifier or trust root.",
+      "actualContract": "Both bundle and manifest are supplied by the caller. A matching digest is a consistency identity, not authentication. The application must independently trust/authenticate/pin compiler delivery before invoking this API.",
+      "executableObservation": "The existing trusted-entry fault injection changes the compiler program and recomputes its manifest; the modified program executes, hits its bounded nontermination, and subsequently recovers canonical compilation. An inconsistent program/manifest pair rejects initialization.",
+      "limitations": "No independent compiler supply-chain authenticity, arbitrary-program safety or generated-preview sandbox is demonstrated."
+    },
+    "validation": {
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test/browser-wasm.test.ts apps/www/test/proto-ui-source.test.ts",
+      "filesPassed": 2,
+      "testsPassed": 8,
+      "formattedCandidate": true,
+      "workspaceTypes": "PASS: check:types:workspace",
+      "publicDocs": "PASS: 116 bilingual primary routes and 4 library inventories",
+      "compilerBundle": {
+        "bytes": 5037359,
+        "compilerSha256": "9d7adb1f710cddb16cd71a4436ed164c7bc5e6ece1e9469cc9b5f0606f9061c6",
+        "execution": "quickjs-wasm"
+      }
+    },
+    "renderedDocs": {
+      "observedAt": "2026-10-04T21:41:02.339Z",
+      "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
+      "normalParagraphs": true,
+      "insidePre": false,
+      "captures": [
+        "internal/compiler/evidence/compiler-guide-en-third-review.webp",
+        "internal/compiler/evidence/compiler-guide-zh-third-review.webp"
+      ]
+    },
+    "baselineCi": {
+      "headSha": "b538520fad437beaf7bd67205ea047a428aa6785",
+      "repositoryJobsPassed": 16,
+      "dco": "SUCCESS",
+      "vercel": "FAILURE: build-rate-limit",
+      "scope": "Prior exact head; not new-candidate CI or independent approval."
+    },
+    "scope": "These two current review findings only; earlier observations remain historical. All #817 migration, complete native targets, SSR/hydration and full Adapter parity obligations remain open."
+  },
   "debt": [
     "No RuntimeBox migration, generated preview sandbox, in-page editor or full-source admission claim; #817 remains open.",
     "142 selected-target source admission rejections remain in-scope with explicit diagnostics in website-demo-migrations.json.",

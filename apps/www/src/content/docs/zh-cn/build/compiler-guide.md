@@ -119,7 +119,7 @@ node --import tsx scripts/compiler/native-consumer-smoke.mjs
 
 ### 浏览器内 WebAssembly 执行
 
-私有 `@proto.ui/compiler/browser` API 在 caller-owned module Worker 中，通过 **QuickJS WebAssembly 执行同一份 canonical compiler**。这是 WASM-hosted JavaScript compiler execution，不是把 TypeScript Compiler ahead-of-time 改写成 WASM。只有经过 digest 校验的可信 compiler bundle 会执行；作者 source 始终只是 AST input。Host 绑定 UTF-8 SHA-256，virtual source path 保留正常 POSIX 语义；不提供浏览器 filesystem，也不下载作者 import 的 module。
+私有 `@proto.ui/compiler/browser` API 在 caller-owned module Worker 中，通过 **QuickJS WebAssembly 执行同一份 canonical compiler**。这是 WASM-hosted JavaScript compiler execution，不是把 TypeScript Compiler ahead-of-time 改写成 WASM。调用者必须独立信任传入的 compiler bundle；作者 source 始终只是 AST input，不会被 evaluate。Host 绑定 UTF-8 SHA-256，virtual source path 保留正常 POSIX 语义；不提供浏览器 filesystem，也不下载作者 import 的 module。
 
 在仓库 root 构建可信 bundle，以及包含 TypeScript version / digest 的 manifest：
 
@@ -130,6 +130,8 @@ node scripts/compiler/build-browser.mjs
 Vite consumer 将生成的 `compiler.js` 作为 text、`build.json` 作为 data 加载，再调用 `createBrowserCompilerClient(bundle, build)`。Request 是 `{ format: 1, revision, source, options: { fileName, profile, files?, exportName?, componentName? } }`；`files` 是 virtual path 到 source text 的 closed map。必须显式选择 target，不会静默替换。成功 response 包含 canonical generated source、supporting file、dependency version、provenance、source map，以及 source identity、compiler-bundle identity 和 request revision。它**不负责挂载或执行生成的 target code**。
 
 可信 bundle 使用 Vite `?raw` import，或未经 transform 的 public asset。直接 fetch Vite transform 后的 JavaScript 可能附带 source map，改变字节；build-identity 校验会正确拒绝该 response。不能通过替换 manifest digest 接受变更后的 delivery。
+
+Digest 比较只检查 **bundle/manifest consistency，不认证 authenticity**。两者都由 caller 提供，同时修改两者就能执行变更后的 program。从同一个可变位置获取 `compiler.js` 和 `build.json` 不构成独立 trust anchor；调用 API 前，应用应通过可信 deployment configuration 或已验证的 supply chain 认证或 pin compiler delivery。此 API 不提供独立 signature verifier 或 trust root；resource limit 也不意味着可以安全接受任意 compiler program。受控测试会修改 compiler program，并为可信 entry 的 fault injection 重算 manifest；这些测试演示了仅检查 consistency 的边界。
 
 Source rejection 返回 `phase: 'compile'` 和正常 diagnostic code/category/file/span；host rejection 返回独立的 `phase: 'host'`。准入在可信 entry 内校验序列化后的 request，先于 compilation 的默认值处理；因继承、nonenumerability 或 `toJSON` 丢失的 target 字段会被拒绝。Worker construction / initialization / transport error 都会 reject client promise。重叠编辑只保留一个 running request 和最新一个 queued request；被取代的 request 以 `AbortError` 拒绝。每次调用绑定提交时的 revision 和 source graph（包括排队 request 的 nested `files`），不受调用者后续 mutation 影响。导航或 owner terminal teardown 时调用 `dispose()`；它终止 Worker，并拒绝尚未完成的工作。
 
