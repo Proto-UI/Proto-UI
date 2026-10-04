@@ -13,7 +13,6 @@ import {
   validateSelfAssessmentResult,
 } from './assessment-runtime.mjs';
 import {
-  authorizeReviewSubmission,
   computeReviewInputDigest,
   computeReviewIngestionInputDigest,
   computeReviewPacketDigest,
@@ -30,6 +29,7 @@ import {
 } from './review-runtime.mjs';
 import {
   authorizeLivePullRequestMerge,
+  authorizeLiveReviewSubmission,
   collectLiveReviewInput,
   submitGitHubMerge,
   submitGitHubReview,
@@ -456,34 +456,19 @@ try {
     const live = collectLiveReviewInput(packet.repositoryId, packet.pullRequest, {
       externalEvidence,
     });
-    const authorization = authorizeReviewSubmission({
+    const reviewAuthorizationContext = {
       packet,
       input,
-      liveInput: live.input,
+      priorPacket,
       ...invocationContext,
       authorizationId: args.get('--authorization'),
       policy,
       selfAssessment: execution.selfAssessment,
-      credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
-      reviewer: live.viewerLogin,
-      priorPacket,
-      ciConclusion: summarizeLiveChecks(live.input.checks, {
-        repositoryId: packet.repositoryId,
-        trustedRepositoryId: policy.trustedCiEvidence?.repositoryId,
-        trustedSource: policy.trustedCiEvidence?.source,
-        trustedCheckNames: policy.trustedCiEvidence?.checkNames,
-        trustedWorkflowNames: policy.trustedCiEvidence?.workflowNames,
-        trustedWorkflowPaths: policy.trustedCiEvidence?.workflowPaths,
-      }),
-      dcoConclusion: summarizeLiveDco(live.input.checks, {
-        repositoryId: packet.repositoryId,
-        trustedRepositoryId: policy.trustedDcoEvidence?.repositoryId,
-        trustedCheckName: policy.trustedDcoEvidence?.checkName,
-        trustedSource: policy.trustedDcoEvidence?.source,
-        trustedProviderId: policy.trustedDcoEvidence?.providerId,
-        trustedDetailsUrl: policy.trustedDcoEvidence?.detailsUrl,
-      }),
-    });
+      actor: live.viewerLogin,
+      viewerPermission: live.viewerPermission,
+      externalEvidence,
+    };
+    const authorization = authorizeLiveReviewSubmission(reviewAuthorizationContext, live);
     if (!authorization.allowed) {
       output = authorization;
     } else {
@@ -498,6 +483,7 @@ try {
         undefined,
         {
           reviewerLogin: live.viewerLogin,
+          authorizationContext: reviewAuthorizationContext,
           invocationId: `${packet.repositoryId}:${packet.pullRequest}:${packet.headSha}:${authorization.recommendedAction}`,
         }
       );

@@ -2457,7 +2457,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { generateKeyPairSync, sign } from 'node:crypto';
 import { loadOwnerAuthorization, ownerDelegationSigningBytes } from '../owner-authorization.mjs';
-function writerOwner(t) {
+function writerOwner(t, actions = ['integrate']) {
   const dir = mkdtempSync(path.join(tmpdir(), 'pui-owner-merge-'));
   t.after(() => rmSync(dir, { recursive: true, force: true }));
   const keys = generateKeyPairSync('ed25519'),
@@ -2470,17 +2470,18 @@ function writerOwner(t) {
     grantor: { id: 19223209, login: 'cyjin-yl' },
     actor: 'cyjin-yl',
     repositoryId,
-    actions: ['integrate'],
+    actions,
     scopeIds: ['pull-request:487'],
     baseRefName: 'main',
     decisionReference: 'fixture:trusted-decision',
   };
-  const save = (status = 'active') => {
+  let revision = 0;
+  const save = (status = 'active', overrides = {}) => {
     const payload = {
       schemaVersion: 1,
       kind: 'proto-ui.owner-delegation-state',
-      revision: status === 'active' ? 1 : 2,
-      grants: [{ ...grant, status }],
+      revision: ++revision,
+      grants: [{ ...grant, status, ...overrides }],
     };
     writeFileSync(
       statePath,
@@ -2534,6 +2535,62 @@ test('bound owner grant reaches actual merge writer once and is revalidated befo
       const result = submitGitHubMerge(repositoryId, 487, opts, runner, fastVerification);
       assert.equal(result.merged, true);
       assert.equal(f.writes, 1);
+    }
+  }
+});
+
+test('owner review writer rechecks grant, target and permission before its single POST', (t) => {
+  for (const failure of ['none', 'revoked', 'narrowed', 'permission', 'target']) {
+    const owner = writerOwner(t, ['review']),
+      a = mergeAuthorizationFixture();
+    a.raw.data.viewer.login = 'cyjin-yl';
+    const packet = { ...a.authorizationContext.packet, recommendedAction: 'COMMENT' };
+    const body = renderReviewBody(packet),
+      context = {
+        ...a.authorizationContext,
+        packet,
+        actor: 'cyjin-yl',
+        executionMode: 'autonomous',
+        executionModeSource: 'schedule',
+        authorizationId: owner.id,
+        ownerAuthorization: owner.proof,
+      };
+    let writes = 0;
+    const runner = (command, args, options) => {
+      if (args.includes('graphql')) {
+        if (failure === 'revoked') owner.save('revoked');
+        if (failure === 'narrowed') owner.save('active', { scopeIds: ['pull-request:488'] });
+        if (failure === 'permission') a.raw.data.repository.viewerPermission = 'READ';
+        if (failure === 'target') a.raw.data.repository.pullRequest.state = 'CLOSED';
+      }
+      if (args.includes('POST')) {
+        writes++;
+        return JSON.stringify({
+          id: 765,
+          node_id: 'PRR_owner_boundary',
+          user: { login: 'cyjin-yl' },
+          state: 'COMMENTED',
+          commit_id: sha('b'),
+          body,
+          html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-765',
+        });
+      }
+      return a.runner(command, args, options);
+    };
+    const invoke = () =>
+      submitGitHubReview(
+        repositoryId,
+        487,
+        { commitId: sha('b'), event: 'COMMENT', body },
+        runner,
+        { reviewerLogin: 'cyjin-yl', authorizationContext: context }
+      );
+    if (failure === 'none') {
+      assert.equal(invoke().status, 'applied');
+      assert.equal(writes, 1);
+    } else {
+      assert.throws(invoke, /boundary|no POST attempted|live canonical/);
+      assert.equal(writes, 0);
     }
   }
 });

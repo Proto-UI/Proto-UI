@@ -2,6 +2,8 @@ import { execFileSync } from 'node:child_process';
 import { ownerAuthorizationAllows } from './owner-authorization.mjs';
 import {
   authorizePullRequestMerge,
+  authorizeReviewSubmission,
+  renderReviewBody,
   isExternalPreviewAuthorizationFailure,
   reviewerPermissionSubjects,
   validateReviewInputSnapshot,
@@ -528,12 +530,50 @@ export function buildLiveReviewInput(
   };
 }
 
+export function authorizeLiveReviewSubmission(context, live) {
+  const policy = context.policy;
+  return authorizeReviewSubmission({
+    packet: context.packet,
+    input: context.input,
+    liveInput: live.input,
+    executionMode: context.executionMode,
+    executionModeSource: context.executionModeSource,
+    authorizationId: context.authorizationId,
+    ownerAuthorization: context.ownerAuthorization,
+    policy,
+    selfAssessment: context.selfAssessment,
+    priorPacket: context.priorPacket ?? null,
+    credentialCanReview: ['ADMIN', 'MAINTAIN', 'WRITE'].includes(live.viewerPermission),
+    reviewer: live.viewerLogin,
+    ciConclusion: summarizeLiveChecks(live.input.checks, {
+      repositoryId: context.packet.repositoryId,
+      trustedRepositoryId: policy?.trustedCiEvidence?.repositoryId,
+      trustedSource: policy?.trustedCiEvidence?.source,
+      trustedCheckNames: policy?.trustedCiEvidence?.checkNames,
+      trustedWorkflowNames: policy?.trustedCiEvidence?.workflowNames,
+      trustedWorkflowPaths: policy?.trustedCiEvidence?.workflowPaths,
+    }),
+    dcoConclusion: summarizeLiveDco(live.input.checks, {
+      repositoryId: context.packet.repositoryId,
+      trustedRepositoryId: policy?.trustedDcoEvidence?.repositoryId,
+      trustedCheckName: policy?.trustedDcoEvidence?.checkName,
+      trustedSource: policy?.trustedDcoEvidence?.source,
+      trustedProviderId: policy?.trustedDcoEvidence?.providerId,
+      trustedDetailsUrl: policy?.trustedDcoEvidence?.detailsUrl,
+    }),
+  });
+}
+
 export function submitGitHubReview(
   repositoryId,
   pullRequest,
   { commitId, event, body },
   runner = execFileSync,
-  { reviewerLogin = null, invocationId = `${commitId}:${event}:${body}` } = {}
+  {
+    reviewerLogin = null,
+    invocationId = `${commitId}:${event}:${body}`,
+    authorizationContext = null,
+  } = {}
 ) {
   const { owner, name } = parseRepositoryId(repositoryId);
   if (!Number.isInteger(pullRequest) || pullRequest < 1) {
@@ -548,6 +588,45 @@ export function submitGitHubReview(
   if (typeof body !== 'string') throw new Error('review submission body is invalid');
   if (typeof reviewerLogin !== 'string' || reviewerLogin.length === 0)
     throw new Error('review submission requires the verified reviewer identity');
+
+  if (authorizationContext !== null) {
+    const context = authorizationContext;
+    if (
+      !context ||
+      Array.isArray(context) ||
+      context.packet?.repositoryId !== repositoryId ||
+      context.input?.repositoryId !== repositoryId ||
+      context.packet?.pullRequest !== pullRequest ||
+      context.input?.pullRequest !== pullRequest ||
+      context.packet?.headSha !== commitId ||
+      context.input?.headSha !== commitId ||
+      context.packet?.recommendedAction !== event ||
+      context.actor !== reviewerLogin ||
+      !['ADMIN', 'MAINTAIN', 'WRITE'].includes(context.viewerPermission) ||
+      renderReviewBody(context.packet) !== body
+    )
+      throw Error('review authorization context binding is invalid; no POST attempted');
+    validateReviewInputSnapshot(context.input);
+    validateReviewPacket(context.packet, context.input);
+    const finalLive = collectLiveReviewInput(repositoryId, pullRequest, {
+      runner,
+      externalEvidence: context.externalEvidence,
+    });
+    if (
+      finalLive.viewerLogin !== context.actor ||
+      finalLive.viewerPermission !== context.viewerPermission
+    )
+      throw Error('review identity or permission changed at the final boundary; no POST attempted');
+    const finalAuthorization = authorizeLiveReviewSubmission(context, finalLive);
+    if (!finalAuthorization.allowed)
+      throw Error(
+        'review eligibility changed at the final boundary: ' +
+          finalAuthorization.reason +
+          '; no POST attempted'
+      );
+    if (finalAuthorization.duplicate)
+      return { status: 'duplicate', invocationId, commitId, event, reconciled: false };
+  }
 
   const expectedState = {
     APPROVE: 'APPROVED',
