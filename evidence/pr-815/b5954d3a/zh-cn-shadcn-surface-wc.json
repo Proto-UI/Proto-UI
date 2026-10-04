@@ -1,0 +1,207 @@
+{
+  "sourceSha": "b5954d3a35bc3a9e5b29d88befdaebc94ad748ef",
+  "sourceDirty": false,
+  "sourceSnapshotSha256": "794278e9f0ae7389b447db22033787f8d0a2ad477418aad4d36138ca81b4d39b",
+  "runId": "2026-10-04T12-21-42.560Z-2921",
+  "route": "/zh-cn/ui-libraries/shadcn/surface/",
+  "runtime": "wc",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "theme": "light",
+  "captures": {
+    "preview": "zh-cn-shadcn-surface-wc.png",
+    "document": "zh-cn-shadcn-surface-wc-document.png"
+  },
+  "documentTypography": {
+    "scope": "Actual text-bearing element within first paragraph; whole-page visual inspection required",
+    "selector": "[data-doc-flow] > p:first-of-type",
+    "computed": {
+      "text": "shadcn-surface-root 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Shadcn 通过 asSurfaceRoot() 继承 Base Surface 契约，再由家族反馈 Rule 实现呈现。",
+      "html": "<span data-site-typography-carrier=\"\" data-demo-ref=\"carrier-3\"><wc-shadcn-text-root data-demo-ref=\"surface-3\" data-pui-root=\"\" class=\"pui-host-root\" data-typography-prototype=\"shadcn-text-root\" data-typography-role=\"body\" data-typography-runtime=\"wc\" data-typography-family=\"shadcn\" data-typography-generation=\"1\" data-pui-style=\"text-base text-foreground font-normal font-sans leading-relaxed tracking-normal not-italic no-underline\" style=\"--pui-radius: 0.625rem; --pui-radius-xl: calc(0.625rem + 4px); --pui-radius-lg: 0.625rem; --pui-radius-md: max(calc(0.625rem - 2px), 0px); --pui-radius-sm: max(calc(0.625rem - 4px), 0px); --pui-background: lab(100% 0 0); --pui-foreground: lab(2.75381% 0 0); --pui-card: lab(100% 0 0); --pui-card-foreground: lab(2.75381% 0 0); --pui-popover: lab(100% 0 0); --pui-popover-foreground: lab(2.75381% 0 0); --pui-primary: lab(7.78201% -0.0000149012 0); --pui-primary-foreground: lab(98.26% 0 0); --pui-secondary: lab(96.52% -0.0000298023 0.0000119209); --pui-secondary-foreground: lab(7.78201% -0.0000149012 0); --pui-muted: lab(96.52% -0.0000298023 0.0000119209); --pui-muted-foreground: lab(48.496% 0 0); --pui-accent: lab(96.52% -0.0000298023 0.0000119209); --pui-accent-foreground: lab(7.78201% -0.0000149012 0); --pui-destructive: lab(48.4493% 77.4328 61.5452); --pui-destructive-foreground: lab(96.4152% 3.22586 1.14673); --pui-border: lab(90.952% 0 -0.0000119209); --pui-input: lab(90.952% 0 -0.0000119209); --pui-ring: lab(66.128% -0.0000298023 0.0000119209); --pui-chart-1: #93c5fd; --pui-chart-2: #3b82f6; --pui-chart-3: #2563eb; --pui-chart-4: #1d4ed8; --pui-chart-5: #1e40af; --pui-sidebar: lab(98.26% 0 0); --pui-sidebar-foreground: lab(2.75381% 0 0); --pui-sidebar-primary: lab(7.78201% -0.0000149012 0); --pui-sidebar-primary-foreground: lab(98.26% 0 0); --pui-sidebar-accent: lab(96.52% -0.0000298023 0.0000119209); --pui-sidebar-accent-foreground: lab(7.78201% -0.0000149012 0); --pui-sidebar-border: lab(90.952% 0 -0.0000119209); --pui-sidebar-ring: lab(66.128% -0.0000298023 0.0000119209); --pui-surface: lab(97.68% -0.0000298023 0.0000119209); --pui-surface-foreground: lab(2.75381% 0 0); --pui-code: lab(97.68% -0.0000298023 0.0000119209); --pui-code-foreground: lab(2.75381% 0 0); --pui-code-highlight: lab(95.36% 0 0); --pui-code-number: lab(48.96% 0 0); --pui-selection: lab(2.75381% 0 0); --pui-selection-foreground: lab(100% 0 0); --pui-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',\n    'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif,\n    'Apple Color Emoji', 'Segoe UI Emoji';\"><span data-site-typography-slot=\"\" data-demo-ref=\"slot-3\"><code dir=\"auto\">shadcn-surface-root</code> 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Shadcn 通过 <code dir=\"auto\">asSurfaceRoot()</code> 继承 <a href=\"/zh-cn/ui-libraries/base/surface/\">Base Surface</a> 契约，再由家族反馈 Rule 实现呈现。</span></wc-shadcn-text-root></span>",
+      "family": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "size": "16px",
+      "weight": "400",
+      "lineHeight": "28.8px"
+    },
+    "renderedSample": {
+      "tag": "span",
+      "text": "shadcn-surface-root 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Shadcn 通过 asSurfaceRoot() 继承 Base Surface 契约，再由家族反馈 Rule 实现呈现。",
+      "directText": [
+        " 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Shadcn 通过 ",
+        " 继承 ",
+        " 契约，再由家族反馈 Rule 实现呈现。"
+      ],
+      "family": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "size": "16px",
+      "weight": "400",
+      "lineHeight": "26px"
+    },
+    "platformFonts": [
+      {
+        "familyName": "Liberation Mono",
+        "postScriptName": "LiberationMono",
+        "isCustomFont": false,
+        "glyphCount": 34
+      },
+      {
+        "familyName": "Noto Sans CJK SC",
+        "postScriptName": "NotoSansCJKsc-Regular",
+        "isCustomFont": false,
+        "glyphCount": 65
+      },
+      {
+        "familyName": "DejaVu Sans",
+        "postScriptName": "DejaVuSans",
+        "isCustomFont": false,
+        "glyphCount": 52
+      }
+    ]
+  },
+  "facts": [
+    {
+      "text": "Outline · rest",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 60,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(100 0 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Muted · no border",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 58,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(96.52 -0.0000298023 0.0000119209)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Solid · supplied focus",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 60,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(7.78201 -0.0000149012 0)",
+      "shadow": "lab(100 0 0) 0px 0px 0px 2px, lab(66.128 -0.0000298023 0.0000119209) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+      "transform": "none"
+    },
+    {
+      "text": "Raised · supplied press",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 60,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(96.52 -0.0000298023 0.0000119209)",
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+      "transform": "matrix(1, 0, 0, 1, 0, 1)"
+    }
+  ],
+  "shellEvidence": {
+    "traces": [
+      {
+        "atMs": 290,
+        "slots": []
+      },
+      {
+        "atMs": 1665.6000000000058,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": true,
+            "hostInert": false,
+            "hostDisplay": "none",
+            "blockedByAncestor": true,
+            "borrowedContent": false,
+            "prototypeCount": 0,
+            "active": false
+          }
+        ]
+      },
+      {
+        "atMs": 1669.6000000000058,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "runtime:changed",
+        "atMs": 1671.8000000000175,
+        "detail": {
+          "id": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      },
+      {
+        "name": "previewer:mounted",
+        "atMs": 1671.8999999999942,
+        "detail": {
+          "runtime": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

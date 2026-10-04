@@ -1,0 +1,20 @@
+{
+  "sourceHead": "b5954d3a35bc3a9e5b29d88befdaebc94ad748ef",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37201787565",
+  "artifactId": 11303371816,
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "theme": "light",
+  "result": "64 passed; 64 clean-source JSON, zero page errors; 66 original PNGs; max raw/active slot counts 1; 176 runtime-matched ready snapshots. Both full documents inspected, actual CJK font measured.",
+  "comparison": "63 of 66 PNGs byte-identical to separately captured 61b checkpoint; remaining differences are 1/5/6 outer-frame edge/corner pixels. Both full-document PNGs are byte-identical, freshly captured in this exact-head run.",
+  "files": {
+    "en-shadcn-surface-wc-document.png": "899c1cc29a620b079f567ffb2803c7e6a6f3d5845b04c16d51d2eadf0613792d",
+    "en-shadcn-surface-wc.json": "5e7230df0448fdde24a12a6dac163ecdd9722bff0e26035ef80b803f1f004d0a",
+    "zh-cn-shadcn-surface-wc-document.png": "7b58026b988ec521fa15f2c33353e3dc238be6148ea4ff0fe4ea3390bd949a54",
+    "zh-cn-shadcn-surface-wc.json": "0da9f6efb6ad88bdabb34559396d007111ccf19fe5268872d287e4f9c29fa364",
+    "font-environment.txt": "24d1a9777faf360b3e645e0bbc1cba91c94bcfc335853608dd8393180b67b3da",
+    "docs815-b595-pixel-comparison.json": "f2cfda021d65bc37b4940880f544a827da593974cf9174852c376c1b8bca0299"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "baselineSource": "61b01ab2df05da340d14af044504df68bd09ec1f",
+  "candidateSource": "b5954d3a35bc3a9e5b29d88befdaebc94ad748ef",
+  "compared": 66,
+  "byteIdentical": 63,
+  "differences": [
+    {
+      "file": "en-brutalist-surface-wc.png",
+      "changedPixels": 1,
+      "bounds": [
+        0,
+        73,
+        1,
+        74
+      ],
+      "scope": "outer preview-frame edge/corner only"
+    },
+    {
+      "file": "en-base-surface-wc.png",
+      "changedPixels": 5,
+      "bounds": [
+        669,
+        401,
+        672,
+        407
+      ],
+      "scope": "outer preview-frame edge/corner only"
+    },
+    {
+      "file": "en-bootstrap-2-3-2-surface-wc.png",
+      "changedPixels": 6,
+      "bounds": [
+        669,
+        77,
+        672,
+        83
+      ],
+      "scope": "outer preview-frame edge/corner only"
+    }
+  ]
+}
