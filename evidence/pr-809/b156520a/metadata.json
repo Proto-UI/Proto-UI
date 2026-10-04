@@ -1,0 +1,9 @@
+{
+  "sourceSha": "b156520aa065b42e9e4504583af5f55c965a7804",
+  "run": 37233096565,
+  "artifact": 11314910331,
+  "mode": "emitted-package artifacts",
+  "sourceDistPairs": 30,
+  "byteIdenticalPairs": 30,
+  "scope": "owned scene Base Button; transform and percentage-radius fallback recover without external semantic/source invalidation"
+}
