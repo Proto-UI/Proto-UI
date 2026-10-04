@@ -1,0 +1,200 @@
+{
+  "sourceSha": "61b01ab2df05da340d14af044504df68bd09ec1f",
+  "sourceDirty": false,
+  "sourceSnapshotSha256": "f1dedbee4c866f30a01db92012cb7a85f4d9dca3ed242d554d2147f5e5630386",
+  "runId": "2026-10-04T11-18-54.874Z-2958",
+  "route": "/en/ui-libraries/shadcn/surface/",
+  "runtime": "wc",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "theme": "light",
+  "captures": {
+    "preview": "en-shadcn-surface-wc.png",
+    "document": "en-shadcn-surface-wc-document.png"
+  },
+  "documentTypography": {
+    "scope": "Actual text-bearing element within first paragraph; whole-page visual inspection required",
+    "selector": "[data-doc-flow] > p:first-of-type",
+    "computed": {
+      "text": "shadcn-surface-root is a draft workspace Surface atom. It preserves one content slot and consumes visual inputs without becoming a Button, link, code panel, preview panel, or page-specific component. Shadcn inherits the Base Surface contract through asSurfaceRoot() and realizes it with family feedback rules.",
+      "family": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "size": "16px",
+      "weight": "400",
+      "lineHeight": "28.8px"
+    },
+    "renderedSample": {
+      "tag": "span",
+      "text": "shadcn-surface-root is a draft workspace Surface atom. It preserves one content slot and consumes visual inputs without becoming a Button, link, code panel, preview panel, or page-specific component. Shadcn inherits the Base Surface contract through asSurfaceRoot() and realizes it with family feedback rules.",
+      "directText": [
+        " is a draft workspace Surface atom. It preserves one content slot and consumes visual inputs without becoming a Button, link, code panel, preview panel, or page-specific component. Shadcn inherits the ",
+        " contract through ",
+        " and realizes it with family feedback rules."
+      ],
+      "family": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "size": "16px",
+      "weight": "400",
+      "lineHeight": "26px"
+    },
+    "platformFonts": [
+      {
+        "familyName": "Liberation Mono",
+        "postScriptName": "LiberationMono",
+        "isCustomFont": false,
+        "glyphCount": 34
+      },
+      {
+        "familyName": "DejaVu Sans",
+        "postScriptName": "DejaVuSans",
+        "isCustomFont": false,
+        "glyphCount": 271
+      }
+    ]
+  },
+  "facts": [
+    {
+      "text": "Outline · rest",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 60,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(100 0 0)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Muted · no border",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 58,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(96.52 -0.0000298023 0.0000119209)",
+      "shadow": "none",
+      "transform": "none"
+    },
+    {
+      "text": "Solid · supplied focus",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 60,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(7.78201 -0.0000149012 0)",
+      "shadow": "lab(100 0 0) 0px 0px 0px 2px, lab(66.128 -0.0000298023 0.0000119209) 0px 0px 0px 4px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+      "transform": "none"
+    },
+    {
+      "text": "Raised · supplied press",
+      "role": null,
+      "tabIndex": -1,
+      "width": 218.28125,
+      "height": 60,
+      "size": 16,
+      "fontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+      "fontWeight": "400",
+      "decoration": "none",
+      "background": "lab(96.52 -0.0000298023 0.0000119209)",
+      "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px",
+      "transform": "matrix(1, 0, 0, 1, 0, 1)"
+    }
+  ],
+  "shellEvidence": {
+    "traces": [
+      {
+        "atMs": 235.09999999997672,
+        "slots": []
+      },
+      {
+        "atMs": 1568.7999999999884,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": true,
+            "hostInert": false,
+            "hostDisplay": "none",
+            "blockedByAncestor": true,
+            "borrowedContent": false,
+            "prototypeCount": 0,
+            "active": false
+          }
+        ]
+      },
+      {
+        "atMs": 1571.2000000000116,
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ],
+    "events": [
+      {
+        "name": "runtime:changed",
+        "atMs": 1572.4000000000233,
+        "detail": {
+          "id": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      },
+      {
+        "name": "previewer:mounted",
+        "atMs": 1572.5,
+        "detail": {
+          "runtime": "wc"
+        },
+        "slots": [
+          {
+            "generation": "1",
+            "phase": null,
+            "runtime": "wc",
+            "hostHidden": false,
+            "hostInert": false,
+            "hostDisplay": "block",
+            "blockedByAncestor": false,
+            "borrowedContent": true,
+            "prototypeCount": 4,
+            "active": true
+          }
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

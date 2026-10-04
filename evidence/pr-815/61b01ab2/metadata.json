@@ -1,0 +1,18 @@
+{
+  "sourceHead": "61b01ab2df05da340d14af044504df68bd09ec1f",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37198284818",
+  "artifactId": 11302285900,
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "theme": "light",
+  "result": "64 passed; 64 clean source-bound JSON, zero page errors; 66 original PNGs; max raw and active slot counts both 1; 176 runtime-matched ready snapshots. Both full documents inspected; Chinese glyphs readable.",
+  "files": {
+    "en-shadcn-surface-wc-document.png": "899c1cc29a620b079f567ffb2803c7e6a6f3d5845b04c16d51d2eadf0613792d",
+    "en-shadcn-surface-wc.json": "85b9ce8588d844269d764439adf67656a809362435610a2b7847812e5656da09",
+    "zh-cn-shadcn-surface-wc-document.png": "7b58026b988ec521fa15f2c33353e3dc238be6148ea4ff0fe4ea3390bd949a54",
+    "zh-cn-shadcn-surface-wc.json": "8038f1b1c1431dbef9311bcc912b070ac07dba3e113138eed16bdd36226ebfae",
+    "font-environment.txt": "24d1a9777faf360b3e645e0bbc1cba91c94bcfc335853608dd8393180b67b3da"
+  }
+}
