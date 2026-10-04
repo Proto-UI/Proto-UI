@@ -253,7 +253,8 @@ export function extractOverviewEntries(source, sourcePath) {
       if (!ts.isObjectLiteralExpression(element)) continue;
       const id = objectStringProperty(element, 'id');
       const href = objectStringProperty(element, 'href');
-      if (id) entries.push({ id, href });
+      const demoId = objectStringProperty(element, 'demoId');
+      if (id) entries.push({ id, href, ...(demoId ? { demoId } : {}) });
     }
     result.set(library, entries);
   }

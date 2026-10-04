@@ -80,7 +80,7 @@ If a future proposal needs one of these answers to change, it requires explicit 
 | `vue2-source-v1` | Vue 2.6.14 | Target framework plus emitted native helpers; no Proto UI Runtime/Adapter |
 | `web-component-source-v1` | Custom Elements v1 | Emitted native helpers; no framework or Proto UI Runtime/Adapter dependency |
 
-GPUI, Qt and Flutter profile identities are **unimplemented** and reject compilation. A profile's concrete tested target version is not a compatibility promise for other versions. Restricted source admission, semantic IR version **4**, target profile identity and emitted helper ABI **1** are separate private compatibility dimensions; neither IR nor helper files are a public plugin SPI.
+The private pipeline also implements GPUI, Qt and Flutter source emitters and four Web SSR profiles. Their source generation does not establish complete native Adapter parity, browser preview support or universal hydration compatibility. A profile's concrete tested target version is not a compatibility promise for other versions. Restricted source admission, semantic IR version **5**, target profile identity and emitted helper ABI **1** are separate private compatibility dimensions; neither IR nor helper files are a public plugin SPI.
 
 The frontend reads a closed, root-contained TypeScript source graph without importing or evaluating the author program. It admits checked data, primitive/control-flow callbacks, static helpers and authored hooks, explicit updates, named State and typed exposes, Props and Context reads/watchers, one-Root templates, serializable Rule conditions and style intent, and the declared native event/focus/accessibility slice. Unsupported syntax, phase/capture authority, operations, target versions and missing host capabilities are diagnostics, not silent bridges.
 
@@ -116,6 +116,36 @@ node --import tsx scripts/compiler/native-consumer-smoke.mjs
 ```
 
 Each run retains `summary.json`, `timing.json`, `costs.json`, runtime traces, diagnostics and dependency integrity in its printed evidence directory. Measurements cover cold/hot/changed compilation, whole-process peak RSS and coarse memory snapshots, emitted/supporting source and dependency payload bytes, real framework initialization/update/teardown, retained handle identity and observed instance/view-epoch/Root counts. They do **not** measure exact allocation counts, garbage collection, native-browser layout latency or Adapter-relative speed. Happy DOM consumers are one-sided evidence; the finite Chromium program is not general equivalence, SSR/hydration support or a claim that compiled output is universally faster or smaller.
+
+### Browser WebAssembly execution
+
+The private `@proto.ui/compiler/browser` API runs the **same canonical compiler inside QuickJS WebAssembly**, with a caller-owned module Worker. This is WASM-hosted JavaScript compiler execution, not an ahead-of-time TypeScript-to-WASM rewrite. Only the trusted, digest-checked compiler bundle executes; authored source remains AST input. The host binds UTF-8 SHA-256, while virtual source paths retain the normal POSIX semantics. It does not supply a browser filesystem or download imported author modules.
+
+Build the trusted bundle and its TypeScript-version/digest manifest from the repository root:
+
+```sh
+node scripts/compiler/build-browser.mjs
+```
+
+In a Vite consumer, load the generated `compiler.js` as text and `build.json` as data, then call `createBrowserCompilerClient(bundle, build)`. Submit `{ format: 1, revision, source, options: { fileName, profile, files?, exportName?, componentName? } }`; `files` is a closed map of virtual paths to source text. A target profile is required and is never silently replaced. A successful response includes the canonical generated source, supporting files, dependency versions, provenance and source map, together with its source identity, compiler-bundle identity and request revision. It **does not mount or execute generated target code**.
+
+Source rejection returns `phase: 'compile'` with the normal diagnostic code/category/file/span. Host rejection returns `phase: 'host'`, distinct from source diagnostics. Worker initialization/transport errors reject the client promise. Overlapping edits retain one running request and only the newest queued request; superseded requests reject with `AbortError`. Call `dispose()` on navigation or terminal owner teardown; it terminates the Worker and rejects pending work.
+
+The configured limits are 256 KiB of UTF-8 serialized input, 128 MiB of WASM heap, 2 MiB of VM stack, 8,388,608 output characters, a 30-second initialization deadline, a five-second VM compilation deadline and a ten-second Worker response deadline. These are resource/failure boundaries, not an admitted instantaneous-preview performance budget or a measurement of whole-browser memory.
+
+Actual Chromium module-Worker evidence compiles the repository's canonical Base Button through WASM. The captured artifact matches ordinary Node compilation and direct WASM execution; separate comparisons cover all four Web source emitters, Unicode source/graph identity, source-located rejection and graph insertion order. In one local observation, initialization took 2.83 seconds and compilation 116 milliseconds; the trusted compiler JavaScript was 5,035,825 uncompressed UTF-8 bytes and the QuickJS WASM asset 503,134 bytes. These single samples do not establish cold/warm distributions, mobile support or a startup budget. The permanent WASM regression also injects a nonterminating **trusted entry** to verify interruption, subsequent canonical compilation and terminal disposal; it never evaluates authored input.
+
+### Website-wide migration inventory
+
+Regenerate the source-bound inventory with:
+
+```sh
+node --import tsx scripts/compiler/website-demo-inventory.mjs
+```
+
+`internal/compiler/website-demo-migrations.json` records every demo-bearing MDX documentation page, homepage/library/Matrix expansion, demo declaration, registration binding and canonical prototype definition. It reuses the Website's manifest-exported source resolver and records actual canonical Node admission diagnostics rather than substituting an Adapter. The current inventory has **120 pages, 65 demo declarations and 145 prototype definitions**; three definitions pass the selected Web Component source profile and 142 are rejected by current source admission. All registration/source addresses are resolved. No page is excluded merely because compilation fails.
+
+Every migration row remains **not migrated**. This inventory and the browser compiler API do not close [#817](https://github.com/Proto-UI/Proto-UI/issues/817): canonical-source admission gaps, supported-target RuntimeBox mounting, optional editing, revision-consistent diagnostics/preview, failure rollback, lifecycle/security boundaries and per-page browser evidence remain explicit obligations. Existing RuntimeBox frame ownership stays with [#786](https://github.com/Proto-UI/Proto-UI/issues/786) / [#777](https://github.com/Proto-UI/Proto-UI/pull/777). A WASM compiler does not sandbox generated preview code.
 
 ## Contribution boundary
 

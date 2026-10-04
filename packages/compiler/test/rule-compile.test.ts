@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { compilePrototype } from '../src/compile';
+import { compilePrototype } from '../src/memory';
 
 export const styledSource = `import {definePrototype,tw} from '@proto.ui/core';
 export default definePrototype({name:'styled-toggle',setup(def){

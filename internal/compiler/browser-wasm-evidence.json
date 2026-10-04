@@ -1,0 +1,312 @@
+{
+  "schemaVersion": 1,
+  "ownerIssue": 817,
+  "baseSha": "e38ec43ea2e83be6a44fea0e3684e7396a5920fe",
+  "requestParaphrase": "Agent paraphrase of the current maintainer direction: advance compiler work through ordinary review/integration and implement #817 for all eligible canonical-proto demos; this artifact covers the bounded browser compiler host and inventory, not RuntimeBox completion.",
+  "compilerScope": "Trusted canonical TypeScript compiler executes inside QuickJS WebAssembly in a module Worker. Authored source is AST input; no Node-server or Adapter fallback.",
+  "coldObservation": {
+    "observedAt": "2026-10-04T16:03:09.490Z",
+    "baseSha": "e38ec43ea2e83be6a44fea0e3684e7396a5920fe",
+    "scope": "Actual Chromium module Worker canonical compiler through QuickJS WASM; one cold and one compile observation, not a performance budget or preview/migration completion",
+    "initializationMs": 2834.399999976158,
+    "compileMs": 115.89999997615814,
+    "build": {
+      "format": 1,
+      "compilerSha256": "d0d6f21956dfd27ed8275d2ed67c38718523b0a1e5795f52e3268d8c76a932b1",
+      "typescriptVersion": "5.9.3",
+      "execution": "quickjs-wasm"
+    },
+    "resultKeys": ["ok", "revision", "source", "output"],
+    "result": {
+      "ok": true,
+      "revision": "canonical-button-v1",
+      "source": {
+        "file": "packages/prototypes/base/src/button/button.proto.ts",
+        "exportName": "default",
+        "sha256": "8193c0541c294df740be6565d9f9f3deacf57a258d3cb3fc5e8b8fc1ef784d77"
+      },
+      "outputKeys": [
+        "code",
+        "profile",
+        "supportingFiles",
+        "dependencies",
+        "provenance",
+        "sourceMap"
+      ],
+      "codeBytes": 40623
+    }
+  },
+  "apiParity": {
+    "observedAt": "2026-10-04T16:23:34.484Z",
+    "build": {
+      "format": 1,
+      "compilerSha256": "d0d6f21956dfd27ed8275d2ed67c38718523b0a1e5795f52e3268d8c76a932b1",
+      "typescriptVersion": "5.9.3",
+      "execution": "quickjs-wasm"
+    },
+    "node": "v24.21.0",
+    "checks": [
+      {
+        "case": "actual Chromium worker / Node / WASM artifact identity",
+        "source": {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "exportName": "default",
+          "sha256": "8193c0541c294df740be6565d9f9f3deacf57a258d3cb3fc5e8b8fc1ef784d77"
+        }
+      },
+      {
+        "case": "canonical target artifact parity",
+        "profile": "react-dom-source-v1",
+        "codeBytes": 53068
+      },
+      {
+        "case": "canonical target artifact parity",
+        "profile": "vue-source-v1",
+        "codeBytes": 49214
+      },
+      {
+        "case": "canonical target artifact parity",
+        "profile": "vue2-source-v1",
+        "codeBytes": 41636
+      },
+      {
+        "case": "canonical target artifact parity",
+        "profile": "web-component-source-v1",
+        "codeBytes": 40623
+      },
+      {
+        "case": "Unicode SHA-256, POSIX closed graph and insertion-order identity",
+        "source": {
+          "file": "演示/entry.proto.ts",
+          "exportName": "default",
+          "sha256": "b57451e1bb6492a0b29948e9a6f788f0c88cfbfefc1c6c964308d60eaa6488bc"
+        }
+      },
+      {
+        "case": "source-bound diagnostics; effectful input is data, never executed",
+        "result": {
+          "ok": false,
+          "revision": "effect-rejected",
+          "phase": "compile",
+          "diagnostics": [
+            {
+              "code": "PUI1004",
+              "category": "unsupported-input",
+              "message": "Unsupported top-level statement; compilation never executes input code.",
+              "span": {
+                "file": "演示/hook.ts",
+                "start": 0,
+                "end": 52,
+                "line": 1,
+                "column": 1,
+                "endLine": 1,
+                "endColumn": 53
+              }
+            }
+          ]
+        }
+      },
+      {
+        "case": "input byte admission",
+        "result": {
+          "ok": false,
+          "revision": "oversized",
+          "phase": "host",
+          "error": {
+            "code": "input-limit",
+            "message": "Closed compiler request exceeds the input byte limit."
+          }
+        }
+      },
+      {
+        "case": "terminal disposal",
+        "result": {
+          "ok": false,
+          "revision": "canonical-button-v1",
+          "phase": "host",
+          "error": {
+            "code": "disposed",
+            "message": "Browser compiler has been disposed."
+          }
+        }
+      }
+    ]
+  },
+  "workerTransitions": {
+    "observedAt": "2026-10-04T17:30:54.867Z",
+    "browser": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36",
+    "scope": "Actual Chromium module Worker edit queue, source/target rejection and terminal client disposal; not RuntimeBox or generated-code sandbox evidence",
+    "build": {
+      "format": 1,
+      "compilerSha256": "d0d6f21956dfd27ed8275d2ed67c38718523b0a1e5795f52e3268d8c76a932b1",
+      "typescriptVersion": "5.9.3",
+      "execution": "quickjs-wasm"
+    },
+    "canonicalSource": {
+      "file": "packages/prototypes/base/src/button/button.proto.ts",
+      "exportName": "default",
+      "sha256": "8193c0541c294df740be6565d9f9f3deacf57a258d3cb3fc5e8b8fc1ef784d77"
+    },
+    "edits": [
+      {
+        "revision": "older",
+        "status": "rejected",
+        "name": "AbortError",
+        "message": "Compiler request was superseded or disposed."
+      },
+      {
+        "revision": "middle",
+        "status": "rejected",
+        "name": "AbortError",
+        "message": "Compiler request was superseded or disposed."
+      },
+      {
+        "revision": "newest",
+        "status": "fulfilled",
+        "result": true,
+        "returnedRevision": "newest",
+        "source": {
+          "file": "packages/prototypes/base/src/button/button.proto.ts",
+          "exportName": "default",
+          "sha256": "a9d73dd0bebc814938eaa73c8de68e167326e9e5666043d5a36b3640253be72f"
+        },
+        "build": {
+          "format": 1,
+          "compilerSha256": "d0d6f21956dfd27ed8275d2ed67c38718523b0a1e5795f52e3268d8c76a932b1",
+          "typescriptVersion": "5.9.3",
+          "execution": "quickjs-wasm"
+        }
+      }
+    ],
+    "invalid": {
+      "ok": false,
+      "revision": "rejected-edit",
+      "phase": "compile",
+      "diagnostics": [
+        {
+          "code": "PUI1004",
+          "category": "unsupported-input",
+          "message": "Unsupported top-level statement; compilation never executes input code.",
+          "span": {
+            "file": "packages/prototypes/base/src/button/button.proto.ts",
+            "start": 5680,
+            "end": 5716,
+            "line": 160,
+            "column": 1,
+            "endLine": 160,
+            "endColumn": 37
+          }
+        }
+      ]
+    },
+    "unsupported": {
+      "ok": false,
+      "revision": "unsupported-target",
+      "phase": "compile",
+      "diagnostics": [
+        {
+          "code": "PUI4001",
+          "category": "unsupported-input",
+          "message": "Unknown target profile \"unsupported-profile\". Choose an implemented profile explicitly; no implicit fallback is available.",
+          "span": {
+            "file": "<target>",
+            "start": 0,
+            "end": 0,
+            "line": 1,
+            "column": 1,
+            "endLine": 1,
+            "endColumn": 1
+          }
+        }
+      ]
+    },
+    "terminalResult": {
+      "status": "rejected",
+      "name": "AbortError"
+    },
+    "after": {
+      "status": "rejected",
+      "name": "AbortError"
+    }
+  },
+  "validation": {
+    "observedAt": "2026-10-04T17:49:44.499Z",
+    "node": "24.21.0",
+    "pnpm": "10.32.1",
+    "compiler": [
+      {
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test",
+        "files": 29,
+        "passed": 231
+      },
+      {
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/src",
+        "files": 12,
+        "passed": 118
+      }
+    ],
+    "types": {
+      "command": "corepack pnpm@10.32.1 check:types",
+      "workspace": "passed",
+      "astro": {
+        "files": 268,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 1,
+        "hintScope": "Existing capture-whitepaper-diagram-evidence.mjs entry.error annotation"
+      }
+    },
+    "publicDocs": {
+      "command": "corepack pnpm@10.32.1 check:public-docs",
+      "result": "passed",
+      "bilingualPrimaryRoutes": 116,
+      "libraryInventories": 4
+    },
+    "docsTests": {
+      "command": "node --test scripts/docs/test/check-public-docs.test.mjs",
+      "passed": 13
+    },
+    "inventory": {
+      "pages": 120,
+      "demoDeclarations": 65,
+      "prototypeDefinitions": 145,
+      "nodeCompiled": 3,
+      "nodeRejected": 142,
+      "unresolvedRegistrations": 0,
+      "unresolvedPageBindings": 0,
+      "migrated": 0,
+      "deterministicRepeat": true
+    }
+  },
+  "renderedDocs": {
+    "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
+    "captures": ["evidence/compiler-guide-en-wasm.webp", "evidence/compiler-guide-zh-wasm.webp"],
+    "scope": "Actual Astro-rendered private API and support-boundary documentation; not evidence of generated target execution."
+  },
+  "existingDemoControl": {
+    "route": "/zh-cn/ui-libraries/base/button/",
+    "adapter": "Web Components",
+    "observedControls": [
+      {
+        "text": "Run action",
+        "role": "button",
+        "ariaDisabled": "false",
+        "tabIndex": 0
+      },
+      {
+        "text": "Disabled",
+        "role": "button",
+        "ariaDisabled": "true",
+        "tabIndex": -1
+      }
+    ],
+    "scope": "Existing ordinary documentation/Adapter preview rendered after extracting the shared source resolver. No WASM preview or native activation claim."
+  },
+  "debt": [
+    "No RuntimeBox migration, generated preview sandbox, in-page editor or full-source admission claim; #817 remains open.",
+    "142 selected-target source admission rejections remain in-scope with explicit diagnostics in website-demo-migrations.json.",
+    "Existing RuntimeBox frame work belongs to #777/#786; do not create a competing frame convention.",
+    "Cold/compile durations are one historical local sample each, not a performance budget or mobile/host support distribution.",
+    "Compiler remains private and release-excluded; no stable/public compiler product claim."
+  ]
+}
