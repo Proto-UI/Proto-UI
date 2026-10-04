@@ -1,0 +1,38 @@
+---
+title: 'Input'
+description: 'Base single-line text control: host-mediated editing, value ownership, and a live RuntimeBox.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Input remains **draft**. This page runs the actual `base-input-root` through Web Components, React, Vue 3 and Vue 2 on one Web host. It does not establish native-host or all-browser conformance.
+
+The Root owns one single-line plain-text editor through its Text Control requirement. The current Web profile materializes exactly one native `input[type="text"]` per instance. Its renderer returns `null` rather than adding another editor or authored child surface. Base has no visual styling; demo layout, explanatory text and acceptance of controlled proposals belong to the application.
+
+<PrototypePreviewer
+  demoId="demo-base-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Value and editing ownership
+
+- `defaultValue` initializes an uncontrolled value once. Unrelated property updates do not reset an edited value to that default.
+- `value` selects controlled ownership. Editing produces a normalized proposal; it becomes authoritative only when its owner accepts and supplies `value` again. The second demo Input has an owner that accepts proposals. Ownership is chosen at instance creation, not switched during its lifetime.
+- `valueChange` carries `{ value, composing, data, inputType }` and `change` carries `{ value }`. The IME `compositionStart`, `compositionUpdate` and `compositionEnd` events carry `{ value, data }`; the host editing session maintains the composition candidate.
+
+## One physical target
+
+`disabled`, `readOnly`, `placeholder`, `required`, `name`, `autoComplete`, `minLength`, `maxLength`, `inputMode` and `enterKeyHint` project onto that same Input.
+
+`ariaLabel`, `labelledBy` and `describedBy` name and describe the textbox. Exposes include `focusSelf()`, `blurSelf()` and the `value`, `disabled`, `readOnly`, `focused`, `focusVisible` and `composing` states.
+
+## Import and boundaries
+
+Import the default Root, `inputRoot` or `asInputRoot` from `@proto.ui/prototypes-base/input`. The authored hook uses the same frozen single-line requirement.
+
+Base does not own arbitrary `type`, submit/search/send commands, form submission, validation UI, selection APIs, system selection/edit-menu chrome or a second editor. Enter remains host/form-owned. `inputMode` and `enterKeyHint` are editing hints, not additional input types or commands. The visual projection has its own [Shadcn Input page](../../shadcn/input/).
+
+- Specification: [P-BASE-INPUT](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-INPUT.yaml)
+- Contract: [C-TEXT-CONTROL-0001](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-TEXT-CONTROL-0001.yaml)
+- Implementation and tests: [Base Input](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/input), [input.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/input.test.ts)

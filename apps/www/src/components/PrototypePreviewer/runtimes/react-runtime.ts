@@ -3,21 +3,16 @@ import { createReactAdapter } from '@proto.ui/adapter-react';
 import type * as ReactTypes from 'react';
 import { claimHostMount, releaseHostMount } from './host-mount';
 
-// 我们不直接 import React，而是用 esm.sh 的 ESM 版本懒加载
-// 也可以替换成本地的 "react" / "react-dom/client"（若打包策略允许）
-const REACT_SOURCE = 'https://esm.sh/react@18';
-const REACT_DOM_SOURCE = 'https://esm.sh/react-dom@18';
+// Keep the React 18 reader runtime, but deliver the pinned pair through
+// the application's lazy assets. ReactDOM's peer resolves the same React
+// instance; no external CDN is required for a reader's mount.
 
-// 异步加载 React 与 ReactDOM
-// 注意：只从 react-dom 单入口导入，避免 esm.sh 因多入口产生重复的 React 实例
 export async function loadReact(): Promise<{
   React: typeof ReactTypes;
   ReactDOM: any;
 }> {
-  const [React, ReactDOM] = await Promise.all([
-    import(/* @vite-ignore */ REACT_SOURCE) as Promise<typeof ReactTypes>,
-    import(/* @vite-ignore */ REACT_DOM_SOURCE) as Promise<any>,
-  ]);
+  const [reactModule, ReactDOM] = await Promise.all([import('react'), import('react-dom/client')]);
+  const React = (reactModule.default ?? reactModule) as unknown as typeof ReactTypes;
   return { React, ReactDOM };
 }
 

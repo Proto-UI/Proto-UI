@@ -378,6 +378,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/radio-group',
                 },
                 {
+                  label: 'Input',
+                  translations: { en: 'Input', 'zh-CN': 'Input' },
+                  slug: 'ui-libraries/base/input',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',

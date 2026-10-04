@@ -10,6 +10,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/workspace/test/lifecycle.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts',

@@ -2,14 +2,10 @@ import type { RuntimeAPI } from './registry';
 import { createVueAdapter, type VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import { claimHostMount, releaseHostMount } from './host-mount';
 
-// 使用 esm.sh 的 ESM 版本懒加载 Vue
-// 也可以替换成本地的 "vue"
-const VUE_SOURCE = 'https://esm.sh/vue@3';
-
-// 异步加载 Vue
+// Deliver the existing locked Vue 3 dependency through lazy same-origin assets.
+// The reader runtime must not depend on an external CDN being reachable.
 export async function loadVue(): Promise<VueRuntimeModule> {
-  const Vue = (await import(/* @vite-ignore */ VUE_SOURCE)) as VueRuntimeModule;
-  return Vue;
+  return (await import('vue')) as unknown as VueRuntimeModule;
 }
 
 type VueApp = {
