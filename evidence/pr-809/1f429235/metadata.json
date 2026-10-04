@@ -1,0 +1,9 @@
+{
+  "sourceSha": "1f4292354367aa61fc187e928d87988af4b3259f",
+  "run": 37228030510,
+  "artifact": 11312591627,
+  "mode": "emitted-package artifacts",
+  "sourceDistPairs": 27,
+  "byteIdenticalPairs": 27,
+  "scope": "owned-scene real Base Button; shadow/nested render roots, not native or DOM capture"
+}

@@ -1,0 +1,239 @@
+{
+  "source": {
+    "revision": "1f4292354367aa61fc187e928d87988af4b3259f",
+    "packageMode": "built-package-artifacts",
+    "shader": "88f681ab7035fd55b04f63edff1841e32c4199e9",
+    "opticalProfile": "regular-readable-v3",
+    "execution": "pending-browser-evidence"
+  },
+  "control": "source-157-control, same current fixture and original kernel",
+  "acceptance": "measured optical/readability controls, visual acceptance still required",
+  "comparisons": [
+    {
+      "scene": "checker",
+      "candidate": {
+        "profile": "regular-readable-v3",
+        "preparationCount": 6,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 2,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "baseline": {
+        "profile": "source-157-control",
+        "preparationCount": 0,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 0,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "delta": {
+        "changedRatio": 0.9898665348492338,
+        "meanMaxChannelDelta": 11.005437469105289
+      },
+      "baselineVariation": 1.4719101123595506,
+      "candidateVariation": 1.499063670411985,
+      "pressDelta": {
+        "changedRatio": 0.2920168067226891,
+        "meanMaxChannelDelta": 9.372590212555611
+      }
+    },
+    {
+      "scene": "text",
+      "candidate": {
+        "profile": "regular-readable-v3",
+        "preparationCount": 7,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 3,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "baseline": {
+        "profile": "source-157-control",
+        "preparationCount": 0,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 0,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "delta": {
+        "changedRatio": 0.8868017795353436,
+        "meanMaxChannelDelta": 14.221453287197232
+      },
+      "baselineVariation": 4.286516853932584,
+      "candidateVariation": 2.887796504369538,
+      "pressDelta": {
+        "changedRatio": 0.5004943153732081,
+        "meanMaxChannelDelta": 12.003830944142363
+      }
+    },
+    {
+      "scene": "solid",
+      "candidate": {
+        "profile": "regular-readable-v3",
+        "preparationCount": 8,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 4,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "baseline": {
+        "profile": "source-157-control",
+        "preparationCount": 0,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 0,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "delta": {
+        "changedRatio": 1,
+        "meanMaxChannelDelta": 7.403855659911023
+      },
+      "baselineVariation": 0,
+      "candidateVariation": 0.0014044943820224719
+    },
+    {
+      "scene": "light",
+      "candidate": {
+        "profile": "regular-readable-v3",
+        "preparationCount": 9,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 4,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "baseline": {
+        "profile": "source-157-control",
+        "preparationCount": 0,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 0,
+        "quality": "experimental-owned-texture",
+        "reason": "rendered",
+        "phase": "rest",
+        "radius": "24",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "delta": {
+        "changedRatio": 1,
+        "meanMaxChannelDelta": 8.214656450815621
+      },
+      "baselineVariation": 0,
+      "candidateVariation": 0.0010923845193508116
+    },
+    {
+      "scene": "dark",
+      "candidate": {
+        "profile": "regular-readable-v3",
+        "preparationCount": 10,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": true,
+        "focusVisible": false,
+        "clicks": 4,
+        "quality": "opaque-fallback",
+        "reason": "rendered-contrast-unsafe",
+        "phase": "rest",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "baseline": {
+        "profile": "source-157-control",
+        "preparationCount": 0,
+        "viewMode": "light",
+        "surfaceRoot": "light",
+        "canvasDirect": true,
+        "pressed": false,
+        "disabled": false,
+        "focused": false,
+        "focusVisible": false,
+        "clicks": 0,
+        "quality": "opaque-fallback",
+        "reason": "rendered-contrast-unsafe",
+        "phase": "rest",
+        "sourceListeners": 1,
+        "preferenceListeners": 1
+      },
+      "scope": "explicit readable degradation"
+    }
+  ]
+}
