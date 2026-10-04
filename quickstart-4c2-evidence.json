@@ -1,0 +1,39 @@
+{
+  "before": "fbd90df092369e6d2aab73c66848f4236ba83a29",
+  "candidate": "4c2d5ba4a0dea8459d47c58400b1c2d244d99452",
+  "workflowRun": 37230409192,
+  "conditions": "Original unedited Chromium CSS-pixel captures, zh-CN, normal text. Desktop1440x1000 and phone390x1000; no physical-device claim.",
+  "manualReview": "All six attached images individually viewed. English/dark/mobile full matrix and complete exact-head CI remain separately recorded, not inferred from this subset.",
+  "images": [
+    {
+      "file": "quickstart-before-fbd-1440-zh-light.png",
+      "sha256": "7599cfbbdcc487ad0c1200bb9ea50210c41cb72da718a09b2917f2757db0586f",
+      "sourceSha": "fbd90df092369e6d2aab73c66848f4236ba83a29"
+    },
+    {
+      "file": "quickstart-after-4c2-1440-zh-light.png",
+      "sha256": "cba1a4897829baa44b91d11569ec6a27402c670fbf190173b2ebc79a16f414aa",
+      "sourceSha": "4c2d5ba4a0dea8459d47c58400b1c2d244d99452"
+    },
+    {
+      "file": "quickstart-after-4c2-1440-zh-dark.png",
+      "sha256": "55861d991e1f253e03ae5d333116d127574598bf6c14f3b4acfd7b610489407d",
+      "sourceSha": "4c2d5ba4a0dea8459d47c58400b1c2d244d99452"
+    },
+    {
+      "file": "quickstart-after-4c2-390-zh-light.png",
+      "sha256": "380850508b9753b47acabbbed35167ea2f7effd6044ba74993d766dc5220400c",
+      "sourceSha": "4c2d5ba4a0dea8459d47c58400b1c2d244d99452"
+    },
+    {
+      "file": "quickstart-after-4c2-390-zh-dark.png",
+      "sha256": "87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da",
+      "sourceSha": "4c2d5ba4a0dea8459d47c58400b1c2d244d99452"
+    },
+    {
+      "file": "header-brutalist-after-4c2-1440-zh-dark.png",
+      "sha256": "ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a",
+      "sourceSha": "4c2d5ba4a0dea8459d47c58400b1c2d244d99452"
+    }
+  ]
+}

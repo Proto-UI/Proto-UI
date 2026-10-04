@@ -67,3 +67,18 @@ Original unedited public-project captures and SHA256:
 - `final-pressure-d657-1440-en-light.png`: `2142d78fc949583dad869573d99bd4d867d01655e1333da1deac19b2bdf05b5e`
 - `final-pressure-anchor-d657-1440-en-light.png`: `1c561746abc83053f0d83d1b0c6add384380bbb8c85e3b19262932c98830622b`
 - `final-header-directory-d657-1440-zh-dark.png`: `ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a`
+
+## Header spacing and information notes:4c2 follow-up
+
+The original fbd before and4c2 after QuickStart show the latest requested correction. Shadcn text-only Header gaps measure32px from brand to navigation and24px between links; framed Brutalist controls retain their existing spacing and public structural paint. The information note now consumes public Base-derived Surface/Text, while its native aside, label, original SVG, text and links remain intact. The title stays on the same line as its icon and remains first in its original sibling order.
+
+The original note text is identical in baseline/candidate metric samples. Actual browser evidence records an orphaned portaled Select after Back on fbd and a closed Select/popup on4c2. Compact-to-desktop returns border-transparent on4c2 instead of the old border-input. At1279 the old TOC appears and the new one remains hidden;1024 is hidden in both captures and is a normal control, not a claimed red reproduction.
+
+Each PNG below was individually inspected in its exact original form; the source identity is never relabeled. Full matrix and exact-head CI remain separate acceptance evidence. No screenshot from the superseded intermediate f8d commit is presented as accepted4c2 output. The evidence-only branch is never merged.
+
+- `quickstart-before-fbd-1440-zh-light.png`: `7599cfbbdcc487ad0c1200bb9ea50210c41cb72da718a09b2917f2757db0586f`
+- `quickstart-after-4c2-1440-zh-light.png`: `cba1a4897829baa44b91d11569ec6a27402c670fbf190173b2ebc79a16f414aa`
+- `quickstart-after-4c2-1440-zh-dark.png`: `55861d991e1f253e03ae5d333116d127574598bf6c14f3b4acfd7b610489407d`
+- `quickstart-after-4c2-390-zh-light.png`: `380850508b9753b47acabbbed35167ea2f7effd6044ba74993d766dc5220400c`
+- `quickstart-after-4c2-390-zh-dark.png`: `87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da`
+- `header-brutalist-after-4c2-1440-zh-dark.png`: `ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a`
