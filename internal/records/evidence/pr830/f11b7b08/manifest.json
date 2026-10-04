@@ -1,0 +1,28 @@
+{
+  "sourceSha": "f11b7b088b4e3db4d1a3a672c556247e6799b712",
+  "baselineSourceSha": "d05d1a00a353b9e72326a05569233d5bb54456a9",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37231402661",
+  "scope": "Four-runtime static carrier, fixture update/dispose and WC resolver precedence. Caller mutation and slot-only topology boundaries are separately covered by WC regressions.",
+  "files": [
+    {
+      "path": "baseline-styled.png",
+      "sha256": "4e600e3b8253d656b77416c25f919afac42095a9efdc62833aacad4a65aca997"
+    },
+    {
+      "path": "candidate-styled.png",
+      "sha256": "323de616bdc14d9aa500f957e70e961b07e69e42d839cdb6913fe7bfe175c326"
+    },
+    {
+      "path": "candidate-resolver.png",
+      "sha256": "147fc94f7f37fdc4f529f5ab4ce67a4ab041f6231aa873641cb813e9b63679b1"
+    },
+    {
+      "path": "baseline-facts.json",
+      "sha256": "3d6bdc395cebd7fb518d65eb61b1763d54b2187793877dd1ec828be3c1c0c4d7"
+    },
+    {
+      "path": "candidate-facts.json",
+      "sha256": "4649307da262c8394b37955d05b90161f668db81952a23655f9e2ebf0001f0dd"
+    }
+  ]
+}
