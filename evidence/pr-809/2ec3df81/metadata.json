@@ -1,0 +1,9 @@
+{
+  "sourceSha": "2ec3df81d40176c6b44596eccf5e43aefed51f3e",
+  "run": 37237353768,
+  "artifact": 11315573289,
+  "mode": "emitted-package artifacts",
+  "sourceDistPairs": 31,
+  "byteIdenticalPairs": 31,
+  "scope": "owned scene Base Button; inherited foreground and opacity variable contrast invalidation and recovery"
+}
