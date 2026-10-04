@@ -1,0 +1,9 @@
+{
+  "sourceSha": "47092d3bfdc722d6a652fac5ba6d198b73ee807b",
+  "run": 37234809461,
+  "artifact": 11315430885,
+  "mode": "emitted-package artifacts",
+  "sourceDistPairs": 30,
+  "byteIdenticalPairs": 30,
+  "scope": "validation-only owned scene Prototype/Base Button composition; not for merge"
+}
