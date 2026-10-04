@@ -1,0 +1,69 @@
+{
+  "sourceSha": "bf4f77b3faefdbf740e03ec67119d9d2db0bc863",
+  "baselineSourceSha": "d05d1a00a353b9e72326a05569233d5bb54456a9",
+  "harnessSha": "bf4f77b3faefdbf740e03ec67119d9d2db0bc863",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37231782776",
+  "viewport": {
+    "width": 1100,
+    "height": 900
+  },
+  "capture": "Native root crop; no image edits.",
+  "summary": {
+    "families": 2,
+    "runtimes": 4,
+    "candidatePngFactPairs": 40,
+    "zeroWidthReservations": 8,
+    "fractional22_5pxReservations": 8,
+    "strictHitDragFocusAssertions": "passed in both baseline/candidate workflow including retained focus checks"
+  },
+  "files": [
+    {
+      "path": "baseline-brutalist-react-initial.png",
+      "sha256": "61607e6e50a7bab33b37a6132a24ed8e71712da99651a6de485b6e3582c1349e"
+    },
+    {
+      "path": "baseline-brutalist-react-initial.json",
+      "sha256": "3989e13ffe0fe2b77cb4b579fb25e02e54efa5f2d8b5654c1444f8373ffbf81f"
+    },
+    {
+      "path": "baseline-shadcn-react-initial.png",
+      "sha256": "982aeaf83f4fee61e697a250f6a2a3c7afec90536ede42a3954af9484c200aea"
+    },
+    {
+      "path": "baseline-shadcn-react-initial.json",
+      "sha256": "0eddad7323b2dbc687202c0f03f9aaa8e7a0da1c32f367585aee9bde18b0265b"
+    },
+    {
+      "path": "candidate-brutalist-react-initial.png",
+      "sha256": "da36b9a1dac25d6f86f38a9d108ed9817d6f242f3f7470f1a8b33c269cd1e7c6"
+    },
+    {
+      "path": "candidate-brutalist-react-initial.json",
+      "sha256": "a92a3262be5ecefe5b05461e2da3557432f91b39763ecce14c08751825ffdbe9"
+    },
+    {
+      "path": "candidate-shadcn-react-initial.png",
+      "sha256": "a3d0d3c1666d1189771151fc523b425545483d17a34e3b96678a40da12c36fa4"
+    },
+    {
+      "path": "candidate-shadcn-react-initial.json",
+      "sha256": "12ebbfc2e88ce13898c1ea8c1ca78deb95ea79d48c9555a14bda6467231b4392"
+    },
+    {
+      "path": "candidate-brutalist-react-zero-reservation.png",
+      "sha256": "4366f692e6f36a1e63f08099e91ba16c9397cf47771002f4a392ffb9b2b8bb52"
+    },
+    {
+      "path": "candidate-brutalist-react-zero-reservation.json",
+      "sha256": "e106d4789527f5908e63fea481d29e976dbd5d31e7a576f2bab1e62b96c8268a"
+    },
+    {
+      "path": "candidate-brutalist-react-fractional-reservation.png",
+      "sha256": "57113e97ad53a4348c8bf06344a91610f552653a3e3f43bb5ea33167206f0766"
+    },
+    {
+      "path": "candidate-brutalist-react-fractional-reservation.json",
+      "sha256": "2b9d02fa8ab5d75732e3086afaf57373df07b0422d137bb2af57b9da30a314b5"
+    }
+  ]
+}

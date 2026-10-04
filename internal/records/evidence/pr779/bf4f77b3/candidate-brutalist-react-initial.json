@@ -1,0 +1,49 @@
+{
+  "sourceSha": "bf4f77b3faefdbf740e03ec67119d9d2db0bc863",
+  "harnessSha": "bf4f77b3faefdbf740e03ec67119d9d2db0bc863",
+  "mode": "candidate-regression",
+  "family": "brutalist",
+  "runtime": "react",
+  "state": "initial",
+  "facts": {
+    "vertical": {
+      "x": 812,
+      "y": 887.375,
+      "width": 16,
+      "height": 172
+    },
+    "horizontal": {
+      "x": 512,
+      "y": 1059.375,
+      "width": 300,
+      "height": 16
+    },
+    "viewport": {
+      "x": 512,
+      "y": 887.375,
+      "width": 316,
+      "height": 188
+    },
+    "hit": {
+      "found": true,
+      "inRoot": true,
+      "isControl": false
+    },
+    "passive": {
+      "x": 812,
+      "y": 1059.375,
+      "width": 16,
+      "height": 16,
+      "overflow": "hidden",
+      "pointerEvents": "none",
+      "innerPointerEvents": "none",
+      "background": "rgb(122, 131, 255)",
+      "borderColor": "rgb(0, 0, 0)",
+      "borderStyle": "solid",
+      "borderLeft": "2px",
+      "borderTop": "2px",
+      "carrier": "absolute inset-0 bg-lavender border-l-2 border-t-2 border-foreground",
+      "hasControlIdentity": false
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "sourceSha": "bf4f77b3faefdbf740e03ec67119d9d2db0bc863",
+  "harnessSha": "bf4f77b3faefdbf740e03ec67119d9d2db0bc863",
+  "mode": "candidate-regression",
+  "family": "shadcn",
+  "runtime": "react",
+  "state": "initial",
+  "facts": {
+    "vertical": {
+      "x": 819,
+      "y": 824,
+      "width": 10,
+      "height": 180
+    },
+    "horizontal": {
+      "x": 511,
+      "y": 1004,
+      "width": 308,
+      "height": 10
+    },
+    "viewport": {
+      "x": 511,
+      "y": 824,
+      "width": 318,
+      "height": 190
+    },
+    "hit": {
+      "found": true,
+      "inRoot": true,
+      "isControl": false
+    },
+    "passive": {
+      "x": 819,
+      "y": 1004,
+      "width": 10,
+      "height": 10,
+      "overflow": "hidden",
+      "pointerEvents": "none",
+      "innerPointerEvents": "none",
+      "background": "lab(96.52 -0.0000298023 0.0000119209)",
+      "borderColor": "lab(90.952 0 -0.0000119209)",
+      "borderStyle": "solid",
+      "borderLeft": "2px",
+      "borderTop": "2px",
+      "carrier": "absolute inset-0 bg-muted border-l-2 border-t-2 border-border",
+      "hasControlIdentity": false
+    }
+  }
+}
