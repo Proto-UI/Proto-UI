@@ -655,6 +655,7 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
     ensureRuntime: () => ensurePhase('callback'),
     ensureEvent: () => ensurePhase('callback'),
     isAlive: () => lifetime !== 'disposed',
+    isSetupComplete: () => phase !== 'setup',
     isReady: () => phase !== 'setup' && mounted && viewConnected && desiredPresent && connected && lifetime === 'alive',
     invoke,
     getRun: () => ${p}RunHandle,

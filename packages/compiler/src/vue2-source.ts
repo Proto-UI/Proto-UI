@@ -564,6 +564,7 @@ ${context.owner}
     ensureRuntime: callback,
     ensureEvent: callback,
     isAlive: () => !terminal && !disposed,
+    isSetupComplete: () => phase !== 'setup',
     isReady: () => phase !== 'setup' && viewActive && present && hostActive && !terminal,
     invoke: (fn) => invoke(fn),
     getRun: () => run,

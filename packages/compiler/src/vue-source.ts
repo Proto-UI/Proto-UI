@@ -497,6 +497,7 @@ ${usesStyle ? `        ${n('Style')}.refresh();` : ''}
         if (${n('Setup')} || ${n('CallbackScope')} !== 'event' || ${n('Disposing')}) throw new Error('[Vue source] ' + operation + ' requires an input callback');
       },
       isAlive: () => !${n('Disposed')} && (!${n('Disposing')} || ${n('InternalTeardown')}),
+      isSetupComplete: () => !${n('Setup')},
       isReady: () => !${n('Setup')} && !${n('Disposing')} && !!${n('CurrentEpoch')}?.committed && ${n('Present')}.value${ssr ? ` && (${n('ParentTree')}?.ready?.() ?? true)` : ''},
       invoke: (callback) => ${n('Invoke')}('event', callback),
       getRun: () => ${n('RunValue')}, getResolvedProps: () => ${n('Props')},

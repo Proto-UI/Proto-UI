@@ -396,7 +396,7 @@ ${context ? `  const context = ${p}CreateContextScope({getParent: () => ${ssr ? 
 ${styled ? `  const ${p}Style = ${p}CreateNativeStyle({ensureSetup, ensureRuntime: runtime, isAlive: () => alive,
     project(tokens) { ${ssr ? "host.attribute('data-pui-style', tokens.length ? tokens.join(' ') : null);" : "if (tokens.length) host.setAttribute('data-pui-style', tokens.join(' ')); else host.removeAttribute('data-pui-style');"} }});\n` : ''}
 ${interacting ? `  const ${p}Interaction: ${p}NativeInteraction<${p}Run> = ${ssr ? 'host.createInteraction' : `${p}CreateNativeInteraction`}<${p}Run>({
-    ensureSetup, ensureRuntime: runtime, ensureEvent: runtime, isAlive: () => alive, isReady: () => !setup && view && intent && !disposing && host.isConnected,
+    ensureSetup, ensureRuntime: runtime, ensureEvent: runtime, isAlive: () => alive, isSetupComplete: () => !setup, isReady: () => !setup && view && intent && !disposing && host.isConnected,
     invoke: <T>(callback: () => T): T => invoke(callback, [], false) as T,
     getRun() { ensure(); if (!currentRun) throw new Error('Interaction requires a live callback scope'); return currentRun; },
     getResolvedProps: () => resolved,

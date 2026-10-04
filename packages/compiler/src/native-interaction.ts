@@ -168,10 +168,12 @@ export function markNativeExposeEvent<T extends Event>(event: T): T { exposeSign
  * is optional if those transitions always refresh. registerObservedState adapts readonly
  * focus facts to the emitter's Expose external-state boundary. No outward Expose dispatch
  * is routed back into Proto input; accessible.action is metadata, not an input handler.
+ * isSetupComplete gates observer callbacks, independently of physical input readiness:
+ * setup initializes facts silently; a live owner still publishes resets after view detach.
  */
 export function createNativeInteraction<Run>(options: {
   ensureSetup(operation: string): void; ensureRuntime(operation: string): void; ensureEvent(operation: string): void;
-  isAlive(): boolean; isReady?(): boolean; invoke<T>(callback: () => T): T;
+  isAlive(): boolean; isSetupComplete(): boolean; isReady?(): boolean; invoke<T>(callback: () => T): T;
   getRun(): Run; getResolvedProps(): Readonly<Record<string, unknown>>; getRoot(): HTMLElement | null; getHost?(): HTMLElement | null;
   subscribeState?(state: NativeState, callback: () => void): () => void;
   registerObservedState?(state: NativeObservedState<boolean>): void;
@@ -212,7 +214,7 @@ export function createNativeInteraction<Run>(options: {
       watch<R>(callback: (run: R, event: NativeStateEvent<boolean>) => void) { alive(); options.ensureSetup('state.watch'); const listener = (event: { type: 'next'; prev: boolean; next: boolean; reason?: unknown }) => callback(options.getRun() as unknown as R, event); callbacks.add(listener); return () => { callbacks.delete(listener); }; },
       subscribe(callback: (event: { type: 'next'; prev: boolean; next: boolean; reason?: unknown }) => void) { alive(); callbacks.add(callback); return () => { callbacks.delete(callback); }; },
     });
-    return { handle, set(next) { if (value === next) return; const prev = value; value = next; for (const callback of [...callbacks]) { if (disposed || !options.isAlive()) break; if (callbacks.has(callback)) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-focus' })); } }, clear() { callbacks.clear(); } };
+    return { handle, set(next) { if (value === next) return; const prev = value; value = next; if (!options.isSetupComplete()) return; for (const callback of [...callbacks]) { if (disposed || !options.isAlive()) break; if (callbacks.has(callback)) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-focus' })); } }, clear() { callbacks.clear(); } };
   }
   const focused = observed(false), focusVisible = observed(false), focusable = observed(false);
   function project(name: string, value: string | null) {
