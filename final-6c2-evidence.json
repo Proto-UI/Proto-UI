@@ -1,0 +1,82 @@
+{
+  "candidate": "6c2d40e5f10984c9d1eee0c989c0435e163b27ea",
+  "wholePrBaseline": "ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31",
+  "latestFeedbackBaseline": "fbd90df092369e6d2aab73c66848f4236ba83a29",
+  "workflowRun": 37232929931,
+  "conditions": "Unedited public project Chromium CSS-pixel captures. Normal zh-CN light/dark. Desktop 1440x1000; QuickStart phone 390x1000; Menu closing journey 390x844. Not a physical device.",
+  "reviewCounts": {
+    "density": {
+      "images": 74,
+      "exactHashReusedReview": 65,
+      "individuallyViewedNewOrChanged": 9
+    },
+    "mobile": {
+      "images": 62,
+      "exactHashReusedReview": 36,
+      "individuallyViewedNewOrChanged": 26
+    }
+  },
+  "browserCases": {
+    "density": 28,
+    "mobile": 10
+  },
+  "browserFailures": [],
+  "images": [
+    {
+      "file": "quickstart-after-6c2-1440-zh-light.png",
+      "sha256": "cba1a4897829baa44b91d11569ec6a27402c670fbf190173b2ebc79a16f414aa",
+      "sourceSha": "6c2d40e5f10984c9d1eee0c989c0435e163b27ea",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "review": "Exact byte hash match to previously individually inspected 4c2 frame; new exact-head capture"
+    },
+    {
+      "file": "quickstart-after-6c2-1440-zh-dark.png",
+      "sha256": "55861d991e1f253e03ae5d333116d127574598bf6c14f3b4acfd7b610489407d",
+      "sourceSha": "6c2d40e5f10984c9d1eee0c989c0435e163b27ea",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "review": "Exact byte hash match to previously individually inspected 4c2 frame; new exact-head capture"
+    },
+    {
+      "file": "quickstart-after-6c2-390-zh-dark.png",
+      "sha256": "87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da",
+      "sourceSha": "6c2d40e5f10984c9d1eee0c989c0435e163b27ea",
+      "dimensions": [
+        390,
+        1000
+      ],
+      "review": "Exact byte hash match to previously individually inspected 4c2 frame; new exact-head capture"
+    },
+    {
+      "file": "header-brutalist-after-6c2-1440-zh-dark.png",
+      "sha256": "ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a",
+      "sourceSha": "6c2d40e5f10984c9d1eee0c989c0435e163b27ea",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "review": "Exact byte hash match to previously individually inspected 4c2 frame; new exact-head capture"
+    },
+    {
+      "file": "menu-click-only-closed-6c2-390-zh-light.png",
+      "sha256": "8e86cbebc9172ff3ecdf78c307f571d44762604bf8215c877719633a88cd7ccc",
+      "sourceSha": "6c2d40e5f10984c9d1eee0c989c0435e163b27ea",
+      "dimensions": [
+        390,
+        844
+      ],
+      "review": "Author individual view_image inspection of the actual 6c2 artifact"
+    }
+  ],
+  "limitations": [
+    "Static pixel review is distinct from actual interaction and state assertions, which are supplied by the browser metrics.",
+    "390/430 CSS-pixel simulation is not physical OnePlus13T;320px/200% and1440/200% are explicit stress.",
+    "Faint dark borders/unchecked outlines, home bottom whitespace, pressure reflow spacing, narrow320+200 source and adjacent pre-existing Base Transition dark status contrast remain observations.",
+    "Some filenames retain original case width1440 while a journey resizes to1024/1279/390. Each row records actual PNG dimensions."
+  ]
+}

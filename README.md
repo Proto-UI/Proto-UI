@@ -82,3 +82,19 @@ Each PNG below was individually inspected in its exact original form; the source
 - `quickstart-after-4c2-390-zh-light.png`: `380850508b9753b47acabbbed35167ea2f7effd6044ba74993d766dc5220400c`
 - `quickstart-after-4c2-390-zh-dark.png`: `87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da`
 - `header-brutalist-after-4c2-1440-zh-dark.png`: `ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a`
+
+## Final Header and note follow-up: 6c2
+
+These are new captures from 6c2d40e5f10984c9d1eee0c989c0435e163b27ea, not relabeled historical PNGs. The whole-PR density baseline is restored to ec6; a separate pinned fbd first-pair isolates the latest Header/Note feedback. Both baseline identities are recorded by the capture metrics. Existing before-fbd images remain correctly labeled and retained.
+
+The final candidate has 74 density frames and 62 mobile interaction frames. All 35 new or differing frames were individually inspected; the remaining 101 current files have identical SHA256 bytes to previously individually inspected 4c2 images. There is no claim of 136 new independent inspections. Actual browser assertions pass for density 28/28 and mobile 10/10, including click-only Menu close, real Back, and WC/React/Vue/Vue2 replacement. The four click-only closure frames were individually viewed. Runtime assertions are separate evidence from still images.
+
+The latest correction preserves the original note words, title, SVG and native aside; its passive paint is provided by the public Base-derived family Surface. Shadcn Header text has 32px brand-to-navigation and 24px inter-link gaps; Brutalist retains its own structural edges/shadow geometry. New CSS does not manufacture atom paint or a new behavior owner. General exact-head CI has succeeded; the full Homepage workflow's final state is recorded separately in the PR report rather than inferred from these two jobs.
+
+The evidence-only branch is never merged. Existing stress/layout observations remain documented; these are simulated browser views, not physical-device or complete accessibility certification.
+
+- `quickstart-after-6c2-1440-zh-light.png`: `cba1a4897829baa44b91d11569ec6a27402c670fbf190173b2ebc79a16f414aa`
+- `quickstart-after-6c2-1440-zh-dark.png`: `55861d991e1f253e03ae5d333116d127574598bf6c14f3b4acfd7b610489407d`
+- `quickstart-after-6c2-390-zh-dark.png`: `87df009a20f0e6494134acfc3b0a4aa75ffb90c746aac89f7b547c81c38674da`
+- `header-brutalist-after-6c2-1440-zh-dark.png`: `ede0b8c4e5a7cb268c2a05c7ef6d8e23081da04ae41b1d70241112bac188643a`
+- `menu-click-only-closed-6c2-390-zh-light.png`: `8e86cbebc9172ff3ecdf78c307f571d44762604bf8215c877719633a88cd7ccc`
