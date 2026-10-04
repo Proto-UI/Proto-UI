@@ -1,0 +1,310 @@
+{
+  "sourceSha": "66c413d69d5770b7f52ab71d787354bd425697bf",
+  "upstream": {
+    "repository": "naughtyduk/liquidGL",
+    "commit": "88f681ab7035fd55b04f63edff1841e32c4199e9",
+    "version": "3.0.0",
+    "sourceKind": "reconstructed-scene",
+    "files": [
+      {
+        "local": "vendor/liquidGL.js",
+        "upstream": "scripts/liquidGL.js",
+        "gitBlob": "b76e6872bf1c93ecacff646d09a77f5ce5f24ddb",
+        "sha256": "1025e58436096a8d66ba787fac840ebd2e211c29835cd4c356f4d268f58b8926",
+        "bytes": 297029,
+        "modifications": "none"
+      },
+      {
+        "local": "vendor/LICENSE",
+        "upstream": "LICENSE",
+        "gitBlob": "f07191544e6d052afe52c41f65da521ed6c01e92",
+        "sha256": "b0a6dd5a8ecb67e51faa7c4f66988be318a53dfcc024ccdad0a261707b2f65aa",
+        "modifications": "none"
+      }
+    ],
+    "excluded": [
+      "assets/**",
+      "package duplication",
+      "upstream demo HTML/CSS/media",
+      "helper script",
+      "unrelated UI packages"
+    ],
+    "execution": "authorized-isolated-browser-baseline-only"
+  },
+  "node": "v24.21.0",
+  "sourceKind": "reconstructed-scene",
+  "mode": "pure-recording",
+  "viewport": {
+    "width": 760,
+    "height": 770
+  },
+  "screenshotCalls": 0,
+  "samples": [
+    {
+      "label": "loaded-normal",
+      "state": {
+        "elapsedMs": 1043.800000000003,
+        "requestedEngine": "auto",
+        "control": "normal",
+        "animatedSpecular": true,
+        "sourceKind": "reconstructed-scene",
+        "backend": "WebGLBackend",
+        "gpuReady": true,
+        "texture": {
+          "width": 760,
+          "height": 560
+        },
+        "lenses": [
+          {
+            "id": "capsule",
+            "destroyed": false,
+            "activated": true,
+            "pointerEvents": "none",
+            "inlineStyle": "pointer-events: none; transition: none; opacity: 1; background: transparent; backdrop-filter: none; box-shadow: none;",
+            "fluid": [
+              -0.7674418604651163,
+              -4.033333333333333,
+              0,
+              0
+            ]
+          },
+          {
+            "id": "panel",
+            "destroyed": false,
+            "activated": true,
+            "pointerEvents": "none",
+            "inlineStyle": "pointer-events: none; transition: none; opacity: 1; background: transparent; backdrop-filter: none; box-shadow: none;",
+            "fluid": [
+              -1.3047945205479452,
+              -1.0423076923076924,
+              0,
+              0
+            ]
+          }
+        ],
+        "canvasCount": 1,
+        "dynamicStyleCount": 1,
+        "sharedRenderer": true,
+        "originalStyles": [
+          {
+            "id": "capsule",
+            "style": "pointer-events: auto"
+          },
+          {
+            "id": "panel",
+            "style": "pointer-events: auto"
+          }
+        ]
+      }
+    },
+    {
+      "label": "source-mutation",
+      "state": {
+        "elapsedMs": 12910.800000000003,
+        "requestedEngine": "auto",
+        "control": "normal",
+        "animatedSpecular": true,
+        "sourceKind": "reconstructed-scene",
+        "backend": "WebGLBackend",
+        "gpuReady": true,
+        "texture": {
+          "width": 760,
+          "height": 560
+        },
+        "lenses": [
+          {
+            "id": "capsule",
+            "destroyed": false,
+            "activated": true,
+            "pointerEvents": "none",
+            "inlineStyle": "pointer-events: none; transition: none; opacity: 1; background: transparent; backdrop-filter: none; box-shadow: none;",
+            "fluid": [
+              0.30827461954954405,
+              0.7166055231058456,
+              0,
+              0
+            ]
+          },
+          {
+            "id": "panel",
+            "destroyed": false,
+            "activated": true,
+            "pointerEvents": "none",
+            "inlineStyle": "pointer-events: none; transition: none; opacity: 1; background: transparent; backdrop-filter: none; box-shadow: none;",
+            "fluid": [
+              0.3039821286911999,
+              0.939814767338261,
+              -0.0001571651736657881,
+              0.00008602939359066885
+            ]
+          }
+        ],
+        "canvasCount": 1,
+        "dynamicStyleCount": 1,
+        "sharedRenderer": true,
+        "originalStyles": [
+          {
+            "id": "capsule",
+            "style": "pointer-events: auto"
+          },
+          {
+            "id": "panel",
+            "style": "pointer-events: auto"
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [],
+  "browserSignals": [
+    {
+      "type": "warning",
+      "text": "No available adapters."
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x2524000fbc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x2524000fbc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x2524000fbc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels"
+    },
+    {
+      "type": "warning",
+      "text": "[.WebGL-0x2524000fbc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat)"
+    }
+  ],
+  "opticalControlLighting": "animated-specular-recording-only",
+  "externalRequestsBlocked": [],
+  "status": "recorded-upstream-unaccepted",
+  "browser": "154.0.8037.57",
+  "frameTimesMs": [
+    33.36800000000001,
+    16.599999999999994,
+    566.6,
+    100,
+    166.69999999999993,
+    83.29999999999995,
+    66.70000000000005,
+    83.29999999999995,
+    66.70000000000005,
+    66.60000000000014,
+    66.69999999999982,
+    83.30000000000018,
+    66.69999999999982,
+    66.70000000000005,
+    66.70000000000005,
+    66.59999999999991,
+    66.70000000000005,
+    66.60000000000014,
+    66.69999999999982,
+    66.70000000000005,
+    83.29999999999995,
+    83.40000000000009,
+    83.30000000000018,
+    83.29999999999973,
+    83.30000000000018,
+    83.40000000000009,
+    83.29999999999973,
+    83.40000000000009,
+    83.30000000000018,
+    83.19999999999982,
+    83.40000000000009,
+    83.40000000000009,
+    83.29999999999973,
+    83.30000000000018,
+    99.90000000000009,
+    83.39999999999964,
+    83.40000000000009,
+    83.30000000000018,
+    83.29999999999973,
+    83.40000000000009,
+    83.20000000000027,
+    66.69999999999982,
+    83.40000000000009,
+    83.29999999999973,
+    83.30000000000018,
+    83.39999999999964,
+    83.20000000000073,
+    83.39999999999964,
+    83.30000000000018,
+    83.39999999999964,
+    83.30000000000018,
+    83.39999999999964,
+    83.30000000000018,
+    83.30000000000018,
+    66.69999999999982,
+    83.30000000000018,
+    83.30000000000018,
+    83.30000000000018,
+    83.39999999999964,
+    83.39999999999964,
+    83.20000000000073,
+    83.29999999999927,
+    83.40000000000055,
+    66.59999999999945,
+    83.40000000000055,
+    83.30000000000018,
+    83.39999999999964,
+    99.89999999999964,
+    83.40000000000055,
+    100,
+    83.30000000000018,
+    83.29999999999927,
+    100,
+    83.40000000000055,
+    83.30000000000018,
+    100,
+    83.29999999999927,
+    83.40000000000055,
+    66.59999999999945,
+    83.30000000000018,
+    66.69999999999982,
+    66.70000000000073,
+    133.29999999999927,
+    149.90000000000055,
+    133.39999999999964,
+    133.30000000000018,
+    133.39999999999964,
+    133.30000000000018,
+    133.30000000000018,
+    150,
+    133.29999999999927,
+    133.40000000000146,
+    166.59999999999854,
+    133.3000000000011,
+    133.39999999999964,
+    133.29999999999927,
+    150,
+    150,
+    166.70000000000073,
+    166.60000000000036,
+    166.6999999999989,
+    166.60000000000036,
+    166.70000000000073,
+    150,
+    83.39999999999964,
+    166.60000000000036,
+    183.29999999999927,
+    166.60000000000036,
+    166.70000000000073,
+    166.6999999999989,
+    166.60000000000036,
+    150,
+    166.70000000000073,
+    166.6999999999989,
+    166.60000000000036,
+    183.39999999999964,
+    166.60000000000036,
+    166.70000000000073,
+    166.59999999999854,
+    166.70000000000073,
+    333.39999999999964,
+    149.89999999999964,
+    200
+  ]
+}
