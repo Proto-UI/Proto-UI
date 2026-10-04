@@ -1133,6 +1133,461 @@
     },
     "scope": "These two current review findings only; earlier observations remain historical. All #817 migration, complete native targets, SSR/hydration and full Adapter parity obligations remain open."
   },
+  "moduleSnapshotRepair": {
+    "observedAt": "2026-10-04T23:21:19.721Z",
+    "baselineSha": "d6b0d4532712389e58217fdb853c47023bb5c670",
+    "authority": {
+      "path": "spec/contracts/C-MODULE-DECLARATION-0001.yaml",
+      "criterion": "C-MODULE-DECLARATION-0001-F",
+      "status": "draft; existing cataloged direction, not a new stable product guarantee"
+    },
+    "before": {
+      "observedAt": "2026-10-04T22:19:33.905Z",
+      "baselineSha": "d6b0d4532712389e58217fdb853c47023bb5c670",
+      "branch": "fix/compiler-authored-module-reuse",
+      "authority": "spec/contracts/C-MODULE-DECLARATION-0001.yaml#C-MODULE-DECLARATION-0001-F",
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test/react-source.test.ts --testNamePattern \"Module requirements\"",
+      "observations": [
+        {
+          "case": "explicit aliased frozen modules reused by caller",
+          "result": "PUI1025: Module requirements must be a checked literal declaration array.",
+          "span": {
+            "file": "native.proto.ts",
+            "line": 3,
+            "column": 62,
+            "endColumn": 78
+          }
+        },
+        {
+          "case": "setup-only hook metadata without caller module declarations",
+          "generatedPhysicalRoot": "IMG",
+          "expectedPhysicalRoot": "DIV",
+          "boundary": "Happy DOM execution of the real generated React DOM source, not Chromium or original Adapter parity."
+        }
+      ],
+      "failedTests": 2,
+      "scope": "Source admission and pre-render selection repair only; no full native/SSR/Demo migration claim."
+    },
+    "change": {
+      "admission": "Decode checked literal declaration arrays/spreads and statically bound core descriptor modules snapshots through existing import/export resolution. Cache completed descriptors, detect pending cycles and reject read-before-initialization. Never execute author factories, getters or computed lookup.",
+      "selection": "Use only the selected caller descriptor declarations; remove setup-hook lifting, redundant Module declaration map/merger and copied output array."
+    },
+    "validation": {
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test/react-source.test.ts packages/compiler/test/source-graph.test.ts packages/compiler/test/parser.test.ts packages/compiler/test/browser-wasm.test.ts apps/www/test/proto-ui-source.test.ts",
+      "filesPassed": 5,
+      "testsPassed": 61,
+      "workspaceTypes": "PASS",
+      "edgeSmokeChecks": 5,
+      "edgeScope": "Normal Node admission/emission; linked/literal-key spreads, cycles, read-before-initialization, duplicate IDs and non-executed computed lookup."
+    },
+    "websiteInventory": {
+      "command": "node --import tsx scripts/compiler/website-demo-inventory.mjs",
+      "output": "internal/compiler/website-demo-migrations.json",
+      "pages": 122,
+      "demos": 65,
+      "prototypes": 145,
+      "compiled": 3,
+      "rejected": 142,
+      "unresolved": 0,
+      "migrated": 0,
+      "changedAdmissions": [
+        {
+          "id": "base-image-root",
+          "entrySha256": "da5c148a7969c15d9350d0a3330493fa6cbe36865ed498f27a8a97c3828aad21",
+          "before": "PUI1025",
+          "after": "PUI1006"
+        },
+        {
+          "id": "base-textarea-root",
+          "entrySha256": "fab8608095481675fdab68a5a831ecbce48fc13cebb5bf86c3b1bd4dcf01b7f4",
+          "before": "PUI1025",
+          "after": "PUI1006"
+        }
+      ],
+      "scope": "The two canonical descriptors pass the repaired Module snapshot boundary but still reject at primitive Props admission. Every page, declaration and migration obligation remains in scope; aggregate admission and migration counts are unchanged."
+    },
+    "publicGuideRendering": {
+      "observedAt": "2026-10-04T23:35:16.940Z",
+      "surface": "Actual local Astro development server and managed Chromium, not Markdown source inspection.",
+      "rows": [
+        {
+          "route": "/en/build/compiler-guide/",
+          "paragraphInsideCode": false,
+          "headingCount": 14,
+          "lastHeading": "Verification of the current boundary"
+        },
+        {
+          "route": "/zh-cn/build/compiler-guide/",
+          "paragraphInsideCode": false,
+          "headingCount": 14,
+          "lastHeading": "验证当前边界"
+        }
+      ],
+      "scope": "Both new ordinary-prose Module paragraphs and later sections render; not deployment or generated preview evidence."
+    },
+    "actualBrowser": {
+      "scope": "Original Runtime/React Adapter and real generated React DOM source only.",
+      "observations": [
+        {
+          "id": "implicit-reference",
+          "tag": "DIV",
+          "alt": null,
+          "fit": "",
+          "count": 5,
+          "html": "<div data-pui-root=\"\" data-count=\"5\" style=\"--pui-count: 5;\"></div>"
+        },
+        {
+          "id": "implicit-candidate",
+          "tag": "DIV",
+          "alt": null,
+          "fit": "",
+          "count": 5,
+          "html": "<div data-pui-root=\"\"></div>"
+        },
+        {
+          "id": "implicit-baseline",
+          "tag": "IMG",
+          "alt": "Borrowed image",
+          "fit": "cover",
+          "count": 5,
+          "html": "<img alt=\"Borrowed image\" data-pui-root=\"\" style=\"object-fit: cover;\">"
+        },
+        {
+          "id": "borrowed-reference",
+          "tag": "IMG",
+          "alt": "Borrowed image",
+          "fit": "cover",
+          "count": 5,
+          "html": "<img data-pui-root=\"\" data-count=\"5\" alt=\"Borrowed image\" style=\"--pui-count: 5; object-fit: cover;\">"
+        },
+        {
+          "id": "borrowed-candidate",
+          "tag": "IMG",
+          "alt": "Borrowed image",
+          "fit": "cover",
+          "count": 5,
+          "html": "<img alt=\"Borrowed image\" data-pui-root=\"\" style=\"object-fit: cover;\">"
+        },
+        {
+          "id": "override-reference",
+          "tag": "INPUT",
+          "alt": null,
+          "fit": "",
+          "count": 5,
+          "html": "<input data-pui-root=\"\" tabindex=\"-1\" data-count=\"5\" style=\"--pui-count: 5;\">"
+        },
+        {
+          "id": "override-candidate",
+          "tag": "INPUT",
+          "alt": null,
+          "fit": "",
+          "count": 5,
+          "html": "<input data-pui-root=\"\" type=\"text\" value=\"\">"
+        }
+      ],
+      "capture": "internal/compiler/evidence/module-reuse-browser.webp",
+      "passed": "DIV/IMG/INPUT physical Root selections and caller count 5 agree; activated borrowed image alt/object-fit agree; published baseline wrongly selects IMG for undeclared caller.",
+      "remainingParityDebt": [
+        "Without asImageView activation, generated image Root projects alternative text/object-fit while the original Adapter does not.",
+        "Original Root projects exposed count into data-count and --pui-count; generated Root does not.",
+        "Unactivated generated text Root adds type/value attributes absent on the original Root."
+      ]
+    },
+    "actualWorker": {
+      "build": {
+        "format": 1,
+        "compilerSha256": "99248812e2449732f6374920ccf364a98db7fb77a3d45573209987bf98b6300b",
+        "typescriptVersion": "5.9.3",
+        "execution": "quickjs-wasm"
+      },
+      "compilerBytes": 5038445,
+      "completeNodeEqualCases": 24,
+      "emittedCases": 18,
+      "rejectedCases": 6,
+      "rows": [
+        {
+          "revision": "module-reuse-implicit-react-runtime-v1",
+          "profile": "react-runtime-v1",
+          "ok": true,
+          "sourceSha256": "416cf457a0aa210706224718b16f13ade3d1fde571f24c0505c54dab67e3eba0",
+          "artifactResultSha256": "2740db9daeacbef90dd5e4b0438055df8ab2dcd9809e4eda1cd9ef9ddff61b6c",
+          "generatedFiles": 1,
+          "diagnostics": [],
+          "elapsedMs": 16.799999952316284,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-implicit-react-dom-source-v1",
+          "profile": "react-dom-source-v1",
+          "ok": true,
+          "sourceSha256": "416cf457a0aa210706224718b16f13ade3d1fde571f24c0505c54dab67e3eba0",
+          "artifactResultSha256": "2b23565db099fbf27b463bcb4b6d800bc8c71af5c35d2751c271168fd0cfee30",
+          "generatedFiles": 4,
+          "diagnostics": [],
+          "elapsedMs": 13.200000047683716,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-implicit-vue-source-v1",
+          "profile": "vue-source-v1",
+          "ok": true,
+          "sourceSha256": "416cf457a0aa210706224718b16f13ade3d1fde571f24c0505c54dab67e3eba0",
+          "artifactResultSha256": "5e0ff28b76d444c8e3a0be7492e854aaf94295e135aab0da2eda5597752caa98",
+          "generatedFiles": 2,
+          "diagnostics": [],
+          "elapsedMs": 17.700000047683716,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-implicit-vue2-source-v1",
+          "profile": "vue2-source-v1",
+          "ok": true,
+          "sourceSha256": "416cf457a0aa210706224718b16f13ade3d1fde571f24c0505c54dab67e3eba0",
+          "artifactResultSha256": "c0ff0215358e03550b6529c9de73aed1ca5194d4be26a719c5b9c319ce14d569",
+          "generatedFiles": 2,
+          "diagnostics": [],
+          "elapsedMs": 12.800000011920929,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-implicit-web-component-source-v1",
+          "profile": "web-component-source-v1",
+          "ok": true,
+          "sourceSha256": "416cf457a0aa210706224718b16f13ade3d1fde571f24c0505c54dab67e3eba0",
+          "artifactResultSha256": "837d6d80d30bce984013d0c59d95040e34d640b2d9068b7120f5bb6062181d5d",
+          "generatedFiles": 5,
+          "diagnostics": [],
+          "elapsedMs": 20.100000023841858,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-implicit-gpui-source-v1",
+          "profile": "gpui-source-v1",
+          "ok": true,
+          "sourceSha256": "416cf457a0aa210706224718b16f13ade3d1fde571f24c0505c54dab67e3eba0",
+          "artifactResultSha256": "f2520702010e51db2b37b0a77c57404a90dbaef9d43d91ffada1a61b7b8a9f88",
+          "generatedFiles": 17,
+          "diagnostics": [],
+          "elapsedMs": 132.79999995231628,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-borrowed-react-runtime-v1",
+          "profile": "react-runtime-v1",
+          "ok": true,
+          "sourceSha256": "0a05709a39c70318d5bc21f9eaa521fa17ab40ea404ef6bcdeee728d6bd2adf0",
+          "artifactResultSha256": "f7728c4f380e5be50bce3a918575c21aa78f2a5dbffaee315b7b112157c4b688",
+          "generatedFiles": 1,
+          "diagnostics": [],
+          "elapsedMs": 10.800000011920929,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-borrowed-react-dom-source-v1",
+          "profile": "react-dom-source-v1",
+          "ok": true,
+          "sourceSha256": "0a05709a39c70318d5bc21f9eaa521fa17ab40ea404ef6bcdeee728d6bd2adf0",
+          "artifactResultSha256": "1381be82f8ac698ac3f9c479b5e684a1f6df39b6a6a84046959db40f041fe2b0",
+          "generatedFiles": 6,
+          "diagnostics": [],
+          "elapsedMs": 17,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-borrowed-vue-source-v1",
+          "profile": "vue-source-v1",
+          "ok": true,
+          "sourceSha256": "0a05709a39c70318d5bc21f9eaa521fa17ab40ea404ef6bcdeee728d6bd2adf0",
+          "artifactResultSha256": "4f74fefdc0020d4feaaa509e89bce08e1fb7fbbd8e297290435950dd4b13b273",
+          "generatedFiles": 4,
+          "diagnostics": [],
+          "elapsedMs": 17.899999976158142,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-borrowed-vue2-source-v1",
+          "profile": "vue2-source-v1",
+          "ok": true,
+          "sourceSha256": "0a05709a39c70318d5bc21f9eaa521fa17ab40ea404ef6bcdeee728d6bd2adf0",
+          "artifactResultSha256": "4b99a0c2733746c5b1a705b37dffbfd3f9d0d5c0d9317ba0faa6b3326c659c1b",
+          "generatedFiles": 4,
+          "diagnostics": [],
+          "elapsedMs": 16.100000023841858,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-borrowed-web-component-source-v1",
+          "profile": "web-component-source-v1",
+          "ok": true,
+          "sourceSha256": "0a05709a39c70318d5bc21f9eaa521fa17ab40ea404ef6bcdeee728d6bd2adf0",
+          "artifactResultSha256": "b6e0939a1b4f17e4fc57feba82ae84c52c700a1ac1c7c469d83b2b382c113b92",
+          "generatedFiles": 5,
+          "diagnostics": [],
+          "elapsedMs": 15.600000023841858,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-borrowed-gpui-source-v1",
+          "profile": "gpui-source-v1",
+          "ok": true,
+          "sourceSha256": "0a05709a39c70318d5bc21f9eaa521fa17ab40ea404ef6bcdeee728d6bd2adf0",
+          "artifactResultSha256": "1146dc9c7a4c4e51fc4679c49a95bea09d45a53d3649db6b45fdcf7af1cec90b",
+          "generatedFiles": 17,
+          "diagnostics": [],
+          "elapsedMs": 77.10000002384186,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-override-react-runtime-v1",
+          "profile": "react-runtime-v1",
+          "ok": true,
+          "sourceSha256": "1e10cfc8daa69a2b0b28258ddbf651568fcf6665b7d7109d7c881128e289e0c3",
+          "artifactResultSha256": "a1879c58b6c569603023f8658aca71eb42a17d7b9b4bcc7106de075ff6c8becc",
+          "generatedFiles": 1,
+          "diagnostics": [],
+          "elapsedMs": 15.599999964237213,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-override-react-dom-source-v1",
+          "profile": "react-dom-source-v1",
+          "ok": true,
+          "sourceSha256": "1e10cfc8daa69a2b0b28258ddbf651568fcf6665b7d7109d7c881128e289e0c3",
+          "artifactResultSha256": "32254cdb292aaa2a31237d26f96e7bc5e6d45aa5a02a8f9c15a1b70961f30995",
+          "generatedFiles": 6,
+          "diagnostics": [],
+          "elapsedMs": 20.100000023841858,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-override-vue-source-v1",
+          "profile": "vue-source-v1",
+          "ok": true,
+          "sourceSha256": "1e10cfc8daa69a2b0b28258ddbf651568fcf6665b7d7109d7c881128e289e0c3",
+          "artifactResultSha256": "3eb829145b11ac17f52f356e2c1013ed8c54414fcf7980a12fd9709ffb10f87f",
+          "generatedFiles": 4,
+          "diagnostics": [],
+          "elapsedMs": 20.400000035762787,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-override-vue2-source-v1",
+          "profile": "vue2-source-v1",
+          "ok": true,
+          "sourceSha256": "1e10cfc8daa69a2b0b28258ddbf651568fcf6665b7d7109d7c881128e289e0c3",
+          "artifactResultSha256": "b5396654b56502d6d41b8d3be03b74b6da031e389e61978590399eed7936d36e",
+          "generatedFiles": 4,
+          "diagnostics": [],
+          "elapsedMs": 22.899999976158142,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-override-web-component-source-v1",
+          "profile": "web-component-source-v1",
+          "ok": true,
+          "sourceSha256": "1e10cfc8daa69a2b0b28258ddbf651568fcf6665b7d7109d7c881128e289e0c3",
+          "artifactResultSha256": "0eefc098b33fdbc76ae97f06921aa8b7877a02a519143c7d4fd3215948bbdbf2",
+          "generatedFiles": 5,
+          "diagnostics": [],
+          "elapsedMs": 20.30000001192093,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-override-gpui-source-v1",
+          "profile": "gpui-source-v1",
+          "ok": true,
+          "sourceSha256": "1e10cfc8daa69a2b0b28258ddbf651568fcf6665b7d7109d7c881128e289e0c3",
+          "artifactResultSha256": "fb9083df5951b265214007e38e0953274244769b790077be5464e850c38f2c16",
+          "generatedFiles": 17,
+          "diagnostics": [],
+          "elapsedMs": 88,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-unsupported-qt-source-v1",
+          "profile": "qt-source-v1",
+          "ok": false,
+          "sourceSha256": null,
+          "artifactResultSha256": "bea99b7e6bbb517a5116bde807c1696a4446817725fccad510dc74b3e968c83f",
+          "generatedFiles": 0,
+          "diagnostics": ["PUI4001"],
+          "elapsedMs": 7.199999988079071,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-unsupported-flutter-source-v1",
+          "profile": "flutter-source-v1",
+          "ok": false,
+          "sourceSha256": null,
+          "artifactResultSha256": "38ad2fafe8f4dc9754c8bf9e86fde74155679a91508aca2e350f7d494c0bf503",
+          "generatedFiles": 0,
+          "diagnostics": ["PUI4001"],
+          "elapsedMs": 7.599999964237213,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-unsupported-react-dom-ssr-v1",
+          "profile": "react-dom-ssr-v1",
+          "ok": false,
+          "sourceSha256": null,
+          "artifactResultSha256": "d283f5cc7b1834a05361a62c8e2d7c995fa603189ad6acc5eed61d3a77081d1a",
+          "generatedFiles": 0,
+          "diagnostics": ["PUI4001"],
+          "elapsedMs": 8,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-unsupported-vue-ssr-v1",
+          "profile": "vue-ssr-v1",
+          "ok": false,
+          "sourceSha256": null,
+          "artifactResultSha256": "e3dfe2d086e5a26cc9d16b1ca69843cb8c6d5b63076f97be5d52bec3242ec041",
+          "generatedFiles": 0,
+          "diagnostics": ["PUI4001"],
+          "elapsedMs": 7.199999988079071,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-unsupported-vue2-ssr-v1",
+          "profile": "vue2-ssr-v1",
+          "ok": false,
+          "sourceSha256": null,
+          "artifactResultSha256": "5926ae730a4ae78e2157b7748069b230fbb2a43a594a33b394bd78aab48524c8",
+          "generatedFiles": 0,
+          "diagnostics": ["PUI4001"],
+          "elapsedMs": 7.600000023841858,
+          "completeNodeEqual": true
+        },
+        {
+          "revision": "module-reuse-unsupported-web-component-ssr-v1",
+          "profile": "web-component-ssr-v1",
+          "ok": false,
+          "sourceSha256": null,
+          "artifactResultSha256": "0f9876d24709ac5331dff651ed8c64e61625e82e4ded197f6fd51c5b551feda6",
+          "generatedFiles": 0,
+          "diagnostics": ["PUI4001"],
+          "elapsedMs": 7.400000035762787,
+          "completeNodeEqual": true
+        }
+      ],
+      "scope": "Complete emitted-artifact/diagnostic equality with normal Node for 3 graphs / 6 metadata-implemented profiles; Qt/Flutter and 4 SSR profiles still reject PUI4001. Not native widget or universal target support proof."
+    },
+    "failedHarnessAttempts": [
+      {
+        "boundary": "Direct tsx import of vitest.config.ts",
+        "error": "__dirname is not defined",
+        "repair": "Use the normal Vite config loader; no global shim or production change."
+      },
+      {
+        "boundary": "Vite transformed compiler.js delivery",
+        "deliveredBytes": 25983368,
+        "deliveredSha256": "31fd771fc64e63697802c7e8ea3611f64d19aff26f6edddceeb5f8f7728f0ba2",
+        "error": "Browser compiler bundle does not match its build identity.",
+        "repair": "Use exact raw asset text; original 99248812 digest retained, no relaxed admission or rehashed transformed program."
+      }
+    ],
+    "scope": "Bounded Module snapshot admission / pre-render Root repair only. Whole-site migration, complete native targets, SSR/hydration, all Adapter projections and preview security obligations remain open."
+  },
   "debt": [
     "No RuntimeBox migration, generated preview sandbox, in-page editor or full-source admission claim; #817 remains open.",
     "142 selected-target source admission rejections remain in-scope with explicit diagnostics in website-demo-migrations.json.",
