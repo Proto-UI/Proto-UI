@@ -1,0 +1,18 @@
+{
+  "source": "157269bbd9bea981a4c59425f667628b9b6d5b8e",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37188311449",
+  "artifact_id": 11298042765,
+  "capture": "original unmodified Chromium PNGs from emitted-package mode",
+  "comparison": "all 8 source/emitted PNG byte pairs and observation sequences match; not full Prototype AOT parity",
+  "files": {
+    "NOTICE": "3fa1d2c6306f00277ba83be23b7b9b497ce80e4373588cc5cda4080813dde65d",
+    "LICENSE": "b0a6dd5a8ecb67e51faa7c4f66988be318a53dfcc024ccdad0a261707b2f65aa",
+    "source-emitted-comparison.json": "74d6ec511952c8da29f36d3354a90f24d95d8442ed84f13e9761509e5913a080",
+    "package-inputs.json": "1105ab2e4d30e21382060567e599bc210a809aaaa276f8ded1b27f02f6fbdeaa",
+    "source.json": "3c4808169879c651f5bae09c1cca120da463311955d29f972679c600061aa022",
+    "source-result.json": "d30ccf998b51c49d3d3dadc4ad7b62928d33dea8c38a1938bb74c0c7fdafeaa3",
+    "emitted-result.json": "6441ef6013cba41e726a94f4041812104f5d04030792110bccfb2200ebe431a2",
+    "emitted-keyboard.png": "d6b42bb554f24e6e84b89ffca2049860df42c89f283a6ea2d57e4057de7f391d",
+    "emitted-rest.png": "ca2b627cdde32fb822efc66cd9f288b53a54f5118fda6d0141b7229a0168ef42"
+  }
+}

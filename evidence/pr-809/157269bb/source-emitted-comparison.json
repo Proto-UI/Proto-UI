@@ -1,0 +1,55 @@
+{
+  "source": "157269bbd9bea981a4c59425f667628b9b6d5b8e",
+  "pngs": [
+    {
+      "name": "01-rest.png",
+      "identical_png_bytes": true,
+      "source_sha256": "ca2b627cdde32fb822efc66cd9f288b53a54f5118fda6d0141b7229a0168ef42",
+      "emitted_sha256": "ca2b627cdde32fb822efc66cd9f288b53a54f5118fda6d0141b7229a0168ef42"
+    },
+    {
+      "name": "02-pointer-pressed.png",
+      "identical_png_bytes": true,
+      "source_sha256": "3322065d875a34d821587ef0720c6abbc47abc638ca508e9e66eec9b5d40e10b",
+      "emitted_sha256": "3322065d875a34d821587ef0720c6abbc47abc638ca508e9e66eec9b5d40e10b"
+    },
+    {
+      "name": "03-keyboard-activation.png",
+      "identical_png_bytes": true,
+      "source_sha256": "d6b42bb554f24e6e84b89ffca2049860df42c89f283a6ea2d57e4057de7f391d",
+      "emitted_sha256": "d6b42bb554f24e6e84b89ffca2049860df42c89f283a6ea2d57e4057de7f391d"
+    },
+    {
+      "name": "04-disabled.png",
+      "identical_png_bytes": true,
+      "source_sha256": "eec12628a235f141194db1ffd4063bb3d8b991358e473f4ba1933da4eee142ea",
+      "emitted_sha256": "eec12628a235f141194db1ffd4063bb3d8b991358e473f4ba1933da4eee142ea"
+    },
+    {
+      "name": "05-preference-fallback.png",
+      "identical_png_bytes": true,
+      "source_sha256": "df33469a64269e4616136d5bdb651dc567aff78df69632cba1297038052db28e",
+      "emitted_sha256": "df33469a64269e4616136d5bdb651dc567aff78df69632cba1297038052db28e"
+    },
+    {
+      "name": "06-source-loss.png",
+      "identical_png_bytes": true,
+      "source_sha256": "df33469a64269e4616136d5bdb651dc567aff78df69632cba1297038052db28e",
+      "emitted_sha256": "df33469a64269e4616136d5bdb651dc567aff78df69632cba1297038052db28e"
+    },
+    {
+      "name": "07-context-loss.png",
+      "identical_png_bytes": true,
+      "source_sha256": "df33469a64269e4616136d5bdb651dc567aff78df69632cba1297038052db28e",
+      "emitted_sha256": "df33469a64269e4616136d5bdb651dc567aff78df69632cba1297038052db28e"
+    },
+    {
+      "name": "08-remounted.png",
+      "identical_png_bytes": true,
+      "source_sha256": "eec12628a235f141194db1ffd4063bb3d8b991358e473f4ba1933da4eee142ea",
+      "emitted_sha256": "eec12628a235f141194db1ffd4063bb3d8b991358e473f4ba1933da4eee142ea"
+    }
+  ],
+  "same_observations": true,
+  "scope": "bounded library-artifact consumer comparison, not full Prototype AOT parity"
+}

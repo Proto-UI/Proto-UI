@@ -1,0 +1,122 @@
+{
+  "status": "passed",
+  "source": {
+    "revision": "157269bbd9bea981a4c59425f667628b9b6d5b8e",
+    "packageMode": "built-package-artifacts",
+    "shader": "88f681ab7035fd55b04f63edff1841e32c4199e9",
+    "execution": "pending-browser-evidence"
+  },
+  "externalRequests": 0,
+  "errors": [],
+  "observations": [
+    {
+      "name": "01-rest",
+      "pressed": false,
+      "disabled": false,
+      "focused": false,
+      "focusVisible": false,
+      "clicks": 0,
+      "quality": "experimental-owned-texture",
+      "reason": "rendered",
+      "phase": "rest",
+      "radius": "24",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    },
+    {
+      "name": "02-pointer-pressed",
+      "pressed": true,
+      "disabled": false,
+      "focused": true,
+      "focusVisible": false,
+      "clicks": 0,
+      "quality": "experimental-owned-texture",
+      "reason": "rendered",
+      "phase": "pressed",
+      "radius": "24",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    },
+    {
+      "name": "03-keyboard-activation",
+      "pressed": false,
+      "disabled": false,
+      "focused": true,
+      "focusVisible": true,
+      "clicks": 2,
+      "quality": "experimental-owned-texture",
+      "reason": "rendered",
+      "phase": "rest",
+      "radius": "24",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    },
+    {
+      "name": "04-disabled",
+      "pressed": false,
+      "disabled": true,
+      "focused": false,
+      "focusVisible": false,
+      "clicks": 2,
+      "quality": "experimental-owned-texture",
+      "reason": "rendered",
+      "phase": "rest",
+      "radius": "24",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    },
+    {
+      "name": "05-preference-fallback",
+      "pressed": false,
+      "disabled": false,
+      "focused": false,
+      "focusVisible": false,
+      "clicks": 2,
+      "quality": "opaque-fallback",
+      "reason": "unsafe-or-unknown-preference",
+      "phase": "rest",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    },
+    {
+      "name": "06-source-loss",
+      "pressed": false,
+      "disabled": false,
+      "focused": false,
+      "focusVisible": false,
+      "clicks": 2,
+      "quality": "opaque-fallback",
+      "reason": "material-source-unavailable",
+      "phase": "rest",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    },
+    {
+      "name": "07-context-loss",
+      "pressed": false,
+      "disabled": false,
+      "focused": false,
+      "focusVisible": false,
+      "clicks": 2,
+      "quality": "opaque-fallback",
+      "reason": "context-lost",
+      "phase": "rest",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    },
+    {
+      "name": "08-remounted",
+      "pressed": false,
+      "disabled": false,
+      "focused": false,
+      "focusVisible": false,
+      "clicks": 2,
+      "quality": "experimental-owned-texture",
+      "reason": "rendered",
+      "phase": "rest",
+      "radius": "24",
+      "sourceListeners": 1,
+      "preferenceListeners": 1
+    }
+  ]
+}
