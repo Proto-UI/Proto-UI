@@ -1,0 +1,22 @@
+{
+  "source": "66e1fb090ad6060698ad4752fe9e072030c3220c",
+  "run": 37216510312,
+  "artifact": 11308687368,
+  "status": "text-control-failed",
+  "images": [
+    {
+      "file": "01-rest.png",
+      "sha256": "8ff41e5b8e937ea679b71d295da7b6e646dcd134f08e6f46c268b86da76e1172"
+    },
+    {
+      "file": "02-pointer-pressed.png",
+      "sha256": "b718640a713e232dada0fd09ecc444b1987cbacae59bbefbbd069de4f32924d1"
+    },
+    {
+      "file": "visual-text-rest.png",
+      "sha256": "090ed88ae230490c1fc82eef78fb8abf3d299f0b78c7c01008fd8906ddfa3eb8"
+    }
+  ],
+  "scope": "Original owned-scene Prototype screenshots; optical controls do not establish subjective Apple fidelity. No imported source imagery; unchanged pinned MIT shader.",
+  "historicalControl": "source157 optical parameter set re-rendered inside each current fixture, not old screenshots relabeled"
+}

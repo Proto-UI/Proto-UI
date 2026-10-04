@@ -1,0 +1,37 @@
+{
+  "scene": "text",
+  "candidate": {
+    "profile": "regular-readable-v2",
+    "pressed": false,
+    "disabled": false,
+    "focused": true,
+    "focusVisible": false,
+    "clicks": 3,
+    "quality": "experimental-owned-texture",
+    "reason": "rendered",
+    "phase": "rest",
+    "radius": "24",
+    "sourceListeners": 1,
+    "preferenceListeners": 1
+  },
+  "baseline": {
+    "profile": "source-157-control",
+    "pressed": false,
+    "disabled": false,
+    "focused": false,
+    "focusVisible": false,
+    "clicks": 0,
+    "quality": "experimental-owned-texture",
+    "reason": "rendered",
+    "phase": "rest",
+    "radius": "24",
+    "sourceListeners": 1,
+    "preferenceListeners": 1
+  },
+  "delta": {
+    "changedRatio": 0.8756796836381612,
+    "meanMaxChannelDelta": 17.227014335145824
+  },
+  "baselineVariation": 4.286516853932584,
+  "candidateVariation": 4.539637952559301
+}
