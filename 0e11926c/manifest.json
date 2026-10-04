@@ -1,0 +1,2630 @@
+{
+  "sourceSha": "0e11926c3890b36a79b05ef366341968fa9f056f",
+  "expectedSha": "0e11926c3890b36a79b05ef366341968fa9f056f",
+  "status": "passed",
+  "route": "/en/test/bootstrap-state-controls/",
+  "runId": "37185596656",
+  "runAttempt": "1",
+  "node": "v24.21.0",
+  "browser": "154.0.8037.57",
+  "viewport": {
+    "width": 1440,
+    "height": 1100
+  },
+  "runtimes": [
+    "wc",
+    "react",
+    "vue",
+    "vue2"
+  ],
+  "runtimeModuleOrigin": "https://esm.sh",
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "screenshots": [
+    "bootstrap-controls-light.png",
+    "wc-light-keyboard-focus.png",
+    "wc-light-state-recovery.png",
+    "react-light-keyboard-focus.png",
+    "react-light-state-recovery.png",
+    "vue-light-keyboard-focus.png",
+    "vue-light-state-recovery.png",
+    "vue2-light-keyboard-focus.png",
+    "vue2-light-state-recovery.png",
+    "bootstrap-controls-dark.png",
+    "wc-dark-keyboard-focus.png",
+    "wc-dark-state-recovery.png",
+    "react-dark-keyboard-focus.png",
+    "react-dark-state-recovery.png",
+    "vue-dark-keyboard-focus.png",
+    "vue-dark-state-recovery.png",
+    "vue2-dark-keyboard-focus.png",
+    "vue2-dark-state-recovery.png",
+    "wc-editors-recovery.png",
+    "react-editors-recovery.png",
+    "vue-editors-recovery.png",
+    "vue2-editors-recovery.png",
+    "bootstrap-controls-separators-dark.png",
+    "bootstrap-controls-mobile.png"
+  ],
+  "results": [
+    {
+      "name": "renders source-owned paint for all eight parts in light",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "wc/light: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "react/light: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "vue/light: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "vue2/light: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "renders source-owned paint for all eight parts in dark",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "wc/dark: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "react/dark: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "vue/dark: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "vue2/dark: real activation, context, controlled requests and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "wc: native singleton editors, controlled values, readonly and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "react: native singleton editors, controlled values, readonly and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "vue: native singleton editors, controlled values, readonly and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "vue2: native singleton editors, controlled values, readonly and disabled recovery",
+      "status": "pass",
+      "errors": []
+    },
+    {
+      "name": "updates semantic/decorative separators, remains readable on mobile, and disposes every real host",
+      "status": "pass",
+      "errors": []
+    }
+  ],
+  "observations": [
+    {
+      "runtime": "wc",
+      "theme": "light",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "react",
+      "theme": "light",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "vue",
+      "theme": "light",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "vue2",
+      "theme": "light",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "wc",
+      "theme": "light",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "react",
+      "theme": "light",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "vue",
+      "theme": "light",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "vue2",
+      "theme": "light",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "wc",
+      "theme": "dark",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "react",
+      "theme": "dark",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "vue",
+      "theme": "dark",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "vue2",
+      "theme": "dark",
+      "paints": {
+        "checkbox": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "indicator": {
+          "background": "rgba(0, 0, 0, 0)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "flex",
+          "width": "14px",
+          "height": "14px",
+          "ring": ""
+        },
+        "switchRoot": {
+          "background": "rgb(230, 230, 230)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px 2px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "flex",
+          "width": "44px",
+          "height": "24px",
+          "ring": ""
+        },
+        "thumb": {
+          "background": "rgb(245, 245, 245)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "block",
+          "width": "20px",
+          "height": "20px",
+          "ring": ""
+        },
+        "toggle": {
+          "background": "rgb(245, 245, 245)",
+          "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 12px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+          "display": "flex",
+          "width": "54.0312px",
+          "height": "30px",
+          "ring": ""
+        },
+        "input": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "30px",
+          "ring": ""
+        },
+        "textarea": {
+          "background": "rgb(255, 255, 255)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "4px",
+          "border": "1px",
+          "padding": "4px 6px",
+          "fontSize": "14px",
+          "lineHeight": "20px",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+          "display": "block",
+          "width": "288.5px",
+          "height": "70px",
+          "ring": ""
+        },
+        "separator": {
+          "background": "rgb(204, 204, 204)",
+          "image": "none",
+          "color": "rgb(51, 51, 51)",
+          "radius": "0px",
+          "border": "0px",
+          "padding": "0px",
+          "fontSize": "16px",
+          "lineHeight": "normal",
+          "weight": "400",
+          "opacity": "1",
+          "shadow": "none",
+          "display": "block",
+          "width": "288.5px",
+          "height": "1px",
+          "ring": ""
+        }
+      }
+    },
+    {
+      "runtime": "wc",
+      "theme": "dark",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "react",
+      "theme": "dark",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "vue",
+      "theme": "dark",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "vue2",
+      "theme": "dark",
+      "beforeCheckbox": {
+        "background": "rgb(245, 245, 245)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": ""
+      },
+      "beforeSwitch": {
+        "background": "rgb(230, 230, 230)",
+        "image": "none",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px 2px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "44px",
+        "height": "24px",
+        "ring": ""
+      },
+      "raised": {
+        "background": "rgb(245, 245, 245)",
+        "image": "linear-gradient(rgb(255, 255, 255), rgb(230, 230, 230))",
+        "color": "rgb(51, 51, 51)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "4px 12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.2) 0px 1px 0px 0px inset, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px",
+        "display": "flex",
+        "width": "54.0312px",
+        "height": "30px",
+        "ring": ""
+      },
+      "focus": {
+        "background": "rgb(0, 68, 204)",
+        "image": "none",
+        "color": "rgb(255, 255, 255)",
+        "radius": "4px",
+        "border": "1px",
+        "padding": "0px",
+        "fontSize": "16px",
+        "lineHeight": "normal",
+        "weight": "400",
+        "opacity": "1",
+        "shadow": "rgb(255, 255, 255) 0px 0px 0px 2px, rgb(0, 85, 170) 0px 0px 0px 4px, rgba(0, 0, 0, 0.075) 0px 1px 1px 0px inset",
+        "display": "flex",
+        "width": "20px",
+        "height": "20px",
+        "ring": "2px"
+      },
+      "activationAndContext": "passed"
+    },
+    {
+      "runtime": "wc",
+      "ref": "input",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "input",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "wc",
+      "ref": "inputControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "inputControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "wc",
+      "ref": "textarea",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "wc",
+      "ref": "textarea",
+      "stage": "multiline-native-sequence",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": null,
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Second line",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": null,
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Second line",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "wc",
+      "ref": "textareaControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textareaControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "wc",
+      "editors": "singleton, controlled and recovery checks passed"
+    },
+    {
+      "runtime": "react",
+      "ref": "input",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "input",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "ref": "inputControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "inputControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "ref": "textarea",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "ref": "textarea",
+      "stage": "multiline-native-sequence",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": null,
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Second line",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": null,
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Second line",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "ref": "textareaControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textareaControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "editors": "singleton, controlled and recovery checks passed"
+    },
+    {
+      "runtime": "vue",
+      "ref": "input",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "input",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "ref": "inputControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "inputControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "ref": "textarea",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "ref": "textarea",
+      "stage": "multiline-native-sequence",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": null,
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Second line",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": null,
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Second line",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "ref": "textareaControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textareaControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "editors": "singleton, controlled and recovery checks passed"
+    },
+    {
+      "runtime": "vue2",
+      "ref": "input",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "input",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "ref": "inputControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "inputControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "ref": "textarea",
+      "stage": "initial-editor-fill-before-count-assertion",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "ref": "textarea",
+      "stage": "multiline-native-sequence",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Changed",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": null,
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        },
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Second line",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Changed\nSecond line"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Changed",
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": null,
+            "inputType": "insertText"
+          }
+        },
+        {
+          "ref": "textarea",
+          "event": "valueChange",
+          "detail": {
+            "value": "Changed\nSecond line",
+            "composing": false,
+            "data": "Second line",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "ref": "textareaControlled",
+      "stage": "controlled-owner-acceptance",
+      "nativeInputs": [
+        {
+          "type": "input",
+          "inputType": "insertText",
+          "data": "Requested",
+          "composing": false,
+          "isTrusted": true,
+          "value": "Requested"
+        }
+      ],
+      "valueChangeRequests": [
+        {
+          "ref": "textareaControlled",
+          "event": "valueChange",
+          "detail": {
+            "value": "Requested",
+            "composing": false,
+            "data": "Requested",
+            "inputType": "insertText"
+          }
+        }
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "editors": "singleton, controlled and recovery checks passed"
+    },
+    {
+      "beforeDispose": 64,
+      "afterDispose": 0,
+      "mobileWidth": 390
+    }
+  ],
+  "pageErrors": [],
+  "scope": "Eight draft Bootstrap Base-inheriting parts in WC/React/Vue 3/Vue 2 only. No native, Compiler, upstream plugin, form-submission or IME conformance claim.",
+  "workflowStatus": "success"
+}
