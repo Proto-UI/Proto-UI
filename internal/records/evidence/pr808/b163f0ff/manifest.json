@@ -1,0 +1,25 @@
+{
+  "sourceSha": "b163f0ff2eaa6c4ad23679d0c3f6841caba25f6c",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37236451548",
+  "scope": "Eight draft Bootstrap Base-inheriting parts in WC/React/Vue 3/Vue 2 only. No native, Compiler, upstream plugin, form-submission or IME conformance claim.",
+  "result": "15 real-browser cases pass, four Web runtimes, two schemes, no page errors.",
+  "selection": "Three original screenshots are published here; the original native manifest describes all 24 screenshots retained in the linked Actions artifact.",
+  "files": [
+    {
+      "path": "bootstrap-controls-dark.png",
+      "sha256": "5afb4550874e563f27719f3bad86ab60e6659f38ad8ae52fa676c1e3ffa6cfcf"
+    },
+    {
+      "path": "bootstrap-controls-light.png",
+      "sha256": "f136bc1e25ad92afb5c0f1a20fa4b2ebf6a78ab89ded034f0b10db7df008192e"
+    },
+    {
+      "path": "native-manifest.json",
+      "sha256": "5f2e9a6b37cf4571bc50e52e8722580306cc9d1fa737bce6df17fc69b489582f"
+    },
+    {
+      "path": "react-editors-recovery.png",
+      "sha256": "40c8bd8ed6a3f7cfd786e7c5ef124b5860a8cf5a078480c652de128f8f8fa75e"
+    }
+  ]
+}
