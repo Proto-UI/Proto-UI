@@ -1,0 +1,9 @@
+{
+  "sourceSha": "28a2213196872464efab5eacc7cd319e155e0844",
+  "run": 37230094954,
+  "artifact": 11313074856,
+  "mode": "emitted-package artifacts",
+  "sourceDistPairs": 28,
+  "byteIdenticalPairs": 28,
+  "scope": "owned scene Base Button; position-only sampling and source/release pixel revocation; no arbitrary DOM or native backend"
+}
