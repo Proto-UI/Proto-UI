@@ -4,7 +4,7 @@
   "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37233619042",
   "scope": "Eight draft Bootstrap Base-inheriting parts in WC/React/Vue 3/Vue 2 only. No native, Compiler, upstream plugin, form-submission or IME conformance claim.",
   "result": "15 native cases pass, four Web runtimes, two schemes, no page errors.",
-  "selection": "Three original screenshots are published here; the original native manifest describes all24 screenshots retained in the linked Actions artifact.",
+  "selection": "Three original screenshots are published here; the original native manifest describes all 24 screenshots retained in the linked Actions artifact.",
   "files": [
     {
       "path": "bootstrap-controls-light.png",
