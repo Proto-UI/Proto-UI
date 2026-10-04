@@ -1,0 +1,28 @@
+{
+  "kind": "public-proto-ui-audit-evidence",
+  "sourceHead": "e03da2224efc64c3ec826b509076920bfe5ba1f6",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37225313500",
+  "scope": "Selected public Brutalist native Chromium captures. 184 total attempts,182 matched;14 complete cases and2 failed React Select End cases. Last image deliberately records failure. Not a full audit or accessibility verdict.",
+  "files": [
+    {
+      "file": "dropdown-menu-react-light-item-default-pointer-held.png",
+      "sha256": "5d8a766b6db58cae29dd981b7630ef5cdd269f959605f648acbfef97ccee7d2a",
+      "sourceHead": "e03da2224efc64c3ec826b509076920bfe5ba1f6"
+    },
+    {
+      "file": "dropdown-menu-react-dark-item-destructive-pointer-held.png",
+      "sha256": "8b74498dfdb31c41ba886c3f5b11e3726128db59eda16581c74a485b4bacab46",
+      "sourceHead": "e03da2224efc64c3ec826b509076920bfe5ba1f6"
+    },
+    {
+      "file": "select-wc-light-item-unselected-pointer-held.png",
+      "sha256": "4ed2c057f4abde620189f8884855a10193cb9afd436a4633dc4269fbda5ca625",
+      "sourceHead": "e03da2224efc64c3ec826b509076920bfe5ba1f6"
+    },
+    {
+      "file": "select-react-light-item-focus-last.png",
+      "sha256": "0566ad3be735d710bc35524a7e9eece95cbf01408e91ce3980c386d370679c09",
+      "sourceHead": "e03da2224efc64c3ec826b509076920bfe5ba1f6"
+    }
+  ]
+}
