@@ -131,7 +131,7 @@ Vite consumer 将生成的 `compiler.js` 作为 text、`build.json` 作为 data 
 
 可信 bundle 使用 Vite `?raw` import，或未经 transform 的 public asset。直接 fetch Vite transform 后的 JavaScript 可能附带 source map，改变字节；build-identity 校验会正确拒绝该 response。不能通过替换 manifest digest 接受变更后的 delivery。
 
-Source rejection 返回 `phase: 'compile'` 和正常 diagnostic code/category/file/span；host rejection 返回独立的 `phase: 'host'`。Worker construction / initialization / transport error 都会 reject client promise。重叠编辑只保留一个 running request 和最新一个 queued request；被取代的 request 以 `AbortError` 拒绝。导航或 owner terminal teardown 时调用 `dispose()`；它终止 Worker，并拒绝尚未完成的工作。
+Source rejection 返回 `phase: 'compile'` 和正常 diagnostic code/category/file/span；host rejection 返回独立的 `phase: 'host'`。准入在可信 entry 内校验序列化后的 request，先于 compilation 的默认值处理；因继承、nonenumerability 或 `toJSON` 丢失的 target 字段会被拒绝。Worker construction / initialization / transport error 都会 reject client promise。重叠编辑只保留一个 running request 和最新一个 queued request；被取代的 request 以 `AbortError` 拒绝。每次调用绑定提交时的 revision 和 source graph（包括排队 request 的 nested `files`），不受调用者后续 mutation 影响。导航或 owner terminal teardown 时调用 `dispose()`；它终止 Worker，并拒绝尚未完成的工作。
 
 配置边界是 UTF-8 serialized input 256 KiB、WASM heap 128 MiB、VM stack 2 MiB、output 8,388,608 字符、initialization 30 秒、VM compilation 5 秒、Worker response 10 秒。这些是 resource / failure boundary，不是已经准入的即时预览性能预算，也不代表 whole-browser memory 测量。
 
@@ -147,7 +147,7 @@ Source rejection 返回 `phase: 'compile'` 和正常 diagnostic code/category/fi
 node --import tsx scripts/compiler/website-demo-inventory.mjs
 ```
 
-`internal/compiler/website-demo-migrations.json` 记录每个含 Demo 的 MDX 文档页面、homepage/library/Matrix 展开、demo declaration、registration binding 和 canonical prototype definition。它复用 Website 的 manifest-exported source resolver，保存实际 canonical Node admission diagnostic，不用 Adapter 替代 compiler。当前清单覆盖 **120 个页面、65 个 demo declaration、145 个 prototype definition**；选择的 Web Component source profile 中，3 个 definition 准入，142 个被现有 source admission 拒绝。Registration/source 地址均已解析；不能因编译失败就把页面排除。
+`internal/compiler/website-demo-migrations.json` 记录每个含 Demo 的 MDX 文档页面、homepage/library/Matrix 展开、demo declaration、registration binding 和 canonical prototype definition。它追踪 import 的 Astro wrapper（包括两个 `UiLibraryGallery` mount），并保留底层 preview 的 file/line 地址。Literal equality choice 用于解析有限的 template-generated demo ID，不执行作者 script；无法解析的动态 mount attribute 保留为明确的行级义务。它复用 Website 的 manifest-exported source resolver，保存实际 canonical Node admission diagnostic，不用 Adapter 替代 compiler。当前清单覆盖 **122 个页面、65 个 demo declaration、145 个 prototype definition**；选择的 Web Component source profile 中，3 个 definition 准入，142 个被现有 source admission 拒绝。Registration/source 地址均已解析；不能因编译失败就把页面排除。
 
 所有迁移行仍是 **not migrated**。这份清单和浏览器 Compiler API 不会关闭 [#817](https://github.com/Proto-UI/Proto-UI/issues/817)：canonical-source admission 缺口、supported-target RuntimeBox mount、可选编辑、同 revision 的 diagnostic/preview、失败 rollback、lifecycle/security boundary 和逐页浏览器证据仍是明确义务。现有 RuntimeBox frame ownership 保持在 [#786](https://github.com/Proto-UI/Proto-UI/issues/786) / [#777](https://github.com/Proto-UI/Proto-UI/pull/777)。WASM Compiler 本身不 sandbox 生成的 preview code。
 

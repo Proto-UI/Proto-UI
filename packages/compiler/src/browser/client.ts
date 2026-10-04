@@ -16,6 +16,7 @@ export interface BrowserCompilerClient {
 type Pending = {
   id: number;
   request: BrowserCompileRequest;
+  revision: string;
   resolve(response: CompilerWorkerResponse): void;
   reject(error: Error): void;
 };
@@ -85,11 +86,14 @@ export function createBrowserCompilerClient(
           build: Object.freeze({ ...message.build }),
           compile(request) {
             if (disposed) return Promise.reject(abort());
-            latest?.reject(abort());
             return new Promise((resolveResult, rejectResult) => {
+              // postMessage snapshots immediate work; queued work must own its graph now.
+              const submitted = running !== null ? structuredClone(request) : request;
+              latest?.reject(abort());
               const item: Pending = {
                 id: ++nextId,
-                request,
+                request: submitted,
+                revision: submitted.revision,
                 resolve: resolveResult,
                 reject: rejectResult,
               };
@@ -109,7 +113,7 @@ export function createBrowserCompilerClient(
         const item = latest;
         latest = null;
         if (
-          message.result.revision !== item.request.revision ||
+          message.result.revision !== item.revision ||
           message.build.compilerSha256 !== build.compilerSha256
         )
           item.reject(

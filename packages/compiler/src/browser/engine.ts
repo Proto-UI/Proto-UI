@@ -23,48 +23,6 @@ function hostError(
   return { ok: false, revision, phase: 'host', error: { code, message } };
 }
 
-function validateRequest(request: BrowserCompileRequest): string | null {
-  if (
-    !request ||
-    request.format !== 1 ||
-    typeof request.revision !== 'string' ||
-    !request.revision ||
-    request.revision.length > 128 ||
-    typeof request.source !== 'string'
-  )
-    return 'Expected format 1, a nonempty revision and source text.';
-  const options = request.options;
-  if (
-    !options ||
-    typeof options !== 'object' ||
-    Array.isArray(options) ||
-    typeof options.fileName !== 'string' ||
-    !options.fileName ||
-    !(
-      (typeof options.profile === 'string' && options.profile) ||
-      (options.profile && typeof options.profile === 'object' && !Array.isArray(options.profile))
-    )
-  )
-    return 'A virtual fileName and explicit target profile are required.';
-  const keys = new Set(['fileName', 'profile', 'files', 'exportName', 'componentName']);
-  if (Object.keys(options).some((key) => !keys.has(key)))
-    return 'Host filesystem and unknown compiler options are unavailable.';
-  if (
-    (options.exportName !== undefined && typeof options.exportName !== 'string') ||
-    (options.componentName !== undefined && typeof options.componentName !== 'string')
-  )
-    return 'Export and component names must be strings.';
-  if (
-    options.files !== undefined &&
-    (!options.files ||
-      typeof options.files !== 'object' ||
-      Array.isArray(options.files) ||
-      Object.values(options.files).some((value) => typeof value !== 'string'))
-  )
-    return 'The virtual source graph must contain only source text.';
-  return null;
-}
-
 /** Only the trusted compiler bundle executes; request source is passed as a string argument. */
 export async function createBrowserCompiler(
   bundle: string,
@@ -141,11 +99,10 @@ export async function createBrowserCompiler(
     compile(request) {
       const revision = typeof request?.revision === 'string' ? request.revision : '';
       if (disposed) return hostError(revision, 'disposed', 'Browser compiler has been disposed.');
-      const problem = validateRequest(request);
-      if (problem) return hostError(revision, 'invalid-request', problem);
       let serialized: string;
       try {
         serialized = JSON.stringify(request);
+        if (typeof serialized !== 'string') throw new TypeError('Missing serialized request.');
       } catch {
         return hostError(
           revision,

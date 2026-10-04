@@ -15,6 +15,7 @@ import {
   type BrowserCompilerBuild,
 } from '../src/browser/protocol';
 import { compilePrototype } from '../src/memory';
+import { startBrowserFixture } from './browser-fixture';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const request: BrowserCompileRequest = {
@@ -134,6 +135,82 @@ export default definePrototype({name:'NativeUnicode',setup(def){
     // The Node fixture has no browser Worker; no timers or fabricated transport are needed.
     const initialization = createBrowserCompilerClient(bundle, build);
     await expect(initialization).rejects.toBeInstanceOf(ReferenceError);
+  });
+
+  it('binds running revisions and queued source graphs to the submitted edit in a real Worker', async () => {
+    const fixture = await startBrowserFixture('wasm-request-snapshot');
+    try {
+      const page = await fixture.browser.newPage();
+      await page.route('**/__wasm_request_snapshot__', (route) =>
+        route.fulfill({
+          contentType: 'text/html',
+          body: '<!doctype html><title>WASM request snapshot</title>',
+        })
+      );
+      await page.goto(`${fixture.baseUrl}/__wasm_request_snapshot__`);
+      await page.addScriptTag({
+        type: 'module',
+        content: `import {createBrowserCompilerClient} from ${JSON.stringify(`/@fs/${path.join(root, 'packages/compiler/src/browser/client.ts')}`)};
+globalThis.__wasmCompilerClient = createBrowserCompilerClient;`,
+      });
+      await page.waitForFunction(() => '__wasmCompilerClient' in globalThis);
+      const observed = await page.evaluate(
+        async ({ bundle, build, input }) => {
+          const factory = (
+            globalThis as unknown as {
+              __wasmCompilerClient: typeof createBrowserCompilerClient;
+            }
+          ).__wasmCompilerClient;
+          const client = await factory(bundle, build);
+          const outcome = (promise: Promise<{ result: unknown }>) =>
+            promise.then(
+              (response) => ({ result: response.result }),
+              (error: Error) => ({ error: error.name, message: error.message })
+            );
+          try {
+            const running = structuredClone(input);
+            const runningResult = outcome(client.compile(running));
+            running.revision = 'mutated-after-running-submit';
+            const first = await runningResult;
+
+            const superseded = outcome(client.compile(structuredClone(input)));
+            const queued = {
+              ...input,
+              options: { ...input.options, files: { ...input.options.files } },
+            };
+            const queuedResult = outcome(client.compile(queued));
+            queued.revision = 'mutated-after-queue-submit';
+            queued.source = queued.source.replace('Unicode编译😀', 'ChangedAfterSubmit');
+            queued.options.files!['演示/hook.ts'] =
+              `throw new Error('Mutated graph must not compile');`;
+            return { running: first, superseded: await superseded, queued: await queuedResult };
+          } finally {
+            client.dispose();
+          }
+        },
+        { bundle, build, input: request }
+      );
+      expect(observed.running).toEqual({ result: canonical(request) });
+      expect(observed.superseded).toMatchObject({ error: 'AbortError' });
+      expect(observed.queued).toEqual({ result: canonical(request) });
+    } finally {
+      await fixture.close();
+    }
+  }, 120_000);
+
+  it('rejects required target fields omitted by JSON serialization instead of choosing defaults', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'SerializedTarget',setup(def){}});`;
+    const omitted = {
+      ...request,
+      source,
+      options: Object.create({ fileName: 'explicit.proto.ts', profile: 'web-component-source-v1' }),
+    };
+    expect(compiler!.compile(omitted)).toMatchObject({
+      ok: false,
+      phase: 'host',
+      error: { code: 'invalid-request' },
+    });
   });
 
   it('rejects mismatched trusted bundles and distinguishes host limits from source diagnostics', async () => {

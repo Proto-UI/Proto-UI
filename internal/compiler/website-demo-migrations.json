@@ -1151,6 +1151,26 @@
       "ownerIssue": 817
     },
     {
+      "file": "apps/www/src/content/docs/en/ui-libraries/index.mdx",
+      "route": "/en/ui-libraries/",
+      "rows": [
+        {
+          "surface": "UiLibraryGallery",
+          "line": 12,
+          "via": {
+            "file": "apps/www/src/components/UiLibraryGallery.astro",
+            "surface": "PrototypePreviewer",
+            "line": 262
+          },
+          "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
+          "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
+          "unresolved": []
+        }
+      ],
+      "migration": "not-migrated",
+      "ownerIssue": 817
+    },
+    {
       "file": "apps/www/src/content/docs/en/ui-libraries/liquid-glass/button.mdx",
       "route": "/en/ui-libraries/liquid-glass/button/",
       "rows": [
@@ -2743,6 +2763,26 @@
             "brutalist-textarea-root",
             "brutalist-toggle"
           ],
+          "unresolved": []
+        }
+      ],
+      "migration": "not-migrated",
+      "ownerIssue": 817
+    },
+    {
+      "file": "apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx",
+      "route": "/zh-cn/ui-libraries/",
+      "rows": [
+        {
+          "surface": "UiLibraryGallery",
+          "line": 12,
+          "via": {
+            "file": "apps/www/src/components/UiLibraryGallery.astro",
+            "surface": "PrototypePreviewer",
+            "line": 262
+          },
+          "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
+          "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
           "unresolved": []
         }
       ],

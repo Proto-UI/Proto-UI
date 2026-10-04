@@ -781,6 +781,295 @@
     },
     "deploymentBoundary": "The Vercel status reports a build-rate limit, not the permitted preview-authorization exception. No CI/deployment waiver, independent approval or merge is claimed."
   },
+  "secondReviewRepair": {
+    "observedAt": "2026-10-04T20:54:40.745Z",
+    "baselineSha": "88988e392e0fd6aca11842e9e94c35b8db740aff",
+    "findings": [
+      {
+        "comment": 4179125026,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/829#discussion_r4179125026",
+        "case": "submitted request snapshot"
+      },
+      {
+        "comment": 4179125029,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/829#discussion_r4179125029",
+        "case": "serialized target admission"
+      },
+      {
+        "comment": 4179125035,
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/829#discussion_r4179125035",
+        "case": "wrapper-mounted Demo inventory"
+      }
+    ],
+    "build": {
+      "format": 1,
+      "compilerSha256": "9d7adb1f710cddb16cd71a4436ed164c7bc5e6ece1e9469cc9b5f0606f9061c6",
+      "typescriptVersion": "5.9.3",
+      "execution": "quickjs-wasm"
+    },
+    "trustedBundleBytes": 5037359,
+    "requestSnapshot": {
+      "before": {
+        "submittedRevision": "closed-graph",
+        "laterCallerRevision": "mutated-after-running-submit",
+        "observedPromiseError": "Compiler response does not match the requested revision and build.",
+        "boundary": "The rejected baseline promise did not expose its Worker response payload."
+      },
+      "change": "Capture the expected revision for every call. Clone queued graphs before superseding earlier work; immediate postMessage already snapshots dispatched graphs.",
+      "after": {
+        "environment": "Actual Chromium module Worker / QuickJS WASM",
+        "running": "Later caller revision mutation no longer rejects the submitted result.",
+        "queued": "Later source/revision/nested options.files mutation leaves complete results equal to canonical Node compilation of the submitted graph.",
+        "superseded": "AbortError",
+        "test": "packages/compiler/test/browser-wasm.test.ts"
+      }
+    },
+    "serializedAdmission": {
+      "before": "A self-contained source with inherited fileName/profile returned ok:true instead of rejecting the fields omitted by JSON serialization.",
+      "change": "Move the existing single admission policy into the trusted entry after JSON.parse, before compilePrototype defaults; reject non-string serialization at the host boundary.",
+      "observations": [
+        {
+          "id": "valid-explicit-target",
+          "result": {
+            "ok": true,
+            "revision": "serialized-target",
+            "profile": "web-component-source-v1",
+            "source": {
+              "file": "explicit.proto.ts",
+              "exportName": "default",
+              "sha256": "e10a6cd15b4efc41a41e88750dd3d096b0d84012965b58903350d8828f62fc15"
+            }
+          }
+        },
+        {
+          "id": "inherited-target",
+          "result": {
+            "ok": false,
+            "revision": "serialized-target",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "A virtual fileName and explicit target profile are required."
+            }
+          }
+        },
+        {
+          "id": "nonenumerable-target",
+          "result": {
+            "ok": false,
+            "revision": "serialized-target",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "A virtual fileName and explicit target profile are required."
+            }
+          }
+        },
+        {
+          "id": "toJSON-omitted-target",
+          "result": {
+            "ok": false,
+            "revision": "serialized-target",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "A virtual fileName and explicit target profile are required."
+            }
+          }
+        },
+        {
+          "id": "undefined-serialization",
+          "result": {
+            "ok": false,
+            "revision": "serialized-target",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "Browser compiler requests must be JSON serializable."
+            }
+          }
+        },
+        {
+          "id": "host-filesystem-option",
+          "result": {
+            "ok": false,
+            "revision": "serialized-target",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "Host filesystem and unknown compiler options are unavailable."
+            }
+          }
+        }
+      ]
+    },
+    "inventory": {
+      "pages": 122,
+      "demos": 65,
+      "prototypes": 145,
+      "previousPagesPreserved": 120,
+      "prototypeDefinitionsUnchanged": true,
+      "addedPages": [
+        {
+          "file": "apps/www/src/content/docs/en/ui-libraries/index.mdx",
+          "route": "/en/ui-libraries/",
+          "rows": [
+            {
+              "surface": "UiLibraryGallery",
+              "line": 12,
+              "via": {
+                "file": "apps/www/src/components/UiLibraryGallery.astro",
+                "surface": "PrototypePreviewer",
+                "line": 262
+              },
+              "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
+              "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
+              "unresolved": []
+            }
+          ],
+          "migration": "not-migrated",
+          "ownerIssue": 817
+        },
+        {
+          "file": "apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx",
+          "route": "/zh-cn/ui-libraries/",
+          "rows": [
+            {
+              "surface": "UiLibraryGallery",
+              "line": 12,
+              "via": {
+                "file": "apps/www/src/components/UiLibraryGallery.astro",
+                "surface": "PrototypePreviewer",
+                "line": 262
+              },
+              "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
+              "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
+              "unresolved": []
+            }
+          ],
+          "migration": "not-migrated",
+          "ownerIssue": 817
+        }
+      ],
+      "unresolvedMounts": []
+    },
+    "docs": {
+      "observedAt": "2026-10-04T21:00:57.163Z",
+      "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
+      "realDomChecks": "Expected headings and ordinary paragraphs, no changed prose inside pre.",
+      "captures": [
+        "internal/compiler/evidence/compiler-guide-en-second-review.webp",
+        "internal/compiler/evidence/compiler-guide-zh-second-review.webp"
+      ],
+      "gallery": {
+        "routes": ["/en/ui-libraries/", "/zh-cn/ui-libraries/"],
+        "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
+        "boundary": "Ordinary wrapper DOM identities only; not compiled RuntimeBox preview execution."
+      }
+    },
+    "validation": {
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test/browser-wasm.test.ts apps/www/test/proto-ui-source.test.ts",
+      "testsPassed": 8,
+      "filesPassed": 2,
+      "workspaceTypes": {
+        "command": "corepack pnpm@10.32.1 -s check:types:workspace",
+        "result": "passed"
+      },
+      "astroTypes": {
+        "command": "corepack pnpm@10.32.1 -s check:types:docs",
+        "files": 268,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 1,
+        "additionalLogWarnings": "Existing duplicate en/zh compiler-guide content IDs during resync; both actual routes rendered the changed prose."
+      },
+      "publicDocs": {
+        "command": "corepack pnpm@10.32.1 -s check:public-docs",
+        "result": "passed",
+        "bilingualPrimaryRoutes": 116,
+        "libraryInventories": 4
+      }
+    },
+    "previousHeadCi": {
+      "head": "88988e392e0fd6aca11842e9e94c35b8db740aff",
+      "checks": [
+        {
+          "name": "lockstep-check",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "browser",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "public-calibration",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "Build docs preview",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "capture",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "public_package_plan",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "type-check",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "rust",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "rust-macos",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "rust-interop",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "test",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "release-scan",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "public_package_build",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "release-stage",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "release-consumer-react",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "cli-smoke",
+          "result": "SUCCESS"
+        },
+        {
+          "name": "Vercel",
+          "result": "FAILURE"
+        },
+        {
+          "name": "DCO",
+          "result": "SUCCESS"
+        }
+      ],
+      "boundary": "Actual prior-head CI success does not waive the earlier local website failures or establish new-head acceptance. Vercel remains a build-rate-limit failure; independent exact-head review and integration are separate."
+    },
+    "scope": "These three review repairs only. No new source admission, native/SSR target admission, RuntimeBox migration or generated preview sandbox claim."
+  },
   "debt": [
     "No RuntimeBox migration, generated preview sandbox, in-page editor or full-source admission claim; #817 remains open.",
     "142 selected-target source admission rejections remain in-scope with explicit diagnostics in website-demo-migrations.json.",

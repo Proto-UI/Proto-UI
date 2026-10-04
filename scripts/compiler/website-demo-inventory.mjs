@@ -14,6 +14,9 @@ const require = createRequire(path.join(www, 'package.json'));
 const { unified } = await import(require.resolve('unified'));
 const { default: remarkParse } = await import(require.resolve('remark-parse'));
 const { default: remarkMdx } = await import(require.resolve('remark-mdx'));
+const { parse: parseAstro } = await import(
+  createRequire(require.resolve('astro/package.json')).resolve('@astrojs/compiler')
+);
 const markdown = unified().use(remarkParse).use(remarkMdx);
 const relative = (file) => path.relative(root, file).split(path.sep).join('/');
 const files = async (pattern) => {
@@ -198,6 +201,142 @@ const surfaces = new Set([
   'DemoMatrix',
   'PrototypeLibraryOverview',
 ]);
+const componentFile = (specifier, containingFile) =>
+  specifier.startsWith('@/')
+    ? path.join(www, 'src', specifier.slice(2))
+    : specifier.startsWith('.')
+      ? path.resolve(path.dirname(containingFile), specifier)
+      : null;
+const expression = (text) => {
+  const ast = ts.createSourceFile('mount.ts', `(${text})`, ts.ScriptTarget.Latest, true);
+  return ast.parseDiagnostics.length || !ts.isExpressionStatement(ast.statements[0])
+    ? null
+    : ast.statements[0].expression;
+};
+const unwrap = (node) => {
+  while (node && ts.isParenthesizedExpression(node)) node = node.expression;
+  return node;
+};
+// Only literal equality choices constrain dynamic mount IDs. Never execute author scripts.
+const choices = (node) => {
+  node = unwrap(node);
+  if (!node || !ts.isBinaryExpression(node)) return null;
+  if (node.operatorToken.kind === ts.SyntaxKind.BarBarToken) {
+    const left = choices(node.left),
+      right = choices(node.right);
+    return left && right && left.key === right.key
+      ? { key: left.key, values: [...new Set([...left.values, ...right.values])] }
+      : null;
+  }
+  if (node.operatorToken.kind !== ts.SyntaxKind.EqualsEqualsEqualsToken) return null;
+  const left = unwrap(node.left),
+    right = unwrap(node.right);
+  return (ts.isIdentifier(left) || ts.isPropertyAccessExpression(left)) &&
+    ts.isStringLiteralLike(right)
+    ? { key: left.getText(), values: [right.text] }
+    : null;
+};
+const strings = (node, bindings) => {
+  node = unwrap(node);
+  if (!node) return null;
+  if (ts.isStringLiteralLike(node)) return [node.text];
+  if (ts.isIdentifier(node) || ts.isPropertyAccessExpression(node))
+    return bindings.get(node.getText()) ?? null;
+  if (!ts.isTemplateExpression(node)) return null;
+  let values = [node.head.text];
+  for (const span of node.templateSpans) {
+    const part = strings(span.expression, bindings);
+    if (!part || values.length * part.length > 256) return null;
+    values = values.flatMap((prefix) => part.map((value) => prefix + value + span.literal.text));
+  }
+  return values;
+};
+const wrappers = new Map();
+async function wrapperMounts(file, seen = new Set()) {
+  if (seen.has(file)) throw new Error(`Cyclic Astro preview wrapper: ${relative(file)}`);
+  if (wrappers.has(file)) return wrappers.get(file);
+  const ancestry = new Set([...seen, file]);
+  const { ast } = await parseAstro(await readFile(file, 'utf8'), { position: true });
+  const frontmatter = ast.children.find((node) => node.type === 'frontmatter')?.value ?? '';
+  const script = ts.createSourceFile(
+    file,
+    frontmatter,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS
+  );
+  const imports = new Map();
+  for (const statement of script.statements) {
+    if (
+      !ts.isImportDeclaration(statement) ||
+      !statement.importClause?.name ||
+      statement.importClause.isTypeOnly ||
+      !ts.isStringLiteralLike(statement.moduleSpecifier)
+    )
+      continue;
+    const target = componentFile(statement.moduleSpecifier.text, file);
+    if (target?.endsWith('.astro')) imports.set(statement.importClause.name.text, target);
+  }
+  const mounts = [];
+  const walk = async (node, inherited) => {
+    let bindings = inherited;
+    if (node.type === 'expression') {
+      const parsed = unwrap(
+        expression(
+          node.children.map((child) => (child.type === 'text' ? child.value : 'null')).join('')
+        )
+      );
+      const selection =
+        parsed &&
+        ts.isBinaryExpression(parsed) &&
+        parsed.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandToken
+          ? choices(parsed.left)
+          : null;
+      if (selection) {
+        bindings = new Map(inherited);
+        const prior = bindings.get(selection.key);
+        bindings.set(
+          selection.key,
+          prior ? selection.values.filter((value) => prior.includes(value)) : selection.values
+        );
+      }
+    }
+    if (node.type === 'component') {
+      const target = imports.get(node.name);
+      const surface = target ? path.basename(target, '.astro') : node.name;
+      if (surfaces.has(surface)) {
+        const attrs = new Map(),
+          unresolved = [];
+        for (const attr of node.attributes ?? []) {
+          if (!['demoId', 'prototypeId', 'library'].includes(attr.name)) continue;
+          const values =
+            attr.kind === 'quoted'
+              ? [attr.value]
+              : attr.kind === 'expression'
+                ? strings(expression(attr.value), bindings)
+                : null;
+          if (values) attrs.set(attr.name, values);
+          else
+            unresolved.push(
+              `${relative(file)}:${attr.position?.start.line ?? node.position.start.line}: unresolved ${attr.name}=${attr.value}`
+            );
+        }
+        mounts.push({
+          surface,
+          attrs,
+          unresolved,
+          via: { file: relative(file), surface, line: node.position.start.line },
+        });
+        return;
+      }
+      if (target) mounts.push(...(await wrapperMounts(target, ancestry)));
+    }
+    for (const child of node.children ?? []) await walk(child, bindings);
+  };
+  await walk(ast, new Map());
+  wrappers.set(file, mounts);
+  return mounts;
+}
 const pages = [];
 const walkMarkdown = (node, callback) => {
   callback(node);
@@ -225,52 +364,84 @@ for (const file of await files('apps/www/src/content/docs/**/*.{md,mdx}')) {
   } catch (error) {
     throw new Error(`${relative(file)}: ${error.message}`, { cause: error });
   }
-  const declarations = new Set();
+  const declarations = new Set(),
+    imports = new Map();
   walkMarkdown(tree, (node) => {
-    if (node.type === 'mdxjsEsm') literalDemos(node.data?.estree, declarations);
+    if (node.type !== 'mdxjsEsm') return;
+    literalDemos(node.data?.estree, declarations);
+    for (const statement of node.data?.estree?.body ?? []) {
+      if (statement.type !== 'ImportDeclaration') continue;
+      const target = componentFile(statement.source.value, file);
+      if (!target?.endsWith('.astro')) continue;
+      for (const binding of statement.specifiers ?? [])
+        if (binding.type === 'ImportDefaultSpecifier') imports.set(binding.local.name, target);
+    }
+  });
+  const mounted = [];
+  walkMarkdown(tree, (node) => {
+    if (
+      ['mdxJsxFlowElement', 'mdxJsxTextElement'].includes(node.type) &&
+      (surfaces.has(node.name) || imports.has(node.name))
+    )
+      mounted.push(node);
   });
   const rows = [];
-  walkMarkdown(tree, (node) => {
-    if (!surfaces.has(node.name) || !['mdxJsxFlowElement', 'mdxJsxTextElement'].includes(node.type))
-      return;
-    const attrs = new Map(
-      (node.attributes ?? [])
-        .filter((item) => item.type === 'mdxJsxAttribute')
-        .map((item) => [item.name, item.value])
-    );
-    const ids = new Set(),
-      prototypeIds = new Set(),
-      unresolved = [];
-    if (typeof attrs.get('demoId') === 'string') ids.add(attrs.get('demoId'));
-    if (typeof attrs.get('prototypeId') === 'string') prototypeIds.add(attrs.get('prototypeId'));
-    if (node.name === 'DemoMatrix') for (const id of demoDeclarations.keys()) ids.add(id);
-    if (node.name === 'HomeDemoPreviewer') for (const id of declarations) ids.add(id);
-    if (node.name === 'PrototypeLibraryOverview') {
-      const library = attrs.get('library');
-      if (typeof library === 'string' && libraries.has(library))
-        for (const id of libraries.get(library)) ids.add(id);
-      else unresolved.push('Library selection requires a source-bound resolution.');
-    }
-    for (const id of ids) {
-      const demo = demoDeclarations.get(id);
-      if (!demo) {
-        unresolved.push(`Missing demo declaration: ${id}`);
-        continue;
+  for (const node of mounted) {
+    const target = imports.get(node.name);
+    const directSurface = target ? path.basename(target, '.astro') : node.name;
+    const mounts = surfaces.has(directSurface)
+      ? [
+          {
+            surface: directSurface,
+            attrs: new Map(
+              (node.attributes ?? [])
+                .filter((item) => item.type === 'mdxJsxAttribute')
+                .map((item) => [item.name, typeof item.value === 'string' ? [item.value] : []])
+            ),
+            unresolved: [],
+          },
+        ]
+      : await wrapperMounts(target);
+    for (const mount of mounts) {
+      const attrs = mount.attrs;
+      const ids = new Set(),
+        prototypeIds = new Set(),
+        unresolved = [...mount.unresolved];
+      for (const id of attrs.get('demoId') ?? []) ids.add(id);
+      for (const id of attrs.get('prototypeId') ?? []) prototypeIds.add(id);
+      if (mount.surface === 'DemoMatrix') for (const id of demoDeclarations.keys()) ids.add(id);
+      if (mount.surface === 'HomeDemoPreviewer') for (const id of declarations) ids.add(id);
+      if (mount.surface === 'PrototypeLibraryOverview') {
+        const selected = attrs.get('library') ?? [];
+        if (!selected.length)
+          unresolved.push('Library selection requires a source-bound resolution.');
+        for (const library of selected) {
+          if (libraries.has(library)) for (const id of libraries.get(library)) ids.add(id);
+          else unresolved.push(`Missing library declaration: ${library}`);
+        }
       }
-      for (const prototypeId of demo.prototypeIds) prototypeIds.add(prototypeId);
-      for (const binding of demo.unresolvedBindings)
-        unresolved.push(`${demo.file}:${binding.line}: ${binding.expression}`);
+      for (const id of ids) {
+        const demo = demoDeclarations.get(id);
+        if (!demo) {
+          unresolved.push(`Missing demo declaration: ${id}`);
+          continue;
+        }
+        for (const prototypeId of demo.prototypeIds) prototypeIds.add(prototypeId);
+        for (const binding of demo.unresolvedBindings)
+          unresolved.push(`${demo.file}:${binding.line}: ${binding.expression}`);
+      }
+      if (!ids.size && !prototypeIds.size)
+        unresolved.push('No statically resolved demo or prototype.');
+      rows.push({
+        surface: node.name,
+        line: node.position.start.line,
+        ...(mount.via ? { via: mount.via } : {}),
+        demoIds: [...ids].sort(),
+        prototypeIds: [...prototypeIds].sort(),
+        unresolved,
+      });
     }
-    if (!ids.size && !prototypeIds.size)
-      unresolved.push('No statically resolved demo or prototype.');
-    rows.push({
-      surface: node.name,
-      line: node.position.start.line,
-      demoIds: [...ids].sort(),
-      prototypeIds: [...prototypeIds].sort(),
-      unresolved,
-    });
-  });
+  }
   if (!rows.length) continue;
   const route = path
     .relative(path.join(www, 'src/content/docs'), file)
