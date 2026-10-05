@@ -5,7 +5,8 @@ export const nativeAdapterModulesArtifact = {
 import { autoUpdate, computePosition, offset, flip, shift, size, type Middleware, type Placement } from '@floating-ui/dom';
 export type NativeConfig = Readonly<Record<string, unknown>>;
 export type NativeStateEvent<T> = { type: 'next'; prev: T; next: T; reason?: unknown } | { type: 'disconnect'; reason: 'unmount' };
-export type NativeObserved<T> = { get(): T; watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
+export type NativeObservedSpec = { kind: 'bool' | 'string' | 'enum' | 'number.discrete' | 'number.range'; options?: readonly string[]; min?: number; max?: number; clamp?: boolean };
+export type NativeObserved<T> = { readonly semantic?: string; readonly spec?: Readonly<NativeObservedSpec>; get(): T; watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
 export type NativeOwnedState<T> = { get(): T; set(value: T, reason?: unknown): void; setDefault(value: T): void };
 export type NativeBorrowedState<T> = NativeOwnedState<T> & { watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void };
 export type NativeOwnedStateSpec = { kind: 'bool' | 'string' | 'enum' | 'number.discrete'; options?: readonly string[] };
@@ -254,10 +255,11 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   const rovingConfig: Record<string, unknown> = { loop: false, navigation: 'arrow', orientation: 'both', entry: 'active', selectOnFocus: false };
   let pendingFocus: NativeFocusRequest | null = null, pendingNavigation: { operation: string; options?: NativeFocusRequest } | null = null;
   let restoreTarget: HTMLElement | null = null;
-  const observed = <T extends boolean | string | number>(initial: T) => {
+  const observed = <T extends boolean | string | number>(initial: T, semantic?: string, spec?: NativeObservedSpec) => {
     let value = initial;
     const listeners = new Set<(event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void>();
     const handle: NativeObserved<T> = Object.freeze({
+      semantic, spec: Object.freeze(spec ?? { kind: typeof initial === 'boolean' ? 'bool' : typeof initial === 'number' ? 'number.discrete' : 'string' }),
       get() { alive(); return value; },
       watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void) { setup('state.watch'); const listener = (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => callback(options.getRun() as unknown as R, event); listeners.add(listener); return () => { listeners.delete(listener); }; },
       subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void) { alive(); listeners.add(callback); return () => listeners.delete(callback); },
@@ -265,7 +267,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     terminalCleanups.push(() => listeners.clear());
     return { handle, set(next: T) { if (Object.is(value, next)) return; const prev = value; value = next; const epoch = generation; for (const callback of [...listeners]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (listeners.has(callback)) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-module' })); } } };
   };
-  const scopeActive = observed<boolean>(false), hasFocused = observed<boolean>(false), rovingActive = observed<boolean>(false), rovingHasFocused = observed<boolean>(false);
+  const scopeActive = observed<boolean>(false, '@focus/active'), hasFocused = observed<boolean>(false, '@focus/hasFocused'), rovingActive = observed<boolean>(false, '@focus/active'), rovingHasFocused = observed<boolean>(false, '@focus/hasFocused');
   const owner: Owner = { identity: options.identity, parent: options.getLogicalParent, target: () => root, host: () => root ? options.getHost?.() ?? root : null, alive: () => !disposed && options.isAlive(), hooks, claims, exposes: () => options.getExposes?.() ?? {}, focusConfig, scopeConfig, rovingConfig, selected: false, active: false, scopeDeclared: false, rovingDeclared: false, focusDeclared: false, entryDeclared: false, scopeActive: false, focus: request => requestFocus(request), changed: () => { const epoch = generation; for (const callback of [...topologySubscribers]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (topologySubscribers.has(callback)) options.invoke(callback); } refresh(); } };
   if (owners.has(options.identity)) throw new Error('[Modules] duplicate live owner identity.');
   function alive() { if (disposed || !options.isAlive()) throw new Error('[Modules] owner is terminally disposed.'); }
@@ -841,15 +843,15 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     },
     snapshot() { alive(); return imageDeclared ? Object.freeze({ source: imageSource, loadingStatus: imageStatus, fit: imageFit }) : null; },
   };
-  const scrollAxes = observed<string>('vertical'), scrollProjection = observed<string>('unresolved'), scrolling = observed<boolean>(false);
-  const followState = observed<string>('off'), followRequest = observed<string>('idle');
-  function axisFacts(): { handle: NativeScrollAxis; update(position: number, viewport: number, extent: number): void } {
-    const position = observed<number>(0), ratio = observed<number>(1), before = observed<boolean>(false), after = observed<boolean>(false), end = observed<boolean>(true);
+  const scrollAxes = observed<string>('vertical', '@scroll/axes', { kind: 'enum', options: ['horizontal', 'vertical', 'both'] }), scrollProjection = observed<string>('unresolved', '@scroll/projection', { kind: 'enum', options: ['unresolved', 'system', 'composed'] }), scrolling = observed<boolean>(false, '@scroll/scrolling');
+  const followState = observed<string>('off', '@scroll/endFollowState', { kind: 'enum', options: ['off', 'pending', 'following', 'paused'] }), followRequest = observed<string>('idle', '@scroll/endFollowRequestStatus', { kind: 'enum', options: ['idle', 'pending', 'applied', 'rejected'] });
+  function axisFacts(axis: 'horizontal' | 'vertical'): { handle: NativeScrollAxis; update(position: number, viewport: number, extent: number): void } {
+    const position = observed<number>(0, '@scroll/' + axis + 'Position', { kind: 'number.range', min: 0, max: 1, clamp: true }), ratio = observed<number>(1, '@scroll/' + axis + 'VisibleRatio', { kind: 'number.range', min: 0, max: 1, clamp: true }), before = observed<boolean>(false, '@scroll/' + axis + 'CanScrollBefore'), after = observed<boolean>(false, '@scroll/' + axis + 'CanScrollAfter'), end = observed<boolean>(true, '@scroll/' + axis + 'AtEnd');
     return { handle: { position: position.handle, visibleRatio: ratio.handle, canScrollBefore: before.handle, canScrollAfter: after.handle, atEnd: end.handle },
       update(offsetValue, viewport, extent) { const range = Math.max(0, extent - viewport); const clamped = Math.min(range, Math.max(0, offsetValue)); position.set(range > 0 ? clamped / range : 0); ratio.set(extent > 0 ? Math.max(0, Math.min(1, viewport / extent)) : 1); before.set(clamped > 0); after.set(clamped < range); end.set(range - clamped <= 1); },
     };
   }
-  const horizontal = axisFacts(), vertical = axisFacts();
+  const horizontal = axisFacts('horizontal'), vertical = axisFacts('vertical');
   let scrollConfig: NativeConfig = { axes: 'vertical', projection: 'auto', endFollow: { mode: 'off' } };
   let scrollChrome: NativeConfig | null = null, readerContacts = 0, scrollTimer: number | undefined;
   let readerIntent = 0, scrollEndFrame: number | null = null;
