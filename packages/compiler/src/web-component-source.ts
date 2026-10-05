@@ -513,6 +513,7 @@ export class ${className} extends HTMLElement {
   get viewEpoch(): number { return this.${prefix}Owner?.epoch ?? 0; }
   get present(): boolean { return this.${prefix}Owner?.view ?? false; }
   connectedCallback(): void {
+    if (!this.isConnected) return;
     ++this.${prefix}Disconnect;
     if (this.${prefix}Closed) return;
     if (this.${prefix}Owner) { this.${prefix}Owner.reconcile(); return; }

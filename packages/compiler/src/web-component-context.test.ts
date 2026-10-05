@@ -144,6 +144,20 @@ function displayedProvider(element: ContextElement): string | undefined {
 
 // These guard real owner ancestry, reference identity, semantic transitions and terminal boundaries.
 describe('native Web Component Context', () => {
+  it('ignores obsolete connected callbacks without constructing a phantom owner', () => {
+    const generated = project();
+    const element = generated.create(consumer());
+    (element as ContextElement & { connectedCallback(): void }).connectedCallback();
+    expect(element.logicalOwner).toBeNull();
+    expect(element.hasAttribute('data-pui-root')).toBe(false);
+    const parent = generated.create(provider(10));
+    parent.append(element);
+    container().append(parent);
+    expect(element.shadowRoot?.querySelector('output')?.textContent).toBe('10');
+    expect(element.getExposes().current?.get()).toBe(10);
+    expect(element.logicalOwner).not.toBeNull();
+  });
+
   it('does not claim a Root when required Context initialization fails', () => {
     const generated = project();
     const element = generated.create(consumer());

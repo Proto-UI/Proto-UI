@@ -106,33 +106,45 @@ export function createRuntimeInstance<P extends PropsBaseType>(
     ]
   );
 
-  opt?.onModulesReady?.(moduleHub);
+  let kernel: Kernel<P>;
+  try {
+    opt?.onModulesReady?.(moduleHub);
 
-  const kernel = createKernel<P>(proto, moduleHub, {
-    allowRunUpdate: opt?.allowRunUpdate,
-    onPhaseChange: (p) => {
-      phaseRef = p;
-    },
-    asHook: {
-      projectState: createAsHookStateProjector<P>(moduleHub.getPort('state')),
-      enterSetup: ({ def, rt }) => {
-        enterActiveAsHookContext({
-          def: def as any,
-          rt,
-          facades: moduleHub.getFacades(),
-          ports: moduleHub.getPorts(),
-        });
+    kernel = createKernel<P>(proto, moduleHub, {
+      allowRunUpdate: opt?.allowRunUpdate,
+      onPhaseChange: (p) => {
+        phaseRef = p;
       },
-      exitSetup: () => {
-        exitActiveAsHookContext();
+      asHook: {
+        projectState: createAsHookStateProjector<P>(moduleHub.getPort('state')),
+        enterSetup: ({ def, rt }) => {
+          enterActiveAsHookContext({
+            def: def as any,
+            rt,
+            facades: moduleHub.getFacades(),
+            ports: moduleHub.getPorts(),
+          });
+        },
+        exitSetup: () => {
+          exitActiveAsHookContext();
+        },
       },
-    },
-    eventSink: {
-      setEventCallbacks: (callbacks) => {
-        (moduleHub as any)[__RT_EVENT_CALLBACKS] = callbacks;
+      eventSink: {
+        setEventCallbacks: (callbacks) => {
+          (moduleHub as any)[__RT_EVENT_CALLBACKS] = callbacks;
+        },
       },
-    },
-  });
+    });
+  } catch (error) {
+    // Construction has not returned a session to the Adapter. Dispose modules
+    // here, while their host identity caps are still available for cleanup.
+    try {
+      moduleHub.dispose();
+    } catch (cleanup) {
+      throw new AggregateError([error, cleanup], '[Runtime] setup and disposal failed.');
+    }
+    throw error;
+  }
 
   // align once (after setup ends kernel is typically "unknown")
   phaseRef = kernel.getPhase() as any;
