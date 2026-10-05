@@ -1,0 +1,229 @@
+{
+  "sourceHead": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+  "sourceTree": "accba8e04268cf68d643a0b8b285205404804360",
+  "runnerMerge": "d5100f82ae0ce7a0b6a530d32539c1b18db2a93c",
+  "main": "dc8bf26cd903223f2dd4c8fc5fd37b8eb5227125",
+  "run": 37319341617,
+  "testJob": 111794098425,
+  "tests": {
+    "nonBrowserPassed": 3094,
+    "browserPassed": 207,
+    "browserFiles": 39,
+    "todo": 34,
+    "skippedFiles": 3,
+    "focusNativeCases": 7
+  },
+  "observations": [
+    {
+      "at": "2026-10-05T14:02:04.4638544Z",
+      "type": "native-entry-owner",
+      "observation": {
+        "completion": "apply",
+        "readyControl": {
+          "active": true,
+          "focused": true
+        },
+        "during": [
+          {
+            "active": false,
+            "focused": false
+          }
+        ],
+        "after": {
+          "active": true,
+          "focused": true
+        },
+        "trustedFocusEvents": 1
+      }
+    },
+    {
+      "at": "2026-10-05T14:02:04.9449721Z",
+      "type": "native-entry-owner",
+      "observation": {
+        "completion": "entry-disable",
+        "readyControl": {
+          "active": true,
+          "focused": true
+        },
+        "during": [
+          {
+            "active": false,
+            "focused": false
+          }
+        ],
+        "after": {
+          "active": false,
+          "focused": false
+        },
+        "trustedFocusEvents": 0
+      }
+    },
+    {
+      "at": "2026-10-05T14:02:05.4113233Z",
+      "type": "native-entry-owner",
+      "observation": {
+        "completion": "explicit-blur",
+        "readyControl": {
+          "active": true,
+          "focused": true
+        },
+        "during": [
+          {
+            "active": false,
+            "focused": false
+          }
+        ],
+        "after": {
+          "active": false,
+          "focused": false
+        },
+        "trustedFocusEvents": 0
+      }
+    },
+    {
+      "at": "2026-10-05T14:02:06.0915707Z",
+      "type": "native-entry-retry",
+      "observation": {
+        "cycles": [
+          {
+            "connected": true,
+            "rejected": true,
+            "acquired": true
+          },
+          {
+            "connected": true,
+            "rejected": true,
+            "acquired": true
+          },
+          {
+            "connected": true,
+            "rejected": true,
+            "acquired": true
+          },
+          {
+            "connected": true,
+            "rejected": true,
+            "acquired": true
+          }
+        ]
+      }
+    },
+    {
+      "at": "2026-10-05T14:02:06.5954148Z",
+      "type": "native-focus-kind",
+      "observation": {
+        "kind": "programmatic",
+        "during": [
+          {
+            "active": true,
+            "focused": true
+          }
+        ],
+        "after": {
+          "active": true,
+          "focused": true
+        },
+        "trustedFocusEvents": 1
+      }
+    },
+    {
+      "at": "2026-10-05T14:02:07.0783625Z",
+      "type": "native-focus-kind",
+      "observation": {
+        "kind": "native",
+        "during": [
+          {
+            "active": false,
+            "focused": false
+          }
+        ],
+        "after": {
+          "active": true,
+          "focused": true
+        },
+        "trustedFocusEvents": 1
+      }
+    },
+    {
+      "at": "2026-10-05T14:02:07.5443147Z",
+      "type": "native-focus-kind",
+      "observation": {
+        "kind": "entry",
+        "during": [
+          {
+            "active": false,
+            "focused": false
+          }
+        ],
+        "after": {
+          "active": true,
+          "focused": true
+        },
+        "trustedFocusEvents": 1
+      }
+    }
+  ],
+  "workflows": [
+    {
+      "name": "Static Template style evidence",
+      "id": 37319341707,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Bounded preference source evidence",
+      "id": 37319341666,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Scroll Area corner evidence",
+      "id": 37319341630,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Liquid Glass material and library evidence",
+      "id": 37319341651,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Material source specialization",
+      "id": 37319341615,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Poppy preview build PR #826",
+      "id": 37319341725,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Browser suite repair evidence",
+      "id": 37319341902,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Documentation image preview evidence",
+      "id": 37319341917,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "Brutalist source-aligned design evidence",
+      "id": 37319341650,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    },
+    {
+      "name": "CI",
+      "id": 37319341617,
+      "head": "69fe771848b9e800ec53c254a4f6f52573c4bd27",
+      "conclusion": "success"
+    }
+  ],
+  "reviewBoundary": "CI and source-owner conflict review are not independent platform approval; PR826 must not merge."
+}
