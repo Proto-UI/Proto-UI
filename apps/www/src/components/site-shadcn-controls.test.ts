@@ -245,6 +245,7 @@ describe('site family projections', () => {
     expect(button.getAttribute('data-pui-style')).toContain('border-2');
     expect(button.getAttribute('data-pui-style')).toContain('rounded-base');
     expect(button.getAttribute('data-pui-style')).toContain('bg-secondary-background');
+    expect(button.getAttribute('data-pui-style')).toContain('border-black');
     expect(button.getAttribute('data-pui-style')).not.toContain('rounded-md');
   });
 
@@ -322,7 +323,12 @@ describe('site family projections', () => {
       expect(trigger.style.width).toBe('100%');
       expect(trigger.style.minWidth).toBe('0');
       expect(trigger.style.maxWidth).toBe('100%');
-      expect(trigger.style.minHeight).toBe('var(--site-control-height, 2.75rem)');
+      expect(trigger.style.minHeight).toBe(
+        'var(--site-select-control-height, var(--site-control-height, 2.75rem))'
+      );
+      expect(trigger.style.getPropertyValue('padding-block')).toBe(
+        'var(--site-select-control-padding-block, 0.5rem)'
+      );
       expect(value.style.minWidth).toBe('0');
       expect(value.style.flex).toBe('1 1 auto');
       expect(value.style.overflow).toBe('hidden');
@@ -358,10 +364,15 @@ it.each(['shadcn', 'brutalist'] as const)(
     const value = document.querySelector<HTMLElement>(`wc-${family}-select-value`)!;
     expect(trigger.getAttribute('role')).toBe('combobox');
     expect(trigger.style.height).toBe('auto');
-    expect(trigger.style.minHeight).toBe('var(--site-control-height, 2.75rem)');
+    expect(trigger.style.minHeight).toBe(
+      'var(--site-select-control-height, var(--site-control-height, 2.75rem))'
+    );
     expect(trigger.style.fontSize).toBe('0.875rem');
     expect(trigger.getAttribute('data-pui-style')).toContain('h-8');
-    expect(trigger.getAttribute('data-pui-style')?.includes('shadow-[4px_4px_0_0_#000]')).toBe(
+    expect(trigger.getAttribute('data-pui-style')).toContain(
+      family === 'brutalist' ? 'border-black' : 'border-transparent'
+    );
+    expect(trigger.getAttribute('data-pui-style')!.includes('shadow-[4px_4px_0_0_#000]')).toBe(
       family === 'brutalist'
     );
     expect(value.style.whiteSpace).toBe('normal');
@@ -373,8 +384,44 @@ it.each(['shadcn', 'brutalist'] as const)(
     expect(trigger.getAttribute('role')).toBe('combobox');
     expect(value.textContent).toBe('Web Components');
     expect(value.style.whiteSpace).toBe('normal');
-    expect(trigger.getAttribute('data-pui-style')?.includes('shadow-[4px_4px_0_0_#000]')).toBe(
+    expect(trigger.getAttribute('data-pui-style')).toContain(
+      family === 'brutalist' ? 'border-black' : 'border-transparent'
+    );
+    expect(trigger.getAttribute('data-pui-style')!.includes('shadow-[4px_4px_0_0_#000]')).toBe(
       family === 'brutalist'
     );
   }
 );
+
+it('bounds the existing local adapter field without clipping enlarged value text', async () => {
+  document.body.innerHTML = `<div data-adapter-select><wc-shadcn-select-root data-site-select-root data-site-initial-value="wc">
+    <wc-shadcn-select-trigger><wc-shadcn-select-value></wc-shadcn-select-value></wc-shadcn-select-trigger>
+    <wc-shadcn-select-content><wc-shadcn-select-item data-value="wc">Web Components</wc-shadcn-select-item></wc-shadcn-select-content>
+    </wc-shadcn-select-root></div>`;
+  initSiteShadcnControls(document);
+  await settle();
+  const root = document.querySelector<HTMLElement>('wc-shadcn-select-root')!;
+  const trigger = document.querySelector<HTMLElement>('wc-shadcn-select-trigger')!;
+  const value = document.querySelector<HTMLElement>('wc-shadcn-select-value')!;
+  expect(root.style.width).toBe('100%');
+  expect(trigger.style.minWidth).toBe('0');
+  expect(trigger.style.maxWidth).toBe('100%');
+  expect(trigger.style.height).toBe('auto');
+  expect(value.style.whiteSpace).toBe('normal');
+  expect(value.style.overflowWrap).toBe('anywhere');
+  expect(trigger.getAttribute('data-pui-style')).toContain('border');
+});
+
+it('maps a legacy ghost alias to the existing public Brutalist surface variant', async () => {
+  document.body.innerHTML =
+    '<header data-site-header><wc-brutalist-button data-site-button data-variant="ghost" data-size="icon">Menu</wc-brutalist-button></header>';
+  initSiteShadcnControls(document);
+  await settle();
+  const button = document.querySelector<HTMLElement>('wc-brutalist-button')!;
+  const tokens = button.getAttribute('data-pui-style')!;
+  expect(button.getAttribute('role')).toBe('button');
+  expect(tokens).toContain('border-black');
+  expect(tokens).toContain('bg-secondary-background');
+  expect(tokens).toContain('shadow-[4px_4px_0_0_#000]');
+  expect(button.style.width).toBe('2.75rem');
+});

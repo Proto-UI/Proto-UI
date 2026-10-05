@@ -28,8 +28,9 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
     // P-SHADCN-SELECT-TRIGGER-SIZE-PROP
     def.props.define({
       size: { type: 'enum', empty: 'fallback', options: ['sm', 'default'] },
+      appearance: { type: 'enum', empty: 'fallback', options: ['default', 'ghost'] },
     });
-    def.props.setDefaults({ size: 'default' });
+    def.props.setDefaults({ size: 'default', appearance: 'default' });
 
     // P-SHADCN-SELECT-TRIGGER-BASE-INHERITANCE,
     // P-SHADCN-SELECT-TRIGGER-CURRENT-BASE-DEVIATIONS
@@ -42,9 +43,18 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
     // P-SHADCN-SELECT-TRIGGER-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
       tw(
-        'flex items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-colors outline-none select-none'
+        'flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none'
       )
     );
+    // P-SHADCN-SELECT-TRIGGER-APPEARANCE: visual delta only; Base owns behavior.
+    def.rule({
+      when: (w) => w.prop('appearance').eq('default'),
+      intent: (i) => i.feedback.style.use(tw('border-input shadow-xs')),
+    });
+    def.rule({
+      when: (w) => w.prop('appearance').eq('ghost'),
+      intent: (i) => i.feedback.style.use(tw('border-transparent shadow-none')),
+    });
     // P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES
     def.rule({
       when: (w) => w.prop('size').eq('default'),
@@ -55,11 +65,18 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
       intent: (i) => i.feedback.style.use(tw('h-8')),
     });
     def.rule({
-      when: (w) => w.state(placeholder).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(placeholder).eq(true),
+          w.any(
+            w.prop('appearance').eq('default'),
+            w.all(w.state(hovered).eq(false), w.state(pressed).eq(false))
+          )
+        ),
       intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
     });
     def.rule({
-      when: (w) => w.state(hovered).eq(true),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(hovered).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-input/50')),
     });
     def.rule({
@@ -67,8 +84,16 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
       intent: (i) => i.feedback.style.use(tw('border-ring ring-3 ring-ring/50')),
     });
     def.rule({
-      when: (w) => w.state(pressed).eq(true),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(pressed).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-input/70 translate-y-px')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('ghost'),
+          w.any(w.state(hovered).eq(true), w.state(pressed).eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),

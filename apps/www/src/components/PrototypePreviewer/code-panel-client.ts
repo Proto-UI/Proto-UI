@@ -55,7 +55,13 @@ function initCodePanel(shell: HTMLElement): void {
   };
   const onToggle = (event: Event) => {
     if (!isSiteButtonActivation(event)) return;
-    setExpanded(shell, shell.dataset.codeExpanded !== 'true');
+    const expanded = shell.dataset.codeExpanded !== 'true';
+    const ownedFocus = !!toggle && toggle.contains(shell.ownerDocument.activeElement);
+    setExpanded(shell, expanded);
+    // The expansion Button is now hidden. Keep keyboard readers on the source
+    // viewport so Arrow/Page keys scroll code and Shift+Tab reaches Copy.
+    if (expanded && ownedFocus)
+      shell.querySelector<HTMLElement>('.proto-previewer__code')?.focus({ preventScroll: true });
   };
   toggle?.addEventListener('click', onToggle);
   const observer =

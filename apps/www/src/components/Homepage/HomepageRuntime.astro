@@ -27,7 +27,11 @@ const localeActions = otherLocale
         text: config.locales![otherLocale].label || otherLocale,
         link: localizedUrl(Astro.url, otherLocale, context.trailingSlash).pathname,
         variant: 'minimal' as const,
-        attrs: { 'data-home-locale': otherLocale, hreflang: otherLocale },
+        attrs: {
+          'data-home-locale': otherLocale,
+          'data-site-link-appearance': 'nav',
+          hreflang: otherLocale,
+        },
       },
     ]
   : [];
@@ -67,26 +71,32 @@ const localeActions = otherLocale
   <div class="site-header-panel" id="site-header-panel" data-site-header-panel>
     <div data-site-header-surface-mount></div>
     <div data-site-header-panel-content>
-      <nav
-        class="site-header-navigation site-header-popup-navigation"
-        data-site-header-navigation
-        aria-label={zh ? '主导航' : 'Primary navigation'}
-      >
-        <HomeActions id="home-navigation-mobile" {actions} />
-      </nav>
-      <div data-site-header-compact-context></div>
-      <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
-        {
-          localeActions.length > 0 && (
-            <div class="site-header-setting">
-              <span class="site-header-setting-label">{zh ? '语言' : 'Language'}</span>
-              <HomeActions id="home-language" actions={localeActions} />
-            </div>
-          )
-        }
-        <div class="site-header-setting">
-          <span class="site-header-setting-label">{zh ? '社区' : 'Community'}</span>
-          <slot name="social" />
+      <div data-site-header-panel-body>
+        <nav
+          class="site-header-navigation site-header-popup-navigation"
+          data-site-header-navigation
+          aria-label={zh ? '主导航' : 'Primary navigation'}
+        >
+          <span class="site-header-group-label">{zh ? '浏览' : 'Explore'}</span>
+          <HomeActions id="home-navigation-mobile" {actions} />
+        </nav>
+        <div data-site-header-compact-context></div>
+        <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
+          <span class="site-header-group-label"
+            >{zh ? '偏好与社区' : 'Preferences and community'}</span
+          >
+          {
+            localeActions.length > 0 && (
+              <div class="site-header-setting">
+                <span class="site-header-setting-label">{zh ? '语言' : 'Language'}</span>
+                <HomeActions id="home-language" actions={localeActions} />
+              </div>
+            )
+          }
+          <div class="site-header-setting">
+            <span class="site-header-setting-label">{zh ? '社区' : 'Community'}</span>
+            <slot name="social" />
+          </div>
         </div>
       </div>
     </div>

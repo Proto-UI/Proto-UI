@@ -5,7 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 
 const ORDINARY_FLOW_GAP_PX = 16;
-const SECTION_FLOW_GAP_PX = 64;
+// Current website reading recipe; native heading semantics and ordinary flow remain unchanged.
+const SECTION_FLOW_GAP_PX = 40;
 const GAP_TOLERANCE_PX = 0.5;
 
 const VIEWPORTS = [

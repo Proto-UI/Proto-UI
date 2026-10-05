@@ -13,7 +13,7 @@ beforeEach(() => {
   theme.color = '#222222';
   theme.read.mockReset().mockImplementation(() => ({ '--pui-foreground': theme.color }));
   document.body.innerHTML =
-    '<div class="sidebar-pane"><ul class="top-level"><li><details><a href="/a/">A</a><a href="/b/">B</a><a href="/c/">C</a></details></li></ul></div>';
+    '<div class="sidebar-pane"><ul class="top-level"><li><details><summary>Group</summary><a href="/a/">A</a><a href="/b/">B</a></details></li></ul></div>';
 });
 afterEach(() => {
   for (const release of releases.splice(0)) release();
@@ -40,7 +40,7 @@ it('reads once at initialization and at most twice for a shared interaction burs
   const duplicate = initSiteNativeControls();
   duplicate();
   expect(theme.read).toHaveBeenCalledTimes(1);
-  for (const link of document.querySelectorAll('a')) {
+  for (const link of document.querySelectorAll('a,summary')) {
     link.dispatchEvent(new Event('pointerenter'));
     link.dispatchEvent(new MouseEvent('pointerdown', { button: 0 }));
     link.dispatchEvent(new Event('pointerleave'));
@@ -52,7 +52,7 @@ it('refreshes implicit stylesheet inputs on the next interaction without broadca
   releases.push(initSiteNativeControls());
   await settle();
   const [first, second] = [...document.querySelectorAll('a')];
-  const untouched = document.querySelectorAll('a')[2].querySelector('wc-site-shadcn-surface')!;
+  const untouched = document.querySelector('summary wc-site-shadcn-surface')!;
   const mutations: MutationRecord[] = [];
   const observer = new MutationObserver((records) => mutations.push(...records));
   observer.observe(untouched, { attributes: true, attributeFilter: ['style'] });
@@ -85,6 +85,7 @@ it('ignores interactions outside its targets and stops sampling after release', 
   expect(theme.read).toHaveBeenCalledTimes(1);
 });
 it('reads once and broadcasts the latest root class/theme/style/family input, preserving native owners', async () => {
+  const summary = document.querySelector('summary')!;
   const link = document.querySelector('a')!;
   releases.push(initSiteNativeControls());
   await settle();
@@ -101,6 +102,7 @@ it('reads once and broadcasts the latest root class/theme/style/family input, pr
     await settle();
     expect(theme.read).toHaveBeenCalledTimes(previousReads + 1);
     assertColor(color);
+    expect(document.querySelector('summary')).toBe(summary);
     expect(document.querySelector('a')).toBe(link);
   }
 });
@@ -160,7 +162,7 @@ it.each(['pointerup', 'blur'])(
   async (event) => {
     releases.push(initSiteNativeControls());
     await settle();
-    for (const link of document.querySelectorAll('a'))
+    for (const link of document.querySelectorAll('a,summary'))
       link.dispatchEvent(new MouseEvent('pointerdown', { button: 0 }));
     await settle();
     for (const surface of document.querySelectorAll('wc-site-shadcn-surface'))
@@ -176,18 +178,21 @@ it.each(['pointerup', 'blur'])(
   }
 );
 
-it('keeps next-current-fact CSSOM sampling and live current text feedback', async () => {
+it('keeps next-current-fact CSSOM sampling and the child reading-specific text feedback', async () => {
   releases.push(initSiteNativeControls());
   await settle();
   theme.color = '#123abc';
   const link = document.querySelector('a')!;
+  const tokens = () =>
+    link.querySelector('wc-site-shadcn-text')!.getAttribute('data-pui-style')?.split(/\s+/);
+  expect(tokens()).toContain('font-normal');
   link.setAttribute('aria-current', 'page');
   await settle();
   expect(theme.read).toHaveBeenCalledTimes(2);
   assertColor('#123abc');
-  expect(link.querySelector('wc-site-shadcn-text')!.getAttribute('data-pui-style')).toContain(
-    'font-semibold'
-  );
+  expect(tokens()).toContain('font-medium');
+  expect(tokens()).not.toContain('font-normal');
+  expect(tokens()).not.toContain('font-semibold');
 });
 
 it('settles a CSSOM palette change between two synchronous native fact publications', async () => {

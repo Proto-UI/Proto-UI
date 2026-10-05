@@ -103,6 +103,7 @@ describe('native anchor visual facts', () => {
       pressed: false,
       focusVisible: false,
       current: false,
+      inView: false,
     });
     const disposedCount = project.mock.calls.length;
     link.dispatchEvent(new Event('pointerenter'));
@@ -110,4 +111,34 @@ describe('native anchor visual facts', () => {
     cleanup();
     expect(project).toHaveBeenCalledTimes(disposedCount);
   });
+});
+
+it('keeps visible TOC sections distinct from the single native aria-current owner', async () => {
+  const { link, project } = fixture();
+  link.dataset.siteLinkAppearance = 'toc';
+  link.setAttribute('in-view', '');
+  await vi.waitFor(() =>
+    expect(project).toHaveBeenLastCalledWith(
+      expect.objectContaining({ inView: true, current: false })
+    )
+  );
+  link.setAttribute('aria-current', 'true');
+  await vi.waitFor(() =>
+    expect(project).toHaveBeenLastCalledWith(
+      expect.objectContaining({ inView: true, current: true })
+    )
+  );
+  link.removeAttribute('aria-current');
+  await vi.waitFor(() =>
+    expect(project).toHaveBeenLastCalledWith(
+      expect.objectContaining({ inView: true, current: false })
+    )
+  );
+  expect(link.hasAttribute('in-view')).toBe(true);
+  link.removeAttribute('in-view');
+  await vi.waitFor(() =>
+    expect(project).toHaveBeenLastCalledWith(
+      expect.objectContaining({ inView: false, current: false })
+    )
+  );
 });

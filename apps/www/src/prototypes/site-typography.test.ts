@@ -33,7 +33,7 @@ describe('app-private semantic typography style closure', () => {
           expect(props.font).toBeTruthy();
           expect(props.weight).toBeTruthy();
           expect(props.tone).toBeTruthy();
-          if (role === 'slogan') expect(props.size).toBe(compact ? '3xl' : '5xl');
+          if (role === 'slogan') expect(props.size).toBe(compact ? '2xl' : '4xl');
         }
   });
 });

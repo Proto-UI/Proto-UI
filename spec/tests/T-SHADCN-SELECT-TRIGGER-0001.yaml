@@ -21,13 +21,21 @@ cases:
         P-SHADCN-SELECT-TRIGGER-AS-CHILD-OMISSION,
       ]
     expectation: shadcn-select-trigger-current-combobox-surface-with-adapter-press-feedback
+  - id: T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
+    title: Ghost presentation and default restoration preserve inherited command ownership
+    covers:
+      - P-SHADCN-SELECT-TRIGGER-APPEARANCE
+      - P-SHADCN-SELECT-TRIGGER-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES
+    expectation: select-trigger-ghost-restores-default-without-stale-paint-or-motion
 implementations:
   - id: prototypes-shadcn-select-trigger-contract
     kind: module-test
     status: passing
     path: packages/prototypes/shadcn/test/select.test.ts
     required: true
-    consumesCases: [T-SHADCN-SELECT-TRIGGER-0001-CASE-CURRENT-PROTOCOL]
+    consumesCases:
+      [T-SHADCN-SELECT-TRIGGER-0001-CASE-CURRENT-PROTOCOL, T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST]
     exercises: [P-SHADCN-SELECT-TRIGGER, P-BASE-SELECT-TRIGGER]
     notes:
       [
@@ -40,6 +48,38 @@ implementations:
         keyboard entry,
         and current tokens; remaining gaps stay centralized.,
       ]
+  - id: website-shadcn-header-select-appearance-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts
+    required: false
+    consumesCases:
+      - T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
+    exercises:
+      - P-SHADCN-SELECT-TRIGGER
+      - P-BASE-SELECT-TRIGGER
+  - id: website-shadcn-empty-ghost-foreground-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts
+    required: false
+    consumesCases:
+      - T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
+    exercises:
+      - P-SHADCN-SELECT-TRIGGER
+      - P-BASE-SELECT-TRIGGER
+    notes:
+      - Bounded WC real-input light/dark foreground and inherited Value paint; current execution evidence is reported separately.
+  - id: website-shadcn-header-ghost-runtime
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/components/header-ghost-appearance.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
+    exercises:
+      - P-SHADCN-SELECT-TRIGGER
+      - P-BASE-SELECT-TRIGGER
 verifies:
   prototypes:
     - id: P-SHADCN-SELECT-TRIGGER
@@ -55,6 +95,7 @@ verifies:
           P-SHADCN-SELECT-TRIGGER-CHEVRON,
           P-SHADCN-SELECT-TRIGGER-COMPATIBILITY-SUBSET,
           P-SHADCN-SELECT-TRIGGER-AS-CHILD-OMISSION,
+          P-SHADCN-SELECT-TRIGGER-APPEARANCE,
         ]
 exercises: { prototypes: [P-SHADCN-SELECT-TRIGGER, P-BASE-SELECT-TRIGGER] }
 revisions:
@@ -68,6 +109,11 @@ revisions:
       version: 0.3.0-alpha.0,
       change: revised,
       summary: Added executable coverage for Adapter-projected one-pixel feedback from the inherited pressed state.,
+    },
+    {
+      version: 0.3.0-alpha.1,
+      change: revised,
+      summary: Added explicit ghost and active-state/default-restoration module coverage; hosted exact-head appearance evidence remains required.,
     },
   ]
 tags: [prototype, shadcn, select, trigger, delta, compatibility, test]

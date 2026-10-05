@@ -253,3 +253,10 @@ proto-concept {
   user-select: none;
   pointer-events: none;
 }
+
+/* Line numbers are decorative; let enlarged source use a narrow container. */
+@container code-panel (max-width: 14rem) {
+  .proto-previewer__code .line::before {
+    display: none;
+  }
+}

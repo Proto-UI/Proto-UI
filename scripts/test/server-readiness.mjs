@@ -49,7 +49,7 @@ function retryDelay(delay, signal) {
 /** One deadline covers requests, body release, and retry delays. */
 export async function waitForServerReadiness(
   url,
-  { timeoutMs, server = null, readOutput = () => '', report = console.log }
+  { timeoutMs, server = null, readOutput = () => '', report = console.log, rejectRedirects = false }
 ) {
   const started = Date.now();
   const deadline = started + timeoutMs;
@@ -81,15 +81,25 @@ export async function waitForServerReadiness(
       const attemptStarted = Date.now();
       attempt += 1;
       let ready = false;
+      let redirectFailure = null;
       try {
         // A slow successful page is still readiness evidence. The original
         // 120s/180s total budget, not a repeating 2s abort, bounds the request.
         const response = await withAbort(
-          fetch(url, { signal: controller.signal }),
+          fetch(url, {
+            signal: controller.signal,
+            ...(rejectRedirects ? { redirect: 'manual' } : {}),
+          }),
           controller.signal
         );
         lastResult = `HTTP ${response.status} ${response.statusText}`.trim();
         await withAbort(response.body?.cancel() ?? Promise.resolve(), controller.signal);
+        if (rejectRedirects && response.status >= 300 && response.status < 400) {
+          redirectFailure = new Error(
+            `Refusing documentation readiness redirect: ${url} -> HTTP ${response.status} Location ${response.headers.get('location') ?? '(absent)'}`
+          );
+          redirectFailure.name = 'DocumentationReadinessRedirectError';
+        }
         ready = response.ok;
       } catch (error) {
         lastResult = describeError(error);
@@ -99,6 +109,7 @@ export async function waitForServerReadiness(
           `requestMs=${Date.now() - attemptStarted} totalMs=${Date.now() - started} ${lastResult}`
       );
       if (earlyExit) throw earlyExit;
+      if (redirectFailure) throw redirectFailure;
       if (controller.signal.aborted || Date.now() >= deadline) break;
       if (ready) return;
       try {

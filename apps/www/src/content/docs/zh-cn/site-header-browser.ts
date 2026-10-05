@@ -1,21 +1,25 @@
 import type { Page } from 'playwright-core';
 
+/** Native viewport resize can precede the application matchMedia callback.
+ * Sample the committed owner location, not transient visibility in the old row. */
+export function hasCommittedHeaderPreferencesDock(): boolean {
+  const preferences = document.querySelector<HTMLElement>(
+    '[data-site-header] [data-site-header-preferences]'
+  );
+  const root = preferences?.closest('[data-site-header]');
+  if (!root?.hasAttribute('data-site-menu-ready')) return false;
+  return window.matchMedia('(max-width: 47.999rem)').matches
+    ? !!preferences?.closest('[data-site-header-compact-context]')
+    : !!preferences?.parentElement?.matches('[data-site-header-context]');
+}
+
 /** Follow the real compact Header journey. This helper neither changes app
  * preferences nor forces interaction with hidden controls. Old baseline pages
  * without the docking marker retain their existing visible selector path. */
 export async function revealHeaderPreferences(page: Page): Promise<boolean> {
   const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
   if (!(await preferences.count())) return false;
-  // A viewport change can precede the application's matchMedia callback.
-  // Wait for the existing owner to reach its real dock, not for a desired
-  // height or a guessed paint delay, before deciding whether to open its menu.
-  await page.waitForFunction(() => {
-    const owner = document.querySelector('[data-site-header] [data-site-header-preferences]');
-    const compact = window.matchMedia('(max-width: 47.999rem)').matches;
-    return owner?.parentElement?.matches(
-      compact ? '[data-site-header-compact-context]' : '[data-site-header-context]'
-    );
-  });
+  await page.waitForFunction(hasCommittedHeaderPreferencesDock);
   if (await preferences.isVisible()) return false;
   const menu = page.locator(
     '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"], [data-docs-site-header] [data-site-menu-button]'

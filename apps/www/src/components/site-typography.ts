@@ -26,7 +26,8 @@ const MARKERS = [
   'data-typography-generation',
 ] as const;
 type Target = { native: HTMLElement; role: SiteTypographyRole };
-type View = Target & {
+type ScopedTarget = Target & { context: 'site' | 'document' };
+type View = ScopedTarget & {
   carrier: HTMLElement;
   surface: HTMLElement;
   slot: HTMLElement;
@@ -180,12 +181,21 @@ export function siteTypographyParticipant(
   const document = root.ownerDocument;
   const ownerId = options.ownerId ?? `site-typography-${++serial}`;
   let alive = true;
-  let committed: Target[] = [];
+  let committed: ScopedTarget[] = [];
   let committedCompact = false;
   const compact = () => document.defaultView?.matchMedia('(max-width: 47.999rem)').matches === true;
-  const targets = () => collectSiteTypographyTargets(root, options.docsOnly);
+  const targets = (): ScopedTarget[] =>
+    collectSiteTypographyTargets(root, options.docsOnly).map((target) => ({
+      ...target,
+      context:
+        options.docsOnly &&
+        target.native.closest('main[data-pagefind-body]') &&
+        !target.native.closest('[data-homepage-runtime],aside,.starlight-aside')
+          ? 'document'
+          : 'site',
+    }));
   let sourceRevision = 0;
-  let sourceSnapshot: { targets: Target[]; nodes: Node[][]; compact: boolean } | undefined;
+  let sourceSnapshot: { targets: ScopedTarget[]; nodes: Node[][]; compact: boolean } | undefined;
   return {
     root,
     // A participant-local revision, independent of the page's runtime/family
@@ -200,9 +210,10 @@ export function siteTypographyParticipant(
         previous.compact !== isCompact ||
         next.length !== previous.targets.length ||
         next.some(
-          ({ native, role }, index) =>
+          ({ native, role, context }, index) =>
             native !== previous.targets[index]!.native ||
             role !== previous.targets[index]!.role ||
+            context !== previous.targets[index]!.context ||
             nodes[index]!.length !== previous.nodes[index]!.length ||
             nodes[index]!.some((node, offset) => node !== previous.nodes[index]![offset])
         )
@@ -222,6 +233,7 @@ export function siteTypographyParticipant(
           (target, index) =>
             target.native !== committed[index]?.native ||
             target.role !== committed[index]?.role ||
+            target.context !== committed[index]?.context ||
             activeViews.get(target.native)?.carrier.parentElement !== target.native ||
             Array.from(target.native.childNodes).some(
               (node) => node !== activeViews.get(target.native)?.carrier
@@ -312,7 +324,7 @@ export function siteTypographyParticipant(
             kind: 'box',
             tag: 'span',
             ref: 'typography-batch',
-            children: selected.map(({ role }, index) => ({
+            children: selected.map(({ role, context }, index) => ({
               kind: 'box',
               tag: 'span',
               ref: `carrier-${index}`,
@@ -323,7 +335,7 @@ export function siteTypographyParticipant(
                   prototypeId: `${family}-text-root`,
                   rootTag: 'span',
                   ref: `surface-${index}`,
-                  props: { ...siteTextRecipe(role, family, isCompact) },
+                  props: { ...siteTextRecipe(role, family, isCompact, context) },
                   surfaceStyle: theme,
                   children: [
                     {

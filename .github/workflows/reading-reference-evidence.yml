@@ -1,0 +1,121 @@
+name: Matched reading reference evidence
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/reading-reference-evidence.yml'
+      - 'apps/www/scripts/*reading-reference*'
+      - 'apps/www/scripts/search-production-preview.mjs'
+      - 'apps/www/package.json'
+      - 'scripts/test/reading-reference-evidence.test.mjs'
+      - 'scripts/test/reading-reference-breakpoints.test.mjs'
+      - 'apps/www/src/content/docs/zh-cn/reading-reflow-evidence.ts'
+      - 'apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx'
+      - 'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/server-readiness.mjs'
+      - 'scripts/test/server-readiness.d.mts'
+      - 'apps/www/src/components/site-text-recipes*'
+      - 'apps/www/src/components/site-typography*'
+      - 'apps/www/src/components/SiteTypographyBootstrap.astro'
+      - 'apps/www/src/components/override/MarkdownContent.astro'
+      - 'apps/www/src/components/override/PageTitle.astro'
+      - 'apps/www/src/components/override/ContentPanel.astro'
+      - 'apps/www/src/components/override/PageFrame.astro'
+      - 'apps/www/src/components/override/TwoColumnContent.astro'
+      - 'apps/www/src/styles/markdown.css'
+      - 'apps/www/src/styles/global.css'
+      - 'apps/www/src/styles/proto-ui-*.css'
+      - 'apps/www/src/styles/shadcn-theme.css'
+      - 'apps/www/scripts/generate-website-prototype-tokens.mjs'
+      - 'apps/www/astro.config.mjs'
+      - 'packages/prototypes/base/src/text/**'
+      - 'packages/prototypes/shadcn/src/text/**'
+      - 'packages/prototypes/brutalist/src/text/**'
+      - 'packages/cli/src/services/proto-style-css.ts'
+      - 'packages/cli/src/services/prototype-style-tokens.ts'
+      - 'scripts/styles/generate-*-style-tokens.ts'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+
+# Source-owned candidate only. Production remains an externally observed,
+# SHA-unknown reference. No existing browser matrix or production code changes.
+permissions:
+  contents: read
+concurrency:
+  group: reading-reference-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked tools and record CJK font environment
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          mkdir -p "$RUNNER_TEMP/reading-reference"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          {
+            dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig
+            fc-match -f '%{family}\n%{file}\n' 'sans-serif:lang=zh-cn'
+          } | tee "$RUNNER_TEMP/reading-reference/font-environment.txt"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --version | tee "$RUNNER_TEMP/reading-reference/browser-environment.txt"
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Verify bounded source and collector contracts
+        run: node --test scripts/test/reading-reference-evidence.test.mjs scripts/test/reading-reference-breakpoints.test.mjs
+      - name: Build the exact clean candidate and bind production bytes
+        id: build
+        timeout-minutes: 10
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+          PROTO_UI_EXPECTED_HEAD: ${{ env.CANDIDATE_SHA }}
+          PROTO_UI_READING_EVIDENCE_DIR: ${{ runner.temp }}/reading-reference
+        run: |
+          set -euo pipefail
+          node apps/www/scripts/reading-reference-production.mjs begin-build
+          corepack pnpm@10.32.1 --filter apps-www build \
+            2>&1 | tee "$PROTO_UI_READING_EVIDENCE_DIR/build.log"
+          node apps/www/scripts/reading-reference-production.mjs finish-build
+      - name: Capture two routes and both themes at the actual reference viewport
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+          PROTO_UI_EXPECTED_HEAD: ${{ env.CANDIDATE_SHA }}
+          PROTO_UI_READING_EVIDENCE_DIR: ${{ runner.temp }}/reading-reference
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 600s \
+            node --import tsx apps/www/scripts/capture-reading-reference.mjs \
+            2>&1 | tee "$PROTO_UI_READING_EVIDENCE_DIR/runner.log"
+      - name: Diagnose normal desktop boundaries and separate enlarged-text controls
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+          PROTO_UI_EXPECTED_HEAD: ${{ env.CANDIDATE_SHA }}
+          PROTO_UI_READING_EVIDENCE_DIR: ${{ runner.temp }}/reading-reference
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 600s \
+            node --import tsx apps/www/scripts/capture-reading-reference.mjs --breakpoints \
+            2>&1 | tee "$PROTO_UI_READING_EVIDENCE_DIR/breakpoint-runner.log"
+      - name: Retain original PNGs, measurements and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reading-reference-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/reading-reference
+          if-no-files-found: warn
+          retention-days: 30

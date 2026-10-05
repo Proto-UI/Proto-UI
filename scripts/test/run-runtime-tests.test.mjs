@@ -943,14 +943,16 @@ describe('native navigation precondition evidence', () => {
       ts.ScriptTarget.Latest,
       true
     );
-    const headerHelper = headerParsed.statements.find(
-      (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'revealHeaderPreferences'
+    const headerHelpers = headerParsed.statements.filter(
+      (node) =>
+        ts.isFunctionDeclaration(node) &&
+        ['hasCommittedHeaderPreferencesDock', 'revealHeaderPreferences'].includes(node.name?.text)
     );
-    assert.ok(headerHelper);
+    assert.equal(headerHelpers.length, 2);
     const context = { result: undefined };
     runInNewContext(
       ts.transpileModule(
-        `${headerHelper.getText(headerParsed).replace(/^export /, '')}; ${helper.getText(parsed)}; result = choose;`,
+        `${headerHelpers.map((node) => node.getText(headerParsed).replace(/^export /, '')).join('; ')}; ${helper.getText(parsed)}; result = choose;`,
         {
           compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
         }
@@ -1005,7 +1007,7 @@ describe('native navigation precondition evidence', () => {
       };
       const page = {
         async waitForFunction(predicate) {
-          assert.equal(typeof predicate, 'function');
+          assert.equal(predicate.name, 'hasCommittedHeaderPreferencesDock');
           order.push('preferences-docked');
         },
         locator(selector) {

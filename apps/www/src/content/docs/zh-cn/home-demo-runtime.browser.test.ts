@@ -482,7 +482,11 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           expect(geometry.border).toBe('0px');
           expect(geometry.shadow).toBe('none');
           expect(geometry.columns).toBe(width >= 1200 ? 4 : width >= 640 ? 2 : 1);
-          if (geometry.triggerHeight < 44) {
+          const expectedTriggerHeight = width >= 768 ? 36 : 44;
+          if (
+            !Number.isFinite(geometry.triggerHeight) ||
+            Math.abs(geometry.triggerHeight - expectedTriggerHeight) >= 0.5
+          ) {
             // The geometry above is the original failed sample. The screenshot
             // below is separately timed and never replaces that assertion.
             try {
@@ -501,6 +505,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
                 colorScheme,
                 width,
                 geometry,
+                expectedTriggerHeight,
                 url: safeUrl(page.url(), baseUrl),
                 recordedAt: new Date().toISOString(),
               };
@@ -516,10 +521,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
               );
             }
           }
-          expect(
-            geometry.triggerHeight,
-            JSON.stringify({ colorScheme, width, geometry })
-          ).toBeGreaterThanOrEqual(44);
+          expect(geometry.triggerHeight).toBeCloseTo(width >= 768 ? 36 : 44, 0);
           expect(geometry.fits, `${colorScheme} ${width}px overflow`).toBe(true);
         }
         expect(await home.locator('[data-projection-control="component"]').count()).toBe(0);
@@ -560,8 +562,10 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           await expect
             .poll(() => trigger.evaluate((element) => element.hasAttribute('data-pressed')))
             .toBe(true);
+          expect(await trigger.getAttribute('data-pui-style')).toContain('border-transparent');
           const pressed = await trigger.boundingBox();
-          expect(pressed?.y).toBeCloseTo(before.y + 1, 1);
+          // Desktop Shadcn ghost retains pressed semantics without field displacement.
+          expect(pressed?.y).toBeCloseTo(before.y, 1);
           await page.mouse.up();
           await expect
             .poll(() => trigger.evaluate((element) => element.hasAttribute('data-pressed')))

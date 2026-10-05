@@ -3,19 +3,18 @@ export type NativeLinkFacts = Readonly<{
   focusVisible: boolean;
   pressed: boolean;
   current: boolean;
+  /** Visibility is a weaker TOC cue, never a second navigation-current owner. */
+  inView?: boolean;
 }>;
 
-function isCurrent(link: HTMLAnchorElement): boolean {
-  return (
-    (link.hasAttribute('aria-current') && link.getAttribute('aria-current') !== 'false') ||
-    (link.dataset.siteLinkAppearance === 'toc' && link.hasAttribute('in-view'))
-  );
+function isCurrent(link: HTMLElement): boolean {
+  return link.hasAttribute('aria-current') && link.getAttribute('aria-current') !== 'false';
 }
 
 /** Observe browser-owned facts without intercepting or synthesizing navigation.
  * No click listener, default prevention, focus request or added focus target. */
 export function bindNativeLinkFacts(
-  link: HTMLAnchorElement,
+  link: HTMLElement,
   project: (facts: NativeLinkFacts) => void,
   options: { isActive?: () => boolean } = {}
 ): () => void {
@@ -30,6 +29,7 @@ export function bindNativeLinkFacts(
     pressed,
     focusVisible: focusVisible(),
     current: isCurrent(link),
+    inView: link.dataset.siteLinkAppearance === 'toc' && link.hasAttribute('in-view'),
   });
   const publish = () => {
     if (alive && link.isConnected && (options.isActive?.() ?? true)) project(snapshot());
@@ -61,11 +61,19 @@ export function bindNativeLinkFacts(
     publish();
   };
   const keydown = (event: Event) => {
-    if ((event as KeyboardEvent).key === 'Enter') pressed = true;
+    if (
+      (event as KeyboardEvent).key === 'Enter' ||
+      (link.localName === 'summary' && (event as KeyboardEvent).key === ' ')
+    )
+      pressed = true;
     publish();
   };
   const keyup = (event: Event) => {
-    if ((event as KeyboardEvent).key === 'Enter') pressed = false;
+    if (
+      (event as KeyboardEvent).key === 'Enter' ||
+      (link.localName === 'summary' && (event as KeyboardEvent).key === ' ')
+    )
+      pressed = false;
     publish();
   };
   const windowBlur = () => {
@@ -101,6 +109,7 @@ export function bindNativeLinkFacts(
       focusVisible: false,
       pressed: false,
       current: isCurrent(link),
+      inView: link.dataset.siteLinkAppearance === 'toc' && link.hasAttribute('in-view'),
     });
   };
 }

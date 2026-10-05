@@ -556,11 +556,21 @@ async function assertSelectFingerprint(
     expect(paint.font).toContain('DM Sans');
   } else {
     expect(restingTokens).toEqual(
-      expect.arrayContaining(['rounded-md', 'border-input', 'data-[pressed]:translate-y-px'])
+      expect.arrayContaining(['rounded-md', 'border-input', 'shadow-xs'])
     );
   }
 
-  await trigger.click();
+  if (projectionFamilyId === 'shadcn') {
+    // Appearance + state is a compound public rule. Assert its actual pressed
+    // projection and pixel displacement, not an unconditional lowered token.
+    await trigger.hover();
+    const before = await trigger.boundingBox();
+    await page.mouse.down();
+    await expect.poll(() => dataPuiStyleTokens(trigger)).toContain('translate-y-px');
+    const pressed = await trigger.boundingBox();
+    expect(pressed!.y - before!.y).toBeCloseTo(1, 1);
+    await page.mouse.up();
+  } else await trigger.click();
   const portal = await portalControlledBy(page, trigger);
   await assertTaskPartInventory(scope, content, portal, coordinate);
   await assertSurfacesShareCoordinate(portal, coordinate, 'Select content coordinate');

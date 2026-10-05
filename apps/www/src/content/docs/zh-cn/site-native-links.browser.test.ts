@@ -967,6 +967,49 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
             'a[data-site-native-link][aria-label="GitHub"] :is(wc-site-shadcn-surface,wc-site-brutalist-surface)'
           )
           .waitFor({ state: 'attached' });
+        const group = page
+          .locator('.sidebar-pane details')
+          .filter({ has: page.locator('a[aria-current="page"]') })
+          .last();
+        const summary = group.locator(':scope > summary');
+        await summary.scrollIntoViewIfNeeded();
+        const summaryPaint = () =>
+          summary.evaluate((element) => {
+            const surface = element.querySelector<HTMLElement>('[data-pui-root]')!;
+            const style = getComputedStyle(surface);
+            return {
+              open: (element.parentElement as HTMLDetailsElement).open,
+              surface: surface.localName,
+              tokens: surface.getAttribute('data-pui-style'),
+              border: style.borderBottomWidth,
+              height: surface.getBoundingClientRect().height,
+              focused: element === document.activeElement,
+              nestedInteractive: element.querySelectorAll('a,button,[tabindex]').length,
+            };
+          });
+        const original = await summaryPaint();
+        expect(original.open).toBe(true);
+        expect(original.surface).toBe(`wc-site-${family}-surface`);
+        expect(original.height).toBeCloseTo(32, 0);
+        expect(original.nestedInteractive).toBe(0);
+        if (family === 'brutalist') expect(original.border).toBe('2px');
+        await summary.click();
+        await expect.poll(async () => (await summaryPaint()).open).toBe(false);
+        await page.keyboard.press('Space');
+        await expect.poll(async () => (await summaryPaint()).open).toBe(true);
+        await page.keyboard.press('Tab');
+        await page.keyboard.press('Shift+Tab');
+        const focused = await summaryPaint();
+        expect(focused.focused).toBe(true);
+        expect(focused.tokens).toContain('ring-2');
+        await captureLinks(
+          page,
+          `docs-${family}-group-focus`,
+          family,
+          'wc',
+          'native-summary; Space restores open; family Surface/Text focus',
+          { original, focused }
+        );
         await openSettings(page);
         await assertHeaderPopupSurface(page, family, 'wc', false);
         const links = page.locator('.site-social-links a[data-site-native-link]');
@@ -1317,7 +1360,19 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         const brand = page.locator('.site-header a[data-site-link-appearance="brand"]').first();
         expect(await brand.getAttribute('role')).toBeNull();
         expect(await brand.locator('[data-pui-root]').count()).toBe(2);
-        expect(await brand.locator('[data-pui-style~="bg-transparent"]').count()).toBe(1);
+        expect(
+          await brand
+            .locator(
+              `[data-pui-style~="${family === 'brutalist' ? 'bg-secondary-background' : 'bg-transparent'}"]`
+            )
+            .count()
+        ).toBe(1);
+        if (family === 'brutalist') {
+          const paint = await linkPaint(brand);
+          expect(paint.tokens).toEqual(
+            expect.arrayContaining(['border-2', 'border-black', 'shadow-[4px_4px_0_0_#000]'])
+          );
+        }
         expect(await brand.locator('[data-pui-style~="font-semibold"]').count()).toBe(1);
         expect(await brand.locator('[role], [tabindex]').count()).toBe(0);
         await captureLinks(
@@ -1341,10 +1396,54 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         await toc.click();
         expect(new URL(page.url()).hash).toBe(new URL(hash!, page.url()).hash);
         await expect.poll(() => toc.getAttribute('in-view')).not.toBeNull();
+        await captureLinks(
+          page,
+          `nav-${family}-${colorScheme}-toc-anchor-landing`,
+          family,
+          'wc',
+          'native-anchor-before-current-assertion',
+          await page.evaluate(() => {
+            const heading = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+            return {
+              hash: location.hash,
+              scrollY,
+              scrollPaddingTop: getComputedStyle(document.documentElement).scrollPaddingTop,
+              header: document.querySelector('header')?.getBoundingClientRect().toJSON(),
+              heading: heading?.getBoundingClientRect().toJSON(),
+              scrollMarginTop: heading ? getComputedStyle(heading).scrollMarginTop : null,
+              links: [...document.querySelectorAll('sl-toc a')].map((e) => ({
+                href: e.getAttribute('href'),
+                current: e.getAttribute('aria-current'),
+                inView: e.hasAttribute('in-view'),
+              })),
+            };
+          })
+        );
+        await expect.poll(() => toc.getAttribute('aria-current')).toBe('true');
         await expect
           .poll(async () => (await linkPaint(toc)).tokens)
           .toContain(family === 'brutalist' ? 'bg-main' : 'bg-accent');
-        expect(await page.locator('sl-toc > div[aria-hidden]').count()).toBe(0);
+        // #843 restores one passive geometry mount, painted only by the
+        // existing public family Surface. Keep rejecting legacy private paint.
+        const range = page.locator('sl-toc > [data-site-toc-highlight][aria-hidden="true"]');
+        expect(await range.count()).toBe(1);
+        expect(await range.getAttribute('role')).toBeNull();
+        expect(await range.getAttribute('tabindex')).toBeNull();
+        const rangeSurface = range.locator(`:scope > wc-site-${family}-surface[data-pui-root]`);
+        expect(await rangeSurface.count()).toBe(1);
+        await expect.poll(() => rangeSurface.getAttribute('data-pui-style')).toContain('bg-muted');
+        expect(
+          await range.locator('[role], [tabindex], a, button, input, select, textarea').count()
+        ).toBe(0);
+        expect(await range.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe(
+          'none'
+        );
+        expect(await range.evaluate((element) => getComputedStyle(element).visibility)).toBe(
+          'visible'
+        );
+        expect(
+          await page.locator('sl-toc > div[aria-hidden]:not([data-site-toc-highlight])').count()
+        ).toBe(0);
         await captureLinks(
           page,
           `nav-${family}-${colorScheme}-toc-current`,

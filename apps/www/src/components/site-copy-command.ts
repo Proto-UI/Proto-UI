@@ -17,7 +17,7 @@ import {
 } from './PrototypePreviewer/projection-materializer';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import type { ProjectionCompositionControls } from './PrototypePreviewer/projection-composition';
-import type { DemoSpec } from './PrototypePreviewer/demo-types';
+import type { DemoSpec, DemoNode } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
 
 const COPY_GLYPHS = {
@@ -54,41 +54,56 @@ export function createCopyCommandDemo(
 ): DemoSpec {
   const labels = copyLabels(root);
   const buttonProps = { variant: family === 'brutalist' ? 'surface' : 'outline', size: 'icon' };
+  const copyButton: DemoNode = {
+    kind: 'proto',
+    prototypeId: `${family}-button`,
+    ref: 'copy-button',
+    props: { ...buttonProps, disabled: false },
+    children: [
+      {
+        kind: 'box',
+        attrs: { 'aria-hidden': 'true' },
+        className: 'site-copy-glyph',
+        ref: 'copy-icon',
+        children: Object.entries(COPY_GLYPHS).map(([state, icon]) => ({
+          kind: 'box' as const,
+          tag: 'span' as const,
+          ref: `copy-glyph-${state}`,
+          attrs: state === 'idle' ? undefined : { hidden: '' },
+          children: [
+            {
+              kind: 'proto' as const,
+              prototypeId: `lucide-${icon}-icon`,
+              props: { size: 18 },
+              surfaceStyle: { pointerEvents: 'none' },
+            },
+          ],
+        })),
+      },
+      { kind: 'box', className: 'sr-only', children: [labels.command] },
+    ],
+  };
   return {
     type: 'demo',
     root: {
       kind: 'box',
       className: 'site-copy-command',
       children: [
-        {
-          kind: 'proto',
-          prototypeId: `${family}-button`,
-          ref: 'copy-button',
-          props: { ...buttonProps, disabled: false },
-          children: [
-            {
-              kind: 'box',
-              attrs: { 'aria-hidden': 'true' },
-              className: 'site-copy-glyph',
-              ref: 'copy-icon',
-              children: Object.entries(COPY_GLYPHS).map(([state, icon]) => ({
-                kind: 'box' as const,
-                tag: 'span' as const,
-                ref: `copy-glyph-${state}`,
-                attrs: state === 'idle' ? undefined : { hidden: '' },
-                children: [
-                  {
-                    kind: 'proto' as const,
-                    prototypeId: `lucide-${icon}-icon`,
-                    props: { size: 18 },
-                    surfaceStyle: { pointerEvents: 'none' },
-                  },
-                ],
-              })),
-            },
-            { kind: 'box', className: 'sr-only', children: [labels.command] },
-          ],
-        },
+        family === 'shadcn'
+          ? {
+              kind: 'proto',
+              prototypeId: `${family}-surface-root`,
+              ref: 'copy-backplate',
+              props: {
+                variant: 'outline',
+                radius: family === 'shadcn' ? 'lg' : 'default',
+                border: 'none',
+                elevation: 'none',
+              },
+              surfaceStyle: { display: 'inline-flex', minWidth: '0', padding: '0' },
+              children: [copyButton],
+            }
+          : copyButton,
         {
           kind: 'proto',
           prototypeId: 'base-live-region-root',
@@ -236,8 +251,9 @@ export function initCopyCommand(root: HTMLElement, readText: () => string): Site
             demo,
             recipe: {
               id: 'website-copy-command',
-              rootPrototypeId: `${family}-button`,
+              rootPrototypeId: family === 'shadcn' ? 'shadcn-surface-root' : `${family}-button`,
               prototypeIds: [
+                ...(family === 'shadcn' ? ['shadcn-surface-root'] : []),
                 `${family}-button`,
                 ...Object.values(COPY_GLYPHS).map((icon) => `lucide-${icon}-icon`),
                 'base-live-region-root',

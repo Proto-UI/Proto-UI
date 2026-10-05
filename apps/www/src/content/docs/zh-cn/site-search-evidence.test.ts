@@ -336,19 +336,19 @@ it('keeps a missed deadline failed when immediate samples stay unavailable throu
   expect(await read()).toBe('false');
 });
 
-it('keeps the same 1000ms DOM-readiness budget even when the RPC reply arrives later', () => {
+it('keeps the same 5000ms DOM-readiness budget even when the RPC reply arrives later', () => {
   const sample = {
     startedAt: 10000,
-    deadline: 11000,
-    observedReadyAt: 10999,
-    completedAt: 11500,
+    deadline: 15000,
+    observedReadyAt: 14999,
+    completedAt: 15500,
     currentDisabled: 'false',
   };
   expect(searchReadinessWasOnTime(sample)).toBe(true);
-  expect(searchReadinessWasOnTime({ ...sample, observedReadyAt: 11001 })).toBe(false);
+  expect(searchReadinessWasOnTime({ ...sample, observedReadyAt: 15001 })).toBe(false);
   expect(searchReadinessWasOnTime({ ...sample, observedReadyAt: null })).toBe(false);
   expect(searchReadinessWasOnTime({ ...sample, currentDisabled: 'true' })).toBe(false);
-  expect(searchReadinessWasOnTime({ ...sample, deadline: 12000 })).toBe(false);
+  expect(searchReadinessWasOnTime({ ...sample, deadline: 16000 })).toBe(false);
 });
 
 it('uses the real recorded deadline in the serialized page waiter, including late-ready rejection', async () => {
@@ -391,7 +391,7 @@ it('uses the real recorded deadline in the serialized page waiter, including lat
   expect(early.observedReadyAt).toBe(999);
   expect(early.completedAt).toBe(1500);
   expect(searchReadinessWasOnTime(early)).toBe(true);
-  observed = 1001;
+  observed = 5001;
   const late = await read({ startedAt: 0 });
   expect(searchReadinessWasOnTime(late)).toBe(false);
 });

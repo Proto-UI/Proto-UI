@@ -68,12 +68,30 @@
     @apply scroll-m-20 text-[2rem] leading-[2.5rem] font-semibold tracking-tight md:text-[2.25rem] md:leading-[2.75rem];
   }
 
+  /* Native document owners retain a matching no-script size and line box.
+     Enhanced Text still owns its paint through public size/leading inputs. */
+  [data-site-family-scope][data-site-library-family='shadcn']:not(:has([data-homepage-runtime]))
+    main[data-pagefind-body]
+    :is(h1[data-site-typography='h1'], [data-doc-flow] h1):not(
+      :where(aside *, .starlight-aside *, [data-previewer-id] *)
+    ) {
+    @apply text-3xl leading-tight;
+  }
+
+  [data-site-family-scope][data-site-library-family='shadcn']:not(:has([data-homepage-runtime]))
+    main[data-pagefind-body]
+    p[data-site-typography='tagline']:not(
+      :where(aside *, .starlight-aside *, [data-previewer-id] *)
+    ) {
+    @apply text-base leading-relaxed text-muted-foreground;
+  }
+
   main[data-pagefind-body] h2 {
-    @apply scroll-m-20 text-[1.625rem] leading-[2.125rem] font-semibold tracking-tight md:text-[1.75rem] md:leading-9;
+    @apply scroll-m-20 text-2xl leading-tight font-semibold tracking-tight;
   }
 
   main[data-pagefind-body] .sl-heading-wrapper {
-    @apply flex items-end mt-16 gap-2;
+    @apply flex items-end mt-10 gap-2;
   }
 
   main[data-pagefind-body] .sl-heading-wrapper a {
@@ -81,11 +99,11 @@
   }
 
   main[data-pagefind-body] h3 {
-    @apply scroll-m-20 text-2xl font-semibold tracking-tight;
+    @apply scroll-m-20 text-xl leading-snug font-semibold tracking-tight;
   }
 
   main[data-pagefind-body] h4 {
-    @apply scroll-m-20 text-xl font-semibold tracking-tight;
+    @apply scroll-m-20 text-lg leading-snug font-semibold tracking-tight;
   }
 
   main[data-pagefind-body] p {

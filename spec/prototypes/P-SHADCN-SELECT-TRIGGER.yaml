@@ -3,15 +3,10 @@ type: prototype
 title: Shadcn Select Trigger inherits Base combobox behavior and adds size, styling, and chevron
 status: draft
 since: 0.2.0-rc.0
-summary: Shadcn Select Trigger inherits Base command, combobox accessibility, open request, placeholder, and disabled behavior and adds size, current state styles including a one-pixel press displacement, and a fixed chevron.
+summary: Shadcn Select Trigger inherits Base combobox behavior and adds size, compatible default or opt-in ghost appearance, state-driven styling and a fixed chevron. Ghost is a Proto UI extension, not pinned-upstream parity.
 statement:
-  zh-CN: >-
-    Shadcn Select Trigger 是 `P-BASE-SELECT-TRIGGER` 之上的 direct part，保留 combobox command/a11y、open request、placeholder 与 disabled behavior，并增加 `size: sm | default`、包含 1px press displacement 的当前 visual feedback 和固定 chevron。`asChild` 明确不提供。
-
-
-  en: >-
-    Shadcn Select Trigger is a direct part over `P-BASE-SELECT-TRIGGER`. It retains combobox command and accessibility, open request, placeholder, and disabled behavior while adding `size: sm | default`, current visual feedback including a one-pixel press displacement, and a fixed chevron. `asChild` is explicitly unavailable.
-
+  zh-CN: 'Shadcn Select Trigger 是 P-BASE-SELECT-TRIGGER 之上的 direct part，保留 combobox command/a11y、open request、placeholder 与 disabled behavior；增加 size: sm | default、appearance: default | ghost、继承状态的 visual feedback 与固定 chevron。default 保留现有外观；ghost 是 Proto UI 自有呈现扩展，不声称来自固定 upstream。asChild 仍不提供。'
+  en: 'Shadcn Select Trigger is a direct part over P-BASE-SELECT-TRIGGER, retaining combobox command/accessibility, open request, placeholder and disabled behavior. It adds size: sm | default, appearance: default | ghost, state-derived visual feedback and a fixed chevron. Default remains compatible; ghost is a Proto UI presentation extension, not pinned-upstream parity. asChild remains unavailable.'
 
 criteria:
   - id: P-SHADCN-SELECT-TRIGGER-UPSTREAM-IDENTITY
@@ -62,27 +57,12 @@ criteria:
       }
   - id: P-SHADCN-SELECT-TRIGGER-CURRENT-VISUAL-SURFACE
     text:
-      {
-        zh-CN: Trigger 必须提供当前 layout、border、background、spacing、typography、shadow、transition 与 outline tokens。,
-        en: Trigger must provide the current layout,
-        border,
-        background,
-        spacing,
-        typography,
-        shadow,
-        transition,
-        and outline tokens.,
-      }
+      en: Both appearances retain flex layout, rounded-md geometry, spacing, typography and outline policy. Default retains border-input and shadow-xs. Ghost uses border-transparent and shadow-none without changing the border-box dimensions.
+      zh-CN: 两种外观保留 flex 布局、rounded-md 几何、间距、字体与 outline 规则。default 保留 border-input 与 shadow-xs；ghost 使用 border-transparent 与 shadow-none，不改变 border-box 尺寸。
   - id: P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES
     text:
-      {
-        zh-CN: placeholder、hover、focusVisible、pressed 与 disabled visuals 必须从 inherited states 派生；pressed Rule 必须一同投射 `bg-input/70` 与 `translate-y-px`，让 Adapter 提供 1px 下压反馈。,
-        en: Placeholder,
-        hover,
-        focusVisible,
-        pressed,
-        and disabled visuals must derive from inherited states; the pressed Rule must project `bg-input/70` and `translate-y-px` together so the Adapter provides one-pixel downward feedback.,
-      }
+      en: Placeholder, hover, focusVisible, pressed and disabled visuals derive only from inherited states. Default hover uses bg-input/50; default pressed projects bg-input/70 and translate-y-px together. Ghost hover/press uses the bg-accent/text-accent-foreground pair without displacement. Both retain the visible focus ring and disabled opacity/pointer gate; changing appearance withdraws the previous appearance and motion tokens.
+      zh-CN: placeholder、hover、focusVisible、pressed 与 disabled visuals 仅从继承状态派生。default hover 使用 bg-input/50，default pressed 同时投射 bg-input/70 与 translate-y-px；ghost hover/press 使用 bg-accent/text-accent-foreground 配对且无位移。二者保留清晰 focus ring 与 disabled opacity/pointer gate，切换 appearance 须撤回旧外观与位移 tokens。
   - id: P-SHADCN-SELECT-TRIGGER-CHEVRON
     text:
       {
@@ -91,13 +71,8 @@ criteria:
       }
   - id: P-SHADCN-SELECT-TRIGGER-COMPATIBILITY-SUBSET
     text:
-      {
-        zh-CN: 当前 behavior/size/surface/chevron 之外的差异集中在唯一 open question。,
-        en: Differences beyond current behavior,
-        size,
-        surface,
-        and chevron are centralized in one open question.,
-      }
+      en: Ghost is an intentional Proto UI presentation extension. Other differences beyond the cataloged behavior, size, surface and chevron remain centralized in the existing upstream-differences question.
+      zh-CN: ghost 是有意的 Proto UI 呈现扩展；已收录 behavior、size、surface、chevron 之外的其余差异继续集中在既有 upstream-differences 问题中。
   - id: P-SHADCN-SELECT-TRIGGER-AS-CHILD-OMISSION
     text:
       {
@@ -105,6 +80,10 @@ criteria:
         en: Upstream Trigger `asChild` is omitted under the shared decision; internal Icon asChild does not create an equivalent outward API.,
       }
     dependsOn: { decisions: [D-AS-CHILD-OMISSION-0001] }
+  - id: P-SHADCN-SELECT-TRIGGER-APPEARANCE
+    text:
+      en: 'Public appearance is default | ghost and defaults to default. Default preserves the existing bordered input surface and shadow. Ghost is an additive Proto UI visual extension: transparent resting border/background, no resting shadow, inherited foreground, and existing size/chevron anatomy. Omission or removal restores default even during active interaction; no Base behavior or Content presentation changes.'
+      zh-CN: 公开 appearance 为 default | ghost，缺省为 default。default 保留既有有框输入表面与阴影；ghost 是 Proto UI 自有视觉扩展：静止边框与背景透明、无静止阴影、继承前景，保留 size 与 chevron anatomy。缺省或移除即使在交互中也恢复 default，不改变 Base 行为或 Content 呈现。
 openQuestions:
   - id: P-SHADCN-SELECT-TRIGGER-Q-UPSTREAM-DIFFERENCES
     question:
@@ -158,6 +137,11 @@ revisions:
       version: 0.3.0-alpha.0,
       change: revised,
       summary: Adopted a Proto UI-specific one-pixel pressed displacement as Adapter-projected Trigger style without claiming pinned-upstream parity.,
+    },
+    {
+      version: 0.3.0-alpha.1,
+      change: revised,
+      summary: Added opt-in ghost Trigger presentation while preserving the default field appearance and Base behavior.,
     },
   ]
 tags: [prototype, shadcn, select, trigger, upstream-derived, delta, compatibility, visual]

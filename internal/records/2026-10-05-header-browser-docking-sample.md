@@ -9,3 +9,9 @@ The helper now waits for the existing owner's parent to agree with the same 47.9
 The original height sample now contains bounded hidden/inert/computed-style ancestry and owner/generation/dock state. If it fails again, the suite retains that sample with source identity and a later screenshot before preserving the original assertion failure. URL/error diagnostics use the existing sanitizers. The screenshot is a later observation and is not represented as the exact instant of the numeric sample. Real hosted verification is still required. No claim is made that the Search product budget or historical network failures are fixed by this test-only change.
 
 Co-author by OpenAI Dots
+
+## #816 integration
+
+The child already exports `hasCommittedHeaderPreferencesDock`, requires the existing `data-site-menu-ready` marker and recognizes compact ancestry. Those stronger ownership checks and the named-predicate source contract remain unchanged when merging parent `c4b6be34b67dc79cad3dd047aeb6f6e59cb5dd65` into `01092db6d6739aaad02cc3f4cdcfe19eaf3e7bf3`. The imported directional race tests use actual DOM docking under that predicate rather than a stub that omits its readiness checks.
+
+The child already expects its Header family trigger to be 36px on desktop and 44px in compact layouts. Its original `toBeCloseTo(width >= 768 ? 36 : 44, 0)` assertion is retained. The new diagnostic capture condition matches that same half-pixel tolerance and records nonfinite samples; a valid child desktop control is not mislabeled as a failing parent 44px case. The parent's original failure record above is historical evidence about its own assertion, not authority to replace the child's height semantics. The native control recipes, quiet reading and 72rem reflow source are unchanged.

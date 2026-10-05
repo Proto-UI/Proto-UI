@@ -209,7 +209,10 @@ it('prepares a fresh family with the current pressed facts before connection', a
   expect(nodes.every((node) => node.localName.includes('brutalist'))).toBe(true);
   expect(probe.initial.find((entry) => entry.host === nodes[0])!.props).toMatchObject({
     pressed: true,
-    variant: 'transparent',
+    variant: 'secondary',
+    radius: 'default',
+    border: 'all',
+    elevation: 'raised',
   });
   for (const node of nodes) {
     expect(metrics(node)).toMatchObject({

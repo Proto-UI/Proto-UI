@@ -96,7 +96,7 @@ jobs:
         # Historical behavior may fail: preserve its red trace, then require
         # the complete before-image inventory in the independent step below.
         continue-on-error: true
-        if: always() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
+        if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
         timeout-minutes: 10
         working-directory: baseline
         run: |
@@ -109,7 +109,7 @@ jobs:
             2>&1 | tee "$RUNNER_TEMP/homepage-evidence/baseline.log"
       - name: Validate the complete immutable baseline visual inventory
         id: baseline_visual_inventory
-        if: always() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
+        if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
         run: |
           node --input-type=module <<'JS'
           import assert from 'node:assert/strict';
@@ -152,7 +152,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: Capture real exact-head candidate with the same browser probe
-        if: always() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
+        if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
         timeout-minutes: 10
         working-directory: candidate
         run: |
@@ -191,7 +191,7 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: Execute focused real-browser regressions on the exact candidate
-        if: always() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
+        if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
         timeout-minutes: 12
         working-directory: candidate
         run: |
@@ -212,7 +212,7 @@ jobs:
               corepack pnpm@10.32.1 exec vitest run --no-file-parallelism "${suites[@]}"
           } 2>&1 | tee "$RUNNER_TEMP/homepage-evidence/browser-regressions.log"
       - name: Verify built production Search with real Pagefind
-        if: always() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
+        if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
         timeout-minutes: 10
         working-directory: candidate
         run: |
@@ -318,5 +318,198 @@ jobs:
         with:
           name: homepage-${{ matrix.name }}-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/homepage-evidence
+          if-no-files-found: warn
+          retention-days: 30
+
+  mobile-navigation-reading:
+    # Additive exact-source evidence for the mobile interaction increment.
+    # Keep the older homepage comparison and all existing acceptance budgets.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      MOBILE_BASELINE_SHA: ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.MOBILE_BASELINE_SHA }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare the same official browser and fonts for both revisions
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          corepack enable
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          mkdir -p "$RUNNER_TEMP/mobile-interaction"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --version | tee "$RUNNER_TEMP/mobile-interaction/browser.txt"
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          for worktree in baseline candidate; do
+            (
+              cd "$worktree"
+              corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+              corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+            )
+          done
+      - name: Capture the first normal-size 390px before view
+        if: ${{ !cancelled() }}
+        working-directory: baseline
+        timeout-minutes: 2
+        run: |
+          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-mobile-interaction-evidence.ts" \
+            --revision-kind baseline --expected-revision "$MOBILE_BASELINE_SHA" --quick-preview \
+            --out "$RUNNER_TEMP/mobile-interaction/first-pair/baseline"
+      - name: Capture the first normal-size 390px after view
+        if: ${{ !cancelled() }}
+        working-directory: candidate
+        timeout-minutes: 2
+        run: |
+          node --import tsx apps/www/scripts/capture-mobile-interaction-evidence.ts \
+            --revision-kind candidate --expected-revision "$CANDIDATE_SHA" --quick-preview \
+            --out "$RUNNER_TEMP/mobile-interaction/first-pair/candidate"
+      - name: Publish the first actual pair before the full interaction matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-first-pair-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/mobile-interaction/first-pair
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Capture the exact pre-change mobile experience
+        if: ${{ !cancelled() }}
+        working-directory: baseline
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-mobile-interaction-evidence.ts" \
+            --revision-kind baseline --expected-revision "$MOBILE_BASELINE_SHA" \
+            --out "$RUNNER_TEMP/mobile-interaction/baseline" \
+            2>&1 | tee "$RUNNER_TEMP/mobile-interaction/baseline.log"
+      - name: Retain the pre-change mobile pictures before candidate validation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-before-${{ env.MOBILE_BASELINE_SHA }}-probe-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/mobile-interaction/baseline
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Capture and regress the exact candidate mobile interactions
+        if: ${{ !cancelled() }}
+        working-directory: candidate
+        timeout-minutes: 6
+        run: |
+          set -euo pipefail
+          node --import tsx apps/www/scripts/capture-mobile-interaction-evidence.ts \
+            --revision-kind candidate --expected-revision "$CANDIDATE_SHA" \
+            --out "$RUNNER_TEMP/mobile-interaction/candidate" \
+            2>&1 | tee "$RUNNER_TEMP/mobile-interaction/candidate.log"
+      - name: Preserve before/after mobile screenshots and all failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-interaction-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/mobile-interaction
+          if-no-files-found: error
+          retention-days: 30
+
+  visual-density:
+    # Consumer-only scale/sidebar/Copy comparison, isolated from the existing gates.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      DENSITY_BASELINE_SHA: ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31
+      DENSITY_FOLLOWUP_BASELINE_SHA: fbd90df092369e6d2aab73c66848f4236ba83a29
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DENSITY_BASELINE_SHA }}
+          path: baseline
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DENSITY_FOLLOWUP_BASELINE_SHA }}
+          path: followup-baseline
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare locked sources and the same official browser/font environment
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          corepack enable
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          mkdir -p "$RUNNER_TEMP/visual-density"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --version | tee "$RUNNER_TEMP/visual-density/browser.txt"
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          for worktree in baseline followup-baseline candidate; do
+            (
+              cd "$worktree"
+              corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+              corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+            )
+          done
+      - name: Capture the first same-page sidebar before view
+        if: ${{ !cancelled() }}
+        working-directory: followup-baseline
+        timeout-minutes: 3
+        run: |
+          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-visual-density-evidence.ts" \
+            --revision-kind baseline --expected-revision "$DENSITY_FOLLOWUP_BASELINE_SHA" --quick-preview \
+            --out "$RUNNER_TEMP/visual-density/first-pair/baseline"
+      - name: Capture the first same-page sidebar after view
+        if: ${{ !cancelled() }}
+        working-directory: candidate
+        timeout-minutes: 3
+        run: |
+          node --import tsx apps/www/scripts/capture-visual-density-evidence.ts \
+            --revision-kind candidate --expected-revision "$CANDIDATE_SHA" --quick-preview \
+            --out "$RUNNER_TEMP/visual-density/first-pair/candidate"
+      - name: Retain the first real sidebar pair before the full matrix
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: density-first-pair-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/visual-density/first-pair
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Capture the complete pre-change homepage and sidebar matrix
+        if: ${{ !cancelled() }}
+        working-directory: baseline
+        timeout-minutes: 6
+        run: |
+          node --import tsx "$GITHUB_WORKSPACE/candidate/apps/www/scripts/capture-visual-density-evidence.ts" \
+            --revision-kind baseline --expected-revision "$DENSITY_BASELINE_SHA" \
+            --out "$RUNNER_TEMP/visual-density/baseline"
+      - name: Capture and verify actual candidate Text and Surface leaves
+        if: ${{ !cancelled() }}
+        working-directory: candidate
+        timeout-minutes: 6
+        run: |
+          node --import tsx apps/www/scripts/capture-visual-density-evidence.ts \
+            --revision-kind candidate --expected-revision "$CANDIDATE_SHA" \
+            --out "$RUNNER_TEMP/visual-density/candidate"
+      - name: Preserve all scale frames, provenance and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-density-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/visual-density
           if-no-files-found: warn
           retention-days: 30

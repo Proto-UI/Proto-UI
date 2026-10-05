@@ -42,8 +42,8 @@ describe('documentation native-navigation visual bridge', () => {
       expect(document.querySelector('.sidebar-pane a')).toBe(sidebar);
       expect(document.querySelector('summary')).toBe(summary);
       expect(
-        summary.querySelector(':is(wc-site-shadcn-surface,wc-site-brutalist-surface)')
-      ).toBeNull();
+        summary.querySelector(':is(wc-site-shadcn-surface,wc-site-brutalist-surface)')?.localName
+      ).toBe(`wc-site-${family}-surface`);
       expect(sidebar.querySelector('.docs-wip-badge')).toBe(badge);
       expect(sidebar.getAttribute('aria-current')).toBe('page');
       expect(sidebar.getAttribute('target')).toBe('_blank');
@@ -120,7 +120,7 @@ describe('documentation native-navigation visual bridge', () => {
     expect(tokens()).not.toContain('bg-main');
     link.setAttribute('in-view', '');
     await settle();
-    expect(tokens()).toContain('bg-main');
+    expect(tokens()).not.toContain('bg-main');
     expect(tokens()).toContain('rounded-base');
     expect(link.hasAttribute('aria-current')).toBe(false);
     link.setAttribute('aria-current', 'true');
@@ -152,4 +152,45 @@ describe('documentation native-navigation visual bridge', () => {
     expect(toc).toContain("setAttribute('in-view', '')");
     expect(toc).toContain("setAttribute('aria-current', 'true')");
   });
+});
+
+it('keeps the native summary, caret and browser-owned disclosure through family replacement and release', async () => {
+  document.body.innerHTML =
+    '<div class="sidebar-pane"><ul class="top-level"><li><details><summary><span class="group-label">Original group</span><svg class="caret"></svg></summary><a href="/original/">Original page</a></details></li></ul></div>';
+  const details = document.querySelector('details')!;
+  const summary = document.querySelector('summary')!;
+  const label = summary.querySelector('.group-label')!;
+  const caret = summary.querySelector('svg')!;
+  const original = [...summary.childNodes];
+  const release = initSiteNativeControls();
+  releases.push(release);
+  for (const family of ['shadcn', 'brutalist', 'shadcn']) {
+    document.documentElement.dataset.siteLibraryFamily = family;
+    await settle();
+    expect(summary.firstElementChild!.localName).toBe(`wc-site-${family}-surface`);
+    expect(summary.querySelector('svg')).toBe(caret);
+    expect(summary.querySelector('.group-label')).toBe(label);
+    expect(summary.querySelector('button,a,[tabindex],[role="button"]')).toBeNull();
+    expect(summary.textContent).toBe('Original group');
+    expect(summary.parentElement).toBe(details);
+    const wasOpen = details.open;
+    summary.click();
+    expect(details.open).toBe(!wasOpen);
+    summary.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    await settle();
+    expect(summary.firstElementChild!.getAttribute('data-pui-style')).toContain('translate-y-px');
+    summary.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
+    await settle();
+    expect(summary.firstElementChild!.getAttribute('data-pui-style')).not.toContain(
+      'translate-y-px'
+    );
+    expect(summary.firstElementChild!.getAttribute('data-pui-style')!.includes('border-b-2')).toBe(
+      family === 'brutalist'
+    );
+  }
+  release();
+  expect([...summary.childNodes]).toEqual(original);
+  expect(summary.hasAttribute('data-site-link-enhanced')).toBe(false);
+  summary.dispatchEvent(new Event('pointerenter'));
+  expect([...summary.childNodes]).toEqual(original);
 });

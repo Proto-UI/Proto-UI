@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { initHomepageRuntime } from './homepage-runtime-client';
 import * as siteFamily from '../site-library-family';
 import * as materialization from '../PrototypePreviewer/projection-materializer';
@@ -9,6 +10,14 @@ import {
 } from '../adapter-preference';
 import type { ProjectionCompositionControls } from '../PrototypePreviewer/projection-composition';
 import type { MaterializedProjectionCandidate } from '../PrototypePreviewer/projection-materializer';
+
+// Keep the pinned host's internal WeakRef forwarding closure alive, exactly as
+// the other real typography suites do. Browser behavior and deadlines stay real.
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 
 type TypographyCandidate = MaterializedProjectionCandidate;
 const preparation = vi.hoisted(() => ({
@@ -148,7 +157,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
           .poll(() =>
             document.querySelector('h1 [data-typography-prototype]')?.getAttribute('data-pui-style')
           )
-          .toContain('text-3xl');
+          .toContain('text-2xl');
       } else {
         const heading = document.createElement('h2');
         heading.textContent = 'New source heading';
@@ -210,7 +219,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
       // Cleanup mutations must not automatically retry the same failed source.
       // A genuine new source revision permits another passive attempt.
       document.querySelector('h1')!.append(' updated');
-      await expect.poll(() => surface().getAttribute('data-pui-style')).toContain('text-3xl');
+      await expect.poll(() => surface().getAttribute('data-pui-style')).toContain('text-2xl');
       expect(note()).toBe(before.input);
     });
   }
@@ -236,7 +245,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
     await expect.poll(() => added.querySelector('[data-typography-prototype]')).not.toBeNull();
     expect(pending.activate).not.toHaveBeenCalled();
     expect(pending.dispose).toHaveBeenCalledOnce();
-    expect(surface().getAttribute('data-pui-style')).toContain('text-5xl');
+    expect(surface().getAttribute('data-pui-style')).toContain('text-4xl');
     expect(document.querySelector('h1')!.textContent).toBe('Latest translated source');
     expect(handle!.getSnapshot()).toEqual(before.snapshot);
     expect(note()).toBe(before.input);
@@ -276,7 +285,7 @@ describe('homepage passive typography refresh preserves real gallery state', () 
   it('whole-page publication rollback restores the latest locally refreshed typography and live gallery', async () => {
     const before = await editGallery();
     resize(true);
-    await expect.poll(() => surface().getAttribute('data-pui-style')).toContain('text-3xl');
+    await expect.poll(() => surface().getAttribute('data-pui-style')).toContain('text-2xl');
     const refreshedSurface = surface();
     const applyFamily = siteFamily.applySiteLibraryFamily;
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -366,15 +375,36 @@ describe('homepage passive typography refresh preserves real gallery state', () 
       else span.dataset.siteTypography = 'caption';
       const target = change === 'new marker' ? span : h1;
       const role = change === 'change role' ? 'h2' : change === 'remove role' ? 'h1' : 'caption';
-      await expect
-        .poll(
-          () =>
-            target
-              .querySelector('[data-typography-prototype]')
-              ?.getAttribute('data-typography-role'),
-          { timeout: 500 }
-        )
-        .toBe(role);
+      const observationStarted = performance.now();
+      try {
+        await expect
+          .poll(
+            () =>
+              target
+                .querySelector('[data-typography-prototype]')
+                ?.getAttribute('data-typography-role'),
+            { timeout: 500 }
+          )
+          .toBe(role);
+      } catch (error) {
+        // Retain the original deadline/failure; distinguish missing observer
+        // admission from a pending materialization on a contended runner.
+        console.error('[homepage-typography-role-diagnostic]', {
+          change,
+          role,
+          elapsedMs: performance.now() - observationStarted,
+          authoredRole: target.getAttribute('data-site-typography'),
+          projectedRole: target
+            .querySelector('[data-typography-prototype]')
+            ?.getAttribute('data-typography-role'),
+          baseline,
+          materializations: preparation.count,
+          page: handle?.getSnapshot(),
+          connected: target.isConnected,
+          batches: document.querySelectorAll('[data-site-typography-batch]').length,
+        });
+        throw error;
+      }
       // Real observer deliveries and self-authored projection metadata must not
       // cause another materialization after this passive batch is published.
       await new Promise((resolve) => setTimeout(resolve, 100));

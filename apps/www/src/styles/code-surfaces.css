@@ -119,17 +119,34 @@
   }
 
   [data-code-inner] {
-    padding: var(--docs-code-padding);
+    container: code-panel / inline-size;
+    padding: min(var(--docs-code-padding), 12px);
   }
   .proto-previewer__code {
     margin: 0;
+    min-width: 0;
+    max-width: 100%;
+    overscroll-behavior: contain;
     max-height: 4.5rem;
     overflow: auto;
     white-space: pre;
     padding-inline-end: 2.75rem;
   }
   [data-code-expanded='true'] .proto-previewer__code {
-    max-height: 9rem;
+    /* A readable window into long examples, bounded by the current viewport. */
+    max-height: min(36rem, 65svh);
+  }
+  /* Enlarged text in a genuinely narrow source container needs its width for
+     code, not decorative numbers or an overlay reservation on every line.
+     The existing Copy owner gets a real control row only at this pressure size. */
+  @container code-panel (max-width: 14rem) {
+    .proto-previewer__code {
+      /* Keep a real native-selection edge gutter, not the Copy-width reserve. */
+      padding-inline: 16px;
+    }
+    [data-code-expanded='true'] .proto-previewer__code {
+      max-height: min(36rem, 65svh, max(6rem, calc(100svh - var(--header-height, 4rem) - 4rem)));
+    }
   }
   [data-code-expanded='false'] [data-code-content] {
     mask-image: linear-gradient(to bottom, black, transparent);

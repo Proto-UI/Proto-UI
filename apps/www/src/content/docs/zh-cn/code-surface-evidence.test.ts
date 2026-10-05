@@ -128,3 +128,15 @@ it('keeps decorative line numbers in the same horizontal flow as selectable code
   expect(rule).toContain('pointer-events: none');
   expect(rule).not.toMatch(/\bposition:\s*(sticky|fixed|absolute)|\bz-index:|\bbackground:/);
 });
+
+it('uses a real Copy row and full source width only for pressure-sized code containers', async () => {
+  const { readFileSync } = await import('node:fs');
+  const css = readFileSync('apps/www/src/styles/code-surfaces.css', 'utf8');
+  const copy = readFileSync('apps/www/src/styles/site-copy-command.css', 'utf8');
+  const global = readFileSync('apps/www/src/styles/global.css', 'utf8');
+  expect(css).toContain('container: code-panel / inline-size');
+  expect(css).toContain('padding: min(var(--docs-code-padding), 12px)');
+  expect(css).toMatch(/@container code-panel \(max-width: 14rem\)[\s\S]*padding-inline: 16px/);
+  expect(copy).toMatch(/@container code-panel \(max-width: 14rem\)[\s\S]*position: static/);
+  expect(global).toMatch(/@container code-panel \(max-width: 14rem\)[\s\S]*display: none/);
+});

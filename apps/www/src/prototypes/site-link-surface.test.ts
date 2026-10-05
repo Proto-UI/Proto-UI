@@ -31,6 +31,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
     'nav',
     'text',
     'brand',
+    'nav-group',
     'sidebar',
     'toc',
     'pagination',
@@ -51,8 +52,9 @@ for (const family of ['shadcn', 'brutalist'] as const)
         const layout = linkSurfaceLayout(family, appearance, emphasis);
         const raised =
           family === 'brutalist' &&
-          ['action', 'icon', 'pagination'].includes(appearance) &&
-          ['primary', 'secondary'].includes(emphasis);
+          (['brand', 'nav'].includes(appearance) ||
+            (['action', 'icon', 'pagination'].includes(appearance) &&
+              ['primary', 'secondary'].includes(emphasis)));
         for (const facts of [
           { hovered: false, pressed: false, focusVisible: false, current: false },
           { hovered: true, pressed: true, focusVisible: true, current: true },
@@ -63,7 +65,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
             surfaceStyle: layout,
           });
           surface.update();
-          setElementProps(text, { ...linkTextProps(appearance, facts) });
+          setElementProps(text, { ...linkTextProps(appearance, facts, family) });
           text.update();
           await settle();
           expect(surface.style.pointerEvents).toBe('none');
@@ -85,7 +87,15 @@ for (const family of ['shadcn', 'brutalist'] as const)
             expect(tokens).toContain(facts.pressed ? 'translate-y-1' : 'shadow-[4px_4px_0_0_#000]');
           else if (family === 'brutalist') expect(tokens).not.toContain('shadow-');
           expect(text.getAttribute('data-pui-style')).toContain(
-            facts.current || appearance === 'brand' ? 'font-semibold' : 'font-medium'
+            family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc')
+              ? facts.current
+                ? 'font-medium'
+                : 'font-normal'
+              : facts.current ||
+                  appearance === 'brand' ||
+                  (family === 'brutalist' && appearance === 'nav-group')
+                ? 'font-semibold'
+                : 'font-medium'
           );
           link.focus();
           expect(document.activeElement).toBe(link);

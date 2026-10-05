@@ -315,7 +315,7 @@ describe('shared website navigation disclosure', () => {
 
 describe('actual Header Button anchoring', () => {
   it('keeps the current binding when an older lease for the same Button retires', () => {
-    const { root, button, panel } = fixture();
+    const { root, button, panel } = fixture(false);
     vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
     vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(280, 6, 44, 44));
     vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 280, 300));
@@ -336,7 +336,7 @@ describe('actual Header Button anchoring', () => {
     const cancel = vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
       frames.delete(id);
     });
-    const { root, button, panel } = fixture();
+    const { root, button, panel } = fixture(false);
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 });
     vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
     vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
@@ -372,7 +372,7 @@ describe('actual Header Button anchoring', () => {
   for (const width of [320, 390])
     for (const rtl of [false, true]) {
       it(`${width}px ${rtl ? 'RTL' : 'LTR'} anchors the painted box to the current Button`, () => {
-        const { root, button, panel } = fixture();
+        const { root, button, panel } = fixture(false);
         root.style.direction = rtl ? 'rtl' : 'ltr';
         Object.defineProperty(window, 'innerWidth', { configurable: true, value: width });
         Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 });
@@ -415,7 +415,7 @@ describe('actual Header Button anchoring', () => {
     }
 
   it('repositions from the newly active runtime Button and clears owned measurements on destroy', () => {
-    const { root, button, panel } = fixture();
+    const { root, button, panel } = fixture(false);
     vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(360);
     vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
     vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 360, 56));
@@ -524,5 +524,57 @@ describe('Docs header offset ownership', () => {
     disclosure!.destroy();
     expect(second.frame.style.getPropertyValue('--header-height')).toBe('137px');
     expect(second.frame.style.getPropertyPriority('--header-height')).toBe('important');
+  });
+});
+
+describe('compact navigation viewport and history', () => {
+  for (const width of [390, 430]) {
+    it(`${width}px uses the remaining visual viewport rather than a 22rem trigger popup`, () => {
+      const { root, button, panel } = fixture();
+      Object.defineProperty(window, 'innerWidth', { configurable: true, value: width });
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 });
+      vi.spyOn(root, 'offsetWidth', 'get').mockReturnValue(width - 32);
+      vi.spyOn(root, 'offsetHeight', 'get').mockReturnValue(56);
+      vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(16, 0, width - 32, 56));
+      vi.spyOn(button, 'getBoundingClientRect').mockReturnValue(new DOMRect(width - 68, 6, 44, 44));
+      vi.spyOn(panel, 'getBoundingClientRect').mockImplementation(
+        () =>
+          new DOMRect(
+            0,
+            0,
+            parseFloat(panel.style.getPropertyValue('--site-header-panel-max-width')),
+            783
+          )
+      );
+      disclosure!.enhance();
+      disclosure!.toggle();
+      expect(panel.style.getPropertyValue('--site-header-panel-left')).toBe('-8px');
+      expect(panel.style.getPropertyValue('--site-header-panel-max-width')).toBe(`${width - 16}px`);
+      expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+      expect(panel.style.getPropertyValue('--site-header-panel-max-height')).toBe('775px');
+      // Hover/pressed translation cannot move a full-width mobile panel.
+      vi.mocked(button.getBoundingClientRect).mockReturnValue(new DOMRect(width - 64, 10, 44, 44));
+      window.dispatchEvent(new Event('resize'));
+      expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('61px');
+      // A genuinely taller header moves the panel without hiding its Close row.
+      vi.mocked(root.getBoundingClientRect).mockReturnValue(new DOMRect(16, 0, width - 32, 100));
+      vi.mocked(Object.getOwnPropertyDescriptor(root, 'offsetHeight')!.get!).mockReturnValue(100);
+      window.dispatchEvent(new Event('resize'));
+      expect(panel.style.getPropertyValue('--site-header-panel-top')).toBe('105px');
+      expect(panel.style.getPropertyValue('--site-header-panel-max-height')).toBe('731px');
+    });
+  }
+  it('closes on Back/Forward and restored pages without adding history entries', () => {
+    const { panel } = fixture();
+    const push = vi.spyOn(history, 'pushState');
+    disclosure!.enhance();
+    disclosure!.toggle();
+    expect(panel.hidden).toBe(false);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    expect(panel.hidden).toBe(true);
+    disclosure!.toggle();
+    window.dispatchEvent(new Event('pageshow'));
+    expect(panel.hidden).toBe(true);
+    expect(push).not.toHaveBeenCalled();
   });
 });

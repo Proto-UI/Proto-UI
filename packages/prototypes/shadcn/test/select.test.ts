@@ -95,18 +95,22 @@ describe('prototypes/shadcn: select', () => {
     await settle();
 
     expect(trigger.getExposes().pressed.get()).toBe(false);
-    expect(styleContains(trigger, 'data-[pressed]:translate-y-px')).toBe(true);
+    // Appearance plus inherited state is runtime-projected, not a state-only class.
+    expect(styleContains(trigger, 'data-[pressed]:translate-y-px')).toBe(false);
     expect(styleContains(trigger, 'translate-y-px')).toBe(false);
 
     trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().pressed.get()).toBe(true);
     expect(trigger.hasAttribute('data-pressed')).toBe(true);
+    expect(styleContains(trigger, 'bg-input/70')).toBe(true);
+    expect(styleContains(trigger, 'translate-y-px')).toBe(true);
 
     trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     await flush();
     expect(trigger.getExposes().pressed.get()).toBe(false);
     expect(trigger.hasAttribute('data-pressed')).toBe(false);
+    expect(styleContains(trigger, 'translate-y-px')).toBe(false);
   });
 
   it('inherits keyboard selection behavior and selected indicator facts from Base', async () => {
@@ -169,4 +173,86 @@ describe('prototypes/shadcn: select', () => {
     await flush();
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
   });
+});
+
+it('withdraws placeholder foreground only during ghost hover or press', async () => {
+  // T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
+  vi.useFakeTimers();
+  const { trigger, value } = createSelect({ trigger: { appearance: 'ghost' } });
+  await settle();
+  const hasMutedForeground = () =>
+    styleContains(trigger, 'text-muted-foreground') ||
+    (trigger.hasAttribute('data-placeholder') &&
+      styleContains(trigger, 'data-[placeholder]:text-muted-foreground'));
+  expect(trigger.hasAttribute('data-placeholder')).toBe(true);
+  expect(value.textContent).toBe('Select a framework');
+  expect(hasMutedForeground()).toBe(true);
+
+  trigger.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+  await flush();
+  expect(trigger.getExposes().hovered.get()).toBe(true);
+  expect(styleContains(trigger, 'text-accent-foreground')).toBe(true);
+  expect(hasMutedForeground()).toBe(false);
+
+  trigger.dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
+  // Touch can press without entering the pointer-hover state.
+  trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, pointerType: 'touch' }));
+  await flush();
+  expect(trigger.getExposes().hovered.get()).toBe(false);
+  expect(trigger.getExposes().pressed.get()).toBe(true);
+  expect(styleContains(trigger, 'text-accent-foreground')).toBe(true);
+  expect(hasMutedForeground()).toBe(false);
+
+  trigger.setProps({});
+  await flush();
+  expect(trigger.getExposes().pressed.get()).toBe(true);
+  expect(hasMutedForeground()).toBe(true);
+  expect(styleContains(trigger, 'text-accent-foreground')).toBe(false);
+  trigger.setProps({ appearance: 'ghost' });
+  await flush();
+  expect(hasMutedForeground()).toBe(false);
+  expect(styleContains(trigger, 'text-accent-foreground')).toBe(true);
+
+  trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, pointerType: 'touch' }));
+  await flush();
+  expect(trigger.getExposes().pressed.get()).toBe(false);
+  expect(hasMutedForeground()).toBe(true);
+  expect(styleContains(trigger, 'text-accent-foreground')).toBe(false);
+});
+
+it('supports ghost presentation and restores default while inherited states stay live', async () => {
+  // T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
+  vi.useFakeTimers();
+  const { trigger, content, root } = createSelect();
+  await settle();
+  trigger.setProps({ appearance: 'ghost' });
+  await flush();
+  expect(styleContains(trigger, 'border-transparent')).toBe(true);
+  expect(styleContains(trigger, 'border-input')).toBe(false);
+  expect(styleContains(trigger, 'shadow-xs')).toBe(false);
+  trigger.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
+  trigger.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+  await flush();
+  expect(trigger.getExposes().pressed.get()).toBe(true);
+  expect(styleContains(trigger, 'bg-accent')).toBe(true);
+  expect(styleContains(trigger, 'translate-y-px')).toBe(false);
+  trigger.setProps({});
+  await flush();
+  expect(trigger.getExposes().pressed.get()).toBe(true);
+  expect(styleContains(trigger, 'border-input')).toBe(true);
+  expect(styleContains(trigger, 'bg-input/70')).toBe(true);
+  expect(styleContains(trigger, 'translate-y-px')).toBe(true);
+  trigger.setProps({ appearance: 'ghost' });
+  await flush();
+  expect(styleContains(trigger, 'translate-y-px')).toBe(false);
+  trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
+  trigger.click();
+  await settle();
+  expect(root.getExposes().open.get()).toBe(true);
+  expect(styleContains(content, 'bg-popover')).toBe(true);
+  expect(styleContains(trigger, 'data-[focus-visible]:ring-3')).toBe(true);
+  trigger.setProps({ appearance: 'ghost', disabled: true });
+  await settle();
+  expect(trigger.getAttribute('aria-disabled')).toBe('true');
+  expect(styleContains(trigger, 'data-[disabled]:pointer-events-none')).toBe(true);
 });

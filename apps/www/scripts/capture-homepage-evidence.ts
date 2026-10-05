@@ -1032,7 +1032,9 @@ try {
             assert.ok(
               globalControls.every(
                 (control) =>
-                  control.width >= 120 && control.height >= 44 && control.fullValueVisible
+                  control.width >= 120 &&
+                  control.height >= (viewport.width < 768 ? 44 : 36) &&
+                  control.fullValueVisible
               ),
               'Global selected values and targets must be fully visible'
             );
@@ -1104,6 +1106,8 @@ try {
                   width: rect.width,
                   height: rect.height,
                   viewportWidth: innerWidth,
+                  compact: matchMedia('(max-width: 47.999rem)').matches,
+                  headerBottom: panel.closest('[data-site-header]')!.getBoundingClientRect().bottom,
                 };
               });
             evidence.headerDisclosureSurface = panelSurface;
@@ -1122,12 +1126,21 @@ try {
             assert.ok(panelSurface.left >= 0 && panelSurface.right <= panelSurface.viewportWidth);
             assert.ok(panelSurface.width > 200 && panelSurface.height > 44);
             assert.ok(
-              Math.abs(panelSurface.top - panelSurface.trigger.bottom - 5) <= 1,
-              'Surface follows the actual hamburger bottom'
+              Math.abs(
+                panelSurface.top -
+                  (panelSurface.compact ? panelSurface.headerBottom : panelSurface.trigger.bottom) -
+                  5
+              ) <= 1,
+              'Surface follows the full compact Header or actual desktop trigger'
             );
             assert.ok(
-              Math.abs(panelSurface.right - panelSurface.trigger.right) <= 1,
-              'Surface fills the trigger-aligned positioning box'
+              Math.abs(
+                panelSurface.right -
+                  (panelSurface.compact
+                    ? panelSurface.viewportWidth - 8
+                    : panelSurface.trigger.right)
+              ) <= 1,
+              'Surface fills the compact viewport or desktop trigger-aligned box'
             );
             evidence.navigationOwnership = await ownership(page, 'wc');
             await screenshot('navigation-open-viewport');

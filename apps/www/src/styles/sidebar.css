@@ -38,7 +38,7 @@
     border-inline-start: 1px solid var(--color-border);
   }
 
-  .sidebar-pane .top-level summary {
+  .sidebar-pane .top-level summary:not([data-site-link-enhanced]) {
     @apply flex items-center justify-between gap-2 rounded-md text-muted-foreground;
     min-height: 2rem;
     padding: 0.375rem 0.5rem;
@@ -56,7 +56,7 @@
     color: inherit;
   }
 
-  .sidebar-pane .top-level ul summary {
+  .sidebar-pane .top-level ul summary:not([data-site-link-enhanced]) {
     @apply text-sidebar-foreground;
     font-size: 0.8125rem;
   }
@@ -98,7 +98,7 @@
   }
 
   .sidebar-pane .top-level a:not([data-site-link-enhanced]):hover,
-  .sidebar-pane .top-level summary:hover {
+  .sidebar-pane .top-level summary:not([data-site-link-enhanced]):hover {
     @apply bg-muted text-sidebar-foreground;
   }
 
@@ -108,14 +108,14 @@
   }
 
   .sidebar-pane .top-level a:not([data-site-link-enhanced]):focus-visible,
-  .sidebar-pane .top-level summary:focus-visible {
+  .sidebar-pane .top-level summary:not([data-site-link-enhanced]):focus-visible {
     outline: 2px solid var(--color-sidebar-ring);
     outline-offset: 2px;
   }
 
   @media (max-width: 63.999rem) {
     .sidebar-pane .top-level a:not([data-site-link-enhanced]),
-    .sidebar-pane .top-level summary {
+    .sidebar-pane .top-level summary:not([data-site-link-enhanced]) {
       min-height: 2.75rem;
     }
   }

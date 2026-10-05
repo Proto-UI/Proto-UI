@@ -22,6 +22,8 @@ export type ShadcnSelectRootAsHookContract = SelectRootAsHookContract;
 
 export interface ShadcnSelectTriggerProps extends SelectTriggerProps {
   size?: 'sm' | 'default';
+  /** Additive presentation; omitted values retain the existing field surface. */
+  appearance?: 'default' | 'ghost';
 }
 export type ShadcnSelectTriggerExposes = SelectTriggerExposes;
 export type ShadcnSelectTriggerAsHookContract = SelectTriggerAsHookContract;

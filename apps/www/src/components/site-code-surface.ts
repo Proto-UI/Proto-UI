@@ -29,15 +29,36 @@ export type CodeSurfaceHandle = {
 /** The projection is decoration behind stable native content, never a substitute
  * command skin. No source node is moved, cloned, replaced or made inert. */
 export function initCodeSurface(root: HTMLElement): CodeSurfaceHandle {
+  return initPassiveSurface(root, 'code');
+}
+
+/** Notes and code share the same passive projection lifetime. Neither creates
+ * a semantic owner or moves authored source nodes into a framework renderer. */
+export function initNoteSurface(root: HTMLElement): CodeSurfaceHandle {
+  return initPassiveSurface(root, 'note');
+}
+
+function initPassiveSurface(root: HTMLElement, purpose: 'code' | 'note'): CodeSurfaceHandle {
   const prior = handles.get(root);
   if (prior) return prior;
   const doc = root.ownerDocument;
   const view = doc.defaultView!;
-  const logicalOwner = `website-code-surface-${++nextOwner}`;
+  const coordinates =
+    purpose === 'note'
+      ? ['noteSurfaceRuntime', 'noteSurfaceFamily', 'noteSurfaceView']
+      : ['codeSurfaceRuntime', 'codeSurfaceFamily', 'codeSurfaceView'];
+  const title =
+    purpose === 'note' ? root.querySelector<HTMLElement>('.starlight-aside__title') : null;
+  const originalTitleRole = title?.getAttribute('data-site-typography') ?? null;
+  if (title) title.dataset.siteTypography = 'label';
+  const logicalOwner = `website-${purpose}-surface-${++nextOwner}`;
   const mount = doc.createElement('div');
-  mount.className = 'site-code-surface-mount';
+  mount.className = `site-${purpose}-surface-mount`;
   mount.setAttribute('aria-hidden', 'true');
-  root.prepend(mount);
+  // Native note rhythm includes :first-child paragraph rules. Keep its title
+  // first rather than letting a decorative, positioned plane change that fact.
+  if (purpose === 'note') root.append(mount);
+  else root.prepend(mount);
   const previewer = root.closest<Previewer>('[data-previewer-id]');
   let preferred: RuntimeId = 'wc';
   try {
@@ -74,7 +95,7 @@ export function initCodeSurface(root: HTMLElement): CodeSurfaceHandle {
           controlIds: [],
           content: {
             recipe: {
-              id: 'website-code-surface',
+              id: `website-${purpose}-surface`,
               rootPrototypeId: surfacePrototypeId(family),
               prototypeIds: [surfacePrototypeId(family)],
             },
@@ -83,7 +104,7 @@ export function initCodeSurface(root: HTMLElement): CodeSurfaceHandle {
               root: {
                 kind: 'proto',
                 prototypeId: surfacePrototypeId(family),
-                className: 'site-code-surface-paint',
+                className: `site-${purpose}-surface-paint`,
                 surfaceStyle: {
                   display: 'block',
                   width: '100%',
@@ -92,12 +113,19 @@ export function initCodeSurface(root: HTMLElement): CodeSurfaceHandle {
                 },
                 props: {
                   variant:
-                    root.dataset.siteCodeSurface === 'toolbar'
-                      ? 'transparent'
-                      : family === 'shadcn'
-                        ? 'muted'
-                        : 'outline',
-                  radius: root.dataset.siteCodeSurface === 'toolbar' ? 'none' : 'default',
+                    purpose === 'note'
+                      ? 'outline'
+                      : root.dataset.siteCodeSurface === 'toolbar'
+                        ? 'transparent'
+                        : family === 'shadcn'
+                          ? 'muted'
+                          : 'outline',
+                  radius:
+                    purpose === 'note' && family === 'shadcn'
+                      ? 'lg'
+                      : root.dataset.siteCodeSurface === 'toolbar'
+                        ? 'none'
+                        : 'default',
                   border: root.dataset.siteCodeSurface === 'toolbar' ? 'bottom' : 'all',
                   elevation: 'none',
                 },
@@ -132,13 +160,13 @@ export function initCodeSurface(root: HTMLElement): CodeSurfaceHandle {
         return {
           publish() {
             if (!isCurrentOwner()) return;
-            root.dataset.codeSurfaceRuntime = commit.selection.runtimeId;
-            root.dataset.codeSurfaceFamily = commit.selection.projectionFamilyId;
-            root.dataset.codeSurfaceView = 'ready';
+            root.dataset[coordinates[0]!] = commit.selection.runtimeId;
+            root.dataset[coordinates[1]!] = commit.selection.projectionFamilyId;
+            root.dataset[coordinates[2]!] = 'ready';
           },
           rollback() {
             if (!isCurrentOwner()) return;
-            for (const key of ['codeSurfaceRuntime', 'codeSurfaceFamily', 'codeSurfaceView']) {
+            for (const key of coordinates) {
               if (old[key] === undefined) delete root.dataset[key];
               else root.dataset[key] = old[key];
             }
@@ -151,7 +179,7 @@ export function initCodeSurface(root: HTMLElement): CodeSurfaceHandle {
   const observe = (promise: Promise<unknown>, current: ProjectionScopeController) =>
     promise.catch((error) => {
       if (!isCurrentOwner() || current !== controller) return;
-      root.dataset.codeSurfaceView = current.getSnapshot().generation ? 'retained' : 'unavailable';
+      root.dataset[coordinates[2]!] = current.getSnapshot().generation ? 'retained' : 'unavailable';
       console.error(
         '[CodeSurface] Passive projection failed; native source remains available.',
         error
@@ -205,9 +233,11 @@ export function initCodeSurface(root: HTMLElement): CodeSurfaceHandle {
       // Async cleanup owns only this instance's detached mount thereafter.
       if (ownsRoot()) {
         handles.delete(root);
-        delete root.dataset.codeSurfaceRuntime;
-        delete root.dataset.codeSurfaceFamily;
-        delete root.dataset.codeSurfaceView;
+        for (const key of coordinates) delete root.dataset[key];
+        if (title?.dataset.siteTypography === 'label') {
+          if (originalTitleRole === null) delete title.dataset.siteTypography;
+          else title.dataset.siteTypography = originalTitleRole;
+        }
       }
       mount.remove();
       try {
@@ -231,7 +261,11 @@ export function initSiteCodeSurfaces(doc: Document = document): () => void {
   }
   const roots = new Map<HTMLElement, CodeSurfaceHandle>();
   const activation = createHiddenFirstActivation(doc, (root) => {
-    if (!roots.has(root)) roots.set(root, initCodeSurface(root));
+    if (!roots.has(root))
+      roots.set(
+        root,
+        root.matches('.starlight-aside--note') ? initNoteSurface(root) : initCodeSurface(root)
+      );
   });
   const remove = (root: HTMLElement) => {
     const handle = roots.get(root);
@@ -240,7 +274,9 @@ export function initSiteCodeSurfaces(doc: Document = document): () => void {
   };
   const scan = () => {
     for (const root of roots.keys()) if (!root.isConnected) remove(root);
-    for (const root of doc.querySelectorAll<HTMLElement>('[data-site-code-surface]')) {
+    for (const root of doc.querySelectorAll<HTMLElement>(
+      '[data-site-code-surface], .starlight-aside--note'
+    )) {
       if (!roots.has(root)) activation.add(root);
     }
   };

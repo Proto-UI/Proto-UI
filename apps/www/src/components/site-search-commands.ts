@@ -94,14 +94,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     const label = root.dataset[`${command}Label`] || command;
     const icon = command === 'open' ? 'search' : command === 'close' ? 'x' : null;
     const props = {
-      variant:
-        family === 'brutalist'
-          ? 'surface'
-          : command === 'open'
-            ? 'ghost'
-            : command === 'close'
-              ? 'ghost'
-              : 'secondary',
+      variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
       size: command === 'open' ? 'default' : 'sm',
     };
     return {

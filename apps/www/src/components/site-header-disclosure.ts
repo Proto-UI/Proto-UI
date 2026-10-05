@@ -1,5 +1,6 @@
 /** Application-owned navigation disclosure. Button owns command activation;
  * the website owns navigation visibility, ARIA relationships and return focus. */
+import { closeSiteSelects } from './site-select-dismissal';
 export interface SiteHeaderDisclosure {
   bindButton(button: HTMLElement): () => void;
   enhance(): void;
@@ -95,8 +96,13 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     const rightEdge = (viewport?.offsetLeft ?? 0) + (viewport?.width ?? window.innerWidth) - 8;
     const bottomEdge = (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - 8;
     const rtl = window.getComputedStyle(root).direction === 'rtl';
-    const availableWidth = Math.max(0, rtl ? rightEdge - anchor.left : anchor.right - leftEdge);
-    const top = anchor.bottom + 5 * scaleY;
+    const mobile = !!compact?.matches;
+    const availableWidth = mobile
+      ? rightEdge - leftEdge
+      : Math.max(0, rtl ? rightEdge - anchor.left : anchor.right - leftEdge);
+    // A mobile navigation panel belongs below the complete header, independent
+    // of the trigger's hover translation or wrapped toolbar rows.
+    const top = (mobile ? header.bottom : anchor.bottom) + 5 * scaleY;
     const values: Record<string, string> = {
       '--site-header-panel-max-width': `${Math.max(0, Math.min(rightEdge - leftEdge, availableWidth)) / scaleX}px`,
       '--site-header-panel-top': `${(top - header.top) / scaleY - root.clientTop}px`,
@@ -105,7 +111,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     for (const [name, value] of Object.entries(values))
       if (panel.style.getPropertyValue(name) !== value) panel.style.setProperty(name, value);
     const width = panel.getBoundingClientRect().width;
-    const aligned = rtl ? anchor.left : anchor.right - width;
+    const aligned = mobile ? leftEdge : rtl ? anchor.left : anchor.right - width;
     const left = Math.max(leftEdge, Math.min(aligned, rightEdge - width));
     const value = `${(left - header.left) / scaleX - root.clientLeft}px`;
     if (panel.style.getPropertyValue('--site-header-panel-left') !== value)
@@ -169,6 +175,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (!open || destroyed) return;
     const focused = document.activeElement;
     const hidingFocus = !!focused && (!!panel?.contains(focused) || ownsSelectPopup(focused));
+    if (panel) closeSiteSelects(panel, 'parent.dismiss');
     open = false;
     sync();
     if (restoreFocus || hidingFocus) activeButton()?.focus({ preventScroll: true });
@@ -231,6 +238,22 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
       activeButton()?.focus();
   };
   const onContentsOpen = () => close();
+  // Do not create a history entry for a non-modal disclosure. Real browser
+  // Back/Forward (including a restored bfcache page) must never resurrect it.
+  const onHistory = () => {
+    const focused = document.activeElement;
+    const popup = focused?.closest('[role="listbox"], [data-site-select-content]');
+    const trigger = popup?.id
+      ? [...root.querySelectorAll<HTMLElement>('[aria-controls]')].find((item) =>
+          item.getAttribute('aria-controls')?.split(/\s+/).includes(popup.id)
+        )
+      : undefined;
+    const wasOpen = open;
+    closeSiteSelects(root, 'history');
+    close(!!trigger);
+    if (!wasOpen && trigger?.isConnected && !trigger.closest('[hidden], [inert]'))
+      trigger.focus({ preventScroll: true });
+  };
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
@@ -260,6 +283,8 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     document.removeEventListener('keydown', onEscape);
     document.removeEventListener('pointerdown', onOutside);
     document.removeEventListener(SITE_CONTENTS_OPEN_EVENT, onContentsOpen);
+    window?.removeEventListener('popstate', onHistory);
+    window?.removeEventListener('pageshow', onHistory);
     document.removeEventListener('astro:before-swap', destroy);
     panel?.removeEventListener('click', onNavigation);
     buttons.clear();
@@ -311,7 +336,11 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     },
     toggle() {
       if (destroyed || !enhanced) return;
-      open = !open;
+      if (open) {
+        close(true);
+        return;
+      }
+      open = true;
       sync();
       if (open) {
         document.dispatchEvent(new CustomEvent(SITE_HEADER_OPEN_EVENT));
@@ -333,6 +362,8 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   document.addEventListener('keydown', onEscape);
   document.addEventListener('pointerdown', onOutside);
   document.addEventListener(SITE_CONTENTS_OPEN_EVENT, onContentsOpen);
+  window?.addEventListener('popstate', onHistory);
+  window?.addEventListener('pageshow', onHistory);
   document.addEventListener('astro:before-swap', destroy);
   panel?.addEventListener('click', onNavigation);
   disclosures.set(root, handle);

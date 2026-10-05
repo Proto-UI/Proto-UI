@@ -5,7 +5,12 @@ beforeAll(() => {
 });
 afterAll(() => observerKeeper.restore());
 import { afterAll, beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
-import { initCodeSurface, initSiteCodeSurfaces, type CodeSurfaceHandle } from './site-code-surface';
+import {
+  initCodeSurface,
+  initNoteSurface,
+  initSiteCodeSurfaces,
+  type CodeSurfaceHandle,
+} from './site-code-surface';
 import { BRUTALIST_THEME } from '../../../../packages/prototypes/brutalist/src/theme';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './PrototypePreviewer/projection-theme';
 
@@ -86,6 +91,60 @@ function fixture() {
   };
 }
 describe('actual passive CodeSurface projection', () => {
+  it.each(['wc', 'react', 'vue', 'vue2'])(
+    '%s projects native information notes through public family Surfaces without replacing content',
+    async (runtime) => {
+      fixture();
+      const note = document.createElement('aside');
+      note.className = 'starlight-aside starlight-aside--note';
+      note.setAttribute('aria-label', 'Stable package channel, v0 project');
+      note.innerHTML =
+        '<p class="starlight-aside__title" aria-hidden="true"><svg aria-hidden="true"></svg>Stable package channel, v0 project</p><div class="starlight-aside__content"><p>Authored <a href="#contract">contract</a> remains unchanged.</p></div>';
+      document.body.append(note);
+      const source = note.textContent;
+      const title = note.querySelector<HTMLElement>('p')!;
+      const icon = note.querySelector('svg');
+      const link = note.querySelector('a')!;
+      link.focus();
+      localStorage.setItem('preferred-prototypes-adapter', runtime);
+      const handle = initNoteSurface(note);
+      handles.push(handle);
+      await handle.ready;
+      expect(note.dataset.noteSurfaceRuntime).toBe(runtime);
+      expect(note.dataset.noteSurfaceFamily).toBe('shadcn');
+      expect(note.querySelector('[data-pui-style]')?.getAttribute('data-pui-style')).toContain(
+        'rounded-lg'
+      );
+      expect(note.querySelector('[data-pui-style]')?.getAttribute('data-pui-style')).toContain(
+        'bg-background'
+      );
+      expect(title.dataset.siteTypography).toBe('label');
+      expect(note.textContent).toBe(source);
+      expect(note.firstElementChild).toBe(title);
+      expect(note.querySelector('svg')).toBe(icon);
+      expect(note.querySelector('a')).toBe(link);
+      expect(document.activeElement).toBe(link);
+      document.documentElement.dataset.siteLibraryFamily = 'brutalist';
+      await vi.waitFor(() => expect(note.dataset.noteSurfaceFamily).toBe('brutalist'));
+      const paint = note.querySelector<HTMLElement>('[data-pui-style]')!;
+      expect(paint.getAttribute('data-pui-style')).toContain('border-2');
+      expect(paint.hasAttribute('role')).toBe(false);
+      expect(paint.hasAttribute('tabindex')).toBe(false);
+      document.documentElement.dataset.theme = 'dark';
+      await vi.waitFor(() =>
+        expect(paint.style.getPropertyValue('--pui-background')).toBe(
+          BRUTALIST_THEME.dark.background
+        )
+      );
+      expect(note.textContent).toBe(source);
+      await handle.destroy();
+      expect(note.querySelector('.site-note-surface-mount')).toBeNull();
+      expect(title.hasAttribute('data-site-typography')).toBe(false);
+      expect(note.textContent).toBe(source);
+      expect(note.getAttribute('aria-label')).toBe('Stable package channel, v0 project');
+    },
+    20000
+  );
   it.each(['wc', 'react', 'vue', 'vue2'])(
     '%s preserves source, selection and native command/focus ownership across family changes',
     async (runtime) => {

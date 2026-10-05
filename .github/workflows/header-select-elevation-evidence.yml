@@ -5,11 +5,14 @@ on:
     paths:
       - '.github/workflows/header-select-elevation-evidence.yml'
       - 'packages/prototypes/brutalist/src/select/**'
+      - 'packages/prototypes/shadcn/src/select/**'
+      - 'packages/prototypes/brutalist/src/button/**'
       - 'apps/www/src/components/PrototypePreviewer/projection-composition.ts'
       - 'apps/www/src/components/Homepage/homepage-runtime-client.ts'
       - 'apps/www/src/components/override/AdapterSelect.astro'
       - 'apps/www/src/components/site-shadcn-controls.ts'
       - 'apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts'
   workflow_dispatch:
 
 # Actual public Header pages only. No deployment, secrets, write permissions,
@@ -32,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        appearance: [flat, elevated]
+        appearance: [flat, family]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,8 +56,10 @@ jobs:
           set -euo pipefail
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          # Bound stalled mirror I/O; retain real CJK fonts and fail on exhausted retries.
+          APT_NETWORK=(-o Acquire::Retries=3 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30)
+          sudo apt-get "${APT_NETWORK[@]}" update -qq
+          sudo apt-get "${APT_NETWORK[@]}" install -y --no-install-recommends fonts-noto-cjk
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
@@ -64,6 +69,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/header-select-elevation"
           PROBE=apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts
           cp "candidate/$PROBE" "subject/$PROBE"
+          cp candidate/apps/www/src/content/docs/zh-cn/header-popup-evidence.ts subject/apps/www/src/content/docs/zh-cn/header-popup-evidence.ts
           git -C subject rev-parse HEAD > "$RUNNER_TEMP/header-select-elevation/subject-sha.txt"
           git -C candidate rev-parse HEAD > "$RUNNER_TEMP/header-select-elevation/probe-sha.txt"
           sha256sum "subject/$PROBE" > "$RUNNER_TEMP/header-select-elevation/probe-sha256.txt"
@@ -80,6 +86,19 @@ jobs:
             corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
             apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts \
             2>&1 | tee "$RUNNER_TEMP/header-select-elevation/browser.log"
+      - name: Empty ghost Select actual paint and capture
+        if: matrix.appearance == 'family'
+        working-directory: subject
+        env:
+          PROTO_UI_HEADER_SELECT_SUBJECT_SHA: ${{ env.CANDIDATE_SHA }}
+          PROTO_UI_GHOST_SELECT_EVIDENCE_DIR: ${{ runner.temp }}/header-select-elevation/empty-ghost
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=10s 180s \
+            corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts \
+            -t 'paints empty ghost Select text' \
+            2>&1 | tee "$RUNNER_TEMP/header-select-elevation/empty-ghost.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

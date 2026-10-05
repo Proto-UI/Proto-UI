@@ -1,0 +1,50 @@
+/* The native Aside owns meaning, icon and authored content. Once its passive
+   public Surface is ready, remove only Starlight's competing fallback paint. */
+.starlight-aside--note {
+  position: relative;
+  isolation: isolate;
+}
+.starlight-aside--note[data-note-surface-view='ready'],
+.starlight-aside--note[data-note-surface-view='retained'] {
+  border: 0;
+  background: none;
+  color: inherit;
+}
+.starlight-aside--note[data-note-surface-view] > :not(.site-note-surface-mount) {
+  position: relative;
+  z-index: 1;
+}
+.site-note-surface-mount {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.site-note-surface-mount
+  :is(
+    .pui-projection-generation,
+    .pui-projection-scope,
+    .pui-projection-content,
+    .site-note-surface-paint
+  ) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+.site-note-surface-mount .pui-projection-controls:empty {
+  display: none;
+}
+.starlight-aside--note[data-note-surface-view] .starlight-aside__title [data-site-typography-slot] {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.starlight-aside--note[data-note-surface-view] .starlight-aside__icon {
+  flex: none;
+}
+.starlight-aside--note[data-note-surface-view] .starlight-aside__content a {
+  color: inherit;
+}

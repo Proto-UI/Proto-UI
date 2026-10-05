@@ -14,7 +14,12 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 - `Root`、`Trigger`、`Value`、`Content`、`Item`
 - `defaultValue` / `value`、`defaultOpen` / `open` 与对应变更事件
 - `Trigger.size="sm | default"`
+- `Trigger.appearance="default | ghost"`
 - `Content.position="item-aligned | popper"`，默认值与 shadcn/ui 一致为 `item-aligned`
 - 单选、禁用项、键盘导航、typeahead、浮层关闭与焦点恢复
 
 `Group`、`Label`、`Separator`、`Viewport`、滚动按钮、`ItemText`、`ItemIndicator` 和表单提交仍在后续范围。Content 通过 Anchored Position host 投射的 anchor-size CSS 变量与 Trigger 动态等宽；当前 `item-aligned` 保留官方 API 与默认值，但几何实现仍复用 Base 的锚点定位，尚未实现 Radix 的逐项对齐算法。
+
+## Trigger 外观
+
+`appearance="default"` 保留上方示例的有框字段表面。`appearance="ghost"` 是显式 Proto UI 呈现扩展：静止边框与背景透明、无静止阴影；hover 与 press 使用 accent 表面，保留清晰键盘焦点 ring 与 disabled 行为。此 prop 设在 `shadcn-select-trigger`，不设在 Root 或 Content；移除时即使在交互中也恢复 `default`。它只改变 Base Select Trigger 之上的视觉投影，不改变选择、键盘导航或浮层行为。

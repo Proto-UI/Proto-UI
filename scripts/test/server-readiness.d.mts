@@ -4,6 +4,7 @@ export function waitForServerReadiness(
   url: string,
   options: {
     timeoutMs: number;
+    rejectRedirects?: boolean;
     server?: ChildProcess | null;
     readOutput?: () => string;
     report?: (message: string) => void;

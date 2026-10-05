@@ -34,7 +34,7 @@ const options = [
       aria-labelledby={labelId}
       data-size="sm"
       data-appearance={family === 'brutalist' ? brutalistTriggerAppearance : undefined}
-      class="adapter-select min-w-36"
+      class="adapter-select"
     >
       <SelectValue data-placeholder="选择适配器" />
     </SelectTrigger>
@@ -67,12 +67,17 @@ const options = [
 </div>
 
 <style>
+  .adapter-select-wrapper {
+    min-width: 0;
+    width: min(9rem, 100%);
+    max-width: 100%;
+  }
   .adapter-select-wrapper [data-site-select-root] {
     display: inline-flex;
   }
 
   .adapter-select-wrapper [data-site-select-trigger] {
-    min-width: 9rem;
+    min-width: min(9rem, 100%);
   }
 
   /* Keep server-rendered chrome compact until the custom elements upgrade so

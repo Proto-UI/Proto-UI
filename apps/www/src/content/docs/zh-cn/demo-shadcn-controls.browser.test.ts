@@ -1,5 +1,7 @@
 // @vitest-environment node
 
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -220,6 +222,133 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('shadcn control documentation browser regressions', () => {
+  it('paints empty ghost Select text with the interaction foreground', async () => {
+    // T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
+    // Bounded WC public-props coverage; the Header suite covers selected controls
+    // across runtimes. No CSS or inherited interaction state is injected here.
+    const { context, page, previewer } = await openRoute(
+      browser,
+      baseUrl,
+      '/en/ui-libraries/shadcn/select/',
+      { width: 1280, height: 900 }
+    );
+    try {
+      await selectRuntime(page, previewer, 'wc', '[role="combobox"]', 1);
+      const trigger = previewer.locator('[role="combobox"][data-placeholder]');
+      await trigger.waitFor({ state: 'visible' });
+      expect(await trigger.count()).toBe(1);
+      const setAppearance = async (appearance?: 'ghost') => {
+        await trigger.evaluate((element, next) => {
+          const control = element as HTMLElement & {
+            setProps(props: Record<string, unknown>): void;
+          };
+          control.setProps(next ? { appearance: next } : {});
+        }, appearance);
+      };
+      const paint = async () =>
+        trigger.evaluate((element) => {
+          const value =
+            element.querySelector('[data-pui-proto="shadcn-select-value"]') ??
+            element.querySelector('wc-shadcn-select-value');
+          if (!value) throw new Error('Actual public Select Value must be present.');
+          const probe = document.createElement('span');
+          element.appendChild(probe);
+          const resolve = (token: string) => {
+            if (!getComputedStyle(element).getPropertyValue(token).trim()) {
+              throw new Error(`Missing public theme token: ${token}`);
+            }
+            probe.style.color = `var(${token})`;
+            return getComputedStyle(probe).color;
+          };
+          const muted = resolve('--pui-muted-foreground');
+          const accent = resolve('--pui-accent-foreground');
+          probe.remove();
+          return {
+            trigger: getComputedStyle(element).color,
+            value: getComputedStyle(value).color,
+            muted,
+            accent,
+            hovered: element.hasAttribute('data-hovered'),
+            pressed: element.hasAttribute('data-pressed'),
+          };
+        });
+      const capture = async (state: string) => {
+        const directory = process.env.PROTO_UI_GHOST_SELECT_EVIDENCE_DIR;
+        if (!directory) return;
+        const subject = process.env.PROTO_UI_HEADER_SELECT_SUBJECT_SHA;
+        if (!subject || !/^[a-f0-9]{40}$/.test(subject)) {
+          throw new Error('Ghost Select evidence requires its exact subject SHA.');
+        }
+        await mkdir(directory, { recursive: true });
+        await trigger.screenshot({ path: path.join(directory, `ghost-select-${state}.png`) });
+        await writeFile(
+          path.join(directory, `ghost-select-${state}.json`),
+          JSON.stringify(
+            { subject, runtime: 'wc', viewport: page.viewportSize(), state, paint: await paint() },
+            null,
+            2
+          )
+        );
+      };
+      for (const theme of ['light', 'dark'] as const) {
+        await applyColorScheme(page, theme);
+        await page.mouse.move(0, 0);
+        await setAppearance('ghost');
+        await expect
+          .poll(async () => {
+            const p = await paint();
+            expect(p.muted).not.toBe(p.accent);
+            return p.trigger === p.muted && p.value === p.muted;
+          })
+          .toBe(true);
+        await capture(`${theme}-rest`);
+        await trigger.hover();
+        await expect
+          .poll(async () => {
+            const p = await paint();
+            return p.hovered && p.trigger === p.accent && p.value === p.accent;
+          })
+          .toBe(true);
+        await capture(`${theme}-hover`);
+        await page.mouse.down();
+        await expect
+          .poll(async () => {
+            const p = await paint();
+            return p.pressed && p.trigger === p.accent && p.value === p.accent;
+          })
+          .toBe(true);
+        await capture(`${theme}-pressed`);
+        await setAppearance();
+        await expect
+          .poll(async () => {
+            const p = await paint();
+            return p.pressed && p.trigger === p.muted && p.value === p.muted;
+          })
+          .toBe(true);
+        await capture(`${theme}-restored-default-pressed`);
+        await setAppearance('ghost');
+        await expect
+          .poll(async () => {
+            const p = await paint();
+            return p.pressed && p.trigger === p.accent && p.value === p.accent;
+          })
+          .toBe(true);
+        await page.mouse.up();
+        await page.keyboard.press('Escape');
+        await page.mouse.move(0, 0);
+        await expect
+          .poll(async () => {
+            const p = await paint();
+            return !p.pressed && !p.hovered && p.trigger === p.muted && p.value === p.muted;
+          })
+          .toBe(true);
+      }
+    } finally {
+      await page.mouse.up();
+      await context.close();
+    }
+  }, 60_000);
+
   it('transitions only colour and box-shadow at the upstream duration and easing', async () => {
     const { context, page, previewer } = await openRoute(browser, baseUrl, TEXTAREA_ROUTE, {
       width: 1440,

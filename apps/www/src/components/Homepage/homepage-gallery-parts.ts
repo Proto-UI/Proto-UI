@@ -55,7 +55,9 @@ export function createHomepageGalleryParts(
       props,
       children,
       ...(ref ? { ref } : {}),
-      ...(id === PREVIEW_SURFACE_ID ? { surfaceStyle: panelSurfaceLayout } : {}),
+      ...(id === PREVIEW_SURFACE_ID
+        ? { surfaceStyle: { ...panelSurfaceLayout, padding: '1.25rem' } }
+        : {}),
       ...(/-(?:button|dialog-trigger|dropdown-menu-trigger)$/.test(id)
         ? { surfaceStyle: homepageCommandLayout(family) }
         : {}),

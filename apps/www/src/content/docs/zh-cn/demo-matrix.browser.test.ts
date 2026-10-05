@@ -6,6 +6,11 @@ import { join } from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RUNTIMES, launchBrowser, openRoute, startServer, stopServer } from './browser-harness';
+import {
+  matrixHostsReady,
+  collectMatrixInteractiveFacts,
+  type InteractiveFact,
+} from './demo-matrix-observation';
 
 const MATRIX_ROUTE = '/zh-cn/internal/demo-matrix/';
 
@@ -33,11 +38,6 @@ type MatrixFacts = {
   adapterColumnCount: number;
   runtimeRows: Record<string, number>;
   unavailable: string[];
-};
-
-type InteractiveFact = {
-  role: string;
-  name: string;
 };
 
 const INTERACTIVE_ROLES = [
@@ -68,17 +68,9 @@ async function waitForMatrix(page: Page): Promise<void> {
     { timeout: 60_000 }
   );
 
-  // Framework loaders settle after the preview roots are marked initialized;
-  // wait for the final host content so a slow import cannot be reported as a
-  // false matrix failure.
-  await page.waitForFunction(
-    () =>
-      [...document.querySelectorAll<HTMLElement>('[data-previewer-id] .host')].every(
-        (host) => host.childElementCount > 0 || host.textContent?.includes('[Preview Error]')
-      ),
-    undefined,
-    { timeout: 60_000 }
-  );
+  // A connected skeleton or laid-out staging generation is not a completed
+  // projection. Observe the existing commit boundary, never signature parity.
+  await page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000 });
 }
 
 async function readMatrixFacts(page: Page): Promise<MatrixFacts> {
@@ -176,61 +168,7 @@ async function readMatrixFacts(page: Page): Promise<MatrixFacts> {
  * matrix surface until the corresponding trigger opens them.
  */
 async function readInteractiveFacts(page: Page): Promise<Record<string, InteractiveFact[][]>> {
-  return page.evaluate((interactiveRoles) => {
-    const roles = new Set<string>(interactiveRoles);
-    const accessibleName = (element: HTMLElement): string => {
-      const labelledBy = element.getAttribute('aria-labelledby');
-      const labelledText = labelledBy
-        ? labelledBy
-            .split(/\s+/)
-            .map((id) => document.getElementById(id)?.textContent ?? '')
-            .join(' ')
-        : '';
-      return (
-        element.getAttribute('aria-label') ||
-        labelledText ||
-        element.getAttribute('title') ||
-        element.textContent ||
-        ''
-      )
-        .trim()
-        .replace(/\s+/g, ' ');
-    };
-    const visible = (element: HTMLElement): boolean => {
-      const rect = element.getBoundingClientRect();
-      const style = getComputedStyle(element);
-      return (
-        rect.width > 0 &&
-        rect.height > 0 &&
-        style.display !== 'none' &&
-        style.visibility !== 'hidden'
-      );
-    };
-
-    const result: Record<string, InteractiveFact[][]> = {};
-    document.querySelectorAll<HTMLElement>('.demo-matrix__item').forEach((item) => {
-      result[item.id] = Array.from(
-        item.querySelectorAll<HTMLElement>(
-          ':scope > .demo-matrix__adapters > .demo-matrix__adapter:not([data-unavailable])'
-        )
-      ).map((adapter) =>
-        Array.from(adapter.querySelectorAll<HTMLElement>('[role],button,input,select,textarea'))
-          .filter((element) => {
-            const role = element.getAttribute('role');
-            return (
-              ((role && roles.has(role)) ||
-                ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(element.tagName)) &&
-              visible(element)
-            );
-          })
-          .map((element) => ({
-            role: element.getAttribute('role') || element.tagName.toLowerCase(),
-            name: accessibleName(element),
-          }))
-      );
-    });
-    return result;
-  }, INTERACTIVE_ROLES);
+  return page.evaluate(collectMatrixInteractiveFacts, INTERACTIVE_ROLES);
 }
 
 async function chooseGlobalAdapter(page: Page, runtime: string): Promise<void> {
@@ -335,7 +273,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
         ).toBe(true);
         expect(
           new Set(signatures.map((signature) => JSON.stringify(signature))).size,
-          `${demoId} accessible controls differ across runtimes`
+          `${demoId} accessible controls differ across runtimes: ${JSON.stringify(signatures)}`
         ).toBeLessThanOrEqual(1);
       }
 

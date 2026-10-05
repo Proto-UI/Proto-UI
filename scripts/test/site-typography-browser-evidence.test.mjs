@@ -75,9 +75,16 @@ function collectSuite() {
 describe('native typography browser ownership and bounded registration', () => {
   it('collects every configured journey without running a browser or hook', () => {
     const { cases, hooks } = collectSuite();
-    assert.equal(cases.length, 30);
-    assert.equal(new Set(cases.map((entry) => entry.name)).size, 30);
+    assert.equal(cases.length, 33);
+    assert.equal(new Set(cases.map((entry) => entry.name)).size, 33);
     assert.equal(hooks.length, 2);
+    for (const family of ['shadcn', 'brutalist', 'homepage'])
+      assert.equal(
+        cases.filter(
+          ({ name }) => name === `${family}: retains its own no-JavaScript heading scale`
+        ).length,
+        1
+      );
     assert.ok(
       cases.every(
         (entry) =>

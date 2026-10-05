@@ -16,7 +16,7 @@
   }
 
   .right-sidebar ul {
-    @apply flex flex-col gap-2 p-4 text-sm;
+    @apply flex flex-col gap-0.5 p-4 text-sm;
   }
 
   .right-sidebar h2 {

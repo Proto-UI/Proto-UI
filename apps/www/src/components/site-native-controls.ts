@@ -19,9 +19,10 @@ import { bindNativeLinkFacts } from './site-native-link-facts';
 import { resolveSiteLibraryFamily, type SiteLibraryFamily } from './site-library-family';
 import { resolveProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 
-const bindings = new WeakMap<HTMLAnchorElement, () => void>();
+const bindings = new WeakMap<HTMLElement, () => void>();
 
-export function siteLinkAppearance(link: HTMLAnchorElement): SiteLinkAppearance {
+export function siteLinkAppearance(link: HTMLElement): SiteLinkAppearance {
+  if (link.localName === 'summary') return 'nav-group';
   if (link.hasAttribute('data-home-brand')) return 'brand';
   const requested = link.dataset.siteLinkAppearance;
   if (
@@ -49,7 +50,7 @@ export function siteLinkAppearance(link: HTMLAnchorElement): SiteLinkAppearance 
 /** Keep Starlight's localized label, line break and title nodes. Only the
  * existing caption becomes visually hidden; the native accessible name still
  * includes Previous/Next and the title. Releasing restores exact node order. */
-function preparePaginationCaption(link: HTMLAnchorElement): () => void {
+function preparePaginationCaption(link: HTMLElement): () => void {
   if (siteLinkAppearance(link) !== 'pagination') return () => {};
   const title = link.querySelector('.link-title');
   const label = title?.parentElement;
@@ -66,18 +67,18 @@ function preparePaginationCaption(link: HTMLAnchorElement): () => void {
   label.insertBefore(caption, title);
   return () => caption.replaceWith(...before);
 }
-export function siteLinkEmphasis(link: HTMLAnchorElement): SiteLinkEmphasis {
+export function siteLinkEmphasis(link: HTMLElement): SiteLinkEmphasis {
   const value = link.dataset.homeActionVariant;
   return value === 'primary' || value === 'minimal' || value === 'link' ? value : 'secondary';
 }
-export function siteLinkIcon(link: HTMLAnchorElement): SiteLinkIcon | 'none' {
+export function siteLinkIcon(link: HTMLElement): SiteLinkIcon | 'none' {
   const value = link.dataset.siteLinkIcon;
   return value === 'github' || value === 'discord' || value === 'x' || value === 'bluesky'
     ? value
     : 'none';
 }
 
-/** Enhances existing SSR anchors, never replaces their native navigation root.
+/** Enhances SSR anchors and summaries, preserving native navigation/disclosure owners.
  * Homepage-owned groups use the same Prototype through their four-runtime
  * transaction; this small WC bridge is only for static documentation chrome. */
 export function initSiteNativeControls(scope: ParentNode = document): () => void {
@@ -101,12 +102,15 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
         );
     }
   }
+  const ranges = [...scope.querySelectorAll<HTMLElement>('[data-site-toc-highlight]')].filter(
+    (range) => !bindings.has(range)
+  );
   const links = [
-    ...scope.querySelectorAll<HTMLAnchorElement>(
-      'a[data-site-native-link], a[data-site-native-button], .sidebar-pane .top-level a[href], .pagination-links a[href], sl-toc a[href]'
+    ...scope.querySelectorAll<HTMLElement>(
+      'a[data-site-native-link], a[data-site-native-button], .sidebar-pane .top-level a[href], .sidebar-pane .top-level summary, .pagination-links a[href], sl-toc a[href]'
     ),
   ].filter((link) => !link.closest('[data-homepage-actions]') && !bindings.has(link));
-  if (!links.length) return () => {};
+  if (!links.length && !ranges.length) return () => {};
   const readFamily = (): SiteLibraryFamily =>
     document.documentElement.dataset.siteLibraryFamily === 'brutalist'
       ? 'brutalist'
@@ -154,6 +158,53 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
     return refreshTheme();
   };
   const releases: Array<() => void> = [];
+  // One passive public family Surface per TOC, sharing this batch's theme.
+  // The native TOC owner alone measures and moves its aria-hidden mount.
+  for (const range of ranges) {
+    let family = batchFamily;
+    let surface = document.createElement(`wc-site-${family}-surface`);
+    const props = () => ({
+      variant: 'muted',
+      radius: family === 'brutalist' ? 'default' : 'md',
+      border: 'none',
+      elevation: 'none',
+      surfaceStyle: {
+        ...batchTheme,
+        display: 'block',
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+      },
+    });
+    const apply = () => {
+      const target = surface as HTMLElement & {
+        setProps?: (props: Record<string, unknown>) => void;
+      };
+      if (target.isConnected && target.setProps) target.setProps(props());
+      else setElementProps(target, props());
+    };
+    apply();
+    range.append(surface);
+    range.setAttribute('data-toc-range-ready', '');
+    const update = () => {
+      if (family !== batchFamily) {
+        const previous = surface;
+        family = batchFamily;
+        surface = document.createElement(`wc-site-${family}-surface`);
+        apply();
+        previous.replaceWith(surface);
+      } else apply();
+    };
+    updates.add(update);
+    const release = () => {
+      updates.delete(update);
+      bindings.delete(range);
+      surface.remove();
+      range.removeAttribute('data-toc-range-ready');
+    };
+    bindings.set(range, release);
+    releases.push(release);
+  }
   for (const link of links) {
     let alive = true;
     const appearance = siteLinkAppearance(link);
@@ -201,11 +252,11 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
         ...linkSurfaceProps(family, appearance, siteLinkEmphasis(link), facts),
         surfaceStyle: {
           ...theme,
-          ...linkSurfaceLayout(family, appearance, siteLinkEmphasis(link)),
+          ...linkSurfaceLayout(family, appearance, siteLinkEmphasis(link), facts),
         },
       };
       const textProps = {
-        ...linkTextProps(appearance, facts),
+        ...linkTextProps(appearance, facts, family),
         surfaceStyle: { ...theme, minWidth: '0' },
       };
       const owner = surface;

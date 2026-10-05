@@ -1,3 +1,4 @@
+import { bindSiteSelectDismissal } from './site-select-dismissal';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import brutalistButton from '@proto.ui/prototypes-brutalist/button';
 import {
@@ -171,7 +172,8 @@ function headerSurfaceStyle(element: HTMLElement, kind: 'button' | 'root' | 'tri
       width: '100%',
       minWidth: '0',
       maxWidth: '100%',
-      minHeight: 'var(--site-control-height, 2.75rem)',
+      minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.75rem))',
+      paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
       ...(docsRuntime ? { height: 'auto' } : {}),
       fontFamily: 'inherit',
       fontSize: '0.875rem',
@@ -207,10 +209,38 @@ function initializeButton(button: HTMLElement): void {
   button.dataset.siteShadcnInitialized = '1';
 }
 
+/** Local demo runtime fields can be narrower than their value at enlarged
+ * text sizes. Bound only this existing consumer, through its public surface. */
+function selectSurfaceStyle(element: HTMLElement, kind: 'root' | 'trigger' | 'value') {
+  const header = headerSurfaceStyle(element, kind);
+  if (header) return header;
+  if (!element.closest('[data-adapter-select]')) return undefined;
+  if (kind === 'value')
+    return {
+      display: 'block',
+      minWidth: '0',
+      flex: '1 1 auto',
+      whiteSpace: 'normal',
+      overflowWrap: 'anywhere',
+      overflow: 'visible',
+    };
+  return {
+    width: '100%',
+    minWidth: '0',
+    maxWidth: '100%',
+    ...(kind === 'trigger' ? { height: 'auto' } : {}),
+  };
+}
+
 function initializeSelect(root: SiteSelectRoot): void {
   const family = root.localName.includes('brutalist') ? 'brutalist' : 'shadcn';
   root.dataset.siteControlFamily = family;
   const initialized = root.dataset.siteShadcnInitialized === '1';
+  bindSiteSelectDismissal(root, (reason) => {
+    const exposes = root.getExposes?.() as SelectCloseExposes | undefined;
+    if (exposes?.open?.get?.() === true)
+      exposes.requestOpen?.({ open: false, reason, focusReason: 'programmatic' });
+  });
   if (!initialized) {
     // `data-value` is owned by the adapter's exposed-state projection, so it
     // is intentionally not used as an authoring input. Keep the SSR seed in a
@@ -220,8 +250,8 @@ function initializeSelect(root: SiteSelectRoot): void {
       value,
       disabled: root.dataset.disabled === 'true',
       closeOnSelect: true,
-      ...(headerSurfaceStyle(root, 'root')
-        ? { surfaceStyle: headerSurfaceStyle(root, 'root') }
+      ...(selectSurfaceStyle(root, 'root')
+        ? { surfaceStyle: selectSurfaceStyle(root, 'root') }
         : {}),
     });
   }
@@ -232,12 +262,26 @@ function initializeSelect(root: SiteSelectRoot): void {
   if (trigger) {
     applyProps(trigger, {
       size: trigger.dataset.size ?? 'default',
-      ...(family === 'brutalist' && trigger.dataset.appearance
+      ...(root.closest('[data-site-header]')
+        ? {
+            appearance:
+              family === 'brutalist'
+                ? (trigger.dataset.appearance ?? 'flat')
+                : (!!root.closest('[data-site-header-preferences]') ||
+                      !root.closest('[data-site-header-panel]')) &&
+                    !root.ownerDocument.defaultView?.matchMedia?.('(max-width: 47.999rem)').matches
+                  ? 'ghost'
+                  : 'default',
+          }
+        : {}),
+      ...(family === 'brutalist' &&
+      !root.closest('[data-site-header]') &&
+      trigger.dataset.appearance
         ? { appearance: trigger.dataset.appearance }
         : {}),
       disabled: trigger.dataset.disabled === 'true',
-      ...(headerSurfaceStyle(trigger, 'trigger')
-        ? { surfaceStyle: headerSurfaceStyle(trigger, 'trigger') }
+      ...(selectSurfaceStyle(trigger, 'trigger')
+        ? { surfaceStyle: selectSurfaceStyle(trigger, 'trigger') }
         : {}),
     });
   }
@@ -248,8 +292,8 @@ function initializeSelect(root: SiteSelectRoot): void {
   if (valuePart) {
     applyProps(valuePart, {
       placeholder: valuePart.dataset.placeholder ?? '',
-      ...(headerSurfaceStyle(valuePart, 'value')
-        ? { surfaceStyle: headerSurfaceStyle(valuePart, 'value') }
+      ...(selectSurfaceStyle(valuePart, 'value')
+        ? { surfaceStyle: selectSurfaceStyle(valuePart, 'value') }
         : {}),
     });
   }

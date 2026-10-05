@@ -59,6 +59,7 @@ const diagnosticPages = new Map<
     initialPollFailure?: { at: number; message: string; cause: string | null };
     requests: unknown[];
     lateObservation?: { budgetMs: number; elapsedMs: number; ready: boolean };
+    startupProfileRecorded?: boolean;
   }
 >();
 function stage(page: Page, id: string, step: string) {
@@ -145,6 +146,72 @@ async function captureFailure(page: Page) {
     await capture(page, entry.id, `late-observation-${entry.stage}`).catch((error) =>
       console.warn('[Search evidence] Late observation unavailable', error)
     );
+    if (
+      entry.stage === 'initial-ready' &&
+      entry.initialPollFailure &&
+      !entry.startupProfileRecorded
+    ) {
+      entry.startupProfileRecorded = true;
+      // An isolated follow-on navigation attributes CPU cost. Profiling never
+      // runs during the original 5000ms acceptance observation or replaces it.
+      const context = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
+      const diagnostic = await context.newPage();
+      const session = await context.newCDPSession(diagnostic);
+      const target = page.url();
+      try {
+        if (new URL(target).origin !== new URL(baseUrl).origin)
+          throw new Error('Diagnostic must remain on the owned test server');
+        await session.send('Profiler.enable');
+        await session.send('Profiler.start');
+        await diagnostic.addInitScript(installSearchStartupTrace);
+        await diagnostic.goto(target, { waitUntil: 'domcontentloaded', timeout: 15_000 });
+        await diagnostic
+          .waitForFunction(
+            () =>
+              document
+                .querySelector(
+                  'site-search [data-projection-generation-state="active"] [data-open-modal]'
+                )
+                ?.getAttribute('aria-disabled') === 'false',
+            undefined,
+            { timeout: 8_000 }
+          )
+          .catch(() => {});
+        const { profile } = await session.send('Profiler.stop');
+        const trace = await diagnostic.evaluate(
+          () => (window as any).__puiSearchStartup?.snapshot() ?? null
+        );
+        await writeFile(
+          path.join(evidenceDirectory, `${entry.id}-post-failure-startup.cpuprofile.json`),
+          JSON.stringify(
+            {
+              source,
+              diagnosticOnly: true,
+              originalFailurePreserved: true,
+              originalReadiness: entry.initialReadiness,
+              target,
+              viewport: page.viewportSize(),
+              profile,
+              trace,
+            },
+            null,
+            2
+          )
+        );
+      } catch (error) {
+        await writeFile(
+          path.join(evidenceDirectory, `${entry.id}-post-failure-profile-error.json`),
+          JSON.stringify(
+            { source, diagnosticOnly: true, originalFailurePreserved: true, error: String(error) },
+            null,
+            2
+          )
+        );
+      } finally {
+        await session.detach().catch(() => {});
+        await context.close();
+      }
+    }
   }
 }
 afterEach(async () => {
@@ -499,8 +566,7 @@ describe.sequential('Search family Button commands', () => {
             );
             expect(await trigger.getAttribute('role')).toBe('button');
             await expect.poll(() => page.locator('html').getAttribute('data-theme')).toBe(theme);
-            // Sibling Header commands use real Shadcn ghost Buttons; fields
-            // retain their independent Select border. Brutalist stays surface.
+            // Each Header consumes its public family Button presentation.
             const triggerTokens = await trigger.getAttribute('data-pui-style');
             expect(triggerTokens).toContain(
               family === 'brutalist' ? 'bg-secondary-background' : 'bg-transparent'
@@ -513,6 +579,9 @@ describe.sequential('Search family Button commands', () => {
               }));
               expect(rest.border).toBe('rgba(0, 0, 0, 0)');
               expect(rest.background).toBe('rgba(0, 0, 0, 0)');
+            } else {
+              expect(triggerTokens).toContain('border-black');
+              expect(triggerTokens).toContain('shadow-[4px_4px_0_0_#000]');
             }
             const box = await trigger.boundingBox();
             expect(box!.height).toBeGreaterThanOrEqual(43);
@@ -690,13 +759,13 @@ for (const width of [1280, 1440, 2048]) {
           expect(geometry.commands).toHaveLength(3);
           expect(Math.abs(geometry.search.height - 44)).toBeLessThanOrEqual(1);
           for (const selector of geometry.selectors) {
-            expect(Math.abs(selector.trigger.height - 44)).toBeLessThanOrEqual(1);
+            expect(Math.abs(selector.trigger.height - 36)).toBeLessThanOrEqual(1);
             expect(Math.abs(selector.trigger.bottom - geometry.search.bottom)).toBeLessThanOrEqual(
               1
             );
-            expect(Math.abs(selector.trigger.center - geometry.search.center)).toBeLessThanOrEqual(
-              1
-            );
+            expect(
+              Math.abs(selector.trigger.center - geometry.search.center - 4)
+            ).toBeLessThanOrEqual(1);
             expect(selector.label.bottom).toBeLessThanOrEqual(selector.trigger.y + 1);
             expect(selector.trigger.scrollWidth - selector.trigger.clientWidth).toBeLessThanOrEqual(
               1
@@ -976,7 +1045,7 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
           expect(geometry.textWidth - geometry.value.width).toBeLessThanOrEqual(1);
           expect(geometry.select.scrollWidth - geometry.select.clientWidth).toBeLessThanOrEqual(1);
           expect(geometry.overflow).toBeLessThanOrEqual(1);
-          expect(Math.abs(geometry.select.height - 44)).toBeLessThanOrEqual(1);
+          expect(Math.abs(geometry.select.height - (width < 768 ? 44 : 36))).toBeLessThanOrEqual(1);
           expect(Math.abs(geometry.search.height - 44)).toBeLessThanOrEqual(1);
           expect(geometry.searchRole).toBe('button');
           expect(geometry.searchDisabled).toBe('false');
@@ -986,9 +1055,6 @@ for (const width of [320, 390, 1280, 1440, 2048]) {
             expect(geometry.search.bottom).toBeLessThanOrEqual(geometry.label.y + 1);
             expect(Math.abs(geometry.sidebarTop - geometry.header.bottom)).toBeLessThanOrEqual(1);
           } else {
-            expect(Math.abs(geometry.select.bottom - geometry.search.bottom)).toBeLessThanOrEqual(
-              1
-            );
             expect(Math.abs(geometry.select.center - geometry.search.center)).toBeLessThanOrEqual(
               1
             );

@@ -1,3 +1,4 @@
+import { bindSiteSelectDismissal } from '../site-select-dismissal';
 import { siteTextRecipe } from '../site-text-recipes';
 import type { RuntimeId } from './runtimes/registry';
 import {
@@ -45,6 +46,9 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   wrapValue?: boolean;
   /** Explicit Brutalist Trigger presentation; other families keep their own recipe. */
   brutalistTriggerAppearance?: 'flat' | 'elevated';
+  /** Shadcn presentation; Brutalist retains its separate explicit appearance. */
+  triggerAppearance?: 'default' | 'ghost';
+  compactTriggerAppearance?: 'default' | 'ghost';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
@@ -483,6 +487,19 @@ function cloneProjectedChild(
   });
 }
 
+function triggerAppearance(
+  config: ProjectionControlConfig<string>,
+  prototypeId: string,
+  compact = false
+): string | undefined {
+  if (prototypeId === 'brutalist-select-trigger') return config.brutalistTriggerAppearance;
+  const appearance =
+    compact && config.compactTriggerAppearance
+      ? config.compactTriggerAppearance
+      : config.triggerAppearance;
+  return appearance;
+}
+
 function createSelectControl<Value extends string>(
   id: ProjectionControlId,
   currentValue: Value,
@@ -536,8 +553,8 @@ function createSelectControl<Value extends string>(
     ref: refs.trigger,
     props: {
       'aria-label': config.label,
-      ...(selectParts.trigger === 'brutalist-select-trigger' && config.brutalistTriggerAppearance
-        ? { appearance: config.brutalistTriggerAppearance }
+      ...(triggerAppearance(config, selectParts.trigger)
+        ? { appearance: triggerAppearance(config, selectParts.trigger) }
         : {}),
     },
     // The website owns control density, through the Adapter's normalized surface channel.
@@ -545,7 +562,8 @@ function createSelectControl<Value extends string>(
       width: '100%',
       minWidth: '0',
       maxWidth: '100%',
-      minHeight: 'var(--site-control-height, 2.25rem)',
+      minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.25rem))',
+      paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
       ...(config.wrapValue ? { height: 'auto' } : {}),
     },
     children: [value],
@@ -749,6 +767,7 @@ export function createProjectionComposition(
 
     activeContext = context;
     const listeners: Array<Readonly<{ element: HTMLElement; listener: EventListener }>> = [];
+    const appearanceCleanups: Array<() => void> = [];
     const document = contentHost.ownerDocument;
     const view = document.defaultView;
     if (!view) {
@@ -801,6 +820,30 @@ export function createProjectionComposition(
           throw new Error(`[PrototypePreviewer] projection ${id} control trigger is missing.`);
         }
         trigger.setAttribute('aria-label', options.controls[id].label);
+        const config = options.controls[id] as ProjectionControlConfig<string>;
+        appearanceCleanups.push(
+          bindSiteSelectDismissal(context.refs[CONTROL_REFS[id].box]!, (reason) => {
+            if (activeContext === context)
+              context.api.call(rootRef, 'requestOpen', {
+                open: false,
+                reason,
+                focusReason: 'programmatic',
+              });
+          })
+        );
+        if (config.compactTriggerAppearance) {
+          const compact = view.matchMedia?.('(max-width: 47.999rem)');
+          const applyAppearance = () => {
+            if (activeContext !== context) return;
+            context.api.setProps(CONTROL_REFS[id].trigger, {
+              appearance: triggerAppearance(config, selectParts.trigger, compact?.matches),
+            });
+          };
+          applyAppearance();
+          compact?.addEventListener('change', applyAppearance);
+          appearanceCleanups.push(() => compact?.removeEventListener('change', applyAppearance));
+        }
+
         const handleValueChange = (value: string | undefined) => {
           if (value === undefined) return;
           if (activeContext !== context) return;
@@ -842,6 +885,7 @@ export function createProjectionComposition(
       applyLocked(context);
     } catch (error) {
       stopObservingMarkerChanges();
+      for (const cleanup of appearanceCleanups) cleanup();
       for (const { element, listener } of listeners) {
         element.removeEventListener('valueChange', listener);
       }
@@ -875,6 +919,7 @@ export function createProjectionComposition(
       };
 
       attempt(stopObservingMarkerChanges);
+      for (const cleanup of appearanceCleanups) attempt(cleanup);
       for (const id of controlIds) {
         attempt(() =>
           context.api.call(CONTROL_REFS[id].root, 'close', 'projection composition cleanup')

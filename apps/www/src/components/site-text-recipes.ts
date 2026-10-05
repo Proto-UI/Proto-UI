@@ -19,24 +19,28 @@ export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
 export function siteTextRecipe(
   role: SiteTypographyRole,
   family: SiteLibraryFamily,
-  compact = false
+  compact = false,
+  context: 'site' | 'document' = 'site'
 ): TextRootProps {
+  // These are existing public Text inputs, composed only for ordinary Shadcn
+  // document reading. Homepage and notice/chrome owners keep their recipes.
+  const reading = context === 'document' && family === 'shadcn';
   const heading = role === 'slogan' || /^h[1-6]$/.test(role);
   const size: TextRootProps['size'] =
     role === 'slogan'
       ? compact
-        ? '3xl'
-        : '5xl'
+        ? '2xl'
+        : '4xl'
       : role === 'tagline'
-        ? compact
+        ? compact || reading
           ? 'base'
           : 'lg'
         : (
             {
-              h1: '4xl',
-              h2: '3xl',
-              h3: '2xl',
-              h4: 'xl',
+              h1: reading ? '3xl' : '4xl',
+              h2: '2xl',
+              h3: 'xl',
+              h4: 'lg',
               h5: 'lg',
               h6: 'base',
               body: 'base',
@@ -46,7 +50,12 @@ export function siteTextRecipe(
           )[role];
   return {
     size,
-    tone: role === 'tagline' || role === 'caption' ? 'muted' : 'default',
+    tone:
+      role === 'tagline' || role === 'caption'
+        ? 'muted'
+        : reading && role === 'body'
+          ? 'inherit'
+          : 'default',
     weight: heading
       ? family === 'brutalist'
         ? 'bold'

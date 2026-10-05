@@ -275,7 +275,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
       const page = await context.newPage();
       await page.goto(`${baseUrl}/zh-cn/`);
       await ready(page, 'wc');
-      for (const width of [390, 320]) {
+      for (const width of [390, 430, 320]) {
         await page.setViewportSize({ width, height: 844 });
         const navigation = page.locator('[data-site-header-navigation]');
         const originalNavigation = await navigation.elementHandle();
@@ -362,8 +362,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           );
         }
         expect(geometry.preferences[1]!.y).toBeGreaterThan(geometry.preferences[0]!.bottom);
-        expect(Math.abs(geometry.panel.top - geometry.menu.bottom - 5)).toBeLessThanOrEqual(1);
-        expect(Math.abs(geometry.panel.right - geometry.menu.right)).toBeLessThanOrEqual(1);
+        expect(Math.abs(geometry.panel.top - geometry.headerBottom - 5)).toBeLessThanOrEqual(1);
+        expect(Math.abs(geometry.panel.right - (width - 8))).toBeLessThanOrEqual(1);
         expect(geometry.height).toBeLessThanOrEqual(64);
         expect(geometry.controls).toHaveLength(3);
         for (const control of geometry.controls) {
@@ -509,8 +509,8 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
   }, 180_000);
   it('uses real family Contents Buttons through all four Docs runtimes with keyboard and exact-source visual evidence', async () => {
     const directory = path.join(
-      process.env.RUNNER_TEMP ?? os.tmpdir(),
-      'homepage-evidence',
+      process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ??
+        path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
       'contents-command'
     );
     await mkdir(directory, { recursive: true });
@@ -525,6 +525,34 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         colorScheme: 'dark',
       });
       const page = await context.newPage();
+      const pageErrors: string[] = [];
+      page.on('pageerror', (error) => pageErrors.push(error.message));
+      page.on('console', (message) => {
+        if (message.type() === 'error') pageErrors.push(`console: ${message.text()}`);
+      });
+      await page.addInitScript(() => {
+        const evidence = {
+          longTasks: [] as Array<{ start: number; duration: number }>,
+          changes: [] as Array<{ at: number; adapter: unknown }>,
+        };
+        Object.assign(window, { __contentsRuntimeEvidence: evidence });
+        document.addEventListener('proto-adapter:change', (event) => {
+          evidence.changes.push({
+            at: performance.timeOrigin + performance.now(),
+            adapter: (event as CustomEvent<{ adapter: unknown }>).detail?.adapter,
+          });
+        });
+        if (PerformanceObserver.supportedEntryTypes.includes('longtask'))
+          new PerformanceObserver((entries) => {
+            evidence.longTasks.push(
+              ...entries.getEntries().map((entry) => ({
+                start: performance.timeOrigin + entry.startTime,
+                duration: entry.duration,
+              }))
+            );
+            evidence.longTasks.splice(0, Math.max(0, evidence.longTasks.length - 100));
+          }).observe({ type: 'longtask', buffered: true });
+      });
       try {
         const route =
           family === 'shadcn'
@@ -541,11 +569,102 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           const select = page.locator('[data-adapter-select] [role="combobox"]');
           await select.click();
           const popup = await select.getAttribute('aria-controls');
+          const transitionStartedAt = Date.now();
           await page
             .locator(`[id=${JSON.stringify(popup)}]`)
             .getByRole('option', { name: LABELS[runtime], exact: true })
             .click();
-          await expect.poll(() => root.getAttribute('data-contents-runtime')).toBe(runtime);
+          const clickedAt = Date.now();
+          let originalError: unknown;
+          try {
+            await expect.poll(() => root.getAttribute('data-contents-runtime')).toBe(runtime);
+          } catch (error) {
+            originalError = error;
+          }
+          const originalCheckAt = Date.now();
+          const readTransition = () =>
+            page.evaluate((since) => {
+              const contents = document.querySelector<HTMLElement>('[data-site-contents-command]');
+              const panel = document.querySelector<HTMLElement>('[data-site-header-panel]');
+              const evidence = (
+                window as typeof window & {
+                  __contentsRuntimeEvidence?: {
+                    longTasks: Array<{ start: number; duration: number }>;
+                    changes: Array<{ at: number; adapter: unknown }>;
+                  };
+                }
+              ).__contentsRuntimeEvidence;
+              return {
+                observedAt: performance.timeOrigin + performance.now(),
+                preference: localStorage.getItem('preferred-prototypes-adapter'),
+                contents: contents ? { ...contents.dataset } : null,
+                panel: panel ? { ...panel.dataset } : null,
+                generations: [
+                  ...document.querySelectorAll<HTMLElement>(
+                    'header [data-projection-generation-host]'
+                  ),
+                ].map((element) => ({ ...element.dataset, inert: element.inert })),
+                longTasks: evidence?.longTasks.filter((entry) => entry.start >= since),
+                changes: evidence?.changes.filter((entry) => entry.at >= since),
+                resources: performance
+                  .getEntriesByType('resource')
+                  .filter(
+                    (entry) =>
+                      performance.timeOrigin + entry.startTime >= since &&
+                      new URL(entry.name).origin === location.origin
+                  )
+                  .slice(-40)
+                  .map((entry) => ({
+                    path: new URL(entry.name).pathname,
+                    start: performance.timeOrigin + entry.startTime,
+                    duration: entry.duration,
+                  })),
+              };
+            }, transitionStartedAt);
+          try {
+            const first = await readTransition();
+            let late: Awaited<ReturnType<typeof readTransition>> | null = null;
+            if (originalError) {
+              // Diagnosis only: retain the original1000ms failure even if this
+              // bounded observation later sees the requested generation commit.
+              await page
+                .waitForFunction(
+                  (target) =>
+                    document.querySelector<HTMLElement>('[data-site-contents-command]')?.dataset
+                      .contentsRuntime === target,
+                  runtime,
+                  { timeout: 3000 }
+                )
+                .catch(() => {});
+              late = await readTransition();
+              await page.screenshot({
+                path: path.join(directory, `${family}-${runtime}-failure.png`),
+              });
+            }
+            await writeFile(
+              path.join(directory, `${family}-${runtime}-transition.json`),
+              JSON.stringify(
+                {
+                  source,
+                  family,
+                  runtime,
+                  transitionStartedAt,
+                  clickedAt,
+                  originalCheckAt,
+                  originalDeadlineMs: 1000,
+                  originalError: originalError ? String(originalError) : null,
+                  first,
+                  late,
+                  pageErrors,
+                },
+                null,
+                2
+              )
+            );
+          } catch (diagnosticError) {
+            console.error('[Contents runtime evidence]', diagnosticError);
+          }
+          if (originalError) throw originalError;
           expect(await root.getAttribute('data-contents-family')).toBe(family);
           expect(await root.getAttribute('data-contents-generation')).toBe(
             await page
@@ -624,7 +743,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
     try {
-      for (const width of [390, 320]) {
+      for (const width of [390, 430, 320]) {
         await page.setViewportSize({ width, height: 844 });
         await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/components/tooltip/`, {
           waitUntil: 'networkidle',
@@ -632,6 +751,9 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         const header = page.locator('[data-docs-site-header]');
         const menu = header.locator('[data-site-menu-button]');
         await expect.poll(() => header.getAttribute('data-site-menu-ready')).toBe('');
+        // This loop reuses its native pointer across navigations. Measure the
+        // resting row, not a legitimate +4px Brutalist hover under the old point.
+        await page.mouse.move(0, 800);
         const geometry = await header.evaluate((element) => {
           const bounds = element.getBoundingClientRect();
           const controls = [
@@ -811,18 +933,16 @@ for (const family of ['shadcn', 'brutalist'] as const) {
               panel: panel.getBoundingClientRect().toJSON(),
               surface: surface.getBoundingClientRect().toJSON(),
               trigger: trigger.getBoundingClientRect().toJSON(),
+              header: trigger.closest('[data-site-header]')!.getBoundingClientRect().toJSON(),
               overflow: document.documentElement.scrollWidth - innerWidth,
             };
           });
           expect(placement.overflow).toBeLessThanOrEqual(1);
-          expect(Math.abs(placement.panel.top - placement.trigger.bottom - 5)).toBeLessThanOrEqual(
+          expect(Math.abs(placement.panel.top - placement.header.bottom - 5)).toBeLessThanOrEqual(
             1
           );
           expect(
-            Math.abs(
-              (rtl ? placement.panel.left : placement.panel.right) -
-                (rtl ? placement.trigger.left : placement.trigger.right)
-            )
+            Math.abs((rtl ? placement.panel.left : placement.panel.right) - (rtl ? 8 : width - 8))
           ).toBeLessThanOrEqual(1);
           expect(Math.abs(placement.surface.width - placement.panel.width)).toBeLessThanOrEqual(1);
           const runtime = page.locator(

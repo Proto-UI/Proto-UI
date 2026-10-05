@@ -63,7 +63,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
     </noscript>
     <div
       data-page-frame-layout
-      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-w-0 w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:240px] lg:[--top-spacing:calc(var(--spacing)*4)]"
+      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-w-0 w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:15rem] lg:[--top-spacing:calc(var(--spacing)*4)]"
     >
       {
         hasSidebar && (
@@ -133,13 +133,18 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   :global(.site-page-frame > .container-wrapper > header:has([data-site-header])) {
     container: docs-page / inline-size;
   }
-  :global(
-    .site-page-frame:has([data-docs-site-header]) [data-doc-flow] :is(h1, h2, h3, h4, h5, h6)[id]
-  ) {
+  /* Our measured Header margin owns anchor clearance for every native main
+     target, including PageTitle and legacy anchors outside MarkdownContent.
+     Starlight root padding would otherwise add a second header offset. */
+  :global(html:has(.site-page-frame [data-docs-site-header])) {
+    scroll-padding-top: 0;
+  }
+  :global(.site-page-frame:has([data-docs-site-header]) main [id]) {
     scroll-margin-top: calc(var(--header-height) + 1rem);
   }
   /* Keep the header and all three documentation columns on one centered canvas. */
   .docs-shell {
+    container: docs-canvas / inline-size;
     max-width: 85rem;
     margin-inline: auto;
   }

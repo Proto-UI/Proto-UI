@@ -23,6 +23,60 @@ function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installati
 }
 afterEach(() => document.body.replaceChildren());
 
+it('reflows enlarged desktop reading columns and Header by container space, preserving original owners', () => {
+  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+  const header = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(frame).toContain('container: docs-canvas / inline-size');
+  expect(frame).toContain('lg:[--sidebar-width:15rem]');
+  expect(columns).toContain('@container docs-canvas (max-width: 72rem)');
+  expect(columns).toContain('class="docs-reading-columns lg:sl-flex"');
+  expect(columns).toMatch(/\.right-sidebar-container[\s\S]*width: 100%/);
+  expect(columns).toMatch(
+    /:global\(\.right-sidebar-panel \.sl-container\)\s*\{[^}]*max-width: none/
+  );
+  expect(header).toContain('@container docs-page (max-width: 68.749rem)');
+  expect(header).toContain('@container docs-page (max-width: 42rem)');
+});
+
+describe('reading reflow query boundaries (source arithmetic, not browser paint)', () => {
+  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+  const query = columns.match(
+    /@media \(min-width: ([\d.]+)rem\)\s*\{\s*@container docs-canvas \(max-width: ([\d.]+)rem\)/
+  );
+  // Media rem uses the initial font; container rem follows the root font. Read
+  // the actual owner thresholds so restoring the inclusive 80/80 defect fails.
+  const reflows = (viewport: number, contentWidth: number, root: number) => {
+    expect(query).not.toBeNull();
+    return viewport >= Number(query![1]) * 16 && contentWidth <= Number(query![2]) * root;
+  };
+
+  it('keeps the ordinary desktop TOC lateral through the padded overlap and its neighbours', () => {
+    for (const viewport of [1279, 1280, 1281, 1296, 1312, 1313, 1327, 1328, 1360, 1361, 1440])
+      for (const scrollbar of [0, 15]) {
+        // PageFrame caps the border box at 85rem; global.css pads each side by
+        // 1rem. The 15px case is a modelled classic scrollbar, not a capture.
+        const contentWidth = Math.min(viewport - scrollbar, 85 * 16) - 2 * 16;
+        expect(reflows(viewport, contentWidth, 16), `${viewport}px, scrollbar ${scrollbar}`).toBe(
+          false
+        );
+      }
+  });
+
+  it('retains root-relative enlarged reflow at the existing column budget and viewport gate', () => {
+    const columnBudget = Number(columns.match(/@media \(min-width: ([\d.]+)rem\)/)![1]);
+    expect(Number(query![2])).toBe(columnBudget);
+    expect(reflows(1440, 1440 - 2 * 32, 32)).toBe(true);
+    expect(reflows(1279, 1279 - 2 * 32, 32)).toBe(false);
+    for (const root of [20, 24, 32]) {
+      const boundary = columnBudget * root;
+      const viewport = boundary + 2 * root;
+      expect(reflows(viewport - 1, boundary - 1, root)).toBe(true);
+      expect(reflows(viewport, boundary, root)).toBe(true);
+      expect(reflows(viewport + 1, boundary + 1, root)).toBe(false);
+    }
+  });
+});
+
 describe('Docs header offset targets the actual MarkdownContent wrapper', () => {
   it('matches the real heading with the owned scroll-margin selector', () => {
     const heading = actualMarkdownFixture();
@@ -31,6 +85,29 @@ describe('Docs header offset targets the actual MarkdownContent wrapper', () => 
     const selector = match![1]!.replace(/\s+/g, ' ').trim();
     expect([...document.querySelectorAll(selector)]).toContain(heading);
     expect(match![2]).toBe('calc(var(--header-height) + 1rem)');
+  });
+
+  it('removes the upstream root offset only when our measured docs Header owns clearance', () => {
+    expect(frame).toMatch(
+      /:global\(html:has\(\.site-page-frame \[data-docs-site-header\]\)\)\s*\{\s*scroll-padding-top: 0;/
+    );
+    expect(frame).toContain('scroll-margin-top: calc(var(--header-height) + 1rem)');
+  });
+
+  it('preserves native clearance for the actual PageTitle and non-heading bookmarks', () => {
+    actualMarkdownFixture(
+      '<h2 id="actual-doc-heading">Section</h2><span id="legacy-bookmark">Legacy anchor</span>'
+    );
+    const titleSource = readFileSync('apps/www/src/components/override/PageTitle.astro', 'utf8');
+    expect(titleSource).toContain('id={PAGE_TITLE_ID}');
+    const title = document.createElement('h1');
+    title.id = '_top';
+    document.querySelector('main')!.prepend(title);
+    expect(title.closest('[data-doc-flow]')).toBeNull();
+    const match = frame.match(/:global\(([^{}]*?)\)\s*\{\s*scroll-margin-top:/)!;
+    const targets = [...document.querySelectorAll(match[1]!.replace(/\s+/g, ' ').trim())];
+    expect(targets).toContain(title);
+    expect(targets).toContain(document.querySelector('#legacy-bookmark'));
   });
 
   it('uses a browser heading locator that exists in the real wrapper', () => {
@@ -114,4 +191,30 @@ it('lets enhanced social anchors enclose the Prototype motion extent without fix
   expect(block).toMatch(/(?:^|[;\n])\s*width:\s*auto/);
   expect(block).toMatch(/(?:^|[;\n])\s*height:\s*auto/);
   expect(block).not.toMatch(/(?:^|[;\n])\s*(?:width|height):\s*2\.75rem/);
+});
+
+it('keeps one Header close toggle and lets short compact menus shrink to their content', () => {
+  for (const path of ['Homepage/HomepageRuntime.astro', 'override/Header.astro']) {
+    const source = readFileSync(`apps/www/src/components/${path}`, 'utf8');
+    expect(source).not.toContain('data-site-menu-close');
+    expect(source).not.toContain('closeMenuButton');
+    expect(source).not.toContain('site-header-panel-heading');
+  }
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(css).not.toMatch(/(?:^|[;\n])\s*height:\s*var\(--site-header-panel-max-height/);
+  expect(css).toContain('max-height: var(--site-header-panel-max-height');
+  expect(css).toContain("[data-site-menu-open='true'] .site-header-menu-icon::before");
+});
+
+it('spaces unframed text separately from framed controls without changing compact navigation', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  const nav = css.match(/\.site-header-navigation\s*\{([^}]+)\}/)![1];
+  expect(nav).toContain('gap: var(--site-header-navigation-gap)');
+  expect(nav).toContain('calc(var(--site-header-brand-navigation-gap) - 0.25rem)');
+  expect(css).toContain('--site-header-navigation-gap: 1.5rem');
+  const framed = css.match(
+    /\[data-site-library-family='brutalist'\] \.site-header\s*\{([^}]+)\}/
+  )![1];
+  expect(framed).toContain('--site-header-navigation-gap: 0.75rem');
+  expect(framed).toContain('--site-header-brand-navigation-gap: 0.75rem');
 });

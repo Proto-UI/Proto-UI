@@ -14,7 +14,12 @@ This entry composes the shadcn visual and API surface over the cataloged Base Se
 - `Root`, `Trigger`, `Value`, `Content`, and `Item`
 - `defaultValue` / `value`, `defaultOpen` / `open`, and their change events
 - `Trigger.size="sm | default"`
+- `Trigger.appearance="default | ghost"`
 - `Content.position="item-aligned | popper"`, defaulting to shadcn/ui's `item-aligned`
 - single selection, disabled items, keyboard navigation, typeahead, popup dismissal, and focus restoration
 
 `Group`, `Label`, `Separator`, `Viewport`, scroll buttons, `ItemText`, `ItemIndicator`, and form submission remain deferred. Content dynamically matches Trigger width through anchor-size CSS variables projected by the Anchored Position host. The current `item-aligned` option preserves the official API and default, but its geometry still uses Base anchor positioning rather than Radix's per-item alignment algorithm.
+
+## Trigger appearance
+
+`appearance="default"` keeps the bordered field surface shown above. `appearance="ghost"` is an opt-in Proto UI presentation extension with a transparent resting border/background and no resting shadow. Hover and press use the accent surface; the visible keyboard focus ring and disabled behavior remain. Set this prop on `shadcn-select-trigger`, not Root or Content. Removing it restores `default`, including during interaction. This changes only presentation over Base Select Trigger, not selection, keyboard navigation or popup behavior.

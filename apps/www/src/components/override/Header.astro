@@ -55,26 +55,32 @@ const navigation = [
       <div class="site-header-panel" id="site-header-panel" data-site-header-panel>
         <div data-site-header-surface-mount />
         <div data-site-header-panel-content>
-          <nav
-            class="site-header-navigation site-header-popup-navigation"
-            data-site-header-navigation
-            aria-label={zh ? '主导航' : 'Primary navigation'}
-          >
-            {navigation.map(({ label, href }) => (
-              <a data-site-native-button href={href}>
-                {label}
-              </a>
-            ))}
-          </nav>
-          <div data-site-header-compact-context />
-          <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
-            <div class="site-header-setting">
-              <span class="site-header-setting-label">{zh ? '语言' : 'Language'}</span>
-              <LanguageSelect />
-            </div>
-            <div class="site-header-setting">
-              <span class="site-header-setting-label">{zh ? '社区' : 'Community'}</span>
-              <SocialIcons />
+          <div data-site-header-panel-body>
+            <nav
+              class="site-header-navigation site-header-popup-navigation"
+              data-site-header-navigation
+              aria-label={zh ? '主导航' : 'Primary navigation'}
+            >
+              <span class="site-header-group-label">{zh ? '浏览' : 'Explore'}</span>
+              {navigation.map(({ label, href }) => (
+                <a data-site-native-button href={href}>
+                  {label}
+                </a>
+              ))}
+            </nav>
+            <div data-site-header-compact-context />
+            <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
+              <span class="site-header-group-label">
+                {zh ? '偏好与社区' : 'Preferences and community'}
+              </span>
+              <div class="site-header-setting">
+                <span class="site-header-setting-label">{zh ? '语言' : 'Language'}</span>
+                <LanguageSelect />
+              </div>
+              <div class="site-header-setting">
+                <span class="site-header-setting-label">{zh ? '社区' : 'Community'}</span>
+                <SocialIcons />
+              </div>
             </div>
           </div>
         </div>
@@ -127,6 +133,9 @@ const navigation = [
       const button = root.querySelector<HTMLElement>('[data-site-menu-button]');
       if (!button || button.dataset.siteMenuBound === 'true') return;
       initSiteControls(root);
+      const compact = window.matchMedia('(max-width: 47.999rem)');
+      const syncAppearance = () => initSiteControls(root);
+      compact.addEventListener('change', syncAppearance);
       const surface = initDocumentationHeaderSurface(root);
       const disclosure = initSiteHeaderDisclosure(root);
       const unbind = disclosure.bindButton(button);
@@ -139,6 +148,7 @@ const navigation = [
       document.addEventListener(
         'astro:before-swap',
         () => {
+          compact.removeEventListener('change', syncAppearance);
           void surface?.destroy();
           button.removeEventListener('click', onClick);
           unbind();

@@ -3,6 +3,10 @@
 .site-header {
   --site-header-row-height: 4rem;
   --site-control-height: 2.75rem;
+  --site-select-control-height: 2.25rem;
+  --site-select-control-padding-block: 0.25rem;
+  --site-header-navigation-gap: 1.5rem;
+  --site-header-brand-navigation-gap: 2rem;
   box-sizing: border-box;
   position: relative;
   display: grid;
@@ -20,11 +24,18 @@
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
+[data-site-library-family='brutalist'] .site-header {
+  /* Framed controls include their own inset and hard-shadow extent. Text-only
+     Shadcn links instead need space measured from the visible glyph edges. */
+  --site-header-navigation-gap: 0.75rem;
+  --site-header-brand-navigation-gap: 0.75rem;
+}
 .site-header :is(button, a, select) {
   font-family: inherit;
 }
 .site-header-brand {
   grid-area: brand;
+  white-space: nowrap;
 }
 .site-header .site-header-brand a {
   min-height: 2.75rem;
@@ -69,12 +80,12 @@
   grid-area: navigation;
   display: flex;
   align-items: center;
-  gap: 1.5rem;
-  margin-inline-start: 1.5rem;
+  gap: var(--site-header-navigation-gap);
+  margin-inline-start: calc(var(--site-header-brand-navigation-gap) - 0.25rem);
 }
 .site-header-navigation :is(.home-actions-fallback, .home-runtime-actions) {
   flex-wrap: nowrap;
-  gap: 1.5rem;
+  gap: var(--site-header-navigation-gap);
 }
 .site-header .site-header-navigation a {
   display: inline-flex;
@@ -335,6 +346,8 @@
 @media (max-width: 47.999rem) {
   .site-header {
     --site-header-row-height: 3.5rem;
+    --site-select-control-height: 2.75rem;
+    --site-select-control-padding-block: 0.5rem;
     grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
     grid-template-areas: 'brand search theme menu' 'context context context context';
     padding-inline: 1rem;
@@ -595,5 +608,75 @@
   .site-header[data-docs-site-header][data-site-menu-ready]:has(.site-header-docs-navigation) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas: 'brand brand contents' 'search theme menu';
+  }
+}
+
+/* Compact navigation uses the safe viewport width and only its available-height
+   ceiling. The original native slot is the single scrolling content owner;
+   short menus keep their natural height and the existing Header toggle closes. */
+[data-site-header-panel-body] {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.site-header-group-label {
+  display: none;
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+  color: var(--color-muted-foreground);
+}
+@media (max-width: 47.999rem) {
+  .site-header[data-site-menu-ready] .site-header-panel {
+    width: var(--site-header-panel-max-width, calc(100vw - 1rem));
+  }
+  .site-header-group-label {
+    display: block;
+  }
+  .site-header-popup-navigation > .site-header-group-label {
+    margin-block-end: 0.5rem;
+  }
+}
+
+/* Use available text-relative space as well as viewport breakpoints. This only
+   reflows the desktop owners; compact preferences keep their existing move and
+   focus semantics. Public atoms still supply all control paint. */
+@media (min-width: 48rem) {
+  @container docs-page (max-width: 68.749rem) {
+    .site-header[data-docs-site-header] {
+      grid-template-columns: auto auto minmax(0, 1fr) repeat(3, 2.75rem);
+      grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
+      grid-template-rows: minmax(var(--site-header-row-height), auto) auto;
+    }
+    .site-header[data-docs-site-header] .site-header-context {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: auto;
+      padding-block: 0.5rem;
+    }
+    .site-header[data-docs-site-header] .site-header-search {
+      margin-inline-start: 0;
+    }
+    .site-header[data-docs-site-header] .site-header-search site-search {
+      --site-search-trigger-width: 2.75rem;
+      --site-search-trigger-padding: 0;
+      --site-search-trigger-justify: center;
+    }
+    .site-header[data-docs-site-header]
+      .site-header-search
+      [data-open-modal]
+      :is(.site-search-label, .site-search-shortcut) {
+      display: none !important;
+    }
+  }
+  @container docs-page (max-width: 42rem) {
+    .site-header[data-docs-site-header] {
+      grid-template-columns: minmax(0, 1fr) repeat(3, 2.75rem);
+      grid-template-areas: 'brand search theme menu' 'navigation navigation navigation navigation' 'context context context context';
+    }
+    .site-header[data-docs-site-header] [data-site-header-desktop-navigation] {
+      flex-wrap: wrap;
+      margin-inline-start: 0;
+    }
   }
 }

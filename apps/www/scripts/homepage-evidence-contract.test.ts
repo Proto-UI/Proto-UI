@@ -130,9 +130,35 @@ test('CI preserves the pinned baseline, exact head, read-only permissions and ar
   assert.equal(artifact.if, 'always()');
 });
 
+test('density retains the whole increment baseline alongside a separately pinned feedback pair', () => {
+  const workflow = parse(
+    readFileSync(
+      new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
+      'utf8'
+    )
+  );
+  const job = workflow.jobs['visual-density'];
+  assert.equal(job.env.DENSITY_BASELINE_SHA, 'ec6e5710d0aaeee6d5844f9c996c1d7ca594aa31');
+  assert.equal(job.env.DENSITY_FOLLOWUP_BASELINE_SHA, 'fbd90df092369e6d2aab73c66848f4236ba83a29');
+  const before = job.steps.filter((step: { run?: string }) =>
+    step.run?.includes('--revision-kind baseline')
+  );
+  assert.equal(before.length, 2);
+  assert.equal(before[0].working_directory ?? before[0]['working-directory'], 'followup-baseline');
+  assert.match(before[0].run, /DENSITY_FOLLOWUP_BASELINE_SHA.*--quick-preview/);
+  assert.equal(before[1]['working-directory'], 'baseline');
+  assert.match(before[1].run, /DENSITY_BASELINE_SHA/);
+  assert.doesNotMatch(before[1].run, /--quick-preview/);
+});
+
 test('serialized browser probes do not depend on tsx keepNames helpers', () => {
   let inspected = 0;
-  for (const file of ['capture-homepage-evidence.ts', 'capture-documentation-evidence.ts']) {
+  for (const file of [
+    'capture-homepage-evidence.ts',
+    'capture-documentation-evidence.ts',
+    'capture-mobile-interaction-evidence.ts',
+    'capture-visual-density-evidence.ts',
+  ]) {
     const source = ts.createSourceFile(
       file,
       readFileSync(new URL(file, import.meta.url), 'utf8'),

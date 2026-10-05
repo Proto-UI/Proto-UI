@@ -491,7 +491,7 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                     await page.waitForFunction(
                       () =>
                         document.querySelector(
-                          '[data-site-typography="slogan"] [data-pui-style~="text-3xl"]'
+                          '[data-site-typography="slogan"] [data-pui-style~="text-2xl"]'
                         ),
                       undefined,
                       { timeout: 15_000 }
@@ -761,3 +761,42 @@ async function chooseHomepage(page: Page, control: string, label: string) {
   await portal.waitFor({ state: 'hidden' });
   await homepageReady(page);
 }
+
+// Application composition only: public Text remains unchanged. These native
+// owners must have useful matching line boxes even when no runtime can mount.
+describe.sequential('document reading native fallback', () => {
+  for (const [name, route, titleSize, titleLeading] of [
+    ['shadcn', '/zh-cn/start-here/quick-start/', '30px', '37.5px'],
+    ['brutalist', '/en/ui-libraries/brutalist/components/button/', '36px', '44px'],
+    ['homepage', '/zh-cn/', '36px', '44px'],
+  ] as const) {
+    it(`${name}: retains its own no-JavaScript heading scale`, async () => {
+      await runCase(
+        `reading-fallback-${name}`,
+        async (page, _context, record) => {
+          await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
+          const native = page.locator('main[data-pagefind-body] h1').first();
+          const paint = await native.evaluate((node) => {
+            const style = getComputedStyle(node);
+            return { size: style.fontSize, leading: style.lineHeight, text: node.textContent };
+          });
+          record.headingPaint = paint;
+          expect(paint.size).toBe(titleSize);
+          expect(paint.leading).toBe(titleLeading);
+          expect(await page.locator('[data-typography-prototype]').count()).toBe(0);
+          if (name === 'shadcn') {
+            record.descriptionPaint = await page
+              .locator('main[data-pagefind-body] p[data-site-typography="tagline"]')
+              .evaluate((node) => {
+                const style = getComputedStyle(node);
+                return { size: style.fontSize, leading: style.lineHeight };
+              });
+            expect(record.descriptionPaint).toEqual({ size: '16px', leading: '26px' });
+          }
+          await capture(page, record, `reading-fallback-${name}`);
+        },
+        { noJS: true }
+      );
+    }, 90_000);
+  }
+});

@@ -78,3 +78,59 @@ a[data-site-link-enhanced] > [data-site-link-content] {
   white-space: nowrap;
   border: 0;
 }
+
+/* Consumer row geometry passed through the real Surface's surfaceStyle input.
+   Paint, type and interaction feedback stay with public family primitives. */
+:root {
+  --site-navigation-row-height: 2rem;
+}
+@media (max-width: 63.999rem) {
+  :root {
+    --site-navigation-row-height: 2.75rem;
+  }
+}
+
+/* Summary remains the browser-owned disclosure target; only the existing
+   family Surface/Text children paint it. Native caret artwork is retained. */
+.sidebar-pane .top-level summary[data-site-link-enhanced] {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  outline: none;
+}
+.sidebar-pane summary[data-site-link-enhanced] .caret {
+  color: inherit;
+}
+
+/* Geometry only: one existing public family Surface owns range paint. Native
+   anchors and their current/focus feedback remain above this passive layer. */
+sl-toc {
+  position: relative;
+  isolation: isolate;
+}
+[data-site-toc-highlight] {
+  position: absolute;
+  inset: 0 auto auto 0;
+  z-index: -1;
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    transform 300ms ease-out,
+    width 300ms ease-out,
+    height 300ms ease-out;
+}
+[data-site-toc-highlight][data-toc-range-ready][data-toc-range-visible] {
+  visibility: visible;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-site-toc-highlight] {
+    transition: none;
+  }
+}
