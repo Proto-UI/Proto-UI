@@ -1059,16 +1059,30 @@ ${projectsState ? `      ${n('StateWeb')}.expose(key, handle);` : ''}
       return snapshot;
     }
     function ${n('DefineProps')}(declarations: Record<string, ${n('PropSpec')}>): void {
+      const merged = { ...${n('PropSpecs')} };
+      let warnings: string[] | undefined;
       for (const key of Object.keys(declarations)) {
         const incoming = declarations[key], previous = ${n('PropSpecs')}[key];
         if (!Object.hasOwn(${n('PropChecks')}, key)) throw new Error('[Vue source] undeclared prop schema');
         const rank = (empty: string) => empty === 'accept' ? 0 : empty === 'error' ? 2 : 1;
+        if (previous && previous.type !== incoming.type) throw new Error('[Vue source] conflicting prop type');
         if (previous && incoming.empty && rank(incoming.empty) > rank(previous.empty ?? 'fallback')) throw new Error('[Vue source] props cannot become stricter');
         if (previous?.options && (!incoming.options || previous.options.some((value) => !incoming.options!.includes(value)))) throw new Error('[Vue source] prop options cannot narrow');
         if (previous?.range && ((incoming.range?.min ?? -Infinity) > (previous.range.min ?? -Infinity) || (incoming.range?.max ?? Infinity) < (previous.range.max ?? Infinity))) throw new Error('[Vue source] prop range cannot narrow');
-        ${n('PropSpecs')}[key] = { ...previous, ...incoming, ...(previous ? { empty: previous.empty ?? 'fallback' } : {}), ...(previous && Object.hasOwn(previous, 'default') ? { default: previous.default } : {}) };
+        if (previous && incoming.empty && rank(incoming.empty) < rank(previous.empty ?? 'fallback'))
+          (warnings ??= []).push('empty behavior relaxed; retaining established policy: ' + key);
+        if (previous?.options && incoming.options?.some(value => !previous.options!.includes(value)))
+          (warnings ??= []).push('enum options widened: ' + key);
+        if (previous?.range && incoming.range && ((incoming.range.min ?? -Infinity) < (previous.range.min ?? -Infinity)
+          || (incoming.range.max ?? Infinity) > (previous.range.max ?? Infinity)))
+          (warnings ??= []).push('range widened: ' + key);
+        if (previous && Object.hasOwn(previous, 'default') && Object.hasOwn(incoming, 'default') && !Object.is(previous.default, incoming.default))
+          (warnings ??= []).push('default changed; retaining established default: ' + key);
+        merged[key] = { ...previous, ...incoming, ...(previous ? { empty: previous.empty ?? 'fallback', range: incoming.range ?? previous.range } : {}), ...(previous && Object.hasOwn(previous, 'default') ? { default: previous.default } : {}) };
       }
+      Object.assign(${n('PropSpecs')}, merged);
       ${n('Props')} = ${n('ResolveProps')}(${n('RawProps')}, false);
+      warnings?.forEach(message => console.warn('[Props] ' + message));
 ${usesStyle ? `      ${n('Style')}.refresh();` : ''}
 ${usesInteraction ? `      ${n('Interaction')}.refresh();` : ''}
     }

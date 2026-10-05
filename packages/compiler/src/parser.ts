@@ -127,6 +127,7 @@ class Frontend {
   readonly graph: SourceGraph;
   readonly hooks = new Map<string, AuthoredHookIR>();
   readonly props = new Map<string, PropIR>();
+  private readonly propEnums = new Map<string, readonly string[]>();
   readonly exposes = new Map<string, ExposureIR>();
   readonly contextKeys = new Map<string, ContextKeyIR>();
   readonly staticDeclarations = new Map<string, StaticCapabilityIR>();
@@ -1106,12 +1107,44 @@ class Frontend {
         if (entry.value.kind !== 'record')
           rejectNode(node, 'PUI1006', 'Prop schema must be a literal record.');
         const item = entry.value.entries.find((value) => value.key === 'type');
-        const type = item?.value.kind === 'literal' ? item.value.value : undefined;
-        if (type !== 'boolean' && type !== 'number' && type !== 'string')
-          rejectNode(node, 'PUI1006', 'Only declared primitive props are currently admitted.');
+        const declared = item?.value.kind === 'literal' ? item.value.value : undefined;
+        let type: PrimitiveType;
+        let enumOptions: readonly string[] | undefined;
+        if (declared === 'enum') {
+          const options = entry.value.entries.find((value) => value.key === 'options')?.value;
+          if (
+            options?.kind !== 'array' ||
+            !options.elements.length ||
+            options.elements.some(
+              (option) => option.kind !== 'literal' || typeof option.value !== 'string'
+            )
+          )
+            rejectNode(node, 'PUI1006', `Enum prop ${entry.key} requires literal string options.`);
+          // Like State enums, the portable value is a string. The authored options
+          // remain on each declaration and are enforced by the owned Props plan.
+          // A later widening must not invalidate an earlier callback's value type.
+          type = 'string';
+          enumOptions = options.elements.map(
+            (option) => (option as ExpressionIR & { kind: 'literal'; value: string }).value
+          );
+        } else if (declared === 'boolean' || declared === 'number' || declared === 'string')
+          type = declared;
+        else
+          rejectNode(
+            node,
+            'PUI1006',
+            'Only primitive and string enum prop domains are currently admitted.'
+          );
         const prior = this.props.get(entry.key);
-        if (prior && !sameType(prior.type, type))
-          rejectNode(node, 'PUI1006', `Conflicting prop type ${entry.key}.`);
+        const previousOptions = this.propEnums.get(entry.key);
+        if (
+          prior &&
+          (!sameType(prior.type, type) ||
+            Boolean(previousOptions) !== Boolean(enumOptions) ||
+            previousOptions?.some((option) => !enumOptions!.includes(option)))
+        )
+          rejectNode(node, 'PUI1006', `Conflicting or narrowed prop domain ${entry.key}.`);
+        if (enumOptions) this.propEnums.set(entry.key, enumOptions);
         this.props.set(entry.key, { name: entry.key, type, span: entry.value.span });
       }
     }

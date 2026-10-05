@@ -1039,6 +1039,7 @@ ${
       define(input: Record<string, ${p}PropSpec>) {
         ensureSetup();
         const merged = {...specs};
+        let warnings: string[] | undefined;
         for (const key of Object.keys(input)) {
           const next = input[key], prev = specs[key];
           if (!['boolean', 'number', 'string', 'enum', 'object', 'any'].includes(next.type)) throw new Error('Unsupported prop type');
@@ -1047,10 +1048,21 @@ ${
           if (prev && (prev.type !== next.type || (prev.range && next.range && ((next.range.min ?? -Infinity) > (prev.range.min ?? -Infinity) || (next.range.max ?? Infinity) < (prev.range.max ?? Infinity))))) throw new Error('Conflicting prop declaration');
           const rank = (empty: string) => empty === 'accept' ? 0 : empty === 'error' ? 2 : 1;
           if (prev && next.empty !== undefined && rank(next.empty) > rank(prev.empty ?? 'fallback')) throw new Error('Conflicting prop empty policy');
+          if (prev?.options && (!next.options || prev.options.some(value => !next.options!.includes(value)))) throw new Error('Prop options cannot narrow');
+          if (prev && next.empty !== undefined && rank(next.empty) < rank(prev.empty ?? 'fallback'))
+            (warnings ??= []).push('empty behavior relaxed; retaining established policy: ' + key);
+          if (prev?.options && next.options?.some(value => !prev.options!.includes(value)))
+            (warnings ??= []).push('enum options widened: ' + key);
+          if (prev?.range && next.range && ((next.range.min ?? -Infinity) < (prev.range.min ?? -Infinity)
+            || (next.range.max ?? Infinity) > (prev.range.max ?? Infinity)))
+            (warnings ??= []).push('range widened: ' + key);
+          if (prev && own(prev, 'default') && own(next, 'default') && !Object.is(prev.default, next.default))
+            (warnings ??= []).push('default changed; retaining established default: ' + key);
           merged[key] = {...prev, ...next, schema: (${p}PropTypes as Record<string, Parameters<typeof ${p}Accepts>[0]>)[key], empty: prev?.empty ?? next.empty ?? 'fallback', range: next.range ?? prev?.range, ...(prev && own(prev, 'default') ? {default: prev.default} : {})};
         }
         Object.assign(specs, merged);
         resolved = resolve(false);
+        warnings?.forEach(message => console.warn('[Props] ' + message));
 ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
       },
       setDefaults(input: Record<string, unknown>) { ensureSetup(); for (const key of Object.keys(input)) if (!own(specs, key)) throw new Error('Undeclared prop default: ' + key); defaults.unshift({...input}); resolved = resolve(false); ${interacting ? `${p}Interaction.refresh(); ` : ''}},

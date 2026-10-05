@@ -876,6 +876,7 @@ ${context.owner}
     setupOnly();
     const next = { ...specs };
     const rank = { accept: 0, fallback: 1, error: 2 };
+    let warnings;
     for (const key of Object.keys(input)) {
       const spec = input[key];
       if (!spec || !['boolean', 'number', 'string', 'object', 'any', 'enum'].includes(spec.type)) throw new Error('[Vue2 native] invalid prop declaration: ' + key);
@@ -888,11 +889,21 @@ ${context.owner}
         if (prior.type !== spec.type || PUIOwn(spec, 'empty') && rank[spec.empty] > rank[prior.empty ?? 'fallback']) throw new Error('[Vue2 native] conflicting prop declaration: ' + key);
         if (prior.options && !prior.options.every((value) => spec.options && spec.options.includes(value))) throw new Error('[Vue2 native] prop options cannot narrow: ' + key);
         if (prior.range && spec.range && ((spec.range.min ?? -Infinity) > (prior.range.min ?? -Infinity) || (spec.range.max ?? Infinity) < (prior.range.max ?? Infinity))) throw new Error('[Vue2 native] prop range cannot narrow: ' + key);
+        if (PUIOwn(spec, 'empty') && rank[spec.empty] < rank[prior.empty ?? 'fallback'])
+          (warnings ??= []).push('empty behavior relaxed; retaining established policy: ' + key);
+        if (prior.options && spec.options.some(value => !prior.options.includes(value)))
+          (warnings ??= []).push('enum options widened: ' + key);
+        if (prior.range && spec.range && ((spec.range.min ?? -Infinity) < (prior.range.min ?? -Infinity)
+          || (spec.range.max ?? Infinity) > (prior.range.max ?? Infinity)))
+          (warnings ??= []).push('range widened: ' + key);
+        if (PUIOwn(prior, 'default') && PUIOwn(spec, 'default') && !Object.is(prior.default, spec.default))
+          (warnings ??= []).push('default changed; retaining established default: ' + key);
         next[key] = { ...prior, ...spec, empty: prior.empty ?? 'fallback', range: spec.range ?? prior.range };
         if (PUIOwn(prior, 'default')) next[key].default = prior.default;
       } else next[key] = { ...spec };
     }
     specs = next; resolved = resolveProps(raw, false).snapshot;
+    warnings?.forEach(message => console.warn('[Props] ' + message));
   };
   const registerPropsWatch = (kind, keys, fn) => {
     setupOnly();

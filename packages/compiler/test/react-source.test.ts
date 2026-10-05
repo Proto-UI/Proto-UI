@@ -462,6 +462,69 @@ export default definePrototype({name:'semantic-projection',setup(def){
     expect(callbacks).toEqual(['created', 'mounted']);
   });
 
+  it('resolves canonical enum and empty props independently without replacing previous valid values', async () => {
+    const { CompiledComponent } = await loadNative(`import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'canonical-props',setup(def){
+  def.props.define({
+    wrap:{type:'enum',options:['soft','hard'],default:'soft',empty:'fallback'},
+    label:{type:'string',default:'declared',empty:'accept'},
+    optional:{type:'string'},
+    count:{type:'number',default:7,empty:'error'}
+  });
+  def.props.setDefaults({wrap:'hard',label:'layered',count:9});
+  def.props.setDefaults({wrap:'soft',label:'latest',count:11});
+  def.props.watch(['wrap','label','optional','count'],run=>{run.update();});
+  return r=>{const props=r.read.props.get();return r.el('output',[
+    props.wrap ?? 'null','|',props.label ?? 'null','|',props.optional ?? 'null','|',props.count ?? -1
+  ]);};
+}});`);
+    const { host, root } = mountHost();
+    const ref = React.createRef<NativeHandle>();
+    const apply = async (props: Record<string, unknown>) => {
+      await React.act(async () => {
+        root.render(React.createElement(CompiledComponent, { ...props, ref }));
+      });
+      return host.querySelector('output')!.textContent;
+    };
+    expect(await apply({ wrap: 'hard', label: 'host', optional: 'retained', count: 12 })).toBe(
+      'hard|host|retained|12'
+    );
+    expect(await apply({ wrap: null, label: undefined, optional: null, count: null })).toBe(
+      'hard|null|retained|12'
+    );
+    expect(await apply({})).toBe('soft|latest|null|11');
+    expect(await apply({ wrap: 'outside', label: 42, optional: false, count: Infinity })).toBe(
+      'hard|host|retained|12'
+    );
+  });
+
+  it('widens canonical enum declarations while retaining the established default and empty policy', async () => {
+    const { CompiledComponent } = await loadNative(`import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'merged-enum',setup(def){
+  def.props.define({fit:{type:'enum',options:['contain'],default:'contain',empty:'fallback'}});
+  def.expose.event('change',{payload:'json'});
+  def.props.watch(['fit'],(run,next)=>{run.expose.emit('change',next.fit);run.update();});
+  def.props.define({fit:{type:'enum',options:['contain','cover','fill'],default:'fill',empty:'accept'}});
+  return r=>r.el('output',r.read.props.get().fit ?? 'null');
+}});`);
+    const { host, root } = mountHost();
+    const ref = React.createRef<NativeHandle>();
+    const changes: unknown[] = [];
+    const onChange = (value: unknown) => changes.push(value);
+    for (const [props, expected] of [
+      [{ fit: 'cover' }, 'cover'],
+      [{ fit: null }, 'cover'],
+      [{}, 'contain'],
+      [{ fit: 'fill' }, 'fill'],
+    ] as const) {
+      await React.act(async () => {
+        root.render(React.createElement(CompiledComponent, { ...props, ref, onChange }));
+      });
+      expect(host.querySelector('output')!.textContent).toBe(expected);
+    }
+    expect(changes).toEqual(['contain', 'fill']);
+  });
+
   it('withdraws missing props to defaults without reusing previous host values or implicitly rendering watcher writes', async () => {
     const source = `import {definePrototype} from '@proto.ui/core';
     export default definePrototype({name:'props-owner',setup(def){
