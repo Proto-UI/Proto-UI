@@ -1,0 +1,71 @@
+{
+  "sourceUniformDeclarations": 97,
+  "sourceTextureSamplers": 7,
+  "correlatedCases": [
+    {
+      "name": "studio",
+      "label": "Correlated whole-graph resource renaming",
+      "codes": [
+        "source-interface-fact-mismatch"
+      ]
+    },
+    {
+      "name": "flutter",
+      "label": "Correlated all frame-producer renaming",
+      "codes": [
+        "missing-frame-input",
+        "coordinate-input-mismatch",
+        "source-interface-fact-mismatch"
+      ]
+    },
+    {
+      "name": "flutter",
+      "label": "Indexed samplers reversed with old slots",
+      "codes": [
+        "reflected-sampler-slot"
+      ]
+    },
+    {
+      "name": "flutter",
+      "label": "Indexed samplers reversed and reindexed consistently",
+      "codes": [
+        "source-interface-fact-mismatch"
+      ]
+    },
+    {
+      "name": "flutter",
+      "label": "Reflected uniform order reversed then slots reallocated",
+      "codes": [
+        "source-interface-fact-mismatch"
+      ]
+    },
+    {
+      "name": "flutter",
+      "label": "Correlated source and ownership downgrade",
+      "codes": [
+        "source-interface-fact-mismatch"
+      ]
+    },
+    {
+      "name": "studio",
+      "label": "JSON __proto__ unknown graph execution field",
+      "codes": [
+        "source-interface-fact-mismatch"
+      ]
+    },
+    {
+      "name": "flutter",
+      "label": "Unknown runtime field under allowed prose container",
+      "codes": [
+        "source-interface-fact-mismatch"
+      ]
+    },
+    {
+      "name": "studio",
+      "label": "Correlated false capability claim",
+      "codes": [
+        "source-interface-fact-mismatch"
+      ]
+    }
+  ]
+}

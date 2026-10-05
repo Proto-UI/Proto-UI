@@ -1,0 +1,267 @@
+{
+  "checks": [
+    {
+      "source": "src/App.tsx",
+      "blob": "dd1c0ee0b9377699fd1e212d1b1c06d59cf57042"
+    },
+    {
+      "source": "src/utils/GPUUtils.ts",
+      "blob": "1effd7c0c4f162ecd2233bb0c3976de33d61698e"
+    },
+    {
+      "source": "src/shaders-wgsl/fragment-bg.wgsl",
+      "blob": "f84212a1aa4e3687fd404218fdd197cce18b2080"
+    },
+    {
+      "source": "src/shaders-wgsl/fragment-bg-vblur.wgsl",
+      "blob": "eabd5091ad5f6166673c01173bad2f2629cadfea"
+    },
+    {
+      "source": "src/shaders-wgsl/fragment-bg-hblur.wgsl",
+      "blob": "b35758ed6498b3b42d81fd6063b292e6e5a6f603"
+    },
+    {
+      "source": "src/shaders-wgsl/fragment-main.wgsl",
+      "blob": "9063a39f000fcb0fd69848dc4c3e51618f0dc3da"
+    },
+    {
+      "source": "lib/src/engine/rendering/liquid_glass_render_object.dart",
+      "blob": "a6e5a7f20e8c717e76f57ad6e0650602ce99235e"
+    },
+    {
+      "source": "lib/src/engine/render_liquid_glass_geometry.dart",
+      "blob": "1dc6d3e807604bcedcde717d2c1ae18bd8e7f596"
+    },
+    {
+      "source": "lib/src/renderer/fragment_shader_extensions.dart",
+      "blob": "2c8848abf42f9da668c8c32606e1e6f5b300988d"
+    },
+    {
+      "source": "shaders/liquid_glass_geometry_blended.frag",
+      "blob": "3d9457df92f56079d48846613ba3df7ca4c18aa0"
+    },
+    {
+      "source": "shaders/liquid_glass_render.frag",
+      "blob": "03b27d53d670b6642fdbf92783175d5e96c9155d"
+    }
+  ],
+  "positives": [
+    {
+      "name": "studio",
+      "cap": 4,
+      "kinds": [
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 4,
+      "kinds": [
+        "owned-video-frame"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 4,
+      "kinds": [
+        "owned-video-frame",
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 5,
+      "kinds": [
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 5,
+      "kinds": [
+        "owned-video-frame"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 5,
+      "kinds": [
+        "owned-video-frame",
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 6,
+      "kinds": [
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 6,
+      "kinds": [
+        "owned-video-frame"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 6,
+      "kinds": [
+        "owned-video-frame",
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 7,
+      "kinds": [
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 7,
+      "kinds": [
+        "owned-video-frame"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 7,
+      "kinds": [
+        "owned-video-frame",
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 8,
+      "kinds": [
+        "owned-image"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 8,
+      "kinds": [
+        "owned-video-frame"
+      ]
+    },
+    {
+      "name": "studio",
+      "cap": 8,
+      "kinds": [
+        "owned-video-frame",
+        "owned-image"
+      ]
+    },
+    {
+      "name": "flutter",
+      "cap": 2,
+      "kinds": null
+    },
+    {
+      "name": "flutter",
+      "cap": 3,
+      "kinds": null
+    },
+    {
+      "name": "flutter",
+      "cap": 4,
+      "kinds": null
+    },
+    {
+      "name": "flutter",
+      "cap": 5,
+      "kinds": null
+    },
+    {
+      "name": "flutter",
+      "cap": 6,
+      "kinds": null
+    },
+    {
+      "name": "flutter",
+      "cap": 7,
+      "kinds": null
+    },
+    {
+      "name": "flutter",
+      "cap": 8,
+      "kinds": null
+    }
+  ],
+  "allowedNoops": [
+    {
+      "name": "studio",
+      "path": "kernels.0.dataBindings",
+      "operation": []
+    },
+    {
+      "name": "studio",
+      "path": "kernels.3.dataBindings",
+      "operation": []
+    },
+    {
+      "name": "studio",
+      "path": "passes.0.dependsOn",
+      "operation": []
+    },
+    {
+      "name": "studio",
+      "path": "frameInputs",
+      "operation": []
+    },
+    {
+      "name": "flutter",
+      "path": "kernels.0.samplers",
+      "operation": []
+    },
+    {
+      "name": "flutter",
+      "path": "kernels.0.dataBindings",
+      "operation": []
+    },
+    {
+      "name": "flutter",
+      "path": "kernels.1.dataBindings",
+      "operation": []
+    },
+    {
+      "name": "flutter",
+      "path": "data",
+      "operation": []
+    },
+    {
+      "name": "flutter",
+      "path": "passes.0.reads",
+      "operation": []
+    },
+    {
+      "name": "flutter",
+      "path": "passes.0.dependsOn",
+      "operation": []
+    },
+    {
+      "name": "flutter",
+      "path": "passes.0.bindings",
+      "operation": {}
+    }
+  ],
+  "allowedSubsetChoices": [
+    {
+      "name": "studio",
+      "path": "sources.0.sourceKinds.0",
+      "operation": "DELETE"
+    },
+    {
+      "name": "studio",
+      "path": "sources.0.sourceKinds.1",
+      "operation": "DELETE"
+    }
+  ],
+  "badAccepts": [],
+  "crashes": [],
+  "rejections": 4267
+}
