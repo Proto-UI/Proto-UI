@@ -4,6 +4,50 @@ import { it, expect } from 'vitest';
 import { AdaptToWebComponent } from '../src/adapt';
 import { setElementProps } from '../src/props';
 
+it('preserves callback authority for later Props watchers after a synchronous render', async () => {
+  const name = 'x-props-nested-callback-render';
+  const observations: string[] = [];
+  AdaptToWebComponent({
+    name,
+    setup(def) {
+      def.props.define({ value: { type: 'number', default: 0 } });
+      const value = def.state.numberDiscrete('value', 0);
+      def.expose.state('value', value);
+      def.props.watchRawAll(() => observations.push('raw'));
+      def.props.watchAll((run) => {
+        observations.push('all');
+        run.update();
+      });
+      def.props.watch(['value'], (run, next) => {
+        value.set(next.value ?? 0);
+        observations.push('keyed');
+        run.update();
+      });
+      return (renderer) => renderer.el('output', value.get());
+    },
+  });
+  const element = document.createElement(name) as HTMLElement & {
+    getExposes(): { value: { get(): number } };
+  };
+  try {
+    document.body.append(element);
+    await Promise.resolve();
+    expect(element.textContent).toBe('0');
+    setElementProps(element, { value: 7 });
+    await Promise.resolve();
+    expect(observations).toEqual(['raw', 'all', 'keyed']);
+    expect(element.getExposes().value.get()).toBe(7);
+    expect(element.textContent).toBe('7');
+    setElementProps(element, { value: 9 });
+    await Promise.resolve();
+    expect(element.getExposes().value.get()).toBe(9);
+    expect(element.textContent).toBe('9');
+  } finally {
+    element.remove();
+    await Promise.resolve();
+  }
+});
+
 it('props re-provide triggers watch but does not render until update()', async () => {
   let watched = 0;
 

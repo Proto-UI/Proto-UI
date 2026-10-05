@@ -110,6 +110,105 @@ export default definePrototype({name:'independent-view', setup(def){
 
 // These regressions exercise externally observable ownership, update, disposal and slot contracts.
 describe('native Web Component semantic source', () => {
+  it('dispatches raw groups before declaration-ordered resolved watchers with checked key metadata', () => {
+    const element = create(`import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'props-watch-family',setup(def){
+  def.props.define({label:{type:'string',default:'default'},count:{type:'number',default:1}});
+  const trace=def.state.string('watch.trace','');
+  def.expose.state('trace',trace);
+  def.expose.event('observation',{payload:'json'});
+  def.props.watchRaw(['extra','label'],(run,next,prev,info)=>{
+    trace.set(trace.get()+'raw-keys|');
+    run.expose.emit('observation',{kind:'raw-keys',all:info.changedKeysAll,matched:info.changedKeysMatched});
+  });
+  def.props.watch(['label'],(run,next,prev,info)=>{
+    trace.set(trace.get()+'resolved-label|');
+    run.expose.emit('observation',{kind:'resolved-label',all:info.changedKeysAll,matched:info.changedKeysMatched,next:next.label,prev:prev.label});
+  });
+  def.props.watchAll((run,next,prev,info)=>{
+    trace.set(trace.get()+'resolved-all|');
+    run.expose.emit('observation',{kind:'resolved-all',all:info.changedKeysAll,matched:info.changedKeysMatched,next:next.label,prev:prev.label});
+    run.update();
+  });
+  def.props.watchRawAll((run,next,prev,info)=>{
+    trace.set(trace.get()+'raw-all|');
+    run.expose.emit('observation',{kind:'raw-all',all:info.changedKeysAll,matched:info.changedKeysMatched});
+  });
+  def.props.watch(['count'],(run,next,prev,info)=>{
+    trace.set(trace.get()+'resolved-count|');
+    run.expose.emit('observation',{kind:'resolved-count',all:info.changedKeysAll,matched:info.changedKeysMatched,next:next.count,prev:prev.count});
+  });
+  return r=>r.el('output',[trace.get(),'@',r.read.props.get().label ?? 'null']);
+}});`);
+    const observations: Array<{
+      kind: string; all: string[]; matched: string[]; next?: string | number; prev?: string | number;
+    }> = [];
+    element.addEventListener('observation', (event) => {
+      observations.push((event as CustomEvent).detail);
+    });
+    element.setProps({ label: 'first', count: 1, extra: 'old' });
+    document.body.append(element);
+    expect(observations).toEqual([]);
+    element.setProps({ label: 'second', count: 2, extra: 'new' });
+    expect(observations).toEqual([
+      { kind: 'raw-all', all: ['label', 'count', 'extra'], matched: ['label', 'count', 'extra'] },
+      { kind: 'raw-keys', all: ['label', 'count', 'extra'], matched: ['extra', 'label'] },
+      { kind: 'resolved-label', all: ['label', 'count'], matched: ['label'], next: 'second', prev: 'first' },
+      { kind: 'resolved-all', all: ['label', 'count'], matched: ['label', 'count'], next: 'second', prev: 'first' },
+      { kind: 'resolved-count', all: ['label', 'count'], matched: ['count'], next: 2, prev: 1 },
+    ]);
+    observations.length = 0;
+    element.setProps({ label: 'second', count: 2, extra: 'new' });
+    expect(observations).toEqual([]);
+    element.setProps({ label: 17, count: 2, extra: 'new' });
+    expect(observations).toEqual([
+      { kind: 'raw-all', all: ['label'], matched: ['label'] },
+      { kind: 'raw-keys', all: ['label'], matched: ['label'] },
+    ]);
+    observations.length = 0;
+    element.setProps({ count: 2, extra: 'new' });
+    expect(observations).toEqual([
+      { kind: 'raw-all', all: ['label'], matched: ['label'] },
+      { kind: 'raw-keys', all: ['label'], matched: ['label'] },
+      { kind: 'resolved-label', all: ['label'], matched: ['label'], next: 'default', prev: 'second' },
+      { kind: 'resolved-all', all: ['label'], matched: ['label'], next: 'default', prev: 'second' },
+    ]);
+  });
+
+  it('normalizes top-level empty raw values and preserves object identity', () => {
+    const element = create(`import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'raw-value-identity',setup(def){
+  def.expose.event('observation',{payload:'json'});
+  def.props.watchRawAll((run,next,prev,info)=>{run.expose.emit('observation',{kind:'all',matched:info.changedKeysMatched});});
+  def.props.watchRaw(['extra'],(run,next,prev,info)=>{run.expose.emit('observation',{kind:'keyed',matched:info.changedKeysMatched});});
+}});`);
+    const observations: unknown[] = [];
+    element.addEventListener('observation', (event) => {
+      observations.push((event as CustomEvent).detail);
+    });
+    document.body.append(element);
+    const changed = [{ kind: 'all', matched: ['extra'] }, { kind: 'keyed', matched: ['extra'] }];
+    element.setProps({ extra: undefined });
+    expect(observations).toEqual(changed);
+    observations.length = 0;
+    element.setProps({ extra: null });
+    expect(observations).toEqual([]);
+    const extra = { value: 1 };
+    element.setProps({ extra });
+    expect(observations).toEqual(changed);
+    observations.length = 0;
+    element.setProps({ extra });
+    expect(observations).toEqual([]);
+    element.setProps({ extra: { value: 1 } });
+    expect(observations).toEqual(changed);
+    observations.length = 0;
+    element.setProps({});
+    expect(observations).toEqual(changed);
+    observations.length = 0;
+    element.setProps({ extra: undefined });
+    expect(observations).toEqual(changed);
+  });
+
   it('preserves a compatible input engine across Module presentation commits', async () => {
     const element = create(`import {definePrototype} from '@proto.ui/core';
 import {asTextControl} from '@proto.ui/hooks';

@@ -615,7 +615,7 @@ ${
       if (vm.$props) void vm.$props[hostKey];
       if (PUIOwn(provided, hostKey)) input[key] = provided[hostKey];
     }
-    for (const key of Object.keys(input)) out[key] = input[key];
+    for (const key of Object.keys(input)) out[key] = input[key] === undefined ? null : input[key];
     return Object.freeze(out);
   };
   const same = (a, b) => {
@@ -682,7 +682,7 @@ ${
     if (!hydrated) { hydrated = true; ${refresh} return; }
     const changedKeys = Object.keys(specs).filter((key) => !Object.is(previous[key], resolved[key]));
     const changedRawKeys = watchers.some((watch) => watch.active && (watch.kind === 'raw' || watch.kind === 'raw-all'))
-      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => PUIOwn(previousRaw, key) !== PUIOwn(raw, key) || !Object.is(previousRaw[key], raw[key])) : [];
+      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : [];
     ${refresh ? `if (changedKeys.length) { ${refresh} }` : ''}
     if ((changedKeys.length || changedRawKeys.length) && !dispatchingProps) {
       dispatchingProps = true;
@@ -696,8 +696,11 @@ ${
               const isRaw = group < 2;
               const changedKeysAll = isRaw ? changedRawKeys : changedKeys;
               const changedKeysMatched = watch.keys === null ? changedKeysAll : watch.keys.filter((key) => changedKeysAll.includes(key));
-              if (changedKeysMatched.length) watch.fn(run, isRaw ? nextRaw : next.snapshot,
-                isRaw ? previousRaw : previous, { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] });
+              if (changedKeysMatched.length) {
+                if (isRaw) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+                watch.fn(run, isRaw ? nextRaw : next.snapshot,
+                  isRaw ? previousRaw : previous, { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] });
+              }
             }
           }
         }, false);

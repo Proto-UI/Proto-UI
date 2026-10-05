@@ -195,7 +195,35 @@ let props=Json::Object(resolved);let mut o=owner.borrow_mut();assert!((o.props_a
 pub fn read_props(owner:&OwnerWeak,raw:bool)->Value{let owner=ensure(owner);let o=owner.borrow();if raw{o.raw_value.clone()}else{o.props_value.clone()}}
 pub fn is_provided(owner:&OwnerWeak,key:Value)->Value{Value::boolean(ensure(owner).borrow().raw.get(key.text()).is_some())}
 pub fn watch_props(owner:&OwnerWeak,keys:Option<Value>,raw:bool,callback:Value)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let keys=keys.map(|v|match v{Value::Json(Json::String(s))=>vec![s],_=>v.items().iter().map(Value::text).collect()});owner.borrow_mut().watchers.push(Watcher{active:active.clone(),keys,raw,callback});disposer(owner,active,false)}
-pub fn replace_props(owner:&OwnerRef,raw:Json){assert!(raw.is_object(),"raw props must be a record");let (old_raw,old_props,watchers)={let o=owner.borrow();assert!(!o.disposed);(o.raw.clone(),o.props.clone(),o.watchers.clone())};{let mut o=owner.borrow_mut();o.raw_value=Value::json(raw.clone());o.raw=raw;o.dirty=true;}resolve_props(owner);let (new_raw,new_props)={let o=owner.borrow();(o.raw.clone(),o.props.clone())};let mut pending=Vec::new();for watcher in watchers{let(previous,next)=if watcher.raw{(&old_raw,&new_raw)}else{(&old_props,&new_props)};let all:BTreeSet<String>=previous.as_object().unwrap().keys().chain(next.as_object().unwrap().keys()).cloned().collect();let changed:Vec<String>=all.into_iter().filter(|key|previous.get(key)!=next.get(key)).collect();if changed.is_empty()||watcher.keys.as_ref().is_some_and(|keys|!changed.iter().any(|key|keys.contains(key))){continue}let info=record(vec![("changedKeys",Value::Array(Rc::new(changed.iter().map(|k|Value::string(k)).collect())))]);pending.push((watcher,next.clone(),previous.clone(),info));}for(watcher,next,previous,info)in pending{if watcher.active.get(){invoke(owner,"props-watch",&watcher.callback,vec![capability(&Rc::downgrade(owner)),Value::json(next),Value::json(previous),info]);}}}
+pub fn replace_props(owner:&OwnerRef,raw:Json){
+    assert!(raw.is_object(),"raw props must be a record");
+    let (old_raw,old_props,watchers)={let o=owner.borrow();assert!(!o.disposed);(o.raw_value.clone(),o.props_value.clone(),o.watchers.clone())};
+    {let mut o=owner.borrow_mut();o.raw_value=Value::json(raw.clone());o.raw=raw;o.dirty=true;}
+    resolve_props(owner);
+    if !watchers.iter().any(|watcher|watcher.active.get()){return}
+    let (new_raw,new_props)={let o=owner.borrow();(o.raw_value.clone(),o.props_value.clone())};
+    let changed=|previous:&Value,next:&Value|->Vec<String>{
+        let(Value::Record(previous),Value::Record(next))=(previous,next)else{panic!("Props snapshots must be records")};
+        let keys:BTreeSet<_>=previous.keys().chain(next.keys()).collect();
+        keys.into_iter().filter(|key|!same_value(previous.get(*key).unwrap_or(&Value::Undefined),next.get(*key).unwrap_or(&Value::Undefined))).cloned().collect()
+    };
+    let raw_changed=if watchers.iter().any(|watcher|watcher.raw&&watcher.active.get()){changed(&old_raw,&new_raw)}else{Vec::new()};
+    let resolved_changed=if watchers.iter().any(|watcher|!watcher.raw&&watcher.active.get()){changed(&old_props,&new_props)}else{Vec::new()};
+    let raw_keys=Value::Array(Rc::new(raw_changed.iter().map(|key|Value::string(key)).collect()));
+    let resolved_keys=Value::Array(Rc::new(resolved_changed.iter().map(|key|Value::string(key)).collect()));
+    for group in 0..3{for watcher in &watchers{
+        if !watcher.active.get()||group!=if watcher.raw{if watcher.keys.is_none(){0}else{1}}else{2}{continue}
+        let(previous,next,changed,all)=if watcher.raw{(&old_raw,&new_raw,&raw_changed,&raw_keys)}else{(&old_props,&new_props,&resolved_changed,&resolved_keys)};
+        if changed.is_empty(){continue}
+        let matched=if let Some(keys)=&watcher.keys{
+            let matched:Vec<Value>=keys.iter().filter(|key|changed.contains(key)).map(|key|Value::string(key)).collect();
+            if matched.is_empty(){continue}Value::Array(Rc::new(matched))
+        }else{all.clone()};
+        let info=record(vec![("changedKeysAll",all.clone()),("changedKeysMatched",matched)]);
+        if watcher.raw{eprintln!("[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.");}
+        invoke(owner,"props-watch",&watcher.callback,vec![capability(&Rc::downgrade(owner)),next.clone(),previous.clone(),info]);
+    }}
+}
 pub fn create_state(owner:&OwnerWeak,kind:&'static str,key:Value,value:Value,spec:Value)->Value{let owner_ref=setup(owner);let key=key.text();assert!(!key.is_empty()&&!owner_ref.borrow().states.contains_key(&key),"State name must be nonempty and same-frame unique");let state=Rc::new(State{value:RefCell::new(normalize_state(kind,value,&spec,true)),kind,spec,owner:owner.clone()});owner_ref.borrow_mut().states.insert(key,state.clone());Value::State(state)}
 fn normalize_state(kind:&str,value:Value,spec:&Value,initial:bool)->Value{match kind{"bool"=>{value.bool();},"string"|"enum"=>{assert!(matches!(value,Value::Json(Json::String(_))),"State string required");let options=spec.member("options",true);assert!(!options.nullish()||kind!="enum","enum options required");if !options.nullish(){assert!(options.items().iter().any(|option|strict_equal(option,&value)),"State value outside options");}},"discrete"|"range"=>{let number=value.num();assert!(number.is_finite(),"State finite number required");let min=spec.member("min",true);let max=spec.member("max",true);if kind=="range"{assert!(!min.nullish()&&!max.nullish()&&min.num()<=max.num(),"invalid range");let clamp=spec.member("clamp",true);if initial&&!clamp.nullish()&&clamp.bool(){return Value::number(number.max(min.num()).min(max.num()))}assert!(number>=min.num()&&number<=max.num(),"State range violation");}else{if !min.nullish(){assert!(number>=min.num(),"State below min")}if !max.nullish(){assert!(number<=max.num(),"State above max")}let step=spec.member("step",true);if !step.nullish(){assert!(step.num()>0.,"State step must be positive");let origin=if min.nullish(){0.}else{min.num()};assert!(((number-origin)/step.num()).fract().abs()<1e-9,"State step violation");}}},_=>panic!("unknown State constructor")};let options=spec.member("options",true);if !options.nullish(){assert!(options.items().iter().any(|item|strict_equal(item,&value)),"State option violation")}value}
 pub fn state_set(receiver:Value,value:Value,reason:Value)->Value{match receiver{Value::State(state)=>{runtime(&state.owner);write_state_value(&state,value,reason);},_=>panic!("State handle required")};Value::Undefined}

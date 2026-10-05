@@ -236,8 +236,15 @@ function styleRule(
   );
   return { ...contract, max: Number.MAX_SAFE_INTEGER };
 }
-const watchParameters: readonly ValueType[] = ['run', 'props', 'props', 'record'];
-const rawWatchParameters: readonly ValueType[] = ['run', 'record', 'record', 'record'];
+const watchInfo: DataType = {
+  kind: 'record',
+  fields: [
+    { name: 'changedKeysAll', type: { kind: 'array', element: 'string' } },
+    { name: 'changedKeysMatched', type: { kind: 'array', element: 'string' } },
+  ],
+};
+const watchParameters: readonly ValueType[] = ['run', 'props', 'props', watchInfo];
+const rawWatchParameters: readonly ValueType[] = ['run', 'record', 'record', watchInfo];
 const optionalRecord: ArgumentRule = { ...record, optional: true };
 const capabilityConfig: ArgumentRule = { role: 'value', types: ['record', 'module-config'] };
 const textSnapshot: DataType = {
