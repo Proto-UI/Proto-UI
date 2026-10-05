@@ -1,0 +1,9 @@
+# Material and Focus combination at 23f11b43
+
+This evidence binds validation-only PR826 source23f11b4301627bc374dfdc4599695885c7a6e866, tree1c47b2e79087b22cd9131df412a8feced1825e98. The PR preserves66db5bac and reviewed83275a9f16d as ordered parents. It must not merge into the product branch.
+
+Canonical package job111683220405 in [CI37285445572](https://github.com/Proto-UI/Proto-UI/actions/runs/37285445572) checked runner merge279d0e424102a5f8353779d46fc76217e9d58665, combining23f with main dc8bf26c. All11 minified hashes/bytes/gzip match the actual new local combination. Runtime67831/68000, React89148/89300, Vue88546/88700, Web Component96969/104500; all9 blocking gates pass without ceiling changes. These measurements replace neither the old66db evidence nor the source PRs' separate integration conditions.
+
+[Source/packed browser run37285445744](https://github.com/Proto-UI/Proto-UI/actions/runs/37285445744) passed. Full [artifact11333789606](https://github.com/Proto-UI/Proto-UI/actions/runs/37285445744/artifacts/11333789606) has31 byte-identical source/packed PNG pairs, zero page errors and zero non-test network requests. The archive SHA-256 is65fd600b5b2ab54f7b92bf430d9b628827663edcaa98824063368bf1e67c6100. Both result files identify the exact23f source. Text-background rest/pressed pixels were inspected; the selected PNGs here are unchanged originals from the packed run.
+
+The regular-readable-v3 optical profile is unchanged. This verifies the updated source combination, not a new visual design. The fixture uses a real Base-derived Prototype and Feedback/Adapter-owned texture chain with owned scene pixels, not arbitrary DOM capture. Native/Vulkan/WebGPU support and stable material admission are not claimed. The kernel's original license and notice accompany the captures.

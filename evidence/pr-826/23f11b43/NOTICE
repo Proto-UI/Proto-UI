@@ -1,0 +1,5 @@
+Extracted without shader modification from naughtyduk/liquidGL 3.0.0
+Commit 88f681ab7035fd55b04f63edff1841e32c4199e9, scripts/liquidGL.js
+Git blob b76e6872bf1c93ecacff646d09a77f5ce5f24ddb
+Copyright (c) NaughtyDuk. MIT; full terms and asset exclusion in LICENSE.
+Proto-UI modifications: separately authored finite ABI writer/resource plan; no shader changes.
