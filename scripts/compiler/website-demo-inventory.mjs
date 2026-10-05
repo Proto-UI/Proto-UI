@@ -528,7 +528,7 @@ const inventory = {
   frameDependency: {
     carrierPr: 777,
     issue: 786,
-    note: 'Existing RuntimeBox frame work is an open, unmerged carrier; do not create a competing frame convention.',
+    note: 'Reuse canonical RuntimeBox frame ownership from #777 / #786; browser/WASM migration must not establish a competing frame convention.',
   },
   pages,
   demos: [...demoDeclarations.values()].sort((a, b) => a.id.localeCompare(b.id)),
