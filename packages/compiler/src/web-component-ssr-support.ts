@@ -415,7 +415,6 @@ export function pendingProviderDefinition(host: HTMLElement): Promise<CustomElem
 }
 export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', carrier: Carrier | null, recovery: boolean): BrowserPort {
   const doc = host.ownerDocument;
-  host.setAttribute('data-pui-root', '');
   let root: HTMLElement | ShadowRoot = host;
   if (recovery) for (const node of Array.from(host.children)) if (node.localName === 'script' && node.hasAttribute('data-pui-carrier')) node.remove();
   const script = carrierNode(host);
@@ -430,6 +429,7 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
     }
   }
   let accepted = false, disposed = false, hydrating = !!carrier;
+  let rootMarkerBaseline: string | null = null;
   let control: HTMLElement | null = null;
   let portalAnchor: Comment | null = null, portalParent: ContextScope | null = null;
   const emissions: {key: string; payload: unknown; options?: CustomEventInit}[] = [];
@@ -635,7 +635,12 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
     parentContext: () => portalAnchor ? portalParent : logicalParent(host),
     bindContext(scope) { if (scope) ownerScopes.set(host, scope); else ownerScopes.delete(host); },
     accept() {
+      if (disposed) throw new Error('Browser port is disposed');
       if (hydrating && carrier?.present) throw new HydrationMismatch('present carrier was not adopted');
+      if (!accepted) {
+        rootMarkerBaseline = host.getAttribute('data-pui-root');
+        host.setAttribute('data-pui-root', '');
+      }
       accepted = true;
       if (script) script.remove();
       if (carrier && !carrier.present) hydrating = false;
@@ -652,6 +657,10 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       const target = control ?? host;
       for (const [name, entry] of attributes) if (target.getAttribute(name) === entry.projected) {
         if (entry.baseline === null) target.removeAttribute(name); else target.setAttribute(name, entry.baseline);
+      }
+      if (accepted && host.getAttribute('data-pui-root') === '') {
+        if (rootMarkerBaseline === null) host.removeAttribute('data-pui-root');
+        else host.setAttribute('data-pui-root', rootMarkerBaseline);
       }
       attributes.clear(); ownerScopes.delete(host);
       if (portalAnchor) { portalAnchor.parentNode?.insertBefore(host, portalAnchor); portalAnchor.remove(); portalAnchor = null; }

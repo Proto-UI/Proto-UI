@@ -265,7 +265,8 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void) { alive(); listeners.add(callback); return () => listeners.delete(callback); },
     });
     terminalCleanups.push(() => listeners.clear());
-    return { handle, set(next: T) { if (Object.is(value, next)) return; const prev = value; value = next; const epoch = generation; for (const callback of [...listeners]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (listeners.has(callback)) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-module' })); } } };
+    // Detach changes logical facts even without a physical Root; terminal owners stay silent.
+    return { handle, set(next: T, lifecycle = false) { if (Object.is(value, next)) return; const prev = value; value = next; const epoch = generation; for (const callback of [...listeners]) { if (epoch !== generation || (lifecycle ? disposed || !options.isAlive() : !ready() || !(options.isReady?.() ?? true))) break; if (listeners.has(callback)) options.invoke(() => callback({ type: 'next', prev, next, reason: 'native-module' })); } } };
   };
   const scopeActive = observed<boolean>(false, '@focus/active'), hasFocused = observed<boolean>(false, '@focus/hasFocused'), rovingActive = observed<boolean>(false, '@focus/active'), rovingHasFocused = observed<boolean>(false, '@focus/hasFocused');
   const owner: Owner = { identity: options.identity, parent: options.getLogicalParent, target: () => root, host: () => root ? options.getHost?.() ?? root : null, alive: () => !disposed && options.isAlive(), hooks, claims, exposes: () => options.getExposes?.() ?? {}, focusConfig, scopeConfig, rovingConfig, selected: false, active: false, scopeDeclared: false, rovingDeclared: false, focusDeclared: false, entryDeclared: false, scopeActive: false, focus: request => requestFocus(request), changed: () => { const epoch = generation; for (const callback of [...topologySubscribers]) { if (epoch !== generation || !ready() || !(options.isReady?.() ?? true)) break; if (topologySubscribers.has(callback)) options.invoke(callback); } refresh(); } };
@@ -1334,7 +1335,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function portalTarget(): HTMLElement | null { return ready() && hooks.has('asOverlay') && overlayConfig.portal && overlayOpen.handle.get() ? root!.ownerDocument.body : null; }
   function unmount() {
     const previous = root;
-    ++generation; ++imageGeneration;
+    const epoch = ++generation; ++imageGeneration;
     invalidateTransition(); stopPosition(); unlockModal();
     root = null;
     if (table) { tableSignature = null; clearTable(); }
@@ -1355,12 +1356,17 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     positionBaselines.clear();
     for (const [target, snapshot] of chromeTargets) { target.style.width = snapshot.width; target.style.height = snapshot.height; target.style.transform = snapshot.transform; target.style.display = snapshot.display; if (snapshot.size) target.style.setProperty('--proto-ui-scroll-thumb-size', snapshot.size); else target.style.removeProperty('--proto-ui-scroll-thumb-size'); if (snapshot.offset) target.style.setProperty('--proto-ui-scroll-thumb-offset', snapshot.offset); else target.style.removeProperty('--proto-ui-scroll-thumb-offset'); }
     chromeTargets.clear(); readerContacts = 0; textComposing = false; overlayMaterialized = false;
-    if (previous) {
-      if (hooks.has('asScrollSurface')) { scrolling.set(false); scrollProjection.set('unresolved'); followState.set('off'); followRequest.set('idle'); }
-      if (options.isAlive() && (options.isReady?.() ?? true)) {
+    if (previous && epoch === generation) {
+      if (hooks.has('asScrollSurface')) {
+        scrolling.set(false, true);
+        if (epoch === generation) scrollProjection.set('unresolved', true);
+        if (epoch === generation) followState.set('off', true);
+        if (epoch === generation) followRequest.set('idle', true);
+      }
+      if (epoch === generation && options.isAlive() && (options.isReady?.() ?? true)) {
         options.invoke(() => { hasFocused.set(false); rovingHasFocused.set(false); });
       }
-      announceTopology();
+      if (epoch === generation) announceTopology();
     }
     if (failures.length) throw new AggregateError(failures, '[Modules] view cleanup failed.');
   }

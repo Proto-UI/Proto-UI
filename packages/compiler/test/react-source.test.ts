@@ -156,7 +156,12 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
   def.props.define({present:{type:'boolean',default:true}});
   const surface=asScrollSurface();
   surface.configure({axes:'vertical',projection:'system'});
+  const detaches=def.state.numberDiscrete('scroll.detaches',0);
+  def.expose.state('count',detaches);
   def.expose.state('projection',surface.projection);
+  surface.projection.watch((run,event)=>{
+    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}
+  });
   def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});
   return (r)=>r.el('section','Scrollable content');
 }});`);
@@ -168,6 +173,8 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
     const projection = (
       ref.current!.getExposes() as unknown as { projection: ExternalState<string> }
     ).projection;
+    const transitions: [string, string][] = [];
+    projection.subscribe((event) => transitions.push([event.prev, event.next]));
     const first = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(projection.get()).toBe('system');
     expect(first.getAttribute('data-pui-scroll-projection')).toBe(projection.get());
@@ -184,6 +191,8 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
       root.render(React.createElement(CompiledComponent, { ref, present: false }));
     });
     expect(projection.get()).toBe('unresolved');
+    expect(ref.current!.getExposes().count.get()).toBe(1);
+    expect(transitions).toEqual([['system', 'unresolved']]);
     expect(first.getAttribute('data-pui-scroll-projection')).toBeNull();
     expect(first.style.overflowX).toBe('');
     expect(first.style.overflowY).toBe('');
@@ -194,6 +203,25 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
     expect(second).not.toBe(first);
     expect(second.getAttribute('data-pui-scroll-projection')).toBe(projection.get());
     expect(second.style.overflowY).toBe('auto');
+    expect(transitions).toEqual([
+      ['system', 'unresolved'],
+      ['unresolved', 'system'],
+    ]);
+    await React.act(async () => {
+      root.unmount();
+    });
+    expect(transitions).toEqual([
+      ['system', 'unresolved'],
+      ['unresolved', 'system'],
+      ['system', 'unresolved'],
+    ]);
+    expect(() => projection.get()).toThrow();
+    second.dispatchEvent(new Event('scroll'));
+    expect(transitions).toEqual([
+      ['system', 'unresolved'],
+      ['unresolved', 'system'],
+      ['system', 'unresolved'],
+    ]);
   });
 
   it('selects the physical Root from aliased pre-render Module requirements', async () => {

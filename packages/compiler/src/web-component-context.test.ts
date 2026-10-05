@@ -7,7 +7,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitWebComponentSource } from './web-component-source';
 
-const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+const floatingUi = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+)('@floating-ui/dom');
 
 interface Projection<T> {
   get(): T;
@@ -30,7 +32,10 @@ let nextTag = 0;
 const elements: ContextElement[] = [];
 const containers: HTMLElement[] = [];
 afterEach(() => {
-  for (const element of elements.splice(0)) { element.dispose(); element.remove(); }
+  for (const element of elements.splice(0)) {
+    element.dispose();
+    element.remove();
+  }
   for (const container of containers.splice(0)) container.remove();
 });
 
@@ -72,7 +77,8 @@ function project() {
       if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
       for (const artifact of emitted.value.supportingFiles ?? []) {
         const existing = sources.get(artifact.path);
-        if (existing !== undefined && existing !== artifact.contents) throw new Error(`Shared artifact conflict: ${artifact.path}`);
+        if (existing !== undefined && existing !== artifact.contents)
+          throw new Error(`Shared artifact conflict: ${artifact.path}`);
         sources.set(artifact.path, artifact.contents);
       }
       sources.set(file, emitted.value.code);
@@ -99,8 +105,12 @@ function provider(value: number, key = 'KEY'): string {
 }
 function consumer({ optional = false, key = 'KEY', cascade = false } = {}): string {
   const subscribe = optional ? 'trySubscribe' : 'subscribe';
-  const read = optional ? `run.context.tryRead(${key})?.value ?? -1` : `run.context.read(${key}).value`;
-  const render = optional ? `renderer.read.context.tryRead(${key})?.value ?? -1` : `renderer.read.context.read(${key}).value`;
+  const read = optional
+    ? `run.context.tryRead(${key})?.value ?? -1`
+    : `run.context.read(${key}).value`;
+  const render = optional
+    ? `renderer.read.context.tryRead(${key})?.value ?? -1`
+    : `renderer.read.context.read(${key}).value`;
   const next = optional ? 'next?.value ?? -1' : 'next.value';
   const prev = optional ? 'prev?.value ?? -1' : 'prev.value';
   return `import {definePrototype} from '@proto.ui/core'; import {${key}} from './keys';
@@ -134,9 +144,19 @@ function displayedProvider(element: ContextElement): string | undefined {
 
 // These guard real owner ancestry, reference identity, semantic transitions and terminal boundaries.
 describe('native Web Component Context', () => {
+  it('does not claim a Root when required Context initialization fails', () => {
+    const generated = project();
+    const element = generated.create(consumer());
+    expect(() => document.body.append(element)).toThrow();
+    expect(element.logicalOwner).toBeNull();
+    expect(element.present).toBe(false);
+    expect(element.hasAttribute('data-pui-root')).toBe(false);
+  });
+
   it('allows self-provider updates without a subscription and publishes every update with its own previous value', () => {
     const generated = project();
-    const parent = generated.create(`import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';
+    const parent =
+      generated.create(`import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';
       export default definePrototype({name:'unsubscribed-self-provider',setup(def){
         def.props.define({value:{type:'number',default:1}});
         def.context.provide(KEY,{value:1});
@@ -151,8 +171,8 @@ describe('native Web Component Context', () => {
     container().append(parent);
     const seen: string[] = [];
     const exposes = child.getExposes();
-    exposes.current?.subscribe(({next, reason}) => seen.push(`${reason}->${next}`));
-    parent.setProps({value: 5});
+    exposes.current?.subscribe(({ next, reason }) => seen.push(`${reason}->${next}`));
+    parent.setProps({ value: 5 });
     expect(seen).toEqual(['1->5', '5->6']);
     expect(exposes.current?.get()).toBe(6);
     expect(exposes.previous?.get()).toBe(5);
@@ -162,7 +182,8 @@ describe('native Web Component Context', () => {
   it('does not grant optional update authority to a required subscriber', () => {
     const generated = project();
     const parent = generated.create(provider(3));
-    const child = generated.create(`import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';
+    const child =
+      generated.create(`import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';
       export default definePrototype({name:'required-not-optional',setup(def){
         def.props.define({attempt:{type:'number',default:0}});
         def.context.subscribe(KEY);
@@ -171,7 +192,7 @@ describe('native Web Component Context', () => {
       }});`);
     parent.append(child);
     container().append(parent);
-    expect(() => child.setProps({attempt: 8})).toThrow(/optional.*subscription/i);
+    expect(() => child.setProps({ attempt: 8 })).toThrow(/optional.*subscription/i);
     expect(displayedProvider(parent)).toBe('3');
     expect(child.shadowRoot?.textContent).toBe('3');
   });
@@ -195,9 +216,9 @@ describe('native Web Component Context', () => {
     expect(displayedProvider(inner)).toBe('10');
     // Move into slotted light DOM: the same consumer still resolves the same nearest owner.
     inner.append(child);
-    child.setProps({probe: 1});
+    child.setProps({ probe: 1 });
     expect(child.getExposes().current?.get()).toBe(10);
-    child.setProps({probe: 1, write: 2});
+    child.setProps({ probe: 1, write: 2 });
     expect(child.getExposes().current?.get()).toBe(12);
     expect(child.getExposes().previous?.get()).toBe(10);
     expect(child.getExposes().calls?.get()).toBe(1);
@@ -214,7 +235,7 @@ describe('native Web Component Context', () => {
     const generated = project();
     const first = generated.create(provider(4));
     const second = generated.create(provider(8, 'OTHER'));
-    const child = generated.create(consumer({optional: true, key: 'OTHER'}));
+    const child = generated.create(consumer({ optional: true, key: 'OTHER' }));
     const fakeOwner = document.createElement('div');
     fakeOwner.setAttribute('data-pui-root', 'same-debug-name');
     fakeOwner.className = 'native-provider';
@@ -224,12 +245,12 @@ describe('native Web Component Context', () => {
     root.append(first, second);
     expect(child.getExposes().current?.get()).toBe(-1);
     expect(child.shadowRoot?.textContent).toBe('-1');
-    child.setProps({write: 7});
+    child.setProps({ write: 7 });
     expect(child.getExposes().accepted?.get()).toBe(false);
     second.append(child);
-    child.setProps({probe: 1, write: 7});
+    child.setProps({ probe: 1, write: 7 });
     expect(child.getExposes().current?.get()).toBe(8);
-    child.setProps({probe: 1, write: 9});
+    child.setProps({ probe: 1, write: 9 });
     expect(child.getExposes().accepted?.get()).toBe(true);
     expect(child.getExposes().current?.get()).toBe(9);
     await Promise.resolve();
@@ -246,15 +267,15 @@ describe('native Web Component Context', () => {
     const owner = child.logicalOwner;
     const exposes = child.getExposes();
     second.append(child);
-    child.setProps({probe: 1});
+    child.setProps({ probe: 1 });
     expect(exposes.current?.get()).toBe(20);
     expect(child.logicalOwner).toBe(owner);
-    first.setProps({value: 5});
+    first.setProps({ value: 5 });
     expect(exposes.calls?.get()).toBe(0);
-    second.setProps({value: 21});
+    second.setProps({ value: 21 });
     expect(exposes.current?.get()).toBe(21);
     expect(exposes.previous?.get()).toBe(20);
-    child.setProps({probe: 1, write: 3});
+    child.setProps({ probe: 1, write: 3 });
     expect(exposes.current?.get()).toBe(24);
     expect(exposes.previous?.get()).toBe(21);
     expect(exposes.calls?.get()).toBe(2);
@@ -264,19 +285,19 @@ describe('native Web Component Context', () => {
     const generated = project();
     const parent = generated.create(provider(2));
     const required = generated.create(consumer());
-    const optional = generated.create(consumer({optional: true}));
+    const optional = generated.create(consumer({ optional: true }));
     parent.append(required, optional);
     container().append(parent);
     const owner = required.logicalOwner;
     const retained = required.getExposes();
     required.remove();
-    expect(() => required.setProps({write: 3})).toThrow(/provider.*missing|disconnected/i);
+    expect(() => required.setProps({ write: 3 })).toThrow(/provider.*missing|disconnected/i);
     parent.append(required);
     expect(required.logicalOwner).toBe(owner);
     expect(retained.current?.get()).toBe(2);
     const optionalExposes = optional.getExposes();
     optional.remove();
-    optional.setProps({write: 7, probe: 1});
+    optional.setProps({ write: 7, probe: 1 });
     expect(optionalExposes.accepted?.get()).toBe(false);
     expect(optionalExposes.current?.get()).toBe(-1);
     required.remove();
@@ -288,12 +309,12 @@ describe('native Web Component Context', () => {
     expect(required.logicalOwner).not.toBe(owner);
     const renewed = required.getExposes();
     const events: number[] = [];
-    renewed.current?.subscribe(({next}) => events.push(next));
+    renewed.current?.subscribe(({ next }) => events.push(next));
     required.dispose();
-    parent.setProps({value: 9});
+    parent.setProps({ value: 9 });
     expect(events).toEqual([]);
     expect(() => renewed.current?.get()).toThrow(/disposed/i);
-    expect(() => required.setProps({probe: 2})).toThrow(/disposed/i);
+    expect(() => required.setProps({ probe: 2 })).toThrow(/disposed/i);
   });
 
   it('retains Context providers and subscriptions across ViewIntent epochs', async () => {
@@ -305,22 +326,22 @@ describe('native Web Component Context', () => {
     const parentOwner = parent.logicalOwner;
     const childOwner = child.logicalOwner;
     const exposes = child.getExposes();
-    child.setProps({visible: false});
+    child.setProps({ visible: false });
     await Promise.resolve();
     expect(child.present).toBe(false);
-    parent.setProps({value: 4});
+    parent.setProps({ value: 4 });
     expect(exposes.current?.get()).toBe(4);
     expect(exposes.previous?.get()).toBe(1);
     expect(exposes.calls?.get()).toBe(1);
     expect(child.logicalOwner).toBe(childOwner);
-    parent.setProps({visible: false, value: 4});
+    parent.setProps({ visible: false, value: 4 });
     await Promise.resolve();
     expect(parent.present).toBe(false);
-    child.setProps({visible: false, write: 2});
+    child.setProps({ visible: false, write: 2 });
     expect(exposes.current?.get()).toBe(6);
     expect(parent.logicalOwner).toBe(parentOwner);
-    parent.setProps({visible: true, value: 4});
-    child.setProps({visible: true, write: 2});
+    parent.setProps({ visible: true, value: 4 });
+    child.setProps({ visible: true, write: 2 });
     await Promise.resolve();
     expect(child.logicalOwner).toBe(childOwner);
     expect(child.shadowRoot?.textContent).toBe('6');
@@ -330,26 +351,36 @@ describe('native Web Component Context', () => {
   it('preserves each reentrant semantic transition and deterministic observer ordering', () => {
     const generated = project();
     const parent = generated.create(provider(1));
-    const first = generated.create(consumer({cascade: true}));
+    const first = generated.create(consumer({ cascade: true }));
     const second = generated.create(consumer());
     parent.append(first, second);
     container().append(parent);
     const seen: string[] = [];
-    first.getExposes().current?.subscribe(({next, reason}) => seen.push(`first:${reason}->${next}`));
-    second.getExposes().current?.subscribe(({next, reason}) => seen.push(`second:${reason}->${next}`));
-    parent.setProps({value: 2});
+    first
+      .getExposes()
+      .current?.subscribe(({ next, reason }) => seen.push(`first:${reason}->${next}`));
+    second
+      .getExposes()
+      .current?.subscribe(({ next, reason }) => seen.push(`second:${reason}->${next}`));
+    parent.setProps({ value: 2 });
     expect(seen).toEqual(['first:1->2', 'second:1->2', 'first:2->3', 'second:2->3']);
     expect(first.getExposes().calls?.get()).toBe(2);
     expect(second.getExposes().calls?.get()).toBe(2);
   });
 
   it('keeps strict unsupported diagnostics when Context is combined with unimplemented element props', () => {
-    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';
+    const parsed = parsePrototype(
+      `import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';
       export default definePrototype({name:'unsupported-context-surface',setup(def){
         def.context.trySubscribe(KEY);
         return (renderer)=>renderer.el('div',{class:'surface'},renderer.read.context.tryRead(KEY)?.value??-1);
-      }});`, {fileName: 'unsupported.ts', files: {'keys.ts': keys}});
-    expect(parsed).toMatchObject({ok: false, diagnostics: [{category: 'unsupported-input', code: 'PUI1006'}]});
+      }});`,
+      { fileName: 'unsupported.ts', files: { 'keys.ts': keys } }
+    );
+    expect(parsed).toMatchObject({
+      ok: false,
+      diagnostics: [{ category: 'unsupported-input', code: 'PUI1006' }],
+    });
   });
 
   it('rejects authored custom-element children at their source tag rather than pretending to preserve child owners', () => {
@@ -358,11 +389,20 @@ describe('native Web Component Context', () => {
         def.context.provide(KEY,{value:1});
         return (renderer)=>renderer.el('section',renderer.el('x-child-consumer'));
       }});`;
-    const parsed = parsePrototype(source, {fileName: 'custom-child.ts', files: {'keys.ts': keys}});
+    const parsed = parsePrototype(source, {
+      fileName: 'custom-child.ts',
+      files: { 'keys.ts': keys },
+    });
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    expect(emitWebComponentSource(parsed.value)).toMatchObject({ok: false, diagnostics: [{
-      category: 'unsupported-input', code: 'PUI3302',
-      span: {file: 'custom-child.ts', start: source.indexOf("'x-child-consumer'")},
-    }]});
+    expect(emitWebComponentSource(parsed.value)).toMatchObject({
+      ok: false,
+      diagnostics: [
+        {
+          category: 'unsupported-input',
+          code: 'PUI3302',
+          span: { file: 'custom-child.ts', start: source.indexOf("'x-child-consumer'") },
+        },
+      ],
+    });
   });
 });

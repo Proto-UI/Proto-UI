@@ -16,7 +16,12 @@
       "typescriptVersion": "5.9.3",
       "execution": "quickjs-wasm"
     },
-    "resultKeys": ["ok", "revision", "source", "output"],
+    "resultKeys": [
+      "ok",
+      "revision",
+      "source",
+      "output"
+    ],
     "result": {
       "ok": true,
       "revision": "canonical-button-v1",
@@ -279,8 +284,14 @@
     }
   },
   "renderedDocs": {
-    "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
-    "captures": ["evidence/compiler-guide-en-wasm.webp", "evidence/compiler-guide-zh-wasm.webp"],
+    "routes": [
+      "/en/build/compiler-guide/",
+      "/zh-cn/build/compiler-guide/"
+    ],
+    "captures": [
+      "evidence/compiler-guide-en-wasm.webp",
+      "evidence/compiler-guide-zh-wasm.webp"
+    ],
     "scope": "Actual Astro-rendered private API and support-boundary documentation; not evidence of generated target execution."
   },
   "existingDemoControl": {
@@ -686,7 +697,10 @@
     "quickjsWasmBytes": 503134,
     "renderedDocs": {
       "observedAt": "2026-10-04T19:41:43.145Z",
-      "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
+      "routes": [
+        "/en/build/compiler-guide/",
+        "/zh-cn/build/compiler-guide/"
+      ],
       "captures": [
         "evidence/compiler-guide-en-wasm-repair.webp",
         "evidence/compiler-guide-zh-wasm-repair.webp"
@@ -922,8 +936,14 @@
                 "surface": "PrototypePreviewer",
                 "line": 262
               },
-              "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
-              "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
+              "demoIds": [
+                "demo-bootstrap-2-3-2-button",
+                "demo-liquid-glass-button"
+              ],
+              "prototypeIds": [
+                "bootstrap-2-3-2-button",
+                "liquid-glass-button"
+              ],
               "unresolved": []
             }
           ],
@@ -942,8 +962,14 @@
                 "surface": "PrototypePreviewer",
                 "line": 262
               },
-              "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
-              "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
+              "demoIds": [
+                "demo-bootstrap-2-3-2-button",
+                "demo-liquid-glass-button"
+              ],
+              "prototypeIds": [
+                "bootstrap-2-3-2-button",
+                "liquid-glass-button"
+              ],
               "unresolved": []
             }
           ],
@@ -955,15 +981,24 @@
     },
     "docs": {
       "observedAt": "2026-10-04T21:00:57.163Z",
-      "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
+      "routes": [
+        "/en/build/compiler-guide/",
+        "/zh-cn/build/compiler-guide/"
+      ],
       "realDomChecks": "Expected headings and ordinary paragraphs, no changed prose inside pre.",
       "captures": [
         "internal/compiler/evidence/compiler-guide-en-second-review.webp",
         "internal/compiler/evidence/compiler-guide-zh-second-review.webp"
       ],
       "gallery": {
-        "routes": ["/en/ui-libraries/", "/zh-cn/ui-libraries/"],
-        "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
+        "routes": [
+          "/en/ui-libraries/",
+          "/zh-cn/ui-libraries/"
+        ],
+        "demoIds": [
+          "demo-bootstrap-2-3-2-button",
+          "demo-liquid-glass-button"
+        ],
         "boundary": "Ordinary wrapper DOM identities only; not compiled RuntimeBox preview execution."
       }
     },
@@ -1116,7 +1151,10 @@
     },
     "renderedDocs": {
       "observedAt": "2026-10-04T21:41:02.339Z",
-      "routes": ["/en/build/compiler-guide/", "/zh-cn/build/compiler-guide/"],
+      "routes": [
+        "/en/build/compiler-guide/",
+        "/zh-cn/build/compiler-guide/"
+      ],
       "normalParagraphs": true,
       "insidePre": false,
       "captures": [
@@ -1510,7 +1548,9 @@
           "sourceSha256": null,
           "artifactResultSha256": "bea99b7e6bbb517a5116bde807c1696a4446817725fccad510dc74b3e968c83f",
           "generatedFiles": 0,
-          "diagnostics": ["PUI4001"],
+          "diagnostics": [
+            "PUI4001"
+          ],
           "elapsedMs": 7.199999988079071,
           "completeNodeEqual": true
         },
@@ -1521,7 +1561,9 @@
           "sourceSha256": null,
           "artifactResultSha256": "38ad2fafe8f4dc9754c8bf9e86fde74155679a91508aca2e350f7d494c0bf503",
           "generatedFiles": 0,
-          "diagnostics": ["PUI4001"],
+          "diagnostics": [
+            "PUI4001"
+          ],
           "elapsedMs": 7.599999964237213,
           "completeNodeEqual": true
         },
@@ -1532,7 +1574,9 @@
           "sourceSha256": null,
           "artifactResultSha256": "d283f5cc7b1834a05361a62c8e2d7c995fa603189ad6acc5eed61d3a77081d1a",
           "generatedFiles": 0,
-          "diagnostics": ["PUI4001"],
+          "diagnostics": [
+            "PUI4001"
+          ],
           "elapsedMs": 8,
           "completeNodeEqual": true
         },
@@ -1543,7 +1587,9 @@
           "sourceSha256": null,
           "artifactResultSha256": "e3dfe2d086e5a26cc9d16b1ca69843cb8c6d5b63076f97be5d52bec3242ec041",
           "generatedFiles": 0,
-          "diagnostics": ["PUI4001"],
+          "diagnostics": [
+            "PUI4001"
+          ],
           "elapsedMs": 7.199999988079071,
           "completeNodeEqual": true
         },
@@ -1554,7 +1600,9 @@
           "sourceSha256": null,
           "artifactResultSha256": "5926ae730a4ae78e2157b7748069b230fbb2a43a594a33b394bd78aab48524c8",
           "generatedFiles": 0,
-          "diagnostics": ["PUI4001"],
+          "diagnostics": [
+            "PUI4001"
+          ],
           "elapsedMs": 7.600000023841858,
           "completeNodeEqual": true
         },
@@ -1565,7 +1613,9 @@
           "sourceSha256": null,
           "artifactResultSha256": "0f9876d24709ac5331dff651ed8c64e61625e82e4ded197f6fd51c5b551feda6",
           "generatedFiles": 0,
-          "diagnostics": ["PUI4001"],
+          "diagnostics": [
+            "PUI4001"
+          ],
           "elapsedMs": 7.400000035762787,
           "completeNodeEqual": true
         }
@@ -4267,7 +4317,9 @@
           "id": "extended/gpui-source-v1",
           "ok": false,
           "phase": "compile",
-          "codes": ["PUI4003"],
+          "codes": [
+            "PUI4003"
+          ],
           "completeNodeEqual": true,
           "revisionEqual": true,
           "buildEqual": true,
@@ -4386,7 +4438,9 @@
           "id": "unimplemented/qt-source-v1",
           "ok": false,
           "phase": "compile",
-          "codes": ["PUI4001"],
+          "codes": [
+            "PUI4001"
+          ],
           "completeNodeEqual": true,
           "revisionEqual": true,
           "buildEqual": true,
@@ -4397,7 +4451,9 @@
           "id": "unimplemented/flutter-source-v1",
           "ok": false,
           "phase": "compile",
-          "codes": ["PUI4001"],
+          "codes": [
+            "PUI4001"
+          ],
           "completeNodeEqual": true,
           "revisionEqual": true,
           "buildEqual": true,
@@ -4408,7 +4464,9 @@
           "id": "unimplemented/react-dom-ssr-v1",
           "ok": false,
           "phase": "compile",
-          "codes": ["PUI4001"],
+          "codes": [
+            "PUI4001"
+          ],
           "completeNodeEqual": true,
           "revisionEqual": true,
           "buildEqual": true,
@@ -4419,7 +4477,9 @@
           "id": "unimplemented/vue-ssr-v1",
           "ok": false,
           "phase": "compile",
-          "codes": ["PUI4001"],
+          "codes": [
+            "PUI4001"
+          ],
           "completeNodeEqual": true,
           "revisionEqual": true,
           "buildEqual": true,
@@ -4430,7 +4490,9 @@
           "id": "unimplemented/vue2-ssr-v1",
           "ok": false,
           "phase": "compile",
-          "codes": ["PUI4001"],
+          "codes": [
+            "PUI4001"
+          ],
           "completeNodeEqual": true,
           "revisionEqual": true,
           "buildEqual": true,
@@ -4441,7 +4503,9 @@
           "id": "unimplemented/web-component-ssr-v1",
           "ok": false,
           "phase": "compile",
-          "codes": ["PUI4001"],
+          "codes": [
+            "PUI4001"
+          ],
           "completeNodeEqual": true,
           "revisionEqual": true,
           "buildEqual": true,
@@ -15957,5 +16021,2276 @@
     "Existing RuntimeBox frame work belongs to #777/#786; do not create a competing frame convention.",
     "Cold/compile durations are one historical local sample each, not a performance budget or mobile/host support distribution.",
     "Compiler remains private and release-excluded; no stable/public compiler product claim."
-  ]
+  ],
+  "rootProjectionReviewRepair": {
+    "observedAt": "2026-10-05T13:25:43.818Z",
+    "reviewedHead": "0f91ac20d441b8978aaaef48802a94f00f3e716a",
+    "reviewComments": [
+      {
+        "id": 4180779463,
+        "path": "packages/compiler/src/native-adapter-modules.ts",
+        "finding": "Scroll detach changed its stored projection but dropped author and external watcher notifications."
+      },
+      {
+        "id": 4180779469,
+        "path": "packages/compiler/src/web-component-ssr-support.ts",
+        "finding": "Early canonical host marker survived port validation/owner initialization failure."
+      }
+    ],
+    "scope": "Common generated Web Module lifecycle notification and accepted canonical Web Component Root marker ownership. No target, vocabulary, spec or profile admission change.",
+    "requestParaphrase": "Continue the full #817, complete native, SSR/hydration and all-Adapter-parity portfolio through normal independently reviewed contributions; this additive review repair is not portfolio closure.",
+    "repairs": [
+      "Only internal lifecycle resets can notify a live logical owner without a physical Root; public input and terminal guards are unchanged. Every subsequent reset rechecks its captured generation after reentrant observers.",
+      "Acquire host data-pui-root only after hydration validation and owner reconciliation. Disposal restores its baseline only while the current marker still equals this port projection."
+    ],
+    "build": {
+      "format": 1,
+      "compilerSha256": "bb7bf65ba3f0ef18bdbf1042f1a76e3f68a810f0d61c372bd78dfb9eb8740332",
+      "typescriptVersion": "5.9.3",
+      "execution": "quickjs-wasm"
+    },
+    "environment": {
+      "frameworks": {
+        "react": "19.2.6",
+        "vue": "3.5.31",
+        "vue2": "2.6.14"
+      },
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+    },
+    "sourceCases": [
+      {
+        "id": "scroll",
+        "source": "import {definePrototype} from '@proto.ui/core';\nimport {asScrollSurface} from '@proto.ui/hooks';\nexport default definePrototype({name:'scroll-root-policy',setup(def){\n  def.props.define({present:{type:'boolean',default:true}});\n  const surface=asScrollSurface();\n  surface.configure({axes:'vertical',projection:'system'});\n  const detaches=def.state.numberDiscrete('scroll.detaches',0);\n  def.expose.state('count',detaches);\n  def.expose.state('projection',surface.projection);\n  surface.projection.watch((run,event)=>{\n    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}\n  });\n  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});\n  return (r)=>r.el('section','Scrollable content');\n}});",
+        "profiles": [
+          "react-dom-source-v1",
+          "vue-source-v1",
+          "vue2-source-v1",
+          "web-component-source-v1"
+        ],
+        "files": {},
+        "provenance": {
+          "fixtureFile": "packages/compiler/test/react-source.test.ts",
+          "fixtureSha256": "62288aebf34470b964200f74304b6c964a57ece7aa0951cff39bb7d772c81b59",
+          "exactTemplate": true
+        },
+        "sourceSha256": "8c3f2be0c9bd557af73e9db7b0ee02d53eac7e2db651ee0f2d3d0a01cb7a562e"
+      },
+      {
+        "id": "context-failure",
+        "source": "import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';\nexport default definePrototype({name:'root-review-context-consumer',setup(def){\n const count=def.state.numberDiscrete('context.current',-1);def.expose.state('count',count);\n def.context.subscribe(KEY);def.lifecycle.onCreated(run=>{count.set(run.context.read(KEY).value);});\n return r=>r.el('output',r.read.context.read(KEY).value);\n}});",
+        "profiles": [
+          "web-component-source-v1"
+        ],
+        "files": {
+          "keys.ts": "import {createContextKey} from '@proto.ui/core';\nexport const KEY=createContextKey<{value:number}>('same-debug-name');\nexport const OTHER=createContextKey<{value:number}>('same-debug-name');"
+        },
+        "provenance": {
+          "fixtureFile": "packages/compiler/src/web-component-context.test.ts",
+          "fixtureSha256": "67638a3fd9d10e8dfc3bcdbd6dee143e03293770c3f83215171dd19b297af6bc",
+          "controlledRequiredProviderReproduction": true
+        },
+        "sourceSha256": "87b2eed11950f4fad6a0f8d1c8856a8682fbe3c71f6580e91f2a2028b69a9b5b"
+      },
+      {
+        "id": "context-provider",
+        "source": "import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';\nexport default definePrototype({name:'root-review-context-provider',setup(def){\n def.context.provide(KEY,{value:10});return r=>r.slot();\n}});",
+        "profiles": [
+          "web-component-source-v1"
+        ],
+        "files": {
+          "keys.ts": "import {createContextKey} from '@proto.ui/core';\nexport const KEY=createContextKey<{value:number}>('same-debug-name');\nexport const OTHER=createContextKey<{value:number}>('same-debug-name');"
+        },
+        "provenance": {
+          "fixtureFile": "packages/compiler/src/web-component-context.test.ts",
+          "fixtureSha256": "67638a3fd9d10e8dfc3bcdbd6dee143e03293770c3f83215171dd19b297af6bc",
+          "actualProvider": true
+        },
+        "sourceSha256": "03f80f85bfb66f62ce3e1973862c9e4d1069a2b430c5a73377d9be9c095136ad"
+      },
+      {
+        "id": "counter",
+        "source": "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'root-review-server',setup(def){const count=def.state.numberDiscrete('counter.value',2);def.expose.state('count',count);return r=>r.el('output',count.get());}});",
+        "profiles": [
+          "web-component-source-v1"
+        ],
+        "files": {},
+        "provenance": {
+          "controlledServerPortReproduction": true
+        },
+        "sourceSha256": "86a1a9784084971a4d666b8380fe853a3d93c6fbe21856f132bef87e408e375e"
+      }
+    ],
+    "workerOutputs": [
+      {
+        "id": "scroll",
+        "profile": "react-dom-source-v1",
+        "request": {
+          "format": 1,
+          "revision": "scroll:react-dom-source-v1",
+          "source": "import {definePrototype} from '@proto.ui/core';\nimport {asScrollSurface} from '@proto.ui/hooks';\nexport default definePrototype({name:'scroll-root-policy',setup(def){\n  def.props.define({present:{type:'boolean',default:true}});\n  const surface=asScrollSurface();\n  surface.configure({axes:'vertical',projection:'system'});\n  const detaches=def.state.numberDiscrete('scroll.detaches',0);\n  def.expose.state('count',detaches);\n  def.expose.state('projection',surface.projection);\n  surface.projection.watch((run,event)=>{\n    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}\n  });\n  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});\n  return (r)=>r.el('section','Scrollable content');\n}});",
+          "options": {
+            "fileName": "root-review.proto.ts",
+            "profile": "react-dom-source-v1",
+            "files": {}
+          }
+        },
+        "source": {
+          "file": "root-review.proto.ts",
+          "exportName": "default",
+          "sha256": "982209d5b0d7d39e9ba5165d730f7aa29e450eb307ab61be3f1e8105b720c421"
+        },
+        "completeOutputDeepEqualNode": true,
+        "wallMs": 34,
+        "codeSha256": "852b49cb8a1616b096463397a0cd3580cf4ef3e9d714820346d4be9160619ee2",
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/style/native-v1.ts",
+            "kind": "source",
+            "sha256": "91e14cadfec5f3c09284eb8c56deae36af8762cfc8f4e5274a72d0bf0268d9d7",
+            "bytes": 4848
+          },
+          {
+            "path": ".proto-ui/expose-state/web-v1.ts",
+            "kind": "source",
+            "sha256": "8e8ccf607a36aacc5516f31c6e7f396957c9f2e2ae86cea3530c41ea9d6dcff6",
+            "bytes": 4460
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "695f018d96d41a5bbe1105618f380596c45517e14ac4ab4c8e06e5a04b99994d",
+            "bytes": 36687
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "fe33d87457082b7beaaaabd161df7b01899d2a7ab70a7d2823658121be05e5a2",
+            "bytes": 133921
+          },
+          {
+            "path": ".proto-ui/context/react-v1.ts",
+            "kind": "source",
+            "sha256": "ae7da902ad9ea792035e450ef3369ace8a5a4a9ddca44234437e9f0e9e68df78",
+            "bytes": 161
+          }
+        ]
+      },
+      {
+        "id": "scroll",
+        "profile": "vue-source-v1",
+        "request": {
+          "format": 1,
+          "revision": "scroll:vue-source-v1",
+          "source": "import {definePrototype} from '@proto.ui/core';\nimport {asScrollSurface} from '@proto.ui/hooks';\nexport default definePrototype({name:'scroll-root-policy',setup(def){\n  def.props.define({present:{type:'boolean',default:true}});\n  const surface=asScrollSurface();\n  surface.configure({axes:'vertical',projection:'system'});\n  const detaches=def.state.numberDiscrete('scroll.detaches',0);\n  def.expose.state('count',detaches);\n  def.expose.state('projection',surface.projection);\n  surface.projection.watch((run,event)=>{\n    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}\n  });\n  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});\n  return (r)=>r.el('section','Scrollable content');\n}});",
+          "options": {
+            "fileName": "root-review.proto.ts",
+            "profile": "vue-source-v1",
+            "files": {}
+          }
+        },
+        "source": {
+          "file": "root-review.proto.ts",
+          "exportName": "default",
+          "sha256": "982209d5b0d7d39e9ba5165d730f7aa29e450eb307ab61be3f1e8105b720c421"
+        },
+        "completeOutputDeepEqualNode": true,
+        "wallMs": 28.30000001192093,
+        "codeSha256": "1ec7dbf21472307be315cd7577279e77e79598a763630ff6001d197f5f65dd22",
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/expose-state/web-v1.ts",
+            "kind": "source",
+            "sha256": "8e8ccf607a36aacc5516f31c6e7f396957c9f2e2ae86cea3530c41ea9d6dcff6",
+            "bytes": 4460
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "695f018d96d41a5bbe1105618f380596c45517e14ac4ab4c8e06e5a04b99994d",
+            "bytes": 36687
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "fe33d87457082b7beaaaabd161df7b01899d2a7ab70a7d2823658121be05e5a2",
+            "bytes": 133921
+          }
+        ]
+      },
+      {
+        "id": "scroll",
+        "profile": "vue2-source-v1",
+        "request": {
+          "format": 1,
+          "revision": "scroll:vue2-source-v1",
+          "source": "import {definePrototype} from '@proto.ui/core';\nimport {asScrollSurface} from '@proto.ui/hooks';\nexport default definePrototype({name:'scroll-root-policy',setup(def){\n  def.props.define({present:{type:'boolean',default:true}});\n  const surface=asScrollSurface();\n  surface.configure({axes:'vertical',projection:'system'});\n  const detaches=def.state.numberDiscrete('scroll.detaches',0);\n  def.expose.state('count',detaches);\n  def.expose.state('projection',surface.projection);\n  surface.projection.watch((run,event)=>{\n    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}\n  });\n  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});\n  return (r)=>r.el('section','Scrollable content');\n}});",
+          "options": {
+            "fileName": "root-review.proto.ts",
+            "profile": "vue2-source-v1",
+            "files": {}
+          }
+        },
+        "source": {
+          "file": "root-review.proto.ts",
+          "exportName": "default",
+          "sha256": "982209d5b0d7d39e9ba5165d730f7aa29e450eb307ab61be3f1e8105b720c421"
+        },
+        "completeOutputDeepEqualNode": true,
+        "wallMs": 27.899999976158142,
+        "codeSha256": "8518f1cdcc7c578b75df824a358dfecb8a4a18c4c0623f72cd7ed474cfb31602",
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/expose-state/web-v1.ts",
+            "kind": "source",
+            "sha256": "8e8ccf607a36aacc5516f31c6e7f396957c9f2e2ae86cea3530c41ea9d6dcff6",
+            "bytes": 4460
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "695f018d96d41a5bbe1105618f380596c45517e14ac4ab4c8e06e5a04b99994d",
+            "bytes": 36687
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "fe33d87457082b7beaaaabd161df7b01899d2a7ab70a7d2823658121be05e5a2",
+            "bytes": 133921
+          }
+        ]
+      },
+      {
+        "id": "scroll",
+        "profile": "web-component-source-v1",
+        "request": {
+          "format": 1,
+          "revision": "scroll:web-component-source-v1",
+          "source": "import {definePrototype} from '@proto.ui/core';\nimport {asScrollSurface} from '@proto.ui/hooks';\nexport default definePrototype({name:'scroll-root-policy',setup(def){\n  def.props.define({present:{type:'boolean',default:true}});\n  const surface=asScrollSurface();\n  surface.configure({axes:'vertical',projection:'system'});\n  const detaches=def.state.numberDiscrete('scroll.detaches',0);\n  def.expose.state('count',detaches);\n  def.expose.state('projection',surface.projection);\n  surface.projection.watch((run,event)=>{\n    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}\n  });\n  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});\n  return (r)=>r.el('section','Scrollable content');\n}});",
+          "options": {
+            "fileName": "root-review.proto.ts",
+            "profile": "web-component-source-v1",
+            "files": {}
+          }
+        },
+        "source": {
+          "file": "root-review.proto.ts",
+          "exportName": "default",
+          "sha256": "982209d5b0d7d39e9ba5165d730f7aa29e450eb307ab61be3f1e8105b720c421"
+        },
+        "completeOutputDeepEqualNode": true,
+        "wallMs": 27.5,
+        "codeSha256": "611cfe094d1191520cb2ebf3961c2213aa48f5820daf183326908024eb194216",
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/expose-state/web-v1.ts",
+            "kind": "source",
+            "sha256": "8e8ccf607a36aacc5516f31c6e7f396957c9f2e2ae86cea3530c41ea9d6dcff6",
+            "bytes": 4460
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "695f018d96d41a5bbe1105618f380596c45517e14ac4ab4c8e06e5a04b99994d",
+            "bytes": 36687
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "fe33d87457082b7beaaaabd161df7b01899d2a7ab70a7d2823658121be05e5a2",
+            "bytes": 133921
+          },
+          {
+            "path": ".proto-ui/web-component/ssr-v1.ts",
+            "kind": "source",
+            "sha256": "df2f80cad74adcb799e52fc784783f40cc3577dd1f4603b1e93f63bdc74995aa",
+            "bytes": 35757
+          }
+        ]
+      },
+      {
+        "id": "context-failure",
+        "profile": "web-component-source-v1",
+        "request": {
+          "format": 1,
+          "revision": "context-failure:web-component-source-v1",
+          "source": "import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';\nexport default definePrototype({name:'root-review-context-consumer',setup(def){\n const count=def.state.numberDiscrete('context.current',-1);def.expose.state('count',count);\n def.context.subscribe(KEY);def.lifecycle.onCreated(run=>{count.set(run.context.read(KEY).value);});\n return r=>r.el('output',r.read.context.read(KEY).value);\n}});",
+          "options": {
+            "fileName": "root-review.proto.ts",
+            "profile": "web-component-source-v1",
+            "files": {
+              "keys.ts": "import {createContextKey} from '@proto.ui/core';\nexport const KEY=createContextKey<{value:number}>('same-debug-name');\nexport const OTHER=createContextKey<{value:number}>('same-debug-name');"
+            }
+          }
+        },
+        "source": {
+          "file": "root-review.proto.ts",
+          "exportName": "default",
+          "sha256": "ce50917c869224daa79d6e53d3cb0c84806522f0d0c65d31ee415a6292f9cce5"
+        },
+        "completeOutputDeepEqualNode": true,
+        "wallMs": 24.600000023841858,
+        "codeSha256": "be7588a3379d92fc25270c6873929fa89ecad3d3ce60aca5b9953c82b67e8a41",
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/key-dc2ed9b5eb8fa03a6d9398eb816a7773a181f41061354a359f30bf77a1a9897c.ts",
+            "kind": "source",
+            "sha256": "4ccd24c79393be1841a9ae7e924a7a70c20c284a9836b68e7e33f4726cf608f6",
+            "bytes": 190
+          },
+          {
+            "path": ".proto-ui/context/key-9d04ced5dd68c3cb55e4ef35a024e79c2127e19d2a1c2de10b3188a87a10c4c8.ts",
+            "kind": "source",
+            "sha256": "9055215f7fcbc92c762744f37dfda2aee748aa81153ecd0e83600c463965634f",
+            "bytes": 192
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/expose-state/web-v1.ts",
+            "kind": "source",
+            "sha256": "8e8ccf607a36aacc5516f31c6e7f396957c9f2e2ae86cea3530c41ea9d6dcff6",
+            "bytes": 4460
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "695f018d96d41a5bbe1105618f380596c45517e14ac4ab4c8e06e5a04b99994d",
+            "bytes": 36687
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "fe33d87457082b7beaaaabd161df7b01899d2a7ab70a7d2823658121be05e5a2",
+            "bytes": 133921
+          },
+          {
+            "path": ".proto-ui/web-component/ssr-v1.ts",
+            "kind": "source",
+            "sha256": "df2f80cad74adcb799e52fc784783f40cc3577dd1f4603b1e93f63bdc74995aa",
+            "bytes": 35757
+          }
+        ]
+      },
+      {
+        "id": "context-provider",
+        "profile": "web-component-source-v1",
+        "request": {
+          "format": 1,
+          "revision": "context-provider:web-component-source-v1",
+          "source": "import {definePrototype} from '@proto.ui/core';import {KEY} from './keys';\nexport default definePrototype({name:'root-review-context-provider',setup(def){\n def.context.provide(KEY,{value:10});return r=>r.slot();\n}});",
+          "options": {
+            "fileName": "root-review.proto.ts",
+            "profile": "web-component-source-v1",
+            "files": {
+              "keys.ts": "import {createContextKey} from '@proto.ui/core';\nexport const KEY=createContextKey<{value:number}>('same-debug-name');\nexport const OTHER=createContextKey<{value:number}>('same-debug-name');"
+            }
+          }
+        },
+        "source": {
+          "file": "root-review.proto.ts",
+          "exportName": "default",
+          "sha256": "859e4cbce2c997fa7e275af4b4326d428af3769d9ee9f05b7fe8eb70e3d54941"
+        },
+        "completeOutputDeepEqualNode": true,
+        "wallMs": 16.400000035762787,
+        "codeSha256": "bd5dd95425ce62b2a17c9e99e32ee11ce1df319696165a7d997d94f8305deaf8",
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/key-dc2ed9b5eb8fa03a6d9398eb816a7773a181f41061354a359f30bf77a1a9897c.ts",
+            "kind": "source",
+            "sha256": "4ccd24c79393be1841a9ae7e924a7a70c20c284a9836b68e7e33f4726cf608f6",
+            "bytes": 190
+          },
+          {
+            "path": ".proto-ui/context/key-9d04ced5dd68c3cb55e4ef35a024e79c2127e19d2a1c2de10b3188a87a10c4c8.ts",
+            "kind": "source",
+            "sha256": "9055215f7fcbc92c762744f37dfda2aee748aa81153ecd0e83600c463965634f",
+            "bytes": 192
+          },
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "695f018d96d41a5bbe1105618f380596c45517e14ac4ab4c8e06e5a04b99994d",
+            "bytes": 36687
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "fe33d87457082b7beaaaabd161df7b01899d2a7ab70a7d2823658121be05e5a2",
+            "bytes": 133921
+          },
+          {
+            "path": ".proto-ui/web-component/ssr-v1.ts",
+            "kind": "source",
+            "sha256": "df2f80cad74adcb799e52fc784783f40cc3577dd1f4603b1e93f63bdc74995aa",
+            "bytes": 35757
+          }
+        ]
+      },
+      {
+        "id": "counter",
+        "profile": "web-component-source-v1",
+        "request": {
+          "format": 1,
+          "revision": "counter:web-component-source-v1",
+          "source": "import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'root-review-server',setup(def){const count=def.state.numberDiscrete('counter.value',2);def.expose.state('count',count);return r=>r.el('output',count.get());}});",
+          "options": {
+            "fileName": "root-review.proto.ts",
+            "profile": "web-component-source-v1",
+            "files": {}
+          }
+        },
+        "source": {
+          "file": "root-review.proto.ts",
+          "exportName": "default",
+          "sha256": "f53ca99186d64e17e7840f68aade769fb8f0264b646486dd9fc60d37013e4326"
+        },
+        "completeOutputDeepEqualNode": true,
+        "wallMs": 12.200000047683716,
+        "codeSha256": "819a598cc06a40b76a5a67077bb2dd78cfd7aa9876f418b72812d98ed1228edc",
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/expose-state/web-v1.ts",
+            "kind": "source",
+            "sha256": "8e8ccf607a36aacc5516f31c6e7f396957c9f2e2ae86cea3530c41ea9d6dcff6",
+            "bytes": 4460
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "695f018d96d41a5bbe1105618f380596c45517e14ac4ab4c8e06e5a04b99994d",
+            "bytes": 36687
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "fe33d87457082b7beaaaabd161df7b01899d2a7ab70a7d2823658121be05e5a2",
+            "bytes": 133921
+          },
+          {
+            "path": ".proto-ui/web-component/ssr-v1.ts",
+            "kind": "source",
+            "sha256": "df2f80cad74adcb799e52fc784783f40cc3577dd1f4603b1e93f63bdc74995aa",
+            "bytes": 35757
+          }
+        ]
+      }
+    ],
+    "rawScroll": [
+      {
+        "profile": "react-dom-source-v1",
+        "steps": [
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 0; overflow: hidden auto;\"><section>Scrollable content</section></div>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-pui-scroll-projection=\"system\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" style=\"overflow: hidden auto; --pui-scroll-detaches: 0;\"><section>Scrollable content</section></div>"
+              }
+            ]
+          },
+          {
+            "present": false,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": false,
+                "marker": null,
+                "html": ""
+              },
+              {
+                "kind": "native",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": false,
+                "marker": null,
+                "html": ""
+              }
+            ]
+          },
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-scroll-detaches=\"1\" data-scroll-projection=\"system\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 1; overflow: hidden auto;\"><section>Scrollable content</section></div>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-pui-scroll-projection=\"system\" data-scroll-detaches=\"1\" data-scroll-projection=\"system\" style=\"overflow: hidden auto; --pui-scroll-detaches: 1;\"><section>Scrollable content</section></div>"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "profile": "vue-source-v1",
+        "steps": [
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div class=\"\" data-pui-root=\"\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 0; overflow: hidden auto;\"><section>Scrollable content</section></div>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-pui-scroll-projection=\"system\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" style=\"overflow: hidden auto; --pui-scroll-detaches: 0;\"><section>Scrollable content</section></div>"
+              }
+            ]
+          },
+          {
+            "present": false,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": false,
+                "marker": null,
+                "html": "<!---->"
+              },
+              {
+                "kind": "native",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": false,
+                "marker": null,
+                "html": "<!---->"
+              }
+            ]
+          },
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div class=\"\" data-pui-root=\"\" data-scroll-detaches=\"1\" data-scroll-projection=\"system\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 1; overflow: hidden auto;\"><section>Scrollable content</section></div>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-pui-scroll-projection=\"system\" data-scroll-detaches=\"1\" data-scroll-projection=\"system\" style=\"overflow: hidden auto; --pui-scroll-detaches: 1;\"><section>Scrollable content</section></div>"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "profile": "vue2-source-v1",
+        "steps": [
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" class=\"\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 0; overflow: hidden auto;\"><section>Scrollable content</section></div>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-pui-scroll-projection=\"system\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" style=\"overflow: hidden auto; --pui-scroll-detaches: 0;\"><section>Scrollable content</section></div>"
+              }
+            ]
+          },
+          {
+            "present": false,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": false,
+                "marker": null,
+                "html": "<!---->"
+              },
+              {
+                "kind": "native",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": false,
+                "marker": null,
+                "html": "<!---->"
+              }
+            ]
+          },
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" class=\"\" data-scroll-detaches=\"1\" data-scroll-projection=\"system\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 1; overflow: hidden auto;\"><section>Scrollable content</section></div>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<div data-pui-root=\"\" data-pui-scroll-projection=\"system\" data-scroll-detaches=\"1\" data-scroll-projection=\"system\" style=\"overflow: hidden auto; --pui-scroll-detaches: 1;\"><section>Scrollable content</section></div>"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "profile": "web-component-source-v1",
+        "steps": [
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<x-root-review-scroll-1 data-pui-root=\"\" class=\"pui-host-root\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 0; overflow: hidden auto;\"><section>Scrollable content</section></x-root-review-scroll-1>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 0,
+                "transitions": [],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<x-root-review-scroll-2 data-pui-scroll-projection=\"system\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" data-pui-root=\"\" style=\"overflow: hidden auto; --pui-scroll-detaches: 0;\"><section>Scrollable content</section></x-root-review-scroll-2>"
+              }
+            ]
+          },
+          {
+            "present": false,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": null,
+                "html": "<x-root-review-scroll-1 data-pui-root=\"\" class=\"pui-host-root\" data-scroll-detaches=\"0\" data-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 0;\" data-pui-view-detached=\"\"></x-root-review-scroll-1>"
+              },
+              {
+                "kind": "native",
+                "projection": "unresolved",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": null,
+                "html": "<x-root-review-scroll-2 data-scroll-detaches=\"0\" data-scroll-projection=\"system\" data-pui-root=\"\" style=\"--pui-scroll-detaches: 0; display: none !important;\"></x-root-review-scroll-2>"
+              }
+            ]
+          },
+          {
+            "present": true,
+            "observed": [
+              {
+                "kind": "original",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "reason: scroll host fact"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "reason: scroll host fact"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<x-root-review-scroll-1 data-pui-root=\"\" class=\"pui-host-root\" data-scroll-detaches=\"1\" data-scroll-projection=\"system\" style=\"--pui-scroll-detaches: 1; overflow: hidden auto;\" data-pui-scroll-projection=\"system\"><section>Scrollable content</section></x-root-review-scroll-1>"
+              },
+              {
+                "kind": "native",
+                "projection": "system",
+                "detaches": 1,
+                "transitions": [
+                  {
+                    "prev": "system",
+                    "next": "unresolved",
+                    "reason": "native-module"
+                  },
+                  {
+                    "prev": "unresolved",
+                    "next": "system",
+                    "reason": "native-module"
+                  }
+                ],
+                "rootConnected": true,
+                "marker": "system",
+                "html": "<x-root-review-scroll-2 data-scroll-detaches=\"1\" data-scroll-projection=\"system\" data-pui-root=\"\" style=\"--pui-scroll-detaches: 1; overflow: hidden auto;\" data-pui-scroll-projection=\"system\"><section>Scrollable content</section></x-root-review-scroll-2>"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "rawContext": [
+      {
+        "kind": "original",
+        "failed": {
+          "marker": "",
+          "logicalOwner": "undefined",
+          "html": "<x-root-review-child-3 data-pui-root=\"\" class=\"pui-host-root\"></x-root-review-child-3>"
+        },
+        "recovered": {
+          "marker": "",
+          "logicalOwner": "undefined",
+          "recoveryError": "TypeError: child.getExposes is not a function",
+          "html": "<x-root-review-child-3 data-pui-root=\"\" class=\"pui-host-root\"></x-root-review-child-3>"
+        }
+      },
+      {
+        "kind": "native",
+        "failed": {
+          "marker": null,
+          "logicalOwner": "null",
+          "present": false,
+          "html": "<x-root-review-child-5 style=\"\"></x-root-review-child-5>"
+        },
+        "recovered": {
+          "marker": "",
+          "logicalOwner": "symbol",
+          "present": true,
+          "count": 10,
+          "html": "<x-root-review-child-5 style=\"--pui-context-current: 10;\" data-context-current=\"10\" data-pui-root=\"\"><output>10</output></x-root-review-child-5>"
+        }
+      }
+    ],
+    "rawPortMismatchesAndBaselines": [
+      {
+        "variant": "missing-markers",
+        "initialized": {
+          "status": "mismatch",
+          "marker": null,
+          "owner": "null",
+          "diagnostic": {
+            "code": "PUI_WC_HYDRATION_MISMATCH",
+            "reason": "light Root ownership markers are absent",
+            "path": "Root"
+          },
+          "html": "<pui-compiled-element><output>2</output><script type=\"application/json\" data-pui-carrier=\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\">{\"version\":1,\"profile\":\"web-component-ssr-v1\",\"binding\":\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\",\"tagName\":\"pui-compiled-element\",\"mode\":\"light\",\"raw\":[],\"presentation\":[{\"kind\":\"element\",\"tag\":\"output\",\"children\":[{\"kind\":\"text\",\"text\":\"2\"}]}],\"control\":null,\"attributes\":{},\"interactionAttributes\":{},\"baselines\":{},\"present\":true}</script></pui-compiled-element>"
+        },
+        "disposed": {
+          "marker": null,
+          "owner": "null",
+          "html": "<pui-compiled-element><output>2</output><script type=\"application/json\" data-pui-carrier=\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\">{\"version\":1,\"profile\":\"web-component-ssr-v1\",\"binding\":\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\",\"tagName\":\"pui-compiled-element\",\"mode\":\"light\",\"raw\":[],\"presentation\":[{\"kind\":\"element\",\"tag\":\"output\",\"children\":[{\"kind\":\"text\",\"text\":\"2\"}]}],\"control\":null,\"attributes\":{},\"interactionAttributes\":{},\"baselines\":{},\"present\":true}</script></pui-compiled-element>"
+        }
+      },
+      {
+        "variant": "wrong-template",
+        "initialized": {
+          "status": "mismatch",
+          "marker": null,
+          "owner": "null",
+          "diagnostic": {
+            "code": "PUI_WC_HYDRATION_MISMATCH",
+            "reason": "element tag differs",
+            "path": "Root/0"
+          },
+          "html": "<pui-compiled-element><!--pui-root-start--><span></span><!--pui-root-end--><script type=\"application/json\" data-pui-carrier=\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\">{\"version\":1,\"profile\":\"web-component-ssr-v1\",\"binding\":\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\",\"tagName\":\"pui-compiled-element\",\"mode\":\"light\",\"raw\":[],\"presentation\":[{\"kind\":\"element\",\"tag\":\"output\",\"children\":[{\"kind\":\"text\",\"text\":\"2\"}]}],\"control\":null,\"attributes\":{},\"interactionAttributes\":{},\"baselines\":{},\"present\":true}</script></pui-compiled-element>"
+        },
+        "disposed": {
+          "marker": null,
+          "owner": "null",
+          "html": "<pui-compiled-element><!--pui-root-start--><span></span><!--pui-root-end--><script type=\"application/json\" data-pui-carrier=\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\">{\"version\":1,\"profile\":\"web-component-ssr-v1\",\"binding\":\"7a308169afc905dd411862bd9175a3c1e22d1a0d77cf74e853e2717458222635\",\"tagName\":\"pui-compiled-element\",\"mode\":\"light\",\"raw\":[],\"presentation\":[{\"kind\":\"element\",\"tag\":\"output\",\"children\":[{\"kind\":\"text\",\"text\":\"2\"}]}],\"control\":null,\"attributes\":{},\"interactionAttributes\":{},\"baselines\":{},\"present\":true}</script></pui-compiled-element>"
+        }
+      },
+      {
+        "variant": "baseline",
+        "initialized": {
+          "status": "adopted",
+          "marker": "",
+          "owner": "symbol",
+          "diagnostic": null,
+          "html": "<pui-compiled-element data-pui-root=\"\" data-counter-value=\"2\" style=\"--pui-counter-value: 2;\"><!--pui-root-start--><output>2</output><!--pui-root-end--></pui-compiled-element>"
+        },
+        "disposed": {
+          "marker": "baseline",
+          "owner": "null",
+          "html": "<pui-compiled-element data-pui-root=\"baseline\" data-counter-value=\"2\" style=\"--pui-counter-value: 2;\"></pui-compiled-element>"
+        }
+      },
+      {
+        "variant": "consumer-write",
+        "initialized": {
+          "status": "adopted",
+          "marker": "",
+          "owner": "symbol",
+          "diagnostic": null,
+          "html": "<pui-compiled-element data-pui-root=\"\" data-counter-value=\"2\" style=\"--pui-counter-value: 2;\"><!--pui-root-start--><output>2</output><!--pui-root-end--></pui-compiled-element>"
+        },
+        "disposed": {
+          "marker": "consumer-after-accept",
+          "owner": "null",
+          "html": "<pui-compiled-element data-pui-root=\"consumer-after-accept\" data-counter-value=\"2\" style=\"--pui-counter-value: 2;\"></pui-compiled-element>"
+        }
+      }
+    ],
+    "sharedPortExact": true,
+    "expectedErrors": [
+      {
+        "type": "error",
+        "expectedFailure": "required-context-original",
+        "message": "Uncaught Error: [Context] provider missing for key: same-debug-name",
+        "stack": "Error: [Context] provider missing for key: same-debug-name\n    at contextError (http://127.0.0.1:4484/packages/modules/context/src/impl.ts:16:15)\n    at ContextModuleImpl.subscribe (http://127.0.0.1:4484/packages/modules/context/src/impl.ts:91:13)\n    at Object.subscribe (http://127.0.0.1:4484/packages/modules/context/src/create.ts:16:40)\n    at Object.subscribe (http://127.0.0.1:4484/packages/runtime/src/kernel/handles/def.ts:258:32)\n    at Object.setup (http://127.0.0.1:4484/.cache/root-projection-review-browser/context-failure.proto.ts:6:15)\n    at createKernel (http://127.0.0.1:4484/packages/runtime/src/kernel/kernel.ts:30:25)\n    at createRuntimeInstance (http://127.0.0.1:4484/packages/runtime/src/instance/instance.ts:74:18)\n    at createRuntimeSession (http://127.0.0.1:4484/packages/runtime/src/instance/session.ts:10:16)\n    at createAdapterHost (http://127.0.0.1:4484/packages/adapters/base/src/host/adapter-host.ts:12:19)\n    at createWebComponentHostSession (http://127.0.0.1:4484/packages/adapters/web-component/src/runtime/session.ts:26:23)"
+      },
+      {
+        "type": "error",
+        "expectedFailure": "required-context-native",
+        "message": "Uncaught Error: [Context] provider missing or disconnected.",
+        "stack": "Error: [Context] provider missing or disconnected.\n    at provider (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/.proto-ui/context/scope-v1.ts:74:23)\n    at Object.subscribe (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/.proto-ui/context/scope-v1.ts:119:32)\n    at Object.subscribe (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/context-failure.ts?import:361:24)\n    at http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/context-failure.ts?import:552:21\n    at CompiledElement.connectedCallback (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/context-failure.ts?import:559:9)\n    at run (http://127.0.0.1:4484/.cache/root-projection-review-browser/main.ts:185:15)"
+      },
+      {
+        "type": "error",
+        "expectedFailure": "hydration-missing-markers",
+        "message": "Uncaught HydrationMismatch: WC hydration mismatch at Root: light Root ownership markers are absent",
+        "stack": "HydrationMismatch: WC hydration mismatch at Root: light Root ownership markers are absent\n    at locateRange (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:423:52)\n    at createBrowserPort (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:425:3)\n    at HTMLElement.connectedCallback (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/Component.client.ts:48:20)\n    at run (http://127.0.0.1:4484/.cache/root-projection-review-browser/main.ts:230:15)"
+      },
+      {
+        "type": "error",
+        "expectedFailure": "hydration-wrong-template",
+        "message": "Uncaught HydrationMismatch: WC hydration mismatch at Root/0: element tag differs",
+        "stack": "HydrationMismatch: WC hydration mismatch at Root/0: element tag differs\n    at matchList (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:401:72)\n    at createBrowserPort (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:432:12)\n    at HTMLElement.connectedCallback (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/Component.client.ts:48:20)\n    at run (http://127.0.0.1:4484/.cache/root-projection-review-browser/main.ts:230:15)"
+      }
+    ],
+    "terminal": {
+      "terminal": [
+        {
+          "profile": "react-dom-source-v1",
+          "kind": "original",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal"
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "reason": "unmount"
+            }
+          ]
+        },
+        {
+          "profile": "react-dom-source-v1",
+          "kind": "native",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: Generated handle is invalid after terminal disposal begins."
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "native-module"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "native-module"
+            },
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "native-module"
+            }
+          ]
+        },
+        {
+          "profile": "vue-source-v1",
+          "kind": "original",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal"
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "reason": "unmount"
+            }
+          ]
+        },
+        {
+          "profile": "vue-source-v1",
+          "kind": "native",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: [Vue source] owner is disposed"
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "native-module"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "native-module"
+            }
+          ]
+        },
+        {
+          "profile": "vue2-source-v1",
+          "kind": "original",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal"
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "reason": "unmount"
+            }
+          ]
+        },
+        {
+          "profile": "vue2-source-v1",
+          "kind": "native",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: [Vue2 native] exposed target has been terminally invalidated."
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "native-module"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "native-module"
+            },
+            {
+              "reason": "unmount"
+            }
+          ]
+        },
+        {
+          "profile": "web-component-source-v1",
+          "kind": "original",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal"
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "reason: scroll host fact"
+            },
+            {
+              "reason": "unmount"
+            }
+          ]
+        },
+        {
+          "profile": "web-component-source-v1",
+          "kind": "native",
+          "html": "",
+          "held": {
+            "rejected": true,
+            "message": "Error: Logical owner is disposed"
+          },
+          "transitions": [
+            {
+              "prev": "system",
+              "next": "unresolved",
+              "reason": "native-module"
+            },
+            {
+              "prev": "unresolved",
+              "next": "system",
+              "reason": "native-module"
+            }
+          ]
+        },
+        {
+          "profile": "web-component-source-v1",
+          "kind": "context-original",
+          "html": ""
+        },
+        {
+          "profile": "web-component-source-v1",
+          "kind": "context-native",
+          "html": ""
+        },
+        {
+          "profile": "shared-unadmitted-ssr-port",
+          "kind": "missing-markers",
+          "html": ""
+        },
+        {
+          "profile": "shared-unadmitted-ssr-port",
+          "kind": "wrong-template",
+          "html": ""
+        },
+        {
+          "profile": "shared-unadmitted-ssr-port",
+          "kind": "baseline",
+          "html": ""
+        },
+        {
+          "profile": "shared-unadmitted-ssr-port",
+          "kind": "consumer-write",
+          "html": ""
+        }
+      ],
+      "errors": [
+        {
+          "type": "error",
+          "expectedFailure": "required-context-original",
+          "message": "Uncaught Error: [Context] provider missing for key: same-debug-name",
+          "stack": "Error: [Context] provider missing for key: same-debug-name\n    at contextError (http://127.0.0.1:4484/packages/modules/context/src/impl.ts:16:15)\n    at ContextModuleImpl.subscribe (http://127.0.0.1:4484/packages/modules/context/src/impl.ts:91:13)\n    at Object.subscribe (http://127.0.0.1:4484/packages/modules/context/src/create.ts:16:40)\n    at Object.subscribe (http://127.0.0.1:4484/packages/runtime/src/kernel/handles/def.ts:258:32)\n    at Object.setup (http://127.0.0.1:4484/.cache/root-projection-review-browser/context-failure.proto.ts:6:15)\n    at createKernel (http://127.0.0.1:4484/packages/runtime/src/kernel/kernel.ts:30:25)\n    at createRuntimeInstance (http://127.0.0.1:4484/packages/runtime/src/instance/instance.ts:74:18)\n    at createRuntimeSession (http://127.0.0.1:4484/packages/runtime/src/instance/session.ts:10:16)\n    at createAdapterHost (http://127.0.0.1:4484/packages/adapters/base/src/host/adapter-host.ts:12:19)\n    at createWebComponentHostSession (http://127.0.0.1:4484/packages/adapters/web-component/src/runtime/session.ts:26:23)"
+        },
+        {
+          "type": "error",
+          "expectedFailure": "required-context-native",
+          "message": "Uncaught Error: [Context] provider missing or disconnected.",
+          "stack": "Error: [Context] provider missing or disconnected.\n    at provider (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/.proto-ui/context/scope-v1.ts:74:23)\n    at Object.subscribe (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/.proto-ui/context/scope-v1.ts:119:32)\n    at Object.subscribe (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/context-failure.ts?import:361:24)\n    at http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/context-failure.ts?import:552:21\n    at CompiledElement.connectedCallback (http://127.0.0.1:4484/.cache/root-projection-review-browser/generated/context-graph/web-component-source-v1/context-failure.ts?import:559:9)\n    at run (http://127.0.0.1:4484/.cache/root-projection-review-browser/main.ts:185:15)"
+        },
+        {
+          "type": "error",
+          "expectedFailure": "hydration-missing-markers",
+          "message": "Uncaught HydrationMismatch: WC hydration mismatch at Root: light Root ownership markers are absent",
+          "stack": "HydrationMismatch: WC hydration mismatch at Root: light Root ownership markers are absent\n    at locateRange (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:423:52)\n    at createBrowserPort (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:425:3)\n    at HTMLElement.connectedCallback (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/Component.client.ts:48:20)\n    at run (http://127.0.0.1:4484/.cache/root-projection-review-browser/main.ts:230:15)"
+        },
+        {
+          "type": "error",
+          "expectedFailure": "hydration-wrong-template",
+          "message": "Uncaught HydrationMismatch: WC hydration mismatch at Root/0: element tag differs",
+          "stack": "HydrationMismatch: WC hydration mismatch at Root/0: element tag differs\n    at matchList (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:401:72)\n    at createBrowserPort (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/.proto-ui/web-component/ssr-v1.ts:432:12)\n    at HTMLElement.connectedCallback (http://127.0.0.1:4484/.cache/root-projection-review-browser/server/Component.client.ts:48:20)\n    at run (http://127.0.0.1:4484/.cache/root-projection-review-browser/main.ts:230:15)"
+        }
+      ]
+    },
+    "validation": {
+      "focused": {
+        "files": 7,
+        "passed": 77,
+        "failed": 0,
+        "wallSeconds": 13.22,
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/src/vue2-source.test.ts packages/compiler/test/vue-source.test.ts packages/compiler/test/react-source.test.ts packages/compiler/test/owner-stress-generated.test.ts packages/compiler/test/targets.test.ts packages/compiler/src/web-component-source.test.ts packages/compiler/src/web-component-context.test.ts"
+      },
+      "types": {
+        "command": "corepack pnpm@10.32.1 check:types",
+        "wallSeconds": 68.26,
+        "source": "actual bg_2 completion in history://current/full",
+        "astroFiles": 268,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 1,
+        "existingHint": "scripts/capture-whitepaper-diagram-evidence.mjs:189",
+        "otherOutput": [
+          "starlight-docs-loader Duplicate id en/build/compiler-guide",
+          "starlight-docs-loader Duplicate id zh-cn/build/compiler-guide"
+        ],
+        "disposition": "Passed workspace and Astro diagnostics; existing duplicate-loader warnings and hint retained, not suppressed."
+      },
+      "noFullSuiteRerun": true,
+      "publicDocs": {
+        "command": "corepack pnpm@10.32.1 -s check:public-docs",
+        "bilingualRoutes": 116,
+        "libraryInventories": 4,
+        "wallSeconds": 11.57,
+        "passed": true
+      }
+    },
+    "visual": {
+      "path": "internal/compiler/evidence/root-projection-review-browser.webp",
+      "sha256": "2eca2be7604ea4be3e3839d36989e0a7d98bf34352e4ce2e06322864c3a6e705",
+      "bytes": 271360,
+      "width": 2000,
+      "height": 3910,
+      "actualSurface": true,
+      "bareImageInspected": true,
+      "disposition": "Actual original/generated Scroll surfaces, failed-context initialization and real provider recovery, shared supported-client port mismatch/baseline checks. Not a migrated RuntimeBox or admitted SSR demonstration."
+    },
+    "earlierFailures": {
+      "red": {
+        "numTotalTestSuites": 4,
+        "numPassedTestSuites": 0,
+        "numFailedTestSuites": 4,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 26,
+        "numPassedTests": 0,
+        "numFailedTests": 2,
+        "numPendingTests": 24,
+        "numTodoTests": 0,
+        "snapshot": {
+          "added": 0,
+          "failure": false,
+          "filesAdded": 0,
+          "filesRemoved": 0,
+          "filesRemovedList": [],
+          "filesUnmatched": 0,
+          "filesUpdated": 0,
+          "matched": 0,
+          "total": 0,
+          "unchecked": 0,
+          "uncheckedKeysByFile": [],
+          "unmatched": 0,
+          "updated": 0,
+          "didUpdate": false
+        },
+        "startTime": 1791182939628,
+        "success": false,
+        "testResults": [
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context does not claim a Root when required Context initialization fails",
+                "status": "failed",
+                "title": "does not claim a Root when required Context initialization fails",
+                "duration": 527.7356210000003,
+                "failureMessages": [
+                  "AssertionError: expected true to be false // Object.is equality\n    at /workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/src/web-component-context.test.ts:143:51\n    at file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14\n    at file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11\n    at runWithTimeout (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)\n    at runTest (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)\n    at processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at runSuite (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+                ],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context allows self-provider updates without a subscription and publishes every update with its own previous value",
+                "status": "skipped",
+                "title": "allows self-provider updates without a subscription and publishes every update with its own previous value",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context does not grant optional update authority to a required subscriber",
+                "status": "skipped",
+                "title": "does not grant optional update authority to a required subscriber",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context resolves nearest/self providers through light-DOM wrappers, slots and shadow-root wrappers",
+                "status": "skipped",
+                "title": "resolves nearest/self providers through light-DOM wrappers, slots and shadow-root wrappers",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context never treats equal debug names or CSS/attribute markers as provider identity",
+                "status": "skipped",
+                "title": "never treats equal debug names or CSS/attribute markers as provider identity",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context rebinds reads, updates and subscription notifications synchronously after an owner move",
+                "status": "skipped",
+                "title": "rebinds reads, updates and subscription notifications synchronously after an owner move",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context does not update an old provider while detached and invalidates retained handles at settled/explicit disposal",
+                "status": "skipped",
+                "title": "does not update an old provider while detached and invalidates retained handles at settled/explicit disposal",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context retains Context providers and subscriptions across ViewIntent epochs",
+                "status": "skipped",
+                "title": "retains Context providers and subscriptions across ViewIntent epochs",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context preserves each reentrant semantic transition and deterministic observer ordering",
+                "status": "skipped",
+                "title": "preserves each reentrant semantic transition and deterministic observer ordering",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context keeps strict unsupported diagnostics when Context is combined with unimplemented element props",
+                "status": "skipped",
+                "title": "keeps strict unsupported diagnostics when Context is combined with unimplemented element props",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context rejects authored custom-element children at their source tag rather than pretending to preserve child owners",
+                "status": "skipped",
+                "title": "rejects authored custom-element children at their source tag rather than pretending to preserve child owners",
+                "failureMessages": [],
+                "meta": {}
+              }
+            ],
+            "startTime": 1791182944064,
+            "endTime": 1791182944591.7356,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/src/web-component-context.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source selects a statically required physical Root without activating its Module properties",
+                "status": "skipped",
+                "title": "selects a statically required physical Root without activating its Module properties",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source projects the negotiated Scroll policy through explicit commits and replacement view epochs",
+                "status": "failed",
+                "title": "projects the negotiated Scroll policy through explicit commits and replacement view epochs",
+                "duration": 276.5102459999998,
+                "failureMessages": [
+                  "AssertionError: expected +0 to be 1 // Object.is equality\n    at /workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/test/react-source.test.ts:194:51\n    at file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+                ],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source selects the physical Root from aliased pre-render Module requirements",
+                "status": "skipped",
+                "title": "selects the physical Root from aliased pre-render Module requirements",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source does not lift setup-only Module requirements into physical Root selection",
+                "status": "skipped",
+                "title": "does not lift setup-only Module requirements into physical Root selection",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source retains a numeric owner across view epochs, commits only explicit updates and invalidates held handles",
+                "status": "skipped",
+                "title": "retains a numeric owner across view epochs, commits only explicit updates and invalidates held handles",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source projects State kinds and semantic names independently of Expose keys and template updates",
+                "status": "skipped",
+                "title": "projects State kinds and semantic names independently of Expose keys and template updates",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source runs setup/created exactly once through StrictMode replay and never starts an abandoned shell",
+                "status": "skipped",
+                "title": "runs setup/created exactly once through StrictMode replay and never starts an abandoned shell",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source withdraws missing props to defaults without reusing previous host values or implicitly rendering watcher writes",
+                "status": "skipped",
+                "title": "withdraws missing props to defaults without reusing previous host values or implicitly rendering watcher writes",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source expands supported authored hooks once and enforces typed method/event boundaries",
+                "status": "skipped",
+                "title": "expands supported authored hooks once and enforces typed method/event boundaries",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source rejects reached host capabilities before output instead of silently bridging native source",
+                "status": "skipped",
+                "title": "rejects reached host capabilities before output instead of silently bridging native source",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source routes native input in owner scope and projects readonly focus/ARIA facts without a template update",
+                "status": "skipped",
+                "title": "routes native input in owner scope and projects readonly focus/ARIA facts without a template update",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source installs explicit raw host listeners without hooks and removes Root/global routes at terminal teardown",
+                "status": "skipped",
+                "title": "installs explicit raw host listeners without hooks and removes Root/global routes at terminal teardown",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source deactivates real Root and global input during Suspense layout disconnection without publishing lifecycle epochs",
+                "status": "skipped",
+                "title": "deactivates real Root and global input during Suspense layout disconnection without publishing lifecycle epochs",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source enforces finite state domains atomically and clamps range definitions but not callback writes",
+                "status": "skipped",
+                "title": "enforces finite state domains atomically and clamps range definitions but not callback writes",
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source rejects component names that would shadow globals used by native lowering",
+                "status": "skipped",
+                "title": "rejects component names that would shadow globals used by native lowering",
+                "failureMessages": [],
+                "meta": {}
+              }
+            ],
+            "startTime": 1791182943998,
+            "endTime": 1791182944274.5103,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/test/react-source.test.ts"
+          }
+        ]
+      },
+      "firstRepair": {
+        "numTotalTestSuites": 6,
+        "numPassedTestSuites": 4,
+        "numFailedTestSuites": 2,
+        "numPendingTestSuites": 0,
+        "numTotalTests": 39,
+        "numPassedTests": 38,
+        "numFailedTests": 1,
+        "numPendingTests": 0,
+        "numTodoTests": 0,
+        "snapshot": {
+          "added": 0,
+          "failure": false,
+          "filesAdded": 0,
+          "filesRemoved": 0,
+          "filesRemovedList": [],
+          "filesUnmatched": 0,
+          "filesUpdated": 0,
+          "matched": 0,
+          "total": 0,
+          "unchecked": 0,
+          "uncheckedKeysByFile": [],
+          "unmatched": 0,
+          "updated": 0,
+          "didUpdate": false
+        },
+        "startTime": 1791183201992,
+        "success": false,
+        "testResults": [
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context does not claim a Root when required Context initialization fails",
+                "status": "passed",
+                "title": "does not claim a Root when required Context initialization fails",
+                "duration": 772.9529679999998,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context allows self-provider updates without a subscription and publishes every update with its own previous value",
+                "status": "passed",
+                "title": "allows self-provider updates without a subscription and publishes every update with its own previous value",
+                "duration": 612.6069320000001,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context does not grant optional update authority to a required subscriber",
+                "status": "passed",
+                "title": "does not grant optional update authority to a required subscriber",
+                "duration": 405.8887770000001,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context resolves nearest/self providers through light-DOM wrappers, slots and shadow-root wrappers",
+                "status": "passed",
+                "title": "resolves nearest/self providers through light-DOM wrappers, slots and shadow-root wrappers",
+                "duration": 435.9175500000001,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context never treats equal debug names or CSS/attribute markers as provider identity",
+                "status": "passed",
+                "title": "never treats equal debug names or CSS/attribute markers as provider identity",
+                "duration": 321.2776550000003,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context rebinds reads, updates and subscription notifications synchronously after an owner move",
+                "status": "passed",
+                "title": "rebinds reads, updates and subscription notifications synchronously after an owner move",
+                "duration": 285.9723270000004,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context does not update an old provider while detached and invalidates retained handles at settled/explicit disposal",
+                "status": "passed",
+                "title": "does not update an old provider while detached and invalidates retained handles at settled/explicit disposal",
+                "duration": 290.97181700000056,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context retains Context providers and subscriptions across ViewIntent epochs",
+                "status": "passed",
+                "title": "retains Context providers and subscriptions across ViewIntent epochs",
+                "duration": 225.61204300000009,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context preserves each reentrant semantic transition and deterministic observer ordering",
+                "status": "passed",
+                "title": "preserves each reentrant semantic transition and deterministic observer ordering",
+                "duration": 245.89800000000014,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context keeps strict unsupported diagnostics when Context is combined with unimplemented element props",
+                "status": "passed",
+                "title": "keeps strict unsupported diagnostics when Context is combined with unimplemented element props",
+                "duration": 1.831992999999784,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component Context"
+                ],
+                "fullName": "native Web Component Context rejects authored custom-element children at their source tag rather than pretending to preserve child owners",
+                "status": "passed",
+                "title": "rejects authored custom-element children at their source tag rather than pretending to preserve child owners",
+                "duration": 1.3245139999999083,
+                "failureMessages": [],
+                "meta": {}
+              }
+            ],
+            "startTime": 1791183203830,
+            "endTime": 1791183207430.3245,
+            "status": "passed",
+            "message": "",
+            "name": "/workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/src/web-component-context.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source preserves a compatible input engine across Module presentation commits",
+                "status": "passed",
+                "title": "preserves a compatible input engine across Module presentation commits",
+                "duration": 754.481833,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source marks only the connected canonical host, not template children or the physical image part",
+                "status": "passed",
+                "title": "marks only the connected canonical host, not template children or the physical image part",
+                "duration": 1031.1404470000002,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source replays exposed values on the canonical host and physical image after presentation commits",
+                "status": "passed",
+                "title": "replays exposed values on the canonical host and physical image after presentation commits",
+                "duration": 320.53641400000015,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source does not render state writes until an explicit update, and invalidates exposed handles on disposal",
+                "status": "passed",
+                "title": "does not render state writes until an explicit update, and invalidates exposed handles on disposal",
+                "duration": 320.94723699999986,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source serializes reentrant exposed state notifications and stops subscriptions at terminal disposal",
+                "status": "passed",
+                "title": "serializes reentrant exposed state notifications and stops subscriptions at terminal disposal",
+                "duration": 342.8256030000002,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source clamps range defaults but rejects out-of-range writes without mutating the published value",
+                "status": "passed",
+                "title": "clamps range defaults but rejects out-of-range writes without mutating the published value",
+                "duration": 245.42789400000038,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source preserves the logical owner and external subscriptions across view epochs, with native slot projection",
+                "status": "passed",
+                "title": "preserves the logical owner and external subscriptions across view epochs, with native slot projection",
+                "duration": 263.18023900000026,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source uses full raw snapshots: invalid input retains a previous valid candidate, omission returns to defaults",
+                "status": "passed",
+                "title": "uses full raw snapshots: invalid input retains a previous valid candidate, omission returns to defaults",
+                "duration": 286.1564669999998,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source requests callback-time updates after state writes and emits declared native events",
+                "status": "passed",
+                "title": "requests callback-time updates after state writes and emits declared native events",
+                "duration": 254.8602120000005,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source keeps synchronous DOM moves alive, disposes settled disconnections, and does not revive explicitly disposed elements",
+                "status": "passed",
+                "title": "keeps synchronous DOM moves alive, disposes settled disconnections, and does not revive explicitly disposed elements",
+                "duration": 354.0429009999998,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source does not route outward click/input signals back into raw or semantic input handlers",
+                "status": "passed",
+                "title": "does not route outward click/input signals back into raw or semantic input handlers",
+                "duration": 300.30269000000044,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source publishes readonly focus facts, refreshes Root projections without rendering, and releases detached listeners",
+                "status": "passed",
+                "title": "publishes readonly focus facts, refreshes Root projections without rendering, and releases detached listeners",
+                "duration": 332.8348529999994,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "native Web Component semantic source"
+                ],
+                "fullName": "native Web Component semantic source rejects an illegal portable semantic input type before producing native output",
+                "status": "passed",
+                "title": "rejects an illegal portable semantic input type before producing native output",
+                "duration": 3.266063000000031,
+                "failureMessages": [],
+                "meta": {}
+              }
+            ],
+            "startTime": 1791183203830,
+            "endTime": 1791183208640.266,
+            "status": "passed",
+            "message": "",
+            "name": "/workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/src/web-component-source.test.ts"
+          },
+          {
+            "assertionResults": [
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source selects a statically required physical Root without activating its Module properties",
+                "status": "passed",
+                "title": "selects a statically required physical Root without activating its Module properties",
+                "duration": 697.7974360000001,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source projects the negotiated Scroll policy through explicit commits and replacement view epochs",
+                "status": "failed",
+                "title": "projects the negotiated Scroll policy through explicit commits and replacement view epochs",
+                "duration": 487.90977299999986,
+                "failureMessages": [
+                  "AssertionError: expected [ [ 'system', 'unresolved' ], …(2) ] to deeply equal [ [ 'system', 'unresolved' ], …(1) ]\n    at /workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/test/react-source.test.ts:213:25\n    at file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file:///workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/node_modules/.pnpm/vitest@2.1.9_@types+node@25.6.2_happy-dom@15.11.7_lightningcss@1.32.0/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+                ],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source selects the physical Root from aliased pre-render Module requirements",
+                "status": "passed",
+                "title": "selects the physical Root from aliased pre-render Module requirements",
+                "duration": 306.09471399999984,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source does not lift setup-only Module requirements into physical Root selection",
+                "status": "passed",
+                "title": "does not lift setup-only Module requirements into physical Root selection",
+                "duration": 87.66431300000022,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source retains a numeric owner across view epochs, commits only explicit updates and invalidates held handles",
+                "status": "passed",
+                "title": "retains a numeric owner across view epochs, commits only explicit updates and invalidates held handles",
+                "duration": 127.40529000000015,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source projects State kinds and semantic names independently of Expose keys and template updates",
+                "status": "passed",
+                "title": "projects State kinds and semantic names independently of Expose keys and template updates",
+                "duration": 109.46542399999998,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source runs setup/created exactly once through StrictMode replay and never starts an abandoned shell",
+                "status": "passed",
+                "title": "runs setup/created exactly once through StrictMode replay and never starts an abandoned shell",
+                "duration": 98.00000199999977,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source withdraws missing props to defaults without reusing previous host values or implicitly rendering watcher writes",
+                "status": "passed",
+                "title": "withdraws missing props to defaults without reusing previous host values or implicitly rendering watcher writes",
+                "duration": 83.93919400000004,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source expands supported authored hooks once and enforces typed method/event boundaries",
+                "status": "passed",
+                "title": "expands supported authored hooks once and enforces typed method/event boundaries",
+                "duration": 97.6578129999998,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source rejects reached host capabilities before output instead of silently bridging native source",
+                "status": "passed",
+                "title": "rejects reached host capabilities before output instead of silently bridging native source",
+                "duration": 2.0290939999999864,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source routes native input in owner scope and projects readonly focus/ARIA facts without a template update",
+                "status": "passed",
+                "title": "routes native input in owner scope and projects readonly focus/ARIA facts without a template update",
+                "duration": 252.24617599999965,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source installs explicit raw host listeners without hooks and removes Root/global routes at terminal teardown",
+                "status": "passed",
+                "title": "installs explicit raw host listeners without hooks and removes Root/global routes at terminal teardown",
+                "duration": 228.90417800000068,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source deactivates real Root and global input during Suspense layout disconnection without publishing lifecycle epochs",
+                "status": "passed",
+                "title": "deactivates real Root and global input during Suspense layout disconnection without publishing lifecycle epochs",
+                "duration": 241.73252700000012,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source enforces finite state domains atomically and clamps range definitions but not callback writes",
+                "status": "passed",
+                "title": "enforces finite state domains atomically and clamps range definitions but not callback writes",
+                "duration": 71.8173340000003,
+                "failureMessages": [],
+                "meta": {}
+              },
+              {
+                "ancestorTitles": [
+                  "checked semantics to native React DOM source"
+                ],
+                "fullName": "checked semantics to native React DOM source rejects component names that would shadow globals used by native lowering",
+                "status": "passed",
+                "title": "rejects component names that would shadow globals used by native lowering",
+                "duration": 10.925873000000138,
+                "failureMessages": [],
+                "meta": {}
+              }
+            ],
+            "startTime": 1791183203820,
+            "endTime": 1791183206723.9258,
+            "status": "failed",
+            "message": "",
+            "name": "/workspace/worktrees/proto-ui-compiler/compiler-root-projection-parity/packages/compiler/test/react-source.test.ts"
+          }
+        ]
+      },
+      "browserStartup": {
+        "failures": [
+          {
+            "action": "browser.open",
+            "appPath": "/home/ezra/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome",
+            "name": "root-projection-review",
+            "error": "Browser open timed out after 30000ms"
+          },
+          {
+            "action": "browser.open retry",
+            "waitUntil": "domcontentloaded",
+            "timeout": 90,
+            "error": "Failed to attach to chrome on http://127.0.0.1:40997: Timed out waiting for CDP endpoint http://127.0.0.1:40997"
+          }
+        ],
+        "server": "root-projection-review-browser readiness and port 4484 observed; logs contain readiness banner only",
+        "disposition": "No consumer verification or browser pass claimed from these failed startup attempts"
+      },
+      "firstRepairDisposition": "Physical terminal detach while React owner is still alive correctly emits unresolved before terminal closure; initial added assertion expected no such event and was corrected. No consumer source/helper mutation was made for that assertion."
+    },
+    "remainingDifferences": [
+      "Raw Scroll event reasons differ; original external terminal observations contain disconnect while generated profiles do not all deliver it, and terminal-detach next events differ. Not normalized or asserted as full parity.",
+      "Original Web Component required-Context failure retains data-pui-root and leaves no initialized public getExposes method; moving it under the real provider does not recover that instance. Generated consumer rejects without marker or owner and recovers with count 10.",
+      "Private SSR serializer entry is exercised only to reproduce the exact same helper shipped by the supported client profile; SSR/hydration profile admission remains unsupported.",
+      "All canonical demo migrations, existing RuntimeBox and optional editor, preview security, native-widget breadth and full Adapter parity remain open."
+    ],
+    "renderedGuides": {
+      "english": {
+        "url": "http://127.0.0.1:4485/en/build/compiler-guide/",
+        "title": "Compiler Guide | Proto UI",
+        "paragraph": "An additional Root review repair delivers Scroll’s system → unresolved notification during physical detach, including the authored watcher, without reopening input or terminal-owner guards. Four original/generated Web pairs exercise detach and retained-owner remount; seven complete browser Worker outputs match Node. The Custom Element Root marker is acquired only when the validated port accepts an owner, then restored on disposal unless the consumer has replaced it. Required-Context initialization failure and two shared-port hydration mismatches leave no generated Root marker or owner; an actual provider permits a fresh client owner. Existing marker baselines and later consumer writes survive disposal. These port checks use the unadmitted private serializer only to reproduce the shared client helper; they do not admit SSR/hydration. Raw event reasons, terminal notification differences and the original Web Component Adapter’s failed-initialization marker/recovery gap remain recorded. All fourteen reproduction containers are empty after disposal, eight retained getters reject, and the four intentional initialization errors are retained separately from unexpected errors.",
+        "paragraphTag": "P",
+        "insideCode": false,
+        "headings": [
+          "Prerequisites",
+          "What 0.2 actually ships",
+          "Constraints that already apply",
+          "Static intent versus arbitrary functions",
+          "No supported Compiler inputs or outputs in 0.2",
+          "Private repository compiler experiment",
+          "Implemented profiles and compatibility",
+          "Local commands and consumer ownership",
+          "Executed evidence and measured costs",
+          "Browser WebAssembly execution",
+          "Website-wide migration inventory",
+          "Contribution boundary",
+          "Verification of the current boundary"
+        ],
+        "language": [
+          {
+            "id": "",
+            "label": null,
+            "labels": [
+              " Select theme   DarkLightAuto   "
+            ],
+            "options": [
+              {
+                "value": "dark",
+                "label": "Dark"
+              },
+              {
+                "value": "light",
+                "label": "Light"
+              },
+              {
+                "value": "auto",
+                "label": "Auto"
+              }
+            ]
+          }
+        ]
+      },
+      "chinese": {
+        "url": "http://127.0.0.1:4485/zh-cn/build/compiler-guide/",
+        "title": "Compiler 指南 | Proto UI",
+        "paragraph": "另一个 Root 审查修复在 physical detach 时交付 Scroll 的 system → unresolved notification，包括 authored watcher；不放宽 input 或 terminal-owner guard。四组原/generated Web consumer 验证 detach 与 retained-owner remount，七份完整 browser Worker output 与 Node 一致。Custom Element 仅在 validated port 接受 owner 后取得 Root marker，dispose 时恢复原值，但不覆盖 consumer 的后续替换。Required-Context 初始化失败和两种 shared-port hydration mismatch 均不留下 generated Root marker 或 owner；挂入真实 provider 后可创建新的 client owner。原 marker baseline 与后续 consumer write 在 disposal 后保留。Port 检查只借助未准入的 private serializer 复现共用 client helper，不构成 SSR/hydration 准入。Raw event reason、terminal notification 差异，以及原 Web Component Adapter 初始化失败后的 marker/recovery 缺口仍记录为未完成项。Dispose 后十四个 reproduction container 全空，八个 retained getter 拒绝调用；四个 intentional initialization error 单独保留，不计作 unexpected error。",
+        "paragraphTag": "P",
+        "insideCode": false,
+        "headings": [
+          "前置阅读",
+          "0.2 实际交付的内容",
+          "已经适用的约束",
+          "Static intent 与任意 function",
+          "0.2 没有受支持的 Compiler input/output",
+          "仓库内的私有 Compiler 实验",
+          "已实现 profile 与 compatibility",
+          "本地命令与 consumer ownership",
+          "已执行证据与成本测量",
+          "浏览器内 WebAssembly 执行",
+          "全站 Demo 迁移清单",
+          "贡献边界",
+          "验证当前边界"
+        ]
+      },
+      "actualLanguageControl": true,
+      "source": "Own Astro dev server on observed-ready 4485; actual managed Chromium tab and viewport screenshots inspected.",
+      "privateDeployment": false
+    }
+  }
 }

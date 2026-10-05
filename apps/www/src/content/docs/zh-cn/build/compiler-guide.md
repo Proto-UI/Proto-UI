@@ -153,6 +153,8 @@ Static Module declaration 在 render 前选择 physical Root，但 image/text pr
 
 后续修复在真实浏览器 WASM Worker 中，将七个受控 Prototype fixture 编译到四个 Web source profile：28 份完整 output 与 Node 一致，再将未经改写的 emitted module 与原 Adapter 并排挂载为 56 个真实 surface。证据覆盖 inactive/active image/input declaration、controlled editing、ordered template children、实测 Scroll request、detach/remount 与 terminal cleanup。Composition 输入是 Chromium 中的 synthetic event，不是 OS/IME 自动化。共用 stylesheet 只提供 geometry，不注入 Module value、Root marker、overflow policy 或 Scroll fact。完整原始 attribute、markup 与仍存在的 Custom Element presentation 差异保留在 `internal/compiler/browser-wasm-evidence.json`。这不等于 native widget、SSR/hydration profile、全部 canonical Demo、RuntimeBox mount 或 editor/security boundary 的准入。
 
+另一个 Root 审查修复在 physical detach 时交付 Scroll 的 `system` → `unresolved` notification，包括 authored watcher；不放宽 input 或 terminal-owner guard。四组原/generated Web consumer 验证 detach 与 retained-owner remount，七份完整 browser Worker output 与 Node 一致。Custom Element 仅在 validated port 接受 owner 后取得 Root marker，dispose 时恢复原值，但不覆盖 consumer 的后续替换。Required-Context 初始化失败和两种 shared-port hydration mismatch 均不留下 generated Root marker 或 owner；挂入真实 provider 后可创建新的 client owner。原 marker baseline 与后续 consumer write 在 disposal 后保留。Port 检查只借助未准入的 private serializer 复现共用 client helper，不构成 SSR/hydration 准入。Raw event reason、terminal notification 差异，以及原 Web Component Adapter 初始化失败后的 marker/recovery 缺口仍记录为未完成项。Dispose 后十四个 reproduction container 全空，八个 retained getter 拒绝调用；四个 intentional initialization error 单独保留，不计作 unexpected error。
+
 ### 全站 Demo 迁移清单
 
 重建 source-bound 清单：

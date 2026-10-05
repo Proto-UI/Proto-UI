@@ -155,6 +155,13 @@ export default definePrototype({name:'canonical-image-host',modules:[declareImag
     light.update();
     image.update();
     expect([...document.querySelectorAll('[data-pui-root]')]).toEqual([shadow, light, image]);
+    shadow.dispose();
+    expect(shadow.hasAttribute('data-pui-root')).toBe(false);
+    light.setAttribute('data-pui-root', 'consumer');
+    light.dispose();
+    expect(light.getAttribute('data-pui-root')).toBe('consumer');
+    image.dispose();
+    expect(image.hasAttribute('data-pui-root')).toBe(false);
   });
 
   it('replays exposed values on the canonical host and physical image after presentation commits', async () => {
