@@ -1264,8 +1264,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
   function rootProperties(): Readonly<Record<string, string | number | boolean | null>> {
     alive();
     const result: Record<string, string | number | boolean | null> = Object.create(null);
-    if (textDeclaration) {
-      if (textDeclaration.config.lineMode === 'single') result.type = 'text';
+    if (textDeclared) {
       result.value = textValue;
       for (const [key, value] of Object.entries(textPatch)) if (!['value','valueMode','defaultValue'].includes(key) && (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean')) {
         if (key === 'minLength' || key === 'maxLength') result[key] = typeof value === 'number' && value >= 0 ? Math.trunc(value) : null;
@@ -1273,7 +1272,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
         else result[key] = value;
       }
     }
-    if (imageDeclaration) { result.src = imageSource || null; result.alt = imagePatch.a11yMode === 'decorative' ? '' : String(imagePatch.alternativeText ?? ''); result.style = 'object-fit:' + imageFit; }
+    if (imageDeclared) { result.src = imageSource || null; result.alt = imagePatch.a11yMode === 'decorative' ? '' : String(imagePatch.alternativeText ?? ''); result.style = 'object-fit:' + imageFit; }
     return result;
   }
   function projectAttributes(): Readonly<Record<string, string | null>> {
@@ -1304,6 +1303,7 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     if (hooks.has('asOverlay')) { result['data-pui-overlay-open'] = String(overlayOpen.handle.get()); if (overlayConfig.modal) result['aria-modal'] = String(overlayOpen.handle.get()); if (overlayKeepMounted) { result['data-pui-view-detached'] = overlayOpen.handle.get() ? null : ''; if (!overlayOpen.handle.get()) { result.hidden = ''; result['aria-hidden'] = 'true'; } } }
     if (hooks.has('asTransition')) result['data-pui-transition-state'] = transitionState.handle.get();
     if (hooks.has('asHitParticipation')) result['data-pui-hit-participation'] = String(hitConfig.mode);
+    if (hooks.has('asScrollSurface') && ready()) result['data-pui-scroll-projection'] = scrollProjection.handle.get();
     return result;
   }
   const attributeBaselines = new Map<string, { baseline: string | null; projected: string | null }>();
@@ -1356,8 +1356,9 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
     for (const [target, snapshot] of chromeTargets) { target.style.width = snapshot.width; target.style.height = snapshot.height; target.style.transform = snapshot.transform; target.style.display = snapshot.display; if (snapshot.size) target.style.setProperty('--proto-ui-scroll-thumb-size', snapshot.size); else target.style.removeProperty('--proto-ui-scroll-thumb-size'); if (snapshot.offset) target.style.setProperty('--proto-ui-scroll-thumb-offset', snapshot.offset); else target.style.removeProperty('--proto-ui-scroll-thumb-offset'); }
     chromeTargets.clear(); readerContacts = 0; textComposing = false; overlayMaterialized = false;
     if (previous) {
+      if (hooks.has('asScrollSurface')) { scrolling.set(false); scrollProjection.set('unresolved'); followState.set('off'); followRequest.set('idle'); }
       if (options.isAlive() && (options.isReady?.() ?? true)) {
-        options.invoke(() => { hasFocused.set(false); rovingHasFocused.set(false); scrolling.set(false); });
+        options.invoke(() => { hasFocused.set(false); rovingHasFocused.set(false); });
       }
       announceTopology();
     }

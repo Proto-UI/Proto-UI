@@ -1363,7 +1363,9 @@ ${usesInteraction ? `            ...${n('Interaction')}.projectAttributes(),` : 
             record.tag = tag; record.properties = properties;
           }
           if (['input', 'textarea', 'img'].includes(tag) && cached.length) throw new Error('[Template] physical control Root requires empty children');
-          const physical = ${n('Vue')}.h(tag, { 'data-pui-root': '', ...properties, ...(${n('Server')} ? Object.fromEntries(Object.entries(attrs).filter(([, value]) => value !== null)) : attrs), ref: bindRoot }, cached.length ? cached : undefined);
+          const physicalProps: Record<string, unknown> = { 'data-pui-root': '', ...properties, ...(${n('Server')} ? Object.fromEntries(Object.entries(attrs).filter(([, value]) => value !== null)) : attrs), ref: bindRoot };
+          if (!${n('Server')}) delete physicalProps.value;
+          const physical = ${n('Vue')}.h(tag, physicalProps, cached.length ? cached : undefined);
 ${
   usesInteraction
     ? `          const portal = ${n('Started')} && !${n('Server')} ? ${n('Interaction')}.portalTarget() : null;
@@ -1372,7 +1374,9 @@ ${
 }`
     : `          const tag = ${usesInteraction ? `${n('Interaction')}.rootTag() ?? 'div'` : "'div'"};
           if (['input', 'textarea', 'img'].includes(tag) && cached.length) throw new Error('[Template] physical control Root requires empty children');
-          const physical = ${n('Vue')}.h(tag, { 'data-pui-root': ''${usesInteraction ? `, ...${n('Interaction')}.rootProperties()` : ''}${usesRoot ? ', ref: bindRoot' : ''} }, cached.length ? cached : undefined);
+          const physicalProps: Record<string, unknown> = { 'data-pui-root': ''${usesInteraction ? `, ...${n('Interaction')}.rootProperties()` : ''}${usesRoot ? ', ref: bindRoot' : ''} };
+${usesInteraction ? '          delete physicalProps.value;' : ''}
+          const physical = ${n('Vue')}.h(tag, physicalProps, cached.length ? cached : undefined);
 ${
   usesInteraction
     ? `          const portal = ${n('Interaction')}.portalTarget();

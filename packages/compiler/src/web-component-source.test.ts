@@ -43,10 +43,10 @@ afterEach(() => {
   }
 });
 
-function create(source: string): NativeElement {
+function create(source: string, shadow = true): NativeElement {
   const parsed = parsePrototype(source, { fileName: 'independent.proto.ts' });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-  const emitted = emitWebComponentSource(parsed.value, { shadow: true });
+  const emitted = emitWebComponentSource(parsed.value, { shadow });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
   // Execute the generated consumer, not authored input and not an IR interpreter.
   const sources = new Map(
@@ -110,6 +110,53 @@ export default definePrototype({name:'independent-view', setup(def){
 
 // These regressions exercise externally observable ownership, update, disposal and slot contracts.
 describe('native Web Component semantic source', () => {
+  it('preserves a compatible input engine across Module presentation commits', async () => {
+    const element = create(`import {definePrototype} from '@proto.ui/core';
+import {asTextControl} from '@proto.ui/hooks';
+import {declareTextControl} from '@proto.ui/module-text-control';
+export default definePrototype({name:'compatible-input',modules:[declareTextControl({
+  content:'plain-text',engine:'host',lineMode:'single'
+})],setup(def){
+  const control=asTextControl();
+  def.lifecycle.onCreated(()=>{control.sync({defaultValue:'Owned value'});});
+  return ()=>null;
+}});`);
+    document.body.append(element);
+    const input = element.shadowRoot!.querySelector('input')!;
+    input.type = 'search';
+    element.update();
+    await Promise.resolve();
+    expect(input.type).toBe('search');
+    expect(input.value).toBe('Owned value');
+  });
+
+  it('marks only the connected canonical host, not template children or the physical image part', () => {
+    const shadow = create(stateSource);
+    const light = create(stateSource, false);
+    const image = create(`import {definePrototype} from '@proto.ui/core';
+import {asImageView} from '@proto.ui/hooks';
+import {declareImageView} from '@proto.ui/module-image-view';
+export default definePrototype({name:'canonical-image-host',modules:[declareImageView({
+  source:'',alternativeText:'Canonical image',a11yMode:'informative',fit:'contain'
+})],setup(def){asImageView();return ()=>null;}});`);
+    expect(shadow.hasAttribute('data-pui-root')).toBe(false);
+    expect(light.hasAttribute('data-pui-root')).toBe(false);
+    expect(image.hasAttribute('data-pui-root')).toBe(false);
+    document.body.append(shadow, light, image);
+    expect(shadow.getAttribute('data-pui-root')).toBe('');
+    expect(light.getAttribute('data-pui-root')).toBe('');
+    expect(image.getAttribute('data-pui-root')).toBe('');
+    expect(shadow.shadowRoot!.querySelector('[data-pui-root]')).toBeNull();
+    expect(light.querySelector('[data-pui-root]')).toBeNull();
+    const physicalImage = image.shadowRoot!.querySelector('img')!;
+    expect(physicalImage.getAttribute('part')).toBe('image');
+    expect(physicalImage.hasAttribute('data-pui-root')).toBe(false);
+    shadow.update();
+    light.update();
+    image.update();
+    expect([...document.querySelectorAll('[data-pui-root]')]).toEqual([shadow, light, image]);
+  });
+
   it('replays exposed values on the canonical host and physical image after presentation commits', async () => {
     const element = create(`import {definePrototype} from '@proto.ui/core';
 import {asImageView} from '@proto.ui/hooks';

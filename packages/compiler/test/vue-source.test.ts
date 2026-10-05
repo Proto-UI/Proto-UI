@@ -8,8 +8,12 @@ import * as Vue from 'vue';
 import { parsePrototype } from '../src/parser';
 import { emitVueSource } from '../src/vue-source';
 
-const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
-const vueServerRenderer = createRequire(fileURLToPath(new NodeURL('../package.json', import.meta.url)))('vue/server-renderer');
+const floatingUi = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+)('@floating-ui/dom');
+const vueServerRenderer = createRequire(
+  fileURLToPath(new NodeURL('../package.json', import.meta.url))
+)('vue/server-renderer');
 
 interface PublicState<T> {
   get(): T;
@@ -22,16 +26,25 @@ interface CounterExposes {
   write(next: number): void;
   bump(delta: number): number;
 }
-interface CounterHandle { update(): void; getExposes(): CounterExposes }
+interface CounterHandle {
+  update(): void;
+  getExposes(): CounterExposes;
+}
 interface InteractionExposes {
   count: PublicState<number>;
   focused: PublicState<boolean>;
   focusVisible: PublicState<boolean>;
   focusable: PublicState<boolean>;
   disable(next: boolean): void;
-  focus(options?: { reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean }): void;
+  focus(options?: {
+    reason?: 'programmatic' | 'keyboard' | 'pointer';
+    preventScroll?: boolean;
+  }): void;
 }
-interface InteractionHandle { update(): void; getExposes(): InteractionExposes }
+interface InteractionHandle {
+  update(): void;
+  getExposes(): InteractionExposes;
+}
 
 const interactionSource = `import {definePrototype} from '@proto.ui/core';
 import {asTrigger,asFocusable,asAccessible} from '@proto.ui/hooks';
@@ -87,12 +100,18 @@ export default definePrototype({name:'numeric-panel',setup(def){
   return (render)=>render.el('section',{},[counter.get(),render.slot()]);
 }});`;
 
-function moduleExports(source: string, files?: Record<string, string>, ssr = false): Record<string, unknown> {
+function moduleExports(
+  source: string,
+  files?: Record<string, string>,
+  ssr = false
+): Record<string, unknown> {
   const parsed = parsePrototype(source, { fileName: 'fixture.proto.ts', files });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-  const emitted = emitVueSource(parsed.value, {ssr});
+  const emitted = emitVueSource(parsed.value, { ssr });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-  const filesByPath = new Map((emitted.value.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents]));
+  const filesByPath = new Map(
+    (emitted.value.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents])
+  );
   filesByPath.set('component.ts', emitted.value.code);
   const cache = new Map<string, Record<string, unknown>>();
   function load(path: string): Record<string, unknown> {
@@ -110,7 +129,8 @@ function moduleExports(source: string, files?: Record<string, string>, ssr = fal
       if (specifier === 'vue') return Vue;
       if (specifier === 'vue/server-renderer') return vueServerRenderer;
       if (specifier === '@floating-ui/dom') return floatingUi;
-      if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency: ${specifier}`);
+      if (!specifier.startsWith('.'))
+        throw new Error(`Unexpected generated dependency: ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);
     return exports;
@@ -120,7 +140,8 @@ function moduleExports(source: string, files?: Record<string, string>, ssr = fal
 
 function component(source: string, files?: Record<string, string>): Vue.Component {
   const exports = moduleExports(source, files);
-  if (!exports.default || typeof exports.default !== 'object') throw new Error('No generated Vue component');
+  if (!exports.default || typeof exports.default !== 'object')
+    throw new Error('No generated Vue component');
   // The object came from the generated defineComponent call, not an external input.
   const generated = exports.default as Vue.Component;
   return generated;
@@ -134,49 +155,122 @@ async function settle(): Promise<void> {
 }
 
 describe('Vue 3 native source', () => {
+  it('keeps the Module-owned editing value through explicit updates and composition', async () => {
+    const Generated = component(`import {definePrototype} from '@proto.ui/core';
+import {asTextControl} from '@proto.ui/hooks';
+import {declareTextControl} from '@proto.ui/module-text-control';
+export default definePrototype({name:'owned-editing-value',modules:[declareTextControl({
+  content:'plain-text',engine:'host',lineMode:'single'
+})],setup(def){
+  const control=asTextControl();
+  def.lifecycle.onCreated(()=>{control.sync({valueMode:'controlled',value:'Owned value'});});
+  return ()=>null;
+}});`);
+    const handle = Vue.shallowRef<{ update(): void }>();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const app = Vue.createApp({
+      setup() {
+        return () => Vue.h(Generated, { ref: handle });
+      },
+    });
+    app.mount(host);
+    try {
+      await settle();
+      const input = host.querySelector('input')!;
+      expect(input.value).toBe('Owned value');
+      handle.value!.update();
+      await settle();
+      expect(input.value).toBe('Owned value');
+      input.dispatchEvent(new Event('compositionstart', { bubbles: true }));
+      input.value = 'Composing value';
+      handle.value!.update();
+      await settle();
+      expect(input.value).toBe('Composing value');
+      input.dispatchEvent(new Event('compositionend', { bubbles: true }));
+      await settle();
+      expect(input.value).toBe('Owned value');
+    } finally {
+      app.unmount();
+      host.remove();
+    }
+  });
+
   it('uses the SSR projection only for adoption, retaining changed State across later view epochs', async () => {
     const generated = moduleExports(counterSource, undefined, true);
-    const renderToString = generated.renderToString as (props: {seed: number; visible: boolean}) => Promise<{html: string; handoff: unknown}>;
-    const hydrate = generated.hydrate as (host: Element, handoff: unknown, options: {props: object}) => Vue.App;
-    const server = await renderToString({seed: 2, visible: true});
-    const host = document.createElement('div'); document.body.append(host); host.innerHTML = server.html;
+    const renderToString = generated.renderToString as (props: {
+      seed: number;
+      visible: boolean;
+    }) => Promise<{ html: string; handoff: unknown }>;
+    const hydrate = generated.hydrate as (
+      host: Element,
+      handoff: unknown,
+      options: { props: object }
+    ) => Vue.App;
+    const server = await renderToString({ seed: 2, visible: true });
+    const host = document.createElement('div');
+    document.body.append(host);
+    host.innerHTML = server.html;
     const initialRoot = host.firstElementChild;
     const reference = Vue.shallowRef<CounterHandle>();
-    const input = Vue.shallowReactive({seed: 2, visible: true, ref: reference});
-    const app = hydrate(host, server.handoff, {props: input});
+    const input = Vue.shallowReactive({ seed: 2, visible: true, ref: reference });
+    const app = hydrate(host, server.handoff, { props: input });
     let owner: CounterHandle | undefined;
     try {
-      await settle(); await settle();
+      await settle();
+      await settle();
       owner = reference.value!;
-      const held = owner.getExposes().counter, write = owner.getExposes().write;
+      const held = owner.getExposes().counter,
+        write = owner.getExposes().write;
       expect(host.firstElementChild).toBe(initialRoot);
       expect(held.get()).toBe(2);
-      input.visible = false; await settle(); await settle();
+      input.visible = false;
+      await settle();
+      await settle();
       expect(host.firstElementChild).toBeNull();
-      write(9); owner.update(); await settle();
+      write(9);
+      owner.update();
+      await settle();
       expect(held.get()).toBe(9);
       expect(host.firstElementChild).toBeNull();
-      input.visible = true; await settle(); await settle();
+      input.visible = true;
+      await settle();
+      await settle();
       expect(owner.getExposes().counter).toBe(held);
       expect(host.querySelector('section')?.textContent).toBe('9');
     } finally {
-      app.unmount(); host.remove();
+      app.unmount();
+      host.remove();
     }
     expect(() => owner!.getExposes()).toThrow();
   });
 
   it('projects focus facts and A11y without updating templates, and retires stale presence Roots', async () => {
-    const Generated = component(interactionSource), handle = Vue.shallowRef<InteractionHandle>();
+    const Generated = component(interactionSource),
+      handle = Vue.shallowRef<InteractionHandle>();
     const input = Vue.shallowRef({ visible: true, disabled: false });
-    const actions: number[] = [], phase: string[] = [], focused: boolean[] = [];
-    const host = document.createElement('div'); document.body.append(host);
-    const app = Vue.createApp({ setup() { return () => Vue.h(Generated, {
-      ...input.value, ref: handle, onAction: (value: number) => actions.push(value), onPhase: (value: string) => phase.push(value),
-    }); } });
+    const actions: number[] = [],
+      phase: string[] = [],
+      focused: boolean[] = [];
+    const host = document.createElement('div');
+    document.body.append(host);
+    const app = Vue.createApp({
+      setup() {
+        return () =>
+          Vue.h(Generated, {
+            ...input.value,
+            ref: handle,
+            onAction: (value: number) => actions.push(value),
+            onPhase: (value: string) => phase.push(value),
+          });
+      },
+    });
     app.mount(host);
     try {
       await settle();
-      const owner = handle.value!, exposed = owner.getExposes(), root = host.querySelector<HTMLElement>('[data-pui-root]')!;
+      const owner = handle.value!,
+        exposed = owner.getExposes(),
+        root = host.querySelector<HTMLElement>('[data-pui-root]')!;
       const off = exposed.focused.subscribe((event) => focused.push(event.next));
       expect(exposed.focusable.get()).toBe(true);
       expect('set' in exposed.focused).toBe(false);
@@ -206,7 +300,8 @@ describe('Vue 3 native source', () => {
       expect(root.getAttribute('aria-disabled')).toBe('true');
       expect(root.textContent).toBe('0');
       expect(phase).toEqual(['mounted']);
-      exposed.focus(); root.click();
+      exposed.focus();
+      root.click();
       expect(exposed.count.get()).toBe(1);
 
       exposed.disable(false);
@@ -236,7 +331,8 @@ describe('Vue 3 native source', () => {
       expect(focused).toEqual([true, false, true]);
 
       app.unmount();
-      nextRoot.dispatchEvent(new Event('ping')); window.dispatchEvent(new Event('ping'));
+      nextRoot.dispatchEvent(new Event('ping'));
+      window.dispatchEvent(new Event('ping'));
       expect(actions).toEqual([1, 2, 12]);
       expect(() => exposed.focused.get()).toThrow(/disposed/);
       expect(() => exposed.focused.subscribe(() => {})).toThrow(/disposed/);
@@ -244,24 +340,50 @@ describe('Vue 3 native source', () => {
       expect(() => off()).toThrow(/disposed/);
       expect(() => exposed.focus()).toThrow(/disposed/);
       expect(phase.at(-1)).toBe('disposed');
-    } finally { app.unmount(); host.remove(); }
+    } finally {
+      app.unmount();
+      host.remove();
+    }
   });
 
   it('parks input bindings under KeepAlive and reactivates the same owner without duplicate listeners', async () => {
-    const Generated = component(interactionSource), handle = Vue.shallowRef<InteractionHandle>(), visible = Vue.ref(true);
-    const actions: number[] = [], phase: string[] = [], host = document.createElement('div'); document.body.append(host);
-    const app = Vue.createApp({ setup() { return () => Vue.h(Vue.KeepAlive, null, { default: () => visible.value
-      ? Vue.h(Generated, { key: 'owner', ref: handle, onAction: (value: number) => actions.push(value), onPhase: (value: string) => phase.push(value) })
-      : Vue.h('aside', { key: 'parked' }, 'parked') }); } });
+    const Generated = component(interactionSource),
+      handle = Vue.shallowRef<InteractionHandle>(),
+      visible = Vue.ref(true);
+    const actions: number[] = [],
+      phase: string[] = [],
+      host = document.createElement('div');
+    document.body.append(host);
+    const app = Vue.createApp({
+      setup() {
+        return () =>
+          Vue.h(Vue.KeepAlive, null, {
+            default: () =>
+              visible.value
+                ? Vue.h(Generated, {
+                    key: 'owner',
+                    ref: handle,
+                    onAction: (value: number) => actions.push(value),
+                    onPhase: (value: string) => phase.push(value),
+                  })
+                : Vue.h('aside', { key: 'parked' }, 'parked'),
+          });
+      },
+    });
     app.mount(host);
     try {
       await settle();
-      const owner = handle.value!, exposed = owner.getExposes(), root = host.querySelector<HTMLElement>('[data-pui-root]')!;
-      root.click(); window.dispatchEvent(new Event('ping'));
+      const owner = handle.value!,
+        exposed = owner.getExposes(),
+        root = host.querySelector<HTMLElement>('[data-pui-root]')!;
+      root.click();
+      window.dispatchEvent(new Event('ping'));
       expect(exposed.count.get()).toBe(101);
       visible.value = false;
       await settle();
-      root.click(); root.dispatchEvent(new Event('ping')); window.dispatchEvent(new Event('ping'));
+      root.click();
+      root.dispatchEvent(new Event('ping'));
+      window.dispatchEvent(new Event('ping'));
       expect(exposed.count.get()).toBe(101);
       exposed.disable(true);
       expect(exposed.focusable.get()).toBe(false);
@@ -274,15 +396,20 @@ describe('Vue 3 native source', () => {
       root.click();
       expect(exposed.count.get()).toBe(101);
       exposed.disable(false);
-      root.click(); window.dispatchEvent(new Event('ping'));
+      root.click();
+      window.dispatchEvent(new Event('ping'));
       expect(exposed.count.get()).toBe(202);
       expect(actions).toEqual([1, 101, 102, 202]);
       expect(phase).toEqual(['mounted', 'unmounted', 'mounted']);
-    } finally { app.unmount(); host.remove(); }
+    } finally {
+      app.unmount();
+      host.remove();
+    }
   });
 
   it('refreshes style Rules subscribed to helper-owned focus facts without requesting a template update', async () => {
-    const Generated = component(`import {definePrototype,tw} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
+    const Generated =
+      component(`import {definePrototype,tw} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
       export default definePrototype({name:'focus-style-owner',setup(def){
         const focus=asFocusable();const focused=focus.focused;
         def.expose.state('focused',focused);
@@ -291,12 +418,16 @@ describe('Vue 3 native source', () => {
         def.rule({when:w=>w.state(focused).eq(true),intent:i=>i.feedback.style.use(tw('ring-2'))});
         return r=>{if(focused.get())return r.el('span','focused');return r.el('span','idle');};
       }});`);
-    const host = document.createElement('div'); document.body.append(host);
+    const host = document.createElement('div');
+    document.body.append(host);
     const app = Vue.createApp(Generated);
-    const owner = app.mount(host) as unknown as { getExposes(): { focused: PublicState<boolean>; focus(): void; disable(): void } };
+    const owner = app.mount(host) as unknown as {
+      getExposes(): { focused: PublicState<boolean>; focus(): void; disable(): void };
+    };
     try {
       await settle();
-      const root = host.querySelector('[data-pui-root]')!, exposed = owner.getExposes();
+      const root = host.querySelector('[data-pui-root]')!,
+        exposed = owner.getExposes();
       exposed.focus();
       expect(exposed.focused.get()).toBe(true);
       expect(root.getAttribute('data-pui-style')).toBe('ring-2');
@@ -307,7 +438,10 @@ describe('Vue 3 native source', () => {
       expect(root.hasAttribute('data-pui-style')).toBe(false);
       await settle();
       expect(root.textContent).toBe('idle');
-    } finally { app.unmount(); host.remove(); }
+    } finally {
+      app.unmount();
+      host.remove();
+    }
   });
 
   it('distinguishes omitted and explicitly undefined host keys in runtime and frame reads', async () => {
@@ -319,13 +453,23 @@ describe('Vue 3 native source', () => {
         def.event.on('host:probe',run=>{provided.set(run.props.isProvided('label'));});
         return r=>{if(r.read.props.isProvided('label'))return r.el('output','provided');return r.el('output','missing');};
       }});`);
-    const input = Vue.shallowRef<Record<string, unknown>>({}), handle = Vue.shallowRef<{ update(): void; getExposes(): { provided: PublicState<boolean> } }>();
+    const input = Vue.shallowRef<Record<string, unknown>>({}),
+      handle = Vue.shallowRef<{
+        update(): void;
+        getExposes(): { provided: PublicState<boolean> };
+      }>();
     const host = document.createElement('div');
-    const app = Vue.createApp({ setup() { return () => Vue.h(Generated, { ...input.value, ref: handle }); } });
+    const app = Vue.createApp({
+      setup() {
+        return () => Vue.h(Generated, { ...input.value, ref: handle });
+      },
+    });
     app.mount(host);
     try {
       await settle();
-      const owner = handle.value!, exposed = owner.getExposes(), root = host.querySelector('[data-pui-root]')!;
+      const owner = handle.value!,
+        exposed = owner.getExposes(),
+        root = host.querySelector('[data-pui-root]')!;
       expect(exposed.provided.get()).toBe(false);
       expect(host.textContent).toBe('missing');
       input.value = { label: undefined };
@@ -343,7 +487,9 @@ describe('Vue 3 native source', () => {
       owner.update();
       await settle();
       expect(host.textContent).toBe('missing');
-    } finally { app.unmount(); }
+    } finally {
+      app.unmount();
+    }
   });
 
   it('retains a numeric owner across presence epochs and commits lifecycle after the DOM', async () => {
@@ -352,14 +498,18 @@ describe('Vue 3 native source', () => {
     const handle = Vue.shallowRef<CounterHandle>();
     const phase: Array<{ kind: string; text: string }> = [];
     const host = document.createElement('div');
-    const app = Vue.createApp(Vue.defineComponent({
-      setup() {
-        return () => Vue.h(Generated, {
-          ...input.value, ref: handle,
-          onPhase: (kind: string) => phase.push({ kind, text: host.textContent ?? '' }),
-        });
-      },
-    }));
+    const app = Vue.createApp(
+      Vue.defineComponent({
+        setup() {
+          return () =>
+            Vue.h(Generated, {
+              ...input.value,
+              ref: handle,
+              onPhase: (kind: string) => phase.push({ kind, text: host.textContent ?? '' }),
+            });
+        },
+      })
+    );
     app.mount(host);
     try {
       await settle();
@@ -396,7 +546,9 @@ describe('Vue 3 native source', () => {
       await settle();
       expect(host.textContent).toBe('9');
       expect(owner.getExposes().counter).toBe(state);
-      expect(phase.filter((entry) => entry.kind === 'created')).toEqual([{ kind: 'created', text: '' }]);
+      expect(phase.filter((entry) => entry.kind === 'created')).toEqual([
+        { kind: 'created', text: '' },
+      ]);
       expect(phase.at(-1)).toEqual({ kind: 'mounted', text: '9' });
 
       // Queue a redraw and terminate before Vue can commit it.
@@ -404,7 +556,10 @@ describe('Vue 3 native source', () => {
       owner.update();
       app.unmount();
       await settle();
-      expect(phase.slice(-2)).toEqual([{ kind: 'unmounted', text: '' }, { kind: 'disposed', text: '' }]);
+      expect(phase.slice(-2)).toEqual([
+        { kind: 'unmounted', text: '' },
+        { kind: 'disposed', text: '' },
+      ]);
       expect(() => exposed.bump(1)).toThrow(/disposed/);
       expect(() => state.get()).toThrow(/disposed/);
       expect(() => owner.update()).toThrow(/disposed/);
@@ -418,11 +573,14 @@ describe('Vue 3 native source', () => {
     const handle = Vue.shallowRef<CounterHandle>();
     const label = Vue.ref('first');
     const host = document.createElement('div');
-    const app = Vue.createApp(Vue.defineComponent({
-      setup() {
-        return () => Vue.h(Generated, { ref: handle }, { default: () => Vue.h('em', label.value) });
-      },
-    }));
+    const app = Vue.createApp(
+      Vue.defineComponent({
+        setup() {
+          return () =>
+            Vue.h(Generated, { ref: handle }, { default: () => Vue.h('em', label.value) });
+        },
+      })
+    );
     app.mount(host);
     try {
       await settle();
@@ -445,9 +603,13 @@ describe('Vue 3 native source', () => {
     const input = Vue.shallowRef<Record<string, unknown>>({ seed: 6, visible: true });
     const handle = Vue.shallowRef<CounterHandle>();
     const host = document.createElement('div');
-    const app = Vue.createApp(Vue.defineComponent({
-      setup() { return () => Vue.h(Generated, { ...input.value, ref: handle }); },
-    }));
+    const app = Vue.createApp(
+      Vue.defineComponent({
+        setup() {
+          return () => Vue.h(Generated, { ...input.value, ref: handle });
+        },
+      })
+    );
     app.mount(host);
     try {
       await settle();
@@ -494,34 +656,49 @@ describe('Vue 3 native source', () => {
   });
 
   it('expands static authored hook control flow and diagnoses unsupported reached hook operations', async () => {
-    const Generated = component(`import {definePrototype} from '@proto.ui/core';import {install} from './hook';
-      export default definePrototype({name:'hook-owner',setup(def){install();return (render)=>render.el('output','hook');}});`, {
-      'hook.ts': `import {defineAsHook} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
+    const Generated = component(
+      `import {definePrototype} from '@proto.ui/core';import {install} from './hook';
+      export default definePrototype({name:'hook-owner',setup(def){install();return (render)=>render.el('output','hook');}});`,
+      {
+        'hook.ts': `import {defineAsHook} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
       export const install=defineAsHook({name:'install',setup(def){
         const unused=()=>{asFocusable();};const alias=unused;
         const value=def.state.numberDiscrete('hook.count',2,{options:[2,4]});
         def.expose.state('fromHook',value);
       }});`,
-    });
+      }
+    );
     const host = document.createElement('div');
     const app = Vue.createApp(Generated);
     // The static hook declares the same public state shape as direct declarations.
-    const mounted = app.mount(host) as unknown as { getExposes(): { fromHook: PublicState<number> } };
+    const mounted = app.mount(host) as unknown as {
+      getExposes(): { fromHook: PublicState<number> };
+    };
     try {
       expect(host.textContent).toBe('hook');
       expect(mounted.getExposes().fromHook.get()).toBe(2);
     } finally {
       app.unmount();
     }
-    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';import {install} from './hook';
-      export default definePrototype({name:'unsupported',setup(){install();}});`, {
-      fileName: 'fixture.proto.ts',
-      files: { 'hook.ts': `import {defineAsHook} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
-        export const install=defineAsHook({name:'install',setup(){const focus=asFocusable();focus.configure({focusScope:true});}});` },
-    });
+    const parsed = parsePrototype(
+      `import {definePrototype} from '@proto.ui/core';import {install} from './hook';
+      export default definePrototype({name:'unsupported',setup(){install();}});`,
+      {
+        fileName: 'fixture.proto.ts',
+        files: {
+          'hook.ts': `import {defineAsHook} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
+        export const install=defineAsHook({name:'install',setup(){const focus=asFocusable();focus.configure({focusScope:true});}});`,
+        },
+      }
+    );
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
     const rejected = emitVueSource(parsed.value);
-    expect(rejected).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED', span: { file: 'hook.ts', line: 2 } }] });
+    expect(rejected).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED', span: { file: 'hook.ts', line: 2 } },
+      ],
+    });
   });
 
   it('clamps range defaults only and preserves string/discrete option constraints', async () => {
@@ -542,13 +719,21 @@ describe('Vue 3 native source', () => {
         };
       }});`);
     interface ConstraintExposes {
-      range: PublicState<number>; choice: PublicState<number>; label: PublicState<string>;
-      setRange(next: number): void; setChoice(next: number): void; setLabel(next: string): void; toggle(): boolean;
+      range: PublicState<number>;
+      choice: PublicState<number>;
+      label: PublicState<string>;
+      setRange(next: number): void;
+      setChoice(next: number): void;
+      setLabel(next: string): void;
+      toggle(): boolean;
     }
     const host = document.createElement('div');
     const app = Vue.createApp(Generated);
     // The exposed API shape is supplied by the generated declaration for this fixture.
-    const mounted = app.mount(host) as unknown as { update(): void; getExposes(): ConstraintExposes };
+    const mounted = app.mount(host) as unknown as {
+      update(): void;
+      getExposes(): ConstraintExposes;
+    };
     try {
       const exposed = mounted.getExposes();
       expect(host.textContent).toBe('10red2off');
@@ -558,7 +743,9 @@ describe('Vue 3 native source', () => {
       expect(exposed.choice.get()).toBe(2);
       expect(() => exposed.setLabel('green')).toThrow(/options/);
       expect(exposed.label.get()).toBe('red');
-      exposed.setRange(5); exposed.setChoice(4); exposed.setLabel('blue');
+      exposed.setRange(5);
+      exposed.setChoice(4);
+      exposed.setLabel('blue');
       expect(exposed.toggle()).toBe(true);
       mounted.update();
       await settle();

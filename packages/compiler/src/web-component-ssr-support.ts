@@ -1,8 +1,12 @@
-interface SsrOptions { className: string; tagName: string; binding: string }
+interface SsrOptions {
+  className: string;
+  tagName: string;
+  binding: string;
+}
 
 /** Ordinary presentation nodes, not semantic IR. Server owns no DOM objects or browser globals. */
 export function webComponentSsrSupport(options: SsrOptions) {
-  const {className, tagName, binding} = options;
+  const { className, tagName, binding } = options;
   const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\n`;
   const server = `export function renderToString(props: GeneratedProps & Record<string, unknown> = {}, options: ServerOptions = {}): {html: string; carrier: Carrier} {
   return renderWithScope(props, options, result => result);
@@ -134,10 +138,18 @@ export function hydrate(element: ${className}, carrier?: Carrier): ${className} 
 }
 export default ${className};
 `;
-  return {imports, server, files: [
-    {path: '.proto-ui/web-component/ssr-v1.ts', kind: 'source' as const, contents: runtimeSource},
-    {path: 'Component.client.ts', kind: 'source' as const, contents: client},
-  ]};
+  return {
+    imports,
+    server,
+    files: [
+      {
+        path: '.proto-ui/web-component/ssr-v1.ts',
+        kind: 'source' as const,
+        contents: runtimeSource,
+      },
+      { path: 'Component.client.ts', kind: 'source' as const, contents: client },
+    ],
+  };
 }
 
 const runtimeSource = String.raw`// Standalone WC presentation/serialization/adoption helper. Not an IR interpreter.
@@ -403,6 +415,7 @@ export function pendingProviderDefinition(host: HTMLElement): Promise<CustomElem
 }
 export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', carrier: Carrier | null, recovery: boolean): BrowserPort {
   const doc = host.ownerDocument;
+  host.setAttribute('data-pui-root', '');
   let root: HTMLElement | ShadowRoot = host;
   if (recovery) for (const node of Array.from(host.children)) if (node.localName === 'script' && node.hasAttribute('data-pui-carrier')) node.remove();
   const script = carrierNode(host);
