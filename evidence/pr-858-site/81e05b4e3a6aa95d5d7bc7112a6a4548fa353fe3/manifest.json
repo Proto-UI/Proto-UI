@@ -1,0 +1,274 @@
+{
+  "agent": "dot",
+  "modeltrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "subject": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+  "probe": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+  "browser": "154.0.8037.57",
+  "workflowRun": 37490212312,
+  "artifact": 11424733108,
+  "archiveSHA256": "b915cc5a048ddc20d3b131dad29aff92ae6ea14e2adbdf1e598e62f3bf0b5157",
+  "result": "Candidate production startup suite: 22/22 passed",
+  "limits": [
+    "Forced-colors native frame also had reduced-transparency active; standalone forced-colors is independently unit-covered, not independently established by that combined native frame.",
+    "Main repository CI and historical cc3 capture are separate gates.",
+    "Cold status frame is bounded loading presentation, not complete atom SSR."
+  ],
+  "captures": [
+    {
+      "id": "home-390-dark-settled-9",
+      "revision": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "open": "true",
+        "theme": "dark",
+        "canonical": {
+          "background": "lab(2.75381% 0 0)",
+          "foreground": "lab(98.26% 0 0)"
+        },
+        "language": {
+          "text": "English",
+          "width": 50.5625,
+          "height": 45
+        },
+        "surfaces": [
+          {
+            "background": "lab(2.75381% 0 0)",
+            "foreground": "lab(98.26% 0 0)"
+          },
+          {
+            "background": "lab(2.75381% 0 0)",
+            "foreground": "lab(98.26% 0 0)"
+          }
+        ],
+        "overflow": false,
+        "phase": "settled"
+      },
+      "image": {
+        "file": "home-390-dark-settled-9.png",
+        "sha256": "fc56b20f8bcc57ad4b4fcdd3ea15c4733e7ceb807817bd4ddd38c511e57e2d7a"
+      }
+    },
+    {
+      "id": "home-390-light-settled-11",
+      "revision": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "open": "true",
+        "theme": "light",
+        "canonical": {
+          "background": "lab(100% 0 0)",
+          "foreground": "lab(2.75381% 0 0)"
+        },
+        "language": {
+          "text": "English",
+          "width": 50.5625,
+          "height": 45
+        },
+        "surfaces": [
+          {
+            "background": "lab(100% 0 0)",
+            "foreground": "lab(2.75381% 0 0)"
+          },
+          {
+            "background": "lab(100% 0 0)",
+            "foreground": "lab(2.75381% 0 0)"
+          }
+        ],
+        "overflow": false,
+        "phase": "settled"
+      },
+      "image": {
+        "file": "home-390-light-settled-11.png",
+        "sha256": "58add21c0e2ae80fa09e951601bb44f638c69509eb5acddb5f3907ab1d7c217a"
+      }
+    },
+    {
+      "id": "button-390-runtime-label",
+      "revision": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/base/button/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "text": "Web Components",
+        "height": 20,
+        "lineHeight": 20,
+        "width": 142,
+        "scrollWidth": 142,
+        "viewport": 390
+      },
+      "image": {
+        "file": "button-390-runtime-label.png",
+        "sha256": "2e59a2d84ca2ad4d78d0fb6461836f18c3cc07b37251795720d1d0bc070e64d4"
+      }
+    },
+    {
+      "id": "cold-card-2048",
+      "revision": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+      "viewport": {
+        "width": 2048,
+        "height": 1237
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/brutalist/components/card/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "interactive",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "scriptsHeld": true,
+        "initial": {
+          "background": "rgb(220, 235, 254)",
+          "color": "rgb(0, 0, 0)",
+          "headingFontSize": "36px",
+          "headingFontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+          "headingTop": 96,
+          "previewHeight": 160,
+          "previewText": "\u6b63\u5728\u52a0\u8f7d\u4ea4\u4e92\u793a\u4f8b\u2026\n\u6b63\u6587\u548c\u6e90\u7801\u5df2\u53ef\u9605\u8bfb\uff0c\u4ea4\u4e92\u63a7\u4ef6\u5c31\u7eea\u540e\u4f1a\u663e\u793a\u5728\u8fd9\u91cc\u3002",
+          "statusBorder": "2px",
+          "statusBackground": "rgb(220, 235, 254)",
+          "bodyWidth": 2048,
+          "viewportWidth": 2048
+        },
+        "settingsVisible": false,
+        "isNative": true
+      },
+      "image": {
+        "file": "cold-card-2048.png",
+        "sha256": "73fc0753c198e37f3f224fc092deda7d8ba900f8666dd53e16e5a60c50c4ea29"
+      }
+    },
+    {
+      "id": "loaded-card-430",
+      "revision": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+      "viewport": {
+        "width": 430,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/brutalist/components/card/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "scriptsReleased": true,
+        "loaded": {
+          "background": "rgb(220, 235, 254)",
+          "color": "rgb(0, 0, 0)",
+          "headingFontSize": "32px",
+          "headingFontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+          "headingTop": 80,
+          "previewHeight": 354,
+          "previewText": "Runtime\nWeb Components\nAI Support \u2014 Conversation workspace\nUse Card as an explicit panel shell.\n12 messages\nOpen conversation",
+          "statusBorder": null,
+          "statusBackground": null,
+          "bodyWidth": 430,
+          "viewportWidth": 430
+        }
+      },
+      "image": {
+        "file": "loaded-card-430.png",
+        "sha256": "51dda87bb877196a88b46eb6ea087d54aca1e7747742e2205136b16be5ef8c16"
+      }
+    },
+    {
+      "id": "dialog-home-390-reduced-transparency",
+      "revision": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "none",
+        "background": "lab(100 0 0)",
+        "backgroundAlpha": 1,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": true,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-reduced-transparency.png",
+        "sha256": "d3dba39aad5f5c564f9be5ec878374770f29ce6f223598fd515d64daac2786c1"
+      }
+    },
+    {
+      "id": "dialog-home-390-restored",
+      "revision": "81e05b4e3a6aa95d5d7bc7112a6a4548fa353fe3",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "blur(4px)",
+        "background": "rgba(0, 0, 0, 0.5)",
+        "backgroundAlpha": 0.5019607843137255,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-restored.png",
+        "sha256": "ce040e28937b147efa515f19bfc51297a51ac7c76b5b18875eda887a0a82e8cb"
+      }
+    }
+  ]
+}
