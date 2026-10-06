@@ -77,9 +77,9 @@ If the primary mechanism is unavailable, select an explicitly disclosed permitte
 
 ### Path A: GPUI-owned portable GPU material
 
-The current Web experiment uses WebGL/GLSL ES 1.00. It is not a WebGPU implementation. The pinned GPUI renderer uses `gpui_wgpu`; its WebGL2 shader variant is a renderer backend detail, not evidence that the existing Web material provider can be reused unchanged.
+The current Web experiment uses WebGL/GLSL ES 1.00. It is not a WebGPU implementation. The fixed pin has several distinct renderer backends. Its macOS entry `crates/gpui_macos/src/gpui_macos.rs` directly uses `gpui_apple::metal_renderer`; `gpui_wgpu` is a separate backend, including its WebGL2 shader variant. The older 2026-09-22 probe record inferred a macOS wgpu default from a core-only build, which the actual platform entry does not support. No backend name proves that the existing Web material provider can be reused unchanged.
 
-At the fixed pin, the GPUI `Scene` primitive list contains Quad, Shadow, Path, Underline, monochrome/subpixel/polychrome sprites and Surface. Its wgpu pipelines mirror those primitives. A `canvas` callback records those primitives; it is not a public arbitrary-shader/postprocess pass. Thus a genuine portable material cannot be completed by only adding a `StyleRefinement` field or replacing a CSS class.
+At the fixed pin, the GPUI `Scene` primitive list contains Quad, Shadow, Path, Underline, monochrome/subpixel/polychrome sprites and Surface. Its renderer pipelines follow those primitive categories, with material differences: the pinned wgpu renderer leaves `PrimitiveBatch::Surfaces` empty, while the Metal renderer implements surfaces but asserts NV12 (`420YpCbCr8BiPlanarFullRange`) input and uses two planes. The public macOS `paint_surface(CVPixelBuffer)` API therefore does not already accept an arbitrary RGBA/alpha optical texture. A macOS-first experiment can evaluate a minimal Metal BGRA/shared-surface extension without assuming the wgpu path is equivalent; source ownership, alpha, color space, synchronization and native output must be proven. A `canvas` callback records those primitives; it is not a public arbitrary-shader/postprocess pass. Thus a genuine portable material cannot be completed by only adding a `StyleRefinement` field or replacing a CSS class.
 
 Implement a small host-owned renderer extension with an explicit owned-scene image resource. Do not capture arbitrary desktop or other-window content. A minimal architecture is:
 
@@ -158,6 +158,7 @@ A material benchmark must include 1, 8 and 32 surfaces, large and small radii, m
 
 - [Pinned GPUI scene](https://github.com/zed-industries/zed/blob/62e5991dd0f0c8a3af8d5e7e9c4652490d468db8/crates/gpui/src/scene.rs), especially `Primitive` and `PaintOperation`.
 - [Pinned GPUI wgpu renderer](https://github.com/zed-industries/zed/blob/62e5991dd0f0c8a3af8d5e7e9c4652490d468db8/crates/gpui_wgpu/src/wgpu_renderer.rs), shader/pipeline inventory.
+- [Pinned macOS renderer selection](https://github.com/zed-industries/zed/blob/62e5991dd0f0c8a3af8d5e7e9c4652490d468db8/crates/gpui_macos/src/gpui_macos.rs) and [Metal surface consumer](https://github.com/zed-industries/zed/blob/62e5991dd0f0c8a3af8d5e7e9c4652490d468db8/crates/gpui_apple/src/metal_renderer.rs).
 - [Pinned macOS window](https://github.com/zed-industries/zed/blob/62e5991dd0f0c8a3af8d5e7e9c4652490d468db8/crates/gpui_macos/src/window.rs), `WindowBackgroundAppearance::Blurred` and raw window handle.
 - [Apple AppKit WWDC25](https://developer.apple.com/videos/play/wwdc2025/310/), content ownership and group sampling around the glass section.
 - [NSGlassEffectView](https://developer.apple.com/documentation/appkit/nsglasseffectview) and [NSGlassEffectContainerView](https://developer.apple.com/documentation/appkit/nsglasseffectcontainerview).

@@ -1,6 +1,6 @@
 # Active prototype comparison and four-family projection matrix
 
-Status: non-normative operational inventory. Tracker: [#870](https://github.com/Proto-UI/Proto-UI/issues/870). Observed 2026-10-06T16:35:12Z; Proto UI main `25c3d0731e39003d87f541afc5e1a294a9d95568`. This replaces #377 as the active matrix entry without closing existing implementation or consumer trackers. Generated from [the structured matrix](prototype-coverage-matrix.json) by `node scripts/coverage-matrices/prototype-coverage.mjs --write`.
+Status: non-normative operational inventory. Tracker: [#870](https://github.com/Proto-UI/Proto-UI/issues/870). Observed 2026-10-06T16:35:12Z; Proto UI main baseline `25c3d0731e39003d87f541afc5e1a294a9d95568`; source inventory main `25c3d0731e39003d87f541afc5e1a294a9d95568`. This replaces #377 as the active matrix entry without closing existing implementation or consumer trackers. Generated from [the structured matrix](prototype-coverage-matrix.json) by `node scripts/coverage-matrices/prototype-coverage.mjs --write`.
 
 ## Independent project and counting boundary
 
@@ -19,13 +19,28 @@ A family is one subject, not the sum of Root/Trigger/Content parts. A P identity
 | liquid-glass | 2 | 2 | 2 |
 | lucide | 1 | 1 | 1 |
 
-Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 159 draft / 0 active P identities**. This is an implementation inventory, not zero usable code and not a count of mature components. The private ChatUI Message/Code Block compositions add 6/3 package-local parts but no public P identities.
+Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 159 draft / 0 active / 0 deprecated / 0 removed P identities**. This is an implementation inventory, not zero usable code and not a count of mature components. The private ChatUI Message/Code Block compositions add 6/3 package-local parts but no public P identities.
+
+## Separate candidate source inventory
+
+Candidate commit b47f5556f52de1684c6f20d73964cd7faa007a88; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; stored path hashes are checked against the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+
+| Library | Main families / identities | Candidate families / identities |
+| --- | --- | --- |
+| base | 22 / 55 | 24 / 59 |
+| shadcn | 17 / 48 | 18 / 49 |
+| brutalist | 19 / 51 | 20 / 52 |
+| bootstrap-2-3-2 | 2 / 2 | 9 / 11 |
+| liquid-glass | 2 / 2 | 3 / 3 |
+| lucide | 1 / 1 | 1 / 1 |
+
+Candidate atomic GPUI obligations: 236; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
 
 ## Reference sets and difference accounting
 
 | Comparison source | Pinned evidence | Denominator | Main counterpart |
 | --- | --- | --- | --- |
-| [shadcn/ui directory](https://ui.shadcn.com/docs/components) | debae9baea4d5c6bd0b1a857b09664db4b925818 | 64 directory subjects | 15 named Shadcn projections; all bounded draft |
+| [shadcn/ui directory](https://ui.shadcn.com/docs/components) | debae9baea4d5c6bd0b1a857b09664db4b925818 | 64 directory subjects | 15 named Shadcn projections; see catalog lifecycle below |
 | [Base UI components](https://base-ui.com/react/overview/quick-start) | f292461437fd97932421379b8c52f9caa018f1a1; docs 1.8.0 | 37 component families | 14 bounded Base counterparts; 23 without a corresponding main family |
 
 **Intersection 30; union 71.** Aliases: Base UI Menu ↔ Dropdown Menu; Preview Card ↔ Hover Card; OTP Field ↔ Input OTP. Radio is counted inside Radio Group. Autocomplete/Combobox and Progress/Meter remain distinct. These aliases mean comparable subject, never interchangeable API.
@@ -42,7 +57,7 @@ Accordion, Alert Dialog, Autocomplete, Avatar, Checkbox Group, Collapsible, Comb
 
 Every row has exact P identities, source/tests, reference revision, four design-family cells, consumer row IDs, independent adoption decision and previous tracker entry in JSON. “Missing main family” does not erase reusable foundations or open work. Full-reference parity and fresh runtime certification are **not assessed** in this source audit.
 
-| Subject / references | Class / decision | Pinned main implementation | Ownership / remaining boundary | Consumer row IDs | Existing work |
+| Subject / references | Class / decision | Pinned source implementation | Ownership / remaining boundary | Consumer row IDs | Existing work |
 | --- | --- | --- | --- | --- | --- |
 | [Accordion](https://ui.shadcn.com/docs/components/accordion) ([pin](https://github.com/shadcn-ui/ui/blob/debae9baea4d5c6bd0b1a857b09664db4b925818/apps/v4/content/docs/components/base/accordion.mdx)); [Accordion](https://base-ui.com/react/components/accordion) ([pin](https://github.com/mui/base-ui/tree/f292461437fd97932421379b8c52f9caa018f1a1/docs/src/app/(docs)/react/components/accordion)) | behavior-or-structure; owner-selected-Finf-complete-delivery | missing-main-family | No main family; accepted dependency graph #388. Do not report it as unplanned or equate a stack of Collapsibles with Accordion. | harness.run.reasoning-trace, www.docs.code-panel-expand, www.shell.sidebar-navigation | [#388](https://github.com/Proto-UI/Proto-UI/issues/388), [#548](https://github.com/Proto-UI/Proto-UI/issues/548), [#549](https://github.com/Proto-UI/Proto-UI/issues/549), [#688](https://github.com/Proto-UI/Proto-UI/issues/688), [#835](https://github.com/Proto-UI/Proto-UI/issues/835) |
 | [Alert](https://ui.shadcn.com/docs/components/alert) ([pin](https://github.com/shadcn-ui/ui/blob/debae9baea4d5c6bd0b1a857b09664db4b925818/apps/v4/content/docs/components/base/alert.mdx)) | styled-only; deferred | missing-main-family | Visual and announcement ownership unresolved; #386/#615 deferred Alert, not implemented it. | www.content.typography-presentation, www.docs.api-table, www.shell.native-link-presentation | [#386](https://github.com/Proto-UI/Proto-UI/issues/386), [#387](https://github.com/Proto-UI/Proto-UI/issues/387), [#559](https://github.com/Proto-UI/Proto-UI/issues/559), [#615](https://github.com/Proto-UI/Proto-UI/issues/615), [#621](https://github.com/Proto-UI/Proto-UI/issues/621), [#737](https://github.com/Proto-UI/Proto-UI/issues/737), [#792](https://github.com/Proto-UI/Proto-UI/issues/792) |
@@ -311,7 +326,16 @@ The App keeps domain truth, backend transport, file storage, credentials, naviga
 
 ## Package consumption boundary
 
-Bootstrap 2.3.2 and Liquid Glass currently declare private: true and source exports. Their existing counts describe workspace implementations, not npm publication. Four-family implementation and runtime/visual parity remain required in Finf; private package status is not a waiver. Changing release identity/publication requires its own explicit release authorization.
+| Library / package | Private | Version | Root export | Publication evidence |
+| --- | --- | --- | --- | --- |
+| base: @proto.ui/prototypes-base | false | 0.3.0-alpha.1 | {"types":"./dist/index.d.ts","import":"./dist/index.js","default":"./dist/index.js"} | Not asserted by source inventory |
+| shadcn: @proto.ui/prototypes-shadcn | false | 0.3.0-alpha.1 | {"types":"./dist/index.d.ts","import":"./dist/index.js","default":"./dist/index.js"} | Not asserted by source inventory |
+| brutalist: @proto.ui/prototypes-brutalist | false | 0.3.0-alpha.1 | {"types":"./dist/index.d.ts","import":"./dist/index.js","default":"./dist/index.js"} | Not asserted by source inventory |
+| bootstrap-2-3-2: @proto.ui/prototypes-bootstrap-2-3-2 | true | not declared | {"types":"./src/index.ts","default":"./src/index.ts"} | Not asserted by source inventory |
+| liquid-glass: @proto.ui/prototypes-liquid-glass | true | not declared | {"types":"./src/index.ts","default":"./src/index.ts"} | Not asserted by source inventory |
+| lucide: @proto.ui/prototypes-lucide | false | 0.3.0-alpha.1 | {"types":"./dist/index.d.ts","import":"./dist/index.js","default":"./dist/index.js"} | Not asserted by source inventory |
+
+These manifest facts describe the selected source revision and do not prove registry publication or a successful consumer install. Four-family implementation and runtime/visual parity remain required in Finf; private package status is not a waiver. Changing release identity/publication requires its own explicit release authorization.
 
 ## Verification and update contract
 

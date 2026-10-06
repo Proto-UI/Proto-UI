@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse as parseYaml } from 'yaml';
@@ -11,6 +13,8 @@ export const FINF_REQUIRED_DIMENSIONS = Object.freeze([
   'Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths',
   'Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages',
   'Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings',
+  'Complete the per-family and per-atomic-identity safe-area/spacing audit and accepted repairs across Base and all four design languages: explicit viewport/container/leaf ownership, outer and inner spacing, long content, scaling and keyboard reflow. Use family-specific evidence, not a universal inset or an unsupported not-applicable shortcut.',
+  'Deliver GPUI with the same applicable semantic capability as the other runtimes for this prototype and all four design-language projections: actual input, focus, accessibility, layout, theme, demo and Adapter/Compiler evidence. Existing private/experimental status or unsupported diagnostics are current gaps, never a final omission or completion shortcut.',
 ]);
 const OVERLAY_REQUIRED_DIMENSIONS = Object.freeze([
   'Reproduce the actual user-reported scroll/scrollbar coordinate drift before assigning root cause',
@@ -74,6 +78,62 @@ const FINF_CORE_ITEM_IDS = Object.freeze([
   'baseline.transition',
   'repair.overlay-scrollbar-coordinate',
 ]);
+const FINF_REQUIRED_PRIOR_PRS = Object.freeze([
+  775, 832, 863, 858, 868, 857, 855, 862, 867, 869, 808, 835, 871,
+]);
+const CONSUMER_LEDGERS = Object.freeze({
+  website: 'internal/website/self-hosting-coverage-matrix.md',
+  harness: 'internal/agent-harness/dogfood-coverage-matrix.md',
+});
+const LIFECYCLES = Object.freeze(['draft', 'active', 'deprecated', 'removed']);
+const SUBJECT_ALIASES = Object.freeze({
+  menu: 'dropdown-menu',
+  'preview-card': 'hover-card',
+  'otp-field': 'input-otp',
+});
+// Scope follows the selected subject, never an editable item name or arbitrary P identity.
+const OVERLAY_BASE_FAMILIES = Object.freeze([
+  'dialog',
+  'dropdown',
+  'hover-card',
+  'select',
+  'tooltip',
+  'autocomplete',
+  'combobox',
+  'context-menu',
+  'menubar',
+  'navigation-menu',
+  'popover',
+  'alert-dialog',
+  'drawer',
+  'toast',
+  'date-picker',
+]);
+const subjectFamily = (slug) => (slug === 'dropdown-menu' ? 'dropdown' : slug);
+const lifecycleOf = (statuses) => {
+  const unique = [...new Set(statuses)];
+  return unique.length === 0 ? 'none' : unique.length === 1 ? unique[0] : 'mixed';
+};
+const normalizedUrl = (value) => {
+  try {
+    const url = new URL(value);
+    url.hash = '';
+    url.pathname = url.pathname.replace(/\/+$/, '');
+    return url.toString();
+  } catch {
+    return value;
+  }
+};
+const canonicalSubject = (slug, aliases) => {
+  const seen = new Set();
+  while (aliases[slug] && !seen.has(slug)) {
+    seen.add(slug);
+    slug = aliases[slug];
+  }
+  return slug;
+};
+const sourceSnapshot = (data) =>
+  data.sourceSnapshot ?? { kind: 'main', revision: data.protoMain, baseMain: data.protoMain };
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const dataPath = 'internal/coverage-matrices/prototype-coverage-matrix.json';
 export const markdownPath = 'internal/coverage-matrices/prototype-coverage-matrix.md';
@@ -129,15 +189,477 @@ export function consumerLedgerRows(text) {
   }
   return { headers, rows };
 }
-export function validate(data, repoRoot = root) {
+const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex');
+const stableJson = (value) =>
+  JSON.stringify(value, (_, item) =>
+    item && typeof item === 'object' && !Array.isArray(item)
+      ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)))
+      : item
+  );
+const MAIN_SOURCE_EVIDENCE_DIGESTS = Object.freeze({
+  '25c3d0731e39003d87f541afc5e1a294a9d95568':
+    '672221b761fc0b8ac2e63280529187166f0f516fc90ffd780c8aaa2c3d004abf',
+});
+const inventoryPaths = (inventory) =>
+  [
+    ...new Set(
+      Object.entries(inventory).flatMap(([lib, families]) => [
+        `packages/prototypes/${lib}/package.json`,
+        ...Object.values(families).flatMap((f) => [
+          ...f.sourceFiles,
+          ...f.tests,
+          ...f.entityIds.map((id) => `spec/prototypes/${id}.yaml`),
+        ]),
+      ])
+    ),
+  ].sort();
+
+// Bind all implementation/export helpers and tests in the six source packages,
+// not only the .proto.ts definitions used by the family-count denominator.
+function candidateBindingPaths(inventory, repoRoot) {
+  const paths = new Set(inventoryPaths(inventory));
+  const visit = (directory) => {
+    if (!fs.existsSync(directory)) return;
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const file = path.join(directory, entry.name);
+      if (entry.isDirectory()) visit(file);
+      else if (entry.isFile()) paths.add(path.relative(repoRoot, file).split(path.sep).join('/'));
+    }
+  };
+  for (const lib of Object.keys(inventory)) {
+    visit(path.join(repoRoot, `packages/prototypes/${lib}/src`));
+    visit(path.join(repoRoot, `packages/prototypes/${lib}/test`));
+  }
+  return [...paths].sort();
+}
+
+// This fixed historical evidence record supports offline/shallow checkouts.
+// Updating its reviewed digest is a main-snapshot refresh, never live remote proof.
+export function captureMainSourceEvidence(data, repoRoot) {
+  const reader = gitSourceFs(repoRoot, data.protoMain);
+  const paths = inventoryPaths(data.prototypeInventory);
+  const catalog = {};
+  const manifests = {};
+  for (const p of paths) {
+    if (p.startsWith('spec/prototypes/')) {
+      const e = parseYaml(reader.readFileSync(path.join(repoRoot, p), 'utf8'));
+      catalog[p] = {
+        id: e.id,
+        status: e.status,
+        sources: e.sources ?? [],
+        inherits: e.inherits ?? {},
+      };
+    } else if (p.endsWith('/package.json')) {
+      const m = JSON.parse(reader.readFileSync(path.join(repoRoot, p), 'utf8'));
+      manifests[p] = {
+        name: m.name,
+        private: m.private ?? false,
+        version: m.version ?? null,
+        exports: { '.': m.exports?.['.'] ?? null },
+      };
+    }
+  }
+  return {
+    revision: data.protoMain,
+    catalog,
+    manifests,
+    sourceBindings: paths.map((p) => ({
+      path: p,
+      sha256: sha256(reader.readFileSync(path.join(repoRoot, p))),
+    })),
+  };
+}
+function historicalSourceFs(evidence, repoRoot) {
+  const files = new Map(evidence.sourceBindings.map((entry) => [entry.path, entry]));
+  const relative = (file) => path.relative(repoRoot, file).split(path.sep).join('/');
+  return {
+    existsSync(file) {
+      const p = relative(file);
+      return files.has(p) || [...files.keys()].some((x) => x.startsWith(p + '/'));
+    },
+    readFileSync(file) {
+      const p = relative(file);
+      const fact = evidence.catalog[p] ?? evidence.manifests[p];
+      if (!fact) throw new Error(`No historical parsed facts for ${p}`);
+      return JSON.stringify(fact);
+    },
+    readdirSync(directory, options = {}) {
+      const prefix = relative(directory) + '/';
+      const entries = new Map();
+      for (const name of files.keys()) {
+        if (!name.startsWith(prefix)) continue;
+        const [first, ...rest] = name.slice(prefix.length).split('/');
+        entries.set(first, rest.length > 0);
+      }
+      return [...entries].map(([name, directory]) =>
+        options.withFileTypes
+          ? { name, isDirectory: () => directory, isFile: () => !directory }
+          : name
+      );
+    },
+  };
+}
+
+// Git objects are needed only when refreshing source evidence. Validation of a
+// separate candidate uses stored historical facts and current worktree hashes.
+const gitSnapshots = new Map();
+function gitSourceFs(repoRoot, revision) {
+  const key = repoRoot + ':' + revision;
+  if (gitSnapshots.has(key)) return gitSnapshots.get(key);
+  if (!/^[a-f0-9]{40}$/.test(revision ?? '')) throw new Error('Invalid source object identity');
+  const output = execFileSync(
+    'git',
+    ['ls-tree', '-rz', revision, '--', 'spec/prototypes', 'packages/prototypes'],
+    { cwd: repoRoot, maxBuffer: 16 * 1024 * 1024 }
+  ).toString();
+  const files = new Map(
+    output
+      .split('\0')
+      .filter(Boolean)
+      .map((line) => {
+        const [header, name] = line.split('\t');
+        return [name, header.split(' ')[2]];
+      })
+  );
+  const contents = new Map();
+  const relative = (file) => path.relative(repoRoot, file).split(path.sep).join('/');
+  const api = {
+    existsSync(file) {
+      const p = relative(file);
+      return files.has(p) || [...files.keys()].some((x) => x.startsWith(p + '/'));
+    },
+    readFileSync(file, encoding) {
+      const p = relative(file);
+      if (!files.has(p)) throw new Error(`Source path absent from ${revision}: ${p}`);
+      if (!contents.has(p))
+        contents.set(
+          p,
+          execFileSync('git', ['cat-file', 'blob', files.get(p)], {
+            cwd: repoRoot,
+            maxBuffer: 16 * 1024 * 1024,
+          })
+        );
+      return encoding ? contents.get(p).toString(encoding) : contents.get(p);
+    },
+    readdirSync(directory, options = {}) {
+      const prefix = relative(directory) + '/';
+      const entries = new Map();
+      for (const name of files.keys()) {
+        if (!name.startsWith(prefix)) continue;
+        const tail = name.slice(prefix.length);
+        const [first, ...rest] = tail.split('/');
+        entries.set(first, rest.length > 0);
+      }
+      return [...entries].map(([name, directory]) =>
+        options.withFileTypes
+          ? { name, isDirectory: () => directory, isFile: () => !directory }
+          : name
+      );
+    },
+  };
+  gitSnapshots.set(key, api);
+  return api;
+}
+
+function candidateView(data) {
+  const candidate = data.candidateSource;
+  const view = {
+    ...data,
+    candidateSource: undefined,
+    prototypeInventory: candidate.prototypeInventory,
+    projectionRows: candidate.projectionRows,
+    atomicProjectionMapping: candidate.atomicProjectionMapping,
+    gpuiCoverageRows: candidate.gpuiCoverageRows,
+    packageConsumption: candidate.packageConsumption,
+    sourceSnapshot: {
+      kind: 'candidate',
+      revision: candidate.revision ?? candidate.tree,
+      baseMain: candidate.baseMain,
+    },
+    counts: { ...data.counts, ...candidate.counts },
+  };
+  view.comparisonRows = structuredClone(data.comparisonRows).map((row) => {
+    const family = subjectFamily(canonicalSubject(row.slug, data.countPolicy.duplicate));
+    row.base = view.prototypeInventory.base[family] ?? null;
+    const lifecycles = [];
+    for (const lib of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+      const f = view.prototypeInventory[lib][family];
+      row.projections[lib] = {
+        ...row.projections[lib],
+        status: f ? `implemented-${f.lifecycle}` : 'not-implemented',
+        entityIds: f?.entityIds ?? [],
+        sourceFiles: f?.sourceFiles ?? [],
+      };
+      if (f) lifecycles.push(f.lifecycle);
+    }
+    row.lifecycle =
+      row.base?.lifecycle ??
+      (lifecycles.length ? lifecycleOf(lifecycles) : 'not-cataloged-for-this-family');
+    return row;
+  });
+  const baseRows = view.comparisonRows.filter((r) =>
+    r.referenceProjects.some((s) => s.project === 'Base UI')
+  );
+  const shadcnRows = view.comparisonRows.filter((r) =>
+    r.referenceProjects.some((s) => s.project === 'shadcn/ui')
+  );
+  view.counts.baseUiMainCounterparts = baseRows.filter((r) => r.base).length;
+  view.counts.baseUiNoMainCounterpart = baseRows.filter((r) => !r.base).length;
+  view.counts.shadcnNamedProjections = shadcnRows.filter(
+    (r) => r.projections.shadcn.entityIds.length
+  ).length;
+  view.counts.shadcnDifferenceClassCounts = count(
+    shadcnRows.filter((r) => !r.projections.shadcn.entityIds.length).map((r) => r.classification)
+  );
+  return view;
+}
+
+// Refresh only the separately labeled candidate; callers retain the main snapshot.
+// This inventories source, never promotes lifecycle or creates acceptance receipts.
+export function refreshCandidateSource(data, repoRoot, identity) {
+  const catalog = fs
+    .readdirSync(path.join(repoRoot, 'spec/prototypes'))
+    .filter((p) => /^P-.*\.yaml$/.test(p))
+    .map((p) => parseYaml(fs.readFileSync(path.join(repoRoot, 'spec/prototypes', p), 'utf8')));
+  const previous = data.candidateSource ?? data;
+  const prototypeInventory = {};
+  const familyKeys = ['bootstrap-2-3-2', 'brutalist', 'liquid-glass', 'shadcn'];
+  for (const lib of Object.keys(data.prototypeInventory)) {
+    const sourceFiles = [];
+    const visit = (directory) => {
+      for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+        const file = path.join(directory, entry.name);
+        if (entry.isDirectory()) visit(file);
+        else if (entry.isFile() && entry.name.endsWith('.proto.ts'))
+          sourceFiles.push(path.relative(repoRoot, file).split(path.sep).join('/'));
+      }
+    };
+    visit(path.join(repoRoot, `packages/prototypes/${lib}/src`));
+    prototypeInventory[lib] = {};
+    for (const family of [...new Set(sourceFiles.map((p) => p.split('/')[4]))].sort()) {
+      const files = sourceFiles
+        .filter((p) => p.startsWith(`packages/prototypes/${lib}/src/${family}/`))
+        .sort();
+      const entities = catalog.filter(
+        (e) =>
+          e.id.startsWith(`P-${lib.toUpperCase()}-`) &&
+          (e.sources ?? []).some((source) => files.includes(source.path))
+      );
+      const old = previous.prototypeInventory[lib]?.[family];
+      const tests = [
+        ...new Set([
+          ...(old?.tests ?? []),
+          ...entities.flatMap((e) =>
+            (e.sources ?? [])
+              .map((source) => source.path)
+              .filter((p) => p.startsWith(`packages/prototypes/${lib}/test/`))
+          ),
+        ]),
+      ]
+        .filter((p) => fs.existsSync(path.join(repoRoot, p)))
+        .sort();
+      prototypeInventory[lib][family] = {
+        family,
+        entityIds: entities.map((e) => e.id).sort(),
+        entityCount: entities.length,
+        sourceFiles: files,
+        tests,
+        lifecycle: lifecycleOf(entities.map((e) => e.status)),
+        implementation: 'bounded-source-present',
+        freshRuntimeResult: 'not-run',
+      };
+    }
+  }
+  const byId = new Map(catalog.map((e) => [e.id, e]));
+  const counts = {
+    libraryInventory: Object.fromEntries(
+      Object.entries(prototypeInventory).map(([lib, families]) => [
+        lib,
+        {
+          families: Object.keys(families).length,
+          entities: Object.values(families).reduce((n, f) => n + f.entityIds.length, 0),
+          sourceFiles: Object.values(families).reduce((n, f) => n + f.sourceFiles.length, 0),
+        },
+      ])
+    ),
+    catalogEntities: catalog.length,
+    ...Object.fromEntries(
+      LIFECYCLES.map((status) => [
+        'catalog' + status[0].toUpperCase() + status.slice(1),
+        catalog.filter((e) => e.status === status).length,
+      ])
+    ),
+    familyInstances: Object.values(prototypeInventory).reduce(
+      (n, families) => n + Object.keys(families).length,
+      0
+    ),
+    distinctPrototypeSubjects: new Set(
+      Object.values(prototypeInventory).flatMap((families) => Object.keys(families))
+    ).size,
+  };
+  const projectionRows = Object.values(prototypeInventory.base).map((base) => ({
+    id: `projection.${base.family}`,
+    base,
+    issue: data.tracker,
+    families: Object.fromEntries(
+      familyKeys.map((lib) => {
+        const f = prototypeInventory[lib][base.family];
+        return [
+          lib,
+          {
+            status: f ? `implemented-${f.lifecycle}` : 'required-full-projection-not-implemented',
+            reason: f
+              ? 'Candidate source present; not current main or full acceptance.'
+              : 'Complete four-family atomic coverage remains required.',
+            entityIds: f?.entityIds ?? [],
+            sourceFiles: f?.sourceFiles ?? [],
+            partCount: f?.entityCount ?? 0,
+            lifecycle: f?.lifecycle ?? 'none',
+            runtimeEvidence: 'not rerun by source refresh',
+            nativeMaterial: lib === 'liquid-glass' ? 'not-certified' : 'not-applicable',
+          },
+        ];
+      })
+    ),
+  }));
+  const atomicProjectionMapping = Object.values(prototypeInventory.base)
+    .flatMap((f) => f.entityIds)
+    .map((baseIdentity) => ({
+      baseIdentity,
+      projectionCells: Object.fromEntries(
+        familyKeys.map((lib) => {
+          const ids = Object.values(prototypeInventory[lib])
+            .flatMap((f) => f.entityIds)
+            .filter((id) =>
+              (byId.get(id)?.inherits?.prototypes ?? []).some(
+                (p) => (typeof p === 'string' ? p : p.id) === baseIdentity
+              )
+            );
+          return [
+            lib,
+            {
+              mappedCurrentIdentities: ids,
+              status: ids.length
+                ? `bounded-${lifecycleOf(ids.map((id) => byId.get(id).status))}-mapping-needs-full-acceptance`
+                : 'required-missing',
+              acceptance: 'unverified',
+            },
+          ];
+        })
+      ),
+    }));
+  const gpuiCoverageRows = atomicProjectionMapping.flatMap((row) =>
+    familyKeys.map((projectionLibrary) => ({
+      baseIdentity: row.baseIdentity,
+      projectionLibrary,
+      projectionIdentities: row.projectionCells[projectionLibrary].mappedCurrentIdentities,
+      status: 'required-unassessed',
+      meaning:
+        'Candidate source reconciliation only; full GPUI capability and native evidence remain required.',
+      implementationEvidence: [],
+      nativeEvidence: [],
+      blockers: [],
+    }))
+  );
+  const packageConsumption = Object.fromEntries(
+    Object.keys(prototypeInventory).map((lib) => {
+      const manifest = JSON.parse(
+        fs.readFileSync(path.join(repoRoot, `packages/prototypes/${lib}/package.json`), 'utf8')
+      );
+      return [
+        lib,
+        {
+          name: manifest.name,
+          private: manifest.private ?? false,
+          version: manifest.version ?? null,
+          rootExport: manifest.exports?.['.'] ?? null,
+          publication: 'Not asserted by source inventory',
+        },
+      ];
+    })
+  );
+  const object = identity.revision ?? identity.tree;
+  if (Boolean(identity.revision) === Boolean(identity.tree) || !/^[a-f0-9]{40}$/.test(object ?? ''))
+    throw new Error('Candidate refresh requires one exact commit or tree');
+  const pinned = gitSourceFs(repoRoot, object);
+  const sourceBindings = candidateBindingPaths(prototypeInventory, repoRoot).map((p) => {
+    const bytes = fs.readFileSync(path.join(repoRoot, p));
+    if (
+      !pinned.existsSync(path.join(repoRoot, p)) ||
+      sha256(pinned.readFileSync(path.join(repoRoot, p))) !== sha256(bytes)
+    )
+      throw new Error(`Candidate refresh object/worktree drift: ${p}`);
+    return { path: p, sha256: sha256(bytes) };
+  });
+  return {
+    kind: 'candidate',
+    baseMain: data.protoMain,
+    ...identity,
+    sourceBindingsObject: object,
+    sourceBindings,
+    counts,
+    prototypeInventory,
+    projectionRows,
+    atomicProjectionMapping,
+    gpuiCoverageRows,
+    packageConsumption,
+  };
+}
+
+export function validate(data, repoRoot = root, candidatePass = false, sourceReader = fs) {
   const errors = [];
   const require = (condition, message) => {
     if (!condition) errors.push(message);
   };
+  let sourceFs = sourceReader;
+  if (data.candidateSource) {
+    try {
+      const evidence = data.mainSourceEvidence;
+      if (
+        evidence?.revision !== data.protoMain ||
+        sha256(stableJson(evidence)) !== MAIN_SOURCE_EVIDENCE_DIGESTS[data.protoMain]
+      )
+        throw new Error('Historical main evidence digest/revision mismatch');
+      sourceFs = historicalSourceFs(evidence, repoRoot);
+    } catch (error) {
+      errors.push(`Pinned main source unavailable: ${error.message}`);
+      return errors;
+    }
+  }
   const rows = data.comparisonRows;
   require(data.schemaVersion === 1, 'Unsupported schema version');
   require(data.tracker === 870, 'Active tracker must be explicit');
   require(new Set(rows.map((r) => r.id)).size === rows.length, 'Duplicate comparison ID');
+  const snapshot = sourceSnapshot(data);
+  require(/^[a-f0-9]{40}$/.test(data.protoMain ?? '') &&
+    /^[a-f0-9]{40}$/.test(snapshot.revision ?? '') &&
+    snapshot.kind === (candidatePass ? 'candidate' : 'main') &&
+    snapshot.baseMain === data.protoMain &&
+    (snapshot.kind !== 'main' ||
+      snapshot.revision === data.protoMain), 'Source snapshot revision boundary drift');
+  const aliases = { ...SUBJECT_ALIASES, ...data.countPolicy.duplicate };
+  require(Object.entries(SUBJECT_ALIASES).every(
+    ([key, value]) => aliases[key] === value
+  ), 'Comparison alias policy drift');
+  const subjects = new Set();
+  const referenceUrls = new Set();
+  for (const row of rows) {
+    const subject = canonicalSubject(row.slug, aliases);
+    require(typeof row.slug === 'string' &&
+      !subjects.has(subject), `Duplicate comparison subject: ${row.slug}`);
+    subjects.add(subject);
+    const projects = new Set();
+    for (const reference of row.referenceProjects) {
+      require(['shadcn/ui', 'Base UI'].includes(reference.project) &&
+        !projects.has(reference.project), `Comparison reference project drift: ${row.id}`);
+      projects.add(reference.project);
+      for (const field of ['url', 'pinnedSource']) {
+        const identity = field + '|' + normalizedUrl(reference[field]);
+        require(!referenceUrls.has(identity), `Duplicate comparison reference: ${row.id}.${field}`);
+        referenceUrls.add(identity);
+      }
+    }
+  }
   const sh = rows.filter((r) => r.referenceProjects.some((s) => s.project === 'shadcn/ui'));
   const ba = rows.filter((r) => r.referenceProjects.some((s) => s.project === 'Base UI'));
   require(sh.length === data.referenceSnapshots.shadcn.directoryCount, 'shadcn denominator drift');
@@ -149,7 +671,7 @@ export function validate(data, repoRoot = root) {
     data.counts.baseUiMainCounterparts, 'Base UI counterpart count drift');
   require(ba.filter((r) => !r.base).length ===
     data.counts.baseUiNoMainCounterpart, 'Base UI absence count drift');
-  require(sh.filter((r) => r.projections.shadcn.status === 'implemented-draft').length ===
+  require(sh.filter((r) => r.projections.shadcn.entityIds.length > 0).length ===
     data.counts.shadcnNamedProjections, 'Shadcn projection count drift');
   require(equal(
     count(rows.map((r) => r.classification)),
@@ -157,14 +679,13 @@ export function validate(data, repoRoot = root) {
   ), 'Classification count drift');
   require(equal(
     count(
-      sh
-        .filter((r) => r.projections.shadcn.status !== 'implemented-draft')
-        .map((r) => r.classification)
+      sh.filter((r) => r.projections.shadcn.entityIds.length === 0).map((r) => r.classification)
     ),
     data.counts.shadcnDifferenceClassCounts
   ), 'Shadcn difference classification count drift');
   const entities = [];
   const inheritance = new Map();
+  const catalog = new Map();
   for (const [lib, families] of Object.entries(data.prototypeInventory)) {
     const values = Object.values(families);
     const n = data.counts.libraryInventory[lib];
@@ -174,7 +695,7 @@ export function validate(data, repoRoot = root) {
     require(sourcePaths.length === n.sourceFiles, `${lib} source count drift`);
     const actualSourcePaths = [];
     const visit = (directory) => {
-      for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      for (const entry of sourceFs.readdirSync(directory, { withFileTypes: true })) {
         const full = path.join(directory, entry.name);
         if (entry.isDirectory()) visit(full);
         else if (entry.isFile() && entry.name.endsWith('.proto.ts'))
@@ -183,7 +704,13 @@ export function validate(data, repoRoot = root) {
     };
     visit(path.join(repoRoot, `packages/prototypes/${lib}/src`));
     require(setEqual(sourcePaths, actualSourcePaths), `${lib} source identity set drift`);
-    for (const f of values) {
+    for (const [family, f] of Object.entries(families)) {
+      require(f.family === family &&
+        f.entityCount ===
+          f.entityIds.length, `Inventory family identity/count drift: ${lib}/${family}`);
+      require(f.sourceFiles.every((p) =>
+        p.startsWith(`packages/prototypes/${lib}/src/${family}/`)
+      ), `Inventory source family drift: ${lib}/${family}`);
       for (const id of f.entityIds) {
         entities.push(id);
         if (!/^P-[A-Z0-9-]+$/.test(id)) {
@@ -191,28 +718,104 @@ export function validate(data, repoRoot = root) {
           continue;
         }
         const file = path.join(repoRoot, `spec/prototypes/${id}.yaml`);
-        require(fs.existsSync(file), `Missing entity: ${id}`);
-        if (fs.existsSync(file)) {
-          inheritance.set(id, inheritedPrototypeIds(fs.readFileSync(file, 'utf8')));
-          require(/^status: draft$/m.test(
-            fs.readFileSync(file, 'utf8')
-          ), `Lifecycle changed: ${id}; refresh matrix`);
+        require(sourceFs.existsSync(file), `Missing entity: ${id}`);
+        if (sourceFs.existsSync(file)) {
+          const entity = parseYaml(sourceFs.readFileSync(file, 'utf8'));
+          catalog.set(id, entity);
+          inheritance.set(
+            id,
+            (entity.inherits?.prototypes ?? []).map((x) => (typeof x === 'string' ? x : x.id))
+          );
+          require(entity.id === id &&
+            LIFECYCLES.includes(entity.status), `Invalid catalog identity/lifecycle: ${id}`);
+          require((entity.sources ?? []).some((source) =>
+            f.sourceFiles.includes(source.path)
+          ), `Inventory catalog source family mismatch: ${id}`);
         }
       }
+      require(f.lifecycle ===
+        lifecycleOf(
+          f.entityIds.map((id) => catalog.get(id)?.status)
+        ), `Inventory lifecycle drift: ${lib}/${family}`);
       for (const p of [...f.sourceFiles, ...f.tests]) {
         if (path.isAbsolute(p) || p.split('/').includes('..')) {
           errors.push(`Unsafe source path: ${p}`);
           continue;
         }
-        require(fs.existsSync(path.join(repoRoot, p)), `Missing source: ${p}`);
+        require(sourceFs.existsSync(path.join(repoRoot, p)), `Missing source: ${p}`);
       }
     }
   }
   require(new Set(entities).size === entities.length, 'Duplicate P identity in inventory');
   require(entities.length === data.counts.catalogEntities, 'Catalog count drift');
-  require(data.counts.catalogDraft === entities.length &&
-    data.counts.catalogActive === 0, 'Snapshot lifecycle totals drift');
-  const actualEntities = fs
+  const lifecycleCounts = count([...catalog.values()].map((e) => e.status));
+  require(LIFECYCLES.every(
+    (status) =>
+      (data.counts['catalog' + status[0].toUpperCase() + status.slice(1)] ?? 0) ===
+      (lifecycleCounts[status] ?? 0)
+  ), 'Snapshot lifecycle totals drift');
+  require(data.counts.familyInstances ===
+    Object.values(data.prototypeInventory).reduce(
+      (n, families) => n + Object.keys(families).length,
+      0
+    ), 'Inventory family-instance total drift');
+  require(data.counts.distinctPrototypeSubjects ===
+    new Set(Object.values(data.prototypeInventory).flatMap((families) => Object.keys(families)))
+      .size, 'Inventory distinct subject total drift');
+  require(setEqual(
+    Object.keys(data.packageConsumption ?? {}),
+    Object.keys(data.prototypeInventory)
+  ), 'Package consumption library set drift');
+  for (const [lib, snapshot] of Object.entries(data.packageConsumption ?? {})) {
+    if (!Object.hasOwn(data.prototypeInventory, lib)) continue;
+    const manifest = JSON.parse(
+      sourceFs.readFileSync(path.join(repoRoot, `packages/prototypes/${lib}/package.json`), 'utf8')
+    );
+    const actual = {
+      name: manifest.name,
+      private: manifest.private ?? false,
+      version: manifest.version ?? null,
+      rootExport: manifest.exports?.['.'] ?? null,
+    };
+    require(Object.entries(actual).every(
+      ([key, value]) => stableJson(snapshot[key]) === stableJson(value)
+    ), `Package consumption snapshot drift: ${lib}`);
+  }
+  const familyMatches = (actual, expected) =>
+    Boolean(actual && expected) &&
+    actual.family === expected.family &&
+    actual.entityCount === expected.entityCount &&
+    actual.lifecycle === expected.lifecycle &&
+    ['entityIds', 'sourceFiles', 'tests'].every((key) =>
+      setEqual(actual[key] ?? [], expected[key] ?? [])
+    );
+  for (const row of rows) {
+    const family = subjectFamily(canonicalSubject(row.slug, aliases));
+    const expectedBase = data.prototypeInventory.base[family];
+    require(expectedBase
+      ? familyMatches(row.base, expectedBase)
+      : !row.base, `Comparison Base inventory mismatch: ${row.id}`);
+    const visibleLifecycles = [];
+    for (const lib of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+      const expected = data.prototypeInventory[lib][family];
+      const cell = row.projections[lib];
+      require(Boolean(cell) &&
+        setEqual(cell.entityIds ?? [], expected?.entityIds ?? []) &&
+        setEqual(cell.sourceFiles ?? [], expected?.sourceFiles ?? []) &&
+        cell.status ===
+          (expected
+            ? `implemented-${expected.lifecycle}`
+            : 'not-implemented'), `Comparison projection inventory mismatch: ${row.id}/${lib}`);
+      if (expected)
+        visibleLifecycles.push(...expected.entityIds.map((id) => catalog.get(id)?.status));
+    }
+    require(row.lifecycle ===
+      (expectedBase?.lifecycle ??
+        (visibleLifecycles.length
+          ? lifecycleOf(visibleLifecycles)
+          : 'not-cataloged-for-this-family')), `Comparison lifecycle mismatch: ${row.id}`);
+  }
+  const actualEntities = sourceFs
     .readdirSync(path.join(repoRoot, 'spec/prototypes'))
     .filter((p) => /^P-.*\.yaml$/.test(p));
   require(actualEntities.length ===
@@ -230,10 +833,25 @@ export function validate(data, repoRoot = root) {
   for (const p of data.projectionRows) {
     require(setEqual(Object.keys(p.families), familyKeys), `Missing projection column: ${p.id}`);
     require(p.id === `projection.${p.base.family}` &&
-      setEqual(
-        p.base.entityIds,
-        data.prototypeInventory.base[p.base.family]?.entityIds ?? []
+      setEqual(p.base.entityIds, data.prototypeInventory.base[p.base.family]?.entityIds ?? []) &&
+      familyMatches(
+        p.base,
+        data.prototypeInventory.base[p.base.family]
       ), `Projection Base identity mismatch: ${p.id}`);
+    for (const lib of familyKeys) {
+      const cell = p.families[lib];
+      const expected = data.prototypeInventory[lib][p.base.family];
+      require(Boolean(cell) &&
+        setEqual(cell.entityIds ?? [], expected?.entityIds ?? []) &&
+        setEqual(cell.sourceFiles ?? [], expected?.sourceFiles ?? []) &&
+        cell.partCount === (expected?.entityIds.length ?? 0) &&
+        cell.lifecycle === (expected?.lifecycle ?? 'none') &&
+        (expected
+          ? cell.status === `implemented-${expected.lifecycle}`
+          : ['required-full-projection-not-implemented', 'open-pr-not-main'].includes(
+              cell.status
+            )), `Projection cell inventory mismatch: ${p.id}/${lib}`);
+    }
   }
   const baseIds = Object.values(data.prototypeInventory.base).flatMap((f) => f.entityIds);
   const mapping = data.atomicProjectionMapping ?? [];
@@ -254,7 +872,43 @@ export function validate(data, repoRoot = root) {
         actual,
         expected
       ), `Atomic inheritance mismatch: ${r.baseIdentity} -> ${lib}`);
+      const cell = r.projectionCells?.[lib];
+      require(cell?.status ===
+        (expected.length
+          ? `bounded-${lifecycleOf(expected.map((id) => catalog.get(id)?.status))}-mapping-needs-full-acceptance`
+          : 'required-missing'), `Atomic lifecycle/status drift: ${r.baseIdentity} -> ${lib}`);
+      const family = Object.values(data.prototypeInventory.base).find((f) =>
+        f.entityIds.includes(r.baseIdentity)
+      );
+      const projection = data.projectionRows.find((p) => p.base.family === family?.family)
+        ?.families?.[lib];
+      require(actual.every((id) =>
+        projection?.entityIds?.includes(id)
+      ), `Projection cell atomic mapping mismatch: ${r.baseIdentity} -> ${lib}`);
     }
+  }
+  const gpuiRows = data.gpuiCoverageRows ?? [];
+  require(setEqual(
+    gpuiRows.map((r) => r.baseIdentity + '|' + r.projectionLibrary),
+    baseIds.flatMap((id) => familyKeys.map((lib) => id + '|' + lib))
+  ), 'Required GPUI atomic/family set drift');
+  for (const row of gpuiRows)
+    require(setEqual(
+      row.projectionIdentities ?? [],
+      mapping.find((x) => x.baseIdentity === row.baseIdentity)?.projectionCells?.[
+        row.projectionLibrary
+      ]?.mappedCurrentIdentities ?? []
+    ), `GPUI projection identity drift: ${row.baseIdentity}/${row.projectionLibrary}`);
+  require(setEqual(
+    Object.keys(data.counts.consumerPrograms),
+    Object.keys(CONSUMER_LEDGERS)
+  ), 'Consumer program configuration drift');
+  for (const row of data.consumerRows) {
+    require(Object.hasOwn(
+      CONSUMER_LEDGERS,
+      row.program
+    ), `Consumer program outside configured ledgers: ${row.ID}`);
+    require(row.source === CONSUMER_LEDGERS[row.program], `Consumer ledger mismatch: ${row.ID}`);
   }
   const consumerIds = new Set(data.consumerRows.map((r) => r.ID));
   require(consumerIds.size === data.consumerRows.length, 'Duplicate consumer ID');
@@ -265,14 +919,16 @@ export function validate(data, repoRoot = root) {
     for (const id of r.consumerRows)
       require(consumerIds.has(id), `Unresolved consumer row: ${r.id} -> ${id}`);
   }
-  for (const [program, summary] of Object.entries(data.counts.consumerPrograms)) {
+  for (const [program, ledger] of Object.entries(CONSUMER_LEDGERS)) {
+    const summary = data.counts.consumerPrograms[program];
+    if (!summary) continue;
     const actual = data.consumerRows.filter((r) => r.program === program);
     require(actual.length === summary.rows &&
       equal(
         count(actual.map((r) => r.State)),
         summary.states
       ), `Consumer totals drift: ${program}`);
-    const source = fs.readFileSync(path.join(repoRoot, actual[0].source), 'utf8');
+    const source = fs.readFileSync(path.join(repoRoot, ledger), 'utf8');
     const parsed = consumerLedgerRows(source);
     require(setEqual(
       [...parsed.rows.keys()],
@@ -290,15 +946,27 @@ export function validate(data, repoRoot = root) {
   for (const r of data.migrationLedger)
     require(r.action === 'retain-existing-owner; no-close' &&
       Boolean(r.migration && r.url), `Missing migration disposition: ${r.number}`);
+  const planSource = data.candidateSource ?? data;
+  const planBaseIds = Object.values(planSource.prototypeInventory.base).flatMap((f) => f.entityIds);
+  const planMapping = planSource.atomicProjectionMapping ?? [];
+  const planGpuiRows = planSource.gpuiCoverageRows ?? [];
   const plan = data.deliveryPlan;
   require(Boolean(plan) && plan.items.length === plan.coreTodoCount, 'Finf task count drift');
   if (plan) {
+    require(plan.gpuiParity?.required === true &&
+      plan.gpuiParity?.requiredDimension === 9, 'GPUI same-capability scope must remain required');
     require(setEqual(
       plan.items.map((x) => x.id),
       FINF_CORE_ITEM_IDS
     ), 'Finf required item scope drift or duplicates');
     require(new Set(plan.priorWork.map((x) => x.pr)).size === plan.priorWork.length &&
       plan.priorWork.every((x) => x.id === `prior-pr.${x.pr}`), 'Finf prior work identity drift');
+    require(setEqual(
+      plan.priorWork.map((x) => x.pr),
+      FINF_REQUIRED_PRIOR_PRS
+    ), 'Finf required prior work set drift');
+    require(plan.initialTodoCount ===
+      plan.coreTodoCount + plan.priorWorkRoutingCount, 'Finf initial task count drift');
     for (const item of plan.priorWork) {
       if (item.complete) {
         const c = item.closeout;
@@ -331,21 +999,35 @@ export function validate(data, repoRoot = root) {
         Object.keys(item.gateResults ?? {}),
         gates
       ), `Finf gate identity mismatch: ${item.id}`);
-      if (item.kind === 'complete-current-Base-four-projections')
+      if (item.id.startsWith('baseline.'))
         require(setEqual(
           item.baseEntityIds ?? [],
-          data.prototypeInventory.base[item.name]?.entityIds ?? []
+          planSource.prototypeInventory.base[item.id.slice('baseline.'.length)]?.entityIds ?? []
         ), `Finf baseline Base scope drift: ${item.id}`);
+      const subject = item.id.split('.').slice(1).join('.');
+      const scopeFamilies =
+        item.id === 'repair.overlay-scrollbar-coordinate'
+          ? OVERLAY_BASE_FAMILIES.filter((family) => planSource.prototypeInventory.base[family])
+          : [subject];
+      const subjectBaseIds = scopeFamilies.flatMap(
+        (family) => planSource.prototypeInventory.base[family]?.entityIds ?? []
+      );
+      if (item.complete || item.baseEntityIds !== undefined)
+        require((!item.complete || subjectBaseIds.length > 0) &&
+          setEqual(
+            item.baseEntityIds ?? [],
+            subjectBaseIds
+          ), `Finf subject Base scope drift: ${item.id}`);
       if (item.complete) {
         const requiredBaseIds = item.baseEntityIds ?? [];
         require(requiredBaseIds.length > 0 &&
           new Set(requiredBaseIds).size === requiredBaseIds.length &&
           requiredBaseIds.every((id) =>
-            baseIds.includes(id)
+            planBaseIds.includes(id)
           ), `Incomplete Finf Base scope: ${item.id}`);
         for (const id of requiredBaseIds)
           for (const lib of familyKeys) {
-            const cell = mapping.find((r) => r.baseIdentity === id)?.projectionCells?.[lib];
+            const cell = planMapping.find((r) => r.baseIdentity === id)?.projectionCells?.[lib];
             require(cell?.mappedCurrentIdentities?.length > 0 &&
               cell.acceptance === 'passed' &&
               cell.mappedCurrentIdentities.every((projection) =>
@@ -357,6 +1039,19 @@ export function validate(data, repoRoot = root) {
                     /^https:\/\//.test(e.source ?? '')
                 )
               ), `Incomplete Finf projection acceptance: ${item.id} -> ${id}/${lib}`);
+          }
+        for (const id of requiredBaseIds)
+          for (const lib of familyKeys) {
+            const gpui = planGpuiRows.find(
+              (r) => r.baseIdentity === id && r.projectionLibrary === lib
+            );
+            require(gpui?.status === 'verified' &&
+              gpui.nativeEvidence?.some(
+                (e) =>
+                  e.result === 'passed' &&
+                  e.revision === item.acceptedRevision &&
+                  /^https:\/\//.test(e.source ?? '')
+              ), `Incomplete GPUI acceptance: ${item.id} -> ${id}/${lib}`);
           }
         const receiptFor = (gate) =>
           (item.evidence ?? []).some(
@@ -383,10 +1078,57 @@ export function validate(data, repoRoot = root) {
       }
     }
   }
+  if (data.candidateSource) {
+    const candidate = data.candidateSource;
+    require(candidate.baseMain === data.protoMain &&
+      candidate.kind === 'candidate' &&
+      Boolean(candidate.revision) !== Boolean(candidate.tree) &&
+      /^[a-f0-9]{40}$/.test(
+        candidate.revision ?? candidate.tree ?? ''
+      ), 'Candidate source revision boundary drift');
+    require(setEqual(Object.keys(candidate.counts), [
+      'libraryInventory',
+      'catalogEntities',
+      'catalogDraft',
+      'catalogActive',
+      'catalogDeprecated',
+      'catalogRemoved',
+      'familyInstances',
+      'distinctPrototypeSubjects',
+    ]), 'Candidate inventory count scope drift');
+    try {
+      const object = candidate.revision ?? candidate.tree;
+      require(candidate.sourceBindingsObject === object, 'Candidate source binding revision drift');
+      const expectedPaths = candidateBindingPaths(candidate.prototypeInventory, repoRoot);
+      const bindings = candidate.sourceBindings ?? [];
+      require(setEqual(
+        bindings.map((entry) => entry.path),
+        expectedPaths
+      ), 'Candidate source binding path set drift');
+      for (const binding of bindings) {
+        const p = binding.path;
+        if (path.isAbsolute(p) || p.split('/').includes('..')) {
+          errors.push(`Unsafe candidate source path: ${p}`);
+          continue;
+        }
+        const absolute = path.join(repoRoot, p);
+        require(/^[a-f0-9]{64}$/.test(binding.sha256 ?? '') &&
+          fs.existsSync(absolute) &&
+          sha256(fs.readFileSync(absolute)) ===
+            binding.sha256, `Candidate source binding/worktree drift: ${p}`);
+      }
+      errors.push(
+        ...validate(candidateView(data), repoRoot, true).map((error) => `Candidate: ${error}`)
+      );
+    } catch (error) {
+      errors.push(`Candidate source cannot be validated: ${error.message}`);
+    }
+  }
   return errors;
 }
 export function renderPlan(d) {
   const p = d.deliveryPlan;
+  const current = d.candidateSource ?? d;
   return (
     [
       '# Finf complete-delivery checklist',
@@ -402,6 +1144,13 @@ export function renderPlan(d) {
         (x) =>
           `- [${x.complete ? 'x' : ' '}] **${x.id}**: ${x.name}. Group: ${x.group}. Existing work: ${x.issues.map(issue).join(', ')}. All gates above are mandatory; partial commits do not check this item.`
       ),
+      '## Cross-matrix safe-area and spacing acceptance',
+      p.layoutAudit.scope + '. ' + p.layoutAudit.rule,
+      ...p.layoutAudit.specificDialogAcceptance.map((x) => '- Dialog acceptance: ' + x),
+      '## GPUI same-capability delivery',
+      p.gpuiParity.scope + '. ' + p.gpuiParity.currentBoundary,
+      p.gpuiParity.material,
+      `The structured ledger has ${current.gpuiCoverageRows.length} required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.`,
       '## Previous work remains equal priority',
       ...p.priorWork.map(
         (x) =>
@@ -413,8 +1162,14 @@ export function renderPlan(d) {
         .filter((x) => x.mandatoryUnfinishedCriteria)
         .flatMap((x) => [
           x.boundedPriorSuccess,
+          ...(x.complete && x.closeout
+            ? [
+                `Accepted closeout for **${x.id}**: ${x.closeout.mode}; source head ${x.closeout.sourceHead}; integration revision ${x.closeout.integrationRevision}; [evidence](${x.closeout.evidence}); [independent review](${x.closeout.independentReview.source}).`,
+              ]
+            : []),
           ...x.mandatoryUnfinishedCriteria.map(
-            (c) => `- **${c.id}** (unmet): ${c.acceptance} [source](${c.source})`
+            (c) =>
+              `- **${c.id}** (${x.complete && x.closeout ? 'accepted closeout' : 'unmet'}): ${c.acceptance} [source](${c.source})`
           ),
         ]),
       `Shared CI hygiene (unmet): ${p.sharedCiHygiene.observed} ${p.sharedCiHygiene.required} [failure](${p.sharedCiHygiene.source})`,
@@ -428,7 +1183,7 @@ export function renderPlan(d) {
           'Bootstrap 2.3.2',
           'Liquid Glass',
         ],
-        d.atomicProjectionMapping.map((x) => [
+        current.atomicProjectionMapping.map((x) => [
           x.baseIdentity,
           ...['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'].map(
             (l) => x.projectionCells[l].mappedCurrentIdentities.join(', ') || 'required missing'
@@ -447,12 +1202,14 @@ export function renderPlan(d) {
   );
 }
 export function render(d) {
-  const source = (p) => `[${p}](https://github.com/Proto-UI/Proto-UI/blob/${d.protoMain}/${p})`;
+  const snapshot = sourceSnapshot(d);
+  const source = (p) =>
+    `[${p}](https://github.com/Proto-UI/Proto-UI/blob/${snapshot.revision}/${p})`;
   const c = d.counts;
   const t = (s) => s.replaceAll('-', ' ');
   const sections = [
     '# Active prototype comparison and four-family projection matrix',
-    `Status: non-normative operational inventory. Tracker: ${issue(d.tracker)}. Observed ${d.observedAt}; Proto UI main \`${d.protoMain}\`. This replaces #377 as the active matrix entry without closing existing implementation or consumer trackers. Generated from [the structured matrix](prototype-coverage-matrix.json) by \`node scripts/coverage-matrices/prototype-coverage.mjs --write\`.`,
+    `Status: non-normative operational inventory. Tracker: ${issue(d.tracker)}. Observed ${d.observedAt}; Proto UI main baseline \`${d.protoMain}\`; source inventory ${snapshot.kind} \`${snapshot.revision}\`${snapshot.kind === 'candidate' ? ' (candidate-only implementation, not current main)' : ''}. This replaces #377 as the active matrix entry without closing existing implementation or consumer trackers. Generated from [the structured matrix](prototype-coverage-matrix.json) by \`node scripts/coverage-matrices/prototype-coverage.mjs --write\`.`,
     '## Independent project and counting boundary',
     d.referencePolicy,
     'A comparison difference alone is not a defect or a new Base obligation. The maintainer has separately selected the complete Finf groups 1–6, all four projections and the Overlay regression as explicit project-owned work. `candidate-needs-independent-admission` means research, not approval. Existing historical `UPSTREAM-*` reference IDs retain source identity only; this document neither renames them nor grants another project authority. Actual technical dependencies and licenses remain unchanged.',
@@ -461,7 +1218,22 @@ export function render(d) {
       ['Library', 'Families', 'P identities', 'Source definitions'],
       Object.entries(c.libraryInventory).map(([k, v]) => [k, v.families, v.entities, v.sourceFiles])
     ),
-    `Total: **${c.familyInstances} library-family instances; ${c.distinctPrototypeSubjects} distinct subjects; ${c.catalogEntities} P identities; ${c.catalogDraft} draft / ${c.catalogActive} active P identities**. This is an implementation inventory, not zero usable code and not a count of mature components. The private ChatUI Message/Code Block compositions add 6/3 package-local parts but no public P identities.`,
+    `Total: **${c.familyInstances} library-family instances; ${c.distinctPrototypeSubjects} distinct subjects; ${c.catalogEntities} P identities; ${LIFECYCLES.map((status) => `${c['catalog' + status[0].toUpperCase() + status.slice(1)] ?? 0} ${status}`).join(' / ')} P identities**. This is an implementation inventory, not zero usable code and not a count of mature components. The private ChatUI Message/Code Block compositions add 6/3 package-local parts but no public P identities.`,
+    ...(d.candidateSource
+      ? [
+          '## Separate candidate source inventory',
+          `Candidate ${d.candidateSource.revision ? 'commit' : 'local tree'} ${d.candidateSource.revision ?? d.candidateSource.tree}; based on main ${d.candidateSource.baseMain}. These source counts are candidate-only; stored path hashes are checked against the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.`,
+          table(
+            ['Library', 'Main families / identities', 'Candidate families / identities'],
+            Object.entries(d.candidateSource.counts.libraryInventory).map(([lib, value]) => [
+              lib,
+              `${c.libraryInventory[lib].families} / ${c.libraryInventory[lib].entities}`,
+              `${value.families} / ${value.entities}`,
+            ])
+          ),
+          `Candidate atomic GPUI obligations: ${d.candidateSource.gpuiCoverageRows.length}; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.`,
+        ]
+      : []),
     '## Reference sets and difference accounting',
     table(
       ['Comparison source', 'Pinned evidence', 'Denominator', 'Main counterpart'],
@@ -470,7 +1242,7 @@ export function render(d) {
           '[shadcn/ui directory](https://ui.shadcn.com/docs/components)',
           d.referenceSnapshots.shadcn.sha,
           `${d.referenceSnapshots.shadcn.directoryCount} directory subjects`,
-          `${c.shadcnNamedProjections} named Shadcn projections; all bounded draft`,
+          `${c.shadcnNamedProjections} named Shadcn projections; see catalog lifecycle below`,
         ],
         [
           '[Base UI components](https://base-ui.com/react/overview/quick-start)',
@@ -494,7 +1266,7 @@ export function render(d) {
       [
         'Subject / references',
         'Class / decision',
-        'Pinned main implementation',
+        'Pinned source implementation',
         'Ownership / remaining boundary',
         'Consumer row IDs',
         'Existing work',
@@ -504,7 +1276,7 @@ export function render(d) {
           .map((s) => `[${s.label}](${s.url}) ([pin](${s.pinnedSource}))`)
           .join('; '),
         `${r.classification}; ${r.decision}`,
-        `${r.mainStatus}${r.base ? '; ' + r.base.entityIds.map((id) => `[${id}](https://github.com/Proto-UI/Proto-UI/blob/${d.protoMain}/spec/prototypes/${id}.yaml)`).join(', ') : ''}`,
+        `${r.mainStatus}${r.base ? '; ' + r.base.entityIds.map((id) => `[${id}](https://github.com/Proto-UI/Proto-UI/blob/${snapshot.revision}/spec/prototypes/${id}.yaml)`).join(', ') : ''}`,
         r.partialOrNegativeBoundary,
         r.consumerRows.join(', ') || 'No current consumer row; independent scope needed',
         r.issues.map(issue).join(', ') || issue(d.tracker),
@@ -577,7 +1349,17 @@ export function render(d) {
       ])
     ),
     '## Package consumption boundary',
-    'Bootstrap 2.3.2 and Liquid Glass currently declare private: true and source exports. Their existing counts describe workspace implementations, not npm publication. Four-family implementation and runtime/visual parity remain required in Finf; private package status is not a waiver. Changing release identity/publication requires its own explicit release authorization.',
+    table(
+      ['Library / package', 'Private', 'Version', 'Root export', 'Publication evidence'],
+      Object.entries(d.packageConsumption).map(([lib, pkg]) => [
+        `${lib}: ${pkg.name}`,
+        String(pkg.private),
+        pkg.version ?? 'not declared',
+        JSON.stringify(pkg.rootExport),
+        pkg.publication,
+      ])
+    ),
+    'These manifest facts describe the selected source revision and do not prove registry publication or a successful consumer install. Four-family implementation and runtime/visual parity remain required in Finf; private package status is not a waiver. Changing release identity/publication requires its own explicit release authorization.',
     '## Verification and update contract',
     '- Source/count/link and receipt-shape integrity (never a substitute for independent review of actual evidence): `node scripts/coverage-matrices/prototype-coverage.mjs --check`. Negative controls: `node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs`.\n- Refresh main and reference revisions before changing facts; update the JSON and regenerate this view. New reference names enter independent review, never automatic scope.\n- Every adopted row needs a real owner, precise semantic/negative boundary, main/open-PR separation, lifecycle, host/Compiler evidence and consumer acceptance. Closing the matrix PR does not close #870.\n- This audit does not rerun prototype/runtime/visual tests. Existing mapped tests are source evidence only; no full-feature or native certification is claimed. Independent review and exact-head CI remain required for the matrix change.',
     'Agent: dot  \nModelTrace: not measured — owner-authorized dot exemption (2026-10-06)',

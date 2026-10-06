@@ -5,6 +5,7 @@ import os from 'node:os';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
+import { subscribe, unsubscribe } from 'node:diagnostics_channel';
 import { waitForServerReadiness } from './server-readiness.mjs';
 import path from 'node:path';
 import { describe, it } from 'node:test';
@@ -272,7 +273,7 @@ describe('bounded reading-reference runner and workflow', () => {
           },
         };
         const route = {
-          request: () => ({ url: () => `${base}/redirect` }),
+          request: () => ({ url: () => `${base}/redirect`, allHeaders: async () => ({}) }),
           // This adversarial transport emulates following when the explicit
           // zero-redirect bound is lost. A final-URL-only check is too late.
           fetch: async (options) => {
@@ -323,7 +324,7 @@ describe('bounded reading-reference runner and workflow', () => {
         dispose: async () => events.push('dispose'),
       };
       const route = {
-        request: () => ({ url: () => `${base}${asset}` }),
+        request: () => ({ url: () => `${base}${asset}`, allHeaders: async () => ({}) }),
         fetch: async (options) => {
           assert.equal(options.maxRedirects, 0);
           events.push('fetch');
@@ -354,7 +355,7 @@ describe('bounded reading-reference runner and workflow', () => {
       let fetches = 0;
       const aborts = [];
       const route = {
-        request: () => ({ url: () => url }),
+        request: () => ({ url: () => url, allHeaders: async () => ({}) }),
         fetch: async () => {
           fetches += 1;
           throw new Error('fixture transport failure');
@@ -430,7 +431,7 @@ describe('bounded reading-reference runner and workflow', () => {
         context = await request.newContext();
         const failures = [];
         const makeRoute = (pathname) => ({
-          request: () => ({ url: () => `${base}${pathname}` }),
+          request: () => ({ url: () => `${base}${pathname}`, allHeaders: async () => ({}) }),
           // Real pinned APIRequestContext; Route.fetch delegates to this same
           // transport. No Chromium/route interception claim is made here.
           fetch: (options) => context.fetch(`${base}${pathname}`, { ...options, timeout: 2_000 }),
@@ -752,4 +753,233 @@ describe('bounded reading-reference runner and workflow', () => {
     assert.match(runner, /locator\('header \[data-theme-toggle\]'\)\.click\(\)/);
     assert.match(runner, /colorScheme: 'light'/);
   });
+});
+
+describe('owned response connection isolation', () => {
+  it('preserves original headers and replaces every Connection spelling once', async () => {
+    for (const connectionHeaders of [
+      { connection: 'keep-alive' },
+      { Connection: 'keep-alive' },
+      { CONNECTION: 'keep-alive', Connection: 'upgrade', connection: 'keep-alive' },
+    ]) {
+      const original = Object.freeze({
+        'accept-language': 'zh-CN',
+        'x-owned-fixture': 'original',
+        ...connectionHeaders,
+      });
+      let disposed = 0;
+      const route = {
+        request: () => ({
+          url: () => 'http://127.0.0.1:4321/asset.js',
+          allHeaders: async () => original,
+        }),
+        fetch: async (options) => {
+          assert.deepEqual(options.headers, {
+            'accept-language': 'zh-CN',
+            'x-owned-fixture': 'original',
+            connection: 'close',
+          });
+          assert.equal(options.maxRedirects, 0);
+          assert.equal(options.maxRetries, 0);
+          assert.equal(options.timeout, 30_000);
+          return { status: () => 200, dispose: async () => disposed++ };
+        },
+        fulfill: async () => {},
+        abort: async () => assert.fail('Normal asset must not abort'),
+      };
+      const failures = [];
+      assert.equal(
+        await routeOwnResponse(route, 'http://127.0.0.1:4321', (failure) => failures.push(failure)),
+        'fulfilled'
+      );
+      assert.deepEqual(failures, []);
+      assert.equal(disposed, 1);
+      assert.deepEqual(original, {
+        'accept-language': 'zh-CN',
+        'x-owned-fixture': 'original',
+        ...connectionHeaders,
+      });
+    }
+  });
+
+  for (const [consumer, pathname, bytes] of [
+    ['reading', '/font.woff2', Buffer.from([0, 2, 128, 255])],
+    ['toc', '/code-panel-client.js', Buffer.from('export const original = true;')],
+  ]) {
+    it(
+      `${consumer} shared guard isolates a real reused-socket reset without retries`,
+      { timeout: 15_000 },
+      async (t) => {
+        const require = createRequire(new URL('../../apps/www/package.json', import.meta.url));
+        const { request } = require('playwright-core');
+        assert.equal(require('playwright-core/package.json').version, '1.58.2');
+        const served = new WeakSet();
+        const wireConnections = [];
+        let hits = 0,
+          resets = 0,
+          disposals = 0;
+        const server = createServer((req, res) => {
+          hits++;
+          assert.equal(req.headers['x-owned-fixture'], consumer);
+          assert.equal(req.headers['accept-language'], 'zh-CN');
+          wireConnections.push(req.headers.connection);
+          assert.equal(
+            req.rawHeaders.filter(
+              (value, index) => index % 2 === 0 && value.toLowerCase() === 'connection'
+            ).length,
+            1
+          );
+          if (req.url === '/fresh-reset' || served.has(req.socket)) {
+            resets++;
+            req.socket.resetAndDestroy();
+            return;
+          }
+          served.add(req.socket);
+          res.statusCode = req.url === '/http-error' ? 503 : 200;
+          res.end(bytes);
+        });
+        let context;
+        const trace = [];
+        let host;
+        const observe = ({ request: outgoing }) => {
+          if (outgoing.getHeader('host') === host)
+            trace.push({ reused: outgoing.reusedSocket, path: outgoing.path });
+        };
+        try {
+          server.listen(0, '127.0.0.1');
+          await once(server, 'listening');
+          const base = `http://127.0.0.1:${server.address().port}`;
+          host = new URL(base).host;
+          const headers = {
+            'accept-language': 'zh-CN',
+            'x-owned-fixture': consumer,
+            connection: 'keep-alive',
+          };
+          context = await request.newContext({ extraHTTPHeaders: headers });
+          subscribe('http.client.request.start', observe);
+          // Baseline and candidate use the same pinned real transport and server.
+          const baseline = await context.fetch(`${base}${pathname}`, {
+            maxRedirects: 0,
+            maxRetries: 0,
+            timeout: 2_000,
+          });
+          assert.deepEqual(await baseline.body(), bytes);
+          await baseline.dispose();
+          await assert.rejects(
+            context.fetch(`${base}${pathname}`, { maxRedirects: 0, maxRetries: 0, timeout: 2_000 }),
+            /read ECONNRESET/
+          );
+          assert.deepEqual(
+            trace.map((entry) => entry.reused),
+            [false, true]
+          );
+          assert.equal(resets, 1);
+          t.diagnostic(
+            JSON.stringify({
+              consumer,
+              transport: 'playwright-core@1.58.2',
+              phase: 'controlled-baseline',
+              reusedSocket: trace.map((entry) => entry.reused),
+              resets,
+              observedError: 'read ECONNRESET',
+              attribution:
+                'Owned fault fixture resets only a reused socket; not a claim about the historical CI cause.',
+            })
+          );
+          const failures = [],
+            aborts = [],
+            statuses = [];
+          const route = (target = pathname) => ({
+            request: () => ({ url: () => `${base}${target}`, allHeaders: async () => headers }),
+            fetch: async (options) => {
+              assert.equal(options.maxRedirects, 0);
+              assert.equal(options.maxRetries, 0);
+              assert.equal(options.timeout, 30_000);
+              // The local fault fixture has its own short test watchdog. The
+              // production guard's unchanged30s argument is asserted above.
+              const response = await context.fetch(`${base}${target}`, {
+                ...options,
+                timeout: 2_000,
+              });
+              const dispose = response.dispose.bind(response);
+              response.dispose = async () => {
+                disposals++;
+                await dispose();
+              };
+              return response;
+            },
+            fulfill: async ({ response }) => {
+              statuses.push(response.status());
+              assert.deepEqual(await response.body(), bytes);
+            },
+            abort: async (code) => aborts.push(code),
+            continue: async () => assert.fail('No unrestricted continuation'),
+          });
+          for (let attempt = 0; attempt < 2; attempt++) {
+            const outcome = await routeOwnResponse(route(), base, (failure) =>
+              failures.push(failure)
+            );
+            assert.equal(
+              outcome,
+              'fulfilled',
+              JSON.stringify({ consumer, trace, resets, failures, aborts })
+            );
+          }
+          assert.deepEqual(
+            trace.slice(2).map((entry) => entry.reused),
+            [false, false]
+          );
+          assert.equal(hits, 4);
+          assert.deepEqual(wireConnections, ['keep-alive', 'keep-alive', 'close', 'close']);
+          assert.equal(resets, 1);
+          assert.equal(disposals, 2);
+          assert.deepEqual(failures, []);
+          assert.deepEqual(aborts, []);
+          assert.deepEqual(statuses, [200, 200]);
+          // Closing reuse is isolation, not a successful fallback for real errors.
+          const beforeReset = hits;
+          assert.equal(
+            await routeOwnResponse(route('/fresh-reset'), base, (failure) =>
+              failures.push(failure)
+            ),
+            'failed-request'
+          );
+          assert.equal(hits - beforeReset, 1);
+          assert.equal(failures.length, 1);
+          assert.equal(failures[0].kind, 'request-error');
+          assert.match(failures[0].error, /read ECONNRESET/);
+          assert.deepEqual(aborts, ['failed']);
+          assert.equal(disposals, 2);
+          const beforeHTTPError = hits;
+          assert.equal(
+            await routeOwnResponse(route('/http-error'), base, (failure) => failures.push(failure)),
+            'fulfilled'
+          );
+          assert.equal(hits - beforeHTTPError, 1);
+          assert.equal(statuses.at(-1), 503);
+          assert.equal(disposals, 3);
+          assert.equal(failures.length, 1, 'Original failed attempt remains retained');
+          t.diagnostic(
+            JSON.stringify({
+              consumer,
+              phase: 'isolated-candidate',
+              sourceRequests: hits,
+              reusedSocket: trace.map((entry) => entry.reused),
+              wireConnections,
+              resets,
+              retainedFailures: failures,
+              disposeCalls: disposals,
+              HTTPStatusPassedThrough: statuses.at(-1),
+              retries: 0,
+            })
+          );
+        } finally {
+          unsubscribe('http.client.request.start', observe);
+          await context?.dispose();
+          server.closeAllConnections();
+          await new Promise((resolve) => server.close(resolve));
+        }
+      }
+    );
+  }
 });

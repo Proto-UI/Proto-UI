@@ -201,6 +201,11 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
   }),
 
+  // Per-render DemoSpec association-key lowering to a public opaque identity.
+  // No ordinary website controller or private host lookup is admitted here.
+  'apps/www/src/components/PrototypePreviewer/demo-associations.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/core']),
+  }),
   'apps/www/src/components/PrototypePreviewer/demo-renderer.ts': Object.freeze({
     specifiers: Object.freeze([
       '@proto.ui/core',
@@ -283,6 +288,12 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/pages/en/test/liquid-glass-material.astro': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-liquid-glass/button']),
     resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
+  }),
+  // Bounded four-runtime fixture of the actual eight Bootstrap source parts.
+  // Its authored commands remain separately blocked consumer compositions.
+  'apps/www/src/pages/en/test/bootstrap-state-controls.astro': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2']),
+    resolvedPaths: Object.freeze(['packages/prototypes/bootstrap-2-3-2/src/theme']),
   }),
   'apps/www/src/pages/en/test/new-projection-families.astro': Object.freeze({
     specifiers: Object.freeze([

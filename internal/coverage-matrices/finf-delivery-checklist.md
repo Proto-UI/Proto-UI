@@ -22,6 +22,10 @@ No item is checked for an incremental/simple implementation. Every required acce
 
 7. Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings
 
+8. Complete the per-family and per-atomic-identity safe-area/spacing audit and accepted repairs across Base and all four design languages: explicit viewport/container/leaf ownership, outer and inner spacing, long content, scaling and keyboard reflow. Use family-specific evidence, not a universal inset or an unsupported not-applicable shortcut.
+
+9. Deliver GPUI with the same applicable semantic capability as the other runtimes for this prototype and all four design-language projections: actual input, focus, accessibility, layout, theme, demo and Adapter/Compiler evidence. Existing private/experimental status or unsupported diagnostics are current gaps, never a final omission or completion shortcut.
+
 Each final Base atomic identity has a real conforming identity/implementation and evidence in each of four design families. Each final family count and atomic identity count is at least Base. Existing extra family identities may remain but cannot compensate for a missing Base mapping.
 
 To be derived from governed completed semantics; 32 deliverables are not automatically 32 new Base families. Date Picker/Data Table/Message Scroller may be proper compositions.
@@ -138,6 +142,24 @@ To be derived from governed completed semantics; 32 deliverables are not automat
 
 - [ ] **repair.overlay-scrollbar-coordinate**: Overlay coordinate offset when scrollbars change. Group: reported-regression. Existing work: [#870](https://github.com/Proto-UI/Proto-UI/issues/870), [#587](https://github.com/Proto-UI/Proto-UI/issues/587), [#683](https://github.com/Proto-UI/Proto-UI/issues/683), [#684](https://github.com/Proto-UI/Proto-UI/issues/684). All gates above are mandatory; partial commits do not check this item.
 
+## Cross-matrix safe-area and spacing acceptance
+
+Every implemented Base and four-family atomic identity, including Lucide dependency behavior where it participates. Source coverage and confirmed findings first, then finish actual Finf implementation and real-input validation; the audit is not the deliverable end state. No blanket 16px rule or unexplained not-applicable mass disposition.
+
+- Dialog acceptance: Reference-aware Shadcn edge clearance and maximum inline/block extent; preserve long-content scrolling
+
+- Dialog acceptance: Test enlarged fonts/zoom, keyboard-reduced available space and applicable safe-area facts
+
+- Dialog acceptance: Implement the reusable prototype/projection/host responsibility, not a homepage-only CSS patch
+
+## GPUI same-capability delivery
+
+Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/LiquidGlass projection, with semantic parity and real native usability. Substantial T0 native implementation already exists; row-specific capability/native evidence is being reconciled. Do not infer absence from the stale native/gpui README or imply full support from current private peer metadata.
+
+Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
+
+The structured ledger has 236 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+
 ## Previous work remains equal priority
 
 - [ ] **prior-pr.775** [#775](https://github.com/Proto-UI/Proto-UI/issues/775): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
@@ -194,58 +216,62 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | --- | --- | --- | --- | --- |
 | P-BASE-ASYNC-REGION | required missing | required missing | required missing | required missing |
 | P-BASE-BUTTON | P-SHADCN-BUTTON | P-BRUTALIST-BUTTON | P-BOOTSTRAP-2-3-2-BUTTON | P-LIQUID-GLASS-BUTTON |
-| P-BASE-CHECKBOX-INDICATOR | P-SHADCN-CHECKBOX-INDICATOR | P-BRUTALIST-CHECKBOX-INDICATOR | required missing | required missing |
-| P-BASE-CHECKBOX | P-SHADCN-CHECKBOX | P-BRUTALIST-CHECKBOX | required missing | required missing |
+| P-BASE-CHECKBOX | P-SHADCN-CHECKBOX | P-BRUTALIST-CHECKBOX | P-BOOTSTRAP-2-3-2-CHECKBOX | required missing |
+| P-BASE-CHECKBOX-INDICATOR | P-SHADCN-CHECKBOX-INDICATOR | P-BRUTALIST-CHECKBOX-INDICATOR | P-BOOTSTRAP-2-3-2-CHECKBOX-INDICATOR | required missing |
+| P-BASE-COLLAPSIBLE | required missing | required missing | required missing | required missing |
+| P-BASE-COLLAPSIBLE-CONTENT | required missing | required missing | required missing | required missing |
+| P-BASE-COLLAPSIBLE-TRIGGER | required missing | required missing | required missing | required missing |
 | P-BASE-DIALOG | P-SHADCN-DIALOG | P-BRUTALIST-DIALOG | required missing | required missing |
+| P-BASE-DIALOG-CLOSE | P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON | P-BRUTALIST-DIALOG-CLOSE, P-BRUTALIST-DIALOG-CLOSE-ICON | required missing | required missing |
+| P-BASE-DIALOG-CONTENT | P-SHADCN-DIALOG-CONTENT | P-BRUTALIST-DIALOG-CONTENT | required missing | required missing |
+| P-BASE-DIALOG-DESCRIPTION | P-SHADCN-DIALOG-DESCRIPTION | P-BRUTALIST-DIALOG-DESCRIPTION | required missing | required missing |
 | P-BASE-DIALOG-MASK | P-SHADCN-DIALOG-MASK | P-BRUTALIST-DIALOG-MASK | required missing | required missing |
 | P-BASE-DIALOG-TITLE | P-SHADCN-DIALOG-TITLE | P-BRUTALIST-DIALOG-TITLE | required missing | required missing |
 | P-BASE-DIALOG-TRIGGER | P-SHADCN-DIALOG-TRIGGER | P-BRUTALIST-DIALOG-TRIGGER | required missing | required missing |
-| P-BASE-DIALOG-CLOSE | P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON | P-BRUTALIST-DIALOG-CLOSE-ICON, P-BRUTALIST-DIALOG-CLOSE | required missing | required missing |
-| P-BASE-DIALOG-CONTENT | P-SHADCN-DIALOG-CONTENT | P-BRUTALIST-DIALOG-CONTENT | required missing | required missing |
-| P-BASE-DIALOG-DESCRIPTION | P-SHADCN-DIALOG-DESCRIPTION | P-BRUTALIST-DIALOG-DESCRIPTION | required missing | required missing |
 | P-BASE-DROPDOWN-MENU | P-SHADCN-DROPDOWN-MENU | P-BRUTALIST-DROPDOWN-MENU | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-CONTENT | P-SHADCN-DROPDOWN-MENU-CONTENT | P-BRUTALIST-DROPDOWN-MENU-CONTENT | required missing | required missing |
-| P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | P-BRUTALIST-DROPDOWN-MENU-TRIGGER | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-ITEM | P-SHADCN-DROPDOWN-MENU-ITEM | P-BRUTALIST-DROPDOWN-MENU-ITEM | required missing | required missing |
+| P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | P-BRUTALIST-DROPDOWN-MENU-TRIGGER | required missing | required missing |
 | P-BASE-HOVER-CARD | P-SHADCN-HOVER-CARD | P-BRUTALIST-HOVER-CARD | required missing | required missing |
 | P-BASE-HOVER-CARD-CONTENT | P-SHADCN-HOVER-CARD-CONTENT | P-BRUTALIST-HOVER-CARD-CONTENT | required missing | required missing |
 | P-BASE-HOVER-CARD-TRIGGER | P-SHADCN-HOVER-CARD-TRIGGER | P-BRUTALIST-HOVER-CARD-TRIGGER | required missing | required missing |
 | P-BASE-IMAGE | required missing | required missing | required missing | required missing |
-| P-BASE-INPUT | P-SHADCN-INPUT | required missing | required missing | required missing |
+| P-BASE-INPUT | P-SHADCN-INPUT | required missing | P-BOOTSTRAP-2-3-2-INPUT | required missing |
+| P-BASE-LABEL | P-SHADCN-LABEL | P-BRUTALIST-LABEL | P-BOOTSTRAP-2-3-2-LABEL | P-LIQUID-GLASS-LABEL |
 | P-BASE-LIVE-REGION | required missing | required missing | required missing | required missing |
 | P-BASE-RADIO-GROUP | P-SHADCN-RADIO-GROUP | required missing | required missing | required missing |
 | P-BASE-RADIO-GROUP-INDICATOR | P-SHADCN-RADIO-GROUP-INDICATOR | required missing | required missing | required missing |
 | P-BASE-RADIO-GROUP-ITEM | P-SHADCN-RADIO-GROUP-ITEM | required missing | required missing | required missing |
-| P-BASE-SCROLL-AREA-SCROLLBAR | P-SHADCN-SCROLL-AREA-SCROLLBAR | P-BRUTALIST-SCROLL-AREA-SCROLLBAR | required missing | required missing |
 | P-BASE-SCROLL-AREA | P-SHADCN-SCROLL-AREA | P-BRUTALIST-SCROLL-AREA | required missing | required missing |
-| P-BASE-SCROLL-AREA-VIEWPORT | P-SHADCN-SCROLL-AREA-VIEWPORT | P-BRUTALIST-SCROLL-AREA-VIEWPORT | required missing | required missing |
+| P-BASE-SCROLL-AREA-SCROLLBAR | P-SHADCN-SCROLL-AREA-SCROLLBAR | P-BRUTALIST-SCROLL-AREA-SCROLLBAR | required missing | required missing |
 | P-BASE-SCROLL-AREA-THUMB | P-SHADCN-SCROLL-AREA-THUMB | P-BRUTALIST-SCROLL-AREA-THUMB | required missing | required missing |
-| P-BASE-SELECT-CONTENT | P-SHADCN-SELECT-CONTENT | P-BRUTALIST-SELECT-CONTENT | required missing | required missing |
+| P-BASE-SCROLL-AREA-VIEWPORT | P-SHADCN-SCROLL-AREA-VIEWPORT | P-BRUTALIST-SCROLL-AREA-VIEWPORT | required missing | required missing |
 | P-BASE-SELECT | P-SHADCN-SELECT | P-BRUTALIST-SELECT | required missing | required missing |
+| P-BASE-SELECT-CONTENT | P-SHADCN-SELECT-CONTENT | P-BRUTALIST-SELECT-CONTENT | required missing | required missing |
 | P-BASE-SELECT-ITEM | P-SHADCN-SELECT-ITEM | P-BRUTALIST-SELECT-ITEM | required missing | required missing |
-| P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | P-BRUTALIST-SELECT-VALUE | required missing | required missing |
 | P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | P-BRUTALIST-SELECT-TRIGGER | required missing | required missing |
-| P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | P-BRUTALIST-SEPARATOR | required missing | required missing |
+| P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | P-BRUTALIST-SELECT-VALUE | required missing | required missing |
+| P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | P-BRUTALIST-SEPARATOR | P-BOOTSTRAP-2-3-2-SEPARATOR | required missing |
 | P-BASE-SURFACE | P-SHADCN-SURFACE | P-BRUTALIST-SURFACE | P-BOOTSTRAP-2-3-2-SURFACE | P-LIQUID-GLASS-SURFACE |
-| P-BASE-SWITCH | P-SHADCN-SWITCH | P-BRUTALIST-SWITCH | required missing | required missing |
-| P-BASE-SWITCH-THUMB | P-SHADCN-SWITCH-THUMB | P-BRUTALIST-SWITCH-THUMB | required missing | required missing |
-| P-BASE-TABLE-CAPTION | required missing | required missing | required missing | required missing |
-| P-BASE-TABLE-HEADER-CELL | required missing | required missing | required missing | required missing |
-| P-BASE-TABLE-CELL | required missing | required missing | required missing | required missing |
-| P-BASE-TABLE-ROW | required missing | required missing | required missing | required missing |
+| P-BASE-SWITCH | P-SHADCN-SWITCH | P-BRUTALIST-SWITCH | P-BOOTSTRAP-2-3-2-SWITCH | required missing |
+| P-BASE-SWITCH-THUMB | P-SHADCN-SWITCH-THUMB | P-BRUTALIST-SWITCH-THUMB | P-BOOTSTRAP-2-3-2-SWITCH-THUMB | required missing |
 | P-BASE-TABLE | required missing | required missing | required missing | required missing |
+| P-BASE-TABLE-CAPTION | required missing | required missing | required missing | required missing |
+| P-BASE-TABLE-CELL | required missing | required missing | required missing | required missing |
+| P-BASE-TABLE-HEADER-CELL | required missing | required missing | required missing | required missing |
+| P-BASE-TABLE-ROW | required missing | required missing | required missing | required missing |
+| P-BASE-TABS | P-SHADCN-TABS | P-BRUTALIST-TABS | required missing | required missing |
 | P-BASE-TABS-CONTENT | P-SHADCN-TABS-CONTENT | P-BRUTALIST-TABS-CONTENT | required missing | required missing |
 | P-BASE-TABS-INDICATOR | required missing | required missing | required missing | required missing |
-| P-BASE-TABS | P-SHADCN-TABS | P-BRUTALIST-TABS | required missing | required missing |
 | P-BASE-TABS-LIST | P-SHADCN-TABS-LIST | P-BRUTALIST-TABS-LIST | required missing | required missing |
 | P-BASE-TABS-TRIGGER | P-SHADCN-TABS-TRIGGER | P-BRUTALIST-TABS-TRIGGER | required missing | required missing |
 | P-BASE-TEXT | P-SHADCN-TEXT | P-BRUTALIST-TEXT | required missing | required missing |
-| P-BASE-TEXTAREA | P-SHADCN-TEXTAREA | P-BRUTALIST-TEXTAREA | required missing | required missing |
-| P-BASE-TOGGLE | P-SHADCN-TOGGLE | P-BRUTALIST-TOGGLE | required missing | required missing |
+| P-BASE-TEXTAREA | P-SHADCN-TEXTAREA | P-BRUTALIST-TEXTAREA | P-BOOTSTRAP-2-3-2-TEXTAREA | required missing |
+| P-BASE-TOGGLE | P-SHADCN-TOGGLE | P-BRUTALIST-TOGGLE | P-BOOTSTRAP-2-3-2-TOGGLE | required missing |
+| P-BASE-TOOLTIP | P-SHADCN-TOOLTIP | P-BRUTALIST-TOOLTIP | required missing | required missing |
+| P-BASE-TOOLTIP-CONTENT | P-SHADCN-TOOLTIP-CONTENT | P-BRUTALIST-TOOLTIP-CONTENT | required missing | required missing |
 | P-BASE-TOOLTIP-GROUP | P-SHADCN-TOOLTIP-GROUP | P-BRUTALIST-TOOLTIP-GROUP | required missing | required missing |
 | P-BASE-TOOLTIP-TRIGGER | P-SHADCN-TOOLTIP-TRIGGER | P-BRUTALIST-TOOLTIP-TRIGGER | required missing | required missing |
-| P-BASE-TOOLTIP-CONTENT | P-SHADCN-TOOLTIP-CONTENT | P-BRUTALIST-TOOLTIP-CONTENT | required missing | required missing |
-| P-BASE-TOOLTIP | P-SHADCN-TOOLTIP | P-BRUTALIST-TOOLTIP | required missing | required missing |
 | P-BASE-TRANSITION | required missing | required missing | required missing | required missing |
 
 ## Integration discipline
@@ -262,7 +288,7 @@ Continue old PRs in place while they can be finished normally. For a carry, reta
 
 Overlay root cause is not yet reproduced. The scrollbar-coordinate regression must retain actual baseline, repaired real-input journeys and every dependent anchored/portaled composition; it cannot be checked from a guessed offset patch.
 
-CSS fallback, owned-scene WebGL realization and Apple-native mapping are separate. Preserve current #809 implementation and #855 failures; no unimplemented WebGPU/Vulkan/native target claimed.
+Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
 Bootstrap and Liquid Glass receive complete source/dist/type/package/consumer readiness in this task. Existing private flags are not a permanent exemption. Inspect release workflows before changing flags/exports; do not implicitly trigger registry publishing. Actual registry release or new credentials remain separately gated.
 

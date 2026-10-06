@@ -18116,3 +18116,40 @@ for (const defect of [
     );
   });
 }
+
+test('Finf demo raw imports remain bounded to reviewed association and Bootstrap fixture paths', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    ['apps/www/src/components/PrototypePreviewer/demo-associations.ts', '@proto.ui/core', false],
+    ['apps/www/src/components/PrototypePreviewer/demo-associations.ts', '@proto.ui/runtime', true],
+    [
+      'apps/www/src/pages/en/test/bootstrap-state-controls.astro',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      false,
+    ],
+    ['apps/www/src/pages/en/test/bootstrap-state-controls.astro', '@proto.ui/adapter-react', true],
+    ['apps/www/src/components/OrdinaryAssociationController.ts', '@proto.ui/core', true],
+  ];
+  for (const [sourcePath, specifier] of cases) {
+    const absolute = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(absolute), { recursive: true });
+    const previous = fs.existsSync(absolute) ? fs.readFileSync(absolute, 'utf8') : '';
+    const code = `import * as observed from '${specifier}'; console.log(observed);`;
+    fs.writeFileSync(
+      absolute,
+      previous + (sourcePath.endsWith('.astro') ? `\n<script>${code}</script>\n` : `\n${code}\n`)
+    );
+  }
+  const message = validationMessage(root);
+  for (const [sourcePath, specifier, rejected] of cases) {
+    assert.equal(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${sourcePath}\` escapes the website consumer-wall allowlist`
+      ),
+      rejected
+    );
+  }
+  // An import allowance does not classify or approve new surrounding UI owners.
+  assert.match(message, /OrdinaryAssociationController/);
+});

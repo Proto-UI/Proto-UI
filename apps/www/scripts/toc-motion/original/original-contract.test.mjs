@@ -204,7 +204,7 @@ if (runnerRoot) {
     const calls = [],
       failures = [];
     const route = {
-      request: () => ({ url: () => 'http://127.0.0.1:4396/' }),
+      request: () => ({ url: () => 'http://127.0.0.1:4396/', allHeaders: async () => ({}) }),
       fetch: async (options) => {
         calls.push(options);
         return {
