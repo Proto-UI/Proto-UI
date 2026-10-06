@@ -1,0 +1,122 @@
+{
+  "schemaVersion": 1,
+  "sourceSha": "fc5effc99779aca637acaa06789937cef1414cf1",
+  "comparison": "Actual initial/open state comparison at the same source, not a before/after implementation claim.",
+  "inputProvenance": "Playwright keyboard and pointer; focus setup may be programmatic. Observed isTrusted is not a human-input claim.",
+  "scope": "Public Shadcn and Brutalist WC family presentation only. No GPUI or Liquid Glass optical-rendering claim.",
+  "sourceDirty": false,
+  "githubRunUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37530646701",
+  "githubJobUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37530646701/job/112498865652",
+  "artifactId": 11444562949,
+  "artifactUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37530646701/artifacts/11444562949",
+  "artifactExpiresAt": "2026-11-05T21:13:32Z",
+  "outcome": {
+    "passed": 14,
+    "total": 36,
+    "failed": 22,
+    "shadcn": {
+      "passed": 9,
+      "failed": 0
+    },
+    "brutalist": {
+      "passed": 5,
+      "failed": 4,
+      "failure": "8 CSS px scroll overflow in 320px/200% cases"
+    },
+    "bootstrap_and_liquid_glass": {
+      "passed": 0,
+      "failed": 18,
+      "failure": "Initialization fails at missing family Select runtime toolbar"
+    }
+  },
+  "files": [
+    {
+      "name": "shadcn-wc-initial.png",
+      "sha256": "98800986e1e47db6ba098ebe10362e78ae91fdd20f691157179001699a6a5a32",
+      "bytes": 63249,
+      "imageSize": {
+        "width": 672,
+        "height": 679
+      },
+      "metadataFile": "shadcn-wc-initial.json",
+      "metadataSha256": "d050043cf62852abf9b9c7a4cc36d8cb3780089353b4127d19704e49a043a67c",
+      "sourceSha": "fc5effc99779aca637acaa06789937cef1414cf1",
+      "sourceDirty": false,
+      "family": "shadcn",
+      "runtime": "wc",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "rootFontSize": "16px",
+      "route": "/en/ui-libraries/shadcn/collapsible/"
+    },
+    {
+      "name": "shadcn-wc-open.png",
+      "sha256": "c122a9d6cdedf36bc7ba05099bc457140a7af3301e4b84a0735028f4692d74b6",
+      "bytes": 80217,
+      "imageSize": {
+        "width": 672,
+        "height": 793
+      },
+      "metadataFile": "shadcn-wc-open.json",
+      "metadataSha256": "5e03df28d648deea834e995c77fced46db776d92d81586598fa00b9e303c0dbd",
+      "sourceSha": "fc5effc99779aca637acaa06789937cef1414cf1",
+      "sourceDirty": false,
+      "family": "shadcn",
+      "runtime": "wc",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "rootFontSize": "16px",
+      "route": "/en/ui-libraries/shadcn/collapsible/"
+    },
+    {
+      "name": "brutalist-wc-initial.png",
+      "sha256": "4ed5cf975c2d9016cde82759988118000d4ee01736ed1668268ee354b89a5875",
+      "bytes": 61089,
+      "imageSize": {
+        "width": 672,
+        "height": 725
+      },
+      "metadataFile": "brutalist-wc-initial.json",
+      "metadataSha256": "18217ae1680e14e3adafe158f39b1df486886a1d79f65eda8a8be4a09e3b60ff",
+      "sourceSha": "fc5effc99779aca637acaa06789937cef1414cf1",
+      "sourceDirty": false,
+      "family": "brutalist",
+      "runtime": "wc",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "rootFontSize": "16px",
+      "route": "/en/ui-libraries/brutalist/components/collapsible/"
+    },
+    {
+      "name": "brutalist-wc-open.png",
+      "sha256": "f81152f632ca63e006e210d99f725775b7f8803b1c43126e5a40b2552c48191d",
+      "bytes": 76934,
+      "imageSize": {
+        "width": 672,
+        "height": 853
+      },
+      "metadataFile": "brutalist-wc-open.json",
+      "metadataSha256": "db867dd1cc79acbf6b33d1462fedb1cf38e62f5f7688c5472d436a79ae5534f6",
+      "sourceSha": "fc5effc99779aca637acaa06789937cef1414cf1",
+      "sourceDirty": false,
+      "family": "brutalist",
+      "runtime": "wc",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "theme": "light",
+      "rootFontSize": "16px",
+      "route": "/en/ui-libraries/brutalist/components/collapsible/"
+    }
+  ]
+}
