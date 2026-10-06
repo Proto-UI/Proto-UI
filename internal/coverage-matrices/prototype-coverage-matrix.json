@@ -18517,6 +18517,13 @@
         "run": 37509949749,
         "artifact": 11436701973,
         "result": "8 Dialog lock scenarios passed; 8 Select cases failed only the classicScrollbar>0 fixture precondition with width0. 40 captured Select collision-adjusted horizontal errors were0; nested actual scrollTop48. Actual rects/72 PNG hashes retained by geometry owner. No product coordinate defect or overall fix is certified."
+      },
+      "secondSourceBatch": {
+        "complete": false,
+        "sourceTree": "3fb66508f23fc143a933c5d118703e0dead4675d",
+        "scope": "Shared Dialog available-space geometry, retained classic-scrollbar diagnostic assertions, initial-focus replay, Label physical accessibility scope, Rust public Pixels conversion and actual formatter output, generated style closure.",
+        "verification": "101 geometry/Label/compiler +391 Focus/Gallery harness controls; workspace/contract types and all style/GPUI style fixtures pass. Native measurements and complete four-system/GPUI acceptance remain pending.",
+        "retainedFailures": "15d Bootstrap/projection/Liquid native jobs did not run browser cases because leading-normal was missing from the generated Draft family manifest; native Rust private-field errors are compiler failures, not successful Label journeys."
       }
     }
   },
@@ -26301,8 +26308,8 @@
   "candidateSource": {
     "kind": "candidate",
     "baseMain": "25c3d0731e39003d87f541afc5e1a294a9d95568",
-    "revision": "b47f5556f52de1684c6f20d73964cd7faa007a88",
-    "sourceBindingsObject": "b47f5556f52de1684c6f20d73964cd7faa007a88",
+    "revision": "41e1a2c18b647b6ba22fd7ff708da107b178ec84",
+    "sourceBindingsObject": "41e1a2c18b647b6ba22fd7ff708da107b178ec84",
     "sourceBindings": [
       {
         "path": "packages/prototypes/base/package.json",
@@ -26394,7 +26401,7 @@
       },
       {
         "path": "packages/prototypes/base/src/dialog/content.proto.ts",
-        "sha256": "b5c6ce798ebf89ee9fd83ec35361713ca03baaad81f1ea53076dca3c4f899833"
+        "sha256": "82b3ec87b339bf1f1f0ae148526e48bd775a2a2539ab2a979b63006561a50963"
       },
       {
         "path": "packages/prototypes/base/src/dialog/description.proto.ts",
@@ -27114,7 +27121,7 @@
       },
       {
         "path": "packages/prototypes/brutalist/src/dialog/content.proto.ts",
-        "sha256": "ee99c99926fdeddbd4bf4954fc8465358edfe49015c93e74156bd9bbba7f6ed2"
+        "sha256": "24ad086e73f4aa4f0d6077b650b4e305fa9b27ff6065d9f9b52365910c843349"
       },
       {
         "path": "packages/prototypes/brutalist/src/dialog/description.proto.ts",
@@ -27430,7 +27437,7 @@
       },
       {
         "path": "packages/prototypes/brutalist/test/dialog.test.ts",
-        "sha256": "4a47cd90cf47b545a9ad4725b90dad97c888c8ee51b957c8619c98432522d9d9"
+        "sha256": "7c512f72c936c5471fc421f2769a90adc8247fac0b4f7ccad6e8e4303b876605"
       },
       {
         "path": "packages/prototypes/brutalist/test/dropdown.test.ts",
@@ -41214,7 +41221,7 @@
       },
       {
         "path": "packages/prototypes/shadcn/src/dialog/content.proto.ts",
-        "sha256": "f391d13c7f444376f59be97677893ed5e45b57261a802d3a7432113430ae6e23"
+        "sha256": "5fa29b52681f4b56ba5fdf8ffd86ff765933f77bea7e0fc69516dbfffac3a23b"
       },
       {
         "path": "packages/prototypes/shadcn/src/dialog/description.proto.ts",
@@ -41530,7 +41537,7 @@
       },
       {
         "path": "packages/prototypes/shadcn/test/dialog.test.ts",
-        "sha256": "04db2a48fb431e4bd48c2398b4e72eb541a49947bd9526bd9aced6a654f1e0e9"
+        "sha256": "152afdc436dbae3797ca8855679d694c1ddbe6b1e0ec06f32404046a1f34842c"
       },
       {
         "path": "packages/prototypes/shadcn/test/dropdown.test.ts",
@@ -41614,7 +41621,7 @@
       },
       {
         "path": "spec/prototypes/P-BASE-DIALOG-CONTENT.yaml",
-        "sha256": "ebcfeb41af51af9680429529fa728dd1fd2ff991161a1b40b4584bee72d58ca1"
+        "sha256": "bb1d23de05b1ce73e9d7d8f18c87797f4ab2320c8893563f0742b959af62263c"
       },
       {
         "path": "spec/prototypes/P-BASE-DIALOG-DESCRIPTION.yaml",
@@ -41902,7 +41909,7 @@
       },
       {
         "path": "spec/prototypes/P-BRUTALIST-DIALOG-CONTENT.yaml",
-        "sha256": "56b8577676c6c6afdcf5acdf64760e85b744d9a0beb02cce5a18e867ae3ad3aa"
+        "sha256": "695d0e39baf399eb7e3a57619f77e065e52c0a37b477cb843c0621d59ef8c218"
       },
       {
         "path": "spec/prototypes/P-BRUTALIST-DIALOG-DESCRIPTION.yaml",
@@ -42106,7 +42113,7 @@
       },
       {
         "path": "spec/prototypes/P-SHADCN-DIALOG-CONTENT.yaml",
-        "sha256": "f82345487d6011c17c0586aa2925406431ea422004db98029a46a7aaf1be644f"
+        "sha256": "852136b55c50f2639ce319385323e4e4fb13a2a44ddd75006034cef60264ef38"
       },
       {
         "path": "spec/prototypes/P-SHADCN-DIALOG-DESCRIPTION.yaml",
