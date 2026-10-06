@@ -47,6 +47,18 @@ function fixture() {
 }
 
 describe('Feedback catalog boundary', () => {
+  it('T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-MERGE: patches and restores one selection-affordance group', () => {
+    const f = fixture();
+    f.style.use(tw('select-none selection:bg-primary'));
+    f.mount();
+    f.style.patch(tw('select-text'));
+    expect(f.style.exportMerged().tokens).toEqual(['selection:bg-primary', 'select-text']);
+    f.style.suppress(tw('select-auto'));
+    expect(f.style.exportMerged().tokens).toEqual(['selection:bg-primary']);
+    f.style.clearPatch();
+    expect(f.style.exportMerged().tokens).toEqual(['select-none', 'selection:bg-primary']);
+  });
+
   it('T-FEEDBACK-0001-CASE-SURFACE: separates author token authority and setup contribution removal', () => {
     const f = fixture();
     expect(FeedbackModuleDef.resourceOwnership).toBe('mixed');

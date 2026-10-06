@@ -21,6 +21,29 @@ describe('proto style css renderer', () => {
     );
     expect(css).toContain('max-height: calc(var(--proto-ui-available-region-height,100%) - 2rem);');
   });
+  it.each(['auto', 'text', 'none'])(
+    'diagnoses selection:select-%s instead of emitting inert highlight CSS',
+    (value) => {
+      const token = `selection:select-${value}`;
+      const css = renderProtoStyleTokenCss([token, `dark:${token}`]);
+      expect(css).toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain(`* - ${token}`);
+      expect(css).toContain(`* - dark:${token}`);
+      expect(css).not.toContain('::selection');
+      expect(css).not.toContain('user-select:');
+    }
+  );
+  it('closes explicit content-selection affordances only on their authored subjects', () => {
+    // T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-CSS
+    const css = renderProtoStyleTokenCss(['select-auto', 'select-text', 'select-none']);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    for (const value of ['auto', 'text', 'none']) {
+      expect(css).toContain(`:where([data-pui-style~="select-${value}"])`);
+      expect(css).toContain(`-webkit-user-select: ${value};`);
+      expect(css).toContain(`user-select: ${value};`);
+    }
+    expect(css).not.toMatch(/(?:html|body|\*)\s*\{[^}]*user-select/s);
+  });
 
   it('lowers both Scroll Area track inset dimensions to valid spaced CSS math', () => {
     const css = renderProtoStyleTokenCss([

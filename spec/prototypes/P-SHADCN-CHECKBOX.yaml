@@ -46,10 +46,13 @@ criteria:
       contracts: [C-CORE-SYNTAX-0003]
   - id: P-SHADCN-CHECKBOX-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: Root 必须投射当前已实现的方框：`size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none`。`rounded-[4px]` 与 `size-3.5` 依赖 style compiler 中两个精确闭包，不得以主题派生的 `rounded-sm`（6px）或 `size-3`（12px）近似替代——16px 方框上这两处都是可见差异。这些 tokens 是当前 passing surface，不表示与 upstream 精确一致。
-      en: Root must project the currently implemented box, `size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none`. `rounded-[4px]` and `size-3.5` rely on two exact style-compiler closures and must not be approximated by the theme-derived `rounded-sm` (6px) or by `size-3` (12px); on a 16px box both are visible differences. These tokens form the current passing surface and do not imply exact upstream parity.
+      zh-CN: Root 必须投射当前已实现的方框：`size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none select-none`。`rounded-[4px]` 与 `size-3.5` 依赖 style compiler 中两个精确闭包，不得以主题派生的 `rounded-sm`（6px）或 `size-3`（12px）近似替代——16px 方框上这两处都是可见差异。这些 tokens 是当前 passing surface，不表示与 shadcn/ui 对照项目精确一致；Proto UI 仍是独立项目。
+      en: Root must project the currently implemented box, `size-4 shrink-0 rounded-[4px] border border-input bg-transparent shadow-xs outline-none select-none`. `rounded-[4px]` and `size-3.5` rely on two exact style-compiler closures and must not be approximated by the theme-derived `rounded-sm` (6px) or by `size-3` (12px); on a 16px box both are visible differences. These tokens form the current passing surface and do not imply exact parity with the shadcn/ui comparison project; Proto UI remains independent.
     dependsOn:
-      contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
+      contracts:
+        - C-RULE-INTENT-FEEDBACK-STYLE-0001
+        - id: C-CONTENT-SELECTION-AFFORDANCE-0001
+          since: 0.3.0-alpha.1
       decisions: [D-WEB-STYLE-BASELINE-0001]
   - id: P-SHADCN-CHECKBOX-STATE-DRIVEN-STYLES
     text:
@@ -138,6 +141,9 @@ inherits:
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-CHECKBOX-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Declared content-selection suppression on the control root while retaining the independent Label association boundary.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Separated the pinned historical compatibility baseline from later official recipe evidence, pinned the exact compared revision, and settled the Indicator centering mechanism as an intentional adoption.

@@ -238,7 +238,7 @@ export function createHomepageGalleryParts(
             : 'Open dialog'
           : button(zh ? '打开对话框' : 'Open dialog'),
       ]),
-      p(part('dialog', 'mask')),
+      p(part('dialog', 'mask'), [], {}, 'gallery-dialog-mask'),
       p(part('dialog', 'content'), [
         p(part('dialog', 'header'), [
           p(part('dialog', 'title'), [zh ? '确认这次选择？' : 'Confirm this choice?']),

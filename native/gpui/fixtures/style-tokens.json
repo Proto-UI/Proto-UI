@@ -710,6 +710,7 @@
       "transform": "translate(var(--pui-translate-x, 0), var(--pui-translate-y, 0)) scale(var(--pui-scale-x, 1), var(--pui-scale-y, 1))"
     },
     "select-none": {
+      "-webkit-user-select": "none",
       "user-select": "none"
     },
     "shadow-[4px_4px_0_0_#000]": {

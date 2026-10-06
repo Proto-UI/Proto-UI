@@ -6,7 +6,7 @@ This directory explains Feedback and preserves legacy detail. The applicable ent
 
 - [C-FEEDBACK-0001](../../../spec/contracts/C-FEEDBACK-0001.yaml) defines the Component-to-User information channel.
 - [C-FEEDBACK-0002](../../../spec/contracts/C-FEEDBACK-0002.yaml) separates setup planning from runtime effects.
-- [C-FEEDBACK-STYLE-0001](../../../spec/contracts/C-FEEDBACK-STYLE-0001.yaml) bounds visual style feedback and prohibits structural rendering as its update mechanism.
+- [C-FEEDBACK-STYLE-0001](../../../spec/contracts/C-FEEDBACK-STYLE-0001.yaml) bounds visual style feedback, explicitly admits only the subject-local content-selection affordance exception in [C-CONTENT-SELECTION-AFFORDANCE-0001](../../../spec/contracts/C-CONTENT-SELECTION-AFFORDANCE-0001.yaml), and prohibits structural rendering as its update mechanism.
 - [C-FEEDBACK-STYLE-0002](../../../spec/contracts/C-FEEDBACK-STYLE-0002.yaml) governs setup-only `use` and `unUse`.
 - [C-FEEDBACK-STYLE-0003](../../../spec/contracts/C-FEEDBACK-STYLE-0003.yaml) and [C-FEEDBACK-STYLE-0004](../../../spec/contracts/C-FEEDBACK-STYLE-0004.yaml) govern token semantics and the boundary between author intent and host translation artifacts.
 - [C-FEEDBACK-STYLE-0005](../../../spec/contracts/C-FEEDBACK-STYLE-0005.yaml) governs runtime `patch`, `suppress`, and `clearPatch`.

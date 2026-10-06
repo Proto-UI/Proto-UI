@@ -60,6 +60,15 @@ describe('core: feedback.style v0 contract', () => {
     expect(() => r.use(tw('&:hover'))).toThrow();
   });
 
+  it.each(['auto', 'text', 'none'])(
+    'rejects selection:select-%s as a highlight affordance',
+    (value) => {
+      const recorder = new FeedbackStyleRecorder();
+      expect(() => recorder.use(tw(`selection:select-${value}`))).toThrow(/subject/);
+      expect(recorder.export().tokens).toEqual([]);
+    }
+  );
+
   it('accepts arbitrary values and decimal-like tokens when no variant syntax is present', () => {
     const r = new FeedbackStyleRecorder();
 

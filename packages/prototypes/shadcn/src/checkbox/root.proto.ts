@@ -11,6 +11,7 @@ const ROOT_BASE_TOKENS = [
   'bg-transparent',
   'shadow-xs',
   'outline-none',
+  'select-none',
 ].join(' ');
 
 const checkboxRoot = definePrototype<ShadcnCheckboxRootProps, ShadcnCheckboxRootExposes>({
