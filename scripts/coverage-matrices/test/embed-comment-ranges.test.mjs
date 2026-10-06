@@ -37,3 +37,21 @@ for (const extension of ['html', 'astro']) {
     assert.equal(mask(input, `surface.${extension}`), input);
   });
 }
+
+for (const extension of ['html', 'astro']) {
+  for (const text of ['ASCII', 'é', '中', '😀', 'é中😀\r\n'])
+    test(`script exact span: ${extension} ${JSON.stringify(text)}`, () => {
+      const prefix = '😀';
+      const script = `<script>const sample=${JSON.stringify(text)};</script>`;
+      const suffix = '<iframe src="/real"></iframe>';
+      assert.equal(
+        mask(prefix + script + suffix, `surface.${extension}`, { includeScripts: true }),
+        prefix + script.replace(/[^\r\n]/g, ' ') + suffix
+      );
+    });
+  test(`script exact span: ${extension} quoted markers retain active suffix`, () => {
+    const input =
+      '<div title="<script>"></div><iframe src="/real"></iframe><div title="</script>"></div>';
+    assert.equal(mask(input, `surface.${extension}`, { includeScripts: true }), input);
+  });
+}
