@@ -5,7 +5,10 @@ on:
     paths:
       - 'packages/modules/scroll/**'
       - 'packages/prototypes/*/src/scroll-area/**'
+      - 'apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.demo.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-brutalist-scroll-area.demo.ts'
       - 'apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/scroll-area-corner-color*.ts'
       - '.github/workflows/scroll-area-corner-evidence.yml'
   workflow_dispatch:
 
@@ -39,8 +42,10 @@ jobs:
           echo "PROTO_UI_SCROLL_CORNER_HARNESS_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
           if [[ "$SUBJECT" == baseline ]]; then
             cp apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts /tmp/scroll-area-corner.browser.test.ts
+            cp apps/www/src/content/docs/zh-cn/scroll-area-corner-color.ts /tmp/scroll-area-corner-color.ts
             git checkout --detach "$BASE_SHA"
             cp /tmp/scroll-area-corner.browser.test.ts apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts
+            cp /tmp/scroll-area-corner-color.ts apps/www/src/content/docs/zh-cn/scroll-area-corner-color.ts
             echo 'PROTO_UI_SCROLL_CORNER_CAPTURE_ONLY=1' >> "$GITHUB_ENV"
           fi
           git rev-parse HEAD

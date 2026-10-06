@@ -214,7 +214,14 @@ describe('prototypes/shadcn: scroll-area', () => {
       expect(styleContains(horizontal, projected), projected).toBe(true);
     }
     for (const thumb of [verticalThumb, horizontalThumb]) {
-      for (const token of ['relative', 'flex-1', 'rounded-full', 'bg-border']) {
+      for (const token of [
+        'relative',
+        'flex-1',
+        'rounded-full',
+        'bg-border',
+        'border',
+        'border-transparent',
+      ]) {
         expect(styleContains(thumb, token), `thumb/${token}`).toBe(true);
       }
       expect(thumb.getAttribute('role')).toBeNull();

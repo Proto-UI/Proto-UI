@@ -33,8 +33,8 @@ criteria:
 
   - id: P-SHADCN-SCROLL-AREA-SCROLLBAR-CORNER
     text:
-      en: In the Web composed projection, each track reserves the measured outer thickness of the other bound rendered track at its long-axis end. The lower-right intersection contains neither track nor Thumb; no separate Corner control or Base identity is created. A missing or display-hidden opposite track reserves zero. Tracks with no overflow keep their existing authored surface while their Thumb is hidden. The CSS inset is host-local and does not extend portable facts or RTL normalization. The horizontal styled Scrollbar owns one private pointer-inert Template surface that fills the reserved intersection with the subdued muted surface and border palette. A zero-width reservation clips all paint and borders. The surface is not a public part, focus target, control, or portable geometry fact.
-      zh-CN: Web composed projection 中，每条 track 在长轴末端避让另一条已绑定且渲染的 track 的实测外厚度。右下交点不包含 track 或 Thumb，不创建独立 Corner control 或 Base identity。另一条 track 缺失或 display 隐藏时避让为零；无 overflow 时保留既有 authored track surface，仅隐藏 Thumb。CSS inset 属于 host-local geometry，不扩展 portable facts 或 RTL normalization。horizontal styled Scrollbar 拥有一个私有、pointer-inert 的 Template surface 填充预留交点，使用 subdued muted surface 与 border 色板。避让宽度为零时裁剪全部填充和边框；该 surface 不是公共 part、focus target、control 或 portable geometry fact。
+      en: In the Web composed projection, each track reserves the measured outer thickness of the other bound rendered track at its long-axis end. The lower-right intersection contains neither track nor Thumb; no separate Corner control or Base identity is created. A missing or display-hidden opposite track reserves zero. Tracks with no overflow keep their existing authored surface while their Thumb is hidden. The CSS inset is host-local and does not extend portable facts or RTL normalization. The reserved intersection must remain visually continuous with the underlying Root surface, without a separate filled tile, divider borders, or authored Corner element. Transparent track borders and rounded Thumbs remain unchanged; no corner paint or hit target is introduced.
+      zh-CN: Web composed projection 中，每条 track 在长轴末端避让另一条已绑定且渲染的 track 的实测外厚度。右下交点不包含 track 或 Thumb，不创建独立 Corner control 或 Base identity。另一条 track 缺失或 display 隐藏时避让为零；无 overflow 时保留既有 authored track surface，仅隐藏 Thumb。CSS inset 属于 host-local geometry，不扩展 portable facts 或 RTL normalization。预留交点必须与底层 Root surface 自然连续，不绘制独立实心方块、分隔边框或 authored Corner element。透明 track border 与圆头 Thumb 保持不变，不引入 corner paint 或 hit target。
 sources:
   - path: packages/prototypes/shadcn/src/scroll-area/scrollbar.proto.ts
   - path: packages/prototypes/shadcn/test/scroll-area.test.ts
@@ -49,6 +49,9 @@ relates:
 verifies:
   tests: [T-SHADCN-SCROLL-AREA-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Removed the rejected Shadcn corner tile and divider edges while preserving measured track separation, transparent tracks, and Base ownership.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added the accepted private horizontal passive corner fill, with zero-reservation clipping and unchanged Base/control ownership.

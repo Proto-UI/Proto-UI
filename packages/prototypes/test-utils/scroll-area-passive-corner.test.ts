@@ -11,12 +11,6 @@ const families = [
     fill: 'bg-lavender',
     height: 'h-[calc(100%_+_2px)]',
   },
-  {
-    name: 'shadcn',
-    prototype: ShadcnScrollAreaScrollbar,
-    fill: 'bg-muted',
-    height: 'h-[calc(100%_+_4px)]',
-  },
 ];
 const settle = async () => {
   for (let step = 0; step < 4; step++) await Promise.resolve();
@@ -77,4 +71,26 @@ describe('styled Scrollbar private passive corner', () => {
       expect(caller.isConnected).toBe(false);
     }
   );
+});
+
+describe('Shadcn Scrollbar continuous corner', () => {
+  it('does not paint a corner tile or replace caller slots across orientation changes', async () => {
+    const Element = AdaptToWebComponent(ShadcnScrollAreaScrollbar);
+    const track = new Element();
+    const caller = document.createElement('span');
+    caller.className = 'caller-owned';
+    track.append(caller);
+    document.body.append(track);
+    for (const orientation of ['vertical', 'horizontal', 'vertical', 'horizontal'] as const) {
+      setElementProps(track, { orientation });
+      await settle();
+      expect([...track.children]).toEqual([caller]);
+      expect(caller.className).toBe('caller-owned');
+      expect(track.querySelector('[data-pui-style~="bg-muted"]')).toBeNull();
+      expect(track.querySelector('[role], [tabindex]')).toBeNull();
+    }
+    track.remove();
+    await settle();
+    expect(caller.isConnected).toBe(false);
+  });
 });

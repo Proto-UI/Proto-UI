@@ -19,8 +19,8 @@ criteria:
       zh-CN: Thumb direct entry 为 shadcn-scroll-area-thumb，且本层不提供 authored asHook。
   - id: P-SHADCN-SCROLL-AREA-THUMB-CURRENT-VISUAL-SURFACE
     text:
-      en: Thumb must project relative flex-1 rounded-full bg-border while host facts determine its size and offset.
-      zh-CN: Thumb 必须投射 relative flex-1 rounded-full bg-border，而 size 与 offset 由 host facts 决定。
+      en: Thumb must project relative flex-1 rounded-full bg-border border border-transparent while host facts determine its border-box size and offset. The transparent border preserves ordinary fill and lets a forced-color host draw an indicator outline without opting out of the user palette.
+      zh-CN: Thumb 必须投射 relative flex-1 rounded-full bg-border border border-transparent，而 border-box size 与 offset 由 host facts 决定。透明边框保留普通 fill，并允许 forced-color host 绘制可见 indicator 轮廓，不退出用户色板。
   - id: P-SHADCN-SCROLL-AREA-THUMB-PASSIVE-BOUNDARY
     text:
       en: Thumb must remain roleless and outside sequential focus; movement requests must retain Base pointer guards and teardown.
@@ -39,6 +39,9 @@ relates:
 verifies:
   tests: [T-SHADCN-SCROLL-AREA-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added a transparent one-pixel Thumb border to retain visible position feedback under forced colors without changing host geometry or opting out of the user palette.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the passive rounded shadcn Scroll Area Thumb surface.
