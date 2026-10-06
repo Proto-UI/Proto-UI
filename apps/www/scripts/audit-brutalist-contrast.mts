@@ -692,7 +692,11 @@ function primary(previewer: Locator, family: string): Locator | null {
       tooltip: '[data-projection-prototype="brutalist-tooltip-trigger"][data-pui-root]',
     } as Record<string, string>
   )[family];
-  return selector ? previewer.locator(`[data-projection-content] ${selector}`).first() : null;
+  if (!selector) return null;
+  const targets = previewer.locator(`[data-projection-content] ${selector}`);
+  // Native editor identity is singular; keep Playwright strictness instead of
+  // choosing one live editor when a wrapper projection accidentally duplicates it.
+  return family === 'textarea' ? targets : targets.first();
 }
 async function passiveSurfaceObservation(
   page: Page,

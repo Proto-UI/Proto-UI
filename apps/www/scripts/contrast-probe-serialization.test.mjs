@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
+import { Window } from 'happy-dom';
 import { transform } from 'esbuild';
 
 // Execute the real source-reader loop and emitted exterior expression with
@@ -280,9 +281,16 @@ const targetObservationFixture = async () => {
     borderBottomRightRadius: '0px',
     borderBottomLeftRadius: '0px',
     boxShadow: 'none',
+    fontSize: '16px',
+    borderImageSource: 'none',
   };
+  style.getPropertyValue = (property) =>
+    style[property.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] ?? '';
   const bounds = { x: 10, y: 10, left: 10, top: 10, right: 50, bottom: 40, width: 40, height: 30 };
   const element = {
+    nodeType: 1,
+    namespaceURI: 'http://www.w3.org/1999/xhtml',
+    childNodes: [],
     parentElement: null,
     assignedSlot: null,
     textContent: 'Native-state fixture',
@@ -291,7 +299,7 @@ const targetObservationFixture = async () => {
     getClientRects: () => [bounds],
     getBoundingClientRect: () => bounds,
     getAttribute: () => null,
-    matches: () => true,
+    matches: (selector) => selector.startsWith(':'),
   };
   const ancestor = {
     ...element,
@@ -303,16 +311,34 @@ const targetObservationFixture = async () => {
   };
   const ancestorStyle = { ...style };
   element.parentElement = ancestor;
+  const textNode = {
+    nodeType: 3,
+    textContent: element.textContent,
+    parentElement: element,
+    childNodes: [],
+  };
+  element.childNodes = [textNode];
+  ancestor.childNodes = [element];
+  const styleByElement = new Map();
   const sandbox = {
     document: {
       activeElement: element,
       createElement: () => ({ getContext: () => ({ fillStyle: '' }) }),
+      createRange: () => ({ selectNodeContents: () => {}, getClientRects: () => [bounds] }),
     },
     CSS: { supports: () => true },
     innerWidth: 800,
     innerHeight: 600,
     ShadowRoot: class {},
-    getComputedStyle: (current) => (current === element ? style : ancestorStyle),
+    Element: class {
+      static [Symbol.hasInstance](node) {
+        return node?.nodeType === 1;
+      }
+    },
+    HTMLSlotElement: class {},
+    Node: { TEXT_NODE: 3 },
+    getComputedStyle: (current) =>
+      styleByElement.get(current) ?? (current === element ? style : ancestorStyle),
   };
   vm.runInNewContext(compiled.code, sandbox);
   const observe = () => sandbox.puiContrastProbe.readContrastTargetObservation(element);
@@ -322,7 +348,18 @@ const targetObservationFixture = async () => {
       { fill: '#5294ff', foreground: '#000' },
       held
     );
-  return { style, ancestorStyle, element, ancestor, sandbox, observe, observePair };
+  return {
+    style,
+    ancestorStyle,
+    element,
+    ancestor,
+    sandbox,
+    observe,
+    observePair,
+    textNode,
+    styleByElement,
+    bounds,
+  };
 };
 
 for (const overflow of ['hidden', 'clip', 'auto', 'scroll']) {
@@ -694,6 +731,13 @@ for (const family of ['badge', 'card', 'skeleton', 'separator', 'spinner']) {
     element.dataset.projectionOwner = 'owner';
     ancestorStyle.overflowX = ancestorStyle.overflowY = 'visible';
     assert.equal(observe().achieved, true);
+    const retainedStyle = { ...style };
+    eraseTargetPaint({ style });
+    const unpainted = observe();
+    assert.equal(unpainted.achieved, false);
+    assert.ok(unpainted.surfaces[0].visibilityLimits.includes('no-supported-nontransparent-paint'));
+    Object.assign(style, retainedStyle);
+    assert.equal(observe().achieved, true);
   });
 }
 
@@ -798,4 +842,417 @@ for (const placement of ['target', 'ancestor']) {
       assert.deepEqual(observe(), { rgba: [255, 255, 255, 255], limits: [] });
     });
   }
+}
+
+// Run the complete exported fingerprint against a controlled DOM/CSSOM. These
+// tests establish serialization/identity behavior, not browser paint coverage.
+const stateIdentityFixture = async ({ shadow = false, native = false } = {}) => {
+  const window = new Window();
+  window.visualViewport = null;
+  const source = await readFile(new URL('./contrast-probe.browser.ts', import.meta.url), 'utf8');
+  const compiled = await transform(source, {
+    loader: 'ts',
+    format: 'iife',
+    globalName: 'puiContrastProbe',
+  });
+  window.document.body.innerHTML = `<section data-projection-scope="fixture" data-projection-owner="fixture" data-projection-generation="1"><${native ? 'textarea' : 'div'} data-pui-root data-projection-owner="fixture" data-projection-generation="1" data-projection-prototype="brutalist-textarea-root"></${native ? 'textarea' : 'div'}></section>`;
+  const host = window.document.querySelector('[data-pui-root]');
+  const container = shadow ? host.attachShadow({ mode: 'open' }) : host;
+  const editor = native ? host : window.document.createElement('textarea');
+  if (!native) container.append(editor);
+  editor.value = 'Current editor';
+  window.eval(compiled.code);
+  return {
+    window,
+    host,
+    container,
+    editor,
+    read: () => window.puiContrastProbe.readContrastState(),
+    close: () => window.happyDOM.abort(),
+  };
+};
+
+for (const property of [
+  'text-decoration-line',
+  'text-decoration-color',
+  'text-decoration-thickness',
+  'text-decoration-style',
+  'text-underline-offset',
+  'text-decoration-skip-ink',
+  'stroke-dasharray',
+]) {
+  test(`fingerprint rejects CSSOM-only ${property} drift without attribute or geometry changes`, async () => {
+    const f = await stateIdentityFixture();
+    try {
+      let value = 'initial-controlled-value';
+      const original = f.window.getComputedStyle.bind(f.window);
+      f.window.getComputedStyle = (node, pseudo) => {
+        const computed = original(node, pseudo);
+        return new Proxy(computed, {
+          get(target, name) {
+            if (name === 'getPropertyValue')
+              return (key) =>
+                node === f.editor && key === property ? value : target.getPropertyValue(key);
+            const item = Reflect.get(target, name, target);
+            return typeof item === 'function' ? item.bind(target) : item;
+          },
+        });
+      };
+      const attributes = f.editor.outerHTML;
+      const before = f.read();
+      assert.equal(f.read(), before);
+      value = 'changed-controlled-value';
+      assert.equal(f.editor.outerHTML, attributes);
+      assert.notEqual(f.read(), before);
+    } finally {
+      await f.close();
+    }
+  });
+}
+
+for (const profile of [{ native: true }, {}, { shadow: true }]) {
+  test(`native editor identity accepts one physical editor ${JSON.stringify(profile)}`, async () => {
+    const f = await stateIdentityFixture(profile);
+    try {
+      const state = JSON.parse(f.read());
+      assert.equal(state.surfaces.length, 1);
+      assert.equal(state.surfaces[0].target[0].tag, 'TEXTAREA');
+      assert.equal(state.surfaces[0].target[0].value, 'Current editor');
+      assert.equal(f.read(), JSON.stringify(state));
+    } finally {
+      await f.close();
+    }
+  });
+}
+
+for (const shadow of [false, true]) {
+  for (const defect of ['missing', 'duplicate', 'foreign-owner', 'stale-generation']) {
+    test(`native editor identity rejects ${defect} in ${shadow ? 'shadow' : 'light'} wrapper`, async () => {
+      const f = await stateIdentityFixture({ shadow });
+      try {
+        if (defect === 'missing') f.editor.remove();
+        else if (defect === 'duplicate') f.container.append(f.editor.cloneNode(true));
+        else
+          f.editor.setAttribute(
+            defect === 'foreign-owner' ? 'data-projection-owner' : 'data-projection-generation',
+            'foreign'
+          );
+        assert.throws(f.read, /native editor|native Textarea/i);
+      } finally {
+        await f.close();
+      }
+    });
+  }
+}
+
+test('Textarea runner retains locator strictness instead of first-match selection', async () => {
+  const source = await readFile(new URL('./audit-brutalist-contrast.mts', import.meta.url), 'utf8');
+  const start = source.indexOf('function primary(');
+  const end = source.indexOf('async function passiveSurfaceObservation', start);
+  assert.ok(start >= 0 && end > start);
+  const compiled = await transform(
+    source.slice(start, end) + '\n globalThis.selectPrimary = primary;',
+    { loader: 'ts' }
+  );
+  const sandbox = {};
+  vm.runInNewContext(compiled.code, sandbox);
+  const first = {};
+  const strict = { first: () => first };
+  const previewer = { locator: () => strict };
+  assert.equal(sandbox.selectPrimary(previewer, 'textarea'), strict);
+  assert.equal(sandbox.selectPrimary(previewer, 'button'), first);
+});
+
+const glyphAreaFixture = async () => {
+  const source = await readFile(new URL('./contrast-probe.browser.ts', import.meta.url), 'utf8');
+  const helperStart = source.indexOf('const supportedSvgFillArea =');
+  const helperEnd = source.indexOf('\n\nconst ', helperStart + 1);
+  const helper = helperStart < 0 ? '' : source.slice(helperStart, helperEnd);
+  const start = source.indexOf('const glyphs = nodes');
+  const end = source.indexOf('const nativeText =', start);
+  assert.ok(start >= 0 && end > start);
+  const compiled = await transform(
+    `globalThis.readGlyphArea = () => { ${helper}\n${source.slice(start, end)} return glyphs; };`,
+    { loader: 'ts' }
+  );
+  class Shape {
+    constructor(tag, path, bounds) {
+      this.tagName = tag;
+      this.namespaceURI = 'http://www.w3.org/2000/svg';
+      this.path = path;
+      this.bounds = bounds;
+    }
+    matches(selector) {
+      return selector.split(',').includes(this.tagName);
+    }
+    closest() {
+      return null;
+    }
+    getBBox() {
+      return this.bounds;
+    }
+    getBoundingClientRect() {
+      return { ...this.bounds, x: 1, y: 1 };
+    }
+  }
+  return ({ tag = 'path', path = 'M2 2L22 22', bounds = { width: 20, height: 20 } } = {}) => {
+    const shape = new Shape(tag, path, bounds);
+    const sandbox = {
+      nodes: [shape],
+      Element: Shape,
+      inactive: false,
+      getComputedStyle: () => ({
+        fill: 'rgb(0, 0, 0)',
+        stroke: 'rgb(0, 0, 0)',
+        color: 'rgb(0, 0, 0)',
+        fillOpacity: '1',
+        strokeOpacity: '1',
+        strokeWidth: '2px',
+        getPropertyValue: (property) => (property === 'd' ? `path("${path}")` : ''),
+      }),
+      background: () => ({ rgba: [255, 255, 255, 255], limits: [] }),
+      paintedVisibility: () => ({ limits: [] }),
+      paint: () => ({ rgba: [0, 0, 0, 255], alpha: 1, limits: [] }),
+      contrast: () => 21,
+    };
+    vm.runInNewContext(compiled.code, sandbox);
+    return sandbox.readGlyphArea()[0];
+  };
+};
+
+for (const [name, input] of [
+  ['line with diagonal bounds', { tag: 'line' }],
+  ['one-segment path', {}],
+  ['closed collinear path', { path: 'M2 2L12 12L22 22Z' }],
+  ['zero-width rect', { tag: 'rect', bounds: { width: 0, height: 20 } }],
+  ['relative path outside the bounded profile', { path: 'm2 2l22 2l22 22z' }],
+  [
+    'multiple-subpath fill outside the bounded profile',
+    { path: 'M2 2L22 2L22 22Z M2 2L22 2L22 22Z' },
+  ],
+]) {
+  test(`SVG numeric reader withholds ${name} fill without losing independent stroke`, async () => {
+    const read = await glyphAreaFixture();
+    const glyph = read(input);
+    assert.equal(glyph.fillContrast, null);
+    assert.ok(glyph.fillLimits.includes('unsupported-svg-fill-geometry'));
+    assert.equal(glyph.strokeContrast, 21);
+    assert.deepEqual(Array.from(glyph.strokeLimits), []);
+  });
+}
+for (const [name, input] of [
+  ['rect', { tag: 'rect' }],
+  ['circle', { tag: 'circle' }],
+  ['ellipse', { tag: 'ellipse' }],
+  ['closed absolute triangle', { path: 'M2 2L22 2L22 22Z' }],
+  ['implicitly closed absolute triangle', { path: 'M2,2 L22,2 L22,22' }],
+]) {
+  test(`SVG numeric reader retains positive-area ${name}`, async () => {
+    const read = await glyphAreaFixture();
+    const glyph = read(input);
+    assert.equal(glyph.fillContrast, 21);
+    assert.equal(glyph.strokeContrast, 21);
+    assert.deepEqual(Array.from(glyph.fillLimits), []);
+  });
+}
+
+const eraseTargetPaint = (fixture) => {
+  Object.assign(fixture.style, {
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    color: 'rgba(0, 0, 0, 0)',
+    webkitTextFillColor: 'rgba(0, 0, 0, 0)',
+    boxShadow: 'none',
+    outlineStyle: 'none',
+    borderTopStyle: 'none',
+    borderRightStyle: 'none',
+    borderBottomStyle: 'none',
+    borderLeftStyle: 'none',
+  });
+};
+
+for (const [name, modify] of [
+  ['fully transparent control', () => {}],
+  [
+    'empty box with an opaque inherited text color',
+    (f) => {
+      f.textNode.textContent = '';
+      f.style.webkitTextFillColor = f.style.color = '#000';
+    },
+  ],
+  [
+    'whitespace-only box',
+    (f) => {
+      f.textNode.textContent = '   ';
+      f.style.webkitTextFillColor = f.style.color = '#000';
+    },
+  ],
+  [
+    'zero-size text ink',
+    (f) => {
+      f.style.fontSize = '0px';
+      f.style.webkitTextFillColor = f.style.color = '#000';
+    },
+  ],
+  [
+    'transparent effective text fill despite opaque color',
+    (f) => {
+      f.style.color = '#000';
+    },
+  ],
+  [
+    'ancestor fill without target paint',
+    (f) => {
+      f.textNode.textContent = '';
+      f.ancestorStyle.backgroundColor = '#fff';
+    },
+  ],
+  [
+    'border-image overriding the claimed border ink',
+    (f) => {
+      Object.assign(f.style, {
+        borderTopStyle: 'solid',
+        borderTopColor: '#000',
+        borderTopWidth: '4px',
+        borderImageSource: 'url(transparent.png)',
+      });
+    },
+  ],
+  [
+    'unverified standalone shadow or outline',
+    (f) => {
+      Object.assign(f.style, {
+        boxShadow: 'black 4px 4px 0px',
+        outlineStyle: 'solid',
+        outlineWidth: '2px',
+        outlineColor: '#000',
+      });
+    },
+  ],
+  [
+    'native fallback DOM text',
+    (f) => {
+      f.style.webkitTextFillColor = f.style.color = '#000';
+      f.element.matches = (selector) =>
+        selector.startsWith(':') || selector.split(',').includes('textarea');
+    },
+  ],
+  [
+    'fully transparent non-sRGB background',
+    (f) => {
+      f.style.backgroundColor = 'oklch(0.7 0.1 40 / 0)';
+    },
+  ],
+]) {
+  test(`shared target predicate withholds ${name} rather than geometry-only achievement`, async () => {
+    const f = await targetObservationFixture();
+    eraseTargetPaint(f);
+    modify(f);
+    const observed = f.observe();
+    assert.equal(observed.achieved, false);
+    assert.equal(observed.visibility.visible, true);
+    assert.equal(observed.visibility.classification, 'unsupported');
+    assert.ok(observed.visibility.limits.includes('no-supported-nontransparent-paint'));
+    assert.equal(observed.focused, true);
+    assert.equal(observed.hovered, true);
+  });
+}
+
+for (const [name, modify] of [
+  [
+    'own opaque fill',
+    (f) => {
+      f.style.backgroundColor = '#fff';
+    },
+  ],
+  [
+    'opaque non-sRGB fill without numeric conversion',
+    (f) => {
+      f.style.backgroundColor = 'oklch(0.7 0.1 40)';
+    },
+  ],
+  [
+    'solid border ink',
+    (f) => {
+      Object.assign(f.style, {
+        borderTopStyle: 'solid',
+        borderTopColor: '#000',
+        borderTopWidth: '4px',
+      });
+    },
+  ],
+  [
+    'direct nonempty Range ink',
+    (f) => {
+      f.style.webkitTextFillColor = f.style.color = '#000';
+    },
+  ],
+]) {
+  test(`shared target predicate keeps ${name} as a bounded paint witness`, async () => {
+    const f = await targetObservationFixture();
+    eraseTargetPaint(f);
+    modify(f);
+    assert.equal(f.observe().achieved, true);
+  });
+}
+
+for (const visible of [true, false]) {
+  test(`composed descendant text witness ${visible ? 'qualifies' : 'rejects hidden ink'}`, async () => {
+    const f = await targetObservationFixture();
+    eraseTargetPaint(f);
+    const child = { ...f.element, parentElement: f.element, childNodes: [] };
+    const text = { ...f.textNode, parentElement: child };
+    child.childNodes = [text];
+    f.element.childNodes = [child];
+    const childStyle = {
+      ...f.style,
+      color: '#000',
+      webkitTextFillColor: '#000',
+      opacity: visible ? '1' : '0',
+    };
+    f.styleByElement.set(child, childStyle);
+    assert.equal(f.observe().achieved, visible);
+  });
+}
+
+for (const opaque of [true, false]) {
+  test(`SVG-only target ${opaque ? 'keeps proven solid stroke' : 'rejects transparent stroke'}`, async () => {
+    const f = await targetObservationFixture();
+    eraseTargetPaint(f);
+    Object.assign(f.element, {
+      namespaceURI: 'http://www.w3.org/2000/svg',
+      childNodes: [],
+      closest: () => null,
+      getBBox: () => ({ width: 20, height: 20 }),
+      getTotalLength: () => 20,
+    });
+    f.element.matches = (selector) =>
+      selector.startsWith(':') || selector.split(',').includes('path');
+    Object.assign(f.style, {
+      fill: 'none',
+      fillOpacity: '1',
+      stroke: opaque ? '#000' : 'rgba(0,0,0,0)',
+      strokeOpacity: '1',
+      strokeWidth: '2px',
+      strokeDasharray: 'none',
+    });
+    assert.equal(f.observe().achieved, opaque);
+  });
+}
+
+for (const hidden of [false, true]) {
+  test(`assigned text uses its composed slot paint chain ${hidden ? 'to reject hidden ink' : 'as a positive witness'}`, async () => {
+    const f = await targetObservationFixture();
+    eraseTargetPaint(f);
+    const slot = { ...f.element, parentElement: f.element, childNodes: [] };
+    const assigned = { ...f.textNode, parentElement: f.element, assignedSlot: slot };
+    slot.childNodes = [assigned];
+    f.element.childNodes = [slot];
+    f.styleByElement.set(slot, {
+      ...f.style,
+      color: '#000',
+      webkitTextFillColor: '#000',
+      opacity: hidden ? '0' : '1',
+    });
+    assert.equal(f.observe().achieved, !hidden);
+  });
 }

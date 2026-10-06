@@ -1042,6 +1042,84 @@ describe('contrast probe / real Chromium instrument calibration', () => {
     expect(path('opaque').fillContrast).toBeCloseTo(21, 8);
   });
 
+  it('requires supported nontransparent paint rather than positive transparent boxes', async () => {
+    const frame = await calibrate(
+      `
+      <style>
+        [data-pui-root] { background:transparent; color:transparent; -webkit-text-fill-color:transparent; border:0; outline:none; box-shadow:none; }
+        #text-only, #descendant span { color:#000; -webkit-text-fill-color:#000; }
+        #border-only { border:4px solid #000; }
+        #fill-only { background:#000; }
+        #non-srgb { background:oklch(0.7 0.1 40); }
+      </style>
+      <div data-pui-root data-demo-ref="transparent">Invisible authored text</div>
+      <div data-pui-root data-demo-ref="empty" style="color:#000;-webkit-text-fill-color:#000"></div>
+      <div data-pui-root data-demo-ref="hidden-child"><span style="color:#000;-webkit-text-fill-color:#000;opacity:0">Hidden ink</span></div>
+      <div id="text-only" data-pui-root data-demo-ref="text-only">Visible text</div>
+      <div id="descendant" data-pui-root data-demo-ref="descendant"><span>Visible descendant</span></div>
+      <div id="border-only" data-pui-root data-demo-ref="border-only"></div>
+      <div id="fill-only" data-pui-root data-demo-ref="fill-only"></div>
+      <div id="non-srgb" data-pui-root data-demo-ref="non-srgb"></div>
+      <div data-pui-root data-demo-ref="svg-stroke"><svg viewBox="0 0 24 24"><path d="M2 2L22 22" fill="none" stroke="black" stroke-width="2"/></svg></div>
+      <div data-pui-root data-demo-ref="svg-transparent"><svg viewBox="0 0 24 24"><path d="M2 2L22 22" fill="none" stroke="transparent" stroke-width="2"/></svg></div>
+      <div id="slot-visible" data-pui-root data-demo-ref="slot-visible">Visible assigned text</div>
+      <div id="slot-hidden" data-pui-root data-demo-ref="slot-hidden">Hidden assigned text</div>
+      <script>
+        for (const id of ['slot-visible', 'slot-hidden']) {
+          document.getElementById(id).attachShadow({mode:'open'}).innerHTML = '<div style="opacity:' + (id === 'slot-hidden' ? '0' : '1') + '"><slot style="color:black;-webkit-text-fill-color:black"></slot></div>';
+        }
+      </script>
+    `,
+      'nontransparent-paint-witness'
+    );
+    for (const ref of ['transparent', 'empty', 'hidden-child', 'svg-transparent', 'slot-hidden']) {
+      const item = surface(frame, ref);
+      expect(item.rect.width).toBeGreaterThan(0);
+      expect(item.rect.height).toBeGreaterThan(0);
+      expect(item.visibility.classification).toBe('unsupported');
+      expect(item.visibility.limits).toContain('no-supported-nontransparent-paint');
+      expect(item.textContrast).toBeNull();
+    }
+    for (const ref of [
+      'text-only',
+      'descendant',
+      'border-only',
+      'fill-only',
+      'non-srgb',
+      'svg-stroke',
+      'slot-visible',
+    ])
+      expect(surface(frame, ref).visibility.classification).toBe('source-model-visible');
+    // Existence of opaque non-sRGB paint does not extend numeric color support.
+    expect(surface(frame, 'non-srgb').paint.fill).toBeNull();
+    expect(surface(frame, 'non-srgb').paint.limits).toContain('unsupported-resolved-color-syntax');
+  });
+
+  it('withholds unfillable SVG ink while retaining independent stroke and positive-area controls', async () => {
+    const frame = await calibrate(
+      `
+      <div data-pui-root data-demo-ref="line"><svg viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="2"><line x1="2" y1="2" x2="22" y2="22"/></svg></div>
+      <div data-pui-root data-demo-ref="segment"><svg viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="2"><path d="M2 2L22 22"/></svg></div>
+      <div data-pui-root data-demo-ref="collinear"><svg viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="2"><path d="M2 2L12 12L22 22Z"/></svg></div>
+      <div data-pui-root data-demo-ref="css-override"><svg viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="2"><path d="M2 2L22 2L22 22Z" style='d:path("M2 2L22 22")'/></svg></div>
+      <div data-pui-root data-demo-ref="triangle"><svg viewBox="0 0 24 24" fill="black" stroke="black" stroke-width="2"><path d="M2 2L22 2L22 22Z"/></svg></div>
+      <div data-pui-root data-demo-ref="rect"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" fill="black"/></svg></div>
+      <div data-pui-root data-demo-ref="circle"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="black"/></svg></div>
+    `,
+      'svg-fill-area'
+    );
+    const glyph = (ref: string) =>
+      surface(frame, ref).glyphs.find((part) => part.tag.toLowerCase() !== 'svg')!;
+    for (const ref of ['line', 'segment', 'collinear', 'css-override']) {
+      expect(glyph(ref).fill).not.toBe('none');
+      expect(glyph(ref).fillContrast).toBeNull();
+      expect(glyph(ref).fillLimits).toContain('unsupported-svg-fill-geometry');
+      expect(glyph(ref).strokeContrast).toBeCloseTo(21, 8);
+    }
+    for (const ref of ['triangle', 'rect', 'circle'])
+      expect(glyph(ref).fillContrast).toBeCloseTo(21, 8);
+  });
+
   it('measures supported opaque boundary fills but withholds image and clipped fill ratios', async () => {
     // The baseline reported the white CSS color as 21:1 even when an opaque
     // black image replaced it or padding-box clipping removed it at the edge.
@@ -1557,6 +1635,124 @@ describe('contrast probe / real Chromium instrument calibration', () => {
       expect(slotted.textContrast).toBeNull();
       expect(slotted.textRuns[0].limits).toContain('unsupported-slot-background-model');
       expect(slotted.textRuns[0].limits).toContain('unsupported-clip-path-or-mask');
+    } finally {
+      await context.close();
+    }
+  });
+
+  it('invalidates CSSOM-only decoration drift without relying on attributes or layout changes', async () => {
+    const context = await browser.newContext({ viewport: { width: 800, height: 600 } });
+    try {
+      const page = await context.newPage();
+      await page.setContent(
+        fixture(
+          `<style id="decoration-source">.decoration { text-decoration-line:underline; text-decoration-color:rgb(0,0,0); text-decoration-thickness:1px; text-decoration-style:solid; text-underline-offset:1px; text-decoration-skip-ink:auto; }</style><div class="decoration" data-pui-root data-projection-owner="calibration" data-projection-generation="1"><span>gyp actual decoration</span></div>`
+        )
+      );
+      await page.addScriptTag({ content: bundle });
+      for (const [property, value] of [
+        ['text-decoration-line', 'line-through'],
+        ['text-decoration-color', 'rgb(255, 0, 0)'],
+        ['text-decoration-thickness', '3px'],
+        ['text-decoration-style', 'double'],
+        ['text-underline-offset', '4px'],
+        ['text-decoration-skip-ink', 'none'],
+      ]) {
+        const result = await page.evaluate(
+          ({ property, value }) => {
+            const root = document.querySelector<HTMLElement>('[data-pui-root]')!;
+            const rule = document.querySelector<HTMLStyleElement>('#decoration-source')!.sheet!
+              .cssRules[0] as CSSStyleRule;
+            const original = rule.style.getPropertyValue(property);
+            const before = window.puiContrastProbe.readContrastState();
+            const attributes = root.outerHTML;
+            const bounds = JSON.stringify(root.getBoundingClientRect().toJSON());
+            rule.style.setProperty(property, value);
+            const observed = getComputedStyle(root).getPropertyValue(property);
+            const after = window.puiContrastProbe.readContrastState();
+            const unchangedSubject =
+              root.outerHTML === attributes &&
+              JSON.stringify(root.getBoundingClientRect().toJSON()) === bounds;
+            rule.style.setProperty(property, original);
+            return {
+              before,
+              after,
+              observed,
+              unchangedSubject,
+              restored: window.puiContrastProbe.readContrastState(),
+            };
+          },
+          { property, value }
+        );
+        expect(result.observed).toBe(value);
+        expect(result.unchangedSubject).toBe(true);
+        expect(result.after).not.toBe(result.before);
+        expect(result.restored).toBe(result.before);
+      }
+    } finally {
+      await context.close();
+    }
+  });
+
+  it('requires one current native Textarea through light and shadow wrapper projections', async () => {
+    const context = await browser.newContext({ viewport: { width: 800, height: 600 } });
+    try {
+      const page = await context.newPage();
+      for (const shadow of [false, true]) {
+        await page.setContent(
+          fixture(
+            `<div id="editor-host" data-pui-root data-projection-owner="calibration" data-projection-generation="1" data-projection-prototype="brutalist-textarea-root"></div>`
+          )
+        );
+        await page.evaluate((shadow) => {
+          const host = document.querySelector('#editor-host')!;
+          const container = shadow ? host.attachShadow({ mode: 'open' }) : host;
+          const editor = document.createElement('textarea');
+          editor.value = 'Current editor';
+          container.append(editor);
+        }, shadow);
+        await page.addScriptTag({ content: bundle });
+        const before = await page.evaluate(() => window.puiContrastProbe.readContrastState());
+        expect(await page.evaluate(() => window.puiContrastProbe.readContrastState())).toBe(before);
+        const image = (await page.screenshot({ type: 'png', caret: 'initial' })).toString('base64');
+        const frame = await page.evaluate(
+          (image) =>
+            window.puiContrastProbe.collectContrastFrame({
+              image,
+              family: 'instrument-calibration',
+            }),
+          image
+        );
+        expect(frame.surfaces).toHaveLength(1);
+        expect(frame.surfaces[0].text).toBe('Current editor');
+        await page.evaluate(() => {
+          const host = document.querySelector('#editor-host')!;
+          const container = host.shadowRoot ?? host;
+          container.append(container.querySelector('textarea')!.cloneNode(true));
+        });
+        await expect(
+          page.evaluate(() => window.puiContrastProbe.readContrastState())
+        ).rejects.toThrow('exactly one current native editor');
+        await expect(
+          page.evaluate(
+            (image) =>
+              window.puiContrastProbe.collectContrastFrame({
+                image,
+                family: 'instrument-calibration',
+              }),
+            image
+          )
+        ).rejects.toThrow('exactly one current native editor');
+        await page.evaluate(() => {
+          const host = document.querySelector('#editor-host')!;
+          const container = host.shadowRoot ?? host;
+          container.querySelectorAll('textarea')[1].remove();
+          container.querySelector('textarea')!.setAttribute('data-projection-owner', 'foreign');
+        });
+        await expect(
+          page.evaluate(() => window.puiContrastProbe.readContrastState())
+        ).rejects.toThrow('foreign projection lease');
+      }
     } finally {
       await context.close();
     }

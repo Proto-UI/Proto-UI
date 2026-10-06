@@ -173,13 +173,29 @@ const currentProjection = (scope: HTMLElement | null) => {
   const surfaces = roots.map((host) => {
     const editor = host.dataset.projectionPrototype === 'brutalist-textarea-root';
     let element: HTMLElement | null = host;
-    if (editor && host.tagName !== 'TEXTAREA') {
-      element = null;
+    if (editor) {
+      const editors: HTMLTextAreaElement[] = [];
+      const visited = new Set<Node>();
       const findEditor = (node: Node) => {
-        if (node instanceof HTMLTextAreaElement) element ??= node;
+        if (visited.has(node)) return;
+        visited.add(node);
+        if (node instanceof HTMLTextAreaElement) editors.push(node);
         for (const child of composedChildren(node)) findEditor(child);
       };
       findEditor(host);
+      if (editors.length !== 1)
+        throw new Error('Declared Textarea requires exactly one current native editor target.');
+      element = editors[0];
+      for (let current: Element | null = element; current; current = composedParent(current)) {
+        const targetOwner = current.getAttribute('data-projection-owner');
+        const targetGeneration = current.getAttribute('data-projection-generation');
+        if (
+          (targetOwner !== null && targetOwner !== owner) ||
+          (targetGeneration !== null && targetGeneration !== generation)
+        )
+          throw new Error('Declared Textarea native editor crosses a foreign projection lease.');
+        if (current === host) break;
+      }
     }
     if (!element) throw new Error('Declared Textarea has no current native editor target.');
     return { host, element };
@@ -250,12 +266,20 @@ const stateProperties = [
   'font-family',
   'line-height',
   'text-shadow',
+  'text-decoration-line',
+  'text-decoration-color',
+  'text-decoration-thickness',
+  'text-decoration-style',
+  'text-underline-offset',
+  'text-decoration-skip-ink',
   'text-indent',
+  'd',
   'fill',
   'fill-opacity',
   'stroke',
   'stroke-opacity',
   'stroke-width',
+  'stroke-dasharray',
   'content',
 ] as const;
 
@@ -445,7 +469,34 @@ const translationOnly = (style: CSSStyleDeclaration): boolean => {
   return true;
 };
 
-const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf = false) => {
+// Only a finite positive-area subset is certified. A stroked bounding box
+// alone does not establish fillable area (notably line and one-segment path).
+const supportedSvgFillArea = (glyph: Element, style: CSSStyleDeclaration): boolean => {
+  if (glyph.namespaceURI !== 'http://www.w3.org/2000/svg') return false;
+  try {
+    const box = (glyph as SVGGraphicsElement).getBBox();
+    if (![box.width, box.height].every((size) => Number.isFinite(size) && size > 0)) return false;
+    if (glyph.matches('rect,circle,ellipse')) return true;
+    if (!glyph.matches('path')) return false;
+    // Read effective CSS geometry, not an attribute that a stylesheet can
+    // override. Preserve the existing simple opaque-triangle positive control.
+    const path = style.getPropertyValue('d').match(/^path\((["'])([^"']+)\1\)$/)?.[2];
+    if (!path) return false;
+    const number = String.raw`([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)`;
+    const pair = `${number}(?:\\s*,\\s*|\\s+)${number}`;
+    const triangle = path.match(
+      new RegExp(`^\\s*M\\s*${pair}\\s*L\\s*${pair}\\s*L\\s*${pair}\\s*Z?\\s*$`)
+    );
+    if (!triangle) return false;
+    const [ax, ay, bx, by, cx, cy] = triangle.slice(1).map(Number);
+    const twiceArea = (bx - ax) * (cy - ay) - (by - ay) * (cx - ax);
+    return Number.isFinite(twiceArea) && twiceArea !== 0;
+  } catch {
+    return false;
+  }
+};
+
+const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf = false) => {
   const limits: string[] = [];
   const roundedOverflowClips: {
     prototype: string | null;
@@ -599,6 +650,120 @@ const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf
     classification: limits.length ? 'unsupported' : 'source-model-visible',
     limits: [...new Set(limits)],
     ...(roundedOverflowClips.length ? { roundedOverflowClips } : {}),
+  };
+};
+
+// Paint existence does not require a luminance conversion. Keep unsupported
+// color spaces out of numeric ratios while recognizing their known opaque alpha.
+const opaqueSourcePaint = (value: string): boolean => {
+  if (typeof value !== 'string' || !value) return false;
+  const resolved = paint(value);
+  if (!resolved.limits.length) return resolved.alpha === 1;
+  const hex = value.match(/^#([\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i)?.[1];
+  if (hex)
+    return (
+      hex.length === 3 ||
+      hex.length === 6 ||
+      /^(?:f|ff)$/i.test(hex.slice(hex.length === 4 ? 3 : 6))
+    );
+  const functional = value.match(/^(?:lab|lch|oklab|oklch|color)\(([^()]*)\)$/i);
+  if (!functional || !CSS.supports('color', value)) return false;
+  const parts = functional[1].split('/');
+  if (parts.length === 1) return true;
+  if (parts.length !== 2 || !/^\s*(?:\d+(?:\.\d*)?|\.\d+)%?\s*$/.test(parts[1])) return false;
+  const alpha = parts[1].trim();
+  return Number.parseFloat(alpha) === (alpha.endsWith('%') ? 100 : 1);
+};
+
+// This is a bounded source witness, not pixel segmentation or an occlusion
+// renderer. Never borrow ancestor fill to claim an otherwise invisible target.
+const hasSupportedPaint = (element: Element): boolean => {
+  const visited = new Set<Node>();
+  const inspect = (node: Node): boolean => {
+    if (visited.has(node)) return false;
+    visited.add(node);
+    if (node.nodeType === Node.TEXT_NODE) {
+      const parent = (node as Text).assignedSlot ?? node.parentElement;
+      if (
+        !parent ||
+        parent.namespaceURI === 'http://www.w3.org/2000/svg' ||
+        !node.textContent?.trim()
+      )
+        return false;
+      const style = getComputedStyle(parent);
+      if (
+        !(parseFloat(style.fontSize) > 0) ||
+        !opaqueSourcePaint(style.webkitTextFillColor || style.color)
+      )
+        return false;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const visibility = paintedBoxVisibility(parent, [...range.getClientRects()], true);
+      return visibility.visible && visibility.classification === 'source-model-visible';
+    }
+    if (!(node instanceof Element)) return false;
+    const style = getComputedStyle(node);
+    const visibility = paintedBoxVisibility(node, [...node.getClientRects()]);
+    if (visibility.visible && visibility.classification === 'source-model-visible') {
+      if (node.namespaceURI === 'http://www.w3.org/2000/svg') {
+        if (!node.closest('defs,clipPath,mask,marker,pattern')) {
+          if (
+            style.fillOpacity === '1' &&
+            opaqueSourcePaint(style.fill) &&
+            supportedSvgFillArea(node, style)
+          )
+            return true;
+          if (
+            style.strokeOpacity === '1' &&
+            opaqueSourcePaint(style.stroke) &&
+            parseFloat(style.strokeWidth) > 0 &&
+            style.strokeDasharray === 'none'
+          ) {
+            try {
+              const length = (node as SVGGeometryElement).getTotalLength();
+              if (Number.isFinite(length) && length > 0) return true;
+            } catch {
+              /* Unknown geometry is not paint proof. */
+            }
+          }
+        }
+      } else {
+        const fillBox =
+          style.backgroundClip === 'border-box' ||
+          (style.backgroundClip === 'padding-box' && node.clientWidth > 0 && node.clientHeight > 0);
+        if (fillBox && style.backgroundImage === 'none' && opaqueSourcePaint(style.backgroundColor))
+          return true;
+        if (
+          style.borderImageSource === 'none' &&
+          ['top', 'right', 'bottom', 'left'].some(
+            (side) =>
+              style.getPropertyValue(`border-${side}-style`) === 'solid' &&
+              parseFloat(style.getPropertyValue(`border-${side}-width`)) > 0 &&
+              opaqueSourcePaint(style.getPropertyValue(`border-${side}-color`))
+          )
+        )
+          return true;
+      }
+    }
+    // Native/replaced content cannot be witnessed by stale defaultValue or DOM
+    // fallback text. Their supported box paint still qualifies above.
+    if (node.matches('textarea,input,select,canvas,img,video,audio,object,iframe,embed'))
+      return false;
+    return composedChildren(node).some(inspect);
+  };
+  return inspect(element);
+};
+
+const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf = false) => {
+  const visibility = paintedBoxVisibility(element, boxes, clipSelf);
+  // Preserve already-unsupported reasons (including the declared rounded-clip
+  // domain) exactly. This adds no known-unsupported terminal exception.
+  if (visibility.classification !== 'source-model-visible' || hasSupportedPaint(element))
+    return visibility;
+  return {
+    ...visibility,
+    classification: 'unsupported',
+    limits: [...visibility.limits, 'no-supported-nontransparent-paint'],
   };
 };
 
@@ -1310,6 +1475,8 @@ const collectContrastFrameInScope = async (
             limits.push('unsupported-svg-container-or-resource');
           const fillLimits = [...limits, ...(fillInk?.limits ?? [])],
             strokeLimits = [...limits, ...(strokeInk?.limits ?? [])];
+          if (fillInk && !supportedSvgFillArea(glyph, glyphStyle))
+            fillLimits.push('unsupported-svg-fill-geometry');
           if (fillInk && (fillInk.alpha !== 1 || glyphStyle.fillOpacity !== '1'))
             fillLimits.push('unsupported-svg-fill-alpha');
           if (strokeInk && (strokeInk.alpha !== 1 || glyphStyle.strokeOpacity !== '1'))
