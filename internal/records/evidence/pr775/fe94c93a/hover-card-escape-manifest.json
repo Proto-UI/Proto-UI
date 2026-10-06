@@ -1,0 +1,520 @@
+{
+  "sourceHead": "fe94c93ab8953f6a8be283d122ab30651fbb087b",
+  "sourceCodeVersion": {
+    "head": "fe94c93ab8953f6a8be283d122ab30651fbb087b",
+    "status": "captured",
+    "kind": "complete clean Git tree plus generated CSS, bound to the opt-in dev server startup identity and current source checks",
+    "cleanTree": "510599b3e3a981cc42fca3e2898e66d3058f204b",
+    "generatedCSS": {
+      "apps/www/src/styles/proto-ui-tokens.generated.css": "678cecc4ca868f335049d05ae549aaa682bb7a782e357c60aa25a243fe379863",
+      "apps/www/src/styles/proto-ui-style.css": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "apps/www/src/styles/shadcn-theme.css": "e64ed915cd40e21a42ebe5fec84afbdb814f9f6a9a337f1024e9be1ba3fb7357"
+    },
+    "sourceSetDigest": "sha256:8e8a500e946de05edb20e92f2942deb714ab609d29b05fbfa7f287279d0eacde",
+    "runnerDigest": "sha256:7d53b45b4ef9a27c285940d37237c65ac64aab35c403e9e007def7b4ee7ca284",
+    "probeDigest": "sha256:b26a4afcffe0023aebbb63d57e2cdaf2c9e164cfdd9188571f402baef73907fa"
+  },
+  "run": 37439640214,
+  "job": 112189920866,
+  "artifact": 11400739311,
+  "artifactSha256": "a177064d2eb23c51150251432895d980aad2e565ec95a6fdd95f0bae2338aea3",
+  "calibrationTests": 29,
+  "verifiedPngFactPairs": 126,
+  "summary": {
+    "collectedFrames": 126,
+    "pngFactMatchedFrames": 126,
+    "achievedTargetPredicates": 126,
+    "unresolvedRuntimeThemeCases": 0,
+    "distinctUnresolvedFamilies": 0,
+    "conformance": "not evaluated; frame count and target predicate count are not full conformance"
+  },
+  "hoverCardEscape": [
+    {
+      "runtime": "wc",
+      "theme": "light",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-x1wk45barlo",
+          "generation": "1",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "WC-BRUTALIST-SELECT-TRIGGER",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    },
+    {
+      "runtime": "wc",
+      "theme": "dark",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-hdcqf9j3imd",
+          "generation": "1",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "WC-BRUTALIST-SELECT-TRIGGER",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    },
+    {
+      "runtime": "react",
+      "theme": "light",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-mh3s35r7lk",
+          "generation": "2",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "DIV",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    },
+    {
+      "runtime": "react",
+      "theme": "dark",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-wd29fdglnir",
+          "generation": "2",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "DIV",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    },
+    {
+      "runtime": "vue",
+      "theme": "light",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-ex0pemq3h5a",
+          "generation": "2",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "DIV",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    },
+    {
+      "runtime": "vue",
+      "theme": "dark",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-6n85hy3jqu4",
+          "generation": "2",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "DIV",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    },
+    {
+      "runtime": "vue2",
+      "theme": "light",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-7i3srehk3lt",
+          "generation": "2",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "DIV",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    },
+    {
+      "runtime": "vue2",
+      "theme": "dark",
+      "escapeTransition": {
+        "basis": "Existing Escape input is observed before any pointer/focus reset: Hover Card retains its same painted owned popup and focus; Tooltip closes while preserving prior focus; Dropdown/Select/Dialog close and restore Trigger; Select preserves observed selection.",
+        "criterion": "P-BASE-HOVER-CARD-CONTENT-OVERLAY (draft)",
+        "before": {
+          "achieved": true,
+          "family": "hover-card",
+          "owner": "pp-fjkugr5k39k",
+          "generation": "2",
+          "popupId": "",
+          "contentPrototype": "brutalist-hover-card-content",
+          "related": true,
+          "owned": true,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "triggerText": "Hover preview",
+          "selection": [],
+          "focusWasTrigger": false,
+          "focusBefore": {
+            "id": "",
+            "tag": "DIV",
+            "role": "combobox",
+            "prototype": "brutalist-select-trigger"
+          }
+        },
+        "stage": "after-escape",
+        "achieved": true,
+        "after": {
+          "sameOwnedPopup": true,
+          "closed": false,
+          "visibility": {
+            "visible": true,
+            "classification": "source-model-visible",
+            "limits": []
+          },
+          "focusPreserved": true,
+          "triggerFocused": false,
+          "ariaExpanded": null,
+          "descriptionRemoved": false,
+          "selectionUnchanged": true,
+          "retainedOptions": true,
+          "selectionBasis": "The current authored Select has unique option labels; preserve its live committed Trigger display and, while projected, exact option selection attributes. Retired option attributes are not live selection evidence.",
+          "triggerText": "Hover preview",
+          "selection": []
+        }
+      }
+    }
+  ],
+  "files": [
+    {
+      "path": "hover-card-react-light-hover-open.png",
+      "sha256": "46d2db3248c38de6b5895d85366c03f3d4451e52ebc31dc1a8e5e4ff222e8fd1",
+      "frame": {
+        "index": 42,
+        "name": "hover-card-react-light-hover-open",
+        "family": "hover-card",
+        "runtime": "react",
+        "theme": "light",
+        "requestedState": "hover-open",
+        "status": "matched",
+        "image": {
+          "path": "hover-card-react-light-hover-open.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/hover-card-react-light-hover-open.png",
+          "digest": "sha256:46d2db3248c38de6b5895d85366c03f3d4451e52ebc31dc1a8e5e4ff222e8fd1",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/hover-card/",
+          "capturedAt": "2026-10-06T09:12:49.858Z"
+        },
+        "factsFile": {
+          "path": "hover-card-react-light-hover-open.facts.json",
+          "digest": "sha256:fbc974ef06527ece0cb5e1bed6953aa8bd55275cb9da42bc8c0db73b0b954f14"
+        },
+        "expectedArtifacts": {
+          "image": "hover-card-react-light-hover-open.png",
+          "facts": "hover-card-react-light-hover-open.facts.json",
+          "mismatch": "hover-card-react-light-hover-open.mismatch.json"
+        },
+        "frameFile": {
+          "path": "report-journal/frame-000042-result.json",
+          "digest": "sha256:d625a242752a3f31b69c6f070530eae0d3f5b5bc9b17506045b054a2c0d37be5"
+        }
+      }
+    },
+    {
+      "path": "hover-card-react-dark-focus-open.png",
+      "sha256": "ef88ceea055de8424c3a5d2343686e8640a0eae9f2b1e6398295af83ae1ec6d6",
+      "frame": {
+        "index": 49,
+        "name": "hover-card-react-dark-focus-open",
+        "family": "hover-card",
+        "runtime": "react",
+        "theme": "dark",
+        "requestedState": "focus-open",
+        "status": "matched",
+        "image": {
+          "path": "hover-card-react-dark-focus-open.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/hover-card-react-dark-focus-open.png",
+          "digest": "sha256:ef88ceea055de8424c3a5d2343686e8640a0eae9f2b1e6398295af83ae1ec6d6",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/hover-card/",
+          "capturedAt": "2026-10-06T09:12:57.633Z"
+        },
+        "factsFile": {
+          "path": "hover-card-react-dark-focus-open.facts.json",
+          "digest": "sha256:75f01baf5e9212235e99d8f90276eea55155b32e3ba68e912ae83192c4d11152"
+        },
+        "expectedArtifacts": {
+          "image": "hover-card-react-dark-focus-open.png",
+          "facts": "hover-card-react-dark-focus-open.facts.json",
+          "mismatch": "hover-card-react-dark-focus-open.mismatch.json"
+        },
+        "frameFile": {
+          "path": "report-journal/frame-000049-result.json",
+          "digest": "sha256:4e7e23b2c17320381f55530bd671c600e7a0386be8d39765692df4f8b1e9f5d3"
+        }
+      }
+    }
+  ],
+  "boundary": "PNGs show their named planned hover-open/focus-open states, not the instantaneous Escape barrier. Native Escape retention is separately evidenced by exact physical-owner observations before reset. Pointer-bridge and full protocol conformance remain uncovered."
+}
