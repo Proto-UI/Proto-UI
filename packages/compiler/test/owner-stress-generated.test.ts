@@ -16,17 +16,32 @@ import { emitVue2Source } from '../src/vue2-source';
 import { emitWebComponentSource } from '../src/web-component-source';
 import type { GeneratedModule } from '../src/ir';
 
-const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+const floatingUi = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+)('@floating-ui/dom');
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
+  true;
 
+type StateEvent =
+  | { type: 'next'; prev: number; next: number; reason?: unknown }
+  | { type: 'disconnect'; reason: 'unmount' };
 interface State {
   get(): number;
-  subscribe(callback: (event: { type: string; next?: number }) => void): () => void;
+  subscribe(callback: (event: StateEvent) => void): () => void;
 }
-interface Exposes { count: State; write(next: number): void }
-interface Handle { update(): void; getExposes(): Exposes }
-interface Phase { kind: string; text: string }
+interface Exposes {
+  count: State;
+  write(next: number): void;
+}
+interface Handle {
+  update(): void;
+  getExposes(): Exposes;
+}
+interface Phase {
+  kind: string;
+  text: string;
+}
 
 // Commands issue multiple actual presence intents in one callback, rather than letting
 // the framework coalesce raw props before the generated owner has observed them.
@@ -73,14 +88,21 @@ function evaluate(module: GeneratedModule): Record<string, unknown> {
     cache.set(file, exports);
     const program = ts.transpileModule(contents, {
       fileName: file,
-      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, allowJs: true },
+      compilerOptions: {
+        target: ts.ScriptTarget.ES2022,
+        module: ts.ModuleKind.CommonJS,
+        allowJs: true,
+      },
     }).outputText;
     new Function('require', 'exports', program)((specifier: string) => {
       if (specifier === 'vue') return Vue;
       if (specifier === '@floating-ui/dom') return floatingUi;
-      if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency: ${specifier}`);
+      if (!specifier.startsWith('.'))
+        throw new Error(`Unexpected generated dependency: ${specifier}`);
       const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier));
-      const target = [resolved, `${resolved}.ts`, `${resolved}.js`].find((candidate) => files.has(candidate));
+      const target = [resolved, `${resolved}.ts`, `${resolved}.js`].find((candidate) =>
+        files.has(candidate)
+      );
       if (!target) throw new Error(`Missing generated dependency: ${specifier}`);
       return load(target);
     }, exports);
@@ -100,14 +122,23 @@ function host(): HTMLDivElement {
   return element;
 }
 function accepted(callback: () => unknown): boolean {
-  try { callback(); return true; } catch { return false; }
+  try {
+    callback();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 let moduleIdentity = 0;
 async function reactComponent() {
   const result = emitReactSource(parsed());
   if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
-  const directory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'generated-modules', `owner-stress-${process.pid}-${moduleIdentity++}`);
+  const directory = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    'generated-modules',
+    `owner-stress-${process.pid}-${moduleIdentity++}`
+  );
   await mkdir(directory, { recursive: true });
   cleanup.push(() => rm(directory, { recursive: true, force: true }));
   const file = path.join(directory, 'Component.tsx');
@@ -118,14 +149,18 @@ async function reactComponent() {
     await writeFile(destination, artifact.contents, 'utf8');
   }
   // The generated module path is selected at runtime; a static import cannot name it.
-  const exports = await import(/* @vite-ignore */ file) as {
-    CompiledComponent: React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<Handle>>;
+  const exports = (await import(/* @vite-ignore */ file)) as {
+    CompiledComponent: React.ForwardRefExoticComponent<
+      Record<string, unknown> & React.RefAttributes<Handle>
+    >;
   };
   return exports.CompiledComponent;
 }
 function reactRoot(element: HTMLElement): Root {
   const root = createRoot(element);
-  cleanup.push(async () => { await React.act(async () => root.unmount()); });
+  cleanup.push(async () => {
+    await React.act(async () => root.unmount());
+  });
   return root;
 }
 
@@ -136,13 +171,37 @@ describe('generated React owner interrupted host work', () => {
     const root = reactRoot(element);
     const ref = React.createRef<Handle>();
     const phases: Phase[] = [];
-    let blocked = true, attempts = 0;
+    let blocked = true,
+      attempts = 0;
     let release!: () => void;
-    const pending = new Promise<void>((resolve) => { release = resolve; });
-    function Gate() { ++attempts; if (blocked) throw pending; return React.createElement('b', null, 'slot'); }
-    const render = (command: number) => root.render(React.createElement(React.StrictMode, null,
-      React.createElement(React.Suspense, { fallback: React.createElement('i', null, 'waiting') },
-        React.createElement(Component, { command, ref, onPhase: (kind: string) => phases.push({ kind, text: element.textContent ?? '' }) }, React.createElement(Gate)))));
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    function Gate() {
+      ++attempts;
+      if (blocked) throw pending;
+      return React.createElement('b', null, 'slot');
+    }
+    const render = (command: number) =>
+      root.render(
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(
+            React.Suspense,
+            { fallback: React.createElement('i', null, 'waiting') },
+            React.createElement(
+              Component,
+              {
+                command,
+                ref,
+                onPhase: (kind: string) => phases.push({ kind, text: element.textContent ?? '' }),
+              },
+              React.createElement(Gate)
+            )
+          )
+        )
+      );
     await React.act(async () => render(0));
     const owner = ref.current!;
     const exposes = owner.getExposes();
@@ -159,7 +218,10 @@ describe('generated React owner interrupted host work', () => {
     // Supersede a real suspended frame, not an unstarted root.render call.
     await React.act(async () => render(4));
     blocked = false;
-    await React.act(async () => { release(); await pending; });
+    await React.act(async () => {
+      release();
+      await pending;
+    });
     expect(element.querySelector('output')).toBeNull();
     expect(phases.map((phase) => phase.kind)).toEqual(['created']);
     expect(owner.getExposes().count).toBe(count);
@@ -178,23 +240,46 @@ describe('generated React owner interrupted host work', () => {
     const phases: string[] = [];
     const terminalAccess: boolean[] = [];
     let exposes: Exposes | undefined;
-    let blocked = false, attempts = 0;
+    let blocked = false,
+      attempts = 0;
     let release!: () => void;
-    const pending = new Promise<void>((resolve) => { release = resolve; });
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     let retryGate!: () => void;
     function Gate() {
       const [, retry] = React.useState(0);
       retryGate = () => retry((value) => value + 1);
-      if (blocked) { ++attempts; throw pending; }
+      if (blocked) {
+        ++attempts;
+        throw pending;
+      }
       return null;
     }
-    const render = (command: number) => root.render(React.createElement(React.Suspense, { fallback: 'waiting' },
-      React.createElement(Component, { ref, command, onPhase: (kind: string) => {
-        phases.push(kind);
-        if ((kind === 'unmounted' || kind === 'beforeDispose') && exposes) {
-          terminalAccess.push(accepted(() => exposes!.write(99)), accepted(() => exposes!.count.subscribe(() => {})));
-        }
-      } }, React.createElement(Gate))));
+    const render = (command: number) =>
+      root.render(
+        React.createElement(
+          React.Suspense,
+          { fallback: 'waiting' },
+          React.createElement(
+            Component,
+            {
+              ref,
+              command,
+              onPhase: (kind: string) => {
+                phases.push(kind);
+                if ((kind === 'unmounted' || kind === 'beforeDispose') && exposes) {
+                  terminalAccess.push(
+                    accepted(() => exposes!.write(99)),
+                    accepted(() => exposes!.count.subscribe(() => {}))
+                  );
+                }
+              },
+            },
+            React.createElement(Gate)
+          )
+        )
+      );
     await React.act(async () => render(0));
     await React.act(async () => render(2));
     const owner = ref.current!;
@@ -202,11 +287,18 @@ describe('generated React owner interrupted host work', () => {
     const count = exposes.count;
     blocked = true;
     exposes.write(8);
-    await React.act(async () => { retryGate(); owner.update(); });
+    await React.act(async () => {
+      retryGate();
+      owner.update();
+    });
     expect(attempts).toBeGreaterThan(0);
     expect(phases).toEqual(['created', 'mounted']);
     await React.act(async () => root.unmount());
-    await React.act(async () => { blocked = false; release(); await pending; });
+    await React.act(async () => {
+      blocked = false;
+      release();
+      await pending;
+    });
     expect(phases).toEqual(['created', 'mounted', 'unmounted', 'beforeDispose']);
     expect(terminalAccess).toEqual([false, false, false, false]);
     expect(element.textContent).toBe('');
@@ -234,22 +326,33 @@ describe('generated Vue 3 scheduled owner work', () => {
     const terminalAccess: boolean[] = [];
     let terminal = false;
     let exposes: Exposes | undefined;
-    const app = Vue.createApp({ setup: () => () => Vue.h(Component, { command: input.value, ref,
-      onPhase: (kind: string) => {
-        phases.push({ kind, text: element.textContent ?? '' });
-        if (terminal && exposes && (kind === 'unmounted' || kind === 'beforeDispose')) {
-          terminalAccess.push(accepted(() => exposes!.write(99)), accepted(() => exposes!.count.subscribe(() => {})));
-        }
-      },
-    }) });
+    const app = Vue.createApp({
+      setup: () => () =>
+        Vue.h(Component, {
+          command: input.value,
+          ref,
+          onPhase: (kind: string) => {
+            phases.push({ kind, text: element.textContent ?? '' });
+            if (terminal && exposes && (kind === 'unmounted' || kind === 'beforeDispose')) {
+              terminalAccess.push(
+                accepted(() => exposes!.write(99)),
+                accepted(() => exposes!.count.subscribe(() => {}))
+              );
+            }
+          },
+        }),
+    });
     app.mount(element);
     let appAlive = true;
-    cleanup.push(() => { if (appAlive) app.unmount(); });
+    cleanup.push(() => {
+      if (appAlive) app.unmount();
+    });
     await settleVue();
     const owner = ref.value!;
     exposes = owner.getExposes();
     const count = exposes.count;
-    exposes.write(7); owner.update();
+    exposes.write(7);
+    owner.update();
     input.value = 1;
     await settleVue();
     expect(element.querySelector('output')).toBeNull();
@@ -261,13 +364,19 @@ describe('generated Vue 3 scheduled owner work', () => {
     input.value = 3;
     await settleVue();
     expect(element.querySelector('[data-pui-root]')).toBe(firstRoot);
-    expect(phases.filter((phase) => phase.kind === 'mounted')).toEqual([{ kind: 'mounted', text: '7' }]);
+    expect(phases.filter((phase) => phase.kind === 'mounted')).toEqual([
+      { kind: 'mounted', text: '7' },
+    ]);
     expect(phases.some((phase) => phase.kind === 'unmounted')).toBe(false);
     const beforeDetach = phases.length;
-    exposes.write(8); owner.update(); input.value = 4;
+    exposes.write(8);
+    owner.update();
+    input.value = 4;
     await settleVue();
     expect(phases.slice(beforeDetach)).toEqual([{ kind: 'unmounted', text: '' }]);
-    exposes.write(9); owner.update(); owner.update();
+    exposes.write(9);
+    owner.update();
+    owner.update();
     await settleVue();
     expect(element.querySelector('output')).toBeNull();
     input.value = 5;
@@ -277,10 +386,16 @@ describe('generated Vue 3 scheduled owner work', () => {
     expect(owner.getExposes().count).toBe(count);
     expect(owner.getExposes().write).toBe(exposes.write);
     const beforeDispose = phases.length;
-    exposes.write(10); owner.update(); terminal = true; app.unmount();
+    exposes.write(10);
+    owner.update();
+    terminal = true;
+    app.unmount();
     appAlive = false;
     await settleVue();
-    expect(phases.slice(beforeDispose).map((phase) => phase.kind)).toEqual(['unmounted', 'beforeDispose']);
+    expect(phases.slice(beforeDispose).map((phase) => phase.kind)).toEqual([
+      'unmounted',
+      'beforeDispose',
+    ]);
     expect(terminalAccess).toEqual([false, false, false, false]);
     expect(() => count.get()).toThrow(/dispos/);
   });
@@ -297,10 +412,14 @@ interface Vue2Runtime {
   extend(options: Record<string, unknown>): new () => Vue2Instance;
   nextTick(): Promise<void>;
 }
-const requireVue2 = createRequire(fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url)));
+const requireVue2 = createRequire(
+  fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url))
+);
 const Vue2 = requireVue2('vue') as Vue2Runtime;
 async function settleVue2(): Promise<void> {
-  await Vue2.nextTick(); await Vue2.nextTick(); await Vue2.nextTick();
+  await Vue2.nextTick();
+  await Vue2.nextTick();
+  await Vue2.nextTick();
 }
 
 describe('generated Vue 2 commit completion invalidation', () => {
@@ -311,21 +430,28 @@ describe('generated Vue 2 commit completion invalidation', () => {
     const element = host();
     const phases: Phase[] = [];
     const Host = Vue2.extend({
-      data() { return { command: 0 }; },
+      data() {
+        return { command: 0 };
+      },
       render(this: Vue2Instance, h: (component: unknown, data: unknown) => unknown) {
-        return h(Component, { props: { command: this.command }, on: {
-          phase: (kind: string) => phases.push({ kind, text: element.textContent ?? '' }),
-        } });
+        return h(Component, {
+          props: { command: this.command },
+          on: {
+            phase: (kind: string) => phases.push({ kind, text: element.textContent ?? '' }),
+          },
+        });
       },
     });
     const vm = new Host();
-    vm.$mount(); element.append(vm.$el);
+    vm.$mount();
+    element.append(vm.$el);
     cleanup.push(() => vm.$destroy());
     await settleVue2();
     const owner = vm.$children[0]!;
     const exposes = owner.getExposes();
     const count = exposes.count;
-    exposes.write(7); owner.update();
+    exposes.write(7);
+    owner.update();
     vm.command = 1;
     await settleVue2();
     expect(phases).toEqual([{ kind: 'created', text: '' }]);
@@ -333,7 +459,9 @@ describe('generated Vue 2 commit completion invalidation', () => {
     await settleVue2();
     expect(phases.at(-1)).toEqual({ kind: 'mounted', text: '7' });
     const firstRoot = element.querySelector('[data-pui-root]');
-    exposes.write(8); owner.update(); vm.command = 3;
+    exposes.write(8);
+    owner.update();
+    vm.command = 3;
     await settleVue2();
     expect(element.querySelector('[data-pui-root]')).toBe(firstRoot);
     expect(element.querySelector('output')?.textContent).toBe('8');
@@ -341,7 +469,9 @@ describe('generated Vue 2 commit completion invalidation', () => {
     vm.command = 4;
     await settleVue2();
     expect(phases.at(-1)).toEqual({ kind: 'unmounted', text: '' });
-    exposes.write(9); owner.update(); owner.update();
+    exposes.write(9);
+    owner.update();
+    owner.update();
     await settleVue2();
     expect(element.querySelector('output')).toBeNull();
     vm.command = 5;
@@ -350,7 +480,12 @@ describe('generated Vue 2 commit completion invalidation', () => {
     expect(vm.$children[0]).toBe(owner);
     expect(owner.getExposes().count).toBe(count);
     expect(owner.getExposes().write).toBe(exposes.write);
-    expect(phases.map((phase) => phase.kind)).toEqual(['created', 'mounted', 'unmounted', 'mounted']);
+    expect(phases.map((phase) => phase.kind)).toEqual([
+      'created',
+      'mounted',
+      'unmounted',
+      'mounted',
+    ]);
   });
 
   it('invalidates an already committed first-view completion when the parent destroys in its updated hook', async () => {
@@ -359,16 +494,28 @@ describe('generated Vue 2 commit completion invalidation', () => {
     const Component = evaluate(emitted.value).CompiledComponent;
     const element = host();
     const phases: string[] = [];
-    let armed = false, interruptedText: string | null = null;
+    let armed = false,
+      interruptedText: string | null = null;
     let exposes: Exposes | undefined;
     const terminalAccess: boolean[] = [];
     const Host = Vue2.extend({
-      data() { return { command: 0 }; },
+      data() {
+        return { command: 0 };
+      },
       render(this: Vue2Instance, h: (component: unknown, data: unknown) => unknown) {
-        return h(Component, { props: { command: this.command }, on: { phase: (kind: string) => {
-          phases.push(kind);
-          if (kind === 'beforeDispose' && exposes) terminalAccess.push(accepted(() => exposes!.write(99)), accepted(() => exposes!.count.subscribe(() => {})));
-        } } });
+        return h(Component, {
+          props: { command: this.command },
+          on: {
+            phase: (kind: string) => {
+              phases.push(kind);
+              if (kind === 'beforeDispose' && exposes)
+                terminalAccess.push(
+                  accepted(() => exposes!.write(99)),
+                  accepted(() => exposes!.count.subscribe(() => {}))
+                );
+            },
+          },
+        });
       },
       updated(this: Vue2Instance) {
         if (!armed) return;
@@ -377,18 +524,21 @@ describe('generated Vue 2 commit completion invalidation', () => {
       },
     });
     const vm = new Host();
-    vm.$mount(); element.append(vm.$el);
+    vm.$mount();
+    element.append(vm.$el);
     cleanup.push(() => vm.$destroy());
     await settleVue2();
     const owner = vm.$children[0]!;
     exposes = owner.getExposes();
     const count = exposes.count;
-    exposes.write(7); owner.update();
+    exposes.write(7);
+    owner.update();
     vm.command = 1;
     await settleVue2();
     expect(element.querySelector('output')).toBeNull();
     expect(phases).toEqual(['created']);
-    armed = true; vm.command = 2;
+    armed = true;
+    vm.command = 2;
     await settleVue2();
     // The DOM really committed, but the child's queued completion is now obsolete.
     expect(interruptedText).toBe('7');
@@ -412,7 +562,10 @@ function customElement(): Element {
   const tag = `x-owner-stress-${++nextTag}`;
   exports.register(tag);
   const element = document.createElement(tag) as Element;
-  cleanup.push(() => { element.dispose(); element.remove(); });
+  cleanup.push(() => {
+    element.dispose();
+    element.remove();
+  });
   return element;
 }
 
@@ -427,14 +580,19 @@ describe('generated custom element settled disconnection', () => {
       const kind = (event as CustomEvent<string>).detail;
       phases.push({ kind, text: element.shadowRoot?.textContent ?? '' });
       if (terminal && exposes && (kind === 'unmounted' || kind === 'beforeDispose')) {
-        terminalAccess.push(accepted(() => exposes!.write(99)), accepted(() => exposes!.count.subscribe(() => {})));
+        terminalAccess.push(
+          accepted(() => exposes!.write(99)),
+          accepted(() => exposes!.count.subscribe(() => {}))
+        );
       }
     });
     document.body.append(element);
     exposes = element.getExposes();
     const identity = element.logicalOwner;
     const count = exposes.count;
-    exposes.write(7); element.update(); element.setProps({ command: 1 });
+    exposes.write(7);
+    element.update();
+    element.setProps({ command: 1 });
     await Promise.resolve();
     expect(element.shadowRoot?.querySelector('output')).toBeNull();
     expect(phases).toEqual([{ kind: 'created', text: '' }]);
@@ -443,11 +601,14 @@ describe('generated custom element settled disconnection', () => {
     expect(phases.at(-1)).toEqual({ kind: 'mounted', text: '7' });
     element.setProps({ command: 3 });
     await Promise.resolve();
-    expect(phases.filter((phase) => phase.kind === 'mounted')).toEqual([{ kind: 'mounted', text: '7' }]);
+    expect(phases.filter((phase) => phase.kind === 'mounted')).toEqual([
+      { kind: 'mounted', text: '7' },
+    ]);
     expect(phases.some((phase) => phase.kind === 'unmounted')).toBe(false);
     element.setProps({ command: 4 });
     await Promise.resolve();
-    exposes.write(9); element.update();
+    exposes.write(9);
+    element.update();
     await Promise.resolve();
     element.setProps({ command: 5 });
     await Promise.resolve();
@@ -455,20 +616,25 @@ describe('generated custom element settled disconnection', () => {
     expect(element.logicalOwner).toBe(identity);
     expect(element.getExposes().count).toBe(count);
     expect(element.getExposes().write).toBe(exposes.write);
-    const stateEvents: string[] = [];
-    count.subscribe((event) => stateEvents.push(event.type));
+    const stateEvents: StateEvent[] = [];
+    count.subscribe((event) => stateEvents.push(event));
     const beforeDispose = phases.length;
     // Queue disconnection first, then old owner work. Its microtask must never
     // publish updated after terminal cleanup, even if the element later reconnects.
-    terminal = true; element.remove(); element.update();
+    terminal = true;
+    element.remove();
+    element.update();
     await Promise.resolve();
     await Promise.resolve();
-    expect(phases.slice(beforeDispose).map((phase) => phase.kind)).toEqual(['unmounted', 'beforeDispose']);
+    expect(phases.slice(beforeDispose).map((phase) => phase.kind)).toEqual([
+      'unmounted',
+      'beforeDispose',
+    ]);
     expect(terminalAccess).toEqual([false, false, false, false]);
-    expect(stateEvents).toEqual([]);
+    expect(stateEvents).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
     expect(element.logicalOwner).toBeNull();
-    expect(() => count.get()).toThrow(/dispos/);
-    expect(() => exposes!.write(10)).toThrow(/dispos/);
+    expect(() => count.get()).toThrow();
+    expect(() => exposes!.write(10)).toThrow();
     const terminalPhases = phases.length;
     document.body.append(element);
     await Promise.resolve();
@@ -476,7 +642,7 @@ describe('generated custom element settled disconnection', () => {
     expect(element.getExposes().count).not.toBe(count);
     expect(phases.slice(terminalPhases)).toEqual([{ kind: 'created', text: '' }]);
     element.getExposes().write(11);
-    expect(stateEvents).toEqual([]);
-    expect(() => count.subscribe(() => {})).toThrow(/dispos/);
+    expect(stateEvents).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(() => count.subscribe(() => {})).toThrow();
   });
 });
