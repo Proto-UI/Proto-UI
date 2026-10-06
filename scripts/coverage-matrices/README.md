@@ -1,5 +1,7 @@
 # Coverage matrix validation
 
+The independent prototype/projection portfolio is [documented here](../../internal/coverage-matrices/README.md). Validate its JSON/source/consumer links with `node scripts/coverage-matrices/prototype-coverage.mjs --check`; regenerate the readable view with `--write`. Its negative controls run with the existing test glob. This source inventory is separate from the Website/Harness runtime ownership checks below.
+
 `node scripts/coverage-matrices/check-coverage-matrices.mjs` validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
 
 ## Static resource and dependency scope

@@ -1,5 +1,7 @@
 # Full Base coverage for the new projection families
 
+Historical checkpoint. The current cross-family inventory is [the active matrix](../coverage-matrices/prototype-coverage-matrix.md), under [#870](https://github.com/Proto-UI/Proto-UI/issues/870) and the retained #792 implementation owner. The 20-family/53-part figures below describe the original checkpoint; pinned main now has 22 Base families/55 P identities. The original requested coverage and unfinished work are retained rather than silently dropped.
+
 Date: 2026-10-03. Non-normative task inventory for #792. Baseline `f7edface`.
 
 The completion boundary is all 20 public Base families / 53 public parts in each projection, with real composition and evidence. The separate `asTransition` authoring hook is not counted as another rendered part. The companion JSON records every part separately. No missing part is silently inherited from Shadcn/Brutalist or marked complete by a union/registry entry.
