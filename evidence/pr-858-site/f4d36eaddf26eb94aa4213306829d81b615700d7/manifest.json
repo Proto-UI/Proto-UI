@@ -1,0 +1,199 @@
+{
+  "subject": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+  "probe": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+  "browser": "154.0.8037.57",
+  "workflowRun": 37463774175,
+  "artifact": 11414258206,
+  "archiveSHA256": "098e8f10a3606e2ad3fff8abfd7a70605e54b99158dbebc3226b0c2d8e900567",
+  "result": "17 passed; Card initial pageshow closes adopted native menu (one real failure)",
+  "notes": [
+    "Actual unmodified compositor PNG; CSS ready and scripts held in cold captures.",
+    "Blue Card background is unchanged after load. Bare initial controls/preview presentation remain an explicit visual limitation.",
+    "These images belong to f4d36eadd, not a later fix."
+  ],
+  "captures": [
+    {
+      "id": "home-390-dark-settled-9",
+      "revision": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "open": "true",
+        "theme": "dark",
+        "canonical": {
+          "background": "lab(2.75381% 0 0)",
+          "foreground": "lab(98.26% 0 0)"
+        },
+        "language": {
+          "text": "English",
+          "width": 50.5625,
+          "height": 45
+        },
+        "surfaces": [
+          {
+            "background": "lab(2.75381% 0 0)",
+            "foreground": "lab(98.26% 0 0)"
+          },
+          {
+            "background": "lab(2.75381% 0 0)",
+            "foreground": "lab(98.26% 0 0)"
+          }
+        ],
+        "overflow": false,
+        "phase": "settled"
+      },
+      "image": {
+        "file": "home-390-dark-settled-9.png",
+        "sha256": "4b8fa8654830fcace54ca24174b927ec6b4d8435871a8ee21d0ddd66e34564b3"
+      }
+    },
+    {
+      "id": "cold-card",
+      "revision": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+      "viewport": {
+        "width": 2048,
+        "height": 1237
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/brutalist/components/card/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "interactive",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "scriptsHeld": true,
+        "initial": {
+          "background": "rgb(220, 235, 254)",
+          "color": "rgb(0, 0, 0)",
+          "headingFontSize": "36px",
+          "headingFontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+          "headingTop": 96,
+          "previewHeight": 160,
+          "previewText": "\u6b63\u5728\u52a0\u8f7d\u4ea4\u4e92\u793a\u4f8b\u2026   <style>\n            .proto-previewer__skeleton {\n              display: none !important;\n            }\n          </style> \u4ea4\u4e92\u793a\u4f8b\u9700\u8981 JavaScript\uff1b\u6b63\u6587\u548c\u6e90\u7801\u4ecd\u53ef\u9605\u8bfb\u3002",
+          "bodyWidth": 2048,
+          "viewportWidth": 2048
+        },
+        "settingsVisible": false,
+        "isNative": true
+      },
+      "image": {
+        "file": "cold-card.png",
+        "sha256": "9082d152c664e4dce258eebcfe1992b361dfb1bbafa04d53d674162d5699e240"
+      }
+    },
+    {
+      "id": "loaded-card",
+      "revision": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+      "viewport": {
+        "width": 2048,
+        "height": 1237
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/brutalist/components/card/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "scriptsReleased": true,
+        "loaded": {
+          "background": "rgb(220, 235, 254)",
+          "color": "rgb(0, 0, 0)",
+          "headingFontSize": "36px",
+          "headingFontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+          "headingTop": 96,
+          "previewHeight": 332,
+          "previewText": "<style>\n            .proto-previewer__skeleton {\n              display: none !important;\n            }\n          </style> \u4ea4\u4e92\u793a\u4f8b\u9700\u8981 JavaScript\uff1b\u6b63\u6587\u548c\u6e90\u7801\u4ecd\u53ef\u9605\u8bfb\u3002  RuntimeWeb ComponentsWeb ComponentsReactVueVue 2AI Support \u2014 Conversation workspaceUse Card as an explicit panel shell.12 messagesOpen conversation",
+          "bodyWidth": 2048,
+          "viewportWidth": 2048
+        }
+      },
+      "image": {
+        "file": "loaded-card.png",
+        "sha256": "373d9d38b012f4ecffddc841d267d63e9d07ea8cded786f4fb58b3d55a2263da"
+      }
+    },
+    {
+      "id": "dialog-home-390-normal",
+      "revision": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "blur(4px)",
+        "background": "rgba(0, 0, 0, 0.5)",
+        "backgroundAlpha": 0.5019607843137255,
+        "connected": true,
+        "opacity": "0.969271",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-normal.png",
+        "sha256": "d9035de22f280c0ae37204cf1f62c8a8fbae8e0dbe0eef23525c4ce459b000c4"
+      }
+    },
+    {
+      "id": "dialog-home-390-reduced-transparency",
+      "revision": "f4d36eaddf26eb94aa4213306829d81b615700d7",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "none",
+        "background": "lab(100 0 0)",
+        "backgroundAlpha": 1,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": true,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-reduced-transparency.png",
+        "sha256": "9d2e85d5f1ba52a517cdd5914ff3cd4ddedd4577b9f8d8458b06f3d40149635e"
+      }
+    }
+  ]
+}
