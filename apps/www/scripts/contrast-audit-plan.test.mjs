@@ -8,6 +8,7 @@ import {
   assertContrastCaseCoverage,
   classifyFlatTabPaint,
   establishNativeItemPointerBaseline,
+  discoverContrastSources,
 } from './contrast-audit-plan.mjs';
 
 const official = ['wc', 'react', 'vue', 'vue2'];
@@ -674,4 +675,592 @@ test('actual capture preserves paired raw evidence for known domain and still fa
       assert.equal(item.knownUnsupported, undefined);
     }
   }
+});
+
+test('all manifest recipes resolve unique authored routes without assuming locale or components layout', async () => {
+  const { PROJECTION_FAMILY_MANIFESTS } =
+    await import('../src/components/PrototypePreviewer/projection-families.ts');
+  const { fileURLToPath } = await import('node:url');
+  const manifest = PROJECTION_FAMILY_MANIFESTS.brutalist;
+  const sources = await discoverContrastSources({
+    contentRoot: fileURLToPath(new URL('../src/content', import.meta.url)),
+    manifest,
+    families: Object.keys(manifest.families),
+  });
+  assert.equal(Object.keys(sources).length, Object.keys(manifest.families).length);
+  assert.equal(
+    sources.label.recipePath,
+    'apps/www/src/content/docs/zh-cn/demo-brutalist-label.demo.ts'
+  );
+  assert.equal(
+    sources.collapsible.recipePath,
+    'apps/www/src/content/docs/demo-brutalist-collapsible.demo.ts'
+  );
+  assert.equal(
+    sources.accordion.recipePath,
+    'apps/www/src/content/docs/demo-brutalist-accordion.demo.ts'
+  );
+  assert.equal(sources.accordion.route, '/en/ui-libraries/brutalist/accordion/');
+  assert.equal(sources.collapsible.route, '/en/ui-libraries/brutalist/components/collapsible/');
+  assert.equal(sources.label.route, '/en/ui-libraries/brutalist/components/label/');
+});
+
+test('source discovery rejects missing, duplicate, stale, dynamic, overridden and commented bindings', async () => {
+  const { mkdtemp, mkdir, writeFile, rm, symlink } = await import('node:fs/promises');
+  const { join } = await import('node:path');
+  const root = await mkdtemp('/tmp/contrast-source-controls-');
+  const page = 'docs/en/ui-libraries/brutalist/disclosure.mdx';
+  const valid = '<PrototypePreviewer demoId="demo-brutalist-disclosure" />';
+  const manifest = { families: { disclosure: { recipeId: 'demo-brutalist-disclosure' } } };
+  async function sample(files) {
+    await rm(root, { recursive: true, force: true });
+    for (const [path, source] of Object.entries(files)) {
+      await mkdir(join(root, path, '..'), { recursive: true });
+      await writeFile(join(root, path), source);
+    }
+    return discoverContrastSources({ contentRoot: root, manifest, families: ['disclosure'] });
+  }
+  const base = { 'docs/demo-brutalist-disclosure.demo.ts': 'export default {};', [page]: valid };
+  try {
+    assert.equal((await sample(base)).disclosure.route, '/en/ui-libraries/brutalist/disclosure/');
+    for (const files of [
+      { [page]: valid },
+      { ...base, 'docs/zh-cn/demo-brutalist-disclosure.demo.ts': 'duplicate' },
+      { ...base, 'docs/en/ui-libraries/brutalist/duplicate.mdx': valid },
+      { ...base, [page]: valid + valid },
+      { ...base, [page]: valid.replace('disclosure"', 'wrong"') },
+      { ...base, [page]: '<PrototypePreviewer demoId={recipe} />' },
+      { ...base, [page]: valid.replace(' />', ' {...props} />') },
+      { ...base, [page]: '---\nslug: elsewhere\n---\n' + valid },
+      { ...base, [page]: '{/* ' + valid + ' */}' },
+      { ...base, [page]: '\x60\x60\x60mdx\n' + valid + '\n\x60\x60\x60' },
+    ])
+      await assert.rejects(sample(files), /recipe|Duplicate|source-bound|binding|slug/);
+    await sample(base);
+    await symlink(join(root, 'docs'), join(root, 'alias'));
+    await assert.rejects(
+      discoverContrastSources({ contentRoot: root, manifest, families: ['disclosure'] }),
+      /Symlink/
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('new family primaries bind exact authored parts without first-match selection', async () => {
+  const { transform } = await import('esbuild');
+  const source = await readFile(new URL('./audit-brutalist-contrast.mts', import.meta.url), 'utf8');
+  const start = source.indexOf('function primary('),
+    end = source.indexOf('\nasync function passiveSurfaceObservation', start);
+  const primary = new Function(
+    (await transform(source.slice(start, end), { loader: 'ts' })).code + ';return primary;'
+  )();
+  const previewer = {
+    locator: (selector) => ({
+      selector,
+      first() {
+        throw new Error('Ambiguous first match');
+      },
+    }),
+  };
+  assert.match(primary(previewer, 'label').selector, /brutalist-label-root.*label-checkbox/);
+  assert.match(
+    primary(previewer, 'collapsible').selector,
+    /uncontrolled.*brutalist-collapsible-trigger/
+  );
+  assert.match(
+    primary(previewer, 'accordion').selector,
+    /brutalist-accordion-trigger.*single-lifetime-trigger/
+  );
+});
+
+// Execute the actual serialized reader in an isolated browser-like realm.
+// Geometry/paint are controlled inputs; this is not native browser evidence.
+async function readerFixture(name, next) {
+  const { transform } = await import('esbuild');
+  const { Window } = await import('happy-dom');
+  const vm = await import('node:vm');
+  const source = await readFile(new URL('./audit-brutalist-contrast.mts', import.meta.url), 'utf8');
+  const start = source.indexOf(`async function ${name}(`),
+    end = source.indexOf(`async function ${next}(`, start);
+  assert.ok(start > 0 && end > start);
+  const code = (await transform(source.slice(start, end), { loader: 'ts', keepNames: true })).code;
+  const reader = new Function('caseSubject', code + `;return ${name};`)(() => ({ key: 'subject' }));
+  const window = new Window();
+  const scope = window.document.createElement('div');
+  window.document.body.append(scope);
+  const boundary = {
+    observation: { achieved: true },
+    owner: 'owner',
+    generation: '1',
+    retained: scope,
+  };
+  const paint = (element) => ({
+    achieved: !element.hidden && element.dataset.unsupported !== 'true',
+    focused: window.document.activeElement === element,
+    focusVisible: true,
+    hovered: true,
+    nativeActive: true,
+  });
+  const sandbox = vm.createContext({
+    document: window.document,
+    puiContrastProbe: {
+      readContrastAuditSubject: () => boundary,
+      readContrastTargetObservation: paint,
+      readContrastPaintedVisibility: (element) => ({
+        visible: !element.hidden,
+        classification: element.dataset.unsupported
+          ? 'unsupported'
+          : element.hidden
+            ? 'exempt-not-visible'
+            : 'source-model-visible',
+      }),
+    },
+  });
+  const node = (prototype, ref, parent = scope) => {
+    const element = window.document.createElement('div');
+    Object.assign(element.dataset, {
+      puiRoot: '',
+      projectionPrototype: prototype,
+      demoRef: ref,
+      projectionOwner: 'owner',
+      projectionGeneration: '1',
+    });
+    parent.append(element);
+    return element;
+  };
+  const locator = (element) => ({
+    evaluate: async (callback, input) => {
+      assert.doesNotMatch(
+        callback.toString(),
+        /__name/,
+        'tsx helpers must not leak into a serialized browser callback'
+      );
+      return vm.runInContext(`(${callback.toString()})`, sandbox)(element, input);
+    },
+  });
+  return { reader, window, scope, boundary, node, locator };
+}
+
+test('actual Label reader requires its named live target and never turns Label into a keyboard control', async () => {
+  for (const damage of [
+    'none',
+    'naming',
+    'duplicate-id',
+    'wrong-target',
+    'duplicate-target',
+    'stale-target',
+    'stale-label',
+    'label-tab-stop',
+    'label-button-role',
+    'wrong-state',
+    'unsupported-target',
+    'unsupported-label',
+    'stale-subject',
+  ]) {
+    const { reader, window, node, locator, boundary } = await readerFixture(
+      'labelAssociationObservation',
+      'labelJourney'
+    );
+    const label = node('brutalist-label-root', 'label-checkbox');
+    const target = node('base-checkbox-root', 'checkbox');
+    label.id = 'actual-label';
+    target.setAttribute('aria-labelledby', label.id);
+    target.setAttribute('role', 'checkbox');
+    target.setAttribute('aria-checked', 'false');
+    if (damage === 'naming') target.setAttribute('aria-labelledby', 'foreign');
+    if (damage === 'duplicate-id') node('base-checkbox-root', 'other').id = label.id;
+    if (damage === 'wrong-target') target.dataset.demoRef = 'passive';
+    if (damage === 'duplicate-target') node('base-checkbox-root', 'checkbox');
+    if (damage === 'stale-target') target.dataset.projectionGeneration = 'old';
+    if (damage === 'stale-label') label.dataset.projectionOwner = 'foreign';
+    if (damage === 'label-tab-stop') label.tabIndex = 0;
+    if (damage === 'label-button-role') label.setAttribute('role', 'button');
+    if (damage === 'wrong-state') target.setAttribute('aria-checked', 'true');
+    if (damage === 'unsupported-target') target.dataset.unsupported = 'true';
+    if (damage === 'unsupported-label') label.dataset.unsupported = 'true';
+    if (damage === 'stale-subject') boundary.observation.achieved = false;
+    const result = await reader({}, locator(label), false);
+    assert.equal(result.achieved, damage === 'none', damage);
+    await window.happyDOM.close();
+  }
+});
+
+for (const family of ['collapsible', 'accordion']) {
+  test(`actual ${family} reader requires exact live relation, region policy and immutable reservation`, async () => {
+    for (const damage of [
+      'none',
+      'wrong-owner',
+      'foreign-owner',
+      'wrong-expanded',
+      'wrong-role',
+      'disabled',
+      'wrong-content',
+      'wrong-controls',
+      'duplicate-content',
+      'duplicate-id',
+      'stale-content',
+      'wrong-role-content',
+      'focusable-content',
+      'wrong-label',
+      'hidden-content',
+      'unsupported-content',
+      'new-reservation',
+      'stale-subject',
+    ]) {
+      const { reader, window, node, locator, boundary } = await readerFixture(
+        'disclosureObservation',
+        'disclosureJourney'
+      );
+      const accordion = family === 'accordion';
+      const owner = node(
+        `brutalist-${family}-${accordion ? 'item' : 'root'}`,
+        accordion ? 'single-lifetime-item' : 'uncontrolled'
+      );
+      const trigger = node(
+        `brutalist-${family}-trigger`,
+        accordion ? 'single-lifetime-trigger' : '',
+        owner
+      );
+      const content = node(
+        `brutalist-${family}-content`,
+        accordion ? 'single-lifetime-content' : '',
+        owner
+      );
+      trigger.id = 'trigger';
+      content.id = 'panel';
+      trigger.setAttribute('role', 'button');
+      trigger.setAttribute('aria-expanded', 'true');
+      trigger.setAttribute('aria-controls', content.id);
+      if (accordion) {
+        content.setAttribute('role', 'region');
+        content.setAttribute('aria-labelledby', trigger.id);
+      }
+      if (damage === 'wrong-owner') owner.dataset.demoRef = 'controlled';
+      if (damage === 'foreign-owner') owner.dataset.projectionOwner = 'foreign';
+      if (damage === 'wrong-expanded') trigger.setAttribute('aria-expanded', 'false');
+      if (damage === 'wrong-role') trigger.setAttribute('role', 'tab');
+      if (damage === 'disabled') trigger.setAttribute('aria-disabled', 'true');
+      if (damage === 'wrong-content') content.remove();
+      if (damage === 'wrong-controls') trigger.setAttribute('aria-controls', 'foreign');
+      if (damage === 'duplicate-content') node(`brutalist-${family}-content`, '', owner);
+      if (damage === 'duplicate-id') node('unrelated', 'other').id = content.id;
+      if (damage === 'stale-content') content.dataset.projectionGeneration = 'old';
+      if (damage === 'wrong-role-content')
+        content.setAttribute('role', accordion ? 'dialog' : 'region');
+      if (damage === 'focusable-content') content.tabIndex = 0;
+      if (damage === 'wrong-label') {
+        if (accordion) content.setAttribute('aria-labelledby', 'other-trigger');
+        else trigger.setAttribute('aria-controls', 'panel other');
+      }
+      if (damage === 'hidden-content') content.hidden = true;
+      if (damage === 'unsupported-content') content.dataset.unsupported = 'true';
+      if (damage === 'stale-subject') boundary.observation.achieved = false;
+      const result = await reader(
+        {},
+        { family },
+        locator(trigger),
+        true,
+        damage === 'new-reservation' ? 'old-panel' : 'panel'
+      );
+      assert.equal(result.achieved, damage === 'none', damage);
+      await window.happyDOM.close();
+    }
+  });
+  test(`actual ${family} closed default-L1 reader rejects stale or merely hidden live views`, async () => {
+    for (const damage of [
+      'absent',
+      'hidden-shell',
+      'visible-shell',
+      'live-hidden-view',
+      'retained-id',
+      'dangling-controls',
+      'foreign-shell',
+      'duplicate-shell',
+    ]) {
+      const { reader, window, node, locator } = await readerFixture(
+        'disclosureObservation',
+        'disclosureJourney'
+      );
+      const accordion = family === 'accordion';
+      const owner = node(
+        `brutalist-${family}-${accordion ? 'item' : 'root'}`,
+        accordion ? 'single-lifetime-item' : 'uncontrolled'
+      );
+      const trigger = node(
+        `brutalist-${family}-trigger`,
+        accordion ? 'single-lifetime-trigger' : '',
+        owner
+      );
+      trigger.setAttribute('role', 'button');
+      trigger.setAttribute('aria-expanded', 'false');
+      if (damage !== 'absent') {
+        const content = node(
+          `brutalist-${family}-content`,
+          accordion ? 'single-lifetime-content' : '',
+          owner
+        );
+        content.hidden = damage !== 'visible-shell';
+        if (damage !== 'live-hidden-view') content.setAttribute('data-pui-view-detached', '');
+        if (damage === 'retained-id') content.id = 'old-panel';
+        if (damage === 'dangling-controls') trigger.setAttribute('aria-controls', 'old-panel');
+        if (damage === 'foreign-shell') content.dataset.projectionGeneration = 'old';
+        if (damage === 'duplicate-shell') node(`brutalist-${family}-content`, '', owner);
+      }
+      const result = await reader({}, { family }, locator(trigger), false);
+      assert.equal(result.achieved, ['absent', 'hidden-shell'].includes(damage), damage);
+      await window.happyDOM.close();
+    }
+  });
+}
+
+async function auditFunction(name, next, dependencies) {
+  const { transform } = await import('esbuild');
+  const source = await readFile(new URL('./audit-brutalist-contrast.mts', import.meta.url), 'utf8');
+  const start = source.indexOf(`async function ${name}(`),
+    end = source.indexOf(`async function ${next}(`, start);
+  assert.ok(start > 0 && end > start);
+  const code = (await transform(source.slice(start, end), { loader: 'ts' })).code;
+  return new Function(...Object.keys(dependencies), code + `;return ${name};`)(
+    ...Object.values(dependencies)
+  );
+}
+
+for (const family of ['label', 'collapsible', 'accordion']) {
+  test(`actual ${family} native journey captures each finite target once and never claims a failed transition`, async () => {
+    for (const fault of [
+      'none',
+      'no-pointer-change',
+      'lost-keyboard-focus',
+      'no-keyboard-change',
+      'changed-reservation',
+    ]) {
+      if (family === 'label' && fault === 'changed-reservation') continue;
+      let active = false,
+        focus = false,
+        value = false,
+        id = 'panel',
+        clicks = 0;
+      const captures = [],
+        actions = [];
+      const target = {
+        hover: async () => {
+          actions.push('hover');
+        },
+        boundingBox: async () => ({ x: 10, y: 10, width: 20, height: 20 }),
+        focus: async () => {
+          focus = true;
+          actions.push('focus-control');
+        },
+        click: async () => {
+          value = !value;
+          clicks++;
+          if (fault === 'changed-reservation' && clicks === 2) id = 'replaced';
+          actions.push('native-click');
+        },
+        and: () => ({
+          waitFor: async () => {
+            actions.push('observed-state');
+          },
+        }),
+      };
+      const label = {
+        ...target,
+        focus: async () => {
+          throw new Error('Label must never receive focus input');
+        },
+      };
+      const page = {
+        locator: () => ({}),
+        mouse: {
+          move: async () => {},
+          down: async () => {
+            active = true;
+            actions.push('native-down');
+          },
+          up: async () => {
+            active = false;
+            focus = true;
+            if (fault !== 'no-pointer-change') value = !value;
+            actions.push('native-up');
+          },
+        },
+        keyboard: {
+          press: async (key) => {
+            actions.push(`native-${key}`);
+            if (key === 'Tab') focus = false;
+            if (key === 'Shift+Tab') focus = fault !== 'lost-keyboard-focus';
+            if (['Space', 'Enter'].includes(key) && fault !== 'no-keyboard-change') value = !value;
+          },
+        },
+      };
+      const paint = () => ({
+        hovered: true,
+        nativeActive: active,
+        focused: focus,
+        focusVisible: true,
+      });
+      const dependencies = {
+        capture: async (_page, _item, state, read) => {
+          const observation = await read();
+          assert.equal(observation.achieved, true, `unachieved ${state}`);
+          captures.push(state);
+        },
+        casePreviewer: () => ({ locator: () => target }),
+        labelAssociationObservation: async (_page, _label, expected) => ({
+          achieved: value === expected,
+          label: { ...paint(), focused: false },
+          target: paint(),
+        }),
+        disclosureObservation: async (_page, _item, _target, expected, identity) => ({
+          achieved: value === expected && (!identity || identity === id),
+          identity: id,
+          trigger: paint(),
+        }),
+      };
+      const name = family === 'label' ? 'labelJourney' : 'disclosureJourney';
+      const next = family === 'label' ? 'disclosureObservation' : 'pointerJourney';
+      const journey = await auditFunction(name, next, dependencies);
+      if (fault === 'none') {
+        await journey(page, { family }, family === 'label' ? label : target);
+        assert.deepEqual(
+          captures,
+          family === 'label'
+            ? [
+                'label-hover',
+                'label-pointer-down',
+                'label-activation-result',
+                'target-keyboard-focus',
+                'target-keyboard-activation',
+              ]
+            : [
+                'hover',
+                'pointer-down',
+                'open',
+                'closed',
+                'reopened',
+                'keyboard-focus',
+                'keyboard-closed',
+                'keyboard-open',
+              ]
+        );
+        assert.equal(new Set(captures).size, captures.length);
+        assert.ok(actions.indexOf('native-up') > actions.indexOf('native-down'));
+        assert.ok(actions.includes('native-Tab') && actions.includes('native-Shift+Tab'));
+      } else {
+        await assert.rejects(
+          journey(page, { family }, family === 'label' ? label : target),
+          /unachieved/
+        );
+        assert.equal(
+          active,
+          false,
+          'native mouse-up must occur even when held-frame capture fails'
+        );
+      }
+    }
+  });
+}
+
+test('new journeys match the actual recipe association and uncontrolled domain instead of a convenient first control', async () => {
+  const { tsImport } = await import('tsx/esm/api');
+  const { PROJECTION_FAMILY_MANIFESTS } =
+    await import('../src/components/PrototypePreviewer/projection-families.ts');
+  const { fileURLToPath } = await import('node:url');
+  const sources = await discoverContrastSources({
+    contentRoot: fileURLToPath(new URL('../src/content', import.meta.url)),
+    manifest: PROJECTION_FAMILY_MANIFESTS.brutalist,
+    families: ['label', 'collapsible', 'accordion'],
+  });
+  for (const family of ['label', 'collapsible', 'accordion']) {
+    const { default: demo } = await tsImport(
+      new URL(sources[family].recipePath, new URL('../../../', import.meta.url)).href,
+      import.meta.url
+    );
+    const nodes = [];
+    const visit = (node, parent = null) => {
+      if (!node || typeof node === 'string') return;
+      nodes.push({ node, parent });
+      for (const child of node.children ?? []) visit(child, node);
+    };
+    visit(demo.root);
+    const ref = (name) => nodes.filter(({ node }) => node.ref === name);
+    if (family === 'label') {
+      assert.equal(ref('label-checkbox').length, 1);
+      assert.equal(ref('checkbox').length, 1);
+      const label = ref('label-checkbox')[0].node,
+        target = ref('checkbox')[0].node;
+      assert.equal(label.prototypeId, 'brutalist-label-root');
+      assert.equal(target.prototypeId, 'base-checkbox-root');
+      assert.deepEqual(label.associations, target.associations);
+      assert.equal(label.props.naming, true);
+      assert.equal(label.props.activation, true);
+      assert.equal(target.props.checked, undefined);
+      assert.equal(target.props.defaultChecked, undefined);
+    } else if (family === 'collapsible') {
+      assert.equal(ref('uncontrolled').length, 1);
+      const root = ref('uncontrolled')[0].node;
+      assert.deepEqual(root.props, {});
+      assert.equal(
+        root.children.filter((node) => node.prototypeId === 'brutalist-collapsible-trigger').length,
+        1
+      );
+      assert.equal(
+        root.children.find((node) => node.prototypeId === 'brutalist-collapsible-content').props
+          .keepMounted,
+        false
+      );
+    } else {
+      assert.equal(ref('single-lifetime-trigger').length, 1);
+      const item = ref('single-lifetime-item')[0].node;
+      assert.equal(item.props.value, 'lifetime');
+      assert.equal(ref('single-lifetime-trigger')[0].parent.ref, 'single-lifetime-heading');
+      assert.equal(ref('single-lifetime-content')[0].parent, item);
+      assert.deepEqual(ref('single-lifetime-content')[0].node.props, {
+        keepMounted: false,
+        region: true,
+      });
+      assert.deepEqual(ref('single')[0].node.props.defaultOpenItems, ['overview']);
+      assert.equal(ref('single')[0].node.props.openItems, undefined);
+    }
+  }
+});
+
+test('new source-bound plans keep naming and default-L1 observations separate from full family acceptance', async () => {
+  const { transform } = await import('esbuild');
+  const source = await readFile(new URL('./audit-brutalist-contrast.mts', import.meta.url), 'utf8');
+  const start = source.indexOf('function plannedStates('),
+    end = source.indexOf('// Populate this matrix', start);
+  const plannedStates = new Function(
+    'passiveFamilies',
+    'contrastHeldBinaryTargets',
+    (await transform(source.slice(start, end), { loader: 'ts' })).code + ';return plannedStates;'
+  )(new Set(['badge', 'card', 'skeleton', 'separator', 'spinner']), contrastHeldBinaryTargets);
+  assert.deepEqual(plannedStates('label'), [
+    'rest',
+    'label-hover',
+    'label-pointer-down',
+    'label-activation-result',
+    'target-keyboard-focus',
+    'target-keyboard-activation',
+  ]);
+  for (const family of ['collapsible', 'accordion'])
+    assert.deepEqual(plannedStates(family), [
+      'rest',
+      'hover',
+      'pointer-down',
+      'open',
+      'closed',
+      'reopened',
+      'keyboard-focus',
+      'keyboard-closed',
+      'keyboard-open',
+    ]);
+  assert.match(source, /Label itself adds no Tab stop or keyboard target/);
+  assert.match(
+    source,
+    /Full controlled, disabled, retained, navigation, nested, terminal, material and GPUI acceptance remains separate/
+  );
+  assert.doesNotMatch(source, /content\/docs\/zh-cn\/\$\{manifest.recipeId\}/);
+  assert.doesNotMatch(source, /\/brutalist\/components\/\$\{family\}/);
 });

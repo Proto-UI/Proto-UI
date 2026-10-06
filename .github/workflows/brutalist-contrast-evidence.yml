@@ -25,6 +25,8 @@ jobs:
             families: dropdown-menu,select,dialog
           - shard: intent-and-tabs
             families: tooltip,hover-card,tabs
+          - shard: naming-and-disclosures
+            families: label,collapsible,accordion
           - shard: passive-and-editors
             families: badge,card,skeleton,separator,spinner,textarea,scroll-area
     runs-on: ubuntu-24.04

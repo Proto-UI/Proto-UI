@@ -3,10 +3,19 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { PROJECTION_FAMILY_MANIFESTS } from '../src/components/PrototypePreviewer/projection-families.ts';
 import { compileContrastAnatomy, compareContrastAnatomy } from './contrast-anatomy.mjs';
+import { discoverContrastSources } from './contrast-audit-plan.mjs';
+import { fileURLToPath } from 'node:url';
+import { tsImport } from 'tsx/esm/api';
+const sources = await discoverContrastSources({
+  contentRoot: fileURLToPath(new URL('../src/content', import.meta.url)),
+  manifest: PROJECTION_FAMILY_MANIFESTS.brutalist,
+  families: Object.keys(PROJECTION_FAMILY_MANIFESTS.brutalist.families),
+});
 
 const load = async (family) => {
-  const { default: demo } = await import(
-    `../src/content/docs/zh-cn/demo-brutalist-${family}.demo.ts`
+  const { default: demo } = await tsImport(
+    new URL(sources[family].recipePath, new URL('../../../', import.meta.url)).href,
+    import.meta.url
   );
   return compileContrastAnatomy(demo, PROJECTION_FAMILY_MANIFESTS.brutalist.families[family]);
 };
@@ -457,3 +466,166 @@ for (const [name, mutate] of Object.entries({
       name
     );
   });
+
+// Exact authored disclosure recipes with deliberately injected state/paint.
+// Native activation and pixels are only claimed by the source-bound audit.
+async function disclosureFixture(family, openRefs) {
+  const plan = await load(family);
+  const sample = model(plan, family);
+  const byPath = new Map(plan.instances.map((node) => [node.path, node]));
+  const nearest = (node, part) => {
+    for (let current = byPath.get(node.parent); current; current = byPath.get(current.parent))
+      if (current.part === part) return current;
+  };
+  const omitted = new Set();
+  for (const node of plan.instances.filter((node) => node.part === 'content')) {
+    const domain = nearest(node, family === 'accordion' ? 'item' : 'root');
+    const trigger = plan.instances.find(
+      (candidate) =>
+        candidate.part === 'trigger' &&
+        nearest(candidate, family === 'accordion' ? 'item' : 'root') === domain
+    );
+    const open = openRefs.includes(trigger.ref ?? domain.ref);
+    const triggerSurface = sample.surfaces.find((surface) => surface.uid === trigger.path);
+    const content = sample.surfaces.find((surface) => surface.uid === node.path);
+    triggerSurface.ariaExpanded = String(open);
+    triggerSurface.controls = open || node.props.keepMounted ? [content.id] : [];
+    if (!open && !node.props.keepMounted) omitted.add(node.path);
+    if (!open && node.props.keepMounted) {
+      content.painted = false;
+      content.currentLease = true;
+      content.visibility = { visible: false, classification: 'exempt-not-visible' };
+    }
+  }
+  sample.surfaces = sample.surfaces.filter((surface) => {
+    for (let node = byPath.get(surface.uid); node; node = byPath.get(node.parent))
+      if (omitted.has(node.path)) return false;
+    return true;
+  });
+  return { plan, sample };
+}
+for (const family of ['collapsible', 'accordion']) {
+  test(`${family} binds default L1, keepMounted and nested presence to exact authored domains`, async () => {
+    const initial =
+      family === 'accordion'
+        ? ['single-overview-trigger', 'multiple-a-trigger']
+        : ['retained', 'disabled'];
+    const { plan, sample } = await disclosureFixture(family, initial);
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
+    const active =
+      family === 'accordion'
+        ? ['single-lifetime-trigger', 'multiple-a-trigger']
+        : ['uncontrolled', 'retained', 'disabled'];
+    const opened = await disclosureFixture(family, active);
+    assert.equal(compareContrastAnatomy(opened.plan, opened.sample).achieved, true);
+    const closed = await disclosureFixture(
+      family,
+      family === 'accordion' ? ['multiple-a-trigger'] : ['retained', 'disabled']
+    );
+    assert.equal(compareContrastAnatomy(closed.plan, closed.sample).achieved, true);
+    const retained = plan.instances.find(
+      (node) => node.part === 'content' && node.props.keepMounted
+    );
+    sample.surfaces = sample.surfaces.filter((surface) => surface.uid !== retained.path);
+    assert.equal(
+      compareContrastAnatomy(plan, sample).achieved,
+      false,
+      'keepMounted cannot silently disappear'
+    );
+  });
+  test(`${family} rejects detached stale relations, foreign parent/lease, unsupported hidden paint and missing open parts`, async () => {
+    const initial =
+      family === 'accordion'
+        ? ['single-overview-trigger', 'multiple-a-trigger']
+        : ['retained', 'disabled'];
+    for (const damage of [
+      'stale-relation',
+      'wrong-parent',
+      'foreign-lease',
+      'unsupported-hidden',
+      'missing-open',
+      'duplicate-open',
+      'cross-domain',
+    ]) {
+      const { plan, sample } = await disclosureFixture(family, initial);
+      const trigger = sample.surfaces.find((surface) => surface.ariaExpanded === 'true');
+      const content = sample.surfaces.find((surface) => trigger.controls.includes(surface.id));
+      if (damage === 'stale-relation')
+        sample.surfaces.find(
+          (surface) =>
+            surface.ariaExpanded === 'false' &&
+            surface.prototypeId.endsWith('-trigger') &&
+            !surface.controls.length
+        ).controls = ['stale'];
+      if (damage === 'wrong-parent') content.parent = trigger.uid;
+      if (damage === 'foreign-lease') {
+        content.currentLease = false;
+        sample.currentLease = false;
+      }
+      if (damage === 'unsupported-hidden') {
+        content.painted = false;
+        content.visibility = { visible: true, classification: 'unsupported' };
+      }
+      if (damage === 'missing-open')
+        sample.surfaces = sample.surfaces.filter((surface) => surface !== content);
+      if (damage === 'duplicate-open') sample.surfaces.push({ ...content, uid: 'duplicate' });
+      if (damage === 'cross-domain')
+        trigger.controls = [
+          sample.surfaces.find(
+            (surface) => surface.prototypeId === content.prototypeId && surface !== content
+          ).id,
+        ];
+      assert.equal(compareContrastAnatomy(plan, sample).achieved, false, damage);
+    }
+  });
+}
+
+for (const family of ['collapsible', 'accordion']) {
+  test(`${family} retained closed views need unique relations and hidden default shells cannot retain identity`, async () => {
+    const { plan, sample } = await disclosureFixture(
+      family,
+      family === 'accordion' ? ['multiple-a-trigger'] : []
+    );
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
+    const missing = plan.instances.find(
+      (node) => node.part === 'content' && !node.props.keepMounted && !node.boundary
+    );
+    assert.ok(missing);
+    const shell = {
+      ...model(plan, family).surfaces.find((surface) => surface.uid === missing.path),
+      id: '',
+      painted: false,
+      currentLease: true,
+      visibility: { visible: false, classification: 'exempt-not-visible' },
+    };
+    sample.surfaces.push(shell);
+    // Accordion overview owns nested children; its preserved owner shell must
+    // retain exact hidden descendants, so use the childless lifetime content.
+    if (family === 'accordion') {
+      const lifetime = plan.instances.find((node) => node.ref === 'single-lifetime-content');
+      Object.assign(
+        shell,
+        model(plan, family).surfaces.find((surface) => surface.uid === lifetime.path),
+        {
+          id: '',
+          painted: false,
+          currentLease: true,
+          visibility: { visible: false, classification: 'exempt-not-visible' },
+        }
+      );
+    }
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
+    shell.id = 'stale-reservation';
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, false);
+    shell.id = '';
+    const retained = sample.surfaces.find(
+      (surface) => plan.instances.find((node) => node.path === surface.uid)?.props.keepMounted
+    );
+    const other = sample.surfaces.find((surface) => surface !== retained && surface.id);
+    const previous = other.id;
+    other.id = retained.id;
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, false);
+    other.id = previous;
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
+  });
+}

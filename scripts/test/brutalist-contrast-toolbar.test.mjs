@@ -138,7 +138,7 @@ for (const mode of ['normal', 'disable-fails', 'get-fails', 'still-enabled', 'un
   });
 }
 
-test('toolbar setup preserves all 17 families, bounded jobs and exact-head evidence', () => {
+test('toolbar setup preserves all current manifest families, bounded jobs and exact-head evidence', () => {
   const workflow = readWorkflow();
   const audit = job(workflow);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
@@ -149,6 +149,7 @@ test('toolbar setup preserves all 17 families, bounded jobs and exact-head evide
     { shard: 'binary-and-buttons', families: 'button,toggle,switch,checkbox' },
     { shard: 'popup-boundaries', families: 'dropdown-menu,select,dialog' },
     { shard: 'intent-and-tabs', families: 'tooltip,hover-card,tabs' },
+    { shard: 'naming-and-disclosures', families: 'label,collapsible,accordion' },
     {
       shard: 'passive-and-editors',
       families: 'badge,card,skeleton,separator,spinner,textarea,scroll-area',
