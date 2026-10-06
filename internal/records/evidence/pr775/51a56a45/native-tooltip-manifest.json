@@ -1,0 +1,2342 @@
+{
+  "sourceHead": "51a56a454adce9814db3601763a5dc3141a0ac85",
+  "cleanTree": "ed8d792215976219b0c96873631670a44e8f7e36",
+  "sourceBinding": {
+    "head": "51a56a454adce9814db3601763a5dc3141a0ac85",
+    "status": "captured",
+    "kind": "complete clean Git tree plus generated CSS, bound to the opt-in dev server startup identity and current source checks",
+    "cleanTree": "ed8d792215976219b0c96873631670a44e8f7e36",
+    "generatedCSS": {
+      "apps/www/src/styles/proto-ui-tokens.generated.css": "15488dfbf43b5a343c209275354ecd183c32f4b99865597eaac1da636fda2763",
+      "apps/www/src/styles/proto-ui-style.css": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "apps/www/src/styles/shadcn-theme.css": "e64ed915cd40e21a42ebe5fec84afbdb814f9f6a9a337f1024e9be1ba3fb7357"
+    },
+    "sourceSetDigest": "sha256:609a0a0f4757b3506af605f731a009c92fdd9b17e2fe9588ef1eb856b638dedb",
+    "runnerDigest": "sha256:1e5e61fc284d1bcbe87e8540650f65cda0a2d20995ccb107b97b21a9880bbdd0",
+    "probeDigest": "sha256:4608ca70ef1aa933164e2eb5ec7431317176fa7a6067c6ef3cfffbd6bc3695d3"
+  },
+  "workflowRun": 37504864115,
+  "job": 112410813203,
+  "artifact": 11432940411,
+  "artifactSha256": "2448a89ff8211155be1a961d0312ae41f1bdd7b2d6f01444cfd6ce10df2b30bf",
+  "verifiedImageFactsJournalReceipts": 126,
+  "frame": {
+    "index": 3,
+    "name": "tooltip-wc-light-keyboard-focus",
+    "family": "tooltip",
+    "runtime": "wc",
+    "theme": "light",
+    "requestedState": "keyboard-focus",
+    "status": "matched",
+    "image": {
+      "path": "tooltip-wc-light-keyboard-focus.png",
+      "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/tooltip-wc-light-keyboard-focus.png",
+      "digest": "sha256:695cd909a3e4dccb9cf1fcb00aeff05b40688e0e480f771787d818efe6c2c08f",
+      "origin": "native Playwright page.screenshot PNG",
+      "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/tooltip/",
+      "capturedAt": "2026-10-06T17:53:27.770Z"
+    },
+    "factsFile": {
+      "path": "tooltip-wc-light-keyboard-focus.facts.json",
+      "digest": "sha256:d27554a803c6e9dc06c3f082bed1a66aaffde9582050ec8e0045de2ffcbf8191"
+    },
+    "expectedArtifacts": {
+      "image": "tooltip-wc-light-keyboard-focus.png",
+      "facts": "tooltip-wc-light-keyboard-focus.facts.json",
+      "mismatch": "tooltip-wc-light-keyboard-focus.mismatch.json"
+    },
+    "frameFile": {
+      "path": "report-journal/frame-000003-result.json",
+      "digest": "sha256:b6f192b8322228fa8857b31510bc678e5714c6fb063f5b3680020f63e8ad5cb8"
+    }
+  },
+  "facts": {
+    "family": "tooltip",
+    "owner": "pp-hcr08erv8b",
+    "generation": "1",
+    "theme": "light",
+    "devicePixelRatio": 1,
+    "surfaces": [
+      {
+        "prototype": "brutalist-tooltip-group",
+        "ref": null,
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Hover or focus for detailsMove to the second triggerGroup preserves the shared warm-delay domain",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgba(0, 0, 0, 0)",
+          "border": "color(srgb 0.621176 0.663529 0.717176)",
+          "borderWidth": "0px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "fillAlpha": 0,
+          "border": [
+            158.39988,
+            169.199895,
+            182.87988,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            220,
+            235,
+            254,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Hover or focus for details",
+            "direct": false,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 17.357612509770586,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          },
+          {
+            "text": "Move to the second trigger",
+            "direct": false,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 17.357612509770586,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          },
+          {
+            "text": "Group preserves the shared warm-delay domain",
+            "direct": false,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": null,
+            "classification": "exempt",
+            "threshold": 4.5,
+            "limits": [
+              "no-painted-layout-box"
+            ],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 217,
+          "height": 52,
+          "clientWidth": 217,
+          "clientHeight": 52
+        },
+        "rect": {
+          "x": 587.65625,
+          "y": 291,
+          "width": 216.671875,
+          "height": 52
+        },
+        "textContrast": null,
+        "textContrastDisposition": {
+          "classification": "unsupported",
+          "limits": [
+            "no-verified-direct-painted-text"
+          ]
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 641.82421875,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 304,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 641.82421875,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 304,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 695.9921875,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 317,
+              "rgb": [
+                230,
+                241,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 695.9921875,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 317,
+              "rgb": [
+                230,
+                240,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 750.16015625,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 330,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 750.16015625,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 330,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "prototype": "brutalist-tooltip-root",
+        "ref": null,
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Hover or focus for details",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgba(0, 0, 0, 0)",
+          "border": "color(srgb 0.621176 0.663529 0.717176)",
+          "borderWidth": "0px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "fillAlpha": 0,
+          "border": [
+            158.39988,
+            169.199895,
+            182.87988,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            220,
+            235,
+            254,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Hover or focus for details",
+            "direct": false,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 17.357612509770586,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 217,
+          "height": 26,
+          "clientWidth": 217,
+          "clientHeight": 26
+        },
+        "rect": {
+          "x": 587.65625,
+          "y": 291,
+          "width": 216.671875,
+          "height": 26
+        },
+        "textContrast": null,
+        "textContrastDisposition": {
+          "classification": "unsupported",
+          "limits": [
+            "no-verified-direct-painted-text"
+          ]
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 641.82421875,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 297.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 641.82421875,
+              "y": 318,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 297.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 695.9921875,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 304,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 695.9921875,
+              "y": 318,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 304,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 750.16015625,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 310.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 750.16015625,
+              "y": 318,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 310.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "prototype": "brutalist-tooltip-trigger",
+        "ref": null,
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": true,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": true
+        },
+        "text": "Hover or focus for details",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgba(0, 0, 0, 0)",
+          "border": "color(srgb 0.621176 0.663529 0.717176)",
+          "borderWidth": "0px",
+          "outline": "rgb(16, 16, 16)",
+          "outlineWidth": "1px",
+          "outlineStyle": "auto",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "fillAlpha": 0,
+          "border": [
+            158.39988,
+            169.199895,
+            182.87988,
+            255
+          ],
+          "outline": [
+            16,
+            16,
+            16,
+            255
+          ],
+          "compositedBackground": [
+            220,
+            235,
+            254,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Hover or focus for details",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 17.357612509770586,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 217,
+          "height": 26,
+          "clientWidth": 217,
+          "clientHeight": 26
+        },
+        "rect": {
+          "x": 587.65625,
+          "y": 291,
+          "width": 216.671875,
+          "height": 26
+        },
+        "textContrast": {
+          "ratio": 17.357612509770586,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 641.82421875,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 297.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 641.82421875,
+              "y": 318,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 297.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 695.9921875,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 304,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 695.9921875,
+              "y": 318,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 304,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 750.16015625,
+              "y": 290,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 310.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 750.16015625,
+              "y": 318,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 310.5,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "prototype": "brutalist-tooltip-root",
+        "ref": null,
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Move to the second triggerGroup preserves the shared warm-delay domain",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgba(0, 0, 0, 0)",
+          "border": "color(srgb 0.621176 0.663529 0.717176)",
+          "borderWidth": "0px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "fillAlpha": 0,
+          "border": [
+            158.39988,
+            169.199895,
+            182.87988,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            220,
+            235,
+            254,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Move to the second trigger",
+            "direct": false,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 17.357612509770586,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          },
+          {
+            "text": "Group preserves the shared warm-delay domain",
+            "direct": false,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": null,
+            "classification": "exempt",
+            "threshold": 4.5,
+            "limits": [
+              "no-painted-layout-box"
+            ],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 217,
+          "height": 26,
+          "clientWidth": 217,
+          "clientHeight": 26
+        },
+        "rect": {
+          "x": 587.65625,
+          "y": 317,
+          "width": 216.671875,
+          "height": 26
+        },
+        "textContrast": null,
+        "textContrastDisposition": {
+          "classification": "unsupported",
+          "limits": [
+            "no-verified-direct-painted-text"
+          ]
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 641.82421875,
+              "y": 316,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 323.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 641.82421875,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 323.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 695.9921875,
+              "y": 316,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 330,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 695.9921875,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 330,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 750.16015625,
+              "y": 316,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 336.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 750.16015625,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 336.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "prototype": "brutalist-tooltip-trigger",
+        "ref": null,
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Move to the second trigger",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgba(0, 0, 0, 0)",
+          "border": "color(srgb 0.621176 0.663529 0.717176)",
+          "borderWidth": "0px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "fillAlpha": 0,
+          "border": [
+            158.39988,
+            169.199895,
+            182.87988,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            220,
+            235,
+            254,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Move to the second trigger",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 17.357612509770586,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 217,
+          "height": 26,
+          "clientWidth": 217,
+          "clientHeight": 26
+        },
+        "rect": {
+          "x": 587.65625,
+          "y": 317,
+          "width": 216.671875,
+          "height": 26
+        },
+        "textContrast": {
+          "ratio": 17.357612509770586,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 641.82421875,
+              "y": 316,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 323.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 641.82421875,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 323.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 695.9921875,
+              "y": 316,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 330,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 695.9921875,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 330,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 750.16015625,
+              "y": 316,
+              "rgb": [
+                16,
+                16,
+                16
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 586.65625,
+              "y": 336.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 750.16015625,
+              "y": 344,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 805.328125,
+              "y": 336.5,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "prototype": "brutalist-tooltip-content",
+        "ref": null,
+        "role": "tooltip",
+        "inactive": false,
+        "visible": false,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Group preserves the shared warm-delay domain",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgba(0, 0, 0, 0)",
+          "border": "color(srgb 0.621176 0.663529 0.717176)",
+          "borderWidth": "0px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "fillAlpha": 0,
+          "border": [
+            158.39988,
+            169.199895,
+            182.87988,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            220,
+            235,
+            254,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Group preserves the shared warm-delay domain",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": null,
+            "classification": "exempt",
+            "threshold": 4.5,
+            "limits": [
+              "no-painted-layout-box"
+            ],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              158.39988,
+              169.199895,
+              182.87988,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 0,
+          "height": 0,
+          "clientWidth": 0,
+          "clientHeight": 0
+        },
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "textContrast": null,
+        "textContrastDisposition": {
+          "classification": "exempt",
+          "limits": [
+            "no-painted-layout-box",
+            "no-verified-direct-painted-text"
+          ]
+        },
+        "visibility": {
+          "classification": "exempt-not-visible",
+          "limits": [
+            "no-painted-layout-box"
+          ]
+        },
+        "perimeterLimits": [],
+        "exterior": [],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "prototype": "brutalist-tooltip-content",
+        "ref": null,
+        "role": "tooltip",
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Portable Base behavior, Brutalist visual grammar",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "2px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "14px",
+          "fontWeight": "500"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Portable Base behavior, Brutalist visual grammar",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "14px",
+            "fontWeight": "500",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 2,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 2,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 2,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 2,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 341,
+          "height": 32,
+          "clientWidth": 341,
+          "clientHeight": 32
+        },
+        "rect": {
+          "x": 523.4375,
+          "y": 251,
+          "width": 345.109375,
+          "height": 36
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [
+          "unsupported-rounded-perimeter"
+        ],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 609.71484375,
+              "y": 250,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 522.4375,
+              "y": 260,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 609.71484375,
+              "y": 288,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 869.546875,
+              "y": 260,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 695.9921875,
+              "y": 250,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 522.4375,
+              "y": 269,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 695.9921875,
+              "y": 288,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 869.546875,
+              "y": 269,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 782.26953125,
+              "y": 250,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 522.4375,
+              "y": 278,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 782.26953125,
+              "y": 288,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 869.546875,
+              "y": 278,
+              "rgb": [
+                220,
+                235,
+                254
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": null
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      }
+    ],
+    "stateFingerprintDigest": "sha256:c175c90a2bebc97bb1eec27fd9c160c69db87b73da40947ba7e60c812cca9a24"
+  },
+  "scope": "Native source-bound checkpoint image, not full conformance or closure of six pending Finf audit criteria.",
+  "Agent": "dot",
+  "ModelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}
