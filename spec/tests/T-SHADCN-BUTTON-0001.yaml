@@ -18,6 +18,7 @@ cases:
     covers:
       - P-SHADCN-BUTTON-VARIANT-PROP
       - P-SHADCN-BUTTON-SIZE-PROP
+      - P-SHADCN-BUTTON-WRAP-PROP
     expectation: shadcn-button-current-variant-size-and-removal-defaults
   - id: T-SHADCN-BUTTON-0001-CASE-INTERACTION-STYLES
     title: inherited Button facts drive hover focus press and disabled visual rules
@@ -59,6 +60,7 @@ verifies:
         - P-SHADCN-BUTTON-CURRENT-BASE-DEVIATIONS
         - P-SHADCN-BUTTON-VARIANT-PROP
         - P-SHADCN-BUTTON-SIZE-PROP
+        - P-SHADCN-BUTTON-WRAP-PROP
         - P-SHADCN-BUTTON-INTERACTION-STYLES
         - P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
         - P-SHADCN-BUTTON-COMPATIBILITY-SUBSET

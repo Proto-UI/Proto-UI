@@ -8,6 +8,20 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it('lowers intrinsic action wrapping and bounded grid tracks without media variants', () => {
+    const css = renderProtoStyleTokenCss([
+      'flex-wrap-reverse',
+      'grid-cols-1',
+      'min-w-0',
+      'h-auto',
+      'min-h-8',
+      'max-w-full',
+    ]);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('flex-wrap: wrap-reverse;');
+    expect(css).toContain('grid-template-columns: repeat(1, minmax(0, 1fr));');
+    expect(css).toContain('min-width: 0px;');
+  });
   it('lowers logical available-region bounds without dropping max-width arithmetic', () => {
     const css = renderProtoStyleTokenCss([
       'left-[var(--proto-ui-available-region-center-x,50%)]',

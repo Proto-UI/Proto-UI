@@ -5,7 +5,7 @@ const dialogHeader = definePrototype({
   name: 'shadcn-dialog-header',
   setup(def) {
     def.anatomy.claim(DIALOG_FAMILY, { role: 'header' });
-    def.feedback.style.use(tw('flex flex-col gap-2 text-left'));
+    def.feedback.style.use(tw('flex min-w-0 flex-col gap-2 text-left'));
     return (renderer) => renderer.r.slot();
   },
 });

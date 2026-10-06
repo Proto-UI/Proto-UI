@@ -21,10 +21,17 @@ const readWebRegion: Reader = (document, probe) => {
   const view = document.defaultView;
   if (!view) return null;
   const style = view.getComputedStyle(probe);
+  const root = document.documentElement;
+  const rootBox = root.getBoundingClientRect();
+  if (!finite(rootBox.width) || rootBox.width <= 0) return null;
+  const rootLeft = rootBox.left + view.scrollX + root.clientLeft;
+  const rootRight = rootLeft + Math.min(root.clientWidth, rootBox.width);
   const viewport = view.visualViewport;
   const width = viewport?.width ?? document.documentElement.clientWidth;
   const height = viewport?.height ?? document.documentElement.clientHeight;
-  const x = viewport?.offsetLeft ?? 0;
+  // clientWidth already excludes a left-side gutter. Its fallback rectangle
+  // starts at the measured root origin, not at zero followed by a second inset.
+  const x = viewport?.offsetLeft ?? rootLeft;
   const y = viewport?.offsetTop ?? 0;
   if (![x, y, width, height].every(finite) || width <= 0 || height <= 0) return null;
   const [top, right, bottom, left] = [
@@ -34,12 +41,14 @@ const readWebRegion: Reader = (document, probe) => {
     style.paddingLeft,
   ].map(Number.parseFloat);
   if (![top, right, bottom, left].every((n) => finite(n) && n >= 0)) return null;
+  const visibleLeft = Math.max(x + left, rootLeft);
+  const visibleRight = Math.min(x + width - right, rootRight);
   // Conservative safe insets within the currently visible region. A keyboard's
   // visual-region shrink is observed without changing global keyboard policy.
   return {
-    x: x + left,
+    x: visibleLeft,
     y: y + top,
-    width: Math.max(0, width - left - right),
+    width: Math.max(0, visibleRight - visibleLeft),
     height: Math.max(0, height - top - bottom),
   };
 };

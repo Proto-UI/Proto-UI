@@ -261,6 +261,7 @@ for (const runtime of RUNTIMES)
               button: button.getBoundingClientRect().toJSON(),
               viewport: {
                 innerWidth,
+                rootRect: document.documentElement.getBoundingClientRect().toJSON(),
                 clientWidth: document.documentElement.clientWidth,
                 clientLeft: document.documentElement.clientLeft,
                 scrollbar: innerWidth - document.documentElement.clientWidth,
@@ -304,7 +305,9 @@ for (const runtime of RUNTIMES)
           expect(before.viewport.scrollbar, 'Real classic scrollbar prerequisite').toBeGreaterThan(
             0
           );
-          const gained = locked.viewport.clientWidth - before.viewport.clientWidth;
+          const gained =
+            Math.min(locked.viewport.clientWidth, locked.viewport.rootRect.width) -
+            Math.min(before.viewport.clientWidth, before.viewport.rootRect.width);
           if (scenario === 'body-propagated')
             expect(gained, 'Body lock actually removes the viewport gutter').toBeGreaterThan(0);
           else expect(gained, 'A retained gutter must not acquire duplicate compensation').toBe(0);

@@ -50,7 +50,7 @@ export default {
                   {
                     kind: 'proto',
                     prototypeId: 'shadcn-button',
-                    props: { variant: 'outline' },
+                    props: { variant: 'outline', wrap: true },
                     children: ['Cancel'],
                   },
                 ],
@@ -62,6 +62,7 @@ export default {
                   {
                     kind: 'proto',
                     prototypeId: 'shadcn-button',
+                    props: { wrap: true },
                     children: ['Save changes'],
                   },
                 ],

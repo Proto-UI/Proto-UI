@@ -21,8 +21,8 @@ criteria:
       zh-CN: 从 @proto.ui/prototypes-brutalist/collapsible 提供 brutalist-collapsible-root，保留 Base props/exposes；private workspace package 不得表述为 registry 已发布。
   - id: P-BRUTALIST-COLLAPSIBLE-VISUAL-SAFETY
     text:
-      en: Preserve min-width zero, bounded max-width, long-word wrapping for text-bearing parts, scalable padding and focus-ring space. Hidden retained Content must remain actually hidden; style does not overwrite canonical state or introduce fixed content height.
-      zh-CN: 保留 min-width zero、有界 max-width、文字 part 长词换行、可缩放 padding 与 focus ring 空间。关闭保留的 Content 必须实际隐藏；样式不得改写 canonical state 或引入固定内容高度。
+      en: Preserve min-width zero, bounded max-width, long-word wrapping for text-bearing parts, scalable padding and focus-ring space. Hidden retained Content must remain actually hidden; style does not overwrite canonical state or introduce fixed content height. Root reserves right and bottom space equal to the Trigger translation so hover/press does not enlarge Root scroll bounds; retain the existing transparent hit envelope rather than clipping it.
+      zh-CN: 保留 min-width zero、有界 max-width、文字 part 长词换行、可缩放 padding 与 focus ring 空间。关闭保留的 Content 必须实际隐藏；样式不得改写 canonical state 或引入固定内容高度。 Root 在右侧和底部保留与 Trigger translation 等量的空间，避免 hover/press 扩大 Root scroll bounds；保留现有透明 hit envelope，不以裁切掩盖它。
 openQuestions:
   - id: P-BRUTALIST-COLLAPSIBLE-Q-ADMISSION
     question:
@@ -50,6 +50,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Introduced the direct family projection with complete Base inheritance, safe layout, source/package boundaries and explicitly unexecuted native/material evidence.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Reserve scalable Trigger displacement after exact-source native evidence measured 8px Root overflow at 200% root text size.
 tags:
   - prototype
   - brutalist

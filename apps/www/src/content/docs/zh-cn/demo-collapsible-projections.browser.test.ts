@@ -3,16 +3,18 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
-import type { Browser, Locator } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES,
+  choosePreviewRuntime,
   launchBrowser,
   openRoute,
   selectRuntime,
   startServer,
   stopServer,
 } from './browser-harness';
+import { revealHeaderPreferences } from './site-header-browser';
 
 const FAMILIES = ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const;
 const route = (family: string, language = 'en') =>
@@ -38,6 +40,30 @@ async function absentContent(root: Locator): Promise<void> {
   for (const placeholder of await root.locator('[data-pui-view-detached]').all()) {
     expect(await placeholder.isVisible()).toBe(false);
   }
+}
+
+async function selectCollapsibleRuntime(
+  page: Page,
+  previewer: Locator,
+  family: string,
+  runtime: (typeof RUNTIMES)[number]
+): Promise<void> {
+  if (family === 'shadcn' || family === 'brutalist')
+    return selectRuntime(page, previewer, runtime, '[aria-expanded]', 4);
+  // These two families do not claim a Select. The existing site Header owns
+  // preference UI outside the demo; select through its actual native clicks.
+  const openedMenu = await revealHeaderPreferences(page);
+  const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
+  await choosePreviewRuntime(page, preferences, runtime);
+  if (openedMenu) {
+    const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+    if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+  }
+  await expect.poll(() => previewer.getAttribute('data-projection-runtime')).toBe(runtime);
+  await expect.poll(() => previewer.getAttribute('data-projection-state')).toBe('ready');
+  await expect
+    .poll(() => previewer.locator('[data-projection-content] [aria-expanded]').count())
+    .toBe(4);
 }
 
 async function expanded(button: Locator, value: boolean): Promise<void> {
@@ -217,7 +243,7 @@ for (const family of FAMILIES) {
         });
         try {
           await trackInput(previewer);
-          await selectRuntime(page, previewer, runtime, '[aria-expanded]', 4);
+          await selectCollapsibleRuntime(page, previewer, family, runtime);
           const uncontrolled = disclosure(previewer, 'uncontrolled');
           const retained = disclosure(previewer, 'retained');
           const disabled = disclosure(previewer, 'disabled');
@@ -316,7 +342,7 @@ for (const family of FAMILIES) {
           // proves the old physical views no longer belong to the live surface.
           const oldViews = await previewer.locator('.host [data-pui-root]').elementHandles();
           const nextRuntime = RUNTIMES[(RUNTIMES.indexOf(runtime) + 1) % RUNTIMES.length]!;
-          await selectRuntime(page, previewer, nextRuntime, '[aria-expanded]', 4);
+          await selectCollapsibleRuntime(page, previewer, family, nextRuntime);
           for (const view of oldViews)
             expect(await view.evaluate((element) => element.isConnected)).toBe(false);
           await expanded(trigger(disclosure(previewer, 'uncontrolled')), false);
@@ -335,7 +361,7 @@ for (const family of FAMILIES) {
         });
         try {
           await trackInput(previewer);
-          await selectRuntime(page, previewer, runtime, '[aria-expanded]', 4);
+          await selectCollapsibleRuntime(page, previewer, family, runtime);
           await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
           const root = disclosure(previewer, 'uncontrolled');
           await trigger(root).click();
@@ -345,7 +371,7 @@ for (const family of FAMILIES) {
               document.documentElement.dataset.theme = value;
               document.documentElement.classList.toggle('dark', value === 'dark');
             }, theme);
-            for (const target of [root, trigger(root), content(root)]) {
+            for (const target of [root, content(root)]) {
               const geometry = await target.evaluate((node) => {
                 const element = node as HTMLElement;
                 const box = element.getBoundingClientRect();
@@ -364,6 +390,37 @@ for (const family of FAMILIES) {
               expect(geometry.left).toBeGreaterThanOrEqual(0);
               expect(geometry.right).toBeLessThanOrEqual(320);
               expect(geometry.scrollWidth - geometry.clientWidth).toBeLessThanOrEqual(1);
+            }
+            const textBounds = await trigger(root).evaluate((node) => {
+              const host = node as HTMLElement;
+              const box = host.getBoundingClientRect();
+              const style = getComputedStyle(host);
+              const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+              const lines: Array<{ left: number; right: number }> = [];
+              while (walker.nextNode()) {
+                const text = walker.currentNode;
+                if (!text.textContent?.trim()) continue;
+                const range = document.createRange();
+                range.selectNodeContents(text);
+                for (const rect of range.getClientRects())
+                  if (rect.width > 0) lines.push({ left: rect.left, right: rect.right });
+              }
+              return {
+                left: box.left,
+                right: box.right,
+                contentLeft:
+                  box.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft),
+                contentRight:
+                  box.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight),
+                lines,
+              };
+            });
+            expect(textBounds.left).toBeGreaterThanOrEqual(0);
+            expect(textBounds.right).toBeLessThanOrEqual(320);
+            expect(textBounds.lines.length).toBeGreaterThan(0);
+            for (const line of textBounds.lines) {
+              expect(line.left).toBeGreaterThanOrEqual(textBounds.contentLeft - 1);
+              expect(line.right).toBeLessThanOrEqual(textBounds.contentRight + 1);
             }
             for (const target of [trigger(root), content(root)]) {
               const padding = await target.evaluate((node) => {
@@ -393,7 +450,7 @@ for (const family of FAMILIES) {
       );
       try {
         await trackInput(previewer);
-        await selectRuntime(page, previewer, 'vue2', '[aria-expanded]', 4);
+        await selectCollapsibleRuntime(page, previewer, family, 'vue2');
         const root = disclosure(previewer, 'uncontrolled');
         await trigger(root).click();
         await expanded(trigger(root), true);

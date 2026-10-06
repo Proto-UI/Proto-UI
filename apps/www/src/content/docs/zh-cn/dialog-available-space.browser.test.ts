@@ -101,6 +101,8 @@ async function facts(dialog: Locator) {
         property: 'transitionProperty' in a ? a.transitionProperty : null,
       })),
       overflowY: s.overflowY,
+      scrollWidth: e.scrollWidth,
+      clientWidth: e.clientWidth,
       scrollHeight: e.scrollHeight,
       clientHeight: e.clientHeight,
       scrollTop: e.scrollTop,
@@ -166,6 +168,65 @@ async function settle(dialog: Locator) {
     await Promise.all(e.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => {})));
   });
 }
+async function reachableActions(page: Page, dialog: Locator) {
+  const actions = dialog.getByRole('button');
+  const count = await actions.count();
+  expect(count).toBeGreaterThan(0);
+  const names: string[] = [];
+  for (let index = 0; index < count; index++) {
+    const action = actions.nth(index);
+    await action.scrollIntoViewIfNeeded();
+    const fact = await action.evaluate((e) => {
+      const dialog = e.closest('[role="dialog"]')!;
+      const r = e.getBoundingClientRect(),
+        d = dialog.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      return {
+        text: e.textContent?.trim() ?? '',
+        left: r.left,
+        right: r.right,
+        contentLeft: d.left + dialog.clientLeft,
+        contentRight: d.left + dialog.clientLeft + dialog.clientWidth,
+        width: r.width,
+        height: r.height,
+        hit: !!hit && e.contains(hit),
+      };
+    });
+    names.push(fact.text);
+    expect(fact.left).toBeGreaterThanOrEqual(fact.contentLeft - 1);
+    expect(fact.right).toBeLessThanOrEqual(fact.contentRight + 1);
+    expect(fact.width).toBeGreaterThan(0);
+    expect(fact.height).toBeGreaterThan(0);
+    expect(fact.hit).toBe(true);
+    await action.focus();
+    expect(
+      await action.evaluate(
+        (e) => e === document.activeElement || e.contains(document.activeElement)
+      )
+    ).toBe(true);
+  }
+  // Verify real sequential navigation, not only programmatic focusability.
+  if (count > 1) {
+    await actions.first().focus();
+    for (let index = 1; index < count; index++) {
+      await page.keyboard.press('Tab');
+      expect(
+        await actions
+          .nth(index)
+          .evaluate((e) => e === document.activeElement || e.contains(document.activeElement))
+      ).toBe(true);
+    }
+    for (let index = count - 2; index >= 0; index--) {
+      await page.keyboard.press('Shift+Tab');
+      expect(
+        await actions
+          .nth(index)
+          .evaluate((e) => e === document.activeElement || e.contains(document.activeElement))
+      ).toBe(true);
+    }
+  }
+  return names;
+}
 function bounded(data: Awaited<ReturnType<typeof facts>>) {
   const r = data.rect,
     v = data.viewport,
@@ -205,6 +266,10 @@ for (const family of ['shadcn', 'brutalist'] as const)
           undefined,
           { timeout: 30_000 }
         );
+        const offered = await previewer.getAttribute('data-runtimes');
+        if (offered && !JSON.parse(offered).includes(runtime)) {
+          throw new Error(`RuntimeNotOffered:${family}/${runtime}:${offered}`);
+        }
         await selectRuntime(page, previewer, runtime, '[aria-haspopup="dialog"]', 1);
         const trigger = page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first();
         await trigger.click();
@@ -231,11 +296,28 @@ for (const family of ['shadcn', 'brutalist'] as const)
           bounded(immediate);
           expect(immediate.paint.transitionProperty).not.toBe('all');
           bounded(data);
+          expect(data.scrollWidth, 'Content has no hidden horizontal overflow').toBeLessThanOrEqual(
+            data.clientWidth + 1
+          );
           expect(data.mask?.x).toBe(0);
           expect(data.mask?.y).toBe(0);
           expect(data.mask?.width).toBe(width);
           expect(data.mask?.height).toBe(900);
           expect(await identity?.evaluate((e) => e.isConnected)).toBe(true);
+        }
+        if (family === 'shadcn') {
+          // Explicit localized-text stress fixture; preserve the existing text node,
+          // prototype, DOM order, handlers and layout. No style override.
+          await dialog.getByRole('button', { name: 'Save changes', exact: true }).evaluate((e) => {
+            const walker = document.createTreeWalker(e, NodeFilter.SHOW_TEXT);
+            for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+              if (node.textContent?.trim() === 'Save changes') {
+                node.textContent = '保存全部个人资料更改并继续下一步';
+                return;
+              }
+            }
+            throw new Error('Missing original action label text node');
+          });
         }
         await page.setViewportSize({ width: 390, height: 360 });
         // Test-only content fixture, no geometry/style/measurement override on the component.
@@ -247,9 +329,13 @@ for (const family of ['shadcn', 'brutalist'] as const)
           e.append(paragraph);
         });
         await page.evaluate(() => (document.documentElement.style.fontSize = '200%'));
+        await settle(dialog);
         await frames(page);
         const long = await capture(page, dialog, `${family}-${runtime}-long-font200`);
         bounded(long);
+        expect(long.scrollWidth, 'Long-content actions fit the inline region').toBeLessThanOrEqual(
+          long.clientWidth + 1
+        );
         expect(long.overflowY).toBe('auto');
         expect(long.scrollHeight).toBeGreaterThan(long.clientHeight);
         await dialog.evaluate((e) => {
@@ -257,6 +343,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
         });
         await frames(page);
         expect((await facts(dialog)).scrollTop).toBeGreaterThan(0);
+        await reachableActions(page, dialog);
         const longClose = dialog.locator('[data-pui-a11y-actions="activate"]').first();
         await longClose.scrollIntoViewIfNeeded();
         expect(
@@ -272,8 +359,14 @@ for (const family of ['shadcn', 'brutalist'] as const)
         await page.setViewportSize({ width: 430, height: 900 });
         const cdp = await context.newCDPSession(page);
         await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 2 });
+        await settle(dialog);
         await frames(page);
-        bounded(await capture(page, dialog, `${family}-${runtime}-scale2`));
+        const zoom = await capture(page, dialog, `${family}-${runtime}-scale2`);
+        bounded(zoom);
+        expect(zoom.scrollWidth, 'Zoomed actions fit the inline region').toBeLessThanOrEqual(
+          zoom.clientWidth + 1
+        );
+        await reachableActions(page, dialog);
         await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1 });
         await cdp.detach();
         await frames(page);
@@ -299,6 +392,9 @@ for (const family of ['shadcn', 'brutalist'] as const)
         const id = `${family}-${runtime}-failure`;
         const setup = await page.evaluate(() => ({
           url: location.pathname,
+          offeredRuntimes: document
+            .querySelector('[data-previewer-id]')
+            ?.getAttribute('data-runtimes'),
           controls: Array.from(document.querySelectorAll('[role="combobox"]')).map((e) => ({
             id: e.id,
             text: e.textContent,

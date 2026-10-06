@@ -72,6 +72,20 @@ describe('prototypes/shadcn: button', () => {
     tokens = controller.getRuleStyleTokens();
     expect(tokens).toContain('border-border');
 
+    rawProps = { wrap: true, size: 'default' };
+    controller.applyRawProps(rawProps as any);
+    tokens = controller.getRuleStyleTokens();
+    expect(tokens).toContain('whitespace-normal');
+    expect(tokens).toContain('min-h-8');
+    expect(tokens).toContain('max-w-full');
+    expect(tokens).not.toContain('h-8');
+    expect(tokens).not.toContain('whitespace-nowrap');
+    rawProps = { wrap: true, size: 'icon' };
+    controller.applyRawProps(rawProps as any);
+    tokens = controller.getRuleStyleTokens();
+    expect(tokens).toContain('size-8');
+    expect(tokens).not.toContain('whitespace-normal');
+
     rawProps = {};
     controller.applyRawProps(rawProps as any);
     tokens = controller.getRuleStyleTokens();

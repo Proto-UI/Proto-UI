@@ -218,3 +218,11 @@ fn the_new_family_geometry_runs_through_layout_and_paint(cx: &mut gpui::TestAppC
     assert_eq!(liquid.size.width, px(42.));
     assert_eq!(liquid.size.height, px(18.));
 }
+
+#[gpui::test]
+fn automatic_height_retains_the_authored_minimum_in_native_layout(
+    cx: &mut gpui::TestAppContext,
+) {
+    let bounds = lay_out(cx, &["relative", "h-auto", "min-h-8"], "shadcn");
+    assert_eq!(bounds.size.height, px(32.0));
+}

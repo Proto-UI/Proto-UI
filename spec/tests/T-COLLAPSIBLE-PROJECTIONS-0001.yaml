@@ -197,7 +197,7 @@ implementations:
       - Finite CSS and four-Web facade/source-only boundaries; no package registry publication.
   - id: native-browser
     kind: workspace-check
-    status: planned
+    status: failing
     required: true
     path: apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
     consumesCases:
@@ -218,8 +218,9 @@ implementations:
       - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
       - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
     notes:
-      - Implemented/registered journeys and exact-head capture CI, but local browser socket restrictions mean no execution or screenshot pass is claimed.
-      - Includes 16 family/runtime interaction journeys, 16 320px/200%-type light+dark journeys and four Chinese narrow pages. GPUI optical material is not established by browser evidence.
+      - 'Exact-source native run 37530646701 at fc5effc99779aca637acaa06789937cef1414cf1 executed all 36 journeys: 14 passed and 22 failed. Four failures measured 8px Brutalist Root overflow at 320px/200% type; eighteen Bootstrap/Liquid failures stopped at a missing family-Select toolbar. Preserve this historical failure.'
+      - The current source reserves Brutalist translation space and makes the two private-family pages use their existing site Header preference control outside the demo. It keeps strict Root/Content bounds and checks Trigger text ranges separately from its intentional transparent hit envelope. A fresh exact-head native rerun and actual captures remain required.
+      - Artifact 11444562949 holds 50 real PNGs and 50 JSON sidecars plus source SHA; screenshots have actual source/runtime/viewport/theme, geometry and input provenance. They are state comparisons, not an invented earlier implementation or proof for later source. GPUI/optical paint remain separate.
   - id: gpui-peer-model
     kind: adapter-test
     status: passing
@@ -263,6 +264,22 @@ implementations:
       - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
     notes:
       - Three real-Runtime typed-intent/lifecycle tests pass on the validation union of Collapsible df699, shared facade tree f426e2a5 and shared text-alignment correction 46ddc381. This dependent consumer must integrate with those shared API/correction sources; no host paint claim.
+  - id: private-family-public-previewer
+    kind: adapter-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/collapsible-previewer.integration.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+    exercises:
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - Two bilingual source checks and eight actual framework caller checks mount the real DemoSpecs without requiring a nonexistent family Select. The existing document preference event remounts the renderer; browser native Header clicks are separately exercised by the native suite.
 verifies:
   prototypes:
     - id: P-SHADCN-COLLAPSIBLE

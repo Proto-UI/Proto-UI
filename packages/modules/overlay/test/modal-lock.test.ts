@@ -1,4 +1,4 @@
-import { afterEach, expect, it } from 'vitest';
+import { afterEach, expect, it, vi } from 'vitest';
 import { createWebOverlayModal } from '../src/web/modal-lock';
 
 const SCROLLBAR_WIDTH = 15;
@@ -10,6 +10,17 @@ function stubScrollbarWidth(width: number, removed = true, left = false): () => 
   const clientWidth = Object.getOwnPropertyDescriptor(root, 'clientWidth');
   const clientLeft = Object.getOwnPropertyDescriptor(root, 'clientLeft');
   Object.defineProperty(view, 'innerWidth', { configurable: true, value: 1000 });
+  const rect = vi.spyOn(root, 'getBoundingClientRect').mockImplementation(() => ({
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: root.clientWidth,
+    bottom: 800,
+    width: root.clientWidth,
+    height: 800,
+    toJSON() {},
+  }));
   const hidden = () => removed && document.body.style.overflow === 'hidden';
   Object.defineProperty(root, 'clientWidth', {
     configurable: true,
@@ -20,6 +31,7 @@ function stubScrollbarWidth(width: number, removed = true, left = false): () => 
     get: () => (left && !hidden() ? width : 0),
   });
   return () => {
+    rect.mockRestore();
     if (innerWidth) Object.defineProperty(view, 'innerWidth', innerWidth);
     if (clientWidth) Object.defineProperty(root, 'clientWidth', clientWidth);
     else Reflect.deleteProperty(root, 'clientWidth');
@@ -122,4 +134,25 @@ it('compensates an actually removed left scrollbar on the left and preserves bot
   expect(document.body.style.getPropertyValue('padding-left')).toBe('7px');
   expect(document.body.style.getPropertyPriority('padding-left')).toBe('important');
   expect(document.body.style.getPropertyValue('padding-right')).toBe('11px');
+});
+
+it('does not compensate viewport growth when a stable root border box retains the gutter', () => {
+  restore = stubScrollbarWidth(15);
+  const root = document.documentElement;
+  vi.mocked(root.getBoundingClientRect).mockImplementation(() => ({
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: 985,
+    bottom: 800,
+    width: 985,
+    height: 800,
+    toJSON() {},
+  }));
+  const modal = createWebOverlayModal(document);
+  modal.lock();
+  expect(root.clientWidth).toBe(1000);
+  expect(document.body.style.paddingRight).toBe('');
+  modal.unlock();
 });

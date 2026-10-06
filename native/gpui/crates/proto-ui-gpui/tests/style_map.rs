@@ -997,3 +997,46 @@ fn explicit_no_selection_matches_plain_native_text_without_claiming_selection_su
         .unmapped_properties()
         .contains(&"user-select"));
 }
+
+#[test]
+fn intrinsic_dialog_tokens_reach_the_exact_public_gpui_fields() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("height", "auto"),
+            ("flex-wrap", "wrap-reverse"),
+            ("grid-template-columns", "repeat(1, minmax(0, 1fr))"),
+        ]),
+        LengthContext::default(),
+    );
+    assert!(mapped.is_complete(), "{:?}", mapped.unmapped);
+    assert_eq!(mapped.refinement.size.height, Some(Length::Auto));
+    assert_eq!(mapped.refinement.flex_wrap, Some(gpui::FlexWrap::WrapReverse));
+    let columns = mapped
+        .refinement
+        .grid_cols
+        .expect("one canonical fractional column");
+    assert_eq!(columns.repeat, 1);
+    assert!(matches!(columns.min_size, gpui::GridTemplateMinSize::Zero));
+}
+
+#[test]
+fn intrinsic_token_mapping_does_not_guess_other_keywords_or_grid_forms() {
+    for (property, value) in [
+        ("height", "fit-content"),
+        ("height", "max-content"),
+        ("flex-wrap", "invented-wrap"),
+        ("grid-template-columns", "repeat(2, minmax(0, 1fr))"),
+        ("grid-template-columns", "minmax(auto, 1fr)"),
+        ("grid-template-columns", "subgrid"),
+    ] {
+        let mapped = map(
+            &declared(&[("position", "relative"), (property, value)]),
+            LengthContext::default(),
+        );
+        assert!(!mapped.is_complete(), "{property}: {value}");
+        assert_eq!(mapped.refinement.size.height, None);
+        assert_eq!(mapped.refinement.flex_wrap, None);
+        assert!(mapped.refinement.grid_cols.is_none());
+    }
+}

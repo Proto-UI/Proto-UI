@@ -1,11 +1,19 @@
 /** Active Web geometry leases share this root-space observation, never a frame poll. */
-type RootSpace = Readonly<{ width: number; height: number; left: number }>;
+type RootSpace = Readonly<{
+  width: number;
+  height: number;
+  left: number;
+  boxWidth: number;
+  boxLeft: number;
+}>;
 type Tracker = { listeners: Set<() => void>; dispose(): void };
 const roots = new WeakMap<Document, Tracker>();
 const read = (root: HTMLElement): RootSpace => ({
   width: root.clientWidth,
   height: root.clientHeight,
   left: root.clientLeft,
+  boxWidth: root.getBoundingClientRect().width,
+  boxLeft: root.getBoundingClientRect().left + (root.ownerDocument.defaultView?.scrollX ?? 0),
 });
 export function observeRootSpace(document: Document, listener: () => void): () => void {
   const root = document.documentElement,
@@ -22,7 +30,9 @@ export function observeRootSpace(document: Document, listener: () => void): () =
       if (
         next.width === previous.width &&
         next.height === previous.height &&
-        next.left === previous.left
+        next.left === previous.left &&
+        next.boxWidth === previous.boxWidth &&
+        next.boxLeft === previous.boxLeft
       )
         return;
       previous = next;

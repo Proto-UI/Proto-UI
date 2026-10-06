@@ -60,6 +60,8 @@ for (const [family, entries, visualToken] of families) {
       expect(styleContains(trigger, 'wrap-anywhere')).toBe(true);
       expect(styleContains(content, 'wrap-anywhere')).toBe(true);
       if (family === 'brutalist') {
+        expect(styleContains(root, 'pr-1')).toBe(true);
+        expect(styleContains(root, 'pb-1')).toBe(true);
         expect(styleContains(content, 'font-sans')).toBe(true);
         expect(styleContains(content, 'font-medium')).toBe(true);
       }

@@ -96,6 +96,10 @@ describe('prototypes/shadcn: dialog', () => {
         'max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]'
       )
     ).toBe(true);
+    expect(styleContains(content, 'grid-cols-1')).toBe(true);
+    expect(styleContains(header, 'min-w-0')).toBe(true);
+    expect(styleContains(footer, 'flex-wrap-reverse')).toBe(true);
+    expect(styleContains(footer, 'justify-end')).toBe(true);
     expect(styleContains(content, 'rounded-lg')).toBe(true);
     expect(styleContains(content, 'shadow-lg')).toBe(true);
     expect(styleContains(content, 'data-[open]:animate-in')).toBe(true);

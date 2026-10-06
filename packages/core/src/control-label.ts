@@ -41,7 +41,9 @@ export type ControlLabelFacade = {
 /** Dedicated instance-association input; never part of portable JSON Props. */
 export type InstanceAssociations = Readonly<{ controlLabel?: ControlLabelRef | null }>;
 export function validateInstanceAssociations(input: unknown): InstanceAssociations {
-  if (input === undefined) return Object.freeze({});
+  // Even omitted input needs an own empty value in its normalized snapshot;
+  // an empty ordinary object could otherwise expose an inherited association.
+  if (input === undefined) return Object.freeze({ controlLabel: null });
   if (
     !input ||
     typeof input !== 'object' ||
@@ -50,11 +52,13 @@ export function validateInstanceAssociations(input: unknown): InstanceAssociatio
   ) {
     throw new TypeError('[InstanceAssociations] expected the explicit typed association input');
   }
-  for (const key of Object.keys(input)) {
+  for (const key of Object.getOwnPropertyNames(input)) {
     if (key !== 'controlLabel')
       throw new TypeError(`[InstanceAssociations] unsupported association: ${key}`);
   }
-  const ref = (input as InstanceAssociations).controlLabel;
+  const ref = Object.prototype.hasOwnProperty.call(input, 'controlLabel')
+    ? (input as InstanceAssociations).controlLabel
+    : null;
   if (ref != null && !isControlLabelRef(ref))
     throw new TypeError(
       '[InstanceAssociations] controlLabel requires a public opaque reference; attribute/static JSON values have no lowering'

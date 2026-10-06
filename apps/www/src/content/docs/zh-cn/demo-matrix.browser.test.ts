@@ -5,9 +5,10 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RUNTIMES, launchBrowser, openRoute, startServer, stopServer } from './browser-harness';
+import { RUNTIMES, launchBrowser, startServer, stopServer } from './browser-harness';
 import {
   matrixHostsReady,
+  collectMatrixReadinessDiagnostics,
   collectMatrixInteractiveFacts,
   type InteractiveFact,
 } from './demo-matrix-observation';
@@ -51,26 +52,183 @@ const INTERACTIVE_ROLES = [
   'textbox',
 ] as const;
 
+type MatrixDiagnosticState = {
+  caseName: string;
+  phase: string;
+  sequence: number;
+  pageErrors: Array<{ name: string; message: string; stack: string | null; at: string }>;
+};
+const matrixDiagnostics = new WeakMap<Page, MatrixDiagnosticState>();
+const diagnosticSourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+
+async function persistReadinessDiagnostic(
+  page: Page,
+  phase: string,
+  outcome: string,
+  error?: unknown
+): Promise<void> {
+  const state = matrixDiagnostics.get(page);
+  if (!state) return;
+  state.phase = phase;
+  const sequence = ++state.sequence;
+  const header = {
+    sourceSha: diagnosticSourceSha,
+    caseName: state.caseName,
+    phase,
+    outcome,
+    sequence,
+    at: new Date().toISOString(),
+    viewport: page.viewportSize(),
+    error:
+      error instanceof Error
+        ? { name: error.name, message: error.message, stack: error.stack ?? null }
+        : error == null
+          ? null
+          : String(error),
+  };
+  // Emit before any page evaluation so a blocked renderer cannot erase the
+  // precise case/phase at the outer runner's existing termination boundary.
+  console.log(`[demo-matrix-readiness] ${JSON.stringify(header)}`);
+  const root =
+    process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
+  if (!root) return;
+  const directory = join(root, 'demo-matrix', 'readiness');
+  const file = join(
+    directory,
+    `${page.viewportSize()?.width ?? 0}-${state.caseName.replace(/[^a-zA-Z0-9]+/g, '-').slice(-110)}-${sequence}-${phase}.json`
+  );
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    await mkdir(directory, { recursive: true });
+    // Write the durable header first. Snapshot timeout affects diagnostics only,
+    // never either original 60-second wait, assertions, or availability.
+    await writeFile(
+      file,
+      JSON.stringify(
+        { ...header, pageErrors: [...state.pageErrors], snapshot: null, snapshotStatus: 'pending' },
+        null,
+        2
+      )
+    );
+    const snapshot = await Promise.race([
+      page.evaluate(collectMatrixReadinessDiagnostics, RUNTIMES.length),
+      new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('Read-only diagnostic snapshot unavailable within 1000ms')),
+          1000
+        );
+      }),
+    ]);
+    await writeFile(
+      file,
+      JSON.stringify(
+        { ...header, pageErrors: [...state.pageErrors], snapshot, snapshotStatus: 'captured' },
+        null,
+        2
+      )
+    );
+  } catch (snapshotError) {
+    console.error(`[demo-matrix-diagnostic-unavailable] ${String(snapshotError)}`);
+    await writeFile(
+      file,
+      JSON.stringify(
+        {
+          ...header,
+          pageErrors: [...state.pageErrors],
+          snapshot: null,
+          snapshotStatus: 'unavailable',
+          snapshotError: String(snapshotError),
+        },
+        null,
+        2
+      )
+    ).catch((writeError) =>
+      console.error(`[demo-matrix-diagnostic-write-error] ${String(writeError)}`)
+    );
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+async function observeMatrixWait(
+  page: Page,
+  phase: string,
+  wait: () => Promise<unknown>
+): Promise<void> {
+  await persistReadinessDiagnostic(page, phase, 'started');
+  try {
+    await wait();
+  } catch (error) {
+    await persistReadinessDiagnostic(page, phase, 'failed', error);
+    throw error;
+  }
+  await persistReadinessDiagnostic(page, phase, 'passed');
+}
+
+async function openMatrixRoute(viewport: { width: number; height: number }) {
+  const context = await browser.newContext({ viewport });
+  const page = await context.newPage();
+  const state: MatrixDiagnosticState = {
+    caseName: expect.getState().currentTestName ?? 'unknown-case',
+    phase: 'route-open',
+    sequence: 0,
+    pageErrors: [],
+  };
+  matrixDiagnostics.set(page, state);
+  page.on('pageerror', (error) => {
+    const entry = {
+      name: error.name,
+      message: error.message.slice(0, 8000),
+      stack: error.stack?.slice(0, 8000) ?? null,
+      at: new Date().toISOString(),
+    };
+    if (state.pageErrors.length < 100) state.pageErrors.push(entry);
+    console.error(
+      `[demo-matrix-pageerror] ${JSON.stringify({ sourceSha: diagnosticSourceSha, caseName: state.caseName, phase: state.phase, ...entry })}`
+    );
+  });
+  await persistReadinessDiagnostic(page, 'route-open', 'started');
+  try {
+    // Preserve openRoute's exact navigation and first-visible-preview boundary.
+    await page.goto(`${baseUrl}${MATRIX_ROUTE}`, { waitUntil: 'networkidle' });
+    await page.locator('[data-previewer-id]').first().waitFor({ state: 'visible' });
+  } catch (error) {
+    await persistReadinessDiagnostic(page, 'route-open', 'failed', error);
+    await context.close();
+    throw error;
+  }
+  await persistReadinessDiagnostic(page, 'route-open', 'passed');
+  return { context, page };
+}
+
 async function waitForMatrix(page: Page): Promise<void> {
-  await page.waitForFunction(
-    (runtimeCount) => {
-      const demos = document.querySelectorAll('.demo-matrix__item').length;
-      const previewers = document.querySelectorAll('[data-previewer-id]').length;
-      const initialized = document.querySelectorAll('[data-previewer-id][data-inited="1"]').length;
-      const unavailable = document.querySelectorAll(
-        '.demo-matrix__adapter[data-unavailable]'
-      ).length;
-      return (
-        demos > 0 && previewers === demos * runtimeCount - unavailable && initialized === previewers
-      );
-    },
-    RUNTIMES.length,
-    { timeout: 60_000 }
+  await observeMatrixWait(page, 'inited-count', () =>
+    page.waitForFunction(
+      (runtimeCount) => {
+        const demos = document.querySelectorAll('.demo-matrix__item').length;
+        const previewers = document.querySelectorAll('[data-previewer-id]').length;
+        const initialized = document.querySelectorAll(
+          '[data-previewer-id][data-inited="1"]'
+        ).length;
+        const unavailable = document.querySelectorAll(
+          '.demo-matrix__adapter[data-unavailable]'
+        ).length;
+        return (
+          demos > 0 &&
+          previewers === demos * runtimeCount - unavailable &&
+          initialized === previewers
+        );
+      },
+      RUNTIMES.length,
+      { timeout: 60_000 }
+    )
   );
 
   // A connected skeleton or laid-out staging generation is not a completed
   // projection. Observe the existing commit boundary, never signature parity.
-  await page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000 });
+  await observeMatrixWait(page, 'committed-host-readiness', () =>
+    page.waitForFunction(matrixHostsReady, undefined, { timeout: 60_000 })
+  );
 }
 
 async function readMatrixFacts(page: Page): Promise<MatrixFacts> {
@@ -242,7 +400,7 @@ afterAll(async () => {
 
 describe.sequential('Website Demo Matrix browser smoke', () => {
   it('mounts every demo in every official Web adapter', async () => {
-    const { context, page } = await openRoute(browser, baseUrl, MATRIX_ROUTE, {
+    const { context, page } = await openMatrixRoute({
       width: 1440,
       height: 900,
     });
@@ -293,13 +451,14 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await chooseGlobalAdapter(page, 'react');
       await reactBroadcast;
     } finally {
+      await persistReadinessDiagnostic(page, 'case-finally', 'observed');
       await context.close();
     }
   }, 180_000);
 
   for (const width of [320, 390]) {
     it(`keeps the matrix readable at ${width}px`, async () => {
-      const { context, page } = await openRoute(browser, baseUrl, MATRIX_ROUTE, {
+      const { context, page } = await openMatrixRoute({
         width,
         height: 900,
       });
@@ -316,13 +475,14 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
         expect(facts.unavailable).toEqual([]);
         expect(facts.previewers).toBe(facts.demos * RUNTIMES.length);
       } finally {
+        await persistReadinessDiagnostic(page, 'case-finally', 'observed');
         await context.close();
       }
     }, 180_000);
   }
 
   it('moves focus into the Base Dialog content in every runtime', async () => {
-    const { context, page } = await openRoute(browser, baseUrl, MATRIX_ROUTE, {
+    const { context, page } = await openMatrixRoute({
       width: 1440,
       height: 900,
     });
@@ -381,6 +541,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
           .toBe(true);
       }
     } finally {
+      await persistReadinessDiagnostic(page, 'case-finally', 'observed');
       await context.close();
     }
   }, 180_000);

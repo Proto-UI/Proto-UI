@@ -238,3 +238,115 @@ it('rebinds the observation when a live target migrates to another document', ()
   expect(other.querySelector('[data-pui-available-space-probe]')).toBeNull();
   expect(target.style.getPropertyValue(key)).toBe('');
 });
+
+it('intersects the visual viewport with a retained root gutter and withdraws an unknown root box', () => {
+  const root = document.documentElement,
+    view = document.defaultView!;
+  const saved = ['clientWidth', 'clientLeft', 'clientHeight'].map(
+    (key) => [key, Object.getOwnPropertyDescriptor(root, key)] as const
+  );
+  Object.defineProperties(root, {
+    clientWidth: { configurable: true, value: 390 },
+    clientLeft: { configurable: true, value: 0 },
+    clientHeight: { configurable: true, value: 900 },
+  });
+  let width = 375;
+  vi.spyOn(root, 'getBoundingClientRect').mockImplementation(() => ({
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: width,
+    bottom: 900,
+    width,
+    height: 900,
+    toJSON() {},
+  }));
+  const originalStyle = view.getComputedStyle.bind(view);
+  vi.spyOn(view, 'getComputedStyle').mockImplementation((el) =>
+    el.hasAttribute('data-pui-available-space-probe')
+      ? ({
+          paddingTop: '0px',
+          paddingRight: '0px',
+          paddingBottom: '0px',
+          paddingLeft: '0px',
+        } as CSSStyleDeclaration)
+      : originalStyle(el)
+  );
+  const target = document.createElement('div');
+  document.body.append(target);
+  const lease = createWebAvailableSpaceHost().attach({
+    target,
+    boundary: 'root-content',
+    viewEpoch: 1,
+  });
+  try {
+    expect(target.style.getPropertyValue(key)).toBe('375px');
+    expect(target.style.getPropertyValue('--proto-ui-available-region-center-x')).toBe('187.5px');
+    width = 0;
+    lease.requestUpdate();
+    expect(target.style.getPropertyValue(key)).toBe('');
+  } finally {
+    lease.dispose();
+    for (const [key, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(root, key, descriptor);
+      else Reflect.deleteProperty(root, key);
+    }
+  }
+});
+
+it('keeps the full left-gutter client width when visualViewport is unavailable', () => {
+  const root = document.documentElement,
+    view = document.defaultView!;
+  const saved = ['clientWidth', 'clientLeft', 'clientHeight'].map(
+    (key) => [key, Object.getOwnPropertyDescriptor(root, key)] as const
+  );
+  const savedViewport = Object.getOwnPropertyDescriptor(view, 'visualViewport');
+  Object.defineProperty(view, 'visualViewport', { configurable: true, value: undefined });
+  Object.defineProperties(root, {
+    clientWidth: { configurable: true, value: 375 },
+    clientLeft: { configurable: true, value: 0 },
+    clientHeight: { configurable: true, value: 900 },
+  });
+  vi.spyOn(root, 'getBoundingClientRect').mockImplementation(() => ({
+    x: 15,
+    y: 0,
+    left: 15,
+    top: 0,
+    right: 390,
+    bottom: 900,
+    width: 375,
+    height: 900,
+    toJSON() {},
+  }));
+  const originalStyle = view.getComputedStyle.bind(view);
+  vi.spyOn(view, 'getComputedStyle').mockImplementation((el) =>
+    el.hasAttribute('data-pui-available-space-probe')
+      ? ({
+          paddingTop: '0px',
+          paddingRight: '0px',
+          paddingBottom: '0px',
+          paddingLeft: '0px',
+        } as CSSStyleDeclaration)
+      : originalStyle(el)
+  );
+  const target = document.createElement('div');
+  document.body.append(target);
+  const lease = createWebAvailableSpaceHost().attach({
+    target,
+    boundary: 'root-content',
+    viewEpoch: 1,
+  });
+  try {
+    expect(target.style.getPropertyValue(key)).toBe('375px');
+    expect(target.style.getPropertyValue('--proto-ui-available-region-center-x')).toBe('202.5px');
+  } finally {
+    lease.dispose();
+    for (const [key, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(root, key, descriptor);
+      else Reflect.deleteProperty(root, key);
+    }
+    if (savedViewport) Object.defineProperty(view, 'visualViewport', savedViewport);
+    else Reflect.deleteProperty(view, 'visualViewport');
+  }
+});

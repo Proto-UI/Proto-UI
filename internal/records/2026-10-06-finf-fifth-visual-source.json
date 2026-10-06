@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-06T22:12:00Z",
+  "previousPublishedHead": "1d166ee703d2653cc32109dec914c31ae28bd869",
+  "Agent": "dot",
+  "ModelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "complete": false,
+  "sourcePackets": [
+    {
+      "topic": "Dialog genuine root-box gutter, intrinsic footer/actions, public Button.wrap, actual Vue2 page admission and fallback origin",
+      "commit": "a1e3f0db4956606b90a5e069427ad1dddac63422",
+      "review": "Root61 controls plus11fallback controls; original native failures preserved."
+    },
+    {
+      "topic": "Four Collapsible runtime inputs and Brutalist translation clearance",
+      "commit": "da44d520d650dcc252d6d146f0c9d6abb4cf8748",
+      "review": "Root10 direct public-preview caller controls; owner156 plusAstro522."
+    },
+    {
+      "topic": "Own-field association validation and legitimate WC L1 rollback counterevidence",
+      "tree": "388feb886ae6d174d744b956b09faebc745aace0",
+      "review": "Root18Core+3WC controls. Review4200497373 is an actual Core repair;4200497384 was not reproduced through supported L1, so no production WC change is claimed."
+    },
+    {
+      "topic": "Failure-before-timeout Demo Matrix readiness diagnostics",
+      "tree": "d6e0636f5a2a6c7f5753e43c43a95f72c99cde6c",
+      "review": "Root8 controls; original predicates, assertions and timeouts are unchanged. This observes rather than claims to fix the900s failure."
+    },
+    {
+      "topic": "Finite native intrinsic tokens for the actual343-token fixture",
+      "tree": "1c13059a9fb5bf4f550a7329b3d53ea49468b145",
+      "review": "Original-pin source review for wrap-reverse, canonical single-column grid and auto height. Local Rust execution was unavailable; native compile/layout tests remain required."
+    }
+  ],
+  "integratedVerification": {
+    "publicPackages": "45/45 with JS-only export smoke",
+    "workspaceTypes": "passed",
+    "websiteProduction": "327pages; actual production graph passed",
+    "prototypeCatalog": "212P identities,213declarations; zero known debt",
+    "specAuthoring": "6 changed inputs checked",
+    "publicDocs": "129 bilingual primary routes; four library inventories",
+    "existingCoverage": "Both consumer matrices passed, no further source binding exemption",
+    "focused": "11suites86passed",
+    "matrixObservation": "8passed",
+    "baselineClassification": "11passed",
+    "generatedStyle": "Shadcn334tokens,Brutalist319tokens;GPUI343compiled,6withoutdeclarations; generated from source"
+  },
+  "retainedFailures": {
+    "Dialog": "fc5 stable-gutter modal lock shifted7.5px; enlarged footer actions clipped; old ShadcnVue2 preview was unavailable.7matched before frames plus a separately recorded unavailable case are not8matched before pictures.",
+    "Collapsible": "fc5 only14/36passed; missing same-family preview Select and genuine narrow overflow caused22failures. Current source uses the existing website Header as its real runtime tool, not another library as a component projection.",
+    "Accordion": "1d native25 actually ran:12passed,13failed. Desktop Base/Shadcn/Brutalist cases provide real evidence; two private families need runtime-tool repair and three narrow cases need geometry diagnosis. Those new repairs are not silently included here.",
+    "GPUI": "1d material workflow, LinuxRust andT0passed; macOS reachedLabel but fixed-pin render_to_image is unimplemented, with no new screenshot. Screenshot bridge and larger AvailableSpace remain later candidates."
+  },
+  "budget": {
+    "originalExitCode": 1,
+    "failedGates": 4,
+    "gzipBytes": [
+      74541,
+      99893,
+      99702,
+      109229
+    ],
+    "policy": "Only a separately reviewed exact-cost child may adjust ceilings; preserve all prior red measurements."
+  },
+  "acceptance": "No delivery item is complete. New exact-head8Dialog/36Collapsible journeys, matrixdiagnostics, nativeintrinsic tests and complete four-family/GPUI/optical scope are still required."
+}

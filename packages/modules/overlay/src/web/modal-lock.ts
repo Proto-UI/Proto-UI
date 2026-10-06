@@ -24,6 +24,16 @@ function restoreInlineStyle(
   else el.style.removeProperty(property);
 }
 
+// Root clientWidth is the viewport width in standards mode and may grow even
+// when scrollbar-gutter:stable still reserves space inside the root border box.
+// Intersect both measurements instead of equating scrollbar disappearance with
+// newly usable page width. The rectangle also preserves the actual gutter side.
+function readPageInlineSpace(root: HTMLElement) {
+  const rect = root.getBoundingClientRect();
+  const width = Math.max(0, Math.min(root.clientWidth, rect.width));
+  return { width, left: rect.left + root.clientLeft };
+}
+
 /**
  * Web scroll-lock realization; one owner cannot release another owner's lock.
  * Compensates only the measured removed gutter on its actual side so the page does
@@ -39,7 +49,7 @@ export function createWebOverlayModal(doc: Document): OverlayModal {
       let lock = locks.get(body);
       if (!lock) {
         const root = doc.documentElement;
-        const before = { width: root.clientWidth, left: root.clientLeft };
+        const before = readPageInlineSpace(root);
         const computed = doc.defaultView?.getComputedStyle(body);
         const originalPadding = {
           left: Number.parseFloat(computed?.paddingLeft ?? ''),
@@ -54,8 +64,9 @@ export function createWebOverlayModal(doc: Document): OverlayModal {
         body.style.setProperty('overflow', 'hidden', lock.overflow.priority);
         // Reading after the lock flushes real layout. A root scrollbar or a
         // stable gutter may survive body overflow:hidden and need no padding.
-        const gained = Math.max(0, root.clientWidth - before.width);
-        const left = Math.min(gained, Math.max(0, before.left - root.clientLeft));
+        const after = readPageInlineSpace(root);
+        const gained = Math.max(0, after.width - before.width);
+        const left = Math.min(gained, Math.max(0, before.left - after.left));
         for (const [side, amount] of [
           ['left', left],
           ['right', gained - left],

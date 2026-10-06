@@ -11,7 +11,8 @@
 
 use gpui::{
     px, AbsoluteLength, AlignItems, CursorStyle, DefiniteLength, Display, Fill, FlexDirection,
-    FontFallbacks, Hsla, JustifyContent, Length, Overflow, Position, StyleRefinement,
+    FlexWrap, FontFallbacks, GridTemplate, GridTemplateMinSize, Hsla, JustifyContent, Length,
+    Overflow, Position, StyleRefinement,
 };
 use proto_ui_style::color::{parse as parse_color, ColorValue};
 use proto_ui_style::length::{evaluate as evaluate_length, Dimension, LengthContext};
@@ -195,7 +196,22 @@ fn apply(
             _ => return Err(Unmapped::UnsupportedValue),
         },
         "width" => style.size.width = Some(to_length(length(value)?)?),
-        "height" => style.size.height = Some(to_length(length(value)?)?),
+        "height" => {
+            style.size.height = Some(if value == "auto" {
+                Length::Auto
+            } else {
+                to_length(length(value)?)?
+            });
+        }
+        "flex-wrap" if value == "wrap-reverse" => {
+            style.flex_wrap = Some(FlexWrap::WrapReverse);
+        }
+        "grid-template-columns" if value == "repeat(1, minmax(0, 1fr))" => {
+            style.grid_cols = Some(GridTemplate {
+                repeat: 1,
+                min_size: GridTemplateMinSize::Zero,
+            });
+        }
         "min-width" => style.min_size.width = Some(to_length(length(value)?)?),
         "min-height" => style.min_size.height = Some(to_length(length(value)?)?),
         "max-width" => style.max_size.width = Some(to_length(length(value)?)?),

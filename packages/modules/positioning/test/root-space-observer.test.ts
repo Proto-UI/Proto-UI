@@ -134,3 +134,24 @@ it('delivers a root change to other live owners before surfacing a subscriber fa
   f.resize(390);
   expect(second).toHaveBeenCalledTimes(2);
 });
+
+it('notifies when retained root gutter changes its box while viewport clientWidth stays fixed', () => {
+  const f = fixture();
+  let width = 390;
+  vi.spyOn(f.root, 'getBoundingClientRect').mockImplementation(() => ({
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: width,
+    bottom: 800,
+    width,
+    height: 800,
+    toJSON() {},
+  }));
+  const update = vi.fn();
+  cleanup.push(observeRootSpace(document, update));
+  width = 375;
+  f.instances[0].fire();
+  expect(update).toHaveBeenCalledTimes(1);
+});
