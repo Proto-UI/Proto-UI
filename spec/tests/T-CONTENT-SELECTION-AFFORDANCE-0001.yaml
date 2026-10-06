@@ -18,6 +18,12 @@ cases:
       - C-CONTENT-SELECTION-AFFORDANCE-0001-WEB
     expectation: explicit-subject-local-css-without-global-suppression
 implementations:
+  - id: core-selection-affordance-subject-validation
+    kind: module-test
+    status: passing
+    path: packages/core/test/contract/feedback.style.v0.contract.test.ts
+    required: true
+    consumesCases: [T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-CSS]
   - id: feedback-selection-affordance-patch
     kind: module-test
     status: passing

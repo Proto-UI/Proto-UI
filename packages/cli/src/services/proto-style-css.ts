@@ -625,6 +625,11 @@ function appendSystemDarkThemeFallback(css: string): string {
 function renderTokenRule(token: string): CssRule | null {
   const parts = splitVariants(token);
   const utility = parts[parts.length - 1] ?? token;
+  // Internal translation artifacts may carry variants without passing through
+  // author validation. Never report inert highlight user-select CSS as support.
+  if (parts.slice(0, -1).includes('selection') && /^select-(auto|text|none)$/.test(utility)) {
+    return null;
+  }
   const css = renderUtility(utility);
   if (!css) return null;
   return { token, css };

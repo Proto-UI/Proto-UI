@@ -138,6 +138,9 @@ inherits:
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-CHECKBOX-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Declared content-selection suppression on the control root while retaining the independent Label association boundary.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Separated the pinned historical compatibility baseline from later official recipe evidence, pinned the exact compared revision, and settled the Indicator centering mechanism as an intentional adoption.

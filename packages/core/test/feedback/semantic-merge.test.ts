@@ -2,6 +2,16 @@ import { describe, it, expect } from 'vitest';
 import { mergeTwTokensV0 } from '../../src/spec/feedback/semantic-merge';
 
 describe('feedback.semantic-merge.v0', () => {
+  it('preserves unknown tokens that resemble the internal selection group', () => {
+    expect(mergeTwTokensV0(['user-select', 'select-none', 'select-text']).tokens).toEqual([
+      'user-select',
+      'select-text',
+    ]);
+    expect(mergeTwTokensV0(['select-none', 'user-select']).tokens).toEqual([
+      'select-none',
+      'user-select',
+    ]);
+  });
   it('resolves content-selection affordances last-wins without merging selection paint', () => {
     // T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-MERGE
     expect(

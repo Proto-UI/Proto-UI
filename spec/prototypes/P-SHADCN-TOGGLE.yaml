@@ -122,6 +122,9 @@ inherits:
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-TOGGLE-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Declared subject-local content-selection suppression without changing inherited activation or value ownership.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced delta-style Shadcn Toggle cataloging with reversible Base inheritance, pinned upstream identity, current visual API guarantees, intentional asChild omission, and centralized compatibility differences.

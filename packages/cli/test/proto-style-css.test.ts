@@ -8,6 +8,18 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it.each(['auto', 'text', 'none'])(
+    'diagnoses selection:select-%s instead of emitting inert highlight CSS',
+    (value) => {
+      const token = `selection:select-${value}`;
+      const css = renderProtoStyleTokenCss([token, `dark:${token}`]);
+      expect(css).toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain(`* - ${token}`);
+      expect(css).toContain(`* - dark:${token}`);
+      expect(css).not.toContain('::selection');
+      expect(css).not.toContain('user-select:');
+    }
+  );
   it('closes explicit content-selection affordances only on their authored subjects', () => {
     // T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-CSS
     const css = renderProtoStyleTokenCss(['select-auto', 'select-text', 'select-none']);

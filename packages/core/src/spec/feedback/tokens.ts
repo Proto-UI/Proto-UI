@@ -80,6 +80,11 @@ export function assertTwTokenV0(token: string, ctx?: string): void {
   if (token.includes(':')) {
     const selectionPrefix = 'selection:';
     if (token.startsWith(selectionPrefix) && !token.slice(selectionPrefix.length).includes(':')) {
+      if (/^select-(auto|text|none)$/.test(token.slice(selectionPrefix.length))) {
+        throw new Error(
+          `[feedback] invalid tw token${where}: content-selection affordances require the subject, not its selection highlight: "${token}"`
+        );
+      }
       if (selectionPayloadHasSelectorSyntax(token.slice(selectionPrefix.length))) {
         throw new Error(
           `[feedback] invalid tw token${where}: selector-like selection payload is forbidden in "${token}"`

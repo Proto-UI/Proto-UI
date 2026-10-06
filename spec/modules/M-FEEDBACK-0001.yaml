@@ -40,6 +40,8 @@ satisfies:
     - C-FEEDBACK-STYLE-0003
     - C-FEEDBACK-STYLE-0004
     - C-FEEDBACK-STYLE-0005
+    - id: C-CONTENT-SELECTION-AFFORDANCE-0001
+      since: 0.3.0-alpha.1
 requires:
   hostCaps:
     - HC-FEEDBACK-STYLE-SINK-0001
@@ -57,6 +59,8 @@ verifies:
     - T-FEEDBACK-STYLE-0001
     - T-FEEDBACK-STYLE-0002
     - T-RULE-INTENT-FEEDBACK-STYLE-0001
+    - id: T-CONTENT-SELECTION-AFFORDANCE-0001
+      since: 0.3.0-alpha.1
 sources:
   - path: packages/modules/feedback/src/create.ts
   - path: packages/modules/feedback/src/types.ts
@@ -75,6 +79,9 @@ openQuestions:
     blocks:
       - render-phase-style-write-policy
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added the bounded content-selection affordance exception and explicit contract/test relations.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged the bounded visual style Module, host sink and executable evidence without lifecycle promotion.

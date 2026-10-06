@@ -68,7 +68,9 @@ export function getSemanticGroupKeyV0(token: string): string {
   // One content-selection affordance per subject. This is independent of
   // selection:* paint and never owns a selection range or control state.
   if (token === 'select-auto' || token === 'select-text' || token === 'select-none') {
-    return 'user-select';
+    // Whitespace cannot occur in an admitted token, so an unknown token can
+    // never collide with this internal group (for example `user-select`).
+    return 'content-selection affordance';
   }
 
   if (
