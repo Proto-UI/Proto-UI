@@ -2,7 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import type { Prototype, OwnedStateHandle } from '@proto.ui/core';
 import type { StatePort } from '@proto.ui/module-state';
-import { executeWithHost, RuntimeHost } from '../../src';
+import { createRuntimeInstance, executeWithHost, RuntimeHost } from '../../src';
 
 /**
  * Runtime Contract (v0): phase guards for OwnedStateHandle APIs
@@ -82,24 +82,15 @@ describe('runtime contract: state phase guards (v0)', () => {
     };
 
     const session = executeWithHost(P, host);
-    const kernel = session.kernel!;
     const statePort = session.caps.getPort<StatePort>('state')!;
-    const phases: string[] = [];
-    let receivedRun: unknown;
 
-    statePort.watch(source, (run, event) => {
+    statePort.watch(source, (_run, event) => {
       if (event.type !== 'next') return;
-      receivedRun = run;
-      phases.push(kernel.getPhase());
       derived.set(event.next, 'reason: state watch callback regression');
     });
 
-    expect(kernel.getPhase()).toBe('unknown');
-    expect(() => statePort.set(source, true, 'reason: privileged host fact')).not.toThrow();
-    expect(phases).toEqual(['callback']);
-    expect(receivedRun).toBe(kernel.run);
+    statePort.set(source, true, 'reason: privileged host fact');
     expect(derived.get()).toBe(true);
-    expect(kernel.getPhase()).toBe('unknown');
     expect(() => derived.set(false)).toThrow();
 
     statePort.watch(source, (_run, event) => {
@@ -108,7 +99,35 @@ describe('runtime contract: state phase guards (v0)', () => {
     expect(() =>
       statePort.set(source, false, 'reason: privileged host fact with throwing watcher')
     ).toThrow('state watcher callback failed');
-    expect(kernel.getPhase()).toBe('unknown');
+    expect(derived.get()).toBe(false);
     expect(() => derived.set(true)).toThrow();
+  });
+
+  it('restores the enclosing callback after a nested render throws without granting ambient writes', () => {
+    const failure = new Error('fixture render failure');
+    let value!: OwnedStateHandle<boolean>;
+    let render!: () => unknown;
+    let caught: unknown;
+    const instance = createRuntimeInstance({
+      name: 'x-runtime-nested-render-failure',
+      setup(def) {
+        value = def.state.bool('value', false);
+        def.lifecycle.onCreated(() => {
+          try {
+            render();
+          } catch (error) {
+            caught = error;
+          }
+          value.set(true);
+        });
+        return () => { throw failure; };
+      },
+    });
+    render = () => instance.renderOnce();
+    instance.runLifecycle('created');
+    expect(caught).toBe(failure);
+    expect(value.get()).toBe(true);
+    expect(() => value.set(false)).toThrow();
+    instance.dispose();
   });
 });

@@ -161,6 +161,12 @@ Source-bound Props run 在真实浏览器 WASM Worker 中，将三个受控 fixt
 
 真实 GPUI headless-window consumer 另行通过 creation、physical commit、`set_props` 与 terminal disposal 验证 provided-empty、missing 和 invalid canonical Props。Web 修复后，生成 Rust 与 SDK source 仍逐字节一致；不据此声称重复 native build 或 native enum/range-widget 广度。Canonical Tabs List graph 已编译，但所需真实 Tabs provider preview 尚未执行。这些观察不构成完整 raw-DOM/terminal-event Adapter parity、完整 native target、SSR/hydration 准入，也不是 RuntimeBox/editor/security boundary 的迁移。
 
+五个已实现 source target 也准入 `props.watchAll`、`props.watchRaw` 与 `props.watchRawAll`，并对 `WatchInfo` 的 string-array field 做检查。生成 helper 保持现有契约：首次 apply 不通知，raw-all 先于 keyed raw callback，所有 raw callback 先于 resolved callback，匹配的 resolved callback 共享 setup 注册顺序。比较使用 `Object.is`，包括 signed zero 和 host-local object identity。Top-level `undefined` 在 frozen raw snapshot 前归一为 `null`，与 Core 一致；nested host-local value 不复制，也不提升为 portable JSON。任意 opaque raw-member access 仍被拒绝。
+
+Source-bound watcher run 将 **10 份真实 WASM Worker 完整 output 与 Node 对照**，再将两个 fixture 挂载到四组原/generated Web consumer，形成 **16 个真实 surface / 120 组 pair observation**。Resolved payload、signed-zero observation 和 authored trace 在包括显式 update 的各步均一致。Generated Vue 3 读取 normalized component props/attrs source，不会重新唤起仅存在于 VNode 的 `+0` → `-0` 变化。另一个真实 Vue pair 验证重复 raw read 共用当前 snapshot，raw callback 收到同一 snapshot；内容相等的新 object 会通知，同一个 retained object 不通知。Dispose 后 18 个 container 全空，8 个 retained State getter 拒绝调用，没有 captured error。Vue 2 raw changed-key array 保留其 props/attrs 顺序差异；不排序或重写原始 observation，也不宣称普遍 raw parity。
+
+原 Runtime 修复让同步 render 完成后恢复进入前的 execution phase，render throw 时也如此。Authored watcher 调用 `run.update()` 不再剥夺后续 watcher 所需的 callback authority；mutation guard 保持不变。真实 GPUI headless-window evidence 覆盖 watcher-family fixture 的 group、key metadata、unchanged/invalid/missing input、signed zero 和 terminal ownership。其 generated Rust 与 SDK byte 仍与实际测试的 generation 一致，两份 captured GPUI artifact 也未改变。因此复用 window proof，不声称又执行了一次 native build 或单独运行了 identity fixture 的 window。先前 source-admission、ordering、Runtime phase 和 Vue 失败保留在 `internal/compiler/browser-wasm-evidence.json`。该增量不等于完整 native target、SSR/hydration、全部 canonical Demo 准入或 RuntimeBox/editor/security migration。
+
 ### 全站 Demo 迁移清单
 
 重建 source-bound 清单：

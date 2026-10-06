@@ -183,11 +183,13 @@ export function createKernel<P extends PropsBaseType>(
   // render
   // ----------------
   const renderOnce = () => {
+    const previousPhase = phase;
     setPhase('render');
-    const children = renderFn(renderer);
-    setPhase('unknown');
-
-    return children;
+    try {
+      return renderFn(renderer);
+    } finally {
+      setPhase(previousPhase);
+    }
   };
 
   return {

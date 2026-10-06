@@ -1110,21 +1110,19 @@ ${
     : ''
 }
     function ${n('ReadProps')}(run: ${n('Run')}): Readonly<GeneratedResolvedProps> { ${n('RequireRun')}(run); return ${n('Props')}; }
-    function ${n('ReadRawProps')}(run: ${n('Run')}): Readonly<Record<string, unknown>> { ${n('RequireRun')}(run); return Object.freeze({ ...${n('RawProps')} }); }
+    function ${n('ReadRawProps')}(run: ${n('Run')}): Readonly<Record<string, unknown>> { ${n('RequireRun')}(run); return ${n('RawProps')}; }
     function ${n('IsProvided')}(run: ${n('Run')}, key: string): boolean { ${n('RequireRun')}(run); return Object.hasOwn(${n('RawProps')}, key); }
     function ${n('GetHostProps')}(): Record<string, unknown> {
-      // Read the authored host snapshot, bypassing Vue Boolean casts and camelization.
-      const raw: Record<string, unknown> = Object.create(null);
-      for (const key of Object.keys(${n('Instance')}.vnode.props ?? {})) {
-        const value = ${n('Instance')}.vnode.props![key];
-        if (['key', 'ref', 'ref_for', 'ref_key'].includes(key) || key.startsWith('onVnode')) continue;
-        if (!Object.hasOwn(${n('PropChecks')}, key) && (
-          ['class', 'hostClass', 'surfaceClass', 'style', 'hostStyle', 'surfaceStyle'].includes(key) ||
-          /^on[A-Z]/.test(key) && typeof value === 'function'
-        )) continue;
-        raw[key] = value;
+      // Match the Adapter's normalized props/attrs source, not the authored VNode.
+      // Vue may retain an attrs value (including +0) across a VNode-only change.
+      const raw: Record<string, unknown> = Object.assign(Object.create(null), ${n('Context')}.attrs, _props);
+      for (const key of Object.keys(raw)) {
+        const value = raw[key];
+        if (['class', 'hostClass', 'surfaceClass', 'style', 'hostStyle', 'surfaceStyle'].includes(key) ||
+          /^on[A-Z]/.test(key) && typeof value === 'function') delete raw[key];
+        else if (value === undefined) raw[key] = null;
       }
-      return raw;
+      return Object.freeze(raw);
     }
     function ${n('NotifyProps')}(): void {
       if (${n('Disposed')} || ${n('Disposing')}) return;
@@ -1140,14 +1138,17 @@ ${usesInteraction ? `      ${n('Interaction')}.refresh();` : ''}
       const all = Object.keys(${n('PropSpecs')}).filter((key) => !Object.is(Reflect.get(previous, key), Reflect.get(next, key)));
 ${
   usesRawWatchers
-    ? `      const rawAll = Object.keys({ ...previousRaw, ...raw }).filter(key => Object.hasOwn(previousRaw, key) !== Object.hasOwn(raw, key) || !Object.is(previousRaw[key], raw[key]));
+    ? `      const rawAll = Object.keys({ ...previousRaw, ...raw }).filter(key => !Object.is(previousRaw[key], raw[key]));
       if (rawAll.length) {
-        const nextRaw = Object.freeze({ ...raw }), prevRaw = Object.freeze({ ...previousRaw });
+        const nextRaw = raw, prevRaw = previousRaw;
         function dispatchRaw(allOnly: boolean): void {
           for (const watcher of ${n('RawWatchers')}) {
             if (!watcher.active || (watcher.keys === null) !== allOnly) continue;
             const matched = watcher.keys ? watcher.keys.filter(key => rawAll.includes(key)) : rawAll;
-            if (matched.length) watcher.callback(${n('RunValue')}, nextRaw, prevRaw, { changedKeysAll: rawAll, changedKeysMatched: matched });
+            if (matched.length) {
+              console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+              watcher.callback(${n('RunValue')}, nextRaw, prevRaw, { changedKeysAll: rawAll, changedKeysMatched: matched });
+            }
           }
         }
         dispatchRaw(true); dispatchRaw(false);

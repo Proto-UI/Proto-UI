@@ -566,8 +566,9 @@ ${ssr ? '  let serverPrepared = false;\n' : ''}  let propsWindow: { raw: Readonl
   const pendingStateEvents: (() => void)[] = [];
   const authorStateWatchCleanups: (() => void)[] = [];
   let emittingState = false;
-  type ${p}ResolvedWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: Readonly<Record<string, unknown>>) => void };
-  type ${p}RawWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: Readonly<Record<string, unknown>>, prev: Readonly<Record<string, unknown>>, info: Readonly<Record<string, unknown>>) => void };
+  type ${p}WatchInfo = { changedKeysAll: string[]; changedKeysMatched: string[] };
+  type ${p}ResolvedWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: ${p}WatchInfo) => void };
+  type ${p}RawWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: Readonly<Record<string, unknown>>, prev: Readonly<Record<string, unknown>>, info: ${p}WatchInfo) => void };
   const watchers: ${p}ResolvedWatcher[] = [];
   const rawWatchers: ${p}RawWatcher[] = [], rawAllWatchers: ${p}RawWatcher[] = [];
   const exposes: Record<string, unknown> = Object.create(null);
@@ -969,7 +970,7 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
         defaults.unshift({ ...partial });
         resolved = ${p}ResolveProps(specs, defaults, previousValid, raw, false);
 ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
-      watch(keys: readonly string[], callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: Readonly<Record<string, unknown>>) => void) {
+      watch(keys: readonly string[], callback: ${p}ResolvedWatcher['callback']) {
         ensurePhase('setup');
         if (!keys.length || keys.some((key) => !Object.hasOwn(specs, key))) throw new Error('[Props] watchers require declared keys.');
         const watcher = { keys: [...keys], callback, active: true };
@@ -1050,7 +1051,7 @@ ${hookDefinitions}
     const nextRaw: Record<string, unknown> = Object.create(null);
     for (const [key, value] of Object.entries(nextHost)) {
       if (key === 'children' || key.startsWith('on') && typeof value === 'function') continue;
-      nextRaw[key] = value;
+      nextRaw[key] = value === undefined ? null : value;
     }
     if (hydrated && Object.keys(raw).length === Object.keys(nextRaw).length
       && Object.keys(nextRaw).every((key) => Object.hasOwn(raw, key) && Object.is(raw[key], nextRaw[key]))) return;
@@ -1066,7 +1067,7 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
       propsWindow = { raw: nextRawSnapshot, resolved: nextResolved };
       try {
       if (rawAllWatchers.length || rawWatchers.length) {
-        const changedRaw = [...new Set([...Object.keys(previousRaw), ...Object.keys(nextRawSnapshot)])].filter(key => Object.hasOwn(previousRaw, key) !== Object.hasOwn(nextRawSnapshot, key) || !Object.is(previousRaw[key], nextRawSnapshot[key]));
+        const changedRaw = [...new Set([...Object.keys(previousRaw), ...Object.keys(nextRawSnapshot)])].filter(key => !Object.is(previousRaw[key], nextRawSnapshot[key]));
         if (changedRaw.length) for (let groupIndex = 0; groupIndex < 2; ++groupIndex) for (const watcher of groupIndex === 0 ? rawAllWatchers : rawWatchers) {
           if (!watcher.active) continue;
           const changedKeysMatched = watcher.keys ? watcher.keys.filter(key => changedRaw.includes(key)) : changedRaw;

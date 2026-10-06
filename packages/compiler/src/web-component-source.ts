@@ -840,18 +840,24 @@ ${ssr ? '  host.bindContext(context);\n' : ''}
   function hydrate(input: Record<string, unknown>): void {
     ensure();
     const prev = resolved, previousRaw = raw;
-    raw = Object.freeze({...input});
+    const nextInput = {...input};
+    for (const key of Object.keys(nextInput)) if (nextInput[key] === undefined) nextInput[key] = null;
+    raw = Object.freeze(nextInput);
     resolved = resolve(true);
 ${styled ? `    ${p}Style.refresh();\n` : ''}
 ${interacting ? `    ${p}Interaction.refresh();\n` : ''}
     if (!hydrated) { hydrated = true; return; }
     const changed = Object.keys(specs).filter((key) => !Object.is(prev[key], resolved[key]));
-    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => own(previousRaw, key) !== own(raw, key) || !Object.is(previousRaw[key], raw[key])) : changed;
+    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : [];
     const next = resolved, nextRaw = raw;
-    for (const watcher of [...watchers]) {
+    const snapshot = [...watchers];
+    for (let group = 0; group < 3; ++group) for (const watcher of snapshot) {
+      if (!watcher.active || (watcher.raw ? watcher.keys === null ? 0 : 1 : 2) !== group) continue;
       const all = watcher.raw ? rawChanged : changed;
-      const matched = watcher.keys === null ? all : all.filter((key) => watcher.keys!.includes(key));
-      if (watcher.active && matched.length) invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
+      const matched = watcher.keys === null ? all : watcher.keys.filter((key) => all.includes(key));
+      if (!matched.length) continue;
+      if (watcher.raw) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+      invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
     }
   }
   function drainEmissions(): void {
