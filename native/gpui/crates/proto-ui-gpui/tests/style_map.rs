@@ -391,7 +391,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 31] = [
+const EXPECTED_UNMAPPED: [&str; 32] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -410,6 +410,8 @@ const EXPECTED_UNMAPPED: [&str; 31] = [
     "pointer-events",
     "touch-action",
     "user-select",
+    // WebKit's compatibility declaration does not add native selection support.
+    "-webkit-user-select",
     "resize",
     "will-change",
     "background-clip",
@@ -430,6 +432,26 @@ const EXPECTED_UNMAPPED: [&str; 31] = [
     "text-underline-offset",
     "white-space",
 ];
+
+#[test]
+fn selection_affordances_keep_both_web_properties_explicitly_unmapped() {
+    let mapped = map(
+        &resolve(&["select-none"], "shadcn"),
+        LengthContext::default(),
+    );
+    let actual: BTreeSet<&str> = mapped
+        .unmapped
+        .iter()
+        .map(|(property, value, reason)| {
+            assert_eq!(value, "none");
+            assert_eq!(*reason, Unmapped::UnknownProperty);
+            property.as_str()
+        })
+        .collect();
+    let expected: BTreeSet<&str> = ["-webkit-user-select", "user-select"].into_iter().collect();
+    assert_eq!(actual, expected);
+    assert!(!mapped.is_complete());
+}
 
 /// The inventory of values a property this layer *does* implement cannot take.
 ///

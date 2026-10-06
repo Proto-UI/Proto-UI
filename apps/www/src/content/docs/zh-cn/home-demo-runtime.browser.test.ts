@@ -94,6 +94,11 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
     // source-token and happy-dom assertions alone cannot prove this behavior.
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
     const page = await context.newPage();
+    const evidenceDirectory =
+      process.env.PUI_CONTENT_SELECTION_EVIDENCE_DIR ??
+      (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+        ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'content-selection')
+        : undefined);
     const selectByDragging = async (target: Locator) => {
       await target.scrollIntoViewIfNeeded();
       const box = await target.boundingBox();
@@ -109,6 +114,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       return page.evaluate(() => window.getSelection()?.toString() ?? '');
     };
     try {
+      if (evidenceDirectory) await mkdir(evidenceDirectory, { recursive: true });
       await page.goto(`${baseUrl}${HOME_ROUTE}`, { waitUntil: 'networkidle' });
       const home = page.locator(HOME_SELECTOR);
       for (const runtime of RUNTIMES) {
@@ -118,6 +124,11 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         await action.waitFor({ state: 'visible' });
         expect(await action.evaluate((el) => getComputedStyle(el).userSelect)).toBe('none');
         expect(await selectByDragging(action)).not.toContain('斜体');
+        if (evidenceDirectory) {
+          await editorCard.screenshot({
+            path: path.join(evidenceDirectory, `selection-${runtime}-action.png`),
+          });
+        }
         const activeBefore = await action.getAttribute('aria-pressed');
         await action.focus();
         await page.keyboard.press('Space');
@@ -127,6 +138,11 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
 
         const title = editorCard.getByRole('heading', { name: '文本编辑', exact: true });
         expect(await selectByDragging(title)).toContain('文本编辑');
+        if (evidenceDirectory) {
+          await editorCard.screenshot({
+            path: path.join(evidenceDirectory, `selection-${runtime}-content.png`),
+          });
+        }
 
         const editor = editorCard.getByRole('textbox', { name: '编辑示例文本', exact: true });
         await editor.fill('Selection survives native editing');
@@ -145,10 +161,10 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         await dialog.waitFor({ state: 'visible' });
         const description = dialog.getByText('这是一个可操作的对话框示例。', { exact: true });
         expect(await selectByDragging(description)).toContain('可操作的对话框');
-        if (process.env.PUI_CONTENT_SELECTION_EVIDENCE_DIR) {
-          const directory = process.env.PUI_CONTENT_SELECTION_EVIDENCE_DIR;
-          await mkdir(directory, { recursive: true });
-          await page.screenshot({ path: path.join(directory, `selection-${runtime}-dialog.png`) });
+        if (evidenceDirectory) {
+          await page.screenshot({
+            path: path.join(evidenceDirectory, `selection-${runtime}-dialog.png`),
+          });
         }
         await page.keyboard.press('Escape');
         await expect.poll(() => dialog.isVisible()).toBe(false);
