@@ -510,10 +510,11 @@ function PUIChildren(value, h, vm, slots) {
   // Vue2's pre flag prevents a registered component from hijacking a semantic DOM tag.
   return [h(value.tag, { pre: true${styled ? ", attrs: value.tokens === undefined ? {} : { 'data-pui-style': value.tokens }" : ''} }, PUIChildren(value.children, h, vm, slots))];
 }
-function PUIRootData(properties, attrs, initial) {
+function PUIRootData(properties, attrs, serializeValue) {
   const result = { pre: true, attrs: { ...attrs } };
   for (const [key, value] of Object.entries(properties)) {
-    if (key === 'value') { if (initial) result.domProps = { value }; }
+    // Browser value/IME writes belong to TextControl; only server HTML serializes value.
+    if (key === 'value') { if (serializeValue) result.domProps = { value }; }
     else if (key === 'style') result.style = value;
     else result.attrs[key] = value === false ? null : value === true ? '' : value;
   }
@@ -1081,7 +1082,7 @@ ${context.owner}
         ssr
           ? `if (shell) {
         const vnode = initialProjection.present
-          ? h(initialProjection.rootTag, PUIRootData(initialProjection.properties, initialProjection.attrs, true), PUIChildren(initialProjection.template, h, vm, { used: false })) : h();
+          ? h(initialProjection.rootTag, PUIRootData(initialProjection.properties, initialProjection.attrs, false), PUIChildren(initialProjection.template, h, vm, { used: false })) : h();
         renderedCommit = { epoch, version: ++commitVersion, present: initialProjection.present, vnode, kind: initialProjection.present ? 'mount' : 'detach' };
         return vnode;
       }
@@ -1110,7 +1111,7 @@ ${context.owner}
       const tag = ${interactive ? 'interaction.rootTag() || rootTag' : 'rootTag'};
       const children = PUIChildren(template, h, vm, { used: false });
       if (['input', 'textarea', 'img'].includes(tag) && children.length) throw new Error('[Template] physical control Root requires empty children.');
-      const vnode = h(tag, PUIRootData(${interactive ? 'interaction.rootProperties()' : '{}'}, { 'data-pui-root': '' }, !viewActive), children);
+      const vnode = h(tag, PUIRootData(${interactive ? 'interaction.rootProperties()' : '{}'}, { 'data-pui-root': '' }, false), children);
       renderedCommit = { epoch, version: ++commitVersion, present: true, vnode, kind: !viewActive ? 'mount' : pending ? 'update' : 'none', revision: pending && pending.revision };
       return vnode;
     },

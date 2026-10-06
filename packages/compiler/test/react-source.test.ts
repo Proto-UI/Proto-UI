@@ -107,6 +107,123 @@ function mountHost() {
 }
 
 describe('checked semantics to native React DOM source', () => {
+  it('selects a statically required physical Root without activating its Module properties', async () => {
+    const image = await loadNative(`import {definePrototype} from '@proto.ui/core';
+import {declareImageView} from '@proto.ui/module-image-view';
+export default definePrototype({name:'inactive-image',modules:[declareImageView({
+  source:'',alternativeText:'Inactive declaration',a11yMode:'informative',fit:'cover'
+})],setup(def){return ()=>null;}});`);
+    const text = await loadNative(`import {definePrototype} from '@proto.ui/core';
+import {declareTextControl} from '@proto.ui/module-text-control';
+export default definePrototype({name:'inactive-input',modules:[declareTextControl({
+  content:'plain-text',engine:'host',lineMode:'single'
+})],setup(def){return ()=>null;}});`);
+    const { host, root } = mountHost();
+    const imageRef = React.createRef<NativeHandle>();
+    const textRef = React.createRef<NativeHandle>();
+    await React.act(async () => {
+      root.render(
+        React.createElement(
+          React.Fragment,
+          null,
+          React.createElement(image.CompiledComponent, { ref: imageRef }),
+          React.createElement(text.CompiledComponent, { ref: textRef })
+        )
+      );
+    });
+    const physicalImage = host.querySelector('img')!;
+    const physicalInput = host.querySelector('input')!;
+    expect(physicalImage.getAttribute('alt')).toBeNull();
+    expect(physicalImage.style.objectFit).toBe('');
+    expect(physicalInput.getAttribute('type')).toBeNull();
+    physicalImage.alt = 'Consumer alternative';
+    physicalImage.style.objectFit = 'fill';
+    physicalInput.value = 'Consumer value';
+    await React.act(async () => {
+      imageRef.current!.update();
+      textRef.current!.update();
+    });
+    expect(host.querySelector('img')).toBe(physicalImage);
+    expect(physicalImage.alt).toBe('Consumer alternative');
+    expect(physicalImage.style.objectFit).toBe('fill');
+    expect(physicalInput.value).toBe('Consumer value');
+  });
+
+  it('projects the negotiated Scroll policy through explicit commits and replacement view epochs', async () => {
+    const { CompiledComponent } = await loadNative(`import {definePrototype} from '@proto.ui/core';
+import {asScrollSurface} from '@proto.ui/hooks';
+export default definePrototype({name:'scroll-root-policy',setup(def){
+  def.props.define({present:{type:'boolean',default:true}});
+  const surface=asScrollSurface();
+  surface.configure({axes:'vertical',projection:'system'});
+  const detaches=def.state.numberDiscrete('scroll.detaches',0);
+  def.expose.state('count',detaches);
+  def.expose.state('projection',surface.projection);
+  surface.projection.watch((run,event)=>{
+    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}
+  });
+  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});
+  return (r)=>r.el('section','Scrollable content');
+}});`);
+    const { host, root } = mountHost();
+    const ref = React.createRef<NativeHandle>();
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref }));
+    });
+    const projection = (
+      ref.current!.getExposes() as unknown as { projection: ExternalState<string> }
+    ).projection;
+    const transitions: [string, string][] = [];
+    projection.subscribe((event) => transitions.push([event.prev, event.next]));
+    const first = host.querySelector<HTMLElement>('[data-pui-root]')!;
+    expect(projection.get()).toBe('system');
+    expect(first.getAttribute('data-pui-scroll-projection')).toBe(projection.get());
+    expect(first.style.overflowX).toBe('hidden');
+    expect(first.style.overflowY).toBe('auto');
+    await React.act(async () => {
+      ref.current!.update();
+    });
+    expect(host.querySelector('[data-pui-root]')).toBe(first);
+    expect(first.getAttribute('data-pui-scroll-projection')).toBe('system');
+    expect(first.style.overflowX).toBe('hidden');
+    expect(first.style.overflowY).toBe('auto');
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref, present: false }));
+    });
+    expect(projection.get()).toBe('unresolved');
+    expect(ref.current!.getExposes().count.get()).toBe(1);
+    expect(transitions).toEqual([['system', 'unresolved']]);
+    expect(first.getAttribute('data-pui-scroll-projection')).toBeNull();
+    expect(first.style.overflowX).toBe('');
+    expect(first.style.overflowY).toBe('');
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref, present: true }));
+    });
+    const second = host.querySelector<HTMLElement>('[data-pui-root]')!;
+    expect(second).not.toBe(first);
+    expect(second.getAttribute('data-pui-scroll-projection')).toBe(projection.get());
+    expect(second.style.overflowY).toBe('auto');
+    expect(transitions).toEqual([
+      ['system', 'unresolved'],
+      ['unresolved', 'system'],
+    ]);
+    await React.act(async () => {
+      root.unmount();
+    });
+    expect(transitions).toEqual([
+      ['system', 'unresolved'],
+      ['unresolved', 'system'],
+      ['system', 'unresolved'],
+    ]);
+    expect(() => projection.get()).toThrow();
+    second.dispatchEvent(new Event('scroll'));
+    expect(transitions).toEqual([
+      ['system', 'unresolved'],
+      ['unresolved', 'system'],
+      ['system', 'unresolved'],
+    ]);
+  });
+
   it('selects the physical Root from aliased pre-render Module requirements', async () => {
     const { CompiledComponent } = await loadNative(
       `import {definePrototype} from '@proto.ui/core';

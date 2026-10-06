@@ -1,8 +1,12 @@
-interface SsrOptions { className: string; tagName: string; binding: string }
+interface SsrOptions {
+  className: string;
+  tagName: string;
+  binding: string;
+}
 
 /** Ordinary presentation nodes, not semantic IR. Server owns no DOM objects or browser globals. */
 export function webComponentSsrSupport(options: SsrOptions) {
-  const {className, tagName, binding} = options;
+  const { className, tagName, binding } = options;
   const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\n`;
   const server = `export function renderToString(props: GeneratedProps & Record<string, unknown> = {}, options: ServerOptions = {}): {html: string; carrier: Carrier} {
   return renderWithScope(props, options, result => result);
@@ -134,10 +138,18 @@ export function hydrate(element: ${className}, carrier?: Carrier): ${className} 
 }
 export default ${className};
 `;
-  return {imports, server, files: [
-    {path: '.proto-ui/web-component/ssr-v1.ts', kind: 'source' as const, contents: runtimeSource},
-    {path: 'Component.client.ts', kind: 'source' as const, contents: client},
-  ]};
+  return {
+    imports,
+    server,
+    files: [
+      {
+        path: '.proto-ui/web-component/ssr-v1.ts',
+        kind: 'source' as const,
+        contents: runtimeSource,
+      },
+      { path: 'Component.client.ts', kind: 'source' as const, contents: client },
+    ],
+  };
 }
 
 const runtimeSource = String.raw`// Standalone WC presentation/serialization/adoption helper. Not an IR interpreter.
@@ -417,6 +429,7 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
     }
   }
   let accepted = false, disposed = false, hydrating = !!carrier;
+  let rootMarkerBaseline: string | null = null;
   let control: HTMLElement | null = null;
   let portalAnchor: Comment | null = null, portalParent: ContextScope | null = null;
   const emissions: {key: string; payload: unknown; options?: CustomEventInit}[] = [];
@@ -622,7 +635,12 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
     parentContext: () => portalAnchor ? portalParent : logicalParent(host),
     bindContext(scope) { if (scope) ownerScopes.set(host, scope); else ownerScopes.delete(host); },
     accept() {
+      if (disposed) throw new Error('Browser port is disposed');
       if (hydrating && carrier?.present) throw new HydrationMismatch('present carrier was not adopted');
+      if (!accepted) {
+        rootMarkerBaseline = host.getAttribute('data-pui-root');
+        host.setAttribute('data-pui-root', '');
+      }
       accepted = true;
       if (script) script.remove();
       if (carrier && !carrier.present) hydrating = false;
@@ -639,6 +657,10 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       const target = control ?? host;
       for (const [name, entry] of attributes) if (target.getAttribute(name) === entry.projected) {
         if (entry.baseline === null) target.removeAttribute(name); else target.setAttribute(name, entry.baseline);
+      }
+      if (accepted && host.getAttribute('data-pui-root') === '') {
+        if (rootMarkerBaseline === null) host.removeAttribute('data-pui-root');
+        else host.setAttribute('data-pui-root', rootMarkerBaseline);
       }
       attributes.clear(); ownerScopes.delete(host);
       if (portalAnchor) { portalAnchor.parentNode?.insertBefore(host, portalAnchor); portalAnchor.remove(); portalAnchor = null; }
