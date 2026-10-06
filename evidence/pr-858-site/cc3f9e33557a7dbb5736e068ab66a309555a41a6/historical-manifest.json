@@ -1,0 +1,36 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "purpose": "Historical screenshot debt only. Not current acceptance.",
+  "source": "cc3f9e33557a7dbb5736e068ab66a309555a41a6",
+  "probe": "cc3f9e33557a7dbb5736e068ab66a309555a41a6",
+  "workflow_run": 37454489064,
+  "attempt": 2,
+  "job": 112383188060,
+  "artifact": 11428835545,
+  "archive_sha256": "39f608608bb66a4330376784de46aed4a621c934e91b77cea097c672274c283e",
+  "result": "Existing family header lane succeeded; focused selected tests only, not all startup journeys.",
+  "known_limits": [
+    "This initial head predates the native-focus and legacy startup repairs.",
+    "Original artifact role/disposition describe its historical lane, not final PR acceptance.",
+    "No private user screenshots included."
+  ],
+  "images": [
+    {
+      "file": "shadcn-wc-light-family-390-runtime-rest.png",
+      "sha256": "492ad092de9e4462c5bde2f02b20b9298e8afd2fcd6a5ede985c4822ef795db4",
+      "pixel_dimensions": [
+        390,
+        1000
+      ]
+    },
+    {
+      "file": "shadcn-wc-dark-family-390-runtime-rest.png",
+      "sha256": "4cf1d6949d09bb2aff655d262236ec7ef203126f1af57a288046a56aa8a6be40",
+      "pixel_dimensions": [
+        390,
+        1000
+      ]
+    }
+  ]
+}
