@@ -1,0 +1,32 @@
+---
+title: 'Bootstrap 2.3.2 Textarea'
+description: '将归档输入框风格投射到 Base 多行文本协议。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Textarea 将 Bootstrap 2.3.2 的输入框语言投射到一个 Base Textarea Root。当前 Web profile 生成唯一的原生多行编辑器。
+
+Base 拥有受控与非受控值、归一化 input、change 与 IME 事件、原生属性、禁用与只读行为、无障碍命名及焦点。外观投射到同一个编辑器， authored children 不会成为第二个编辑器。此增量不新增表单工作流、校验提示、自动增高或富文本。
+
+通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。可编辑 release note，聚焦只读编辑器，并与禁用编辑器比较。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## API
+
+- `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder`
+- `rows`、`wrap`、`maxLength`、`minLength`、`name`、`required`、`autoComplete`
+- `ariaLabel`、`labelledBy`、`describedBy`
+- 继承 `valueChange`、`change`、composition 事件、`focusSelf`、`blurSelf`
+
+这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。

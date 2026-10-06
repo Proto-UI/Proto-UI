@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 export const READY_ROUTES = Object.freeze([
   '/en/test/style-isolation/',
   '/en/test/new-projection-families/',
+  '/en/test/bootstrap-state-controls/',
   '/en/test/liquid-glass-material/',
   '/en/ui-libraries/base/image/',
   '/en/ui-libraries/base/table/',
@@ -92,6 +93,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
 ]);
 

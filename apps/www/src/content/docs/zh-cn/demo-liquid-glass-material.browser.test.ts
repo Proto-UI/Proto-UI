@@ -350,8 +350,19 @@ describe.sequential('Liquid Glass bounded material on real Web hosts', () => {
           const picker = page.locator('[data-adapter-select-root]').first();
           await picker.getByRole('combobox').click();
           await page.getByRole('option', { name: labels[runtime], exact: true }).last().click();
-          const panel = page.locator(`[data-adapter-panel="${runtime}"]`);
+          // Bootstrap uses one preview following the actual page runtime control;
+          // Liquid still has the existing fixed-runtime adapter panels.
+          const panel =
+            family === 'bootstrap-2-3-2'
+              ? page.locator('[data-demo-id="demo-bootstrap-2-3-2-button"]')
+              : page.locator(`[data-adapter-panel="${runtime}"]`);
+          if (family === 'bootstrap-2-3-2') expect(await panel.count()).toBe(1);
           await expect.poll(() => panel.isVisible()).toBe(true);
+          await expect
+            .poll(() =>
+              panel.locator('[data-projection-scope]').getAttribute('data-projection-runtime')
+            )
+            .toBe(runtime);
           const button = panel.getByRole('button', { name: 'Back', exact: true });
           await button.click();
           await expect.poll(() => panel.getByRole('status').textContent()).toBe('1 activations');
