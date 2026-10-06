@@ -1,0 +1,1582 @@
+{
+  "source": {
+    "head": "27f05fdeb2dc7d6c4f7682423ddd49931baa5e26",
+    "status": "captured",
+    "kind": "complete clean Git tree plus generated CSS, bound to the opt-in dev server startup identity and current source checks",
+    "cleanTree": "b26c1aa8fc1a7b4d2e3eb67e62eedd60cb0c83d4",
+    "generatedCSS": {
+      "apps/www/src/styles/proto-ui-tokens.generated.css": "15488dfbf43b5a343c209275354ecd183c32f4b99865597eaac1da636fda2763",
+      "apps/www/src/styles/proto-ui-style.css": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "apps/www/src/styles/shadcn-theme.css": "e64ed915cd40e21a42ebe5fec84afbdb814f9f6a9a337f1024e9be1ba3fb7357"
+    },
+    "sourceSetDigest": "sha256:73472bac3c3793589a258a7dfd0667845fbfddd7d4a5ccbe0aa8533ca6db2536",
+    "runnerDigest": "sha256:1e5e61fc284d1bcbe87e8540650f65cda0a2d20995ccb107b97b21a9880bbdd0",
+    "probeDigest": "sha256:1f191f17ba90933b5503c8bed98594feedca22ceec2faa894cc4307584f2e6ed"
+  },
+  "workflowRun": 37485171392,
+  "artifactId": 11424520302,
+  "artifactSha256": "8b07ba2ffa33d0f9956596fd847d6a09604acd39d21aafbeeb236b4dc320f062",
+  "summary": {
+    "collectedFrames": 126,
+    "pngFactMatchedFrames": 126,
+    "achievedTargetPredicates": 126,
+    "expectedRuntimeThemeCases": 22,
+    "observedRuntimeThemeCases": 22,
+    "knownUnsupportedRuntimeThemeCases": 0,
+    "knownUnsupportedPairedRawFrames": 0,
+    "knownUnsupportedUnexecutedTargets": 0,
+    "unresolvedRuntimeThemeCases": 0,
+    "distinctUnresolvedFamilies": 0,
+    "caseCoverage": [
+      {
+        "family": "tooltip",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tooltip",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tooltip",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tooltip",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tooltip",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tooltip",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "vue2",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "hover-card",
+        "runtime": "vue2",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "vue2",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "tabs",
+        "runtime": "vue2",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      }
+    ],
+    "conformance": "not evaluated; frame count and target predicate count are not full conformance"
+  },
+  "frames": [
+    {
+      "name": "tooltip-wc-light-keyboard-focus",
+      "image": "sha256:ee60db25a21eee291a26c8ce28e0b99030fcb3e47ca7537da1ddaaf786571770",
+      "facts": "sha256:c46400297fa94c4a680bf651dc540f78fe1daf4856d5d185bfe80bb270a75c1f",
+      "anatomyBefore": {
+        "achieved": true,
+        "recipeId": "demo-brutalist-tooltip",
+        "expectations": [
+          {
+            "path": "root.children.0",
+            "prototypeId": "brutalist-tooltip-group",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": true,
+            "policy": "description"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": false,
+            "policy": "description"
+          }
+        ],
+        "failures": [],
+        "extras": [],
+        "matched": [
+          {
+            "path": "root.children.0",
+            "uid": 0,
+            "prototypeId": "brutalist-tooltip-group"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "uid": 1,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "uid": 2,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "uid": 3,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "uid": 4,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "uid": 6,
+            "prototypeId": "brutalist-tooltip-content"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "uid": 5,
+            "prototypeId": "brutalist-tooltip-content"
+          }
+        ],
+        "omitted": [],
+        "basis": "Exact authored recipe instances, native current state/relations and current projection lease; closed detached subtrees may be omitted, or retained as exact hidden in-content owner shells. Tooltip may retain its unique stable ID/role only without an active relation. Not full semantic or cue conformance.",
+        "owner": "pp-lhbi718jxro",
+        "generation": "1",
+        "observed": {
+          "owner": "pp-lhbi718jxro",
+          "generation": "1",
+          "primary": 2,
+          "currentLease": true,
+          "surfaces": [
+            {
+              "uid": 0,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-group",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 1,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 2,
+              "parent": 1,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [
+                "pui-tooltip-1-content"
+              ],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": true,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 3,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 4,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 5,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": false,
+              "visibility": {
+                "visible": false,
+                "classification": "exempt-not-visible",
+                "limits": [
+                  "no-painted-layout-box"
+                ]
+              }
+            },
+            {
+              "uid": 6,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "pui-tooltip-1-content",
+              "role": "tooltip",
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": false,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            }
+          ],
+          "projection": {
+            "achieved": true,
+            "owner": "pp-lhbi718jxro",
+            "generation": "1",
+            "shellGeneration": "1",
+            "expected": {
+              "recipeId": "demo-brutalist-tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "shellPrototypeId": "brutalist-surface-root",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "family": "tooltip",
+              "runtime": "wc",
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "prototypeIds": [
+                "brutalist-tooltip-group",
+                "brutalist-tooltip-root",
+                "brutalist-tooltip-trigger",
+                "brutalist-tooltip-content"
+              ]
+            },
+            "observed": {
+              "recipeId": "demo-brutalist-tooltip",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "scopeCount": 1,
+              "contentCount": 1,
+              "state": "ready",
+              "family": "brutalist",
+              "runtime": "wc",
+              "contentFamily": "brutalist",
+              "contentRuntime": "wc",
+              "componentId": "tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "contentOwner": "pp-lhbi718jxro",
+              "contentGeneration": "1",
+              "previewerState": "ready",
+              "previewerFamily": "brutalist",
+              "previewerRuntime": "wc",
+              "shell": {
+                "boundaryValid": true,
+                "count": 1,
+                "mountCount": 1,
+                "retainedContentCount": 1,
+                "slotCount": 1,
+                "prototypeId": "brutalist-surface-root",
+                "family": "brutalist",
+                "runtime": "wc",
+                "generation": "1",
+                "owner": null,
+                "ownershipBasis": "Reserved published DOM boundary under the current lease-bearing mount; the independent controller owner is not published or certified.",
+                "mountOwner": "pp-lhbi718jxro",
+                "mountGeneration": "1",
+                "retainedOwner": "pp-lhbi718jxro",
+                "retainedGeneration": "1",
+                "rendererHostHidden": false,
+                "slotOwnsRetainedContent": true
+              },
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "rootPresent": true,
+              "invalidRoots": [],
+              "misplacedRoots": [],
+              "subject": {
+                "expectedPreviewerId": "pp-lhbi718jxro",
+                "previewerId": "pp-lhbi718jxro",
+                "connected": true,
+                "matchingSubjectCount": 1
+              }
+            },
+            "boundary": "Requested authored Brutalist recipe/component/runtime and current lease, checked before and after every PNG/fact frame; not semantic conformance."
+          }
+        },
+        "requestedFrame": "keyboard-focus",
+        "requirePrimaryOpen": true
+      },
+      "anatomyAfter": {
+        "achieved": true,
+        "recipeId": "demo-brutalist-tooltip",
+        "expectations": [
+          {
+            "path": "root.children.0",
+            "prototypeId": "brutalist-tooltip-group",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": true,
+            "policy": "description"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": false,
+            "policy": "description"
+          }
+        ],
+        "failures": [],
+        "extras": [],
+        "matched": [
+          {
+            "path": "root.children.0",
+            "uid": 0,
+            "prototypeId": "brutalist-tooltip-group"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "uid": 1,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "uid": 2,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "uid": 3,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "uid": 4,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "uid": 6,
+            "prototypeId": "brutalist-tooltip-content"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "uid": 5,
+            "prototypeId": "brutalist-tooltip-content"
+          }
+        ],
+        "omitted": [],
+        "basis": "Exact authored recipe instances, native current state/relations and current projection lease; closed detached subtrees may be omitted, or retained as exact hidden in-content owner shells. Tooltip may retain its unique stable ID/role only without an active relation. Not full semantic or cue conformance.",
+        "owner": "pp-lhbi718jxro",
+        "generation": "1",
+        "observed": {
+          "owner": "pp-lhbi718jxro",
+          "generation": "1",
+          "primary": 2,
+          "currentLease": true,
+          "surfaces": [
+            {
+              "uid": 0,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-group",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 1,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 2,
+              "parent": 1,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [
+                "pui-tooltip-1-content"
+              ],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": true,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 3,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 4,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 5,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": false,
+              "visibility": {
+                "visible": false,
+                "classification": "exempt-not-visible",
+                "limits": [
+                  "no-painted-layout-box"
+                ]
+              }
+            },
+            {
+              "uid": 6,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "pui-tooltip-1-content",
+              "role": "tooltip",
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": false,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            }
+          ],
+          "projection": {
+            "achieved": true,
+            "owner": "pp-lhbi718jxro",
+            "generation": "1",
+            "shellGeneration": "1",
+            "expected": {
+              "recipeId": "demo-brutalist-tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "shellPrototypeId": "brutalist-surface-root",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "family": "tooltip",
+              "runtime": "wc",
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "prototypeIds": [
+                "brutalist-tooltip-group",
+                "brutalist-tooltip-root",
+                "brutalist-tooltip-trigger",
+                "brutalist-tooltip-content"
+              ]
+            },
+            "observed": {
+              "recipeId": "demo-brutalist-tooltip",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "scopeCount": 1,
+              "contentCount": 1,
+              "state": "ready",
+              "family": "brutalist",
+              "runtime": "wc",
+              "contentFamily": "brutalist",
+              "contentRuntime": "wc",
+              "componentId": "tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "contentOwner": "pp-lhbi718jxro",
+              "contentGeneration": "1",
+              "previewerState": "ready",
+              "previewerFamily": "brutalist",
+              "previewerRuntime": "wc",
+              "shell": {
+                "boundaryValid": true,
+                "count": 1,
+                "mountCount": 1,
+                "retainedContentCount": 1,
+                "slotCount": 1,
+                "prototypeId": "brutalist-surface-root",
+                "family": "brutalist",
+                "runtime": "wc",
+                "generation": "1",
+                "owner": null,
+                "ownershipBasis": "Reserved published DOM boundary under the current lease-bearing mount; the independent controller owner is not published or certified.",
+                "mountOwner": "pp-lhbi718jxro",
+                "mountGeneration": "1",
+                "retainedOwner": "pp-lhbi718jxro",
+                "retainedGeneration": "1",
+                "rendererHostHidden": false,
+                "slotOwnsRetainedContent": true
+              },
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "rootPresent": true,
+              "invalidRoots": [],
+              "misplacedRoots": [],
+              "subject": {
+                "expectedPreviewerId": "pp-lhbi718jxro",
+                "previewerId": "pp-lhbi718jxro",
+                "connected": true,
+                "matchingSubjectCount": 1
+              }
+            },
+            "boundary": "Requested authored Brutalist recipe/component/runtime and current lease, checked before and after every PNG/fact frame; not semantic conformance."
+          }
+        },
+        "requestedFrame": "keyboard-focus",
+        "requirePrimaryOpen": true
+      },
+      "targetObservation": {
+        "achieved": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "prototype": "brutalist-tooltip-trigger",
+        "text": "Hover or focus for details",
+        "focused": true,
+        "focusVisible": true,
+        "hovered": false,
+        "nativeActive": false,
+        "ariaPressed": null,
+        "ariaSelected": null,
+        "ariaChecked": null,
+        "ariaExpanded": null,
+        "shadow": "none"
+      },
+      "beforeFingerprintDigest": "sha256:03906c7c01d1876c5615488843a65e8dfdb15759b73e5be6c60cb6964365e56f",
+      "afterFingerprintDigest": "sha256:03906c7c01d1876c5615488843a65e8dfdb15759b73e5be6c60cb6964365e56f"
+    },
+    {
+      "name": "tooltip-wc-dark-keyboard-focus",
+      "image": "sha256:a1f2944fb20161b503bb4d9cd9c86365715f9215eb709dbcaa4e4082ac43b809",
+      "facts": "sha256:33b7dc7f361e57f65ce186b234d67ecdffffc634c58850ffec5b56983f7172fa",
+      "anatomyBefore": {
+        "achieved": true,
+        "recipeId": "demo-brutalist-tooltip",
+        "expectations": [
+          {
+            "path": "root.children.0",
+            "prototypeId": "brutalist-tooltip-group",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": true,
+            "policy": "description"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": false,
+            "policy": "description"
+          }
+        ],
+        "failures": [],
+        "extras": [],
+        "matched": [
+          {
+            "path": "root.children.0",
+            "uid": 0,
+            "prototypeId": "brutalist-tooltip-group"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "uid": 1,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "uid": 2,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "uid": 3,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "uid": 4,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "uid": 6,
+            "prototypeId": "brutalist-tooltip-content"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "uid": 5,
+            "prototypeId": "brutalist-tooltip-content"
+          }
+        ],
+        "omitted": [],
+        "basis": "Exact authored recipe instances, native current state/relations and current projection lease; closed detached subtrees may be omitted, or retained as exact hidden in-content owner shells. Tooltip may retain its unique stable ID/role only without an active relation. Not full semantic or cue conformance.",
+        "owner": "pp-nkhz4h62zk",
+        "generation": "1",
+        "observed": {
+          "owner": "pp-nkhz4h62zk",
+          "generation": "1",
+          "primary": 2,
+          "currentLease": true,
+          "surfaces": [
+            {
+              "uid": 0,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-group",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 1,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 2,
+              "parent": 1,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [
+                "pui-tooltip-1-content"
+              ],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": true,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 3,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 4,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 5,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": false,
+              "visibility": {
+                "visible": false,
+                "classification": "exempt-not-visible",
+                "limits": [
+                  "no-painted-layout-box"
+                ]
+              }
+            },
+            {
+              "uid": 6,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "pui-tooltip-1-content",
+              "role": "tooltip",
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": false,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            }
+          ],
+          "projection": {
+            "achieved": true,
+            "owner": "pp-nkhz4h62zk",
+            "generation": "1",
+            "shellGeneration": "1",
+            "expected": {
+              "recipeId": "demo-brutalist-tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "shellPrototypeId": "brutalist-surface-root",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "family": "tooltip",
+              "runtime": "wc",
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "prototypeIds": [
+                "brutalist-tooltip-group",
+                "brutalist-tooltip-root",
+                "brutalist-tooltip-trigger",
+                "brutalist-tooltip-content"
+              ]
+            },
+            "observed": {
+              "recipeId": "demo-brutalist-tooltip",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "scopeCount": 1,
+              "contentCount": 1,
+              "state": "ready",
+              "family": "brutalist",
+              "runtime": "wc",
+              "contentFamily": "brutalist",
+              "contentRuntime": "wc",
+              "componentId": "tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "contentOwner": "pp-nkhz4h62zk",
+              "contentGeneration": "1",
+              "previewerState": "ready",
+              "previewerFamily": "brutalist",
+              "previewerRuntime": "wc",
+              "shell": {
+                "boundaryValid": true,
+                "count": 1,
+                "mountCount": 1,
+                "retainedContentCount": 1,
+                "slotCount": 1,
+                "prototypeId": "brutalist-surface-root",
+                "family": "brutalist",
+                "runtime": "wc",
+                "generation": "1",
+                "owner": null,
+                "ownershipBasis": "Reserved published DOM boundary under the current lease-bearing mount; the independent controller owner is not published or certified.",
+                "mountOwner": "pp-nkhz4h62zk",
+                "mountGeneration": "1",
+                "retainedOwner": "pp-nkhz4h62zk",
+                "retainedGeneration": "1",
+                "rendererHostHidden": false,
+                "slotOwnsRetainedContent": true
+              },
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "rootPresent": true,
+              "invalidRoots": [],
+              "misplacedRoots": [],
+              "subject": {
+                "expectedPreviewerId": "pp-nkhz4h62zk",
+                "previewerId": "pp-nkhz4h62zk",
+                "connected": true,
+                "matchingSubjectCount": 1
+              }
+            },
+            "boundary": "Requested authored Brutalist recipe/component/runtime and current lease, checked before and after every PNG/fact frame; not semantic conformance."
+          }
+        },
+        "requestedFrame": "keyboard-focus",
+        "requirePrimaryOpen": true
+      },
+      "anatomyAfter": {
+        "achieved": true,
+        "recipeId": "demo-brutalist-tooltip",
+        "expectations": [
+          {
+            "path": "root.children.0",
+            "prototypeId": "brutalist-tooltip-group",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-root",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "prototypeId": "brutalist-tooltip-trigger",
+            "required": true,
+            "policy": "always-authored"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": true,
+            "policy": "description"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "prototypeId": "brutalist-tooltip-content",
+            "required": false,
+            "policy": "description"
+          }
+        ],
+        "failures": [],
+        "extras": [],
+        "matched": [
+          {
+            "path": "root.children.0",
+            "uid": 0,
+            "prototypeId": "brutalist-tooltip-group"
+          },
+          {
+            "path": "root.children.0.children.0",
+            "uid": 1,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.0.children.0",
+            "uid": 2,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.1",
+            "uid": 3,
+            "prototypeId": "brutalist-tooltip-root"
+          },
+          {
+            "path": "root.children.0.children.1.children.0",
+            "uid": 4,
+            "prototypeId": "brutalist-tooltip-trigger"
+          },
+          {
+            "path": "root.children.0.children.0.children.1",
+            "uid": 6,
+            "prototypeId": "brutalist-tooltip-content"
+          },
+          {
+            "path": "root.children.0.children.1.children.1",
+            "uid": 5,
+            "prototypeId": "brutalist-tooltip-content"
+          }
+        ],
+        "omitted": [],
+        "basis": "Exact authored recipe instances, native current state/relations and current projection lease; closed detached subtrees may be omitted, or retained as exact hidden in-content owner shells. Tooltip may retain its unique stable ID/role only without an active relation. Not full semantic or cue conformance.",
+        "owner": "pp-nkhz4h62zk",
+        "generation": "1",
+        "observed": {
+          "owner": "pp-nkhz4h62zk",
+          "generation": "1",
+          "primary": 2,
+          "currentLease": true,
+          "surfaces": [
+            {
+              "uid": 0,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-group",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 1,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 2,
+              "parent": 1,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [
+                "pui-tooltip-1-content"
+              ],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": true,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 3,
+              "parent": 0,
+              "prototypeId": "brutalist-tooltip-root",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 4,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-trigger",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            },
+            {
+              "uid": 5,
+              "parent": 3,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "",
+              "role": null,
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": true,
+              "currentLease": true,
+              "painted": false,
+              "visibility": {
+                "visible": false,
+                "classification": "exempt-not-visible",
+                "limits": [
+                  "no-painted-layout-box"
+                ]
+              }
+            },
+            {
+              "uid": 6,
+              "parent": null,
+              "prototypeId": "brutalist-tooltip-content",
+              "ref": null,
+              "id": "pui-tooltip-1-content",
+              "role": "tooltip",
+              "controls": [],
+              "descriptions": [],
+              "ariaChecked": null,
+              "ariaSelected": null,
+              "ariaExpanded": null,
+              "hovered": false,
+              "focused": false,
+              "withinContent": false,
+              "currentLease": true,
+              "painted": true,
+              "visibility": {
+                "visible": true,
+                "classification": "source-model-visible",
+                "limits": []
+              }
+            }
+          ],
+          "projection": {
+            "achieved": true,
+            "owner": "pp-nkhz4h62zk",
+            "generation": "1",
+            "shellGeneration": "1",
+            "expected": {
+              "recipeId": "demo-brutalist-tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "shellPrototypeId": "brutalist-surface-root",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "family": "tooltip",
+              "runtime": "wc",
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "prototypeIds": [
+                "brutalist-tooltip-group",
+                "brutalist-tooltip-root",
+                "brutalist-tooltip-trigger",
+                "brutalist-tooltip-content"
+              ]
+            },
+            "observed": {
+              "recipeId": "demo-brutalist-tooltip",
+              "serializedRuntimes": "[\"wc\",\"react\",\"vue\"]",
+              "scopeCount": 1,
+              "contentCount": 1,
+              "state": "ready",
+              "family": "brutalist",
+              "runtime": "wc",
+              "contentFamily": "brutalist",
+              "contentRuntime": "wc",
+              "componentId": "tooltip",
+              "contentRecipeId": "website-runtime-preview:demo-brutalist-tooltip",
+              "contentOwner": "pp-nkhz4h62zk",
+              "contentGeneration": "1",
+              "previewerState": "ready",
+              "previewerFamily": "brutalist",
+              "previewerRuntime": "wc",
+              "shell": {
+                "boundaryValid": true,
+                "count": 1,
+                "mountCount": 1,
+                "retainedContentCount": 1,
+                "slotCount": 1,
+                "prototypeId": "brutalist-surface-root",
+                "family": "brutalist",
+                "runtime": "wc",
+                "generation": "1",
+                "owner": null,
+                "ownershipBasis": "Reserved published DOM boundary under the current lease-bearing mount; the independent controller owner is not published or certified.",
+                "mountOwner": "pp-nkhz4h62zk",
+                "mountGeneration": "1",
+                "retainedOwner": "pp-nkhz4h62zk",
+                "retainedGeneration": "1",
+                "rendererHostHidden": false,
+                "slotOwnsRetainedContent": true
+              },
+              "rootPrototypeId": "brutalist-tooltip-root",
+              "rootPresent": true,
+              "invalidRoots": [],
+              "misplacedRoots": [],
+              "subject": {
+                "expectedPreviewerId": "pp-nkhz4h62zk",
+                "previewerId": "pp-nkhz4h62zk",
+                "connected": true,
+                "matchingSubjectCount": 1
+              }
+            },
+            "boundary": "Requested authored Brutalist recipe/component/runtime and current lease, checked before and after every PNG/fact frame; not semantic conformance."
+          }
+        },
+        "requestedFrame": "keyboard-focus",
+        "requirePrimaryOpen": true
+      },
+      "targetObservation": {
+        "achieved": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "prototype": "brutalist-tooltip-trigger",
+        "text": "Hover or focus for details",
+        "focused": true,
+        "focusVisible": true,
+        "hovered": false,
+        "nativeActive": false,
+        "ariaPressed": null,
+        "ariaSelected": null,
+        "ariaChecked": null,
+        "ariaExpanded": null,
+        "shadow": "none"
+      },
+      "beforeFingerprintDigest": "sha256:12a6f733c6395d834eb88795768dfb94fcde251f43ecf63aa5a2f7bfa88e96d4",
+      "afterFingerprintDigest": "sha256:12a6f733c6395d834eb88795768dfb94fcde251f43ecf63aa5a2f7bfa88e96d4"
+    }
+  ]
+}
