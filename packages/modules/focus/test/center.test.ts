@@ -181,7 +181,7 @@ describe('FocusCenter roving options ownership', () => {
       center.focusInRoving(provider, 'first', {
         entryRequest: {
           defer: true,
-          get reason() {
+          get reason(): 'keyboard' {
             center.focusInRoving(provider, 'last', {
               entryRequest: { defer: true, reason: 'pointer', preventScroll: true },
             });
@@ -206,7 +206,7 @@ describe('FocusCenter roving options ownership', () => {
       center.focusInRoving(provider, 'first', {
         entryRequest: {
           defer: true,
-          get reason() {
+          get reason(): 'keyboard' {
             center.noteFocused(newer);
             return 'keyboard';
           },

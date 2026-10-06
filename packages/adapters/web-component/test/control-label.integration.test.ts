@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createControlLabelRef } from '@proto.ui/core';
 import { AdaptToWebComponent, setElementProps, setElementAssociations } from '../src';
 import { checkboxRoot as checkbox } from '../../../prototypes/base/src/checkbox';
@@ -11,6 +11,7 @@ AdaptToWebComponent(checkbox);
 AdaptToWebComponent(switchRoot);
 AdaptToWebComponent(labelRoot);
 AdaptToWebComponent(inputRoot);
+AdaptToWebComponent(inputRoot, { registerAs: 'test-label-shadow-input', shadow: true });
 AdaptToWebComponent(textareaRoot);
 AdaptToWebComponent(radioGroupRoot);
 AdaptToWebComponent(radioGroupItem);
@@ -80,6 +81,36 @@ describe('Web Component independent Control Label association', () => {
       expect(signals).toEqual([]);
     }
   );
+  it('does not associate an outer Label with an editor inside a separate ShadowRoot', async () => {
+    const f = await pair('test-label-shadow-input');
+    const editor = f.control.shadowRoot!.querySelector('input')!;
+    expect(editor.hasAttribute('aria-labelledby')).toBe(false);
+    pointerClick(f.label);
+    expect(f.control.shadowRoot!.activeElement).not.toBe(editor);
+  });
+  it('admits the same physical editor scope and withdraws again when its Label leaves', async () => {
+    const f = await pair('test-label-shadow-input');
+    const shadow = f.control.shadowRoot!;
+    const editor = shadow.querySelector('input')!;
+    shadow.append(f.label);
+    await flush();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(editor.getAttribute('aria-labelledby')).toBe(f.label.id);
+    pointerClick(f.label);
+    expect(shadow.activeElement).toBe(editor);
+    editor.blur();
+    document.body.append(f.label);
+    await flush();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(editor.hasAttribute('aria-labelledby')).toBe(false);
+    const focus = vi.spyOn(editor, 'focus');
+    try {
+      pointerClick(f.label);
+      expect(focus).not.toHaveBeenCalled();
+    } finally {
+      focus.mockRestore();
+    }
+  });
   it('respects an explicit Text Control name while allowing activation-only association', async () => {
     const f = await pair(
       'base-input-root',

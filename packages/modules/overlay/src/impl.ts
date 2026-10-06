@@ -12,6 +12,7 @@ import type {
   OverlayReason,
   OverlayRegistration,
   AnchoredPositionHandle,
+  AvailableSpaceHandle,
   AnchoredPositionSnapshot,
   AnatomyPartView,
 } from '@proto.ui/core';
@@ -43,6 +44,7 @@ const DEFAULT_CONFIG: OverlayConfig = Object.freeze({
   sideOffset: 4,
   alignOffset: 0,
   anchored: false,
+  availableSpace: false,
   strategy: 'absolute',
   avoidCollisions: true,
   collisionBoundary: 'clippingAncestors',
@@ -156,7 +158,8 @@ export class OverlayModuleImpl extends ModuleBase {
     private readonly boundaryPort: BoundaryPort,
     private readonly eventPort: EventPort,
     private readonly anatomyPort: AnatomyPort,
-    private readonly anchoredPosition: AnchoredPositionHandle
+    private readonly anchoredPosition: AnchoredPositionHandle,
+    private readonly availableSpace: AvailableSpaceHandle | null = null
   ) {
     super(caps);
     this.prototypeName = prototypeName;
@@ -323,12 +326,14 @@ export class OverlayModuleImpl extends ModuleBase {
 
   private deactivateViewSideEffects(): void {
     this.anchoredPosition.disconnect();
+    this.availableSpace?.disconnect();
     this.unlockModalIfNeeded();
   }
 
   private teardownMountedViewSideEffects(): void {
     this.clearLayer();
     this.anchoredPosition.disconnect();
+    this.availableSpace?.disconnect();
     this.unmountGlobalIfNeeded();
     this.unlockModalIfNeeded();
   }
@@ -451,6 +456,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.patchValue('sideOffset', patch.sideOffset);
     this.patchValue('alignOffset', patch.alignOffset);
     this.patchValue('anchored', patch.anchored);
+    this.patchValue('availableSpace', patch.availableSpace);
     this.patchValue('strategy', patch.strategy);
     this.patchValue('avoidCollisions', patch.avoidCollisions);
     this.patchValue('collisionBoundary', patch.collisionBoundary);
@@ -545,6 +551,15 @@ export class OverlayModuleImpl extends ModuleBase {
   }
 
   private syncAnchoredPosition(): void {
+    const availableTarget = this.registration.content ?? this.resolveHostElement();
+    if (
+      this.config.availableSpace &&
+      this.viewActive &&
+      this.mountPhase === 'mounted' &&
+      availableTarget
+    ) {
+      this.availableSpace?.connect({ target: availableTarget, boundary: 'root-content' });
+    } else this.availableSpace?.disconnect();
     if (!this.config.anchored || !this.viewActive || this.mountPhase !== 'mounted') {
       this.anchoredPosition.disconnect();
       return;

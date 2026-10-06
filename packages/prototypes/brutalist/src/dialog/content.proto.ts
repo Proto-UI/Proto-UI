@@ -16,7 +16,7 @@ const dialogContent = definePrototype<BrutalistDialogContentProps, BrutalistDial
     // P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR: centered hard-shadowed rounded modal panel (BRUTALIST_PANEL_TOKENS, fixed translate).
     def.feedback.style.use(
       tw(
-        `fixed left-1/2 top-1/2 grid w-full max-w-lg gap-4 -translate-x-1/2 -translate-y-1/2 p-6 outline-none duration-200 ${BRUTALIST_PANEL_TOKENS} shadow-[4px_4px_0_0_#000]`
+        `fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] grid w-full max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))] max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto gap-4 -translate-x-1/2 -translate-y-1/2 p-6 outline-none duration-200 ${BRUTALIST_PANEL_TOKENS} shadow-[4px_4px_0_0_#000]`
       )
     );
 

@@ -361,7 +361,8 @@ mod macos {
             let enabled: bool = msg_send![child, isAccessibilityEnabled];
             let value: *mut AnyObject = msg_send![child, accessibilityValue];
             let number = number(value);
-            let is_text: bool = !value.is_null() && msg_send![value, isKindOfClass: objc2::class!(NSString)];
+            let is_text: bool =
+                !value.is_null() && msg_send![value, isKindOfClass: objc2::class!(NSString)];
             let text_value = if is_text { string(value) } else { None };
             into.push((
                 depth,

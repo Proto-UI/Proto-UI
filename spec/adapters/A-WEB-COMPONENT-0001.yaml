@@ -27,6 +27,10 @@ criteria:
       contracts:
         - id: C-CONTROL-LABEL-0001
           since: 0.3.0-alpha.1
+  - id: A-WEB-COMPONENT-0001-AVAILABLE
+    text:
+      en: 'The Web Adapter installs the shared available-space host alongside anchored positioning; only opted-in active Overlay content leases it. Simulated geometry tests verify wiring and cleanup without claiming native viewport fidelity.'
+      zh-CN: 'Web Adapter 在锚定定位旁安装共享 available-space host；仅主动 opt-in 的活跃 Overlay content 获取租约。模拟几何测试证明连接和清理，不冒认原生 viewport fidelity。'
   - id: A-WEB-COMPONENT-0001-POSITIONING
     text:
       en: 'The Web Adapter installs Positioning and translates anchored geometry through the shared Floating UI host. Active Overlay placement, resize updates, non-transform projection and cleanup have executable Adapter evidence; this slice does not claim native browser layout fidelity.'
@@ -273,6 +277,9 @@ provides:
       since: 0.3.0-alpha.1
       role: translated-capability
       note: Same-tree Web lease and eligible activation request bridge; native/AT admission remains separate.
+    - id: HC-AVAILABLE-SPACE-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
     - id: HC-A11Y-0001
       since: 0.3.0-alpha.1
       role: translated-capability
@@ -378,6 +385,8 @@ relates:
 verifies:
   tests:
     - id: T-CONTROL-LABEL-0001
+      since: 0.3.0-alpha.1
+    - id: T-AVAILABLE-SPACE-0001
       since: 0.3.0-alpha.1
     - id: T-RULE-COLOR-SCHEME-0001
       since: 0.3.0-alpha.0

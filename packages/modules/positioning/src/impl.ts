@@ -1,4 +1,6 @@
 import type {
+  AvailableSpaceConnection,
+  AvailableSpaceHandle,
   AnchoredPositionConfig,
   AnchoredPositionConnection,
   AnchoredPositionHandle,
@@ -8,6 +10,8 @@ import type {
 } from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import {
+  AVAILABLE_SPACE_HOST_CAP,
+  type AvailableSpaceHostLease,
   ANCHORED_POSITION_HOST_CAP,
   type AnchoredPositionHost,
   type AnchoredPositionHostLease,
@@ -18,14 +22,77 @@ export class PositioningModuleImpl extends ModuleBase {
   private lease: AnchoredPositionHostLease | null = null;
   private snapshot: AnchoredPositionSnapshot | null = null;
 
+  private availableConnection: AvailableSpaceConnection | null = null;
+  private availableLease: AvailableSpaceHostLease | null = null;
+  private availableEpoch = 0;
+  private availableVersion = 0;
+  private terminal = false;
+
   protected override onCapsEpoch(): void {
-    if (!this.connection) return;
-    this.attach(this.connection);
+    if (this.terminal) return;
+    if (this.connection) this.attach(this.connection);
+    if (this.availableConnection) this.attachAvailable(this.availableConnection);
   }
+
+  private attachAvailable(connection: AvailableSpaceConnection): void {
+    const version = ++this.availableVersion;
+    const previous = this.availableLease;
+    this.availableLease = null;
+    previous?.dispose();
+    if (
+      this.terminal ||
+      version !== this.availableVersion ||
+      this.availableConnection !== connection
+    )
+      return;
+    const viewEpoch = ++this.availableEpoch;
+    if (!this.caps.has(AVAILABLE_SPACE_HOST_CAP)) return;
+    const host = this.caps.get(AVAILABLE_SPACE_HOST_CAP);
+    if (!host) return;
+    const lease = host.attach({ ...connection, viewEpoch });
+    if (
+      this.terminal ||
+      version !== this.availableVersion ||
+      this.availableConnection !== connection
+    )
+      lease.dispose();
+    else this.availableLease = lease;
+  }
+
+  readonly availableHandle: AvailableSpaceHandle = {
+    connect: (connection) => {
+      if (this.terminal) return;
+      const same =
+        this.availableConnection !== null &&
+        this.availableConnection.target === connection.target &&
+        this.availableConnection.boundary === connection.boundary;
+      this.availableConnection = connection;
+      if (same && this.availableLease) {
+        this.availableLease.requestUpdate();
+        return;
+      }
+      this.attachAvailable(connection);
+    },
+    requestUpdate: () => {
+      if (!this.terminal) this.availableLease?.requestUpdate();
+    },
+    disconnect: () => {
+      this.availableVersion++;
+      this.availableEpoch++;
+      const previous = this.availableLease;
+      this.availableLease = null;
+      this.availableConnection = null;
+      previous?.dispose();
+    },
+  };
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
-    if (phase === 'unmounted') this.disconnect();
+    if (phase === 'unmounted') {
+      this.terminal = true;
+      this.disconnect();
+      this.availableHandle.disconnect();
+    }
   }
 
   private getHost(): AnchoredPositionHost | null {

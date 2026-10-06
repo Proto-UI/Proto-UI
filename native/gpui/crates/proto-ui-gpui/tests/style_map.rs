@@ -877,8 +877,14 @@ fn text_inherited_tone_reports_unsupported_value_without_parent_style() {
 fn explicit_no_selection_matches_plain_native_text_without_claiming_selection_support() {
     let mut resolved = resolve(&["select-none"], "shadcn");
     // Isolate selection from the separate implicit-position gap.
-    resolved.declarations.insert("position".into(), "relative".into());
+    resolved
+        .declarations
+        .insert("position".into(), "relative".into());
     assert!(map(&resolved, LengthContext::default()).is_complete());
-    resolved.declarations.insert("user-select".into(), "text".into());
-    assert!(map(&resolved, LengthContext::default()).unmapped_properties().contains(&"user-select"));
+    resolved
+        .declarations
+        .insert("user-select".into(), "text".into());
+    assert!(map(&resolved, LengthContext::default())
+        .unmapped_properties()
+        .contains(&"user-select"));
 }

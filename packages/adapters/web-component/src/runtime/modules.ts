@@ -92,6 +92,8 @@ import {
   type OverlayLayerScheduler,
 } from '@proto.ui/module-overlay';
 import {
+  AVAILABLE_SPACE_HOST_CAP,
+  createWebAvailableSpaceHost,
   ANCHORED_POSITION_HOST_CAP,
   createFloatingUiAnchoredPositionHost,
 } from '@proto.ui/module-positioning';
@@ -403,6 +405,19 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   };
   const physicalControl = () => args.textControlTarget;
   const physicalImage = () => args.imageViewTarget;
+  const getAccessibilitySurface = () => {
+    const surface = args.surfaceProjection.getSurfaceTarget();
+    return surface === el ? getConnectedTriggerSurface() : surface;
+  };
+  const getControlLabelSurface = () => (args.isViewReady() ? getAccessibilitySurface() : null);
+  const subscribeControlLabelSurface = (listener: () => void) => {
+    const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
+    const offReady = subscribeFocusTarget(listener);
+    return () => {
+      offSurface();
+      offReady();
+    };
+  };
   // Keep canonical instance-facing state markers on the custom-element
   // boundary while mirroring only the generated selector context needed by
   // translated feedback.style tokens on a split presentation surface.
@@ -410,7 +425,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
 
   return createCapsWiring()
     .use('control-label', [
-      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getTriggerSurface, subscribeFocusTarget)],
+      [
+        CONTROL_LABEL_HOST_CAP,
+        createWebControlLabelHost(getControlLabelSurface, subscribeControlLabelSurface),
+      ],
       [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('text-control', [
@@ -438,20 +456,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
-        createWebA11yProjector(
-          () => {
-            const surface = args.surfaceProjection.getSurfaceTarget();
-            return surface === el ? getConnectedTriggerSurface() : surface;
-          },
-          (listener) => {
-            const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
-            const offTrigger = subscribeLogicalTriggerSurface(instanceToken, listener);
-            return () => {
-              offSurface();
-              offTrigger();
-            };
-          }
-        ),
+        createWebA11yProjector(getAccessibilitySurface, (listener) => {
+          const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
+          const offTrigger = subscribeLogicalTriggerSurface(instanceToken, listener);
+          return () => {
+            offSurface();
+            offTrigger();
+          };
+        }),
       ],
     ])
     .use('event', [
@@ -609,7 +621,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [HOST_ELEMENT_CAP, el],
       [BOUNDARY_HOST_BRIDGE_CAP, createWebBoundaryHostBridge()],
     ])
-    .use('positioning', [[ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()]])
+    .use('positioning', [
+      [ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()],
+      [AVAILABLE_SPACE_HOST_CAP, createWebAvailableSpaceHost()],
+    ])
     .use('scroll', [
       [
         SCROLL_SURFACE_HOST_CAP,

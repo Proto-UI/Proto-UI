@@ -244,7 +244,16 @@ impl InputBridge {
                     .entry(surface.session.clone())
                     .or_insert_with(|| surface.id.clone());
             }
-            if surface.a11y.as_ref().is_some_and(|a11y| a11y.activatable || matches!(a11y.role, accesskit::Role::Button | accesskit::Role::Switch | accesskit::Role::CheckBox | accesskit::Role::Tab)) {
+            if surface.a11y.as_ref().is_some_and(|a11y| {
+                a11y.activatable
+                    || matches!(
+                        a11y.role,
+                        accesskit::Role::Button
+                            | accesskit::Role::Switch
+                            | accesskit::Role::CheckBox
+                            | accesskit::Role::Tab
+                    )
+            }) {
                 interactive.insert(surface.id.clone());
             }
             if let Some(focus) = &surface.focus {
@@ -334,7 +343,9 @@ impl InputBridge {
     /// loses activation and `focus` when it regains it, and GPUI calls the
     /// focus callbacks at exactly those moments.
     fn sync_focus(&mut self, window: &Window) {
-        if !window.is_window_active() { self.label_input.cancel(); }
+        if !window.is_window_active() {
+            self.label_input.cancel();
+        }
         let now = window
             .is_window_active()
             .then(|| {
@@ -376,7 +387,11 @@ impl InputBridge {
 
     fn mouse_down(&mut self, event: &MouseDownEvent) {
         let path = std::mem::take(&mut self.collected);
-        self.label_input.pointer_down(&path, (event.position.x.0, event.position.y.0), event.button == MouseButton::Left && event.modifiers == gpui::Modifiers::default());
+        self.label_input.pointer_down(
+            &path,
+            (event.position.x.as_f32(), event.position.y.as_f32()),
+            event.button == MouseButton::Left && event.modifiers == gpui::Modifiers::default(),
+        );
         let modifiers = PortableModifiers::from(event.modifiers);
         let target = self.target(path.clone());
         self.route(HostInput::Pointer {
@@ -394,7 +409,11 @@ impl InputBridge {
 
     fn mouse_up(&mut self, event: &MouseUpEvent) {
         let path = std::mem::take(&mut self.collected);
-        self.label_input.pointer_up(&path, (event.position.x.0, event.position.y.0), event.button == MouseButton::Left && event.modifiers == gpui::Modifiers::default());
+        self.label_input.pointer_up(
+            &path,
+            (event.position.x.as_f32(), event.position.y.as_f32()),
+            event.button == MouseButton::Left && event.modifiers == gpui::Modifiers::default(),
+        );
         let modifiers = PortableModifiers::from(event.modifiers);
         self.route(HostInput::Pointer {
             phase: PointerPhase::Up,
@@ -422,7 +441,8 @@ impl InputBridge {
     }
 
     fn mouse_move(&mut self, event: &MouseMoveEvent) {
-        self.label_input.pointer_move((event.position.x.0, event.position.y.0));
+        self.label_input
+            .pointer_move((event.position.x.as_f32(), event.position.y.as_f32()));
         let path = std::mem::take(&mut self.collected);
         self.route(HostInput::Pointer {
             phase: PointerPhase::Move,
@@ -752,13 +772,20 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
         match child {
             SurfaceChild::Surface(surface) => render_surface(surface, bridge),
             SurfaceChild::Text(text) => {
-                let label = bridge.borrow().label_input.route_for_session(&surface.session);
+                let label = bridge
+                    .borrow()
+                    .label_input
+                    .route_for_session(&surface.session);
                 if let Some(route) = label {
                     native_label_text(index, text, route, bridge)
                 } else {
-                    Text::new(ElementId::NamedInteger("text".into(), index as u64), text.clone()).into_any_element()
+                    Text::new(
+                        ElementId::NamedInteger("text".into(), index as u64),
+                        text.clone(),
+                    )
+                    .into_any_element()
                 }
-            },
+            }
             // Only a session with nothing to show yet is still a placeholder.
             SurfaceChild::Session(_) => Empty.into_any_element(),
         }
@@ -869,17 +896,24 @@ impl Element for Disabled {
 /// One visible text node, with its ordinary Label role and no keyboard focus.
 /// The child is raw text without a second accessibility node; this is not a
 /// copied aria-label or hidden duplicate of the rendered caption.
-fn native_label_text(index: usize, text: &SharedString, route: LabelRoute, bridge: &Rc<RefCell<InputBridge>>) -> AnyElement {
+fn native_label_text(
+    index: usize,
+    text: &SharedString,
+    route: LabelRoute,
+    bridge: &Rc<RefCell<InputBridge>>,
+) -> AnyElement {
     let action_bridge = bridge.clone();
     NativeLabelText(
-        div().id(ElementId::NamedInteger("text".into(), index as u64))
+        div()
+            .id(ElementId::NamedInteger("text".into(), index as u64))
             .role(accesskit::Role::Label)
             .on_a11y_action(AccessibleAction::Click, move |_, _, _| {
                 action_bridge.borrow_mut().label_input.accessibility(&route);
             })
             .child(text.clone()),
         text.clone(),
-    ).into_any_element()
+    )
+    .into_any_element()
 }
 
 struct NativeLabelText(Stateful<Div>, SharedString);

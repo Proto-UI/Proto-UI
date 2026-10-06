@@ -65,9 +65,11 @@ pub(crate) struct LabelInput {
 impl LabelInput {
     pub fn replace_routes(&mut self, routes: HashMap<String, LabelRoute>) {
         self.routes = routes;
-        if self.pending.as_ref().is_some_and(|pending| {
-            !self.routes.values().any(|route| route == &pending.route)
-        }) {
+        if self
+            .pending
+            .as_ref()
+            .is_some_and(|pending| !self.routes.values().any(|route| route == &pending.route))
+        {
             self.pending = None;
         }
     }
@@ -77,7 +79,10 @@ impl LabelInput {
     }
 
     pub fn route_for_session(&self, session: &str) -> Option<LabelRoute> {
-        self.routes.values().find(|route| route.session_id == session).cloned()
+        self.routes
+            .values()
+            .find(|route| route.session_id == session)
+            .cloned()
     }
 
     fn eligible_route(&self, path: &[String]) -> Option<LabelRoute> {
@@ -96,7 +101,10 @@ impl LabelInput {
 
     pub fn pointer_down(&mut self, path: &[String], position: (f32, f32), eligible: bool) {
         self.pending = if eligible {
-            self.eligible_route(path).map(|route| PendingPointer { route, origin: position })
+            self.eligible_route(path).map(|route| PendingPointer {
+                route,
+                origin: position,
+            })
         } else {
             None
         };
@@ -114,7 +122,9 @@ impl LabelInput {
 
     pub fn pointer_up(&mut self, path: &[String], position: (f32, f32), eligible: bool) {
         self.pointer_move(position);
-        let Some(pending) = self.pending.take() else { return; };
+        let Some(pending) = self.pending.take() else {
+            return;
+        };
         if eligible && self.eligible_route(path).as_ref() == Some(&pending.route) {
             self.emit(pending.route, ControlLabelActivationSource::Pointer);
         }
@@ -126,7 +136,10 @@ impl LabelInput {
 
     pub fn accessibility(&mut self, expected: &LabelRoute) {
         if self.routes.values().any(|route| route == expected) {
-            self.emit(expected.clone(), ControlLabelActivationSource::Accessibility);
+            self.emit(
+                expected.clone(),
+                ControlLabelActivationSource::Accessibility,
+            );
         }
     }
 
@@ -152,7 +165,12 @@ mod tests {
     use super::*;
 
     fn fixture() -> (LabelInput, LabelRoute, Vec<String>) {
-        let route = LabelRoute { session_id: "label".into(), view_epoch: 1, lease_id: "lease:1".into(), view_revision: 2 };
+        let route = LabelRoute {
+            session_id: "label".into(),
+            view_epoch: 1,
+            lease_id: "lease:1".into(),
+            view_revision: 2,
+        };
         let mut input = LabelInput::default();
         input.replace_routes(HashMap::from([("caption".into(), route.clone())]));
         (input, route, vec!["caption/text".into(), "caption".into()])
@@ -198,6 +216,9 @@ mod tests {
         input.accessibility(&current);
         let output = input.drain();
         assert_eq!(output.len(), 1);
-        assert_eq!(output[0].source, ControlLabelActivationSource::Accessibility);
+        assert_eq!(
+            output[0].source,
+            ControlLabelActivationSource::Accessibility
+        );
     }
 }

@@ -8,6 +8,20 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it('lowers logical available-region bounds without dropping max-width arithmetic', () => {
+    const css = renderProtoStyleTokenCss([
+      'left-[var(--proto-ui-available-region-center-x,50%)]',
+      'max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]',
+      'max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)]',
+    ]);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('left: var(--proto-ui-available-region-center-x,50%);');
+    expect(css).toContain(
+      'max-width: min(32rem,calc(var(--proto-ui-available-region-width,100%) - 2rem));'
+    );
+    expect(css).toContain('max-height: calc(var(--proto-ui-available-region-height,100%) - 2rem);');
+  });
+
   it('lowers both Scroll Area track inset dimensions to valid spaced CSS math', () => {
     const css = renderProtoStyleTokenCss([
       'data-[orientation=vertical]:h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',

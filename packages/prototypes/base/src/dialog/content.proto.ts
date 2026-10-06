@@ -59,7 +59,7 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
     closeOnFocusOutside: false,
     restore: 'trigger',
     entry: 'content',
-    placement: 'center' as any,
+    availableSpace: true,
     portal: true,
     modal: false,
     layerRole: 'dialog-content',
@@ -257,7 +257,11 @@ const dialogContent = definePrototype({
   name: 'base-dialog-content',
   setup(def) {
     setupDialogContent(def);
-    def.feedback.style.use(tw('fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'));
+    def.feedback.style.use(
+      tw(
+        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] max-w-[var(--proto-ui-available-region-width,100%)] max-h-[var(--proto-ui-available-region-height,100%)] overflow-y-auto -translate-x-1/2 -translate-y-1/2'
+      )
+    );
   },
 });
 

@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "parent": "15d864de54210c2eebc4f4b2fec6235324989989",
+  "sourceTreeBeforeRecord": "be233c4bb4092ee55d2c03d5734de837449c2545",
+  "scope": [
+    "Shared leased available-space geometry for Base/Shadcn/Brutalist Dialog and its Web hosts/compiler",
+    "Classic scrollbar diagnostic removes only Playwright default hide-scrollbars; positive width and actual geometry checks remain",
+    "Reviewed Label reader corrections and same actual WC accessibility-surface scope",
+    "Same-intent Focus layout retry survives internal pending-slot replay; explicit cancellation/owner gates remain",
+    "Rust native compilation uses public Pixels::as_f32; actual official rustfmt patch applied",
+    "Roving unit-test literal type annotations; no production logic change",
+    "Regenerate all style-token and GPUI style fixtures, including missing leading-normal in Bootstrap/Liquid Label sets"
+  ],
+  "priorFailures": [
+    {
+      "run": 37518189141,
+      "job": 112456427053,
+      "kind": "generated-draft-token-manifest-stale-before-browser"
+    },
+    {
+      "run": 37518189188,
+      "job": 112456428113,
+      "kind": "same generated token closure failure before browser"
+    },
+    {
+      "run": 37518188986,
+      "job": 112456426459,
+      "kind": "same generated token closure failure before browser"
+    }
+  ],
+  "verification": {
+    "geometryLabelCompiler": {
+      "suites": 8,
+      "passed": 101
+    },
+    "focusAndActualGalleryFrameworkHarness": {
+      "suites": 14,
+      "passed": 391,
+      "nativeBrowser": false
+    },
+    "types": ["workspace tsc passed", "contract type tsc passed"],
+    "generated": [
+      "Shadcn321 tokens current",
+      "Brutalist297 tokens current",
+      "Draft family closure current",
+      "GPUI315 compiled/6 non-declaration style tokens current"
+    ]
+  },
+  "boundaries": [
+    "Native geometry, actual scrollbar width, Rust/Clippy/macOS input and real screenshot results require this new official head.",
+    "No source-only tests or former visual runs close any Finf item. All 68 items remain unchecked.",
+    "Four-system/full-GPUI delivery and remaining prototype families remain open.",
+    "The previous numeric budget transaction does not cover these changed sources; remeasure before proposing new ceilings."
+  ],
+  "Agent": "dot",
+  "ModelTrace": "not measured — owner-authorized dot exemption (2026-10-06)"
+}

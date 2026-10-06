@@ -82,6 +82,8 @@ import {
   type OverlayLayerScheduler,
 } from '@proto.ui/module-overlay';
 import {
+  AVAILABLE_SPACE_HOST_CAP,
+  createWebAvailableSpaceHost,
   ANCHORED_POSITION_HOST_CAP,
   createFloatingUiAnchoredPositionHost,
 } from '@proto.ui/module-positioning';
@@ -493,7 +495,10 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       [HOST_ELEMENT_CAP, el],
       [BOUNDARY_HOST_BRIDGE_CAP, createWebBoundaryHostBridge()],
     ])
-    .use('positioning', [[ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()]])
+    .use('positioning', [
+      [ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()],
+      [AVAILABLE_SPACE_HOST_CAP, createWebAvailableSpaceHost()],
+    ])
     .use('scroll', [
       [
         SCROLL_SURFACE_HOST_CAP,

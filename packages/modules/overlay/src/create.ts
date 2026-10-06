@@ -27,7 +27,8 @@ export function createOverlayModule(ctx: ModuleFactoryArgs): OverlayModule {
         deps.requirePort<BoundaryPort>('boundary'),
         deps.requirePort<EventPort>('event'),
         deps.requirePort<AnatomyPort>('anatomy'),
-        deps.requireFacade<PositioningFacade>('positioning').getAnchoredPosition()
+        deps.requireFacade<PositioningFacade>('positioning').getAnchoredPosition(),
+        deps.requireFacade<PositioningFacade>('positioning').getAvailableSpace?.() ?? null
       );
 
       return {

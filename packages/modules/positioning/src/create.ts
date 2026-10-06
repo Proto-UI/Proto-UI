@@ -13,8 +13,14 @@ export function createPositioningModule(ctx: ModuleFactoryArgs): PositioningModu
     caps,
     deps,
     build: () => ({
-      facade: { getAnchoredPosition: () => impl.handle },
-      port: { getAnchoredPosition: () => impl.handle },
+      facade: {
+        getAnchoredPosition: () => impl.handle,
+        getAvailableSpace: () => impl.availableHandle,
+      },
+      port: {
+        getAnchoredPosition: () => impl.handle,
+        getAvailableSpace: () => impl.availableHandle,
+      },
       hooks: {
         onProtoPhase: (phase) => impl.onProtoPhase(phase),
       },

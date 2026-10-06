@@ -206,10 +206,12 @@ describe('prototypes/brutalist: dialog', () => {
     }
     for (const token of [
       'fixed',
-      'left-1/2',
-      'top-1/2',
+      'left-[var(--proto-ui-available-region-center-x,50%)]',
+      'top-[var(--proto-ui-available-region-center-y,50%)]',
       'grid',
-      'max-w-lg',
+      'max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]',
+      'max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)]',
+      'overflow-y-auto',
       'p-6',
       'rounded-base',
       'border-2',

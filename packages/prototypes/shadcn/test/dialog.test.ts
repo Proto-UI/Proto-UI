@@ -90,6 +90,12 @@ describe('prototypes/shadcn: dialog', () => {
     expect(mask.getExposes().transitionState.get()).toBe('entering');
     expect(styleContains(content, 'hidden')).toBe(false);
     expect(styleContains(mask, 'hidden')).toBe(false);
+    expect(
+      styleContains(
+        content,
+        'max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]'
+      )
+    ).toBe(true);
     expect(styleContains(content, 'rounded-lg')).toBe(true);
     expect(styleContains(content, 'shadow-lg')).toBe(true);
     expect(styleContains(content, 'data-[open]:animate-in')).toBe(true);

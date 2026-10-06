@@ -15,14 +15,14 @@ The demo pairs this Label projection with real, visually neutral Base controls t
 
 - `naming` defaults to `true`. The target refers to the actual rendered Label using an accessibility relationship. Do not add a hidden copy of the same name.
 - `activation` defaults to `false`. With `true`, an eligible pointer or trusted non-pointer action requests the target's existing operation. Checkbox and Switch keep their controlled/disabled behavior; Radio Item delegates to its Group; Input and Textarea request focus without editing or moving the selection themselves.
-- Label adds no button role, Tab stop or separate keyboard action. Keyboard input remains on the control. Nested links/buttons, modified or cancelled pointer gestures and drag selection are not forwarded.
+- Label adds no button role, Tab stop or separate keyboard action. Keyboard input remains on the control. Nested links/buttons, modified pointer input, pointercancel and drag gestures are not forwarded.
 - Naming-only labels and long descriptions remain copyable. A short actionable Label declares its own selection affordance. The controlled example deliberately keeps its value off after proposals; this is the application's ownership decision.
 
 Activation stays in the originating click turn so editor focus is not delayed to a timer. Cancellation already observed by the host click listener is respected; a later listener cannot undo a committed operation. Cancelling pointerup alone is not click cancellation. This is a bounded custom Label protocol, not a claim to reproduce every native HTML label default-action detail. Actual assistive-technology behavior remains to be verified.
 
 ## Explicit association, outside JSON Props
 
-Create one stable `createControlLabelRef()` from `@proto.ui/core` for each pair. Keep it for the row's logical lifetime. In React, Vue and Vue 2, pass `instanceAssociations={ controlLabel: ref }` as the Adapter-owned input to both components. It is removed before raw/resolved Proto Props, even with a custom `getProps` projection.
+Create one stable `createControlLabelRef()` from `@proto.ui/core` for each pair. Keep it for the row's logical lifetime. In React, Vue and Vue 2, pass `instanceAssociations: { controlLabel: ref }` as the Adapter-owned input to both components. It is removed before raw/resolved Proto Props, even with a custom `getProps` projection.
 
 In WC, call `setElementAssociations(target, { controlLabel: ref })` and the same setter for the Label from `@proto.ui/adapter-web-component`. Use normal Props only for `naming`, `activation` and the control's values. Attribute strings, JSON-cloned references and unknown association keys are rejected. DemoSpec expresses `associations: { controlLabel: 'row-key' }`; each render instance materializes an independent public reference for that key.
 

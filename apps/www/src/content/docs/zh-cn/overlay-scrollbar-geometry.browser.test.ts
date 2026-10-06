@@ -3,9 +3,9 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser, Locator, Page } from 'playwright-core';
+import { chromium, type Browser, type Locator, type Page } from 'playwright-core';
 import { afterAll, beforeAll, expect, it } from 'vitest';
-import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
+import { chromeExecutable, RUNTIMES, startServer, stopServer } from './browser-harness';
 
 // Controlled layout conditions around actual public Select/Dialog consumers.
 // No injected rectangles, positioning coordinates, fake controls or offset repair.
@@ -20,7 +20,14 @@ let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
   baseUrl = await startServer('/zh-cn/');
-  browser = await launchBrowser();
+  // Playwright headless defaults include --hide-scrollbars, which defeats the
+  // classic-scrollbar precondition. Keep real browser layout; suppress no UI.
+  browser = await chromium.launch({
+    executablePath: await chromeExecutable(),
+    headless: true,
+    ignoreDefaultArgs: ['--hide-scrollbars'],
+    args: ['--disable-dev-shm-usage', '--no-sandbox'],
+  });
   if (output) await mkdir(output, { recursive: true });
 }, 150_000);
 afterAll(async () => {

@@ -653,7 +653,7 @@ function renderUtility(utility: string): string[] | null {
 
 function renderSpacingUtility(utility: string): string[] | null {
   const spacingMatch = utility.match(
-    /^(gap|h|w|min-h|min-w|max-h|size|p|px|py|pl|pr|pt|pb|mt|mb|ml|mr|top|left|right)-(.+)$/
+    /^(gap|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|pt|pb|mt|mb|ml|mr|top|left|right)-(.+)$/
   );
   if (!spacingMatch) return null;
   const [, kind, rawValue] = spacingMatch;
@@ -666,6 +666,7 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (kind === 'min-h') return [`min-height: ${value};`];
   if (kind === 'min-w') return [`min-width: ${value};`];
   if (kind === 'max-h') return [`max-height: ${value};`];
+  if (kind === 'max-w') return [`max-width: ${value};`];
   if (kind === 'size') return [`width: ${value};`, `height: ${value};`];
   if (kind === 'p') return [`padding: ${value};`];
   if (kind === 'px') return [`padding-inline: ${value};`];

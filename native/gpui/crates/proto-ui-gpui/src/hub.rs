@@ -16,9 +16,10 @@ use std::collections::{HashMap, HashSet};
 
 use gpui::{App, Context, EventEmitter, FocusHandle, Refineable, StyleRefinement, Window};
 use proto_ui_host_protocol::messages::{
-    ControlLabelKind, ControlLabelPlan, ControlLabelView, InstanceAssociations, InstanceAssociationsSet, NativeControlLabelView,
-    ExposeCall, FocusResult, HostToPeerMessage, InputSampleMessage, MetaSet, OpenStatus,
-    PeerToHostMessage, ProjectionAckMessage, PropsSet, SessionDispose, SessionOpen, WireRecord,
+    ControlLabelKind, ControlLabelPlan, ControlLabelView, ExposeCall, FocusResult,
+    HostToPeerMessage, InputSampleMessage, InstanceAssociations, InstanceAssociationsSet, MetaSet,
+    NativeControlLabelView, OpenStatus, PeerToHostMessage, ProjectionAckMessage, PropsSet,
+    SessionDispose, SessionOpen, WireRecord,
 };
 use proto_ui_host_protocol::model::{
     ActivationStatus, DefaultActionStatus, DeliveryResult, DetachStatus, HostSessionModel,
@@ -33,8 +34,8 @@ use proto_ui_style::Theme;
 use serde_json::{json, Value};
 
 use crate::a11y::{project, A11yIssue, A11yProjection, A11yReference};
-use crate::host::{ProtoHostView, SurfaceChild, SurfaceNode, FOCUS_ROOT_REF};
 use crate::control_label::{ControlLabelRef, LabelRoute, NativeTreeIdentity};
+use crate::host::{ProtoHostView, SurfaceChild, SurfaceNode, FOCUS_ROOT_REF};
 use crate::input::{SessionRoute, SurfaceId};
 use crate::style::{style_for_feedback_tokens, StyleIssue};
 use crate::template::{build, parse, BuildContext, BuildIssue};
@@ -153,7 +154,10 @@ pub enum HubNote {
         sample_id: String,
     },
     /// A native label plan does not belong to the installed surface epoch.
-    ControlLabelRefused { session_id: SessionId, view_epoch: u64 },
+    ControlLabelRefused {
+        session_id: SessionId,
+        view_epoch: u64,
+    },
     /// A feedback style for a view other than the installed one.
     StyleRefused {
         session_id: SessionId,
@@ -456,15 +460,25 @@ impl ProtoHostView {
     }
 
     /// Replaces the dedicated typed label association, never a JSON Prop.
-    pub fn set_control_label_association(&mut self, session_id: &str, reference: Option<&ControlLabelRef>) {
+    pub fn set_control_label_association(
+        &mut self,
+        session_id: &str,
+        reference: Option<&ControlLabelRef>,
+    ) {
         if self.hub.session(session_id).is_none() {
             self.note_unknown(session_id, "instance.associations");
             return;
         }
-        self.hub.outbox.push(HostToPeerMessage::InstanceAssociations(InstanceAssociationsSet {
-            session_id: session_id.to_string(),
-            associations: InstanceAssociations { control_label: reference.map(ControlLabelRef::wire_key) },
-        }));
+        self.hub
+            .outbox
+            .push(HostToPeerMessage::InstanceAssociations(
+                InstanceAssociationsSet {
+                    session_id: session_id.to_string(),
+                    associations: InstanceAssociations {
+                        control_label: reference.map(ControlLabelRef::wire_key),
+                    },
+                },
+            ));
     }
 
     /// Calls a method the instance exposes, returning the call's identifier;
@@ -507,8 +521,16 @@ impl ProtoHostView {
                     self.note_unknown(&message.session_id, "control-label.plan");
                     return;
                 };
-                if session.model.snapshot().current_epoch != Some(message.view_epoch) || message.plan.as_ref().is_some_and(|plan| plan.lease_id.is_empty() || (plan.kind == ControlLabelKind::Target && plan.activation)) {
-                    self.hub.notes.push(HubNote::ControlLabelRefused { session_id: message.session_id, view_epoch: message.view_epoch });
+                if session.model.snapshot().current_epoch != Some(message.view_epoch)
+                    || message.plan.as_ref().is_some_and(|plan| {
+                        plan.lease_id.is_empty()
+                            || (plan.kind == ControlLabelKind::Target && plan.activation)
+                    })
+                {
+                    self.hub.notes.push(HubNote::ControlLabelRefused {
+                        session_id: message.session_id,
+                        view_epoch: message.view_epoch,
+                    });
                     return;
                 }
                 if session.control_label_plan != message.plan {
@@ -772,11 +794,21 @@ impl ProtoHostView {
         let label_actions = self.bridge.borrow_mut().label_input.drain();
         for action in label_actions {
             let valid = self.hub.session(&action.session_id).is_some_and(|session| {
-                session.control_label_plan.as_ref().is_some_and(|plan| plan.kind == ControlLabelKind::Label && plan.activation && plan.lease_id == action.lease_id)
-                    && session.control_label_view.as_ref().is_some_and(|view| view.view.is_some() && view.revision == action.view_revision && view.view_epoch == action.view_epoch)
-                    && session.model.snapshot().active_epoch == Some(action.view_epoch)
+                session.control_label_plan.as_ref().is_some_and(|plan| {
+                    plan.kind == ControlLabelKind::Label
+                        && plan.activation
+                        && plan.lease_id == action.lease_id
+                }) && session.control_label_view.as_ref().is_some_and(|view| {
+                    view.view.is_some()
+                        && view.revision == action.view_revision
+                        && view.view_epoch == action.view_epoch
+                }) && session.model.snapshot().active_epoch == Some(action.view_epoch)
             });
-            if valid { self.hub.outbox.push(HostToPeerMessage::ControlLabelActivate(action)); }
+            if valid {
+                self.hub
+                    .outbox
+                    .push(HostToPeerMessage::ControlLabelActivate(action));
+            }
         }
         let routed = self.bridge.borrow_mut().drain();
         for routed in routed {
@@ -1042,7 +1074,11 @@ impl ProtoHostView {
     /// queues data; layout and paint never synchronously enter the guest.
     pub(crate) fn publish_control_labels(&mut self, window: &Window) {
         let rendered: HashSet<SessionId> = self.rendered_sessions().into_iter().collect();
-        let scope = format!("window:{:?}:tree:{}", window.window_handle().window_id(), self.hub.native_tree.0);
+        let scope = format!(
+            "window:{:?}:tree:{}",
+            window.window_handle().window_id(),
+            self.hub.native_tree.0
+        );
         let mut routes = HashMap::new();
         for (session_id, session) in &mut self.hub.sessions {
             let Some(plan) = &session.control_label_plan else {
@@ -1050,7 +1086,14 @@ impl ProtoHostView {
                 continue;
             };
             let snapshot = session.model.snapshot();
-            let Some(epoch) = snapshot.current_epoch.or_else(|| session.control_label_view.as_ref().map(|view| view.view_epoch)) else { continue; };
+            let Some(epoch) = snapshot.current_epoch.or_else(|| {
+                session
+                    .control_label_view
+                    .as_ref()
+                    .map(|view| view.view_epoch)
+            }) else {
+                continue;
+            };
             let present = rendered.contains(session_id) && snapshot.active_epoch == Some(epoch);
             let view = present.then(|| NativeControlLabelView {
                 identity: format!("surface:{}:epoch:{}", session.native_identity.0, epoch),
@@ -1059,21 +1102,38 @@ impl ProtoHostView {
                 // Proto-authored names are checked by the A11y Module itself.
                 authored_name: false,
             });
-            let unchanged = session.control_label_view.as_ref().is_some_and(|old| old.view_epoch == epoch && old.lease_id == plan.lease_id && old.view == view);
+            let unchanged = session.control_label_view.as_ref().is_some_and(|old| {
+                old.view_epoch == epoch && old.lease_id == plan.lease_id && old.view == view
+            });
             if !unchanged {
                 self.hub.next_label_revision += 1;
                 let message = ControlLabelView {
-                    session_id: session_id.clone(), view_epoch: epoch, lease_id: plan.lease_id.clone(),
-                    revision: self.hub.next_label_revision, view,
+                    session_id: session_id.clone(),
+                    view_epoch: epoch,
+                    lease_id: plan.lease_id.clone(),
+                    revision: self.hub.next_label_revision,
+                    view,
                 };
-                self.hub.outbox.push(HostToPeerMessage::ControlLabelView(message.clone()));
+                self.hub
+                    .outbox
+                    .push(HostToPeerMessage::ControlLabelView(message.clone()));
                 session.control_label_view = Some(message);
             }
             if present && plan.kind == ControlLabelKind::Label && plan.activation {
-                let revision = session.control_label_view.as_ref().expect("current native view").revision;
-                routes.insert(session.root_id.clone(), LabelRoute {
-                    session_id: session_id.clone(), view_epoch: epoch, lease_id: plan.lease_id.clone(), view_revision: revision,
-                });
+                let revision = session
+                    .control_label_view
+                    .as_ref()
+                    .expect("current native view")
+                    .revision;
+                routes.insert(
+                    session.root_id.clone(),
+                    LabelRoute {
+                        session_id: session_id.clone(),
+                        view_epoch: epoch,
+                        lease_id: plan.lease_id.clone(),
+                        view_revision: revision,
+                    },
+                );
             }
         }
         self.bridge.borrow_mut().label_input.replace_routes(routes);

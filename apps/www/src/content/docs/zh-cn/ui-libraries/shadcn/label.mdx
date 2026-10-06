@@ -14,13 +14,13 @@ Label 当前仍是 **draft**。shadcn 投影复用独立的 Base Label 协议；
 ## 分开声明名称和激活
 
 - `naming` 默认 `true`：目标通过可访问关系引用真实渲染的 Label，不再放置重复的隐藏名称。
-- `activation` 默认 `false`：设为 `true` 后，符合条件的指针动作请求目标已有操作。Checkbox、Switch 保持 disabled 与 controlled 规则；Radio Item 向 Group 请求选值；Input、Textarea 只请求 focus，不由 Label 改值或操纵选区。
-- Label 不增加 button role、Tab 停靠点或独立键盘激活。嵌套链接/按钮、带修饰键、取消与拖拽手势不转发。
+- `activation` 默认 `false`：设为 `true` 后，符合条件的指针动作或可信的非指针激活请求目标已有操作。Checkbox、Switch 保持 disabled 与 controlled 规则；Radio Item 向 Group 请求选值；Input、Textarea 只请求 focus，不由 Label 改值或操纵选区。
+- Label 不增加 button role、Tab 停靠点或独立键盘激活。嵌套链接/按钮、带修饰键的输入、pointercancel 与拖拽手势不转发。
 - 仅命名的 Label 与长说明仍可复制。短操作标签在自己的原型上表达选择策略。受控示例会拒绝接受切换提案，保持关闭，这是应用的值所有权决定。
 
 ## 关联不进入 JSON Props
 
-从 `@proto.ui/core` 调用 `createControlLabelRef()`，每一对控件/标签保留一个稳定引用。React、Vue、Vue 2 向双方传 Adapter-owned `instanceAssociations={ controlLabel: ref }`。这不是普通 Proto Props；即使自定义 getProps，也会在 raw/resolved Props 之前剥离。
+从 `@proto.ui/core` 调用 `createControlLabelRef()`，每一对控件/标签保留一个稳定引用。React、Vue、Vue 2 向双方传 Adapter-owned `instanceAssociations: { controlLabel: ref }`。这不是普通 Proto Props；即使自定义 getProps，也会在 raw/resolved Props 之前剥离。
 
 WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, { controlLabel: ref })`，Label 同样调用。普通 Props 只传 naming、activation 和控件值。attribute 字符串、JSON clone 后的对象、未知关联键会被拒绝。DemoSpec 用 `associations: { controlLabel: 'row-key' }` 表达纯数据意图，每个 render instance 单独物化公开引用。
 

@@ -1,0 +1,31 @@
+id: HC-AVAILABLE-SPACE-0001
+type: host-cap
+title: Host leases a logical available root-content region
+status: draft
+lifecycleRationale: Bounded logical-space lease with Web controls; native viewport, physical occlusion and GPUI realization remain separately evidenced obligations.
+since: 0.3.0-alpha.1
+summary: An active target leases finite host-logical geometry independently of anchored placement; unknown geometry withdraws projection.
+criteria:
+  - id: HC-AVAILABLE-SPACE-0001-REGION
+    text:
+      en: 'Frames contain a nullable logical-pixel rect with finite origin and nonnegative extent, revision and viewEpoch. Host safe insets and occlusions determine the available region; center and size derive from the same rect. Browser viewport and CSS environment objects never cross this boundary.'
+      zh-CN: 'Frame 包含可为空的逻辑像素矩形、revision 与 viewEpoch；origin 有限且尺寸非负。host 合成安全区和遮挡，中心与尺寸来自同一矩形；浏览器 viewport 和 CSS env 不跨此边界。'
+  - id: HC-AVAILABLE-SPACE-0001-OWNERSHIP
+    text:
+      en: 'Only the current live target lease may project. Replacement, disposal and reader reentrancy revoke stale output. Cleanup restores only still-owned projected properties and preserves later external writes, including priority. Unknown facts revoke geometry rather than inventing zero.'
+      zh-CN: '仅目标当前活跃租约可投射；替换、释放、测量重入撤销旧输出。清理只恢复仍归本租约的投射属性，保留外部后写值和优先级。未知事实撤销几何，不伪造零区域。'
+  - id: HC-AVAILABLE-SPACE-0001-OBSERVATION
+    text:
+      en: 'Web shares one measurement probe and resize/visual-region listeners per active document and reader, releasing all on the last lease. Inactive or invalid targets acquire no observation; document migration releases the former observation before rebinding.'
+      zh-CN: 'Web 同 document 和 reader 的活跃租约共享一个测量节点与 resize/可见区域监听，最后租约退出后全部释放。无效或非活跃目标不获取监听；document 迁移先释放旧监听。'
+verifies:
+  tests: [T-AVAILABLE-SPACE-0001]
+sources:
+  - path: packages/core/src/positioning.ts
+  - path: packages/modules/positioning/src/caps.ts
+  - path: packages/modules/positioning/src/web/available-space-host.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the bounded logical region lease and Web realization; GPUI translation and physical keyboard evidence remain separate obligations.
+tags: [host-capability, positioning, available-space, geometry]
