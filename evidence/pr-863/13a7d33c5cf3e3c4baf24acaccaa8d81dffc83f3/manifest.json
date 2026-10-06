@@ -1,0 +1,1048 @@
+{
+  "sourceSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+  "harnessSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+  "runId": 37486062129,
+  "candidateArtifact": {
+    "id": 11422849839,
+    "sha256": "f635e67d6e222a86ce17a1bd963ec71db6c1f6d1a96f662be0c94f230a696c1f"
+  },
+  "baselineArtifact": {
+    "id": 11423607633,
+    "sha256": "eeea24480a3b55bc445c6873adcc8e5c0efcc22ca748fce4e855ed43bbabe8f7"
+  },
+  "files": [
+    {
+      "path": "shadcn-wc-end.png",
+      "sha256": "254ebc8c8e6935c118b484e6a6bb29d0eadcba93eebb7cfb78d7de3144bbd9d2",
+      "bytes": 8326,
+      "capture": {
+        "sourceSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T15:24:54.106Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "light",
+        "harnessSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "mode": "candidate-regression",
+        "family": "shadcn",
+        "runtime": "wc",
+        "state": "end",
+        "facts": {
+          "vertical": {
+            "x": 819,
+            "y": 957.5,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1137.5,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 957.5,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "lab(100 0 0)"
+          },
+          "trackPaint": [
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "alpha": 0
+            },
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "alpha": 0
+            }
+          ]
+        },
+        "thumbPaint": [
+          {
+            "x": 821,
+            "y": 1052.7277221679688,
+            "width": 6,
+            "height": 82.765625,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(90.952 0 -0.0000119209)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          },
+          {
+            "x": 631.09228515625,
+            "y": 1139.5,
+            "width": 185.90625,
+            "height": 6,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(90.952 0 -0.0000119209)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          }
+        ]
+      }
+    },
+    {
+      "path": "shadcn-wc-end-dark.png",
+      "sha256": "1292e488d0de7dbe6f77694909741ebc9a4e8a862c5cb952c61d28496ed4114e",
+      "bytes": 8195,
+      "capture": {
+        "sourceSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T15:24:54.389Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "dark",
+        "harnessSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "mode": "candidate-regression",
+        "family": "shadcn",
+        "runtime": "wc",
+        "state": "end-dark",
+        "facts": {
+          "vertical": {
+            "x": 819,
+            "y": 957.5,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1137.5,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 957.5,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "lab(2.75381 0 0)"
+          },
+          "trackPaint": [
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "alpha": 0
+            },
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "alpha": 0
+            }
+          ]
+        },
+        "thumbPaint": [
+          {
+            "x": 821,
+            "y": 1052.7277221679688,
+            "width": 6,
+            "height": 82.765625,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(100 0 0 / 0.1)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          },
+          {
+            "x": 631.09228515625,
+            "y": 1139.5,
+            "width": 185.90625,
+            "height": 6,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(100 0 0 / 0.1)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          }
+        ]
+      }
+    },
+    {
+      "path": "shadcn-wc-end-forced-colors.png",
+      "sha256": "f2f67e5a977bb2bd98bfc56d266fc258ae1c9973dc300c08b2e208b364dc10f1",
+      "bytes": 7850,
+      "capture": {
+        "sourceSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T15:24:55.039Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "light",
+        "harnessSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "mode": "candidate-regression",
+        "family": "shadcn",
+        "runtime": "wc",
+        "state": "end-forced-colors",
+        "facts": {
+          "geometry": {
+            "vertical": {
+              "x": 819,
+              "y": 957.5,
+              "width": 10,
+              "height": 180
+            },
+            "horizontal": {
+              "x": 511,
+              "y": 1137.5,
+              "width": 308,
+              "height": 10
+            },
+            "viewport": {
+              "x": 511,
+              "y": 957.5,
+              "width": 318,
+              "height": 190
+            },
+            "hit": {
+              "found": true,
+              "inRoot": true,
+              "isControl": false
+            },
+            "continuousCorner": {
+              "rootRadius": "8px",
+              "viewportRadius": "8px",
+              "background": "rgb(255, 255, 255)"
+            },
+            "trackPaint": [
+              {
+                "background": "rgba(255, 255, 255, 0)",
+                "alpha": 0
+              },
+              {
+                "background": "rgba(255, 255, 255, 0)",
+                "alpha": 0
+              }
+            ]
+          },
+          "surface": "rgb(255, 255, 255)",
+          "thumbs": [
+            {
+              "background": "rgb(255, 255, 255)",
+              "borderColor": "rgb(0, 0, 0)",
+              "borderWidth": "1px",
+              "borderStyle": "solid",
+              "display": "block",
+              "forcedColorAdjust": "auto"
+            },
+            {
+              "background": "rgb(255, 255, 255)",
+              "borderColor": "rgb(0, 0, 0)",
+              "borderWidth": "1px",
+              "borderStyle": "solid",
+              "display": "block",
+              "forcedColorAdjust": "auto"
+            }
+          ]
+        },
+        "thumbPaint": [
+          {
+            "x": 821,
+            "y": 1052.7277221679688,
+            "width": 6,
+            "height": 82.765625,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          },
+          {
+            "x": 631.09228515625,
+            "y": 1139.5,
+            "width": 185.90625,
+            "height": 6,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          }
+        ]
+      }
+    },
+    {
+      "path": "shadcn-react-end-focused.png",
+      "sha256": "009e4b243cf295c015f05437079c03efc63070e686019ef6161c32f3ad989c97",
+      "bytes": 8728,
+      "capture": {
+        "sourceSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T15:24:58.942Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "light",
+        "harnessSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "mode": "candidate-regression",
+        "family": "shadcn",
+        "runtime": "react",
+        "state": "end-focused",
+        "facts": {
+          "end": {
+            "vertical": {
+              "x": 819,
+              "y": 1018.140625,
+              "width": 10,
+              "height": 180
+            },
+            "horizontal": {
+              "x": 511,
+              "y": 1198.140625,
+              "width": 308,
+              "height": 10
+            },
+            "viewport": {
+              "x": 511,
+              "y": 1018.140625,
+              "width": 318,
+              "height": 190
+            },
+            "hit": {
+              "found": true,
+              "inRoot": true,
+              "isControl": false
+            },
+            "continuousCorner": {
+              "rootRadius": "8px",
+              "viewportRadius": "8px",
+              "background": "lab(100 0 0)"
+            },
+            "trackPaint": [
+              {
+                "background": "rgba(0, 0, 0, 0)",
+                "alpha": 0
+              },
+              {
+                "background": "rgba(0, 0, 0, 0)",
+                "alpha": 0
+              }
+            ]
+          },
+          "focused": {
+            "x": 511,
+            "y": 1018.140625,
+            "width": 318,
+            "height": 190
+          }
+        },
+        "thumbPaint": [
+          {
+            "x": 821,
+            "y": 1113.3683471679688,
+            "width": 6,
+            "height": 82.765625,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(90.952 0 -0.0000119209)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          },
+          {
+            "x": 631.09228515625,
+            "y": 1200.140625,
+            "width": 185.90625,
+            "height": 6,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(90.952 0 -0.0000119209)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          }
+        ]
+      }
+    },
+    {
+      "path": "shadcn-react-minimum-thumbs-end.png",
+      "sha256": "8750411b1543498621664a0b87511d0361c378a228b88516f89188388eabc9f0",
+      "bytes": 1377,
+      "capture": {
+        "sourceSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T15:24:59.605Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "light",
+        "harnessSha": "13a7d33c5cf3e3c4baf24acaccaa8d81dffc83f3",
+        "mode": "candidate-regression",
+        "family": "shadcn",
+        "runtime": "react",
+        "state": "minimum-thumbs-end",
+        "facts": {
+          "vertical": {
+            "x": 819,
+            "y": 1018.140625,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1198.140625,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 1018.140625,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "lab(100 0 0)"
+          },
+          "trackPaint": [
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "alpha": 0
+            },
+            {
+              "background": "rgba(0, 0, 0, 0)",
+              "alpha": 0
+            }
+          ]
+        },
+        "thumbPaint": [
+          {
+            "x": 821,
+            "y": 1178.140625,
+            "width": 6,
+            "height": 18,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(90.952 0 -0.0000119209)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          },
+          {
+            "x": 799,
+            "y": 1200.140625,
+            "width": 18,
+            "height": 6,
+            "boxSizing": "border-box",
+            "backgroundClip": "border-box",
+            "background": "lab(90.952 0 -0.0000119209)",
+            "borderColor": "rgba(0, 0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid"
+          }
+        ]
+      }
+    }
+  ],
+  "runtimeChecks": [
+    {
+      "runtime": "wc",
+      "baselineSource": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "beforeThumbs": [
+        {
+          "x": 821,
+          "y": 1052.7277221679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1139.5,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        }
+      ],
+      "afterThumbs": [
+        {
+          "x": 821,
+          "y": 1052.7277221679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1139.5,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ],
+      "forced": {
+        "geometry": {
+          "vertical": {
+            "x": 819,
+            "y": 957.5,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1137.5,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 957.5,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "rgb(255, 255, 255)"
+          },
+          "trackPaint": [
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            },
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            }
+          ]
+        },
+        "surface": "rgb(255, 255, 255)",
+        "thumbs": [
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          },
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          }
+        ]
+      },
+      "minimumThumbs": [
+        {
+          "x": 821,
+          "y": 1117.5,
+          "width": 6,
+          "height": 18,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 799,
+          "y": 1139.5,
+          "width": 18,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ]
+    },
+    {
+      "runtime": "react",
+      "baselineSource": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "beforeThumbs": [
+        {
+          "x": 821,
+          "y": 1113.3683471679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1200.140625,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        }
+      ],
+      "afterThumbs": [
+        {
+          "x": 821,
+          "y": 1113.3683471679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1200.140625,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ],
+      "forced": {
+        "geometry": {
+          "vertical": {
+            "x": 819,
+            "y": 1018.140625,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1198.140625,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 1018.140625,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "rgb(255, 255, 255)"
+          },
+          "trackPaint": [
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            },
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            }
+          ]
+        },
+        "surface": "rgb(255, 255, 255)",
+        "thumbs": [
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          },
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          }
+        ]
+      },
+      "minimumThumbs": [
+        {
+          "x": 821,
+          "y": 1178.140625,
+          "width": 6,
+          "height": 18,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 799,
+          "y": 1200.140625,
+          "width": 18,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ]
+    },
+    {
+      "runtime": "vue",
+      "baselineSource": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "beforeThumbs": [
+        {
+          "x": 821,
+          "y": 1113.3683471679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1200.140625,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        }
+      ],
+      "afterThumbs": [
+        {
+          "x": 821,
+          "y": 1113.3683471679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1200.140625,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ],
+      "forced": {
+        "geometry": {
+          "vertical": {
+            "x": 819,
+            "y": 1018.140625,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1198.140625,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 1018.140625,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "rgb(255, 255, 255)"
+          },
+          "trackPaint": [
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            },
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            }
+          ]
+        },
+        "surface": "rgb(255, 255, 255)",
+        "thumbs": [
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          },
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          }
+        ]
+      },
+      "minimumThumbs": [
+        {
+          "x": 821,
+          "y": 1178.140625,
+          "width": 6,
+          "height": 18,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 799,
+          "y": 1200.140625,
+          "width": 18,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ]
+    },
+    {
+      "runtime": "vue2",
+      "baselineSource": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+      "beforeThumbs": [
+        {
+          "x": 821,
+          "y": 1113.3683471679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1200.140625,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "lab(90.952 0 -0.0000119209)",
+          "borderWidth": "0px",
+          "borderStyle": "solid"
+        }
+      ],
+      "afterThumbs": [
+        {
+          "x": 821,
+          "y": 1113.3683471679688,
+          "width": 6,
+          "height": 82.765625,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 631.09228515625,
+          "y": 1200.140625,
+          "width": 185.90625,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ],
+      "forced": {
+        "geometry": {
+          "vertical": {
+            "x": 819,
+            "y": 1018.140625,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1198.140625,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 1018.140625,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "rgb(255, 255, 255)"
+          },
+          "trackPaint": [
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            },
+            {
+              "background": "rgba(255, 255, 255, 0)",
+              "alpha": 0
+            }
+          ]
+        },
+        "surface": "rgb(255, 255, 255)",
+        "thumbs": [
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          },
+          {
+            "background": "rgb(255, 255, 255)",
+            "borderColor": "rgb(0, 0, 0)",
+            "borderWidth": "1px",
+            "borderStyle": "solid",
+            "display": "block",
+            "forcedColorAdjust": "auto"
+          }
+        ]
+      },
+      "minimumThumbs": [
+        {
+          "x": 821,
+          "y": 1178.140625,
+          "width": 6,
+          "height": 18,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        },
+        {
+          "x": 799,
+          "y": 1200.140625,
+          "width": 18,
+          "height": 6,
+          "boxSizing": "border-box",
+          "backgroundClip": "border-box",
+          "background": "lab(90.952 0 -0.0000119209)",
+          "borderColor": "rgba(0, 0, 0, 0)",
+          "borderWidth": "1px",
+          "borderStyle": "solid"
+        }
+      ]
+    }
+  ]
+}
