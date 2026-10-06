@@ -27,6 +27,7 @@ import {
   OVERLAY_GLOBAL_MOUNT_CAP,
   OVERLAY_LAYER_SCHEDULER_CAP,
   OVERLAY_MODAL_CAP,
+  OVERLAY_TARGET_HOST_CAP,
   type OverlayGlobalMount,
   type OverlayLayerScheduler,
   type OverlayModal,
@@ -107,6 +108,7 @@ export class OverlayModuleImpl extends ModuleBase {
   private presenceBound = false;
   private readonly prototypeName: string;
   private readonly warnings: string[] = [];
+  private targetIssue: string | null = null;
   private readonly boundary: BoundaryHandle<any>;
   private lastReason: OverlayReason | undefined = undefined;
   private viewReconciliationVersion = 0;
@@ -121,10 +123,10 @@ export class OverlayModuleImpl extends ModuleBase {
   private globalMount: OverlayGlobalMount | null = null;
   private modalLock: OverlayModal | null = null;
   private layerScheduler: OverlayLayerScheduler | null = null;
-  private mountedHost: HTMLElement | null = null;
+  private mountedHost: unknown | null = null;
   private anchorPart: AnatomyPartView | null = null;
   private layerDetach: (() => void) | null = null;
-  private layerHost: HTMLElement | null = null;
+  private layerHost: unknown | null = null;
   private modalLocked = false;
   private readonly boundaryDisposers: Record<
     'trigger' | 'anchor' | 'content',
@@ -245,16 +247,42 @@ export class OverlayModuleImpl extends ModuleBase {
     }
   }
 
-  private resolveHostElement(): HTMLElement | null {
-    let hostEl: HTMLElement | null =
-      this.registration.content instanceof HTMLElement ? this.registration.content : null;
-    if (hostEl) return hostEl;
-    if (!this.caps.has(HOST_ELEMENT_CAP)) return null;
-    const capHost = this.caps.get(HOST_ELEMENT_CAP);
-    return capHost instanceof HTMLElement ? capHost : null;
+  private resolveHostElement(): unknown | null {
+    if (this.caps.has(OVERLAY_TARGET_HOST_CAP)) {
+      const epoch = this.caps.epoch;
+      const version = this.viewReconciliationVersion;
+      const registration = this.registration;
+      const host = this.caps.get(OVERLAY_TARGET_HOST_CAP);
+      const candidate = this.registration.content ?? host.root();
+      const resolved =
+        candidate !== null && typeof candidate === 'object' ? host.resolve(candidate) : null;
+      if (
+        epoch !== this.caps.epoch ||
+        version !== this.viewReconciliationVersion ||
+        registration !== this.registration
+      )
+        return null;
+      if (resolved !== null && typeof resolved === 'object') {
+        this.targetIssue = null;
+        return resolved;
+      }
+      this.targetIssue = '[Overlay] host target unavailable or foreign';
+      return null;
+    }
+    // Compatibility for existing Web-only providers. A native peer has no
+    // HTMLElement global; absence is not permission to accept a foreign token.
+    const candidate =
+      this.registration.content ??
+      (this.caps.has(HOST_ELEMENT_CAP) ? this.caps.get(HOST_ELEMENT_CAP) : null);
+    if (typeof HTMLElement !== 'undefined' && candidate instanceof HTMLElement) {
+      this.targetIssue = null;
+      return candidate;
+    }
+    this.targetIssue = '[Overlay] host target capability unavailable';
+    return null;
   }
 
-  private mountGlobalIfNeeded(hostEl: HTMLElement): void {
+  private mountGlobalIfNeeded(hostEl: unknown): void {
     if (!this.config.portal || !this.globalMount) return;
 
     if (this.mountedHost === hostEl) return;
@@ -274,7 +302,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.mountedHost = null;
   }
 
-  private applyLayerIfNeeded(hostEl: HTMLElement): void {
+  private applyLayerIfNeeded(hostEl: unknown): void {
     if (!this.layerScheduler) return;
 
     if (this.layerDetach && this.layerHost === hostEl) return;
@@ -313,14 +341,21 @@ export class OverlayModuleImpl extends ModuleBase {
   }
 
   private syncViewSideEffects(): void {
-    if (this.mountPhase !== 'mounted') return;
+    if (this.mountPhase !== 'mounted' || !this.viewActive) return;
+    const version = this.viewReconciliationVersion;
+    const epoch = this.caps.epoch;
     this.syncAnchorPartRegistration();
     const hostEl = this.resolveHostElement();
+    if (version !== this.viewReconciliationVersion || epoch !== this.caps.epoch || !this.viewActive)
+      return;
     if (hostEl) {
       this.mountGlobalIfNeeded(hostEl);
       this.applyLayerIfNeeded(hostEl);
+    } else {
+      this.teardownMountedViewSideEffects();
+      return;
     }
-    this.syncAnchoredPosition();
+    this.syncAnchoredPosition(hostEl);
     this.lockModalIfNeeded();
   }
 
@@ -380,7 +415,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.syncEscapeCandidate();
     this.viewReconciliationVersion += 1;
     if (active) {
-      if (this.mountPhase === 'mounted') this.lockModalIfNeeded();
+      if (this.mountPhase === 'mounted') this.reconcileViewResourcesAfterCallback();
       return;
     }
     this.deactivateViewSideEffects();
@@ -521,7 +556,7 @@ export class OverlayModuleImpl extends ModuleBase {
   }
 
   getWarnings(): readonly string[] {
-    return Object.freeze(this.warnings.slice());
+    return Object.freeze([...this.warnings, ...(this.targetIssue ? [this.targetIssue] : [])]);
   }
 
   getLastReason(): OverlayReason | undefined {
@@ -550,8 +585,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.replaceRegistration({ anchor: target ?? null });
   }
 
-  private syncAnchoredPosition(): void {
-    const availableTarget = this.registration.content ?? this.resolveHostElement();
+  private syncAnchoredPosition(availableTarget = this.resolveHostElement()): void {
     if (
       this.config.availableSpace &&
       this.viewActive &&
@@ -565,7 +599,7 @@ export class OverlayModuleImpl extends ModuleBase {
       return;
     }
     const anchor = this.resolveAnchorTarget();
-    const floating = this.registration.content ?? this.resolveHostElement();
+    const floating = availableTarget;
     if (!anchor || !floating) {
       this.anchoredPosition.disconnect();
       return;
@@ -608,9 +642,6 @@ export class OverlayModuleImpl extends ModuleBase {
     this.replaceRegistration({ content: target });
 
     if (!this.viewActive) return;
-
-    const hostEl = this.resolveHostElement();
-    if (!hostEl) return;
     this.reconcileViewResourcesAfterCallback();
   }
 

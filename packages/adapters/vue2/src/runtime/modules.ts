@@ -142,7 +142,7 @@ type Vue2OwnerModulesArgs<Props extends PropsBaseType> = {
 
 export function createVue2OverlayGlobalMount(
   instanceToken: LogicalInstanceToken
-): OverlayGlobalMount {
+): OverlayGlobalMount<HTMLElement> {
   const anchors = new WeakMap<HTMLElement, Comment>();
 
   return {

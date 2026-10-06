@@ -141,7 +141,7 @@ type VueOwnerModulesArgs<Props extends PropsBaseType> = {
 
 export function createVueOverlayGlobalMount(
   instanceToken: LogicalInstanceToken
-): OverlayGlobalMount {
+): OverlayGlobalMount<HTMLElement> {
   return {
     mount(hostEl: HTMLElement) {
       const parentToken = getLogicalParent(instanceToken);

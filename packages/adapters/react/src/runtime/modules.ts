@@ -142,7 +142,7 @@ type ReactOwnerModulesArgs<Props extends PropsBaseType> = {
 
 export function createReactOverlayGlobalMount(
   instanceToken: LogicalInstanceToken
-): OverlayGlobalMount {
+): OverlayGlobalMount<HTMLElement> {
   return {
     mount(hostEl: HTMLElement) {
       const parentToken = getLogicalParent(instanceToken);

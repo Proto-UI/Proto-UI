@@ -21,7 +21,7 @@ function toInteger(value: unknown, fallback: number): number {
 
 export function createZIndexOverlayLayerScheduler(
   options: OverlayZIndexLayerSchedulerOptions = {}
-): OverlayLayerScheduler {
+): OverlayLayerScheduler<HTMLElement> {
   const baseZIndex = toInteger(options.baseZIndex, DEFAULT_BASE_Z_INDEX);
   const step = Math.max(1, toInteger(options.step, DEFAULT_STEP));
   const roleOffsets = {
