@@ -1,0 +1,437 @@
+{
+  "sourceHead": "173890a2c75dd6b433ebfee130fba43743bbef1a",
+  "sourceTree": "0423a69348eca803fc586cb7e07f6fa3336bc4ee",
+  "workflowRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/37468558684",
+  "artifact": 11416943133,
+  "artifactSha256": "13b8bb9633e613fe744d14e33e117c55992f6fd2a4baef7dae9ad15b335d5dac",
+  "pngSha256": "cf26bcd0a05532d358640ec4d3606c997b66d82ca1ac82d076e73d5bd08c7707",
+  "fixtureSha256": "0df54d430afe925b7ce26b92c558fa0a4a3ed20694d169cf25eedb58fa0987a6",
+  "probeBundleSha256": "67a72c61ef518442d81865313fe1146bfae1b98a43a1c99d200a5808ab57cca5",
+  "viewport": {
+    "width": 800,
+    "height": 900,
+    "devicePixelRatio": 1,
+    "scrollX": 0,
+    "scrollY": 0,
+    "scrollWidth": 800,
+    "scrollHeight": 900
+  },
+  "metrics": [
+    {
+      "ref": "plain-text",
+      "rect": {
+        "x": 24,
+        "y": 24,
+        "width": 220,
+        "height": 32
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": {
+        "ratio": 21,
+        "threshold": 4.5,
+        "basis": "verified direct-text source-model-only; receiving pixels unverified"
+      },
+      "textDisposition": {
+        "classification": "source-model-only",
+        "limits": []
+      },
+      "textRuns": [
+        {
+          "text": "Plain text",
+          "direct": true,
+          "color": "rgb(0, 0, 0)",
+          "alpha": 1,
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "ratio": 21,
+          "classification": "source-model-only",
+          "threshold": 4.5,
+          "limits": [],
+          "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+        }
+      ],
+      "placeholder": null
+    },
+    {
+      "ref": "stroke-text",
+      "rect": {
+        "x": 24,
+        "y": 64,
+        "width": 220,
+        "height": 32
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "unsupported-text-stroke",
+          "no-verified-direct-painted-text"
+        ]
+      },
+      "textRuns": [
+        {
+          "text": "Stroked text",
+          "direct": true,
+          "color": "rgb(0, 0, 0)",
+          "alpha": 1,
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "ratio": null,
+          "classification": "unsupported",
+          "threshold": 4.5,
+          "limits": [
+            "unsupported-text-stroke"
+          ],
+          "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+        }
+      ],
+      "placeholder": null
+    },
+    {
+      "ref": "stroke-descendant",
+      "rect": {
+        "x": 24,
+        "y": 104,
+        "width": 220,
+        "height": 32
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "no-verified-direct-painted-text"
+        ]
+      },
+      "textRuns": [
+        {
+          "text": "Stroked descendant",
+          "direct": false,
+          "color": "rgb(0, 0, 0)",
+          "alpha": 1,
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "ratio": null,
+          "classification": "unsupported",
+          "threshold": 4.5,
+          "limits": [
+            "unsupported-text-stroke"
+          ],
+          "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+        }
+      ],
+      "placeholder": null
+    },
+    {
+      "ref": "plain-native",
+      "rect": {
+        "x": 24,
+        "y": 144,
+        "width": 220,
+        "height": 54
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": {
+        "ratio": 21,
+        "threshold": 4.5,
+        "basis": "native-value source-model-only; receiving pixels unverified"
+      },
+      "textDisposition": {
+        "classification": "source-model-only",
+        "limits": []
+      },
+      "textRuns": [
+        {
+          "text": "Native value",
+          "direct": true,
+          "color": "rgb(0, 0, 0)",
+          "alpha": 1,
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "ratio": null,
+          "classification": "exempt",
+          "threshold": 4.5,
+          "limits": [
+            "no-painted-layout-box"
+          ],
+          "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+        }
+      ],
+      "placeholder": {
+        "shown": false,
+        "color": "rgb(0, 0, 0)",
+        "opacity": "1",
+        "ratio": null,
+        "classification": "not-painted",
+        "limits": [],
+        "basis": "placeholder source-model-only; native editor clipping/scroll and receiving pixels unverified"
+      }
+    },
+    {
+      "ref": "stroke-native",
+      "rect": {
+        "x": 24,
+        "y": 206,
+        "width": 220,
+        "height": 54
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "unsupported-text-stroke"
+        ]
+      },
+      "textRuns": [
+        {
+          "text": "Stroked native value",
+          "direct": true,
+          "color": "rgb(0, 0, 0)",
+          "alpha": 1,
+          "fontSize": "16px",
+          "fontWeight": "400",
+          "ratio": null,
+          "classification": "exempt",
+          "threshold": 4.5,
+          "limits": [
+            "no-painted-layout-box",
+            "unsupported-text-stroke"
+          ],
+          "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+        }
+      ],
+      "placeholder": {
+        "shown": false,
+        "color": "rgb(0, 0, 0)",
+        "opacity": "1",
+        "ratio": null,
+        "classification": "not-painted",
+        "limits": [
+          "unsupported-placeholder-text-stroke"
+        ],
+        "basis": "placeholder source-model-only; native editor clipping/scroll and receiving pixels unverified"
+      }
+    },
+    {
+      "ref": "plain-placeholder",
+      "rect": {
+        "x": 24,
+        "y": 268,
+        "width": 220,
+        "height": 54
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "no-painted-native-value"
+        ]
+      },
+      "textRuns": [],
+      "placeholder": {
+        "shown": true,
+        "color": "rgb(0, 0, 0)",
+        "opacity": "1",
+        "ratio": 21,
+        "classification": "source-model-only",
+        "limits": [],
+        "basis": "placeholder source-model-only; native editor clipping/scroll and receiving pixels unverified"
+      }
+    },
+    {
+      "ref": "stroke-placeholder",
+      "rect": {
+        "x": 24,
+        "y": 330,
+        "width": 220,
+        "height": 54
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "no-painted-native-value"
+        ]
+      },
+      "textRuns": [],
+      "placeholder": {
+        "shown": true,
+        "color": "rgb(0, 0, 0)",
+        "opacity": "1",
+        "ratio": null,
+        "classification": "unsupported",
+        "limits": [
+          "unsupported-placeholder-text-stroke"
+        ],
+        "basis": "placeholder source-model-only; native editor clipping/scroll and receiving pixels unverified"
+      }
+    },
+    {
+      "ref": "zero-text",
+      "rect": {
+        "x": 24,
+        "y": 392,
+        "width": 220,
+        "height": 32
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "unsupported-font-size",
+          "no-verified-direct-painted-text"
+        ]
+      },
+      "textRuns": [
+        {
+          "text": "Zero-size direct text",
+          "direct": true,
+          "color": "rgb(0, 0, 0)",
+          "alpha": 1,
+          "fontSize": "0px",
+          "fontWeight": "400",
+          "ratio": null,
+          "classification": "exempt",
+          "threshold": 4.5,
+          "limits": [
+            "no-painted-layout-box",
+            "unsupported-font-size"
+          ],
+          "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+        }
+      ],
+      "placeholder": null
+    },
+    {
+      "ref": "zero-native",
+      "rect": {
+        "x": 24,
+        "y": 432,
+        "width": 220,
+        "height": 54
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "unsupported-font-size"
+        ]
+      },
+      "textRuns": [
+        {
+          "text": "Zero-size native value",
+          "direct": true,
+          "color": "rgb(0, 0, 0)",
+          "alpha": 1,
+          "fontSize": "0px",
+          "fontWeight": "400",
+          "ratio": null,
+          "classification": "exempt",
+          "threshold": 4.5,
+          "limits": [
+            "no-painted-layout-box",
+            "unsupported-font-size"
+          ],
+          "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+        }
+      ],
+      "placeholder": {
+        "shown": false,
+        "color": "rgb(0, 0, 0)",
+        "opacity": "1",
+        "ratio": null,
+        "classification": "not-painted",
+        "limits": [
+          "unsupported-placeholder-font-size"
+        ],
+        "basis": "placeholder source-model-only; native editor clipping/scroll and receiving pixels unverified"
+      }
+    },
+    {
+      "ref": "zero-placeholder",
+      "rect": {
+        "x": 24,
+        "y": 494,
+        "width": 220,
+        "height": 54
+      },
+      "fill": [
+        255,
+        255,
+        255,
+        255
+      ],
+      "textContrast": null,
+      "textDisposition": {
+        "classification": "unsupported",
+        "limits": [
+          "no-painted-native-value"
+        ]
+      },
+      "textRuns": [],
+      "placeholder": {
+        "shown": true,
+        "color": "rgb(0, 0, 0)",
+        "opacity": "1",
+        "ratio": null,
+        "classification": "unsupported",
+        "limits": [
+          "unsupported-placeholder-font-size"
+        ],
+        "basis": "placeholder source-model-only; native editor clipping/scroll and receiving pixels unverified"
+      }
+    }
+  ],
+  "boundary": "Unmodified native calibration screenshot and source-model metrics. Plain controls retain21:1; altered/zero-size text metrics withheld. Not product/whole accessibility conformance."
+}

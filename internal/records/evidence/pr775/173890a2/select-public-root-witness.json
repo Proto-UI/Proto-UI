@@ -1,0 +1,189 @@
+{
+  "source": {
+    "head": "173890a2c75dd6b433ebfee130fba43743bbef1a",
+    "status": "captured",
+    "kind": "complete clean Git tree plus generated CSS, bound to the opt-in dev server startup identity and current source checks",
+    "cleanTree": "0423a69348eca803fc586cb7e07f6fa3336bc4ee",
+    "generatedCSS": {
+      "apps/www/src/styles/proto-ui-tokens.generated.css": "678cecc4ca868f335049d05ae549aaa682bb7a782e357c60aa25a243fe379863",
+      "apps/www/src/styles/proto-ui-style.css": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "apps/www/src/styles/shadcn-theme.css": "e64ed915cd40e21a42ebe5fec84afbdb814f9f6a9a337f1024e9be1ba3fb7357"
+    },
+    "sourceSetDigest": "sha256:2c0f992a79b64cf888ad5ab4a6dc3c612a19f057197655268d25bd9b1a763f56",
+    "runnerDigest": "sha256:1e5e61fc284d1bcbe87e8540650f65cda0a2d20995ccb107b97b21a9880bbdd0",
+    "probeDigest": "sha256:1f191f17ba90933b5503c8bed98594feedca22ceec2faa894cc4307584f2e6ed"
+  },
+  "run": 37468558684,
+  "artifact": 11416943133,
+  "cases": [
+    {
+      "runtime": "wc",
+      "theme": "light",
+      "owner": "pp-ckh82s4471a",
+      "generation": "1",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": true,
+      "retiredOptions": false,
+      "optionViewWithdrawn": false,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "wc",
+      "theme": "dark",
+      "owner": "pp-ll1wfgltnr",
+      "generation": "1",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": true,
+      "retiredOptions": false,
+      "optionViewWithdrawn": false,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "react",
+      "theme": "light",
+      "owner": "pp-exybpmwf7h",
+      "generation": "2",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": false,
+      "retiredOptions": true,
+      "optionViewWithdrawn": false,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "react",
+      "theme": "dark",
+      "owner": "pp-5bb858zy6hl",
+      "generation": "2",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": false,
+      "retiredOptions": true,
+      "optionViewWithdrawn": false,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue",
+      "theme": "light",
+      "owner": "pp-gykn0hedami",
+      "generation": "2",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": false,
+      "retiredOptions": true,
+      "optionViewWithdrawn": false,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue",
+      "theme": "dark",
+      "owner": "pp-2h9kjyi17tx",
+      "generation": "2",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": false,
+      "retiredOptions": true,
+      "optionViewWithdrawn": false,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue2",
+      "theme": "light",
+      "owner": "pp-5t6j0467xaq",
+      "generation": "2",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": false,
+      "retiredOptions": false,
+      "optionViewWithdrawn": true,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue2",
+      "theme": "dark",
+      "owner": "pp-4c18c2d2ztc",
+      "generation": "2",
+      "before": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": true
+      },
+      "after": {
+        "value": "paper",
+        "textValue": "Paper",
+        "open": false
+      },
+      "retainedOptions": false,
+      "retiredOptions": false,
+      "optionViewWithdrawn": true,
+      "sameOwnedSelectRoot": true,
+      "triggerFocused": true
+    }
+  ],
+  "boundary": "Same physical current Root public facts before any corrective input. Vue2 optionViewWithdrawn is not semantic selection retirement."
+}
