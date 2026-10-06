@@ -1588,6 +1588,3256 @@
     ],
     "scope": "Bounded Module snapshot admission / pre-render Root repair only. Whole-site migration, complete native targets, SSR/hydration, all Adapter projections and preview security obligations remain open."
   },
+  "exposedStateWebProjection": {
+    "observedAt": "2026-10-05T01:46:27.648Z",
+    "baselineSha": "ad720b5cfe7567c42c5ad88375faf3f78a52e160",
+    "authority": {
+      "catalog": "spec/modules/M-EXPOSE-STATE-WEB-0001.yaml (draft)",
+      "contract": "internal/contracts/expose/expose-state.web-extension.v0.md",
+      "naming": "packages/modules/expose-state-web/src/utils.ts",
+      "mode": "packages/modules/expose-state-web/src/caps.ts",
+      "scope": "Web-only extension; no DOM projection promise for native platforms. Old DOM artifact erasure/restoration and collision ownership remain unresolved."
+    },
+    "reproduction": {
+      "failedConsumerTests": [
+        {
+          "name": "checked semantics to native React DOM source retains a numeric owner across view epochs, commits only explicit updates and invalidates held handles",
+          "error": "AssertionError: expected null to be '4' // Object.is equality"
+        },
+        {
+          "name": "checked semantics to native React DOM source projects State kinds and semantic names independently of Expose keys and template updates",
+          "error": "AssertionError: expected null to be '' // Object.is equality"
+        }
+      ],
+      "mirrorBeforeFix": [
+        {
+          "id": "wc-mirror-original",
+          "shadow": "<img part=\"image\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" alt=\"Projection mirror\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25; object-fit: contain;\">",
+          "host": "<projection-mirror-original data-pui-root=\"\" class=\"pui-host-root\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-original>"
+        },
+        {
+          "id": "wc-mirror-candidate",
+          "shadow": "<img part=\"image\" alt=\"Projection mirror\" style=\"object-fit:contain\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\">",
+          "host": "<projection-mirror-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-candidate>"
+        }
+      ],
+      "mirrorRepair": "Web Component presentation commit overwrote image CSS variables after the state projection. Replaying projection after the actual host projectRoot commit preserves both canonical-host and presentation-mirror values."
+    },
+    "browser": {
+      "frameworks": {
+        "react": "19.2.6",
+        "vue": "3.5.31",
+        "vue2": "2.6.14",
+        "webComponent": "Custom Elements v1"
+      },
+      "surfaceCount": 26,
+      "scalarAndMirrorSurfaces": 18,
+      "readonlySurfaces": 8,
+      "initial": {
+        "observations": [
+          {
+            "id": "react-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div class=\"\" data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div class=\"\" data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div class=\"\" data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "wc-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-default-original data-pui-root=\"\" class=\"pui-host-root\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-default-original>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-default-candidate",
+            "attrs": {
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-default-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-default-candidate>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-extended-original data-pui-root=\"\" class=\"pui-host-root\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-extended-original>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-extended-candidate",
+            "attrs": {
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2",
+              "data-panel-progress": "0.25"
+            },
+            "vars": {
+              "--pui-constructor": "ready",
+              "--pui-panel-mode": "idle",
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-extended-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-extended-candidate>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<projection-observed-original data-pui-root=\"\" class=\"pui-host-root\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></projection-observed-original>",
+            "shadow": ""
+          },
+          {
+            "id": "wc-observed-candidate",
+            "attrs": {
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<projection-observed-candidate tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></projection-observed-candidate>",
+            "shadow": ""
+          },
+          {
+            "id": "wc-mirror-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": {
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "mirrorVars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "text": null,
+            "html": "<projection-mirror-original data-pui-root=\"\" class=\"pui-host-root\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-original>",
+            "shadow": "<img part=\"image\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" alt=\"Projection mirror\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25; object-fit: contain;\">"
+          },
+          {
+            "id": "wc-mirror-candidate",
+            "attrs": {
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "vars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "mirrorAttrs": {
+              "data-disabled": "",
+              "data-constructor": "ready",
+              "data-panel-mode": "idle",
+              "data-panel-step-count": "2"
+            },
+            "mirrorVars": {
+              "--pui-panel-step-count": "2",
+              "--pui-panel-progress": "0.25"
+            },
+            "text": null,
+            "html": "<projection-mirror-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-candidate>",
+            "shadow": "<img part=\"image\" alt=\"Projection mirror\" style=\"object-fit: contain; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\">"
+          }
+        ],
+        "errors": [],
+        "status": "26 real mounted surfaces. 3.5.31 / Vue2 2.6.14 / React 19.2.6"
+      },
+      "viewEpochs": {
+        "advanced": [
+          {
+            "id": "react-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div class=\"\" data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div class=\"\" data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div class=\"\" data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" class=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" class=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"><output>2</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "wc-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-default-original data-pui-root=\"\" class=\"pui-host-root\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"></projection-default-original>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-default-candidate",
+            "attrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-default-candidate data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"></projection-default-candidate>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-extended-original data-pui-root=\"\" class=\"pui-host-root\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"></projection-extended-original>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-extended-candidate",
+            "attrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "2",
+            "html": "<projection-extended-candidate data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"></projection-extended-candidate>",
+            "shadow": "<output>2</output>"
+          },
+          {
+            "id": "wc-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<projection-observed-original data-pui-root=\"\" class=\"pui-host-root\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></projection-observed-original>",
+            "shadow": ""
+          },
+          {
+            "id": "wc-observed-candidate",
+            "attrs": {
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<projection-observed-candidate tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></projection-observed-candidate>",
+            "shadow": ""
+          },
+          {
+            "id": "wc-mirror-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "mirrorVars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "text": null,
+            "html": "<projection-mirror-original data-pui-root=\"\" class=\"pui-host-root\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"></projection-mirror-original>",
+            "shadow": "<img part=\"image\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" alt=\"Projection mirror\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75; object-fit: contain;\">"
+          },
+          {
+            "id": "wc-mirror-candidate",
+            "attrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "vars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "3"
+            },
+            "mirrorVars": {
+              "--pui-panel-step-count": "3",
+              "--pui-panel-progress": "0.75"
+            },
+            "text": null,
+            "html": "<projection-mirror-candidate data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\" style=\"--pui-panel-step-count: 3; --pui-panel-progress: 0.75;\"></projection-mirror-candidate>",
+            "shadow": "<img part=\"image\" alt=\"Projection mirror\" style=\"object-fit: contain; --pui-panel-step-count: 3; --pui-panel-progress: 0.75;\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"3\">"
+          }
+        ],
+        "rows": [
+          {
+            "id": "react-default-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "react-default-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "react-extended-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "react-extended-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue-default-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue-default-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue-extended-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue-extended-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue2-default-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue2-default-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue2-extended-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "vue2-extended-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": false
+          },
+          {
+            "id": "wc-default-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": true
+          },
+          {
+            "id": "wc-default-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": true
+          },
+          {
+            "id": "wc-extended-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": true
+          },
+          {
+            "id": "wc-extended-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": "4"
+            },
+            "samePhysical": true
+          },
+          {
+            "id": "wc-mirror-original",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": null
+            },
+            "samePhysical": true
+          },
+          {
+            "id": "wc-mirror-candidate",
+            "ok": true,
+            "detached": {
+              "oldAttr": "3",
+              "oldVar": "3",
+              "retained": 4,
+              "visibleText": null
+            },
+            "rebound": {
+              "attr": "4",
+              "cssVar": "4",
+              "count": 4,
+              "text": null
+            },
+            "samePhysical": true
+          }
+        ],
+        "errors": [],
+        "observations": [
+          {
+            "id": "react-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "react-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div class=\"\" data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div class=\"\" data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div class=\"\" data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" class=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-default-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" class=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-extended-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<div data-pui-root=\"\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"><output>4</output></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "vue2-observed-candidate",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+            "shadow": null
+          },
+          {
+            "id": "wc-default-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<projection-default-original data-pui-root=\"\" class=\"pui-host-root\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"></projection-default-original>",
+            "shadow": "<output>4</output>"
+          },
+          {
+            "id": "wc-default-candidate",
+            "attrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<projection-default-candidate data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"></projection-default-candidate>",
+            "shadow": "<output>4</output>"
+          },
+          {
+            "id": "wc-extended-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<projection-extended-original data-pui-root=\"\" class=\"pui-host-root\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"></projection-extended-original>",
+            "shadow": "<output>4</output>"
+          },
+          {
+            "id": "wc-extended-candidate",
+            "attrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4",
+              "data-panel-progress": "0.75"
+            },
+            "vars": {
+              "--pui-constructor": "changed",
+              "--pui-panel-mode": "busy",
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": "4",
+            "html": "<projection-extended-candidate data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" data-panel-progress=\"0.75\" style=\"--pui-constructor: changed; --pui-panel-mode: busy; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"></projection-extended-candidate>",
+            "shadow": "<output>4</output>"
+          },
+          {
+            "id": "wc-observed-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-focus-focusable": "",
+              "data-pui-scroll-projection": "system"
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<projection-observed-original data-pui-root=\"\" class=\"pui-host-root\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></projection-observed-original>",
+            "shadow": ""
+          },
+          {
+            "id": "wc-observed-candidate",
+            "attrs": {
+              "data-focus-focusable": ""
+            },
+            "vars": {
+              "--pui-scroll-vertical-visible-ratio": "1"
+            },
+            "mirrorAttrs": null,
+            "mirrorVars": null,
+            "text": null,
+            "html": "<projection-observed-candidate tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></projection-observed-candidate>",
+            "shadow": ""
+          },
+          {
+            "id": "wc-mirror-original",
+            "attrs": {
+              "data-pui-root": "",
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "mirrorVars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "text": null,
+            "html": "<projection-mirror-original data-pui-root=\"\" class=\"pui-host-root\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"></projection-mirror-original>",
+            "shadow": "<img part=\"image\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" alt=\"Projection mirror\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75; object-fit: contain;\">"
+          },
+          {
+            "id": "wc-mirror-candidate",
+            "attrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "vars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "mirrorAttrs": {
+              "data-constructor": "changed",
+              "data-panel-mode": "busy",
+              "data-panel-step-count": "4"
+            },
+            "mirrorVars": {
+              "--pui-panel-step-count": "4",
+              "--pui-panel-progress": "0.75"
+            },
+            "text": null,
+            "html": "<projection-mirror-candidate data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\" style=\"--pui-panel-step-count: 4; --pui-panel-progress: 0.75;\"></projection-mirror-candidate>",
+            "shadow": "<img part=\"image\" alt=\"Projection mirror\" style=\"object-fit: contain; --pui-panel-step-count: 4; --pui-panel-progress: 0.75;\" data-constructor=\"changed\" data-panel-mode=\"busy\" data-panel-step-count=\"4\">"
+          }
+        ]
+      },
+      "readonly": {
+        "rows": [
+          {
+            "id": "react-observed-original",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\" data-focused=\"\"></div>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "react-observed-original",
+              "attrs": {
+                "data-pui-root": "",
+                "data-focus-focusable": "",
+                "data-pui-scroll-projection": "system"
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+              "shadow": null
+            },
+            "ok": true
+          },
+          {
+            "id": "react-observed-candidate",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\" data-focused=\"\"></div>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "react-observed-candidate",
+              "attrs": {
+                "data-pui-root": "",
+                "data-focus-focusable": ""
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "shadow": null
+            },
+            "ok": true
+          },
+          {
+            "id": "vue-observed-original",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<div class=\"\" data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\" data-focused=\"\"></div>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "vue-observed-original",
+              "attrs": {
+                "data-pui-root": "",
+                "data-focus-focusable": "",
+                "data-pui-scroll-projection": "system"
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<div class=\"\" data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+              "shadow": null
+            },
+            "ok": true
+          },
+          {
+            "id": "vue-observed-candidate",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\" data-focused=\"\"></div>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "vue-observed-candidate",
+              "attrs": {
+                "data-pui-root": "",
+                "data-focus-focusable": ""
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "shadow": null
+            },
+            "ok": true
+          },
+          {
+            "id": "vue2-observed-original",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<div data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\" data-focused=\"\"></div>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "vue2-observed-original",
+              "attrs": {
+                "data-pui-root": "",
+                "data-focus-focusable": "",
+                "data-pui-scroll-projection": "system"
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<div data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+              "shadow": null
+            },
+            "ok": true
+          },
+          {
+            "id": "vue2-observed-candidate",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\" data-focused=\"\"></div>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "vue2-observed-candidate",
+              "attrs": {
+                "data-pui-root": "",
+                "data-focus-focusable": ""
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "shadow": null
+            },
+            "ok": true
+          },
+          {
+            "id": "wc-observed-original",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<projection-observed-original data-pui-root=\"\" class=\"pui-host-root\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\" data-focused=\"\"></projection-observed-original>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "wc-observed-original",
+              "attrs": {
+                "data-pui-root": "",
+                "data-focus-focusable": "",
+                "data-pui-scroll-projection": "system"
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<projection-observed-original data-pui-root=\"\" class=\"pui-host-root\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></projection-observed-original>",
+              "shadow": ""
+            },
+            "ok": true
+          },
+          {
+            "id": "wc-observed-candidate",
+            "before": {
+              "focused": false,
+              "fraction": 1,
+              "vars": "1",
+              "continuousAttr": false
+            },
+            "focused": {
+              "value": true,
+              "attribute": true,
+              "active": true,
+              "rawHost": "<projection-observed-candidate tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\" data-focused=\"\"></projection-observed-candidate>"
+            },
+            "blurred": {
+              "value": false,
+              "attribute": false
+            },
+            "raw": {
+              "id": "wc-observed-candidate",
+              "attrs": {
+                "data-focus-focusable": ""
+              },
+              "vars": {
+                "--pui-scroll-vertical-visible-ratio": "1"
+              },
+              "mirrorAttrs": null,
+              "mirrorVars": null,
+              "text": null,
+              "html": "<projection-observed-candidate tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></projection-observed-candidate>",
+              "shadow": ""
+            },
+            "ok": true
+          }
+        ],
+        "errors": [],
+        "namingAuthority": "packages/modules/expose-state-web/src/utils.ts:@focus/focused -> focused",
+        "priorIncorrectOracle": "exposed-state-projection-observed-browser.json used data-focus-focused and independently failed the original adapters as well"
+      },
+      "terminal": {
+        "bagLookupReceipt": {
+          "rows": [
+            {
+              "id": "react-default-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\" data-pui-view-pending=\"\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "react-default-candidate",
+              "method": "advance",
+              "methodError": "TypeError: held[method] is not a function",
+              "stateError": "TypeError: Cannot read properties of undefined (reading 'get')",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "react-extended-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\" data-pui-view-pending=\"\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "react-extended-candidate",
+              "method": "advance",
+              "methodError": "TypeError: held[method] is not a function",
+              "stateError": "TypeError: Cannot read properties of undefined (reading 'get')",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "react-observed-original",
+              "method": "focus",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\" data-pui-view-pending=\"\"></div>",
+              "ok": true
+            },
+            {
+              "id": "react-observed-candidate",
+              "method": "focus",
+              "methodError": "TypeError: held[method] is not a function",
+              "stateError": "TypeError: Cannot read properties of undefined (reading 'get')",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "ok": true
+            },
+            {
+              "id": "vue-default-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div class=\"\" data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div class=\"\" data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue-default-candidate",
+              "method": "advance",
+              "methodError": "Error: [Vue source] owner is disposed",
+              "stateError": "Error: [Vue source] owner is disposed",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue-extended-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div class=\"\" data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div class=\"\" data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue-extended-candidate",
+              "method": "advance",
+              "methodError": "Error: [Vue source] owner is disposed",
+              "stateError": "Error: [Vue source] owner is disposed",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue-observed-original",
+              "method": "focus",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div class=\"\" data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+              "oldRootAfter": "<div class=\"\" data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "ok": true
+            },
+            {
+              "id": "vue-observed-candidate",
+              "method": "focus",
+              "methodError": "Error: [Vue source] owner is disposed",
+              "stateError": "Error: [Vue source] owner is disposed",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "ok": true
+            },
+            {
+              "id": "vue2-default-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue2-default-candidate",
+              "method": "advance",
+              "methodError": "Error: [Vue2 native] exposed target has been terminally invalidated.",
+              "stateError": "Error: [Vue2 native] exposed target has been terminally invalidated.",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue2-extended-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue2-extended-candidate",
+              "method": "advance",
+              "methodError": "Error: [Vue2 native] exposed target has been terminally invalidated.",
+              "stateError": "Error: [Vue2 native] exposed target has been terminally invalidated.",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"><output>2</output></div>",
+              "ok": true
+            },
+            {
+              "id": "vue2-observed-original",
+              "method": "focus",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "ok": true
+            },
+            {
+              "id": "vue2-observed-candidate",
+              "method": "focus",
+              "methodError": "Error: [Vue2 native] exposed target has been terminally invalidated.",
+              "stateError": "Error: [Vue2 native] exposed target has been terminally invalidated.",
+              "oldRootConnected": false,
+              "oldRootBefore": "<div data-pui-root=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "oldRootAfter": "<div data-pui-root=\"\" data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\"></div>",
+              "ok": true
+            },
+            {
+              "id": "wc-default-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-default-original data-pui-root=\"\" class=\"pui-host-root\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-default-original>",
+              "oldRootAfter": "<projection-default-original data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-default-original>",
+              "ok": true
+            },
+            {
+              "id": "wc-default-candidate",
+              "method": "advance",
+              "methodError": "Error: Logical owner is disposed",
+              "stateError": "Error: Logical owner is disposed",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-default-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-default-candidate>",
+              "oldRootAfter": "<projection-default-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-default-candidate>",
+              "ok": true
+            },
+            {
+              "id": "wc-extended-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-extended-original data-pui-root=\"\" class=\"pui-host-root\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-extended-original>",
+              "oldRootAfter": "<projection-extended-original data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-extended-original>",
+              "ok": true
+            },
+            {
+              "id": "wc-extended-candidate",
+              "method": "advance",
+              "methodError": "Error: Logical owner is disposed",
+              "stateError": "Error: Logical owner is disposed",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-extended-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-extended-candidate>",
+              "oldRootAfter": "<projection-extended-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" data-panel-progress=\"0.25\" style=\"--pui-constructor: ready; --pui-panel-mode: idle; --pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-extended-candidate>",
+              "ok": true
+            },
+            {
+              "id": "wc-observed-original",
+              "method": "focus",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-observed-original data-pui-root=\"\" class=\"pui-host-root\" tabindex=\"0\" data-focus-focusable=\"\" data-pui-scroll-projection=\"system\" style=\"--pui-scroll-vertical-visible-ratio: 1; overflow: auto;\"></projection-observed-original>",
+              "oldRootAfter": "<projection-observed-original data-pui-root=\"\" class=\"\" tabindex=\"0\" data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\"></projection-observed-original>",
+              "ok": true
+            },
+            {
+              "id": "wc-observed-candidate",
+              "method": "focus",
+              "methodError": "Error: Logical owner is disposed",
+              "stateError": "Error: Logical owner is disposed",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-observed-candidate tabindex=\"0\" data-focus-focusable=\"\" style=\"overflow: hidden auto; --pui-scroll-vertical-visible-ratio: 1;\"></projection-observed-candidate>",
+              "oldRootAfter": "<projection-observed-candidate data-focus-focusable=\"\" style=\"--pui-scroll-vertical-visible-ratio: 1;\"></projection-observed-candidate>",
+              "ok": true
+            },
+            {
+              "id": "wc-mirror-original",
+              "method": "advance",
+              "methodError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "stateError": "Error: [AdapterHost] cannot invoke an exposed callable after terminal disposal",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-mirror-original data-pui-root=\"\" class=\"pui-host-root\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-original>",
+              "oldRootAfter": "<projection-mirror-original data-pui-root=\"\" class=\"\" data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-original>",
+              "ok": true
+            },
+            {
+              "id": "wc-mirror-candidate",
+              "method": "advance",
+              "methodError": "Error: Logical owner is disposed",
+              "stateError": "Error: Logical owner is disposed",
+              "oldRootConnected": false,
+              "oldRootBefore": "<projection-mirror-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-candidate>",
+              "oldRootAfter": "<projection-mirror-candidate data-disabled=\"\" data-constructor=\"ready\" data-panel-mode=\"idle\" data-panel-step-count=\"2\" style=\"--pui-panel-step-count: 2; --pui-panel-progress: 0.25;\"></projection-mirror-candidate>",
+              "ok": true
+            }
+          ],
+          "errors": [],
+          "remainingChildNodes": [
+            {
+              "id": "react-default-original",
+              "count": 0
+            },
+            {
+              "id": "react-default-candidate",
+              "count": 0
+            },
+            {
+              "id": "react-extended-original",
+              "count": 0
+            },
+            {
+              "id": "react-extended-candidate",
+              "count": 0
+            },
+            {
+              "id": "react-observed-original",
+              "count": 0
+            },
+            {
+              "id": "react-observed-candidate",
+              "count": 0
+            },
+            {
+              "id": "vue-default-original",
+              "count": 0
+            },
+            {
+              "id": "vue-default-candidate",
+              "count": 0
+            },
+            {
+              "id": "vue-extended-original",
+              "count": 0
+            },
+            {
+              "id": "vue-extended-candidate",
+              "count": 0
+            },
+            {
+              "id": "vue-observed-original",
+              "count": 0
+            },
+            {
+              "id": "vue-observed-candidate",
+              "count": 0
+            },
+            {
+              "id": "vue2-default-original",
+              "count": 0
+            },
+            {
+              "id": "vue2-default-candidate",
+              "count": 0
+            },
+            {
+              "id": "vue2-extended-original",
+              "count": 0
+            },
+            {
+              "id": "vue2-extended-candidate",
+              "count": 0
+            },
+            {
+              "id": "vue2-observed-original",
+              "count": 0
+            },
+            {
+              "id": "vue2-observed-candidate",
+              "count": 0
+            },
+            {
+              "id": "wc-default-original",
+              "count": 0
+            },
+            {
+              "id": "wc-default-candidate",
+              "count": 0
+            },
+            {
+              "id": "wc-extended-original",
+              "count": 0
+            },
+            {
+              "id": "wc-extended-candidate",
+              "count": 0
+            },
+            {
+              "id": "wc-observed-original",
+              "count": 0
+            },
+            {
+              "id": "wc-observed-candidate",
+              "count": 0
+            },
+            {
+              "id": "wc-mirror-original",
+              "count": 0
+            },
+            {
+              "id": "wc-mirror-candidate",
+              "count": 0
+            }
+          ]
+        },
+        "invalidBagLookupRows": [
+          "react-default-candidate",
+          "react-extended-candidate",
+          "react-observed-candidate"
+        ],
+        "correctedRetainedReactHandles": {
+          "rows": [
+            {
+              "id": "react-default-candidate",
+              "capturedCallableBeforeDisposal": true,
+              "capturedStateBeforeDisposal": true,
+              "valueBefore": 2,
+              "methodError": "Error: Generated handle is invalid after terminal disposal begins.",
+              "stateError": "Error: Generated handle is invalid after terminal disposal begins.",
+              "ok": true,
+              "remainingChildNodes": 0
+            },
+            {
+              "id": "react-extended-candidate",
+              "capturedCallableBeforeDisposal": true,
+              "capturedStateBeforeDisposal": true,
+              "valueBefore": 2,
+              "methodError": "Error: Generated handle is invalid after terminal disposal begins.",
+              "stateError": "Error: Generated handle is invalid after terminal disposal begins.",
+              "ok": true,
+              "remainingChildNodes": 0
+            },
+            {
+              "id": "react-observed-candidate",
+              "capturedCallableBeforeDisposal": true,
+              "capturedStateBeforeDisposal": true,
+              "valueBefore": false,
+              "methodError": "Error: Generated handle is invalid after terminal disposal begins.",
+              "stateError": "Error: Generated handle is invalid after terminal disposal begins.",
+              "ok": true,
+              "remainingChildNodes": 0
+            }
+          ],
+          "errors": [],
+          "correction": "Earlier terminal driver retained the exposed bag rather than each callable/state; native React clears that bag. Those three TypeErrors were not valid retained-callable evidence.",
+          "interopCorrection": "Vite optimized CJS React DOM import requires the actual default export object; the first corrected-driver attempt failed before mounting."
+        },
+        "allContainersEmpty": true
+      },
+      "standaloneQueuedSourceEdge": {
+        "initial": {
+          "host": "<div data-queue-value=\"1\" style=\"--pui-queue-value: 1;\"></div>",
+          "mirror": "<span data-queue-value=\"1\" style=\"--pui-queue-value: 1;\"></span>"
+        },
+        "detached": {
+          "host": "<div data-queue-value=\"1\" style=\"--pui-queue-value: 1;\"></div>",
+          "mirror": "<span data-queue-value=\"1\" style=\"--pui-queue-value: 1;\"></span>"
+        },
+        "remounted": {
+          "old": "<div data-queue-value=\"1\" style=\"--pui-queue-value: 1;\"></div>",
+          "new": "<div data-queue-value=\"8\" style=\"--pui-queue-value: 8;\"></div>",
+          "mirror": "<span data-queue-value=\"8\" style=\"--pui-queue-value: 8;\"></span>"
+        },
+        "disposed": {
+          "host": "<div data-queue-value=\"8\" style=\"--pui-queue-value: 8;\"></div>",
+          "mirror": "<span data-queue-value=\"8\" style=\"--pui-queue-value: 8;\"></span>"
+        },
+        "ok": true,
+        "boundary": "Standalone emitted helper with controlled source queue and actual HTMLElement targets; not a RuntimeBox or native-widget test"
+      },
+      "screenshot": {
+        "path": "internal/compiler/evidence/exposed-state-projection-browser.webp",
+        "width": 1750,
+        "height": 4399,
+        "bytes": 284834,
+        "scope": "Actual 26 original/native mounted DOM surfaces after Vite dependency reload; values shown are read from each current DOM, not expected labels."
+      }
+    },
+    "actualWorker": {
+      "build": {
+        "format": 1,
+        "compilerSha256": "2198c5a868602170bb3db0a082c010c2944b68e63c768fe5ceb324d453db520a",
+        "typescriptVersion": "5.9.3",
+        "execution": "quickjs-wasm"
+      },
+      "bundleBytes": 5050271,
+      "rows": [
+        {
+          "id": "default/react-runtime-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 52.5,
+          "outputCharacters": 5490
+        },
+        {
+          "id": "default/react-dom-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 44.30000001192093,
+          "outputCharacters": 62713
+        },
+        {
+          "id": "default/vue-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 37.80000001192093,
+          "outputCharacters": 51090
+        },
+        {
+          "id": "default/vue2-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 37.39999997615814,
+          "outputCharacters": 46860
+        },
+        {
+          "id": "default/web-component-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 35.60000002384186,
+          "outputCharacters": 251969
+        },
+        {
+          "id": "default/gpui-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 156.19999998807907,
+          "outputCharacters": 397373
+        },
+        {
+          "id": "extended/react-runtime-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 27.900000035762787,
+          "outputCharacters": 5570
+        },
+        {
+          "id": "extended/react-dom-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 34.09999996423721,
+          "outputCharacters": 62758
+        },
+        {
+          "id": "extended/vue-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 32.80000001192093,
+          "outputCharacters": 51135
+        },
+        {
+          "id": "extended/vue2-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 31.400000035762787,
+          "outputCharacters": 46905
+        },
+        {
+          "id": "extended/web-component-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 32.60000002384186,
+          "outputCharacters": 252014
+        },
+        {
+          "id": "extended/gpui-source-v1",
+          "ok": false,
+          "phase": "compile",
+          "codes": ["PUI4003"],
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 15.300000011920929,
+          "outputCharacters": 0
+        },
+        {
+          "id": "observed/react-runtime-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 9.199999988079071,
+          "outputCharacters": 3432
+        },
+        {
+          "id": "observed/react-dom-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.899999976158142,
+          "outputCharacters": 239737
+        },
+        {
+          "id": "observed/vue-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.100000023841858,
+          "outputCharacters": 228664
+        },
+        {
+          "id": "observed/vue2-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.400000035762787,
+          "outputCharacters": 222978
+        },
+        {
+          "id": "observed/web-component-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.899999976158142,
+          "outputCharacters": 256886
+        },
+        {
+          "id": "observed/gpui-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 74,
+          "outputCharacters": 393446
+        },
+        {
+          "id": "mirror/react-runtime-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 26.5,
+          "outputCharacters": 5722
+        },
+        {
+          "id": "mirror/react-dom-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 33.19999998807907,
+          "outputCharacters": 242170
+        },
+        {
+          "id": "mirror/vue-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 31.69999998807907,
+          "outputCharacters": 231451
+        },
+        {
+          "id": "mirror/vue2-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 31.899999976158142,
+          "outputCharacters": 225402
+        },
+        {
+          "id": "mirror/web-component-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 31.30000001192093,
+          "outputCharacters": 259476
+        },
+        {
+          "id": "mirror/gpui-source-v1",
+          "ok": true,
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 87.10000002384186,
+          "outputCharacters": 397810
+        },
+        {
+          "id": "unimplemented/qt-source-v1",
+          "ok": false,
+          "phase": "compile",
+          "codes": ["PUI4001"],
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 15,
+          "outputCharacters": 0
+        },
+        {
+          "id": "unimplemented/flutter-source-v1",
+          "ok": false,
+          "phase": "compile",
+          "codes": ["PUI4001"],
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.899999976158142,
+          "outputCharacters": 0
+        },
+        {
+          "id": "unimplemented/react-dom-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "codes": ["PUI4001"],
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.799999952316284,
+          "outputCharacters": 0
+        },
+        {
+          "id": "unimplemented/vue-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "codes": ["PUI4001"],
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.600000023841858,
+          "outputCharacters": 0
+        },
+        {
+          "id": "unimplemented/vue2-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "codes": ["PUI4001"],
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.800000011920929,
+          "outputCharacters": 0
+        },
+        {
+          "id": "unimplemented/web-component-ssr-v1",
+          "ok": false,
+          "phase": "compile",
+          "codes": ["PUI4001"],
+          "completeNodeEqual": true,
+          "revisionEqual": true,
+          "buildEqual": true,
+          "elapsedMs": 14.899999976158142,
+          "outputCharacters": 0
+        }
+      ],
+      "malformed": [
+        {
+          "mode": {
+            "allowStringVar": "yes"
+          },
+          "result": {
+            "ok": false,
+            "revision": "malformed-mode-0",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "Web projection mode accepts only boolean allowStringVar and allowContinuousAttr."
+            }
+          },
+          "ok": true
+        },
+        {
+          "mode": {
+            "allowContinuousAttr": 1
+          },
+          "result": {
+            "ok": false,
+            "revision": "malformed-mode-1",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "Web projection mode accepts only boolean allowStringVar and allowContinuousAttr."
+            }
+          },
+          "ok": true
+        },
+        {
+          "mode": {
+            "notAFlag": true
+          },
+          "result": {
+            "ok": false,
+            "revision": "malformed-mode-2",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "Web projection mode accepts only boolean allowStringVar and allowContinuousAttr."
+            }
+          },
+          "ok": true
+        },
+        {
+          "mode": [],
+          "result": {
+            "ok": false,
+            "revision": "malformed-mode-3",
+            "phase": "host",
+            "error": {
+              "code": "invalid-request",
+              "message": "Web projection mode accepts only boolean allowStringVar and allowContinuousAttr."
+            }
+          },
+          "ok": true
+        }
+      ],
+      "project": {
+        "modeChangeInvalidated": true,
+        "changedOutputEqualsFresh": true,
+        "changedOutputDiffersFromDefault": true,
+        "unchangedModeReused": true,
+        "revertedModeInvalidated": true,
+        "revertedOutputEqualsDefault": true
+      },
+      "browserErrors": [],
+      "cases": [
+        {
+          "id": "default/react-runtime-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "3c43d81895d8678b7f2e61c5d7af58d16bab34d5928d6fc50a0d603e0692f699",
+          "nodeResultSha256": "4f689b4ae9d00c264c26f54e113bce899cdfdeeab242c09cc7c2d7cb4dd904f4",
+          "admission": "generated"
+        },
+        {
+          "id": "default/react-dom-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "32ac1a632964073b5185a725d941df0d1e64620a4306d4d0298835ee8aa12305",
+          "nodeResultSha256": "7eb990ea72f74a5de6a0accd3bc639f972b03be2e19870213bb2406a55cd35fa",
+          "admission": "generated"
+        },
+        {
+          "id": "default/vue-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "8bad244bab30e78dbdb18282fd4a15094bd70d50312a172577f3a9a2f18aec01",
+          "nodeResultSha256": "19cb970c6ed6d3c772a27fb6790f03c8d5fba6b1d40f69de7a975ff952d3dd70",
+          "admission": "generated"
+        },
+        {
+          "id": "default/vue2-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "1b6316bef47079efe9cc78b07e80d8ff0b4aa4e1d481783334dd208b4c55fc49",
+          "nodeResultSha256": "1baa2cb1daf5693d7506a0aa907b966d9db27368d0b4d208faba4c48286f092e",
+          "admission": "generated"
+        },
+        {
+          "id": "default/web-component-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "b9b98babcc3f93fdd04bb80796ae770f2b668d5f63b0c0e1189686323d9037ab",
+          "nodeResultSha256": "bf6e7238463e6c0bdb06ba305c58aa34176a35f3aaf598d7c8fb1b25e4932f9c",
+          "admission": "generated"
+        },
+        {
+          "id": "default/gpui-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "6a3cc199c048bc4ebdd9370242fcb152e72d0036b619b7760060576e7b4198c6",
+          "nodeResultSha256": "5bd2aded78ed4ec1f665855cef4ceefab65c9f9c416103251f96987b60773ae8",
+          "admission": "generated"
+        },
+        {
+          "id": "extended/react-runtime-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "dab2c1ff03045114579467d7911a4b5d3b1b7ceab873aafaed418b378acc090e",
+          "nodeResultSha256": "ed95aa1aaa4b933c6637189f76c5df4bbd2fe980d50b318b6f7969e5fbb896ae",
+          "admission": "generated"
+        },
+        {
+          "id": "extended/react-dom-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "e87d7ecf10d9e4c0cc472b1db1039dc155600c3869ded3d80365b4ead708f36d",
+          "nodeResultSha256": "5191ac11b441841ad4d08a0d3d59c3a173e9aefb410a5838ae439c0b395640f1",
+          "admission": "generated"
+        },
+        {
+          "id": "extended/vue-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "5bda93a09abc2a50906d2cf8217f22ffcf4dd2c13ef48016d0fc72f861e14d78",
+          "nodeResultSha256": "cd9d55cfa7e72f96f267b1b18db9d459412d382e0e8108f54ff8ee651b777a6f",
+          "admission": "generated"
+        },
+        {
+          "id": "extended/vue2-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "cef7bb031a88ab1b5d24c82f2ec8f1dcc23bce74d931aef83529c8b3b96cffe4",
+          "nodeResultSha256": "21edbd74131da44b5ba3ef2ed3c51ae2e11b95847570b7d172c76f65b95f4ac1",
+          "admission": "generated"
+        },
+        {
+          "id": "extended/web-component-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "e87f1d213f0ab73b1eb16b048649ce49d76ff53d74adb0ddc42650b2c3cb0f8c",
+          "nodeResultSha256": "72b9539bab59570eab20cca7580f512a86063c7066c1b9875c2abb6f3e9aef4c",
+          "admission": "generated"
+        },
+        {
+          "id": "extended/gpui-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "0d87220ee7bf80155de62288668e8e013e2674daadc850f1e8b065e516b665a5",
+          "nodeResultSha256": "4fa086beb27ca6db1c93bd2855482ca166fac9bd9088feb2f1801d0934a816f6",
+          "admission": "rejected"
+        },
+        {
+          "id": "observed/react-runtime-v1",
+          "sourceUtf8Sha256": "1f9c2b7b59ffda448d15c35639ec860d50a482681f902d6a6ebe6948fa16d7cd",
+          "requestSha256": "dc5bb9197c549b001b547913480ff8a5c4ba31c2bc3c4a4963694195c57979f5",
+          "nodeResultSha256": "28f15dfecfa0a8700c20e9b4a76b5775dd5c11f2b5d3142a21a95d53dc6301f9",
+          "admission": "generated"
+        },
+        {
+          "id": "observed/react-dom-source-v1",
+          "sourceUtf8Sha256": "1f9c2b7b59ffda448d15c35639ec860d50a482681f902d6a6ebe6948fa16d7cd",
+          "requestSha256": "8ec6471f318d796cd12588e01f3c2161317ec2b93419333b8ed3d6a114b2c93f",
+          "nodeResultSha256": "2024d63b4ca3dc700384352a88f0237bda05aae0f938588eb79ea4cd8adb1e0a",
+          "admission": "generated"
+        },
+        {
+          "id": "observed/vue-source-v1",
+          "sourceUtf8Sha256": "1f9c2b7b59ffda448d15c35639ec860d50a482681f902d6a6ebe6948fa16d7cd",
+          "requestSha256": "2cece1c3ce7a29f9fbfaab6b6beecbd676e57a88bfa1a76b1e55126d578b2155",
+          "nodeResultSha256": "3f8edebc89e935ddeade60a11561a7274f508472ee6637501ac99c2f02b40609",
+          "admission": "generated"
+        },
+        {
+          "id": "observed/vue2-source-v1",
+          "sourceUtf8Sha256": "1f9c2b7b59ffda448d15c35639ec860d50a482681f902d6a6ebe6948fa16d7cd",
+          "requestSha256": "dbe670aa628faa175b848c2978bb69ae490f3ed060c26f999679aa75566da4ff",
+          "nodeResultSha256": "f01023c60e46e6fd38b6896ef3e185f4db34d57847f3ee8c1c13d1f0e4ef9861",
+          "admission": "generated"
+        },
+        {
+          "id": "observed/web-component-source-v1",
+          "sourceUtf8Sha256": "1f9c2b7b59ffda448d15c35639ec860d50a482681f902d6a6ebe6948fa16d7cd",
+          "requestSha256": "5175691c5f1dba9f1e07b314c0f8c4e6a0123f161beee7ddccbf3169a88791b5",
+          "nodeResultSha256": "a4f3db391b837025314d5efc3424912eeca6819e637a4a0463b782320e4a0c38",
+          "admission": "generated"
+        },
+        {
+          "id": "observed/gpui-source-v1",
+          "sourceUtf8Sha256": "1f9c2b7b59ffda448d15c35639ec860d50a482681f902d6a6ebe6948fa16d7cd",
+          "requestSha256": "1078e6b7afd1e5ae1ea47716eb6becbd40b08eb5d10aa73fca1b83d8f6b959eb",
+          "nodeResultSha256": "3f5462e7a6a04902459fd0e911e22b7141a8153e3fd847bcdb89a334caf68674",
+          "admission": "generated"
+        },
+        {
+          "id": "mirror/react-runtime-v1",
+          "sourceUtf8Sha256": "840bd16f92a082a2e516d7a32d35cf3fad03b32e3ce6193f2556024bf44cfb27",
+          "requestSha256": "d5dc6d60ebe948d137a61d040e62244f52c666c3b6f7f38bf88e8b72c2d302d0",
+          "nodeResultSha256": "f7f5c47362c41572146b901679902ea770d5cd070311a2fd000c7a619f23c06c",
+          "admission": "generated"
+        },
+        {
+          "id": "mirror/react-dom-source-v1",
+          "sourceUtf8Sha256": "840bd16f92a082a2e516d7a32d35cf3fad03b32e3ce6193f2556024bf44cfb27",
+          "requestSha256": "4c7b5c8ac0b34ff437e109572c8d01dec54a61470f866f314b56c00eb3ca64a1",
+          "nodeResultSha256": "8d1c410d14fbf5a9bd649b26a2f8f945938220aeefba963899712a7ccafe4e8c",
+          "admission": "generated"
+        },
+        {
+          "id": "mirror/vue-source-v1",
+          "sourceUtf8Sha256": "840bd16f92a082a2e516d7a32d35cf3fad03b32e3ce6193f2556024bf44cfb27",
+          "requestSha256": "e5e2f2a53fbee7273ebaadd2325362d2d5fa91a4224b3c6ed05a0dd990259f9c",
+          "nodeResultSha256": "3597e2277d6931ff0c8a45ffac1c5a921aabe60aaaf0efe0b90364429d429dfe",
+          "admission": "generated"
+        },
+        {
+          "id": "mirror/vue2-source-v1",
+          "sourceUtf8Sha256": "840bd16f92a082a2e516d7a32d35cf3fad03b32e3ce6193f2556024bf44cfb27",
+          "requestSha256": "2644d56c5b4c7d32409d54faf429cb450f835d70b4a0decbd088c691a6d7a0ee",
+          "nodeResultSha256": "f6c9ea044db89f7e94e8a9296225ce18520ae11316c9255c2581bf4af365c147",
+          "admission": "generated"
+        },
+        {
+          "id": "mirror/web-component-source-v1",
+          "sourceUtf8Sha256": "840bd16f92a082a2e516d7a32d35cf3fad03b32e3ce6193f2556024bf44cfb27",
+          "requestSha256": "31c50af05bce8d1f238c4daebe66d4cb10b823c1c797fd525d0dbab1531f1890",
+          "nodeResultSha256": "aec22534fb694f484652fa600a176419c5d4c707c30ae40e0b19e3dde005f5ab",
+          "admission": "generated"
+        },
+        {
+          "id": "mirror/gpui-source-v1",
+          "sourceUtf8Sha256": "840bd16f92a082a2e516d7a32d35cf3fad03b32e3ce6193f2556024bf44cfb27",
+          "requestSha256": "c7863ec0f7afd2ca241a7c16847fdc4816a916a1a95d577ef018af57eeca26e6",
+          "nodeResultSha256": "f2326b8f603d5984ecc8b6635f0f07a257838905165dd16b2ded872150bc054f",
+          "admission": "generated"
+        },
+        {
+          "id": "unimplemented/qt-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "0403586c06ddb181c227ef9e760833058ce36b985f76f73ad47f7e086a2d75f6",
+          "nodeResultSha256": "f2d08809e35ada4b3e47f931470d3f68d30ec1fadb4db55daeb7859f0b05bfb5",
+          "admission": "rejected"
+        },
+        {
+          "id": "unimplemented/flutter-source-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "7ad98c7bd4fb2276dd87fe492d6f87c93a0d857d99b3eb7872af221729afc795",
+          "nodeResultSha256": "47dd9ccc0717ee9ac32441edb17e9f8aebda569050eb45226a58b09ef8f7d29e",
+          "admission": "rejected"
+        },
+        {
+          "id": "unimplemented/react-dom-ssr-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "52b62a09138b7803523894ed31b48b6fa61daa3f79731bf5f3d1d3ebf2ffc04b",
+          "nodeResultSha256": "379421f043c14760a18545cb0e03fc441d9c30eaf93cc662b67aced7ed276e04",
+          "admission": "rejected"
+        },
+        {
+          "id": "unimplemented/vue-ssr-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "9bfe0264878d9719b1f8129b9d9207489b2d3780eb2f0f766628abb41f6b6c04",
+          "nodeResultSha256": "5e9eec0f546e01989bb2a984059ebba82585c9444c245b90f6dff37327dca794",
+          "admission": "rejected"
+        },
+        {
+          "id": "unimplemented/vue2-ssr-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "dc7ea7d95275507f61d737435775182e4ede6b2afac538970d352e59388b8cfb",
+          "nodeResultSha256": "c1bd92fde0258a9bb478f8b63987f49117e22fd55bf35273d8c094aa3e4c9241",
+          "admission": "rejected"
+        },
+        {
+          "id": "unimplemented/web-component-ssr-v1",
+          "sourceUtf8Sha256": "e2d046566ec2292715f9d27d5d9c0dc16ca183c95d18ecc282724937f600e90e",
+          "requestSha256": "df0c373de600f45833000161a5b020fe6edd0cd41988dc5e0affb9376db0ff2c",
+          "nodeResultSha256": "19fb78a20035eec692e77073af9f503332eac0a64dc99d5f12e8076818085a0d",
+          "admission": "rejected"
+        }
+      ],
+      "scope": "Complete Node/actual Chromium QuickJS WASM artifact and diagnostic equality: 23 successful outputs, one Web-only GPUI mode rejection, six unimplemented profile rejections and four malformed Host mode rejections. Not native-widget, SSR or RuntimeBox execution."
+    },
+    "failedHarnessAttempts": [
+      {
+        "boundary": "Original Web Component construction",
+        "error": "NotSupportedError: constructor already registered",
+        "repair": "Use the real Adapter register:false option with shadow:true; no synthetic subclass."
+      },
+      {
+        "boundary": "Props-driven view epoch observation",
+        "error": "Four null-Root observations and Vue2 non-detachment in the first driver",
+        "repair": "Explicit callback-safe semantic update after framework-specific Props delivery; original Vue2 consumes attrs, generated Vue2 consumes declared props."
+      },
+      {
+        "boundary": "Readonly focus attribute oracle",
+        "error": "data-focus-focused absent in both original and candidate",
+        "repair": "Use Module-owned @focus/focused alias data-focused; retain failed observation."
+      },
+      {
+        "boundary": "Initial browser compiler import",
+        "error": "Execution context destroyed during actual Vite new-dependency optimization/reload",
+        "repair": "Wait for actual page recovery, then repeat only the interrupted Worker import."
+      },
+      {
+        "boundary": "Retained native React terminal handle",
+        "error": "Driver re-looked up deleted expose-bag keys, producing TypeErrors instead of exercising retained callables",
+        "repair": "Capture the actual method and State getter before disposal; corrected default/extended/readonly cases all reject from terminal guards."
+      },
+      {
+        "boundary": "Vite optimized React DOM module import",
+        "error": "createRoot is not a function before any corrected-driver mount",
+        "repair": "Read the actual optimized CJS default export, not an invented named export."
+      }
+    ],
+    "validation": {
+      "focused": {
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/test/react-source.test.ts packages/compiler/test/vue-source.test.ts packages/compiler/test/vue2-source.test.ts packages/compiler/test/web-component-source.test.ts packages/compiler/test/owner-stress.test.ts packages/compiler/test/browser-wasm.test.ts packages/compiler/src/project.test.ts packages/compiler/test/targets.test.ts --reporter=json --outputFile=.cache/exposed-state-projection-final-validation.json",
+        "passed": 47,
+        "failed": 0,
+        "actualFiles": [
+          "packages/compiler/src/project.test.ts",
+          "packages/compiler/test/browser-wasm.test.ts",
+          "packages/compiler/test/react-source.test.ts",
+          "packages/compiler/test/targets.test.ts",
+          "packages/compiler/test/vue-source.test.ts"
+        ],
+        "unmatchedPatterns": [
+          "packages/compiler/test/vue2-source.test.ts",
+          "packages/compiler/test/web-component-source.test.ts",
+          "packages/compiler/test/owner-stress.test.ts"
+        ]
+      },
+      "colocatedCorrection": {
+        "command": "corepack pnpm@10.32.1 exec vitest run packages/compiler/src/vue2-source.test.ts packages/compiler/src/web-component-source.test.ts packages/compiler/test/owner-stress-generated.test.ts --reporter=json --outputFile=.cache/exposed-state-projection-colocated-validation.json",
+        "passed": 29,
+        "failed": 0,
+        "actualFiles": [
+          "packages/compiler/src/vue2-source.test.ts",
+          "packages/compiler/src/web-component-source.test.ts",
+          "packages/compiler/test/owner-stress-generated.test.ts"
+        ]
+      },
+      "combinedUniqueTests": 76,
+      "types": {
+        "command": "corepack pnpm@10.32.1 -s check:types:workspace",
+        "result": "PASS",
+        "elapsedSeconds": 33.45
+      },
+      "publicDocs": {
+        "command": "corepack pnpm@10.32.1 -s check:public-docs",
+        "result": "PASS",
+        "bilingualPrimaryRoutes": 116,
+        "libraryInventories": 4
+      },
+      "renderedGuides": {
+        "en": {
+          "url": "http://127.0.0.1:4479/en/build/compiler-guide/",
+          "headingCount": 14,
+          "projection": "The four Web source profiles lower ExposedState Host projection into a standalone supporting helper. Names use the State semantic, falling back to the exposure key, and share the existing Module’s official aliases and normalization. Boolean true adds an empty attribute and false removes it; string/enum values write attributes, discrete numbers write attributes and CSS variables, and continuous numbers write only CSS variables by default. The JavaScript compile APIs accept the existing exposeStateWebMode flags allowStringVar and allowContinuousAttr. This is a Web extension, not a DOM projection promise for GPUI, Qt or Flutter.",
+          "projectionIsProse": true,
+          "evidence": "The ExposedState repair separately mounts all four original Web Adapters alongside generated native consumers: 18 scalar/mirror surfaces exercise writes without structural rendering, real detach and retained-State remount; eight readonly surfaces exercise actual focus/blur and continuous Scroll projection. Actual WASM Worker comparison covers 23 successful complete outputs, the Web-only GPUI mode rejection, six unimplemented-profile rejections and four malformed mode requests. Earlier failed observations and corrected driver mistakes remain recorded. Canonical Web Component Root markers and native Scroll projection markers still differ, so these bounded observations are not complete Adapter parity or RuntimeBox migration.",
+          "evidenceIsProse": true,
+          "accurateTargetBoundary": true
+        },
+        "zh": {
+          "url": "http://127.0.0.1:4479/zh-cn/build/compiler-guide/",
+          "headingCount": 14,
+          "projection": "四个 Web source profile 将 ExposedState Host projection 降低为独立 supporting helper。命名使用 State semantic，缺失时回退到 exposure key，并复用现有 Module 的 official alias 与 normalization。Boolean true 写空 attribute、false 移除；string/enum 写 attribute，discrete number 写 attribute 与 CSS variable，continuous number 默认只写 CSS variable。JavaScript compile API 接受现有 exposeStateWebMode 的 allowStringVar 与 allowContinuousAttr flag。这是 Web extension，不是对 GPUI、Qt、Flutter 的 DOM projection 承诺。",
+          "projectionIsProse": true,
+          "evidence": "ExposedState 修复另行将四个原 Web Adapter 与生成的 native consumer 实际并排挂载：18 个 scalar/mirror surface 验证不触发 structural render 的 write、真实 detach 和保留 State 的 remount；8 个 readonly surface 验证实际 focus/blur 与 continuous Scroll projection。真实 WASM Worker 对照覆盖 23 个成功的完整 output、GPUI 的 Web-only mode 拒绝、6 个未实现 profile 拒绝，以及 4 个 malformed mode request。早期失败观察和修正后的 driver 错误仍保留。Canonical Web Component Root marker 与 native Scroll projection marker 仍有差异；这些有限观察不代表完整 Adapter parity 或 RuntimeBox migration。",
+          "evidenceIsProse": true,
+          "accurateTargetBoundary": true
+        }
+      },
+      "postFormatBundle": {
+        "compilerSha256": "2198c5a868602170bb3db0a082c010c2944b68e63c768fe5ceb324d453db520a",
+        "bytes": 5050271,
+        "unchangedFromActualWorkerProof": true
+      },
+      "scope": "Eight exact focused files, workspace types and public-doc checks; not a local full-suite result. Initial unmatched patterns and earlier missing-CHROME_PATH failure remain retained."
+    },
+    "knownParityDifferences": [
+      "Generated Web Component canonical Host lacks the original data-pui-root marker.",
+      "Generated Scroll projection lacks the original data-pui-scroll-projection=system marker and has a distinct overflow presentation.",
+      "Inactive image/text property projection and canonical primitive Props admission remain separate unresolved tasks."
+    ],
+    "scope": "Bounded Web ExposedState projection repair only. Full native targets, SSR/hydration, all Adapter parity, every canonical Demo/RuntimeBox/editor migration and preview-security obligations remain open."
+  },
   "debt": [
     "No RuntimeBox migration, generated preview sandbox, in-page editor or full-source admission claim; #817 remains open.",
     "142 selected-target source admission rejections remain in-scope with explicit diagnostics in website-demo-migrations.json.",

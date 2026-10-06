@@ -184,8 +184,11 @@ export default definePrototype({name:'ordinary-root',setup(def){
     const exposes = handle.getExposes();
     const heldState = exposes.count;
     const heldMethod = exposes.add;
+    const firstView = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(host.querySelector('output')?.textContent).toBe('2slot');
     expect(heldState.get()).toBe(4);
+    expect(firstView.getAttribute('data-count')).toBe('4');
+    expect(firstView.style.getPropertyValue('--pui-count')).toBe('4');
     expect(lifecycle).toEqual(['created', 'mounted']);
 
     const transitions: number[] = [];
@@ -196,6 +199,8 @@ export default definePrototype({name:'ordinary-root',setup(def){
     expect(heldState.get()).toBe(7);
     expect(exposes.read()).toBe(7);
     expect(host.querySelector('output')?.textContent).toBe('2slot');
+    expect(firstView.getAttribute('data-count')).toBe('7');
+    expect(firstView.style.getPropertyValue('--pui-count')).toBe('7');
     expect(transitions).toEqual([7]);
     await React.act(async () => {
       handle.update();
@@ -216,11 +221,17 @@ export default definePrototype({name:'ordinary-root',setup(def){
     });
     expect(heldState.get()).toBe(9);
     expect(host.querySelector('output')).toBeNull();
+    expect(firstView.getAttribute('data-count')).toBe('7');
+    expect(firstView.style.getPropertyValue('--pui-count')).toBe('7');
     expect(lifecycle).toEqual(['created', 'mounted', 'updated', 'unmounted']);
     await React.act(async () => {
       root.render(React.createElement(CompiledComponent, { ...props, present: true }));
     });
     expect(host.querySelector('output')?.textContent).toBe('9slot');
+    const replacementView = host.querySelector<HTMLElement>('[data-pui-root]')!;
+    expect(replacementView).not.toBe(firstView);
+    expect(replacementView.getAttribute('data-count')).toBe('4');
+    expect(replacementView.style.getPropertyValue('--pui-count')).toBe('4');
     expect(handle.getExposes().add).toBe(heldMethod);
     expect(lifecycle).toEqual(['created', 'mounted', 'updated', 'unmounted', 'mounted']);
     off();
@@ -246,6 +257,52 @@ export default definePrototype({name:'ordinary-root',setup(def){
     expect(() => heldState.get()).toThrow(/terminal disposal/);
     expect(() => heldState.subscribe(() => undefined)).toThrow(/terminal disposal/);
     expect(() => handle.update()).toThrow(/terminal disposal/);
+  });
+
+  it('projects State kinds and semantic names independently of Expose keys and template updates', async () => {
+    const { CompiledComponent } = await loadNative(`import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'semantic-projection',setup(def){
+  const enabled=def.state.bool('@interaction/disabled',true);
+  const text=def.state.string('constructor','ready');
+  const choice=def.state.enum('panel.Mode','idle',{options:['idle','busy']});
+  const steps=def.state.numberDiscrete('  Panel.stepCount!  ',2,{min:0,max:9,step:1});
+  const progress=def.state.numberRange('panel.progress',0.25,{min:0,max:1});
+  def.expose.state('flag',enabled);
+  def.expose.state('label',text);
+  def.expose.state('choice',choice);
+  def.expose.state('steps',steps);
+  def.expose.state('progress',progress);
+  def.expose.method('advance',()=>{
+    enabled.set(false); text.set('changed'); choice.set('busy'); steps.set(3); progress.set(0.75);
+  });
+  return r=>r.el('output','unchanged');
+}});`);
+    const { host, root } = mountHost();
+    const ref = React.createRef<NativeHandle>();
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref }));
+    });
+    const physical = host.querySelector<HTMLElement>('[data-pui-root]')!;
+    expect(physical.getAttribute('data-disabled')).toBe('');
+    expect(physical.getAttribute('data-constructor')).toBe('ready');
+    expect(physical.getAttribute('data-panel-mode')).toBe('idle');
+    expect(physical.getAttribute('data-panel-step-count')).toBe('2');
+    expect(physical.style.getPropertyValue('--pui-panel-step-count')).toBe('2');
+    expect(physical.style.getPropertyValue('--pui-panel-progress')).toBe('0.25');
+    expect(physical.hasAttribute('data-panel-progress')).toBe(false);
+    expect(physical.hasAttribute('data-flag')).toBe(false);
+    expect(physical.style.getPropertyValue('--pui-constructor')).toBe('');
+    const exposes = ref.current!.getExposes() as unknown as { advance(): void };
+    await React.act(async () => {
+      exposes.advance();
+    });
+    expect(physical.hasAttribute('data-disabled')).toBe(false);
+    expect(physical.getAttribute('data-constructor')).toBe('changed');
+    expect(physical.getAttribute('data-panel-mode')).toBe('busy');
+    expect(physical.getAttribute('data-panel-step-count')).toBe('3');
+    expect(physical.style.getPropertyValue('--pui-panel-step-count')).toBe('3');
+    expect(physical.style.getPropertyValue('--pui-panel-progress')).toBe('0.75');
+    expect(host.querySelector('output')?.textContent).toBe('unchanged');
   });
 
   it('runs setup/created exactly once through StrictMode replay and never starts an abandoned shell', async () => {

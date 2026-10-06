@@ -20,6 +20,7 @@ import {
 import { CompilerRejection } from './diagnostics';
 import { generatedSourcePath } from './emitter-map';
 import type { CompileResult, SourceSpan } from './ir';
+import type { ExposeStateWebMode } from './native-expose-state-web';
 
 export type { ExclusiveOutputFile } from './artifact-output';
 export interface FileCompileOptions {
@@ -27,6 +28,7 @@ export interface FileCompileOptions {
   exportName?: string;
   componentName?: string;
   profile?: string | TargetSelection;
+  exposeStateWebMode?: ExposeStateWebMode;
   nativeSdkPath?: string;
   /** Closed, already-read source input used by project compilation; no second filesystem read. */
   sourceSnapshot?: { entry: string; files: Readonly<Record<string, string>> };
@@ -58,6 +60,7 @@ export async function compileFile(
         exportName: options.exportName,
         componentName: options.componentName,
         profile: options.profile,
+        exposeStateWebMode: options.exposeStateWebMode,
         nativeSdkPath: options.nativeSdkPath,
       });
     }
@@ -91,6 +94,7 @@ export async function compileFile(
       exportName: options.exportName,
       componentName: options.componentName,
       profile: options.profile,
+      exposeStateWebMode: options.exposeStateWebMode,
       nativeSdkPath: options.nativeSdkPath,
     });
   } catch (error) {
