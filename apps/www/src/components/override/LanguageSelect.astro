@@ -58,7 +58,9 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
       data-size="sm"
       class="language-select min-w-24"
     >
-      <SelectValue data-placeholder="Select language" />
+      <SelectValue data-placeholder="Select language">
+        {localeOptions.find((option) => option.value === selectedLocale)?.label}
+      </SelectValue>
     </SelectTrigger>
     <SelectContent
       data-site-select-content
@@ -75,9 +77,30 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
       }
     </SelectContent>
   </SelectRoot>
+  <span class="language-select-fallback" data-site-select-fallback>
+    {
+      localeOptions
+        .filter((option) => !option.isCurrent)
+        .map((option) => (
+          <a href={option.path} hreflang={option.value}>
+            {option.label}
+          </a>
+        ))
+    }
+  </span>
 </div>
 
 <style>
+  .language-select-wrapper
+    [data-site-shadcn-initialized='1']:not([data-site-select-fallback-retained])
+    + .language-select-fallback {
+    display: none;
+  }
+
+  .language-select-wrapper [data-site-select-root][data-site-select-fallback-retained] {
+    display: none;
+  }
+
   .language-select-wrapper [data-site-select-root] {
     display: inline-flex;
   }

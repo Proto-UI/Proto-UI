@@ -62,6 +62,26 @@ export function initPreviewer(options: PreviewerOptions) {
   root.dataset.inited = '1';
 
   const host = root.querySelector('.host') as HTMLElement;
+  // The renderer owns host children, including clearing them before asynchronous
+  // preparation. Keep the initial status in its application shell until publish.
+  const startupStatus = host.querySelector<HTMLElement>('.proto-previewer__skeleton');
+  const startupShell = host.parentElement;
+  const hostWasInert = host.inert;
+  let startupPending = Boolean(startupStatus && startupShell);
+  if (startupStatus && startupShell) {
+    startupShell.insertBefore(startupStatus, host);
+    startupShell.setAttribute('data-previewer-startup-shell', '');
+    host.setAttribute('data-previewer-startup-pending', '');
+    host.inert = true;
+  }
+  const finishStartup = () => {
+    if (!startupPending) return;
+    startupPending = false;
+    startupStatus!.remove();
+    startupShell?.removeAttribute('data-previewer-startup-shell');
+    host.removeAttribute('data-previewer-startup-pending');
+    host.inert = hostWasInert;
+  };
   const selectRoot = root.querySelector<SiteSelectRoot>(
     '[data-adapter-select-root], wc-shadcn-select-root'
   );
@@ -257,6 +277,7 @@ export function initPreviewer(options: PreviewerOptions) {
         await result.destroy();
         return;
       }
+      finishStartup();
       currentDemo = { id, destroy: result.destroy };
       activeSurface = surface;
       const watchTheme = () =>
@@ -301,6 +322,7 @@ export function initPreviewer(options: PreviewerOptions) {
         '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
       pre.style.whiteSpace = 'pre-wrap';
       host.appendChild(pre);
+      finishStartup();
       console.error(err);
       dispatch('error', { error: err });
     } finally {
@@ -383,6 +405,7 @@ export function initPreviewer(options: PreviewerOptions) {
           await previous?.destroy();
         } finally {
           host.replaceChildren();
+          finishStartup();
         }
       })();
       return destroyPromise;

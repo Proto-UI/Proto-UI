@@ -52,7 +52,13 @@ const navigation = [
           </a>
         ))}
       </nav>
-      <div class="site-header-panel" id="site-header-panel" data-site-header-panel>
+      <details class="site-header-panel" id="site-header-panel" data-site-header-panel>
+        <summary
+          data-site-header-fallback-summary
+          aria-label={zh ? '导航与设置' : 'Navigation and settings'}
+        >
+          <span class="site-header-menu-icon" aria-hidden="true" />
+        </summary>
         <div data-site-header-surface-mount />
         <div data-site-header-panel-content>
           <div data-site-header-panel-body>
@@ -84,7 +90,7 @@ const navigation = [
             </div>
           </div>
         </div>
-      </div>
+      </details>
       <div class="site-header-context" data-site-header-context>
         <div class="site-header-runtime" data-site-header-preferences>
           <span class="site-header-runtime-label">{zh ? '预览 Runtime' : 'Preview runtime'}</span>

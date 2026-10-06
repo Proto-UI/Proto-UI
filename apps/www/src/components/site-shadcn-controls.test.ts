@@ -425,3 +425,95 @@ it('maps a legacy ghost alias to the existing public Brutalist surface variant',
   expect(tokens).toContain('shadow-[4px_4px_0_0_#000]');
   expect(button.style.width).toBe('2.75rem');
 });
+
+it.each(['react', 'vue', 'vue2'])(
+  'reads saved %s before the first Adapter Select props are projected',
+  async (saved) => {
+    registerSiteShadcnControls();
+    localStorage.setItem('preferred-prototypes-adapter', saved);
+    document.body.innerHTML = `<div><wc-shadcn-select-root data-site-select-root data-adapter-select-root data-site-initial-value="wc"><wc-shadcn-select-trigger><wc-shadcn-select-value>Runtime</wc-shadcn-select-value></wc-shadcn-select-trigger><wc-shadcn-select-content>${['wc', 'react', 'vue', 'vue2'].map((value) => `<wc-shadcn-select-item data-value="${value}" data-text-value="${value}">${value}</wc-shadcn-select-item>`).join('')}</wc-shadcn-select-content></wc-shadcn-select-root></div>`;
+    try {
+      initSiteShadcnControls(document);
+      await settle();
+      expect(
+        selectValue(document.querySelector<SiteSelectRoot>('[data-adapter-select-root]')!)
+      ).toBe(saved);
+    } finally {
+      localStorage.clear();
+      document.body.replaceChildren();
+    }
+  }
+);
+
+it.each(['shadcn', 'brutalist'] as const)(
+  '%s preserves a focused native locale destination until the reader leaves it',
+  async (family) => {
+    registerSiteShadcnControls();
+    const css = document.createElement('style');
+    const source = (await import('node:fs')).readFileSync(
+      'apps/www/src/components/override/LanguageSelect.astro',
+      'utf8'
+    );
+    css.textContent = source.match(/<style>([\s\S]*?)<\/style>/)![1]!;
+    document.head.append(css);
+    document.body.innerHTML = `<div class="language-select-wrapper"><wc-${family}-select-root data-site-select-root data-site-initial-value="zh-cn"><wc-${family}-select-trigger data-site-select-trigger><wc-${family}-select-value></wc-${family}-select-value></wc-${family}-select-trigger><wc-${family}-select-content><wc-${family}-select-item data-value="zh-cn" data-text-value="简体中文">简体中文</wc-${family}-select-item><wc-${family}-select-item data-value="en" data-text-value="English">English</wc-${family}-select-item></wc-${family}-select-content></wc-${family}-select-root><span class="language-select-fallback" data-site-select-fallback><a href="/en/">English</a></span></div><div data-slot></div><button data-outside>Outside</button>`;
+    const wrapper = document.querySelector<HTMLElement>('.language-select-wrapper')!;
+    const root = wrapper.querySelector<SiteSelectRoot>('[data-site-select-root]')!;
+    const fallback = wrapper.querySelector<HTMLElement>('[data-site-select-fallback]')!;
+    const link = fallback.querySelector<HTMLAnchorElement>('a')!;
+    try {
+      link.focus();
+      initSiteShadcnControls(document);
+      await settle();
+      expect(getComputedStyle(fallback).display).not.toBe('none');
+      expect(getComputedStyle(root).display).toBe('none');
+      expect(document.activeElement).toBe(link);
+      expect(root.nextElementSibling).toBe(fallback);
+      expect(link.getAttribute('href')).toBe('/en/');
+      const second = document.createElement('a');
+      second.href = '/zh-cn/';
+      second.textContent = 'Another native destination';
+      fallback.append(second);
+      second.focus();
+      await settle();
+      expect(root.dataset.siteSelectFallbackRetained).toBe('true');
+      expect(document.activeElement).toBe(second);
+      link.focus();
+      // Surface publication may produce transient focusout while moving the
+      // same native subtree; restoration in that publication retains the lease.
+      link.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+      document.querySelector('[data-slot]')!.append(wrapper);
+      link.focus();
+      await settle();
+      expect(getComputedStyle(fallback).display).not.toBe('none');
+      expect(document.activeElement).toBe(link);
+      expect(wrapper.querySelector('[data-site-select-root]')).toBe(root);
+      expect(root.nextElementSibling).toBe(fallback);
+      const outside = document.querySelector<HTMLButtonElement>('[data-outside]')!;
+      outside.focus();
+      await settle();
+      expect(getComputedStyle(fallback).display).toBe('none');
+      expect(getComputedStyle(root).display).not.toBe('none');
+      expect(document.activeElement).toBe(outside);
+      initSiteShadcnControls(document);
+      await settle();
+      expect(root.hasAttribute('data-site-select-fallback-retained')).toBe(false);
+      expect(selectValue(root)).toBe('zh-cn');
+    } finally {
+      css.remove();
+      document.body.replaceChildren();
+    }
+  }
+);
+
+it('does not retain an unfocused locale fallback or take focus from another owner', async () => {
+  registerSiteShadcnControls();
+  document.body.innerHTML = `<div><wc-shadcn-select-root data-site-select-root><wc-shadcn-select-trigger data-site-select-trigger></wc-shadcn-select-trigger></wc-shadcn-select-root><span data-site-select-fallback><a href="/en/">English</a></span></div><button data-outside>Outside</button>`;
+  const outside = document.querySelector<HTMLButtonElement>('[data-outside]')!;
+  outside.focus();
+  initSiteShadcnControls(document);
+  await settle();
+  expect(document.querySelector('[data-site-select-fallback-retained]')).toBeNull();
+  expect(document.activeElement).toBe(outside);
+  document.body.replaceChildren();
+});

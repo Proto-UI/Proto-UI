@@ -5,13 +5,14 @@ const fakes = vi.hoisted(() => ({
   restoreFocus: vi.fn(),
   stopTheme: vi.fn(),
   watchTheme: vi.fn(),
+  resolveTheme: vi.fn(),
 }));
 vi.mock('../PrototypePreviewer/projection-materializer', () => ({
   materializeProjectionCandidate: fakes.materialize,
   restoreProjectionControlFocus: fakes.restoreFocus,
 }));
 vi.mock('../PrototypePreviewer/projection-theme', () => ({
-  resolveProjectionThemeSurfaceStyle: () => ({ '--pui-background': '#fff' }),
+  resolveProjectionThemeSurfaceStyle: fakes.resolveTheme,
   watchProjectionThemeSurfaceStyle: fakes.watchTheme,
 }));
 import { createHomepageContent, initHomepageRuntime } from './homepage-runtime-client';
@@ -60,6 +61,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   fakes.materialize.mockReset().mockImplementation(async () => candidate());
   fakes.watchTheme.mockReturnValue(fakes.stopTheme);
+  fakes.resolveTheme.mockReset().mockReturnValue({ '--pui-background': '#fff' });
 });
 afterEach(async () => {
   await handle?.destroy();
@@ -663,4 +665,39 @@ describe('pending homepage runtime preference intent', () => {
       retired.resolve();
     }
   });
+});
+
+it('reads one page-owned theme before updating nested language/social candidates', async () => {
+  const root = fixture();
+  const language = document.createElement('div');
+  language.id = 'language';
+  language.dataset.homepageActions = '';
+  language.innerHTML =
+    '<div data-homepage-fallback><a href="/en/">English</a></div><div data-homepage-mount></div>';
+  const oldSurface = document.createElement('div');
+  oldSurface.style.setProperty('--pui-background', '#fff');
+  oldSurface.append(language);
+  root.append(oldSurface);
+  let dark = false;
+  // Model a retained projected shell's old, explicit theme. This test isolates
+  // coordinator ownership; the browser lane verifies actual CSS and paint.
+  fakes.resolveTheme.mockImplementation((_family, scope) => ({
+    '--pui-background': scope === language ? '#fff' : dark ? '#111' : '#fff',
+    '--pui-foreground': scope === language ? '#111' : dark ? '#fff' : '#111',
+  }));
+  handle = initHomepageRuntime(root);
+  await settle();
+  const candidates = await Promise.all(fakes.materialize.mock.results.map((r) => r.value));
+  const generation = handle!.getSnapshot().generation;
+  const shadcnWatch = fakes.watchTheme.mock.calls.find(([family]) => family === 'shadcn')!;
+  for (const next of [true, false, true]) {
+    dark = next;
+    shadcnWatch[2]();
+    for (const candidate of candidates)
+      expect(candidate.setThemeSurfaceStyle).toHaveBeenLastCalledWith({
+        '--pui-background': dark ? '#111' : '#fff',
+        '--pui-foreground': dark ? '#fff' : '#111',
+      });
+    expect(handle!.getSnapshot().generation).toBe(generation);
+  }
 });

@@ -167,14 +167,30 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
   >
     <div class="proto-previewer__preview" role="region" aria-live="polite">
       <div class="host">
-        <span class="proto-previewer__skeleton">{isZh ? '交互示例' : 'Interactive preview'}</span>
-        <noscript
-          >{
+        <div class="proto-previewer__skeleton" role="status">
+          <span class="proto-previewer__loading-title">
+            {isZh ? '正在加载交互示例…' : 'Loading interactive preview…'}
+          </span>
+          <span class="proto-previewer__loading-detail">
+            {
+              isZh
+                ? '正文和源码已可阅读，交互控件就绪后会显示在这里。'
+                : 'The article and source are ready to read. Interactive controls will appear here when ready.'
+            }
+          </span>
+        </div>
+        <noscript>
+          <style is:inline>
+            .proto-previewer__skeleton {
+              display: none !important;
+            }
+          </style>
+          {
             isZh
               ? '交互示例需要 JavaScript；正文和源码仍可阅读。'
               : 'Interactive previews require JavaScript; the article and source remain readable.'
-          }</noscript
-        >
+          }
+        </noscript>
       </div>
     </div>
   </div>
@@ -232,7 +248,7 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
     .proto-previewer__preview .host {
       min-width: 0;
       max-width: 100%;
-      min-height: 7rem;
+      min-height: var(--runtime-box-content-min, 10rem);
       width: 100%;
       display: flex;
       align-items: center;
@@ -292,6 +308,12 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
     }
 
     .proto-previewer__skeleton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--runtime-box-content-min, 10rem);
+      width: 100%;
+      color: var(--color-muted-foreground);
       font-size: 0.875rem;
       line-height: 1.5;
     }
@@ -302,7 +324,7 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
       }
 
       .proto-previewer__preview .host {
-        min-height: 7rem;
+        min-height: var(--runtime-box-content-min, 10rem);
       }
     }
   </style>

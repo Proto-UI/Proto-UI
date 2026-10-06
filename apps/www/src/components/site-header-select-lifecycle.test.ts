@@ -74,7 +74,11 @@ describe('Header keeps actual Select lifetime inside its visible owner', () => {
         expect(select.getExposes?.().open?.get?.()).toBe(true);
         const content = document.getElementById(trigger.getAttribute('aria-controls')!)!;
         expect(content).not.toBeNull();
-        window.dispatchEvent(new Event(event));
+        window.dispatchEvent(
+          event === 'pageshow'
+            ? Object.assign(new Event(event), { persisted: true })
+            : new Event(event)
+        );
         await settle();
         expect(select.getExposes?.().open?.get?.()).toBe(false);
         expect(trigger.getAttribute('aria-expanded')).toBe('false');

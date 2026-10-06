@@ -573,8 +573,79 @@ describe('compact navigation viewport and history', () => {
     window.dispatchEvent(new PopStateEvent('popstate'));
     expect(panel.hidden).toBe(true);
     disclosure!.toggle();
-    window.dispatchEvent(new Event('pageshow'));
+    window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
     expect(panel.hidden).toBe(true);
     expect(push).not.toHaveBeenCalled();
   });
 });
+
+it('adopts an open native fallback disclosure without closing its focused content', () => {
+  document.body.innerHTML = `<header data-site-header><details data-site-header-panel id="native-panel" open><summary data-site-header-fallback-summary>Navigation</summary><div data-site-header-settings><a href="/en/">English</a></div></details><button data-menu>Menu</button></header>`;
+  const root = document.querySelector<HTMLElement>('header')!;
+  const panel = root.querySelector<HTMLDetailsElement>('details')!;
+  const link = panel.querySelector('a')!;
+  const button = root.querySelector('button')!;
+  link.focus();
+  disclosure = initSiteHeaderDisclosure(root);
+  disclosure.bindButton(button);
+  disclosure.enhance();
+  expect(panel.open).toBe(true);
+  expect(panel.hidden).toBe(false);
+  expect(button.getAttribute('aria-expanded')).toBe('true');
+  expect(document.activeElement).toBe(link);
+  disclosure.close();
+  expect(panel.hidden).toBe(true);
+  disclosure.destroy();
+  expect(panel.hidden).toBe(false);
+  expect(panel.open).toBe(false);
+});
+
+it('transfers a focused native summary to the real menu button on enhancement', () => {
+  document.body.innerHTML = `<header data-site-header><details data-site-header-panel id="native-panel"><summary data-site-header-fallback-summary tabindex="0">Navigation</summary><div data-site-header-settings><a href="/en/">English</a></div></details><button data-menu>Menu</button></header>`;
+  const root = document.querySelector<HTMLElement>('header')!;
+  const summary = root.querySelector<HTMLElement>('summary')!;
+  const button = root.querySelector('button')!;
+  summary.focus();
+  disclosure = initSiteHeaderDisclosure(root);
+  disclosure.bindButton(button);
+  disclosure.enhance();
+  expect(document.activeElement).toBe(button);
+  expect(button.getAttribute('aria-expanded')).toBe('false');
+});
+
+it('keeps an adopted native menu open when initial pageshow follows delayed scripts', () => {
+  document.body.innerHTML = `<header data-site-header><details data-site-header-panel open><summary>Navigation</summary><div data-site-header-settings><a href="/en/">English</a></div></details><button data-menu>Menu</button></header>`;
+  const root = document.querySelector<HTMLElement>('header')!;
+  const link = root.querySelector<HTMLAnchorElement>('a')!;
+  disclosure = initSiteHeaderDisclosure(root);
+  disclosure.bindButton(root.querySelector<HTMLElement>('[data-menu]')!);
+  link.focus();
+  disclosure.enhance();
+  window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: false }));
+  expect(root.dataset.siteMenuOpen).toBe('true');
+  expect(document.activeElement).toBe(link);
+  window.dispatchEvent(Object.assign(new Event('pageshow'), { persisted: true }));
+  expect(root.dataset.siteMenuOpen).toBe('false');
+});
+
+it.each([true, false])(
+  'adopts the latest native state %s changed after binding but before enhancement',
+  (latestOpen) => {
+    document.body.innerHTML = `<header data-site-header><details data-site-header-panel><summary tabindex="0">Navigation</summary><div data-site-header-settings><a href="/en/">English</a></div></details><button data-menu>Menu</button></header>`;
+    const root = document.querySelector<HTMLElement>('header')!;
+    const panel = root.querySelector<HTMLDetailsElement>('details')!;
+    const summary = root.querySelector<HTMLElement>('summary')!;
+    const button = root.querySelector<HTMLElement>('[data-menu]')!;
+    disclosure = initSiteHeaderDisclosure(root);
+    disclosure.bindButton(button);
+    panel.open = true;
+    panel.open = latestOpen;
+    summary.focus();
+    expect(root.hasAttribute('data-site-menu-ready')).toBe(false);
+    disclosure.enhance();
+    expect(root.dataset.siteMenuOpen).toBe(String(latestOpen));
+    expect(document.activeElement).toBe(button);
+    disclosure.enhance();
+    expect(root.dataset.siteMenuOpen).toBe(String(latestOpen));
+  }
+);

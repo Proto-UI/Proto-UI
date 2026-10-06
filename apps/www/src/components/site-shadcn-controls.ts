@@ -1,3 +1,4 @@
+import { PREFERRED_ADAPTER_KEY } from './adapter-preference-key';
 import { bindSiteSelectDismissal } from './site-select-dismissal';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import brutalistButton from '@proto.ui/prototypes-brutalist/button';
@@ -232,7 +233,43 @@ function selectSurfaceStyle(element: HTMLElement, kind: 'root' | 'trigger' | 'va
   };
 }
 
+const nativeFallbackFocusLeases = new WeakMap<HTMLElement, () => void>();
+
+/** Finish a reader's already-focused native navigation before changing its
+ * activation semantics to a Select. The prepared Select stays out of layout
+ * and the accessibility tree until that native interaction actually ends. */
+function retainFocusedNativeSelectFallback(root: SiteSelectRoot): void {
+  const fallback = root.nextElementSibling;
+  const document = root.ownerDocument;
+  if (
+    !fallback?.matches('[data-site-select-fallback]') ||
+    !fallback.contains(document.activeElement)
+  ) {
+    nativeFallbackFocusLeases.get(root)?.();
+    return;
+  }
+  if (nativeFallbackFocusLeases.has(root)) return;
+  root.dataset.siteSelectFallbackRetained = 'true';
+  const release = () => {
+    fallback.removeEventListener('focusout', onFocusOut);
+    delete root.dataset.siteSelectFallbackRetained;
+    nativeFallbackFocusLeases.delete(root);
+  };
+  const onFocusOut = (event: Event) => {
+    const next = (event as FocusEvent).relatedTarget;
+    if (next instanceof Node && fallback.contains(next)) return;
+    // A Surface publication synchronously moves and restores the same native
+    // node. Observe the completed focus transaction, never guess with a timer.
+    queueMicrotask(() => {
+      if (!fallback.isConnected || !fallback.contains(document.activeElement)) release();
+    });
+  };
+  fallback.addEventListener('focusout', onFocusOut);
+  nativeFallbackFocusLeases.set(root, release);
+}
+
 function initializeSelect(root: SiteSelectRoot): void {
+  retainFocusedNativeSelectFallback(root);
   const family = root.localName.includes('brutalist') ? 'brutalist' : 'shadcn';
   root.dataset.siteControlFamily = family;
   const initialized = root.dataset.siteShadcnInitialized === '1';
@@ -245,7 +282,27 @@ function initializeSelect(root: SiteSelectRoot): void {
     // `data-value` is owned by the adapter's exposed-state projection, so it
     // is intentionally not used as an authoring input. Keep the SSR seed in a
     // separate data attribute that the runtime will not overwrite.
-    const value = root.dataset.siteInitialValue ?? '';
+    let value = root.dataset.siteInitialValue ?? '';
+    if (root.hasAttribute('data-adapter-select-root')) {
+      try {
+        const saved = root.ownerDocument.defaultView?.localStorage.getItem(PREFERRED_ADAPTER_KEY);
+        if (
+          saved &&
+          [
+            ...root.querySelectorAll(
+              'wc-shadcn-select-item[data-value], wc-brutalist-select-item[data-value]'
+            ),
+          ].some(
+            (item) =>
+              item.closest('[data-site-select-root]') === root &&
+              item.getAttribute('data-value') === saved
+          )
+        )
+          value = saved;
+      } catch {
+        /* A blocked preference store retains the declared default. */
+      }
+    }
     updateSelectProps(root, {
       value,
       disabled: root.dataset.disabled === 'true',

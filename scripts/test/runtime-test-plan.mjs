@@ -105,10 +105,19 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
 ]);
 
-// Built Pagefind evidence uses its dedicated production owner, never the dev server.
+// Production-specific evidence uses dedicated built-site owners, never the dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
 ]);
+
+// Each production-only suite has an executable owner; exclusion is never a skip.
+export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts':
+    'apps/www/scripts/run-search-production-evidence.mjs',
+  'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':
+    '.github/workflows/site-startup-theme-evidence.yml',
+});
 
 // Bound each CI worker to a deterministic share of the complete development inventory.
 // Sorted round-robin assignment is deterministic and never changes local coverage.
