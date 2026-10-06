@@ -159,9 +159,94 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         await open.click();
         const dialog = page.getByRole('dialog', { name: '确认这次选择？', exact: true });
         await dialog.waitFor({ state: 'visible' });
+        // Playwright visibility permits opacity:0. Wait for the real enter
+        // lifecycle and finite native animations before measuring a range or
+        // capturing it; a passing DOM Selection is not visual-readiness proof.
+        const dialogHandle = await dialog.elementHandle();
+        const mask = page.locator('[data-demo-ref="gallery-dialog-mask"]');
+        await expect.poll(() => mask.count()).toBe(1);
+        await mask.waitFor({ state: 'visible' });
+        const maskHandle = await mask.elementHandle();
+        if (!dialogHandle || !maskHandle)
+          throw new Error('Dialog content and mask must materialize');
+        const waitForEnteredDialog = async () => {
+          for (const handle of [dialogHandle, maskHandle]) {
+            await expect.poll(() => handle.getAttribute('data-transition-state')).toBe('entered');
+            await handle.evaluate(async (element) => {
+              await Promise.all(
+                element
+                  .getAnimations({ subtree: true })
+                  .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+                  .map((animation) => animation.finished.catch(() => {}))
+              );
+              await new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              );
+            });
+            await expect
+              .poll(() =>
+                handle.evaluate((element) => {
+                  for (
+                    let current: Element | null = element;
+                    current;
+                    current = current.parentElement
+                  ) {
+                    const style = getComputedStyle(current);
+                    if (
+                      style.display === 'none' ||
+                      style.visibility !== 'visible' ||
+                      Number(style.opacity) === 0
+                    )
+                      return false;
+                  }
+                  return element.isConnected && getComputedStyle(element).opacity === '1';
+                })
+              )
+              .toBe(true);
+          }
+          await expect
+            .poll(() =>
+              dialogHandle.evaluate((element) => {
+                const style = getComputedStyle(element);
+                const rect = element.getBoundingClientRect();
+                const top = document.elementFromPoint(
+                  rect.x + rect.width / 2,
+                  rect.y + rect.height / 2
+                );
+                return (
+                  element.isConnected &&
+                  style.opacity === '1' &&
+                  style.visibility === 'visible' &&
+                  rect.width > 0 &&
+                  rect.height > 0 &&
+                  (top === element || (!!top && element.contains(top)))
+                );
+              })
+            )
+            .toBe(true);
+        };
+        await waitForEnteredDialog();
         const description = dialog.getByText('这是一个可操作的对话框示例。', { exact: true });
         expect(await selectByDragging(description)).toContain('可操作的对话框');
+        await waitForEnteredDialog();
+        expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).toContain(
+          '可操作的对话框'
+        );
         if (evidenceDirectory) {
+          await writeFile(
+            path.join(evidenceDirectory, `selection-${runtime}-dialog-facts.json`),
+            JSON.stringify(
+              await dialog.evaluate((element) => ({
+                transition: element.getAttribute('data-transition-state'),
+                opacity: getComputedStyle(element).opacity,
+                visibility: getComputedStyle(element).visibility,
+                rect: element.getBoundingClientRect().toJSON(),
+                selection: window.getSelection()?.toString() ?? '',
+              })),
+              null,
+              2
+            )
+          );
           await page.screenshot({
             path: path.join(evidenceDirectory, `selection-${runtime}-dialog.png`),
           });
@@ -169,6 +254,13 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         await page.keyboard.press('Escape');
         await expect.poll(() => dialog.isVisible()).toBe(false);
       }
+    } catch (error) {
+      if (evidenceDirectory) {
+        await page
+          .screenshot({ path: path.join(evidenceDirectory, 'selection-readiness-failure.png') })
+          .catch(() => {});
+      }
+      throw error;
     } finally {
       await context.close();
     }
