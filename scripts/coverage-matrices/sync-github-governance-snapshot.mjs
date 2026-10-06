@@ -1,9 +1,20 @@
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { isDeepStrictEqual } from 'node:util';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { format as formatPrettier, resolveConfig as resolvePrettierConfig } from 'prettier';
+
+export const BODY_HASH_NORMALIZATION = 'sha256:utf8-crlf-to-lf-null-as-empty-v1';
+
+export function governanceBodyHash(body) {
+  if (body !== null && typeof body !== 'string')
+    throw new TypeError('GitHub body must be a string or null; missing body is not evidence');
+  return createHash('sha256')
+    .update((body ?? '').replace(/\r\n/gu, '\n'), 'utf8')
+    .digest('hex');
+}
 
 const REPOSITORY = 'Proto-UI/Proto-UI';
 const SNAPSHOT_PATH = 'internal/coverage-matrices/github-governance-snapshot.json';
@@ -130,17 +141,33 @@ export function reconcileGovernanceSnapshot({
     if (!live) throw new Error(`live pull request #${number} was not returned`);
     return live;
   });
-  return { schemaVersion: 1, repository: REPOSITORY, issues, pullRequests };
+  return {
+    schemaVersion: 1,
+    repository: REPOSITORY,
+    bodyHashNormalization: BODY_HASH_NORMALIZATION,
+    issues,
+    pullRequests,
+  };
 }
 
-// updatedAt is retained observation metadata. Comments or a non-governance body
-// clarification can change it without changing any of the governed facts below.
+// updatedAt is retained observation metadata. Comment activity changes it without
+// changing governed facts; every body change is tracked independently by its digest.
 // All other record/root fields remain part of equality; unknown fields fail closed.
 export function governanceFacts(snapshot) {
+  if (
+    snapshot.bodyHashNormalization !== undefined &&
+    snapshot.bodyHashNormalization !== BODY_HASH_NORMALIZATION
+  )
+    throw new Error('unsupported governance body hash normalization');
   const facts = (record) => {
     if (typeof record.updatedAt !== 'string' || Number.isNaN(Date.parse(record.updatedAt))) {
       throw new Error(`invalid observation timestamp for governance record #${record.number}`);
     }
+    if (
+      (snapshot.bodyHashNormalization !== undefined || Object.hasOwn(record, 'bodySha256')) &&
+      !/^[a-f0-9]{64}$/u.test(record.bodySha256 ?? '')
+    )
+      throw new Error(`invalid body digest for governance record #${record.number}`);
     const { updatedAt: _observedUpdate, ...governed } = record;
     return governed;
   };
@@ -152,7 +179,16 @@ export function governanceFacts(snapshot) {
 }
 
 export function hasGovernanceDrift(currentSnapshot, liveSnapshot) {
-  return !isDeepStrictEqual(governanceFacts(currentSnapshot), governanceFacts(liveSnapshot));
+  const current = governanceFacts(currentSnapshot);
+  const live = governanceFacts(liveSnapshot);
+  // Legacy snapshots never compared body bytes. Require one explicit factual
+  // refresh; do not silently certify an absent body baseline as unchanged.
+  if (
+    currentSnapshot.bodyHashNormalization === undefined ||
+    liveSnapshot.bodyHashNormalization === undefined
+  )
+    return true;
+  return !isDeepStrictEqual(current, live);
 }
 
 function githubJson(endpoint) {
@@ -183,6 +219,7 @@ export function normalizeLiveIssue(number, issue) {
     nodeId: issue.node_id,
     url: issue.html_url,
     title: issue.title,
+    bodySha256: governanceBodyHash(issue.body),
     state: issue.state.toUpperCase(),
     stateReason: issue.state_reason?.toUpperCase() ?? null,
     updatedAt: issue.updated_at,
@@ -196,18 +233,22 @@ function liveIssue(number) {
   return normalizeLiveIssue(number, githubJson(`repos/${REPOSITORY}/issues/${number}`));
 }
 
-function livePullRequest(number) {
-  const pullRequest = githubJson(`repos/${REPOSITORY}/pulls/${number}`);
+export function normalizeLivePullRequest(number, pullRequest) {
   return {
     number: pullRequest.number,
     nodeId: pullRequest.node_id,
     url: pullRequest.html_url,
     title: pullRequest.title,
+    bodySha256: governanceBodyHash(pullRequest.body),
     state: pullRequest.merged_at ? 'MERGED' : pullRequest.state.toUpperCase(),
     updatedAt: pullRequest.updated_at,
     headSha: pullRequest.head.sha,
     mergeCommit: pullRequest.merge_commit_sha,
   };
+}
+
+function livePullRequest(number) {
+  return normalizeLivePullRequest(number, githubJson(`repos/${REPOSITORY}/pulls/${number}`));
 }
 
 function isMainModule() {
