@@ -1,0 +1,147 @@
+{
+  "runId": 37481293926,
+  "subject": "public Proto UI Shadcn Scroll Area",
+  "evidenceDisposition": "partial; first head light/dark WC only; forced-color harness failure retained",
+  "candidate": "653113dae104faa7dc90c0f725acf20d92a9a838",
+  "baseline": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+  "artifacts": [
+    {
+      "id": 11421875712,
+      "sha256": "1f1cae32940fa4f49f65fec1210bc7a4e3af04919478c776cc716ba75d6b183f"
+    },
+    {
+      "id": 11420799934,
+      "sha256": "15f110ae19c32ccf271f1a8161016332b2d1154e8ac71980cb85dc430eb39de3"
+    }
+  ],
+  "files": [
+    {
+      "path": "baseline-shadcn-wc-end.png",
+      "sha256": "87c16b97ca54921023b2e6b89a805dcb9f1a8f88e4756e519c90ea8445d10903",
+      "bytes": 8058,
+      "capture": {
+        "sourceSha": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T14:46:10.286Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "light",
+        "harnessSha": "653113dae104faa7dc90c0f725acf20d92a9a838",
+        "mode": "baseline-capture-only",
+        "family": "shadcn",
+        "runtime": "wc",
+        "state": "end",
+        "facts": {
+          "viewport": {
+            "x": 511,
+            "y": 957.5,
+            "width": 318,
+            "height": 190
+          }
+        }
+      }
+    },
+    {
+      "path": "candidate-shadcn-wc-end.png",
+      "sha256": "5f6382b36ed82199fa5e504e4a8afbf004294c670d9b252a220d874c85907a4f",
+      "bytes": 8329,
+      "capture": {
+        "sourceSha": "653113dae104faa7dc90c0f725acf20d92a9a838",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T14:47:29.673Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "light",
+        "harnessSha": "653113dae104faa7dc90c0f725acf20d92a9a838",
+        "mode": "candidate-regression",
+        "family": "shadcn",
+        "runtime": "wc",
+        "state": "end",
+        "facts": {
+          "vertical": {
+            "x": 819,
+            "y": 957.5,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1137.5,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 957.5,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "lab(100 0 0)"
+          }
+        }
+      }
+    },
+    {
+      "path": "candidate-shadcn-wc-end-dark.png",
+      "sha256": "79292c6d4eaec36d99e4227e23adaacef65792c83d2ae8aa45a0e619786a65ac",
+      "bytes": 8212,
+      "capture": {
+        "sourceSha": "653113dae104faa7dc90c0f725acf20d92a9a838",
+        "browser": "154.0.8037.57",
+        "capturedAt": "2026-10-06T14:47:29.940Z",
+        "viewport": {
+          "width": 1100,
+          "height": 900
+        },
+        "colorScheme": "dark",
+        "harnessSha": "653113dae104faa7dc90c0f725acf20d92a9a838",
+        "mode": "candidate-regression",
+        "family": "shadcn",
+        "runtime": "wc",
+        "state": "end-dark",
+        "facts": {
+          "vertical": {
+            "x": 819,
+            "y": 957.5,
+            "width": 10,
+            "height": 180
+          },
+          "horizontal": {
+            "x": 511,
+            "y": 1137.5,
+            "width": 308,
+            "height": 10
+          },
+          "viewport": {
+            "x": 511,
+            "y": 957.5,
+            "width": 318,
+            "height": 190
+          },
+          "hit": {
+            "found": true,
+            "inRoot": true,
+            "isControl": false
+          },
+          "continuousCorner": {
+            "rootRadius": "8px",
+            "viewportRadius": "8px",
+            "background": "lab(2.75381 0 0)"
+          }
+        }
+      }
+    }
+  ]
+}
