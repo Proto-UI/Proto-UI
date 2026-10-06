@@ -1,0 +1,16 @@
+{
+  "transition": "entered",
+  "opacity": "1",
+  "visibility": "visible",
+  "rect": {
+    "x": 464,
+    "y": 428,
+    "width": 512,
+    "height": 144,
+    "top": 428,
+    "right": 976,
+    "bottom": 572,
+    "left": 464
+  },
+  "selection": "这是一个可操作的对话框示例。"
+}

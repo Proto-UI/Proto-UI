@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "subjectHead": "69c093ea6c4ac5fb478b828ec7e6d026788eed60",
+  "probeHead": "69c093ea6c4ac5fb478b828ec7e6d026788eed60",
+  "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+  "mergeCheckout": "0e482280a5321e99a0710597a188796173a13b3c",
+  "artifactId": 11437031363,
+  "artifactZipSha256": "72dd36c1852f7502b0d43a43807c73f276f2f998ac70cadfaccd525438734bf0",
+  "run": "https://github.com/Proto-UI/Proto-UI/actions/runs/37510368602",
+  "job": "https://github.com/Proto-UI/Proto-UI/actions/runs/37510368602/job/112437202129",
+  "browser": "Chromium through repository browser harness",
+  "captureDate": "2026-10-06",
+  "scope": "four-runtime text-selection journey; separate from Label, IME, assistive technology and GPUI completeness",
+  "retention": "evidence-only branch; do not merge into main; keep immutable image URLs for PR 868",
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "files": [
+    {
+      "file": "selection-react-action.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-react-action.png",
+      "runtime": "react",
+      "state": "action",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 369
+      },
+      "sha256": "06a54d486801c2bc71948c88d514e2053100611f1bc88661e312171d4c849908",
+      "gitBlobSha": "e20490d7dbd897352aded48775110779be44dc9f",
+      "bytes": 15091,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-react-content.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-react-content.png",
+      "runtime": "react",
+      "state": "content",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 369
+      },
+      "sha256": "bdad9692c3b1799ccfed52f79e60e40891e552bebd486bb58090c5d927e15a03",
+      "gitBlobSha": "082cb0414fc7bd678363525663e3f5efa0c6d57a",
+      "bytes": 15424,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-react-dialog.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-react-dialog.png",
+      "runtime": "react",
+      "state": "dialog",
+      "captureType": "page",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 1000
+      },
+      "sha256": "dbe98d035aec3e7c9171d70516973a41d32444f61e3ab561637dc1c8db877dd3",
+      "gitBlobSha": "b26475c1d8ff1af9e062dad78fcf6da7ab999ac4",
+      "bytes": 133356,
+      "originalPixels": true,
+      "factsFile": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-react-dialog-facts.json"
+    },
+    {
+      "file": "selection-vue-action.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue-action.png",
+      "runtime": "vue",
+      "state": "action",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 369
+      },
+      "sha256": "06a54d486801c2bc71948c88d514e2053100611f1bc88661e312171d4c849908",
+      "gitBlobSha": "e20490d7dbd897352aded48775110779be44dc9f",
+      "bytes": 15091,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-vue-content.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue-content.png",
+      "runtime": "vue",
+      "state": "content",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 369
+      },
+      "sha256": "bdad9692c3b1799ccfed52f79e60e40891e552bebd486bb58090c5d927e15a03",
+      "gitBlobSha": "082cb0414fc7bd678363525663e3f5efa0c6d57a",
+      "bytes": 15424,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-vue-dialog.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue-dialog.png",
+      "runtime": "vue",
+      "state": "dialog",
+      "captureType": "page",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 1000
+      },
+      "sha256": "fc702116ec49176b84896c075ed84799004552597297677c5633e35c012a0b7b",
+      "gitBlobSha": "573417062dd2698423e44ccc849ab08268eb623a",
+      "bytes": 133193,
+      "originalPixels": true,
+      "factsFile": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue-dialog-facts.json"
+    },
+    {
+      "file": "selection-vue2-action.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue2-action.png",
+      "runtime": "vue2",
+      "state": "action",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 369
+      },
+      "sha256": "06a54d486801c2bc71948c88d514e2053100611f1bc88661e312171d4c849908",
+      "gitBlobSha": "e20490d7dbd897352aded48775110779be44dc9f",
+      "bytes": 15091,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-vue2-content.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue2-content.png",
+      "runtime": "vue2",
+      "state": "content",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 369
+      },
+      "sha256": "bdad9692c3b1799ccfed52f79e60e40891e552bebd486bb58090c5d927e15a03",
+      "gitBlobSha": "082cb0414fc7bd678363525663e3f5efa0c6d57a",
+      "bytes": 15424,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-vue2-dialog.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue2-dialog.png",
+      "runtime": "vue2",
+      "state": "dialog",
+      "captureType": "page",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 1000
+      },
+      "sha256": "d664d8c9ebe538a29a8b211feab89adc30d493f6fd01b52e1e22ea6e7d82b881",
+      "gitBlobSha": "e1f6961038e20402a2b8bb65f7318fd6e79d5c8a",
+      "bytes": 133373,
+      "originalPixels": true,
+      "factsFile": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-vue2-dialog-facts.json"
+    },
+    {
+      "file": "selection-wc-action.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-wc-action.png",
+      "runtime": "wc",
+      "state": "action",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 359
+      },
+      "sha256": "f69afe1170acb424c158897341dc6243af4de2f2defdb4f8406d02be280a7d7a",
+      "gitBlobSha": "70058ac4544022fb1028de3c3fbd83eac73b6593",
+      "bytes": 15045,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-wc-content.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-wc-content.png",
+      "runtime": "wc",
+      "state": "content",
+      "captureType": "editor-card element",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 294,
+        "height": 359
+      },
+      "sha256": "6adb7ff4d9b574fd4afcb9f86c747900efef2921dacf9f8ccd36898d4eaf984e",
+      "gitBlobSha": "371176e13140eac9b7907bb6d84692d52c97023e",
+      "bytes": 15378,
+      "originalPixels": true
+    },
+    {
+      "file": "selection-wc-dialog.png",
+      "path": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-wc-dialog.png",
+      "runtime": "wc",
+      "state": "dialog",
+      "captureType": "page",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "imagePixels": {
+        "width": 1440,
+        "height": 1000
+      },
+      "sha256": "25061ba3e1190ba5df3533269a0a69e022c0fc3a31c7e6ceffce9ffb6dc2af9a",
+      "gitBlobSha": "bc65e30d7b29305987d6f15bcb152e118c549d02",
+      "bytes": 133377,
+      "originalPixels": true,
+      "factsFile": "evidence/pr-868-selection/69c093ea6c4ac5fb478b828ec7e6d026788eed60/selection-wc-dialog-facts.json"
+    }
+  ]
+}
