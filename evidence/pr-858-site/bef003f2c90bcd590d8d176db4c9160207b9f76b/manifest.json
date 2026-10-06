@@ -1,0 +1,204 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "subject": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+  "probe": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+  "browser": "154.0.8037.57",
+  "workflow_run": 37494130560,
+  "job": 112374164573,
+  "artifact": 11426583135,
+  "artifact_zip_sha256": "7a855f3aaeb610bb1b98fe323e99eaa3e41f1821b036877dd77e93c703a1f422",
+  "native_result": "22/22 passed",
+  "records": [
+    {
+      "id": "dialog-home-390-normal",
+      "revision": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "blur(4px)",
+        "background": "rgba(0, 0, 0, 0.5)",
+        "backgroundAlpha": 0.5019607843137255,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-normal.png",
+        "sha256": "8df270334908e5e21c68b42566ddcc2f40c54e365b644f1a31048274e5be2b25"
+      }
+    },
+    {
+      "id": "dialog-home-390-reduced-transparency",
+      "revision": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "none",
+        "background": "lab(100 0 0)",
+        "backgroundAlpha": 1,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": true,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-reduced-transparency.png",
+        "sha256": "4394de31dde5c9417624a54cc2fb3087437629ba4a0e1deb6bb065e1d47dff0d"
+      }
+    },
+    {
+      "id": "dialog-home-390-forced-colors",
+      "revision": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "none",
+        "background": "rgb(255, 255, 255)",
+        "backgroundAlpha": 1,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": true
+      },
+      "image": {
+        "file": "dialog-home-390-forced-colors.png",
+        "sha256": "a7de4b1182a8c05ab371c5fe7131b407e2577a4825857048fa80601006542522"
+      }
+    },
+    {
+      "id": "dialog-home-390-combined-preferences",
+      "revision": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "none",
+        "background": "rgb(255, 255, 255)",
+        "backgroundAlpha": 1,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": true,
+        "forcedColors": true
+      },
+      "image": {
+        "file": "dialog-home-390-combined-preferences.png",
+        "sha256": "a7de4b1182a8c05ab371c5fe7131b407e2577a4825857048fa80601006542522"
+      }
+    },
+    {
+      "id": "dialog-home-390-restored",
+      "revision": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "blur(4px)",
+        "background": "rgba(0, 0, 0, 0.5)",
+        "backgroundAlpha": 0.5019607843137255,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-restored.png",
+        "sha256": "90904d4e66c6c9b9bda84903a8124a8174f19aa592ede5106f6f7865b7f35d96"
+      }
+    }
+  ],
+  "limits": [
+    "Browser-emulated preferences and viewport; not physical-device capture.",
+    "Full repository CI is tracked separately.",
+    "No user-supplied private screenshot is included."
+  ]
+}
