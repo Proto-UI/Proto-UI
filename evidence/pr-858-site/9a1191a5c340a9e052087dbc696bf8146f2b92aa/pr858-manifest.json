@@ -1,0 +1,39 @@
+{
+  "sourceSha": "9a1191a5c340a9e052087dbc696bf8146f2b92aa",
+  "probeSha": "9a1191a5c340a9e052087dbc696bf8146f2b92aa",
+  "workflowRun": 37455595414,
+  "artifact": 11409549700,
+  "artifactSha256": "8dd63d70ed007374d14dd5a57d129bcc177919f2ff98c2934e03e984dd2a48fc",
+  "route": "/zh-cn/",
+  "runtime": "wc",
+  "scope": "Header native interaction lane; does not substitute for the production startup/theme/blur probe",
+  "files": [
+    {
+      "file": "shadcn-wc-light-family-390-runtime-rest.png",
+      "sha256": "492ad092de9e4462c5bde2f02b20b9298e8afd2fcd6a5ede985c4822ef795db4",
+      "dimensions": [
+        390,
+        1000
+      ],
+      "bytes": 40709
+    },
+    {
+      "file": "shadcn-wc-dark-family-390-theme-button-left-edge.png",
+      "sha256": "3bd4b017d5684e32afa101e6c290ea0849cfaa6b36fad5514174a5d82cb36ad8",
+      "dimensions": [
+        390,
+        1000
+      ],
+      "bytes": 40528
+    },
+    {
+      "file": "shadcn-wc-dark-family-1440-runtime-popup.png",
+      "sha256": "be3118a2af0bc3a94d8400fb7e23f380bbe9b2d7ac98c405ffec655254164c17",
+      "dimensions": [
+        1440,
+        1000
+      ],
+      "bytes": 125252
+    }
+  ]
+}
