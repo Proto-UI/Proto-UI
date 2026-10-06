@@ -31,6 +31,9 @@ afterAll(async () => {
       JSON.stringify(
         {
           sourceSha,
+          probeSha: process.env.PROTO_UI_DIALOG_PROBE_SHA ?? sourceSha,
+          subject: process.env.PROTO_UI_DIALOG_SUBJECT ?? 'candidate',
+          renderer: 'Astro dev server',
           browser: browser?.version(),
           conditions:
             'Real public Dialog. Viewport resizing and CDP page scale emulate available-space changes; not physical keyboard/notch evidence. Long text and 200% root font are explicit stress fixtures.',
@@ -77,6 +80,26 @@ async function facts(dialog: Locator) {
       },
       mask: m?.toJSON(),
       font: parseFloat(getComputedStyle(document.documentElement).fontSize),
+      rendering: {
+        dpr: devicePixelRatio,
+        fonts: document.fonts.status,
+        scheme: matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
+        rootClientWidth: document.documentElement.clientWidth,
+        rootClientLeft: document.documentElement.clientLeft,
+      },
+      paint: {
+        fontFamily: s.fontFamily,
+        fontSize: s.fontSize,
+        fontWeight: s.fontWeight,
+        lineHeight: s.lineHeight,
+        transitionProperty: s.transitionProperty,
+        transitionDuration: s.transitionDuration,
+      },
+      animations: e.getAnimations().map((a) => ({
+        playState: a.playState,
+        pending: a.pending,
+        property: 'transitionProperty' in a ? a.transitionProperty : null,
+      })),
       overflowY: s.overflowY,
       scrollHeight: e.scrollHeight,
       clientHeight: e.clientHeight,
@@ -91,14 +114,48 @@ async function facts(dialog: Locator) {
     };
   });
 }
+async function renderedDialogFonts(page: Page, dialog: Locator) {
+  const id = await dialog.getAttribute('id');
+  if (!id) return { status: 'missing-id', fonts: [] };
+  const cdp = await page.context().newCDPSession(page);
+  try {
+    await cdp.send('DOM.enable');
+    await cdp.send('CSS.enable');
+    await cdp.send('DOM.getDocument');
+    const selector = `[id=${JSON.stringify(id)}]`;
+    const expression = `(()=>{const root=document.querySelector(${JSON.stringify(selector)});if(!root)return null;const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);for(let node=walker.nextNode();node;node=walker.nextNode()){if(node.textContent.trim())return node.parentElement;}return null;})()`;
+    const { result } = await cdp.send('Runtime.evaluate', {
+      expression,
+      objectGroup: 'dialog-font-evidence',
+    });
+    if (!result.objectId) return { status: 'no-text', fonts: [] };
+    const { nodeId } = await cdp.send('DOM.requestNode', { objectId: result.objectId });
+    const { fonts } = await cdp.send('CSS.getPlatformFontsForNode', { nodeId });
+    return { status: fonts.some((f) => f.glyphCount > 0) ? 'measured' : 'no-glyphs', fonts };
+  } finally {
+    await cdp.send('Runtime.releaseObjectGroup', { objectGroup: 'dialog-font-evidence' });
+    await cdp.detach();
+  }
+}
 async function capture(page: Page, dialog: Locator, id: string) {
   const data = await facts(dialog);
+  const platformFonts = id.endsWith('-390-settled')
+    ? await renderedDialogFonts(page, dialog)
+    : undefined;
   let image;
   if (output) {
     const bytes = await page.screenshot({ path: path.join(output, `${id}.png`) });
     image = { file: `${id}.png`, sha256: createHash('sha256').update(bytes).digest('hex') };
   }
-  observations.push({ id, sourceSha, viewport: page.viewportSize(), data, image });
+  observations.push({
+    id,
+    sourceSha,
+    route: new URL(page.url()).pathname,
+    viewport: page.viewportSize(),
+    data,
+    platformFonts,
+    image,
+  });
   return data;
 }
 async function settle(dialog: Locator) {
@@ -133,19 +190,46 @@ for (const family of ['shadcn', 'brutalist'] as const)
         height: 900,
       });
       try {
+        await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
+        await page.evaluate(() => document.fonts.ready);
+        // Choose the runtime only after its current generation is published.
+        // A visible SSR preview shell alone does not establish an interactive Select.
+        await page.waitForFunction(
+          () => {
+            const root = document.querySelector<HTMLElement>('[data-previewer-id]');
+            const scope = root?.querySelector<HTMLElement>('[data-projection-scope]');
+            return root?.dataset.projectionMode === 'fixed-family'
+              ? scope?.dataset.projectionState === 'ready'
+              : !!root?.querySelector('.host [aria-haspopup="dialog"]');
+          },
+          undefined,
+          { timeout: 30_000 }
+        );
         await selectRuntime(page, previewer, runtime, '[aria-haspopup="dialog"]', 1);
         const trigger = page.locator('[data-previewer-id] [aria-haspopup="dialog"]').first();
         await trigger.click();
         const dialog = page.getByRole('dialog').last();
         await dialog.waitFor({ state: 'visible' });
         await capture(page, dialog, `${family}-${runtime}-390-immediate`);
+        await page.evaluate(() => document.fonts.ready);
         await settle(dialog);
         await frames(page);
         const identity = await dialog.elementHandle();
         for (const width of [390, 430, 320, 1024]) {
           await page.setViewportSize({ width, height: 900 });
           await frames(page);
+          const immediate = await capture(
+            page,
+            dialog,
+            `${family}-${runtime}-${width}-resize-immediate`
+          );
+          // Record both phases before asserting, so historical failures retain
+          // a genuinely settled reference without suppressing the early check.
+          await settle(dialog);
+          await frames(page);
           const data = await capture(page, dialog, `${family}-${runtime}-${width}-settled`);
+          bounded(immediate);
+          expect(immediate.paint.transitionProperty).not.toBe('all');
           bounded(data);
           expect(data.mask?.x).toBe(0);
           expect(data.mask?.y).toBe(0);
@@ -211,6 +295,36 @@ for (const family of ['shadcn', 'brutalist'] as const)
         bounded(await capture(page, dialog, `${family}-${runtime}-reopened`));
         await page.keyboard.press('Escape');
         await dialog.waitFor({ state: 'hidden' });
+      } catch (error) {
+        const id = `${family}-${runtime}-failure`;
+        const setup = await page.evaluate(() => ({
+          url: location.pathname,
+          controls: Array.from(document.querySelectorAll('[role="combobox"]')).map((e) => ({
+            id: e.id,
+            text: e.textContent,
+            controls: e.getAttribute('aria-controls'),
+            expanded: e.getAttribute('aria-expanded'),
+          })),
+          options: Array.from(document.querySelectorAll('[role="option"]')).map((e) => ({
+            text: e.textContent,
+            id: e.id,
+            visible: (e as HTMLElement).getBoundingClientRect().height > 0,
+          })),
+          runtimeScopes: Array.from(document.querySelectorAll('[data-projection-scope]')).map(
+            (e) => ({
+              state: e.getAttribute('data-projection-state'),
+              runtime: e.getAttribute('data-projection-runtime'),
+              generation: e.getAttribute('data-projection-generation'),
+            })
+          ),
+        }));
+        let image;
+        if (output) {
+          const bytes = await page.screenshot({ path: path.join(output, `${id}.png`) });
+          image = { file: `${id}.png`, sha256: createHash('sha256').update(bytes).digest('hex') };
+        }
+        observations.push({ id, sourceSha, error: String(error), setup, image });
+        throw error;
       } finally {
         await context.close();
       }

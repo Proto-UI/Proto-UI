@@ -26,3 +26,4 @@ export * from './text-control';
 export * from './caps';
 export * from './image-view';
 export * from './control-label';
+export * from './material';

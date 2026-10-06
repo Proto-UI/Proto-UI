@@ -84,7 +84,7 @@ function fixture() {
     kind: 'control-label.view' as const,
     sessionId: 'label',
     viewEpoch: epoch,
-    leaseId,
+    leaseId: owner.plan()?.leaseId ?? leaseId,
     revision,
     view: { identity, scope: tree, authoredName: false },
   });
@@ -92,7 +92,7 @@ function fixture() {
     kind: 'control-label.activate' as const,
     sessionId: 'label',
     viewEpoch: epoch,
-    leaseId,
+    leaseId: owner.plan()?.leaseId ?? leaseId,
     viewRevision: revision,
     sequence: 1,
     source: 'pointer' as const,
@@ -173,6 +173,22 @@ describe('GPUI native view lease', () => {
     f.owner.view(f.view(2));
     expect(f.owner.activate(f.activate())).toBe(false);
     expect(f.owner.activate(f.activate(2))).toBe(true);
+    expect(f.onActivate).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects a previously unseen higher-revision view/action from the retired action policy', () => {
+    const f = fixture();
+    f.owner.view(f.view(1));
+    const delayedView = f.view(2);
+    const delayedAction = f.activate(2);
+    f.lease.setActivation(false);
+    f.lease.setActivation(true);
+    expect(f.owner.plan()!.leaseId).not.toBe(delayedView.leaseId);
+    expect(f.owner.view(delayedView)).toBe(false);
+    expect(f.owner.activate(delayedAction)).toBe(false);
+    expect(f.onActivate).not.toHaveBeenCalled();
+    expect(f.owner.view(f.view(3))).toBe(true);
+    expect(f.owner.activate(f.activate(3))).toBe(true);
     expect(f.onActivate).toHaveBeenCalledTimes(1);
   });
 

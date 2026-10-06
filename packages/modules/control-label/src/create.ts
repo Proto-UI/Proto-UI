@@ -161,48 +161,63 @@ class ControlLabelModuleImpl extends ModuleBase {
       return;
     }
     const generation = ++this.generation;
-    const host = this.caps.get(CONTROL_LABEL_HOST_CAP).attach({
-      kind: this.kind,
-      activation: this.kind === 'label' && this.options.activation,
-      onActivate: (source) => {
-        if (generation === this.generation && !this.disposed)
-          this.binding?.requestActivation(source);
-      },
-      onViewChange: () => {
-        if (generation === this.generation && !this.disposed) this.binding?.refresh();
-      },
-    });
-    if (generation !== this.generation || this.disposed) {
-      host.dispose();
-      return;
-    }
-    this.host = host;
-    const binding = bindControlLabel({
-      owner: this.owner,
-      kind: this.kind,
-      ref: this.ref,
-      semanticRef: this.a11y.getObjectRef(),
-      view: () =>
-        generation === this.generation && this.present && !this.disposed ? host.view() : null,
-      options: () => this.options,
-      name: (label) => this.a11y.claimControlLabelName(label),
-      activate: (isCurrent, source) => {
-        if (!isCurrent() || !this.activate) return;
-        if (!this.caps.has(CONTROL_LABEL_RUN_IN_CALLBACK_CAP)) {
-          this.setDiagnostic('unsupported-callback-scope');
-          return;
+    try {
+      const host = this.caps.get(CONTROL_LABEL_HOST_CAP).attach({
+        kind: this.kind,
+        activation: this.kind === 'label' && this.options.activation,
+        onActivate: (source) => {
+          if (generation === this.generation && !this.disposed)
+            this.binding?.requestActivation(source);
+        },
+        onViewChange: () => {
+          if (generation === this.generation && !this.disposed) this.binding?.refresh();
+        },
+      });
+      if (generation !== this.generation || this.disposed) {
+        host.dispose();
+        return;
+      }
+      this.host = host;
+      const binding = bindControlLabel({
+        owner: this.owner,
+        kind: this.kind,
+        ref: this.ref,
+        semanticRef: this.a11y.getObjectRef(),
+        view: () =>
+          generation === this.generation && this.present && !this.disposed ? host.view() : null,
+        options: () => this.options,
+        name: (label) => this.a11y.claimControlLabelName(label),
+        activate: (isCurrent, source) => {
+          if (!isCurrent() || !this.activate) return;
+          if (!this.caps.has(CONTROL_LABEL_RUN_IN_CALLBACK_CAP)) {
+            this.setDiagnostic('unsupported-callback-scope');
+            return;
+          }
+          this.caps.get(CONTROL_LABEL_RUN_IN_CALLBACK_CAP)(() => {
+            if (!isCurrent() || generation !== this.generation || !this.activate) return;
+            const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
+            if (!run) throw new Error('[ControlLabel] host failed to enter target callback scope');
+            this.activate(run, { isCurrent, source });
+          });
+        },
+        diagnostic: (code) => this.setDiagnostic(code),
+      });
+      if (generation !== this.generation || this.disposed) binding.dispose();
+      else this.binding = binding;
+    } catch (error) {
+      // Acquisition may have installed a host before naming failed. Withdraw
+      // only this attempt, and clear intent before cleanup can install a newer
+      // association. A failed reference is then eligible for an explicit retry.
+      if (generation === this.generation && !this.disposed) {
+        this.ref = null;
+        try {
+          this.release();
+        } catch {
+          // Preserve the acquisition error, even if its cleanup also failed.
         }
-        this.caps.get(CONTROL_LABEL_RUN_IN_CALLBACK_CAP)(() => {
-          if (!isCurrent() || generation !== this.generation || !this.activate) return;
-          const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
-          if (!run) throw new Error('[ControlLabel] host failed to enter target callback scope');
-          this.activate(run, { isCurrent, source });
-        });
-      },
-      diagnostic: (code) => this.setDiagnostic(code),
-    });
-    if (generation !== this.generation || this.disposed) binding.dispose();
-    else this.binding = binding;
+      }
+      throw error;
+    }
   }
 }
 export function createControlLabelModule(ctx: ModuleFactoryArgs) {

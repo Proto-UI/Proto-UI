@@ -1,0 +1,66 @@
+id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+type: contract
+title: Rule contributes complete typed material candidates through Feedback
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The shared typed contribution path has bounded Runtime tests. Actual provider paint, all Adapter profiles and full Compiler realization still block stable admission.
+  zh-CN: 共享 typed contribution 已有有界 Runtime 测试；真实 provider paint、全部 Adapter profile 与完整 Compiler 实现仍阻塞稳定接纳。
+summary: Material is a separate finite Rule channel; whole candidates and final style are replaced together without implicit precedence or input ownership.
+statement:
+  en: Setup declares one material slot through Feedback and may contribute static whole candidates. Rule material.use contributes a validated complete candidate while its condition is active. The evaluator retains every candidate and jointly replaces the Rule style and material contribution before one visual flush. Neither declaration order, CSS lowering nor reentrant invalidation may merge, drop or duplicate candidates.
+  zh-CN: Setup 经 Feedback 声明单一 material slot，可贡献静态整值 candidate。Rule material.use 在条件激活时贡献经校验的完整 candidate。evaluator 保留所有 candidate，并在一次视觉 flush 前共同替换 Rule style/material contribution。声明顺序、CSS lowering 或重入 invalidation 均不得合并、丢失或重复 candidate。
+criteria:
+  - id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001-SURFACE
+    text:
+      en: def.feedback.material.declare and use, including their returned disposers, are setup-only. One live slot is permitted per instance. Static intent requires no button, exposed state name or backend model. Private version 1 and shared version 2 declarations cannot own the same slot.
+      zh-CN: def.feedback.material.declare/use 及其 disposer 均为 setup-only；每实例只允许一个 live slot。静态意图不要求 Button、exposed state 名或后端 model；私有 v1 与共享 v2 不得同时拥有同一 slot。
+  - id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001-WHOLE
+    text:
+      en: Validate immutable whole candidates even in inactive Rules. Active contributions preserve cardinality, including identical duplicates. Zero candidates retain the slot and fallback; a tombstone removes the slot. A material-only Rule with no style tokens still executes.
+      zh-CN: inactive Rule 的整值 candidate 也必须校验并冻结；active contribution 保留基数，包括相同重复项。零候选保留 slot/fallback；tombstone 移除 slot。没有 style token 的 material-only Rule 仍须执行。
+  - id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001-REPLACE
+    text:
+      en: Replace one Rule owner's style and material together before projecting. Reentrant reevaluation waits for the current contribution ownership transfer; a retired disposer cannot remove a newer owner or leave an obsolete candidate behind. Detached views receive no host writes, remount replays the current instance intent, and terminal cleanup cannot resurrect it.
+      zh-CN: 一个 Rule owner 的 style/material 在 projection 前共同替换。重入 reevaluation 须等待当前 contribution ownership 转移；退役 disposer 不得移除新 owner 或遗留旧候选。detached view 不写宿主，remount 重放当前实例意图，terminal cleanup 后不得复活。
+  - id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001-LOWERING
+    text:
+      en: Material-bearing Rules remain evaluator-owned rather than being filtered by style-only optimization. Until complete geometry and paint provenance is available, an instance with a shared material slot retains its style Rules too. Compiler front-end lowering preserves the same portable values and explicit tombstones; it cannot claim backend generation or paint from that IR alone.
+      zh-CN: 含 material 的 Rule 保留在 evaluator，不得被 style-only 优化过滤。完整 geometry/paint provenance 未实现前，声明共享 material slot 的实例也保留其 style Rule。Compiler 前端保留相同portable值及显式tombstone，仅有IR不代表backend生成或paint。
+dependsOn:
+  contracts:
+    - C-FEEDBACK-MATERIAL-0001
+    - C-VISUAL-TRANSACTION-0001
+    - C-RULE-INTENT-0001
+relates:
+  modules:
+    - M-FEEDBACK-0001
+  hostCaps:
+    - HC-FEEDBACK-VISUAL-SINK-0001
+references:
+  tests:
+    - T-MATERIAL-VISUAL-RESULT-0001
+sources:
+  - path: packages/core/src/handles.ts
+  - path: packages/modules/feedback/src/create.ts
+  - path: packages/modules/rule/src/intent-builder.ts
+  - path: packages/modules/rule/src/eval.ts
+  - path: packages/modules/rule/src/impl.ts
+  - path: packages/modules/rule-expose-state-web/src/create.ts
+  - path: packages/runtime/src/kernel/handles/def.ts
+  - path: experiments/material-specializer/shared-intent.mjs
+openQuestions:
+  - id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001-Q-HOST
+    question: Which actual Adapter and Compiler backend proves complete source-bound paint from the shared contribution path?
+    blocks:
+      - activation:C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+      - implementation:T-MATERIAL-VISUAL-RESULT-0001#material-host-atomic-integration
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined shared finite material contribution ownership without claiming provider or full Compiler support.
+tags:
+  - feedback
+  - material
+  - rule
+  - draft

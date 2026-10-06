@@ -1,0 +1,55 @@
+---
+title: 'Collapsible'
+description: 'Neobrutalist Collapsible: Root, Trigger, Content and inherited Base disclosure semantics.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Neobrutalist Collapsible 包含 Root、Trigger、Content 三个真实 Proto UI 原型，各自消费对应的 Base Collapsible hook。Root 仍是唯一展开状态 owner；本体系只增加表现。当前为独立维护的 draft 设计投影。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## 体验协议
+
+Demo 在四种 Web Adapter 中使用真实库原型。第一个 disclosure 初始关闭并 detach Content view；第二个初始打开，关闭后保留隐藏 view；第三个禁用但保持展开；第四个收到请求后仍然关闭，直到激活 **Accept**。这个接受按钮是独立的应用操作，不是 Trigger 内的第二个交互 owner。
+
+## 三个 part，一个状态 owner
+
+- Root：`open?`、`defaultOpen?`、`disabled?`；公开 `open`、请求方法 `openCollapsible`、`close`、`toggle` 和携带 `{ open, reason }` 的 `openChange`。
+- Trigger：`disabled?`；继承 expanded、effective disabled、hover、press、focused、focus-visible、button accessibility、自然 Tab 顺序、Enter/Space 激活与受保护的 `focusSelf`。
+- Content：`keepMounted?`；继承派生 `open`/`hidden`、role-neutral content 与 L1 view presence。关闭不销毁逻辑实例；不承诺 detached native child/view state 保留。
+
+Root 的自身 anatomy domain 必须恰有一个 Trigger 和一个 Content。嵌套与相邻 disclosure 独立持有状态。受控请求只有在 owner 提供新 `open` 后才改变 canonical expansion；忽略请求就保持原状。disabled 抑制请求，但不会关闭已经展开的内容。此处没有 heading 前置条件、Accordion selection、方向键导航、region landmark、自动 focus movement 或 Overlay。
+
+## 表现与窄屏
+
+原型使用有界宽度、可收缩布局、长词换行、可缩放内边距，不设固定内容高度。focus 与 disabled 外观消费 Base state。外围需保留 focus ring 的空间；Neobrutalist 还需容纳硬阴影及移动后的 pointer envelope。Demo 包含长标签与连续长词，browser acceptance 覆盖 320px、200% 根文字尺寸与明暗主题。源码或 synthetic DOM 通过不代表这些实际绘制与原生输入已通过。
+
+固定版本的参考项目导出的是 unstyled Collapsible primitives。此处的安全间距及控制/内容表面是 Proto UI 明确增加的设计语言默认值，不宣称参考源码已有这些样式。行为由 Base 提供，参考项目的 React primitive 不是实现依赖。
+
+## 使用
+
+当前源码为 `react`、`vue`、`vue2`、`wc` 提供 `brutalist-collapsible` CLI facade；新增源码入口不代表某个已发布版本已经具备它。
+
+```ts
+import {
+  collapsibleRoot,
+  collapsibleTrigger,
+  collapsibleContent,
+} from '@proto.ui/prototypes-brutalist/collapsible';
+```
+
+适配导出的原型时保留三 part composition。[Base 协议](/zh-cn/ui-libraries/base/collapsible/) 说明共享请求与生命周期保证。
+
+## 证据与参考
+
+四 Adapter synthetic DOM 与 compiler mappings，和已注册 browser journeys、截图、GPUI native execution、独立稳定准入是分开的证据。未执行的宿主证据仍是验收缺口。
+
+- [实现源码](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/collapsible)
+- [neobrutalism-components reference](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/collapsible.tsx)
+- [可执行证据映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)

@@ -1,7 +1,51 @@
 import type { ControlLabelHost } from './caps';
 
+// Native interactive content plus authored editing/focus intent. Conditional
+// media stay passive without controls; readonly/disabled controls still own
+// their input and must not activate an unrelated associated target.
 const INTERACTIVE =
-  'a[href],button,input,textarea,select,summary,[contenteditable]:not([contenteditable="false"]),[role="button"],[role="link"],[role="checkbox"],[role="switch"],[role="radio"],[role="textbox"],[role="combobox"],[role="menuitem"],[role="tab"],[tabindex]:not([tabindex="-1"])';
+  'a[href],area[href],button,input:not([type="hidden" i]),textarea,select,summary,details,embed,iframe,label,audio[controls],video[controls],img[usemap],img[controls],[contenteditable]:not([contenteditable="false"]),[tabindex]:not([tabindex="-1"])';
+// ARIA's widget category also contains passive progressbar and tabpanel roles.
+// Only input/action/selection widgets belong here; an ordinary meter, separator
+// or content container is not turned into an interaction boundary by its role.
+const INTERACTIVE_ROLES = new Set([
+  'button',
+  'checkbox',
+  'combobox',
+  'grid',
+  'gridcell',
+  'link',
+  'listbox',
+  'menu',
+  'menubar',
+  'menuitem',
+  'menuitemcheckbox',
+  'menuitemradio',
+  'option',
+  'radio',
+  'radiogroup',
+  'scrollbar',
+  'searchbox',
+  'slider',
+  'spinbutton',
+  'switch',
+  'tab',
+  'tablist',
+  'textbox',
+  'tree',
+  'treegrid',
+  'treeitem',
+]);
+function isInteractive(element: Element): boolean {
+  return (
+    element.matches(INTERACTIVE) ||
+    (element
+      .getAttribute('role')
+      ?.split(/\s+/)
+      .some((role) => INTERACTIVE_ROLES.has(role)) ??
+      false)
+  );
+}
 type ScopeMember = { anchor: Node; notify(): void };
 type ScopeObserver = { observer: MutationObserver; members: Set<ScopeMember> };
 const observers = new WeakMap<Node, ScopeObserver>();
@@ -136,7 +180,7 @@ export function createWebControlLabelHost(
           const eligible = (event: Event) => {
             for (const node of event.composedPath()) {
               if (node === next) return true;
-              if (node instanceof document.defaultView!.Element && node.matches(INTERACTIVE))
+              if (node instanceof document.defaultView!.Element && isInteractive(node))
                 return false;
             }
             return false;

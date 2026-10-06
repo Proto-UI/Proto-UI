@@ -14,6 +14,8 @@ export const SHARED_BASE_FAMILY_IDS = [
 export type SharedBaseFamilyId = (typeof SHARED_BASE_FAMILY_IDS)[number];
 export type ProjectionComponentId =
   | SharedBaseFamilyId
+  | 'collapsible'
+  | 'accordion'
   | 'label'
   | 'checkbox'
   | 'input'
@@ -53,6 +55,8 @@ export type ProjectionFamilyManifest = Readonly<{
 export type ProjectionFamilyManifestRegistry = Readonly<Record<string, ProjectionFamilyManifest>>;
 
 const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[]>> = {
+  collapsible: ['root', 'trigger', 'content'],
+  accordion: ['root', 'item', 'heading', 'trigger', 'content'],
   label: ['root'],
   button: ['root'],
   toggle: ['root'],
@@ -91,6 +95,57 @@ const SHADCN_MANIFEST = {
   themeArtifactId: 'website-shadcn-theme',
   themeInputId: 'website-root-computed-pui-theme',
   families: {
+    accordion: {
+      baseFamilyId: 'P-BASE-ACCORDION',
+      recipeId: 'demo-shadcn-accordion',
+      recipePrototypeIds: [
+        'shadcn-accordion-root',
+        'shadcn-accordion-item',
+        'shadcn-accordion-heading',
+        'shadcn-accordion-trigger',
+        'shadcn-accordion-content',
+        'shadcn-button',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-ACCORDION', prototypeId: 'shadcn-accordion-root' },
+        item: { basePrototypeId: 'P-BASE-ACCORDION-ITEM', prototypeId: 'shadcn-accordion-item' },
+        heading: {
+          basePrototypeId: 'P-BASE-ACCORDION-HEADING',
+          prototypeId: 'shadcn-accordion-heading',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-ACCORDION-TRIGGER',
+          prototypeId: 'shadcn-accordion-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-ACCORDION-CONTENT',
+          prototypeId: 'shadcn-accordion-content',
+        },
+      },
+    },
+    collapsible: {
+      baseFamilyId: 'P-BASE-COLLAPSIBLE',
+      recipeId: 'demo-shadcn-collapsible',
+      recipePrototypeIds: [
+        'shadcn-collapsible-root',
+        'shadcn-collapsible-trigger',
+        'shadcn-collapsible-content',
+        'shadcn-button',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-COLLAPSIBLE', prototypeId: 'shadcn-collapsible-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-TRIGGER',
+          prototypeId: 'shadcn-collapsible-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-CONTENT',
+          prototypeId: 'shadcn-collapsible-content',
+        },
+      },
+    },
     label: {
       baseFamilyId: 'P-BASE-LABEL',
       recipeId: 'demo-shadcn-label',
@@ -375,6 +430,57 @@ const BRUTALIST_MANIFEST = {
   themeArtifactId: 'prototype-brutalist-theme',
   themeInputId: 'website-brutalist-theme-mode',
   families: {
+    accordion: {
+      baseFamilyId: 'P-BASE-ACCORDION',
+      recipeId: 'demo-brutalist-accordion',
+      recipePrototypeIds: [
+        'brutalist-accordion-root',
+        'brutalist-accordion-item',
+        'brutalist-accordion-heading',
+        'brutalist-accordion-trigger',
+        'brutalist-accordion-content',
+        'brutalist-button',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-ACCORDION', prototypeId: 'brutalist-accordion-root' },
+        item: { basePrototypeId: 'P-BASE-ACCORDION-ITEM', prototypeId: 'brutalist-accordion-item' },
+        heading: {
+          basePrototypeId: 'P-BASE-ACCORDION-HEADING',
+          prototypeId: 'brutalist-accordion-heading',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-ACCORDION-TRIGGER',
+          prototypeId: 'brutalist-accordion-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-ACCORDION-CONTENT',
+          prototypeId: 'brutalist-accordion-content',
+        },
+      },
+    },
+    collapsible: {
+      baseFamilyId: 'P-BASE-COLLAPSIBLE',
+      recipeId: 'demo-brutalist-collapsible',
+      recipePrototypeIds: [
+        'brutalist-collapsible-root',
+        'brutalist-collapsible-trigger',
+        'brutalist-collapsible-content',
+        'brutalist-button',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-COLLAPSIBLE', prototypeId: 'brutalist-collapsible-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-TRIGGER',
+          prototypeId: 'brutalist-collapsible-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-CONTENT',
+          prototypeId: 'brutalist-collapsible-content',
+        },
+      },
+    },
     label: {
       baseFamilyId: 'P-BASE-LABEL',
       recipeId: 'demo-brutalist-label',
@@ -727,6 +833,70 @@ const BOOTSTRAP_232_MANIFEST = {
   themeInputId: 'website-bootstrap-2-3-2-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    accordion: {
+      baseFamilyId: 'P-BASE-ACCORDION',
+      recipeId: 'demo-bootstrap-2-3-2-accordion',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-accordion-root',
+        'bootstrap-2-3-2-accordion-item',
+        'bootstrap-2-3-2-accordion-heading',
+        'bootstrap-2-3-2-accordion-trigger',
+        'bootstrap-2-3-2-accordion-content',
+        'bootstrap-2-3-2-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-ACCORDION',
+          prototypeId: 'bootstrap-2-3-2-accordion-root',
+        },
+        item: {
+          basePrototypeId: 'P-BASE-ACCORDION-ITEM',
+          prototypeId: 'bootstrap-2-3-2-accordion-item',
+        },
+        heading: {
+          basePrototypeId: 'P-BASE-ACCORDION-HEADING',
+          prototypeId: 'bootstrap-2-3-2-accordion-heading',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-ACCORDION-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-accordion-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-ACCORDION-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-accordion-content',
+        },
+      },
+    },
+    collapsible: {
+      baseFamilyId: 'P-BASE-COLLAPSIBLE',
+      recipeId: 'demo-bootstrap-2-3-2-collapsible',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-collapsible-root',
+        'bootstrap-2-3-2-collapsible-trigger',
+        'bootstrap-2-3-2-collapsible-content',
+        'bootstrap-2-3-2-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE',
+          prototypeId: 'bootstrap-2-3-2-collapsible-root',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-collapsible-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-collapsible-content',
+        },
+      },
+    },
     label: {
       baseFamilyId: 'P-BASE-LABEL',
       recipeId: 'demo-bootstrap-2-3-2-label',
@@ -825,6 +995,67 @@ const LIQUID_GLASS_MANIFEST = {
   themeInputId: 'website-liquid-glass-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    accordion: {
+      baseFamilyId: 'P-BASE-ACCORDION',
+      recipeId: 'demo-liquid-glass-accordion',
+      recipePrototypeIds: [
+        'liquid-glass-accordion-root',
+        'liquid-glass-accordion-item',
+        'liquid-glass-accordion-heading',
+        'liquid-glass-accordion-trigger',
+        'liquid-glass-accordion-content',
+        'liquid-glass-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-ACCORDION', prototypeId: 'liquid-glass-accordion-root' },
+        item: {
+          basePrototypeId: 'P-BASE-ACCORDION-ITEM',
+          prototypeId: 'liquid-glass-accordion-item',
+        },
+        heading: {
+          basePrototypeId: 'P-BASE-ACCORDION-HEADING',
+          prototypeId: 'liquid-glass-accordion-heading',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-ACCORDION-TRIGGER',
+          prototypeId: 'liquid-glass-accordion-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-ACCORDION-CONTENT',
+          prototypeId: 'liquid-glass-accordion-content',
+        },
+      },
+    },
+    collapsible: {
+      baseFamilyId: 'P-BASE-COLLAPSIBLE',
+      recipeId: 'demo-liquid-glass-collapsible',
+      recipePrototypeIds: [
+        'liquid-glass-collapsible-root',
+        'liquid-glass-collapsible-trigger',
+        'liquid-glass-collapsible-content',
+        'liquid-glass-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
+      parts: {
+        root: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE',
+          prototypeId: 'liquid-glass-collapsible-root',
+        },
+        trigger: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-TRIGGER',
+          prototypeId: 'liquid-glass-collapsible-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-COLLAPSIBLE-CONTENT',
+          prototypeId: 'liquid-glass-collapsible-content',
+        },
+      },
+    },
     label: {
       baseFamilyId: 'P-BASE-LABEL',
       recipeId: 'demo-liquid-glass-label',

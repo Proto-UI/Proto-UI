@@ -1,0 +1,263 @@
+id: T-BASE-ACCORDION-0001
+type: test
+title: Accordion source and host evidence boundaries
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Finf #872 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Finf #872. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Focused source evidence is distinct from unexecuted native/browser/material/GPUI acceptance.
+statement:
+  zh-CN: 已执行synthetic-DOM测试只覆盖各自断言；浏览器与GPUI旅程是必需的未完成验收，不从JSON transport或token存在推断。
+  en: Executed synthetic-DOM tests cover only their named assertions. Browser and GPUI journeys are mandatory open acceptance work, never inferred from JSON transport or token presence.
+cases:
+  - id: T-BASE-ACCORDION-0001-CASE-ROOT-OWNER
+    title: root owner boundary
+    covers:
+      - P-BASE-ACCORDION-OWNER
+    expectation: Root owns one normalized JSON string-key set. mode=single admits the first supplied unique key; multiple preserves unique insertion order. No other part owns selection; no callback Props or Base-protocol-specific dependencies are introduced.
+  - id: T-BASE-ACCORDION-0001-CASE-ROOT-CONTROLLED
+    title: root controlled boundary
+    covers:
+      - P-BASE-ACCORDION-CONTROLLED
+    expectation: openItems presence controls ownership. Requests emit openChange {openItems,value,open,reason} once without optimistic mutation. Owner updates, initialization, default changes and structural reconciliation emit no requests. defaultOpenItems initializes once. Reentrant newer owner inputs win.
+  - id: T-BASE-ACCORDION-0001-CASE-ROOT-MINIMUM
+    title: root minimum boundary
+    covers:
+      - P-BASE-ACCORDION-MINIMUM
+    expectation: allowEmpty defaults true. When false, a request cannot close the last selected key; an uncontrolled initially empty or emptied known selection picks the first enabled registered Item. An empty group stays empty. Controlled empty input is not repaired against the owner.
+  - id: T-BASE-ACCORDION-0001-CASE-ROOT-KEYS
+    title: root keys boundary
+    covers:
+      - P-BASE-ACCORDION-KEYS
+    expectation: Keys are non-empty strings. Supplied duplicates normalize once; unknown supplied/default keys remain dormant until an Item registers, accommodating progressive host mounting. Requests to absent keys are rejected. Uncontrolled keys previously registered then removed are retired; renaming is remove/add. Disabled selection is retained. getOpenItems returns a defensive copy and openCount counts canonical keys, including dormant owner keys.
+  - id: T-BASE-ACCORDION-0001-CASE-ROOT-DISABLED
+    title: root disabled boundary
+    covers:
+      - P-BASE-ACCORDION-DISABLED
+    expectation: Root or Item disabled suppresses that Item activation and sequential focus, including imperative requests, without changing canonical expansion or moving focus. Explicit owner updates still apply.
+  - id: T-BASE-ACCORDION-0001-CASE-ROOT-ANATOMY
+    title: root anatomy boundary
+    covers:
+      - P-BASE-ACCORDION-ANATOMY
+    expectation: One Root permits zero or more Items and descendant header Triggers in its group domain. Each Item anchors its own heading/trigger/content family. Nested Root domains isolate collection, state, requests, focus navigation and relationships.
+  - id: T-BASE-ACCORDION-0001-CASE-ITEM-IDENTITY
+    title: item identity boundary
+    covers:
+      - P-BASE-ACCORDION-ITEM-IDENTITY
+    expectation: Item value is required and non-empty; registered values are unique per Root and duplicate identity fails closed. Identity is stable by authored key, never collection index. Live adoption reads the destination Root and retires former membership.
+  - id: T-BASE-ACCORDION-0001-CASE-ITEM-DERIVATION
+    title: item derivation boundary
+    covers:
+      - P-BASE-ACCORDION-ITEM-DERIVATION
+    expectation: Item derives open, disabled and collapseBlocked from the current Root plus local disabled. It supplies one item-scoped context to Heading/Trigger/Content; reentrant owner updates win over stale notifications.
+  - id: T-BASE-ACCORDION-0001-CASE-HEADING-SEMANTICS
+    title: heading semantics boundary
+    covers:
+      - P-BASE-ACCORDION-HEADING-SEMANTICS
+    expectation: One Heading per Item wraps the sole Trigger and declares heading with integer level 1..6, default 3. The author chooses the page hierarchy; persistent secondary actions belong outside Heading. Heading adds no action or focus target.
+  - id: T-BASE-ACCORDION-0001-CASE-TRIGGER-ACTIVATION
+    title: trigger activation boundary
+    covers:
+      - P-BASE-ACCORDION-TRIGGER-ACTIVATION
+    expectation: Button-like Trigger reuses asTrigger and asFocusable. Enter/Space or pointer press commit requests a toggle once; cancel/incomplete press does not. Every enabled header stays in the natural Tab sequence; focus alone never changes selection.
+  - id: T-BASE-ACCORDION-0001-CASE-TRIGGER-NAVIGATION
+    title: trigger navigation boundary
+    covers:
+      - P-BASE-ACCORDION-TRIGGER-NAVIGATION
+    expectation: Root orientation defaults vertical and direction ltr. Vertical Up/Down or horizontal Left/Right move only header focus in current Anatomy order, skipping disabled; horizontal RTL reverses. Home/End select the first/last focus target. loop defaults true; false leaves focus at endpoints. Unrelated/modifier keys and nested content input remain untouched.
+  - id: T-BASE-ACCORDION-0001-CASE-TRIGGER-A11Y
+    title: trigger a11y boundary
+    covers:
+      - P-BASE-ACCORDION-TRIGGER-A11Y
+    expectation: Trigger declares button, content name, canonical expanded, and item-scoped controls with key panel. aria-disabled includes collapseBlocked for the final required open header, but collapseBlocked alone does not remove focus. Disabled and transient interaction exposes stay separate.
+  - id: T-BASE-ACCORDION-0001-CASE-CONTENT-PRESENCE
+    title: content presence boundary
+    covers:
+      - P-BASE-ACCORDION-CONTENT-PRESENCE
+    expectation: Content derives open/hidden and callback-only desired presence keepMounted || open. Default L1 detach preserves the logical instance, not host children or native state; keepMounted retains the complete hidden view. No transition timer, delayed-close semantics, focus entry or focus return is added. Consumer-authored transitions must not create a second canonical open owner.
+  - id: T-BASE-ACCORDION-0001-CASE-CONTENT-RELATIONSHIP
+    title: content relationship boundary
+    covers:
+      - P-BASE-ACCORDION-CONTENT-RELATIONSHIP
+    expectation: Content declares item-scoped panel identity and labelledBy its Trigger. region defaults false and true opts into a region landmark. Author chooses it to avoid landmark proliferation. Identity reservation and IDREF withdrawal/restore follow the existing A11y relationship service through detach/reopen.
+  - id: T-BASE-ACCORDION-0001-CASE-LIQUID-OPTICAL-INTENT
+    title: Explicit shared optical intent is distinct from host paint
+    covers:
+      - P-LIQUID-GLASS-ACCORDION-TRIGGER-MATERIAL
+    expectation: 'Runtime executes the actual LiquidGlass Accordion Trigger: rest/press/release/disabled choose at most one liquid-glass candidate, missing visual capability diagnoses and keeps opaque style, detach/remount uses fresh view epochs, and disposal cannot revive a sink. No host optical renderer, image comparison, native input, OS A11y or GPUI paint is certified.'
+implementations:
+  - id: base-accordion
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/accordion.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-ACCORDION-0001-CASE-ROOT-OWNER
+      - T-BASE-ACCORDION-0001-CASE-ROOT-CONTROLLED
+      - T-BASE-ACCORDION-0001-CASE-ROOT-MINIMUM
+      - T-BASE-ACCORDION-0001-CASE-ROOT-KEYS
+      - T-BASE-ACCORDION-0001-CASE-ROOT-DISABLED
+      - T-BASE-ACCORDION-0001-CASE-ROOT-ANATOMY
+      - T-BASE-ACCORDION-0001-CASE-ITEM-IDENTITY
+      - T-BASE-ACCORDION-0001-CASE-ITEM-DERIVATION
+      - T-BASE-ACCORDION-0001-CASE-HEADING-SEMANTICS
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-ACTIVATION
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-NAVIGATION
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-A11Y
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-PRESENCE
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-RELATIONSHIP
+    exercises:
+      - P-BASE-ACCORDION
+      - P-BASE-ACCORDION-ITEM
+      - P-BASE-ACCORDION-HEADING
+      - P-BASE-ACCORDION-TRIGGER
+      - P-BASE-ACCORDION-CONTENT
+    notes:
+      - Twenty-five focused tests executed in happy-dom; malformed JSON transport, native input/paint, OS accessibility, terminal native focus and full service conformance remain separate evidence.
+  - id: react-accordion
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/accordion.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-ACCORDION-0001-CASE-ROOT-OWNER
+      - T-BASE-ACCORDION-0001-CASE-ROOT-CONTROLLED
+      - T-BASE-ACCORDION-0001-CASE-ROOT-MINIMUM
+      - T-BASE-ACCORDION-0001-CASE-ROOT-DISABLED
+      - T-BASE-ACCORDION-0001-CASE-HEADING-SEMANTICS
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-NAVIGATION
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-A11Y
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-PRESENCE
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-RELATIONSHIP
+    exercises: &a1
+      - P-BASE-ACCORDION-CONTENT
+      - P-BASE-ACCORDION-HEADING
+      - P-BASE-ACCORDION-ITEM
+      - P-BASE-ACCORDION-TRIGGER
+      - P-BASE-ACCORDION
+      - P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT
+      - P-BOOTSTRAP-2-3-2-ACCORDION-HEADING
+      - P-BOOTSTRAP-2-3-2-ACCORDION-ITEM
+      - P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER
+      - P-BOOTSTRAP-2-3-2-ACCORDION
+      - P-BRUTALIST-ACCORDION-CONTENT
+      - P-BRUTALIST-ACCORDION-HEADING
+      - P-BRUTALIST-ACCORDION-ITEM
+      - P-BRUTALIST-ACCORDION-TRIGGER
+      - P-BRUTALIST-ACCORDION
+      - P-LIQUID-GLASS-ACCORDION-CONTENT
+      - P-LIQUID-GLASS-ACCORDION-HEADING
+      - P-LIQUID-GLASS-ACCORDION-ITEM
+      - P-LIQUID-GLASS-ACCORDION-TRIGGER
+      - P-LIQUID-GLASS-ACCORDION
+      - P-SHADCN-ACCORDION-CONTENT
+      - P-SHADCN-ACCORDION-HEADING
+      - P-SHADCN-ACCORDION-ITEM
+      - P-SHADCN-ACCORDION-TRIGGER
+      - P-SHADCN-ACCORDION
+    notes:
+      - Twenty shared synthetic-DOM tests execute actual Base and four family setup projections through actual framework ownership; no native browser/material/GPUI proof.
+  - id: vue-accordion
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/accordion.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-ACCORDION-0001-CASE-ROOT-OWNER
+      - T-BASE-ACCORDION-0001-CASE-ROOT-CONTROLLED
+      - T-BASE-ACCORDION-0001-CASE-ROOT-MINIMUM
+      - T-BASE-ACCORDION-0001-CASE-ROOT-DISABLED
+      - T-BASE-ACCORDION-0001-CASE-HEADING-SEMANTICS
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-NAVIGATION
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-A11Y
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-PRESENCE
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-RELATIONSHIP
+    exercises: *a1
+    notes:
+      - Twenty shared synthetic-DOM tests execute actual Base and four family setup projections through actual framework ownership; no native browser/material/GPUI proof.
+  - id: vue2-accordion
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/accordion.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-ACCORDION-0001-CASE-ROOT-OWNER
+      - T-BASE-ACCORDION-0001-CASE-ROOT-CONTROLLED
+      - T-BASE-ACCORDION-0001-CASE-ROOT-MINIMUM
+      - T-BASE-ACCORDION-0001-CASE-ROOT-DISABLED
+      - T-BASE-ACCORDION-0001-CASE-HEADING-SEMANTICS
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-NAVIGATION
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-A11Y
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-PRESENCE
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-RELATIONSHIP
+    exercises: *a1
+    notes:
+      - Twenty shared synthetic-DOM tests execute actual Base and four family setup projections through actual framework ownership; no native browser/material/GPUI proof.
+  - id: web-component-accordion
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/accordion.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-ACCORDION-0001-CASE-ROOT-OWNER
+      - T-BASE-ACCORDION-0001-CASE-ROOT-CONTROLLED
+      - T-BASE-ACCORDION-0001-CASE-ROOT-MINIMUM
+      - T-BASE-ACCORDION-0001-CASE-ROOT-DISABLED
+      - T-BASE-ACCORDION-0001-CASE-HEADING-SEMANTICS
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-NAVIGATION
+      - T-BASE-ACCORDION-0001-CASE-TRIGGER-A11Y
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-PRESENCE
+      - T-BASE-ACCORDION-0001-CASE-CONTENT-RELATIONSHIP
+    exercises: *a1
+    notes:
+      - Twenty shared synthetic-DOM tests execute actual Base and four family setup projections through actual framework ownership; no native browser/material/GPUI proof.
+  - id: accordion-web-compiler
+    kind: runtime-test
+    status: passing
+    path: packages/cli/test/accordion-prototype.test.ts
+    required: true
+    exercises: *a1
+    notes:
+      - Nine executed tests cover generated four-Web facades, private-source gates, complete source token lowering, observed state tokens and real SVG glyph updates. Compiler lowering is not native paint evidence.
+  - id: accordion-native-browser
+    kind: workspace-check
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts
+    required: true
+    exercises: *a1
+    notes:
+      - 'Implemented and registered: twenty native family/runtime journeys plus five narrow Chinese 320px / 200% text journeys. Not executed on this source. CI must bind actual screenshot manifests to this head; no proxy screenshots or old results satisfy this mapping.'
+  - id: liquid-accordion-shared-material
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/liquid-glass/test/accordion-material.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-ACCORDION-0001-CASE-LIQUID-OPTICAL-INTENT
+    exercises:
+      - P-LIQUID-GLASS-ACCORDION-TRIGGER
+    notes:
+      - Three actual Runtime sessions/ports fixtures exercise the public Trigger source against the shared material contract. This is intent/runtime evidence only; required browser/native/GPUI paint remains unexecuted.
+verifies:
+  prototypes:
+    - P-BASE-ACCORDION
+    - P-BASE-ACCORDION-ITEM
+    - P-BASE-ACCORDION-HEADING
+    - P-BASE-ACCORDION-TRIGGER
+    - P-BASE-ACCORDION-CONTENT
+    - id: P-LIQUID-GLASS-ACCORDION-TRIGGER
+      anchors:
+        - P-LIQUID-GLASS-ACCORDION-TRIGGER-MATERIAL
+sources:
+  - path: packages/adapters/base/test/fixtures/accordion-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bounded source tests and explicit uncompleted native acceptance.
+tags:
+  - test
+  - accordion
+  - adapters
+exercises:
+  prototypes: *a1

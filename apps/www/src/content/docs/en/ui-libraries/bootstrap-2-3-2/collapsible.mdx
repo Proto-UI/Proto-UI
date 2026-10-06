@@ -1,0 +1,55 @@
+---
+title: 'Collapsible'
+description: 'Bootstrap 2.3.2 Collapsible: Root, Trigger, Content and inherited Base disclosure semantics.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Collapsible contains three real Proto UI prototypes: Root, Trigger and Content. Each consumes its matching Base Collapsible hook. Root remains the sole expansion owner; this family changes presentation only. This is a draft, independently maintained design projection.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## Try the protocol
+
+The demo uses the library prototypes in all four Web adapters. The first disclosure starts closed and detaches its content view. The second starts open and retains a hidden view after closing. The third is disabled while open. The fourth stays closed after a request until you activate **Accept**. That acceptance button is a separate application action, never a second interaction owner inside Trigger.
+
+## Three parts, one state owner
+
+- Root: `open?`, `defaultOpen?`, `disabled?`; exposes `open`, request methods `openCollapsible`, `close`, `toggle`, and `openChange` with `{ open, reason }`.
+- Trigger: `disabled?`; inherits expanded, effective disabled, hover, press, focused and focus-visible states, button accessibility, natural Tab order, Enter/Space activation and guarded `focusSelf`.
+- Content: `keepMounted?`; inherits derived `open`/`hidden`, role-neutral content and L1 view presence. Closing does not dispose the logical instance. Detached native child/view state is not promised.
+
+Supply exactly one Trigger and one Content in the Root's own anatomy domain. Nested and adjacent disclosures retain independent ownership. Controlled requests never change canonical expansion until the owner supplies a new `open`; ignored requests stay ignored. Disabled suppresses requests without closing already open content. There is no heading prerequisite, Accordion selection, arrow-key navigation, region landmark, automatic focus movement or Overlay.
+
+## Presentation and small screens
+
+The primitives use bounded width, shrinkable layout, wrapping long words, scalable padding and no fixed content height. Focus and disabled appearance consume Base states. Keep enough surrounding room for the focus ring and, in Neobrutalist, its hard shadow and translated pointer envelope. The demo includes a long label and unbroken content word; browser acceptance checks 320px width, 200% root text size and both light and dark themes. Source/simulated-DOM passes do not establish these paint or native-input results.
+
+The visual reference is specifically Bootstrap 2.3.2: 4px group corners, 8px/15px trigger spacing and 9px/15px content spacing with a top border. This projection has independent Base disclosure semantics; it imports neither the jQuery Collapse plugin nor Accordion group ownership, and does not reproduce its height animation. The 15px/9px reference values are expressed as 0.9375rem/0.5625rem at a 16px root size, so padding scales with text. The Apache 2.0 notice and license stay with the source.
+
+## Consume
+
+This package remains private, unpublished workspace source. Import its source prototypes into a workspace and use the desired adapter. Internal facade generation requires explicit workspace source mode; the public installed-consumer CLI refuses this entry. No registry publication is implied.
+
+```ts
+import {
+  collapsibleRoot,
+  collapsibleTrigger,
+  collapsibleContent,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/collapsible';
+```
+
+Keep the same three-part composition when adapting the exported prototypes. The [Base protocol](/en/ui-libraries/base/collapsible/) describes the shared request and lifecycle guarantees.
+
+## Evidence and references
+
+Four-adapter synthetic-DOM and compiler mappings are separate from registered browser journeys, screenshots, native GPUI execution and independent stable admission. Unexecuted host evidence remains an acceptance gap.
+
+- [Implementation source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/bootstrap-2-3-2/src/collapsible)
+- [Bootstrap 2.3.2 reference](https://github.com/twbs/bootstrap/blob/v2.3.2/less/accordion.less)
+- [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-COLLAPSIBLE-PROJECTIONS-0001.yaml)

@@ -23,6 +23,154 @@ function getPrototypeIdFromPath(path: string): string | null {
  * value: 动态导入函数
  */
 const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
+  'base-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-root', mod.accordionRoot);
+  },
+  'base-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-item', mod.accordionItem);
+  },
+  'base-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-heading', mod.accordionHeading);
+  },
+  'base-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-trigger', mod.accordionTrigger);
+  },
+  'base-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-content', mod.accordionContent);
+  },
+  'shadcn-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-root', mod.accordionRoot);
+  },
+  'shadcn-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-item', mod.accordionItem);
+  },
+  'shadcn-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-heading', mod.accordionHeading);
+  },
+  'shadcn-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-trigger', mod.accordionTrigger);
+  },
+  'shadcn-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-content', mod.accordionContent);
+  },
+  'brutalist-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-root', mod.accordionRoot);
+  },
+  'brutalist-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-item', mod.accordionItem);
+  },
+  'brutalist-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-heading', mod.accordionHeading);
+  },
+  'brutalist-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-trigger', mod.accordionTrigger);
+  },
+  'brutalist-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-content', mod.accordionContent);
+  },
+  'bootstrap-2-3-2-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-root', mod.accordionRoot);
+  },
+  'bootstrap-2-3-2-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-item', mod.accordionItem);
+  },
+  'bootstrap-2-3-2-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-heading', mod.accordionHeading);
+  },
+  'bootstrap-2-3-2-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-trigger', mod.accordionTrigger);
+  },
+  'bootstrap-2-3-2-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-content', mod.accordionContent);
+  },
+  'liquid-glass-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-root', mod.accordionRoot);
+  },
+  'liquid-glass-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-item', mod.accordionItem);
+  },
+  'liquid-glass-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-heading', mod.accordionHeading);
+  },
+  'liquid-glass-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-trigger', mod.accordionTrigger);
+  },
+  'liquid-glass-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-content', mod.accordionContent);
+  },
+  'shadcn-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/collapsible');
+    registerPrototype('shadcn-collapsible-root', mod.collapsibleRoot);
+  },
+  'shadcn-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/collapsible');
+    registerPrototype('shadcn-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'shadcn-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/collapsible');
+    registerPrototype('shadcn-collapsible-content', mod.collapsibleContent);
+  },
+  'brutalist-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/collapsible');
+    registerPrototype('brutalist-collapsible-root', mod.collapsibleRoot);
+  },
+  'brutalist-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/collapsible');
+    registerPrototype('brutalist-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'brutalist-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/collapsible');
+    registerPrototype('brutalist-collapsible-content', mod.collapsibleContent);
+  },
+  'bootstrap-2-3-2-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/collapsible');
+    registerPrototype('bootstrap-2-3-2-collapsible-root', mod.collapsibleRoot);
+  },
+  'bootstrap-2-3-2-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/collapsible');
+    registerPrototype('bootstrap-2-3-2-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'bootstrap-2-3-2-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/collapsible');
+    registerPrototype('bootstrap-2-3-2-collapsible-content', mod.collapsibleContent);
+  },
+  'liquid-glass-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/collapsible');
+    registerPrototype('liquid-glass-collapsible-root', mod.collapsibleRoot);
+  },
+  'liquid-glass-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/collapsible');
+    registerPrototype('liquid-glass-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'liquid-glass-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/collapsible');
+    registerPrototype('liquid-glass-collapsible-content', mod.collapsibleContent);
+  },
   'base-label-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/label');
     registerPrototype('base-label-root', mod.default);

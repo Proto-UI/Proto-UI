@@ -1,0 +1,352 @@
+id: T-COLLAPSIBLE-PROJECTIONS-0001
+type: test
+title: Collapsible four-family projection evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft while native source-bound input/paint, optical material and GPUI evidence and independent stable admission remain incomplete. Executed synthetic-DOM/compiler coverage is bounded below.
+  zh-CN: native 源码绑定输入/绘制、光学材质、GPUI 与独立稳定准入未完成，保留 draft；已执行 synthetic DOM/compiler 子范围如下。
+summary: Twelve projected parts retain Base semantics and receive distinct source, compiler and native evidence.
+cases:
+  - id: T-COLLAPSIBLE-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+    title: Four-family four-Adapter disclosure ownership and lifetime
+    covers:
+      - P-SHADCN-COLLAPSIBLE-BASE-INHERITANCE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+      - P-SHADCN-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+      - P-BRUTALIST-COLLAPSIBLE-BASE-INHERITANCE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+      - P-LIQUID-GLASS-COLLAPSIBLE-BASE-INHERITANCE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+    expectation: Every actual projection setup retains controlled/uncontrolled requests, disabled suppression, keyboard and focus, role-neutral content, L1 remount, keepMounted, domain isolation and anatomy rejection under four Web adapters. Source tests do not establish native fidelity.
+  - id: T-COLLAPSIBLE-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+    title: Package facade and finite style compiler consumption
+    covers:
+      - P-SHADCN-COLLAPSIBLE-DIRECT-ENTRY
+      - P-SHADCN-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+      - P-SHADCN-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+      - P-BRUTALIST-COLLAPSIBLE-DIRECT-ENTRY
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+      - P-LIQUID-GLASS-COLLAPSIBLE-DIRECT-ENTRY
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+    expectation: All twelve direct entries and corresponding four-Web-host facades resolve; private source families require explicit workspace code generation; every source token has finite CSS lowering. No registry publishing occurs.
+  - id: T-COLLAPSIBLE-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    title: Long-text, focus-space and hidden-content source and native surface safety
+    covers:
+      - P-SHADCN-COLLAPSIBLE-VISUAL-SAFETY
+      - P-SHADCN-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+      - P-SHADCN-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+      - P-BRUTALIST-COLLAPSIBLE-VISUAL-SAFETY
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-VISUAL-SAFETY
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+      - P-LIQUID-GLASS-COLLAPSIBLE-VISUAL-SAFETY
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+    expectation: Source assertions establish width/wrapping/style-state policy only. Separately registered native journeys exercise real input, computed hidden display, safe padding, 320px long text at 200% font size, light/dark, and source-bound screenshots. GPUI/optical material require separate evidence.
+  - id: T-COLLAPSIBLE-PROJECTIONS-0001-CASE-MATERIAL-INTENT
+    title: Liquid Trigger consumes shared whole optical intent without another semantic owner
+    covers:
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-MATERIAL-INTENT
+    expectation: A real three-part Runtime fixture records one Trigger slot, mutually exclusive Base pressed/rest candidates, disabled/cancel resets, view release/remount and complete opaque fallback/diagnosis with no visual sink. Root and Content remain material-neutral. This evidence does not render optical material or prove host/GPUI parity.
+implementations:
+  - id: web-component-collapsible-projections
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/adapters/web-component/test/collapsible.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+    exercises:
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - '25 tests: 5 unchanged Base and 5 per each of four projections; actual framework ownership in synthetic DOM. Fresh exact-source results remain in the delivery record; not native browser proof.'
+  - id: react-collapsible-projections
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/adapters/react/test/collapsible.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+    exercises:
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - '25 tests: 5 unchanged Base and 5 per each of four projections; actual framework ownership in synthetic DOM. Fresh exact-source results remain in the delivery record; not native browser proof.'
+  - id: vue-collapsible-projections
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/adapters/vue/test/collapsible.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+    exercises:
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - '25 tests: 5 unchanged Base and 5 per each of four projections; actual framework ownership in synthetic DOM. Fresh exact-source results remain in the delivery record; not native browser proof.'
+  - id: vue2-collapsible-projections
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/adapters/vue2/test/collapsible.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+    exercises:
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - '25 tests: 5 unchanged Base and 5 per each of four projections; actual framework ownership in synthetic DOM. Fresh exact-source results remain in the delivery record; not native browser proof.'
+  - id: direct-presentation
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/prototypes/test-utils/test/collapsible-projections.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    exercises:
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - Eight synthetic-DOM direct-prototype tests; token/state assertions do not establish computed layout or accessibility technology fidelity.
+  - id: compiler-consumption
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/cli/test/collapsible-projections.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+    exercises:
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - Finite CSS and four-Web facade/source-only boundaries; no package registry publication.
+  - id: native-browser
+    kind: workspace-check
+    status: planned
+    required: true
+    path: apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    exercises:
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - Implemented/registered journeys and exact-head capture CI, but local browser socket restrictions mean no execution or screenshot pass is claimed.
+      - Includes 16 family/runtime interaction journeys, 16 320px/200%-type light+dark journeys and four Chinese narrow pages. GPUI optical material is not established by browser evidence.
+  - id: gpui-peer-model
+    kind: adapter-test
+    status: passing
+    required: true
+    path: packages/adapters/gpui-peer/test/collapsible-projections.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+    exercises: &a1
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-COLLAPSIBLE-TRIGGER
+      - P-SHADCN-COLLAPSIBLE-CONTENT
+      - P-BRUTALIST-COLLAPSIBLE
+      - P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      - P-BRUTALIST-COLLAPSIBLE-CONTENT
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      - P-LIQUID-GLASS-COLLAPSIBLE
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+    notes:
+      - Twelve real-peer/ScriptedHost transport checks (four families × retained, detached and controlled/disabled fixtures). No Rust host, native input, computed paint, optical material or GPUI parity claim.
+  - id: public-demo-registration
+    kind: workspace-check
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/collapsible-projections.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+    exercises: *a1
+    notes:
+      - Four actual DemoSpec imports validate their exact Prototype sets against the manifest and load every direct entry; not DOM or native paint evidence.
+  - id: liquid-material-consumer
+    kind: runtime-test
+    status: passing
+    required: true
+    path: packages/prototypes/liquid-glass/test/collapsible-material.test.ts
+    consumesCases:
+      - T-COLLAPSIBLE-PROJECTIONS-0001-CASE-MATERIAL-INTENT
+    exercises:
+      - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+    notes:
+      - Three real-Runtime typed-intent/lifecycle tests pass on the validation union of Collapsible df699, shared facade tree f426e2a5 and shared text-alignment correction 46ddc381. This dependent consumer must integrate with those shared API/correction sources; no host paint claim.
+verifies:
+  prototypes:
+    - id: P-SHADCN-COLLAPSIBLE
+      anchors:
+        - P-SHADCN-COLLAPSIBLE-BASE-INHERITANCE
+        - P-SHADCN-COLLAPSIBLE-DIRECT-ENTRY
+        - P-SHADCN-COLLAPSIBLE-VISUAL-SAFETY
+    - id: P-SHADCN-COLLAPSIBLE-TRIGGER
+      anchors:
+        - P-SHADCN-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+        - P-SHADCN-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+        - P-SHADCN-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+    - id: P-SHADCN-COLLAPSIBLE-CONTENT
+      anchors:
+        - P-SHADCN-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+        - P-SHADCN-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+        - P-SHADCN-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+    - id: P-BRUTALIST-COLLAPSIBLE
+      anchors:
+        - P-BRUTALIST-COLLAPSIBLE-BASE-INHERITANCE
+        - P-BRUTALIST-COLLAPSIBLE-DIRECT-ENTRY
+        - P-BRUTALIST-COLLAPSIBLE-VISUAL-SAFETY
+    - id: P-BRUTALIST-COLLAPSIBLE-TRIGGER
+      anchors:
+        - P-BRUTALIST-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+        - P-BRUTALIST-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+        - P-BRUTALIST-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+    - id: P-BRUTALIST-COLLAPSIBLE-CONTENT
+      anchors:
+        - P-BRUTALIST-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+        - P-BRUTALIST-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+        - P-BRUTALIST-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+    - id: P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      anchors:
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-VISUAL-SAFETY
+    - id: P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER
+      anchors:
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+    - id: P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT
+      anchors:
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+    - id: P-LIQUID-GLASS-COLLAPSIBLE
+      anchors:
+        - P-LIQUID-GLASS-COLLAPSIBLE-BASE-INHERITANCE
+        - P-LIQUID-GLASS-COLLAPSIBLE-DIRECT-ENTRY
+        - P-LIQUID-GLASS-COLLAPSIBLE-VISUAL-SAFETY
+    - id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+      anchors:
+        - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+        - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+        - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+        - P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-MATERIAL-INTENT
+    - id: P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+      anchors:
+        - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+        - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+        - P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+exercises:
+  prototypes: *a1
+openQuestions:
+  - id: T-COLLAPSIBLE-PROJECTIONS-0001-Q-NATIVE
+    question:
+      en: When does exact-head native browser and GPUI evidence complete the declared host boundary?
+      zh-CN: 何时以 exact-head native browser 与 GPUI 证据完成所声明的宿主边界？
+    blocks:
+      - activation:T-COLLAPSIBLE-PROJECTIONS-0001
+      - implementation:T-COLLAPSIBLE-PROJECTIONS-0001#native-browser
+sources:
+  - path: packages/adapters/base/test/fixtures/collapsible-conformance.ts
+  - path: packages/adapters/base/test/fixtures/collapsible-projections.ts
+  - path: .github/workflows/collapsible-projections-evidence.yml
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Mapped 12 projected parts to executed synthetic-DOM/compiler checks and separately registered but unexecuted native browser journeys.
+tags:
+  - test
+  - collapsible
+  - projection
+  - adapter
+  - compiler

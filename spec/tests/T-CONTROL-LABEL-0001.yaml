@@ -83,6 +83,15 @@ cases:
       - P-LIQUID-GLASS-LABEL-CONSUMPTION
     expectation: public-family-projection-of-one-independent-base-protocol
 implementations:
+  - id: control-label-acquisition-recovery
+    kind: module-test
+    status: passing
+    path: packages/modules/control-label/test/failure-recovery.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-PAIR
+    notes:
+      - Injected host/projection failures exercise same-reference retry, partial-lease cleanup, original-error preservation and newer reentrant association ownership; this is not native host evidence.
   - id: control-label-action-projection
     kind: module-test
     status: passing

@@ -85,20 +85,20 @@ fn feedback_refines_the_host_root_without_inventing_a_position() {
 
 #[test]
 fn feedback_insets_need_an_authored_supported_position() {
-    let unspecified = style_for_feedback_tokens(["left-1/2"], None, LengthContext::default());
+    let unspecified = style_for_feedback_tokens(["left-[100%]"], None, LengthContext::default());
     assert_eq!(unspecified.refinement.position, None);
     assert_eq!(unspecified.refinement.inset.left, None);
     assert_eq!(
         unspecified.issues,
         [StyleIssue::Unmapped {
             property: "left".into(),
-            value: "50%".into(),
+            value: "100%".into(),
             reason: Unmapped::UnsupportedValue,
         }]
     );
 
     let absolute =
-        style_for_feedback_tokens(["absolute", "left-1/2"], None, LengthContext::default());
+        style_for_feedback_tokens(["absolute", "left-[100%]"], None, LengthContext::default());
     assert!(
         absolute.issues.is_empty(),
         "unexpected: {:?}",
@@ -107,7 +107,7 @@ fn feedback_insets_need_an_authored_supported_position() {
     assert_eq!(absolute.refinement.position, Some(Position::Absolute));
     assert_eq!(
         absolute.refinement.inset.left,
-        Some(Length::Definite(DefiniteLength::Fraction(0.5)))
+        Some(Length::Definite(DefiniteLength::Fraction(1.0)))
     );
 }
 
@@ -182,7 +182,13 @@ fn maps_layout_and_box_properties() {
 #[test]
 fn maps_a_percentage_to_a_fraction_and_keeps_position() {
     let mapped = map(
-        &resolve(&["absolute", "w-full", "left-1/2"], "shadcn"),
+        // Preserve percentage semantics independently of source inventory:
+        // current Dialog tokens no longer emit the former left-1/2 spelling.
+        &declared(&[
+            ("position", "absolute"),
+            ("width", "100%"),
+            ("left", "50%"),
+        ]),
         LengthContext::default(),
     );
     let style = &mapped.refinement;
@@ -391,7 +397,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 32] = [
+const EXPECTED_UNMAPPED: [&str; 33] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -431,6 +437,7 @@ const EXPECTED_UNMAPPED: [&str; 32] = [
     "text-decoration-line",
     "text-underline-offset",
     "white-space",
+    "overflow-wrap",
 ];
 
 #[test]
@@ -460,7 +467,25 @@ fn selection_affordances_keep_both_web_properties_explicitly_unmapped() {
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 11] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 14] = [
+    (
+        "overflow-x",
+        "auto",
+        "Accordion's long-line scroll policy needs conditional horizontal scrolling. \
+         GPUI's Scroll mode is not evidence for CSS Auto overflow parity.",
+    ),
+    (
+        "max-height",
+        "calc(100% - 2rem)",
+        "Dialog's available-space height requires the live logical content region and gutter. \
+         A fraction minus a length cannot be represented by a GPUI definite length alone.",
+    ),
+    (
+        "max-width",
+        "min(32rem,calc(100% - 2rem))",
+        "Dialog's available-space width requires a live layout basis before min can choose. \
+         The Web variable fallback does not implement the native available-space lease.",
+    ),
     (
         "color",
         "inherit",
@@ -532,6 +557,72 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 11] = [
         "GPUI has no Auto overflow mode and Scroll reserves scrollbar space even when content fits.",
     ),
 ];
+
+#[test]
+fn prefixed_none_selection_matches_the_existing_native_text_policy() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("user-select", "none"),
+            ("-webkit-user-select", "none"),
+        ]),
+        LengthContext::default(),
+    );
+    assert!(mapped.is_complete());
+    for property in ["user-select", "-webkit-user-select"] {
+        let unsupported = map(
+            &declared(&[("position", "relative"), (property, "text")]),
+            LengthContext::default(),
+        );
+        assert!(!unsupported.is_complete());
+    }
+}
+
+#[test]
+fn margin_zero_resets_every_edge_without_claiming_other_margin_forms() {
+    let mapped = map(
+        &declared(&[("position", "relative"), ("margin", "0")]),
+        LengthContext::default(),
+    );
+    assert!(mapped.is_complete());
+    let zero = Some(Length::Definite(DefiniteLength::Absolute(
+        AbsoluteLength::Pixels(gpui::px(0.0)),
+    )));
+    assert_eq!(mapped.refinement.margin.top, zero);
+    assert_eq!(mapped.refinement.margin.right, zero);
+    assert_eq!(mapped.refinement.margin.bottom, zero);
+    assert_eq!(mapped.refinement.margin.left, zero);
+    for value in ["auto", "1px", "0 1px", "100%"] {
+        let unsupported = map(
+            &declared(&[("position", "relative"), ("margin", value)]),
+            LengthContext::default(),
+        );
+        assert!(!unsupported.is_complete());
+        assert_eq!(unsupported.refinement.margin.top, None);
+        assert_eq!(unsupported.refinement.margin.right, None);
+        assert_eq!(unsupported.refinement.margin.bottom, None);
+        assert_eq!(unsupported.refinement.margin.left, None);
+    }
+}
+
+#[test]
+fn available_space_expressions_are_not_truncated_to_a_fraction() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("max-height", "calc(100% - 2rem)"),
+            ("max-width", "min(32rem,calc(100% - 2rem))"),
+        ]),
+        LengthContext::default(),
+    );
+    assert_eq!(mapped.refinement.max_size.width, None);
+    assert_eq!(mapped.refinement.max_size.height, None);
+    assert_eq!(mapped.unmapped.len(), 2);
+    assert!(mapped
+        .unmapped
+        .iter()
+        .all(|(_, _, reason)| *reason == Unmapped::UnsupportedValue));
+}
 
 /// The source-aligned Brutalist theme gives its ordinary surfaces a 5px radius.
 /// This positive projection check is independent of the invalid-calc negatives.

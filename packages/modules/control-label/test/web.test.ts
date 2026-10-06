@@ -117,6 +117,42 @@ describe('Control Label Web intent bridge', () => {
       expect(f.activate).not.toHaveBeenCalled();
     }
   );
+  it.each([
+    '<audio controls></audio>',
+    '<video controls></video>',
+    '<span role="slider" aria-readonly="true"><b>value</b></span>',
+    '<span role="spinbutton" tabindex="-1"><b>value</b></span>',
+    '<span role="option"><b>choice</b></span>',
+    '<span role="menuitemcheckbox" aria-disabled="true"><b>choice</b></span>',
+    '<span role="menuitemradio"><b>choice</b></span>',
+    '<span role="searchbox"><b>query</b></span>',
+    '<span role="treeitem"><b>entry</b></span>',
+    '<span role="scrollbar"><b>thumb</b></span>',
+  ])('keeps nested control input owned by its descendant: %s', async (markup) => {
+    const f = fixture();
+    f.el.innerHTML = markup;
+    const child = f.el.firstElementChild as HTMLElement;
+    const click = vi.fn((event: Event) => expect(event.defaultPrevented).toBe(false));
+    child.addEventListener('click', click);
+    await gesture((child.firstElementChild ?? child) as HTMLElement);
+    expect(click).toHaveBeenCalledOnce();
+    expect(f.activate).not.toHaveBeenCalled();
+  });
+  it.each([
+    '<span><b>ordinary caption</b></span>',
+    '<span role="progressbar"><b>progress</b></span>',
+    '<span role="meter"><b>value</b></span>',
+    '<span role="separator"><b>decoration</b></span>',
+    '<span role="tabpanel"><b>description</b></span>',
+    '<video></video>',
+    '<audio></audio>',
+  ])('retains label activation through passive content: %s', async (markup) => {
+    const f = fixture();
+    f.el.innerHTML = markup;
+    const child = f.el.firstElementChild as HTMLElement;
+    await gesture((child.firstElementChild ?? child) as HTMLElement);
+    expect(f.activate).toHaveBeenCalledOnce();
+  });
   it('does not invent keyboard or untrusted click-only activation', async () => {
     const f = fixture();
     f.el.click();

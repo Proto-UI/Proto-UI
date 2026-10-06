@@ -53,6 +53,14 @@
     "./label": {
       "types": "./src/label/index.ts",
       "default": "./src/label/index.ts"
+    },
+    "./collapsible": {
+      "types": "./src/collapsible/index.ts",
+      "default": "./src/collapsible/index.ts"
+    },
+    "./accordion": {
+      "types": "./src/accordion/index.ts",
+      "default": "./src/accordion/index.ts"
     }
   },
   "dependencies": {

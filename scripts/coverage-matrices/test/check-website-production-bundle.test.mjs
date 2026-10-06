@@ -88,6 +88,14 @@ function graphFixture() {
         dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
         moduleIds: ['apps/www/src/pages/en/test/new-projection-families.astro'],
       }),
+      chunk('_astro/bootstrap-state-controls.js', {
+        isEntry: true,
+        facadeModuleId:
+          'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
+        imports: ['_astro/wc-host.js'],
+        dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+        moduleIds: ['apps/www/src/pages/en/test/bootstrap-state-controls.astro'],
+      }),
       chunk('_astro/liquid-glass-material.js', {
         isEntry: true,
         facadeModuleId:
@@ -211,6 +219,7 @@ test('rejects a graph without route-owned Web Component host provenance', () => 
     '_astro/home-demo.js',
     '_astro/new-projection-families.js',
     '_astro/liquid-glass-material.js',
+    '_astro/bootstrap-state-controls.js',
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
@@ -229,6 +238,7 @@ test('does not mistake an orphaned WC runtime for primary host provenance', () =
     '_astro/home-demo.js',
     '_astro/new-projection-families.js',
     '_astro/liquid-glass-material.js',
+    '_astro/bootstrap-state-controls.js',
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
@@ -370,6 +380,9 @@ test('allows Adapter modules only in the exact reviewed site-control bridge chun
 test('rejects unreviewed Adapter modules inside the reviewed bridge chunk', () => {
   const graph = graphFixture();
   const unreviewedModules = [
+    // This helper belongs to lazy framework adapters, not the sitewide WC
+    // bridge. Do not make a barrel/chunk regression pass by admitting it here.
+    'packages/adapters/base/src/host/instance-associations.ts',
     'packages/adapters/base/src/host/unreviewed-extension.ts',
     'packages/adapters/web-component/src/unreviewed-extension.ts',
   ];
@@ -1087,3 +1100,25 @@ for (const moduleId of [
     });
   }
 }
+
+test('Bootstrap state-controls admission is exact and keeps frameworks lazy', () => {
+  const graph = graphFixture();
+  const route = graph.chunks.find(
+    (entry) => entry.fileName === '_astro/bootstrap-state-controls.js'
+  );
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  route.imports.push('_astro/react.js');
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('statically includes the react Adapter')
+    )
+  );
+  route.imports.pop();
+  route.facadeModuleId =
+    'apps/www/src/pages/en/test/copied-bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts';
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('Website shell entry')
+    )
+  );
+});

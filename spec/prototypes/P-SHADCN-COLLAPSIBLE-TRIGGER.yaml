@@ -1,0 +1,59 @@
+id: P-SHADCN-COLLAPSIBLE-TRIGGER
+type: prototype
+title: shadcn Collapsible Trigger inherits Base disclosure semantics
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft implementation projection pending exact-source native browser evidence, independent review and explicit stable admission. Base draft dependencies remain draft.
+  zh-CN: 实现投影保留 draft，等待精确源码 native browser evidence、独立审查与明确稳定准入；Base draft 依赖仍是 draft。
+summary: shadcn presentation over independent Base Collapsible trigger.
+statement:
+  zh-CN: shadcn trigger 直接消费 asCollapsibleTrigger，完整保留 Base trigger 协议。不复合第二个 Button、Toggle、Accordion 或 Overlay owner；只增加体系表现与公开源码入口。 固定设计参考的 Collapsible primitives 本来 unstyled；当前 host 表面与间距是明确的 Proto UI 差异，不依赖参考 runtime。
+  en: The shadcn trigger directly consumes asCollapsibleTrigger and retains the full Base trigger protocol. No second Button, Toggle, Accordion or Overlay owner is composed. This projection adds only family presentation and public source entries. The pinned design-reference Collapsible primitives are unstyled; current host surfaces and spacing are declared Proto UI deltas, not reference-runtime dependencies.
+criteria:
+  - id: P-SHADCN-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+    text:
+      en: The shadcn trigger directly consumes asCollapsibleTrigger and retains the full Base trigger protocol. No second Button, Toggle, Accordion or Overlay owner is composed. This projection adds only family presentation and public source entries.
+      zh-CN: shadcn trigger 直接消费 asCollapsibleTrigger，完整保留 Base trigger 协议。不复合第二个 Button、Toggle、Accordion 或 Overlay owner；只增加体系表现与公开源码入口。
+  - id: P-SHADCN-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+    text:
+      en: Expose shadcn-collapsible-trigger through @proto.ui/prototypes-shadcn/collapsible with unchanged Base props and exposes. Private workspace packages must not be represented as registry-published.
+      zh-CN: 从 @proto.ui/prototypes-shadcn/collapsible 提供 shadcn-collapsible-trigger，保留 Base props/exposes；private workspace package 不得表述为 registry 已发布。
+  - id: P-SHADCN-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+    text:
+      en: Preserve min-width zero, bounded max-width, long-word wrapping for text-bearing parts, scalable padding and focus-ring space. Hidden retained Content must remain actually hidden; style does not overwrite canonical state or introduce fixed content height.
+      zh-CN: 保留 min-width zero、有界 max-width、文字 part 长词换行、可缩放 padding 与 focus ring 空间。关闭保留的 Content 必须实际隐藏；样式不得改写 canonical state 或引入固定内容高度。
+openQuestions:
+  - id: P-SHADCN-COLLAPSIBLE-TRIGGER-Q-ADMISSION
+    question:
+      en: When do complete source-bound host evidence and independent review justify stable admission?
+      zh-CN: 何时由完整源码绑定宿主证据与独立审查支持稳定准入？
+    blocks:
+      - activation:P-SHADCN-COLLAPSIBLE-TRIGGER
+sources:
+  - path: packages/prototypes/shadcn/src/collapsible/trigger.proto.ts
+  - path: packages/prototypes/shadcn/src/collapsible/types.ts
+  - path: packages/prototypes/shadcn/src/collapsible/index.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/collapsible.tsx
+    label: Design reference only; not Proto UI semantic authority or an implementation dependency
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-COLLAPSIBLE-TRIGGER
+verifies:
+  tests:
+    - T-COLLAPSIBLE-PROJECTIONS-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the direct family projection with complete Base inheritance, safe layout, source/package boundaries and explicitly unexecuted native/material evidence.
+tags:
+  - prototype
+  - shadcn
+  - collapsible
+  - trigger
+  - draft
+  - projection

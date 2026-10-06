@@ -803,6 +803,273 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     },
   ]),
 
+  'base-accordion': baseCompound('base-accordion', 'Base Accordion', [
+    {
+      prototypeImport: 'accordionRoot',
+      exportBaseName: 'BaseAccordionRoot',
+      elementName: 'proto-ui-base-accordion-root',
+    },
+    {
+      prototypeImport: 'accordionItem',
+      exportBaseName: 'BaseAccordionItem',
+      elementName: 'proto-ui-base-accordion-item',
+    },
+    {
+      prototypeImport: 'accordionHeading',
+      exportBaseName: 'BaseAccordionHeading',
+      elementName: 'proto-ui-base-accordion-heading',
+    },
+    {
+      prototypeImport: 'accordionTrigger',
+      exportBaseName: 'BaseAccordionTrigger',
+      elementName: 'proto-ui-base-accordion-trigger',
+    },
+    {
+      prototypeImport: 'accordionContent',
+      exportBaseName: 'BaseAccordionContent',
+      elementName: 'proto-ui-base-accordion-content',
+    },
+  ]),
+
+  'shadcn-accordion': shadcnCompound('shadcn-accordion', 'Shadcn Accordion', [
+    {
+      prototypeImport: 'accordionRoot',
+      exportBaseName: 'ShadcnAccordionRoot',
+      elementName: 'proto-ui-shadcn-accordion-root',
+    },
+    {
+      prototypeImport: 'accordionItem',
+      exportBaseName: 'ShadcnAccordionItem',
+      elementName: 'proto-ui-shadcn-accordion-item',
+    },
+    {
+      prototypeImport: 'accordionHeading',
+      exportBaseName: 'ShadcnAccordionHeading',
+      elementName: 'proto-ui-shadcn-accordion-heading',
+    },
+    {
+      prototypeImport: 'accordionTrigger',
+      exportBaseName: 'ShadcnAccordionTrigger',
+      elementName: 'proto-ui-shadcn-accordion-trigger',
+    },
+    {
+      prototypeImport: 'accordionContent',
+      exportBaseName: 'ShadcnAccordionContent',
+      elementName: 'proto-ui-shadcn-accordion-content',
+    },
+  ]),
+
+  'brutalist-accordion': brutalistCompound('brutalist-accordion', 'Brutalist Accordion', [
+    {
+      prototypeImport: 'accordionRoot',
+      exportBaseName: 'BrutalistAccordionRoot',
+      elementName: 'proto-ui-brutalist-accordion-root',
+    },
+    {
+      prototypeImport: 'accordionItem',
+      exportBaseName: 'BrutalistAccordionItem',
+      elementName: 'proto-ui-brutalist-accordion-item',
+    },
+    {
+      prototypeImport: 'accordionHeading',
+      exportBaseName: 'BrutalistAccordionHeading',
+      elementName: 'proto-ui-brutalist-accordion-heading',
+    },
+    {
+      prototypeImport: 'accordionTrigger',
+      exportBaseName: 'BrutalistAccordionTrigger',
+      elementName: 'proto-ui-brutalist-accordion-trigger',
+    },
+    {
+      prototypeImport: 'accordionContent',
+      exportBaseName: 'BrutalistAccordionContent',
+      elementName: 'proto-ui-brutalist-accordion-content',
+    },
+  ]),
+  'bootstrap-2-3-2-accordion': {
+    ...defineCompound(
+      'bootstrap-2-3-2-accordion',
+      'bootstrap-2-3-2 Accordion (workspace source)',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      '@proto.ui/prototypes-bootstrap-2-3-2/accordion',
+      [
+        {
+          prototypeImport: 'accordionRoot',
+          exportBaseName: 'Bootstrap232AccordionRoot',
+          elementName: 'proto-ui-bootstrap-2-3-2-accordion-root',
+        },
+        {
+          prototypeImport: 'accordionItem',
+          exportBaseName: 'Bootstrap232AccordionItem',
+          elementName: 'proto-ui-bootstrap-2-3-2-accordion-item',
+        },
+        {
+          prototypeImport: 'accordionHeading',
+          exportBaseName: 'Bootstrap232AccordionHeading',
+          elementName: 'proto-ui-bootstrap-2-3-2-accordion-heading',
+        },
+        {
+          prototypeImport: 'accordionTrigger',
+          exportBaseName: 'Bootstrap232AccordionTrigger',
+          elementName: 'proto-ui-bootstrap-2-3-2-accordion-trigger',
+        },
+        {
+          prototypeImport: 'accordionContent',
+          exportBaseName: 'Bootstrap232AccordionContent',
+          elementName: 'proto-ui-bootstrap-2-3-2-accordion-content',
+        },
+      ],
+      { stylePreset: 'bootstrap-2-3-2' }
+    ),
+    sourceOnly: true,
+  },
+  'liquid-glass-accordion': {
+    ...defineCompound(
+      'liquid-glass-accordion',
+      'liquid-glass Accordion (workspace source)',
+      '@proto.ui/prototypes-liquid-glass',
+      '@proto.ui/prototypes-liquid-glass/accordion',
+      [
+        {
+          prototypeImport: 'accordionRoot',
+          exportBaseName: 'LiquidGlassAccordionRoot',
+          elementName: 'proto-ui-liquid-glass-accordion-root',
+        },
+        {
+          prototypeImport: 'accordionItem',
+          exportBaseName: 'LiquidGlassAccordionItem',
+          elementName: 'proto-ui-liquid-glass-accordion-item',
+        },
+        {
+          prototypeImport: 'accordionHeading',
+          exportBaseName: 'LiquidGlassAccordionHeading',
+          elementName: 'proto-ui-liquid-glass-accordion-heading',
+        },
+        {
+          prototypeImport: 'accordionTrigger',
+          exportBaseName: 'LiquidGlassAccordionTrigger',
+          elementName: 'proto-ui-liquid-glass-accordion-trigger',
+        },
+        {
+          prototypeImport: 'accordionContent',
+          exportBaseName: 'LiquidGlassAccordionContent',
+          elementName: 'proto-ui-liquid-glass-accordion-content',
+        },
+      ],
+      { stylePreset: 'liquid-glass' }
+    ),
+    sourceOnly: true,
+  },
+  'shadcn-collapsible': {
+    ...defineCompound(
+      'shadcn-collapsible',
+      'Shadcn Collapsible',
+      '@proto.ui/prototypes-shadcn',
+      '@proto.ui/prototypes-shadcn/collapsible',
+      [
+        {
+          prototypeImport: 'collapsibleRoot',
+          exportBaseName: 'ShadcnCollapsibleRoot',
+          elementName: 'proto-ui-shadcn-collapsible-root',
+        },
+        {
+          prototypeImport: 'collapsibleTrigger',
+          exportBaseName: 'ShadcnCollapsibleTrigger',
+          elementName: 'proto-ui-shadcn-collapsible-trigger',
+        },
+        {
+          prototypeImport: 'collapsibleContent',
+          exportBaseName: 'ShadcnCollapsibleContent',
+          elementName: 'proto-ui-shadcn-collapsible-content',
+        },
+      ],
+      { stylePreset: 'shadcn' }
+    ),
+  },
+
+  'brutalist-collapsible': {
+    ...defineCompound(
+      'brutalist-collapsible',
+      'Brutalist Collapsible',
+      '@proto.ui/prototypes-brutalist',
+      '@proto.ui/prototypes-brutalist/collapsible',
+      [
+        {
+          prototypeImport: 'collapsibleRoot',
+          exportBaseName: 'BrutalistCollapsibleRoot',
+          elementName: 'proto-ui-brutalist-collapsible-root',
+        },
+        {
+          prototypeImport: 'collapsibleTrigger',
+          exportBaseName: 'BrutalistCollapsibleTrigger',
+          elementName: 'proto-ui-brutalist-collapsible-trigger',
+        },
+        {
+          prototypeImport: 'collapsibleContent',
+          exportBaseName: 'BrutalistCollapsibleContent',
+          elementName: 'proto-ui-brutalist-collapsible-content',
+        },
+      ],
+      { stylePreset: 'brutalist' }
+    ),
+  },
+
+  'bootstrap-2-3-2-collapsible': {
+    ...defineCompound(
+      'bootstrap-2-3-2-collapsible',
+      'Bootstrap232 Collapsible',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      '@proto.ui/prototypes-bootstrap-2-3-2/collapsible',
+      [
+        {
+          prototypeImport: 'collapsibleRoot',
+          exportBaseName: 'Bootstrap232CollapsibleRoot',
+          elementName: 'proto-ui-bootstrap-2-3-2-collapsible-root',
+        },
+        {
+          prototypeImport: 'collapsibleTrigger',
+          exportBaseName: 'Bootstrap232CollapsibleTrigger',
+          elementName: 'proto-ui-bootstrap-2-3-2-collapsible-trigger',
+        },
+        {
+          prototypeImport: 'collapsibleContent',
+          exportBaseName: 'Bootstrap232CollapsibleContent',
+          elementName: 'proto-ui-bootstrap-2-3-2-collapsible-content',
+        },
+      ],
+      { stylePreset: 'bootstrap-2-3-2' }
+    ),
+    sourceOnly: true,
+  },
+
+  'liquid-glass-collapsible': {
+    ...defineCompound(
+      'liquid-glass-collapsible',
+      'LiquidGlass Collapsible',
+      '@proto.ui/prototypes-liquid-glass',
+      '@proto.ui/prototypes-liquid-glass/collapsible',
+      [
+        {
+          prototypeImport: 'collapsibleRoot',
+          exportBaseName: 'LiquidGlassCollapsibleRoot',
+          elementName: 'proto-ui-liquid-glass-collapsible-root',
+        },
+        {
+          prototypeImport: 'collapsibleTrigger',
+          exportBaseName: 'LiquidGlassCollapsibleTrigger',
+          elementName: 'proto-ui-liquid-glass-collapsible-trigger',
+        },
+        {
+          prototypeImport: 'collapsibleContent',
+          exportBaseName: 'LiquidGlassCollapsibleContent',
+          elementName: 'proto-ui-liquid-glass-collapsible-content',
+        },
+      ],
+      { stylePreset: 'liquid-glass' }
+    ),
+    sourceOnly: true,
+  },
+
   'base-collapsible': baseCompound('base-collapsible', 'Base Collapsible', [
     {
       prototypeImport: 'collapsibleRoot',

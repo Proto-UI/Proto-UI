@@ -174,10 +174,28 @@ function validateBuiltPackage(pkg, distDir) {
   }
 }
 
+/** Every explicit JS export is a compiler root, even when intentionally kept
+ * out of the runtime barrel to preserve a lazy/import ownership boundary. */
+export function publicPackageSourceEntries(pkg) {
+  const sourceRoot = join(pkg.dir, 'src');
+  const entries = new Set([join(sourceRoot, 'index.ts')]);
+  for (const target of flattenExportTargets(pkg.manifest.exports)) {
+    if (!target.startsWith('./dist/') || !target.endsWith('.js') || target.includes('*')) continue;
+    const stem = resolve(sourceRoot, target.slice('./dist/'.length, -3));
+    if (relative(sourceRoot, stem).startsWith('..'))
+      throw new Error(`${pkg.name}: export escapes its source directory: ${target}`);
+    const entry = ['.ts', '.tsx', '.js'].map((extension) => stem + extension).find(existsSync);
+    if (!entry) throw new Error(`${pkg.name}: missing source for explicit export ${target}`);
+    entries.add(entry);
+  }
+  for (const entry of entries)
+    if (!existsSync(entry)) throw new Error(`${pkg.name}: missing source entry ${entry}`);
+  return [...entries];
+}
+
 export function buildPublicPackage(pkg, options = {}) {
   const distDir = options.outDir ?? join(pkg.dir, 'dist');
-  const sourceEntry = join(pkg.dir, 'src', 'index.ts');
-  if (!existsSync(sourceEntry)) throw new Error(`${pkg.name}: missing src/index.ts`);
+  const sourceEntries = publicPackageSourceEntries(pkg);
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
 
@@ -209,7 +227,7 @@ export function buildPublicPackage(pkg, options = {}) {
     'react-jsx',
     '--strict',
     '--skipLibCheck',
-    sourceEntry,
+    ...sourceEntries,
   ];
   const started = performance.now();
   const result = spawnSync(process.execPath, args, {

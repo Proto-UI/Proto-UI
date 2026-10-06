@@ -84,6 +84,9 @@ function normalizedBundleModuleId(id) {
 function websiteManualChunk(id) {
   const normalizedId = normalizedBundleModuleId(id);
   const modulePath = normalizedId?.split('?', 1)[0];
+  // Only the lazy React/Vue/Vue2 adapters use this reserved-input helper.
+  // Do not pull it into every WC site shell through the broad Base grouping.
+  if (modulePath === 'packages/adapters/base/src/host/instance-associations.ts') return;
   if (
     modulePath === 'apps/www/src/components/site-shadcn-controls.ts' ||
     /^packages\/adapters\/(?:base|web-component)\//u.test(modulePath ?? '')

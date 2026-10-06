@@ -72,6 +72,15 @@ const colorVars = new Set([
 ]);
 
 const staticUtilities: Record<string, string[]> = {
+  // Bounded layout-safety vocabulary used by Accordion and other authored controls.
+  'text-start': ['text-align: start;'],
+  'whitespace-normal': ['white-space: normal;'],
+  'break-words': ['overflow-wrap: break-word;'],
+  'overflow-x-auto': ['overflow-x: auto;'],
+  'm-0': ['margin: 0;'],
+  'outline-2': ['outline-style: solid;', 'outline-width: 2px;'],
+  'outline-offset-2': ['outline-offset: 2px;'],
+  'rounded-2xl': ['border-radius: 1rem;'],
   'forced-colors-focus-outline': ['outline: 2px solid transparent;', 'outline-offset: 2px;'],
   'surface-fade': [
     'transition-property: opacity;',
@@ -237,6 +246,7 @@ const staticUtilities: Record<string, string[]> = {
   'border-b-2': ['border-bottom-width: 2px;', 'border-bottom-style: solid;'],
   'border-t-2': ['border-top-width: 2px;', 'border-top-style: solid;'],
   'border-b': ['border-bottom-width: 1px;', 'border-bottom-style: solid;'],
+  'border-t': ['border-top-width: 1px;', 'border-top-style: solid;'],
   'border-l-2': ['border-left-width: 2px;', 'border-left-style: solid;'],
   'border-ink': ['border-color: var(--pui-foreground);'],
   'border-current': ['border-color: currentColor;'],

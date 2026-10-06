@@ -1,3 +1,4 @@
+import { observeRootSpace } from './root-space-observer';
 import type { AvailableSpaceFrame, AvailableSpaceRect } from '@proto.ui/core';
 import type { AvailableSpaceHost, AvailableSpaceHostConnection } from '../caps';
 
@@ -83,6 +84,7 @@ function trackerFor(document: Document, read: Reader): Tracker {
   (document.body ?? document.documentElement).append(probe);
   const view = document.defaultView;
   const viewport = view?.visualViewport;
+  let stopRoot = () => {};
   const tracker: Tracker = {
     document,
     probe,
@@ -94,12 +96,14 @@ function trackerFor(document: Document, read: Reader): Tracker {
       view?.removeEventListener('resize', tracker.update);
       viewport?.removeEventListener('resize', tracker.update);
       viewport?.removeEventListener('scroll', tracker.update);
+      stopRoot();
       probe.remove();
       byReader!.delete(read);
       if (!byReader!.size) trackers.delete(document);
     },
   };
   byReader.set(read, tracker);
+  stopRoot = observeRootSpace(document, tracker.update);
   view?.addEventListener('resize', tracker.update);
   viewport?.addEventListener('resize', tracker.update);
   viewport?.addEventListener('scroll', tracker.update);

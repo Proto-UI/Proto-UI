@@ -1,9 +1,20 @@
-import type { StyleHandle, ModuleInstance } from '@proto.ui/core';
+import type {
+  StyleHandle,
+  ModuleInstance,
+  MaterialSlot,
+  MaterialCandidate,
+  MaterialIntentFrame,
+} from '@proto.ui/core';
 import type { ModuleFacade, ModuleHooks, ModuleScope } from '@proto.ui/core';
 
 export type FeedbackRuntimeStyleDisposer = (options?: { flush?: boolean }) => void;
 
 export interface FeedbackFacade extends ModuleFacade {
+  material: {
+    /** Setup-only single owned slot and whole candidate contributions. */
+    declare(slot: MaterialSlot): () => void;
+    use(candidate: MaterialCandidate): () => void;
+  };
   style: {
     /** setup-only */
     use: (...handles: StyleHandle[]) => () => void;
@@ -23,6 +34,14 @@ export interface FeedbackFacade extends ModuleFacade {
 }
 
 export type FeedbackPort = {
+  /** Replaces a Rule's style and material together before one visual flush. */
+  replaceVisualRuntime?: (
+    previous: FeedbackRuntimeStyleDisposer | null,
+    handles: readonly StyleHandle[],
+    candidates: readonly MaterialCandidate[]
+  ) => FeedbackRuntimeStyleDisposer | null;
+  exportMaterialFrame?: () => MaterialIntentFrame;
+  materialDiagnostics?: () => readonly string[];
   /** Private material integration: keep relevant Rules in the evaluator. */
   shouldRetainStyleRule?: (tokens: readonly string[]) => boolean;
   /**

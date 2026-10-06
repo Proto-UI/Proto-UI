@@ -1,3 +1,4 @@
+import { observeRootSpace } from './root-space-observer';
 import {
   autoUpdate,
   computePosition,
@@ -138,7 +139,14 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
         cleanup = null;
         const { anchor, floating } = connection;
         if (!isElement(anchor) || !isElement(floating)) return;
-        cleanup = autoUpdate(anchor, floating, position, { animationFrame: false });
+        const stopAuto = autoUpdate(anchor, floating, position, { animationFrame: false });
+        const stopRoot = observeRootSpace(anchor.ownerDocument, () => {
+          void position();
+        });
+        cleanup = () => {
+          stopAuto();
+          stopRoot();
+        };
       };
 
       restart();

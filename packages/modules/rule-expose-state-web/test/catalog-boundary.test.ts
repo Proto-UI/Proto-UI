@@ -55,6 +55,27 @@ function fixture() {
   return { module, caps, map, rules, contributions, remaining, apply, phase };
 }
 
+it('keeps mixed and material-only Rules in the evaluator instead of style-only filtering', () => {
+  const f = fixture();
+  f.rules[0].intent.ops.push({
+    kind: 'feedback.material.use',
+    candidate: { intent: 'liquid-glass' },
+  });
+  f.rules.push({
+    ...f.rules[0],
+    id: 2,
+    intent: {
+      kind: 'ops',
+      ops: [{ kind: 'feedback.material.use', candidate: { intent: 'adaptive-blur' } }],
+    },
+  });
+  f.phase('mounted', 1);
+  f.apply();
+  expect(f.remaining()).toEqual([1, 2]);
+  expect([...f.contributions]).toEqual([]);
+  f.module.hooks?.dispose?.();
+});
+
 it('T-RULE-EXPOSE-STATE-WEB-0001-CASE-LIFETIME: revokes optimized contributions and filtering between view epochs', () => {
   const f = fixture();
   f.phase('mounted', 1);

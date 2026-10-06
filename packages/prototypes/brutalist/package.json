@@ -129,6 +129,16 @@
       "types": "./dist/label/index.d.ts",
       "import": "./dist/label/index.js",
       "default": "./dist/label/index.js"
+    },
+    "./collapsible": {
+      "types": "./dist/collapsible/index.d.ts",
+      "import": "./dist/collapsible/index.js",
+      "default": "./dist/collapsible/index.js"
+    },
+    "./accordion": {
+      "types": "./dist/accordion/index.d.ts",
+      "import": "./dist/accordion/index.js",
+      "default": "./dist/accordion/index.js"
     }
   },
   "description": "Neo-Brutalist Proto UI prototype library with package and CLI family imports.",

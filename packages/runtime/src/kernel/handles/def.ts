@@ -166,6 +166,26 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
     },
 
     feedback: {
+      material: {
+        declare(slot) {
+          ensureSetup('def.feedback.material.declare');
+          const off = feedback.material.declare(slot);
+          recordCaptured(def, 'feedback', off);
+          return () => {
+            ensureSetup('def.feedback.material.declare:dispose');
+            off();
+          };
+        },
+        use(candidate) {
+          ensureSetup('def.feedback.material.use');
+          const off = feedback.material.use(candidate);
+          recordCaptured(def, 'feedback', off);
+          return () => {
+            ensureSetup('def.feedback.material.use:dispose');
+            off();
+          };
+        },
+      },
       style: {
         use: (...handles: StyleHandle[]) => {
           ensureSetup(`def.feedback.style.use`);

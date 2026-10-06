@@ -8,11 +8,22 @@ lifecycleRationale:
   zh-CN: cases 区分计划中的私有纯 resolver/state-machine 证据与尚未实现的 Runtime、optimizer 和宿主集成。 实际测试存在、执行并审阅之前，任何 implementation 都不得标记 passing。 宿主原子性、native paint 与完整 compiler conformance 仍未证明。
 summary: Draft addressable cases for finite candidates, conservative fallback, post-patch ownership, complete snapshots and independent freshness rejection.
 cases:
+  - id: T-MATERIAL-VISUAL-RESULT-0001-CASE-SHARED-CONTRIBUTION
+    title: Public typed intent survives real Runtime and Rule ownership transitions
+    covers:
+      - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-SURFACE
+      - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-WHOLE
+      - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-REPLACE
+      - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-LOWERING
+      - M-FEEDBACK-0001-MATERIAL
+      - HC-FEEDBACK-VISUAL-SINK-0001-INPUT
+      - HC-FEEDBACK-VISUAL-SINK-0001-LIFETIME
+    expectation: Exercise static and material-only Rules, inactive validation, whole contributions, joint replacement, reentrant host invalidation, setup guards, missing host diagnostics, sink replacement, detach/remount and terminal cleanup in the real Runtime. A scripted sink proves receipt/lifetime only, not physical paint or resource leases.
   - id: T-MATERIAL-VISUAL-RESULT-0001-CASE-GRAMMAR
     title: Closed candidates reject arbitrary and malformed material values
     covers:
       - C-FEEDBACK-MATERIAL-0001-GRAMMAR
-    expectation: Accept only the finite version/fidelity/model/variant/phase/center/rounded-rectangle combinations; reject unknown fields, NaN/Infinity, arbitrary coordinates, paths, texture URLs, CSS and shader programs. A strict portable-model request never silently becomes native-semantic.
+    expectation: Accept distinct version 2 liquid-glass and adaptive-blur candidates, including parameter-free static intent. Concrete profile/model remains host-private. Reject unknown fields, NaN/Infinity, arbitrary coordinates, paths, textures, CSS and shaders. Never substitute custom optics and native/browser blur across the requested intent.
   - id: T-MATERIAL-VISUAL-RESULT-0001-CASE-SLOT
     title: Complete exclusive candidates never merge or use last-write-wins
     covers:
@@ -34,7 +45,7 @@ cases:
     title: Pure resolution consumes final style provenance and fails closed on unresolved lowering
     covers:
       - C-FEEDBACK-MATERIAL-0001-PROVENANCE
-    expectation: Supply complete post-patch normalized paint contributions with channel and owned token references; cover adding/removing fill via patch, suppress and clearPatch. Unknown/incomplete or selector-dependent provenance selects fallback and diagnostic, never enhanced. Claims stop at observable Proto intent and do not assert the absence of arbitrary external CSS.
+    expectation: Supply complete post-patch normalized paint contributions with channel and owned token references; cover adding/removing fill via patch, suppress and clearPatch. Unknown/incomplete or selector-dependent provenance preserves legal original style and rejects material admission; it cannot invent a valid fallback. Claims stop at observable Proto intent and do not assert the absence of arbitrary external CSS.
     notes:
       - Synthetic final-style inputs exercise the pure boundary only; they do not prove the current optimizer supplies that boundary.
   - id: T-MATERIAL-VISUAL-RESULT-0001-CASE-GEOMETRY
@@ -44,11 +55,11 @@ cases:
       - C-VISUAL-TRANSACTION-0001-IDENTITY
     expectation: The accepted axis-aligned rounded rectangle uses one final style geometry and radius source. Invalid/unknown/incompatible bounds or radii select fallback and diagnostic. A geometry revision change invalidates old material completion even when surface identity and frame sequence match.
   - id: T-MATERIAL-VISUAL-RESULT-0001-CASE-SAFETY
-    title: Every conservative first-profile veto resolves opaque without a later Rule turn
+    title: Transparency overrides and constrained-motion paths resolve without another Rule turn
     covers:
       - C-FEEDBACK-MATERIAL-0001-SAFETY
       - C-VISUAL-TRANSACTION-0001-FALLBACK
-    expectation: Individually vary reducedMotion, reducedTransparency, forced colors, unsafe/unknown contrast, unknown preference facts, missing/false/unknown/incompatible support and source loss/staleness. Each veto produces the complete opaque fallback immediately in the result. Recovery requires current valid inputs; CSS syntax support alone cannot produce enhanced quality.
+    expectation: Vary transparency, forced colors, contrast and missing/stale support to require immediate opaque fallback. Reduced/unknown motion preserves static material when supported and constrains dynamic deformation; a missing static provider path produces its specific fallback diagnostic. Recovery requires current valid inputs; CSS syntax support alone cannot prove paint.
   - id: T-MATERIAL-VISUAL-RESULT-0001-CASE-SNAPSHOT
     title: Complete snapshot fields distinguish style clear and material tombstone from omission
     covers:
@@ -102,10 +113,50 @@ cases:
       - C-VISUAL-TRANSACTION-0001-REMOVE
       - C-VISUAL-TRANSACTION-0001-BOUNDARY
       - C-FEEDBACK-MATERIAL-0001-QUALITY
+      - HC-FEEDBACK-VISUAL-SINK-0001-EVIDENCE
     expectation: Observe actual host paint across opaque-to-material, source-loss fallback, recovery, style clear, material tombstone, geometry change and surface replacement. No transparent intermediate paint, double fill or mixed-generation clip is visible. Bind evidence to exact Adapter/engine/profile; test interruption and stale callbacks. React setters, Vue shallowRef and immediate requestFlush call order alone cannot pass. Native admission also requires negotiated protocol negative vectors.
     notes:
       - Planned host evidence; this case claims no present Web/native provider support, Apple resemblance or complete compiler support.
 implementations:
+  - id: material-shared-runtime
+    kind: runtime-test
+    status: planned
+    path: packages/runtime/test/contract/material-intent.runtime.test.ts
+    required: true
+    consumesCases:
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-SHARED-CONTRIBUTION
+    notes:
+      - Real Runtime with a scripted intent sink; independent review pending, no Adapter paint admission.
+  - id: material-shared-optimizer
+    kind: module-test
+    status: planned
+    path: packages/modules/rule-expose-state-web/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-SHARED-CONTRIBUTION
+    notes:
+      - Mixed and material-only Rules must remain in the evaluator.
+  - id: material-shared-grammar
+    kind: module-test
+    status: planned
+    path: packages/core/test/material.test.ts
+    required: true
+    consumesCases:
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-GRAMMAR
+    notes:
+      - Version 2 shared data vectors; execution alone is not independent review or provider admission.
+  - id: material-shared-policy
+    kind: module-test
+    status: planned
+    path: packages/modules/feedback/test/shared-material-policy.test.ts
+    required: true
+    consumesCases:
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-SLOT
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-FALLBACK
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-SAFETY
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-PURE
+    notes:
+      - Pure host-fact inputs establish eligibility policy, never source acquisition or committed paint.
   - id: material-visual-result-unit
     kind: module-test
     status: planned
@@ -124,7 +175,7 @@ implementations:
       - T-MATERIAL-VISUAL-RESULT-0001-CASE-RETIREMENT
       - T-MATERIAL-VISUAL-RESULT-0001-CASE-PURE
     notes:
-      - Planned private implementation target is packages/modules/feedback/src/material/visual-result.ts; no public export or host wiring is implied.
+      - The private version 1 resolver in packages/modules/feedback/src/material/visual-result.ts retains historical profile and transaction evidence. Its old motion veto and refractive grammar do not implement the version 2 common policy; migration is pending.
       - Keep planned until the actual implementation and tests exist and their executed results have been reviewed against these cases.
       - Pure tests can establish normalized-input and logical transaction behavior only, not physical host atomicity or real provider support.
   - id: material-style-runtime-integration
@@ -145,7 +196,19 @@ implementations:
     notes:
       - No executable path or Adapter provider claim exists yet; add exact profile-bound real paint/lifetime evidence before admission.
 verifies:
+  hostCaps:
+    - id: HC-FEEDBACK-VISUAL-SINK-0001
+      anchors:
+        - HC-FEEDBACK-VISUAL-SINK-0001-INPUT
+        - HC-FEEDBACK-VISUAL-SINK-0001-LIFETIME
+        - HC-FEEDBACK-VISUAL-SINK-0001-EVIDENCE
   contracts:
+    - id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+      anchors:
+        - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-SURFACE
+        - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-WHOLE
+        - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-REPLACE
+        - C-RULE-INTENT-FEEDBACK-MATERIAL-0001-LOWERING
     - id: C-FEEDBACK-MATERIAL-0001
       anchors:
         - C-FEEDBACK-MATERIAL-0001-GRAMMAR

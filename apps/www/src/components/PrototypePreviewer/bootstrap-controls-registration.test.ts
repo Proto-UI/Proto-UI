@@ -33,7 +33,18 @@ describe('Bootstrap 2.3.2 partial control registration', () => {
     });
   }
   it('does not alias missing parts, kinds or claim a complete family', () => {
-    expect(Object.keys(PROJECTION_FAMILY_MANIFESTS['bootstrap-2-3-2'].families)).toHaveLength(7);
+    expect(Object.keys(PROJECTION_FAMILY_MANIFESTS['bootstrap-2-3-2'].families)).toEqual([
+      'accordion',
+      'collapsible',
+      'label',
+      'button',
+      'checkbox',
+      'switch',
+      'toggle',
+      'input',
+      'textarea',
+      'separator',
+    ]);
     expect(() => resolveProjectionPart('bootstrap-2-3-2', 'switch', 'indicator')).toThrow(
       /no part indicator/
     );

@@ -166,3 +166,84 @@ describe('module-positioning: Floating UI host', () => {
     lease.dispose();
   });
 });
+
+it('updates a same-size anchor when only root space changes and releases that observation', async () => {
+  const root = document.documentElement;
+  const oldWidth = Object.getOwnPropertyDescriptor(root, 'clientWidth');
+  const oldObserver = Object.getOwnPropertyDescriptor(window, 'ResizeObserver');
+  let width = 1000;
+  Object.defineProperty(root, 'clientWidth', { configurable: true, get: () => width });
+  const observers: { targets: Set<Element>; fire(): void; disconnect: ReturnType<typeof vi.fn> }[] =
+    [];
+  class Resize {
+    targets = new Set<Element>();
+    disconnect = vi.fn(() => this.targets.clear());
+    constructor(callback: ResizeObserverCallback) {
+      observers.push({
+        targets: this.targets,
+        fire: () =>
+          callback(
+            [
+              {
+                target: root,
+                contentRect: root.getBoundingClientRect(),
+                borderBoxSize: [],
+                contentBoxSize: [],
+                devicePixelContentBoxSize: [],
+              },
+            ],
+            this as unknown as ResizeObserver
+          ),
+        disconnect: this.disconnect,
+      });
+    }
+    observe(target: Element) {
+      this.targets.add(target);
+    }
+    unobserve(target: Element) {
+      this.targets.delete(target);
+    }
+  }
+  vi.stubGlobal('ResizeObserver', Resize);
+  Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: Resize });
+  const anchor = document.createElement('button'),
+    floating = document.createElement('div');
+  document.body.append(anchor, floating);
+  setRect(anchor, rect(100, 100, 50, 20));
+  setRect(floating, rect(0, 0, 40, 10));
+  const lease = createFloatingUiAnchoredPositionHost().attach({
+    anchor,
+    floating,
+    config: baseConfig,
+  });
+  try {
+    await flush();
+    expect(floating.style.left).toBe('100px');
+    const observer = observers.find((o) => o.targets.has(root));
+    expect(observer).toBeDefined();
+    width = 985;
+    setRect(anchor, rect(92.5, 100, 50, 20));
+    observer!.fire();
+    await flush();
+    expect(floating.style.left).toBe('92.5px');
+    width = 1000;
+    setRect(anchor, rect(100, 100, 50, 20));
+    observer!.fire();
+    await flush();
+    expect(floating.style.left).toBe('100px');
+    lease.dispose();
+    expect(observer!.disconnect).toHaveBeenCalledTimes(1);
+    width = 985;
+    setRect(anchor, rect(92.5, 100, 50, 20));
+    observer!.fire();
+    await flush();
+    expect(floating.style.left).toBe('100px');
+  } finally {
+    lease.dispose();
+    vi.unstubAllGlobals();
+    if (oldObserver) Object.defineProperty(window, 'ResizeObserver', oldObserver);
+    else Reflect.deleteProperty(window, 'ResizeObserver');
+    if (oldWidth) Object.defineProperty(root, 'clientWidth', oldWidth);
+    else Reflect.deleteProperty(root, 'clientWidth');
+  }
+});

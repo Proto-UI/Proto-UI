@@ -16,8 +16,8 @@ criteria:
       zh-CN: '仅目标当前活跃租约可投射；替换、释放、测量重入撤销旧输出。清理只恢复仍归本租约的投射属性，保留外部后写值和优先级。未知事实撤销几何，不伪造零区域。'
   - id: HC-AVAILABLE-SPACE-0001-OBSERVATION
     text:
-      en: 'Web shares one measurement probe and resize/visual-region listeners per active document and reader, releasing all on the last lease. Inactive or invalid targets acquire no observation; document migration releases the former observation before rebinding.'
-      zh-CN: 'Web 同 document 和 reader 的活跃租约共享一个测量节点与 resize/可见区域监听，最后租约退出后全部释放。无效或非活跃目标不获取监听；document 迁移先释放旧监听。'
+      en: 'Web shares one measurement probe and resize/visual-region listeners per active document and reader, releasing all on the last lease. Available-space and anchored leases also share document-root size/origin observation, so scrollbar changes do not require anchor resizing or perpetual animation-frame polling. Inactive or invalid targets acquire no observation; document migration releases the former observation before rebinding.'
+      zh-CN: 'Web 同 document 和 reader 的活跃租约共享一个测量节点与 resize/可见区域监听，最后租约退出后全部释放。Available-space 与 anchored 租约还共享 document root 尺寸/原点观察；滚动条变化不依赖 anchor resize，也不用永久逐帧轮询。无效或非活跃目标不获取监听；document 迁移先释放旧监听。'
 verifies:
   tests: [T-AVAILABLE-SPACE-0001]
 sources:

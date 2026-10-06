@@ -1,11 +1,13 @@
+import { COLLAPSIBLE_PROJECTIONS } from '../../base/test/fixtures/collapsible-projections';
 import { createVue2Adapter } from '../src';
 import { Vue2Any, Vue2RuntimeAny, flushVue2 } from './utils/vue2';
 import {
   collapsibleAdapterConformance,
   type CollapsibleTree,
+  type CollapsibleDriver,
 } from '../../base/test/fixtures/collapsible-conformance';
 
-collapsibleAdapterConformance('vue2', async (tree) => {
+const mount: CollapsibleDriver = async (tree) => {
   const host = document.createElement('div');
   document.body.append(host);
   const adapt = createVue2Adapter(Vue2RuntimeAny);
@@ -64,4 +66,9 @@ collapsibleAdapterConformance('vue2', async (tree) => {
       host.remove();
     },
   };
-});
+};
+
+collapsibleAdapterConformance('vue2', mount);
+for (const [family, projection] of COLLAPSIBLE_PROJECTIONS) {
+  collapsibleAdapterConformance(`vue2/${family}`, mount, projection);
+}

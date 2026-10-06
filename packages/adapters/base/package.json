@@ -15,6 +15,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./internal/instance-associations": {
+      "types": "./dist/host/instance-associations.d.ts",
+      "import": "./dist/host/instance-associations.js",
+      "default": "./dist/host/instance-associations.js"
     }
   },
   "description": "Base package for building Proto UI adapters.",

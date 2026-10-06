@@ -91,7 +91,15 @@ export function createPeerControlLabelHost(options: {
         view: () => (current === lease && options.live() ? lease.view : null),
         setActivation(activation) {
           if (current !== lease || lease.plan.activation === activation) return;
-          lease.plan = { ...lease.plan, activation };
+          // An unseen response from the old action policy can have a higher
+          // view revision. A new opaque lease, not a revision threshold alone,
+          // binds the response and any action to this option generation.
+          lease.plan = {
+            ...lease.plan,
+            leaseId: `${options.sessionId}:label:${++nextNativeLease}`,
+            activation,
+          };
+          lease.lastActivation = 0;
           lease.awaitingActionView = true;
           options.publish(lease.plan);
         },

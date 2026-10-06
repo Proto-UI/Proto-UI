@@ -180,7 +180,21 @@ class A11yModuleImpl extends ModuleBase {
       if (this.controlLabelName || !canName()) return null;
       const contribution = { target };
       this.controlLabelName = contribution;
-      this.applyProjection();
+      try {
+        this.applyProjection();
+      } catch (error) {
+        // No lease is returned on failure. Release this contribution now so a
+        // retry can claim naming; never erase a reentrantly installed successor.
+        if (this.controlLabelName === contribution) {
+          this.controlLabelName = null;
+          try {
+            this.applyProjection();
+          } catch {
+            // The original projection failure remains the observable error.
+          }
+        }
+        throw error;
+      }
       return {
         isActive: () => this.controlLabelName === contribution && canName(),
         dispose: () => {

@@ -264,3 +264,6 @@ export { default as ShadcnSurfaceRoot, surfaceRoot } from './surface';
 export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
 
 export * from './label';
+
+export * from './collapsible';
+export * from './accordion';

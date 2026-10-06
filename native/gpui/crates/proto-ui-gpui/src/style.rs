@@ -151,7 +151,7 @@ fn apply(
         // This renderer's plain Text surfaces do not create a native selection
         // controller. `none` is therefore honored directly. Other selection
         // intents still require the dedicated text-selection implementation.
-        "user-select" if value == "none" => {}
+        "user-select" | "-webkit-user-select" if value == "none" => {}
         "display" => match value {
             "flex" | "inline-flex" => style.display = Some(Display::Flex),
             "block" | "inline-block" => style.display = Some(Display::Block),
@@ -231,6 +231,18 @@ fn apply(
             style.padding.right = Some(edge);
             style.padding.bottom = Some(edge);
             style.padding.left = Some(edge);
+        }
+        "margin" => {
+            // The current source emits only m-0. Do not infer general
+            // multi-value/auto/percentage margin support from that reset.
+            if value != "0" && value != "0px" {
+                return Err(Unmapped::UnsupportedValue);
+            }
+            let edge = to_length(length(value)?)?;
+            style.margin.top = Some(edge);
+            style.margin.right = Some(edge);
+            style.margin.bottom = Some(edge);
+            style.margin.left = Some(edge);
         }
         "padding-inline" => {
             let edge = to_definite(length(value)?)?;

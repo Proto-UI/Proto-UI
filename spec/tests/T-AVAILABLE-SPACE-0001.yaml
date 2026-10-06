@@ -36,6 +36,12 @@ cases:
       ]
     expectation: live-region-insets-long-content-and-full-window-mask
 implementations:
+  - id: shared-root-space-observation
+    kind: module-test
+    status: passing
+    path: packages/modules/positioning/test/root-space-observer.test.ts
+    required: true
+    consumesCases: [T-AVAILABLE-SPACE-0001-CASE-HOST]
   - id: available-space-host-controls
     kind: module-test
     status: passing

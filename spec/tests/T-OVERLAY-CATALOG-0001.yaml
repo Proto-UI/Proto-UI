@@ -9,6 +9,10 @@ lifecycleRationale: >-
 since: 0.3.0-alpha.0
 summary: Runtime input identity, real Adapter wiring with simulated DOM, resource replacement and shared modal locks; no generic focus or full modal certification.
 cases:
+  - id: T-OVERLAY-CATALOG-0001-CASE-GUTTER
+    title: Compensate measured removed gutters without double padding
+    covers: [HC-OVERLAY-MODAL-0001-GUTTER]
+    expectation: actual-width-delta-and-side-with-stable-gutter-and-nested-restoration
   - id: T-OVERLAY-CATALOG-0001-CASE-ESCAPE
     title: One scoped Escape owner and immutable privileged input metadata
     covers:
@@ -47,6 +51,12 @@ cases:
       - C-AS-OVERLAY-0001-P
     expectation: only-selected-root-receives-escape-request-while-owner-keeps-open
 implementations:
+  - id: modal-gutter-delta-controls
+    kind: module-test
+    status: passing
+    path: packages/modules/overlay/test/modal-lock.test.ts
+    required: true
+    consumesCases: [T-OVERLAY-CATALOG-0001-CASE-GUTTER]
   - id: runtime-overlay-escape
     kind: runtime-test
     status: passing

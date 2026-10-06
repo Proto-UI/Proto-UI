@@ -155,6 +155,11 @@
       "types": "./dist/label/index.d.ts",
       "import": "./dist/label/index.js",
       "default": "./dist/label/index.js"
+    },
+    "./accordion": {
+      "types": "./dist/accordion/index.d.ts",
+      "import": "./dist/accordion/index.js",
+      "default": "./dist/accordion/index.js"
     }
   },
   "description": "Base Proto UI prototype library for reusable interaction prototypes.",

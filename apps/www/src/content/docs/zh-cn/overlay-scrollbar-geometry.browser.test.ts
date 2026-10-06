@@ -246,12 +246,15 @@ for (const runtime of RUNTIMES)
       try {
         await ready(page, runtime, direction);
         const trigger = page.getByRole('button', { name: '打开对话框', exact: true });
-        for (const gutter of ['auto', 'stable'] as const) {
+        for (const scenario of ['body-propagated', 'stable-gutter', 'root-owned'] as const) {
+          const gutter = scenario === 'stable-gutter' ? 'stable' : 'auto';
           await layout(page, 'scroll', gutter);
-          // Body overflow is the real modal owner's surface; root overflow auto lets it propagate.
-          await page.evaluate(() => {
-            document.documentElement.style.overflowY = 'auto';
-          });
+          // CSS propagates body overflow only through a visible root. Keep an
+          // explicit root-owned scrollbar as a separate non-disappearing case.
+          await page.evaluate((scenario) => {
+            document.documentElement.style.overflow =
+              scenario === 'root-owned' ? 'auto' : 'visible';
+          }, scenario);
           await trigger.scrollIntoViewIfNeeded();
           const read = () =>
             trigger.evaluate((button) => ({
@@ -286,7 +289,7 @@ for (const runtime of RUNTIMES)
           await settled(dialog);
           await frames(page);
           const locked = await read();
-          await capture(page, `${runtime}-${direction}-dialog-${gutter}-locked`, {
+          await capture(page, `${runtime}-${direction}-dialog-${scenario}-locked`, {
             before,
             locked,
           });
@@ -294,10 +297,17 @@ for (const runtime of RUNTIMES)
           await dialog.waitFor({ state: 'hidden' });
           await expect.poll(async () => (await read()).inline).toEqual(before.inline);
           const restored = await read();
-          await capture(page, `${runtime}-${direction}-dialog-${gutter}-restored`, {
+          await capture(page, `${runtime}-${direction}-dialog-${scenario}-restored`, {
             before,
             restored,
           });
+          expect(before.viewport.scrollbar, 'Real classic scrollbar prerequisite').toBeGreaterThan(
+            0
+          );
+          const gained = locked.viewport.clientWidth - before.viewport.clientWidth;
+          if (scenario === 'body-propagated')
+            expect(gained, 'Body lock actually removes the viewport gutter').toBeGreaterThan(0);
+          else expect(gained, 'A retained gutter must not acquire duplicate compensation').toBe(0);
           expect(Math.abs(locked.button.x - before.button.x)).toBeLessThanOrEqual(1);
           expect(Math.abs(locked.button.width - before.button.width)).toBeLessThanOrEqual(1);
           expect(restored.inline).toEqual(before.inline);

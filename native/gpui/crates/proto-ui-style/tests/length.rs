@@ -203,11 +203,16 @@ fn tells_a_length_apart_from_a_keyword() {
 /// this observed source inventory is empty.
 const INVALID_ON_THE_WEB_TOO: [&str; 0] = [];
 
+// Valid CSS, but choosing the smaller value needs the real containing size.
+// This source inventory does not certify a native available-space projection.
+const NEEDS_LAYOUT_BASIS: [&str; 1] = ["min(32rem,calc(100% - 2rem))"];
+
 #[test]
 fn evaluates_every_length_a_theme_can_produce() {
     let context = LengthContext::default();
     let mut checked = 0usize;
     let mut invalid: BTreeSet<String> = BTreeSet::new();
+    let mut needs_basis: BTreeSet<String> = BTreeSet::new();
 
     for language in themes().names() {
         for scheme in [ColorScheme::Light, ColorScheme::Dark] {
@@ -228,6 +233,9 @@ fn evaluates_every_length_a_theme_can_produce() {
                         Err(LengthError::InvalidArithmetic(_)) => {
                             invalid.insert(value.clone());
                         }
+                        Err(LengthError::NeedsBasis(_)) => {
+                            needs_basis.insert(value.clone());
+                        }
                         Err(error) => {
                             panic!("{language}/{scheme:?} {token} {property} = {value}: {error:?}")
                         }
@@ -246,4 +254,10 @@ fn evaluates_every_length_a_theme_can_produce() {
         "the set of expressions that are invalid CSS changed"
     );
     assert!(checked > 200, "only checked {checked} lengths");
+    let expected_basis: BTreeSet<String> =
+        NEEDS_LAYOUT_BASIS.iter().map(|s| s.to_string()).collect();
+    assert_eq!(
+        needs_basis, expected_basis,
+        "the exact set of values requiring layout context changed"
+    );
 }

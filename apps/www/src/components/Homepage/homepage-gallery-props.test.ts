@@ -41,13 +41,55 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     };
     await settle();
     verify();
-    expect(host.querySelectorAll('[data-home-text]')).toHaveLength(28);
+    expect(host.querySelectorAll('[data-home-text]')).toHaveLength(24);
     for (const owner of host.querySelectorAll('[data-home-text]')) {
       const text = owner.querySelector('[data-pui-root]')!;
       expect(text).not.toBeNull();
       expect(text.getAttribute('data-pui-style')).toContain('font-');
       expect(owner.querySelectorAll('[data-pui-root]')).toHaveLength(1);
     }
+    // Four formerly passive Text slots are now real Label prototypes. Keep
+    // their own identity and exact one-control naming edges in the inventory.
+    const labels = Array.from(host.querySelectorAll<HTMLElement>(`wc-${family}-label-root`));
+    const expectedLabels = [
+      ['gallery-checkbox', 'Select'],
+      ['choice-product', 'Product updates'],
+      ['choice-components', 'New components'],
+      ['choice-events', 'Community events'],
+    ] as const;
+    const verifyLabels = () => {
+      expect(labels).toHaveLength(4);
+      const ids = labels.map((label) => label.id);
+      expect(new Set(ids).size).toBe(4);
+      expect(ids.every(Boolean)).toBe(true);
+      for (const [name, text] of expectedLabels) {
+        const control = ref(name);
+        const label = labels.find((label) => label.textContent?.trim() === text)!;
+        expect(label, text).toBeDefined();
+        expect(label.hasAttribute('data-pui-root')).toBe(true);
+        expect(label.closest('[data-home-text]')).toBeNull();
+        expect(label.getAttribute('data-pui-style')).toContain('font-');
+        expect(control.getAttribute('role')).toBe('checkbox');
+        expect(control.getAttribute('aria-labelledby')?.split(/\s+/)).toEqual([label.id]);
+        for (const other of labels.filter((other) => other !== label)) {
+          expect(control.getAttribute('aria-labelledby')?.split(/\s+/)).not.toContain(other.id);
+        }
+      }
+    };
+    verifyLabels();
+    // Bounded observer negative controls: a missing or cross-wired relation
+    // must not become a pass merely because the total owner count is 28.
+    const labelledControl = ref('gallery-checkbox');
+    const originalRelation = labelledControl.getAttribute('aria-labelledby')!;
+    labelledControl.removeAttribute('aria-labelledby');
+    expect(verifyLabels).toThrow();
+    labelledControl.setAttribute(
+      'aria-labelledby',
+      labels.find((label) => label.textContent?.trim() === 'Product updates')!.id
+    );
+    expect(verifyLabels).toThrow();
+    labelledControl.setAttribute('aria-labelledby', originalRelation);
+    verifyLabels();
     for (const tile of host.querySelectorAll('[data-gallery-demo]')) {
       const surface = tile.querySelector('[data-pui-root]')!;
       const appearance =

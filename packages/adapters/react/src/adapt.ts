@@ -1,4 +1,4 @@
-import { withoutInstanceAssociations } from '@proto.ui/adapter-base';
+import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import {
   getModuleDeclaration,

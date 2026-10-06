@@ -212,6 +212,7 @@ describe('prototypes/brutalist: dialog', () => {
       'max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]',
       'max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)]',
       'overflow-y-auto',
+      'transition-opacity',
       'p-6',
       'rounded-base',
       'border-2',

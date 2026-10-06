@@ -42,3 +42,5 @@ export { default as BaseSurfaceRoot, surfaceRoot, asSurfaceRoot } from './surfac
 export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
 
 export * from './label';
+
+export * from "./accordion";

@@ -23,18 +23,29 @@ export type CollapsibleMount = {
   unmount(): Promise<void>;
 };
 
-type Mount = (tree: CollapsibleTree[]) => Promise<CollapsibleMount>;
+export type CollapsibleDriver = (tree: CollapsibleTree[]) => Promise<CollapsibleMount>;
+export type CollapsibleProjection = {
+  collapsibleRoot: Prototype<any, any>;
+  collapsibleTrigger: Prototype<any, any>;
+  collapsibleContent: Prototype<any, any>;
+};
 let nextId = 0;
 
-function recipe(name: string, props: Record<string, unknown> = {}, keepMounted = false) {
-  const prefix = `collapsible-${name}-${++nextId}`;
+function createRecipe(
+  name: string,
+  props: Record<string, unknown> = {},
+  keepMounted = false,
+  projection?: CollapsibleProjection
+) {
+  const prefix = `collapsible-${name.replaceAll('/', '-')}-${++nextId}`;
   const requests: Array<{ open: boolean; reason: string }> = [];
   const lifecycle = { created: 0, mounted: 0, unmounted: 0, disposed: 0 };
   let rootRun!: RunHandle<any>;
   const root = definePrototype({
     name: `${prefix}-root`,
     setup(def) {
-      asCollapsibleRoot();
+      if (projection) projection.collapsibleRoot.setup(def);
+      else asCollapsibleRoot();
       def.lifecycle.onCreated((run) => {
         rootRun = run;
       });
@@ -49,15 +60,17 @@ function recipe(name: string, props: Record<string, unknown> = {}, keepMounted =
   });
   const trigger = definePrototype({
     name: `${prefix}-trigger`,
-    setup() {
-      asCollapsibleTrigger();
+    setup(def) {
+      if (projection) projection.collapsibleTrigger.setup(def);
+      else asCollapsibleTrigger();
       return (renderer) => [renderer.el('span', `${prefix}-trigger`), renderer.slot()];
     },
   });
   const content = definePrototype({
     name: `${prefix}-content`,
     setup(def) {
-      asCollapsibleContent();
+      if (projection) projection.collapsibleContent.setup(def);
+      else asCollapsibleContent();
       def.lifecycle.onCreated(() => {
         lifecycle.created += 1;
       });
@@ -107,7 +120,13 @@ async function until(view: CollapsibleMount, predicate: () => boolean) {
 
 // Every driver mounts actual framework owners. These are simulated-DOM
 // translation checks; browser paint/native Tab fidelity is separate evidence.
-export function collapsibleAdapterConformance(name: string, mount: Mount) {
+export function collapsibleAdapterConformance(
+  name: string,
+  mount: CollapsibleDriver,
+  projection?: CollapsibleProjection
+) {
+  const recipe = (name: string, props: Record<string, unknown> = {}, keepMounted = false) =>
+    createRecipe(name, props, keepMounted, projection);
   describe(`${name}: Collapsible compound translation`, () => {
     it('retains one logical instance across L1 epochs and cleans up terminal ownership', async () => {
       // T-BASE-COLLAPSIBLE-0001-CASE-UNCONTROLLED

@@ -26,9 +26,19 @@ const EXPECTED_SHARED_BASE_FAMILY_IDS = [
 ] as const;
 
 const EXPECTED_COMPONENT_IDS = {
-  shadcn: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'label', 'input', 'checkbox', 'radio-group'],
+  shadcn: [
+    ...EXPECTED_SHARED_BASE_FAMILY_IDS,
+    'accordion',
+    'collapsible',
+    'label',
+    'input',
+    'checkbox',
+    'radio-group',
+  ],
   brutalist: [
     ...EXPECTED_SHARED_BASE_FAMILY_IDS,
+    'accordion',
+    'collapsible',
     'checkbox',
     'label',
     'badge',
@@ -720,6 +730,26 @@ describe('Website projection-family manifests', () => {
         { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
       ],
 
+      'shadcn/accordion': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      'brutalist/accordion': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' },
+      ],
+      'bootstrap-2-3-2/accordion': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      'liquid-glass/accordion': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
+      'shadcn/collapsible': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      'brutalist/collapsible': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' },
+      ],
+      'bootstrap-2-3-2/collapsible': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      'liquid-glass/collapsible': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
       'shadcn/toggle': [{ basePrototypeId: null, prototypeId: 'lucide-icon' }],
       'shadcn/dialog': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
       'brutalist/card': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
@@ -798,8 +828,19 @@ describe('partial new projection families', () => {
       const manifest = PROJECTION_FAMILY_MANIFESTS[family];
       expect(Object.keys(manifest.families)).toEqual(
         family === 'bootstrap-2-3-2'
-          ? ['label', 'button', 'checkbox', 'switch', 'toggle', 'input', 'textarea', 'separator']
-          : ['label', 'button']
+          ? [
+              'accordion',
+              'collapsible',
+              'label',
+              'button',
+              'checkbox',
+              'switch',
+              'toggle',
+              'input',
+              'textarea',
+              'separator',
+            ]
+          : ['accordion', 'collapsible', 'label', 'button']
       );
       expect(() => validateProjectionFamilyManifest(manifest)).not.toThrow();
       expect(resolveProjectionPart(family, 'button', 'root').prototypeId).toBe(`${family}-button`);
@@ -814,6 +855,52 @@ describe('partial new projection families', () => {
         projectionFamilyId: family,
         familyId: 'button',
       });
+    });
+  }
+});
+
+describe('Collapsible projection manifest closure', () => {
+  for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const) {
+    it(`${family} resolves the real three parts and separate controlled acceptance Button`, () => {
+      expect(resolveProjectionRecipe(`demo-${family}-collapsible`)).toEqual({
+        projectionFamilyId: family,
+        familyId: 'collapsible',
+      });
+      for (const part of ['root', 'trigger', 'content']) {
+        expect(resolveProjectionPart(family, 'collapsible', part)).toEqual({
+          prototypeId: `${family}-collapsible-${part}`,
+          basePrototypeId: `P-BASE-COLLAPSIBLE${part === 'root' ? '' : '-' + part.toUpperCase()}`,
+        });
+      }
+      expect(PROJECTION_FAMILY_MANIFESTS[family].families.collapsible.auxiliaryPrototypes).toEqual([
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: `${family}-button` },
+      ]);
+    });
+  }
+});
+
+describe('Accordion exact family projection admission', () => {
+  for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const) {
+    it(`${family} owns its real five-atom recipe and never borrows the site default theme`, () => {
+      expect(resolveProjectionRecipe(`demo-${family}-accordion`)).toEqual({
+        projectionFamilyId: family,
+        familyId: 'accordion',
+      });
+      const manifest = PROJECTION_FAMILY_MANIFESTS[family].families.accordion;
+      expect(Object.keys(manifest.parts)).toEqual([
+        'root',
+        'item',
+        'heading',
+        'trigger',
+        'content',
+      ]);
+      for (const role of ['root', 'item', 'heading', 'trigger', 'content'])
+        expect(resolveProjectionPart(family, 'accordion', role).prototypeId).toBe(
+          `${family}-accordion-${role}`
+        );
+      expect(manifest.auxiliaryPrototypes).toEqual([
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: `${family}-button` },
+      ]);
     });
   }
 });

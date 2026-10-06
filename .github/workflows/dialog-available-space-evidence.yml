@@ -1,0 +1,109 @@
+name: Dialog available-space matched evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dialog-available-space-evidence.yml'
+      - 'apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/server-readiness*'
+      - 'scripts/test/check-dialog-baseline-evidence*'
+      - 'packages/modules/positioning/**'
+      - 'packages/modules/overlay/**'
+      - 'packages/prototypes/*/src/dialog/**'
+      - 'packages/adapters/**'
+      - 'packages/cli/**'
+      - 'packages/core/**'
+      - 'packages/hooks/**'
+      - 'packages/runtime/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dialog-space-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BASELINE_SHA: 15d864de54210c2eebc4f4b2fec6235324989989
+jobs:
+  matched-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        subject: [baseline, candidate]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          path: candidate
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.subject == 'baseline' && env.BASELINE_SHA || env.CANDIDATE_SHA }}
+          path: subject
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked subjects and matching public font resources
+        working-directory: subject
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          mkdir -p "$RUNNER_TEMP/dialog-space"
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$RUNNER_TEMP/dialog-space/font-environment.txt"
+          fc-match -f '%{family}\n%{file}\n' sans-serif >> "$RUNNER_TEMP/dialog-space/font-environment.txt"
+          CHROME=$(command -v google-chrome || command -v chromium)
+          "$CHROME" --version > "$RUNNER_TEMP/dialog-space/browser-environment.txt"
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Bind one complete candidate probe closure to both source subjects
+        run: |
+          set -euo pipefail
+          for PROBE in \
+            apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts \
+            apps/www/src/content/docs/zh-cn/browser-harness.ts \
+            scripts/test/server-readiness.mjs; do
+            cp "candidate/$PROBE" "subject/$PROBE"
+            sha256sum "subject/$PROBE" >> "$RUNNER_TEMP/dialog-space/probe-sha256.txt"
+          done
+          git -C subject rev-parse HEAD > "$RUNNER_TEMP/dialog-space/subject-sha.txt"
+          git -C candidate rev-parse HEAD > "$RUNNER_TEMP/dialog-space/probe-sha.txt"
+          node --test candidate/scripts/test/check-dialog-baseline-evidence.test.mjs
+      - name: Run identical native inputs and retain historical failing assertions
+        working-directory: subject
+        env:
+          PROTO_UI_DIALOG_PROBE_SHA: ${{ env.CANDIDATE_SHA }}
+          PROTO_UI_DIALOG_SUBJECT: ${{ matrix.subject }}
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/dialog-space
+        run: |
+          set -uo pipefail
+          set +e
+          corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
+            apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts \
+            --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/dialog-space/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/dialog-space/browser.log"
+          status=${PIPESTATUS[0]}
+          set -e
+          echo "$status" > "$RUNNER_TEMP/dialog-space/product-exit-code.txt"
+          if [[ "$PROTO_UI_DIALOG_SUBJECT" == baseline ]]; then
+            node ../candidate/scripts/test/check-dialog-baseline-evidence.mjs \
+              "$RUNNER_TEMP/dialog-space/vitest.json" \
+              "$RUNNER_TEMP/dialog-space/dialog-available-space/observations.json" "$status" \
+              | tee "$RUNNER_TEMP/dialog-space/expected-failure-classification.json"
+          else
+            exit "$status"
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dialog-space-${{ matrix.subject }}-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/dialog-space
+          retention-days: 30
+          if-no-files-found: error

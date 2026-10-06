@@ -13,3 +13,6 @@ export { default as Bootstrap232SurfaceRoot, surfaceRoot } from './surface';
 export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
 
 export * from './label';
+
+export * from './collapsible';
+export * from './accordion';
