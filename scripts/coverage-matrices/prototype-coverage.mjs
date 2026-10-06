@@ -301,7 +301,8 @@ function historicalSourceFs(evidence, repoRoot) {
 }
 
 // Git objects are needed only when refreshing source evidence. Validation of a
-// separate candidate uses stored historical facts and current worktree hashes.
+// separate candidate uses stored historical facts and self-verifying Git tree
+// proofs plus current bytes, so a shallow checkout needs no older Git objects.
 const gitSnapshots = new Map();
 function gitSourceFs(repoRoot, revision) {
   const key = repoRoot + ':' + revision;
@@ -359,6 +360,157 @@ function gitSourceFs(repoRoot, revision) {
   };
   gitSnapshots.set(key, api);
   return api;
+}
+
+function gitObjectSha(type, bytes) {
+  return createHash('sha1').update(`${type} ${bytes.length}\0`).update(bytes).digest('hex');
+}
+function treeEntries(bytes) {
+  const entries = new Map();
+  let offset = 0;
+  while (offset < bytes.length) {
+    const space = bytes.indexOf(32, offset);
+    const nul = bytes.indexOf(0, space + 1);
+    if (space <= offset || nul < 0 || nul + 21 > bytes.length)
+      throw new Error('Malformed Git object proof tree');
+    const mode = bytes.subarray(offset, space).toString('ascii');
+    const name = bytes.subarray(space + 1, nul).toString('utf8');
+    if (!name || name.includes('/') || name === '.' || name === '..' || entries.has(name))
+      throw new Error('Invalid Git object proof tree name');
+    entries.set(name, { mode, sha: bytes.subarray(nul + 1, nul + 21).toString('hex') });
+    offset = nul + 21;
+  }
+  return entries;
+}
+const gitProofSnapshots = new Map();
+function captureGitObjectProof(repoRoot, object, paths) {
+  const key = repoRoot + ':' + object + ':' + sha256(paths.join('\0'));
+  if (gitProofSnapshots.has(key)) return structuredClone(gitProofSnapshots.get(key));
+  const read = (type, sha) =>
+    execFileSync('git', ['cat-file', type, sha], {
+      cwd: repoRoot,
+      maxBuffer: 16 * 1024 * 1024,
+    });
+  const objectType = read('-t', object).toString().trim();
+  if (!['commit', 'tree'].includes(objectType))
+    throw new Error('Candidate object is not commit/tree');
+  const commit = objectType === 'commit' ? read('commit', object) : undefined;
+  const rootTree = commit ? /^tree ([a-f0-9]{40})\n/.exec(commit.toString('utf8'))?.[1] : object;
+  if (!rootTree) throw new Error('Candidate commit has no root tree');
+  const trees = new Map();
+  const parse = (sha) => {
+    if (!trees.has(sha)) {
+      const raw = read('tree', sha);
+      if (gitObjectSha('tree', raw) !== sha) throw new Error('Git tree content hash mismatch');
+      trees.set(sha, { sha, contentBase64: raw.toString('base64'), entries: treeEntries(raw) });
+    }
+    return trees.get(sha).entries;
+  };
+  for (const file of paths) {
+    let tree = rootTree;
+    const parts = file.split('/');
+    for (let i = 0; i < parts.length; i++) {
+      const entry = parse(tree).get(parts[i]);
+      if (!entry) throw new Error(`Candidate Git tree is missing ${file}`);
+      if (i < parts.length - 1) {
+        if (!['40000', '040000'].includes(entry.mode))
+          throw new Error(`Non-tree parent for ${file}`);
+        tree = entry.sha;
+      } else if (!['100644', '100755'].includes(entry.mode)) {
+        throw new Error(`Candidate source is not a regular Git blob: ${file}`);
+      }
+    }
+  }
+  const proof = {
+    objectType,
+    rootTree,
+    ...(commit ? { commitBase64: commit.toString('base64') } : {}),
+    trees: [...trees.values()].map(({ sha, contentBase64 }) => ({ sha, contentBase64 })),
+  };
+  gitProofSnapshots.set(key, structuredClone(proof));
+  return proof;
+}
+function candidateGitProof(candidate) {
+  const object = candidate.revision ?? candidate.tree;
+  const proof = candidate.sourceObjectProof;
+  const type = candidate.revision ? 'commit' : 'tree';
+  if (!proof || proof.objectType !== type || !/^[a-f0-9]{40}$/.test(proof.rootTree ?? ''))
+    throw new Error('Missing or mismatched Git object proof');
+  const decode = (text) => {
+    if (typeof text !== 'string') throw new Error('Missing Git object proof bytes');
+    const bytes = Buffer.from(text, 'base64');
+    if (bytes.toString('base64') !== text) throw new Error('Noncanonical Git object proof bytes');
+    return bytes;
+  };
+  if (type === 'commit') {
+    const bytes = decode(proof.commitBase64);
+    if (
+      gitObjectSha('commit', bytes) !== object ||
+      /^tree ([a-f0-9]{40})\n/.exec(bytes.toString('utf8'))?.[1] !== proof.rootTree
+    )
+      throw new Error('Git object proof does not match advertised Git object');
+  } else if (proof.rootTree !== object || proof.commitBase64 !== undefined) {
+    throw new Error('Git object proof does not match advertised Git object');
+  }
+  const trees = new Map();
+  for (const entry of proof.trees ?? []) {
+    const bytes = decode(entry.contentBase64);
+    if (gitObjectSha('tree', bytes) !== entry.sha || trees.has(entry.sha))
+      throw new Error('Git object proof tree hash/identity mismatch');
+    trees.set(entry.sha, treeEntries(bytes));
+  }
+  return (file, bytes) => {
+    let tree = proof.rootTree;
+    const parts = file.split('/');
+    for (let i = 0; i < parts.length; i++) {
+      const entry = trees.get(tree)?.get(parts[i]);
+      if (!entry) throw new Error(`Git object proof path missing: ${file}`);
+      if (i < parts.length - 1) {
+        if (!['40000', '040000'].includes(entry.mode))
+          throw new Error(`Git object proof non-tree: ${file}`);
+        tree = entry.sha;
+      } else if (
+        !['100644', '100755'].includes(entry.mode) ||
+        gitObjectSha('blob', bytes) !== entry.sha
+      ) {
+        throw new Error(`Candidate binding differs from advertised Git object: ${file}`);
+      }
+    }
+  };
+}
+function hasGpuiImplementation(row, revision, repoRoot) {
+  return (
+    Array.isArray(row?.blockers) &&
+    row.blockers.length === 0 &&
+    Array.isArray(row.projectionIdentities) &&
+    row.projectionIdentities.length > 0 &&
+    row.projectionIdentities.every((identity) =>
+      row.implementationEvidence?.some(
+        (e) =>
+          e &&
+          typeof e === 'object' &&
+          e.result === 'passed' &&
+          e.baseIdentity === row.baseIdentity &&
+          e.projectionIdentity === identity &&
+          /^[a-f0-9]{40}$/.test(e.revision ?? '') &&
+          (!revision || e.revision === revision) &&
+          /^https:\/\//.test(e.source ?? '') &&
+          Array.isArray(e.paths) &&
+          e.paths.length > 0 &&
+          e.paths.every(
+            (p) =>
+              typeof p === 'string' &&
+              !path.isAbsolute(p) &&
+              !p.split('/').includes('..') &&
+              /^(?:native\/gpui\/crates\/[^/]+\/src\/|packages\/adapters\/gpui-peer\/src\/)/.test(
+                p
+              ) &&
+              fs.existsSync(path.join(repoRoot, p)) &&
+              fs.lstatSync(path.join(repoRoot, p)).isFile()
+          )
+      )
+    )
+  );
 }
 
 function candidateView(data) {
@@ -548,6 +700,12 @@ export function refreshCandidateSource(data, repoRoot, identity) {
         })
       ),
     }));
+  const previousGpuiRows = new Map(
+    (previous.gpuiCoverageRows ?? []).map((row) => [
+      row.baseIdentity + '|' + row.projectionLibrary,
+      row,
+    ])
+  );
   const gpuiCoverageRows = atomicProjectionMapping.flatMap((row) =>
     familyKeys.map((projectionLibrary) => ({
       baseIdentity: row.baseIdentity,
@@ -558,7 +716,9 @@ export function refreshCandidateSource(data, repoRoot, identity) {
         'Candidate source reconciliation only; full GPUI capability and native evidence remain required.',
       implementationEvidence: [],
       nativeEvidence: [],
-      blockers: [],
+      blockers: [
+        ...(previousGpuiRows.get(row.baseIdentity + '|' + projectionLibrary)?.blockers ?? []),
+      ],
     }))
   );
   const packageConsumption = Object.fromEntries(
@@ -596,6 +756,11 @@ export function refreshCandidateSource(data, repoRoot, identity) {
     baseMain: data.protoMain,
     ...identity,
     sourceBindingsObject: object,
+    sourceObjectProof: captureGitObjectProof(
+      repoRoot,
+      object,
+      sourceBindings.map((binding) => binding.path)
+    ),
     sourceBindings,
     counts,
     prototypeInventory,
@@ -899,6 +1064,14 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
         row.projectionLibrary
       ]?.mappedCurrentIdentities ?? []
     ), `GPUI projection identity drift: ${row.baseIdentity}/${row.projectionLibrary}`);
+  for (const row of gpuiRows) {
+    if (row.status === 'verified')
+      require(hasGpuiImplementation(
+        row,
+        undefined,
+        repoRoot
+      ), `Incomplete GPUI implementation: ${row.baseIdentity}/${row.projectionLibrary}`);
+  }
   require(setEqual(
     Object.keys(data.counts.consumerPrograms),
     Object.keys(CONSUMER_LEDGERS)
@@ -1045,6 +1218,11 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
             const gpui = planGpuiRows.find(
               (r) => r.baseIdentity === id && r.projectionLibrary === lib
             );
+            require(hasGpuiImplementation(
+              gpui,
+              item.acceptedRevision,
+              repoRoot
+            ), `Incomplete GPUI implementation: ${item.id} -> ${id}/${lib}`);
             require(gpui?.status === 'verified' &&
               gpui.nativeEvidence?.some(
                 (e) =>
@@ -1099,6 +1277,7 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
     try {
       const object = candidate.revision ?? candidate.tree;
       require(candidate.sourceBindingsObject === object, 'Candidate source binding revision drift');
+      const proveBlob = candidateGitProof(candidate);
       const expectedPaths = candidateBindingPaths(candidate.prototypeInventory, repoRoot);
       const bindings = candidate.sourceBindings ?? [];
       require(setEqual(
@@ -1112,10 +1291,11 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
           continue;
         }
         const absolute = path.join(repoRoot, p);
+        const bytes = fs.existsSync(absolute) ? fs.readFileSync(absolute) : undefined;
         require(/^[a-f0-9]{64}$/.test(binding.sha256 ?? '') &&
-          fs.existsSync(absolute) &&
-          sha256(fs.readFileSync(absolute)) ===
-            binding.sha256, `Candidate source binding/worktree drift: ${p}`);
+          bytes !== undefined &&
+          sha256(bytes) === binding.sha256, `Candidate source binding/worktree drift: ${p}`);
+        if (bytes !== undefined) proveBlob(p, bytes);
       }
       errors.push(
         ...validate(candidateView(data), repoRoot, true).map((error) => `Candidate: ${error}`)
@@ -1222,7 +1402,7 @@ export function render(d) {
     ...(d.candidateSource
       ? [
           '## Separate candidate source inventory',
-          `Candidate ${d.candidateSource.revision ? 'commit' : 'local tree'} ${d.candidateSource.revision ?? d.candidateSource.tree}; based on main ${d.candidateSource.baseMain}. These source counts are candidate-only; stored path hashes are checked against the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.`,
+          `Candidate ${d.candidateSource.revision ? 'commit' : 'local tree'} ${d.candidateSource.revision ?? d.candidateSource.tree}; based on main ${d.candidateSource.baseMain}. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.`,
           table(
             ['Library', 'Main families / identities', 'Candidate families / identities'],
             Object.entries(d.candidateSource.counts.libraryInventory).map(([lib, value]) => [

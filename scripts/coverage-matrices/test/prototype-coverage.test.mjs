@@ -245,6 +245,7 @@ test('complete parity still fails with missing or unevidenced four-family atomic
   assert(validate(e).some((x) => x.includes('Incomplete GPUI acceptance')));
   for (const gpui of e.gpuiCoverageRows.filter((x) => x.baseIdentity === 'P-BASE-BUTTON')) {
     gpui.status = 'verified';
+    fillGpuiImplementation(gpui, item.acceptedRevision);
     gpui.nativeEvidence = [
       {
         result: 'passed',
@@ -583,6 +584,18 @@ test('review 4198701695: retained criteria render accepted closeout instead of u
   assert(rendered.includes(item.closeout.evidence));
 });
 
+function fillGpuiImplementation(row, revision) {
+  row.blockers = [];
+  row.implementationEvidence = row.projectionIdentities.map((projectionIdentity) => ({
+    baseIdentity: row.baseIdentity,
+    projectionIdentity,
+    revision,
+    result: 'passed',
+    source: 'https://example.invalid/shape-only-implementation-receipt',
+    paths: ['packages/adapters/gpui-peer/src/session.ts'],
+  }));
+}
+
 function acceptAtomicScope(d, item, ids) {
   item.baseEntityIds = ids;
   for (const id of ids) {
@@ -598,6 +611,7 @@ function acceptAtomicScope(d, item, ids) {
     }
     for (const row of d.gpuiCoverageRows.filter((x) => x.baseIdentity === id)) {
       row.status = 'verified';
+      fillGpuiImplementation(row, item.acceptedRevision);
       row.nativeEvidence = [
         {
           result: 'passed',
@@ -740,4 +754,85 @@ test('main evidence and candidate hash snapshots cannot substitute for each othe
   const e = sameSourceCandidate();
   e.mainSourceEvidence.revision = e.candidateSource.tree;
   assert(validate(e).some((x) => x.includes('Historical main evidence digest/revision mismatch')));
+});
+
+test('review 4199624952: changing both advertised object fields cannot reuse worktree bindings', () => {
+  const d = sameSourceCandidate();
+  d.candidateSource.tree = d.protoMain;
+  d.candidateSource.sourceBindingsObject = d.protoMain;
+  assert(validate(d).some((x) => /advertised Git object|Git object proof/.test(x)));
+});
+test('review 4199624959: native receipt cannot override GPUI implementation blockers', () => {
+  const d = copy();
+  acceptAtomicScope(d, acceptedItemShape(d, 'baseline.button'), ['P-BASE-BUTTON']);
+  d.gpuiCoverageRows.find((r) => r.baseIdentity === 'P-BASE-BUTTON').blockers = [
+    'Native host not implemented',
+  ];
+  assert(validate(d).some((x) => /GPUI implementation/.test(x)));
+});
+test('review 4199624959: an empty implementation ledger cannot verify GPUI', () => {
+  const d = copy();
+  acceptAtomicScope(d, acceptedItemShape(d, 'baseline.button'), ['P-BASE-BUTTON']);
+  const row = d.gpuiCoverageRows.find((r) => r.baseIdentity === 'P-BASE-BUTTON');
+  row.blockers = [];
+  row.implementationEvidence = [];
+  assert(validate(d).some((x) => /GPUI implementation/.test(x)));
+});
+
+test('advertised commit proof rejects a real but different commit even with both fields changed', () => {
+  const d = copy();
+  const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString().trim();
+  d.candidateSource = refreshCandidateSource(d, root, { revision });
+  assert.deepEqual(validate(d), []);
+  d.candidateSource.revision = d.protoMain;
+  d.candidateSource.sourceBindingsObject = d.protoMain;
+  assert(validate(d).some((x) => /Git object proof.*advertised Git object/.test(x)));
+});
+test('offline Git proofs reject changed tree bytes and a missing Merkle branch', () => {
+  const d = sameSourceCandidate();
+  const tree = d.candidateSource.sourceObjectProof.trees[0];
+  const bytes = Buffer.from(tree.contentBase64, 'base64');
+  bytes[bytes.length - 1] ^= 1;
+  tree.contentBase64 = bytes.toString('base64');
+  assert(validate(d).some((x) => /Git object proof tree hash/.test(x)));
+  const e = sameSourceCandidate();
+  e.candidateSource.sourceObjectProof.trees.shift();
+  assert(validate(e).some((x) => /Git object proof path missing/.test(x)));
+});
+test('GPUI implementation records must identify this projection and real native source at acceptance revision', () => {
+  for (const mutate of [
+    (e) => {
+      e.revision = 'b'.repeat(40);
+    },
+    (e) => {
+      e.projectionIdentity = 'P-BASE-LABEL';
+    },
+    (e) => {
+      e.paths = ['native/gpui/crates/nonexistent/src/pretend.rs'];
+    },
+    (e) => {
+      e.paths = ['packages/prototypes/base/src/button/button.proto.ts'];
+    },
+    (e) => {
+      e.paths = ['native/gpui/../../../package.json'];
+    },
+  ]) {
+    const d = copy();
+    acceptAtomicScope(d, acceptedItemShape(d, 'baseline.button'), ['P-BASE-BUTTON']);
+    const row = d.gpuiCoverageRows.find((r) => r.baseIdentity === 'P-BASE-BUTTON');
+    mutate(row.implementationEvidence[0]);
+    assert(validate(d).some((x) => /GPUI implementation/.test(x)));
+  }
+});
+
+test('candidate refresh does not erase known unresolved GPUI blockers', () => {
+  const d = sameSourceCandidate();
+  const row = d.candidateSource.gpuiCoverageRows[0];
+  row.blockers = ['Actual native source scope remains unimplemented'];
+  const refreshed = refreshCandidateSource(d, root, { tree: d.candidateSource.tree });
+  const retained = refreshed.gpuiCoverageRows.find(
+    (r) => r.baseIdentity === row.baseIdentity && r.projectionLibrary === row.projectionLibrary
+  );
+  assert.deepEqual(retained.blockers, row.blockers);
+  assert.equal(retained.status, 'required-unassessed');
 });
