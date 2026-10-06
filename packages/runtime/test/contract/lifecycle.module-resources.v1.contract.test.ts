@@ -133,6 +133,44 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
     }
   );
 
+  it.each(['forged-ref', 'throwing-getter'])(
+    'releases setup resources when initial associations fail: %s',
+    async (mode) => {
+      let disposed = 0;
+      let created = 0;
+      const failure = new Error('association transport failed');
+      const records: Record<string, unknown>[] = [];
+      const proto = definePrototype({
+        name: 'lifecycle-failed-association-owner',
+        setup(def) {
+          def.expose.state('open', def.state.bool('open', false));
+          def.lifecycle.onBeforeDispose(() => {
+            disposed += 1;
+          });
+          def.lifecycle.onCreated(() => {
+            created += 1;
+          });
+        },
+      });
+      const host = createImmediateHost((wiring) => {
+        wiring.attach('expose-state', [
+          [EXPOSES_RECORD_SINK_CAP, (record: Record<string, unknown>) => records.push(record)],
+        ]);
+      });
+      host.getInstanceAssociations = () => {
+        if (mode === 'throwing-getter') throw failure;
+        return { controlLabel: {} } as any;
+      };
+      expect(() => createRuntimeSession(proto, host)).toThrow(
+        mode === 'throwing-getter' ? failure : /opaque reference/
+      );
+      expect(created).toBe(0);
+      expect(disposed).toBe(1);
+      expect(records.at(-1)).toEqual({});
+      await Promise.resolve();
+    }
+  );
+
   it('keeps Expose Event declarations across view epochs and invalidates emit at disposal', async () => {
     const emitted: string[] = [];
     let retainedRun: any;

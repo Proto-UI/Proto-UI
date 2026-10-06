@@ -299,7 +299,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
     moduleHub.getPort<ControlLabelPort>('control-label')?.prepareViewPresence(present);
     moduleHub.getPort<A11yPort>('a11y')?.prepareViewPresence(present);
   });
-  applyInstanceAssociations(host.getInstanceAssociations?.());
 
   const mount = (): Promise<void> => {
     if (instancePhase !== 'alive') {
@@ -572,6 +571,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   setInstancePhase('alive');
   try {
+    applyInstanceAssociations(host.getInstanceAssociations?.());
     callbackScope.run(run, () => {
       for (const cb of lifecycle.created) cb(run);
     });
