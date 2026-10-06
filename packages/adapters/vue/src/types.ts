@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 import type { AsHookCaller, ExposeEvent, ExposeOf, Prototype } from '@proto.ui/core';
 import type { ProtoAdapterExposes } from '@proto.ui/adapter-base';
 import type { PropsBaseType } from '@proto.ui/types';
@@ -49,6 +50,7 @@ type VuePortableProps<TProto extends ProtoLike> =
     : never;
 
 export type ProtoVueProps<TProto extends ProtoLike> = VuePortableProps<TProto> & {
+  instanceAssociations?: InstanceAssociations;
   class?: string | string[] | Record<string, boolean>;
   hostClass?: string | string[] | Record<string, boolean>;
   surfaceClass?: string | string[] | Record<string, boolean>;

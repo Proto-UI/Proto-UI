@@ -1,0 +1,41 @@
+id: P-LIQUID-GLASS-LABEL
+type: prototype
+title: liquid-glass Label projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
+summary: Family-owned typography and ink over the same independent Base Label protocol.
+statement:
+  en: This is an independent Proto UI-authored liquid-glass presentation projection of P-BASE-LABEL. References to another design system are comparison evidence, not external project authority. The projection retains naming, activation, callback and lifecycle ownership without negative patches.
+criteria:
+  - id: P-LIQUID-GLASS-LABEL-INHERITANCE
+    text:
+      en: The projection calls asLabelRoot and preserves its content, independent options, explicit association input and target operation boundaries.
+  - id: P-LIQUID-GLASS-LABEL-STYLE
+    text:
+      en: Typography and foreground use this family's existing theme vocabulary. The label adds no glass background, whole-surface suppression or control value ownership.
+  - id: P-LIQUID-GLASS-LABEL-CONSUMPTION
+    text:
+      en: The /label entry and root export expose the same source. Four Web adapters consume it; host support is evidenced separately from source shape. The package remains unpublished workspace source. Explicit workspace facade generation and CSS closure are tested; installed-consumer CLI use diagnoses unsupported before any registry installation.
+inherits:
+  prototypes:
+    - P-BASE-LABEL
+dependsOn:
+  contracts:
+    - C-CONTROL-LABEL-0001
+    - C-FEEDBACK-STYLE-0003
+verifies:
+  tests:
+    - T-CONTROL-LABEL-0001
+sources:
+  - path: packages/prototypes/liquid-glass/src/label/root.proto.ts
+  - path: packages/prototypes/liquid-glass/src/label/index.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added a real Base Label projection while retaining explicit consumption and host-evidence limits.
+tags:
+  - prototype
+  - liquid-glass
+  - label

@@ -40,3 +40,5 @@ export * from './text';
 export { default as BaseSurfaceRoot, surfaceRoot, asSurfaceRoot } from './surface';
 
 export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
+
+export * from './label';

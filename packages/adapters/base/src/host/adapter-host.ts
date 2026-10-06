@@ -16,6 +16,7 @@ export type AdapterHostInput<P extends PropsBaseType> = Pick<
   | 'schedule'
   | 'scheduleDelay'
   | 'getRawProps'
+  | 'getInstanceAssociations'
   | 'onLifecycleCheckpoint'
   | 'onLifecycleEvent'
   | 'presenceLifecycle'
@@ -56,6 +57,7 @@ export function createAdapterHost<P extends PropsBaseType>(
   const session = createRuntimeSession(proto, {
     prototypeName: proto.name,
     getRawProps: host.getRawProps,
+    getInstanceAssociations: host.getInstanceAssociations,
     commit: host.commit,
     schedule: host.schedule,
     scheduleDelay: host.scheduleDelay ?? defaultScheduleDelay,

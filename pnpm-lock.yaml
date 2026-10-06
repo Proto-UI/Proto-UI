@@ -332,6 +332,9 @@ importers:
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../../modules/context
+      '@proto.ui/module-control-label':
+        specifier: workspace:*
+        version: link:../../modules/control-label
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
@@ -426,6 +429,9 @@ importers:
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../../modules/context
+      '@proto.ui/module-control-label':
+        specifier: workspace:*
+        version: link:../../modules/control-label
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
@@ -511,6 +517,9 @@ importers:
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../../modules/context
+      '@proto.ui/module-control-label':
+        specifier: workspace:*
+        version: link:../../modules/control-label
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
@@ -596,6 +605,9 @@ importers:
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../../modules/context
+      '@proto.ui/module-control-label':
+        specifier: workspace:*
+        version: link:../../modules/control-label
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
@@ -789,6 +801,21 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
+
+  packages/modules/control-label:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-a11y':
+        specifier: workspace:*
+        version: link:../a11y
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
@@ -1315,6 +1342,9 @@ importers:
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../modules/context
+      '@proto.ui/module-control-label':
+        specifier: workspace:*
+        version: link:../modules/control-label
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../modules/event

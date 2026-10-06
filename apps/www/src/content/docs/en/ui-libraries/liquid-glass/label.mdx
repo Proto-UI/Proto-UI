@@ -1,0 +1,39 @@
+---
+title: 'Label'
+description: 'Independent control naming and activation through an explicit Proto UI association.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+This Label remains **draft**. The liquid-glass projection shares the independent Base Label protocol. Proto UI is an independent project; design references inform a deliberate projection rather than becoming project authority.
+
+<PrototypePreviewer demoId="demo-liquid-glass-label" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} />
+
+The demo pairs this Label projection with real, visually neutral Base controls to isolate the association protocol. “On/Off” is a read-only subscription to each control's public exposed state, not a second value owner or a click handler. Input and Textarea are actual native text editors. This benchmark does not claim that another design family's control projections have been tested.
+
+## Two independent effects
+
+- `naming` defaults to `true`. The target refers to the actual rendered Label using an accessibility relationship. Do not add a hidden copy of the same name.
+- `activation` defaults to `false`. With `true`, an eligible pointer or trusted non-pointer action requests the target's existing operation. Checkbox and Switch keep their controlled/disabled behavior; Radio Item delegates to its Group; Input and Textarea request focus without editing or moving the selection themselves.
+- Label adds no button role, Tab stop or separate keyboard action. Keyboard input remains on the control. Nested links/buttons, modified or cancelled pointer gestures and drag selection are not forwarded.
+- Naming-only labels and long descriptions remain copyable. A short actionable Label declares its own selection affordance. The controlled example deliberately keeps its value off after proposals; this is the application's ownership decision.
+
+Activation stays in the originating click turn so editor focus is not delayed to a timer. Cancellation already observed by the host click listener is respected; a later listener cannot undo a committed operation. Cancelling pointerup alone is not click cancellation. This is a bounded custom Label protocol, not a claim to reproduce every native HTML label default-action detail. Actual assistive-technology behavior remains to be verified.
+
+## Explicit association, outside JSON Props
+
+Create one stable `createControlLabelRef()` from `@proto.ui/core` for each pair. Keep it for the row's logical lifetime. In React, Vue and Vue 2, pass `instanceAssociations={ controlLabel: ref }` as the Adapter-owned input to both components. It is removed before raw/resolved Proto Props, even with a custom `getProps` projection.
+
+In WC, call `setElementAssociations(target, { controlLabel: ref })` and the same setter for the Label from `@proto.ui/adapter-web-component`. Use normal Props only for `naming`, `activation` and the control's values. Attribute strings, JSON-cloned references and unknown association keys are rejected. DemoSpec expresses `associations: { controlLabel: 'row-key' }`; each render instance materializes an independent public reference for that key.
+
+Exactly one live Label and one live target are supported per reference. Missing/duplicate/stale endpoints fail closed. Explicitly paired siblings are allowed; Web views must also share Document and tree root. A reference does not authorize cross-document or cross-shadow-root matching, DOM lookup or arbitrary commands. A nonempty explicit `ariaLabel`/`labelledBy` keeps naming ownership and diagnoses a conflicting Label naming request; use an explicit activation-only Label when appropriate.
+
+## Consumption and limits
+
+Import from `@proto.ui/prototypes-liquid-glass/label`. This package remains unpublished workspace source. Its four-Web facade generator requires explicit workspace mode; the installed-consumer CLI refuses this entry before attempting an npm install. This limit does not waive source/runtime/visual testing.
+
+The first target set is Checkbox, Switch, Radio Group Item, Input and Textarea. Form submission, validation, multiple-label ordering and native-platform/assistive-technology certification are not provided by this association. Browser acceptance is tracked separately from source and synthetic host tests.
+
+- [Label contract](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
+- [P-LIQUID-GLASS-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-LIQUID-GLASS-LABEL.yaml)
+- [Executable evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)

@@ -30,8 +30,12 @@ export type DemoNode =
       surfaceStyle?: DemoSurfaceStyle;
       ref?: string;
       props?: Record<string, unknown>;
+      associations?: DemoAssociationKeys;
       children?: DemoChild[];
     };
+
+/** Serializable association intent, scoped to one demo render; not a DOM/API ref. */
+export type DemoAssociationKeys = Readonly<{ controlLabel: string }>;
 
 export type DemoChild = DemoNode | string;
 
@@ -234,6 +238,15 @@ export function assertDemoSpec(demo: DemoSpec) {
       }
       if (node.surfaceStyle !== undefined) {
         assertSurfaceStyle(node.surfaceStyle, [...path, 'surfaceStyle']);
+      }
+      if (node.associations !== undefined) {
+        const keys = node.associations;
+        if (!keys || typeof keys !== 'object' || Object.keys(keys).some(key => key !== 'controlLabel') || typeof keys.controlLabel !== 'string' || !keys.controlLabel.trim()) {
+          throw new Error('[PrototypePreviewer] associations requires one nonempty controlLabel key');
+        }
+      }
+      if (node.props && Object.hasOwn(node.props, 'instanceAssociations')) {
+        throw new Error('[PrototypePreviewer] association intent belongs in node.associations, not props');
       }
       if ((node as any).props !== undefined) {
         assertJsonLike((node as any).props, [...path, 'props']);

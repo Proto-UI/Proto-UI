@@ -1,5 +1,11 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asAccessible, asCollectionItem, asFocusable, asTrigger } from '@proto.ui/hooks';
+import {
+  asAccessible,
+  asCollectionItem,
+  asFocusable,
+  asTrigger,
+  asControlLabel,
+} from '@proto.ui/hooks';
 import {
   createRadioGroupItemId,
   notifyRadioGroupItemsChanged,
@@ -96,10 +102,10 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
     setRadioGroupCurrentItem(run, instanceId);
   };
 
-  const requestSelection = (run: RunHandle<RadioGroupItemProps>): boolean => {
+  const requestSelection = (run: RunHandle<RadioGroupItemProps>, isCurrent = () => true): boolean => {
     const ownValue = run.props.get().value ?? '';
     const accepted = requestRadioGroupValue(run, ownValue);
-    if (accepted) run.expose.emit('select', { value: ownValue });
+    if (accepted && isCurrent()) run.expose.emit('select', { value: ownValue });
     return accepted;
   };
 
@@ -154,12 +160,28 @@ function setupRadioGroupItem(def: DefHandle<RadioGroupItemProps, RadioGroupItemE
     });
   });
 
-  def.event.on('press.commit', (run, event) => {
+  const activate = (
+    run: RunHandle<RadioGroupItemProps>,
+    isCurrent = () => true,
+    requestFocus?: () => void,
+    key?: string
+  ) => {
     pressed.set(false, 'reason: radio item press commit => pressed reset');
-    if (disabled.get()) return;
-    if (event?.key === 'Enter') return;
+    if (disabled.get() || key === 'Enter' || !isCurrent()) return;
     setCurrent(run);
-    requestSelection(run);
+    if (disabled.get() || !isCurrent()) return;
+    requestFocus?.();
+    if (disabled.get() || !isCurrent()) return;
+    requestSelection(run, isCurrent);
+  };
+  def.event.on('press.commit', (run, event) => {
+    activate(run, undefined, undefined, event?.key);
+  });
+  asControlLabel().target<RadioGroupItemProps>((run, request) => {
+    const isCurrent = () => !disabled.get() && request.isCurrent();
+    activate(run, isCurrent, () => focusable.focusSelf({
+      reason: request.source === 'pointer' ? 'pointer' : 'programmatic',
+    }));
   });
 
   def.event.on('pointer.enter', () => {

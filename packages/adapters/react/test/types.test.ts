@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 import { describe, expectTypeOf, it } from 'vitest';
 import { definePrototype, type ExposeEvent, type ExposeState } from '@proto.ui/core';
 import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
@@ -37,6 +38,7 @@ describe('adapter-react: type helpers', () => {
 
   it('combines proto props with host props and event props', () => {
     expectTypeOf<ProtoReactProps<typeof proto>>().toEqualTypeOf<{
+      instanceAssociations?: InstanceAssociations;
       label?: string;
       disabled?: boolean;
       children?: any;

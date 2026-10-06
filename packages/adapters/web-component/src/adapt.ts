@@ -40,6 +40,7 @@ import {
   bindController,
   bindElementSurfaceProjection,
   getElementProps,
+  getElementAssociations,
   setElementProps,
   unbindController,
 } from './props';
@@ -236,6 +237,17 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       super.blur();
     }
 
+    static get observedAttributes() {
+      return ['instance-associations', 'control-label-ref'];
+    }
+
+    attributeChangedCallback(name: string, _previous: string | null, next: string | null) {
+      if (next !== null)
+        throw new TypeError(
+          `[Web Component] ${name} has no instance-association attribute lowering; use setElementAssociations`
+        );
+    }
+
     connectedCallback() {
       // A focus observer can reconnect this element while the old owner's
       // cleanup is still using its fields. Start the new owner only afterward.
@@ -243,6 +255,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._terminalReconnectRequested = true;
         return;
       }
+      if (this.hasAttribute('instance-associations') || this.hasAttribute('control-label-ref')) {
+        throw new TypeError(
+          '[Web Component] instance-association attributes have no lowering; use setElementAssociations'
+        );
+      }
+
       if (this._mountedOnce) {
         const previousParent = getLogicalParent(this._instanceToken);
         const previousRoot = previousParent ? getLogicalRoot(previousParent) : null;
@@ -398,6 +416,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           root: thisRoot,
           schedule,
           rawPropsSource,
+          getInstanceAssociations: () => getElementAssociations(thisEl),
           textControlTarget: this._textControlTarget,
           imageViewTarget: this._imageViewTarget,
           wiring,

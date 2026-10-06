@@ -8,6 +8,8 @@ export type A11yProjector = ((snapshot: A11ySemanticObjectSnapshot) => void) & {
   reactivate?(): void;
   dispose?(): void;
   clearHeadingLevel?(): void;
+  /** Host-authored naming, excluding this projector's owned contributions. */
+  hasAuthoredName?(): boolean;
 };
 
 export const A11Y_PROJECT_CAP = cap<A11yProjector>('@proto.ui/a11y/project');

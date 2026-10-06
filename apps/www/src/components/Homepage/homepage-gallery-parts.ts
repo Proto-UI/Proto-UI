@@ -45,13 +45,15 @@ export function createHomepageGalleryParts(
     id: string,
     children: DemoChild[] = [],
     props: Record<string, unknown> = {},
-    ref?: string
+    ref?: string,
+    associationKey?: string
   ): DemoNode => {
     ids.add(id);
     if (ref) authoredProps.set(ref, { ...props });
     return {
       kind: 'proto',
       prototypeId: id,
+      ...(associationKey ? { associations: { controlLabel: associationKey } } : {}),
       props,
       children,
       ...(ref ? { ref } : {}),
@@ -114,11 +116,12 @@ export function createHomepageGalleryParts(
     box('home-gallery__choice', [
       p(
         `${family}-checkbox-root`,
-        [p(`${family}-checkbox-indicator`), box('sr-only', [label])],
+        [p(`${family}-checkbox-indicator`)],
         { defaultChecked: checked },
-        ref
+        ref,
+        `choice:${ref}`
       ),
-      box('home-gallery__choice-label', [label]),
+      p(`${family}-label-root`, [label], { naming: true, activation: true }, undefined, `choice:${ref}`),
     ]);
   const status = (value: string, ref: string) =>
     box('home-gallery__status', [value], ref, { role: 'status', 'aria-live': 'polite' });

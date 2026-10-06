@@ -5,3 +5,5 @@ export * from './theme';
 export { default as LiquidGlassSurfaceRoot, surfaceRoot } from './surface';
 
 export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
+
+export * from './label';

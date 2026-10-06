@@ -26,10 +26,11 @@ const EXPECTED_SHARED_BASE_FAMILY_IDS = [
 ] as const;
 
 const EXPECTED_COMPONENT_IDS = {
-  shadcn: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'input', 'checkbox', 'radio-group'],
+  shadcn: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'label', 'input', 'checkbox', 'radio-group'],
   brutalist: [
     ...EXPECTED_SHARED_BASE_FAMILY_IDS,
     'checkbox',
+    'label',
     'badge',
     'card',
     'skeleton',
@@ -40,6 +41,7 @@ const EXPECTED_COMPONENT_IDS = {
 } as const;
 
 const EXPECTED_REQUIRED_PART_IDS = {
+  label: ['root'],
   button: ['root'],
   toggle: ['root'],
   switch: ['root', 'thumb'],
@@ -685,6 +687,39 @@ describe('Website projection-family manifests', () => {
 
   it('classifies every recipe Prototype with explicit part or auxiliary lineage', () => {
     const expectedAuxiliaries = {
+      'shadcn/label': [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+      'brutalist/label': [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+      'bootstrap-2-3-2/label': [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+      'liquid-glass/label': [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+
       'shadcn/toggle': [{ basePrototypeId: null, prototypeId: 'lucide-icon' }],
       'shadcn/dialog': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
       'brutalist/card': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
@@ -763,8 +798,8 @@ describe('partial new projection families', () => {
       const manifest = PROJECTION_FAMILY_MANIFESTS[family];
       expect(Object.keys(manifest.families)).toEqual(
         family === 'bootstrap-2-3-2'
-          ? ['button', 'checkbox', 'switch', 'toggle', 'input', 'textarea', 'separator']
-          : ['button']
+          ? ['label', 'button', 'checkbox', 'switch', 'toggle', 'input', 'textarea', 'separator']
+          : ['label', 'button']
       );
       expect(() => validateProjectionFamilyManifest(manifest)).not.toThrow();
       expect(resolveProjectionPart(family, 'button', 'root').prototypeId).toBe(`${family}-button`);

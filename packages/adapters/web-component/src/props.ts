@@ -1,7 +1,9 @@
+import { validateInstanceAssociations, type InstanceAssociations } from '@proto.ui/core';
 // packages/adapters/web-component/src/props.ts
 import type { RuntimeController } from '@proto.ui/runtime';
 import type { HostSurfaceProjection } from '@proto.ui/adapter-base';
 
+const associationsMap = new WeakMap<HTMLElement, InstanceAssociations>();
 const rawMap = new WeakMap<HTMLElement, Record<string, any>>();
 const ctrlMap = new WeakMap<HTMLElement, RuntimeController>();
 const classTokenMap = new WeakMap<HTMLElement, Set<string>>();
@@ -28,7 +30,30 @@ type SurfaceBinding = {
 
 const surfaceBindingMap = new WeakMap<HTMLElement, SurfaceBinding>();
 
+/** Separate host-instance association input, not a portable Props value. */
+export function setElementAssociations(el: HTMLElement, input: InstanceAssociations): void {
+  const associations = validateInstanceAssociations(input);
+  const previous = associationsMap.get(el);
+  associationsMap.set(el, associations);
+  try {
+    ctrlMap.get(el)?.applyInstanceAssociations(associations);
+  } catch (error) {
+    if (associationsMap.get(el) === associations) {
+      if (previous) associationsMap.set(el, previous);
+      else associationsMap.delete(el);
+    }
+    throw error;
+  }
+}
+export function getElementAssociations(el: HTMLElement): InstanceAssociations {
+  return associationsMap.get(el) ?? {};
+}
+
 export function setElementProps(el: HTMLElement, nextRaw: Record<string, any>) {
+  if (nextRaw && Object.hasOwn(nextRaw, 'instanceAssociations'))
+    throw new TypeError(
+      '[Web Component] instance associations use setElementAssociations, not setElementProps'
+    );
   const raw = { ...(nextRaw ?? {}) };
   syncClassProps(el, raw.className ?? raw.class);
   const surfaceProps = Object.freeze({
@@ -93,6 +118,7 @@ export function getElementProps(el: HTMLElement) {
 
 export function bindController(el: HTMLElement, ctrl: RuntimeController) {
   ctrlMap.set(el, ctrl);
+  ctrl.applyInstanceAssociations(getElementAssociations(el));
 
   // if props already set before connected, apply once now
   const raw = rawMap.get(el);

@@ -497,6 +497,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/input',
                 },
                 {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/base/label',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
@@ -610,6 +615,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/input',
                 },
                 {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/shadcn/label',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/shadcn/textarea',
@@ -676,6 +686,11 @@ export default defineConfig({
                   translations: { en: 'Separator', 'zh-CN': 'Separator' },
                   slug: 'ui-libraries/bootstrap-2-3-2/separator',
                 },
+                {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/label',
+                },
               ],
             },
             {
@@ -691,6 +706,11 @@ export default defineConfig({
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/liquid-glass/button',
+                },
+                {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/liquid-glass/label',
                 },
               ],
             },
@@ -742,6 +762,11 @@ export default defineConfig({
                   translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
                   slug: 'ui-libraries/brutalist/components/checkbox',
                   badge: inProgressBadge,
+                },
+                {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/brutalist/components/label',
                 },
                 {
                   label: 'Button',

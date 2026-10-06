@@ -1,3 +1,5 @@
+import { withoutInstanceAssociations } from '@proto.ui/adapter-base';
+import type { InstanceAssociations } from '@proto.ui/core';
 import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
 import {
   getModuleDeclaration,
@@ -77,6 +79,7 @@ export { __VUE2_PROTO_INSTANCE } from './platform/instance-tree';
 
 export type Vue2AdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
+    instanceAssociations?: InstanceAssociations;
     class?: string | string[] | Record<string, boolean>;
     hostClass?: string | string[] | Record<string, boolean>;
     surfaceClass?: string | string[] | Record<string, boolean>;
@@ -156,6 +159,7 @@ function defaultGetProps<Props extends PropsBaseType>(
     surfaceClass,
     hostStyle,
     surfaceStyle,
+    instanceAssociations,
     ...rest
   } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
@@ -290,6 +294,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         },
       },
       props: {
+        instanceAssociations: { type: Object, default: undefined },
         hostClass: { type: [String, Array, Object], default: undefined },
         surfaceClass: { type: [String, Array, Object], default: undefined },
         hostStyle: { type: [String, Array, Object], default: undefined },
@@ -326,7 +331,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           debugName: `${proto.name}#raw-props`,
           get() {
             const nextProps = getProps(collectAdapterInput<Props>(vm));
-            return (nextProps ?? {}) as Readonly<Props & PropsBaseType>;
+            return withoutInstanceAssociations(nextProps) as Readonly<Props & PropsBaseType>;
           },
           subscribe(cb) {
             state.subs.add(cb);
@@ -344,6 +349,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             proto,
             schedule,
             rawPropsSource,
+            getInstanceAssociations: () => vm.instanceAssociations ?? {},
             wiring,
             eventGate: {
               disable: () => state.eventGate?.disable(),
@@ -592,6 +598,7 @@ function collectAdapterInput<Props extends PropsBaseType>(
     surfaceClass: vm.surfaceClass,
     hostStyle: vm.hostStyle,
     surfaceStyle: vm.surfaceStyle,
+    instanceAssociations: vm.instanceAssociations,
   } as Vue2AdapterProps<Props>;
 }
 
@@ -845,6 +852,7 @@ function initSession<Props extends PropsBaseType>(
         proto: targetProto,
         schedule: targetOptions.schedule,
         rawPropsSource: state.rawPropsSource!,
+        getInstanceAssociations: () => vm.instanceAssociations ?? {},
         wiring,
         eventGate: {
           disable: () => state.eventGate?.disable(),
@@ -913,6 +921,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
 function notifyPropsChange(vm: any, autoUpdate: boolean) {
   const state = getState(vm);
   if (!state.rawPropsSource) return;
+  state.controller?.applyInstanceAssociations(vm.instanceAssociations ?? {});
   const nextHostProps = state.rawPropsSource.get();
   if (state.lastHostProps && shallowEqualHostProps(state.lastHostProps, nextHostProps)) return;
   state.lastHostProps = nextHostProps;

@@ -4,6 +4,11 @@ import {
   resolveWebFocusEntryTarget,
 } from '@proto.ui/adapter-base';
 import {
+  CONTROL_LABEL_HOST_CAP,
+  CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
+  createWebControlLabelHost,
+} from '@proto.ui/module-control-label';
+import {
   cancelWebEventDefaultAction,
   createCapsWiring,
   createWebMoveGestureHost,
@@ -209,6 +214,10 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   const physicalImage = () => args.imageViewTarget;
 
   return createCapsWiring()
+    .use('control-label', [
+      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getTriggerSurface, undefined)],
+      [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('text-control', [
       [
         TEXT_CONTROL_HOST_CAP,
@@ -400,6 +409,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const presentationSurface = args.textControlTarget ?? args.imageViewTarget ?? el;
 
   return createCapsWiring()
+    .use('control-label', [
+      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getTriggerSurface, subscribeFocusTarget)],
+      [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('text-control', [
       [
         TEXT_CONTROL_HOST_CAP,

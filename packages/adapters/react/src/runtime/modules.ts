@@ -1,3 +1,8 @@
+import {
+  CONTROL_LABEL_HOST_CAP,
+  CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
+  createWebControlLabelHost,
+} from '@proto.ui/module-control-label';
 import type { FocusEntryConfig } from '@proto.ui/core';
 import {
   isWebFocusTargetActive,
@@ -297,6 +302,10 @@ export function createReactModules<Props extends PropsBaseType>(args: {
   const physicalImage = () => args.getCurrentElement() as HTMLImageElement | null;
 
   return createCapsWiring()
+    .use('control-label', [
+      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getTriggerSurface, subscribeFocusTarget)],
+      [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('text-control', [
       [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],

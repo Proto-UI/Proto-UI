@@ -1,4 +1,5 @@
-import { setElementProps } from '@proto.ui/adapter-web-component';
+import { createDemoAssociationScope } from './demo-associations';
+import { setElementProps, setElementAssociations } from '@proto.ui/adapter-web-component';
 import type { ReactRuntime } from '@proto.ui/adapter-react';
 import type { VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import type { Prototype } from '@proto.ui/core';
@@ -165,7 +166,7 @@ function callInScope(inst: DemoInstance, fn: () => void) {
   return fn();
 }
 
-function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLElement[]) {
+function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLElement[], associations: ReturnType<typeof createDemoAssociationScope>) {
   if (typeof node === 'string') {
     parent.appendChild(document.createTextNode(node));
     return;
@@ -183,7 +184,7 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
     if (node.ref) el.setAttribute('data-demo-ref', node.ref);
     parent.appendChild(el);
     const kids = node.children ?? [];
-    for (const child of kids) renderDemoNodeWc(child, el, instances);
+    for (const child of kids) renderDemoNodeWc(child, el, instances, associations);
     return;
   }
 
@@ -198,6 +199,7 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
     surfaceStyle: node.surfaceStyle,
   };
   wcSurfaceProps.set(el, surfaceProps);
+  setElementAssociations(el, associations.resolve(node.associations) ?? {});
   setElementProps(el, {
     ...(node.props ?? {}),
     ...surfaceProps,
@@ -206,7 +208,7 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
   // Materialize authored children before connecting the custom element so the
   // Web Component adapter can project slots or reject contentless children.
   const kids = node.children ?? [];
-  for (const child of kids) renderDemoNodeWc(child, el, instances);
+  for (const child of kids) renderDemoNodeWc(child, el, instances, associations);
   parent.appendChild(el);
 }
 
@@ -233,8 +235,9 @@ async function renderDemoWc(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
   const instances: HTMLElement[] = [];
-  renderDemoNodeWc(demo.root, host, instances);
+  renderDemoNodeWc(demo.root, host, instances, associations);
 
   const refs = collectDemoRefs(host);
   const api: DemoRuntimeApi = {
@@ -277,6 +280,7 @@ async function renderDemoWc(
         const instance = instances[index];
         if (instance) cleanupSteps.push(() => instance.remove());
       }
+      cleanupSteps.push(() => associations.dispose());
       runCleanupSteps(cleanupSteps);
     })
   ) {
@@ -295,6 +299,7 @@ async function renderDemoReact(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
 
   // Non-WC modules join the graph only when this runtime is selected. A
   // superseded owner must not proceed to CDN loading after that import boundary.
@@ -349,6 +354,7 @@ async function renderDemoReact(
         else componentRefs.delete(node.ref!);
       };
     }
+    mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClassName = node.className;
     if (node.surfaceStyle) {
       mergedProps.surfaceStyle = normalizeReactSurfaceStyle(node.surfaceStyle, host.ownerDocument);
@@ -374,6 +380,7 @@ async function renderDemoReact(
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => root.unmount(),
+        () => associations.dispose(),
       ]);
     })
   ) {
@@ -451,6 +458,7 @@ async function renderDemoVue(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
 
   const [{ createVueAdapter }, { loadVue }] = await vueModules();
   if (!ownsLease(opt, lease)) return abandonLease(lease);
@@ -508,6 +516,7 @@ async function renderDemoVue(
         if (el) componentRefs.set(node.ref!, el as DemoInstance);
       };
     }
+    mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
     if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
     return Vue.h(Component, mergedProps, () => kids);
@@ -530,6 +539,7 @@ async function renderDemoVue(
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => app.unmount(),
+        () => associations.dispose(),
       ]);
     })
   ) {
@@ -579,6 +589,7 @@ async function renderDemoVue2(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
 
   const [{ createVue2Adapter }, { loadVue2, toVue2ComponentData, toVue2Runtime }] =
     await vue2Modules();
@@ -641,6 +652,7 @@ async function renderDemoVue2(
       Object.assign(mergedProps, propsMap[node.ref] ?? {});
       mergedProps['data-demo-ref'] = node.ref;
     }
+    mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
     if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
 
@@ -676,6 +688,7 @@ async function renderDemoVue2(
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => app.$destroy(),
+        () => associations.dispose(),
       ]);
     })
   ) {

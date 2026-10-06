@@ -29,7 +29,8 @@
     "@proto.ui/module-text-control": "workspace:*",
     "@proto.ui/module-rule-expose-state-web": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
-    "@proto.ui/module-test-sys": "workspace:*"
+    "@proto.ui/module-test-sys": "workspace:*",
+    "@proto.ui/module-control-label": "workspace:*"
   },
   "devDependencies": {},
   "exports": {

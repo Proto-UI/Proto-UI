@@ -262,3 +262,5 @@ export * from './text';
 export { default as ShadcnSurfaceRoot, surfaceRoot } from './surface';
 
 export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
+
+export * from './label';

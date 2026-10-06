@@ -43,6 +43,11 @@ export async function runAddCommand(argv: string[]): Promise<void> {
     );
   }
 
+  if (componentEntry.sourceOnly) {
+    throw new Error(
+      `${componentEntry.id} is workspace-source-only; installed-consumer add is unsupported and no registry install was attempted.`
+    );
+  }
   const adapter = getAdapter(host);
   if (!adapter) {
     // unreachable: normalizeHost only returns ids drawn from ADAPTER_REGISTRY,

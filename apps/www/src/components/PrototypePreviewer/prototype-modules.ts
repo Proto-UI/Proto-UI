@@ -23,6 +23,26 @@ function getPrototypeIdFromPath(path: string): string | null {
  * value: 动态导入函数
  */
 const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
+  'base-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/label');
+    registerPrototype('base-label-root', mod.default);
+  },
+  'shadcn-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/label');
+    registerPrototype('shadcn-label-root', mod.default);
+  },
+  'brutalist-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/label');
+    registerPrototype('brutalist-label-root', mod.default);
+  },
+  'bootstrap-2-3-2-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/label');
+    registerPrototype('bootstrap-2-3-2-label-root', mod.default);
+  },
+  'liquid-glass-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/label');
+    registerPrototype('liquid-glass-label-root', mod.default);
+  },
   'base-surface-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/surface');
     registerPrototype('base-surface-root', mod.default);

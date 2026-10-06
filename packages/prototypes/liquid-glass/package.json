@@ -25,6 +25,10 @@
     "./surface": {
       "types": "./src/surface/index.ts",
       "default": "./src/surface/index.ts"
+    },
+    "./label": {
+      "types": "./src/label/index.ts",
+      "default": "./src/label/index.ts"
     }
   },
   "dependencies": {

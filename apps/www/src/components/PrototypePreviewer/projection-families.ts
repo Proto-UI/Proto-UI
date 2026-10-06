@@ -14,6 +14,7 @@ export const SHARED_BASE_FAMILY_IDS = [
 export type SharedBaseFamilyId = (typeof SHARED_BASE_FAMILY_IDS)[number];
 export type ProjectionComponentId =
   | SharedBaseFamilyId
+  | 'label'
   | 'checkbox'
   | 'input'
   | 'radio-group'
@@ -52,6 +53,7 @@ export type ProjectionFamilyManifest = Readonly<{
 export type ProjectionFamilyManifestRegistry = Readonly<Record<string, ProjectionFamilyManifest>>;
 
 const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[]>> = {
+  label: ['root'],
   button: ['root'],
   toggle: ['root'],
   switch: ['root', 'thumb'],
@@ -89,6 +91,28 @@ const SHADCN_MANIFEST = {
   themeArtifactId: 'website-shadcn-theme',
   themeInputId: 'website-root-computed-pui-theme',
   families: {
+    label: {
+      baseFamilyId: 'P-BASE-LABEL',
+      recipeId: 'demo-shadcn-label',
+      recipePrototypeIds: [
+        'shadcn-label-root',
+        'base-checkbox-root',
+        'base-switch-root',
+        'base-radio-group-root',
+        'base-radio-group-item',
+        'base-input-root',
+        'base-textarea-root',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+      parts: { root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'shadcn-label-root' } },
+    },
     button: {
       baseFamilyId: 'P-BASE-BUTTON',
       recipeId: 'demo-shadcn-button',
@@ -351,6 +375,28 @@ const BRUTALIST_MANIFEST = {
   themeArtifactId: 'prototype-brutalist-theme',
   themeInputId: 'website-brutalist-theme-mode',
   families: {
+    label: {
+      baseFamilyId: 'P-BASE-LABEL',
+      recipeId: 'demo-brutalist-label',
+      recipePrototypeIds: [
+        'brutalist-label-root',
+        'base-checkbox-root',
+        'base-switch-root',
+        'base-radio-group-root',
+        'base-radio-group-item',
+        'base-input-root',
+        'base-textarea-root',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+      parts: { root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'brutalist-label-root' } },
+    },
     button: {
       baseFamilyId: 'P-BASE-BUTTON',
       recipeId: 'demo-brutalist-button',
@@ -681,6 +727,30 @@ const BOOTSTRAP_232_MANIFEST = {
   themeInputId: 'website-bootstrap-2-3-2-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    label: {
+      baseFamilyId: 'P-BASE-LABEL',
+      recipeId: 'demo-bootstrap-2-3-2-label',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-label-root',
+        'base-checkbox-root',
+        'base-switch-root',
+        'base-radio-group-root',
+        'base-radio-group-item',
+        'base-input-root',
+        'base-textarea-root',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'bootstrap-2-3-2-label-root' },
+      },
+    },
     button: {
       baseFamilyId: 'P-BASE-BUTTON',
       recipeId: 'demo-bootstrap-2-3-2-button',
@@ -755,6 +825,28 @@ const LIQUID_GLASS_MANIFEST = {
   themeInputId: 'website-liquid-glass-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    label: {
+      baseFamilyId: 'P-BASE-LABEL',
+      recipeId: 'demo-liquid-glass-label',
+      recipePrototypeIds: [
+        'liquid-glass-label-root',
+        'base-checkbox-root',
+        'base-switch-root',
+        'base-radio-group-root',
+        'base-radio-group-item',
+        'base-input-root',
+        'base-textarea-root',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+      ],
+      parts: { root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'liquid-glass-label-root' } },
+    },
     button: {
       baseFamilyId: 'P-BASE-BUTTON',
       recipeId: 'demo-liquid-glass-button',

@@ -8,7 +8,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { safeError, safeUrl } from '../../../../../../scripts/test/search-startup-profile.mjs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RUNTIMES, launchBrowser, startServer, stopServer } from './browser-harness';
+import { RUNTIMES, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
 
 const HOME_ROUTE = '/zh-cn/';
 const HOME_SELECTOR = '[data-home-showcase]';
@@ -817,4 +817,142 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
       await context.close();
     }
   }, 240_000);
+});
+
+// C-CONTROL-LABEL-0001: real published documentation and real input. These
+// journeys supplement owner/host tests; they do not certify a screen reader.
+describe.sequential('Independent Label public documentation', () => {
+  for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+    it(`${family}: naming, activation and copyable content across four Web adapters`, async () => {
+      const context = await browser.newContext({ viewport: { width: 1040, height: 900 } });
+      const page = await context.newPage();
+      const evidenceRoot =
+        process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ??
+        path.join(os.tmpdir(), 'proto-ui-control-label');
+      const directory = path.join(evidenceRoot, 'control-label');
+      try {
+        await mkdir(directory, { recursive: true });
+        const folder = family === 'brutalist' ? 'brutalist/components' : family;
+        const response = await page.goto(`${baseUrl}/en/ui-libraries/${folder}/label/`, {
+          waitUntil: 'domcontentloaded',
+        });
+        expect(response?.status()).toBe(200);
+        const preview = page.locator('[data-previewer-id]').first();
+        await preview.scrollIntoViewIfNeeded();
+        for (const runtime of RUNTIMES) {
+          await selectRuntime(page, preview, runtime, '[data-demo-ref="label-checkbox"]', 1);
+          const content = preview.locator('.pui-runtime-preview-surface');
+          const label = (name: string) => content.locator(`[data-demo-ref="label-${name}"]`);
+          const checkbox = content.getByRole('checkbox', {
+            name: 'Community updates',
+            exact: true,
+          });
+          const checked = (control: Locator) => control.getAttribute('aria-checked');
+          await expect.poll(() => checked(checkbox)).toBe('false');
+          expect(await label('checkbox').getAttribute('tabindex')).toBeNull();
+          await label('checkbox').click();
+          await expect.poll(() => checked(checkbox)).toBe('true');
+          await expect
+            .poll(() => checkbox.evaluate((element) => document.activeElement === element))
+            .toBe(true);
+          await page.keyboard.press('Space');
+          await expect.poll(() => checked(checkbox)).toBe('false');
+
+          const toggle = content.getByRole('switch', { name: 'Enable notifications', exact: true });
+          await label('switch').click();
+          await expect.poll(() => checked(toggle)).toBe('true');
+          const push = content.getByRole('radio', { name: 'Push delivery', exact: true });
+          const email = content.getByRole('radio', { name: 'Email delivery', exact: true });
+          await label('radio-push').click();
+          await expect.poll(() => checked(push)).toBe('true');
+          await expect.poll(() => checked(email)).toBe('false');
+
+          const input = content.locator('input');
+          await label('input').click();
+          await expect
+            .poll(() => input.evaluate((element) => document.activeElement === element))
+            .toBe(true);
+          await page.keyboard.press('ControlOrMeta+A');
+          await page.keyboard.insertText('Named native editor');
+          expect(await input.inputValue()).toBe('Named native editor');
+          const textarea = content.locator('textarea');
+          await label('textarea').click();
+          await expect
+            .poll(() => textarea.evaluate((element) => document.activeElement === element))
+            .toBe(true);
+          await page.keyboard.press('ControlOrMeta+A');
+          expect(
+            await textarea.evaluate((element) => ({
+              start: (element as HTMLTextAreaElement).selectionStart,
+              end: (element as HTMLTextAreaElement).selectionEnd,
+              length: (element as HTMLTextAreaElement).value.length,
+            }))
+          ).toEqual({ start: 0, end: 31, length: 31 });
+
+          for (const name of ['disabled', 'controlled']) {
+            const control = content.locator(`[data-demo-ref="${name}"]`);
+            await label(name).click();
+            expect(await checked(control)).toBe('false');
+          }
+          await label('passive').click();
+          expect(await checked(content.locator('[data-demo-ref="passive"]'))).toBe('false');
+
+          // Drag the actual passive description; no DOM selection API creates
+          // the selection and no page-local CSS changes the product affordance.
+          const description = content.locator('[data-demo-ref="description"]');
+          await description.scrollIntoViewIfNeeded();
+          const bounds = await description.boundingBox();
+          if (!bounds) throw new Error('Description must have physical bounds.');
+          await page.mouse.click(bounds.x + 2, bounds.y + bounds.height / 2);
+          await page.mouse.move(bounds.x + 2, bounds.y + bounds.height / 2);
+          await page.mouse.down();
+          await page.mouse.move(
+            bounds.x + Math.min(bounds.width - 2, 350),
+            bounds.y + bounds.height / 2,
+            { steps: 20 }
+          );
+          await page.mouse.up();
+          expect(
+            (await page.evaluate(() => window.getSelection()?.toString() ?? '')).length
+          ).toBeGreaterThan(5);
+          await preview.screenshot({
+            path: path.join(directory, `label-${family}-${runtime}.png`),
+          });
+        }
+      } catch (error) {
+        await page
+          .screenshot({ path: path.join(directory, `label-${family}-failure.png`), fullPage: true })
+          .catch(() => {});
+        throw error;
+      } finally {
+        await context.close();
+      }
+    }, 180_000);
+  }
+
+  it('records native HTML label click versus pointerup cancellation with real input', async () => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    try {
+      // A separate native comparison fixture, never substituted for Proto's
+      // public-page journey above or presented as a project screenshot.
+      await page.setContent(
+        '<label for="native">Native comparison label</label><input id="native" type="checkbox">'
+      );
+      const label = page.locator('label');
+      const control = page.locator('input');
+      await label.evaluate((element) =>
+        element.addEventListener('pointerup', (event) => event.preventDefault())
+      );
+      await label.click();
+      expect(await control.isChecked()).toBe(true);
+      await label.evaluate((element) =>
+        element.addEventListener('click', (event) => event.preventDefault())
+      );
+      await label.click();
+      expect(await control.isChecked()).toBe(true);
+    } finally {
+      await context.close();
+    }
+  });
 });

@@ -35,7 +35,7 @@ type Vue2ComponentData = {
   style?: unknown;
 };
 
-const DECLARED_HOST_PROPS = new Set(['hostClass', 'surfaceClass', 'hostStyle', 'surfaceStyle']);
+const DECLARED_HOST_PROPS = new Set(['hostClass', 'surfaceClass', 'hostStyle', 'surfaceStyle', 'instanceAssociations']);
 
 export function toVue2ComponentData(input: Record<string, unknown> = {}): Vue2ComponentData {
   const props: Record<string, unknown> = {};

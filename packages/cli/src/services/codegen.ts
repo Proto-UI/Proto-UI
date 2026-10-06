@@ -141,10 +141,21 @@ function renderPreset(host: string, preset: ComponentPreset): string[] {
   ];
 }
 
-export function renderHostIndex(host: string, componentIds: string[]): string {
+export function renderHostIndex(
+  host: string,
+  componentIds: string[],
+  options: { sourceMode?: 'installed' | 'workspace' } = {}
+): string {
   const adapter = getAdapter(host);
   if (!adapter) throw new Error(`unsupported host "${host}"`);
 
+  for (const componentId of componentIds) {
+    if (getComponentEntry(componentId)?.sourceOnly && options.sourceMode !== 'workspace') {
+      throw new Error(
+        `${componentId} is workspace-source-only and has no installed-consumer package; use explicit workspace source generation`
+      );
+    }
+  }
   const lines = createFileHeader();
   if (componentIds.length === 0) {
     lines.push('export {};', '');

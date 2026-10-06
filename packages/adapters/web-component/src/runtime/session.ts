@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
 import type { Prototype, TemplateChildren } from '@proto.ui/core';
 import { type RawPropsSource } from '@proto.ui/module-props';
@@ -15,6 +16,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   root: Element | ShadowRoot;
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
+  getInstanceAssociations?: () => InstanceAssociations;
   textControlTarget: HTMLElement | null;
   imageViewTarget: HTMLImageElement | null;
   wiring: ReturnType<typeof createHostWiring>;
@@ -62,6 +64,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     { ...proto, name: tagName },
     {
       getRawProps: () => rawPropsSource.get() as Readonly<Props & PropsBaseType>,
+      getInstanceAssociations: args.getInstanceAssociations,
       schedule,
       onLifecycleCheckpoint,
       onLifecycleEvent,

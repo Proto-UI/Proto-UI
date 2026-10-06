@@ -150,6 +150,11 @@
       "types": "./dist/surface/index.d.ts",
       "import": "./dist/surface/index.js",
       "default": "./dist/surface/index.js"
+    },
+    "./label": {
+      "types": "./dist/label/index.d.ts",
+      "import": "./dist/label/index.js",
+      "default": "./dist/label/index.js"
     }
   },
   "description": "Base Proto UI prototype library for reusable interaction prototypes.",

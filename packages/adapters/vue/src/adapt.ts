@@ -1,3 +1,5 @@
+import { withoutInstanceAssociations } from '@proto.ui/adapter-base';
+import type { InstanceAssociations } from '@proto.ui/core';
 import {
   getModuleDeclaration,
   type Prototype,
@@ -81,6 +83,7 @@ export type { VueAdapterHandle } from './types';
 
 export type VueAdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
+    instanceAssociations?: InstanceAssociations;
     class?: string | string[] | Record<string, boolean>;
     hostClass?: string | string[] | Record<string, boolean>;
     surfaceClass?: string | string[] | Record<string, boolean>;
@@ -119,6 +122,7 @@ function defaultGetProps<Props extends PropsBaseType>(
     style,
     hostStyle,
     surfaceStyle,
+    instanceAssociations,
     ...rest
   } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
@@ -202,6 +206,7 @@ export function createVueAdapter(runtime: VueRuntime) {
       name: `Proto(${proto.name})`,
       inheritAttrs: false,
       props: {
+        instanceAssociations: { type: Object, default: undefined },
         hostClass: { type: [String, Array, Object], default: undefined },
         surfaceClass: { type: [String, Array, Object], default: undefined },
         hostStyle: { type: [String, Array, Object], default: undefined },
@@ -262,7 +267,7 @@ export function createVueAdapter(runtime: VueRuntime) {
               ...(ctx.attrs ?? {}),
               ...(props ?? {}),
             } as VueAdapterProps<Props>);
-            return (nextProps ?? {}) as Readonly<Props & PropsBaseType>;
+            return withoutInstanceAssociations(nextProps) as Readonly<Props & PropsBaseType>;
           },
           subscribe(cb) {
             subs.add(cb);
@@ -285,6 +290,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             proto,
             schedule,
             rawPropsSource,
+            getInstanceAssociations: () => props.instanceAssociations ?? {},
             wiring,
             eventGate: {
               disable: () => eventGateRef.value?.disable(),
@@ -356,6 +362,7 @@ export function createVueAdapter(runtime: VueRuntime) {
 
         let lastHostProps = rawPropsSource.get();
         const notifyPropsChange = () => {
+          controllerRef.value?.applyInstanceAssociations(props.instanceAssociations ?? {});
           const nextHostProps = rawPropsSource.get();
           if (shallowEqualHostProps(lastHostProps, nextHostProps)) return;
           lastHostProps = nextHostProps;

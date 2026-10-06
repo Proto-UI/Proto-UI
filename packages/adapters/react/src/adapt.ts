@@ -1,3 +1,5 @@
+import { withoutInstanceAssociations } from '@proto.ui/adapter-base';
+import type { InstanceAssociations } from '@proto.ui/core';
 import {
   getModuleDeclaration,
   type Prototype,
@@ -85,6 +87,7 @@ export type { ReactAdapterHandle } from './types';
 
 export type ReactAdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
+    instanceAssociations?: InstanceAssociations;
     children?: any;
     className?: string;
     hostClassName?: string;
@@ -128,6 +131,7 @@ function defaultGetProps<Props extends PropsBaseType>(
     style,
     hostStyle,
     surfaceStyle,
+    instanceAssociations,
     ...rest
   } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
@@ -306,7 +310,9 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         rawPropsSourceRef.current = {
           debugName: `${proto.name}#raw-props`,
           get() {
-            const nextProps = getProps(propsRef.current) ?? ({} as Partial<Props>);
+            const nextProps = withoutInstanceAssociations(
+              getProps(propsRef.current)
+            ) as Partial<Props>;
             return nextProps as Readonly<Props & PropsBaseType>;
           },
           subscribe(cb) {
@@ -327,7 +333,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       );
 
       runtime.useEffect(() => {
-        const nextRawProps = snapshotRawProps(getProps(propsRef.current));
+        controllerRef.current?.applyInstanceAssociations(
+          propsRef.current.instanceAssociations ?? {}
+        );
+        const nextRawProps = snapshotRawProps(
+          withoutInstanceAssociations(getProps(propsRef.current))
+        );
         const previousRawProps = deliveredRawPropsRef.current;
         deliveredRawPropsRef.current = nextRawProps;
         if (previousRawProps && hasSameRawProps(previousRawProps, nextRawProps)) return;
@@ -344,6 +355,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           proto,
           schedule,
           rawPropsSource: rawPropsSourceRef.current as RawPropsSource<Props>,
+          getInstanceAssociations: () => propsRef.current.instanceAssociations ?? {},
           wiring,
           eventGate: {
             disable: () => eventGateRef.current?.disable(),

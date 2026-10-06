@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 // packages/runtime/src/instance/execute/types.ts
 import { TemplateChildren } from '@proto.ui/core';
 import { PropsBaseType } from '@proto.ui/types';
@@ -17,6 +18,7 @@ export interface ExecuteResult<P extends PropsBaseType> {
 }
 
 export interface RuntimeController {
+  applyInstanceAssociations(input: InstanceAssociations): void;
   applyRawProps(nextRaw: Record<string, any>): void;
 
   update(): void; // render + commit (host only)

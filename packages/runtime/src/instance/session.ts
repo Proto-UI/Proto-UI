@@ -1,3 +1,4 @@
+import { validateInstanceAssociations } from '@proto.ui/core';
 import type {
   InstancePhase,
   MountPhase,
@@ -10,6 +11,7 @@ import type { PropsFacade, PropsPort } from '@proto.ui/module-props';
 import type { RulePort } from '@proto.ui/module-rule';
 import type { EventPort } from '@proto.ui/module-event';
 import type { PresencePort } from '@proto.ui/module-presence';
+import type { ControlLabelPort } from '@proto.ui/module-control-label';
 import type { A11yPort } from '@proto.ui/module-a11y';
 
 import { __RT_EVENT_CALLBACKS } from '../kernel/event';
@@ -260,7 +262,19 @@ export function createRuntimeSession<P extends PropsBaseType>(
     }
   };
 
+  const applyInstanceAssociations = (input: unknown) => {
+    if (instancePhase === 'disposing' || instancePhase === 'disposed') return;
+    const associations = validateInstanceAssociations(input);
+    const port = moduleHub.getPort<ControlLabelPort>('control-label');
+    if (!port) {
+      if (associations.controlLabel)
+        throw new Error('[InstanceAssociations] Control Label module is unavailable');
+      return;
+    }
+    port.setReference(associations.controlLabel);
+  };
   const controller: RuntimeController = {
+    applyInstanceAssociations,
     applyRawProps(nextRaw) {
       if (instancePhase === 'disposed') return;
       propsPort.applyRaw({ ...(nextRaw ?? {}) });
@@ -282,8 +296,10 @@ export function createRuntimeSession<P extends PropsBaseType>(
   // Register before hosts subscribe: revoke relationship leases before a
   // ViewIntent can hide or remove its physical view. Terminal lock clears it.
   kernel.viewIntent.subscribe(({ present }) => {
+    moduleHub.getPort<ControlLabelPort>('control-label')?.prepareViewPresence(present);
     moduleHub.getPort<A11yPort>('a11y')?.prepareViewPresence(present);
   });
+  applyInstanceAssociations(host.getInstanceAssociations?.());
 
   const mount = (): Promise<void> => {
     if (instancePhase !== 'alive') {

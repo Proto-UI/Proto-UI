@@ -14,6 +14,7 @@ export interface ComponentEntry {
   packageName: string;
   importPath: string;
   stylePreset: string | null;
+  sourceOnly?: boolean;
   items: ComponentItem[];
   preset?: ComponentPreset;
 }
@@ -209,6 +210,37 @@ const baseCompound = (
   );
 
 export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
+  'base-label': base('base-label', 'Base Label', 'labelRoot', 'BaseLabelRoot'),
+  'shadcn-label': shadcn('shadcn-label', 'Shadcn Label', 'labelRoot', 'ShadcnLabelRoot'),
+  'brutalist-label': brutalist(
+    'brutalist-label',
+    'Brutalist Label',
+    'labelRoot',
+    'BrutalistLabelRoot'
+  ),
+  'bootstrap-2-3-2-label': {
+    ...defineSimple(
+      'bootstrap-2-3-2-label',
+      'bootstrap-2-3-2 Label (workspace source)',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      '@proto.ui/prototypes-bootstrap-2-3-2/label',
+      'labelRoot',
+      'Bootstrap232LabelRoot'
+    ),
+    sourceOnly: true,
+  },
+  'liquid-glass-label': {
+    ...defineSimple(
+      'liquid-glass-label',
+      'liquid-glass Label (workspace source)',
+      '@proto.ui/prototypes-liquid-glass',
+      '@proto.ui/prototypes-liquid-glass/label',
+      'labelRoot',
+      'LiquidGlassLabelRoot'
+    ),
+    sourceOnly: true,
+  },
+
   'base-surface': base('base-surface', 'Base Surface', 'surfaceRoot', 'BaseSurfaceRoot'),
   'shadcn-surface': shadcn('shadcn-surface', 'Shadcn Surface', 'surfaceRoot', 'ShadcnSurfaceRoot'),
   'brutalist-surface': brutalist(
@@ -971,6 +1003,7 @@ export function getComponentEntry(componentId: string | undefined): ComponentEnt
 
 export function listComponentChoices(): { title: string; value: string }[] {
   return Object.values(COMPONENT_REGISTRY)
+    .filter((entry) => !entry.sourceOnly)
     .map((entry) => ({
       title: entry.label,
       value: entry.id,

@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
 import type { CommitSignal, RuntimeCheckpoint, RuntimeLifecycleEvent } from '@proto.ui/runtime';
 import type { Prototype } from '@proto.ui/core';
@@ -8,6 +9,7 @@ export function createVue2HostSession<Props extends PropsBaseType>(args: {
   proto: Prototype<Props>;
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
+  getInstanceAssociations?: () => InstanceAssociations;
   wiring: ReturnType<typeof createHostWiring>;
   eventGate: {
     disable(): void;
@@ -40,6 +42,7 @@ export function createVue2HostSession<Props extends PropsBaseType>(args: {
     proto,
     {
       getRawProps: () => rawPropsSource.get() as Readonly<Props & PropsBaseType>,
+      getInstanceAssociations: args.getInstanceAssociations,
       schedule,
       onLifecycleCheckpoint,
       onLifecycleEvent,

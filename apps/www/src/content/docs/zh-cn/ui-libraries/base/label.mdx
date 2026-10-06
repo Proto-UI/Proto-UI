@@ -1,0 +1,39 @@
+---
+title: 'Label'
+description: '用显式 Proto UI 关联分别表达可访问名称与控件激活。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Label 当前仍是 **draft**。base 投影复用独立的 Base Label 协议；Proto UI 是独立项目，设计资料用于比较与自主采纳，不构成其他项目对 Proto UI 的权威。
+
+<PrototypePreviewer demoId="demo-base-label" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} />
+
+此例将当前 Label 投影与真实、视觉中性的 Base 控件配对，以隔离验证关联协议。On/Off 只订阅控件公开状态，没有第二套 value，也没有替 Label 转发 click 的页面监听器。Input 与 Textarea 是实际原生编辑器；此基准不声称已验证其他设计体系的控件投影。
+
+## 分开声明名称和激活
+
+- `naming` 默认 `true`：目标通过可访问关系引用真实渲染的 Label，不再放置重复的隐藏名称。
+- `activation` 默认 `false`：设为 `true` 后，符合条件的指针动作请求目标已有操作。Checkbox、Switch 保持 disabled 与 controlled 规则；Radio Item 向 Group 请求选值；Input、Textarea 只请求 focus，不由 Label 改值或操纵选区。
+- Label 不增加 button role、Tab 停靠点或独立键盘激活。嵌套链接/按钮、带修饰键、取消与拖拽手势不转发。
+- 仅命名的 Label 与长说明仍可复制。短操作标签在自己的原型上表达选择策略。受控示例会拒绝接受切换提案，保持关闭，这是应用的值所有权决定。
+
+## 关联不进入 JSON Props
+
+从 `@proto.ui/core` 调用 `createControlLabelRef()`，每一对控件/标签保留一个稳定引用。React、Vue、Vue 2 向双方传 Adapter-owned `instanceAssociations={ controlLabel: ref }`。这不是普通 Proto Props；即使自定义 getProps，也会在 raw/resolved Props 之前剥离。
+
+WC 使用 `@proto.ui/adapter-web-component` 的 `setElementAssociations(target, { controlLabel: ref })`，Label 同样调用。普通 Props 只传 naming、activation 和控件值。attribute 字符串、JSON clone 后的对象、未知关联键会被拒绝。DemoSpec 用 `associations: { controlLabel: 'row-key' }` 表达纯数据意图，每个 render instance 单独物化公开引用。
+
+每个引用仅支持一个 live Label 和一个 live target。缺失、重复、过期时不选取 DOM 顺序上的赢家。显式配对的 siblings 可以关联，但 Web 还要求相同 Document 与 tree root；不隐式跨 document/shadow root，也不提供 DOM 查询或任意 action bus。已有非空 ariaLabel/labelledBy 保留命名所有权；与 Label 命名冲突时明确诊断，必要时显式选择 activation-only。
+
+## 消费与范围
+
+入口为 `@proto.ui/prototypes-base/label`。CLI component `base-label` 可生成 WC、React、Vue、Vue 2 facade。
+
+当前目标集合为 Checkbox、Switch、Radio Group Item、Input、Textarea；不附带 Form submission、validation、多 Label 排序或原生平台/辅助技术认证。真实浏览器验收与源码、合成宿主测试分别追踪。
+
+- [关联契约](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-CONTROL-LABEL-0001.yaml)
+- [P-BASE-LABEL](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-LABEL.yaml)
+- [测试映射](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-CONTROL-LABEL-0001.yaml)
+
+Web activation 保留在原 click 调用时段，不用定时器推迟编辑器 focus。宿主监听器已观察到的 click 取消会被尊重；后续监听器不能撤回已经提交的操作。仅取消 pointerup 不等于取消 click。这是有界的自定义 Label 协议，未声称复现原生 HTML label 的全部默认动作细节；真实辅助技术行为仍待验证。

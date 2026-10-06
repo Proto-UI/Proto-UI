@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 import type { AsHookCaller, ExposeEvent, ExposeOf, Prototype } from '@proto.ui/core';
 import type { ProtoAdapterExposes } from '@proto.ui/adapter-base';
 import type { PropsBaseType } from '@proto.ui/types';
@@ -34,6 +35,7 @@ type Vue2PortableProps<TProto extends ProtoLike> =
     : never;
 
 export type ProtoVue2Props<TProto extends ProtoLike> = Vue2PortableProps<TProto> & {
+  instanceAssociations?: InstanceAssociations;
   class?: Vue2HostClass;
   hostClass?: Vue2HostClass;
   surfaceClass?: Vue2HostClass;
@@ -81,6 +83,7 @@ export type Vue2ComponentOptions<TProto extends Prototype<any, any>> = {
 };
 
 export type Vue2AdapterInstance<TProto extends Prototype<any, any>> = Vue2AdapterHandle<TProto> & {
+  instanceAssociations?: InstanceAssociations;
   $attrs?: Record<string, unknown>;
   $slots?: Record<string, unknown>;
   $props: ProtoVue2Props<TProto>;

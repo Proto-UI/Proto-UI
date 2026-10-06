@@ -884,6 +884,20 @@ export function createWebA11yProjectionRegistry(
       };
       projector.detach = detach;
       projector.isBound = () => !record.disposed && !record.detached && record.target !== null;
+      projector.hasAuthoredName = () => {
+        const target = record.target;
+        if (!target) return true;
+        const scalar = scalarAttributeRefs.get(target)?.get('aria-label');
+        const currentName = target.getAttribute('aria-label');
+        const authoredName =
+          scalar && currentName === scalar.projectedValue ? scalar.baseline : currentName;
+        if (authoredName?.trim()) return true;
+        const relation = relationOwnerships.get(target)?.get('aria-labelledby');
+        const currentRelation = target.getAttribute('aria-labelledby');
+        if (relation && currentRelation === relation.projectedValue)
+          return relation.baseline.size > 0;
+        return !!currentRelation?.trim();
+      };
       projector.reactivate = () => {
         if (record.disposed || !record.detached) return;
         record.detached = false;
