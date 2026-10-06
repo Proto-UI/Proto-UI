@@ -447,6 +447,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/tabs',
                 },
                 {
+                  label: 'Collapsible (Draft)',
+                  translations: { en: 'Collapsible (Draft)', 'zh-CN': 'Collapsible（Draft）' },
+                  slug: 'ui-libraries/base/collapsible',
+                },
+                {
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/base/hover-card',

@@ -437,6 +437,65 @@ describe('AnatomyModuleImpl', () => {
     off();
   });
 
+  it('notifies detached domains of logical adoption without reviving host observation', () => {
+    const family = createAnatomyFamily('detached-logical-adoption', {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        item: { cardinality: { min: 0, max: 1 } },
+      },
+    });
+    const first = {},
+      second = {},
+      item = {};
+    const parents = new Map<unknown, unknown | null>([[item, first]]);
+    let observed = 0;
+    const modules = [first, second, item].map((instance, index) => {
+      const caps = makeCaps({
+        instance,
+        getParent: (token) => parents.get(token) ?? null,
+        getPrototype: () => makeProto(),
+        getRootTarget: () => instance,
+        orderObserver: () => {
+          observed++;
+          return () => {
+            observed--;
+          };
+        },
+      });
+      const impl = new AnatomyModuleImpl(caps, 'logical-adoption', makeExposePort());
+      impl.claim(family, { role: index === 2 ? 'item' : 'root' });
+      return { caps, impl };
+    });
+    const left: number[] = [],
+      right: number[] = [];
+    modules[0].impl.subscribeParts(family, 'item', (_run, parts) => left.push(parts.length));
+    modules[1].impl.subscribeParts(family, 'item', (_run, parts) => right.push(parts.length));
+    try {
+      for (const { caps } of modules) caps.__sys.__setExecPhase('callback');
+      for (const { impl } of modules.slice(0, 2)) impl.onMountPhase('mounted', 1);
+      expect(observed).toBe(2);
+      for (const { impl } of modules.slice(0, 2)) impl.onMountPhase('detached', 1);
+      expect(observed).toBe(0);
+      expect(left).toEqual([]);
+      expect(right).toEqual([]);
+
+      // The Adapter changes ancestry; no mounted view or DOM observer delivers it.
+      parents.set(item, second);
+      modules[2].impl.port.syncStructure();
+      expect(left).toEqual([0]);
+      expect(right).toEqual([1]);
+      expect(modules[0].impl.partsOf(family, 'item')).toEqual([]);
+      expect(modules[1].impl.partsOf(family, 'item')).toHaveLength(1);
+      expect(observed).toBe(0);
+      modules[2].impl.port.syncStructure();
+      expect(left).toEqual([0]);
+      expect(right).toEqual([1]);
+      expect(observed).toBe(0);
+    } finally {
+      for (const { impl } of modules) impl.dispose();
+    }
+  });
+
   it('signals target readiness changes across a family domain', () => {
     const family = createAnatomyFamily('target-readiness-subscribe', {
       roles: {

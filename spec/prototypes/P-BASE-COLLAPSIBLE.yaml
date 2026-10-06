@@ -1,0 +1,168 @@
+id: P-BASE-COLLAPSIBLE
+type: prototype
+title: Base Collapsible is a root-owned single disclosure protocol
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: Issue 388 接受了本 bounded slice 的身份、所有权与语义边界；保留 draft，等待实际实现、四种 Web Adapter 与 consumer/public projection 证据的独立审查及明确稳定准入。已合入 relationship prerequisite 不会激活本原型或其 draft 依赖。
+  en: Issue 388 accepts this bounded slice's identity, ownership, and semantic boundaries. It remains draft pending independent review of actual implementation, four Web Adapter and consumer/public-projection evidence, and explicit stable admission. The merged relationship prerequisite activates neither this prototype nor its draft dependencies.
+summary: One Root owns canonical disclosure open state and request-only openChange; one Trigger and one role-neutral Content consume that state in the same anatomy domain.
+statement:
+  zh-CN: >-
+    Base Collapsible 表示一个 inline disclosure subject，而非 Accordion、Overlay 或 focus scope。Root 是唯一 canonical open owner；受控 request 不产生 optimistic truth，defaultOpen 只初始化非受控实例，disabled 只抑制请求而不改写展开状态。Trigger 与 Content 消费同域 context。默认关闭 Content 使用 L1 detach，keepMounted 显式保留隐藏 view。direct 与 authored asHook 使用同一 protocol；协议中没有宿主 identity 或 presence registry。
+
+  en: >-
+    Base Collapsible represents one inline disclosure subject, not an Accordion, Overlay, or focus scope. Root is the sole canonical open owner; controlled requests create no optimistic truth, defaultOpen initializes only an uncontrolled instance, and disabled suppresses requests without rewriting expansion. Trigger and Content consume same-domain context. Closed Content uses L1 detach by default; keepMounted explicitly retains a hidden view. Direct and authored-asHook entries share one protocol without host identity or a presence registry.
+
+anatomy:
+  family: base-collapsible
+  roles:
+    root:
+      cardinality: { min: 1, max: 1 }
+      summary:
+        zh-CN: 唯一 open owner、context provider 与 domain anchor。
+        en: Sole open owner, context provider, and domain anchor.
+    trigger:
+      cardinality: { min: 1, max: 1 }
+      summary:
+        zh-CN: 请求 Root toggle 的 button-like controlling part。
+        en: Button-like controlling part that requests Root toggle.
+    content:
+      cardinality: { min: 1, max: 1 }
+      summary:
+        zh-CN: 派生 open/hidden 的 role-neutral inline content part。
+        en: Role-neutral inline content part deriving open and hidden.
+  relations:
+    - { kind: contains, parent: root, child: trigger }
+    - { kind: contains, parent: root, child: content }
+criteria:
+  - id: P-BASE-COLLAPSIBLE-IDENTITY
+    text:
+      zh-CN: Collapsible 必须表示一个 disclosure subject；Content 是 canonical authored part 名称，Disclosure 是跨 pattern 术语，不是另一个公开原型身份。
+      en: Collapsible must represent one disclosure subject; Content is the canonical authored part name, while Disclosure is a cross-pattern term rather than another public prototype identity.
+  - id: P-BASE-COLLAPSIBLE-AUTHORING-ENTRIES
+    text:
+      zh-CN: '`base-collapsible-root` direct prototype（collapsibleRoot）与 asCollapsibleRoot 必须实现同一 Root protocol，并从 @proto.ui/prototypes-base/collapsible 提供相同 consumer 语义。'
+      en: 'The base-collapsible-root direct prototype (collapsibleRoot) and asCollapsibleRoot must implement the same Root protocol and provide equivalent consumer semantics through @proto.ui/prototypes-base/collapsible.'
+    dependsOn:
+      contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001]
+      decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
+  - id: P-BASE-COLLAPSIBLE-PROTOCOL-INDEPENDENCE
+    text:
+      zh-CN: Collapsible 不得通过 Button、Toggle、Tabs、Dialog 或其他 Base protocol-specific authored asHook 获取自身语义；可复用 protocol-neutral open/request、activation、focus 与 accessibility 能力。
+      en: Collapsible must not obtain its semantics through Button, Toggle, Tabs, Dialog, or another Base protocol-specific authored asHook; it may reuse protocol-neutral open/request, activation, focus, and accessibility capabilities.
+    dependsOn:
+      decisions: [D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  - id: P-BASE-COLLAPSIBLE-ANATOMY
+    text:
+      zh-CN: Root 必须声明并 claim 顶层 anatomy 的 base-collapsible family；root、trigger、content 均为 1..1，root contains trigger/content；anatomy 不得自动创建 part 或注入行为。
+      en: Root must declare and claim the top-level base-collapsible anatomy family, with root, trigger, and content each 1..1 and root containing trigger and content; anatomy must not create parts or inject behavior.
+    dependsOn:
+      contracts: [C-ANATOMY-0001, C-ANATOMY-0002, C-ANATOMY-0004]
+  - id: P-BASE-COLLAPSIBLE-CARDINALITY
+    text:
+      zh-CN: 同域重复 role 必须立即按 max=1 拒绝；min=1 只能在真实宿主 readiness 后的 settled composition 检查。关闭 Content 的 L1 detach 不移除逻辑 part claim，不得伪造 mount-completion signal。
+      en: Duplicate roles in a domain must be rejected immediately by max=1; min=1 is checked only for settled composition after real host readiness. Closed Content L1 detach does not remove its logical part claim, and no mount-completion signal may be fabricated.
+    dependsOn:
+      contracts: [C-ANATOMY-0002, C-ANATOMY-0005, C-LIFECYCLE-0008]
+  - id: P-BASE-COLLAPSIBLE-ROOT-OWNER
+    text:
+      zh-CN: Root 必须唯一拥有 canonical open state，expose open 与 openCollapsible/close/toggle；方法必须进入与 Trigger 相同的 request channel，不得绕过 disabled 或 controlled owner。requestVersion/requestedOpen/reason 只能是 ephemeral request envelope，不是第二 open owner 或公开 steady-state 保证。
+      en: Root must solely own canonical open state and expose open and openCollapsible/close/toggle. Methods must enter the same request channel as Trigger without bypassing disabled or the controlled owner. requestVersion/requestedOpen/reason may only be an ephemeral request envelope, not a second open owner or public steady-state guarantee.
+    dependsOn:
+      contracts: [C-STATE-0001, C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001]
+  - id: P-BASE-COLLAPSIBLE-PROPS
+    text:
+      zh-CN: >-
+        Root 必须接受 open?: boolean、defaultOpen?: boolean、disabled?: boolean；提供 open 时由 owner input 控制，defaultOpen 与 disabled 默认 false。Props 不得添加 onOpenChange 回调来替代 expose event。
+
+      en: >-
+        Root must accept open?: boolean, defaultOpen?: boolean, and disabled?: boolean. Providing open selects owner-input control; defaultOpen and disabled default to false. Props must not add an onOpenChange callback as a substitute for the expose event.
+
+    dependsOn:
+      contracts: [C-PROPS-0001, C-EXPOSE-EVENT-0001]
+  - id: P-BASE-COLLAPSIBLE-DEFAULT-OPEN
+    text:
+      zh-CN: defaultOpen 只在创建非受控实例时初始化 open；后续 defaultOpen 更新、重复 mount 或 disabled 更新不得重置用户展开状态。受控 open 优先于 defaultOpen。
+      en: defaultOpen initializes open only when creating an uncontrolled instance. Later defaultOpen updates, repeated mounts, and disabled updates must not reset user expansion; controlled open takes precedence over defaultOpen.
+    dependsOn:
+      contracts: [C-PROPS-0001, C-LIFECYCLE-0008]
+  - id: P-BASE-COLLAPSIBLE-REQUEST-ONLY
+    text:
+      zh-CN: 接受的交互与 imperative request 必须通过 Root openChange 发出 {open:boolean, reason:'pointer'|'keyboard'|'programmatic'}；reason 由 portable press key 归一化，imperative request 默认 programmatic（显式已识别 reason 除外）。该 signal 表示请求而非 owner 已接受的事实；非受控 Root 可提交请求的 open。
+      en: Accepted interaction and imperative requests must emit Root openChange with {open:boolean, reason:'pointer'|'keyboard'|'programmatic'}. Reasons are normalized from the portable press key; imperative requests default to programmatic unless an explicitly recognized reason is supplied. The signal describes a request, not an owner-accepted fact; an uncontrolled Root may commit the requested open.
+    dependsOn:
+      contracts: [C-EXPOSE-EVENT-0001, C-EVENT-TYPE-0001]
+  - id: P-BASE-COLLAPSIBLE-CONTROLLED
+    text:
+      zh-CN: 受控 request 后 Root open、Trigger expanded 与 Content open/hidden/presence 必须保留 owner input 的事实直到新 open input 到达；不得 optimistic 展开、折叠或建立第二套状态。
+      en: After a controlled request, Root open, Trigger expanded, and Content open/hidden/presence must retain the owner-input fact until new open input arrives; no optimistic expansion, collapse, or second state truth is allowed.
+    dependsOn:
+      contracts: [C-PROPS-0001, C-STATE-0001, C-CONTEXT-0007]
+  - id: P-BASE-COLLAPSIBLE-DISABLED
+    text:
+      zh-CN: Root disabled 必须抑制 Trigger 与 imperative open/close/toggle request，不发出 openChange；它不得强制关闭或改写 canonical open，也不得阻止受控 owner input 同步事实。
+      en: Root disabled must suppress Trigger and imperative open/close/toggle requests without openChange; it must not force closure, rewrite canonical open, or prevent controlled owner input from synchronizing the fact.
+    dependsOn:
+      contracts: [C-PROPS-0001, C-STATE-INTERACTION-0001]
+  - id: P-BASE-COLLAPSIBLE-CONTEXT
+    text:
+      zh-CN: Root 必须通过 canonical COLLAPSIBLE_CONTEXT 向同一 COLLAPSIBLE_FAMILY domain 的 parts 发布 open、disabled 与必要的 request 协调；host id、host node、view presence 与 relationship registry 不得写入 portable context。
+      en: Root must publish open, disabled, and necessary request coordination through canonical COLLAPSIBLE_CONTEXT to parts in the same COLLAPSIBLE_FAMILY domain. Host ids, host nodes, view presence, and a relationship registry must not enter portable context.
+    dependsOn:
+      contracts: [C-CONTEXT-0001, C-CONTEXT-0002, C-CONTEXT-0007, C-A11Y-PART-RELATIONSHIP-0001]
+  - id: P-BASE-COLLAPSIBLE-NO-SYNC-EVENTS
+    text:
+      zh-CN: Prop synchronization、default initialization、context/structural synchronization 与 lifecycle reconciliation 不得产生 openChange；只有接受的语义 request 可产生该 outward signal。
+      en: Prop synchronization, default initialization, context/structural synchronization, and lifecycle reconciliation must not emit openChange; only accepted semantic requests may produce that outward signal.
+    dependsOn:
+      contracts: [C-EXPOSE-EVENT-0001, C-LIFECYCLE-0008]
+  - id: P-BASE-COLLAPSIBLE-BOUNDARIES
+    text:
+      zh-CN: 本 slice 不包含 Accordion group ownership、heading prerequisite、region landmark、Overlay、focus scope、自动 focus movement、orientation、roving 或 Arrow/Home/End routing，也不新增 Host Capability。
+      en: This slice excludes Accordion group ownership, a heading prerequisite, region landmarks, Overlay, focus scopes, automatic focus movement, orientation, roving, and Arrow/Home/End routing, and adds no Host Capability.
+openQuestions:
+  - id: P-BASE-COLLAPSIBLE-Q-STABLE-ADMISSION
+    question:
+      zh-CN: 独立维护者何时在实际 executable、consumer、公开投射与宿主证据审查后明确准入此 Root protocol 为 stable？
+      en: When will an independent maintainer explicitly admit this Root protocol as stable after reviewing actual executable, consumer, public-projection, and host evidence?
+    context:
+      zh-CN: focused Base 与四种 Web Adapter T mappings 已在 synthetic DOM 通过，public-browser mapping 尚未执行；这些结果、Issue 388 实现授权和 prerequisite 合入均不是稳定准入，draft dependency 不得描述为 active 保证。L1 逻辑保留不扩大为 detached host child 或 native view state 保留。
+      en: Focused Base and four Web Adapter T mappings passed under a synthetic DOM; the public-browser mapping is unexecuted. These results, Issue 388 implementation authorization and merged prerequisites are not stable admission; draft dependencies must not be described as active guarantees. L1 logical preservation does not extend to detached host children or native view state.
+    blocks: [activation:P-BASE-COLLAPSIBLE]
+sources:
+  - path: https://github.com/Proto-UI/Proto-UI/issues/388
+    sections: [Accepted first-slice decisions, Base Collapsible]
+  - path: https://github.com/Proto-UI/Proto-UI/issues/388#issuecomment-5378970491
+    label: Accepted Checkpoint A as amended
+  - path: https://github.com/Proto-UI/Proto-UI/issues/388#issuecomment-5427325581
+    label: Heading prerequisite belongs only to Accordion.Header
+  - path: packages/prototypes/base/src/collapsible/root.proto.ts
+  - path: packages/prototypes/base/src/collapsible/shared.ts
+  - path: packages/prototypes/base/src/collapsible/types.ts
+  - path: packages/prototypes/base/src/collapsible/index.ts
+  - path: packages/prototypes/base/src/tools/use-open-state.ts
+dependsOn:
+  contracts:
+    [
+      C-ANATOMY-0002,
+      C-ANATOMY-0004,
+      C-ANATOMY-0005,
+      C-PROPS-0001,
+      C-STATE-0001,
+      C-CONTEXT-0001,
+      C-EXPOSE-STATE-0001,
+      C-EXPOSE-EVENT-0001,
+      C-LIFECYCLE-0008,
+      C-A11Y-PART-RELATIONSHIP-0001,
+    ]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+relates:
+  prototypes: [P-BASE-COLLAPSIBLE-TRIGGER, P-BASE-COLLAPSIBLE-CONTENT]
+verifies:
+  tests: [T-BASE-COLLAPSIBLE-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the accepted single-disclosure Root, canonical open/request ownership, anatomy and negative boundaries with bounded executable mappings and independent stable-admission blockers.
+tags: [prototype, base, collapsible, disclosure, compound]

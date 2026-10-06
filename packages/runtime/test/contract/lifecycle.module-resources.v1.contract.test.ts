@@ -37,6 +37,102 @@ function createImmediateHost(
 }
 
 describe('runtime contract: lifecycle module resource ownership (v1)', () => {
+  it('releases a failed created instance while preserving the original failure', () => {
+    const failure = new Error('created callback rejected the composition');
+    const records: Record<string, unknown>[] = [];
+    let retainedRun: any;
+    let disposed = 0;
+    const proto = definePrototype({
+      name: 'lifecycle-failed-created-resource-owner',
+      setup(def) {
+        const open = def.state.bool('open', false);
+        def.expose.state('open', open);
+        def.expose.event('change');
+        def.lifecycle.onBeforeDispose(() => {
+          disposed += 1;
+        });
+        def.lifecycle.onCreated((run) => {
+          retainedRun = run;
+          throw failure;
+        });
+      },
+    });
+    let thrown: unknown;
+    try {
+      createRuntimeSession(
+        proto,
+        createImmediateHost((wiring) => {
+          wiring.attach('expose-state', [
+            [EXPOSES_RECORD_SINK_CAP, (record: Record<string, unknown>) => records.push(record)],
+          ]);
+        })
+      );
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBe(failure);
+    expect(disposed).toBe(1);
+    expect(records.at(-1)).toEqual({});
+    expect(() => retainedRun.expose.emit('change')).toThrow();
+  });
+
+  it('preserves both created and terminal cleanup failures in the synchronous caller', () => {
+    const createdFailure = new Error('created failure');
+    const cleanupFailure = new Error('cleanup failure');
+    const proto = definePrototype({
+      name: 'lifecycle-failed-created-and-cleanup-owner',
+      setup(def) {
+        def.lifecycle.onCreated(() => {
+          throw createdFailure;
+        });
+        def.lifecycle.onBeforeDispose(() => {
+          throw cleanupFailure;
+        });
+      },
+    });
+    let thrown: unknown;
+    try {
+      createRuntimeSession(proto, createImmediateHost());
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(AggregateError);
+    expect((thrown as AggregateError).errors).toEqual([createdFailure, cleanupFailure]);
+  });
+
+  it.each([undefined, null, false, 0, ''])(
+    'preserves falsy cleanup failure %s when creation fails',
+    async (cleanupFailure) => {
+      const createdFailure = new Error('created failure');
+      let cleanupCalls = 0;
+      const proto = definePrototype({
+        name: 'lifecycle-failed-created-falsy-cleanup-owner',
+        setup(def) {
+          def.lifecycle.onCreated(() => {
+            throw createdFailure;
+          });
+          def.lifecycle.onBeforeDispose(() => {
+            cleanupCalls += 1;
+            throw cleanupFailure;
+          });
+        },
+      });
+      let thrown: unknown;
+      try {
+        createRuntimeSession(proto, createImmediateHost());
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(AggregateError);
+      expect((thrown as AggregateError).errors).toEqual([createdFailure, cleanupFailure]);
+      // Allow the shared disposal promise to settle: failed synchronous creation
+      // has no returned session from which a caller could observe that promise.
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(cleanupCalls).toBe(1);
+    }
+  );
+
   it('keeps Expose Event declarations across view epochs and invalidates emit at disposal', async () => {
     const emitted: string[] = [];
     let retainedRun: any;

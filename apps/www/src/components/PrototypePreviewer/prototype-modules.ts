@@ -103,6 +103,19 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/toggle');
     registerPrototype('base-toggle', mod.toggle);
   },
+  // Runtime registry loaders keep each preview family out of the initial bundle.
+  'base-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/collapsible');
+    registerPrototype('base-collapsible-root', mod.collapsibleRoot);
+  },
+  'base-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-base/collapsible');
+    registerPrototype('base-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'base-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/collapsible');
+    registerPrototype('base-collapsible-content', mod.collapsibleContent);
+  },
   'base-switch-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/switch');
     registerPrototype('base-switch-root', mod.switchRoot);

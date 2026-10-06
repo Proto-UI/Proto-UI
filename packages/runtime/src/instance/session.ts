@@ -284,11 +284,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
   kernel.viewIntent.subscribe(({ present }) => {
     moduleHub.getPort<A11yPort>('a11y')?.prepareViewPresence(present);
   });
-  setInstancePhase('alive');
-  callbackScope.run(run, () => {
-    for (const cb of lifecycle.created) cb(run);
-  });
-  emit({ type: 'instance.created' });
 
   const mount = (): Promise<void> => {
     if (instancePhase !== 'alive') {
@@ -454,7 +449,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   const unmount = (): Promise<void> => unmountInternal(false);
 
-  const dispose = (): Promise<void> => {
+  const dispose = (failFast = false): Promise<void> => {
     if (disposePending) return disposePending;
     if (instancePhase === 'disposed') return Promise.resolve();
     // Publish the shared completion before any callback can reenter disposal.
@@ -465,6 +460,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       rejectDispose = reject;
     });
     disposePending = pending;
+    let synchronousFailure: { error: unknown } | undefined;
     const succeed = () => {
       disposePending = undefined;
       resolveDispose();
@@ -521,6 +517,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
         // presence transition blocks unmount. The returned Promise still
         // carries callback errors to async-aware callers.
         const finalError = finalizeDispose();
+        if (finalError.failed) synchronousFailure = { error: finalError.error };
         completion = unmountResult.then(
           () => {
             if (finalError.failed) throw finalError.error;
@@ -544,10 +541,35 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
       completion.then(succeed, fail);
     } catch (error) {
+      synchronousFailure = { error };
       fail(error);
+    }
+    if (failFast && synchronousFailure) {
+      // Failed creation cannot return a session or its disposal promise. Keep
+      // shared reentrant completion intact while reporting synchronous cleanup
+      // failure to that same creation caller, including falsy thrown values.
+      void pending.catch(() => {});
+      throw synchronousFailure.error;
     }
     return pending;
   };
+
+  setInstancePhase('alive');
+  try {
+    callbackScope.run(run, () => {
+      for (const cb of lifecycle.created) cb(run);
+    });
+  } catch (error) {
+    // No session reaches the host on failure. Release logical resources while
+    // its owner capabilities still exist, before host wiring is revoked.
+    try {
+      void dispose(true);
+    } catch (cleanupError) {
+      throw new AggregateError([error, cleanupError]);
+    }
+    throw error;
+  }
+  emit({ type: 'instance.created' });
 
   if (host.presenceLifecycle === 'session') {
     moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver({
