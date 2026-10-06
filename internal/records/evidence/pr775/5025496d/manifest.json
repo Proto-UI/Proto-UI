@@ -1,0 +1,630 @@
+{
+  "sourceCodeVersion": {
+    "head": "5025496dbb20ec976e868e461835fd1ad15afb3e",
+    "status": "captured",
+    "kind": "complete clean Git tree plus generated CSS, bound to the opt-in dev server startup identity and current source checks",
+    "cleanTree": "c322a18f7f83f50e07415c21e1a869bddd993070",
+    "generatedCSS": {
+      "apps/www/src/styles/proto-ui-tokens.generated.css": "678cecc4ca868f335049d05ae549aaa682bb7a782e357c60aa25a243fe379863",
+      "apps/www/src/styles/proto-ui-style.css": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+      "apps/www/src/styles/shadcn-theme.css": "e64ed915cd40e21a42ebe5fec84afbdb814f9f6a9a337f1024e9be1ba3fb7357"
+    },
+    "sourceSetDigest": "sha256:d70c043e92fc7829b8c3f7a5ffcde29353756dc3e74e5c68ecf05d7476391f64",
+    "runnerDigest": "sha256:0634d179d7ff6f10eb4209c9d4e3207bce0e022d2ff35075cf074c7313a087a9",
+    "probeDigest": "sha256:2c4fa551993152e05bfc29e2692b7109db53ce5d5ea51db954f54b030c6da6f1"
+  },
+  "workflowRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/37447891020",
+  "passiveArtifact": 11406535651,
+  "popupArtifact": 11405385004,
+  "passiveSummary": {
+    "collectedFrames": 96,
+    "pngFactMatchedFrames": 88,
+    "achievedTargetPredicates": 88,
+    "expectedRuntimeThemeCases": 56,
+    "observedRuntimeThemeCases": 48,
+    "knownUnsupportedRuntimeThemeCases": 8,
+    "knownUnsupportedPairedRawFrames": 8,
+    "knownUnsupportedUnexecutedTargets": 40,
+    "unresolvedRuntimeThemeCases": 0,
+    "distinctUnresolvedFamilies": 0,
+    "conformance": "not evaluated; frame count and target predicate count are not full conformance"
+  },
+  "knownUnsupportedCases": [
+    {
+      "family": "scroll-area",
+      "runtime": "wc",
+      "theme": "light",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "wc",
+        "theme": "light",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-3yan7olxnx3",
+            "generation": "1",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 642,
+              "bottom": 824
+            }
+          }
+        ],
+        "owner": "pp-3yan7olxnx3",
+        "generation": "1",
+        "image": {
+          "path": "scroll-area-wc-light-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-wc-light-rest.png",
+          "digest": "sha256:443d2880611c83b7bb9b20194d90f0edea5be721b0f0961827794fba5a63ef24",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:17.658Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-wc-light-rest.facts.json",
+          "digest": "sha256:c040b37ee1f784d79aa3bc93f1d6356f36e9174a415abf841263d397e1b9dcb7"
+        },
+        "fingerprintDigest": "sha256:d6ea16fe9de5f218185f6caaf5aed9780827d1f9dbb382f93b08145ba128cc89",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    },
+    {
+      "family": "scroll-area",
+      "runtime": "wc",
+      "theme": "dark",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "wc",
+        "theme": "dark",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-t2u5f2e37a",
+            "generation": "1",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 642,
+              "bottom": 824
+            }
+          }
+        ],
+        "owner": "pp-t2u5f2e37a",
+        "generation": "1",
+        "image": {
+          "path": "scroll-area-wc-dark-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-wc-dark-rest.png",
+          "digest": "sha256:971913c47c3757009fb3528400332fdc17e143157f7bedc896d7e15804045ad1",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:21.506Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-wc-dark-rest.facts.json",
+          "digest": "sha256:54fc8cb29a5ad467b490f577ffef3d0febc71c9663d8cb6c346e63203ac711fe"
+        },
+        "fingerprintDigest": "sha256:38f5108a08647cfc15226bf2c211f6594a76176b27e8cb6e76455452b2f2f353",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    },
+    {
+      "family": "scroll-area",
+      "runtime": "react",
+      "theme": "light",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "react",
+        "theme": "light",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-l28ytckjm7e",
+            "generation": "2",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 678.359375,
+              "bottom": 860.359375
+            }
+          }
+        ],
+        "owner": "pp-l28ytckjm7e",
+        "generation": "2",
+        "image": {
+          "path": "scroll-area-react-light-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-react-light-rest.png",
+          "digest": "sha256:b5a7102126eb04389a9a0e0bab5e4927bcba9de0ce1a9e4e3535d8787a1fe6db",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:25.561Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-react-light-rest.facts.json",
+          "digest": "sha256:c06b889907cbd8d7e2abc913df8fb6e1507e7c0df1e9eb35fd6f441e4679e136"
+        },
+        "fingerprintDigest": "sha256:69727c5cd3b4f918cade75fccd0819fd4d8e14b0a7de54c544c755a7e2350db2",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    },
+    {
+      "family": "scroll-area",
+      "runtime": "react",
+      "theme": "dark",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "react",
+        "theme": "dark",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-z7y7x0f0kyp",
+            "generation": "2",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 678.359375,
+              "bottom": 860.359375
+            }
+          }
+        ],
+        "owner": "pp-z7y7x0f0kyp",
+        "generation": "2",
+        "image": {
+          "path": "scroll-area-react-dark-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-react-dark-rest.png",
+          "digest": "sha256:62e02d2d87ee50be1f0dfc89f1a41579478ca0951cfa672a64e74f4b5b30ba21",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:29.761Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-react-dark-rest.facts.json",
+          "digest": "sha256:423aaa3bd6d68ebe7b489d32aff97bf020b56c38a1d598ff1b8132e740bcfc84"
+        },
+        "fingerprintDigest": "sha256:909f93ef2bf8fc327a4e33f87fa778b1c62e544ef1e24863c64d78f786324d44",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    },
+    {
+      "family": "scroll-area",
+      "runtime": "vue",
+      "theme": "light",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "vue",
+        "theme": "light",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-1pa5p6pxz7g",
+            "generation": "2",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 678.359375,
+              "bottom": 860.359375
+            }
+          }
+        ],
+        "owner": "pp-1pa5p6pxz7g",
+        "generation": "2",
+        "image": {
+          "path": "scroll-area-vue-light-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-vue-light-rest.png",
+          "digest": "sha256:00978cd14c097342d661f9e1e97e9f56bdce38cd14d438d28bb7233db53e16e8",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:33.709Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-vue-light-rest.facts.json",
+          "digest": "sha256:11b06bfd5a38d7bee4aa7e14b7dc9af4c8106b1a4c8d57140c16d31d123ee533"
+        },
+        "fingerprintDigest": "sha256:82adc8b7535db997eeb3da77d804d8fe09b88ab10891a152a232db192bbb83b5",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    },
+    {
+      "family": "scroll-area",
+      "runtime": "vue",
+      "theme": "dark",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "vue",
+        "theme": "dark",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-7sk6536hh34",
+            "generation": "2",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 678.359375,
+              "bottom": 860.359375
+            }
+          }
+        ],
+        "owner": "pp-7sk6536hh34",
+        "generation": "2",
+        "image": {
+          "path": "scroll-area-vue-dark-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-vue-dark-rest.png",
+          "digest": "sha256:4d9896e52a07a212d06e13a961de28944830df59f2a5f06f9a9683432483e038",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:37.893Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-vue-dark-rest.facts.json",
+          "digest": "sha256:18a6566139f79f1adda507fd6713272e3a03d296bfe9f18478bcf6b998eb3bab"
+        },
+        "fingerprintDigest": "sha256:831f23cd3959b50460056b97e40234988bbea579937b4dd5bed0eb0dcbd53e9d",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    },
+    {
+      "family": "scroll-area",
+      "runtime": "vue2",
+      "theme": "light",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "vue2",
+        "theme": "light",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-zc79swz78hp",
+            "generation": "2",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 678.359375,
+              "bottom": 860.359375
+            }
+          }
+        ],
+        "owner": "pp-zc79swz78hp",
+        "generation": "2",
+        "image": {
+          "path": "scroll-area-vue2-light-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-vue2-light-rest.png",
+          "digest": "sha256:dc6a559598cafd2eaf6c01d35aa1fc017c4df4a541419ed32c3ff3581e5da0dc",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:41.812Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-vue2-light-rest.facts.json",
+          "digest": "sha256:77dc43ff7d5a49f3b855b831914187690656744e38b6593024441dd6cdd9fd5e"
+        },
+        "fingerprintDigest": "sha256:2b1d25aae6ccb14a6bdbdfad387d547160abaee0416cdca99f3ff696984e3f89",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    },
+    {
+      "family": "scroll-area",
+      "runtime": "vue2",
+      "theme": "dark",
+      "status": "known-unsupported",
+      "achievedTargets": [],
+      "knownUnsupported": {
+        "domain": "scroll-area-rounded-overflow-paint",
+        "followup": "https://github.com/Proto-UI/Proto-UI/issues/853",
+        "family": "scroll-area",
+        "runtime": "vue2",
+        "theme": "dark",
+        "state": "rest",
+        "achieved": false,
+        "numericAcceptance": "not-evaluated",
+        "reason": "Declared ScrollArea rounded overflow edge paint is outside the fixed-px whole-box proof domain.",
+        "geometryOnly": [
+          {
+            "prototype": "brutalist-scroll-area-root",
+            "owner": "pp-18vrseyu4p7",
+            "generation": "2",
+            "radii": [
+              "5px",
+              "5px",
+              "5px",
+              "5px"
+            ],
+            "overflowX": "hidden",
+            "overflowY": "hidden",
+            "fixedPx": true,
+            "safeInteriorOverlap": true,
+            "whollyInsideSafeRect": false,
+            "boxCount": 1,
+            "safeRect": {
+              "left": 541,
+              "right": 851,
+              "top": 678.359375,
+              "bottom": 860.359375
+            }
+          }
+        ],
+        "owner": "pp-18vrseyu4p7",
+        "generation": "2",
+        "image": {
+          "path": "scroll-area-vue2-dark-rest.png",
+          "absolutePath": "/home/runner/work/_temp/contrast-evidence/candidate/scroll-area-vue2-dark-rest.png",
+          "digest": "sha256:1a1dadb13b41d7382dba8680a61cebe846a01f8afce85a4bd4e82ed38c578722",
+          "origin": "native Playwright page.screenshot PNG",
+          "route": "http://127.0.0.1:4321/en/ui-libraries/brutalist/components/scroll-area/",
+          "capturedAt": "2026-10-06T10:27:45.909Z"
+        },
+        "factsFile": {
+          "path": "scroll-area-vue2-dark-rest.facts.json",
+          "digest": "sha256:aebeb19783c843c047280fe7dfd17dbbbbad82a24bba75a75712d1fa79ac02b4"
+        },
+        "fingerprintDigest": "sha256:cdcec8c35592d4b876207ee8cb8da2b003c14840a40d3f1397e43c18d3f11eb7",
+        "unexecutedTargets": [
+          "rest",
+          "hover",
+          "keyboard-focus",
+          "scroll-end",
+          "wheel-both-axes"
+        ],
+        "boundary": "Raw PNG/facts and complete ownership/anatomy/fingerprint pairing retained. Interior overlap is geometry, not painted or numeric acceptance. No later journey was executed."
+      }
+    }
+  ],
+  "nativeCalibration": {
+    "passed": 30,
+    "failed": 0,
+    "cornerSamples": [
+      {
+        "name": "rounded-hidden",
+        "xy": [
+          80,
+          80
+        ],
+        "blackPixels": 0,
+        "whitePixels": 64,
+        "classification": "unsupported-rounded-overflow-clip"
+      },
+      {
+        "name": "rounded-clip",
+        "xy": [
+          220,
+          80
+        ],
+        "blackPixels": 0,
+        "whitePixels": 64,
+        "classification": "unsupported-rounded-overflow-clip"
+      },
+      {
+        "name": "square-hidden",
+        "xy": [
+          360,
+          80
+        ],
+        "blackPixels": 64,
+        "classification": "supported"
+      },
+      {
+        "name": "rounded-visible",
+        "xy": [
+          500,
+          80
+        ],
+        "blackPixels": 64,
+        "classification": "supported"
+      },
+      {
+        "name": "fixed-px-center",
+        "xy": [
+          686,
+          126
+        ],
+        "blackPixels": 64,
+        "classification": "supported"
+      }
+    ]
+  },
+  "images": [
+    {
+      "path": "rounded-overflow-clips.png",
+      "sha256": "dd696ee2f1d37a1c22eb1263bbe41815160418bc2dd560460c442020076ee795",
+      "bytes": 4213,
+      "unalteredNativePNG": true
+    },
+    {
+      "path": "scroll-area-react-light-rest-unmeasured.png",
+      "sha256": "b5a7102126eb04389a9a0e0bab5e4927bcba9de0ce1a9e4e3535d8787a1fe6db",
+      "bytes": 147932,
+      "unalteredNativePNG": true
+    }
+  ],
+  "boundary": "Raw ScrollArea screenshot is retained visual evidence, NOT an achieved target, known-hidden claim, numeric acceptance or full conformance. No later ScrollArea journey was executed. Remaining measurement capability tracked by #853."
+}
