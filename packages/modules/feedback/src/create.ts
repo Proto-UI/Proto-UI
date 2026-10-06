@@ -20,7 +20,7 @@ import type {
 } from './types';
 import { EFFECTS_CAP } from './caps';
 import { VISUAL_FEEDBACK_SINK_CAP, type VisualFeedbackSink } from './material/shared-sink';
-import { OWNED_MATERIAL_ID } from './material/owned-slot';
+import { OWNED_MATERIAL_ID } from './material/declaration-id';
 import {
   MATERIAL_BINDING_FACTORY_CAP,
   type MaterialBinding,

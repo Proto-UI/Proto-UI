@@ -184,11 +184,7 @@ fn maps_a_percentage_to_a_fraction_and_keeps_position() {
     let mapped = map(
         // Preserve percentage semantics independently of source inventory:
         // current Dialog tokens no longer emit the former left-1/2 spelling.
-        &declared(&[
-            ("position", "absolute"),
-            ("width", "100%"),
-            ("left", "50%"),
-        ]),
+        &declared(&[("position", "absolute"), ("width", "100%"), ("left", "50%")]),
         LengthContext::default(),
     );
     let style = &mapped.refinement;
@@ -397,7 +393,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 33] = [
+const EXPECTED_UNMAPPED: [&str; 31] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -415,9 +411,6 @@ const EXPECTED_UNMAPPED: [&str; 33] = [
     "z-index",
     "pointer-events",
     "touch-action",
-    "user-select",
-    // WebKit's compatibility declaration does not add native selection support.
-    "-webkit-user-select",
     "resize",
     "will-change",
     "background-clip",
@@ -441,25 +434,32 @@ const EXPECTED_UNMAPPED: [&str; 33] = [
 ];
 
 #[test]
-fn selection_affordances_keep_both_web_properties_explicitly_unmapped() {
-    // Use a supported positioning context; implicit static-position diagnostics
-    // are covered separately and must not be mistaken for selection properties.
-    let mapped = map(
-        &resolve(&["relative", "select-none"], "shadcn"),
-        LengthContext::default(),
-    );
-    let actual: BTreeSet<&str> = mapped
-        .unmapped
-        .iter()
-        .map(|(property, value, reason)| {
-            assert_eq!(value, "none");
-            assert_eq!(*reason, Unmapped::UnknownProperty);
-            property.as_str()
-        })
-        .collect();
-    let expected: BTreeSet<&str> = ["-webkit-user-select", "user-select"].into_iter().collect();
-    assert_eq!(actual, expected);
-    assert!(!mapped.is_complete());
+fn selectable_text_affordances_remain_explicitly_unmapped() {
+    // Current prototypes emit none, which plain native Text honors. Keep
+    // selectable text/all as independent negative controls, not fake source
+    // inventory entries or evidence that passive native selection is complete.
+    for value in ["text", "all"] {
+        let mapped = map(
+            &declared(&[
+                ("position", "relative"),
+                ("user-select", value),
+                ("-webkit-user-select", value),
+            ]),
+            LengthContext::default(),
+        );
+        let actual: BTreeSet<&str> = mapped
+            .unmapped
+            .iter()
+            .map(|(property, actual, reason)| {
+                assert_eq!(actual, value);
+                assert_eq!(*reason, Unmapped::UnknownProperty);
+                property.as_str()
+            })
+            .collect();
+        let expected: BTreeSet<&str> = ["-webkit-user-select", "user-select"].into_iter().collect();
+        assert_eq!(actual, expected);
+        assert!(!mapped.is_complete());
+    }
 }
 
 /// The inventory of values a property this layer *does* implement cannot take.
