@@ -11,7 +11,7 @@
     "rowsSourceMapped": 158,
     "completeArticleRuntimeVerified": 0,
     "finalUnreadArticles": 0,
-    "initialTransientReadFailuresRetained": true,
+    "initialTransientReadFailuresRetained": false,
     "extraHigUrlsChecked": 4,
     "extraCanonicalArticles": 0,
     "aliasesVerified": [
@@ -40,7 +40,9 @@
       "未验证": 79,
       "不适用": 76,
       "缺陷": 3
-    }
+    },
+    "initialTransientReadFailureEvidenceScope": "初始浏览器读取失败后来恢复；此公共矩阵未附逐次失败日志，不能作为该日志已保留的证据。readError只表示最终读取状态。",
+    "affirmedPlatformScopeCorrections": 18
   },
   "purpose": "以HIG比较Proto UI理念相容性与抽象归属，不全盘采纳，不做Apple合规认证。",
   "boundaries": [
@@ -972,14 +974,21 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": [],
+        "basis": "not-separated-in-article",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Designing for iOS",
       "group": "Getting started",
       "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ios",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "该页专门讨论 iOS；不等同该平台上的Web或native测试结果",
+      "appleApplicablePlatforms": "文章明确面向：iOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ios",
         "mainBodyRead": true,
@@ -1050,14 +1059,22 @@
         ],
         "evidenceRefs": ["web-profiles", "gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["iOS"],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS"],
+        "basis": "explicit-article-subject",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ios"
+      }
     },
     {
       "item": "Designing for iPadOS",
       "group": "Getting started",
       "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ipados",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "该页专门讨论 iPadOS；不等同该平台上的Web或native测试结果",
+      "appleApplicablePlatforms": "文章明确面向：iPadOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ipados",
         "mainBodyRead": true,
@@ -1128,14 +1145,22 @@
         ],
         "evidenceRefs": ["web-profiles", "gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["iPadOS"],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iPadOS"],
+        "basis": "explicit-article-subject",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-ipados"
+      }
     },
     {
       "item": "Designing for macOS",
       "group": "Getting started",
       "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-macos",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "该页专门讨论 macOS；不等同该平台上的Web或native测试结果",
+      "appleApplicablePlatforms": "文章明确面向：macOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-macos",
         "mainBodyRead": true,
@@ -1206,14 +1231,22 @@
         ],
         "evidenceRefs": ["web-profiles", "gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["macOS"],
+        "basis": "explicit-article-subject",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-macos"
+      }
     },
     {
       "item": "Designing for tvOS",
       "group": "Getting started",
       "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-tvos",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "该页专门讨论 tvOS；不等同该平台上的Web或native测试结果",
+      "appleApplicablePlatforms": "文章明确面向：tvOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-tvos",
         "mainBodyRead": true,
@@ -1284,14 +1317,22 @@
         ],
         "evidenceRefs": ["web-profiles", "gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["tvOS"],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["tvOS"],
+        "basis": "explicit-article-subject",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-tvos"
+      }
     },
     {
       "item": "Designing for visionOS",
       "group": "Getting started",
       "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-visionos",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "该页专门讨论 visionOS；不等同该平台上的Web或native测试结果",
+      "appleApplicablePlatforms": "文章明确面向：visionOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-visionos",
         "mainBodyRead": true,
@@ -1362,14 +1403,22 @@
         ],
         "evidenceRefs": ["web-profiles", "gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["visionOS"],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["visionOS"],
+        "basis": "explicit-article-subject",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-visionos"
+      }
     },
     {
       "item": "Designing for watchOS",
       "group": "Getting started",
       "url": "https://developer.apple.com/design/human-interface-guidelines/designing-for-watchos",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "该页专门讨论 watchOS；不等同该平台上的Web或native测试结果",
+      "appleApplicablePlatforms": "文章明确面向：watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-watchos",
         "mainBodyRead": true,
@@ -1440,7 +1489,15 @@
         ],
         "evidenceRefs": ["web-profiles", "gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["watchOS"],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["watchOS"],
+        "basis": "explicit-article-subject",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/designing-for-watchos"
+      }
     },
     {
       "item": "Designing for games",
@@ -1509,7 +1566,14 @@
         ],
         "evidenceRefs": ["event", "button", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": [],
+        "basis": "not-separated-in-article",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Designing for iPhone Duo",
@@ -1587,7 +1651,14 @@
         ],
         "evidenceRefs": ["web-profiles", "gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": [],
+        "basis": "not-separated-in-article",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Accessibility",
@@ -1699,7 +1770,14 @@
         ],
         "evidenceRefs": ["a11y", "focus", "preferences", "text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "App icons",
@@ -1755,7 +1833,14 @@
         ],
         "evidenceRefs": ["icons", "website"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Branding",
@@ -1835,7 +1920,14 @@
         ],
         "evidenceRefs": ["surface", "text", "theme", "website"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Color",
@@ -1909,7 +2001,14 @@
         ],
         "evidenceRefs": ["theme", "a11y"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Dark Mode",
@@ -1960,7 +2059,14 @@
         ],
         "evidenceRefs": ["theme", "app-settings"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Icons",
@@ -2026,7 +2132,14 @@
         ],
         "evidenceRefs": ["icons", "a11y"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Images",
@@ -2099,14 +2212,21 @@
         ],
         "evidenceRefs": ["image", "a11y"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Immersive experiences",
       "group": "Foundations",
       "url": "https://developer.apple.com/design/human-interface-guidelines/immersive-experiences",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、tvOS、watchOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：visionOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/immersive-experiences",
         "mainBodyRead": true,
@@ -2152,7 +2272,16 @@
         ],
         "evidenceRefs": ["gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["visionOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/immersive-experiences",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Inclusion",
@@ -2240,7 +2369,14 @@
         ],
         "evidenceRefs": ["catalog", "a11y", "website"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Layout",
@@ -2305,7 +2441,14 @@
         ],
         "evidenceRefs": ["layout", "surface", "text"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Materials",
@@ -2380,7 +2523,14 @@
         ],
         "evidenceRefs": ["material", "preferences", "surface"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Motion",
@@ -2434,7 +2584,14 @@
         ],
         "evidenceRefs": ["motion", "preferences"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Privacy",
@@ -2515,7 +2672,14 @@
         ],
         "evidenceRefs": ["catalog", "text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Right to left",
@@ -2591,7 +2755,14 @@
         ],
         "evidenceRefs": ["tabs", "focus", "text"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "SF Symbols",
@@ -2632,14 +2803,21 @@
         ],
         "evidenceRefs": ["icons"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Spatial layout",
       "group": "Foundations",
       "url": "https://developer.apple.com/design/human-interface-guidelines/spatial-layout",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、tvOS、watchOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：visionOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/spatial-layout",
         "mainBodyRead": true,
@@ -2685,7 +2863,16 @@
         ],
         "evidenceRefs": ["gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["visionOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/spatial-layout",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Typography",
@@ -2735,7 +2922,14 @@
         ],
         "evidenceRefs": ["text", "layout"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Writing",
@@ -2785,7 +2979,14 @@
         ],
         "evidenceRefs": ["website", "text"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Charting data",
@@ -2878,7 +3079,14 @@
         ],
         "evidenceRefs": ["table", "a11y", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Collaboration and sharing",
@@ -2940,7 +3148,14 @@
         ],
         "evidenceRefs": ["event", "state", "dialog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Drag and drop",
@@ -3005,7 +3220,14 @@
         ],
         "evidenceRefs": ["native-input", "scroll", "event"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Entering data",
@@ -3118,7 +3340,14 @@
         ],
         "evidenceRefs": ["text-control", "checkbox", "a11y"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Feedback",
@@ -3195,7 +3424,14 @@
         ],
         "evidenceRefs": ["live", "async", "dialog", "style"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "File management",
@@ -3256,7 +3492,14 @@
         ],
         "evidenceRefs": ["catalog", "event"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Going full screen",
@@ -3304,7 +3547,14 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Launching",
@@ -3360,7 +3610,14 @@
         ],
         "evidenceRefs": ["website", "async"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Live-viewing apps",
@@ -3408,7 +3665,14 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Loading",
@@ -3486,7 +3750,14 @@
         ],
         "evidenceRefs": ["async", "live", "spinner", "website"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Managing accounts",
@@ -3561,7 +3832,14 @@
         ],
         "evidenceRefs": ["text-control", "button"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Managing notifications",
@@ -3603,7 +3881,14 @@
         ],
         "evidenceRefs": ["live"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Modality",
@@ -3659,7 +3944,14 @@
         ],
         "evidenceRefs": ["dialog", "focus"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Multitasking",
@@ -3718,7 +4010,14 @@
         ],
         "evidenceRefs": ["gpui", "event", "state"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Offering help",
@@ -3781,7 +4080,14 @@
         ],
         "evidenceRefs": ["tooltip", "website"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Onboarding",
@@ -3844,7 +4150,14 @@
         ],
         "evidenceRefs": ["website", "tooltip"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Playing audio",
@@ -3899,7 +4212,14 @@
         ],
         "evidenceRefs": ["event", "button"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Playing haptics",
@@ -3953,7 +4273,14 @@
         ],
         "evidenceRefs": ["style"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "macOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Playing video",
@@ -4034,7 +4361,14 @@
         ],
         "evidenceRefs": ["image", "button", "a11y"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Printing",
@@ -4082,7 +4416,14 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Ratings and reviews",
@@ -4130,7 +4471,14 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Searching",
@@ -4199,7 +4547,14 @@
         ],
         "evidenceRefs": ["search", "text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Settings",
@@ -4241,7 +4596,14 @@
         ],
         "evidenceRefs": ["app-settings", "preferences"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Undo and redo",
@@ -4321,7 +4683,14 @@
         ],
         "evidenceRefs": ["text-control", "event"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Workouts",
@@ -4369,7 +4738,14 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["macOS", "tvOS", "visionOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Action button",
@@ -4441,14 +4817,21 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["iPadOS", "macOS", "tvOS", "visionOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Apple Pencil and Scribble",
       "group": "Inputs",
       "url": "https://developer.apple.com/design/human-interface-guidelines/apple-pencil-and-scribble",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、macOS、tvOS、visionOS、watchOS；明确不支持：iOS、macOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：iPadOS；明确不支持：iOS、macOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/apple-pencil-and-scribble",
         "mainBodyRead": true,
@@ -4513,14 +4896,23 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["iPadOS"],
+        "excludedPlatforms": ["iOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/apple-pencil-and-scribble",
+        "scopeNote": "适用于支持对应Apple Pencil能力的iPad设备；不同笔和设备的能力需另核。"
+      }
     },
     {
       "item": "Camera Control",
       "group": "Inputs",
       "url": "https://developer.apple.com/design/human-interface-guidelines/camera-control",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iPadOS、macOS、tvOS、visionOS、watchOS；明确不支持：iPadOS、macOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：iOS；明确不支持：iPadOS、macOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/camera-control",
         "mainBodyRead": true,
@@ -4585,14 +4977,23 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["iOS"],
+        "excludedPlatforms": ["iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/camera-control",
+        "scopeNote": "适用于具备Camera Control的iPhone设备；不宣称每台iOS设备都有此硬件。"
+      }
     },
     {
       "item": "Digital Crown",
       "group": "Inputs",
       "url": "https://developer.apple.com/design/human-interface-guidelines/digital-crown",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、tvOS；明确不支持：iOS、iPadOS、macOS、tvOS",
+      "appleApplicablePlatforms": "适用平台：visionOS、watchOS；明确不支持：iOS、iPadOS、macOS、tvOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/digital-crown",
         "mainBodyRead": true,
@@ -4657,14 +5058,23 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["visionOS", "watchOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "tvOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/digital-crown",
+        "scopeNote": "watchOS应用可处理表冠交互；visionOS讨论系统交互，应用不接收表冠的直接信息。"
+      }
     },
     {
       "item": "Eyes",
       "group": "Inputs",
       "url": "https://developer.apple.com/design/human-interface-guidelines/eyes",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、tvOS、watchOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：visionOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/eyes",
         "mainBodyRead": true,
@@ -4729,7 +5139,16 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["visionOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/eyes",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Focus and selection",
@@ -4832,7 +5251,14 @@
         ],
         "evidenceRefs": ["focus", "tabs", "radio", "style"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["iOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Game controls",
@@ -4901,7 +5327,14 @@
         ],
         "evidenceRefs": ["event", "button", "focus"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Gestures",
@@ -4967,7 +5400,14 @@
         ],
         "evidenceRefs": ["native-input", "scroll", "button"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Gyroscope and accelerometer",
@@ -5039,7 +5479,14 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Keyboards",
@@ -5156,7 +5603,14 @@
         ],
         "evidenceRefs": ["focus", "text-control", "tabs", "menu"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Nearby interactions",
@@ -5228,7 +5682,14 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["macOS", "tvOS", "visionOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Pointing devices",
@@ -5292,14 +5753,21 @@
         ],
         "evidenceRefs": ["native-input", "focus", "button"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Remotes",
       "group": "Inputs",
       "url": "https://developer.apple.com/design/human-interface-guidelines/remotes",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、visionOS、watchOS；明确不支持：iOS、iPadOS、macOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：tvOS；明确不支持：iOS、iPadOS、macOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/remotes",
         "mainBodyRead": true,
@@ -5364,7 +5832,16 @@
         ],
         "evidenceRefs": ["native-input", "web-profiles", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["tvOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/remotes",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "AirPlay",
@@ -5439,7 +5916,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Always On",
@@ -5497,22 +5981,28 @@
       "status": "不适用",
       "evidence": "已检查C-RULE-PREFERENCES固定key，没有Always On/锁屏事实。Liquid fallback不等于设备息屏适配。",
       "priority": "P3",
-      "existingIssueCandidates": [
+      "existingIssueCandidates": [793, 792],
+      "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      },
+      "existingIssueCandidateNotes": [
         {
           "number": 793,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/793",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         },
         {
           "number": 792,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/792",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         }
-      ],
-      "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      ]
     },
     {
       "item": "App Clips",
@@ -5594,7 +6084,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Apple In-App Purchase",
@@ -5664,7 +6161,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Apple Pay",
@@ -5745,7 +6249,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "若未来做支付组件，单独采用官方Apple Pay API与可用性/品牌测试；保留Base Button disabled协议。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Augmented reality",
@@ -5817,7 +6328,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "若空间平台成为目标，先定义跟踪/中断/用户安全边界，再决定可跨宿主语义；目前不报缺功能bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "CareKit",
@@ -5901,7 +6419,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "CarPlay",
@@ -5993,7 +6518,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Game Center",
@@ -6062,7 +6594,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Generative AI",
@@ -6131,16 +6670,23 @@
       "status": "未验证",
       "evidence": "P-BASE-ASYNC-REGION与LIVE-REGION存在，分别提供busy和公告；无AI执行/undo/retry流程。源码不能证明生成途中取消、恢复焦点或模型错误体验。",
       "priority": "P2",
-      "existingIssueCandidates": [
+      "existingIssueCandidates": [864],
+      "nextStep": "如要AI示例，先定实际任务，使用现有busy/live/button组合验证取消/重试、纠正后反馈和焦点；隐私/模型披露留给App Maker。",
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      },
+      "existingIssueCandidateNotes": [
         {
           "number": 864,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/864",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         }
-      ],
-      "nextStep": "如要AI示例，先定实际任务，使用现有busy/live/button组合验证取消/重试、纠正后反馈和焦点；隐私/模型披露留给App Maker。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      ]
     },
     {
       "item": "HealthKit",
@@ -6201,7 +6747,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "HomeKit",
@@ -6268,7 +6821,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "iCloud",
@@ -6329,7 +6889,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "ID Verifier",
@@ -6399,7 +6966,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "iMessage apps and stickers",
@@ -6485,7 +7059,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Live Photos",
@@ -6552,7 +7133,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Mac Catalyst",
@@ -6623,34 +7211,38 @@
       "status": "不适用",
       "evidence": "查得真实Rust GPUI/AccessKit及headless/macOS测试入口；无Catalyst Adapter。本轮未运行native窗口或平台交互。",
       "priority": "P3",
-      "existingIssueCandidates": [
+      "existingIssueCandidates": [687, 732, 733, 828],
+      "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iPadOS", "macOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      },
+      "existingIssueCandidateNotes": [
         {
           "number": 687,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/687",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         },
         {
           "number": 732,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/732",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         },
         {
           "number": 733,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/733",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         },
         {
           "number": 828,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/828",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         }
-      ],
-      "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      ]
     },
     {
       "item": "Machine learning",
@@ -6710,16 +7302,23 @@
       "status": "未验证",
       "evidence": "无Core ML推理/校准产品流。现有状态与按钮不验证模型质量、反馈学习、排序或信息授权。",
       "priority": "P3",
-      "existingIssueCandidates": [
+      "existingIssueCandidates": [864],
+      "nextStep": "有真实推荐/校准流程时再验拒绝/纠正/撤销与反馈效果；Base不自动发数据或解释置信度。",
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      },
+      "existingIssueCandidateNotes": [
         {
           "number": 864,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/864",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         }
-      ],
-      "nextStep": "有真实推荐/校准流程时再验拒绝/纠正/撤销与反馈效果；Base不自动发数据或解释置信度。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      ]
     },
     {
       "item": "Maps",
@@ -6812,7 +7411,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "NFC",
@@ -6873,7 +7479,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Photo editing",
@@ -6935,7 +7548,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "ResearchKit",
@@ -6998,7 +7618,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "SharePlay",
@@ -7063,7 +7690,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "ShazamKit",
@@ -7123,7 +7757,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Sign in with Apple",
@@ -7221,7 +7862,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": [],
+        "basis": "not-separated-in-article",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Siri",
@@ -7288,7 +7936,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": [],
+        "basis": "not-separated-in-article",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Tap to Pay on iPhone",
@@ -7351,7 +8006,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "VoiceOver",
@@ -7457,22 +8119,28 @@
       "status": "未验证",
       "evidence": "源码已有label/name/heading level、image informative/decorative和live status/alert；GPUI仅映射button/switch/tablist/tab/tabpanel/checkbox，heading、status/alert及多数关系产生unsupported诊断。真实屏幕阅读顺序、rotor、动态公告、gesture替代未在本轮测试。这是已声明有限host覆盖，不自动判Base缺陷。",
       "priority": "P2",
-      "existingIssueCandidates": [
+      "existingIssueCandidates": [687, 864],
+      "nextStep": "建立Apple真实VoiceOver测试表：Web四adapter的name/role/state/heading/关系/动态公告与焦点；GPUI按已支持角色单独测试，并将heading/live/rotor列明确未支持/待接纳，不以测试文件存在算通过。",
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      },
+      "existingIssueCandidateNotes": [
         {
           "number": 687,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/687",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         },
         {
           "number": 864,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/864",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         }
-      ],
-      "nextStep": "建立Apple真实VoiceOver测试表：Web四adapter的name/role/state/heading/关系/动态公告与焦点；GPUI按已支持角色单独测试，并将heading/live/rotor列明确未支持/待接纳，不以测试文件存在算通过。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      ]
     },
     {
       "item": "Wallet",
@@ -7548,7 +8216,14 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "visionOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Charts",
@@ -7641,7 +8316,14 @@
         ],
         "evidenceRefs": ["table", "a11y", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Image views",
@@ -7697,7 +8379,14 @@
         ],
         "evidenceRefs": ["image", "button"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Text views",
@@ -7791,7 +8480,14 @@
         ],
         "evidenceRefs": ["text", "text-control", "style"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Web views",
@@ -7839,7 +8535,14 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Boxes",
@@ -7894,7 +8597,14 @@
         ],
         "evidenceRefs": ["surface"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Collections",
@@ -7955,14 +8665,21 @@
         ],
         "evidenceRefs": ["collection", "table"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Column views",
       "group": "Components / Layout and organization",
       "url": "https://developer.apple.com/design/human-interface-guidelines/column-views",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/column-views",
         "mainBodyRead": true,
@@ -8010,7 +8727,16 @@
         ],
         "evidenceRefs": ["collection", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/column-views",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Disclosure controls",
@@ -8066,7 +8792,14 @@
         ],
         "evidenceRefs": ["button", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Labels",
@@ -8173,7 +8906,14 @@
         ],
         "evidenceRefs": ["text", "checkbox", "a11y", "style"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Lists and tables",
@@ -8252,14 +8992,21 @@
         ],
         "evidenceRefs": ["table", "a11y"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Lockups",
       "group": "Components / Layout and organization",
       "url": "https://developer.apple.com/design/human-interface-guidelines/lockups",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、visionOS、watchOS；明确不支持：iOS、iPadOS、macOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：tvOS；明确不支持：iOS、iPadOS、macOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/lockups",
         "mainBodyRead": true,
@@ -8321,14 +9068,23 @@
         ],
         "evidenceRefs": ["image", "text", "focus"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["tvOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/lockups",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Outline views",
       "group": "Components / Layout and organization",
       "url": "https://developer.apple.com/design/human-interface-guidelines/outline-views",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/outline-views",
         "mainBodyRead": true,
@@ -8382,7 +9138,16 @@
         ],
         "evidenceRefs": ["collection", "table"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/outline-views",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Split views",
@@ -8439,7 +9204,14 @@
         ],
         "evidenceRefs": ["layout", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Tab views",
@@ -8494,7 +9266,14 @@
         ],
         "evidenceRefs": ["tabs"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Activity views",
@@ -8556,7 +9335,14 @@
         ],
         "evidenceRefs": ["menu", "event"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["macOS", "tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Buttons",
@@ -8618,7 +9404,14 @@
         ],
         "evidenceRefs": ["button", "style"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Context menus",
@@ -8667,14 +9460,21 @@
         ],
         "evidenceRefs": ["menu"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Dock menus",
       "group": "Components / Menus and actions",
       "url": "https://developer.apple.com/design/human-interface-guidelines/dock-menus",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/dock-menus",
         "mainBodyRead": true,
@@ -8716,7 +9516,16 @@
         ],
         "evidenceRefs": ["menu"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/dock-menus",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Edit menus",
@@ -8798,7 +9607,14 @@
         ],
         "evidenceRefs": ["text-control", "menu"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Home Screen quick actions",
@@ -8845,7 +9661,14 @@
         ],
         "evidenceRefs": ["event"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["macOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Menus",
@@ -8908,14 +9731,21 @@
         ],
         "evidenceRefs": ["menu", "focus"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Ornaments",
       "group": "Components / Menus and actions",
       "url": "https://developer.apple.com/design/human-interface-guidelines/ornaments",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、tvOS、watchOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：visionOS；明确不支持：iOS、iPadOS、macOS、tvOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/ornaments",
         "mainBodyRead": true,
@@ -8968,7 +9798,16 @@
         ],
         "evidenceRefs": ["surface", "gpui"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["visionOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/ornaments",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Pop-up buttons",
@@ -9023,7 +9862,14 @@
         ],
         "evidenceRefs": ["select"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Pull-down buttons",
@@ -9080,7 +9926,14 @@
         ],
         "evidenceRefs": ["menu", "button"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "The menu bar",
@@ -9142,7 +9995,14 @@
         ],
         "evidenceRefs": ["menu", "event"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["iOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Toolbars",
@@ -9222,14 +10082,21 @@
         ],
         "evidenceRefs": ["button", "toggle", "focus", "layout"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Path controls",
       "group": "Components / Navigation and search",
       "url": "https://developer.apple.com/design/human-interface-guidelines/path-controls",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/path-controls",
         "mainBodyRead": true,
@@ -9270,7 +10137,16 @@
         ],
         "evidenceRefs": ["catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/path-controls",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Search fields",
@@ -9339,7 +10215,14 @@
         ],
         "evidenceRefs": ["search", "text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Sidebars",
@@ -9396,7 +10279,14 @@
         ],
         "evidenceRefs": ["layout", "focus"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Tab bars",
@@ -9465,14 +10355,21 @@
         ],
         "evidenceRefs": ["tabs", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Token fields",
       "group": "Components / Navigation and search",
       "url": "https://developer.apple.com/design/human-interface-guidelines/token-fields",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/token-fields",
         "mainBodyRead": true,
@@ -9532,7 +10429,16 @@
         ],
         "evidenceRefs": ["text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/token-fields",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Action sheets",
@@ -9589,7 +10495,14 @@
         ],
         "evidenceRefs": ["dialog", "menu"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["visionOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Alerts",
@@ -9639,7 +10552,14 @@
         ],
         "evidenceRefs": ["dialog", "button"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Page controls",
@@ -9710,14 +10630,21 @@
         ],
         "evidenceRefs": ["tabs", "scroll"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["macOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Panels",
       "group": "Components / Presentation",
       "url": "https://developer.apple.com/design/human-interface-guidelines/panels",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/panels",
         "mainBodyRead": true,
@@ -9773,7 +10700,16 @@
         ],
         "evidenceRefs": ["surface", "dialog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/panels",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Popovers",
@@ -9844,7 +10780,14 @@
         ],
         "evidenceRefs": ["tooltip", "dialog", "menu"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Scroll views",
@@ -9908,7 +10851,14 @@
         ],
         "evidenceRefs": ["scroll", "focus"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Sheets",
@@ -9950,7 +10900,14 @@
         ],
         "evidenceRefs": ["dialog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Windows",
@@ -10003,7 +10960,14 @@
         ],
         "evidenceRefs": ["gpui", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["iOS", "tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Color wells",
@@ -10084,14 +11048,21 @@
         ],
         "evidenceRefs": ["text-control", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Combo boxes",
       "group": "Components / Selection and input",
       "url": "https://developer.apple.com/design/human-interface-guidelines/combo-boxes",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/combo-boxes",
         "mainBodyRead": true,
@@ -10172,14 +11143,23 @@
         ],
         "evidenceRefs": ["select", "text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/combo-boxes",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Digit entry views",
       "group": "Components / Selection and input",
       "url": "https://developer.apple.com/design/human-interface-guidelines/digit-entry-views",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、macOS、visionOS、watchOS；明确不支持：iOS、iPadOS、macOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：tvOS；明确不支持：iOS、iPadOS、macOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/digit-entry-views",
         "mainBodyRead": true,
@@ -10239,14 +11219,23 @@
         ],
         "evidenceRefs": ["text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["tvOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/digit-entry-views",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Image wells",
       "group": "Components / Selection and input",
       "url": "https://developer.apple.com/design/human-interface-guidelines/image-wells",
       "accessDate": "2026-10-06",
-      "appleApplicablePlatforms": "正文平台段提及：iOS、iPadOS、tvOS、visionOS、watchOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
+      "appleApplicablePlatforms": "适用平台：macOS；明确不支持：iOS、iPadOS、tvOS、visionOS、watchOS",
       "source": {
         "requestedUrl": "https://developer.apple.com/design/human-interface-guidelines/image-wells",
         "mainBodyRead": true,
@@ -10300,7 +11289,16 @@
         ],
         "evidenceRefs": ["image", "event"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": ["macOS"],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "article-body-and-platform-exclusions",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。",
+        "evidenceUrl": "https://developer.apple.com/design/human-interface-guidelines/image-wells",
+        "scopeNote": "正文主体、对应开发文档及明确排除的平台一起确定；不只摘录平台段标题。"
+      }
     },
     {
       "item": "Pickers",
@@ -10369,7 +11367,14 @@
         ],
         "evidenceRefs": ["select", "radio"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Segmented controls",
@@ -10453,7 +11458,14 @@
         ],
         "evidenceRefs": ["radio", "tabs", "toggle"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Sliders",
@@ -10495,7 +11507,14 @@
         ],
         "evidenceRefs": ["native-input"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Steppers",
@@ -10570,7 +11589,14 @@
         ],
         "evidenceRefs": ["button", "text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Text fields",
@@ -10662,7 +11688,14 @@
         ],
         "evidenceRefs": ["text-control", "a11y"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Toggles",
@@ -10759,7 +11792,14 @@
         ],
         "evidenceRefs": ["toggle", "checkbox", "switch", "style"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Virtual keyboards",
@@ -10826,7 +11866,14 @@
         ],
         "evidenceRefs": ["text-control"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["macOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Activity rings",
@@ -10874,7 +11921,14 @@
         ],
         "evidenceRefs": ["spinner"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["macOS", "tvOS", "visionOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Gauges",
@@ -10929,7 +11983,14 @@
         ],
         "evidenceRefs": ["text", "catalog"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["tvOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Progress indicators",
@@ -10992,7 +12053,14 @@
         ],
         "evidenceRefs": ["async", "live", "spinner"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Rating indicators",
@@ -11047,11 +12115,18 @@
         ],
         "evidenceRefs": ["radio", "text"]
       },
-      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。"
+      "verificationLimit": "本轮静态源码/实体与官方正文比较；未逐条运行所有浏览器、真实Apple设备或辅助技术。源级存在不等于整个HIG条目通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": ["iOS", "iPadOS", "tvOS", "visionOS", "watchOS"],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "App Shortcuts",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/app-shortcuts",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "iOS、iPadOS、visionOS、watchOS；tvOS不支持。macOS不支持App Shortcuts本身，但正文明确支持App Intents actions并可组装自定义shortcut。",
@@ -11122,11 +12197,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Complications",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/complications",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "watchOS；iOS、iPadOS、macOS、tvOS、visionOS明确不支持本条。",
@@ -11211,11 +12293,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Controls",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/controls",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "iOS、iPadOS、macOS；watchOS、tvOS、visionOS明确不支持。",
@@ -11279,11 +12368,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Live Activities",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/live-activities",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "从iOS/iPadOS启动；映射至配对macOS menu bar、watchOS Smart Stack、CarPlay；正文不支持tvOS、visionOS。",
@@ -11341,11 +12437,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Notifications",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/notifications",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "平台节列iOS、iPadOS、macOS、tvOS、visionOS；watchOS另有short/long look及double-tap action排序。",
@@ -11408,20 +12511,27 @@
       "status": "不适用",
       "evidence": "没有UNUserNotificationCenter/Web Push集成。Base LiveRegion明确无focus/event/command通道，不能算OS通知实现。",
       "priority": "P3",
-      "existingIssueCandidates": [
+      "existingIssueCandidates": [864],
+      "nextStep": "保留通知与a11y公告边界；若建设通知UI，先确定in-app还是OS，再按真实授权/前台/重复/隐私状态验证。",
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "tvOS", "visionOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      },
+      "existingIssueCandidateNotes": [
         {
           "number": 864,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/864",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         }
-      ],
-      "nextStep": "保留通知与a11y公告边界；若建设通知UI，先确定in-app还是OS，再按真实授权/前台/重复/隐私状态验证。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      ]
     },
     {
       "item": "Snippets",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/snippets",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "iOS、iPadOS、macOS；tvOS、visionOS、watchOS明确不支持。",
@@ -11480,11 +12590,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Status bars",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/status-bars",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "iOS、iPadOS；macOS、tvOS、visionOS、watchOS明确不支持本条。",
@@ -11560,11 +12677,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Top Shelf",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/top-shelf",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "tvOS；iOS、iPadOS、macOS、visionOS、watchOS明确不支持。",
@@ -11636,11 +12760,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["tvOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Watch faces",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/watch-faces",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "watchOS；iOS、iPadOS、macOS、tvOS、visionOS明确不支持本条。",
@@ -11718,11 +12849,18 @@
       "priority": "P3",
       "existingIssueCandidates": [],
       "nextStep": "保持平台/应用边界；仅当具体产品需要该能力时另建明确宿主集成范围与证据，不按本页缺席自动报Base bug。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      }
     },
     {
       "item": "Widgets",
-      "group": "System experiences",
+      "group": "Components / System experiences",
       "url": "https://developer.apple.com/design/human-interface-guidelines/widgets",
       "accessDate": "2026-10-06",
       "appleApplicablePlatforms": "iOS、iPadOS、macOS、visionOS、watchOS；tvOS明确不支持；正文包含StandBy与CarPlay场景。",
@@ -11800,22 +12938,28 @@
       "status": "不适用",
       "evidence": "无WidgetKit/SwiftUI/widget extension。现有样式、CSS导出或GPUI局部paint不是widgets跨设备/appearance/距离验证。",
       "priority": "P3",
-      "existingIssueCandidates": [
+      "existingIssueCandidates": [792, 793],
+      "nextStep": "若未来有widget目标，先定义系统extension边界，再按所选family验证各rendering mode、可读性/尺寸/权限；保留Base语义和样式体系分离。",
+      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。",
+      "applePlatformScope": {
+        "affirmedPlatforms": [],
+        "excludedPlatforms": [],
+        "platformSectionMentions": ["iOS", "iPadOS", "macOS", "visionOS", "watchOS"],
+        "basis": "platform-section-only",
+        "limitation": "Apple文章范围，不是Proto平台支持；平台段提及不等于整个主题已在该平台实现。"
+      },
+      "existingIssueCandidateNotes": [
         {
           "number": 792,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/792",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         },
         {
           "number": 793,
           "url": "https://github.com/Proto-UI/Proto-UI/issues/793",
-          "kind": "existing parent-supplied candidate; not re-fetched by this read-only worker",
-          "scope": "context/follow-up candidate only; no claim this issue already admits this Apple feature"
+          "scope": "本次逐篇复查未重新读取该候选Issue；只作去重/后续核对线索，不声称它已接纳此Apple功能。"
         }
-      ],
-      "nextStep": "若未来有widget目标，先定义系统extension边界，再按所选family验证各rendering mode、可读性/尺寸/权限；保留Base语义和样式体系分离。",
-      "verificationLimit": "静态源码/实体和官方正文对照；本轮未运行测试、真实Apple宿主、VoiceOver或截图验证；不宣称HIG整体通过。"
+      ]
     }
   ]
 }
