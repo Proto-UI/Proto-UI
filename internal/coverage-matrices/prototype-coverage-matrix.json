@@ -5935,7 +5935,7 @@
         },
         "bootstrap-2-3-2": {
           "status": "implemented-draft",
-          "reason": "Public implementation on pinned main; no lifecycle or full-host admission implied.",
+          "reason": "Private workspace/source implementation on pinned main; no npm publication or stable lifecycle/host admission implied.",
           "entityIds": ["P-BOOTSTRAP-2-3-2-BUTTON"],
           "sourceFiles": ["packages/prototypes/bootstrap-2-3-2/src/button/button.proto.ts"],
           "partCount": 1,
@@ -6815,7 +6815,7 @@
         },
         "bootstrap-2-3-2": {
           "status": "implemented-draft",
-          "reason": "Public implementation on pinned main; no lifecycle or full-host admission implied.",
+          "reason": "Private workspace/source implementation on pinned main; no npm publication or stable lifecycle/host admission implied.",
           "entityIds": ["P-BOOTSTRAP-2-3-2-SURFACE"],
           "sourceFiles": ["packages/prototypes/bootstrap-2-3-2/src/surface/root.proto.ts"],
           "partCount": 1,
@@ -12942,12 +12942,12 @@
       "baseIdentity": "P-BASE-CHECKBOX",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": ["P-SHADCN-CHECKBOX-INDICATOR", "P-SHADCN-CHECKBOX"],
+          "mappedCurrentIdentities": ["P-SHADCN-CHECKBOX"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": ["P-BRUTALIST-CHECKBOX", "P-BRUTALIST-CHECKBOX-INDICATOR"],
+          "mappedCurrentIdentities": ["P-BRUTALIST-CHECKBOX"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -12967,30 +12967,12 @@
       "baseIdentity": "P-BASE-DIALOG",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-DIALOG-TRIGGER",
-            "P-SHADCN-DIALOG-CONTENT",
-            "P-SHADCN-DIALOG-MASK",
-            "P-SHADCN-DIALOG-CLOSE",
-            "P-SHADCN-DIALOG-TITLE",
-            "P-SHADCN-DIALOG-DESCRIPTION",
-            "P-SHADCN-DIALOG-CLOSE-ICON",
-            "P-SHADCN-DIALOG"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-DIALOG"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": [
-            "P-BRUTALIST-DIALOG",
-            "P-BRUTALIST-DIALOG-MASK",
-            "P-BRUTALIST-DIALOG-CONTENT",
-            "P-BRUTALIST-DIALOG-CLOSE-ICON",
-            "P-BRUTALIST-DIALOG-CLOSE",
-            "P-BRUTALIST-DIALOG-TRIGGER",
-            "P-BRUTALIST-DIALOG-DESCRIPTION",
-            "P-BRUTALIST-DIALOG-TITLE"
-          ],
+          "mappedCurrentIdentities": ["P-BRUTALIST-DIALOG"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -13160,22 +13142,12 @@
       "baseIdentity": "P-BASE-DROPDOWN-MENU",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-DROPDOWN-MENU-CONTENT",
-            "P-SHADCN-DROPDOWN-MENU-TRIGGER",
-            "P-SHADCN-DROPDOWN-MENU",
-            "P-SHADCN-DROPDOWN-MENU-ITEM"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-DROPDOWN-MENU"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": [
-            "P-BRUTALIST-DROPDOWN-MENU-TRIGGER",
-            "P-BRUTALIST-DROPDOWN-MENU",
-            "P-BRUTALIST-DROPDOWN-MENU-ITEM",
-            "P-BRUTALIST-DROPDOWN-MENU-CONTENT"
-          ],
+          "mappedCurrentIdentities": ["P-BRUTALIST-DROPDOWN-MENU"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -13270,20 +13242,12 @@
       "baseIdentity": "P-BASE-HOVER-CARD",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-HOVER-CARD-CONTENT",
-            "P-SHADCN-HOVER-CARD",
-            "P-SHADCN-HOVER-CARD-TRIGGER"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-HOVER-CARD"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": [
-            "P-BRUTALIST-HOVER-CARD-CONTENT",
-            "P-BRUTALIST-HOVER-CARD",
-            "P-BRUTALIST-HOVER-CARD-TRIGGER"
-          ],
+          "mappedCurrentIdentities": ["P-BRUTALIST-HOVER-CARD"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -13428,11 +13392,7 @@
       "baseIdentity": "P-BASE-RADIO-GROUP",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-RADIO-GROUP-INDICATOR",
-            "P-SHADCN-RADIO-GROUP-ITEM",
-            "P-SHADCN-RADIO-GROUP"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-RADIO-GROUP"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -13532,22 +13492,12 @@
       "baseIdentity": "P-BASE-SCROLL-AREA",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-SCROLL-AREA-SCROLLBAR",
-            "P-SHADCN-SCROLL-AREA",
-            "P-SHADCN-SCROLL-AREA-THUMB",
-            "P-SHADCN-SCROLL-AREA-VIEWPORT"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-SCROLL-AREA"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": [
-            "P-BRUTALIST-SCROLL-AREA-THUMB",
-            "P-BRUTALIST-SCROLL-AREA-VIEWPORT",
-            "P-BRUTALIST-SCROLL-AREA-SCROLLBAR",
-            "P-BRUTALIST-SCROLL-AREA"
-          ],
+          "mappedCurrentIdentities": ["P-BRUTALIST-SCROLL-AREA"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -13642,24 +13592,12 @@
       "baseIdentity": "P-BASE-SELECT",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-SELECT-VALUE",
-            "P-SHADCN-SELECT-ITEM",
-            "P-SHADCN-SELECT-TRIGGER",
-            "P-SHADCN-SELECT",
-            "P-SHADCN-SELECT-CONTENT"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-SELECT"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": [
-            "P-BRUTALIST-SELECT-VALUE",
-            "P-BRUTALIST-SELECT-TRIGGER",
-            "P-BRUTALIST-SELECT-CONTENT",
-            "P-BRUTALIST-SELECT-ITEM",
-            "P-BRUTALIST-SELECT"
-          ],
+          "mappedCurrentIdentities": ["P-BRUTALIST-SELECT"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -13804,12 +13742,12 @@
       "baseIdentity": "P-BASE-SWITCH",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": ["P-SHADCN-SWITCH-THUMB", "P-SHADCN-SWITCH"],
+          "mappedCurrentIdentities": ["P-SHADCN-SWITCH"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": ["P-BRUTALIST-SWITCH", "P-BRUTALIST-SWITCH-THUMB"],
+          "mappedCurrentIdentities": ["P-BRUTALIST-SWITCH"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -14029,22 +13967,12 @@
       "baseIdentity": "P-BASE-TABS",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-TABS-TRIGGER",
-            "P-SHADCN-TABS-CONTENT",
-            "P-SHADCN-TABS",
-            "P-SHADCN-TABS-LIST"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-TABS"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": [
-            "P-BRUTALIST-TABS-CONTENT",
-            "P-BRUTALIST-TABS-LIST",
-            "P-BRUTALIST-TABS-TRIGGER",
-            "P-BRUTALIST-TABS"
-          ],
+          "mappedCurrentIdentities": ["P-BRUTALIST-TABS"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -14264,22 +14192,12 @@
       "baseIdentity": "P-BASE-TOOLTIP",
       "projectionCells": {
         "shadcn": {
-          "mappedCurrentIdentities": [
-            "P-SHADCN-TOOLTIP-GROUP",
-            "P-SHADCN-TOOLTIP-TRIGGER",
-            "P-SHADCN-TOOLTIP-CONTENT",
-            "P-SHADCN-TOOLTIP"
-          ],
+          "mappedCurrentIdentities": ["P-SHADCN-TOOLTIP"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
         "brutalist": {
-          "mappedCurrentIdentities": [
-            "P-BRUTALIST-TOOLTIP",
-            "P-BRUTALIST-TOOLTIP-TRIGGER",
-            "P-BRUTALIST-TOOLTIP-CONTENT",
-            "P-BRUTALIST-TOOLTIP-GROUP"
-          ],
+          "mappedCurrentIdentities": ["P-BRUTALIST-TOOLTIP"],
           "status": "bounded-draft-mapping-needs-full-acceptance",
           "acceptance": "unverified"
         },
@@ -14343,7 +14261,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14370,7 +14288,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14397,7 +14315,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14424,7 +14342,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14451,7 +14369,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14478,7 +14396,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14505,7 +14423,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14532,7 +14450,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14559,7 +14477,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14586,7 +14504,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14613,7 +14531,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14640,7 +14558,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14667,7 +14585,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14694,7 +14612,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14721,7 +14639,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14748,7 +14666,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14775,7 +14693,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14802,7 +14720,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14829,7 +14747,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14856,7 +14774,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14883,7 +14801,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14910,7 +14828,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14937,7 +14855,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14964,7 +14882,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -14991,7 +14909,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15018,7 +14936,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15045,7 +14963,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15072,7 +14990,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15099,7 +15017,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15126,7 +15044,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15153,7 +15071,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15180,7 +15098,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15207,7 +15125,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15235,7 +15153,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15263,7 +15181,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15291,7 +15209,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15327,7 +15245,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15360,7 +15278,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15392,7 +15310,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15420,7 +15338,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15448,7 +15366,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15476,7 +15394,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15508,7 +15426,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15541,7 +15459,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15575,7 +15493,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15603,7 +15521,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15631,7 +15549,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15659,7 +15577,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15693,7 +15611,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15727,7 +15645,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15755,7 +15673,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15783,7 +15701,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15811,7 +15729,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15844,7 +15762,7 @@
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings"
@@ -15875,13 +15793,16 @@
           "4": "not-run",
           "5": "not-run",
           "6": "not-run",
-          "7": "not-run"
+          "7": "not-run",
+          "8": "not-run",
+          "9": "not-run",
+          "10": "not-run"
         },
         "requirements": [
           "Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done",
           "Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass",
           "Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass",
-          "Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation",
+          "Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.",
           "Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths",
           "Real-input runtime and commit-bound visual evidence for all affected compositions/overlay dependants and four design languages",
           "Focused and applicable aggregate tests plus trusted exact-head CI/DCO and independent review; no outstanding applicable findings",
@@ -15900,7 +15821,7 @@
         "pr": 775,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 775,
           "title": "test(brutalist): add calibrated rendered contrast audit",
@@ -15921,14 +15842,65 @@
           "migration": "Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
-        }
+        },
+        "currentPrSnapshot": {
+          "number": 775,
+          "head": "83633a21fe16bb41dda7dd9b5440d9c5c8623172",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/775",
+          "observedAt": "2026-10-06T17:22:00Z"
+        },
+        "mandatoryUnfinishedCriteria": [
+          {
+            "id": "775-paint-presence",
+            "complete": false,
+            "source": "https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650211",
+            "acceptance": "achieved/painted require bounded actual paint presence, including real descendant ink; reject fully transparent nonzero geometry and unsupported/hidden cases. Do not treat nontransparent text color without glyphs as ink."
+          },
+          {
+            "id": "775-fillable-svg",
+            "complete": false,
+            "source": "https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650234",
+            "acceptance": "Withhold fill ratio unless the finite geometry profile proves fillable area; reject line/degenerate paths, retain stroke and pixels, and use fillable circle/rect positive controls."
+          },
+          {
+            "id": "775-unique-editor",
+            "complete": false,
+            "source": "https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650245",
+            "acceptance": "Collect composed light/shadow editor candidates and require exactly one; reject missing/duplicate/foreign targets and retain four-Adapter real single-editor positives."
+          },
+          {
+            "id": "775-decoration-fingerprint",
+            "complete": false,
+            "source": "https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650258",
+            "acceptance": "Fingerprint applicable text-decoration line/color/thickness/style/offset paint changes, including CSSOM changes without attribute/rect mutation between image and fact collection; preserve inheritance/descendant snapshot scope."
+          },
+          {
+            "id": "775-reading-route-reset",
+            "complete": false,
+            "source": "https://github.com/Proto-UI/Proto-UI/actions/runs/37490381731",
+            "acceptance": "Diagnose the repeated local route.fetch ECONNRESET at radio-group-light-normal-1279-text100; retain both failed attempts and network refusal boundary, prove all 16 real cases without blind retries or readiness widening. Shared keepalive is a hypothesis, not established cause."
+          },
+          {
+            "id": "775-no-js-timeout",
+            "complete": false,
+            "source": "https://github.com/Proto-UI/Proto-UI/actions/runs/37490381737",
+            "acceptance": "Use phase diagnostics from frozen b3601697c4daef1854b64d64a6edb2102a398e6d to establish the actual cause of the 5s no-JS overview timeout. Preserve assertions/time budget and cleanup; a diagnostic commit is not the repair."
+          }
+        ],
+        "boundedPriorSuccess": "Existing 41-calibration profile: 790 raw / 782 achieved / 8 declared rounded-clip unmeasured / 40 not executed; does not close the six later criteria."
       },
       {
         "id": "prior-pr.832",
         "pr": 832,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 832,
           "title": "fix(react): defer native focus until event ingress is ready",
@@ -15949,6 +15921,18 @@
           "migration": "Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
+        },
+        "currentPrSnapshot": {
+          "number": 832,
+          "head": "f6a62aea190bbd4dcb7dfea1f7baf4a63d439358",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/832",
+          "observedAt": "2026-10-06T17:22:00Z"
         }
       },
       {
@@ -15956,7 +15940,7 @@
         "pr": 863,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 863,
           "title": "fix(shadcn): remove the Scroll Area corner tile",
@@ -15977,6 +15961,18 @@
           "migration": "Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
+        },
+        "currentPrSnapshot": {
+          "number": 863,
+          "head": "dc72df662a3ad601931c1df226d8592d3157049b",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/863",
+          "observedAt": "2026-10-06T17:22:00Z"
         }
       },
       {
@@ -15984,15 +15980,27 @@
         "pr": 858,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
-        "observed": null
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "observed": null,
+        "currentPrSnapshot": {
+          "number": 858,
+          "head": "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+          "base": "20b1f06f505555b50fb9aaf4aada5be475f507b5",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/858",
+          "observedAt": "2026-10-06T17:22:00Z"
+        }
       },
       {
         "id": "prior-pr.868",
         "pr": 868,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "specific cancelled selection publication was explicitly restored by the owner; revalidate the exact patch with its topic owner before integration",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 868,
           "title": "fix(selection): express bounded content-selection affordances",
@@ -16013,6 +16021,18 @@
           "migration": "Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
+        },
+        "currentPrSnapshot": {
+          "number": 868,
+          "head": "5be76aceabb8df214e936b60484df1782827b117",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/868",
+          "observedAt": "2026-10-06T17:22:00Z"
         }
       },
       {
@@ -16020,15 +16040,27 @@
         "pr": 857,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
-        "observed": null
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "observed": null,
+        "currentPrSnapshot": {
+          "number": 857,
+          "head": "a10374ab07793811f4d3b8d0d9edd4d68ed80668",
+          "base": "48b80f8b8b0b94dbac04919e3516bc6a1ed2c37c",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/857",
+          "observedAt": "2026-10-06T17:22:00Z"
+        }
       },
       {
         "id": "prior-pr.855",
         "pr": 855,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 855,
           "title": "fix(material): align padding-box geometry and bound composed blending",
@@ -16049,6 +16081,18 @@
           "migration": "Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
+        },
+        "currentPrSnapshot": {
+          "number": 855,
+          "head": "60c0bdeb17e5cdc3404512d66b33d0956fb392f1",
+          "base": "48b80f8b8b0b94dbac04919e3516bc6a1ed2c37c",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/855",
+          "observedAt": "2026-10-06T17:22:00Z"
         }
       },
       {
@@ -16056,23 +16100,47 @@
         "pr": 862,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
-        "observed": null
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "observed": null,
+        "currentPrSnapshot": {
+          "number": 862,
+          "head": "f4c53e779f38c6f4ca2fc56348b276b1b3f20a86",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/862",
+          "observedAt": "2026-10-06T17:22:00Z"
+        }
       },
       {
         "id": "prior-pr.867",
         "pr": 867,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
-        "observed": null
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "observed": null,
+        "currentPrSnapshot": {
+          "number": 867,
+          "head": "a1b8c7eb5845f1e94fe753bed8aa58e5a95c0bd9",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/867",
+          "observedAt": "2026-10-06T17:22:00Z"
+        }
       },
       {
         "id": "prior-pr.869",
         "pr": 869,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 869,
           "title": "docs(design): compare 158 HIG topics with Proto UI principles and ownership",
@@ -16093,6 +16161,18 @@
           "migration": "Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
+        },
+        "currentPrSnapshot": {
+          "number": 869,
+          "head": "4b921099f220413e7da5a3c68ec669f96cdfd701",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/869",
+          "observedAt": "2026-10-06T17:22:00Z"
         }
       },
       {
@@ -16100,7 +16180,7 @@
         "pr": 808,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 808,
           "title": "feat(bootstrap): project eight Base state and text control parts",
@@ -16121,6 +16201,18 @@
           "migration": "Open Bootstrap six-family/eight-part candidate, not counted in main.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
+        },
+        "currentPrSnapshot": {
+          "number": 808,
+          "head": "e8e0b01d4fd7751bc2d1c96170c07adb74801ddb",
+          "base": "48b80f8b8b0b94dbac04919e3516bc6a1ed2c37c",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": false,
+          "mergeableState": "dirty",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/808",
+          "observedAt": "2026-10-06T17:22:00Z"
         }
       },
       {
@@ -16128,7 +16220,7 @@
         "pr": 835,
         "complete": false,
         "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "preserve current authorization and branch owner",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
         "observed": {
           "number": 835,
           "title": "feat(base): add complete draft Collapsible slice (#388)",
@@ -16149,14 +16241,58 @@
           "migration": "Open Collapsible candidate, not counted in main; Accordion still follows #388.",
           "action": "retain-existing-owner; no-close",
           "assignees": []
+        },
+        "currentPrSnapshot": {
+          "number": 835,
+          "head": "dae1a67acb07efb56e8ff39713b781b861dabf4a",
+          "base": "c9691a6b4f026e4b7e43f2cf4059bfe778afb837",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": false,
+          "mergeableState": "dirty",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/835",
+          "observedAt": "2026-10-06T17:22:00Z"
+        }
+      },
+      {
+        "id": "prior-pr.871",
+        "pr": 871,
+        "complete": false,
+        "disposition": "Continue original shared benchmark bootstrap repair; retain frozen code, failures and review/CI evidence as equal-priority Finf follow-up if not quickly integrated.",
+        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "observed": {
+          "head": "dbdd969",
+          "source": "https://github.com/Proto-UI/Proto-UI/pull/871",
+          "state": "open; exact full head recheck required before integration"
+        },
+        "currentPrSnapshot": {
+          "number": 871,
+          "head": "0ed119b52cd2c498d90121e681d2c47953c4f345",
+          "base": "25c3d0731e39003d87f541afc5e1a294a9d95568",
+          "state": "open",
+          "merged": false,
+          "draft": false,
+          "mergeable": true,
+          "mergeableState": "blocked",
+          "url": "https://github.com/Proto-UI/Proto-UI/pull/871",
+          "observedAt": "2026-10-06T17:22:00Z"
         }
       }
     ],
-    "priorWorkRoutingCount": 12,
-    "initialTodoCount": 67,
+    "priorWorkRoutingCount": 13,
+    "initialTodoCount": 68,
     "finalBaseCount": "To be derived from governed completed semantics; 32 deliverables are not automatically 32 new Base families. Date Picker/Data Table/Message Scroller may be proper compositions.",
     "projectionInvariant": "Each final Base atomic identity has a real conforming identity/implementation and evidence in each of four design families. Each final family count and atomic identity count is at least Base. Existing extra family identities may remain but cannot compensate for a missing Base mapping.",
-    "materialBoundary": "CSS fallback, owned-scene WebGL realization and Apple-native mapping are separate. Preserve current #809 implementation and #855 failures; no unimplemented WebGPU/Vulkan/native target claimed."
+    "materialBoundary": "CSS fallback, owned-scene WebGL realization and Apple-native mapping are separate. Preserve current #809 implementation and #855 failures; no unimplemented WebGPU/Vulkan/native target claimed.",
+    "packagingBoundary": "Bootstrap and Liquid Glass receive complete source/dist/type/package/consumer readiness in this task. Existing private flags are not a permanent exemption. Inspect release workflows before changing flags/exports; do not implicitly trigger registry publishing. Actual registry release or new credentials remain separately gated.",
+    "sharedCiHygiene": {
+      "id": "governance-timestamp-only-drift",
+      "complete": false,
+      "source": "https://github.com/Proto-UI/Proto-UI/actions/runs/37501442006/job/112399177604",
+      "observed": "Real API reconciliation of 27 Issues plus PR580 showed only #377.updatedAt changed; governance fields and reviewed owners were identical.",
+      "required": "Coordinate one semantic-versus-observation timestamp correction; preserve failure and real API evidence, do not blindly refresh multiple branches or weaken owner/state validation."
+    }
   },
   "evidenceOnlyBranches": [
     {
@@ -16167,5 +16303,71 @@
       "pr": 846,
       "rule": "NEVER MERGE; consume evidence only"
     }
-  ]
+  ],
+  "packageConsumption": {
+    "base": {
+      "name": "@proto.ui/prototypes-base",
+      "private": false,
+      "version": "0.3.0-alpha.1",
+      "rootExport": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "publication": "Not asserted by source inventory"
+    },
+    "shadcn": {
+      "name": "@proto.ui/prototypes-shadcn",
+      "private": false,
+      "version": "0.3.0-alpha.1",
+      "rootExport": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "publication": "Not asserted by source inventory"
+    },
+    "brutalist": {
+      "name": "@proto.ui/prototypes-brutalist",
+      "private": false,
+      "version": "0.3.0-alpha.1",
+      "rootExport": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "publication": "Not asserted by source inventory"
+    },
+    "bootstrap-2-3-2": {
+      "name": "@proto.ui/prototypes-bootstrap-2-3-2",
+      "private": true,
+      "version": null,
+      "rootExport": {
+        "types": "./src/index.ts",
+        "default": "./src/index.ts"
+      },
+      "publication": "Not asserted by source inventory"
+    },
+    "liquid-glass": {
+      "name": "@proto.ui/prototypes-liquid-glass",
+      "private": true,
+      "version": null,
+      "rootExport": {
+        "types": "./src/index.ts",
+        "default": "./src/index.ts"
+      },
+      "publication": "Not asserted by source inventory"
+    },
+    "lucide": {
+      "name": "@proto.ui/prototypes-lucide",
+      "private": false,
+      "version": "0.3.0-alpha.1",
+      "rootExport": {
+        "types": "./dist/index.d.ts",
+        "import": "./dist/index.js",
+        "default": "./dist/index.js"
+      },
+      "publication": "Not asserted by source inventory"
+    }
+  }
 }

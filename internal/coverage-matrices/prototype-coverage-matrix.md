@@ -19,7 +19,7 @@ A family is one subject, not the sum of Root/Trigger/Content parts. A P identity
 | liquid-glass | 2 | 2 | 2 |
 | lucide | 1 | 1 | 1 |
 
-Total: **63 library-family instances; 27 distinct subjects; 159 P identities, all draft; 0 active P identities**. This is an implementation inventory, not zero usable code and not 159 mature components. The private ChatUI Message/Code Block compositions add 6/3 package-local parts but no public P identities.
+Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 159 draft / 0 active P identities**. This is an implementation inventory, not zero usable code and not a count of mature components. The private ChatUI Message/Code Block compositions add 6/3 package-local parts but no public P identities.
 
 ## Reference sets and difference accounting
 
@@ -30,7 +30,7 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities, al
 
 **Intersection 30; union 71.** Aliases: Base UI Menu ↔ Dropdown Menu; Preview Card ↔ Hover Card; OTP Field ↔ Input OTP. Radio is counted inside Radio Group. Autocomplete/Combobox and Progress/Meter remain distinct. These aliases mean comparable subject, never interchangeable API.
 
-The 71-subject union contains 46 behavior/structure comparison names, 6 styled-only subjects, 17 compositions, Direction as one provider/environment subject and Chart as one currently excluded domain. Of the 46, 16 have Base source counterparts and 30 do not; several absent names can be realized by composition, so **30 is not an admitted new-Base count**.
+The 71-subject union contains 46 behavior/structure comparison names, 6 styled-only subjects, 17 compositions, 1 provider/environment subject and 1 currently excluded domain. Of the behavior/structure subjects, 16 have Base source counterparts and 30 do not. Several absent names can be realized by composition; this difference is not an admitted new-Base count.
 
 The 49 shadcn names without a named Shadcn projection split into **24 behavior/structure, 6 visual, 17 composition, 1 environment and 1 excluded**. Table already exists in Base; Badge/Card/Skeleton/Spinner already exist in Brutalist; Message already exists as a private composition. Current Base UI counterparts and named Shadcn projections are bounded subsets, not full feature parity.
 
@@ -157,7 +157,7 @@ Brutalist-only direct styled subjects: Badge, Card, Skeleton and Spinner. They r
 
 ## Finf complete-delivery plan
 
-The maintainer has selected **55 full-acceptance core items**, plus 12 prior-PR carry/closeout items. None is checked complete. The [complete checkbox ledger](finf-delivery-checklist.md) is the execution entry. Final Base counts grow only through governed identities; all four projections must match each final Base identity rather than reaching a number with duplicates.
+The maintainer has selected **55 full-acceptance core items**, plus 13 prior-PR carry/closeout items. 0 core items are checked complete; the remaining items retain their full acceptance gates. The [complete checkbox ledger](finf-delivery-checklist.md) is the execution entry. Final Base counts grow only through governed identities; all four projections must match each final Base identity rather than reaching a number with duplicates.
 
 ## Highest-leverage abstraction work
 
@@ -309,9 +309,13 @@ The App keeps domain truth, backend transport, file storage, credentials, naviga
 | [#868](https://github.com/Proto-UI/Proto-UI/issues/868) fix(selection): express bounded content-selection affordances | open PR; head c1dc4a850aec7eef98f18cc5bdbadf6d375fde73 | Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it. |
 | [#869](https://github.com/Proto-UI/Proto-UI/issues/869) docs(design): compare 158 HIG topics with Proto UI principles and ownership | open PR; head 4b921099f220413e7da5a3c68ec669f96cdfd701 | Keep the existing active implementation/consumer owner and acceptance criteria; this matrix does not duplicate or close it. |
 
+## Package consumption boundary
+
+Bootstrap 2.3.2 and Liquid Glass currently declare private: true and source exports. Their existing counts describe workspace implementations, not npm publication. Four-family implementation and runtime/visual parity remain required in Finf; private package status is not a waiver. Changing release identity/publication requires its own explicit release authorization.
+
 ## Verification and update contract
 
-- Source/count/link integrity: `node scripts/coverage-matrices/prototype-coverage.mjs --check`. Negative controls: `node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs`.
+- Source/count/link and receipt-shape integrity (never a substitute for independent review of actual evidence): `node scripts/coverage-matrices/prototype-coverage.mjs --check`. Negative controls: `node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs`.
 - Refresh main and reference revisions before changing facts; update the JSON and regenerate this view. New reference names enter independent review, never automatic scope.
 - Every adopted row needs a real owner, precise semantic/negative boundary, main/open-PR separation, lifecycle, host/Compiler evidence and consumer acceptance. Closing the matrix PR does not close #870.
 - This audit does not rerun prototype/runtime/visual tests. Existing mapped tests are source evidence only; no full-feature or native certification is claimed. Independent review and exact-head CI remain required for the matrix change.

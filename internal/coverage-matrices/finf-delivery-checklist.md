@@ -1,6 +1,6 @@
 # Finf complete-delivery checklist
 
-Tracker: [#870](https://github.com/Proto-UI/Proto-UI/issues/870). Status: **work in progress, not merge-ready**. 67 initial unchecked items: 55 full delivery items and 12 existing-PR closeout/carry items.
+Tracker: [#870](https://github.com/Proto-UI/Proto-UI/issues/870). Status: **work in progress, not merge-ready**. 68 initial unchecked items: 55 full delivery items and 13 existing-PR closeout/carry items.
 
 Current owner explicitly selects groups 1–6 and complete four-family projection coverage, including Bootstrap 2.3.2 and Liquid Glass, plus Overlay scrollbar coordinate repair. This is project-owned scope, not automatic adoption of comparison projects.
 
@@ -14,7 +14,7 @@ No item is checked for an incremental/simple implementation. Every required acce
 
 3. Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass
 
-4. Complete DemoSpec and reachable real demos, API/package/CLI surfaces and bilingual documentation
+4. Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.
 
 5. Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths
 
@@ -140,31 +140,51 @@ To be derived from governed completed semantics; 32 deliverables are not automat
 
 ## Previous work remains equal priority
 
-- [ ] **prior-pr.775** [#775](https://github.com/Proto-UI/Proto-UI/issues/775): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.775** [#775](https://github.com/Proto-UI/Proto-UI/issues/775): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.832** [#832](https://github.com/Proto-UI/Proto-UI/issues/832): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.832** [#832](https://github.com/Proto-UI/Proto-UI/issues/832): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.863** [#863](https://github.com/Proto-UI/Proto-UI/issues/863): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.863** [#863](https://github.com/Proto-UI/Proto-UI/issues/863): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.858** [#858](https://github.com/Proto-UI/Proto-UI/issues/858): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.858** [#858](https://github.com/Proto-UI/Proto-UI/issues/858): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.868** [#868](https://github.com/Proto-UI/Proto-UI/issues/868): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. specific cancelled selection publication was explicitly restored by the owner; revalidate the exact patch with its topic owner before integration.
+- [ ] **prior-pr.868** [#868](https://github.com/Proto-UI/Proto-UI/issues/868): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.857** [#857](https://github.com/Proto-UI/Proto-UI/issues/857): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.857** [#857](https://github.com/Proto-UI/Proto-UI/issues/857): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.855** [#855](https://github.com/Proto-UI/Proto-UI/issues/855): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.855** [#855](https://github.com/Proto-UI/Proto-UI/issues/855): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.862** [#862](https://github.com/Proto-UI/Proto-UI/issues/862): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.862** [#862](https://github.com/Proto-UI/Proto-UI/issues/862): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.867** [#867](https://github.com/Proto-UI/Proto-UI/issues/867): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.867** [#867](https://github.com/Proto-UI/Proto-UI/issues/867): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.869** [#869](https://github.com/Proto-UI/Proto-UI/issues/869): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.869** [#869](https://github.com/Proto-UI/Proto-UI/issues/869): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.808** [#808](https://github.com/Proto-UI/Proto-UI/issues/808): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.808** [#808](https://github.com/Proto-UI/Proto-UI/issues/808): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.835** [#835](https://github.com/Proto-UI/Proto-UI/issues/835): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. preserve current authorization and branch owner.
+- [ ] **prior-pr.835** [#835](https://github.com/Proto-UI/Proto-UI/issues/835): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-The shared benchmark bootstrap repair is awaiting its verified PR number and remains with its current owner; add its exact frozen receipt before integration. #826 and #846 are **NEVER MERGE**, evidence-only branches.
+- [ ] **prior-pr.871** [#871](https://github.com/Proto-UI/Proto-UI/issues/871): Continue original shared benchmark bootstrap repair; retain frozen code, failures and review/CI evidence as equal-priority Finf follow-up if not quickly integrated.. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
+
+The shared benchmark bootstrap repair is tracked by #871 and remains with its current owner until an exact frozen integration receipt is accepted. #826 and #846 are **NEVER MERGE**, evidence-only branches.
+
+## Retained prior-work acceptance details
+
+Existing 41-calibration profile: 790 raw / 782 achieved / 8 declared rounded-clip unmeasured / 40 not executed; does not close the six later criteria.
+
+- **775-paint-presence** (unmet): achieved/painted require bounded actual paint presence, including real descendant ink; reject fully transparent nonzero geometry and unsupported/hidden cases. Do not treat nontransparent text color without glyphs as ink. [source](https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650211)
+
+- **775-fillable-svg** (unmet): Withhold fill ratio unless the finite geometry profile proves fillable area; reject line/degenerate paths, retain stroke and pixels, and use fillable circle/rect positive controls. [source](https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650234)
+
+- **775-unique-editor** (unmet): Collect composed light/shadow editor candidates and require exactly one; reject missing/duplicate/foreign targets and retain four-Adapter real single-editor positives. [source](https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650245)
+
+- **775-decoration-fingerprint** (unmet): Fingerprint applicable text-decoration line/color/thickness/style/offset paint changes, including CSSOM changes without attribute/rect mutation between image and fact collection; preserve inheritance/descendant snapshot scope. [source](https://github.com/Proto-UI/Proto-UI/pull/775#discussion_r4197650258)
+
+- **775-reading-route-reset** (unmet): Diagnose the repeated local route.fetch ECONNRESET at radio-group-light-normal-1279-text100; retain both failed attempts and network refusal boundary, prove all 16 real cases without blind retries or readiness widening. Shared keepalive is a hypothesis, not established cause. [source](https://github.com/Proto-UI/Proto-UI/actions/runs/37490381731)
+
+- **775-no-js-timeout** (unmet): Use phase diagnostics from frozen b3601697c4daef1854b64d64a6edb2102a398e6d to establish the actual cause of the 5s no-JS overview timeout. Preserve assertions/time budget and cleanup; a diagnostic commit is not the repair. [source](https://github.com/Proto-UI/Proto-UI/actions/runs/37490381737)
+
+Shared CI hygiene (unmet): Real API reconciliation of 27 Issues plus PR580 showed only #377.updatedAt changed; governance fields and reviewed owners were identical. Coordinate one semantic-versus-observation timestamp correction; preserve failure and real API evidence, do not blindly refresh multiple branches or weaken owner/state validation. [failure](https://github.com/Proto-UI/Proto-UI/actions/runs/37501442006/job/112399177604)
 
 ## Atomic parity obligations
 
@@ -175,39 +195,39 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-ASYNC-REGION | required missing | required missing | required missing | required missing |
 | P-BASE-BUTTON | P-SHADCN-BUTTON | P-BRUTALIST-BUTTON | P-BOOTSTRAP-2-3-2-BUTTON | P-LIQUID-GLASS-BUTTON |
 | P-BASE-CHECKBOX-INDICATOR | P-SHADCN-CHECKBOX-INDICATOR | P-BRUTALIST-CHECKBOX-INDICATOR | required missing | required missing |
-| P-BASE-CHECKBOX | P-SHADCN-CHECKBOX-INDICATOR, P-SHADCN-CHECKBOX | P-BRUTALIST-CHECKBOX, P-BRUTALIST-CHECKBOX-INDICATOR | required missing | required missing |
-| P-BASE-DIALOG | P-SHADCN-DIALOG-TRIGGER, P-SHADCN-DIALOG-CONTENT, P-SHADCN-DIALOG-MASK, P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-TITLE, P-SHADCN-DIALOG-DESCRIPTION, P-SHADCN-DIALOG-CLOSE-ICON, P-SHADCN-DIALOG | P-BRUTALIST-DIALOG, P-BRUTALIST-DIALOG-MASK, P-BRUTALIST-DIALOG-CONTENT, P-BRUTALIST-DIALOG-CLOSE-ICON, P-BRUTALIST-DIALOG-CLOSE, P-BRUTALIST-DIALOG-TRIGGER, P-BRUTALIST-DIALOG-DESCRIPTION, P-BRUTALIST-DIALOG-TITLE | required missing | required missing |
+| P-BASE-CHECKBOX | P-SHADCN-CHECKBOX | P-BRUTALIST-CHECKBOX | required missing | required missing |
+| P-BASE-DIALOG | P-SHADCN-DIALOG | P-BRUTALIST-DIALOG | required missing | required missing |
 | P-BASE-DIALOG-MASK | P-SHADCN-DIALOG-MASK | P-BRUTALIST-DIALOG-MASK | required missing | required missing |
 | P-BASE-DIALOG-TITLE | P-SHADCN-DIALOG-TITLE | P-BRUTALIST-DIALOG-TITLE | required missing | required missing |
 | P-BASE-DIALOG-TRIGGER | P-SHADCN-DIALOG-TRIGGER | P-BRUTALIST-DIALOG-TRIGGER | required missing | required missing |
 | P-BASE-DIALOG-CLOSE | P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON | P-BRUTALIST-DIALOG-CLOSE-ICON, P-BRUTALIST-DIALOG-CLOSE | required missing | required missing |
 | P-BASE-DIALOG-CONTENT | P-SHADCN-DIALOG-CONTENT | P-BRUTALIST-DIALOG-CONTENT | required missing | required missing |
 | P-BASE-DIALOG-DESCRIPTION | P-SHADCN-DIALOG-DESCRIPTION | P-BRUTALIST-DIALOG-DESCRIPTION | required missing | required missing |
-| P-BASE-DROPDOWN-MENU | P-SHADCN-DROPDOWN-MENU-CONTENT, P-SHADCN-DROPDOWN-MENU-TRIGGER, P-SHADCN-DROPDOWN-MENU, P-SHADCN-DROPDOWN-MENU-ITEM | P-BRUTALIST-DROPDOWN-MENU-TRIGGER, P-BRUTALIST-DROPDOWN-MENU, P-BRUTALIST-DROPDOWN-MENU-ITEM, P-BRUTALIST-DROPDOWN-MENU-CONTENT | required missing | required missing |
+| P-BASE-DROPDOWN-MENU | P-SHADCN-DROPDOWN-MENU | P-BRUTALIST-DROPDOWN-MENU | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-CONTENT | P-SHADCN-DROPDOWN-MENU-CONTENT | P-BRUTALIST-DROPDOWN-MENU-CONTENT | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | P-BRUTALIST-DROPDOWN-MENU-TRIGGER | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-ITEM | P-SHADCN-DROPDOWN-MENU-ITEM | P-BRUTALIST-DROPDOWN-MENU-ITEM | required missing | required missing |
-| P-BASE-HOVER-CARD | P-SHADCN-HOVER-CARD-CONTENT, P-SHADCN-HOVER-CARD, P-SHADCN-HOVER-CARD-TRIGGER | P-BRUTALIST-HOVER-CARD-CONTENT, P-BRUTALIST-HOVER-CARD, P-BRUTALIST-HOVER-CARD-TRIGGER | required missing | required missing |
+| P-BASE-HOVER-CARD | P-SHADCN-HOVER-CARD | P-BRUTALIST-HOVER-CARD | required missing | required missing |
 | P-BASE-HOVER-CARD-CONTENT | P-SHADCN-HOVER-CARD-CONTENT | P-BRUTALIST-HOVER-CARD-CONTENT | required missing | required missing |
 | P-BASE-HOVER-CARD-TRIGGER | P-SHADCN-HOVER-CARD-TRIGGER | P-BRUTALIST-HOVER-CARD-TRIGGER | required missing | required missing |
 | P-BASE-IMAGE | required missing | required missing | required missing | required missing |
 | P-BASE-INPUT | P-SHADCN-INPUT | required missing | required missing | required missing |
 | P-BASE-LIVE-REGION | required missing | required missing | required missing | required missing |
-| P-BASE-RADIO-GROUP | P-SHADCN-RADIO-GROUP-INDICATOR, P-SHADCN-RADIO-GROUP-ITEM, P-SHADCN-RADIO-GROUP | required missing | required missing | required missing |
+| P-BASE-RADIO-GROUP | P-SHADCN-RADIO-GROUP | required missing | required missing | required missing |
 | P-BASE-RADIO-GROUP-INDICATOR | P-SHADCN-RADIO-GROUP-INDICATOR | required missing | required missing | required missing |
 | P-BASE-RADIO-GROUP-ITEM | P-SHADCN-RADIO-GROUP-ITEM | required missing | required missing | required missing |
 | P-BASE-SCROLL-AREA-SCROLLBAR | P-SHADCN-SCROLL-AREA-SCROLLBAR | P-BRUTALIST-SCROLL-AREA-SCROLLBAR | required missing | required missing |
-| P-BASE-SCROLL-AREA | P-SHADCN-SCROLL-AREA-SCROLLBAR, P-SHADCN-SCROLL-AREA, P-SHADCN-SCROLL-AREA-THUMB, P-SHADCN-SCROLL-AREA-VIEWPORT | P-BRUTALIST-SCROLL-AREA-THUMB, P-BRUTALIST-SCROLL-AREA-VIEWPORT, P-BRUTALIST-SCROLL-AREA-SCROLLBAR, P-BRUTALIST-SCROLL-AREA | required missing | required missing |
+| P-BASE-SCROLL-AREA | P-SHADCN-SCROLL-AREA | P-BRUTALIST-SCROLL-AREA | required missing | required missing |
 | P-BASE-SCROLL-AREA-VIEWPORT | P-SHADCN-SCROLL-AREA-VIEWPORT | P-BRUTALIST-SCROLL-AREA-VIEWPORT | required missing | required missing |
 | P-BASE-SCROLL-AREA-THUMB | P-SHADCN-SCROLL-AREA-THUMB | P-BRUTALIST-SCROLL-AREA-THUMB | required missing | required missing |
 | P-BASE-SELECT-CONTENT | P-SHADCN-SELECT-CONTENT | P-BRUTALIST-SELECT-CONTENT | required missing | required missing |
-| P-BASE-SELECT | P-SHADCN-SELECT-VALUE, P-SHADCN-SELECT-ITEM, P-SHADCN-SELECT-TRIGGER, P-SHADCN-SELECT, P-SHADCN-SELECT-CONTENT | P-BRUTALIST-SELECT-VALUE, P-BRUTALIST-SELECT-TRIGGER, P-BRUTALIST-SELECT-CONTENT, P-BRUTALIST-SELECT-ITEM, P-BRUTALIST-SELECT | required missing | required missing |
+| P-BASE-SELECT | P-SHADCN-SELECT | P-BRUTALIST-SELECT | required missing | required missing |
 | P-BASE-SELECT-ITEM | P-SHADCN-SELECT-ITEM | P-BRUTALIST-SELECT-ITEM | required missing | required missing |
 | P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | P-BRUTALIST-SELECT-VALUE | required missing | required missing |
 | P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | P-BRUTALIST-SELECT-TRIGGER | required missing | required missing |
 | P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | P-BRUTALIST-SEPARATOR | required missing | required missing |
 | P-BASE-SURFACE | P-SHADCN-SURFACE | P-BRUTALIST-SURFACE | P-BOOTSTRAP-2-3-2-SURFACE | P-LIQUID-GLASS-SURFACE |
-| P-BASE-SWITCH | P-SHADCN-SWITCH-THUMB, P-SHADCN-SWITCH | P-BRUTALIST-SWITCH, P-BRUTALIST-SWITCH-THUMB | required missing | required missing |
+| P-BASE-SWITCH | P-SHADCN-SWITCH | P-BRUTALIST-SWITCH | required missing | required missing |
 | P-BASE-SWITCH-THUMB | P-SHADCN-SWITCH-THUMB | P-BRUTALIST-SWITCH-THUMB | required missing | required missing |
 | P-BASE-TABLE-CAPTION | required missing | required missing | required missing | required missing |
 | P-BASE-TABLE-HEADER-CELL | required missing | required missing | required missing | required missing |
@@ -216,7 +236,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-TABLE | required missing | required missing | required missing | required missing |
 | P-BASE-TABS-CONTENT | P-SHADCN-TABS-CONTENT | P-BRUTALIST-TABS-CONTENT | required missing | required missing |
 | P-BASE-TABS-INDICATOR | required missing | required missing | required missing | required missing |
-| P-BASE-TABS | P-SHADCN-TABS-TRIGGER, P-SHADCN-TABS-CONTENT, P-SHADCN-TABS, P-SHADCN-TABS-LIST | P-BRUTALIST-TABS-CONTENT, P-BRUTALIST-TABS-LIST, P-BRUTALIST-TABS-TRIGGER, P-BRUTALIST-TABS | required missing | required missing |
+| P-BASE-TABS | P-SHADCN-TABS | P-BRUTALIST-TABS | required missing | required missing |
 | P-BASE-TABS-LIST | P-SHADCN-TABS-LIST | P-BRUTALIST-TABS-LIST | required missing | required missing |
 | P-BASE-TABS-TRIGGER | P-SHADCN-TABS-TRIGGER | P-BRUTALIST-TABS-TRIGGER | required missing | required missing |
 | P-BASE-TEXT | P-SHADCN-TEXT | P-BRUTALIST-TEXT | required missing | required missing |
@@ -225,7 +245,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-TOOLTIP-GROUP | P-SHADCN-TOOLTIP-GROUP | P-BRUTALIST-TOOLTIP-GROUP | required missing | required missing |
 | P-BASE-TOOLTIP-TRIGGER | P-SHADCN-TOOLTIP-TRIGGER | P-BRUTALIST-TOOLTIP-TRIGGER | required missing | required missing |
 | P-BASE-TOOLTIP-CONTENT | P-SHADCN-TOOLTIP-CONTENT | P-BRUTALIST-TOOLTIP-CONTENT | required missing | required missing |
-| P-BASE-TOOLTIP | P-SHADCN-TOOLTIP-GROUP, P-SHADCN-TOOLTIP-TRIGGER, P-SHADCN-TOOLTIP-CONTENT, P-SHADCN-TOOLTIP | P-BRUTALIST-TOOLTIP, P-BRUTALIST-TOOLTIP-TRIGGER, P-BRUTALIST-TOOLTIP-CONTENT, P-BRUTALIST-TOOLTIP-GROUP | required missing | required missing |
+| P-BASE-TOOLTIP | P-SHADCN-TOOLTIP | P-BRUTALIST-TOOLTIP | required missing | required missing |
 | P-BASE-TRANSITION | required missing | required missing | required missing | required missing |
 
 ## Integration discipline
@@ -234,9 +254,17 @@ dot Finf integrator; topic owners provide frozen patches; only integrator CAS-up
 
 Continue old PRs in place while they can be finished normally. For a carry, retain frozen source, original author/provenance, exact failures, unresolved criteria and evidence links. Do not rewrite history or close an unfinished item as fixed. Only the integrator updates this Finf ref with an expected-head lease. No new leaf PR is required for an internal Finf topic slice; independent review, CI, DCO, repository protection and actual semantic boundaries remain mandatory.
 
+- Required Overlay evidence: Reproduce the actual user-reported scroll/scrollbar coordinate drift before assigning root cause
+
+- Required Overlay evidence: Exercise body and nested scrollers, portal/container coordinates, scrollbar appearance/removal, modal scroll lock, RTL, zoom/transforms and resize; verify every anchored/dependent overlay
+
+- Required Overlay evidence: Preserve original reproduction, failing baseline and repaired exact-head evidence
+
 Overlay root cause is not yet reproduced. The scrollbar-coordinate regression must retain actual baseline, repaired real-input journeys and every dependent anchored/portaled composition; it cannot be checked from a guessed offset patch.
 
 CSS fallback, owned-scene WebGL realization and Apple-native mapping are separate. Preserve current #809 implementation and #855 failures; no unimplemented WebGPU/Vulkan/native target claimed.
+
+Bootstrap and Liquid Glass receive complete source/dist/type/package/consumer readiness in this task. Existing private flags are not a permanent exemption. Inspect release workflows before changing flags/exports; do not implicitly trigger registry publishing. Actual registry release or new credentials remain separately gated.
 
 Agent: dot  
 ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
