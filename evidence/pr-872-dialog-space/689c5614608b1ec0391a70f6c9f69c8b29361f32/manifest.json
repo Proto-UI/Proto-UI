@@ -1,0 +1,38 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "head": "689c5614608b1ec0391a70f6c9f69c8b29361f32",
+  "checkout": "47ece539126714fbaa59b5d3e3c87a90dd3dce61",
+  "artifact": 11440138654,
+  "zipSha256": "2c31d948ef93ff4252bc18e82ae6040f1f8a8e81ee508437739ec6d0ee14a929",
+  "browser": "154.0.8037.57",
+  "probeSha256": "7c19da6398e01bf9d7f881313283016920321fe16f722dd06214dc07179041ff",
+  "scope": "Initial settled 390px inset improvement only. Full eight journeys failed: seven resize samples preceded settled geometry and Shadcn Vue2 runtime option selection timed out. No GPUI/physical keyboard or full geometry acceptance.",
+  "comparison": "Old30d is production, new689c is dev; same en/Shadcn/WC route,390x900,light,DPR1 but different probe/build and page scroll. Reference comparison, not a strict matched experiment.",
+  "files": [
+    {
+      "file": "30d-shadcn-wc-390x900-reference-before.png",
+      "size": 71610,
+      "sha256": "7c3fc0cf427402c1864a189375206f6b3c022737ca1ddfe4981ac461398ee8b4",
+      "gitBlob": "09ed49784a0a47da49a9a34ca055e61a3fca6d51",
+      "source": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "role": "historical reference"
+    },
+    {
+      "file": "689c-merge47ece-shadcn-wc-390x900-inset16.png",
+      "size": 84435,
+      "sha256": "d724ce473998a519865ef3d937f1d19c1c7e70a55876e4ddfacc43531540db26",
+      "gitBlob": "f3a69ac7638fc062ca805603d57c97756842eca1",
+      "source": "47ece539126714fbaa59b5d3e3c87a90dd3dce61",
+      "role": "initial 390px settled content x16 width358 right374; Mask full viewport"
+    },
+    {
+      "file": "shadcn-wc-430-settled.png",
+      "size": 86466,
+      "sha256": "ffc64a6b8a5952bfc8084e5f3aa7fb547951a60142e36a1fd415db1b19ff66b1",
+      "gitBlob": "6f3103947bf878a99dd6b15250654ea9ff064eb6",
+      "source": "47ece539126714fbaa59b5d3e3c87a90dd3dce61",
+      "role": "original failed resize frame; filename says settled but two-RAF probe did not prove settled; preserve without relabeling as pass"
+    }
+  ]
+}
