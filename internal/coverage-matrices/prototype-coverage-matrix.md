@@ -23,18 +23,18 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate commit 41e1a2c18b647b6ba22fd7ff708da107b178ec84; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit 78903a5419c6aff381a7de9c1123dbee733eca68; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Main families / identities | Candidate families / identities |
 | --- | --- | --- |
-| base | 22 / 55 | 24 / 59 |
-| shadcn | 17 / 48 | 18 / 49 |
-| brutalist | 19 / 51 | 20 / 52 |
-| bootstrap-2-3-2 | 2 / 2 | 9 / 11 |
-| liquid-glass | 2 / 2 | 3 / 3 |
+| base | 22 / 55 | 25 / 64 |
+| shadcn | 17 / 48 | 20 / 57 |
+| brutalist | 19 / 51 | 22 / 60 |
+| bootstrap-2-3-2 | 2 / 2 | 11 / 19 |
+| liquid-glass | 2 / 2 | 5 / 11 |
 | lucide | 1 / 1 | 1 / 1 |
 
-Candidate atomic GPUI obligations: 236; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
+Candidate atomic GPUI obligations: 256; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
 
 ## Reference sets and difference accounting
 

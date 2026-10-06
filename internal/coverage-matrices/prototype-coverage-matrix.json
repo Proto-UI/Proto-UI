@@ -8565,7 +8565,7 @@
       "Difficulty": "F4",
       "Milestone": "M0 / S6",
       "State": "blocked",
-      "Evidence": "Current family WC Select supplies valueChange while localization owns cookie/storage and destination mapping; HomepageRuntime retains native locale links",
+      "Evidence": "Current family WC Select supplies valueChange while localization owns cookie/storage and destination mapping; HomepageRuntime retains native locale links; documentation locale links remain available until successful Select enhancement",
       "Escape or exemption": "—",
       "Re-review or removal issue": "#420 requires stable Select admission, native locale fallback, locale parity and remount evidence",
       "program": "website",
@@ -8576,7 +8576,7 @@
     },
     {
       "ID": "www.shell.adapter-select",
-      "Path": "apps/www/src/components/override/AdapterSelect.astro",
+      "Path": "apps/www/src/components/override/AdapterSelect.astro`, `apps/www/src/styles/site-startup.css",
       "User job": "Choose the public runtime preference for participating website consumers and examples",
       "Current owner": "Website examples",
       "Target class": "official-prototype",
@@ -8598,13 +8598,13 @@
     },
     {
       "ID": "www.shell.mobile-menu-toggle",
-      "Path": "apps/www/src/components/SiteContentsCommand.astro`, `apps/www/src/components/site-contents-command.ts`, `apps/www/src/components/site-header-disclosure.ts`, `apps/www/src/components/override/Header.astro",
+      "Path": "apps/www/src/components/SiteContentsCommand.astro`, `apps/www/src/components/site-contents-command.ts`, `apps/www/src/components/site-header-disclosure.ts`, `apps/www/src/components/override/Header.astro`, `apps/www/src/styles/site-startup.css",
       "User job": "Open and close navigation on narrow viewports",
       "Current owner": "Website header disclosure and contents-navigation composition",
       "Target class": "site-composition",
       "Proto UI chain": "Disclosure or Collapsible composition plus generated facades",
       "Lifecycle": "Required disclosure family and consumer boundary are not stable",
-      "WC host and SSR/no-JS strategy": "WC: generated website facades are required for owned primitives; SSR: the trigger name and navigation content are present; no-JS: navigation remains reachable in document flow",
+      "WC host and SSR/no-JS strategy": "WC: generated website facades are required for owned primitives; SSR: the trigger name and navigation content are present; no-JS: native disclosure keeps navigation reachable before enhancement and during script failure",
       "Dependency and owner": "#388 disclosure family and #420 consumer wall; owner: Disclosure domain plus website shell",
       "Difficulty": "F4",
       "Milestone": "M0 / S7",
@@ -9512,7 +9512,7 @@
     },
     {
       "ID": "www.demo.prototype-previewer",
-      "Path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro`, `apps/www/src/components/PrototypePreviewer/previewer-client.ts` , `apps/www/src/components/PrototypePreviewer/demo-associations.ts",
+      "Path": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro`, `apps/www/src/components/PrototypePreviewer/previewer-client.ts` , `apps/www/src/components/PrototypePreviewer/demo-associations.ts`, `apps/www/src/styles/site-startup.css",
       "User job": "Run an official prototype in its documented host",
       "Current owner": "Website demonstration infrastructure",
       "Target class": "infrastructure-exempt",
@@ -17199,8 +17199,8 @@
           "9": "not-run"
         },
         "baseEntityIds": [
-          "P-BASE-CHECKBOX-INDICATOR",
-          "P-BASE-CHECKBOX"
+          "P-BASE-CHECKBOX",
+          "P-BASE-CHECKBOX-INDICATOR"
         ],
         "issues": [
           792,
@@ -17238,12 +17238,12 @@
         },
         "baseEntityIds": [
           "P-BASE-DIALOG",
-          "P-BASE-DIALOG-MASK",
-          "P-BASE-DIALOG-TITLE",
-          "P-BASE-DIALOG-TRIGGER",
           "P-BASE-DIALOG-CLOSE",
           "P-BASE-DIALOG-CONTENT",
-          "P-BASE-DIALOG-DESCRIPTION"
+          "P-BASE-DIALOG-DESCRIPTION",
+          "P-BASE-DIALOG-MASK",
+          "P-BASE-DIALOG-TITLE",
+          "P-BASE-DIALOG-TRIGGER"
         ],
         "issues": [
           792,
@@ -17282,8 +17282,8 @@
         "baseEntityIds": [
           "P-BASE-DROPDOWN-MENU",
           "P-BASE-DROPDOWN-MENU-CONTENT",
-          "P-BASE-DROPDOWN-MENU-TRIGGER",
-          "P-BASE-DROPDOWN-MENU-ITEM"
+          "P-BASE-DROPDOWN-MENU-ITEM",
+          "P-BASE-DROPDOWN-MENU-TRIGGER"
         ],
         "issues": [
           792,
@@ -17509,10 +17509,10 @@
           "9": "not-run"
         },
         "baseEntityIds": [
-          "P-BASE-SCROLL-AREA-SCROLLBAR",
           "P-BASE-SCROLL-AREA",
-          "P-BASE-SCROLL-AREA-VIEWPORT",
-          "P-BASE-SCROLL-AREA-THUMB"
+          "P-BASE-SCROLL-AREA-SCROLLBAR",
+          "P-BASE-SCROLL-AREA-THUMB",
+          "P-BASE-SCROLL-AREA-VIEWPORT"
         ],
         "issues": [
           792,
@@ -17549,11 +17549,11 @@
           "9": "not-run"
         },
         "baseEntityIds": [
-          "P-BASE-SELECT-CONTENT",
           "P-BASE-SELECT",
+          "P-BASE-SELECT-CONTENT",
           "P-BASE-SELECT-ITEM",
-          "P-BASE-SELECT-VALUE",
-          "P-BASE-SELECT-TRIGGER"
+          "P-BASE-SELECT-TRIGGER",
+          "P-BASE-SELECT-VALUE"
         ],
         "issues": [
           792,
@@ -17702,11 +17702,11 @@
           "9": "not-run"
         },
         "baseEntityIds": [
+          "P-BASE-TABLE",
           "P-BASE-TABLE-CAPTION",
-          "P-BASE-TABLE-HEADER-CELL",
           "P-BASE-TABLE-CELL",
-          "P-BASE-TABLE-ROW",
-          "P-BASE-TABLE"
+          "P-BASE-TABLE-HEADER-CELL",
+          "P-BASE-TABLE-ROW"
         ],
         "issues": [
           792,
@@ -17743,9 +17743,9 @@
           "9": "not-run"
         },
         "baseEntityIds": [
+          "P-BASE-TABS",
           "P-BASE-TABS-CONTENT",
           "P-BASE-TABS-INDICATOR",
-          "P-BASE-TABS",
           "P-BASE-TABS-LIST",
           "P-BASE-TABS-TRIGGER"
         ],
@@ -17895,10 +17895,10 @@
           "9": "not-run"
         },
         "baseEntityIds": [
-          "P-BASE-TOOLTIP-GROUP",
-          "P-BASE-TOOLTIP-TRIGGER",
+          "P-BASE-TOOLTIP",
           "P-BASE-TOOLTIP-CONTENT",
-          "P-BASE-TOOLTIP"
+          "P-BASE-TOOLTIP-GROUP",
+          "P-BASE-TOOLTIP-TRIGGER"
         ],
         "issues": [
           792,
@@ -18165,6 +18165,12 @@
           "mergeableState": "blocked",
           "url": "https://github.com/Proto-UI/Proto-UI/pull/858",
           "observedAt": "2026-10-06T19:05:00Z"
+        },
+        "sourceIntegration": {
+          "complete": false,
+          "sourceHead": "59e3b825affddd7c5a59af60ca87d912f4486247",
+          "mode": "normal-history-merge",
+          "acceptance": "Source carried into candidate; new union CI and independent review still required."
         }
       },
       {
@@ -18205,6 +18211,12 @@
           "mergeableState": "blocked",
           "url": "https://github.com/Proto-UI/Proto-UI/pull/868",
           "observedAt": "2026-10-06T19:05:00Z"
+        },
+        "sourceIntegration": {
+          "complete": false,
+          "sourceHead": "82f8b60f2aa2b66af319cbe37feb2dc0cb0335c2",
+          "mode": "normal-history-merge",
+          "acceptance": "Source carried into candidate; new union CI and independent review still required."
         }
       },
       {
@@ -18508,9 +18520,9 @@
     },
     "candidateObservation": {
       "complete": false,
-      "baseFamilies": 24,
-      "baseParts": 59,
-      "catalogEntities": 175,
+      "baseFamilies": 25,
+      "baseParts": 64,
+      "catalogEntities": 212,
       "allCatalogEntitiesDraft": true,
       "nativeOverlayDiagnosis": {
         "source": "c071ebd63ddcc7c023cbe9d3c64e667672190f81",
@@ -18524,6 +18536,14 @@
         "scope": "Shared Dialog available-space geometry, retained classic-scrollbar diagnostic assertions, initial-focus replay, Label physical accessibility scope, Rust public Pixels conversion and actual formatter output, generated style closure.",
         "verification": "101 geometry/Label/compiler +391 Focus/Gallery harness controls; workspace/contract types and all style/GPUI style fixtures pass. Native measurements and complete four-system/GPUI acceptance remain pending.",
         "retainedFailures": "15d Bootstrap/projection/Liquid native jobs did not run browser cases because leading-normal was missing from the generated Draft family manifest; native Rust private-field errors are compiler failures, not successful Label journeys."
+      },
+      "thirdSourceBatch": {
+        "complete": false,
+        "sourceTree": "54e8922b15d3ab8ea9f4e9e087c20d70d15455d9",
+        "sourceStageRecord": "internal/records/2026-10-06-finf-third-source-integration.json",
+        "nativeState": "New-head CI has not started; all completion boxes remain unchecked. Previous 689 run37521369232 was terminal red; real T0 Label5/5 is bounded evidence only.",
+        "scope": "Preserved #858/#868 ancestry; four Collapsible projections and Base/four Accordion sets; Label/GPUI/typography repairs; measured root scrollbar geometry; typed material contributions and family consumers; exact framework association import leaves.",
+        "sourceCommit": "78903a5419c6aff381a7de9c1123dbee733eca68"
       }
     }
   },
@@ -26308,32 +26328,36 @@
   "candidateSource": {
     "kind": "candidate",
     "baseMain": "25c3d0731e39003d87f541afc5e1a294a9d95568",
-    "revision": "41e1a2c18b647b6ba22fd7ff708da107b178ec84",
-    "sourceBindingsObject": "41e1a2c18b647b6ba22fd7ff708da107b178ec84",
+    "revision": "78903a5419c6aff381a7de9c1123dbee733eca68",
+    "sourceBindingsObject": "78903a5419c6aff381a7de9c1123dbee733eca68",
     "sourceObjectProof": {
       "objectType": "commit",
-      "rootTree": "3fb66508f23fc143a933c5d118703e0dead4675d",
-      "commitBase64": "dHJlZSAzZmI2NjUwOGYyM2ZjMTQzYTkzM2M1ZDExODcwM2UwZGVhZDQ2NzVkCnBhcmVudCAxNWQ4NjRkZTU0MjEwYzJlZWJjNGY0YjJmZWM2MjM1MzI0OTg5OTg5CmF1dGhvciBjeWppbi55bCA8Y2hlbnllamluMjAwNEBmb3htYWlsLmNvbT4gMTc5MTMxNTUzOCArMDgwMApjb21taXR0ZXIgY3lqaW4ueWwgPGNoZW55ZWppbjIwMDRAZm94bWFpbC5jb20+IDE3OTEzMTU1MzggKzA4MDAKCmZpeChmaW5mKTogaW50ZWdyYXRlIERpYWxvZyBnZW9tZXRyeSwgZm9jdXMgcmVwbGF5IGFuZCBuYXRpdmUgYnVpbGQgcmVwYWlycwoKQ29uc3VtZSBpbmRlcGVuZGVudGx5IHJldmlld2VkIGZyb3plbiBnZW9tZXRyeS9MYWJlbC9Gb2N1cyBwYXRjaGVzIHdpdGggYWRkaXRpdmUgQWRhcHRlciBjYXBhYmlsaXR5IHJlY29uY2lsaWF0aW9uLiBQcmVzZXJ2ZSBzYW1lLW93bmVyIEZvY3VzIHJldHJ5IGFuZCByZWFsIGFjY2Vzc2liaWxpdHktc3VyZmFjZSBMYWJlbCBzY29wZS4gQXBwbHkgb2ZmaWNpYWwgUnVzdCBmb3JtYXR0aW5nIGFuZCBwdWJsaWMgUGl4ZWxzIGNvbnZlcnNpb24sIGV4cGxpY2l0IHRlc3QgbGl0ZXJhbCB0eXBlcywgYW5kIGdlbmVyYXRlZCBkcmFmdCB0b2tlbiBjbG9zdXJlLiBDb21iaW5lZCBjb250cm9scyBwYXNzIDEwMSBnZW9tZXRyeS9MYWJlbC9jb21waWxlciBhbmQgMzkxIEZvY3VzL0dhbGxlcnksIHdpdGggd29ya3NwYWNlL2NvbnRyYWN0IHR5cGVzOyBuYXRpdmUgYW5kIGZ1bGwgZGVsaXZlcnkgYWNjZXB0YW5jZSByZW1haW4gcGVuZGluZy4gT3JpZ2luYWwgQ0kgZmFpbHVyZXMgYXJlIHJldGFpbmVkIGluIHRoZSByZWNvcmQuCgpBZ2VudDogZG90CgpNb2RlbFRyYWNlOiBub3QgbWVhc3VyZWQg4oCUIG93bmVyLWF1dGhvcml6ZWQgZG90IGV4ZW1wdGlvbiAoMjAyNi0xMC0wNikKClNpZ25lZC1vZmYtYnk6IGN5amluLnlsIDxjaGVueWVqaW4yMDA0QGZveG1haWwuY29tPgoK",
+      "rootTree": "54e8922b15d3ab8ea9f4e9e087c20d70d15455d9",
+      "commitBase64": "dHJlZSA1NGU4OTIyYjE1ZDNhYjhlYTlmNGU5ZTA4N2MyMGQ3MGQxNTQ1NWQ5CnBhcmVudCBlZDNlNDM4ODZjNzEwZmZiNDQyZGM0Y2Y0YjQ1MTcwZGY1YTRjNjkxCmF1dGhvciBjeWppbi55bCA8Y2hlbnllamluMjAwNEBmb3htYWlsLmNvbT4gMTc5MTMyMDE2NCArMDgwMApjb21taXR0ZXIgY3lqaW4ueWwgPGNoZW55ZWppbjIwMDRAZm94bWFpbC5jb20+IDE3OTEzMjAxNjQgKzA4MDAKCmZlYXQoZmluZik6IGludGVncmF0ZSBjb21wbGV0ZSBkaXNjbG9zdXJlIHNvdXJjZXMgYW5kIHNoYXJlZCBnZW9tZXRyeS9tYXRlcmlhbCByZXBhaXJzCgpTb3VyY2Utc3RhZ2UgYmF0Y2g6IGZvdXIgQ29sbGFwc2libGUgcHJvamVjdGlvbnMsIEJhc2UvZm91ciBBY2NvcmRpb24gZmFtaWxpZXMsIGdvdmVybmVkIHR5cGVkIG1hdGVyaWFsIGFuZCBib3RoIExpcXVpZCBjb25zdW1lcnMsIG1lYXN1cmVkIHJvb3Qtc3BhY2UgYW5kIHNjcm9sbGJhciBjb21wZW5zYXRpb24sIExhYmVsIHJlY292ZXJ5LCBHUFVJIGxlYXNlcyBhbmQgZmluaXRlIG5hdGl2ZSB0b2tlbiBtYXBwaW5nLCBleGFjdCBmcmFtZXdvcmsgYXNzb2NpYXRpb24gbGVhdmVzIGFuZCBwYWNrYWdlIGV4cG9ydHMuIFByZXNlcnZlIGJvdGggbGVnYWN5IHRhc2sgYW5jZXN0cnkgYW5kIG9yaWdpbmFsIG5hdGl2ZSBmYWlsdXJlcy4KCjQ1IHB1YmxpYyBwYWNrYWdlcywgd29ya3NwYWNlIHR5cGVzLCAzMjctcGFnZSBwcm9kdWN0aW9uIGFuZCBhY3R1YWwgYnVuZGxlIGdyYXBoIHBhc3MuIEZvY3VzZWQgZmFtaWx5L21hdGVyaWFsIDQxMywgZ2VvbWV0cnkvY29uc3VtZXI3MCwgY2FycmllZCByZXZpZXcxNzksIGdyYXBoL3J1bm5lcjUxMyBjb250cm9scyBwYXNzZWQuIEFsbCA2OCBjb21wbGV0ZS1kZWxpdmVyeSB0YXJnZXRzIHJlbWFpbiB1bmNoZWNrZWQ7IGV4YWN0LWhlYWQgbmF0aXZlIHNjcmVlbnNob3RzLCBvcHRpY2FsIHJlbmRlcmluZywgZnVsbCBHUFVJIHBhcml0eSBhbmQgaW5kZXBlbmRlbnQgYXBwcm92YWwgcmVtYWluIHBlbmRpbmcuCgpBZ2VudDogZG90Ck1vZGVsVHJhY2U6IG5vdCBtZWFzdXJlZCDigJQgb3duZXItYXV0aG9yaXplZCBkb3QgZXhlbXB0aW9uICgyMDI2LTEwLTA2KQoKU2lnbmVkLW9mZi1ieTogY3lqaW4ueWwgPGNoZW55ZWppbjIwMDRAZm94bWFpbC5jb20+",
       "trees": [
         {
-          "sha": "3fb66508f23fc143a933c5d118703e0dead4675d",
-          "contentBase64": "NDAwMDAgLmFnZW50cwDX6N24HcohOoWdj3qm2RoAeT3RXDEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAxsY3LdyBXmDV0yoE8+TmqRIaUqUxMDA3NTUgLmdpdGlnbm9yZQClH3Q94gTB4SRJyfdIoTF3P/nHJjQwMDAwIC5odXNreQClHcntnDhuce1hEVZxZOjCQTOoBDEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQDKd4OBPwqUyv4YnSGhagklCQ8XuTEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kAJmfdk3pJt9tGb26VmdcYtnP2Fh/MTAwNjQ0IENPTlRSSUJVVElORy5tZAAY2EhzYvNPl9GhJw+AMfgBqWv03TEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAMwOdxXXkIEMtikFN93tD/cEIANcxMDA2NDQgUkVBRE1FLnpoLUNOLm1kAM6PTGdDpteLywpZ1qnTbr5KqFjMMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kAHvK3CmvePU2VUNs7o59KuShQtVeMTAwNjQ0IFZFUlNJT04AGnYCiaooIqhvxjPnp/XHmx8Nb3Q0MDAwMCBhcHBzAIwVNTACEgArLOlLuLr7dxdjoIfYNDAwMDAgYmVuY2htYXJrcwDSXyPh8WjGdWWMkOIAwDKGSqDNhTQwMDAwIGRvY3MAo7w5mQKNpfn++oN1MGxzOwdfick0MDAwMCBleHBlcmltZW50cwB70XqoHQ7XNLvul5G12QYjHbBrSDQwMDAwIGludGVncmF0aW9ucwDJzuevOVxfNI+ygZ3BMdfxYZ41kzQwMDAwIGludGVybmFsAG/Pq/399B5wA9z+8KzZiiECsM0ONDAwMDAgbmF0aXZlAFV3oaDeMxrtWfM6qXbCa+BFIoWXMTAwNjQ0IHBhY2thZ2UuanNvbgCmJfRPT42VZhTF3dTJERQelHQX3TQwMDAwIHBhY2thZ2VzAL/XFy/SKWlWSPJv9J28K1tMnKomMTAwNjQ0IHBucG0tbG9jay55YW1sAAPTXN+7PjHVe/W4rtq5oz+Qk6PhMTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAekvNY9Iu1y+5AlJZO+mNajD9ivo0MDAwMCBzY3JpcHRzALr2i27be1SMS+/VjgvDhVtVl37HNDAwMDAgc2hhcmVkALCQofhrg5qqbNYuUBi5jVpJ0i3HNDAwMDAgc3BlYwArlMa3wx10AMnjRQM0YepdLzRTOTEwMDY0NCB0c2NvbmZpZy5qc29uAJERreJmhUqErzfIprTB1XXx6QYFMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHbZOlVjqyGyVTUTm1+a1pMmGtyLMTAwNjQ0IHZlcmNlbC5qc29uAAlO7+Y8Vh456RZmygySVNKdy8BpMTAwNjQ0IHZpdGVzdC5jb25maWcudHMA69aNMCu7y1+wLRI9rFchl+0n3OM="
+          "sha": "54e8922b15d3ab8ea9f4e9e087c20d70d15455d9",
+          "contentBase64": "NDAwMDAgLmFnZW50cwDX6N24HcohOoWdj3qm2RoAeT3RXDEwMDY0NCAuZWRpdG9yY29uZmlnABZh6UPLOKTTqQ8v5nLWTHKDN1VXMTAwNjQ0IC5lbnYucHJvZHVjdGlvbgBbYoFLp2YBaOlb+mqJhS/HIN54JzQwMDAwIC5naXRodWIAq0qF1FPF+YvrgZa+novtsq/n/gExMDA3NTUgLmdpdGlnbm9yZQClH3Q94gTB4SRJyfdIoTF3P/nHJjQwMDAwIC5odXNreQClHcntnDhuce1hEVZxZOjCQTOoBDEwMDY0NCAubnBtcmMAf5vchzLCtG6fgQSlGwpie9gZVVIxMDA2NDQgLm52bXJjAKRf1SzFiRVw1imfqzhkMQPDlVR0MTAwNjQ0IC5wcmV0dGllcmlnbm9yZQDKd4OBPwqUyv4YnSGhagklCQ8XuTEwMDc1NSAucHJldHRpZXJyYwB8+DHrjez4uf2lZSErwkGhfi4m8jQwMDAwIC52c2NvZGUA0PPZml/Vr9Pl+77PwRCcB6Ar5KYxMDA2NDQgQUdFTlRTLm1kAJmfdk3pJt9tGb26VmdcYtnP2Fh/MTAwNjQ0IENPTlRSSUJVVElORy5tZAAY2EhzYvNPl9GhJw+AMfgBqWv03TEwMDY0NCBEQ08ubWQASbjLBUkmeoF2Rnc4sXKmPYbv9DYxMDA2NDQgTElDRU5TRQBKG+1hNWpuh5hJh5/64ZJAWlDxxTEwMDY0NCBSRUFETUUubWQAMwOdxXXkIEMtikFN93tD/cEIANcxMDA2NDQgUkVBRE1FLnpoLUNOLm1kAM6PTGdDpteLywpZ1qnTbr5KqFjMMTAwNjQ0IFJFTEVBU0VfQ0hFQ0tMSVNULm1kAHvK3CmvePU2VUNs7o59KuShQtVeMTAwNjQ0IFZFUlNJT04AGnYCiaooIqhvxjPnp/XHmx8Nb3Q0MDAwMCBhcHBzABJqUksoeGPnkNOp2pmx2cdioUgENDAwMDAgYmVuY2htYXJrcwDSXyPh8WjGdWWMkOIAwDKGSqDNhTQwMDAwIGRvY3MAo7w5mQKNpfn++oN1MGxzOwdfick0MDAwMCBleHBlcmltZW50cwD2PlwRyuIZw+8j1zIBSlNRgvq0BjQwMDAwIGludGVncmF0aW9ucwDJzuevOVxfNI+ygZ3BMdfxYZ41kzQwMDAwIGludGVybmFsANUX5Pm1hGyJFODiEWec49hvmVCINDAwMDAgbmF0aXZlAGnONFnS0Jf48f3NdA4ZvuoWyWESMTAwNjQ0IHBhY2thZ2UuanNvbgCmJfRPT42VZhTF3dTJERQelHQX3TQwMDAwIHBhY2thZ2VzAEKkFh/vJ+mn9CyiYu2ZuOk8A9MPMTAwNjQ0IHBucG0tbG9jay55YW1sAAPTXN+7PjHVe/W4rtq5oz+Qk6PhMTAwNjQ0IHBucG0td29ya3NwYWNlLnlhbWwAekvNY9Iu1y+5AlJZO+mNajD9ivo0MDAwMCBzY3JpcHRzAO72E8p6Qgt/qIY8+uLSsTfvDZFFNDAwMDAgc2hhcmVkALCQofhrg5qqbNYuUBi5jVpJ0i3HNDAwMDAgc3BlYwDBiyIIY2KgF2XE/EElkudKLliYRzEwMDY0NCB0c2NvbmZpZy5qc29uAKUbxEoonqnlIBNqBzOrpbFQqYRXMTAwNjQ0IHRzY29uZmlnLndvcmtzcGFjZS5qc29uAHbZOlVjqyGyVTUTm1+a1pMmGtyLMTAwNjQ0IHZlcmNlbC5qc29uAAlO7+Y8Vh456RZmygySVNKdy8BpMTAwNjQ0IHZpdGVzdC5jb25maWcudHMA69aNMCu7y1+wLRI9rFchl+0n3OM="
         },
         {
-          "sha": "bfd7172fd229695648f26ff49dbc2b5b4c9caa26",
-          "contentBase64": "NDAwMDAgYWRhcHRlcnMAqdx8/WFRKUixO9DVpmcfqjz086E0MDAwMCBjbGkARmWSrml7FHuOJCz8oPByQKSELgA0MDAwMCBjb21wb3NpdGlvbnMA0bkdE22B7hIOUNrltMXXyu7IjUU0MDAwMCBjb3JlACYz6f3iEWrRchVmq1V5yi8x4COoNDAwMDAgaG9va3MAX2RN23WC502bXGDmlco4LJ7FTYM0MDAwMCBob3N0LXByb3RvY29sAD+RfQH5PltkXUb4zS9IYBMiICGdNDAwMDAgbW9kdWxlcwB+o6AfF1lWaWTqoBnvlrXEbbBJ5TQwMDAwIHByb3RvdHlwZXMAKrXwai1nJUdqX+nlJYQcEYc+7rQ0MDAwMCBydW50aW1lALz97V8K6Bk+4pT1KDRTFO2M+MltNDAwMDAgc3BlYwBQu+Ip8cDs/PNhgx1SFQ1QlughgDQwMDAwIHR5cGVzAKuRN0As+smBYMGptmLLMluLEgnXNDAwMDAgd2ViLWNvbmZvcm1hbmNlAH/9IlWOYGht7ncSDic6BIDOZcGI"
+          "sha": "42a4161fef27e9a7f42ca262ed99b8e93c03d30f",
+          "contentBase64": "NDAwMDAgYWRhcHRlcnMAk05S0RLLCWbe9wtlbTyeBkPPv7I0MDAwMCBjbGkAuWadL2UrthPU+XzyicHAZuwrLrQ0MDAwMCBjb21wb3NpdGlvbnMA0bkdE22B7hIOUNrltMXXyu7IjUU0MDAwMCBjb3JlABq4dlWBSu8+uJh0kUrsbX65wdsXNDAwMDAgaG9va3MAX2RN23WC502bXGDmlco4LJ7FTYM0MDAwMCBob3N0LXByb3RvY29sAD+RfQH5PltkXUb4zS9IYBMiICGdNDAwMDAgbW9kdWxlcwD5ZyTP+R5pMNndYzkAe8PhwmU3IzQwMDAwIHByb3RvdHlwZXMAid1cSfH4NGQFNe2VECHZfE43iqo0MDAwMCBydW50aW1lAFJ4JnPaq7jDnFpBggwiNvoWe6fTNDAwMDAgc3BlYwBQu+Ip8cDs/PNhgx1SFQ1QlughgDQwMDAwIHR5cGVzAKuRN0As+smBYMGptmLLMluLEgnXNDAwMDAgd2ViLWNvbmZvcm1hbmNlAH/9IlWOYGht7ncSDic6BIDOZcGI"
         },
         {
-          "sha": "2ab5f06a2d6725476a5fe9e525841c11873eeeb4",
-          "contentBase64": "NDAwMDAgYmFzZQBuqaXvRKz5xokyQcYqyQREqJOP2jQwMDAwIGJvb3RzdHJhcC0yLTMtMgAgbDoasfeWBOalIDBn9XmEPnR7VDQwMDAwIGJydXRhbGlzdAAbRlb+RloOpp3lrBnO6GbjOGEegTQwMDAwIGxpcXVpZC1nbGFzcwAD4x0CxaJfhDMc6oWVfNd4xIlrqDQwMDAwIGx1Y2lkZQAL30LAjNLRrQ3tU1nDuci1XtKZ/jQwMDAwIHNoYWRjbgAJAQEjmUz23L7LpBUAUctg13abiTQwMDAwIHRlc3QtdXRpbHMAd1q2virhnEOUUs955zPRWQ/UJFQ="
+          "sha": "89dd5c49f1f834640535ed951021d97c4e378aaa",
+          "contentBase64": "NDAwMDAgYmFzZQBxNrOlxV0DIj5xsC9E1Fmco6PexDQwMDAwIGJvb3RzdHJhcC0yLTMtMgAhjJr8ggjzejdU7C/2uCK3HHpJpDQwMDAwIGJydXRhbGlzdABZG1HXJcH2HMMs4zXiFHpFsXolbTQwMDAwIGxpcXVpZC1nbGFzcwBJ0Aj2p+Ma0UMMtIOHA3luyRmxBTQwMDAwIGx1Y2lkZQAL30LAjNLRrQ3tU1nDuci1XtKZ/jQwMDAwIHNoYWRjbgDwcUr11wAsaukXkG68VqVV5adhPDQwMDAwIHRlc3QtdXRpbHMAvFRZMlX/K0OlgeV/VrlnVIPx4F4="
         },
         {
-          "sha": "6ea9a5ef44acf9c6893241c62ac90444a8938fda",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZADOq8ZHI6Ky6t3DkP+wGw3odAjctjEwMDY0NCBwYWNrYWdlLmpzb24A7fyvZoWyot9gEw9y13L9br1/gGs0MDAwMCBzcmMAyLUZE06MNOQeW5P1nbFWhYJiW8A0MDAwMCB0ZXN0ALaikFmyIX9gXE4F7LRMYbLf4Sjk"
+          "sha": "7136b3a5c55d03223e71b02f44d4599ca3a3dec4",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZADOq8ZHI6Ky6t3DkP+wGw3odAjctjEwMDY0NCBwYWNrYWdlLmpzb24ApGhnJchPUxjbvoR/3O4oto5M2GM0MDAwMCBzcmMAFqictDbuW+CThWXLAJ1t/OI+4hQ0MDAwMCB0ZXN0AF29Iayj6T1VLmTcgn3ERK61P1HM"
         },
         {
-          "sha": "c8b519134e8c34e41e5b93f59db1568582625bc0",
-          "contentBase64": "NDAwMDAgYXN5bmMtcmVnaW9uAIgHscPh4yqKz74hEoCaFYhCdGjGNDAwMDAgYmVoYXZpb3JzAH0e4Xgutsui4WcKXMz+JNOQAIb/NDAwMDAgYnV0dG9uAP1UtJ+CFGQFn6GDa70VTmB7KuuSNDAwMDAgY2hlY2tib3gA/DbNR+l/StFBanZ4l9pGmPJq+Ms0MDAwMCBjb2xsYXBzaWJsZQA6odbuAHOUqE0qp7ee9qJHpgkn3TQwMDAwIGRpYWxvZwC3m5AW1/zUj6TwX0yHa/FmtnHWeDQwMDAwIGRyb3Bkb3duAA0S/ijvT2LrqphrXdeKbDrUu67qNDAwMDAgaG92ZXItY2FyZAC+wSJ+k/zZd0mP93NuJqjB758kFDQwMDAwIGltYWdlAG4KiR4b9JTMsDGf4v698PXThXXzMTAwNjQ0IGluZGV4LnRzAAO9e0oYNjvBgiBt3YysKKCIM3r3NDAwMDAgaW5wdXQAJtd3dYdX30EZBaFhFv2/wz1MNCo0MDAwMCBsYWJlbAAgX9PEs5d7fMVMaZCCY38nZyoGvDQwMDAwIGxpdmUtcmVnaW9uADyuDAdTll3OKnGhpxvGDuP/PZG2NDAwMDAgcmFkaW8tZ3JvdXAAVzXuEBj2JJITy39/kftYmr9JtEY0MDAwMCBzY3JvbGwtYXJlYQCexWlzt9SheenWJ1KgpuwMRl/HyjQwMDAwIHNlbGVjdAAfrs0BzZpVGMLcmM4IYJw/zRElMjQwMDAwIHNlcGFyYXRvcgCf8FJuNFptcXpaKElqWE+tZ6afPTQwMDAwIHN1cmZhY2UA82xxgReqD5SkfTu0zord3uvaEL80MDAwMCBzd2l0Y2gAFxgoWD8mhVyDLc8pZBQI3NqsCOE0MDAwMCB0YWJsZQCtx85n0fhTQB3kPY6ZIiAxP9vToTQwMDAwIHRhYnMAmWqtihgbLOkuwOz8/6pkK0DJCc40MDAwMCB0ZXh0AKlxLOiH149Rgnd0w4ecYfwkZhGaNDAwMDAgdGV4dGFyZWEAI9Y4Kz+jil76NewKgkNXwyGjVIQ0MDAwMCB0b2dnbGUARZp+S9uSK8f5+BAxsAl3IAzU6mQ0MDAwMCB0b29scwCa4zw3KY9VmJN0cftPmBrris8xNjQwMDAwIHRvb2x0aXAAryo8AUq1LYpovC0hWc0nkFo2XBI0MDAwMCB0cmFuc2l0aW9uAOt1k0s/eGGwuHoCUs8M1930k06z"
+          "sha": "16a89cb436ee5be0938565cb009d6dfce23ee214",
+          "contentBase64": "NDAwMDAgYWNjb3JkaW9uAG5xBnEl9UTpvdk/ogIQVXv1nCWoNDAwMDAgYXN5bmMtcmVnaW9uAIgHscPh4yqKz74hEoCaFYhCdGjGNDAwMDAgYmVoYXZpb3JzAH0e4Xgutsui4WcKXMz+JNOQAIb/NDAwMDAgYnV0dG9uAP1UtJ+CFGQFn6GDa70VTmB7KuuSNDAwMDAgY2hlY2tib3gA/DbNR+l/StFBanZ4l9pGmPJq+Ms0MDAwMCBjb2xsYXBzaWJsZQA6odbuAHOUqE0qp7ee9qJHpgkn3TQwMDAwIGRpYWxvZwC3m5AW1/zUj6TwX0yHa/FmtnHWeDQwMDAwIGRyb3Bkb3duAA0S/ijvT2LrqphrXdeKbDrUu67qNDAwMDAgaG92ZXItY2FyZAC+wSJ+k/zZd0mP93NuJqjB758kFDQwMDAwIGltYWdlAG4KiR4b9JTMsDGf4v698PXThXXzMTAwNjQ0IGluZGV4LnRzAI17McFetNLsBBxGd8EVA7J9bNqaNDAwMDAgaW5wdXQAJtd3dYdX30EZBaFhFv2/wz1MNCo0MDAwMCBsYWJlbAAgX9PEs5d7fMVMaZCCY38nZyoGvDQwMDAwIGxpdmUtcmVnaW9uADyuDAdTll3OKnGhpxvGDuP/PZG2NDAwMDAgcmFkaW8tZ3JvdXAAVzXuEBj2JJITy39/kftYmr9JtEY0MDAwMCBzY3JvbGwtYXJlYQCexWlzt9SheenWJ1KgpuwMRl/HyjQwMDAwIHNlbGVjdAAfrs0BzZpVGMLcmM4IYJw/zRElMjQwMDAwIHNlcGFyYXRvcgCf8FJuNFptcXpaKElqWE+tZ6afPTQwMDAwIHN1cmZhY2UA82xxgReqD5SkfTu0zord3uvaEL80MDAwMCBzd2l0Y2gAFxgoWD8mhVyDLc8pZBQI3NqsCOE0MDAwMCB0YWJsZQCtx85n0fhTQB3kPY6ZIiAxP9vToTQwMDAwIHRhYnMAmWqtihgbLOkuwOz8/6pkK0DJCc40MDAwMCB0ZXh0AKlxLOiH149Rgnd0w4ecYfwkZhGaNDAwMDAgdGV4dGFyZWEAI9Y4Kz+jil76NewKgkNXwyGjVIQ0MDAwMCB0b2dnbGUARZp+S9uSK8f5+BAxsAl3IAzU6mQ0MDAwMCB0b29scwCa4zw3KY9VmJN0cftPmBrris8xNjQwMDAwIHRvb2x0aXAAryo8AUq1LYpovC0hWc0nkFo2XBI0MDAwMCB0cmFuc2l0aW9uAOt1k0s/eGGwuHoCUs8M1930k06z"
+        },
+        {
+          "sha": "6e71067125f544e9bdd93fa20210557bf59c25a8",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAY15RUgcEKaJPS7azhG0HVPVw/ioxMDA2NDQgaGVhZGluZy5wcm90by50cwDgYHqHwJk9sNwt3twyKTK3kea7zTEwMDY0NCBpbmRleC50cwATVWa88LXnPSPI3Tv2KMHVT1vzvDEwMDY0NCBpdGVtLnByb3RvLnRzAHw6lYSR7GnEmmo4FVoF4L8eNzlGMTAwNjQ0IHJvb3QucHJvdG8udHMAq4i6+FnzKVHZHcza9TagPB59c+YxMDA2NDQgc2hhcmVkLnRzAPhbnINI8rQ9EjTLFwRG49L/R88wMTAwNjQ0IHRyaWdnZXIucHJvdG8udHMApVkm5e3pmIbTYOvmN8kja89+/VsxMDA2NDQgdHlwZXMudHMA+u44L1unPt49dt9Mt1SDIbxiU3g="
         },
         {
           "sha": "8807b1c3e1e32a8acfbe2112809a1588427468c6",
@@ -26440,16 +26464,20 @@
           "contentBase64": "MTAwNjQ0IGFzLXRyYW5zaXRpb24ucHJvdG8udHMApfnVJuNhU/msreE7Ts+zdQSbz3kxMDA2NDQgaW5kZXgudHMAVV+ZUECfxCZaZuK2NT+S+lhZoaUxMDA2NDQgbWFjaGluZS50cwArWwx9R4fC/yaNG6yiayilKd9GvDEwMDY0NCB0cmFuc2l0aW9uLnByb3RvLnRzALihBoupBhQdrqA8qvIAv7VGWFhMMTAwNjQ0IHR5cGVzLnRzAKm5Y4P/8pp82xVyGV5pYN/ucwWf"
         },
         {
-          "sha": "b6a29059b2217f605c4e05ecb44c61b2dfe128e4",
-          "contentBase64": "MTAwNjQ0IGFzLWJ1dHRvbi50ZXN0LnRzAKFW4BwoNGK3s+Tc+xb2xt32DNMHMTAwNjQ0IGFzLXRyYW5zaXRpb24udGVzdC50cwAndswMOnzAttcWVNYjBH7dJnpj7TEwMDY0NCBhc3luYy1yZWdpb24udGVzdC50cwABlc18/3O7MxA6a0cz28tfuI/l0TEwMDY0NCBidXR0b24tdmlldy1saWZldGltZS50ZXN0LnRzAFo581s1T3it3RX+V2VA5xfBbKYyMTAwNjQ0IGNoZWNrYm94LnRlc3QudHMAgtc/lB1ZNCCzuE7n3gLTVQcICdMxMDA2NDQgY29sbGFwc2libGUudGVzdC50cwCwEzf1XRdoOcpcx6bOHqTaz5ki4zEwMDY0NCBjb250cm9sLWxhYmVsLnByb2plY3Rpb25zLnRlc3QudHMAwwgFJmlyVLGNFd3vH8vGLTi+/sQxMDA2NDQgZGlhbG9nLnRlc3QudHMAJM/cMgoaqqD+HCERDQKzVSUzLY4xMDA2NDQgZHJvcGRvd24udGVzdC50cwARUQRbQKIkwFTye+5FI7kxSluv9DEwMDY0NCBob3Zlci1jYXJkLmJlbmNoLnRzACsoQqgTmzEg0xPMplWvwhODInAIMTAwNjQ0IGhvdmVyLWNhcmQudGVzdC50cwB7qQdPYevTdcF3k6ArYI/mH8SPNTEwMDY0NCBpbWFnZS50ZXN0LnRzAG0hkIPayb0dFpbD6Zxft70k2QUWMTAwNjQ0IGlucHV0LnRlc3QudHMA313jDQ/U8C3dTUqQeJX7HVGSkHUxMDA2NDQgbGl2ZS1yZWdpb24udGVzdC50cwCaTqJFMZeYRuR52aujzMrGbT3DSTEwMDY0NCBvdmVybGF5LWRpc21pc3NhbC50ZXN0LnRzALnUWsESdyrJN2M7JH+vWq9ncTzZMTAwNjQ0IHJhZGlvLWdyb3VwLnRlc3QudHMAqvlAYq6H23Ngk1YCBDY0Opqd94UxMDA2NDQgc2Nyb2xsLWFyZWEudGVzdC50cwAwn1NcIcoQBZPgZB5Q37F+3gEUkTEwMDY0NCBzZWxlY3QudGVzdC50cwCfYFuw+al2w+mQ0IKyGOH7TpuATTEwMDY0NCBzZXBhcmF0b3IudGVzdC50cwDF3Jck6ilBBIKgDHEMwcO1mxt82jEwMDY0NCBzd2l0Y2gudGVzdC50cwDmgg0ctAvh6jyDYGW2/vAe1w/dyDEwMDY0NCB0YWJsZS50ZXN0LnRzAJumaHgMNUFW5Vt+tG9piPUOSeKuMTAwNjQ0IHRhYnMudGVzdC50cwD65mZI87TOqdrIJWO36hnVnsoKGzEwMDY0NCB0ZXh0YXJlYS50ZXN0LnRzAPxLpGunBm5tYqxiUFnUb1Icp/S7MTAwNjQ0IHRvZ2dsZS50ZXN0LnRzAK6svpIpmcp1O0pZ2gXIux53enWyMTAwNjQ0IHRvb2x0aXAudGVzdC50cwAX5XNPnyJPmEbl3n4+/oYZUw7EeTEwMDY0NCB1c2UtY29sbGVjdGlvbi50ZXN0LnRzAOWwgR/oUvBlfZgbShU8R/XI0g6KMTAwNjQ0IHVzZS1lc2NhcGUta2V5LnRlc3QudHMAsk5S6+iCCTfQ8NAC0ngxuf7WkmUxMDA2NDQgdXNlLW9wZW4tc3RhdGUudGVzdC50cwBt+dwz+FAskZOCex0fuQyKLbtvSw=="
+          "sha": "5dbd21aca3e93d552e64dc827dc444aeb53f51cc",
+          "contentBase64": "MTAwNjQ0IGFjY29yZGlvbi50ZXN0LnRzAGs4Xo2HLG7vygyt0a/bUhyqMJXzMTAwNjQ0IGFzLWJ1dHRvbi50ZXN0LnRzAKFW4BwoNGK3s+Tc+xb2xt32DNMHMTAwNjQ0IGFzLXRyYW5zaXRpb24udGVzdC50cwAndswMOnzAttcWVNYjBH7dJnpj7TEwMDY0NCBhc3luYy1yZWdpb24udGVzdC50cwABlc18/3O7MxA6a0cz28tfuI/l0TEwMDY0NCBidXR0b24tdmlldy1saWZldGltZS50ZXN0LnRzAFo581s1T3it3RX+V2VA5xfBbKYyMTAwNjQ0IGNoZWNrYm94LnRlc3QudHMAgtc/lB1ZNCCzuE7n3gLTVQcICdMxMDA2NDQgY29sbGFwc2libGUudGVzdC50cwCwEzf1XRdoOcpcx6bOHqTaz5ki4zEwMDY0NCBjb250cm9sLWxhYmVsLnByb2plY3Rpb25zLnRlc3QudHMAwwgFJmlyVLGNFd3vH8vGLTi+/sQxMDA2NDQgZGlhbG9nLnRlc3QudHMAJM/cMgoaqqD+HCERDQKzVSUzLY4xMDA2NDQgZHJvcGRvd24udGVzdC50cwARUQRbQKIkwFTye+5FI7kxSluv9DEwMDY0NCBob3Zlci1jYXJkLmJlbmNoLnRzACsoQqgTmzEg0xPMplWvwhODInAIMTAwNjQ0IGhvdmVyLWNhcmQudGVzdC50cwB7qQdPYevTdcF3k6ArYI/mH8SPNTEwMDY0NCBpbWFnZS50ZXN0LnRzAG0hkIPayb0dFpbD6Zxft70k2QUWMTAwNjQ0IGlucHV0LnRlc3QudHMA313jDQ/U8C3dTUqQeJX7HVGSkHUxMDA2NDQgbGl2ZS1yZWdpb24udGVzdC50cwCaTqJFMZeYRuR52aujzMrGbT3DSTEwMDY0NCBvdmVybGF5LWRpc21pc3NhbC50ZXN0LnRzALnUWsESdyrJN2M7JH+vWq9ncTzZMTAwNjQ0IHJhZGlvLWdyb3VwLnRlc3QudHMAqvlAYq6H23Ngk1YCBDY0Opqd94UxMDA2NDQgc2Nyb2xsLWFyZWEudGVzdC50cwAwn1NcIcoQBZPgZB5Q37F+3gEUkTEwMDY0NCBzZWxlY3QudGVzdC50cwCfYFuw+al2w+mQ0IKyGOH7TpuATTEwMDY0NCBzZXBhcmF0b3IudGVzdC50cwDF3Jck6ilBBIKgDHEMwcO1mxt82jEwMDY0NCBzd2l0Y2gudGVzdC50cwDmgg0ctAvh6jyDYGW2/vAe1w/dyDEwMDY0NCB0YWJsZS50ZXN0LnRzAJumaHgMNUFW5Vt+tG9piPUOSeKuMTAwNjQ0IHRhYnMudGVzdC50cwD65mZI87TOqdrIJWO36hnVnsoKGzEwMDY0NCB0ZXh0YXJlYS50ZXN0LnRzAPxLpGunBm5tYqxiUFnUb1Icp/S7MTAwNjQ0IHRvZ2dsZS50ZXN0LnRzAK6svpIpmcp1O0pZ2gXIux53enWyMTAwNjQ0IHRvb2x0aXAudGVzdC50cwAX5XNPnyJPmEbl3n4+/oYZUw7EeTEwMDY0NCB1c2UtY29sbGVjdGlvbi50ZXN0LnRzAOWwgR/oUvBlfZgbShU8R/XI0g6KMTAwNjQ0IHVzZS1lc2NhcGUta2V5LnRlc3QudHMAsk5S6+iCCTfQ8NAC0ngxuf7WkmUxMDA2NDQgdXNlLW9wZW4tc3RhdGUudGVzdC50cwBt+dwz+FAskZOCex0fuQyKLbtvSw=="
         },
         {
-          "sha": "206c3a1ab1f79604e6a5203067f579843e747b54",
-          "contentBase64": "MTAwNjQ0IExJQ0VOU0UtQk9PVFNUUkFQANZFaVZzNJ45R+jlrkIzLQrDFkzXMTAwNjQ0IFJFQURNRS5tZACRwGZ/WzjGmL8sfHKfCnlVcUtmADEwMDY0NCBUSElSRF9QQVJUWV9OT1RJQ0VTLm1kACItdpE9aG6Ab8dUDw++EpeTRQaUMTAwNjQ0IHBhY2thZ2UuanNvbgDlp46kGu20RrqKR3w95i5z4Lg+TDQwMDAwIHNyYwAIFyhJ8awYtN4lZ8RYKeJMGJPmdzQwMDAwIHRlc3QAPckX04YJ1OjmzStGMvLhNr0O8OE="
+          "sha": "218c9afc8208f37a3754ec2ff6b822b71c7a49a4",
+          "contentBase64": "MTAwNjQ0IExJQ0VOU0UtQk9PVFNUUkFQANZFaVZzNJ45R+jlrkIzLQrDFkzXMTAwNjQ0IFJFQURNRS5tZACRwGZ/WzjGmL8sfHKfCnlVcUtmADEwMDY0NCBUSElSRF9QQVJUWV9OT1RJQ0VTLm1kAEnZo79DahZxso5IUmba7EicGPZpMTAwNjQ0IHBhY2thZ2UuanNvbgCavgG+d10ON2OqkB024a19Ovw4uzQwMDAwIHNyYwD1IE+TJ6rmCBfSbcpk73AGHlaTjzQwMDAwIHRlc3QAPckX04YJ1OjmzStGMvLhNr0O8OE="
         },
         {
-          "sha": "08172849f1ac18b4de2567c45829e24c1893e677",
-          "contentBase64": "NDAwMDAgYnV0dG9uANfYMhMejO7+6H+yntt3JeRRc5yxNDAwMDAgY2hlY2tib3gAqgQLcLg2PshRjGTLE3c0oXPJFeIxMDA2NDQgaW5kZXgudHMARSYNIeFe6nBDzx02Plw2Gv7H7+s0MDAwMCBpbnB1dACOJG+uphTvyUp5/1co5PQh3BnUBjQwMDAwIGxhYmVsAJ952hZWVM/Tvy3gYGKpPalXwceMNDAwMDAgc2VwYXJhdG9yAFZ5t+GYyTSZdhdXyHpHOdzUr068NDAwMDAgc3VyZmFjZQCJSmkW8zkYVP5+RMJzWBtggtkY1zQwMDAwIHN3aXRjaAARJ04Si5GOKokN697U1ggsgbw86TQwMDAwIHRleHRhcmVhAAlRZIYk8rgE5+VCdxm0m3QZtKqBMTAwNjQ0IHRoZW1lLnRzAMF7d4gXL77LXkKbQDgFzXge5wZzNDAwMDAgdG9nZ2xlAAdELGFRyVWFRlzqOAMIlQ5dE53i"
+          "sha": "f5204f9327aae60817d26dca64ef70061e56938f",
+          "contentBase64": "NDAwMDAgYWNjb3JkaW9uAKbd1LGdD90KTOPp3xtMdB/OBzn2NDAwMDAgYnV0dG9uANfYMhMejO7+6H+yntt3JeRRc5yxNDAwMDAgY2hlY2tib3gAqgQLcLg2PshRjGTLE3c0oXPJFeI0MDAwMCBjb2xsYXBzaWJsZQBkIUQhef487UgXkrpLgGukPWW88jEwMDY0NCBpbmRleC50cwCgOJISAupMx2K9xXgMSvBfOjE3FDQwMDAwIGlucHV0AI4kb66mFO/JSnn/Vyjk9CHcGdQGNDAwMDAgbGFiZWwAn3naFlZUz9O/LeBgYqk9qVfBx4w0MDAwMCBzZXBhcmF0b3IAVnm34ZjJNJl2F1fIekc53NSvTrw0MDAwMCBzdXJmYWNlAIlKaRbzORhU/n5EwnNYG2CC2RjXNDAwMDAgc3dpdGNoABEnThKLkY4qiQ3r3tTWCCyBvDzpNDAwMDAgdGV4dGFyZWEACVFkhiTyuATn5UJ3GbSbdBm0qoExMDA2NDQgdGhlbWUudHMAwXt3iBcvvsteQptAOAXNeB7nBnM0MDAwMCB0b2dnbGUAB0QsYVHJVYVGXOo4AwiVDl0TneI="
+        },
+        {
+          "sha": "a6ddd4b19d0fdd0a4ce3e9df1b4c741fce0739f6",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAVmYTxNZwaaNmAg0LXv4MD/Q7kpQxMDA2NDQgaGVhZGluZy5wcm90by50cwDSedph6K5p8uwpNHq0mxNFrf0ZtTEwMDY0NCBpbmRleC50cwAdr6FWyS4lkbkTwBcfc+57gHHYFjEwMDY0NCBpdGVtLnByb3RvLnRzAJn9PzsHw9QOYjrlnTDG1AZeYDCKMTAwNjQ0IHJvb3QucHJvdG8udHMArjsDAkCi5t0HVjIzp/8CuMMshlMxMDA2NDQgdHJpZ2dlci5wcm90by50cwBBVqe0eqDEhLyDa61CS98H5BuW5g=="
         },
         {
           "sha": "d7d832131e8ceefee87fb29edb7725e451739cb1",
@@ -26458,6 +26486,10 @@
         {
           "sha": "aa040b70b8363ec8518c64cb137734a173c915e2",
           "contentBase64": "MTAwNjQ0IGluZGV4LnRzAKcYPrx27PRvhD30mC+3zyxpv9ipMTAwNjQ0IGluZGljYXRvci5wcm90by50cwD9urYRCxB9smo3XUWHwc8sOAJvmDEwMDY0NCByb290LnByb3RvLnRzAH+UB4zDfYH0pThAAy/btO/3M07f"
+        },
+        {
+          "sha": "6421442179fe3ced481792ba4b806ba43d65bcf2",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAdeU2f9Ux5jdiZWlASc/QOIZynv4xMDA2NDQgaW5kZXgudHMATfpXAAdWKfJ89fCwCOZyJwVcdmMxMDA2NDQgcm9vdC5wcm90by50cwB/F/W9JkcRtuhgZYa8Q9kkAfJFtTEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzAOfaZO6qV9E/f36PPEH7NeYzjCKIMTAwNjQ0IHR5cGVzLnRzALhrBX5LFHqK8Ixmn3dJqCQfh21u"
         },
         {
           "sha": "8e246faea614efc94a79ff5728e4f421dc19d406",
@@ -26492,12 +26524,16 @@
           "contentBase64": "MTAwNjQ0IGJ1dHRvbi50ZXN0LnRzABk5xFcCNMduLO4vo9MAwlFScKruMTAwNjQ0IGNvbnRyb2xzLnRlc3QudHMABVgxv4Au0Uha0O2sRmTrr+/AbGM="
         },
         {
-          "sha": "1b4656fe465a0ea69de5ac19cee866e338611e81",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACzclkODFpdOp42WaY2qxUz1ACQozEwMDY0NCBUSElSRF9QQVJUWV9OT1RJQ0VTLm1kAJ2/BUST8RS3gM5kOPpSuG2jbXI3MTAwNjQ0IHBhY2thZ2UuanNvbgDO8vHuPlH4+W6YNFZHnGmZsxaZ9TQwMDAwIHNyYwB+WOg3XSDba5RT3lKlPnm7JsIPGzQwMDAwIHRlc3QABVTlUnZvOxB7vGGnEw07cCbsi1k="
+          "sha": "591b51d725c1f61cc32ce335e2147a45b17a256d",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZACzclkODFpdOp42WaY2qxUz1ACQozEwMDY0NCBUSElSRF9QQVJUWV9OT1RJQ0VTLm1kAJ2/BUST8RS3gM5kOPpSuG2jbXI3MTAwNjQ0IHBhY2thZ2UuanNvbgC0NccHr7jQH6J5YMK0/872Di/a/zQwMDAwIHNyYwATOi1detRvtOavX7Z1jX+Yway0mzQwMDAwIHRlc3QALS4f8EogPdyqYW1HNjKO2FvDoU8="
         },
         {
-          "sha": "7e58e8375d20db6b9453de52a53e79bb26c20f1b",
-          "contentBase64": "NDAwMDAgYmFkZ2UAJrb6GtlO4urKn3N67t5Hcm4Jqmo0MDAwMCBidXR0b24AeB8waw8HQDIsvn9v4RjNCpbAsB00MDAwMCBjYXJkAKzdKF/orKz7aHU4sJjik4OavgLsNDAwMDAgY2hlY2tib3gA7pOLoorC60NRinbG4MJ0xc3xscs0MDAwMCBkaWFsb2cAhs3BP5/03tcoXPi5X5oKARAek1M0MDAwMCBkcm9wZG93bgDVc4Jkambfog3qf49Idzy7N2CoKTQwMDAwIGhvdmVyLWNhcmQAkVMmXRjRgrkLTwengL0yYvsd9AIxMDA2NDQgaW5kZXgudHMA6DrBLEgnlvAnTXOEP4qXf5HOjyA0MDAwMCBsYWJlbABD8Y+7Er7VVlEMWcBIKnfqVGcRpTQwMDAwIHNjcm9sbC1hcmVhAKMcHKbU5S8b5nHJomFapTh/Xu49NDAwMDAgc2VsZWN0AGG2tqQbgqj1Eb/NIggTyeZ48gFNNDAwMDAgc2VwYXJhdG9yAHNXlvyOkdrzSFUVcMPXxIwIyxmDNDAwMDAgc2tlbGV0b24AXhE/1bVYHMFPZst6uTEm1+rcJLk0MDAwMCBzcGlubmVyACnRYI7yfC1an+KqSnlPNVSbdngdMTAwNjQ0IHN0eWxlLnRzAOx+ivn+KcQSc13WygsdF6bNdPhkNDAwMDAgc3VyZmFjZQDyz8jXxKaVUgW8c2rUn0PCGP8RYjQwMDAwIHN3aXRjaADt44In/KN1iooa1mFViEmieKLaQTQwMDAwIHRhYnMAzl5JXeKp13hqunGcM7LM71QurJw0MDAwMCB0ZXh0AJ4cEPxlUrYI890A24YhjfbPx68zNDAwMDAgdGV4dGFyZWEAJatXxyC5mv5/TWKAfY3etAGiywgxMDA2NDQgdGhlbWUudHMABsFjfWmK0K9flattmRuuXQVcUt00MDAwMCB0b2dnbGUA5cviK8s9s/skZWncWJyNs+JTI+80MDAwMCB0b29sdGlwAC3r+RIOR1nS7Jrf7ayPuU445rId"
+          "sha": "133a2d5d7ad46fb4e6af5fb6758d7f98c1acb49b",
+          "contentBase64": "NDAwMDAgYWNjb3JkaW9uANPwcLbLy00+OFeTjRmADvfOJQoKNDAwMDAgYmFkZ2UAJrb6GtlO4urKn3N67t5Hcm4Jqmo0MDAwMCBidXR0b24AeB8waw8HQDIsvn9v4RjNCpbAsB00MDAwMCBjYXJkAKzdKF/orKz7aHU4sJjik4OavgLsNDAwMDAgY2hlY2tib3gA7pOLoorC60NRinbG4MJ0xc3xscs0MDAwMCBjb2xsYXBzaWJsZQC1Qu7v5DunVIpPOzTplcMh5ClTgTQwMDAwIGRpYWxvZwAAl9JuG7DELDASAZeFn4+xATa+TzQwMDAwIGRyb3Bkb3duANVzgmRqZt+iDep/j0h3PLs3YKgpNDAwMDAgaG92ZXItY2FyZACRUyZdGNGCuQtPB6eAvTJi+x30AjEwMDY0NCBpbmRleC50cwAaQxzzYQBjEt260DfCc4t57r7IuDQwMDAwIGxhYmVsAEPxj7sSvtVWUQxZwEgqd+pUZxGlNDAwMDAgc2Nyb2xsLWFyZWEAoxwcptTlLxvmccmiYVqlOH9e7j00MDAwMCBzZWxlY3QAYba2pBuCqPURv80iCBPJ5njyAU00MDAwMCBzZXBhcmF0b3IAc1eW/I6R2vNIVRVww9fEjAjLGYM0MDAwMCBza2VsZXRvbgBeET/VtVgcwU9my3q5MSbX6twkuTQwMDAwIHNwaW5uZXIAKdFgjvJ8LVqf4qpKeU81VJt2eB0xMDA2NDQgc3R5bGUudHMA7H6K+f4pxBJzXdbKCx0Xps10+GQ0MDAwMCBzdXJmYWNlAPLPyNfEppVSBbxzatSfQ8IY/xFiNDAwMDAgc3dpdGNoAO3jgif8o3WKihrWYVWISaJ4otpBNDAwMDAgdGFicwDOXkld4qnXeGq6cZwzsszvVC6snDQwMDAwIHRleHQAnhwQ/GVStgjz3QDbhiGN9s/HrzM0MDAwMCB0ZXh0YXJlYQAlq1fHILma/n9NYoB9jd60AaLLCDEwMDY0NCB0aGVtZS50cwAGwWN9aYrQr1+Vq22ZG65dBVxS3TQwMDAwIHRvZ2dsZQDly+Iryz2z+yRladxYnI2z4lMj7zQwMDAwIHRvb2x0aXAALev5Eg5HWdLsmt/trI+5Tjjmsh0="
+        },
+        {
+          "sha": "d3f070b6cbcb4d3e3857938d19800ef7ce250a0a",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAPzVKTI1uxKJ0eBAc2qnWnByWg3IxMDA2NDQgaGVhZGluZy5wcm90by50cwAebYeZS0qt4JcKeYtTyB5MrOiYuzEwMDY0NCBpbmRleC50cwAAW/9VowZMa2+2C9l5HLbrigKR+TEwMDY0NCBpdGVtLnByb3RvLnRzACsHPcOVHKjYI6KkR737RZLWZ72hMTAwNjQ0IHJvb3QucHJvdG8udHMAJxTSk6chVQ42rea5tYCBQ0hlc5IxMDA2NDQgdHJpZ2dlci5wcm90by50cwB+yYdA0LIE/8/q3SjqGz0JTs1NYA=="
         },
         {
           "sha": "26b6fa1ad94ee2eaca9f737aeede47726e09aa6a",
@@ -26516,8 +26552,12 @@
           "contentBase64": "MTAwNjQ0IGluZGV4LnRzAKCGh8MegCe/+86wUEzs0DecPQFCMTAwNjQ0IGluZGljYXRvci5wcm90by50cwBiRG5fQI7rUjqZbodE00xPa1gx2jEwMDY0NCByb290LnByb3RvLnRzAAgxra0YSOpMIBjlk88M8hXbzy/vMTAwNjQ0IHR5cGVzLnRzACQAjXJ1GZYL8YyYtH/4GzcH9fA5"
         },
         {
-          "sha": "86cdc13f9ff4ded7285cf8b95f9a0a01101e9353",
-          "contentBase64": "MTAwNjQ0IGNsb3NlLWljb24ucHJvdG8udHMAYbeIcLrn5QkbEU4wUjkAZ4A53F0xMDA2NDQgY2xvc2UucHJvdG8udHMAdVAfCD4mxhKBUzSmBM9k9qUFOpgxMDA2NDQgY29udGVudC5wcm90by50cwBM/E2EgLni+ZT6QXS2E1hg9y9ijDEwMDY0NCBkZXNjcmlwdGlvbi5wcm90by50cwBRb06zFDuFf+uphD4xrXQIAZW7+jEwMDY0NCBmb290ZXIucHJvdG8udHMAFI71wtejgidY3aoGh0jbe/sy0p4xMDA2NDQgaGVhZGVyLnByb3RvLnRzAE0ZURok2Klt5LiYpgyvWzlmKzG/MTAwNjQ0IGluZGV4LnRzAM53F1J4KkGqHqQJMujUFbuOs8UyMTAwNjQ0IG92ZXJsYXkucHJvdG8udHMAAeeOkGPSVYzRezVte52S65e+m6AxMDA2NDQgcm9vdC5wcm90by50cwDQ5Y7D7NgJD00qwLZUmnMBAWHEojEwMDY0NCB0aXRsZS5wcm90by50cwDZpPd38RK2yPFhqYpbtBZKz6q+zzEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzAEis1L8uP8/uE3pzXfLTmLWXQ/R+MTAwNjQ0IHR5cGVzLnRzADxdJSKpckiQtSaWokb8kY1CKuU6"
+          "sha": "b542eeefe43ba7548a4f3b34e995c321e4295381",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAr/rSsksLIxhetvUv8vNMsNCqqZ8xMDA2NDQgaW5kZXgudHMAEosjBHXqQwzEVIjy8Plu/8JMR/cxMDA2NDQgcm9vdC5wcm90by50cwBPw+L2e1Q/zIp7uyTV8K5Y0nT49jEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzAIWdFftH6eo/4Qd677XjBOpITI+eMTAwNjQ0IHR5cGVzLnRzAB/UkujJAuHHcLQ258T+lIm8uZsM"
+        },
+        {
+          "sha": "0097d26e1bb0c42c30120197859f8fb10136be4f",
+          "contentBase64": "MTAwNjQ0IGNsb3NlLWljb24ucHJvdG8udHMAYbeIcLrn5QkbEU4wUjkAZ4A53F0xMDA2NDQgY2xvc2UucHJvdG8udHMAdVAfCD4mxhKBUzSmBM9k9qUFOpgxMDA2NDQgY29udGVudC5wcm90by50cwD2elxy2CShQGvt6smm58u2053A0DEwMDY0NCBkZXNjcmlwdGlvbi5wcm90by50cwBRb06zFDuFf+uphD4xrXQIAZW7+jEwMDY0NCBmb290ZXIucHJvdG8udHMAFI71wtejgidY3aoGh0jbe/sy0p4xMDA2NDQgaGVhZGVyLnByb3RvLnRzAE0ZURok2Klt5LiYpgyvWzlmKzG/MTAwNjQ0IGluZGV4LnRzAM53F1J4KkGqHqQJMujUFbuOs8UyMTAwNjQ0IG92ZXJsYXkucHJvdG8udHMAAeeOkGPSVYzRezVte52S65e+m6AxMDA2NDQgcm9vdC5wcm90by50cwDQ5Y7D7NgJD00qwLZUmnMBAWHEojEwMDY0NCB0aXRsZS5wcm90by50cwDZpPd38RK2yPFhqYpbtBZKz6q+zzEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzAEis1L8uP8/uE3pzXfLTmLWXQ/R+MTAwNjQ0IHR5cGVzLnRzADxdJSKpckiQtSaWokb8kY1CKuU6"
         },
         {
           "sha": "d57382646a66dfa20dea7f8f48773cbb3760a829",
@@ -26580,20 +26620,28 @@
           "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMArGXOJV7cI4jKU7DD3PXcvMMvwCcxMDA2NDQgZ3JvdXAucHJvdG8udHMANMgR2/ee3yNDpUJ8i1tN4QmFZ9YxMDA2NDQgaW5kZXgudHMAZaHmRPe/wRw5QFxauiXgepL/R70xMDA2NDQgcm9vdC5wcm90by50cwCY5LK+qaAPROaj+znqEst3MUFkHDEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzAEENjx/3DsM+S8TBKd7+s0yVC/E+MTAwNjQ0IHR5cGVzLnRzADdim6MljJjrXwP/RsUaVTlwxIrZ"
         },
         {
-          "sha": "0554e552766f3b107bbc61a7130d3b7026ec8b59",
-          "contentBase64": "MTAwNjQ0IGJhZGdlLnRlc3QudHMAaLDLtsLYfattYhUbRc6XPolpxZYxMDA2NDQgYnV0dG9uLWxpdmUtdGhlbWUudGVzdC50cwDXztV/y4hjW4agcRA47kLxIIVD7zEwMDY0NCBidXR0b24udGVzdC50cwDckGYUjKbNl1ibhFpI3vYdTJTn0jEwMDY0NCBjYXJkLnRlc3QudHMAS5kYYFbzGbKEdJzdEi/JUaKZNbQxMDA2NDQgY2hlY2tib3gudGVzdC50cwBWg2QhuHSqX/5+ykEHYMLI9m2RpTEwMDY0NCBkaWFsb2cudGVzdC50cwCXvy6XbDIH6tt3jyYMAvjxQSSM9TEwMDY0NCBkcm9wZG93bi50ZXN0LnRzAFzugowevX32Vc5PhLvjftQn9OjMMTAwNjQ0IGhvdmVyLWNhcmQudGVzdC50cwAuoPVvxP0G8BL+559Cp746TYzVgjEwMDY0NCBzY3JvbGwtYXJlYS50ZXN0LnRzABymV3+/kPWbPuEeSyz5ggCfjAObMTAwNjQ0IHNlbGVjdC50ZXN0LnRzAIsE7HSnvdJJyvhscoDhRWYrLb85MTAwNjQ0IHNlcGFyYXRvci50ZXN0LnRzAOaIfrA9f9/j1gwhtdInqw7NMY1RMTAwNjQ0IHNrZWxldG9uLnRlc3QudHMA/K8gsvo/+eLN5lN3aadYGn0GaM4xMDA2NDQgc3Bpbm5lci50ZXN0LnRzAHdOnUs1aMGaM8uWlI/AGHwGn/2iMTAwNjQ0IHN3aXRjaC50ZXN0LnRzANGHQ/zP0n5QRda0fsrUk4fG6ayHMTAwNjQ0IHRhYnMudGVzdC50cwAWKHhwrNaRxYk0U8tHK91xph1pWDEwMDY0NCB0ZXh0YXJlYS50ZXN0LnRzAEqAwLpyjiw5k5eORMNw4foGAZ7BMTAwNjQ0IHRoZW1lLnRlc3QudHMAIq4JUqLPcdtsFafg/jLgDfJjTaUxMDA2NDQgdG9nZ2xlLnRlc3QudHMA+2glE3OlIY6SWAbFj7YOUFJVg34xMDA2NDQgdG9vbHRpcC50ZXN0LnRzAFHxTtTdywVdusTRVQ9XsZskLA/b"
+          "sha": "2d2e1ff04a203ddcaa616d4736328ed85bc3a14f",
+          "contentBase64": "MTAwNjQ0IGJhZGdlLnRlc3QudHMAaLDLtsLYfattYhUbRc6XPolpxZYxMDA2NDQgYnV0dG9uLWxpdmUtdGhlbWUudGVzdC50cwDXztV/y4hjW4agcRA47kLxIIVD7zEwMDY0NCBidXR0b24udGVzdC50cwDckGYUjKbNl1ibhFpI3vYdTJTn0jEwMDY0NCBjYXJkLnRlc3QudHMAS5kYYFbzGbKEdJzdEi/JUaKZNbQxMDA2NDQgY2hlY2tib3gudGVzdC50cwBWg2QhuHSqX/5+ykEHYMLI9m2RpTEwMDY0NCBkaWFsb2cudGVzdC50cwCSNZMnKMjX+GkENF/j7zPbdXgYQzEwMDY0NCBkcm9wZG93bi50ZXN0LnRzAFzugowevX32Vc5PhLvjftQn9OjMMTAwNjQ0IGhvdmVyLWNhcmQudGVzdC50cwAuoPVvxP0G8BL+559Cp746TYzVgjEwMDY0NCBzY3JvbGwtYXJlYS50ZXN0LnRzABymV3+/kPWbPuEeSyz5ggCfjAObMTAwNjQ0IHNlbGVjdC50ZXN0LnRzAIsE7HSnvdJJyvhscoDhRWYrLb85MTAwNjQ0IHNlcGFyYXRvci50ZXN0LnRzAOaIfrA9f9/j1gwhtdInqw7NMY1RMTAwNjQ0IHNrZWxldG9uLnRlc3QudHMA/K8gsvo/+eLN5lN3aadYGn0GaM4xMDA2NDQgc3Bpbm5lci50ZXN0LnRzAHdOnUs1aMGaM8uWlI/AGHwGn/2iMTAwNjQ0IHN3aXRjaC50ZXN0LnRzANGHQ/zP0n5QRda0fsrUk4fG6ayHMTAwNjQ0IHRhYnMudGVzdC50cwAWKHhwrNaRxYk0U8tHK91xph1pWDEwMDY0NCB0ZXh0YXJlYS50ZXN0LnRzAEqAwLpyjiw5k5eORMNw4foGAZ7BMTAwNjQ0IHRoZW1lLnRlc3QudHMAIq4JUqLPcdtsFafg/jLgDfJjTaUxMDA2NDQgdG9nZ2xlLnRlc3QudHMA+2glE3OlIY6SWAbFj7YOUFJVg34xMDA2NDQgdG9vbHRpcC50ZXN0LnRzAFHxTtTdywVdusTRVQ9XsZskLA/b"
         },
         {
-          "sha": "03e31d02c5a25f84331cea85957cd778c4896ba8",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZADQ/kRESkLorxumH1LHFLOrvPnaDzEwMDY0NCBwYWNrYWdlLmpzb24AQjnZoZC/zb5gMRqLz8m7wadPjrc0MDAwMCBzcmMAEydp2jbiVXJp9FXQoH+k/e7Kiog0MDAwMCB0ZXN0AEoexOiIgmht2Oufu7n8bKmNMs4u"
+          "sha": "49d008f6a7e31ad1430cb4838703796ec919b105",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZADQ/kRESkLorxumH1LHFLOrvPnaDzEwMDY0NCBwYWNrYWdlLmpzb24AD5T0PEENdEc2v4yOeGdAYh/2igU0MDAwMCBzcmMAcrTk1pkmJVy3ZFbbIR5Z3xMdY1w0MDAwMCB0ZXN0AItYZFzAvpoZ0gS5pJo0OVTmrrcQ"
         },
         {
-          "sha": "132769da36e2557269f455d0a07fa4fdeeca8a88",
-          "contentBase64": "NDAwMDAgYnV0dG9uALbpLuTgw0H3plJncuFrBQg6W8diMTAwNjQ0IGluZGV4LnRzAL9J+ynKLVJq4J0h9UIq6awbcZtoNDAwMDAgbGFiZWwAwZGZM8p6A8yYodrGR4lIf/w2Qww0MDAwMCBzdXJmYWNlAOnqTTaDQYhzhpSv3vUPH+VMPkbnMTAwNjQ0IHRoZW1lLnRzAKzcZ2SgMmml5+9zY9j20qn7UMmo"
+          "sha": "72b4e4d69926255cb76456db211e59df131d635c",
+          "contentBase64": "NDAwMDAgYWNjb3JkaW9uALK/JXuKqQPuaS5kJoXqf4eEkAwUNDAwMDAgYnV0dG9uALbpLuTgw0H3plJncuFrBQg6W8diNDAwMDAgY29sbGFwc2libGUAmafFTYPjndBPWmStcMGvK6yXS3kxMDA2NDQgaW5kZXgudHMAy9ONE8WkwKDd2keWvLCRcM+lJLg0MDAwMCBsYWJlbADBkZkzynoDzJih2sZHiUh//DZDDDQwMDAwIHN1cmZhY2UA6epNNoNBiHOGlK/e9Q8f5Uw+RucxMDA2NDQgdGhlbWUudHMArNxnZKAyaaXn73Nj2PbSqftQyag="
+        },
+        {
+          "sha": "b2bf257b8aa903ee692e642685ea7f8784900c14",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAKO0L0307oj+oRdGrB+fO+sy6rQgxMDA2NDQgaGVhZGluZy5wcm90by50cwAldMLPTrQrXjFoerwxDlh2csZXnDEwMDY0NCBpbmRleC50cwAZX5AphFm/1APb6OX1T7FXzgGn1TEwMDY0NCBpdGVtLnByb3RvLnRzAPJMdkvYh2G/aTfblA2yuQ3b0Fh3MTAwNjQ0IHJvb3QucHJvdG8udHMADTx9+D7ySQVVam2ytEUGDVYl2MsxMDA2NDQgdHJpZ2dlci5wcm90by50cwCy4eeXEInAvUvsRhPsb6sA93ZCFg=="
         },
         {
           "sha": "b6e92ee4e0c341f7a6526772e16b05083a5bc762",
           "contentBase64": "MTAwNjQ0IGJ1dHRvbi5wcm90by50cwBHIKu6r0Rm8aM+yTcrnD7zCHxUhTEwMDY0NCBpbmRleC50cwAE52ph/lsoSupMwCdUqW2Zj+qonQ=="
+        },
+        {
+          "sha": "99a7c54d83e39dd04f5a64ad70c1af2bac974b79",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAVuBxmbLQG/TB5aQPorZbjlK+rccxMDA2NDQgaW5kZXgudHMAQZLPKnU5sPzk6cQJ1pUH8HxwUWwxMDA2NDQgcm9vdC5wcm90by50cwCM+1m34NGvahkbiOyMnFExC02PsjEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzAHI6GW5z9Yp/P1lIUgEK6m+z75dOMTAwNjQ0IHR5cGVzLnRzAFn25Uy5+MdbMIx2Y+oG+fyXjhLm"
         },
         {
           "sha": "c1919933ca7a03cc98a1dac64789487ffc36430c",
@@ -26604,8 +26652,8 @@
           "contentBase64": "MTAwNjQ0IGluZGV4LnRzAA4PQa6pSYMPVLkUKmnCM5ptd2XLMTAwNjQ0IHJvb3QucHJvdG8udHMAYoSfI/hwowg6CSmKJofpb/4hTY4="
         },
         {
-          "sha": "4a1ec4e88882686dd8eb9fbbb9fc6ca98d32ce2e",
-          "contentBase64": "MTAwNjQ0IGJ1dHRvbi50ZXN0LnRzAIJTy9I7vtRLr3RYHFTC08iZQclnMTAwNjQ0IG1hdGVyaWFsLnRlc3QudHMAdC8BpQQr6vvR7m0Lw9LoNuXm/1w="
+          "sha": "8b58645cc0be9a19d204b9a49a343954e6aeb710",
+          "contentBase64": "MTAwNjQ0IGFjY29yZGlvbi1tYXRlcmlhbC50ZXN0LnRzAEF5+GCaE10G8xNqcR6eCc99ayHUMTAwNjQ0IGJ1dHRvbi50ZXN0LnRzAIJTy9I7vtRLr3RYHFTC08iZQclnMTAwNjQ0IGNvbGxhcHNpYmxlLW1hdGVyaWFsLnRlc3QudHMAeQk/feKMliMa3AiBgZ1k7vTnj/0xMDA2NDQgbWF0ZXJpYWwudGVzdC50cwB0LwGlBCvq+9HubQvD0ug25eb/XA=="
         },
         {
           "sha": "0bdf42c08cd2d1ad0ded5359c3b9c8b55ed299fe",
@@ -26632,24 +26680,32 @@
           "contentBase64": "MTAwNjQ0IGljb24udGVzdC50cwCNoDf9dDcNpxxTvfa7VqUFuEAlzg=="
         },
         {
-          "sha": "09010123994cf6dcbecba4150051cb60d7769b89",
-          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZAD8cgEEChFpQ+OnHlkwWaYoeMB5WDEwMDY0NCBUSElSRF9QQVJUWV9OT1RJQ0VTLm1kAMxCsdZ6jo1W6zQml631HoW1vu0DMTAwNjQ0IHBhY2thZ2UuanNvbgAEewj4W23jYhT7ByQMzS+15ZVw9zQwMDAwIHNyYwA0cB1BjMxMprO0lvJLfLWA34f6ajQwMDAwIHRlc3QAgG4Y9duGeN1eve4IEZYoFkQI+m8="
+          "sha": "f0714af5d7002c6ae917906ebc56a555e5a7613c",
+          "contentBase64": "MTAwNjQ0IFJFQURNRS5tZAD8cgEEChFpQ+OnHlkwWaYoeMB5WDEwMDY0NCBUSElSRF9QQVJUWV9OT1RJQ0VTLm1kAMxCsdZ6jo1W6zQml631HoW1vu0DMTAwNjQ0IHBhY2thZ2UuanNvbgCM/NVi0wMhfw1lo2KXUT6hBtKzCDQwMDAwIHNyYwAWwQCmvSyKwcNy1D8Yngu+AqakIjQwMDAwIHRlc3QA52dXhlEVLqFRlL6efal1ZAVZ4Og="
         },
         {
-          "sha": "34701d418ccc4ca6b3b496f24b7cb580df87fa6a",
-          "contentBase64": "NDAwMDAgYnV0dG9uAJfwKy8QfCapSB/5CnWWpwObxnOSNDAwMDAgY2hlY2tib3gAqeEN+ddF/07dDQ7hKla1NLVrFzMxMDA2NDQgY29tcG9uZW50LXByZXNldHMudHMA/QEhGftBS/rORnL42tdshAzo4msxMDA2NDQgY29tcG9uZW50LXByZXNldHMudHlwZXMudHMAXg3OgkyJTNB0I/pJEJ9O3Fm6hGM0MDAwMCBkaWFsb2cAz4Yu8jqLRtN1xternrPmFi77l9s0MDAwMCBkcm9wZG93bgBh4wNkjxEXX7my/NV+C66lgu3h7zQwMDAwIGhvdmVyLWNhcmQASVJeQOl/n5rH/xJug8W38n+6u/AxMDA2NDQgaW5kZXgudHMAhO0YUG1MGuiZNdvEBQyGxTwXeps0MDAwMCBpbnB1dAC7o+yqG4h+jMmpuyvtYO9cCkAgzDQwMDAwIGxhYmVsAANT8OXvMNcswwPN9YGENM0csN4vNDAwMDAgcmFkaW8tZ3JvdXAAAx9ET9esInaRpaT8RblHBp7xagA0MDAwMCBzY3JvbGwtYXJlYQA2C7qF08rDXWFyJlQ3mc1ywdYqFzQwMDAwIHNlbGVjdABNH9ku4mbmot8A5moz6LQbNU8+NTQwMDAwIHNlcGFyYXRvcgDeLWwcBRvEvn2oV5YnTAQ46wrNBDQwMDAwIHN1cmZhY2UA1yi+yAR245pXxF7joOyvf0U1/kg0MDAwMCBzd2l0Y2gAR2tYRAUxttPyE7hi3CE3ATXVxFU0MDAwMCB0YWJzAHsHloATMXf+72mO1TO8/hi1+jKHNDAwMDAgdGV4dAAsHMkoXz0BSHnJ6oXCuQyHMnDXMTQwMDAwIHRleHRhcmVhAJ84ts+rhsBbgYntRnfsYVCMjXmPNDAwMDAgdG9nZ2xlAGnbQJn7XEoaufAN0P8h+lWDZ7elNDAwMDAgdG9vbHRpcAAD2LOetTK3qkLRnsJgpsxpFkVrIQ=="
+          "sha": "16c100a6bd2c8ac1c372d43f189e0bbe02a6a422",
+          "contentBase64": "NDAwMDAgYWNjb3JkaW9uALkOQ8Y1c+zbpFj0Ye5KjMVOOZiSNDAwMDAgYnV0dG9uAJfwKy8QfCapSB/5CnWWpwObxnOSNDAwMDAgY2hlY2tib3gAk0qXb/JpxSJJJw0eBtovg3W2ijc0MDAwMCBjb2xsYXBzaWJsZQDGCHt+zX1UFBU4QllrH4QZsUNDAjEwMDY0NCBjb21wb25lbnQtcHJlc2V0cy50cwD9ASEZ+0FL+s5Gcvja12yEDOjiazEwMDY0NCBjb21wb25lbnQtcHJlc2V0cy50eXBlcy50cwBeDc6CTIlM0HQj+kkQn07cWbqEYzQwMDAwIGRpYWxvZwDKPViFhyv/7qltux+JeYa9J+ZGqjQwMDAwIGRyb3Bkb3duAGHjA2SPERdfubL81X4LrqWC7eHvNDAwMDAgaG92ZXItY2FyZABJUl5A6X+fmsf/Em6Dxbfyf7q78DEwMDY0NCBpbmRleC50cwBrWWaTwlgXysImgySch9PyXHRe7zQwMDAwIGlucHV0ALuj7KobiH6Myam7K+1g71wKQCDMNDAwMDAgbGFiZWwAA1Pw5e8w1yzDA831gYQ0zRyw3i80MDAwMCByYWRpby1ncm91cAADH0RP16widpGlpPxFuUcGnvFqADQwMDAwIHNjcm9sbC1hcmVhADYLuoXTysNdYXImVDeZzXLB1ioXNDAwMDAgc2VsZWN0AE0f2S7iZuai3wDmajPotBs1Tz41NDAwMDAgc2VwYXJhdG9yAN4tbBwFG8S+fahXlidMBDjrCs0ENDAwMDAgc3VyZmFjZQDXKL7IBHbjmlfEXuOg7K9/RTX+SDQwMDAwIHN3aXRjaABHa1hEBTG20/ITuGLcITcBNdXEVTQwMDAwIHRhYnMAeweWgBMxd/7vaY7VM7z+GLX6Moc0MDAwMCB0ZXh0ACwcyShfPQFIecnqhcK5DIcycNcxNDAwMDAgdGV4dGFyZWEAnzi2z6uGwFuBie1Gd+xhUIyNeY80MDAwMCB0b2dnbGUAFoPpYUYUajrjEokmqnm1OeN7lWQ0MDAwMCB0b29sdGlwAAPYs561MreqQtGewmCmzGkWRWsh"
+        },
+        {
+          "sha": "b90e43c63573ecdba458f461ee4a8cc54e399892",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMA1zDQQtN1336XJ0uXHXLxzbUXIacxMDA2NDQgaGVhZGluZy5wcm90by50cwABWn+aEXhcRVUogdnBo7gUzN6UpDEwMDY0NCBpbmRleC50cwBe+XWfM/WXiYRQ392PbkM0yYFh+DEwMDY0NCBpdGVtLnByb3RvLnRzAEmfx8sOe6a9IefQuuSPLqRi4BH5MTAwNjQ0IHJvb3QucHJvdG8udHMAWo1c5LgV1L0pcVpN4Y2rDS3UHwoxMDA2NDQgdHJpZ2dlci5wcm90by50cwAxX2YAyU3xGE1WEwwXleUYwzmxkg=="
         },
         {
           "sha": "97f02b2f107c26a9481ff90a7596a7039bc67392",
           "contentBase64": "MTAwNjQ0IGJ1dHRvbi5wcm90by50cwA8G1cryzy/bLHf5CjmpeLZJHdi8zEwMDY0NCBpbmRleC50cwAl6Lw5RBMqoeC1rNtiMAZDVSB4DDEwMDY0NCB0eXBlcy50cwB+CIYEIYcwWds/FhF7UQuLRY8e2A=="
         },
         {
-          "sha": "a9e10df9d745ff4edd0d0ee12a56b534b56b1733",
-          "contentBase64": "MTAwNjQ0IGluZGV4LnRzAFXZH8Fu4D/8+muVQa2H7Jj8uqyrMTAwNjQ0IGluZGljYXRvci5wcm90by50cwAqamgFHBy2FAbbQTV7rZC7uBHZbTEwMDY0NCBwcmVzZXQudHMAk2bwJnUV6pN4SCwUbOSDomhX7R0xMDA2NDQgcm9vdC5wcm90by50cwDQoyeV68DRlzE0IPNfKdDlurPnCzEwMDY0NCB0eXBlcy50cwA+XVUitMpJKAn630jSp4C889UV5Q=="
+          "sha": "934a976ff269c52249270d1e06da2f8375b68a37",
+          "contentBase64": "MTAwNjQ0IGluZGV4LnRzAFXZH8Fu4D/8+muVQa2H7Jj8uqyrMTAwNjQ0IGluZGljYXRvci5wcm90by50cwAqamgFHBy2FAbbQTV7rZC7uBHZbTEwMDY0NCBwcmVzZXQudHMAk2bwJnUV6pN4SCwUbOSDomhX7R0xMDA2NDQgcm9vdC5wcm90by50cwCtX/gI9qCN8tpXMtlr+XytHVOhfjEwMDY0NCB0eXBlcy50cwA+XVUitMpJKAn630jSp4C889UV5Q=="
         },
         {
-          "sha": "cf862ef23a8b46d375c6d7ab9eb3e6162efb97db",
-          "contentBase64": "MTAwNjQ0IGNsb3NlLWljb24ucHJvdG8udHMAcQXJm1vAHnvMyTgcvh6DzpStqegxMDA2NDQgY2xvc2UucHJvdG8udHMAqpmBi3qkKGreXkYv/RP+7ioiSqUxMDA2NDQgY29udGVudC5wcm90by50cwBlv6iRaGuLxr8Mwe6PqpNsQLfiqDEwMDY0NCBkZXNjcmlwdGlvbi5wcm90by50cwA3ZBP40kQXlimznFT4vTUlHJpugjEwMDY0NCBmb290ZXIucHJvdG8udHMAzEUSn9J+rJZ8CeDCDc1GVV4UV/QxMDA2NDQgaGVhZGVyLnByb3RvLnRzAC9EuSDQGaKaeh5vZ6nIxk8IYHj0MTAwNjQ0IGluZGV4LnRzAMQnSHVKli9vJlbF9YgjqLNwLv1bMTAwNjQ0IG92ZXJsYXkucHJvdG8udHMAw5MXr7Z8GAbB8PEZ3FTLFUBYNwwxMDA2NDQgcHJlc2V0LnRzAIZxIOpE67dDIcnfpgnmOcyh/52AMTAwNjQ0IHJvb3QucHJvdG8udHMAkUucuK9Ri7Iqd+00t9qMffBoqEYxMDA2NDQgdGl0bGUucHJvdG8udHMAOOeVeQJAhYajsjiUzMISDyF5lm0xMDA2NDQgdHJpZ2dlci5wcm90by50cwBCz6DC9I4F6BWZ47plKkghQ9b7DzEwMDY0NCB0eXBlcy50cwB8Q9pRaf6yfWeboyH/z/JXoJhVNQ=="
+          "sha": "c6087b7ecd7d5414153842596b1f8419b1434302",
+          "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAgfcmU+QlZuq8XG6Gol6T61eSwFYxMDA2NDQgaW5kZXgudHMAGj1QuUlPTX+hXqxZ9myhVTgkjIExMDA2NDQgcm9vdC5wcm90by50cwBCJHJukcr7+iKOiXyATBo2EvYOsTEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzANgwiIT9t7MCMX3izu7LNuotW2CbMTAwNjQ0IHR5cGVzLnRzADRh4vqvLYmmOKjZHZVMl6tdn7+d"
+        },
+        {
+          "sha": "ca3d5885872bffeea96dbb1f897986bd27e646aa",
+          "contentBase64": "MTAwNjQ0IGNsb3NlLWljb24ucHJvdG8udHMAcQXJm1vAHnvMyTgcvh6DzpStqegxMDA2NDQgY2xvc2UucHJvdG8udHMAqpmBi3qkKGreXkYv/RP+7ioiSqUxMDA2NDQgY29udGVudC5wcm90by50cwAXaYCDkssm8e3az4YGZ7fRAPKkoTEwMDY0NCBkZXNjcmlwdGlvbi5wcm90by50cwA3ZBP40kQXlimznFT4vTUlHJpugjEwMDY0NCBmb290ZXIucHJvdG8udHMAzEUSn9J+rJZ8CeDCDc1GVV4UV/QxMDA2NDQgaGVhZGVyLnByb3RvLnRzAC9EuSDQGaKaeh5vZ6nIxk8IYHj0MTAwNjQ0IGluZGV4LnRzAMQnSHVKli9vJlbF9YgjqLNwLv1bMTAwNjQ0IG92ZXJsYXkucHJvdG8udHMAkZXm0eeYwJ+XsaUvrArKw31y7yAxMDA2NDQgcHJlc2V0LnRzAIZxIOpE67dDIcnfpgnmOcyh/52AMTAwNjQ0IHJvb3QucHJvdG8udHMAkUucuK9Ri7Iqd+00t9qMffBoqEYxMDA2NDQgdGl0bGUucHJvdG8udHMAOOeVeQJAhYajsjiUzMISDyF5lm0xMDA2NDQgdHJpZ2dlci5wcm90by50cwBCz6DC9I4F6BWZ47plKkghQ9b7DzEwMDY0NCB0eXBlcy50cwB8Q9pRaf6yfWeboyH/z/JXoJhVNQ=="
         },
         {
           "sha": "61e303648f11175fb9b2fcd57e0baea582ede1ef",
@@ -26704,31 +26760,63 @@
           "contentBase64": "MTAwNjQ0IGluZGV4LnRzABFN46Swti8Wa6CYJXJ0OaXi9FbxMTAwNjQ0IHJvb3QucHJvdG8udHMAIe5TQJ5bQ0S3+BMZ6yelMAEjihYxMDA2NDQgdHlwZXMudHMAf3Sg42XT2EvSxnpQd+0Lrps1+0c="
         },
         {
-          "sha": "69db4099fb5c4a1ab9f00dd0ff21fa558367b7a5",
-          "contentBase64": "MTAwNjQ0IGluZGV4LnRzAFPgC4zjcBXFTjPuujMvrYAje5yPMTAwNjQ0IHRvZ2dsZS5wcm90by50cwB1yFJlNCst7JmHcr+1Vad/LPdi/jEwMDY0NCB0eXBlcy50cwASprcBRam93mM3WuF2EA5SVSOpbg=="
+          "sha": "1683e96146146a3ae3128926aa79b539e37b9564",
+          "contentBase64": "MTAwNjQ0IGluZGV4LnRzAFPgC4zjcBXFTjPuujMvrYAje5yPMTAwNjQ0IHRvZ2dsZS5wcm90by50cwDZ+w7WBnmsqTfoAgnaRp7OOkEURTEwMDY0NCB0eXBlcy50cwASprcBRam93mM3WuF2EA5SVSOpbg=="
         },
         {
           "sha": "03d8b39eb532b7aa42d19ec260a6cc6916456b21",
           "contentBase64": "MTAwNjQ0IGNvbnRlbnQucHJvdG8udHMAiSDSDeQfBcT+9ba9+KuY0Hbmk8MxMDA2NDQgZ3JvdXAucHJvdG8udHMAoXf7OGrZ7rnVNFXjVgy/DthLhBExMDA2NDQgaW5kZXgudHMAwttFD/lWM+ePd/ASBkNnWtHUv5gxMDA2NDQgcm9vdC5wcm90by50cwCDYfQA+CvvHO9H/kpmDn7g8Vb9VDEwMDY0NCB0cmlnZ2VyLnByb3RvLnRzAKbHPVh6jAponbkG/xivnAfY/ULtMTAwNjQ0IHR5cGVzLnRzAIR3QylldRlVISxfpDU4XcVP+Omq"
         },
         {
-          "sha": "806e18f5db8678dd5ebdee08119628164408fa6f",
-          "contentBase64": "MTAwNjQ0IGJ1dHRvbi50ZXN0LnRzAPCl0uFtI6Kb4B+CQLPolDRbPn60MTAwNjQ0IGNoZWNrYm94LnRlc3QudHMAOUdx6QmEXoRkcy32twnK83RMIlQxMDA2NDQgY29tcG9uZW50LXByZXNldHMudGVzdC50cwDeRMFwEe3BFMc19antbtL37u2NnTEwMDY0NCBkaWFsb2cudGVzdC50cwC7faEroJI1QHFOy3xjcZG7llKBLjEwMDY0NCBkcm9wZG93bi50ZXN0LnRzABFu1KwCjFmA0QseJubtfsaWc+2GMTAwNjQ0IGhvdmVyLWNhcmQudGVzdC50cwB85bSNsKIbH0RBr34WYNVlUeNqpTEwMDY0NCBpbnB1dC50ZXN0LnRzALlRu0bApp9CeXt1fPkKEZl5fxEoMTAwNjQ0IHJhZGlvLWdyb3VwLnRlc3QudHMAKhdrVrsnF5F4M5NeC5wPi4doEegxMDA2NDQgc2Nyb2xsLWFyZWEudGVzdC50cwBRn1OMsKzrxbf1yihFI3ZDFUGdFTEwMDY0NCBzZWxlY3QudGVzdC50cwAKRsDXrhdCwP1HwQG0mhYSAl4tOzEwMDY0NCBzZXBhcmF0b3IudGVzdC50cwBRFummP8gAoqYPXP3NKt7f15S3TzEwMDY0NCBzd2l0Y2gudGVzdC50cwBOSD6SsYr+pnCSrGWyZN7wke1vczEwMDY0NCB0YWJzLnRlc3QudHMAq3tzgTHEQ77QhUF6nbFRAi8dFNoxMDA2NDQgdGV4dGFyZWEudGVzdC50cwCWr+d73JnDXR9UmF6Q2171fjgrkTEwMDY0NCB0b2dnbGUudGVzdC50cwBBR3FB11WWRIwjqsp1XoLObv5lBjEwMDY0NCB0b29sdGlwLnRlc3QudHMAhAQk3IRILYOSxp4rslCG0XHaYiI="
+          "sha": "e767578651152ea15194be9e7da975640559e0e8",
+          "contentBase64": "MTAwNjQ0IGJ1dHRvbi50ZXN0LnRzAPCl0uFtI6Kb4B+CQLPolDRbPn60MTAwNjQ0IGNoZWNrYm94LnRlc3QudHMAv7lkucuvmGAt16vpD/nr+XxCP18xMDA2NDQgY29tcG9uZW50LXByZXNldHMudGVzdC50cwDeRMFwEe3BFMc19antbtL37u2NnTEwMDY0NCBkaWFsb2ctbWF0ZXJpYWwudGVzdC50cwAWSktF3ZaI8yT293MnRIQO871urTEwMDY0NCBkaWFsb2cudGVzdC50cwDYFDf9gUV/G53QhgpJ1AuVObte+zEwMDY0NCBkcm9wZG93bi50ZXN0LnRzABFu1KwCjFmA0QseJubtfsaWc+2GMTAwNjQ0IGhvdmVyLWNhcmQudGVzdC50cwB85bSNsKIbH0RBr34WYNVlUeNqpTEwMDY0NCBpbnB1dC50ZXN0LnRzALlRu0bApp9CeXt1fPkKEZl5fxEoMTAwNjQ0IHJhZGlvLWdyb3VwLnRlc3QudHMAKhdrVrsnF5F4M5NeC5wPi4doEegxMDA2NDQgc2Nyb2xsLWFyZWEudGVzdC50cwBRn1OMsKzrxbf1yihFI3ZDFUGdFTEwMDY0NCBzZWxlY3QudGVzdC50cwAKRsDXrhdCwP1HwQG0mhYSAl4tOzEwMDY0NCBzZXBhcmF0b3IudGVzdC50cwBRFummP8gAoqYPXP3NKt7f15S3TzEwMDY0NCBzd2l0Y2gudGVzdC50cwBOSD6SsYr+pnCSrGWyZN7wke1vczEwMDY0NCB0YWJzLnRlc3QudHMAq3tzgTHEQ77QhUF6nbFRAi8dFNoxMDA2NDQgdGV4dGFyZWEudGVzdC50cwCWr+d73JnDXR9UmF6Q2171fjgrkTEwMDY0NCB0b2dnbGUudGVzdC50cwA2s6ScR55xKbehPfJ2hehRIN4tFzEwMDY0NCB0b29sdGlwLnRlc3QudHMAhAQk3IRILYOSxp4rslCG0XHaYiI="
         },
         {
-          "sha": "2b94c6b7c31d7400c9e345033461ea5d2f345339",
-          "contentBase64": "MTAwNjQ0IE1PRFVMRS1IT1NULUNBUC1BREFQVEVSLUNBVEFMT0dJTkcuemgtQ04ubWQALkjdpM1BuDKoiJPBD9aL3JfUs4YxMDA2NDQgUkVBRE1FLm1kAKCBoNb8c8qnErHwhXO+0sv2eVPBNDAwMDAgYWRhcHRlcnMAGKeDFZ7tOZCE9edgnC90GqxwFPk0MDAwMCBjb250cmFjdHMAVuAyvfNdKpU6+8MLOH3toLvDD1Y0MDAwMCBkZWNpc2lvbnMA3kVnN6n4omn7FWCamqV6eWOfRMg0MDAwMCBob3N0LWNhcHMA5A8nFp/xVBgivyIR8vzeMd71BtU0MDAwMCBrbm93bGVkZ2UARsxYbkQlJp3clWa1Cs9nXw5QDtM0MDAwMCBtb2R1bGVzAAteUZOiuSalcvPfiPh+jMb3T3eUNDAwMDAgcHJvdG90eXBlcwC7squQT9h3NX46ycCIdOyk1kIogTQwMDAwIHRlc3RzABCthtSwFXxlw6PdwvFRaWrPQKZBNDAwMDAgdmVyc2lvbnMAoR2sMrFXk/HXN5HZAo0YBmiNu44="
+          "sha": "c18b22086362a01765c4fc412592e74a2e589847",
+          "contentBase64": "MTAwNjQ0IE1PRFVMRS1IT1NULUNBUC1BREFQVEVSLUNBVEFMT0dJTkcuemgtQ04ubWQALkjdpM1BuDKoiJPBD9aL3JfUs4YxMDA2NDQgUkVBRE1FLm1kAKCBoNb8c8qnErHwhXO+0sv2eVPBNDAwMDAgYWRhcHRlcnMAGKeDFZ7tOZCE9edgnC90GqxwFPk0MDAwMCBjb250cmFjdHMAF2GdI9ZcoO+eroYCa7xf4G0y1uI0MDAwMCBkZWNpc2lvbnMA3kVnN6n4omn7FWCamqV6eWOfRMg0MDAwMCBob3N0LWNhcHMAAsQjgiI53ehla7TDvZlGIIDyU5o0MDAwMCBrbm93bGVkZ2UARsxYbkQlJp3clWa1Cs9nXw5QDtM0MDAwMCBtb2R1bGVzALtAUhRFr49ZpFVifrYIlkzG4TuWNDAwMDAgcHJvdG90eXBlcwDPxHZZA6eADVj9G9WuTO4SyVG0ZTQwMDAwIHRlc3RzAM6sKoDlGjefxhzmWnEtMZ3Ep7dnNDAwMDAgdmVyc2lvbnMAoR2sMrFXk/HXN5HZAo0YBmiNu44="
         },
         {
-          "sha": "bbb2ab904fd877357e3ac9c08874eca4d6422881",
-          "contentBase64": "MTAwNjQ0IFAtQkFTRS1BU1lOQy1SRUdJT04ueWFtbAD8thTaEjkyI+9emcLRD3JSwBuaqzEwMDY0NCBQLUJBU0UtQlVUVE9OLnlhbWwA4ePnlPksXUf+huDxxuzfgYGzGFkxMDA2NDQgUC1CQVNFLUNIRUNLQk9YLUlORElDQVRPUi55YW1sAESgFRnYYin8VqRDrSC8ONnVz7ueMTAwNjQ0IFAtQkFTRS1DSEVDS0JPWC55YW1sAExIXNLZD6NtH9LKjHnVHdyUkb/BMTAwNjQ0IFAtQkFTRS1DT0xMQVBTSUJMRS1DT05URU5ULnlhbWwAF1EgdwcT8e5Vb224/22sFOs17mExMDA2NDQgUC1CQVNFLUNPTExBUFNJQkxFLVRSSUdHRVIueWFtbAC1csbqRPxMdZQhwoxcV+9uXbuUHjEwMDY0NCBQLUJBU0UtQ09MTEFQU0lCTEUueWFtbACrayIV7Y28K9Tk3i+FH3eqXcDnszEwMDY0NCBQLUJBU0UtRElBTE9HLUNMT1NFLnlhbWwAstnE4zOaIsuUIvKVeExFzBRE6LUxMDA2NDQgUC1CQVNFLURJQUxPRy1DT05URU5ULnlhbWwAFvshVNn+acgvqe6qixkoc5OQOR0xMDA2NDQgUC1CQVNFLURJQUxPRy1ERVNDUklQVElPTi55YW1sAPbUcSEXTwLTlqZTWZj2rFsDHIStMTAwNjQ0IFAtQkFTRS1ESUFMT0ctTUFTSy55YW1sAL3stq2WQNMJrFKlTxgDnl968SjmMTAwNjQ0IFAtQkFTRS1ESUFMT0ctVElUTEUueWFtbADyd+hBoaMh/O8JEHmXXCXGqSxJrTEwMDY0NCBQLUJBU0UtRElBTE9HLVRSSUdHRVIueWFtbADfkq76iujd/TR/n5ZptwPkNo4lzTEwMDY0NCBQLUJBU0UtRElBTE9HLnlhbWwAa8dyxq6Z7q+k6huuDCjsRLyNUXExMDA2NDQgUC1CQVNFLURST1BET1dOLU1FTlUtQ09OVEVOVC55YW1sAMUTiVz3avcPs41NNjfM0jOS+u4jMTAwNjQ0IFAtQkFTRS1EUk9QRE9XTi1NRU5VLUlURU0ueWFtbACfJzrySUGLqW7opIkS7AIHtQ9cITEwMDY0NCBQLUJBU0UtRFJPUERPV04tTUVOVS1UUklHR0VSLnlhbWwA20OdHZFOaybr9zfAzOn1R4zQOn0xMDA2NDQgUC1CQVNFLURST1BET1dOLU1FTlUueWFtbAAKPqq7lKePU+rnGMHRRgNLj+uTrzEwMDY0NCBQLUJBU0UtSE9WRVItQ0FSRC1DT05URU5ULnlhbWwA+8LgkknMkw6aZUu5s6+SW+wlE2IxMDA2NDQgUC1CQVNFLUhPVkVSLUNBUkQtVFJJR0dFUi55YW1sAERd9JlCg5O2In97xKn+452MI7MTMTAwNjQ0IFAtQkFTRS1IT1ZFUi1DQVJELnlhbWwAhay0Mp6WWWJ/TLg9XyU2Oa/Er+cxMDA2NDQgUC1CQVNFLUlNQUdFLnlhbWwAV24iLqpOBU7D7uCqZGjcW5MS/T8xMDA2NDQgUC1CQVNFLUlOUFVULnlhbWwA5W8rpKg6rFvnF+5OMoa10ItSLlQxMDA2NDQgUC1CQVNFLUxBQkVMLnlhbWwAUJa6DCkyVMB178hjnUrdj3j+u3gxMDA2NDQgUC1CQVNFLUxJVkUtUkVHSU9OLnlhbWwAgLJHcv4FzThK6zo7VdZg3M9A1hIxMDA2NDQgUC1CQVNFLVJBRElPLUdST1VQLUlORElDQVRPUi55YW1sAG5G/Zz7qQvF8cZwYtqYw2AKokk0MTAwNjQ0IFAtQkFTRS1SQURJTy1HUk9VUC1JVEVNLnlhbWwANsFywSOhhpDiROxxBD2CQ1o5+BQxMDA2NDQgUC1CQVNFLVJBRElPLUdST1VQLnlhbWwAnbVBri0JPculAq34O+RYrqW6nagxMDA2NDQgUC1CQVNFLVNDUk9MTC1BUkVBLVNDUk9MTEJBUi55YW1sAK7pqR92rKN/chexmaPmOkE2TU4qMTAwNjQ0IFAtQkFTRS1TQ1JPTEwtQVJFQS1USFVNQi55YW1sAJ+yCMzxVoB74Q4mqZvNXd9D2BIGMTAwNjQ0IFAtQkFTRS1TQ1JPTEwtQVJFQS1WSUVXUE9SVC55YW1sALoPp5HPNybeethS4kYkHy+1x3lZMTAwNjQ0IFAtQkFTRS1TQ1JPTEwtQVJFQS55YW1sADiDSFwqH8KZod1rvTa1b9CaLO0cMTAwNjQ0IFAtQkFTRS1TRUxFQ1QtQ09OVEVOVC55YW1sALQzJSLipoSWfOqSRCggMXAEmb/nMTAwNjQ0IFAtQkFTRS1TRUxFQ1QtSVRFTS55YW1sADkJZK8e82pwrsBGFT+QRpM9AAcLMTAwNjQ0IFAtQkFTRS1TRUxFQ1QtVFJJR0dFUi55YW1sAK2ZBS0tgIe81//HPRVbOI5MjjX2MTAwNjQ0IFAtQkFTRS1TRUxFQ1QtVkFMVUUueWFtbADyqqSOuHTfO0rfEn2ZHmRN0LI7QjEwMDY0NCBQLUJBU0UtU0VMRUNULnlhbWwAFXYibHGLdT5zgkSs2NRGQGfdWs0xMDA2NDQgUC1CQVNFLVNFUEFSQVRPUi55YW1sAD2hIg7evOutd+cJ3jx/FBWQMttuMTAwNjQ0IFAtQkFTRS1TVVJGQUNFLnlhbWwAZ6rNkwtKa98myzSQH5cwKd/vZ68xMDA2NDQgUC1CQVNFLVNXSVRDSC1USFVNQi55YW1sAJJpTLfWMfUZ92KzN3fTlafuR5RlMTAwNjQ0IFAtQkFTRS1TV0lUQ0gueWFtbACLpFYRUJPiXjB4+BL7hc8SQxoOfDEwMDY0NCBQLUJBU0UtVEFCTEUtQ0FQVElPTi55YW1sAHK7qCndNdnZ0nauKo3+gv/MLZn1MTAwNjQ0IFAtQkFTRS1UQUJMRS1DRUxMLnlhbWwA8ACAEcgr1nxSsCwqJZRbwXwVEdQxMDA2NDQgUC1CQVNFLVRBQkxFLUhFQURFUi1DRUxMLnlhbWwAYuvHn9OwW45/sEdUrPDPKTMA83cxMDA2NDQgUC1CQVNFLVRBQkxFLVJPVy55YW1sAMT48iAyNBJRi4k7Jncv3XMFG5qaMTAwNjQ0IFAtQkFTRS1UQUJMRS55YW1sAL7kXizap/jhVZZY5R+ROA33SNKEMTAwNjQ0IFAtQkFTRS1UQUJTLUNPTlRFTlQueWFtbABlsUJ18P/NMOitLLpxxvOwJUW8yDEwMDY0NCBQLUJBU0UtVEFCUy1JTkRJQ0FUT1IueWFtbADRysZJxNKVwLs8uxftQ3Z+kmcGezEwMDY0NCBQLUJBU0UtVEFCUy1MSVNULnlhbWwAb4ATCT/EUlcT1o0RTGlmTCLx9+wxMDA2NDQgUC1CQVNFLVRBQlMtVFJJR0dFUi55YW1sAA2V0gUvGzXkyBVzwRdzNAnFTVGhMTAwNjQ0IFAtQkFTRS1UQUJTLnlhbWwAbnWIEdOA9KLYdtnQ5tihG12kIiYxMDA2NDQgUC1CQVNFLVRFWFQueWFtbACms+miFCcZe/k7iR/thSty+rakQjEwMDY0NCBQLUJBU0UtVEVYVEFSRUEueWFtbABJdPqL04cUKtGoh87oozy8EyFkYDEwMDY0NCBQLUJBU0UtVE9HR0xFLnlhbWwAa97Jimq7//awWrqGd9b3QmPRJvAxMDA2NDQgUC1CQVNFLVRPT0xUSVAtQ09OVEVOVC55YW1sABTq9mX+WUdgWj5wGSnr3ll0m10WMTAwNjQ0IFAtQkFTRS1UT09MVElQLUdST1VQLnlhbWwAjQ5nDpaBJ36TkSpY3bdMWDkFzlQxMDA2NDQgUC1CQVNFLVRPT0xUSVAtVFJJR0dFUi55YW1sAF1+byCWNCk3n1K2TUqzgvl2yH29MTAwNjQ0IFAtQkFTRS1UT09MVElQLnlhbWwAD0rfB1aUuwyL9XmVJbUc4QvnXfkxMDA2NDQgUC1CQVNFLVRSQU5TSVRJT04ueWFtbABD8NwYUTDi3maggwA2mE8ZHBe64zEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1CVVRUT04ueWFtbADaFrGXF5haIWOxzXJQf9/P9FDHEzEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1DSEVDS0JPWC1JTkRJQ0FUT1IueWFtbAAj5frbbtTcGO93bMwrQr034mEd5TEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1DSEVDS0JPWC55YW1sALRyBqjq55JqxGte1hc8GndjrorgMTAwNjQ0IFAtQk9PVFNUUkFQLTItMy0yLUlOUFVULnlhbWwAlwpxKlx1/Hg6GJZwz+bCiZ/7mkIxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItTEFCRUwueWFtbAA31uXWwGRYml84lJ2ONhD3vTH9TDEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1TRVBBUkFUT1IueWFtbAB+TVx4Qa/kTOw5JNGLQ+XZBd6YSTEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1TVVJGQUNFLnlhbWwAGRuUtDQPfWR1JPIvI5RIGTTxP9MxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItU1dJVENILVRIVU1CLnlhbWwA/PQSGyyZvHrWhvRgw5j0HSiYC50xMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItU1dJVENILnlhbWwAQ24DTP32xXgF4LbKwAI7sPzD2a0xMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItVEVYVEFSRUEueWFtbAAjQ27QixQE53v2uwAEecgHoNx9szEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1UT0dHTEUueWFtbAC6xU5lPskn7MXGjSdwj2pK8YiWWjEwMDY0NCBQLUJSVVRBTElTVC1CQURHRS55YW1sAECekKOy7+64OPQ7NQT4jDb9oURmMTAwNjQ0IFAtQlJVVEFMSVNULUJVVFRPTi55YW1sAMlHN9Qo9YJCPQ1zvu6c26UlMPRYMTAwNjQ0IFAtQlJVVEFMSVNULUNBUkQtQ09OVEVOVC55YW1sALELAKlGEic9OFSRnhYOnkUnEjBAMTAwNjQ0IFAtQlJVVEFMSVNULUNBUkQtRk9PVEVSLnlhbWwA3PjAck76JthR+PX20xKg8EB4m6cxMDA2NDQgUC1CUlVUQUxJU1QtQ0FSRC1IRUFERVIueWFtbACQ877OePv8rzTnGekbw1KDBESakDEwMDY0NCBQLUJSVVRBTElTVC1DQVJELnlhbWwANfTxIill2KGnY1CQ5moVmSMp83sxMDA2NDQgUC1CUlVUQUxJU1QtQ0hFQ0tCT1gtSU5ESUNBVE9SLnlhbWwAlEtudFxATE0FtNU5dBdDGaEhvrExMDA2NDQgUC1CUlVUQUxJU1QtQ0hFQ0tCT1gueWFtbADYRiQSgEuZUCnAar2BBtdaLneDYDEwMDY0NCBQLUJSVVRBTElTVC1ESUFMT0ctQ0xPU0UtSUNPTi55YW1sAJsbi1xGqj5FbCkJ8ky9L5aoF4uoMTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy1DTE9TRS55YW1sADJenWm8ZRRJ4Z76P3vwf2hOa5WfMTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy1DT05URU5ULnlhbWwAu4IWbvWmlDC3UfusCUucmjSU/IAxMDA2NDQgUC1CUlVUQUxJU1QtRElBTE9HLURFU0NSSVBUSU9OLnlhbWwAQSLyMfjHGHYNMAAnUhF0w+EHoiYxMDA2NDQgUC1CUlVUQUxJU1QtRElBTE9HLUZPT1RFUi55YW1sAPedBBCpHu7VtD22hVxEk/YwTO0JMTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy1IRUFERVIueWFtbABIVIDcMLoCp7wyY1DTgdUlobb9sDEwMDY0NCBQLUJSVVRBTElTVC1ESUFMT0ctTUFTSy55YW1sAOk+HS9FTIIA8otAZ7bL4j9TuvgHMTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy1USVRMRS55YW1sAKQQCGzgcvcTuMysYJeWiMLJyqi4MTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy1UUklHR0VSLnlhbWwAiRnDmSBDL3/mfHpKZFXensDqnWExMDA2NDQgUC1CUlVUQUxJU1QtRElBTE9HLnlhbWwAINgd3ivNdiujPzTr39rlKxN3sJkxMDA2NDQgUC1CUlVUQUxJU1QtRFJPUERPV04tTUVOVS1DT05URU5ULnlhbWwAHG6Tceqjcr1dnGZ5aGo1uBSU8m0xMDA2NDQgUC1CUlVUQUxJU1QtRFJPUERPV04tTUVOVS1JVEVNLnlhbWwACkDlvyLUbUQroX2n3/KV86lw/OoxMDA2NDQgUC1CUlVUQUxJU1QtRFJPUERPV04tTUVOVS1UUklHR0VSLnlhbWwA9M+Df/GF0S0DJARxyUKoUjC82WQxMDA2NDQgUC1CUlVUQUxJU1QtRFJPUERPV04tTUVOVS55YW1sAPADCpIfjPPgLb+QVvcpR8HCqqNaMTAwNjQ0IFAtQlJVVEFMSVNULUhPVkVSLUNBUkQtQ09OVEVOVC55YW1sAATaL97kjpdl7jGr3WTUF93Xt4QyMTAwNjQ0IFAtQlJVVEFMSVNULUhPVkVSLUNBUkQtVFJJR0dFUi55YW1sABePu1jwKeiiwvP7037opG1GGVwDMTAwNjQ0IFAtQlJVVEFMSVNULUhPVkVSLUNBUkQueWFtbABC7Q+EaX6Hh5Tps+bka0qwH6nOGzEwMDY0NCBQLUJSVVRBTElTVC1MQUJFTC55YW1sAOeNTWZWcu333e2p5NDLr/uZmQm/MTAwNjQ0IFAtQlJVVEFMSVNULVNDUk9MTC1BUkVBLVNDUk9MTEJBUi55YW1sAKeL/ivlb6tR3cf3Ucvg9qU3kleDMTAwNjQ0IFAtQlJVVEFMSVNULVNDUk9MTC1BUkVBLVRIVU1CLnlhbWwAtUFbSLIp576VugUBQmDBse7G6HIxMDA2NDQgUC1CUlVUQUxJU1QtU0NST0xMLUFSRUEtVklFV1BPUlQueWFtbAD7NPKgGslFSLwhKsohgQj1Rf3yMTEwMDY0NCBQLUJSVVRBTElTVC1TQ1JPTEwtQVJFQS55YW1sAIo3KUjCvhWMZB1JtqCbv/AcAPtBMTAwNjQ0IFAtQlJVVEFMSVNULVNFTEVDVC1DT05URU5ULnlhbWwAejwIwulZIUZQ7mhrCjROlf0FuCUxMDA2NDQgUC1CUlVUQUxJU1QtU0VMRUNULUlURU0ueWFtbABmztKUiCnW8TTqfa6mn2m8lcTohjEwMDY0NCBQLUJSVVRBTElTVC1TRUxFQ1QtVFJJR0dFUi55YW1sAJs7VuwUCNBXNKOEtoatt2IghDYNMTAwNjQ0IFAtQlJVVEFMSVNULVNFTEVDVC1WQUxVRS55YW1sAKczYN2FjtpEPS9qpfTxHstg6PeZMTAwNjQ0IFAtQlJVVEFMSVNULVNFTEVDVC55YW1sALkabwWeUTQxEJ18PzdeNhWDSQJhMTAwNjQ0IFAtQlJVVEFMSVNULVNFUEFSQVRPUi55YW1sABn8Gspbq+jnpUFrP2h8++VjTiVEMTAwNjQ0IFAtQlJVVEFMSVNULVNLRUxFVE9OLnlhbWwAIS8Q3b6IShXfKCRSa4vISbqjOo0xMDA2NDQgUC1CUlVUQUxJU1QtU1BJTk5FUi55YW1sALHSFRWCgjD3zxV+w35NhVPyRpNPMTAwNjQ0IFAtQlJVVEFMSVNULVNVUkZBQ0UueWFtbACH4GJOxNnSxIAdyGINoF1b1xYpiTEwMDY0NCBQLUJSVVRBTElTVC1TV0lUQ0gtVEhVTUIueWFtbADnvq7rluwykcFM2KrUcmLLMI1oyjEwMDY0NCBQLUJSVVRBTElTVC1TV0lUQ0gueWFtbAChbzuYXCbC/FxY/T/rz/GO6LuJvjEwMDY0NCBQLUJSVVRBTElTVC1UQUJTLUNPTlRFTlQueWFtbADm3t0YaGUgL1PzQZ8iFvhsgf5UtjEwMDY0NCBQLUJSVVRBTElTVC1UQUJTLUxJU1QueWFtbABrCooSg5DyVV3mB+Ugh6lxteaeQDEwMDY0NCBQLUJSVVRBTElTVC1UQUJTLVRSSUdHRVIueWFtbAAQHt0iPipxkv3+trz1V1TKqwl+QjEwMDY0NCBQLUJSVVRBTElTVC1UQUJTLnlhbWwAO97pW+68G7yC8K/yhGE46JhppkkxMDA2NDQgUC1CUlVUQUxJU1QtVEVYVC55YW1sAGSkssWl6SZjSX4qZi6fR2wY9RPkMTAwNjQ0IFAtQlJVVEFMSVNULVRFWFRBUkVBLnlhbWwA59u35ZP1Jpa9JlgErKmg9n9L0poxMDA2NDQgUC1CUlVUQUxJU1QtVE9HR0xFLnlhbWwA53F04yQWeUtwTbKGwcyZtQoDTvcxMDA2NDQgUC1CUlVUQUxJU1QtVE9PTFRJUC1DT05URU5ULnlhbWwAUnHfyTQnrOvGKQ0lcrdRH1rLwkcxMDA2NDQgUC1CUlVUQUxJU1QtVE9PTFRJUC1HUk9VUC55YW1sALGu3yxg/AWI6X/cWXB92h91RYcNMTAwNjQ0IFAtQlJVVEFMSVNULVRPT0xUSVAtVFJJR0dFUi55YW1sAIWC2OR0nIgo4mo8XBr1ZuTGK3MYMTAwNjQ0IFAtQlJVVEFMSVNULVRPT0xUSVAueWFtbAD8t0K3vynb3G9jVFSexLAdcOfmlDEwMDY0NCBQLUxJUVVJRC1HTEFTUy1CVVRUT04ueWFtbAAqBbhCo4uXGlrs4L/o6JSe1eiTbTEwMDY0NCBQLUxJUVVJRC1HTEFTUy1MQUJFTC55YW1sABgICrFU7fIPzz7HJmY3ViNtRtQFMTAwNjQ0IFAtTElRVUlELUdMQVNTLVNVUkZBQ0UueWFtbADk0n+YHY65hkA+h9Sh74k8EUv/wDEwMDY0NCBQLUxVQ0lERS1JQ09OLnlhbWwAY7D8rwxz3dI7d18imS/hR2pnEx4xMDA2NDQgUC1TSEFEQ04tQlVUVE9OLnlhbWwAwAKAu1sbqARQ5dUEsKBV/UL/z0UxMDA2NDQgUC1TSEFEQ04tQ0hFQ0tCT1gtSU5ESUNBVE9SLnlhbWwAT+1jJ6cAHJ1vOMXiFaJ7ydG0DP8xMDA2NDQgUC1TSEFEQ04tQ0hFQ0tCT1gueWFtbADWzBM3Qy4w0KZsA4YRfgM3TqAcpjEwMDY0NCBQLVNIQURDTi1ESUFMT0ctQ0xPU0UtSUNPTi55YW1sAA8RjuVtkFvn1/7nlz5jjzcb2z8RMTAwNjQ0IFAtU0hBRENOLURJQUxPRy1DTE9TRS55YW1sAFzoPcD6yeT62gFdjjavBfak2BUXMTAwNjQ0IFAtU0hBRENOLURJQUxPRy1DT05URU5ULnlhbWwAXPgjiqVJcshW1eftKcWy82/5ROoxMDA2NDQgUC1TSEFEQ04tRElBTE9HLURFU0NSSVBUSU9OLnlhbWwACNbN9jCbJQUmSMOB+W0gI6ANCpMxMDA2NDQgUC1TSEFEQ04tRElBTE9HLUZPT1RFUi55YW1sAKtmacwjzArosFXKVw7HmpB+0dkiMTAwNjQ0IFAtU0hBRENOLURJQUxPRy1IRUFERVIueWFtbADL4M5Z9Cd3WmnfWrdcnPTLT/JovTEwMDY0NCBQLVNIQURDTi1ESUFMT0ctTUFTSy55YW1sAAYZkyohSueFQzZu6k3YSz5rN0INMTAwNjQ0IFAtU0hBRENOLURJQUxPRy1USVRMRS55YW1sAL7Syu9trRHF/qpd+unsik2wMd0sMTAwNjQ0IFAtU0hBRENOLURJQUxPRy1UUklHR0VSLnlhbWwA54sESKUGjWCPYhqtV1l88mskJLsxMDA2NDQgUC1TSEFEQ04tRElBTE9HLnlhbWwAJZCEPua6bzgguWviorl0fdwz4R4xMDA2NDQgUC1TSEFEQ04tRFJPUERPV04tTUVOVS1DT05URU5ULnlhbWwAWZFu0eymQTyBij+G4hkBnwYPjnIxMDA2NDQgUC1TSEFEQ04tRFJPUERPV04tTUVOVS1JVEVNLnlhbWwA7FpCiIIkI+K6v5yvs2uiOa+6eooxMDA2NDQgUC1TSEFEQ04tRFJPUERPV04tTUVOVS1UUklHR0VSLnlhbWwAAOJWLh12OTjLOPKUl5Z7J0H0cAUxMDA2NDQgUC1TSEFEQ04tRFJPUERPV04tTUVOVS55YW1sALqAKi8e7TJJvgL2j3K1rqk+Q2+1MTAwNjQ0IFAtU0hBRENOLUhPVkVSLUNBUkQtQ09OVEVOVC55YW1sAB+3DAneNP1yFOOp889OYr2Q7wYMMTAwNjQ0IFAtU0hBRENOLUhPVkVSLUNBUkQtVFJJR0dFUi55YW1sADjKGzsK8dskIxQ+tRlVAY7j4IcGMTAwNjQ0IFAtU0hBRENOLUhPVkVSLUNBUkQueWFtbAB24B5nwNegCv4TlbgSgE3lYWv97jEwMDY0NCBQLVNIQURDTi1JTlBVVC55YW1sAKMl5INMme/JJLPcl5CyetHXL6hQMTAwNjQ0IFAtU0hBRENOLUxBQkVMLnlhbWwALTsjElFYBBC/V2//kokjEBvyFhwxMDA2NDQgUC1TSEFEQ04tUkFESU8tR1JPVVAtSU5ESUNBVE9SLnlhbWwAPwuwIL6movLc/MJsw8KC/mdC/7oxMDA2NDQgUC1TSEFEQ04tUkFESU8tR1JPVVAtSVRFTS55YW1sACCc+KSvztnwLfIaGWCCiMS9PpOkMTAwNjQ0IFAtU0hBRENOLVJBRElPLUdST1VQLnlhbWwApZPcwis0bdArR/z84XSI/Zm0hoUxMDA2NDQgUC1TSEFEQ04tU0NST0xMLUFSRUEtU0NST0xMQkFSLnlhbWwAro9m6+wwJGhwQQznw91zjxnCVngxMDA2NDQgUC1TSEFEQ04tU0NST0xMLUFSRUEtVEhVTUIueWFtbAAqgqOHesq5UnGFL3rlQhVTpKd1CjEwMDY0NCBQLVNIQURDTi1TQ1JPTEwtQVJFQS1WSUVXUE9SVC55YW1sAI3g377maf3wcxkEpQBFt3cdnIcWMTAwNjQ0IFAtU0hBRENOLVNDUk9MTC1BUkVBLnlhbWwAX9zC13CoikS63BLVhzkP6CSdK2UxMDA2NDQgUC1TSEFEQ04tU0VMRUNULUNPTlRFTlQueWFtbADMZrEAd7bVjCZjxsnQjVtFbOKtJjEwMDY0NCBQLVNIQURDTi1TRUxFQ1QtSVRFTS55YW1sABAQsTqpYSfbjD7Y6b7aTuiulSieMTAwNjQ0IFAtU0hBRENOLVNFTEVDVC1UUklHR0VSLnlhbWwAY/aezDMcPk7X4wTiWeyjYGqh+m8xMDA2NDQgUC1TSEFEQ04tU0VMRUNULVZBTFVFLnlhbWwAVoBK3axQ2SlTV7iuBr0AO0aUKP0xMDA2NDQgUC1TSEFEQ04tU0VMRUNULnlhbWwAMuZ/H5Kg6/Ww1m1rqcuzZjHRQ+4xMDA2NDQgUC1TSEFEQ04tU0VQQVJBVE9SLnlhbWwARnHd96jiZLOvpvPuJ/ZJpUbjfD0xMDA2NDQgUC1TSEFEQ04tU1VSRkFDRS55YW1sAL+zbF/i8u3fS4dSBtavdhENCebfMTAwNjQ0IFAtU0hBRENOLVNXSVRDSC1USFVNQi55YW1sAJFVHiQ50OXFUOzkeQSwo9J5dsAkMTAwNjQ0IFAtU0hBRENOLVNXSVRDSC55YW1sAM3ft23Q8M1SzOy5PlsnatkP+nJQMTAwNjQ0IFAtU0hBRENOLVRBQlMtQ09OVEVOVC55YW1sAH2/7LWefOfgdmwMpTJ+NNoun7DyMTAwNjQ0IFAtU0hBRENOLVRBQlMtTElTVC55YW1sANUkNMCXxdhCCHvl++ZVMNnnjxWKMTAwNjQ0IFAtU0hBRENOLVRBQlMtVFJJR0dFUi55YW1sAO8lYS2ksSsjNBulG4ckBzM/7DNWMTAwNjQ0IFAtU0hBRENOLVRBQlMueWFtbABxETDr6pVwBPjqEZrp/cfPNATtOzEwMDY0NCBQLVNIQURDTi1URVhULnlhbWwAZOh4yxvn467T+acCco+MKqK8abcxMDA2NDQgUC1TSEFEQ04tVEVYVEFSRUEueWFtbADqYuYSU/3QH76WVZpwuo2s5JBMNzEwMDY0NCBQLVNIQURDTi1UT0dHTEUueWFtbACbQM7bAvypoCeKbgLUJjIdrWDVUTEwMDY0NCBQLVNIQURDTi1UT09MVElQLUNPTlRFTlQueWFtbABjArWP25qqbrdAPFl+NVHI2zK+HjEwMDY0NCBQLVNIQURDTi1UT09MVElQLUdST1VQLnlhbWwAp0gcH7kyHoNIDnbBzQErL4VsBcoxMDA2NDQgUC1TSEFEQ04tVE9PTFRJUC1UUklHR0VSLnlhbWwAzhM+ifkyumOVJURgRF4BD1U4mrYxMDA2NDQgUC1TSEFEQ04tVE9PTFRJUC55YW1sAGwq2aEJHK+vATUcXA68WCTo2S/4"
+          "sha": "cfc4765903a7800d58fd1bd5ae4cee12c951b465",
+          "contentBase64": "MTAwNjQ0IFAtQkFTRS1BQ0NPUkRJT04tQ09OVEVOVC55YW1sAPPdSshvP+qiDMd0AHoZZqrxughxMTAwNjQ0IFAtQkFTRS1BQ0NPUkRJT04tSEVBRElORy55YW1sABDz3w9wqQtDJm5AQxjevQ1II7nuMTAwNjQ0IFAtQkFTRS1BQ0NPUkRJT04tSVRFTS55YW1sAKH/EanOHFTBvEoZVXWwYmSRgLYYMTAwNjQ0IFAtQkFTRS1BQ0NPUkRJT04tVFJJR0dFUi55YW1sAIfARlQZD3X3qbyeIA2kowpsYEAyMTAwNjQ0IFAtQkFTRS1BQ0NPUkRJT04ueWFtbACYwtUPRVrf2M7Nm/wAnYdxTc605jEwMDY0NCBQLUJBU0UtQVNZTkMtUkVHSU9OLnlhbWwA/LYU2hI5MiPvXpnC0Q9yUsAbmqsxMDA2NDQgUC1CQVNFLUJVVFRPTi55YW1sAOHj55T5LF1H/obg8cbs34GBsxhZMTAwNjQ0IFAtQkFTRS1DSEVDS0JPWC1JTkRJQ0FUT1IueWFtbABEoBUZ2GIp/FakQ60gvDjZ1c+7njEwMDY0NCBQLUJBU0UtQ0hFQ0tCT1gueWFtbABMSFzS2Q+jbR/Syox51R3clJG/wTEwMDY0NCBQLUJBU0UtQ09MTEFQU0lCTEUtQ09OVEVOVC55YW1sABdRIHcHE/HuVW9tuP9trBTrNe5hMTAwNjQ0IFAtQkFTRS1DT0xMQVBTSUJMRS1UUklHR0VSLnlhbWwAtXLG6kT8THWUIcKMXFfvbl27lB4xMDA2NDQgUC1CQVNFLUNPTExBUFNJQkxFLnlhbWwAq2siFe2NvCvU5N4vhR93ql3A57MxMDA2NDQgUC1CQVNFLURJQUxPRy1DTE9TRS55YW1sALLZxOMzmiLLlCLylXhMRcwUROi1MTAwNjQ0IFAtQkFTRS1ESUFMT0ctQ09OVEVOVC55YW1sABb7IVTZ/mnIL6nuqosZKHOTkDkdMTAwNjQ0IFAtQkFTRS1ESUFMT0ctREVTQ1JJUFRJT04ueWFtbAD21HEhF08C05amU1mY9qxbAxyErTEwMDY0NCBQLUJBU0UtRElBTE9HLU1BU0sueWFtbAC97LatlkDTCaxSpU8YA55fevEo5jEwMDY0NCBQLUJBU0UtRElBTE9HLVRJVExFLnlhbWwA8nfoQaGjIfzvCRB5l1wlxqksSa0xMDA2NDQgUC1CQVNFLURJQUxPRy1UUklHR0VSLnlhbWwA35Ku+oro3f00f5+WabcD5DaOJc0xMDA2NDQgUC1CQVNFLURJQUxPRy55YW1sAGvHcsaume6vpOobrgwo7ES8jVFxMTAwNjQ0IFAtQkFTRS1EUk9QRE9XTi1NRU5VLUNPTlRFTlQueWFtbADFE4lc92r3D7ONTTY3zNIzkvruIzEwMDY0NCBQLUJBU0UtRFJPUERPV04tTUVOVS1JVEVNLnlhbWwAnyc68klBi6lu6KSJEuwCB7UPXCExMDA2NDQgUC1CQVNFLURST1BET1dOLU1FTlUtVFJJR0dFUi55YW1sANtDnR2RTmsm6/c3wMzp9UeM0Dp9MTAwNjQ0IFAtQkFTRS1EUk9QRE9XTi1NRU5VLnlhbWwACj6qu5Snj1Pq5xjB0UYDS4/rk68xMDA2NDQgUC1CQVNFLUhPVkVSLUNBUkQtQ09OVEVOVC55YW1sAPvC4JJJzJMOmmVLubOvklvsJRNiMTAwNjQ0IFAtQkFTRS1IT1ZFUi1DQVJELVRSSUdHRVIueWFtbABEXfSZQoOTtiJ/e8Sp/uOdjCOzEzEwMDY0NCBQLUJBU0UtSE9WRVItQ0FSRC55YW1sAIWstDKelllif0y4PV8lNjmvxK/nMTAwNjQ0IFAtQkFTRS1JTUFHRS55YW1sAFduIi6qTgVOw+7gqmRo3FuTEv0/MTAwNjQ0IFAtQkFTRS1JTlBVVC55YW1sAOVvK6SoOqxb5xfuTjKGtdCLUi5UMTAwNjQ0IFAtQkFTRS1MQUJFTC55YW1sAFCWugwpMlTAde/IY51K3Y94/rt4MTAwNjQ0IFAtQkFTRS1MSVZFLVJFR0lPTi55YW1sAICyR3L+Bc04Sus6O1XWYNzPQNYSMTAwNjQ0IFAtQkFTRS1SQURJTy1HUk9VUC1JTkRJQ0FUT1IueWFtbABuRv2c+6kLxfHGcGLamMNgCqJJNDEwMDY0NCBQLUJBU0UtUkFESU8tR1JPVVAtSVRFTS55YW1sADbBcsEjoYaQ4kTscQQ9gkNaOfgUMTAwNjQ0IFAtQkFTRS1SQURJTy1HUk9VUC55YW1sAJ21Qa4tCT3LpQKt+DvkWK6lup2oMTAwNjQ0IFAtQkFTRS1TQ1JPTEwtQVJFQS1TQ1JPTExCQVIueWFtbACu6akfdqyjf3IXsZmj5jpBNk1OKjEwMDY0NCBQLUJBU0UtU0NST0xMLUFSRUEtVEhVTUIueWFtbACfsgjM8VaAe+EOJqmbzV3fQ9gSBjEwMDY0NCBQLUJBU0UtU0NST0xMLUFSRUEtVklFV1BPUlQueWFtbAC6D6eRzzcm3nrYUuJGJB8vtcd5WTEwMDY0NCBQLUJBU0UtU0NST0xMLUFSRUEueWFtbAA4g0hcKh/CmaHda702tW/QmiztHDEwMDY0NCBQLUJBU0UtU0VMRUNULUNPTlRFTlQueWFtbAC0MyUi4qaElnzqkkQoIDFwBJm/5zEwMDY0NCBQLUJBU0UtU0VMRUNULUlURU0ueWFtbAA5CWSvHvNqcK7ARhU/kEaTPQAHCzEwMDY0NCBQLUJBU0UtU0VMRUNULVRSSUdHRVIueWFtbACtmQUtLYCHvNf/xz0VWziOTI419jEwMDY0NCBQLUJBU0UtU0VMRUNULVZBTFVFLnlhbWwA8qqkjrh03ztK3xJ9mR5kTdCyO0IxMDA2NDQgUC1CQVNFLVNFTEVDVC55YW1sABV2Imxxi3U+c4JErNjURkBn3VrNMTAwNjQ0IFAtQkFTRS1TRVBBUkFUT1IueWFtbAA9oSIO3rzrrXfnCd48fxQVkDLbbjEwMDY0NCBQLUJBU0UtU1VSRkFDRS55YW1sAGeqzZMLSmvfJss0kB+XMCnf72evMTAwNjQ0IFAtQkFTRS1TV0lUQ0gtVEhVTUIueWFtbACSaUy31jH1Gfdiszd305Wn7keUZTEwMDY0NCBQLUJBU0UtU1dJVENILnlhbWwAi6RWEVCT4l4wePgS+4XPEkMaDnwxMDA2NDQgUC1CQVNFLVRBQkxFLUNBUFRJT04ueWFtbAByu6gp3TXZ2dJ2riqN/oL/zC2Z9TEwMDY0NCBQLUJBU0UtVEFCTEUtQ0VMTC55YW1sAPAAgBHIK9Z8UrAsKiWUW8F8FRHUMTAwNjQ0IFAtQkFTRS1UQUJMRS1IRUFERVItQ0VMTC55YW1sAGLrx5/TsFuOf7BHVKzwzykzAPN3MTAwNjQ0IFAtQkFTRS1UQUJMRS1ST1cueWFtbADE+PIgMjQSUYuJOyZ3L91zBRuamjEwMDY0NCBQLUJBU0UtVEFCTEUueWFtbAC+5F4s2qf44VWWWOUfkTgN90jShDEwMDY0NCBQLUJBU0UtVEFCUy1DT05URU5ULnlhbWwAZbFCdfD/zTDorSy6ccbzsCVFvMgxMDA2NDQgUC1CQVNFLVRBQlMtSU5ESUNBVE9SLnlhbWwA0crGScTSlcC7PLsX7UN2fpJnBnsxMDA2NDQgUC1CQVNFLVRBQlMtTElTVC55YW1sAG+AEwk/xFJXE9aNEUxpZkwi8ffsMTAwNjQ0IFAtQkFTRS1UQUJTLVRSSUdHRVIueWFtbAANldIFLxs15MgVc8EXczQJxU1RoTEwMDY0NCBQLUJBU0UtVEFCUy55YW1sAG51iBHTgPSi2HbZ0ObYoRtdpCImMTAwNjQ0IFAtQkFTRS1URVhULnlhbWwAprPpohQnGXv5O4kf7YUrcvq2pEIxMDA2NDQgUC1CQVNFLVRFWFRBUkVBLnlhbWwASXT6i9OHFCrRqIfO6KM8vBMhZGAxMDA2NDQgUC1CQVNFLVRPR0dMRS55YW1sAGveyYpqu//2sFq6hnfW90Jj0SbwMTAwNjQ0IFAtQkFTRS1UT09MVElQLUNPTlRFTlQueWFtbAAU6vZl/llHYFo+cBkp695ZdJtdFjEwMDY0NCBQLUJBU0UtVE9PTFRJUC1HUk9VUC55YW1sAI0OZw6WgSd+k5EqWN23TFg5Bc5UMTAwNjQ0IFAtQkFTRS1UT09MVElQLVRSSUdHRVIueWFtbABdfm8gljQpN59Stk1Ks4L5dsh9vTEwMDY0NCBQLUJBU0UtVE9PTFRJUC55YW1sAA9K3wdWlLsMi/V5lSW1HOEL5135MTAwNjQ0IFAtQkFTRS1UUkFOU0lUSU9OLnlhbWwAQ/DcGFEw4t5moIMANphPGRwXuuMxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItQUNDT1JESU9OLUNPTlRFTlQueWFtbADlml+Qw/HUQxG6Ba1IgRBXDdE2kDEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1BQ0NPUkRJT04tSEVBRElORy55YW1sAJv5/i43dfRJkJsBhYuIQnelnEEuMTAwNjQ0IFAtQk9PVFNUUkFQLTItMy0yLUFDQ09SRElPTi1JVEVNLnlhbWwASe6oy4Nwgyach6ed7aAp+Ez0EOcxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItQUNDT1JESU9OLVRSSUdHRVIueWFtbAC/Ei1/FbRBZEWfkLsE5ZuPGkn5wjEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1BQ0NPUkRJT04ueWFtbACgkSc0lcXhDv6eB/KBJXImmX+TTzEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1CVVRUT04ueWFtbADaFrGXF5haIWOxzXJQf9/P9FDHEzEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1DSEVDS0JPWC1JTkRJQ0FUT1IueWFtbAAj5frbbtTcGO93bMwrQr034mEd5TEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1DSEVDS0JPWC55YW1sALRyBqjq55JqxGte1hc8GndjrorgMTAwNjQ0IFAtQk9PVFNUUkFQLTItMy0yLUNPTExBUFNJQkxFLUNPTlRFTlQueWFtbACAsl6j939kUI0YtWbwYTVRdxhunjEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1DT0xMQVBTSUJMRS1UUklHR0VSLnlhbWwAzI2U9QMPL/xbFGpAXFTeixI2NSsxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItQ09MTEFQU0lCTEUueWFtbABGg4grXSQ911pbOfdCNRSNciwWEDEwMDY0NCBQLUJPT1RTVFJBUC0yLTMtMi1JTlBVVC55YW1sAJcKcSpcdfx4OhiWcM/mwomf+5pCMTAwNjQ0IFAtQk9PVFNUUkFQLTItMy0yLUxBQkVMLnlhbWwAN9bl1sBkWJpfOJSdjjYQ970x/UwxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItU0VQQVJBVE9SLnlhbWwAfk1ceEGv5EzsOSTRi0Pl2QXemEkxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItU1VSRkFDRS55YW1sABkblLQ0D31kdSTyLyOUSBk08T/TMTAwNjQ0IFAtQk9PVFNUUkFQLTItMy0yLVNXSVRDSC1USFVNQi55YW1sAPz0Ehssmbx61ob0YMOY9B0omAudMTAwNjQ0IFAtQk9PVFNUUkFQLTItMy0yLVNXSVRDSC55YW1sAENuA0z99sV4BeC2ysACO7D8w9mtMTAwNjQ0IFAtQk9PVFNUUkFQLTItMy0yLVRFWFRBUkVBLnlhbWwAI0Nu0IsUBOd79rsABHnIB6DcfbMxMDA2NDQgUC1CT09UU1RSQVAtMi0zLTItVE9HR0xFLnlhbWwAusVOZT7JJ+zFxo0ncI9qSvGIlloxMDA2NDQgUC1CUlVUQUxJU1QtQUNDT1JESU9OLUNPTlRFTlQueWFtbAD8lJ9ltz9+/AGMSSdOVnPjohFPLjEwMDY0NCBQLUJSVVRBTElTVC1BQ0NPUkRJT04tSEVBRElORy55YW1sAFaEsJK6ca0ztk0EqJPa0QUdBej7MTAwNjQ0IFAtQlJVVEFMSVNULUFDQ09SRElPTi1JVEVNLnlhbWwAsnQ5VR19JEbqagJKzeg/l2OLIY8xMDA2NDQgUC1CUlVUQUxJU1QtQUNDT1JESU9OLVRSSUdHRVIueWFtbAC97/ioPN8Cbc37BgODIuHBYpei7zEwMDY0NCBQLUJSVVRBTElTVC1BQ0NPUkRJT04ueWFtbAAXYytL6E+IXRKAsxq3ttyNfESECDEwMDY0NCBQLUJSVVRBTElTVC1CQURHRS55YW1sAECekKOy7+64OPQ7NQT4jDb9oURmMTAwNjQ0IFAtQlJVVEFMSVNULUJVVFRPTi55YW1sAMlHN9Qo9YJCPQ1zvu6c26UlMPRYMTAwNjQ0IFAtQlJVVEFMSVNULUNBUkQtQ09OVEVOVC55YW1sALELAKlGEic9OFSRnhYOnkUnEjBAMTAwNjQ0IFAtQlJVVEFMSVNULUNBUkQtRk9PVEVSLnlhbWwA3PjAck76JthR+PX20xKg8EB4m6cxMDA2NDQgUC1CUlVUQUxJU1QtQ0FSRC1IRUFERVIueWFtbACQ877OePv8rzTnGekbw1KDBESakDEwMDY0NCBQLUJSVVRBTElTVC1DQVJELnlhbWwANfTxIill2KGnY1CQ5moVmSMp83sxMDA2NDQgUC1CUlVUQUxJU1QtQ0hFQ0tCT1gtSU5ESUNBVE9SLnlhbWwAlEtudFxATE0FtNU5dBdDGaEhvrExMDA2NDQgUC1CUlVUQUxJU1QtQ0hFQ0tCT1gueWFtbADYRiQSgEuZUCnAar2BBtdaLneDYDEwMDY0NCBQLUJSVVRBTElTVC1DT0xMQVBTSUJMRS1DT05URU5ULnlhbWwA9+m5sKg+YKDl5Gx/trRoKbEs+V0xMDA2NDQgUC1CUlVUQUxJU1QtQ09MTEFQU0lCTEUtVFJJR0dFUi55YW1sAGVQSrxGFI40Ov+6J/kL+DgaU15yMTAwNjQ0IFAtQlJVVEFMSVNULUNPTExBUFNJQkxFLnlhbWwAlPnNqw96/EopFbGJ+tlQuAqWyjAxMDA2NDQgUC1CUlVUQUxJU1QtRElBTE9HLUNMT1NFLUlDT04ueWFtbACbG4tcRqo+RWwpCfJMvS+WqBeLqDEwMDY0NCBQLUJSVVRBTElTVC1ESUFMT0ctQ0xPU0UueWFtbAAyXp1pvGUUSeGe+j978H9oTmuVnzEwMDY0NCBQLUJSVVRBTElTVC1ESUFMT0ctQ09OVEVOVC55YW1sALuCFm71ppQwt1H7rAlLnJo0lPyAMTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy1ERVNDUklQVElPTi55YW1sAEEi8jH4xxh2DTAAJ1IRdMPhB6ImMTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy1GT09URVIueWFtbAD3nQQQqR7u1bQ9toVcRJP2MEztCTEwMDY0NCBQLUJSVVRBTElTVC1ESUFMT0ctSEVBREVSLnlhbWwASFSA3DC6Aqe8MmNQ04HVJaG2/bAxMDA2NDQgUC1CUlVUQUxJU1QtRElBTE9HLU1BU0sueWFtbADpPh0vRUyCAPKLQGe2y+I/U7r4BzEwMDY0NCBQLUJSVVRBTElTVC1ESUFMT0ctVElUTEUueWFtbACkEAhs4HL3E7jMrGCXlojCycqouDEwMDY0NCBQLUJSVVRBTElTVC1ESUFMT0ctVFJJR0dFUi55YW1sAIkZw5kgQy9/5nx6SmRV3p7A6p1hMTAwNjQ0IFAtQlJVVEFMSVNULURJQUxPRy55YW1sACDYHd4rzXYroz8069/a5SsTd7CZMTAwNjQ0IFAtQlJVVEFMSVNULURST1BET1dOLU1FTlUtQ09OVEVOVC55YW1sABxuk3Hqo3K9XZxmeWhqNbgUlPJtMTAwNjQ0IFAtQlJVVEFMSVNULURST1BET1dOLU1FTlUtSVRFTS55YW1sAApA5b8i1G1EK6F9p9/ylfOpcPzqMTAwNjQ0IFAtQlJVVEFMSVNULURST1BET1dOLU1FTlUtVFJJR0dFUi55YW1sAPTPg3/xhdEtAyQEcclCqFIwvNlkMTAwNjQ0IFAtQlJVVEFMSVNULURST1BET1dOLU1FTlUueWFtbADwAwqSH4zz4C2/kFb3KUfBwqqjWjEwMDY0NCBQLUJSVVRBTElTVC1IT1ZFUi1DQVJELUNPTlRFTlQueWFtbAAE2i/e5I6XZe4xq91k1Bfd17eEMjEwMDY0NCBQLUJSVVRBTElTVC1IT1ZFUi1DQVJELVRSSUdHRVIueWFtbAAXj7tY8CnoosLz+9N+6KRtRhlcAzEwMDY0NCBQLUJSVVRBTElTVC1IT1ZFUi1DQVJELnlhbWwAQu0PhGl+h4eU6bPm5GtKsB+pzhsxMDA2NDQgUC1CUlVUQUxJU1QtTEFCRUwueWFtbADnjU1mVnLt993tqeTQy6/7mZkJvzEwMDY0NCBQLUJSVVRBTElTVC1TQ1JPTEwtQVJFQS1TQ1JPTExCQVIueWFtbACni/4r5W+rUd3H91HL4PalN5JXgzEwMDY0NCBQLUJSVVRBTElTVC1TQ1JPTEwtQVJFQS1USFVNQi55YW1sALVBW0iyKee+lboFAUJgwbHuxuhyMTAwNjQ0IFAtQlJVVEFMSVNULVNDUk9MTC1BUkVBLVZJRVdQT1JULnlhbWwA+zTyoBrJRUi8ISrKIYEI9UX98jExMDA2NDQgUC1CUlVUQUxJU1QtU0NST0xMLUFSRUEueWFtbACKNylIwr4VjGQdSbagm7/wHAD7QTEwMDY0NCBQLUJSVVRBTElTVC1TRUxFQ1QtQ09OVEVOVC55YW1sAHo8CMLpWSFGUO5oawo0TpX9BbglMTAwNjQ0IFAtQlJVVEFMSVNULVNFTEVDVC1JVEVNLnlhbWwAZs7SlIgp1vE06n2upp9pvJXE6IYxMDA2NDQgUC1CUlVUQUxJU1QtU0VMRUNULVRSSUdHRVIueWFtbACbO1bsFAjQVzSjhLaGrbdiIIQ2DTEwMDY0NCBQLUJSVVRBTElTVC1TRUxFQ1QtVkFMVUUueWFtbACnM2DdhY7aRD0vaqX08R7LYOj3mTEwMDY0NCBQLUJSVVRBTElTVC1TRUxFQ1QueWFtbAC5Gm8FnlE0MRCdfD83XjYVg0kCYTEwMDY0NCBQLUJSVVRBTElTVC1TRVBBUkFUT1IueWFtbAAZ/BrKW6vo56VBaz9ofPvlY04lRDEwMDY0NCBQLUJSVVRBTElTVC1TS0VMRVRPTi55YW1sACEvEN2+iEoV3ygkUmuLyEm6ozqNMTAwNjQ0IFAtQlJVVEFMSVNULVNQSU5ORVIueWFtbACx0hUVgoIw988VfsN+TYVT8kaTTzEwMDY0NCBQLUJSVVRBTElTVC1TVVJGQUNFLnlhbWwAh+BiTsTZ0sSAHchiDaBdW9cWKYkxMDA2NDQgUC1CUlVUQUxJU1QtU1dJVENILVRIVU1CLnlhbWwA576u65bsMpHBTNiq1HJiyzCNaMoxMDA2NDQgUC1CUlVUQUxJU1QtU1dJVENILnlhbWwAoW87mFwmwvxcWP0/68/xjui7ib4xMDA2NDQgUC1CUlVUQUxJU1QtVEFCUy1DT05URU5ULnlhbWwA5t7dGGhlIC9T80GfIhb4bIH+VLYxMDA2NDQgUC1CUlVUQUxJU1QtVEFCUy1MSVNULnlhbWwAawqKEoOQ8lVd5gflIIepcbXmnkAxMDA2NDQgUC1CUlVUQUxJU1QtVEFCUy1UUklHR0VSLnlhbWwAEB7dIj4qcZL9/ra89VdUyqsJfkIxMDA2NDQgUC1CUlVUQUxJU1QtVEFCUy55YW1sADve6VvuvBu8gvCv8oRhOOiYaaZJMTAwNjQ0IFAtQlJVVEFMSVNULVRFWFQueWFtbABkpLLFpekmY0l+KmYun0dsGPUT5DEwMDY0NCBQLUJSVVRBTElTVC1URVhUQVJFQS55YW1sAOfbt+WT9SaWvSZYBKypoPZ/S9KaMTAwNjQ0IFAtQlJVVEFMSVNULVRPR0dMRS55YW1sAOdxdOMkFnlLcE2yhsHMmbUKA073MTAwNjQ0IFAtQlJVVEFMSVNULVRPT0xUSVAtQ09OVEVOVC55YW1sAFJx38k0J6zrxikNJXK3UR9ay8JHMTAwNjQ0IFAtQlJVVEFMSVNULVRPT0xUSVAtR1JPVVAueWFtbACxrt8sYPwFiOl/3FlwfdofdUWHDTEwMDY0NCBQLUJSVVRBTElTVC1UT09MVElQLVRSSUdHRVIueWFtbACFgtjkdJyIKOJqPFwa9WbkxitzGDEwMDY0NCBQLUJSVVRBTElTVC1UT09MVElQLnlhbWwA/LdCt78p29xvY1RUnsSwHXDn5pQxMDA2NDQgUC1MSVFVSUQtR0xBU1MtQUNDT1JESU9OLUNPTlRFTlQueWFtbACXwO6eIJTwszdaSNxWZwkRkuyNoDEwMDY0NCBQLUxJUVVJRC1HTEFTUy1BQ0NPUkRJT04tSEVBRElORy55YW1sAKr2lP11x1xDuGZhKpI2y56vmyZeMTAwNjQ0IFAtTElRVUlELUdMQVNTLUFDQ09SRElPTi1JVEVNLnlhbWwAWStMqs0AsA6f2TukQGTtyJsnhUkxMDA2NDQgUC1MSVFVSUQtR0xBU1MtQUNDT1JESU9OLVRSSUdHRVIueWFtbABey1q0TivtWCsuOhembJW5//zgqzEwMDY0NCBQLUxJUVVJRC1HTEFTUy1BQ0NPUkRJT04ueWFtbADMOM+H/5vCGROORnKtWWWM4Fbt4DEwMDY0NCBQLUxJUVVJRC1HTEFTUy1CVVRUT04ueWFtbAAqBbhCo4uXGlrs4L/o6JSe1eiTbTEwMDY0NCBQLUxJUVVJRC1HTEFTUy1DT0xMQVBTSUJMRS1DT05URU5ULnlhbWwAr6m5xmoDf3uXy0hdGqnRg2c9hysxMDA2NDQgUC1MSVFVSUQtR0xBU1MtQ09MTEFQU0lCTEUtVFJJR0dFUi55YW1sAP6GQ9AEy1sgj2Vva3TE8EgqpQzVMTAwNjQ0IFAtTElRVUlELUdMQVNTLUNPTExBUFNJQkxFLnlhbWwAyai4eAo2OHJShn2/tsGW39UxrnsxMDA2NDQgUC1MSVFVSUQtR0xBU1MtTEFCRUwueWFtbAAYCAqxVO3yD88+xyZmN1YjbUbUBTEwMDY0NCBQLUxJUVVJRC1HTEFTUy1TVVJGQUNFLnlhbWwA5NJ/mB2OuYZAPofUoe+JPBFL/8AxMDA2NDQgUC1MVUNJREUtSUNPTi55YW1sAGOw/K8Mc93SO3dfIpkv4UdqZxMeMTAwNjQ0IFAtU0hBRENOLUFDQ09SRElPTi1DT05URU5ULnlhbWwAkn8CFm6QoXyCTwMvEvG7Nkh2hGMxMDA2NDQgUC1TSEFEQ04tQUNDT1JESU9OLUhFQURJTkcueWFtbADOqFSIRC6tQzCh4D6s+FE9esMAZTEwMDY0NCBQLVNIQURDTi1BQ0NPUkRJT04tSVRFTS55YW1sABNT5lIUDrMhZlRqG4R7IlEHRd5WMTAwNjQ0IFAtU0hBRENOLUFDQ09SRElPTi1UUklHR0VSLnlhbWwAtMiMj+qpzgHEkkmc4YDP0cUW7B4xMDA2NDQgUC1TSEFEQ04tQUNDT1JESU9OLnlhbWwAuN946wqWxMm3oZrrbEvpa33GmI4xMDA2NDQgUC1TSEFEQ04tQlVUVE9OLnlhbWwAwAKAu1sbqARQ5dUEsKBV/UL/z0UxMDA2NDQgUC1TSEFEQ04tQ0hFQ0tCT1gtSU5ESUNBVE9SLnlhbWwAT+1jJ6cAHJ1vOMXiFaJ7ydG0DP8xMDA2NDQgUC1TSEFEQ04tQ0hFQ0tCT1gueWFtbAAv+mkQkKIjbhmof4J89hHB7YyK/DEwMDY0NCBQLVNIQURDTi1DT0xMQVBTSUJMRS1DT05URU5ULnlhbWwA+8j2zojCEZ7/9z6Zv8XfcBnOfjIxMDA2NDQgUC1TSEFEQ04tQ09MTEFQU0lCTEUtVFJJR0dFUi55YW1sAPqCy3Vo1MYtlhWVAEjilRN50QxvMTAwNjQ0IFAtU0hBRENOLUNPTExBUFNJQkxFLnlhbWwAQC6/4RJs45kQ9lAVpEuJfBr3lfoxMDA2NDQgUC1TSEFEQ04tRElBTE9HLUNMT1NFLUlDT04ueWFtbAAPEY7lbZBb59f+55c+Y483G9s/ETEwMDY0NCBQLVNIQURDTi1ESUFMT0ctQ0xPU0UueWFtbABc6D3A+snk+toBXY42rwX2pNgVFzEwMDY0NCBQLVNIQURDTi1ESUFMT0ctQ09OVEVOVC55YW1sAFz4I4qlSXLIVtXn7SnFsvNv+UTqMTAwNjQ0IFAtU0hBRENOLURJQUxPRy1ERVNDUklQVElPTi55YW1sAAjWzfYwmyUFJkjDgfltICOgDQqTMTAwNjQ0IFAtU0hBRENOLURJQUxPRy1GT09URVIueWFtbACrZmnMI8wK6LBVylcOx5qQftHZIjEwMDY0NCBQLVNIQURDTi1ESUFMT0ctSEVBREVSLnlhbWwAy+DOWfQnd1pp31q3XJz0y0/yaL0xMDA2NDQgUC1TSEFEQ04tRElBTE9HLU1BU0sueWFtbAA4pds0qHTs7RQJ/8/O4z9cFCmoiDEwMDY0NCBQLVNIQURDTi1ESUFMT0ctVElUTEUueWFtbAC+0srvba0Rxf6qXfrp7IpNsDHdLDEwMDY0NCBQLVNIQURDTi1ESUFMT0ctVFJJR0dFUi55YW1sAOeLBEilBo1gj2IarVdZfPJrJCS7MTAwNjQ0IFAtU0hBRENOLURJQUxPRy55YW1sACWQhD7mum84ILlr4qK5dH3cM+EeMTAwNjQ0IFAtU0hBRENOLURST1BET1dOLU1FTlUtQ09OVEVOVC55YW1sAFmRbtHspkE8gYo/huIZAZ8GD45yMTAwNjQ0IFAtU0hBRENOLURST1BET1dOLU1FTlUtSVRFTS55YW1sAOxaQoiCJCPiur+cr7NrojmvunqKMTAwNjQ0IFAtU0hBRENOLURST1BET1dOLU1FTlUtVFJJR0dFUi55YW1sAADiVi4ddjk4yzjylJeWeydB9HAFMTAwNjQ0IFAtU0hBRENOLURST1BET1dOLU1FTlUueWFtbAC6gCovHu0ySb4C9o9yta6pPkNvtTEwMDY0NCBQLVNIQURDTi1IT1ZFUi1DQVJELUNPTlRFTlQueWFtbAAftwwJ3jT9chTjqfPPTmK9kO8GDDEwMDY0NCBQLVNIQURDTi1IT1ZFUi1DQVJELVRSSUdHRVIueWFtbAA4yhs7CvHbJCMUPrUZVQGO4+CHBjEwMDY0NCBQLVNIQURDTi1IT1ZFUi1DQVJELnlhbWwAduAeZ8DXoAr+E5W4EoBN5WFr/e4xMDA2NDQgUC1TSEFEQ04tSU5QVVQueWFtbACjJeSDTJnvySSz3JeQsnrR1y+oUDEwMDY0NCBQLVNIQURDTi1MQUJFTC55YW1sAC07IxJRWAQQv1dv/5KJIxAb8hYcMTAwNjQ0IFAtU0hBRENOLVJBRElPLUdST1VQLUlORElDQVRPUi55YW1sAD8LsCC+pqLy3PzCbMPCgv5nQv+6MTAwNjQ0IFAtU0hBRENOLVJBRElPLUdST1VQLUlURU0ueWFtbAAgnPikr87Z8C3yGhlggojEvT6TpDEwMDY0NCBQLVNIQURDTi1SQURJTy1HUk9VUC55YW1sAKWT3MIrNG3QK0f8/OF0iP2ZtIaFMTAwNjQ0IFAtU0hBRENOLVNDUk9MTC1BUkVBLVNDUk9MTEJBUi55YW1sAK6PZuvsMCRocEEM58Pdc48ZwlZ4MTAwNjQ0IFAtU0hBRENOLVNDUk9MTC1BUkVBLVRIVU1CLnlhbWwAKoKjh3rKuVJxhS965UIVU6SndQoxMDA2NDQgUC1TSEFEQ04tU0NST0xMLUFSRUEtVklFV1BPUlQueWFtbACN4N++5mn98HMZBKUARbd3HZyHFjEwMDY0NCBQLVNIQURDTi1TQ1JPTEwtQVJFQS55YW1sAF/cwtdwqIpEutwS1Yc5D+gknStlMTAwNjQ0IFAtU0hBRENOLVNFTEVDVC1DT05URU5ULnlhbWwAzGaxAHe21YwmY8bJ0I1bRWzirSYxMDA2NDQgUC1TSEFEQ04tU0VMRUNULUlURU0ueWFtbAAQELE6qWEn24w+2Om+2k7orpUonjEwMDY0NCBQLVNIQURDTi1TRUxFQ1QtVFJJR0dFUi55YW1sAGP2nswzHD5O1+ME4lnso2BqofpvMTAwNjQ0IFAtU0hBRENOLVNFTEVDVC1WQUxVRS55YW1sAFaASt2sUNkpU1e4rga9ADtGlCj9MTAwNjQ0IFAtU0hBRENOLVNFTEVDVC55YW1sADLmfx+SoOv1sNZta6nLs2Yx0UPuMTAwNjQ0IFAtU0hBRENOLVNFUEFSQVRPUi55YW1sAEZx3feo4mSzr6bz7if2SaVG43w9MTAwNjQ0IFAtU0hBRENOLVNVUkZBQ0UueWFtbAC/s2xf4vLt30uHUgbWr3YRDQnm3zEwMDY0NCBQLVNIQURDTi1TV0lUQ0gtVEhVTUIueWFtbACRVR4kOdDlxVDs5HkEsKPSeXbAJDEwMDY0NCBQLVNIQURDTi1TV0lUQ0gueWFtbADN37dt0PDNUszsuT5bJ2rZD/pyUDEwMDY0NCBQLVNIQURDTi1UQUJTLUNPTlRFTlQueWFtbAB9v+y1nnzn4HZsDKUyfjTaLp+w8jEwMDY0NCBQLVNIQURDTi1UQUJTLUxJU1QueWFtbADVJDTAl8XYQgh75fvmVTDZ548VijEwMDY0NCBQLVNIQURDTi1UQUJTLVRSSUdHRVIueWFtbADvJWEtpLErIzQbpRuHJAczP+wzVjEwMDY0NCBQLVNIQURDTi1UQUJTLnlhbWwAcREw6+qVcAT46hGa6f3HzzQE7TsxMDA2NDQgUC1TSEFEQ04tVEVYVC55YW1sAGToeMsb5+Ou0/mnAnKPjCqivGm3MTAwNjQ0IFAtU0hBRENOLVRFWFRBUkVBLnlhbWwA6mLmElP90B++llWacLqNrOSQTDcxMDA2NDQgUC1TSEFEQ04tVE9HR0xFLnlhbWwAxyYDTOTmPm4HZJ/D/mLZTmQJSDQxMDA2NDQgUC1TSEFEQ04tVE9PTFRJUC1DT05URU5ULnlhbWwAYwK1j9uaqm63QDxZfjVRyNsyvh4xMDA2NDQgUC1TSEFEQ04tVE9PTFRJUC1HUk9VUC55YW1sAKdIHB+5Mh6DSA52wc0BKy+FbAXKMTAwNjQ0IFAtU0hBRENOLVRPT0xUSVAtVFJJR0dFUi55YW1sAM4TPon5MrpjlSVEYEReAQ9VOJq2MTAwNjQ0IFAtU0hBRENOLVRPT0xUSVAueWFtbABsKtmhCRyvrwE1HFwOvFgk6Nkv+A=="
         }
       ]
     },
     "sourceBindings": [
       {
         "path": "packages/prototypes/base/package.json",
-        "sha256": "54cb44c26c569fe107b3f405f15f478a3d0f75e116225f27fb3daa3e57559859"
+        "sha256": "8a5df5ae16d5db60e3722439d9da809d004e67c1e17d3cf38b5b664672f1c1c5"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/content.proto.ts",
+        "sha256": "e6d4f703587a54bfa535281b9ec38b6ac3a9dce6a40ca4fef3b50b0e394b86c3"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/heading.proto.ts",
+        "sha256": "c0e1586cb46e07568eab644482fe1eb2b68e641433b5bbcda2c4fc64f91d19dd"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/index.ts",
+        "sha256": "dd5e56ba69cd190c9d7114a6d2c57a38e184c535e521c17b16e213bb8ba86bdb"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/item.proto.ts",
+        "sha256": "98055f6c0d0c34572dd8c2aceb8586bdf0634cf4837ff420dfe51aaa2dc528dd"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/root.proto.ts",
+        "sha256": "6b897cf541ca6a881084b4f80688241af32302571da46b85240b46d57d7a836b"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/shared.ts",
+        "sha256": "ac3d0d772e0fe7a6da73fc50674191fe549e83c99f134881dba46a6849af6c62"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/trigger.proto.ts",
+        "sha256": "0fc5bacc0b37607effe8950e83c96d4ba0379f80a7e8f3c49c515a5e9d087234"
+      },
+      {
+        "path": "packages/prototypes/base/src/accordion/types.ts",
+        "sha256": "69292091a24afefce61b3a1e0598ae256a1bca69f581487779fc8ad7bd7027da"
       },
       {
         "path": "packages/prototypes/base/src/async-region/index.ts",
@@ -26920,7 +27008,7 @@
       },
       {
         "path": "packages/prototypes/base/src/index.ts",
-        "sha256": "3d44675e2fea06cb8d254530bec3c33ba5ccbf8c1aa557b77ed533d67293ebdd"
+        "sha256": "a8fd77000073b154d4f4cccb1b88fc4becf3f331fe4dd398bb2e042440693778"
       },
       {
         "path": "packages/prototypes/base/src/input/index.ts",
@@ -27247,6 +27335,10 @@
         "sha256": "67ab34f7c089252d78437a3ae6c1e23cdc1e806b8e0d826e67c62d8bb383e2d6"
       },
       {
+        "path": "packages/prototypes/base/test/accordion.test.ts",
+        "sha256": "9c6db5ca40793d543eb8d32d879442f62c2568e1f138113c29b91bdc28484b3c"
+      },
+      {
         "path": "packages/prototypes/base/test/as-button.test.ts",
         "sha256": "28a6eecebb473b37ad489c635538dbf02e6dca4d035243352af1391542efcb66"
       },
@@ -27360,7 +27452,31 @@
       },
       {
         "path": "packages/prototypes/bootstrap-2-3-2/package.json",
-        "sha256": "ad2193326f825cb4579b8eb15602a6e852bb9efff1e95c09e4f65942ca179b05"
+        "sha256": "3568492c16b02efccdf54f1989aeb34f61d9eec2fd03f2ac76f9487a33e7e039"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/accordion/content.proto.ts",
+        "sha256": "2e9d5c40ba62c422b6290e45edb7c5cc71fbb9bff474c83c26ecdf3d0d095a6d"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/accordion/heading.proto.ts",
+        "sha256": "bbe116d9e486ba5cb13bf884bb356a2df74f0e9a0d0ab9b3da16d8ba97586dc8"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/accordion/index.ts",
+        "sha256": "ba584d1cccc0df29d3c79563260d6a8d27094f8498d00d538baccb6428eb2934"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/accordion/item.proto.ts",
+        "sha256": "82cc999ea05710e0b975e8379d52311efbed8223fc8f990ddc6d7425c612f7b6"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/accordion/root.proto.ts",
+        "sha256": "c6ac56bdf85f4226a29eff20daf3974bb7f43eeb2e678a551a4bf0f88e8a4307"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/accordion/trigger.proto.ts",
+        "sha256": "2d5cd6525edb69945c56cb0b628462b6b72c738ab5dc498446a7bc99ba0f4c96"
       },
       {
         "path": "packages/prototypes/bootstrap-2-3-2/src/button/button.proto.ts",
@@ -27383,8 +27499,28 @@
         "sha256": "ff264353f6f32a5966bbf0a20893684a367314c4f0d5b0f101903b302bba0a37"
       },
       {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/collapsible/content.proto.ts",
+        "sha256": "9e3091d3f161856e4e8cb63b8a6a3aa9483e5582de4f7dbc0022bc9381b98206"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/collapsible/index.ts",
+        "sha256": "0e8973f3e42c2e2b988d68f907e7accc782e2be531b49e50152db1e44965caff"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/collapsible/root.proto.ts",
+        "sha256": "a5ccde029aa0324fe8a2392ddf769aa9bff58d919efd8dc098a73175644be2ca"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/collapsible/trigger.proto.ts",
+        "sha256": "2d882dc826f5cc1f68c29ca05c094e1eb2d1228f1d1c16f96daff1eb4383276e"
+      },
+      {
+        "path": "packages/prototypes/bootstrap-2-3-2/src/collapsible/types.ts",
+        "sha256": "c5d5396ff1fb2b1fa1116074d3cabd55215ee39fdd5473ff657a80bfd97ee5dd"
+      },
+      {
         "path": "packages/prototypes/bootstrap-2-3-2/src/index.ts",
-        "sha256": "1ebdfea3996ea59565f7728b2da4d47e82d7135c0ff448fd8a4218bac3cc22e9"
+        "sha256": "15bf3cc3772fd107b897936676fb57c7d94e8812bb14f37403bc2491cb8f1ce4"
       },
       {
         "path": "packages/prototypes/bootstrap-2-3-2/src/input/index.ts",
@@ -27460,7 +27596,31 @@
       },
       {
         "path": "packages/prototypes/brutalist/package.json",
-        "sha256": "1c04771e80aa07141f8099fb567d780ac20342254b09574230dd1276c6224f8d"
+        "sha256": "1085bef422a3bfbb1c95f560970085a39d5488fffd4bc900929cbe14f4a1699f"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/accordion/content.proto.ts",
+        "sha256": "8863af7c9df082f4a49e6e417071c3ce0d4a08c9d726f71d63ce8a5d45941f6d"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/accordion/heading.proto.ts",
+        "sha256": "c65991b579771d9076b4ca883d9b07bc8240908cc266359fad773119544ad3ea"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/accordion/index.ts",
+        "sha256": "2554e6c2e6bcb19b6e3d0ac1a8848f158ea7f56e5a89048f505f51acd964bbf3"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/accordion/item.proto.ts",
+        "sha256": "585473c0d21d7a881bd36f3a0c51c51653976998022e464a8de0ddec736cbf9f"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/accordion/root.proto.ts",
+        "sha256": "0a5ba3d2a1fae045a96540a9ad567738deda24662487fc565a3905e7a00fc281"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/accordion/trigger.proto.ts",
+        "sha256": "94d8120a32758b5b2d3b514bd3514054861d8050608e2dfc72048e4751515d48"
       },
       {
         "path": "packages/prototypes/brutalist/src/badge/index.ts",
@@ -27527,6 +27687,26 @@
         "sha256": "f4bfccf92b91b04a0e74ff9894252fb664ed6a802fb59307a0f7dcf10d6f191c"
       },
       {
+        "path": "packages/prototypes/brutalist/src/collapsible/content.proto.ts",
+        "sha256": "dd2a6dfd9465cdd2738b2185c1bd99f833fd565604a2dd8402cd2ebaf7c53e35"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/collapsible/index.ts",
+        "sha256": "07e614f0374250163d86304486443fa058b3aa986664bcd651bfab4b44bb9ca7"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/collapsible/root.proto.ts",
+        "sha256": "0fa6903f15db79d05d185d5724be9911057fa7b5a3837e842a8b65f0d1ff293a"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/collapsible/trigger.proto.ts",
+        "sha256": "08544dd27283c6208ba9fc0cc63628e165421688d746fcaa537cf785827099d8"
+      },
+      {
+        "path": "packages/prototypes/brutalist/src/collapsible/types.ts",
+        "sha256": "c6b6a3e7f8d7aff7b869b6ac5e27f33ad9dc0ac177df28e917118cd5e36a78bc"
+      },
+      {
         "path": "packages/prototypes/brutalist/src/dialog/close-icon.proto.ts",
         "sha256": "23aadab62280c83f4832d8856a7dc8f11a6fd767ae7c382d7fcce46e7d0247c2"
       },
@@ -27536,7 +27716,7 @@
       },
       {
         "path": "packages/prototypes/brutalist/src/dialog/content.proto.ts",
-        "sha256": "24ad086e73f4aa4f0d6077b650b4e305fa9b27ff6065d9f9b52365910c843349"
+        "sha256": "df6645afb424b05aeb6b95721ff36ace847428f59587de135951f6bcbda0d972"
       },
       {
         "path": "packages/prototypes/brutalist/src/dialog/description.proto.ts",
@@ -27620,7 +27800,7 @@
       },
       {
         "path": "packages/prototypes/brutalist/src/index.ts",
-        "sha256": "4833c7134eb34e291d03910221fc6f3261b2d031dbf761b5e1e6773016c06ec2"
+        "sha256": "da825acef1ececb9ba8950630ce73ccba90285213b96bb61bfde9292502898fc"
       },
       {
         "path": "packages/prototypes/brutalist/src/label/index.ts",
@@ -27852,7 +28032,7 @@
       },
       {
         "path": "packages/prototypes/brutalist/test/dialog.test.ts",
-        "sha256": "7c512f72c936c5471fc421f2769a90adc8247fac0b4f7ccad6e8e4303b876605"
+        "sha256": "37016c551c0252c3ad8f947372473fa3b6fd131574cce3fded7e4be5f680dd99"
       },
       {
         "path": "packages/prototypes/brutalist/test/dropdown.test.ts",
@@ -27908,7 +28088,31 @@
       },
       {
         "path": "packages/prototypes/liquid-glass/package.json",
-        "sha256": "3bb79a14d3ad78ab8669305d5f38a87952f5850d66a70542f19c33406114cebf"
+        "sha256": "4b832a3658177dc24eae8d373ede909cd1b4c0cf4e0e98125b518db232570652"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/accordion/content.proto.ts",
+        "sha256": "ae301882cf3bbad5062b510693f2e63403b7afaa3d7f2c0ad7bcfd0d4e1b52cb"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/accordion/heading.proto.ts",
+        "sha256": "ec61b64c387480417087a2d72e0ae63eb85df79d8610bd0dc9a9204bacdc76b8"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/accordion/index.ts",
+        "sha256": "54a734d56e7a5fc74cf8b58580cd0c4270ee8001af9ff8916a75e540795426f8"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/accordion/item.proto.ts",
+        "sha256": "8074f2c33a4a28be7c4edc6bcbf878c7369c780d26cea3b08e230034d7ae63eb"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/accordion/root.proto.ts",
+        "sha256": "6e46d0c13b2583d56f185a62b3c5d4bce254b872178c7f7a9945f269d55f5aa5"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/accordion/trigger.proto.ts",
+        "sha256": "02180be03ca9d15c6278cb9188127af13400a0ff83592a2bfd754c9afb017286"
       },
       {
         "path": "packages/prototypes/liquid-glass/src/button/button.proto.ts",
@@ -27919,8 +28123,28 @@
         "sha256": "8362e66e2674c2b06c0516237fc2f6a53b9d50e7edd1d10f7e19ccbaeac3d512"
       },
       {
+        "path": "packages/prototypes/liquid-glass/src/collapsible/content.proto.ts",
+        "sha256": "d515ddebdf8e29ef77be38ef8f111892d5b08eef2aa31b0893865e0b02c1bba7"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/collapsible/index.ts",
+        "sha256": "376232663fe92b316d9fda26e70791bb4344251abfaab57d9fcf9c56243a80f4"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/collapsible/root.proto.ts",
+        "sha256": "551404bc1a47833d5ba2fc1577723eca642b7e3b2159a13c6996dc7ff0181d93"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/collapsible/trigger.proto.ts",
+        "sha256": "00a5771a4e2942800a047cf2b4f38195ff3fe98056fbdc924112f7d0c92bb59f"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/src/collapsible/types.ts",
+        "sha256": "22c1181164711e7ce6f4d2e5d4b3cf911eb2813b776a3ec5d7fe9e2d9325172f"
+      },
+      {
         "path": "packages/prototypes/liquid-glass/src/index.ts",
-        "sha256": "9e8a5c13562aaf7e91a41e76659029a6523b3362bcb34d9d740fa5f842373962"
+        "sha256": "8a852f70c349747e0318714f07c45be4ec6c21061374e1e3c5c2f9c59da6da4d"
       },
       {
         "path": "packages/prototypes/liquid-glass/src/label/index.ts",
@@ -27943,8 +28167,16 @@
         "sha256": "51c2a685df3cb76d6bc89b879885f6656c70d0cd89da8c07a4b75328f4632c87"
       },
       {
+        "path": "packages/prototypes/liquid-glass/test/accordion-material.test.ts",
+        "sha256": "d44703ed032c63099df9457897e2a9f00104900fe455fa899472563e0313ebb4"
+      },
+      {
         "path": "packages/prototypes/liquid-glass/test/button.test.ts",
         "sha256": "b1888b4a72c715dda8c8ed41cc6eb3d26f76b073bb966e65b7f417e53818240b"
+      },
+      {
+        "path": "packages/prototypes/liquid-glass/test/collapsible-material.test.ts",
+        "sha256": "6bb6dbafcd067b63d85c233616461140d45cf362786bd09a50c5026c40e80d52"
       },
       {
         "path": "packages/prototypes/liquid-glass/test/material.test.ts",
@@ -41584,7 +41816,31 @@
       },
       {
         "path": "packages/prototypes/shadcn/package.json",
-        "sha256": "2ff183afaef82517fa1208413c12fa6f94366715f16e486e0f940b99b62a7c4b"
+        "sha256": "144b88907e115f573ce1492c2f9371fab70a9a0f2a6420f8ea9c5e041af638f2"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/accordion/content.proto.ts",
+        "sha256": "5cd6c4643ab5914782362b70715c77aa3e45e01ef333810bc176ba1edc459ef2"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/accordion/heading.proto.ts",
+        "sha256": "9215cf9dbbacd7641ca47373f9397fcf885f07c4784d3a5d3d6d4408c0991fc3"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/accordion/index.ts",
+        "sha256": "82ab8f6f5642d57b017d2555fef47782be78d5cb04b3b14259d192513e01351b"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/accordion/item.proto.ts",
+        "sha256": "fd7635b2f73c46907d5ebf2b38cb8e756ba411bef7b249e11360de765cdd3716"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/accordion/root.proto.ts",
+        "sha256": "5ce5761132d625263ae0de7dda45672ee710ae97810cb96216b8ee30cb0d1bb3"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/accordion/trigger.proto.ts",
+        "sha256": "6a9564cbc150ef15391f90d845ec86619167f0cd887f4adf16146ac2515a7cb3"
       },
       {
         "path": "packages/prototypes/shadcn/src/button/button.proto.ts",
@@ -41612,11 +41868,31 @@
       },
       {
         "path": "packages/prototypes/shadcn/src/checkbox/root.proto.ts",
-        "sha256": "9d3099226bcd2b575df536a2df97ffbd3a4416fd65f1e5cdc61bdd28cc33e3d3"
+        "sha256": "9abdea11438834110f86fab3dd15c5b943c9302679ee20fba6ab2d8ae3442084"
       },
       {
         "path": "packages/prototypes/shadcn/src/checkbox/types.ts",
         "sha256": "a82264cf2c6ee45eceebc8dc46a3fee22dc23529cdd2ca4c5c96ea4edc9764ae"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/collapsible/content.proto.ts",
+        "sha256": "b0153bb0878b6593492d3e8c252f28fff66080c729950ded37b11c267ecf98d6"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/collapsible/index.ts",
+        "sha256": "f74c60c73a6ac6e309ddcc69d7ba0f7df100580cb9eb0d9abad751795b2a8c07"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/collapsible/root.proto.ts",
+        "sha256": "d54abb1e02c49295d2d077bf216413f64bb5bef8383d863c64448b89cdb37f30"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/collapsible/trigger.proto.ts",
+        "sha256": "cd14c07b27a35ed94354b51b707d9afb5eea4998716a29b04cdcf987feaef144"
+      },
+      {
+        "path": "packages/prototypes/shadcn/src/collapsible/types.ts",
+        "sha256": "4a11bb7cfe658537a4a57b38e2395efc86d551a2793caa8d9f48465d5e731594"
       },
       {
         "path": "packages/prototypes/shadcn/src/component-presets.ts",
@@ -41636,7 +41912,7 @@
       },
       {
         "path": "packages/prototypes/shadcn/src/dialog/content.proto.ts",
-        "sha256": "5fa29b52681f4b56ba5fdf8ffd86ff765933f77bea7e0fc69516dbfffac3a23b"
+        "sha256": "4236c765372061ba87ec508bd7b33a0f698e435adc92fc20bcaa3c88fd554d45"
       },
       {
         "path": "packages/prototypes/shadcn/src/dialog/description.proto.ts",
@@ -41656,7 +41932,7 @@
       },
       {
         "path": "packages/prototypes/shadcn/src/dialog/overlay.proto.ts",
-        "sha256": "02499986fb4239403ee5c4614c51b3fb2f36124d435110e9b023683e0718aee3"
+        "sha256": "dc586ea28d89946fb3a0b6b040be480b32772ad656d558c63cf9a86f9f9f530f"
       },
       {
         "path": "packages/prototypes/shadcn/src/dialog/preset.ts",
@@ -41724,7 +42000,7 @@
       },
       {
         "path": "packages/prototypes/shadcn/src/index.ts",
-        "sha256": "b2e4752f073521d72f4a6c1ec0aee2d1cbe42a586854b2bee648a4d6b9d399a7"
+        "sha256": "e3a77b8952e012ee3ccd7f016ba7413d307523e9df39c14bff13e1d65e79df13"
       },
       {
         "path": "packages/prototypes/shadcn/src/input/index.ts",
@@ -41908,7 +42184,7 @@
       },
       {
         "path": "packages/prototypes/shadcn/src/toggle/toggle.proto.ts",
-        "sha256": "d365038e673c81f29b168be3615058a21afad683a2064d25e1ee74b6cb7612a9"
+        "sha256": "3b6101052381e59953f1a6448d8a21e662c5f500ff70bce102a54e835aeff87d"
       },
       {
         "path": "packages/prototypes/shadcn/src/toggle/types.ts",
@@ -41944,15 +42220,19 @@
       },
       {
         "path": "packages/prototypes/shadcn/test/checkbox.test.ts",
-        "sha256": "1e9f1853f64b0c444c6f1b21c7024ec80bbfd6558f1151df98322f92e819fbe4"
+        "sha256": "e5336e81d0f262d9e9078c1924c7600f227479ebebc4935da6b9c422f6e52690"
       },
       {
         "path": "packages/prototypes/shadcn/test/component-presets.test.ts",
         "sha256": "2ad3bbcbe306540532b0af9796db6403db9d6d904bd996e7029b58146a267851"
       },
       {
+        "path": "packages/prototypes/shadcn/test/dialog-material.test.ts",
+        "sha256": "533c67d2be379f0dbd059759a2ffd1449279fa5198a8f9555bfd16639beee3d2"
+      },
+      {
         "path": "packages/prototypes/shadcn/test/dialog.test.ts",
-        "sha256": "152afdc436dbae3797ca8855679d694c1ddbe6b1e0ec06f32404046a1f34842c"
+        "sha256": "27a4ae18d9e69d52dc88a06087735d28fa2dad72bc477c519dea53061eb5d98c"
       },
       {
         "path": "packages/prototypes/shadcn/test/dropdown.test.ts",
@@ -41996,11 +42276,31 @@
       },
       {
         "path": "packages/prototypes/shadcn/test/toggle.test.ts",
-        "sha256": "962518887229c59de2e51e918b54f2347005b7251eb53c4a89cb0812ed4b16ec"
+        "sha256": "7c3d7b0a3c285280c584a0e9a39733d5f3c5a75223191e511ab8b6dc301805d5"
       },
       {
         "path": "packages/prototypes/shadcn/test/tooltip.test.ts",
         "sha256": "ea6182b0457b85c3ac7492d85e9b91f5cf0bf7312425205bfe77bf8f241d9fd8"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-ACCORDION-CONTENT.yaml",
+        "sha256": "6430831910b1e8233c9e1f7e42ceb9fd260f90415372d375bebeb2df296b057b"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-ACCORDION-HEADING.yaml",
+        "sha256": "a0aee077a11d83d9b7f1b8792be59c2f4b4fdb66df46bf946c6bfde109c39ff0"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-ACCORDION-ITEM.yaml",
+        "sha256": "34f3e632534eea203df3b0f1c5f17beb4faadf82c5883989e14db434be651a71"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-ACCORDION-TRIGGER.yaml",
+        "sha256": "14907f4542ccc2785f6bde383188b282adb439013cfb0a2135e82bac3f7c44b2"
+      },
+      {
+        "path": "spec/prototypes/P-BASE-ACCORDION.yaml",
+        "sha256": "569c20743b6b5444990e48db2e51d554e62ebd8188a1738298475f35ed40ca25"
       },
       {
         "path": "spec/prototypes/P-BASE-ASYNC-REGION.yaml",
@@ -42239,6 +42539,26 @@
         "sha256": "07e25bdfdc83a15436048cbda68191c415b98e05e6d43e0dd608670ceb4648b5"
       },
       {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT.yaml",
+        "sha256": "afbfbd0dda245a38bd48499e7bf0e0e2f6413020fbff547dc4dc146e3d204bbb"
+      },
+      {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-ACCORDION-HEADING.yaml",
+        "sha256": "5eabe4675a32cc4725a89b346b24380e46a9304f11791de655d745d525b43e0d"
+      },
+      {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-ACCORDION-ITEM.yaml",
+        "sha256": "7f17b571f78df9f68926af04f77b77515add859eb75bb449220c8dead5165f45"
+      },
+      {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER.yaml",
+        "sha256": "d7c37e982770f6a421134c2e94659f521d9d332ed670e10b1b96a401190d3287"
+      },
+      {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-ACCORDION.yaml",
+        "sha256": "dc5cc99fb48e3f51477aba448c166613869937d77620871288a61fd65646c6e7"
+      },
+      {
         "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-BUTTON.yaml",
         "sha256": "407ae134f90e7ef3efe2ba6d6733c52f93cda8f6809defcacf95046b4d71665c"
       },
@@ -42249,6 +42569,18 @@
       {
         "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-CHECKBOX.yaml",
         "sha256": "4ab56984b5a4eea92df9ccc553d8e2b6018bdfba5bc705b22c436dab717fc26a"
+      },
+      {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT.yaml",
+        "sha256": "bdc7a3e66038b066c8bc0937638a37549911e60ce69b2a01154b2daca9887b3b"
+      },
+      {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER.yaml",
+        "sha256": "981c2670a0b1bc8fca77a5e0d4cf489469442dcc86c05c5035c2ec7d4acb5181"
+      },
+      {
+        "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-COLLAPSIBLE.yaml",
+        "sha256": "8d2d76d9bd3ffa2949e4c5664ef7acda496d68616f6b08836b95b819caf14d4d"
       },
       {
         "path": "spec/prototypes/P-BOOTSTRAP-2-3-2-INPUT.yaml",
@@ -42283,6 +42615,26 @@
         "sha256": "31abd4ad8d36d2c2fb32f75d91fe7b21e87a3fd72f4351d9dbbe9b12dbf4234b"
       },
       {
+        "path": "spec/prototypes/P-BRUTALIST-ACCORDION-CONTENT.yaml",
+        "sha256": "6f8faf793f0c511ca124e6057869fd1ff3684e7d067f626b09a1f860754b84ed"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-ACCORDION-HEADING.yaml",
+        "sha256": "0c41c94f87d6a9fbad4a047d03936ebc59c64e538033e2468403346542446ee2"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-ACCORDION-ITEM.yaml",
+        "sha256": "1ac35b55c67d722bfdc6b52d7bf479b375671375b581f47064e22521a1e76471"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-ACCORDION-TRIGGER.yaml",
+        "sha256": "4e306f14806c86b83a4fc650446150d24ed39841156f3ff4f1be17d740b7e9d9"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-ACCORDION.yaml",
+        "sha256": "789a2236ecd5125f311c366181d8d85f30f7c4b680345cbeb3fee9d0881ba23b"
+      },
+      {
         "path": "spec/prototypes/P-BRUTALIST-BADGE.yaml",
         "sha256": "a883bc29a22918c06206190a4e406116ed51b756c65f1de3027625ec6219bf23"
       },
@@ -42313,6 +42665,18 @@
       {
         "path": "spec/prototypes/P-BRUTALIST-CHECKBOX.yaml",
         "sha256": "23b8493b141333ff882466f2c56566c627d066ffeb686d56e91b6f7451e9e79e"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-COLLAPSIBLE-CONTENT.yaml",
+        "sha256": "04cc88038e09e4ebfa48e3310a325cacad72729cda2c0d0947efea68971d87f9"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-COLLAPSIBLE-TRIGGER.yaml",
+        "sha256": "dfb5dbc61370f679305c87f10b407f7cda5970bfcbae1baf586d4189f007cf75"
+      },
+      {
+        "path": "spec/prototypes/P-BRUTALIST-COLLAPSIBLE.yaml",
+        "sha256": "503f85679eb215a314bbfb6c299dad020cdc60ade63d86ed1bd3d4f55aa8de53"
       },
       {
         "path": "spec/prototypes/P-BRUTALIST-DIALOG-CLOSE-ICON.yaml",
@@ -42491,8 +42855,40 @@
         "sha256": "ae7d7b8a1cef65dfc64bac19468cb4c8ab135baa99d62a16ee78d8baf6180a2d"
       },
       {
+        "path": "spec/prototypes/P-LIQUID-GLASS-ACCORDION-CONTENT.yaml",
+        "sha256": "7caf7e1caa791ae0876ca31d242be92b9936919d9c904dc6bbc4ba7b7bd2df59"
+      },
+      {
+        "path": "spec/prototypes/P-LIQUID-GLASS-ACCORDION-HEADING.yaml",
+        "sha256": "59cd4ade2ee17fd6342abbc3f3f9b7ef82b025fcb4d35a4ee069560cbc095a1d"
+      },
+      {
+        "path": "spec/prototypes/P-LIQUID-GLASS-ACCORDION-ITEM.yaml",
+        "sha256": "de61b5cc4cfb6f05d385d2916fa4b5b7e059999bd5421a85845c1c68b987c645"
+      },
+      {
+        "path": "spec/prototypes/P-LIQUID-GLASS-ACCORDION-TRIGGER.yaml",
+        "sha256": "997ab30b545825cd5d4696a4a9ab357d9583c4c373d65b4e531d55a855e06851"
+      },
+      {
+        "path": "spec/prototypes/P-LIQUID-GLASS-ACCORDION.yaml",
+        "sha256": "68e1daab4205a76321c836b2e81e2b398bddd4ede1a51e6491a8644001336f85"
+      },
+      {
         "path": "spec/prototypes/P-LIQUID-GLASS-BUTTON.yaml",
         "sha256": "126e30c5bdd5dec4bba173a8d28c392de6b4953a40b93b744a9a094f8a915133"
+      },
+      {
+        "path": "spec/prototypes/P-LIQUID-GLASS-COLLAPSIBLE-CONTENT.yaml",
+        "sha256": "a0e1ae3a1c446dac67ad6309d2114a03baece2b932bcb27ee4a85a7652c91b65"
+      },
+      {
+        "path": "spec/prototypes/P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER.yaml",
+        "sha256": "bd5bdcf356b9387172e1a01f02047a1937e87f9e2d0ab0bf8cafd183cf41c728"
+      },
+      {
+        "path": "spec/prototypes/P-LIQUID-GLASS-COLLAPSIBLE.yaml",
+        "sha256": "47f0ce4f7ab93216d9e2a88779c2ddaaad7696a1b3904dd03a70db14795dd3b3"
       },
       {
         "path": "spec/prototypes/P-LIQUID-GLASS-LABEL.yaml",
@@ -42507,6 +42903,26 @@
         "sha256": "4e5f51d0ca8c5cc26db01541ac105d3ce70bd78e81f8f9d3968b9ad47040d389"
       },
       {
+        "path": "spec/prototypes/P-SHADCN-ACCORDION-CONTENT.yaml",
+        "sha256": "92c8b91bd5aed6dd32926ad71fc721ae92687054a4963397aa1bfc8582c160f7"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-ACCORDION-HEADING.yaml",
+        "sha256": "b0338f3ca9baf12dc1433e04329679f3ff4341f31afdbbd2a6208597a3205e9c"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-ACCORDION-ITEM.yaml",
+        "sha256": "a33311e43728484e989029c1ce98b4fab6ce764a8189dc7ee4ffb55b017050ab"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-ACCORDION-TRIGGER.yaml",
+        "sha256": "44dde2668239008f6d6282df0e61061e44bf50fbb72d273df05ec6e6f9f9c566"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-ACCORDION.yaml",
+        "sha256": "7a319ef31edbd0c0dc59da987e9245c6f4113f79213d088f4f0e221253612149"
+      },
+      {
         "path": "spec/prototypes/P-SHADCN-BUTTON.yaml",
         "sha256": "c55e557bb2d67adc501797e51d40c871d724f4f429a28aa9e5d8bb647411774d"
       },
@@ -42516,7 +42932,19 @@
       },
       {
         "path": "spec/prototypes/P-SHADCN-CHECKBOX.yaml",
-        "sha256": "4bef8a9d5851173f8c5a0245e43c7e41af52bbdf8d3af61b782bce4b71e44a3c"
+        "sha256": "19f57b79fc7fe9ab729a7c3aec1b153a8b3a633df8b37b18f5b5585fa5aec515"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-COLLAPSIBLE-CONTENT.yaml",
+        "sha256": "b84b95b44a0ef5e2c96e6d4db04262f11f43f73621f0248f2524eb83d217e756"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-COLLAPSIBLE-TRIGGER.yaml",
+        "sha256": "e633dad981cdd4d7c2981b2a30b1d3184d074f7b46a44dc9e842fa0f3bb84f5b"
+      },
+      {
+        "path": "spec/prototypes/P-SHADCN-COLLAPSIBLE.yaml",
+        "sha256": "71720b914f27284bec9b721575ec419446d3bcd5fb3e64f57e0fa4ef428e0386"
       },
       {
         "path": "spec/prototypes/P-SHADCN-DIALOG-CLOSE-ICON.yaml",
@@ -42544,7 +42972,7 @@
       },
       {
         "path": "spec/prototypes/P-SHADCN-DIALOG-MASK.yaml",
-        "sha256": "6c63dbc894471606d9c8fe6a7399b0ef5e2de566142c740b962d8803b1efc688"
+        "sha256": "e6d2c4c5511ca9866c664c9c9ee32d78c8d0990c556e57359447aac360d8b01c"
       },
       {
         "path": "spec/prototypes/P-SHADCN-DIALOG-TITLE.yaml",
@@ -42684,7 +43112,7 @@
       },
       {
         "path": "spec/prototypes/P-SHADCN-TOGGLE.yaml",
-        "sha256": "5df4a6d75bed9393ec0fa470167a7d51d88d3b98ee14371f9339e2e71cef2c1a"
+        "sha256": "eded929ae634d859e1c075bf5945a6a41a5b02ce6f388045367113bbea51ba08"
       },
       {
         "path": "spec/prototypes/P-SHADCN-TOOLTIP-CONTENT.yaml",
@@ -42706,29 +43134,29 @@
     "counts": {
       "libraryInventory": {
         "base": {
-          "families": 24,
-          "entities": 59,
-          "sourceFiles": 60
+          "families": 25,
+          "entities": 64,
+          "sourceFiles": 65
         },
         "shadcn": {
-          "families": 18,
-          "entities": 49,
-          "sourceFiles": 49
+          "families": 20,
+          "entities": 57,
+          "sourceFiles": 57
         },
         "brutalist": {
-          "families": 20,
-          "entities": 52,
-          "sourceFiles": 52
+          "families": 22,
+          "entities": 60,
+          "sourceFiles": 60
         },
         "bootstrap-2-3-2": {
-          "families": 9,
-          "entities": 11,
-          "sourceFiles": 11
+          "families": 11,
+          "entities": 19,
+          "sourceFiles": 19
         },
         "liquid-glass": {
-          "families": 3,
-          "entities": 3,
-          "sourceFiles": 3
+          "families": 5,
+          "entities": 11,
+          "sourceFiles": 11
         },
         "lucide": {
           "families": 1,
@@ -42736,16 +43164,38 @@
           "sourceFiles": 1
         }
       },
-      "catalogEntities": 175,
-      "catalogDraft": 175,
+      "catalogEntities": 212,
+      "catalogDraft": 212,
       "catalogActive": 0,
       "catalogDeprecated": 0,
       "catalogRemoved": 0,
-      "familyInstances": 75,
-      "distinctPrototypeSubjects": 29
+      "familyInstances": 84,
+      "distinctPrototypeSubjects": 30
     },
     "prototypeInventory": {
       "base": {
+        "accordion": {
+          "family": "accordion",
+          "entityIds": [
+            "P-BASE-ACCORDION",
+            "P-BASE-ACCORDION-CONTENT",
+            "P-BASE-ACCORDION-HEADING",
+            "P-BASE-ACCORDION-ITEM",
+            "P-BASE-ACCORDION-TRIGGER"
+          ],
+          "entityCount": 5,
+          "sourceFiles": [
+            "packages/prototypes/base/src/accordion/content.proto.ts",
+            "packages/prototypes/base/src/accordion/heading.proto.ts",
+            "packages/prototypes/base/src/accordion/item.proto.ts",
+            "packages/prototypes/base/src/accordion/root.proto.ts",
+            "packages/prototypes/base/src/accordion/trigger.proto.ts"
+          ],
+          "tests": [],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
         "async-region": {
           "family": "async-region",
           "entityIds": [
@@ -43199,6 +43649,28 @@
         }
       },
       "shadcn": {
+        "accordion": {
+          "family": "accordion",
+          "entityIds": [
+            "P-SHADCN-ACCORDION",
+            "P-SHADCN-ACCORDION-CONTENT",
+            "P-SHADCN-ACCORDION-HEADING",
+            "P-SHADCN-ACCORDION-ITEM",
+            "P-SHADCN-ACCORDION-TRIGGER"
+          ],
+          "entityCount": 5,
+          "sourceFiles": [
+            "packages/prototypes/shadcn/src/accordion/content.proto.ts",
+            "packages/prototypes/shadcn/src/accordion/heading.proto.ts",
+            "packages/prototypes/shadcn/src/accordion/item.proto.ts",
+            "packages/prototypes/shadcn/src/accordion/root.proto.ts",
+            "packages/prototypes/shadcn/src/accordion/trigger.proto.ts"
+          ],
+          "tests": [],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
         "button": {
           "family": "button",
           "entityIds": [
@@ -43233,6 +43705,24 @@
           "implementation": "bounded-source-present",
           "freshRuntimeResult": "not-run"
         },
+        "collapsible": {
+          "family": "collapsible",
+          "entityIds": [
+            "P-SHADCN-COLLAPSIBLE",
+            "P-SHADCN-COLLAPSIBLE-CONTENT",
+            "P-SHADCN-COLLAPSIBLE-TRIGGER"
+          ],
+          "entityCount": 3,
+          "sourceFiles": [
+            "packages/prototypes/shadcn/src/collapsible/content.proto.ts",
+            "packages/prototypes/shadcn/src/collapsible/root.proto.ts",
+            "packages/prototypes/shadcn/src/collapsible/trigger.proto.ts"
+          ],
+          "tests": [],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
         "dialog": {
           "family": "dialog",
           "entityIds": [
@@ -43261,6 +43751,7 @@
             "packages/prototypes/shadcn/src/dialog/trigger.proto.ts"
           ],
           "tests": [
+            "packages/prototypes/shadcn/test/dialog-material.test.ts",
             "packages/prototypes/shadcn/test/dialog.test.ts"
           ],
           "lifecycle": "draft",
@@ -43547,6 +44038,28 @@
         }
       },
       "brutalist": {
+        "accordion": {
+          "family": "accordion",
+          "entityIds": [
+            "P-BRUTALIST-ACCORDION",
+            "P-BRUTALIST-ACCORDION-CONTENT",
+            "P-BRUTALIST-ACCORDION-HEADING",
+            "P-BRUTALIST-ACCORDION-ITEM",
+            "P-BRUTALIST-ACCORDION-TRIGGER"
+          ],
+          "entityCount": 5,
+          "sourceFiles": [
+            "packages/prototypes/brutalist/src/accordion/content.proto.ts",
+            "packages/prototypes/brutalist/src/accordion/heading.proto.ts",
+            "packages/prototypes/brutalist/src/accordion/item.proto.ts",
+            "packages/prototypes/brutalist/src/accordion/root.proto.ts",
+            "packages/prototypes/brutalist/src/accordion/trigger.proto.ts"
+          ],
+          "tests": [],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
         "badge": {
           "family": "badge",
           "entityIds": [
@@ -43617,6 +44130,24 @@
           "tests": [
             "packages/prototypes/brutalist/test/checkbox.test.ts"
           ],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
+        "collapsible": {
+          "family": "collapsible",
+          "entityIds": [
+            "P-BRUTALIST-COLLAPSIBLE",
+            "P-BRUTALIST-COLLAPSIBLE-CONTENT",
+            "P-BRUTALIST-COLLAPSIBLE-TRIGGER"
+          ],
+          "entityCount": 3,
+          "sourceFiles": [
+            "packages/prototypes/brutalist/src/collapsible/content.proto.ts",
+            "packages/prototypes/brutalist/src/collapsible/root.proto.ts",
+            "packages/prototypes/brutalist/src/collapsible/trigger.proto.ts"
+          ],
+          "tests": [],
           "lifecycle": "draft",
           "implementation": "bounded-source-present",
           "freshRuntimeResult": "not-run"
@@ -43931,6 +44462,28 @@
         }
       },
       "bootstrap-2-3-2": {
+        "accordion": {
+          "family": "accordion",
+          "entityIds": [
+            "P-BOOTSTRAP-2-3-2-ACCORDION",
+            "P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT",
+            "P-BOOTSTRAP-2-3-2-ACCORDION-HEADING",
+            "P-BOOTSTRAP-2-3-2-ACCORDION-ITEM",
+            "P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER"
+          ],
+          "entityCount": 5,
+          "sourceFiles": [
+            "packages/prototypes/bootstrap-2-3-2/src/accordion/content.proto.ts",
+            "packages/prototypes/bootstrap-2-3-2/src/accordion/heading.proto.ts",
+            "packages/prototypes/bootstrap-2-3-2/src/accordion/item.proto.ts",
+            "packages/prototypes/bootstrap-2-3-2/src/accordion/root.proto.ts",
+            "packages/prototypes/bootstrap-2-3-2/src/accordion/trigger.proto.ts"
+          ],
+          "tests": [],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
         "button": {
           "family": "button",
           "entityIds": [
@@ -43957,6 +44510,24 @@
           "sourceFiles": [
             "packages/prototypes/bootstrap-2-3-2/src/checkbox/indicator.proto.ts",
             "packages/prototypes/bootstrap-2-3-2/src/checkbox/root.proto.ts"
+          ],
+          "tests": [],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
+        "collapsible": {
+          "family": "collapsible",
+          "entityIds": [
+            "P-BOOTSTRAP-2-3-2-COLLAPSIBLE",
+            "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT",
+            "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER"
+          ],
+          "entityCount": 3,
+          "sourceFiles": [
+            "packages/prototypes/bootstrap-2-3-2/src/collapsible/content.proto.ts",
+            "packages/prototypes/bootstrap-2-3-2/src/collapsible/root.proto.ts",
+            "packages/prototypes/bootstrap-2-3-2/src/collapsible/trigger.proto.ts"
           ],
           "tests": [],
           "lifecycle": "draft",
@@ -44065,6 +44636,30 @@
         }
       },
       "liquid-glass": {
+        "accordion": {
+          "family": "accordion",
+          "entityIds": [
+            "P-LIQUID-GLASS-ACCORDION",
+            "P-LIQUID-GLASS-ACCORDION-CONTENT",
+            "P-LIQUID-GLASS-ACCORDION-HEADING",
+            "P-LIQUID-GLASS-ACCORDION-ITEM",
+            "P-LIQUID-GLASS-ACCORDION-TRIGGER"
+          ],
+          "entityCount": 5,
+          "sourceFiles": [
+            "packages/prototypes/liquid-glass/src/accordion/content.proto.ts",
+            "packages/prototypes/liquid-glass/src/accordion/heading.proto.ts",
+            "packages/prototypes/liquid-glass/src/accordion/item.proto.ts",
+            "packages/prototypes/liquid-glass/src/accordion/root.proto.ts",
+            "packages/prototypes/liquid-glass/src/accordion/trigger.proto.ts"
+          ],
+          "tests": [
+            "packages/prototypes/liquid-glass/test/accordion-material.test.ts"
+          ],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
         "button": {
           "family": "button",
           "entityIds": [
@@ -44077,6 +44672,26 @@
           "tests": [
             "packages/prototypes/liquid-glass/test/button.test.ts",
             "packages/prototypes/liquid-glass/test/material.test.ts"
+          ],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
+        "collapsible": {
+          "family": "collapsible",
+          "entityIds": [
+            "P-LIQUID-GLASS-COLLAPSIBLE",
+            "P-LIQUID-GLASS-COLLAPSIBLE-CONTENT",
+            "P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER"
+          ],
+          "entityCount": 3,
+          "sourceFiles": [
+            "packages/prototypes/liquid-glass/src/collapsible/content.proto.ts",
+            "packages/prototypes/liquid-glass/src/collapsible/root.proto.ts",
+            "packages/prototypes/liquid-glass/src/collapsible/trigger.proto.ts"
+          ],
+          "tests": [
+            "packages/prototypes/liquid-glass/test/collapsible-material.test.ts"
           ],
           "lifecycle": "draft",
           "implementation": "bounded-source-present",
@@ -44131,6 +44746,122 @@
       }
     },
     "projectionRows": [
+      {
+        "id": "projection.accordion",
+        "base": {
+          "family": "accordion",
+          "entityIds": [
+            "P-BASE-ACCORDION",
+            "P-BASE-ACCORDION-CONTENT",
+            "P-BASE-ACCORDION-HEADING",
+            "P-BASE-ACCORDION-ITEM",
+            "P-BASE-ACCORDION-TRIGGER"
+          ],
+          "entityCount": 5,
+          "sourceFiles": [
+            "packages/prototypes/base/src/accordion/content.proto.ts",
+            "packages/prototypes/base/src/accordion/heading.proto.ts",
+            "packages/prototypes/base/src/accordion/item.proto.ts",
+            "packages/prototypes/base/src/accordion/root.proto.ts",
+            "packages/prototypes/base/src/accordion/trigger.proto.ts"
+          ],
+          "tests": [],
+          "lifecycle": "draft",
+          "implementation": "bounded-source-present",
+          "freshRuntimeResult": "not-run"
+        },
+        "issue": 870,
+        "families": {
+          "bootstrap-2-3-2": {
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-BOOTSTRAP-2-3-2-ACCORDION",
+              "P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT",
+              "P-BOOTSTRAP-2-3-2-ACCORDION-HEADING",
+              "P-BOOTSTRAP-2-3-2-ACCORDION-ITEM",
+              "P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/bootstrap-2-3-2/src/accordion/content.proto.ts",
+              "packages/prototypes/bootstrap-2-3-2/src/accordion/heading.proto.ts",
+              "packages/prototypes/bootstrap-2-3-2/src/accordion/item.proto.ts",
+              "packages/prototypes/bootstrap-2-3-2/src/accordion/root.proto.ts",
+              "packages/prototypes/bootstrap-2-3-2/src/accordion/trigger.proto.ts"
+            ],
+            "partCount": 5,
+            "lifecycle": "draft",
+            "runtimeEvidence": "not rerun by source refresh",
+            "nativeMaterial": "not-applicable"
+          },
+          "brutalist": {
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-BRUTALIST-ACCORDION",
+              "P-BRUTALIST-ACCORDION-CONTENT",
+              "P-BRUTALIST-ACCORDION-HEADING",
+              "P-BRUTALIST-ACCORDION-ITEM",
+              "P-BRUTALIST-ACCORDION-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/brutalist/src/accordion/content.proto.ts",
+              "packages/prototypes/brutalist/src/accordion/heading.proto.ts",
+              "packages/prototypes/brutalist/src/accordion/item.proto.ts",
+              "packages/prototypes/brutalist/src/accordion/root.proto.ts",
+              "packages/prototypes/brutalist/src/accordion/trigger.proto.ts"
+            ],
+            "partCount": 5,
+            "lifecycle": "draft",
+            "runtimeEvidence": "not rerun by source refresh",
+            "nativeMaterial": "not-applicable"
+          },
+          "liquid-glass": {
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-LIQUID-GLASS-ACCORDION",
+              "P-LIQUID-GLASS-ACCORDION-CONTENT",
+              "P-LIQUID-GLASS-ACCORDION-HEADING",
+              "P-LIQUID-GLASS-ACCORDION-ITEM",
+              "P-LIQUID-GLASS-ACCORDION-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/liquid-glass/src/accordion/content.proto.ts",
+              "packages/prototypes/liquid-glass/src/accordion/heading.proto.ts",
+              "packages/prototypes/liquid-glass/src/accordion/item.proto.ts",
+              "packages/prototypes/liquid-glass/src/accordion/root.proto.ts",
+              "packages/prototypes/liquid-glass/src/accordion/trigger.proto.ts"
+            ],
+            "partCount": 5,
+            "lifecycle": "draft",
+            "runtimeEvidence": "not rerun by source refresh",
+            "nativeMaterial": "not-certified"
+          },
+          "shadcn": {
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-SHADCN-ACCORDION",
+              "P-SHADCN-ACCORDION-CONTENT",
+              "P-SHADCN-ACCORDION-HEADING",
+              "P-SHADCN-ACCORDION-ITEM",
+              "P-SHADCN-ACCORDION-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/shadcn/src/accordion/content.proto.ts",
+              "packages/prototypes/shadcn/src/accordion/heading.proto.ts",
+              "packages/prototypes/shadcn/src/accordion/item.proto.ts",
+              "packages/prototypes/shadcn/src/accordion/root.proto.ts",
+              "packages/prototypes/shadcn/src/accordion/trigger.proto.ts"
+            ],
+            "partCount": 5,
+            "lifecycle": "draft",
+            "runtimeEvidence": "not rerun by source refresh",
+            "nativeMaterial": "not-applicable"
+          }
+        }
+      },
       {
         "id": "projection.async-region",
         "base": {
@@ -44377,42 +45108,74 @@
         "issue": 870,
         "families": {
           "bootstrap-2-3-2": {
-            "status": "required-full-projection-not-implemented",
-            "reason": "Complete four-family atomic coverage remains required.",
-            "entityIds": [],
-            "sourceFiles": [],
-            "partCount": 0,
-            "lifecycle": "none",
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-BOOTSTRAP-2-3-2-COLLAPSIBLE",
+              "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT",
+              "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/bootstrap-2-3-2/src/collapsible/content.proto.ts",
+              "packages/prototypes/bootstrap-2-3-2/src/collapsible/root.proto.ts",
+              "packages/prototypes/bootstrap-2-3-2/src/collapsible/trigger.proto.ts"
+            ],
+            "partCount": 3,
+            "lifecycle": "draft",
             "runtimeEvidence": "not rerun by source refresh",
             "nativeMaterial": "not-applicable"
           },
           "brutalist": {
-            "status": "required-full-projection-not-implemented",
-            "reason": "Complete four-family atomic coverage remains required.",
-            "entityIds": [],
-            "sourceFiles": [],
-            "partCount": 0,
-            "lifecycle": "none",
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-BRUTALIST-COLLAPSIBLE",
+              "P-BRUTALIST-COLLAPSIBLE-CONTENT",
+              "P-BRUTALIST-COLLAPSIBLE-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/brutalist/src/collapsible/content.proto.ts",
+              "packages/prototypes/brutalist/src/collapsible/root.proto.ts",
+              "packages/prototypes/brutalist/src/collapsible/trigger.proto.ts"
+            ],
+            "partCount": 3,
+            "lifecycle": "draft",
             "runtimeEvidence": "not rerun by source refresh",
             "nativeMaterial": "not-applicable"
           },
           "liquid-glass": {
-            "status": "required-full-projection-not-implemented",
-            "reason": "Complete four-family atomic coverage remains required.",
-            "entityIds": [],
-            "sourceFiles": [],
-            "partCount": 0,
-            "lifecycle": "none",
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-LIQUID-GLASS-COLLAPSIBLE",
+              "P-LIQUID-GLASS-COLLAPSIBLE-CONTENT",
+              "P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/liquid-glass/src/collapsible/content.proto.ts",
+              "packages/prototypes/liquid-glass/src/collapsible/root.proto.ts",
+              "packages/prototypes/liquid-glass/src/collapsible/trigger.proto.ts"
+            ],
+            "partCount": 3,
+            "lifecycle": "draft",
             "runtimeEvidence": "not rerun by source refresh",
             "nativeMaterial": "not-certified"
           },
           "shadcn": {
-            "status": "required-full-projection-not-implemented",
-            "reason": "Complete four-family atomic coverage remains required.",
-            "entityIds": [],
-            "sourceFiles": [],
-            "partCount": 0,
-            "lifecycle": "none",
+            "status": "implemented-draft",
+            "reason": "Candidate source present; not current main or full acceptance.",
+            "entityIds": [
+              "P-SHADCN-COLLAPSIBLE",
+              "P-SHADCN-COLLAPSIBLE-CONTENT",
+              "P-SHADCN-COLLAPSIBLE-TRIGGER"
+            ],
+            "sourceFiles": [
+              "packages/prototypes/shadcn/src/collapsible/content.proto.ts",
+              "packages/prototypes/shadcn/src/collapsible/root.proto.ts",
+              "packages/prototypes/shadcn/src/collapsible/trigger.proto.ts"
+            ],
+            "partCount": 3,
+            "lifecycle": "draft",
             "runtimeEvidence": "not rerun by source refresh",
             "nativeMaterial": "not-applicable"
           }
@@ -45997,6 +46760,171 @@
     ],
     "atomicProjectionMapping": [
       {
+        "baseIdentity": "P-BASE-ACCORDION",
+        "projectionCells": {
+          "bootstrap-2-3-2": {
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-ACCORDION"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "brutalist": {
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-ACCORDION"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "liquid-glass": {
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-ACCORDION"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "shadcn": {
+            "mappedCurrentIdentities": [
+              "P-SHADCN-ACCORDION"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          }
+        }
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-CONTENT",
+        "projectionCells": {
+          "bootstrap-2-3-2": {
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "brutalist": {
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-ACCORDION-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "liquid-glass": {
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-ACCORDION-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "shadcn": {
+            "mappedCurrentIdentities": [
+              "P-SHADCN-ACCORDION-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          }
+        }
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-HEADING",
+        "projectionCells": {
+          "bootstrap-2-3-2": {
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-ACCORDION-HEADING"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "brutalist": {
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-ACCORDION-HEADING"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "liquid-glass": {
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-ACCORDION-HEADING"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "shadcn": {
+            "mappedCurrentIdentities": [
+              "P-SHADCN-ACCORDION-HEADING"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          }
+        }
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-ITEM",
+        "projectionCells": {
+          "bootstrap-2-3-2": {
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-ACCORDION-ITEM"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "brutalist": {
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-ACCORDION-ITEM"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "liquid-glass": {
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-ACCORDION-ITEM"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "shadcn": {
+            "mappedCurrentIdentities": [
+              "P-SHADCN-ACCORDION-ITEM"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          }
+        }
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-TRIGGER",
+        "projectionCells": {
+          "bootstrap-2-3-2": {
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "brutalist": {
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-ACCORDION-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "liquid-glass": {
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-ACCORDION-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          },
+          "shadcn": {
+            "mappedCurrentIdentities": [
+              "P-SHADCN-ACCORDION-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
+            "acceptance": "unverified"
+          }
+        }
+      },
+      {
         "baseIdentity": "P-BASE-ASYNC-REGION",
         "projectionCells": {
           "bootstrap-2-3-2": {
@@ -46120,23 +47048,31 @@
         "baseIdentity": "P-BASE-COLLAPSIBLE",
         "projectionCells": {
           "bootstrap-2-3-2": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-COLLAPSIBLE"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "brutalist": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-COLLAPSIBLE"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "liquid-glass": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-COLLAPSIBLE"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "shadcn": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-SHADCN-COLLAPSIBLE"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           }
         }
@@ -46145,23 +47081,31 @@
         "baseIdentity": "P-BASE-COLLAPSIBLE-CONTENT",
         "projectionCells": {
           "bootstrap-2-3-2": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "brutalist": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-COLLAPSIBLE-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "liquid-glass": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-COLLAPSIBLE-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "shadcn": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-SHADCN-COLLAPSIBLE-CONTENT"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           }
         }
@@ -46170,23 +47114,31 @@
         "baseIdentity": "P-BASE-COLLAPSIBLE-TRIGGER",
         "projectionCells": {
           "bootstrap-2-3-2": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "brutalist": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-BRUTALIST-COLLAPSIBLE-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "liquid-glass": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           },
           "shadcn": {
-            "mappedCurrentIdentities": [],
-            "status": "required-missing",
+            "mappedCurrentIdentities": [
+              "P-SHADCN-COLLAPSIBLE-TRIGGER"
+            ],
+            "status": "bounded-draft-mapping-needs-full-acceptance",
             "acceptance": "unverified"
           }
         }
@@ -47680,6 +48632,246 @@
     ],
     "gpuiCoverageRows": [
       {
+        "baseIdentity": "P-BASE-ACCORDION",
+        "projectionLibrary": "bootstrap-2-3-2",
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-ACCORDION"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION",
+        "projectionLibrary": "brutalist",
+        "projectionIdentities": [
+          "P-BRUTALIST-ACCORDION"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION",
+        "projectionLibrary": "liquid-glass",
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-ACCORDION"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION",
+        "projectionLibrary": "shadcn",
+        "projectionIdentities": [
+          "P-SHADCN-ACCORDION"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-CONTENT",
+        "projectionLibrary": "bootstrap-2-3-2",
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-CONTENT",
+        "projectionLibrary": "brutalist",
+        "projectionIdentities": [
+          "P-BRUTALIST-ACCORDION-CONTENT"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-CONTENT",
+        "projectionLibrary": "liquid-glass",
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-ACCORDION-CONTENT"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-CONTENT",
+        "projectionLibrary": "shadcn",
+        "projectionIdentities": [
+          "P-SHADCN-ACCORDION-CONTENT"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-HEADING",
+        "projectionLibrary": "bootstrap-2-3-2",
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-ACCORDION-HEADING"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-HEADING",
+        "projectionLibrary": "brutalist",
+        "projectionIdentities": [
+          "P-BRUTALIST-ACCORDION-HEADING"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-HEADING",
+        "projectionLibrary": "liquid-glass",
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-ACCORDION-HEADING"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-HEADING",
+        "projectionLibrary": "shadcn",
+        "projectionIdentities": [
+          "P-SHADCN-ACCORDION-HEADING"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-ITEM",
+        "projectionLibrary": "bootstrap-2-3-2",
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-ACCORDION-ITEM"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-ITEM",
+        "projectionLibrary": "brutalist",
+        "projectionIdentities": [
+          "P-BRUTALIST-ACCORDION-ITEM"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-ITEM",
+        "projectionLibrary": "liquid-glass",
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-ACCORDION-ITEM"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-ITEM",
+        "projectionLibrary": "shadcn",
+        "projectionIdentities": [
+          "P-SHADCN-ACCORDION-ITEM"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-TRIGGER",
+        "projectionLibrary": "bootstrap-2-3-2",
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-TRIGGER",
+        "projectionLibrary": "brutalist",
+        "projectionIdentities": [
+          "P-BRUTALIST-ACCORDION-TRIGGER"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-TRIGGER",
+        "projectionLibrary": "liquid-glass",
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-ACCORDION-TRIGGER"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
+        "baseIdentity": "P-BASE-ACCORDION-TRIGGER",
+        "projectionLibrary": "shadcn",
+        "projectionIdentities": [
+          "P-SHADCN-ACCORDION-TRIGGER"
+        ],
+        "status": "required-unassessed",
+        "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
+        "implementationEvidence": [],
+        "nativeEvidence": [],
+        "blockers": []
+      },
+      {
         "baseIdentity": "P-BASE-ASYNC-REGION",
         "projectionLibrary": "bootstrap-2-3-2",
         "projectionIdentities": [],
@@ -47862,7 +49054,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE",
         "projectionLibrary": "bootstrap-2-3-2",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-COLLAPSIBLE"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47872,7 +49066,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE",
         "projectionLibrary": "brutalist",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-BRUTALIST-COLLAPSIBLE"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47882,7 +49078,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE",
         "projectionLibrary": "liquid-glass",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-COLLAPSIBLE"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47892,7 +49090,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE",
         "projectionLibrary": "shadcn",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-SHADCN-COLLAPSIBLE"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47902,7 +49102,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-CONTENT",
         "projectionLibrary": "bootstrap-2-3-2",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47912,7 +49114,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-CONTENT",
         "projectionLibrary": "brutalist",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-BRUTALIST-COLLAPSIBLE-CONTENT"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47922,7 +49126,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-CONTENT",
         "projectionLibrary": "liquid-glass",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-COLLAPSIBLE-CONTENT"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47932,7 +49138,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-CONTENT",
         "projectionLibrary": "shadcn",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-SHADCN-COLLAPSIBLE-CONTENT"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47942,7 +49150,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-TRIGGER",
         "projectionLibrary": "bootstrap-2-3-2",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47952,7 +49162,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-TRIGGER",
         "projectionLibrary": "brutalist",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-BRUTALIST-COLLAPSIBLE-TRIGGER"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47962,7 +49174,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-TRIGGER",
         "projectionLibrary": "liquid-glass",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],
@@ -47972,7 +49186,9 @@
       {
         "baseIdentity": "P-BASE-COLLAPSIBLE-TRIGGER",
         "projectionLibrary": "shadcn",
-        "projectionIdentities": [],
+        "projectionIdentities": [
+          "P-SHADCN-COLLAPSIBLE-TRIGGER"
+        ],
         "status": "required-unassessed",
         "meaning": "Candidate source reconciliation only; full GPUI capability and native evidence remain required.",
         "implementationEvidence": [],

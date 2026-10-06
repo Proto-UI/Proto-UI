@@ -158,7 +158,7 @@ Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/Liqu
 
 Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
-The structured ledger has 236 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+The structured ledger has 256 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
 
 ## Previous work remains equal priority
 
@@ -214,13 +214,18 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 
 | Base atomic identity | Shadcn | Neobrutalism (brutalist) | Bootstrap 2.3.2 | Liquid Glass |
 | --- | --- | --- | --- | --- |
+| P-BASE-ACCORDION | P-SHADCN-ACCORDION | P-BRUTALIST-ACCORDION | P-BOOTSTRAP-2-3-2-ACCORDION | P-LIQUID-GLASS-ACCORDION |
+| P-BASE-ACCORDION-CONTENT | P-SHADCN-ACCORDION-CONTENT | P-BRUTALIST-ACCORDION-CONTENT | P-BOOTSTRAP-2-3-2-ACCORDION-CONTENT | P-LIQUID-GLASS-ACCORDION-CONTENT |
+| P-BASE-ACCORDION-HEADING | P-SHADCN-ACCORDION-HEADING | P-BRUTALIST-ACCORDION-HEADING | P-BOOTSTRAP-2-3-2-ACCORDION-HEADING | P-LIQUID-GLASS-ACCORDION-HEADING |
+| P-BASE-ACCORDION-ITEM | P-SHADCN-ACCORDION-ITEM | P-BRUTALIST-ACCORDION-ITEM | P-BOOTSTRAP-2-3-2-ACCORDION-ITEM | P-LIQUID-GLASS-ACCORDION-ITEM |
+| P-BASE-ACCORDION-TRIGGER | P-SHADCN-ACCORDION-TRIGGER | P-BRUTALIST-ACCORDION-TRIGGER | P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER | P-LIQUID-GLASS-ACCORDION-TRIGGER |
 | P-BASE-ASYNC-REGION | required missing | required missing | required missing | required missing |
 | P-BASE-BUTTON | P-SHADCN-BUTTON | P-BRUTALIST-BUTTON | P-BOOTSTRAP-2-3-2-BUTTON | P-LIQUID-GLASS-BUTTON |
 | P-BASE-CHECKBOX | P-SHADCN-CHECKBOX | P-BRUTALIST-CHECKBOX | P-BOOTSTRAP-2-3-2-CHECKBOX | required missing |
 | P-BASE-CHECKBOX-INDICATOR | P-SHADCN-CHECKBOX-INDICATOR | P-BRUTALIST-CHECKBOX-INDICATOR | P-BOOTSTRAP-2-3-2-CHECKBOX-INDICATOR | required missing |
-| P-BASE-COLLAPSIBLE | required missing | required missing | required missing | required missing |
-| P-BASE-COLLAPSIBLE-CONTENT | required missing | required missing | required missing | required missing |
-| P-BASE-COLLAPSIBLE-TRIGGER | required missing | required missing | required missing | required missing |
+| P-BASE-COLLAPSIBLE | P-SHADCN-COLLAPSIBLE | P-BRUTALIST-COLLAPSIBLE | P-BOOTSTRAP-2-3-2-COLLAPSIBLE | P-LIQUID-GLASS-COLLAPSIBLE |
+| P-BASE-COLLAPSIBLE-CONTENT | P-SHADCN-COLLAPSIBLE-CONTENT | P-BRUTALIST-COLLAPSIBLE-CONTENT | P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT | P-LIQUID-GLASS-COLLAPSIBLE-CONTENT |
+| P-BASE-COLLAPSIBLE-TRIGGER | P-SHADCN-COLLAPSIBLE-TRIGGER | P-BRUTALIST-COLLAPSIBLE-TRIGGER | P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER | P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER |
 | P-BASE-DIALOG | P-SHADCN-DIALOG | P-BRUTALIST-DIALOG | required missing | required missing |
 | P-BASE-DIALOG-CLOSE | P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON | P-BRUTALIST-DIALOG-CLOSE, P-BRUTALIST-DIALOG-CLOSE-ICON | required missing | required missing |
 | P-BASE-DIALOG-CONTENT | P-SHADCN-DIALOG-CONTENT | P-BRUTALIST-DIALOG-CONTENT | required missing | required missing |
