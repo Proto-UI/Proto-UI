@@ -17934,3 +17934,86 @@ for (const [kind, extension] of [
       );
     });
 }
+
+for (const [kind, extension] of [
+  ['website', 'html'],
+  ['website', 'astro'],
+  ['harness', 'html'],
+]) {
+  for (const [name, source, rejects] of [
+    [
+      'quoted script markers',
+      '<div data-open="<script>"></div><iframe src="/preview"></iframe><div data-close="</script>"></div>',
+      true,
+    ],
+    [
+      'quoted mixed script markers',
+      '<div data-open="<sCrIpT>"></div><iframe src="/preview"></iframe><div data-close="</sCrIpT>"></div>',
+      true,
+    ],
+    [
+      'actual script example',
+      '<script>const sample="<iframe src=\'/preview\'></iframe>";</script>',
+      false,
+    ],
+    [
+      'actual Unicode script with active suffix',
+      '<script>const sample="é中😀";</script><iframe src="/real"></iframe>',
+      true,
+    ],
+    [
+      'Unicode prefix and quoted markers',
+      '😀<div data-open="<script>"></div><iframe src="/preview"></iframe><div data-close="</script>"></div>',
+      true,
+    ],
+    [
+      'quoted script markers without embed',
+      '<div data-open="<script>"></div><div data-close="</script>"></div>',
+      false,
+    ],
+  ])
+    test(`embed script parser review: ${kind} ${extension} ${name}`, () => {
+      const issues = probeReview('embed-script-parser', kind, source, extension);
+      assert.equal(
+        issues.some((issue) =>
+          /unreviewed.*(?:embed|preview)|(?:embed|preview).*not reviewed/iu.test(issue)
+        ),
+        rejects,
+        issues.join('\n')
+      );
+    });
+}
+for (const [name, content, rejects] of [
+  [
+    'frontmatter example',
+    `---\nconst sample='<iframe src="/example"></iframe>';\n---\n<p>Text</p>`,
+    false,
+  ],
+  [
+    'frontmatter followed active embed',
+    `---\nconst sample='<script>😀</script>';\n---\n<iframe src="/real"></iframe>`,
+    true,
+  ],
+  ['component Script keeps child markup', '<Script><iframe src="/real"></iframe></Script>', true],
+])
+  test(`embed script parser Astro context: ${name}`, () => {
+    const issues = probeReview('embed-script-astro-context', 'website', content, 'astro');
+    assert.equal(
+      issues.some((issue) => /unreviewed.*embed/iu.test(issue)),
+      rejects,
+      issues.join('\n')
+    );
+  });
+
+test('embed script parser preserves the separate Harness import-map gate', () => {
+  const issues = probeReview(
+    'embed-script-import-map',
+    'harness',
+    '<script type="importmap">{"imports":{"runtime":"https://cdn.example/runtime.js"}}</script>',
+    'html'
+  );
+  assert.ok(
+    issues.some((issue) => /import.?map/iu.test(issue)),
+    issues.join('\n')
+  );
+});

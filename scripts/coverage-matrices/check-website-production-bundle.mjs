@@ -62,6 +62,12 @@ const REQUIRED_ADAPTER_FAMILIES = Object.freeze(['react', 'vue', 'vue2']);
 const REVIEWED_WEB_COMPONENT_HOST_MODULE =
   'apps/www/src/components/PrototypePreviewer/wc-registry.ts';
 const REVIEWED_WEBSITE_CONTROL_MODULE = 'apps/www/src/components/site-shadcn-controls.ts';
+// Existing exact source owners in WEBSITE_RAW_IMPORT_ALLOWLIST. Native links
+// have their own Surface/Text WC bridge; neither boundary admits React/Vue.
+const REVIEWED_WEBSITE_CONTROL_APIS = new Set([
+  REVIEWED_WEBSITE_CONTROL_MODULE,
+  'apps/www/src/components/site-native-controls.ts',
+]);
 // Exact Adapter modules reviewed for the site-control bridge closure.
 // #801 adds the two source providers imported by the same WC adapt entry;
 // exact-head production graph verification remains required for their placement.
@@ -102,6 +108,11 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/platform/instance-tree.ts',
   'packages/adapters/web-component/src/platform/meta.ts',
   'packages/adapters/web-component/src/props.ts',
+  // Accepted WC-owned opaque fallback/visual-node bookkeeping; this does not
+  // admit shader/compiler assets or opt-in installation into ordinary shells.
+  'packages/adapters/web-component/src/material/owned-texture-sink.ts',
+  'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
+  'packages/adapters/web-component/src/visual-surface.ts',
   'packages/adapters/web-component/src/runtime/effects-port.ts',
   'packages/adapters/web-component/src/runtime/modules.ts',
   'packages/adapters/web-component/src/runtime/session.ts',
@@ -537,18 +548,142 @@ export function collectWebsiteProductionBundleIssues({
       }
     }
     if (reviewedSiteRoots.has(shellRoot.fileName)) {
-      const rendererRoots = chunks.filter((chunk) =>
-        chunk.moduleIds.map(moduleIdWithoutQuery).includes(REVIEWED_RENDERER_MODULE)
-      );
-      const rendererClosure = new Set(
-        rendererRoots.flatMap((chunk) => [
-          ...closure(chunksByFileName, chunk.fileName, ['imports', 'dynamicImports']),
-        ])
-      );
+      // Follow module-owned edges, not every edge of a shared renderer chunk.
+      // Module identity (including queries) must remain exact throughout this
+      // traversal; chunk membership alone never supplies importer provenance.
+      const moduleRecords = bundleGraph.modules;
+      const modulesById = new Map();
+      let validModuleGraph = Array.isArray(moduleRecords);
+      for (const record of Array.isArray(moduleRecords) ? moduleRecords : []) {
+        if (
+          !record ||
+          typeof record.id !== 'string' ||
+          !record.id ||
+          modulesById.has(record.id) ||
+          !['imports', 'dynamicImports'].every(
+            (field) =>
+              Array.isArray(record[field]) && record[field].every((id) => typeof id === 'string')
+          )
+        ) {
+          validModuleGraph = false;
+          continue;
+        }
+        modulesById.set(record.id, record);
+      }
+      for (const record of modulesById.values()) {
+        if ([...record.imports, ...record.dynamicImports].some((id) => !modulesById.has(id)))
+          validModuleGraph = false;
+      }
       for (const fileName of completeClosure) {
-        if (staticClosure.has(fileName) || rendererClosure.has(fileName)) continue;
+        if ((chunksByFileName.get(fileName)?.moduleIds ?? []).some((id) => !modulesById.has(id)))
+          validModuleGraph = false;
+      }
+      if (!validModuleGraph || !modulesById.has(REVIEWED_RENDERER_MODULE)) {
+        issues.push(
+          `reviewed Website runtime entry \`${shellRoot.facadeModuleId}\` requires complete renderer module-edge provenance`
+        );
+      }
+      const rendererModules = validModuleGraph
+        ? closure(modulesById, REVIEWED_RENDERER_MODULE, ['imports', 'dynamicImports'])
+        : new Set();
+      // Target membership does not authorize another importer's edge to that
+      // same target. Find forbidden dependencies reachable without passing
+      // through the reviewed renderer API, preserving importer identities.
+      const bypassTargets = new Map();
+      if (validModuleGraph) {
+        const importers = new Map();
+        for (const record of modulesById.values()) {
+          for (const target of [...record.imports, ...record.dynamicImports]) {
+            if (!importers.has(target)) importers.set(target, new Set());
+            importers.get(target).add(record.id);
+          }
+        }
+        const reviewedBridgeModules = new Set(
+          [...reviewedWebsiteControlChunks]
+            .flatMap((fileName) => chunksByFileName.get(fileName)?.moduleIds ?? [])
+            .filter(isReviewedWebsiteControlAdapterModule)
+        );
+        const pending = [];
+        for (const fileName of completeClosure) {
+          for (const id of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+            if (
+              (forbiddenFrameworkFamily(id) !== null || isProtoUiAdapterModule(id)) &&
+              !reviewedBridgeModules.has(id)
+            ) {
+              bypassTargets.set(id, id);
+              pending.push(id);
+            }
+          }
+        }
+        for (let cursor = 0; cursor < pending.length; cursor++) {
+          const target = pending[cursor];
+          for (const importer of importers.get(target) ?? []) {
+            if (importer === REVIEWED_RENDERER_MODULE || bypassTargets.has(importer)) continue;
+            bypassTargets.set(importer, bypassTargets.get(target));
+            pending.push(importer);
+          }
+        }
+        for (const fileName of completeClosure) {
+          for (const importer of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+            if (!rendererModules.has(importer) && bypassTargets.has(importer)) {
+              issues.push(
+                `reviewed Website runtime entry \`${shellRoot.facadeModuleId}\` has an unowned importer edge bypassing its renderer: ${importer} -> ${bypassTargets.get(importer)}`
+              );
+            }
+          }
+        }
+        // A reviewed bridge target still needs importer provenance. Trace it
+        // separately: only this target class may stop at the exact controls API;
+        // sharing a visited map with other targets could hide an unsafe origin.
+        const bridgeOwnedModules = new Set(
+          [...REVIEWED_WEBSITE_CONTROL_APIS].flatMap((id) => [
+            ...closure(modulesById, id, ['imports', 'dynamicImports']),
+          ])
+        );
+        const bridgeBypassTargets = new Map();
+        const bridgePending = [];
+        for (const fileName of completeClosure) {
+          for (const id of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+            if (reviewedBridgeModules.has(id)) {
+              bridgeBypassTargets.set(id, id);
+              bridgePending.push(id);
+            }
+          }
+        }
+        for (let cursor = 0; cursor < bridgePending.length; cursor++) {
+          const target = bridgePending[cursor];
+          for (const importer of importers.get(target) ?? []) {
+            if (
+              importer === REVIEWED_RENDERER_MODULE ||
+              REVIEWED_WEBSITE_CONTROL_APIS.has(importer) ||
+              bridgeBypassTargets.has(importer)
+            )
+              continue;
+            bridgeBypassTargets.set(importer, bridgeBypassTargets.get(target));
+            bridgePending.push(importer);
+          }
+        }
+        for (const fileName of completeClosure) {
+          for (const importer of chunksByFileName.get(fileName)?.moduleIds ?? []) {
+            if (
+              !rendererModules.has(importer) &&
+              !bridgeOwnedModules.has(importer) &&
+              bridgeBypassTargets.has(importer)
+            ) {
+              issues.push(
+                `reviewed Website runtime entry \`${shellRoot.facadeModuleId}\` has an unowned importer edge bypassing its site-control bridge: ${importer} -> ${bridgeBypassTargets.get(importer)}`
+              );
+            }
+          }
+        }
+      }
+      for (const fileName of completeClosure) {
+        if (staticClosure.has(fileName)) continue;
         for (const moduleId of chunksByFileName.get(fileName)?.moduleIds ?? []) {
-          if (forbiddenFrameworkFamily(moduleId) !== null || isProtoUiAdapterModule(moduleId)) {
+          if (
+            (forbiddenFrameworkFamily(moduleId) !== null || isProtoUiAdapterModule(moduleId)) &&
+            !rendererModules.has(moduleId)
+          ) {
             issues.push(
               `reviewed Website runtime entry \`${shellRoot.facadeModuleId}\` reaches Adapter module outside its renderer closure: ${moduleId}`
             );

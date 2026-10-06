@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { isDeepStrictEqual } from 'node:util';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -132,6 +133,28 @@ export function reconcileGovernanceSnapshot({
   return { schemaVersion: 1, repository: REPOSITORY, issues, pullRequests };
 }
 
+// updatedAt is retained observation metadata. Comments or a non-governance body
+// clarification can change it without changing any of the governed facts below.
+// All other record/root fields remain part of equality; unknown fields fail closed.
+export function governanceFacts(snapshot) {
+  const facts = (record) => {
+    if (typeof record.updatedAt !== 'string' || Number.isNaN(Date.parse(record.updatedAt))) {
+      throw new Error(`invalid observation timestamp for governance record #${record.number}`);
+    }
+    const { updatedAt: _observedUpdate, ...governed } = record;
+    return governed;
+  };
+  return {
+    ...snapshot,
+    issues: snapshot.issues.map(facts),
+    pullRequests: snapshot.pullRequests.map(facts),
+  };
+}
+
+export function hasGovernanceDrift(currentSnapshot, liveSnapshot) {
+  return !isDeepStrictEqual(governanceFacts(currentSnapshot), governanceFacts(liveSnapshot));
+}
+
 function githubJson(endpoint) {
   let lastError;
   for (let attempt = 1; attempt <= 3; attempt += 1) {
@@ -222,11 +245,13 @@ if (isMainModule()) {
   if (mode === '--write') {
     fs.writeFileSync(absoluteSnapshotPath, serialized, 'utf8');
     console.log(`[coverage-governance] refreshed ${reconciled.issues.length} Issues`);
-  } else if (fs.readFileSync(absoluteSnapshotPath, 'utf8') !== serialized) {
+  } else if (hasGovernanceDrift(currentSnapshot, reconciled)) {
     throw new Error(
       `governance snapshot drifted from live ${REPOSITORY}; run the explicit --write refresh workflow`
     );
   } else {
-    console.log(`[coverage-governance] OK (${reconciled.issues.length} Issues)`);
+    console.log(
+      `[coverage-governance] OK (${reconciled.issues.length} Issues; observation-only timestamp changes ignored)`
+    );
   }
 }

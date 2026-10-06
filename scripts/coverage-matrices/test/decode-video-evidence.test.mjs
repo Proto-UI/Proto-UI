@@ -1,6 +1,5 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { test, mock } from 'node:test';
@@ -9,41 +8,36 @@ import { syncBuiltinESMExports } from 'node:module';
 import { decodeVideoEvidence } from '../decode-video-evidence.mjs';
 
 const fixtures = fileURLToPath(new URL('./fixtures/video/', import.meta.url));
-for (const name of [
-  'faststart.mp4',
-  'moov-at-end.mp4',
-  'colors.mov',
-  'colors.mkv',
-  'colors.webm',
-]) {
-  test(`bounded real decoder verifies ${name} with seekable sealed input`, () => {
-    const result = decodeVideoEvidence(path.join(fixtures, name));
-    assert.deepEqual(result, { width: 32, height: 32, seconds: 1.5, frames: 3, distinctPixels: 3 });
+// Override only in this test process; this is simulated platform coverage,
+// not proof of native Windows/macOS or successful media decoding.
+function simulatePlatform(t, platform) {
+  const original = Object.getOwnPropertyDescriptor(process, 'platform');
+  Object.defineProperty(process, 'platform', { ...original, value: platform });
+  t.after(() => Object.defineProperty(process, 'platform', original));
+}
+
+for (const platform of ['win32', 'darwin']) {
+  test(`unsupported ${platform} fails before invoking tools (simulated platform)`, (t) => {
+    simulatePlatform(t, platform);
+    const spawn = mock.method(childProcess, 'spawnSync', () => {
+      throw new Error('must not invoke a decoder on an unsupported platform');
+    });
+    syncBuiltinESMExports();
+    try {
+      assert.throws(
+        () => decodeVideoEvidence(path.join(fixtures, 'faststart.mp4')),
+        /video decoder unverified: supported Linux toolchain is unavailable/
+      );
+      assert.equal(spawn.mock.callCount(), 0);
+    } finally {
+      spawn.mock.restore();
+      syncBuiltinESMExports();
+    }
   });
 }
 
-test('bounded decoder rejects truncation rather than accepting a decoded prefix', (t) => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'coverage-video-'));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const data = fs.readFileSync(path.join(fixtures, 'faststart.mp4'));
-  const filename = path.join(root, 'truncated.mp4');
-  fs.writeFileSync(filename, data.subarray(0, -10));
-  assert.throws(() => decodeVideoEvidence(filename), /ffmpeg failed|ffprobe failed/);
-});
-
-for (const [name, limits] of [
-  ['bytes', { bytes: 16 }],
-  ['pixels', { pixels: 16 }],
-  ['frames', { frames: 2 }],
-  ['duration', { seconds: 1 }],
-  ['wall time', { timeoutMs: 1 }],
-]) {
-  test(`bounded decoder enforces the ${name} limit`, () => {
-    assert.throws(() => decodeVideoEvidence(path.join(fixtures, 'faststart.mp4'), limits));
-  });
-}
-
-test('unavailable decoder toolchain is a failure, not a signature fallback or skip', () => {
+test('unavailable decoder toolchain fails closed (simulated Linux)', (t) => {
+  simulatePlatform(t, 'linux');
   const replacement = mock.method(childProcess, 'spawnSync', () => ({
     error: { code: 'ENOENT' },
     status: null,
@@ -62,25 +56,6 @@ test('unavailable decoder toolchain is a failure, not a signature fallback or sk
   }
 });
 
-test('PATH-prepended fake media tools cannot substitute for the distro toolchain', (t) => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'coverage-fake-tools-'));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const marker = path.join(root, 'executed');
-  for (const name of ['python3', 'ffmpeg', 'ffprobe']) {
-    fs.writeFileSync(path.join(root, name), `#!/bin/sh\nprintf fake > '${marker}'\nexit 0\n`, {
-      mode: 0o755,
-    });
-  }
-  const original = process.env.PATH;
-  try {
-    process.env.PATH = root;
-    assert.equal(decodeVideoEvidence(path.join(fixtures, 'faststart.mp4')).frames, 3);
-    assert.equal(fs.existsSync(marker), false);
-  } finally {
-    process.env.PATH = original;
-  }
-});
-
 test('decoder helper seals input and forbids nested file and network protocols', () => {
   const wrapper = fs.readFileSync(
     new URL('../with-sealed-video-input.py', import.meta.url),
@@ -96,24 +71,63 @@ test('decoder helper seals input and forbids nested file and network protocols',
   assert.doesNotMatch(driver, /['"]-protocol_whitelist['"],\s*['"][^'"]*(?:file|https?|tcp)/);
 });
 
-test('a genuine one-frame clip cannot satisfy multi-frame evidence', () => {
-  assert.throws(() => decodeVideoEvidence(path.join(fixtures, 'one-frame.mp4')), /frame-count/);
+test(
+  'portable suite does not run Linux media integration',
+  {
+    skip: 'NOT RUN here: node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs; required separately in Linux CI',
+  },
+  () => {}
+);
+
+const integration = fileURLToPath(
+  new URL('./decode-video-evidence.integration.mjs', import.meta.url)
+);
+function runIntegration(preload) {
+  // A nested CLI must start its own runner rather than inherit node:test's child context.
+  const env = { ...process.env };
+  delete env.NODE_TEST_CONTEXT;
+  return childProcess.spawnSync(
+    process.execPath,
+    [
+      '--import',
+      `data:text/javascript,${encodeURIComponent(preload)}`,
+      '--test',
+      '--test-reporter=tap',
+      integration,
+    ],
+    { encoding: 'utf8', timeout: 15000, env }
+  );
+}
+
+test('explicit integration CLI fails on unsupported platform (simulated Windows)', () => {
+  const result = runIntegration(`
+    import childProcess from 'node:child_process';
+    import { syncBuiltinESMExports } from 'node:module';
+    Object.defineProperty(process, 'platform', { value: 'win32' });
+    childProcess.spawnSync = () => { throw new Error('tools must not execute in portable controls'); };
+    syncBuiltinESMExports();
+  `);
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /supported Linux toolchain is unavailable/);
+  assert.match(result.stdout, /# skipped 0/);
 });
 
-test('multiple encoded frames with identical pixels cannot satisfy a transition', (t) => {
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'coverage-static-video-'));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const data = fs.readFileSync(path.join(fixtures, 'colors.mov'));
-  const type = data.indexOf(Buffer.from('mdat'));
-  assert.ok(type >= 4);
-  const length = data.readUInt32BE(type - 4);
-  data.fill(0, type + 4, type - 4 + length);
-  const filename = path.join(root, 'static.mov');
-  fs.writeFileSync(filename, data);
-  assert.throws(() => decodeVideoEvidence(filename), /no decoded visual transition/);
+test('explicit integration CLI fails when tools are missing (simulated ENOENT)', () => {
+  const result = runIntegration(`
+    import childProcess from 'node:child_process';
+    import { syncBuiltinESMExports } from 'node:module';
+    Object.defineProperty(process, 'platform', { value: 'linux' });
+    childProcess.spawnSync = () => ({ error: { code: 'ENOENT' }, status: null, stdout: '', stderr: '' });
+    syncBuiltinESMExports();
+  `);
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /ffprobe failed: ENOENT/);
+  assert.match(result.stdout, /# skipped 0/);
 });
 
-test('CI version receipt and baseline checks use the same absolute distro tools', (t) => {
+test('CI requires the explicit real-decoder entry before the repository suite', () => {
   const workflow = fs.readFileSync(
     new URL('../../../.github/workflows/ci.yml', import.meta.url),
     'utf8'
@@ -122,30 +136,10 @@ test('CI version receipt and baseline checks use the same absolute distro tools'
     workflow.indexOf('      - name: Install and identify the bounded video'),
     workflow.indexOf('      - name: Public documentation gate')
   );
-  const lines = [
-    ...block.matchAll(/^          (\/usr\/bin\/(?:python3|ffmpeg|ffprobe) .+)$/gm),
-  ].map((match) => match[1]);
-  assert.equal(lines.length, 5);
-  assert.doesNotMatch(block, /^          (?:python3|ffmpeg|ffprobe) /m);
-  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'coverage-fake-receipt-'));
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  const marker = path.join(root, 'executed');
-  for (const name of ['python3', 'ffmpeg', 'ffprobe', 'grep']) {
-    fs.writeFileSync(
-      path.join(root, name),
-      `#!/bin/sh\nprintf fake > '${marker}'\nprintf 'ffmpeg version 6.1.fake\\n'\nexit 0\n`,
-      { mode: 0o755 }
-    );
-  }
-  const actual = childProcess
-    .spawnSync('/usr/bin/ffmpeg', ['-version'], { encoding: 'utf8' })
-    .stdout.split('\n')[0];
-  const receipt = childProcess.spawnSync(
-    '/bin/bash',
-    ['-c', 'set -euo pipefail\n' + lines.join('\n')],
-    { encoding: 'utf8', env: { PATH: root, LANG: 'C', LC_ALL: 'C' } }
+  assert.match(block, /set -euo pipefail/);
+  assert.match(
+    block,
+    /^          node --test scripts\/coverage-matrices\/test\/decode-video-evidence\.integration\.mjs$/m
   );
-  assert.ok(receipt.stdout.includes(actual));
-  assert.equal(receipt.status, /^ffmpeg version 6\.1\./.test(actual) ? 0 : 1);
-  assert.equal(fs.existsSync(marker), false);
+  assert.doesNotMatch(block, /continue-on-error|\|\| true/);
 });

@@ -4,6 +4,8 @@ import { parse as parseYaml } from 'yaml';
 import { test } from 'node:test';
 import {
   collectDependencyOwners,
+  governanceFacts,
+  hasGovernanceDrift,
   normalizeLiveIssue,
   reconcileGovernanceSnapshot,
 } from '../sync-github-governance-snapshot.mjs';
@@ -239,4 +241,130 @@ test('live Issues endpoint rejects every own pull_request marker while retaining
       () => normalizeLiveIssue(420, { ...raw, pull_request: marker }),
       /pull request.*dependency Issue/
     );
+});
+
+function comparisonFixture() {
+  return {
+    schemaVersion: 1,
+    repository: 'Proto-UI/Proto-UI',
+    issues: [
+      {
+        number: 377,
+        nodeId: 'I-377',
+        url: 'https://github.com/Proto-UI/Proto-UI/issues/377',
+        title: 'Coverage',
+        state: 'OPEN',
+        stateReason: null,
+        updatedAt: '2026-09-27T00:53:27Z',
+        labels: ['documentation'],
+        assignees: ['cyjin-yl'],
+        milestone: null,
+        owners: ['maintainers'],
+      },
+    ],
+    pullRequests: [
+      {
+        number: 580,
+        nodeId: 'PR-580',
+        url: 'https://github.com/Proto-UI/Proto-UI/pull/580',
+        title: 'Docs',
+        state: 'MERGED',
+        updatedAt: '2026-09-01T00:00:00Z',
+        headSha: 'a'.repeat(40),
+        mergeCommit: 'b'.repeat(40),
+      },
+    ],
+  };
+}
+test('observation-only updatedAt changes do not produce governance drift or mutate snapshots', () => {
+  const before = comparisonFixture();
+  const current = structuredClone(before);
+  const live = structuredClone(before);
+  live.issues[0].updatedAt = '2026-10-06T17:14:14Z';
+  live.pullRequests[0].updatedAt = '2026-10-06T17:14:14Z';
+  assert.equal(hasGovernanceDrift(current, live), false);
+  assert.deepEqual(current, before);
+  assert.equal(live.issues[0].updatedAt, '2026-10-06T17:14:14Z');
+  assert.equal('updatedAt' in governanceFacts(current).issues[0], false);
+});
+for (const [field, value] of Object.entries({
+  number: 378,
+  nodeId: 'another-issue',
+  url: 'https://github.com/Proto-UI/Proto-UI/issues/378',
+  title: 'Changed',
+  state: 'CLOSED',
+  stateReason: 'COMPLETED',
+  labels: ['different'],
+  assignees: ['different'],
+  milestone: 'new milestone',
+  owners: ['other owner'],
+})) {
+  test(`Issue ${field} drift remains blocking even with timestamp churn`, () => {
+    const current = comparisonFixture();
+    const live = structuredClone(current);
+    live.issues[0][field] = value;
+    live.issues[0].updatedAt = '2026-10-06T17:14:14Z';
+    assert.equal(hasGovernanceDrift(current, live), true);
+  });
+}
+for (const [field, value] of Object.entries({
+  number: 581,
+  nodeId: 'another-pr',
+  url: 'https://github.com/Proto-UI/Proto-UI/pull/581',
+  title: 'Changed',
+  state: 'CLOSED',
+  headSha: 'c'.repeat(40),
+  mergeCommit: null,
+})) {
+  test(`PR ${field} drift remains blocking even with timestamp churn`, () => {
+    const current = comparisonFixture();
+    const live = structuredClone(current);
+    live.pullRequests[0][field] = value;
+    live.pullRequests[0].updatedAt = '2026-10-06T17:14:14Z';
+    assert.equal(hasGovernanceDrift(current, live), true);
+  });
+}
+test('new, removed or unknown governed fields remain blocking', () => {
+  for (const mutate of [
+    (s) => {
+      s.issues = [];
+    },
+    (s) => {
+      s.pullRequests = [];
+    },
+    (s) => {
+      s.issues[0].newDecision = 'changed';
+    },
+    (s) => {
+      s.repository = 'Other/Repo';
+    },
+    (s) => {
+      s.schemaVersion = 2;
+    },
+  ]) {
+    const current = comparisonFixture();
+    const live = structuredClone(current);
+    mutate(live);
+    assert.equal(hasGovernanceDrift(current, live), true);
+  }
+});
+test('invalid or missing observation timestamps remain invalid metadata', () => {
+  for (const value of [undefined, null, 123, 'invalid']) {
+    const current = comparisonFixture();
+    current.issues[0].updatedAt = value;
+    assert.throws(() => governanceFacts(current), /invalid observation timestamp/);
+  }
+});
+test('explicit reconciliation retains the real new observation timestamp', () => {
+  const current = comparisonFixture();
+  const live = structuredClone(current);
+  live.issues[0].updatedAt = '2026-10-06T17:14:14Z';
+  const result = reconcileGovernanceSnapshot({
+    currentSnapshot: current,
+    dependencyOwners: new Map([[377, new Set(['maintainers'])]]),
+    liveIssues: live.issues,
+    livePullRequests: live.pullRequests,
+  });
+  assert.equal(result.issues[0].updatedAt, '2026-10-06T17:14:14Z');
+  assert.equal(hasGovernanceDrift(current, result), false);
 });

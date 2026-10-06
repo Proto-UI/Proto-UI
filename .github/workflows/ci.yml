@@ -429,7 +429,7 @@ jobs:
           /usr/bin/ffprobe -version | /usr/bin/grep -E '^ffprobe version 6\.1\.'
           # Real fixture decoding proves fd seek/seal and codec capabilities;
           # inventory or version strings alone do not satisfy this gate.
-          node --test scripts/coverage-matrices/test/decode-video-evidence.test.mjs
+          node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs
 
       - name: Public documentation gate and repository tests
         env:
