@@ -1,0 +1,53 @@
+id: T-CONTENT-SELECTION-AFFORDANCE-0001
+type: test
+title: Content-selection token merge and Web compiler closure
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Focused executable tests cover token merging and subject-local Web CSS generation. Browser pointer-selection, native editing and complete cross-Adapter evidence remain outside this first test slice and block stable admission.
+summary: Tests the bounded vocabulary, conflict resolution and physical Web stylesheet closure without claiming native input or all-host support.
+cases:
+  - id: T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-MERGE
+    title: Selection affordances resolve last-wins independently of selection paint
+    covers: [C-CONTENT-SELECTION-AFFORDANCE-0001-MERGE]
+    expectation: one-selection-affordance-per-subject
+  - id: T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-CSS
+    title: All three tokens generate scoped standard and WebKit-prefixed CSS
+    covers:
+      - C-CONTENT-SELECTION-AFFORDANCE-0001-VOCABULARY
+      - C-CONTENT-SELECTION-AFFORDANCE-0001-WEB
+    expectation: explicit-subject-local-css-without-global-suppression
+implementations:
+  - id: feedback-selection-affordance-patch
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/catalog-boundary.test.ts
+    required: true
+    consumesCases: [T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-MERGE]
+  - id: core-selection-affordance-merge
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/semantic-merge.test.ts
+    required: true
+    consumesCases: [T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-MERGE]
+  - id: cli-selection-affordance-css
+    kind: module-test
+    status: passing
+    path: packages/cli/test/proto-style-css.test.ts
+    required: true
+    consumesCases: [T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-CSS]
+verifies:
+  contracts:
+    - id: C-CONTENT-SELECTION-AFFORDANCE-0001
+      anchors:
+        - C-CONTENT-SELECTION-AFFORDANCE-0001-VOCABULARY
+        - C-CONTENT-SELECTION-AFFORDANCE-0001-MERGE
+        - C-CONTENT-SELECTION-AFFORDANCE-0001-WEB
+sources:
+  - path: packages/core/test/feedback/semantic-merge.test.ts
+  - path: packages/cli/test/proto-style-css.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added focused token and compiler evidence while leaving real-browser and native-host acceptance pending.
+tags: [feedback, selection, compiler, test]

@@ -14,6 +14,13 @@ statement:
 
 
 criteria:
+  - id: P-SHADCN-TOGGLE-CONTENT-SELECTION
+    text:
+      en: The action subject declares select-none to suppress accidental label selection without replacing inherited activation, active state, focus or accessibility. This follows C-CONTENT-SELECTION-AFFORDANCE-0001 and does not apply blanket suppression to passive content or editors.
+    dependsOn:
+      contracts:
+        - id: C-CONTENT-SELECTION-AFFORDANCE-0001
+          since: 0.3.0-alpha.1
   - id: P-SHADCN-TOGGLE-UPSTREAM-IDENTITY
     text:
       zh-CN: Shadcn Toggle 必须明确标记为 Proto UI 维护的非官方 shadcn/ui 衍生实现，并以固定 upstream revision/path 作为兼容比较基线；P 实体只治理 Proto UI 投射，不主张上游所有权或认证。

@@ -65,6 +65,12 @@ export function getSemanticGroupKeyV0(token: string): string {
     return `${selectionPrefix}${getSemanticGroupKeyV0(token.slice(selectionPrefix.length))}`;
   }
 
+  // One content-selection affordance per subject. This is independent of
+  // selection:* paint and never owns a selection range or control state.
+  if (token === 'select-auto' || token === 'select-text' || token === 'select-none') {
+    return 'user-select';
+  }
+
   if (
     token === 'flex' ||
     token === 'inline-flex' ||

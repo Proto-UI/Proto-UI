@@ -1,23 +1,23 @@
 id: C-FEEDBACK-STYLE-0001
 type: contract
-title: feedback.style is the visual feedback surface
+title: feedback.style is visual feedback with a bounded content-selection exception
 status: draft
 since: 0.1.0
-summary: '`feedback.style` describes visual feedback that can change component appearance without triggering render or changing template structure.'
+summary: '`feedback.style` describes visual feedback and the explicitly bounded content-selection affordance exception without triggering render or changing template structure.'
 statement:
   zh-CN: >-
-    `feedback.style` 是 Feedback 通路中仅负责视觉反馈的 surface。它描述组件应如何改变自身样貌，使 User 感知组件的存在、状态或变化；样式更新不触发 render，也不负责改变 template 的逻辑结构或内容。
+    `feedback.style` 是 Feedback 通路中负责视觉反馈的 surface；唯一有界非纯视觉例外是 C-CONTENT-SELECTION-AFFORDANCE-0001 明确治理的当前 subject 文本选择可供性。该例外承认宿主选择交互策略变化，但不接纳 selection range、editing、focus、activation 或 clipboard command 所有权。它描述组件应如何改变自身样貌，使 User 感知组件的存在、状态或变化；样式更新不触发 render，也不负责改变 template 的逻辑结构或内容。
 
 
   en: >-
-    `feedback.style` is the visual-feedback-only surface within the Feedback channel. It describes how a component should change its appearance so the User can perceive the component's existence, state, or changes; style updates do not trigger render and do not change template logic structure or content.
+    `feedback.style` is the visual-feedback surface within the Feedback channel, with only the bounded subject-local content-selection affordance exception governed by C-CONTENT-SELECTION-AFFORDANCE-0001. This exception admits a host selection-interaction policy change but not ownership of selection ranges, editing, focus, activation or clipboard commands. It describes how a component should change its appearance so the User can perceive the component's existence, state, or changes; style updates do not trigger render and do not change template logic structure or content.
 
 
 criteria:
   - id: C-FEEDBACK-STYLE-0001-A
     text:
-      zh-CN: '`feedback.style` 必须被识别为 Feedback 通路下的视觉反馈 surface，且只覆盖视觉反馈。'
-      en: '`feedback.style` must be identified as a visual-feedback surface under the Feedback channel, and covers visual feedback only.'
+      zh-CN: '`feedback.style` 必须被识别为 Feedback 通路下的视觉反馈 surface，除 C-CONTENT-SELECTION-AFFORDANCE-0001 的精确有界例外外，只覆盖视觉反馈。'
+      en: '`feedback.style` must be identified as a visual-feedback surface under the Feedback channel, and covers visual feedback only except for the exact bounded exception in C-CONTENT-SELECTION-AFFORDANCE-0001.'
   - id: C-FEEDBACK-STYLE-0001-B
     text:
       zh-CN: '`feedback.style` 可以改变组件的视觉样貌。'
@@ -69,6 +69,9 @@ revisions:
   - version: 0.1.0
     change: revised
     summary: Clarified no-render style updates as a defining feature of the `feedback.style` surface.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Explicitly admitted the bounded subject-local content-selection interaction affordance exception while retaining all editing and semantic ownership boundaries.
 tags:
   - feedback
   - style

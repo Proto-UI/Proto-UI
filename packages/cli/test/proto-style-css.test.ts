@@ -8,6 +8,18 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it('closes explicit content-selection affordances only on their authored subjects', () => {
+    // T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-CSS
+    const css = renderProtoStyleTokenCss(['select-auto', 'select-text', 'select-none']);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    for (const value of ['auto', 'text', 'none']) {
+      expect(css).toContain(`:where([data-pui-style~="select-${value}"])`);
+      expect(css).toContain(`-webkit-user-select: ${value};`);
+      expect(css).toContain(`user-select: ${value};`);
+    }
+    expect(css).not.toMatch(/(?:html|body|\*)\s*\{[^}]*user-select/s);
+  });
+
   it('lowers both Scroll Area track inset dimensions to valid spaced CSS math', () => {
     const css = renderProtoStyleTokenCss([
       'data-[orientation=vertical]:h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',

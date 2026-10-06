@@ -1,0 +1,60 @@
+id: C-CONTENT-SELECTION-AFFORDANCE-0001
+type: contract
+title: Bounded host content-selection affordances preserve useful text and editing
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: This bounded revision catalogs an existing select-none host affordance, adds explicit restoration and deterministic merging, and remains draft pending independent review and real-browser cross-Adapter evidence. Reusable control-label association and native host selection realization are not admitted here.
+summary: Explicit subject-local selection affordances are a narrow exception to visual-only Feedback, not an editor, selection state, or copy-protection channel.
+statement:
+  en: >-
+    Feedback style admits only the three subject-local content-selection affordance tokens select-auto, select-text and select-none as a bounded exception to its visual-only rule. This admits host selection interaction policy, not merely selection paint, and does not give Feedback ownership of selection ranges, editing, selected/checked/active state, focus, activation or clipboard commands. Prototype authors declare the policy on the semantic action or content subject; hosts retain physical text selection and editing. Unspecified policy preserves host defaults.
+
+  zh-CN: >-
+    Feedback style 仅以有界例外接纳作用于当前 subject 的 select-auto、select-text、select-none 内容选择可供性 token。该例外确实改变宿主文本选择交互，不只是选区配色；它不授予 Feedback selection range、editing、selected/checked/active state、focus、activation 或 clipboard command 所有权。Prototype 作者在对应 action 或 content subject 上明确声明策略；物理文本选择与编辑仍归宿主。未声明策略时保留宿主默认。
+
+criteria:
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-VOCABULARY
+    text:
+      en: select-auto delegates to the host default at the subject; select-text explicitly allows text selection; select-none suppresses accidental text selection starting on that subject. Auto is not an alias for text inside an ancestor that suppresses selection. These tokens do not create an all-or-nothing atomic selection mode.
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-OWNERS
+    text:
+      en: Pure action labels and drag handles may declare select-none on their owning Prototype or part. Surface, document roots, passive Text, card copy, Dialog titles/descriptions, useful data/status/errors and editor content must not acquire blanket suppression merely because they occur near controls. Suppression on an ancestor must not prevent explicitly selectable nested content where the host supports restoration.
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-LABELS
+    text:
+      en: A short actionable control label can use the control's policy only under an admitted semantic association and activation owner. A sibling visual label, accessible-name text copy or styling alias does not establish that association. Long descriptions remain content. This contract introduces no Label identity or association API and does not amend existing Checkbox anatomy omissions.
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-BOUNDARY
+    text:
+      en: Selection affordance changes must not clear or programmatically select document text, intercept clipboard commands, cancel arbitrary pointer/keyboard default actions, mutate control state, replace labels or synthesize focus. Text Control retains the selection, cursor, IME and native editing-chrome requirements of C-TEXT-CONTROL-0001. Placeholder paint is not an editor value or proof of an editor selection defect.
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-MERGE
+    text:
+      en: The three tokens form one content-selection semantic group; the last contribution in source order wins. Runtime positive patch, suppression and clearPatch use that same group. The selection paint target selection:* remains independent. This new bounded contract deliberately changes prior fallback grouping for conflicting select tokens; a single existing select-none keeps its meaning.
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-WEB
+    text:
+      en: The Web style compiler must realize each admitted token only on its authored data-pui-style subject using the matching user-select value and its WebKit-prefixed equivalent. It must not install a document-wide suppression/reset. Browser differences for ranges crossing unselectable content remain observable host behavior; CSS suppression is not copy protection and does not restrict programmatic Selection or accessibility APIs.
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-SUPPORT
+    text:
+      en: Token acceptance and CSS generation do not certify native selection support or every browser. Unsupported native properties or tokens retain explicit diagnostics. GPUI/AppKit/SwiftUI/Flutter/Qt selection fidelity and real assistive-technology conformance are outside this slice.
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-STYLE-0003
+    - C-FEEDBACK-STYLE-0005
+    - C-TEXT-CONTROL-0001
+references:
+  prototypes:
+    - P-BASE-TEXT
+    - P-SHADCN-TOGGLE
+    - P-SHADCN-CHECKBOX
+sources:
+  - path: packages/core/src/spec/feedback/semantic-merge.ts
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: internal/records/2026-10-06-content-selection-affordance.md
+verifies:
+  tests:
+    - T-CONTENT-SELECTION-AFFORDANCE-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Admitted one explicit subject-local selection-affordance exception, restoration vocabulary and revised same-group semantics while retaining editing and Label boundaries.
+tags: [feedback, text, selection, accessibility, host-boundary]

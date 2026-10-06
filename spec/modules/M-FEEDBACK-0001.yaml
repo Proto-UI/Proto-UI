@@ -5,8 +5,8 @@ status: draft
 since: 0.3.0-alpha.0
 summary: The standard Feedback module merges setup and internal contributions, applies a final runtime patch layer, and delegates visual realization to a host style sink.
 statement:
-  en: This slice catalogs the existing visual style realization of the Component-to-User Feedback channel. Feedback owns per-instance semantic style state; the host owns materialization. Runtime installs the module with mixed resource ownership. This draft does not admit auditory or tactile feedback, new author APIs, or a general rendering policy.
-  zh-CN: 本 slice 编目 Component-to-User Feedback 通路已有的视觉样式实现。Feedback 拥有每实例语义样式状态，宿主拥有物化；Runtime 以 mixed resource ownership 安装该 Module。本 draft 不接纳听觉或触觉能力、新作者 API 或通用渲染策略。
+  en: This slice catalogs the existing visual style realization of the Component-to-User Feedback channel and the exact bounded content-selection affordance exception in C-CONTENT-SELECTION-AFFORDANCE-0001. Feedback owns per-instance semantic style state; the host owns materialization. Runtime installs the module with mixed resource ownership. This draft does not admit auditory or tactile feedback, new author APIs, or a general rendering policy.
+  zh-CN: 本 slice 编目 Component-to-User Feedback 通路已有的视觉样式实现与 C-CONTENT-SELECTION-AFFORDANCE-0001 的精确有界内容选择可供性例外。Feedback 拥有每实例语义样式状态，宿主拥有物化；Runtime 以 mixed resource ownership 安装该 Module。本 draft 不接纳听觉或触觉能力、新作者 API 或通用渲染策略。
 criteria:
   - id: M-FEEDBACK-0001-A
     text:
