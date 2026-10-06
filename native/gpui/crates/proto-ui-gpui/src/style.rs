@@ -148,6 +148,10 @@ fn apply(
     };
 
     match property {
+        // This renderer's plain Text surfaces do not create a native selection
+        // controller. `none` is therefore honored directly. Other selection
+        // intents still require the dedicated text-selection implementation.
+        "user-select" if value == "none" => {},
         "display" => match value {
             "flex" | "inline-flex" => style.display = Some(Display::Flex),
             "block" | "inline-block" => style.display = Some(Display::Block),

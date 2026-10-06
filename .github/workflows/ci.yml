@@ -163,6 +163,21 @@ jobs:
         working-directory: native/gpui
         run: cargo fmt --all --check
 
+      - name: Collect a failed native-format patch
+        if: failure()
+        working-directory: native/gpui
+        run: |
+          cargo fmt --all
+          git diff --binary -- . > "${RUNNER_TEMP}/gpui-rustfmt.patch"
+
+      - name: Upload native-format diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpui-rustfmt-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/gpui-rustfmt.patch
+          if-no-files-found: ignore
+
       # The platform-independent crates only. `proto-ui-gpui` depends on GPUI,
       # whose Linux backends need a system toolchain this job does not install,
       # and the first fixture is pinned to macOS by
@@ -213,13 +228,26 @@ jobs:
         working-directory: native/gpui
         run: cargo test --workspace
 
-      - name: Base Button through macOS accessibility
-        # Opens a real window, so it is not part of `cargo test --workspace`.
+      - name: Native controls and Label through macOS accessibility
+        # Opens the test's own real window and captures only its rendered frame.
         working-directory: native/gpui
+        env:
+          PROTO_GPUI_EVIDENCE_DIR: ${{ github.workspace }}/native/gpui/evidence
         run: |
           set -euo pipefail
-          cargo test -p proto-ui-gpui --features macos-accessibility-test --test accesskit_macos 2>&1 | tee accesskit.log
-          grep -Eq "test result: ok\. [1-9][0-9]* passed" accesskit.log
+          mkdir -p evidence
+          printf 'checkout=%s\npr_head=%s\n' "$(git rev-parse HEAD)" "${{ github.event.pull_request.head.sha || github.sha }}" > evidence/source.txt
+          sw_vers >> evidence/source.txt
+          cargo test -p proto-ui-gpui --features macos-accessibility-test --test accesskit_macos 2>&1 | tee evidence/accesskit.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" evidence/accesskit.log
+
+      - name: Upload native source-bound evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpui-native-evidence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: native/gpui/evidence/
+          if-no-files-found: ignore
 
   rust-interop:
     # The real Rust host against the real Node peer. These tests are ignored
@@ -321,6 +349,13 @@ jobs:
           set -euo pipefail
           cargo test -p proto-ui-gpui --test checkbox_t0 -- --ignored --test-threads=1 2>&1 | tee checkbox_t0.log
           grep -Eq "test result: ok\. [1-9][0-9]* passed" checkbox_t0.log
+
+      - name: Base Label association over T0 in a GPUI window
+        working-directory: native/gpui
+        run: |
+          set -euo pipefail
+          cargo test -p proto-ui-gpui --test control_label_t0 -- --ignored --test-threads=1 2>&1 | tee control_label_t0.log
+          grep -Eq "test result: ok\. [1-9][0-9]* passed" control_label_t0.log
 
   test-plan:
     env:

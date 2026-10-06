@@ -16,6 +16,8 @@ import type { HostToPeerMessage, PeerToHostMessage, WireRecord } from '@proto.ui
 import { createBaseBundle, type PrototypeBundle } from './bundle';
 import { createPeerSession, type PeerSession } from './session';
 import { createFrameDecoder, encodeFrame } from './transport';
+import { createAssociationLedger } from './associations';
+import { createNativeScopeLedger, createNativeA11yLedger } from './control-label';
 
 export const PEER_NAME = '@proto.ui/adapter-gpui-peer';
 
@@ -36,6 +38,9 @@ export type PeerProcessOptions = {
 export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
   const decoder = createFrameDecoder<HostToPeerMessage>();
   const sessions = new Map<string, PeerSession>();
+  const associations = createAssociationLedger();
+  const nativeScope = createNativeScopeLedger();
+  const nativeA11yId = createNativeA11yLedger();
   // The environment the host last reported, which every session's rules read.
   let meta: WireRecord = {};
   const log = options.log ?? (() => {});
@@ -46,7 +51,10 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
 
   const send = (message: PeerToHostMessage) => {
     // A session also ends with the one it was opened inside.
-    if (message.kind === 'session.disposed') sessions.delete(message.sessionId);
+    if (message.kind === 'session.disposed') {
+      sessions.delete(message.sessionId);
+      associations.release(message.sessionId);
+    }
     options.write(encodeFrame(message));
   };
   const diagnose = (sessionId: string | null, code: string, message: string) =>
@@ -125,6 +133,8 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
             send,
             parent,
             getMeta: (key) => meta[key],
+            nativeScope,
+            nativeA11yId,
           });
         } catch (error) {
           // Setup runs as the instance is created. A part opened inside an
@@ -146,6 +156,14 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
           diagnostics: [],
         });
         await opened.mount();
+        return;
+      }
+      case 'instance.associations': {
+        const target = session(message.sessionId, message.kind);
+        if (target)
+          associations.apply(message.sessionId, message.associations, (value) =>
+            target.setAssociations(value)
+          );
         return;
       }
       case 'props.set':

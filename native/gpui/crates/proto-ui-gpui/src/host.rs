@@ -44,7 +44,7 @@
 //! pointer made, which reaches the Prototype the way any activation does.
 
 use std::cell::RefCell;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::panic::Location;
 use std::rc::Rc;
 
@@ -59,6 +59,7 @@ use proto_ui_host_protocol::event_type::{EventType, ExtensionEvent};
 use proto_ui_host_protocol::wire::SessionId;
 
 use crate::a11y::{names_from_descendants, A11yProjection};
+use crate::control_label::{LabelInput, LabelRoute};
 use crate::input::{
     HostInput, InputRouter, PointerPhase, RouteOwner, Routed, SessionRoute, SurfaceId, Target,
 };
@@ -151,6 +152,7 @@ impl SurfaceNode {
 #[derive(Default)]
 pub struct InputBridge {
     router: InputRouter,
+    pub(crate) label_input: LabelInput,
     /// Surfaces whose listener saw the current mouse event, innermost first.
     collected: Vec<SurfaceId>,
     owner_of: HashMap<SurfaceId, SessionId>,
@@ -223,6 +225,7 @@ impl InputBridge {
         self.parent_of.clear();
         self.root_of.clear();
         self.focusable.clear();
+        let mut interactive = HashSet::new();
         // Reversed so the stack visits surfaces in document order, which makes
         // the first root recorded for a session the outermost one.
         let mut pending: Vec<(&SurfaceNode, Option<&SurfaceNode>)> = surfaces
@@ -241,6 +244,9 @@ impl InputBridge {
                     .entry(surface.session.clone())
                     .or_insert_with(|| surface.id.clone());
             }
+            if surface.a11y.as_ref().is_some_and(|a11y| a11y.activatable || matches!(a11y.role, accesskit::Role::Button | accesskit::Role::Switch | accesskit::Role::CheckBox | accesskit::Role::Tab)) {
+                interactive.insert(surface.id.clone());
+            }
             if let Some(focus) = &surface.focus {
                 self.focusable.push((focus.clone(), surface.id.clone()));
             }
@@ -252,6 +258,7 @@ impl InputBridge {
                     .map(|child| (child, Some(surface))),
             );
         }
+        self.label_input.set_interactive(interactive);
     }
 
     /// Who owns an input on these surfaces, as the Web router decides it.
@@ -327,6 +334,7 @@ impl InputBridge {
     /// loses activation and `focus` when it regains it, and GPUI calls the
     /// focus callbacks at exactly those moments.
     fn sync_focus(&mut self, window: &Window) {
+        if !window.is_window_active() { self.label_input.cancel(); }
         let now = window
             .is_window_active()
             .then(|| {
@@ -368,6 +376,7 @@ impl InputBridge {
 
     fn mouse_down(&mut self, event: &MouseDownEvent) {
         let path = std::mem::take(&mut self.collected);
+        self.label_input.pointer_down(&path, (event.position.x.0, event.position.y.0), event.button == MouseButton::Left && event.modifiers == gpui::Modifiers::default());
         let modifiers = PortableModifiers::from(event.modifiers);
         let target = self.target(path.clone());
         self.route(HostInput::Pointer {
@@ -385,6 +394,7 @@ impl InputBridge {
 
     fn mouse_up(&mut self, event: &MouseUpEvent) {
         let path = std::mem::take(&mut self.collected);
+        self.label_input.pointer_up(&path, (event.position.x.0, event.position.y.0), event.button == MouseButton::Left && event.modifiers == gpui::Modifiers::default());
         let modifiers = PortableModifiers::from(event.modifiers);
         self.route(HostInput::Pointer {
             phase: PointerPhase::Up,
@@ -412,6 +422,7 @@ impl InputBridge {
     }
 
     fn mouse_move(&mut self, event: &MouseMoveEvent) {
+        self.label_input.pointer_move((event.position.x.0, event.position.y.0));
         let path = std::mem::take(&mut self.collected);
         self.route(HostInput::Pointer {
             phase: PointerPhase::Move,
@@ -422,6 +433,7 @@ impl InputBridge {
 
     fn mouse_exit(&mut self, event: &MouseExitEvent) {
         self.collected.clear();
+        self.label_input.cancel();
         self.route(HostInput::PointerExit {
             modifiers: PortableModifiers::from(event.modifiers),
         });
@@ -621,10 +633,11 @@ impl ProtoHostView {
 }
 
 impl Render for ProtoHostView {
-    fn render(&mut self, _window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
+    fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         // GPUI redraws every window when the application changes its reduce
         // motion setting, which is when the peer hears of it.
         self.send_meta(cx);
+        self.publish_control_labels(window);
         self.bridge.borrow_mut().index(&self.surfaces);
         let (down, up) = (self.bridge.clone(), self.bridge.clone());
         let mouse = self.bridge.clone();
@@ -738,11 +751,14 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
     let element = element.children(surface.children.iter().enumerate().map(|(index, child)| {
         match child {
             SurfaceChild::Surface(surface) => render_surface(surface, bridge),
-            SurfaceChild::Text(text) => Text::new(
-                ElementId::NamedInteger("text".into(), index as u64),
-                text.clone(),
-            )
-            .into_any_element(),
+            SurfaceChild::Text(text) => {
+                let label = bridge.borrow().label_input.route_for_session(&surface.session);
+                if let Some(route) = label {
+                    native_label_text(index, text, route, bridge)
+                } else {
+                    Text::new(ElementId::NamedInteger("text".into(), index as u64), text.clone()).into_any_element()
+                }
+            },
             // Only a session with nothing to show yet is still a placeholder.
             SurfaceChild::Session(_) => Empty.into_any_element(),
         }
@@ -839,6 +855,114 @@ impl Element for Disabled {
     fn write_a11y_info(&self, node: &mut accesskit::Node) {
         Element::write_a11y_info(&self.0, node);
         node.set_disabled();
+    }
+
+    fn a11y_synthetic_children(
+        &mut self,
+        prepaint: &mut Self::PrepaintState,
+        builder: &mut gpui::A11ySubtreeBuilder,
+    ) {
+        Element::a11y_synthetic_children(&mut self.0, prepaint, builder)
+    }
+}
+
+/// One visible text node, with its ordinary Label role and no keyboard focus.
+/// The child is raw text without a second accessibility node; this is not a
+/// copied aria-label or hidden duplicate of the rendered caption.
+fn native_label_text(index: usize, text: &SharedString, route: LabelRoute, bridge: &Rc<RefCell<InputBridge>>) -> AnyElement {
+    let action_bridge = bridge.clone();
+    NativeLabelText(
+        div().id(ElementId::NamedInteger("text".into(), index as u64))
+            .role(accesskit::Role::Label)
+            .on_a11y_action(AccessibleAction::Click, move |_, _, _| {
+                action_bridge.borrow_mut().label_input.accessibility(&route);
+            })
+            .child(text.clone()),
+        text.clone(),
+    ).into_any_element()
+}
+
+struct NativeLabelText(Stateful<Div>, SharedString);
+
+impl IntoElement for NativeLabelText {
+    type Element = Self;
+
+    fn into_element(self) -> Self::Element {
+        self
+    }
+}
+
+impl Element for NativeLabelText {
+    type RequestLayoutState = <Stateful<Div> as Element>::RequestLayoutState;
+    type PrepaintState = <Stateful<Div> as Element>::PrepaintState;
+
+    fn id(&self) -> Option<ElementId> {
+        Element::id(&self.0)
+    }
+
+    fn source_location(&self) -> Option<&'static Location<'static>> {
+        Element::source_location(&self.0)
+    }
+
+    fn request_layout(
+        &mut self,
+        id: Option<&GlobalElementId>,
+        inspector_id: Option<&InspectorElementId>,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> (LayoutId, Self::RequestLayoutState) {
+        Element::request_layout(&mut self.0, id, inspector_id, window, cx)
+    }
+
+    fn prepaint(
+        &mut self,
+        id: Option<&GlobalElementId>,
+        inspector_id: Option<&InspectorElementId>,
+        bounds: Bounds<Pixels>,
+        request_layout: &mut Self::RequestLayoutState,
+        window: &mut Window,
+        cx: &mut App,
+    ) -> Self::PrepaintState {
+        Element::prepaint(
+            &mut self.0,
+            id,
+            inspector_id,
+            bounds,
+            request_layout,
+            window,
+            cx,
+        )
+    }
+
+    fn paint(
+        &mut self,
+        id: Option<&GlobalElementId>,
+        inspector_id: Option<&InspectorElementId>,
+        bounds: Bounds<Pixels>,
+        request_layout: &mut Self::RequestLayoutState,
+        prepaint: &mut Self::PrepaintState,
+        window: &mut Window,
+        cx: &mut App,
+    ) {
+        Element::paint(
+            &mut self.0,
+            id,
+            inspector_id,
+            bounds,
+            request_layout,
+            prepaint,
+            window,
+            cx,
+        )
+    }
+
+    fn a11y_role(&self) -> Option<accesskit::Role> {
+        Element::a11y_role(&self.0)
+    }
+
+    fn write_a11y_info(&self, node: &mut accesskit::Node) {
+        Element::write_a11y_info(&self.0, node);
+        node.set_value(self.1.to_string());
     }
 
     fn a11y_synthetic_children(

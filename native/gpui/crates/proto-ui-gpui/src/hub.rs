@@ -16,6 +16,7 @@ use std::collections::{HashMap, HashSet};
 
 use gpui::{App, Context, EventEmitter, FocusHandle, Refineable, StyleRefinement, Window};
 use proto_ui_host_protocol::messages::{
+    ControlLabelKind, ControlLabelPlan, ControlLabelView, InstanceAssociations, InstanceAssociationsSet, NativeControlLabelView,
     ExposeCall, FocusResult, HostToPeerMessage, InputSampleMessage, MetaSet, OpenStatus,
     PeerToHostMessage, ProjectionAckMessage, PropsSet, SessionDispose, SessionOpen, WireRecord,
 };
@@ -33,6 +34,7 @@ use serde_json::{json, Value};
 
 use crate::a11y::{project, A11yIssue, A11yProjection, A11yReference};
 use crate::host::{ProtoHostView, SurfaceChild, SurfaceNode, FOCUS_ROOT_REF};
+use crate::control_label::{ControlLabelRef, LabelRoute, NativeTreeIdentity};
 use crate::input::{SessionRoute, SurfaceId};
 use crate::style::{style_for_feedback_tokens, StyleIssue};
 use crate::template::{build, parse, BuildContext, BuildIssue};
@@ -71,6 +73,9 @@ struct HubSession {
     feedback: StyleRefinement,
     /// Whether the focus plan lets the host focus the root on request.
     focus_programmatic: bool,
+    native_identity: NativeTreeIdentity,
+    control_label_plan: Option<ControlLabelPlan>,
+    control_label_view: Option<ControlLabelView>,
     /// The Expose states as the peer last reported them.
     states: WireRecord,
     /// Delivered samples whose host default action already ran, until a
@@ -147,6 +152,8 @@ pub enum HubNote {
         session_id: SessionId,
         sample_id: String,
     },
+    /// A native label plan does not belong to the installed surface epoch.
+    ControlLabelRefused { session_id: SessionId, view_epoch: u64 },
     /// A feedback style for a view other than the installed one.
     StyleRefused {
         session_id: SessionId,
@@ -171,6 +178,8 @@ pub struct HostHub {
     next_call: u64,
     /// The environment the peer last heard.
     meta: Option<WireRecord>,
+    native_tree: NativeTreeIdentity,
+    next_label_revision: u64,
 }
 
 impl HostHub {
@@ -408,6 +417,9 @@ impl ProtoHostView {
                 projection: None,
                 feedback: StyleRefinement::default(),
                 focus_programmatic: false,
+                native_identity: NativeTreeIdentity::default(),
+                control_label_plan: None,
+                control_label_view: None,
                 states: WireRecord::new(),
                 default_ran: HashSet::new(),
             },
@@ -440,6 +452,18 @@ impl ProtoHostView {
         self.hub.outbox.push(HostToPeerMessage::PropsSet(PropsSet {
             session_id: session_id.to_string(),
             props,
+        }));
+    }
+
+    /// Replaces the dedicated typed label association, never a JSON Prop.
+    pub fn set_control_label_association(&mut self, session_id: &str, reference: Option<&ControlLabelRef>) {
+        if self.hub.session(session_id).is_none() {
+            self.note_unknown(session_id, "instance.associations");
+            return;
+        }
+        self.hub.outbox.push(HostToPeerMessage::InstanceAssociations(InstanceAssociationsSet {
+            session_id: session_id.to_string(),
+            associations: InstanceAssociations { control_label: reference.map(ControlLabelRef::wire_key) },
         }));
     }
 
@@ -478,6 +502,25 @@ impl ProtoHostView {
         cx: &mut Context<Self>,
     ) {
         match message {
+            PeerToHostMessage::ControlLabelPlan(message) => {
+                let Some(session) = self.hub.session_mut(&message.session_id) else {
+                    self.note_unknown(&message.session_id, "control-label.plan");
+                    return;
+                };
+                if session.model.snapshot().current_epoch != Some(message.view_epoch) || message.plan.as_ref().is_some_and(|plan| plan.lease_id.is_empty() || (plan.kind == ControlLabelKind::Target && plan.activation)) {
+                    self.hub.notes.push(HubNote::ControlLabelRefused { session_id: message.session_id, view_epoch: message.view_epoch });
+                    return;
+                }
+                if session.control_label_plan != message.plan {
+                    // Option changes are an action-generation boundary even
+                    // when the physical text surface did not move. Old queued
+                    // actions and pointer sequences must not cross off/on.
+                    session.control_label_view = None;
+                }
+                session.control_label_plan = message.plan;
+                self.publish_control_labels(window);
+                cx.notify();
+            }
             PeerToHostMessage::ProjectionInstall(install) => {
                 let ack = self.install(install.transaction, window, cx);
                 self.hub
@@ -497,6 +540,7 @@ impl ProtoHostView {
                 {
                     ActivationStatus::Activated | ActivationStatus::AlreadyActive => {
                         self.refresh_route(&activate.session_id);
+                        self.publish_control_labels(window);
                     }
                     status => self.hub.notes.push(HubNote::ActivationRefused {
                         session_id: activate.session_id,
@@ -725,6 +769,15 @@ impl ProtoHostView {
     /// made, then the input routed since the last call, as samples the model
     /// has accepted.
     pub fn take_outbox(&mut self) -> Vec<HostToPeerMessage> {
+        let label_actions = self.bridge.borrow_mut().label_input.drain();
+        for action in label_actions {
+            let valid = self.hub.session(&action.session_id).is_some_and(|session| {
+                session.control_label_plan.as_ref().is_some_and(|plan| plan.kind == ControlLabelKind::Label && plan.activation && plan.lease_id == action.lease_id)
+                    && session.control_label_view.as_ref().is_some_and(|view| view.view.is_some() && view.revision == action.view_revision && view.view_epoch == action.view_epoch)
+                    && session.model.snapshot().active_epoch == Some(action.view_epoch)
+            });
+            if valid { self.hub.outbox.push(HostToPeerMessage::ControlLabelActivate(action)); }
+        }
         let routed = self.bridge.borrow_mut().drain();
         for routed in routed {
             let Some(session) = self.hub.session_mut(&routed.session_id) else {
@@ -980,8 +1033,50 @@ impl ProtoHostView {
                 Some(place_sessions(root, &roots, &mut vec![id.clone()]))
             })
             .collect();
+        self.publish_control_labels(window);
         self.subscribe_focus(window, cx);
         cx.notify();
+    }
+
+    /// Publishes only host-owned views in the actual GPUI window/tree. This
+    /// queues data; layout and paint never synchronously enter the guest.
+    pub(crate) fn publish_control_labels(&mut self, window: &Window) {
+        let rendered: HashSet<SessionId> = self.rendered_sessions().into_iter().collect();
+        let scope = format!("window:{:?}:tree:{}", window.window_handle().window_id(), self.hub.native_tree.0);
+        let mut routes = HashMap::new();
+        for (session_id, session) in &mut self.hub.sessions {
+            let Some(plan) = &session.control_label_plan else {
+                session.control_label_view = None;
+                continue;
+            };
+            let snapshot = session.model.snapshot();
+            let Some(epoch) = snapshot.current_epoch.or_else(|| session.control_label_view.as_ref().map(|view| view.view_epoch)) else { continue; };
+            let present = rendered.contains(session_id) && snapshot.active_epoch == Some(epoch);
+            let view = present.then(|| NativeControlLabelView {
+                identity: format!("surface:{}:epoch:{}", session.native_identity.0, epoch),
+                scope: scope.clone(),
+                // The root has no separate consumer-owned naming channel.
+                // Proto-authored names are checked by the A11y Module itself.
+                authored_name: false,
+            });
+            let unchanged = session.control_label_view.as_ref().is_some_and(|old| old.view_epoch == epoch && old.lease_id == plan.lease_id && old.view == view);
+            if !unchanged {
+                self.hub.next_label_revision += 1;
+                let message = ControlLabelView {
+                    session_id: session_id.clone(), view_epoch: epoch, lease_id: plan.lease_id.clone(),
+                    revision: self.hub.next_label_revision, view,
+                };
+                self.hub.outbox.push(HostToPeerMessage::ControlLabelView(message.clone()));
+                session.control_label_view = Some(message);
+            }
+            if present && plan.kind == ControlLabelKind::Label && plan.activation {
+                let revision = session.control_label_view.as_ref().expect("current native view").revision;
+                routes.insert(session.root_id.clone(), LabelRoute {
+                    session_id: session_id.clone(), view_epoch: epoch, lease_id: plan.lease_id.clone(), view_revision: revision,
+                });
+            }
+        }
+        self.bridge.borrow_mut().label_input.replace_routes(routes);
     }
 
     fn note_a11y(&mut self, session_id: &str, issues: Vec<A11yIssue>) {

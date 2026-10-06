@@ -36,6 +36,52 @@ export const HOST_TO_PEER_EXAMPLES: ExamplesByKind<HostToPeerMessage> = {
     },
   ],
   'meta.set': [{ kind: 'meta.set', meta: { reducedMotion: 'reduce' } }],
+  'instance.associations': [
+    {
+      kind: 'instance.associations',
+      sessionId: 's-label',
+      associations: { controlLabel: 'native:pair:1' },
+    },
+    { kind: 'instance.associations', sessionId: 's-label', associations: {} },
+  ],
+  'control-label.view': [
+    {
+      kind: 'control-label.view',
+      sessionId: 's-label',
+      viewEpoch: 1,
+      leaseId: 'label:lease:1',
+      revision: 1,
+      view: { identity: 'native:surface:1', scope: 'window:1:tree:1', authoredName: false },
+    },
+    {
+      kind: 'control-label.view',
+      sessionId: 's-label',
+      viewEpoch: 1,
+      leaseId: 'label:lease:1',
+      revision: 2,
+      view: null,
+    },
+  ],
+  'control-label.activate': [
+    {
+      kind: 'control-label.activate',
+      sessionId: 's-label',
+      viewEpoch: 1,
+      leaseId: 'label:lease:1',
+      viewRevision: 1,
+      sequence: 1,
+      source: 'pointer',
+    },
+    {
+      kind: 'control-label.activate',
+      sessionId: 's-label',
+      viewEpoch: 1,
+      leaseId: 'label:lease:1',
+      viewRevision: 1,
+      sequence: 2,
+      source: 'accessibility',
+    },
+  ],
   'session.open': [
     {
       kind: 'session.open',
@@ -114,6 +160,15 @@ export const HOST_TO_PEER_EXAMPLES: ExamplesByKind<HostToPeerMessage> = {
 };
 
 export const PEER_TO_HOST_EXAMPLES: ExamplesByKind<PeerToHostMessage> = {
+  'control-label.plan': [
+    {
+      kind: 'control-label.plan',
+      sessionId: 's-label',
+      viewEpoch: 1,
+      plan: { leaseId: 'label:lease:1', kind: 'label', activation: true },
+    },
+    { kind: 'control-label.plan', sessionId: 's-label', viewEpoch: 1, plan: null },
+  ],
   'peer.hello': [
     {
       kind: 'peer.hello',

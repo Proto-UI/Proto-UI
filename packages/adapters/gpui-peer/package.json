@@ -21,6 +21,7 @@
     "@proto.ui/module-a11y": "workspace:*",
     "@proto.ui/module-anatomy": "workspace:*",
     "@proto.ui/module-as-trigger": "workspace:*",
+    "@proto.ui/module-control-label": "workspace:*",
     "@proto.ui/module-context": "workspace:*",
     "@proto.ui/module-event": "workspace:*",
     "@proto.ui/module-expose": "workspace:*",

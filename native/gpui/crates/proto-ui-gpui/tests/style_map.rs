@@ -391,7 +391,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 31] = [
+const EXPECTED_UNMAPPED: [&str; 30] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -409,7 +409,6 @@ const EXPECTED_UNMAPPED: [&str; 31] = [
     "z-index",
     "pointer-events",
     "touch-action",
-    "user-select",
     "resize",
     "will-change",
     "background-clip",
@@ -872,4 +871,14 @@ fn text_inherited_tone_reports_unsupported_value_without_parent_style() {
         property == "color" && value == "inherit" && *reason == Unmapped::UnsupportedValue
     }));
     assert!(!mapped.is_complete());
+}
+
+#[test]
+fn explicit_no_selection_matches_plain_native_text_without_claiming_selection_support() {
+    let mut resolved = resolve(&["select-none"], "shadcn");
+    // Isolate selection from the separate implicit-position gap.
+    resolved.declarations.insert("position".into(), "relative".into());
+    assert!(map(&resolved, LengthContext::default()).is_complete());
+    resolved.declarations.insert("user-select".into(), "text".into());
+    assert!(map(&resolved, LengthContext::default()).unmapped_properties().contains(&"user-select"));
 }

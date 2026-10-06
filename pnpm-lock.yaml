@@ -271,6 +271,9 @@ importers:
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
+      '@proto.ui/module-control-label':
+        specifier: workspace:*
+        version: link:../../modules/control-label
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../../modules/context

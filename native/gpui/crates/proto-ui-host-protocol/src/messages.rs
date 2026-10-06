@@ -93,6 +93,82 @@ pub struct SessionOpen {
     pub parent_session_id: Option<SessionId>,
 }
 
+/// Renderer-owned association keys, deliberately outside JSON Prototype Props.
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct InstanceAssociations {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub control_label: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct InstanceAssociationsSet {
+    pub session_id: SessionId,
+    pub associations: InstanceAssociations,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ControlLabelKind {
+    Label,
+    Target,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ControlLabelPlan {
+    pub lease_id: String,
+    pub kind: ControlLabelKind,
+    pub activation: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ControlLabelPlanMessage {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
+    #[serde(deserialize_with = "crate::wire::required_nullable")]
+    pub plan: Option<ControlLabelPlan>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct NativeControlLabelView {
+    pub identity: String,
+    pub scope: String,
+    pub authored_name: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ControlLabelView {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
+    pub lease_id: String,
+    pub revision: u64,
+    #[serde(deserialize_with = "crate::wire::required_nullable")]
+    pub view: Option<NativeControlLabelView>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ControlLabelActivationSource {
+    Pointer,
+    Accessibility,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct ControlLabelActivate {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
+    pub lease_id: String,
+    pub view_revision: u64,
+    pub sequence: u64,
+    pub source: ControlLabelActivationSource,
+}
+
 /// `ok` or `failed`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -358,6 +434,9 @@ envelopes!(
     HostToPeerMessage {
         HostHello(HostHello) => "host.hello",
         MetaSet(MetaSet) => "meta.set",
+        InstanceAssociations(InstanceAssociationsSet) => "instance.associations",
+        ControlLabelView(ControlLabelView) => "control-label.view",
+        ControlLabelActivate(ControlLabelActivate) => "control-label.activate",
         SessionOpen(SessionOpen) => "session.open",
         PropsSet(PropsSet) => "props.set",
         ProjectionAck(ProjectionAckMessage) => "projection.ack",
@@ -372,6 +451,7 @@ envelopes!(
     /// A message the peer sends to the host.
     PeerToHostMessage {
         PeerHello(PeerHello) => "peer.hello",
+        ControlLabelPlan(ControlLabelPlanMessage) => "control-label.plan",
         SessionOpened(SessionOpened) => "session.opened",
         // Boxed: a transaction carries a whole template and plan, several
         // times the size of any other message.

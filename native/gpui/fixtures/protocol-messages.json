@@ -5,6 +5,9 @@
     "hostToPeer": [
       "host.hello",
       "meta.set",
+      "instance.associations",
+      "control-label.view",
+      "control-label.activate",
       "session.open",
       "props.set",
       "projection.ack",
@@ -14,6 +17,7 @@
       "session.dispose"
     ],
     "peerToHost": [
+      "control-label.plan",
       "peer.hello",
       "session.opened",
       "projection.install",
@@ -55,6 +59,56 @@
       "meta": {
         "reducedMotion": "reduce"
       }
+    },
+    {
+      "kind": "instance.associations",
+      "sessionId": "s-label",
+      "associations": {
+        "controlLabel": "native:pair:1"
+      }
+    },
+    {
+      "kind": "instance.associations",
+      "sessionId": "s-label",
+      "associations": {}
+    },
+    {
+      "kind": "control-label.view",
+      "sessionId": "s-label",
+      "viewEpoch": 1,
+      "leaseId": "label:lease:1",
+      "revision": 1,
+      "view": {
+        "identity": "native:surface:1",
+        "scope": "window:1:tree:1",
+        "authoredName": false
+      }
+    },
+    {
+      "kind": "control-label.view",
+      "sessionId": "s-label",
+      "viewEpoch": 1,
+      "leaseId": "label:lease:1",
+      "revision": 2,
+      "view": null
+    },
+    {
+      "kind": "control-label.activate",
+      "sessionId": "s-label",
+      "viewEpoch": 1,
+      "leaseId": "label:lease:1",
+      "viewRevision": 1,
+      "sequence": 1,
+      "source": "pointer"
+    },
+    {
+      "kind": "control-label.activate",
+      "sessionId": "s-label",
+      "viewEpoch": 1,
+      "leaseId": "label:lease:1",
+      "viewRevision": 1,
+      "sequence": 2,
+      "source": "accessibility"
     },
     {
       "kind": "session.open",
@@ -173,6 +227,22 @@
     }
   ],
   "peerToHost": [
+    {
+      "kind": "control-label.plan",
+      "sessionId": "s-label",
+      "viewEpoch": 1,
+      "plan": {
+        "leaseId": "label:lease:1",
+        "kind": "label",
+        "activation": true
+      }
+    },
+    {
+      "kind": "control-label.plan",
+      "sessionId": "s-label",
+      "viewEpoch": 1,
+      "plan": null
+    },
     {
       "kind": "peer.hello",
       "protocolVersion": 0,
