@@ -11,9 +11,12 @@ const floatingUi = createRequire(
   fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
 )('@floating-ui/dom');
 
+type StateEvent<T> =
+  | { type: 'next'; prev: T; next: T; reason?: unknown }
+  | { type: 'disconnect'; reason: 'unmount' };
 interface StateProjection<T> {
   get(): T;
-  subscribe(callback: (event: { prev: T; next: T; reason?: unknown }) => void): () => void;
+  subscribe(callback: (event: StateEvent<T>) => void): () => void;
   unsubscribe(off: () => void): void;
 }
 interface NativeElement extends HTMLElement {
@@ -29,6 +32,7 @@ interface NativeElement extends HTMLElement {
     inputs?: StateProjection<number>;
     focused?: StateProjection<boolean>;
     focusable?: StateProjection<boolean>;
+    projection?: StateProjection<string>;
     bump?: (next: number) => void;
     disable?: (next: boolean) => void;
   };
@@ -110,6 +114,116 @@ export default definePrototype({name:'independent-view', setup(def){
 
 // These regressions exercise externally observable ownership, update, disposal and slot contracts.
 describe('native Web Component semantic source', () => {
+  it('disconnects borrowed and owned external State only at terminal owner disposal', async () => {
+    const element = create(`import {definePrototype} from '@proto.ui/core';
+import {asScrollSurface} from '@proto.ui/hooks';
+export default definePrototype({name:'scroll-root-policy',setup(def){
+  def.props.define({present:{type:'boolean',default:true}});
+  const surface=asScrollSurface();
+  surface.configure({axes:'vertical',projection:'system'});
+  const detaches=def.state.numberDiscrete('scroll.detaches',0);
+  def.expose.state('count',detaches);
+  def.expose.state('projection',surface.projection);
+  surface.projection.watch((run,event)=>{
+    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}
+  });
+  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});
+  return (r)=>r.el('section','Scrollable content');
+}});`);
+    document.body.append(element);
+    const { projection, count } = element.getExposes();
+    const transitions: [string, string][] = [];
+    const disconnects: StateEvent<string>[] = [],
+      ownedDisconnects: StateEvent<number>[] = [];
+    const cancelled: StateEvent<string>[] = [];
+    const off = projection!.subscribe((event) => cancelled.push(event));
+    off();
+    projection!.subscribe((event) => {
+      if (event.type === 'next') transitions.push([event.prev, event.next]);
+      else disconnects.push(event);
+    });
+    count!.subscribe((event) => {
+      if (event.type === 'disconnect') ownedDisconnects.push(event);
+    });
+    const first = element.shadowRoot!.querySelector('section')!;
+    expect(projection!.get()).toBe('system');
+    expect(element.style.overflowY).toBe('auto');
+    element.setProps({ present: false });
+    await Promise.resolve();
+    expect(element.shadowRoot!.querySelector('section')).toBeNull();
+    expect(projection!.get()).toBe('unresolved');
+    expect(element.getExposes().projection).toBe(projection);
+    expect(count!.get()).toBe(1);
+    expect(transitions).toEqual([['system', 'unresolved']]);
+    expect(disconnects).toEqual([]);
+    element.setProps({ present: true });
+    await Promise.resolve();
+    const second = element.shadowRoot!.querySelector('section')!;
+    expect(second).not.toBe(first);
+    expect(element.style.overflowY).toBe('auto');
+    expect(element.getExposes().projection).toBe(projection);
+    expect(transitions).toEqual([
+      ['system', 'unresolved'],
+      ['unresolved', 'system'],
+    ]);
+    expect(disconnects).toEqual([]);
+    element.dispose();
+    expect(disconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(ownedDisconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(cancelled).toEqual([]);
+    expect(() => projection!.get()).toThrow();
+    expect(() => count!.get()).toThrow();
+    element.dispose();
+    second.dispatchEvent(new Event('scroll'));
+    expect(disconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+  });
+
+  it('invalidates every external State after a terminal subscriber throws, retaining the first error', () => {
+    const element = create(`import {definePrototype} from '@proto.ui/core';
+import {asScrollSurface} from '@proto.ui/hooks';
+export default definePrototype({name:'throwing-external-consumer',setup(def){
+  const surface=asScrollSurface();
+  const count=def.state.numberDiscrete('count',0);
+  def.expose.state('projection',surface.projection);
+  def.expose.state('count',count);
+  return r=>r.el('section','value');
+}});`);
+    document.body.append(element);
+    const { projection, count } = element.getExposes();
+    const primary = new Error('borrowed subscriber failure');
+    const secondary = new Error('owned subscriber failure');
+    const borrowedEvents: StateEvent<string>[] = [],
+      ownedEvents: StateEvent<number>[] = [];
+    projection!.subscribe((event) => {
+      if (event.type === 'disconnect') throw primary;
+    });
+    projection!.subscribe((event) => {
+      if (event.type === 'disconnect') borrowedEvents.push(event);
+    });
+    count!.subscribe((event) => {
+      if (event.type === 'disconnect') throw secondary;
+    });
+    count!.subscribe((event) => {
+      if (event.type === 'disconnect') ownedEvents.push(event);
+    });
+    let failure: unknown;
+    try {
+      element.dispose();
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBe(primary);
+    expect(borrowedEvents).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(ownedEvents).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(() => projection!.get()).toThrow();
+    expect(() => count!.get()).toThrow();
+    expect(() => projection!.subscribe(() => {})).toThrow();
+    expect(() => count!.subscribe(() => {})).toThrow();
+    element.dispose();
+    expect(borrowedEvents).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(ownedEvents).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+  });
+
   it('dispatches raw groups before declaration-ordered resolved watchers with checked key metadata', () => {
     const element = create(`import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'props-watch-family',setup(def){
@@ -141,7 +255,11 @@ export default definePrototype({name:'props-watch-family',setup(def){
   return r=>r.el('output',[trace.get(),'@',r.read.props.get().label ?? 'null']);
 }});`);
     const observations: Array<{
-      kind: string; all: string[]; matched: string[]; next?: string | number; prev?: string | number;
+      kind: string;
+      all: string[];
+      matched: string[];
+      next?: string | number;
+      prev?: string | number;
     }> = [];
     element.addEventListener('observation', (event) => {
       observations.push((event as CustomEvent).detail);
@@ -153,8 +271,20 @@ export default definePrototype({name:'props-watch-family',setup(def){
     expect(observations).toEqual([
       { kind: 'raw-all', all: ['label', 'count', 'extra'], matched: ['label', 'count', 'extra'] },
       { kind: 'raw-keys', all: ['label', 'count', 'extra'], matched: ['extra', 'label'] },
-      { kind: 'resolved-label', all: ['label', 'count'], matched: ['label'], next: 'second', prev: 'first' },
-      { kind: 'resolved-all', all: ['label', 'count'], matched: ['label', 'count'], next: 'second', prev: 'first' },
+      {
+        kind: 'resolved-label',
+        all: ['label', 'count'],
+        matched: ['label'],
+        next: 'second',
+        prev: 'first',
+      },
+      {
+        kind: 'resolved-all',
+        all: ['label', 'count'],
+        matched: ['label', 'count'],
+        next: 'second',
+        prev: 'first',
+      },
       { kind: 'resolved-count', all: ['label', 'count'], matched: ['count'], next: 2, prev: 1 },
     ]);
     observations.length = 0;
@@ -170,7 +300,13 @@ export default definePrototype({name:'props-watch-family',setup(def){
     expect(observations).toEqual([
       { kind: 'raw-all', all: ['label'], matched: ['label'] },
       { kind: 'raw-keys', all: ['label'], matched: ['label'] },
-      { kind: 'resolved-label', all: ['label'], matched: ['label'], next: 'default', prev: 'second' },
+      {
+        kind: 'resolved-label',
+        all: ['label'],
+        matched: ['label'],
+        next: 'default',
+        prev: 'second',
+      },
       { kind: 'resolved-all', all: ['label'], matched: ['label'], next: 'default', prev: 'second' },
     ]);
   });
@@ -187,7 +323,10 @@ export default definePrototype({name:'raw-value-identity',setup(def){
       observations.push((event as CustomEvent).detail);
     });
     document.body.append(element);
-    const changed = [{ kind: 'all', matched: ['extra'] }, { kind: 'keyed', matched: ['extra'] }];
+    const changed = [
+      { kind: 'all', matched: ['extra'] },
+      { kind: 'keyed', matched: ['extra'] },
+    ];
     element.setProps({ extra: undefined });
     expect(observations).toEqual(changed);
     observations.length = 0;
@@ -317,11 +456,14 @@ export default definePrototype({name:'projected-image',modules:[declareImageView
     document.body.appendChild(element);
     const exposes = element.getExposes();
     const observed: string[] = [];
-    exposes.count?.subscribe(({ next }) => {
-      observed.push(`a:${next}`);
-      if (next === 5) exposes.bump?.(6);
+    exposes.count?.subscribe((event) => {
+      if (event.type !== 'next') return;
+      observed.push(`a:${event.next}`);
+      if (event.next === 5) exposes.bump?.(6);
     });
-    exposes.count?.subscribe(({ next }) => observed.push(`b:${next}`));
+    exposes.count?.subscribe((event) => {
+      if (event.type === 'next') observed.push(`b:${event.next}`);
+    });
     exposes.bump?.(5);
     expect(observed).toEqual(['a:5', 'b:5', 'a:6', 'b:6']);
     element.dispose();
@@ -356,7 +498,9 @@ export default definePrototype({name:'projected-image',modules:[declareImageView
     const epoch = element.viewEpoch;
     const exposes = element.getExposes();
     const events: number[] = [];
-    exposes.count?.subscribe(({ next }) => events.push(next));
+    exposes.count?.subscribe((event) => {
+      if (event.type === 'next') events.push(event.next);
+    });
     expect(element.shadowRoot?.querySelector('slot')?.assignedNodes()).toEqual([content]);
     element.setProps({ visible: false, count: 4 });
     await Promise.resolve();
@@ -505,7 +649,9 @@ export default definePrototype({name:'projected-image',modules:[declareImageView
     const child = element.shadowRoot?.querySelector('output');
     const identity = element.logicalOwner;
     const facts: boolean[] = [];
-    exposes.focused?.subscribe(({ next }) => facts.push(next));
+    exposes.focused?.subscribe((event) => {
+      if (event.type === 'next') facts.push(event.next);
+    });
     expect(exposes.focusable?.get()).toBe(false);
     expect(element.getAttribute('tabindex')).toBe('-1');
     expect(element.getAttribute('role')).toBe('button');

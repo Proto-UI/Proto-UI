@@ -15,9 +15,12 @@ const vueServerRenderer = createRequire(
   fileURLToPath(new NodeURL('../package.json', import.meta.url))
 )('vue/server-renderer');
 
+type StateEvent<T> =
+  | { type: 'next'; prev: T; next: T; reason?: unknown }
+  | { type: 'disconnect'; reason: 'unmount' };
 interface PublicState<T> {
   get(): T;
-  subscribe(callback: (event: { type: 'next'; prev: T; next: T }) => void): () => void;
+  subscribe(callback: (event: StateEvent<T>) => void): () => void;
   unsubscribe(off: () => void): void;
   readonly spec: { kind: string; min?: number; max?: number };
 }
@@ -155,6 +158,84 @@ async function settle(): Promise<void> {
 }
 
 describe('Vue 3 native source', () => {
+  it('disconnects borrowed and owned external State only at terminal owner disposal', async () => {
+    const Generated = component(`import {definePrototype} from '@proto.ui/core';
+import {asScrollSurface} from '@proto.ui/hooks';
+export default definePrototype({name:'scroll-root-policy',setup(def){
+  def.props.define({present:{type:'boolean',default:true}});
+  const surface=asScrollSurface();
+  surface.configure({axes:'vertical',projection:'system'});
+  const detaches=def.state.numberDiscrete('scroll.detaches',0);
+  def.expose.state('count',detaches);
+  def.expose.state('projection',surface.projection);
+  surface.projection.watch((run,event)=>{
+    if(event.type==='next' && event.next==='unresolved'){detaches.set(detaches.get()+1);}
+  });
+  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});
+  return (r)=>r.el('section','Scrollable content');
+}});`);
+    const handle = Vue.shallowRef<{
+      getExposes(): { projection: PublicState<string>; count: PublicState<number> };
+    }>();
+    const input = Vue.shallowRef({ present: true });
+    const host = document.createElement('div');
+    document.body.append(host);
+    const app = Vue.createApp({ render: () => Vue.h(Generated, { ...input.value, ref: handle }) });
+    app.mount(host);
+    try {
+      await settle();
+      const owner = handle.value!,
+        { projection, count } = owner.getExposes();
+      const transitions: [string, string][] = [];
+      const disconnects: StateEvent<string>[] = [],
+        ownedDisconnects: StateEvent<number>[] = [];
+      const cancelled: StateEvent<string>[] = [];
+      const off = projection.subscribe((event) => cancelled.push(event));
+      off();
+      projection.subscribe((event) => {
+        if (event.type === 'next') transitions.push([event.prev, event.next]);
+        else disconnects.push(event);
+      });
+      count.subscribe((event) => {
+        if (event.type === 'disconnect') ownedDisconnects.push(event);
+      });
+      const first = host.querySelector<HTMLElement>('[data-pui-root]')!;
+      expect(projection.get()).toBe('system');
+      expect(first.style.overflowY).toBe('auto');
+      input.value = { present: false };
+      await settle();
+      expect(host.querySelector('[data-pui-root]')).toBeNull();
+      expect(projection.get()).toBe('unresolved');
+      expect(owner.getExposes().projection).toBe(projection);
+      expect(count.get()).toBe(1);
+      expect(transitions).toEqual([['system', 'unresolved']]);
+      expect(disconnects).toEqual([]);
+      input.value = { present: true };
+      await settle();
+      const second = host.querySelector<HTMLElement>('[data-pui-root]')!;
+      expect(second).not.toBe(first);
+      expect(second.style.overflowY).toBe('auto');
+      expect(owner.getExposes().projection).toBe(projection);
+      expect(transitions).toEqual([
+        ['system', 'unresolved'],
+        ['unresolved', 'system'],
+      ]);
+      expect(disconnects).toEqual([]);
+      app.unmount();
+      await settle();
+      expect(disconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+      expect(ownedDisconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+      expect(cancelled).toEqual([]);
+      expect(() => projection.get()).toThrow();
+      expect(() => count.get()).toThrow();
+      second.dispatchEvent(new Event('scroll'));
+      expect(disconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    } finally {
+      app.unmount();
+      host.remove();
+    }
+  });
+
   it('observes normalized Vue attrs rather than reviving VNode-only signed-zero changes', async () => {
     const Generated = component(`import {definePrototype} from '@proto.ui/core';
 export default definePrototype({name:'vue-normalized-snapshot',setup(def){
@@ -169,11 +250,12 @@ export default definePrototype({name:'vue-normalized-snapshot',setup(def){
     const observations: Array<{ kind: string; keys?: string[]; count?: number }> = [];
     const host = document.createElement('div');
     const app = Vue.createApp({
-      render: () => Vue.h(Generated, {
-        ...input.value,
-        ref: handle,
-        onObservation: (event: typeof observations[number]) => observations.push(event),
-      }),
+      render: () =>
+        Vue.h(Generated, {
+          ...input.value,
+          ref: handle,
+          onObservation: (event: (typeof observations)[number]) => observations.push(event),
+        }),
     });
     app.mount(host);
     try {
@@ -315,7 +397,9 @@ export default definePrototype({name:'owned-editing-value',modules:[declareTextC
       const owner = handle.value!,
         exposed = owner.getExposes(),
         root = host.querySelector<HTMLElement>('[data-pui-root]')!;
-      const off = exposed.focused.subscribe((event) => focused.push(event.next));
+      const off = exposed.focused.subscribe((event) => {
+        if (event.type === 'next') focused.push(event.next);
+      });
       expect(exposed.focusable.get()).toBe(true);
       expect('set' in exposed.focused).toBe(false);
       expect(root.getAttribute('tabindex')).toBe('0');
@@ -680,9 +764,11 @@ export default definePrototype({name:'owned-editing-value',modules:[declareTextC
       const exposed = mounted.getExposes();
       const values: number[] = [];
       const offA = exposed.counter.subscribe((event) => {
-        if (event.next === 3) exposed.write(4);
+        if (event.type === 'next' && event.next === 3) exposed.write(4);
       });
-      const offB = exposed.counter.subscribe((event) => values.push(event.next));
+      const offB = exposed.counter.subscribe((event) => {
+        if (event.type === 'next') values.push(event.next);
+      });
       exposed.write(3);
       expect(values).toEqual([3, 4]);
       expect(exposed.counter.get()).toBe(4);

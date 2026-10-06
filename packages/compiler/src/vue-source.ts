@@ -702,6 +702,16 @@ ${ssr ? `    ${n('Tree')}.ready = () => !${n('Disposed')} && !${n('Disposing')} 
     const ${n('PublicStates')} = new WeakMap<object, object>();
     const ${n('InternalSubscriptions')} = new WeakMap<object, (callback: (event: ${n('StateEvent')}<unknown>) => void) => () => void>();
     const ${n('StateCleanup')}: Array<() => void> = [];
+    function ${n('DisposeStates')}(): void {
+      let failure: unknown;
+      // Watch registrations follow their source; release them before its external projection.
+      for (let index = ${n('StateCleanup')}.length - 1; index >= 0; --index) {
+        try { ${n('StateCleanup')}[index](); }
+        catch (error) { failure ??= error; }
+      }
+      ${n('StateCleanup')}.length = 0;
+      if (failure !== undefined) throw failure;
+    }
     const ${n('Events')} = new Set<string>();
     const ${n('PropChecks')}: Record<string, (value: unknown) => boolean> = {
 ${propChecks}
@@ -750,7 +760,7 @@ ${
       try { return callback(); } finally { ${n('CallbackScope')} = previous; }
     }
     function ${n('RegisterObservedState')}<T extends boolean | string | number>(state: ${n('ObservedState')}<T>): void {
-      const removals = new Set<() => void>();
+      const removals = new Map<() => void, (event: ${n('StateEvent')}<T>) => void>();
       const projection: ${n('PublicState')}<T> = Object.freeze({
         spec: Object.freeze(state.spec ?? { kind: typeof state.get() === 'boolean' ? 'bool' as const : typeof state.get() === 'number' ? 'number.discrete' as const : 'string' as const }),
         get() { ${n('PublicAlive')}(); return state.get(); },
@@ -759,7 +769,7 @@ ${
           let active = true;
           const off = state.subscribe((event) => { if (active && !${n('Disposed')} && !${n('Disposing')}) callback(event); });
           const stop = () => { if (!active) return; active = false; removals.delete(stop); off(); };
-          removals.add(stop);
+          removals.set(stop, callback);
           return () => { ${n('PublicAlive')}(); stop(); };
         },
         unsubscribe(off: () => void) { ${n('PublicAlive')}(); off(); },
@@ -776,7 +786,16 @@ ${
 ${usesStyle ? `        ${n('Style')}.refresh();` : ''}
         ${n('Interaction')}.refresh();
       });
-      ${n('StateCleanup')}.push(() => { refresh(); for (const stop of removals) stop(); });
+      ${n('StateCleanup')}.push(() => {
+        refresh();
+        let failure: unknown;
+        for (const [stop, callback] of removals) {
+          stop();
+          try { callback({type: 'disconnect', reason: 'unmount'}); }
+          catch (error) { failure ??= error; }
+        }
+        if (failure !== undefined) throw failure;
+      });
     }
     const ${n('Interaction')}: ${n('NativeInteraction')}<${n('Run')}> = ${n('CreateInteraction')}<${n('Run')}>({
       ensureSetup(operation) { ${n('Alive')}(); if (!${n('Setup')}) throw new Error('[Vue source] ' + operation + ' requires setup'); },
@@ -984,7 +1003,15 @@ ${
         subscribe(callback) { subscribers.add(callback); return () => { subscribers.delete(callback); }; } });`
     : ''
 }
-      ${n('StateCleanup')}.push(() => subscribers.clear());
+      ${n('StateCleanup')}.push(() => {
+        let failure: unknown;
+        for (const callback of subscribers) {
+          try { callback({type: 'disconnect', reason: 'unmount'}); }
+          catch (error) { failure ??= error; }
+        }
+        subscribers.clear();
+        if (failure !== undefined) throw failure;
+      });
       return handle;
     }
     function ${n('Declare')}(key: string, value: unknown): void {
@@ -1245,7 +1272,7 @@ ${projectsState ? `        ${n('StateWeb')}.dispose();` : ''}
             try { ${contextArtifacts ? `${n('Scope')}.dispose();` : ''} }
             finally {
               ${n('Disposed')} = true;
-              for (const cleanup of ${n('StateCleanup')}) cleanup();
+              ${n('DisposeStates')}();
               ${n('StateQueue')}.length = 0; ${n('Watchers')}.length = 0;${usesRawWatchers ? ` ${n('RawWatchers')}.length = 0;` : ''}
             }
           }
@@ -1422,30 +1449,34 @@ ${
         catch (error) { failure = error; }
         finally { ${n('CurrentEpoch')}.active = false; }
       }`
-    : `    ${n('Vue')}.onUnmounted(() => {`
+    : `    ${n('Vue')}.onUnmounted(() => {
+      let failure: unknown;`
 }
       ${n('InternalTeardown')} = true;
 ${projectsState ? `      ${n('StateWeb')}.dispose();` : ''}
       try { ${ssr ? `if (${n('Started')}) ` : ''}${n('InvokeLife')}('beforeDispose'); }
-${ssr ? `      catch (error) { failure ??= error; }` : ''}
+      catch (error) { failure ??= error; }
       finally {
         try { ${contextArtifacts ? `${n('Scope')}.dispose();` : ''} }
+        catch (error) { failure ??= error; }
         finally {
           try { ${usesInteraction ? `${n('Interaction')}.dispose();` : ''} }
+          catch (error) { failure ??= error; }
           finally {
             try { ${usesStyle ? `${n('Style')}.dispose();` : ''} }
+            catch (error) { failure ??= error; }
             finally {
               ${n('InternalTeardown')} = false; ${n('Disposed')} = true;
-              for (const cleanup of ${n('StateCleanup')}) cleanup();
+              try { ${n('DisposeStates')}(); } catch (error) { failure ??= error; }
               ${n('StateQueue')}.length = 0; ${n('Watchers')}.length = 0;${usesRawWatchers ? ` ${n('RawWatchers')}.length = 0;` : ''}
             }
           }
         }
       }
+      if (failure !== undefined) throw failure;
 ${
   ssr
-    ? `      if (failure !== undefined) throw failure;
-    }
+    ? `    }
     ${n('Vue')}.onUnmounted(${n('DisposeOwner')});`
     : `    });`
 }

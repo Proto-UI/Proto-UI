@@ -566,6 +566,18 @@ ${ssr ? '  let serverPrepared = false;\n' : ''}  let propsWindow: { raw: Readonl
   const pendingStateEvents: (() => void)[] = [];
   const authorStateWatchCleanups: (() => void)[] = [];
   let emittingState = false;
+  function disconnectStates(): void {
+    let failure: unknown;
+    for (const subscribers of stateSubscribers) {
+      for (const callback of subscribers) {
+        try { callback({type: 'disconnect', reason: 'unmount'}); }
+        catch (error) { failure ??= error; }
+      }
+      subscribers.clear();
+    }
+    stateSubscribers.clear();
+    if (failure !== undefined) throw failure;
+  }
   type ${p}WatchInfo = { changedKeysAll: string[]; changedKeysMatched: string[] };
   type ${p}ResolvedWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: ${p}WatchInfo) => void };
   type ${p}RawWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: Readonly<Record<string, unknown>>, prev: Readonly<Record<string, unknown>>, info: ${p}WatchInfo) => void };
@@ -1101,7 +1113,7 @@ ${
 ${projectsState ? `      ${p}StateWeb.dispose();\n` : ''}${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= error; }\n` : ''}      try { ${p}Style.dispose(); } catch (error) { failure ??= error; }
       try { context.dispose(); } catch (error) { failure ??= error; }
       lifetime = 'disposed'; phase = 'idle'; connected = false;
-      for (const subscribers of stateSubscribers) subscribers.clear();
+      try { disconnectStates(); } catch (error) { failure ??= error; }
       pendingStateEvents.length = 0; watchers.length = 0; rawWatchers.length = 0; rawAllWatchers.length = 0;
       for (const list of Object.values(callbacks)) list.length = 0;
       for (const key of Object.keys(exposes)) delete exposes[key];
@@ -1231,7 +1243,7 @@ ${projectsState ? `          ${p}StateWeb.dispose();\n` : ''}${
           ${p}Style.dispose();
           context.dispose();
           lifetime = 'disposed'; phase = 'idle';
-          for (const subscribers of stateSubscribers) subscribers.clear();
+          try { disconnectStates(); } catch (error) { failure ??= error; }
           pendingStateEvents.length = 0;
           watchers.length = 0;
           rawWatchers.length = 0; rawAllWatchers.length = 0;
