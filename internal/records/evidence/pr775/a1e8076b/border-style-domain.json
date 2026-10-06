@@ -1,0 +1,2476 @@
+{
+  "sourceHead": "a1e8076bd76a2032cf4f6bdeeabe57b39ace1002",
+  "observedAt": "2026-10-06T07:52:38.191Z",
+  "fixtureSha256": "223e1c51a20d0148dce430d8bbe3629d3dfa562387269bcf657c4c33dc0a3171",
+  "probeBundleSha256": "ed28cf309bb9e36043cf7b0a406c871b9e0c785573db453e29ec0f06677a69cb",
+  "pngSha256": "6d46870cbf22748e370f3ddab782e06a72d7ce30dea2e148af8614dd43f4e374",
+  "pngSize": {
+    "width": 800,
+    "height": 900
+  },
+  "viewport": {
+    "width": 800,
+    "height": 900,
+    "devicePixelRatio": 1,
+    "scrollX": 0,
+    "scrollY": 0,
+    "scrollWidth": 800,
+    "scrollHeight": 900
+  },
+  "frame": {
+    "family": "instrument-calibration",
+    "owner": "calibration",
+    "generation": "1",
+    "theme": "light",
+    "devicePixelRatio": 1,
+    "stateFingerprint": "{\"owner\":\"calibration\",\"generation\":\"1\",\"scope\":{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"theme\":{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"viewport\":[800,900,1,0,0],\"visualViewport\":[0,0,800,900,1],\"focus\":[{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}],\"surfaces\":[{\"host\":{\"id\":4,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"solid\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px solid black\"]],\"rect\":[40,48,220,32],\"rects\":[[40,48,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"solid\",\"solid\",\"solid\",\"solid\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"target\":[{\"id\":4,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"solid\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px solid black\"]],\"rect\":[40,48,220,32],\"rects\":[[40,48,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"solid\",\"solid\",\"solid\",\"solid\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},[[{\"id\":5,\"text\":\"Solid control\",\"rects\":[[44,55,88.046875,17]]},[]]]],\"ancestry\":[{\"id\":6,\"tag\":\"DIV\",\"attributes\":[[\"style\",\"background:white;padding:16px\"]],\"rect\":[24,24,752,280],\"rects\":[[24,24,752,280]],\"scroll\":[0,0,752,280,752,280],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}]},{\"host\":{\"id\":7,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"dashed\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px dashed black\"]],\"rect\":[40,88,220,32],\"rects\":[[40,88,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dashed\",\"dashed\",\"dashed\",\"dashed\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"target\":[{\"id\":7,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"dashed\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px dashed black\"]],\"rect\":[40,88,220,32],\"rects\":[[40,88,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dashed\",\"dashed\",\"dashed\",\"dashed\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},[[{\"id\":8,\"text\":\"Dashed border\",\"rects\":[[44,95,105.84375,17]]},[]]]],\"ancestry\":[{\"id\":6,\"tag\":\"DIV\",\"attributes\":[[\"style\",\"background:white;padding:16px\"]],\"rect\":[24,24,752,280],\"rects\":[[24,24,752,280]],\"scroll\":[0,0,752,280,752,280],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}]},{\"host\":{\"id\":9,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"dotted\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px dotted black\"]],\"rect\":[40,128,220,32],\"rects\":[[40,128,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dotted\",\"dotted\",\"dotted\",\"dotted\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"target\":[{\"id\":9,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"dotted\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px dotted black\"]],\"rect\":[40,128,220,32],\"rects\":[[40,128,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dotted\",\"dotted\",\"dotted\",\"dotted\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},[[{\"id\":10,\"text\":\"Dotted border\",\"rects\":[[44,135,97.84375,17]]},[]]]],\"ancestry\":[{\"id\":6,\"tag\":\"DIV\",\"attributes\":[[\"style\",\"background:white;padding:16px\"]],\"rect\":[24,24,752,280],\"rects\":[[24,24,752,280]],\"scroll\":[0,0,752,280,752,280],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}]},{\"host\":{\"id\":11,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"double\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px double black\"]],\"rect\":[40,168,220,32],\"rects\":[[40,168,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"double\",\"double\",\"double\",\"double\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"target\":[{\"id\":11,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"double\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px double black\"]],\"rect\":[40,168,220,32],\"rects\":[[40,168,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"double\",\"double\",\"double\",\"double\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},[[{\"id\":12,\"text\":\"Double border\",\"rects\":[[44,175,101.40625,17]]},[]]]],\"ancestry\":[{\"id\":6,\"tag\":\"DIV\",\"attributes\":[[\"style\",\"background:white;padding:16px\"]],\"rect\":[24,24,752,280],\"rects\":[[24,24,752,280]],\"scroll\":[0,0,752,280,752,280],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}]},{\"host\":{\"id\":13,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"mixed\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px black;border-style:dashed solid dotted double\"]],\"rect\":[40,208,220,32],\"rects\":[[40,208,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dashed\",\"solid\",\"dotted\",\"double\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"target\":[{\"id\":13,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"mixed\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px black;border-style:dashed solid dotted double\"]],\"rect\":[40,208,220,32],\"rects\":[[40,208,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dashed\",\"solid\",\"dotted\",\"double\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},[[{\"id\":14,\"text\":\"Mixed sides\",\"rects\":[[44,215,84.484375,17]]},[]]]],\"ancestry\":[{\"id\":6,\"tag\":\"DIV\",\"attributes\":[[\"style\",\"background:white;padding:16px\"]],\"rect\":[24,24,752,280],\"rects\":[[24,24,752,280]],\"scroll\":[0,0,752,280,752,280],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}]},{\"host\":{\"id\":15,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"zero\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:0 solid black;text-indent:4px\"]],\"rect\":[40,248,220,32],\"rects\":[[40,248,220,32]],\"scroll\":[0,0,220,32,220,32],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"solid\",\"solid\",\"solid\",\"solid\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"4px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"4px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"4px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"target\":[{\"id\":15,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"zero\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:0 solid black;text-indent:4px\"]],\"rect\":[40,248,220,32],\"rects\":[[40,248,220,32]],\"scroll\":[0,0,220,32,220,32],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"solid\",\"solid\",\"solid\",\"solid\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"4px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"4px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"4px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},[[{\"id\":16,\"text\":\"Zero width\",\"rects\":[[44,251,74.703125,17]]},[]]]],\"ancestry\":[{\"id\":6,\"tag\":\"DIV\",\"attributes\":[[\"style\",\"background:white;padding:16px\"]],\"rect\":[24,24,752,280],\"rects\":[[24,24,752,280]],\"scroll\":[0,0,752,280,752,280],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}]},{\"host\":{\"id\":17,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"fill\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px dashed black\"]],\"rect\":[40,328,220,32],\"rects\":[[40,328,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dashed\",\"dashed\",\"dashed\",\"dashed\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},\"target\":[{\"id\":17,\"tag\":\"DIV\",\"attributes\":[[\"data-demo-ref\",\"fill\"],[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-pui-root\",\"\"],[\"style\",\"border:4px dashed black\"]],\"rect\":[40,328,220,32],\"rects\":[[40,328,220,32]],\"scroll\":[0,0,212,24,212,24],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"4px\",\"4px\",\"4px\",\"4px\",\"dashed\",\"dashed\",\"dashed\",\"dashed\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},[[{\"id\":18,\"text\":\"Independent white fill\",\"rects\":[[44,335,150.328125,17]]},[]]]],\"ancestry\":[{\"id\":19,\"tag\":\"DIV\",\"attributes\":[[\"style\",\"background:black;padding:16px\"]],\"rect\":[24,304,752,80],\"rects\":[[24,304,752,80]],\"scroll\":[0,0,752,80,752,80],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":2,\"tag\":\"MAIN\",\"attributes\":[[\"data-projection-generation\",\"1\"],[\"data-projection-owner\",\"calibration\"],[\"data-projection-scope\",\"calibration\"]],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":1,\"tag\":\"BODY\",\"attributes\":[],\"rect\":[24,24,752,360],\"rects\":[[24,24,752,360]],\"scroll\":[0,0,752,360,752,360],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(255, 255, 255)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"sans-serif\",\"24px\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null},{\"id\":3,\"tag\":\"HTML\",\"attributes\":[[\"data-theme\",\"light\"]],\"rect\":[0,0,800,408],\"rects\":[[0,0,800,408]],\"scroll\":[0,0,800,900,800,900],\"value\":null,\"checked\":null,\"styles\":[[\"block\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"normal\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],[\"inline\",\"visible\",\"visible\",\"static\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgba(0, 0, 0, 0)\",\"none\",\"border-box\",\"normal\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"rgb(0, 0, 0)\",\"0px\",\"0px\",\"0px\",\"0px\",\"none\",\"none\",\"none\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"3px\",\"none\",\"0px\",\"none\",\"1\",\"none\",\"none\",\"normal\",\"none\",\"none\",\"none\",\"none\",\"none\",\"flat\",\"visible\",\"visible\",\"auto\",\"none\",\"none\",\"none\",\"auto\",\"16px\",\"400\",\"\\\"Times New Roman\\\"\",\"normal\",\"none\",\"0px\",\"rgb(0, 0, 0)\",\"1\",\"none\",\"1\",\"1px\",\"none\"],null],\"focus\":[false,false,false,false],\"assigned\":null}]}]}",
+    "surfaces": [
+      {
+        "ref": "solid",
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Solid control",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "4px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Solid control",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 212,
+          "height": 24,
+          "clientWidth": 212,
+          "clientHeight": 24
+        },
+        "rect": {
+          "x": 40,
+          "y": 48,
+          "width": 220,
+          "height": 32
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 95,
+              "y": 47,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 56,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 95,
+              "y": 81,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 56,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 150,
+              "y": 47,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 64,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 150,
+              "y": 81,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 64,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 205,
+              "y": 47,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 72,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 205,
+              "y": 81,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 72,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "ref": "dashed",
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Dashed border",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "4px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Dashed border",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 212,
+          "height": 24,
+          "clientWidth": 212,
+          "clientHeight": 24
+        },
+        "rect": {
+          "x": 40,
+          "y": 88,
+          "width": 220,
+          "height": 32
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 95,
+              "y": 87,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 96,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 95,
+              "y": 121,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 96,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 150,
+              "y": 87,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 104,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 150,
+              "y": 121,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 104,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 205,
+              "y": 87,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 112,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 205,
+              "y": 121,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 112,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "ref": "dotted",
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Dotted border",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "4px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Dotted border",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dotted",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dotted",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dotted",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dotted",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 212,
+          "height": 24,
+          "clientWidth": 212,
+          "clientHeight": 24
+        },
+        "rect": {
+          "x": 40,
+          "y": 128,
+          "width": 220,
+          "height": 32
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 95,
+              "y": 127,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 136,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 95,
+              "y": 161,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 136,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 150,
+              "y": 127,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 144,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 150,
+              "y": 161,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 144,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 205,
+              "y": 127,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 152,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 205,
+              "y": 161,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 152,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "ref": "double",
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Double border",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "4px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Double border",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "double",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "double",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "double",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "double",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 212,
+          "height": 24,
+          "clientWidth": 212,
+          "clientHeight": 24
+        },
+        "rect": {
+          "x": 40,
+          "y": 168,
+          "width": 220,
+          "height": 32
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 95,
+              "y": 167,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 176,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 95,
+              "y": 201,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 176,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 150,
+              "y": 167,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 184,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 150,
+              "y": 201,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 184,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 205,
+              "y": 167,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 192,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 205,
+              "y": 201,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 192,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "ref": "mixed",
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Mixed sides",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "4px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Mixed sides",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dotted",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "double",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 212,
+          "height": 24,
+          "clientWidth": 212,
+          "clientHeight": 24
+        },
+        "rect": {
+          "x": 40,
+          "y": 208,
+          "width": 220,
+          "height": 32
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 95,
+              "y": 207,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 216,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 95,
+              "y": 241,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 216,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 150,
+              "y": 207,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 224,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 150,
+              "y": 241,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 224,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 205,
+              "y": 207,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 232,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 205,
+              "y": 241,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 232,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": 21,
+            "opaqueBorderVsPixel": 21,
+            "opaqueFillVsPixel": 1
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "ref": "zero",
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Zero width",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "0px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Zero width",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 0,
+            "style": "solid",
+            "limits": []
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 220,
+          "height": 32,
+          "clientWidth": 220,
+          "clientHeight": 32
+        },
+        "rect": {
+          "x": 40,
+          "y": 248,
+          "width": 220,
+          "height": 32
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 95,
+              "y": 247,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 256,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 95,
+              "y": 281,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 256,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 150,
+              "y": 247,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 264,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 150,
+              "y": 281,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 264,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 205,
+              "y": 247,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 272,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 205,
+              "y": 281,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 272,
+              "rgb": [
+                255,
+                255,
+                255
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 1
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      },
+      {
+        "ref": "fill",
+        "role": null,
+        "inactive": false,
+        "visible": true,
+        "state": {
+          "checked": null,
+          "selected": null,
+          "active": null,
+          "focused": false,
+          "hovered": false,
+          "pressed": false,
+          "focusVisible": false
+        },
+        "text": "Independent white fill",
+        "style": {
+          "color": "rgb(0, 0, 0)",
+          "fill": "rgb(255, 255, 255)",
+          "border": "rgb(0, 0, 0)",
+          "borderWidth": "4px",
+          "outline": "rgb(0, 0, 0)",
+          "outlineWidth": "3px",
+          "outlineStyle": "none",
+          "shadow": "none",
+          "transform": "none",
+          "opacity": "1",
+          "fontSize": "16px",
+          "fontWeight": "400"
+        },
+        "paint": {
+          "text": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "textAlpha": 1,
+          "fill": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "fillAlpha": 1,
+          "border": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "outline": [
+            0,
+            0,
+            0,
+            255
+          ],
+          "compositedBackground": [
+            255,
+            255,
+            255,
+            255
+          ],
+          "limits": []
+        },
+        "textRuns": [
+          {
+            "text": "Independent white fill",
+            "direct": true,
+            "color": "rgb(0, 0, 0)",
+            "alpha": 1,
+            "fontSize": "16px",
+            "fontWeight": "400",
+            "ratio": 21,
+            "classification": "source-model-only",
+            "threshold": 4.5,
+            "limits": [],
+            "basis": "resolved sRGB ink versus composed ancestor background; sibling overlays and glyph coverage unverified"
+          }
+        ],
+        "glyphs": [],
+        "placeholder": null,
+        "borders": {
+          "top": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "right": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "bottom": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          },
+          "left": {
+            "color": [
+              0,
+              0,
+              0,
+              255
+            ],
+            "alpha": 1,
+            "width": 4,
+            "style": "dashed",
+            "limits": [
+              "unsupported-border-style"
+            ]
+          }
+        },
+        "shadows": [],
+        "scroll": {
+          "left": 0,
+          "top": 0,
+          "width": 212,
+          "height": 24,
+          "clientWidth": 212,
+          "clientHeight": 24
+        },
+        "rect": {
+          "x": 40,
+          "y": 328,
+          "width": 220,
+          "height": 32
+        },
+        "textContrast": {
+          "ratio": 21,
+          "threshold": 4.5,
+          "basis": "verified direct-text source-model-only; receiving pixels unverified"
+        },
+        "textContrastDisposition": {
+          "classification": "source-model-only",
+          "limits": []
+        },
+        "visibility": {
+          "classification": "source-model-visible",
+          "limits": []
+        },
+        "perimeterLimits": [],
+        "exterior": [
+          {
+            "side": "top",
+            "point": {
+              "x": 95,
+              "y": 327,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 336,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 95,
+              "y": 361,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 336,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 150,
+              "y": 327,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 344,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 150,
+              "y": 361,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 344,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "top",
+            "point": {
+              "x": 205,
+              "y": 327,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "left",
+            "point": {
+              "x": 39,
+              "y": 352,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "bottom",
+            "point": {
+              "x": 205,
+              "y": 361,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          },
+          {
+            "side": "right",
+            "point": {
+              "x": 261,
+              "y": 352,
+              "rgb": [
+                0,
+                0,
+                0
+              ]
+            },
+            "innerBorderVsBackground": null,
+            "opaqueBorderVsPixel": null,
+            "opaqueFillVsPixel": 21
+          }
+        ],
+        "cueDisposition": "unclassified observation; numerical edge alone is not a component/state conformance verdict"
+      }
+    ]
+  }
+}

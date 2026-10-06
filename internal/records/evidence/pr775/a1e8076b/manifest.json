@@ -1,0 +1,300 @@
+{
+  "sourceHead": "a1e8076bd76a2032cf4f6bdeeabe57b39ace1002",
+  "sourceTree": "0f6710cfd006fdb8be7c8a9bb6be6642a33b5b4b",
+  "run": 37432338341,
+  "job": 112165888368,
+  "artifact": 11397567215,
+  "artifactSha256": "08b079707952641ee2ad1adca91ac18fd4e0e4b2b917344492826b4b9fbf1b47",
+  "calibrationTestsPassed": 28,
+  "summary": {
+    "collectedFrames": 256,
+    "pngFactMatchedFrames": 256,
+    "achievedTargetPredicates": 256,
+    "unresolvedRuntimeThemeCases": 0,
+    "distinctUnresolvedFamilies": 0,
+    "caseCoverage": [
+      {
+        "family": "dropdown-menu",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue2",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dropdown-menu",
+        "runtime": "vue2",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue2",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "select",
+        "runtime": "vue2",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "wc",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "wc",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "react",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "react",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "vue",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "vue",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "vue2",
+        "theme": "light",
+        "status": "observed",
+        "missingTargets": []
+      },
+      {
+        "family": "dialog",
+        "runtime": "vue2",
+        "theme": "dark",
+        "status": "observed",
+        "missingTargets": []
+      }
+    ],
+    "conformance": "not evaluated; frame count and target predicate count are not full conformance"
+  },
+  "dialogEscape": [
+    {
+      "runtime": "wc",
+      "theme": "light",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "wc",
+      "theme": "dark",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "react",
+      "theme": "light",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "react",
+      "theme": "dark",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue",
+      "theme": "light",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue",
+      "theme": "dark",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue2",
+      "theme": "light",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    },
+    {
+      "runtime": "vue2",
+      "theme": "dark",
+      "achieved": true,
+      "sameOwnedPopup": true,
+      "closed": true,
+      "triggerFocused": true
+    }
+  ],
+  "files": [
+    {
+      "path": "border-style-domain.png",
+      "sha256": "6d46870cbf22748e370f3ddab782e06a72d7ce30dea2e148af8614dd43f4e374",
+      "kind": "instrument calibration"
+    },
+    {
+      "path": "border-style-domain.json",
+      "sha256": "5b6bd347735c65356dc2b631ff0cb8766b508a8092ac6d23cbb564f8361d6710",
+      "kind": "instrument calibration"
+    },
+    {
+      "path": "rounded-perimeter.png",
+      "sha256": "add5472d588805cc745f9942b76b49407895853aa0e915f477cc7322b6b3633e",
+      "kind": "instrument calibration"
+    },
+    {
+      "path": "rounded-perimeter.json",
+      "sha256": "b65a9a6ac63e017626940b36b75a43cf63487906fb7ac8f111b783c050114658",
+      "kind": "instrument calibration"
+    },
+    {
+      "path": "signed-shadow-sides.png",
+      "sha256": "7168ab0a1d87582fc028ff2d4071c9cec77e8ae99fbf2b6525f4fa5a6b3c76f7",
+      "kind": "instrument calibration"
+    },
+    {
+      "path": "signed-shadow-sides.json",
+      "sha256": "7e24eef078e0020b64c5d8ae93521e7b1408b24964c3a1a2dec791ed933c574e",
+      "kind": "instrument calibration"
+    },
+    {
+      "path": "dialog-react-light-open.png",
+      "sha256": "a6edda630385e5ea6fb971d74730df36a17b10ded79db5caaa46aa88bfde99b5",
+      "kind": "public documented component state; not a screenshot of the instantaneous Escape barrier"
+    },
+    {
+      "path": "dialog-react-dark-keyboard-focus.png",
+      "sha256": "0548fcb2e61e5d375cf127d51c3b06e09edf5eb9e0e21a8d84abeea6d5804f16",
+      "kind": "public documented component state; not a screenshot of the instantaneous Escape barrier"
+    }
+  ],
+  "limitations": [
+    "Other audit shards and complete CI were still pending when this manifest was prepared.",
+    "Controlled geometry fixtures are instrument calibration, not component conformance.",
+    "Existing #832 follow-up and Tooltip Group sibling-handoff review remain separate."
+  ]
+}
