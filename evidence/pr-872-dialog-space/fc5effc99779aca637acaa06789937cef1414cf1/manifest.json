@@ -1,0 +1,49 @@
+{
+  "baselineSubject": "15d864de54210c2eebc4f4b2fec6235324989989",
+  "candidateSubject": "fc5effc99779aca637acaa06789937cef1414cf1",
+  "bothProbe": "fc5effc99779aca637acaa06789937cef1414cf1",
+  "run": 37530646677,
+  "baselineArtifact": 11443853900,
+  "candidateArtifact": 11444955374,
+  "conditions": {
+    "route": "/en/ui-libraries/shadcn/dialog/",
+    "runtime": "wc",
+    "renderer": "Astro dev server",
+    "browser": "154.0.8037.57",
+    "dpr": 1,
+    "theme": "light",
+    "pairedViewport": "390x900",
+    "fontEnvironment": "Identical font-environment.txt and browser-environment.txt; actual platform fonts and computed font metrics equal"
+  },
+  "result": "7/8 complete candidate journeys pass; historical and current Shadcn Vue2 preview lacks runtime option. Seven strict geometry pairs. Stress screenshots reveal real remaining horizontal footer clipping not covered by the original outer-bounds assertions. GPUI and physical keyboard/notch not validated.",
+  "images": [
+    {
+      "file": "15d-same-probe-fc5-shadcn-wc-before-390x900.png",
+      "state": "baseline",
+      "bytes": 83748,
+      "sha256": "b6ad5778477fcb8499196a33baeffeeaf48afa1273a75f5949a744d2d806d533",
+      "gitBlobSha": "3d8264f2839990ae32872ac9f6fee63743128ff9"
+    },
+    {
+      "file": "fc5-shadcn-wc-after-390x900.png",
+      "state": "candidate",
+      "bytes": 84435,
+      "sha256": "d724ce473998a519865ef3d937f1d19c1c7e70a55876e4ddfacc43531540db26",
+      "gitBlobSha": "f3a69ac7638fc062ca805603d57c97756842eca1"
+    },
+    {
+      "file": "shadcn-wc-scale2.png",
+      "state": "candidate-known-clipping",
+      "bytes": 62224,
+      "sha256": "c57a1ac65f6d8675e9b37b1b28a032468d1037d4774b0ac0b2ea3a7f3f4da36c",
+      "gitBlobSha": "8c4059b41f58cc08d13d4d889b714e770476f198"
+    },
+    {
+      "file": "shadcn-wc-long-font200.png",
+      "state": "candidate-known-clipping",
+      "bytes": 23920,
+      "sha256": "8d42d6758993cce91358fc05121e335b3372ab78434959ab8f08a1f0962c70e4",
+      "gitBlobSha": "0de213164a6f0dc8c450602a1c449f8ba90e71eb"
+    }
+  ]
+}
