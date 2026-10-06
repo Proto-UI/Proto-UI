@@ -1,0 +1,303 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "subject": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+  "probe": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+  "probeClosure": [
+    "4a77c0e2d4fcff82faec2c689a14618b8e265ee8b65d5482cf26c50400ba8206  subject/apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts",
+    "64a6da3f89e8cc9453b2e7ff28a9baa919f636fab45f983d88476ca5bfcb1138  subject/apps/www/src/content/docs/zh-cn/browser-harness.ts",
+    "4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda  subject/scripts/test/server-readiness.mjs"
+  ],
+  "sourceParents": [
+    "bef003f2c90bcd590d8d176db4c9160207b9f76b",
+    "a10374ab07793811f4d3b8d0d9edd4d68ed80668",
+    "25c3d0731e39003d87f541afc5e1a294a9d95568"
+  ],
+  "browser": "154.0.8037.57",
+  "workflowRun": 37504082925,
+  "job": 112408176254,
+  "artifact": 11430449924,
+  "archiveSha256": "e6c784d51eb1a7d62e67dd43c639d4544ad345e5ddad31e4cb18151badbec9cd",
+  "nativeResult": "27/27 passed",
+  "records": [
+    {
+      "id": "home-390-dark-settled-9",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "open": "true",
+        "theme": "dark",
+        "canonical": {
+          "background": "lab(2.75381% 0 0)",
+          "foreground": "lab(98.26% 0 0)"
+        },
+        "language": {
+          "text": "English",
+          "width": 50.5625,
+          "height": 45
+        },
+        "surfaces": [
+          {
+            "background": "lab(2.75381% 0 0)",
+            "foreground": "lab(98.26% 0 0)"
+          },
+          {
+            "background": "lab(2.75381% 0 0)",
+            "foreground": "lab(98.26% 0 0)"
+          }
+        ],
+        "overflow": false,
+        "phase": "settled"
+      },
+      "image": {
+        "file": "home-390-dark-settled-9.png",
+        "sha256": "fc56b20f8bcc57ad4b4fcdd3ea15c4733e7ceb807817bd4ddd38c511e57e2d7a"
+      }
+    },
+    {
+      "id": "dialog-home-390-react-normal",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "blur(4px)",
+        "background": "rgba(0, 0, 0, 0.5)",
+        "backgroundAlpha": 0.5019607843137255,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-react-normal.png",
+        "sha256": "5ec8f1ea6538f7395d21363988d196f675d6bb896ac707e71f53373ae79013f8"
+      }
+    },
+    {
+      "id": "dialog-home-390-react-forced-colors",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "none",
+        "background": "rgb(255, 255, 255)",
+        "backgroundAlpha": 1,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": true
+      },
+      "image": {
+        "file": "dialog-home-390-react-forced-colors.png",
+        "sha256": "a7de4b1182a8c05ab371c5fe7131b407e2577a4825857048fa80601006542522"
+      }
+    },
+    {
+      "id": "dialog-home-390-react-restored",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "backdropFilter": "blur(4px)",
+        "background": "rgba(0, 0, 0, 0.5)",
+        "backgroundAlpha": 0.5019607843137255,
+        "connected": true,
+        "opacity": "1",
+        "rect": {
+          "x": 0,
+          "y": 0,
+          "width": 390,
+          "height": 900,
+          "top": 0,
+          "right": 390,
+          "bottom": 900,
+          "left": 0
+        },
+        "reducedTransparency": false,
+        "forcedColors": false
+      },
+      "image": {
+        "file": "dialog-home-390-react-restored.png",
+        "sha256": "8dc5325c7090ca14c2dbd76e872c7a9d5a1ca134d4d20c7007f59cf56b5b8618"
+      }
+    },
+    {
+      "id": "legacy-2048-publish-module-held",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 2048,
+        "height": 1237
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/base/button/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "statusConnected": true,
+        "statusText": "  正在加载交互示例…   正文和源码已可阅读，交互控件就绪后会显示在这里。  ",
+        "statusRect": {
+          "x": 815,
+          "y": 373,
+          "width": 370,
+          "height": 160,
+          "top": 373,
+          "right": 1185,
+          "bottom": 533,
+          "left": 815
+        },
+        "hostInert": true,
+        "hostVisibility": "hidden",
+        "overflow": false
+      },
+      "image": {
+        "file": "legacy-2048-publish-module-held.png",
+        "sha256": "8957d8f64634454216384e973342d794d3d34fedf42488493f56cd973c753b25"
+      }
+    },
+    {
+      "id": "legacy-390-publish-module-held",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/base/button/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "statusConnected": true,
+        "statusText": "  正在加载交互示例…   正文和源码已可阅读，交互控件就绪后会显示在这里。  ",
+        "statusRect": {
+          "x": 36,
+          "y": 461,
+          "width": 318,
+          "height": 160,
+          "top": 461,
+          "right": 354,
+          "bottom": 621,
+          "left": 36
+        },
+        "hostInert": true,
+        "hostVisibility": "hidden",
+        "overflow": false
+      },
+      "image": {
+        "file": "legacy-390-publish-module-held.png",
+        "sha256": "63cd29ab6aa8f393cc731cdd491dfbd53fa6782c1ec4a712ca67fb45b5905554"
+      }
+    },
+    {
+      "id": "legacy-390-publish-settled",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/base/button/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "statusCount": 0,
+        "hostInert": false,
+        "hostVisibility": "visible",
+        "text": "Run actionDisabled"
+      },
+      "image": {
+        "file": "legacy-390-publish-settled.png",
+        "sha256": "dfcf7f0d2ee0f5d0164e470c53c1c31cd79c0fc651071d3fb2f2f62764dd8fe7"
+      }
+    },
+    {
+      "id": "legacy-390-failure-settled",
+      "revision": "30d477c1b0eb88662ef2e0bf28a952d678404a4d",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/base/button/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "statusCount": 0,
+        "hostInert": false,
+        "hostVisibility": "visible",
+        "text": "[Preview Error]\nTypeError: Failed to fetch dynamically imported module: http://127.0.0.1:4356/_astro/demo-base-button.demo.W3N7RTtI.js"
+      },
+      "image": {
+        "file": "legacy-390-failure-settled.png",
+        "sha256": "996fc3fb6e4b840a58a65f454ef01abf25de64ea5c98ee3b3efe86d57c1c063d"
+      }
+    }
+  ],
+  "limits": [
+    "Browser-emulated viewport and media preferences, not physical-device testing.",
+    "Retaining the same focused node during media changes does not establish correct initial Dialog entry focus.",
+    "React steady Mask evidence does not invalidate a different revision/input-time screenshot.",
+    "Full CI tracked separately; timestamp-only governance drift has a shared follow-up.",
+    "Only own public project pages, no private user reference images."
+  ]
+}
