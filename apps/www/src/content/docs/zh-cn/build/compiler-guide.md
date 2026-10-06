@@ -80,13 +80,19 @@ portable analyzable input → [future Compiler] → host artifacts
 | `vue2-source-v1` | Vue 2.6.14 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
 | `web-component-source-v1` | Custom Elements v1 | 生成的 native helper；不依赖 framework 或 Proto UI Runtime/Adapter |
 
-私有 pipeline 还实现了 GPUI、Qt、Flutter source emitter 和四个 Web SSR profile。能够生成 source，不等于完整 native Adapter parity、浏览器 preview 支持或普遍 hydration compatibility。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **5**、target profile identity 与生成 helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+Registry 还登记了 GPUI、Qt、Flutter source profile 和四个 Web SSR profile。GPUI artifact generation 不等于完整 native Adapter parity 或浏览器 preview 支持；Qt、Flutter 与四个 SSR profile 当前仍按未实现拒绝。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **5**、target profile identity 与生成 helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
 
 Frontend 读取限定 root 内的完整 TypeScript source graph，不 import 或 evaluate 作者程序。准入范围包括 checked data、primitive/control-flow callback、static helper 和 authored hook、显式 update、named State 与 typed expose、Props/Context read/watch、单 Root template、serializable Rule condition/style intent，以及已声明的 native event/focus/accessibility 切片。Unsupported syntax、phase/capture authority、operation、target version 和缺失 host capability 会生成 diagnostic，不会静默 bridge。
+
+Static Module requirements 可以使用 checked declaration array、checked array spread，或静态解析到已准入 `definePrototype`/`defineAsHook` descriptor 的 `modules` snapshot，包括 local import/re-export alias 与字面 `['modules']` 访问。只解码已准入的 declaration factory；不会执行作者 input 中的 factory、getter 或 computed lookup。Cycle、初始化前读取和重复 declaration ID 会被拒绝。Pre-render Root selection 仅由所选 caller Prototype 的显式 declaration 决定；setup 中调用 authored hook 不会隐式提升它的 requirements。该冻结复用准入与 physical-Root 修复不代表所有 canonical source、每种 Module projection 或完整 target/Adapter parity 已成立。
 
 Native template 将 child style 与 Root feedback 分开，并支持 singular anonymous slot。任意 attribute、`PrototypeRef`、multiple/named slot、native interaction group/portal，以及准入 vocabulary 之外的 interaction operation 仍不支持。Raw host event 是 opaque；可读取 raw Props snapshot，但任意 raw member 不会冒充 typed portable data。Setup style 的 `unUse` 与 Rule declaration disposer 仍是 setup-only；runtime 变化使用 Rule 和 `run.feedback.style.patch/suppress/clearPatch`。
 
 State write 与 feedback projection 本身不会请求 template render。作者显式 update intent 与 host policy 分开：React/Vue 3 consumer 执行 authored update；Vue 2 的默认 props policy 与 Custom Element `setProps` 可以显式请求 semantic update。View detach 保留 instance state、exposed handle、Context 与 pending intent；terminal disposal 才关闭它们。Framework wrapper 使用 native ownership 组合 component，而不是在 template 内嵌入 Prototype node。
+
+四个 Web source profile 将 ExposedState Host projection 降低为独立 supporting helper。命名使用 State semantic，缺失时回退到 exposure key，并复用现有 Module 的 official alias 与 normalization。Boolean `true` 写空 attribute、`false` 移除；string/enum 写 attribute，discrete number 写 attribute 与 CSS variable，continuous number 默认只写 CSS variable。JavaScript compile API 接受现有 `exposeStateWebMode` 的 `allowStringVar` 与 `allowContinuousAttr` flag。这是 Web extension，不是对 GPUI、Qt、Flutter 的 DOM projection 承诺。
+
+Projection subscription 属于可投影的 view epoch，host/commit 变化时重放，并覆盖不同的 presentation mirror。Detach 和 terminal disposal 使排队 write 失效；detach 不销毁保留的上游 State。Readonly Focus 与 Scroll State 保留 semantic name 和 numeric kind。旧 DOM artifact 的清除或恢复、collision ownership 仍是 governing contract 的未决项，helper 不自行发明这些 policy。
 
 ### 本地命令与 consumer ownership
 
@@ -127,7 +133,7 @@ node --import tsx scripts/compiler/native-consumer-smoke.mjs
 node scripts/compiler/build-browser.mjs
 ```
 
-Vite consumer 将生成的 `compiler.js` 作为 text、`build.json` 作为 data 加载，再调用 `createBrowserCompilerClient(bundle, build)`。Request 是 `{ format: 1, revision, source, options: { fileName, profile, files?, exportName?, componentName? } }`；`files` 是 virtual path 到 source text 的 closed map。必须显式选择 target，不会静默替换。成功 response 包含 canonical generated source、supporting file、dependency version、provenance、source map，以及 source identity、compiler-bundle identity 和 request revision。它**不负责挂载或执行生成的 target code**。
+Vite consumer 将生成的 `compiler.js` 作为 text、`build.json` 作为 data 加载，再调用 `createBrowserCompilerClient(bundle, build)`。Request 是 `{ format: 1, revision, source, options: { fileName, profile, files?, exportName?, componentName?, exposeStateWebMode? } }`；`files` 是 virtual path 到 source text 的 closed map。必须显式选择 target，不会静默替换。可选 Web projection mode 仅接受上述两个 boolean flag；malformed mode 在 Host 边界拒绝。成功 response 包含 canonical generated source、supporting file、dependency version、provenance、source map，以及 source identity、compiler-bundle identity 和 request revision。它**不负责挂载或执行生成的 target code**。
 
 可信 bundle 使用 Vite `?raw` import，或未经 transform 的 public asset。直接 fetch Vite transform 后的 JavaScript 可能附带 source map，改变字节；build-identity 校验会正确拒绝该 response。不能通过替换 manifest digest 接受变更后的 delivery。
 
@@ -140,6 +146,8 @@ Source rejection 返回 `phase: 'compile'` 和正常 diagnostic code/category/fi
 真实 Chromium module Worker 已通过 WASM 编译仓库的 canonical Base Button；记录的 artifact 与普通 Node compilation、直接 WASM execution 一致。另行比较了四个 Web source emitter、Unicode source/graph identity、source-located rejection 和 graph insertion order。一次本地观察中，初始化 2.83 秒、编译 116 毫秒；可信 compiler JavaScript 是 5,035,825 uncompressed UTF-8 byte，QuickJS WASM asset 是 503,134 byte。单次样本不构成 cold/warm distribution、mobile 支持或 startup budget。永久 WASM regression 还在**可信 entry** 内注入非终止调用，验证 interruption、后续 canonical compilation 和 terminal disposal；不会 evaluate 作者 input。
 
 审查修复将真实 Chromium Worker result 与 Node 对照，覆盖十二个已登记 profile identity，并另行验证 Unicode GPUI field 和 embedded-NUL source。GPUI Rust artifact（包括 Cargo package identity）已在不提供 Node `Buffer` global 的情况下保持一致；SHA-256 bridge 保留 NUL separator。Qt、Flutter 与四个 SSR profile 仍返回 canonical unsupported-target diagnostic。这些是 compiler-artifact 对照，不是 native widget 执行、generated-preview sandbox 或新的 target admission。Source-bound 修复 receipt 记录在 `internal/compiler/browser-wasm-evidence.json`；上面的早期时间样本保留为历史观察。
+
+ExposedState 修复另行将四个原 Web Adapter 与生成的 native consumer 实际并排挂载：18 个 scalar/mirror surface 验证不触发 structural render 的 write、真实 detach 和保留 State 的 remount；8 个 readonly surface 验证实际 focus/blur 与 continuous Scroll projection。真实 WASM Worker 对照覆盖 23 个成功的完整 output、GPUI 的 Web-only mode 拒绝、6 个未实现 profile 拒绝，以及 4 个 malformed mode request。早期失败观察和修正后的 driver 错误仍保留。Canonical Web Component Root marker 与 native Scroll projection marker 仍有差异；这些有限观察不代表完整 Adapter parity 或 RuntimeBox migration。
 
 ### 全站 Demo 迁移清单
 

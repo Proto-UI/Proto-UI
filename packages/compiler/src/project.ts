@@ -6,6 +6,7 @@ import { compileFile } from './compile';
 import type { Compilation } from './memory';
 import { CompilerRejection } from './diagnostics';
 import { IR_VERSION, type CompileResult, type CompilerDiagnostic, type SourceSpan } from './ir';
+import type { ExposeStateWebMode } from './native-expose-state-web';
 import {
   isLocalSourceSpecifier,
   localSourceBase,
@@ -22,6 +23,7 @@ export interface CompileProjectOptions {
   exportName?: string;
   componentName?: string;
   nativeSdkPath?: string;
+  exposeStateWebMode?: ExposeStateWebMode;
   /** Explicit identity/watch inputs; the project compiler does not interpret configuration files. */
   configFiles?: readonly string[];
 }
@@ -248,6 +250,7 @@ export class CompilerProject {
         exportName: options.exportName ?? 'default',
         componentName: options.componentName ?? null,
         nativeSdkPath: options.nativeSdkPath ?? null,
+        exposeStateWebMode: options.exposeStateWebMode ?? null,
         configuration,
       })
     );
@@ -300,6 +303,7 @@ export class CompilerProject {
             exportName: options.exportName,
             componentName: options.componentName,
             nativeSdkPath: options.nativeSdkPath,
+            exposeStateWebMode: options.exposeStateWebMode,
             sourceSnapshot: { entry, files },
           });
         }

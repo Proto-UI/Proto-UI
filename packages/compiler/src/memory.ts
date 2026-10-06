@@ -10,6 +10,7 @@ import { emitFlutterSource } from './flutter-source';
 import { resolveTargetProfile, checkTargetOperations, type TargetSelection } from './targets';
 import { attachEmitterMap } from './emitter-map';
 import type { CompileResult, GeneratedModule, ParseOptions, PrototypeIR } from './ir';
+import type { ExposeStateWebMode } from './native-expose-state-web';
 
 export interface Compilation {
   ir: PrototypeIR;
@@ -18,6 +19,8 @@ export interface Compilation {
 export interface CompileOptions extends ParseOptions {
   componentName?: string;
   profile?: string | TargetSelection;
+  /** Web-only Host projection mode, matching the existing Adapter option. */
+  exposeStateWebMode?: ExposeStateWebMode;
   /** GPUI source dependency shared by composed prototypes; omission bundles the editable SDK. */
   nativeSdkPath?: string;
 }
@@ -31,10 +34,32 @@ export function compilePrototype(
   if (!parsed.ok) return parsed;
   const profile = resolveTargetProfile(options.profile ?? 'react-runtime-v1');
   if (!profile.ok) return profile;
+  if (
+    options.exposeStateWebMode &&
+    (profile.value.framework === 'gpui' ||
+      profile.value.framework === 'qt' ||
+      profile.value.framework === 'flutter')
+  ) {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI4003',
+          category: 'unsupported-input',
+          message:
+            'exposeStateWebMode requires a Web target; it does not provide DOM projection on native platforms.',
+          span: parsed.value.setup.span,
+        },
+      ],
+    };
+  }
   const admitted = checkTargetOperations(parsed.value, profile.value);
   if (!admitted.ok) return admitted;
   let emitted: CompileResult<GeneratedModule>;
-  const emitOptions = { componentName: options.componentName };
+  const emitOptions = {
+    componentName: options.componentName,
+    exposeStateWebMode: options.exposeStateWebMode,
+  };
   switch (profile.value.id) {
     case 'react-runtime-v1':
       emitted = emitReact(parsed.value, emitOptions);
@@ -49,7 +74,10 @@ export function compilePrototype(
       emitted = emitVue2Source(parsed.value, emitOptions);
       break;
     case 'web-component-source-v1':
-      emitted = emitWebComponentSource(parsed.value, { className: options.componentName });
+      emitted = emitWebComponentSource(parsed.value, {
+        className: options.componentName,
+        exposeStateWebMode: options.exposeStateWebMode,
+      });
       break;
     case 'gpui-source-v1':
       emitted = emitGpuiSource(parsed.value, {
@@ -75,6 +103,7 @@ export function compilePrototype(
     case 'web-component-ssr-v1':
       emitted = emitWebComponentSource(parsed.value, {
         className: options.componentName,
+        exposeStateWebMode: options.exposeStateWebMode,
         ssr: true,
       });
       break;

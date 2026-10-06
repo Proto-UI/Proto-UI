@@ -24,7 +24,14 @@ function validateRequest(request: BrowserCompileRequest): string | null {
     )
   )
     return 'A virtual fileName and explicit target profile are required.';
-  const keys = new Set(['fileName', 'profile', 'files', 'exportName', 'componentName']);
+  const keys = new Set([
+    'fileName',
+    'profile',
+    'files',
+    'exportName',
+    'componentName',
+    'exposeStateWebMode',
+  ]);
   if (Object.keys(options).some((key) => !keys.has(key)))
     return 'Host filesystem and unknown compiler options are unavailable.';
   if (
@@ -32,6 +39,18 @@ function validateRequest(request: BrowserCompileRequest): string | null {
     (options.componentName !== undefined && typeof options.componentName !== 'string')
   )
     return 'Export and component names must be strings.';
+  const mode = options.exposeStateWebMode;
+  if (
+    mode !== undefined &&
+    (!mode ||
+      typeof mode !== 'object' ||
+      Array.isArray(mode) ||
+      Object.entries(mode).some(
+        ([key, value]) =>
+          !['allowStringVar', 'allowContinuousAttr'].includes(key) || typeof value !== 'boolean'
+      ))
+  )
+    return 'Web projection mode accepts only boolean allowStringVar and allowContinuousAttr.';
   if (
     options.files !== undefined &&
     (!options.files ||
