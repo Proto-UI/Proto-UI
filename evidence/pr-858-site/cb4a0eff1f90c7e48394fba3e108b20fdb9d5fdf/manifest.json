@@ -1,0 +1,85 @@
+{
+  "agent": "dot",
+  "modeltrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "subject": "cb4a0eff1f90c7e48394fba3e108b20fdb9d5fdf",
+  "probe": "cb4a0eff1f90c7e48394fba3e108b20fdb9d5fdf",
+  "browser": "154.0.8037.57",
+  "workflowRun": 37480008520,
+  "artifact": 11422207250,
+  "archiveSHA256": "a04f78df4d971435a340ac4f0d7f5e8149afe8867e0ee8a11ef0dbfe021b25d7",
+  "result": "19 passed; 3 Card widths retain open state but lose focused locale-link identity during enhancement",
+  "captures": [
+    {
+      "id": "cold-card-2048",
+      "revision": "cb4a0eff1f90c7e48394fba3e108b20fdb9d5fdf",
+      "viewport": {
+        "width": 2048,
+        "height": 1237
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/brutalist/components/card/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "interactive",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "scriptsHeld": true,
+        "initial": {
+          "background": "rgb(220, 235, 254)",
+          "color": "rgb(0, 0, 0)",
+          "headingFontSize": "36px",
+          "headingFontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+          "headingTop": 96,
+          "previewHeight": 160,
+          "previewText": "\u6b63\u5728\u52a0\u8f7d\u4ea4\u4e92\u793a\u4f8b\u2026\n\u6b63\u6587\u548c\u6e90\u7801\u5df2\u53ef\u9605\u8bfb\uff0c\u4ea4\u4e92\u63a7\u4ef6\u5c31\u7eea\u540e\u4f1a\u663e\u793a\u5728\u8fd9\u91cc\u3002",
+          "statusBorder": "2px",
+          "statusBackground": "rgb(220, 235, 254)",
+          "bodyWidth": 2048,
+          "viewportWidth": 2048
+        },
+        "settingsVisible": false,
+        "isNative": true
+      },
+      "image": {
+        "file": "cold-card-2048.png",
+        "sha256": "73fc0753c198e37f3f224fc092deda7d8ba900f8666dd53e16e5a60c50c4ea29"
+      }
+    },
+    {
+      "id": "cold-home-390",
+      "revision": "cb4a0eff1f90c7e48394fba3e108b20fdb9d5fdf",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "interactive",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "scriptsHeld": true,
+        "initial": {
+          "background": "lab(100 0 0)",
+          "color": "lab(2.75381 0 0)",
+          "headingFontSize": "32px",
+          "headingFontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+          "headingTop": 187,
+          "previewHeight": null,
+          "previewText": null,
+          "statusBorder": null,
+          "statusBackground": null,
+          "bodyWidth": 390,
+          "viewportWidth": 390
+        },
+        "settingsVisible": false,
+        "isNative": true
+      },
+      "image": {
+        "file": "cold-home-390.png",
+        "sha256": "2f62e2a0efae3c9c06801e7bdc39cd2d9357f457207a77e3dcb7ae47a2b521e3"
+      }
+    }
+  ]
+}
