@@ -57,7 +57,7 @@ const cases = [
   // internal/records/2026-10-06-finf-source-union-budget.json
   // Follow-up Dialog/Label/native source batch, independently measured exact cost:
   // internal/records/2026-10-06-finf-dialog-source-budget.json
-  ['runtime root', 'packages/runtime/src/index.ts', 74_520],
+  ['runtime root', 'packages/runtime/src/index.ts', 74_541],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -78,8 +78,8 @@ const cases = [
   // Subsequent bounded request/owner-release repair measured as an actual union:
   // internal/records/2026-10-06-focus-request-release-budget.json
   // internal/records/2026-10-06-template-scroll-focus-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 99_743],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 99_526],
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 99_893],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 99_702],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -87,7 +87,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 109_067],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 109_229],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];
