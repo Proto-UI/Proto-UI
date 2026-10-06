@@ -435,8 +435,10 @@ const EXPECTED_UNMAPPED: [&str; 32] = [
 
 #[test]
 fn selection_affordances_keep_both_web_properties_explicitly_unmapped() {
+    // Use a supported positioning context; implicit static-position diagnostics
+    // are covered separately and must not be mistaken for selection properties.
     let mapped = map(
-        &resolve(&["select-none"], "shadcn"),
+        &resolve(&["relative", "select-none"], "shadcn"),
         LengthContext::default(),
     );
     let actual: BTreeSet<&str> = mapped
