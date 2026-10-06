@@ -121,3 +121,26 @@ for (const mode of ['normal', 'disable-fails', 'get-fails', 'enabled', 'unset'])
     }
   });
 }
+
+// The independent Accordion job shares this verified official preference
+// protocol, without replacing the standard CI suite or its retained failures.
+test('independent Accordion evidence uses the same fail-closed toolbar protocol', () => {
+  const workflow = YAML.parse(
+    readFileSync('.github/workflows/accordion-family-evidence.yml', 'utf8')
+  );
+  assert.deepEqual(workflow.permissions, { contents: 'read' });
+  const steps = workflow.jobs['browser-evidence'].steps;
+  const index = steps.findIndex((step) => step.run?.includes(disable));
+  const observe = steps.findIndex((step) =>
+    step.run?.includes('demo-accordion-family.browser.test.ts')
+  );
+  assert.ok(index >= 0 && index < observe);
+  assert.equal(steps[index].run, assertSurface(read()));
+  assert.equal(steps[index].if, undefined);
+  assert.equal(steps[index]['continue-on-error'], undefined);
+  assert.ok(
+    steps.some((step) =>
+      step.run?.includes('node --test scripts/test/brutalist-design-toolbar.test.mjs')
+    )
+  );
+});
