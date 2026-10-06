@@ -1,0 +1,78 @@
+{
+  "sourceSha": "1d166ee703d2653cc32109dec914c31ae28bd869",
+  "fixture": "demo-accordion-family.browser.test.ts",
+  "name": "brutalist-react-light-closed-keyboard-focus",
+  "family": "brutalist",
+  "runtime": "react",
+  "state": "closed-keyboard-focus",
+  "rect": {
+    "x": 306,
+    "y": 411.09375,
+    "width": 620,
+    "height": 336
+  },
+  "aria": [
+    {
+      "ref": "single-overview-trigger",
+      "expanded": "false",
+      "disabled": "false",
+      "controls": null
+    },
+    {
+      "ref": "single-lifetime-trigger",
+      "expanded": "false",
+      "disabled": "false",
+      "controls": null
+    },
+    {
+      "ref": "single-disabled-trigger",
+      "expanded": "false",
+      "disabled": "true",
+      "controls": null
+    },
+    {
+      "ref": "single-long-trigger",
+      "expanded": "false",
+      "disabled": "false",
+      "controls": null
+    }
+  ],
+  "trustedInputs": [
+    {
+      "type": "pointerdown",
+      "trusted": true,
+      "ref": "__pui_projection__runtime_trigger",
+      "key": null
+    },
+    {
+      "type": "click",
+      "trusted": true,
+      "ref": "__pui_projection__runtime_trigger",
+      "key": null
+    },
+    {
+      "type": "keydown",
+      "trusted": true,
+      "ref": "single-overview-trigger",
+      "key": "Enter"
+    },
+    {
+      "type": "keyup",
+      "trusted": true,
+      "ref": "single-overview-trigger",
+      "key": "Enter"
+    }
+  ],
+  "checkedAt": "2026-10-06T21:56:35.506Z",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "environment": {
+    "theme": "light",
+    "colorScheme": "light",
+    "devicePixelRatio": 1,
+    "rootFontSize": "16px"
+  },
+  "comparison": "Same source, runtime and viewport across family/state captures; no historical before-image exists."
+}

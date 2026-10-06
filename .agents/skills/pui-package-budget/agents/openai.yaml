@@ -1,7 +1,0 @@
-interface:
-  display_name: 'Update Proto UI Package Budget'
-  short_description: 'Apply one evidenced numeric ceiling change'
-  default_prompt: 'Use $pui-package-budget to apply this accepted capability cost as a bounded numeric transaction with canonical evidence.'
-
-policy:
-  allow_implicit_invocation: false

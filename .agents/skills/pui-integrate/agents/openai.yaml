@@ -1,7 +1,0 @@
-interface:
-  display_name: 'Proto UI Integrate'
-  short_description: 'Merge a reviewed exact head through repository rules'
-  default_prompt: 'Use $pui-integrate to integrate this reviewed Proto UI pull request at its exact head.'
-
-policy:
-  allow_implicit_invocation: false

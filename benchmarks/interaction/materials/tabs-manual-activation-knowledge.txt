@@ -1,6 +1,0 @@
-Public development calibration material only.
-Source: https://github.com/Proto-UI/Proto-UI/blob/f5bae261491368b586959f1d8b353cf372775221/spec/prototypes/P-BASE-TABS.yaml
-Entity: P-BASE-TABS; lifecycle: draft. Draft direction is not a stable guarantee.
-
-P-BASE-TABS-ROLE-SINGLE-SELECTION
-Tabs represents a compound single-selection protocol; at most one protocol value is selected/current within the same Tabs domain.

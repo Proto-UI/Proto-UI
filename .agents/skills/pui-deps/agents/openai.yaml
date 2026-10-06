@@ -1,6 +1,0 @@
-interface:
-  display_name: 'Assess Dependency Drift'
-  short_description: 'Assess one dependency drift slice.'
-  default_prompt: 'Use $pui-deps to assess one bounded Proto UI dependency drift slice without updating dependencies.'
-policy:
-  allow_implicit_invocation: false

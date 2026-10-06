@@ -1,0 +1,78 @@
+{
+  "sourceSha": "1d166ee703d2653cc32109dec914c31ae28bd869",
+  "fixture": "demo-accordion-family.browser.test.ts",
+  "name": "brutalist-react-light-initial-open",
+  "family": "brutalist",
+  "runtime": "react",
+  "state": "initial-open",
+  "rect": {
+    "x": 306,
+    "y": 411.09375,
+    "width": 620,
+    "height": 532
+  },
+  "aria": [
+    {
+      "ref": "single-overview-trigger",
+      "expanded": "true",
+      "disabled": "false",
+      "controls": "pui-a11y-7"
+    },
+    {
+      "ref": "nested-overview-trigger",
+      "expanded": "false",
+      "disabled": "false",
+      "controls": null
+    },
+    {
+      "ref": "nested-details-trigger",
+      "expanded": "false",
+      "disabled": "false",
+      "controls": null
+    },
+    {
+      "ref": "single-lifetime-trigger",
+      "expanded": "false",
+      "disabled": "false",
+      "controls": null
+    },
+    {
+      "ref": "single-disabled-trigger",
+      "expanded": "false",
+      "disabled": "true",
+      "controls": null
+    },
+    {
+      "ref": "single-long-trigger",
+      "expanded": "false",
+      "disabled": "false",
+      "controls": null
+    }
+  ],
+  "trustedInputs": [
+    {
+      "type": "pointerdown",
+      "trusted": true,
+      "ref": "__pui_projection__runtime_trigger",
+      "key": null
+    },
+    {
+      "type": "click",
+      "trusted": true,
+      "ref": "__pui_projection__runtime_trigger",
+      "key": null
+    }
+  ],
+  "checkedAt": "2026-10-06T21:56:35.312Z",
+  "viewport": {
+    "width": 1280,
+    "height": 1000
+  },
+  "environment": {
+    "theme": "light",
+    "colorScheme": "light",
+    "devicePixelRatio": 1,
+    "rootFontSize": "16px"
+  },
+  "comparison": "Same source, runtime and viewport across family/state captures; no historical before-image exists."
+}

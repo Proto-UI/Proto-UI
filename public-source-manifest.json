@@ -1,0 +1,38 @@
+{
+  "sourceSha": "1d166ee703d2653cc32109dec914c31ae28bd869",
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37536707942",
+  "artifactId": 11447935388,
+  "artifactZipSha256": "51de7d72bbebbe278f702fa5930c7282a536ec6d8ad706a1bc38f0182cd1e374",
+  "files": [
+    {
+      "file": "1d166ee703d2-brutalist-react-light-closed-keyboard-focus.png",
+      "sha256": "075ed6ac7839229bd57580a6eb4544450c104303462db992e5c14ee04f6d4639",
+      "bytes": 30515,
+      "sidecar": "1d166ee703d2-brutalist-react-light-closed-keyboard-focus.json"
+    },
+    {
+      "file": "1d166ee703d2-brutalist-react-light-initial-open.png",
+      "sha256": "d85271d3838d3a6dacf8f008a42672a8125fe510d9e4559d901f016b933e9a11",
+      "bytes": 49321,
+      "sidecar": "1d166ee703d2-brutalist-react-light-initial-open.json"
+    },
+    {
+      "file": "1d166ee703d2-shadcn-react-light-closed-keyboard-focus.png",
+      "sha256": "11b17af5286bcb4859bb8a60505cfbdd5df1b998649eb2f0365d42f4a73f29d0",
+      "bytes": 20106,
+      "sidecar": "1d166ee703d2-shadcn-react-light-closed-keyboard-focus.json"
+    },
+    {
+      "file": "1d166ee703d2-shadcn-react-light-initial-open.png",
+      "sha256": "f00e32d66335232d0e895c3dba35e7bb4de7017d97b79a0b6034bc29853dda4a",
+      "bytes": 33452,
+      "sidecar": "1d166ee703d2-shadcn-react-light-initial-open.json"
+    }
+  ],
+  "result": {
+    "executed": 25,
+    "passed": 12,
+    "failed": 13
+  },
+  "scope": "Same-source React light 1280x1000 initial-open / closed-keyboard-focus. Actual PNGs inspected. Not narrow-screen, GPUI, or complete-family acceptance."
+}

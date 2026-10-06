@@ -1,7 +1,0 @@
-# Homepage stack synchronization with main (2026-10-04)
-
-PR777's reviewedec6e5710d0aaeee6d5844f9c996c1d7ca594aa31 head was green, but GitHub reported a conflict. Its PR base metadata was stale atd4bdb66b; the branch-ref API and actual fetch both identified currentmain asd05d1a00a353b9e72326a05569233d5bb54456a9. An isolated merge-tree against that exact live main reproduced one conflict in`.github/workflows/ci.yml`.
-
-The history-preserving merge retains both independent additions at their shared boundary: main's native GPUI T0 Toggle, Switch, Tabs view-intent, Tabs, Transition and Checkbox steps stay in`rust-interop`, while the homepage branch's deterministic`test-plan`, `test-general`, `test-browser` and aggregate`test` jobs stay intact. No job or nonzero-test-count guard is removed. Other upstream changes merge normally from main; no contributor-authored website prose is rewritten for this synchronization.
-
-Evidence before push: the unresolved conflict fails YAML parsing; resolved YAML parses, its entire`rust-macos` and`rust-interop` job objects exactly equal the main parent, and all four runtime CI job objects exactly equal theec6 parent. The112 runtime-runner/observer-host tests pass locally. Full merged-head CI and independent platform approval remain required; prior-head green is not substituted. Work is isolated from the original author worktrees. PR815/816 will absorb the new base without rewriting their histories after source-head coordination.

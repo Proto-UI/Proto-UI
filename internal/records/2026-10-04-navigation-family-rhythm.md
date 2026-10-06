@@ -1,9 +1,0 @@
-# Navigation family rhythm (2026-10-04)
-
-The user accepted the full Header family direction, then identified uneven spacing after adding structural surfaces and a visually inconsistent directory. This increment changes layout and public family consumption only; existing words and information order remain unchanged.
-
-The old 24px text-navigation gap and leading margin compounded the public 4px Brutalist shadow allowance. The new shared layout leaves 12px between visible neighbouring control extents. Browser evidence measures all three brand/nav border-box gaps (16px including the 4px shadow), rather than inferring spacing from CSS alone.
-
-Sidebar and TOC anchors already used real family Surface/Text. Brutalist current/hover now selects the public structural border in addition to its accent fill. The surface's geometric padding compensates for the 2px border, preserving the 4px/8px content inset and 32px desktop/44px compact minimum. Idle rows do not acquire a heavy frame or shadow. Group summaries were a genuine missing dogfood path: native details/summary now retain the original label/caret, native activation and focus while public Surface/Text own their presentation. Group typography stays at 12px, and Brutalist groups use an existing bottom-border input. No disclosure or Link protocol is invented.
-
-Coverage includes actual Summary owner/content identity, pointer activation, observed Space press facts, family replacement and cleanup; hosted evidence also exercises real browser Space toggle and focus. Previous full serial general validation of 4a56 preserved three failures in old brand/nav motion-envelope and Search ghost assertions. Those assertions are reconciled with the later approved family direction, without changing Search's original 1000ms readiness window. Exact new-head visual and hosted validation remain pending.

@@ -1,6 +1,0 @@
-{
-  "version": 2,
-  "buildCommand": "corepack pnpm@10.32.1 --filter apps-www build",
-  "outputDirectory": "apps/www/dist",
-  "installCommand": "corepack pnpm@10.32.1 install --frozen-lockfile"
-}

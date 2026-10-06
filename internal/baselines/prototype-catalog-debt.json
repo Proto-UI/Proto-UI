@@ -1,5 +1,0 @@
-{
-  "schemaVersion": 1,
-  "description": "Existing concrete prototype declarations that still need P/T catalog entities. CI rejects unlisted or stale debt, so accepting a new gap requires an explicit reviewed edit.",
-  "uncataloged": []
-}
