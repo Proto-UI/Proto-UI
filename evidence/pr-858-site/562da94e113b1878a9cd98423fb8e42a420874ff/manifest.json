@@ -1,0 +1,47 @@
+{
+  "agent": "dot",
+  "modeltrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "subject": "562da94e113b1878a9cd98423fb8e42a420874ff",
+  "probe": "562da94e113b1878a9cd98423fb8e42a420874ff",
+  "browser": "154.0.8037.57",
+  "workflowRun": 37487553135,
+  "artifact": 11424377944,
+  "archiveSHA256": "bec4b071c1121c9a0d84729f090283e1a1ebe7d12ee0dc58024b55869a108c30",
+  "result": "19 passed; original focus href/node identity assertions passed; 3 later strict-locator probe failures prevent AX and Enter/Tab/ShiftTab completion",
+  "captures": [
+    {
+      "id": "loaded-card-390",
+      "revision": "562da94e113b1878a9cd98423fb8e42a420874ff",
+      "viewport": {
+        "width": 390,
+        "height": 900
+      },
+      "url": "http://127.0.0.1:4356/zh-cn/ui-libraries/brutalist/components/card/",
+      "rendering": {
+        "dpr": 1,
+        "readyState": "complete",
+        "fonts": "loaded"
+      },
+      "facts": {
+        "scriptsReleased": true,
+        "loaded": {
+          "background": "rgb(220, 235, 254)",
+          "color": "rgb(0, 0, 0)",
+          "headingFontSize": "32px",
+          "headingFontFamily": "ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"PingFang SC\", \"Hiragino Sans GB\", \"Microsoft YaHei\", \"Noto Sans CJK SC\", \"Noto Sans SC\", sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\"",
+          "headingTop": 80,
+          "previewHeight": 396,
+          "previewText": "Runtime\nWeb Components\nAI Support \u2014 Conversation workspace\nUse Card as an explicit panel shell.\n12 messages\nOpen conversation",
+          "statusBorder": null,
+          "statusBackground": null,
+          "bodyWidth": 390,
+          "viewportWidth": 390
+        }
+      },
+      "image": {
+        "file": "loaded-card-390.png",
+        "sha256": "ad2ea7e5ede2ed3f120bd1e69e98b7c97822030725ab1cf96c81bf32afd9b0f8"
+      }
+    }
+  ]
+}
