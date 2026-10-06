@@ -73,7 +73,9 @@ export async function evaluateCalibration({
     networkPolicy:
       'All page requests aborted; service workers blocked; restrictive inline-only CSP',
     timeouts: {
-      launchMs: 10_000,
+      // Browser process bootstrap is not a scored interaction deadline. Match
+      // the existing 30s browser setup policy; action and outer-run bounds stay.
+      launchMs: 30_000,
       actionMs: 1_200,
       screenshotMs: 5_000,
       totalMs: null,

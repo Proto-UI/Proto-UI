@@ -600,6 +600,8 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           value: note?.value,
           selectionStart: note?.selectionStart,
           selectionEnd: note?.selectionEnd,
+          editingTrace: (note as (HTMLTextAreaElement & { __editingTrace?: unknown[] }) | null)
+            ?.__editingTrace,
           active: active
             ? {
                 tag: active.tagName,
@@ -672,6 +674,72 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
           await expect.poll(() => summary.getAttribute('aria-checked')).toBe('true');
           const noteText = `${family} / ${runtime}`;
           editingCase.stage = 'native-fill';
+          // Bounded diagnostics on this authored fixture only. Delegate through
+          // the existing descriptor (including any framework value tracker),
+          // and retain all original native input/caret assertions unchanged.
+          if (runtime === 'react')
+            await editor.evaluate((target: HTMLTextAreaElement) => {
+              const node = target as HTMLTextAreaElement & { __editingTrace?: unknown[] };
+              const trace: unknown[] = [];
+              node.__editingTrace = trace;
+              const record = (operation: string, details?: unknown) => {
+                if (trace.length >= 48) trace.shift();
+                trace.push({
+                  operation,
+                  value: node.value,
+                  start: node.selectionStart,
+                  end: node.selectionEnd,
+                  details,
+                });
+              };
+              const descriptor =
+                Object.getOwnPropertyDescriptor(node, 'value') ??
+                Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value');
+              if (descriptor?.get && descriptor?.set)
+                Object.defineProperty(node, 'value', {
+                  configurable: true,
+                  enumerable: descriptor.enumerable,
+                  get() {
+                    return descriptor.get!.call(this);
+                  },
+                  set(value) {
+                    record('value-before', {
+                      next: value,
+                      stack: new Error().stack?.split('\n').slice(1, 12),
+                    });
+                    descriptor.set!.call(this, value);
+                    record('value-after');
+                  },
+                });
+              const setSelectionRange = node.setSelectionRange;
+              node.setSelectionRange = function (...args) {
+                record('selection-before', {
+                  args,
+                  stack: new Error().stack?.split('\n').slice(1, 12),
+                });
+                setSelectionRange.apply(this, args);
+                record('selection-after');
+              };
+              for (const type of [
+                'focus',
+                'blur',
+                'beforeinput',
+                'input',
+                'change',
+                'compositionstart',
+                'compositionend',
+              ]) {
+                node.addEventListener(
+                  type,
+                  () => {
+                    record(type);
+                    queueMicrotask(() => record(`${type}-microtask`));
+                  },
+                  true
+                );
+              }
+              record('installed');
+            });
           await editor.fill(noteText);
           await reportEditingState('after-native-fill');
           await expect

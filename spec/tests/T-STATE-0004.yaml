@@ -3,7 +3,7 @@ type: test
 title: State watch, event, and lifecycle tests
 status: draft
 since: 0.1.0
-summary: Module and runtime tests for setup-only watch registration, callback-scope binding, StateEvent delivery, deterministic ordering, and lifecycle cleanup.
+summary: Module and runtime tests for setup-only watch registration, callback-scope binding, StateEvent delivery, deterministic ordering, lifecycle cleanup, and callback mutation admission after successful or caught-failing nested renders with idle rejection.
 cases:
   - id: T-STATE-0004-CASE-WATCH-SETUP-ONLY
     title: Watch registration is setup-only and absent from owned views
@@ -49,6 +49,15 @@ cases:
       - C-STATE-0010-G
       - M-STATE-0001-B
     expectation: current-run-callback-scope-and-phase-restoration
+  - id: T-STATE-0004-CASE-NESTED-RENDER-CALLBACK
+    title: State mutation remains admitted in the owning callback after a nested render returns or throws, but not after the callback exits
+    covers:
+      - C-STATE-0004-C
+      - C-STATE-0004-E
+    expectation: nested-render-success-or-caught-error-preserves-callback-set-and-idle-set-rejects-without-mutation
+    notes:
+      - Both normal render return and the exact caught render exception are exercised inside the owning callback. The subsequent owned State set changes the observable value to true.
+      - After callback exit, idle set(false) must throw and leave the observed value true. This is a preserved phase boundary, not a weakened guard or a run-handle forwarding assertion.
 implementations:
   - id: module-state-port-watch-contract
     kind: module-test
@@ -91,6 +100,9 @@ implementations:
     required: true
     consumesCases:
       - T-STATE-0004-CASE-CALLBACK-SCOPE
+      - T-STATE-0004-CASE-NESTED-RENDER-CALLBACK
+    notes:
+      - "Nested-render selector: it.each([false, true]) 'preserves state mutation admission after a nested render (throws=%s)'. Both throws=false and throws=true passed in the retained PR #811 final affected run, following the retained two-case red/green reproduction; this catalog edit is not a fresh execution."
 verifies:
   contracts:
     - id: C-CORE-SYNTAX-0002
@@ -99,7 +111,9 @@ verifies:
         - C-CORE-SYNTAX-0002-F
     - id: C-STATE-0004
       anchors:
+        - C-STATE-0004-C
         - C-STATE-0004-D
+        - C-STATE-0004-E
     - id: C-STATE-0010
       anchors:
         - C-STATE-0010-A
@@ -122,6 +136,11 @@ verifies:
         - C-STATE-0012-C
         - C-STATE-0012-D
         - C-STATE-0012-E
+  modules:
+    - id: M-STATE-0001
+      since: 0.3.0-alpha.1
+      anchors:
+        - M-STATE-0001-B
 exercises:
   contracts:
     - id: C-STATE-0005
@@ -138,6 +157,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Added state watch, StateEvent, and lifecycle test mapping.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Mapped retained normal-return and caught-exception nested-render regressions to owned State callback-only mutation admission and wrapper phase boundaries, including post-callback idle rejection without value mutation.
 tags:
   - state
   - watch

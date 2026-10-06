@@ -93,11 +93,27 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           port?.trace?.('after-unmount');
         } catch {}
 
-        wiring.afterUnmount();
-        eventGate.dispose();
-        router.dispose();
-        clearSlotProjector();
-        onAfterUnmount?.();
+        // A readiness observer may throw while the view is released. Complete
+        // the session tail too, preserving the original disposal failure.
+        let failed = false;
+        let firstError: unknown;
+        for (const release of [
+          () => wiring.afterUnmount(),
+          () => eventGate.dispose(),
+          () => router.dispose(),
+          clearSlotProjector,
+          () => onAfterUnmount?.(),
+        ]) {
+          try {
+            release();
+          } catch (error) {
+            if (!failed) {
+              failed = true;
+              firstError = error;
+            }
+          }
+        }
+        if (failed) throw firstError;
       },
     },
     { initialMount }

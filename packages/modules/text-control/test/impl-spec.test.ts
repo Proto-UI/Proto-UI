@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { TextControlEvent, TextControlLineMode, TextControlPatch } from '@proto.ui/core';
 import { CapsVault, SYS_CAP, type SystemCaps } from '@proto.ui/module-base';
 import {
   TEXT_CONTROL_HOST_CAP,
+  TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
   type TextControlHost,
   type TextControlHostConnection,
   type TextControlHostLease,
@@ -56,7 +57,11 @@ function event(type: TextControlEvent['type'], value: string, composing = false)
   return { type, value, composing, data: null, inputType: null };
 }
 
-function createHarness(withHost = true, lineMode: TextControlLineMode = 'multiline') {
+function createHarness(
+  withHost = true,
+  lineMode: TextControlLineMode = 'multiline',
+  beforeRun?: () => void
+) {
   const sys = createSystemCaps();
   const vault = new CapsVault();
   const connectionBox: { current: TextControlHostConnection | null } = { current: null };
@@ -84,7 +89,21 @@ function createHarness(withHost = true, lineMode: TextControlLineMode = 'multili
       return lease;
     },
   };
-  if (withHost) vault.attach([[TEXT_CONTROL_HOST_CAP, host]]);
+  if (withHost)
+    vault.attach([
+      [TEXT_CONTROL_HOST_CAP, host],
+      ...(beforeRun
+        ? [
+            [
+              TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+              (callback: () => void) => {
+                beforeRun();
+                callback();
+              },
+            ] as const,
+          ]
+        : []),
+    ]);
   const module = createTextControlModule({
     init: {
       prototypeName: 'x-textarea',
@@ -456,3 +475,578 @@ it('T-TEXT-CONTROL-0001-CASE-CANCEL: listener cancellation is setup-only', () =>
   h.sys.phase = 'callback';
   expect(off).toThrow('illegal phase');
 });
+
+// C-TEXT-CONTROL-0001-D/E/F/G: CallbackScope drains pending props before
+// invoking the event listener. This controlled prelude reproduces that order.
+describe('TextControl composition across callback-scope entry', () => {
+  it.each([
+    ['compositionstart', true],
+    ['input', true],
+    ['input', false],
+    ['compositionend', false],
+  ] as const)(
+    'protects the native candidate while old props drain before %s (composing=%s)',
+    async (type, composing) => {
+      let beforeRun = () => {};
+      const h = createHarness(true, 'multiline', () => beforeRun());
+      const control = h.module.facade.declare();
+      const seen: Array<{ value: string; composing: boolean }> = [];
+      control.on(type, (_run, next) => {
+        seen.push({ value: next.value, composing: next.composing });
+        if (!next.composing) control.sync({ value: next.value });
+      });
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'A备' });
+      const connection = h.connectionBox.current!;
+      if (type === 'compositionend') connection.onEvent(event('compositionstart', 'A备', true));
+      h.setPatchValue('A备注');
+      const during: Array<{ value: string; composing: boolean }> = [];
+      beforeRun = () => {
+        // A pending props task drains once; later reconciliation must not
+        // invent another stale owner update after this event was accepted.
+        beforeRun = () => {};
+        control.sync({ value: 'A备' });
+        during.push({ value: h.getPatchValue(), composing: control.snapshot()!.composing });
+      };
+      connection.onEvent(event(type, 'A备注', composing));
+      expect(during).toEqual([
+        { value: 'A备注', composing: type === 'compositionend' || composing },
+      ]);
+      expect(seen).toEqual([{ value: 'A备注', composing }]);
+      await Promise.resolve();
+      expect(h.getPatchValue()).toBe('A备注');
+      h.module.hooks.onMountPhase?.('detached', 1);
+    }
+  );
+
+  it.each(['compositionstart', 'compositionend'] as const)(
+    'does not deliver an old %s after the callback prelude replaces the lease',
+    async (type) => {
+      let beforeRun = () => {};
+      const h = createHarness(true, 'multiline', () => beforeRun());
+      const control = h.module.facade.declare();
+      const seen: TextControlEvent[] = [];
+      control.on(type, (_run, next) => seen.push(next));
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'owner' });
+      const old = h.connectionBox.current!;
+      if (type === 'compositionend') old.onEvent(event('compositionstart', 'owner', true));
+      beforeRun = () => {
+        h.module.hooks.onMountPhase?.('detached', 1);
+        h.module.hooks.onMountPhase?.('mounted', 2);
+      };
+      old.onEvent(event(type, 'obsolete', type !== 'compositionend'));
+      await Promise.resolve();
+      expect(seen).toEqual([]);
+      expect(control.snapshot()).toEqual({ value: 'owner', composing: false });
+      expect(h.getPatchValue()).toBe('owner');
+      h.module.hooks.onMountPhase?.('detached', 2);
+    }
+  );
+});
+
+it('releases an interrupted event prelude so later owner values still project', () => {
+  let interrupt = false;
+  const h = createHarness(true, 'multiline', () => {
+    if (interrupt) throw new Error('prelude interrupted');
+  });
+  const control = h.module.facade.declare();
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ valueMode: 'controlled', value: 'owner' });
+  interrupt = true;
+  h.setPatchValue('proposal');
+  expect(() => h.connectionBox.current!.onEvent(event('input', 'proposal'))).toThrow(
+    'prelude interrupted'
+  );
+  control.sync({ value: 'recovered' });
+  expect(h.getPatchValue()).toBe('recovered');
+  h.module.hooks.onMountPhase?.('detached', 1);
+});
+
+it.each(['input', 'compositionend'] as const)(
+  'reconciles queued owner props before deferred %s restoration',
+  async (type) => {
+    let queuedOwner: string | undefined;
+    let control: ReturnType<ReturnType<typeof createTextControlModule>['facade']['declare']>;
+    const h = createHarness(true, 'multiline', () => {
+      if (queuedOwner !== undefined) {
+        const value = queuedOwner;
+        queuedOwner = undefined;
+        control.sync({ value });
+      }
+    });
+    control = h.module.facade.declare();
+    control.on(type, (_run, next) => {
+      // Runtime owner props are pending for the next callback-scope entry,
+      // matching the real React18 trace. Do not fabricate a host write here.
+      queueMicrotask(() => {
+        queuedOwner = next.value;
+      });
+    });
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: '' });
+    const connection = h.connectionBox.current!;
+    if (type === 'compositionend') connection.onEvent(event('compositionstart', '', true));
+    h.setPatchValue('accepted edit');
+    connection.onEvent(event(type, 'accepted edit'));
+    expect(h.getPatchValue()).toBe('accepted edit');
+    await Promise.resolve();
+    expect(h.getPatchValue()).toBe('accepted edit');
+    expect(queuedOwner).toBeUndefined();
+    h.module.hooks.onMountPhase?.('detached', 1);
+  }
+);
+
+it('still restores a rejected proposal when the owner did not accept it', async () => {
+  const h = createHarness(true, 'multiline', () => {}),
+    control = h.module.facade.declare();
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ valueMode: 'controlled', value: 'owner' });
+  h.setPatchValue('unaccepted proposal');
+  h.connectionBox.current!.onEvent(event('input', 'unaccepted proposal'));
+  await Promise.resolve();
+  expect(h.getPatchValue()).toBe('owner');
+});
+it('does not enter an old deferred callback after a replacement lease is mounted first', async () => {
+  let runs = 0;
+  const h = createHarness(true, 'multiline', () => {
+      runs++;
+    }),
+    control = h.module.facade.declare();
+  control.on('input', () =>
+    queueMicrotask(() => {
+      h.module.hooks.onMountPhase?.('detached', 1);
+      h.module.hooks.onMountPhase?.('mounted', 2);
+      control.sync({ value: 'new owner' });
+    })
+  );
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ valueMode: 'controlled', value: 'owner' });
+  h.setPatchValue('old proposal');
+  h.connectionBox.current!.onEvent(event('input', 'old proposal'));
+  await Promise.resolve();
+  expect(h.getPatchValue()).toBe('new owner');
+  expect(runs).toBe(1);
+});
+it('does not apply restoration to a lease replaced by callback-scope prework', async () => {
+  let replace = false,
+    updatesAfterReplace = -1;
+  let control: any;
+  const h = createHarness(true, 'multiline', () => {
+    if (replace) {
+      replace = false;
+      h.module.hooks.onMountPhase?.('detached', 1);
+      h.module.hooks.onMountPhase?.('mounted', 2);
+      control.sync({ value: 'new owner' });
+      updatesAfterReplace = h.getUpdateCount();
+    }
+  });
+  control = h.module.facade.declare();
+  control.on('input', () =>
+    queueMicrotask(() => {
+      replace = true;
+    })
+  );
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ valueMode: 'controlled', value: 'owner' });
+  h.setPatchValue('proposal');
+  h.connectionBox.current!.onEvent(event('input', 'proposal'));
+  await Promise.resolve();
+  expect(updatesAfterReplace).toBeGreaterThanOrEqual(0);
+  expect(h.getPatchValue()).toBe('new owner');
+  expect(h.getUpdateCount()).toBe(updatesAfterReplace);
+});
+it('a new composition begun before restoration retains its current candidate', async () => {
+  const h = createHarness(true, 'multiline', () => {}),
+    control = h.module.facade.declare();
+  control.on('input', () =>
+    queueMicrotask(() => {
+      h.connectionBox.current!.onEvent(event('compositionstart', 'new candidate', true));
+      h.setPatchValue('new candidate');
+    })
+  );
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ valueMode: 'controlled', value: 'owner' });
+  h.setPatchValue('proposal');
+  h.connectionBox.current!.onEvent(event('input', 'proposal'));
+  await Promise.resolve();
+  expect(control.snapshot()?.composing).toBe(true);
+  expect(h.getPatchValue()).toBe('new candidate');
+});
+
+it.each([
+  ['single', 'input'],
+  ['multiline', 'input'],
+  ['single', 'compositionend'],
+  ['multiline', 'compositionend'],
+] as const)(
+  'preserves real Web %s caret while draining queued owner %s acceptance',
+  async (lineMode, type) => {
+    let control: any,
+      pendingOwner: string | null = null;
+    const h = createHarness(false, lineMode);
+    const target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+    document.body.append(target);
+    h.vault.attach([
+      [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(() => target)],
+      [
+        TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+        (fn: () => void) => {
+          if (pendingOwner !== null) {
+            const value = pendingOwner;
+            pendingOwner = null;
+            control.sync({ value });
+          }
+          fn();
+        },
+      ],
+    ]);
+    control = h.module.facade.declare();
+    control.on(type, (_run: any, ev: any) =>
+      queueMicrotask(() => {
+        pendingOwner = ev.value;
+      })
+    );
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: '' });
+    target.focus();
+    try {
+      if (type === 'compositionend') target.dispatchEvent(new CompositionEvent('compositionstart'));
+      target.value = 'accepted native text';
+      target.setSelectionRange(20, 20);
+      target.dispatchEvent(
+        type === 'input'
+          ? new InputEvent('input', { data: 'accepted native text', inputType: 'insertText' })
+          : new CompositionEvent('compositionend', { data: 'accepted native text' })
+      );
+      expect(target.selectionStart).toBe(20);
+      await Promise.resolve();
+      expect(target.value).toBe('accepted native text');
+      expect(target.selectionStart).toBe(20);
+      expect(target.selectionEnd).toBe(20);
+    } finally {
+      h.module.hooks.dispose?.();
+      target.remove();
+    }
+  }
+);
+
+describe.each(['single', 'multiline'] as const)(
+  'interrupted %s composition boundaries',
+  (lineMode) => {
+    it.each([
+      ['compositionstart', true],
+      ['input', true],
+      ['input', false],
+      ['compositionend', false],
+    ] as const)('settles %s (%s) when callback prework throws', (type, composing) => {
+      let beforeRun = () => {};
+      const h = createHarness(true, lineMode, () => beforeRun());
+      const control = h.module.facade.declare();
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'owner' });
+      h.connectionBox.current!.onEvent(event('compositionstart', 'candidate', true));
+      beforeRun = () => {
+        throw new Error('prework failed');
+      };
+      expect(() => h.connectionBox.current!.onEvent(event(type, 'candidate', composing))).toThrow(
+        'prework failed'
+      );
+      expect(control.snapshot()?.composing).toBe(composing);
+      control.sync({ value: 'recovered' });
+      expect(h.getLatestPatch().value).toBe(composing ? undefined : 'recovered');
+      h.module.hooks.onMountPhase?.('detached', 1);
+    });
+
+    it.each([false, true])(
+      'does not clear a newer composition when interrupted (new lease=%s)',
+      (replaceLease) => {
+        let beforeRun = () => {};
+        const h = createHarness(true, lineMode, () => beforeRun());
+        const control = h.module.facade.declare();
+        h.module.hooks.onMountPhase?.('mounted', 1);
+        h.sys.phase = 'callback';
+        control.sync({ valueMode: 'controlled', value: 'owner' });
+        const old = h.connectionBox.current!;
+        old.onEvent(event('compositionstart', 'old candidate', true));
+        beforeRun = () => {
+          beforeRun = () => {};
+          if (replaceLease) {
+            h.module.hooks.onMountPhase?.('detached', 1);
+            h.module.hooks.onMountPhase?.('mounted', 2);
+          }
+          h.connectionBox.current!.onEvent(event('compositionstart', 'new candidate', true));
+          throw new Error('old prework failed');
+        };
+        expect(() => old.onEvent(event('compositionend', 'old candidate'))).toThrow(
+          'old prework failed'
+        );
+        expect(control.snapshot()?.composing).toBe(true);
+        control.sync({ value: 'new owner' });
+        expect(h.getLatestPatch().value).toBeUndefined();
+        h.connectionBox.current!.onEvent(event('compositionend', 'new candidate'));
+        control.sync({ value: 'recovered' });
+        expect(h.getLatestPatch().value).toBe('recovered');
+        h.module.hooks.onMountPhase?.('detached', replaceLease ? 2 : 1);
+      }
+    );
+  }
+);
+
+it.each([false, true])(
+  'settles composition after a throwing listener without overwriting nested input (%s)',
+  (nested) => {
+    const h = createHarness();
+    const control = h.module.facade.declare();
+    control.on('compositionend', () => {
+      if (nested)
+        h.connectionBox.current!.onEvent(event('compositionstart', 'new candidate', true));
+      throw new Error('listener failed');
+    });
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    h.connectionBox.current!.onEvent(event('compositionstart', 'old candidate', true));
+    expect(() =>
+      h.connectionBox.current!.onEvent(event('compositionend', 'old candidate'))
+    ).toThrow('listener failed');
+    expect(control.snapshot()?.composing).toBe(nested);
+    control.sync({ value: 'recovered' });
+    expect(h.getLatestPatch().value).toBe(nested ? undefined : 'recovered');
+    h.module.hooks.onMountPhase?.('detached', 1);
+  }
+);
+
+it('does not deliver a superseded event after newer composition enters during prework', () => {
+  let beforeRun = () => {};
+  const h = createHarness(true, 'multiline', () => beforeRun());
+  const control = h.module.facade.declare();
+  const seen: string[] = [];
+  control.on('compositionend', () => seen.push('obsolete end'));
+  h.module.hooks.onMountPhase?.('mounted', 1);
+  h.sys.phase = 'callback';
+  control.sync({ valueMode: 'controlled', value: 'owner' });
+  h.connectionBox.current!.onEvent(event('compositionstart', 'old candidate', true));
+  beforeRun = () => {
+    beforeRun = () => {};
+    h.connectionBox.current!.onEvent(event('compositionstart', 'new candidate', true));
+  };
+  h.connectionBox.current!.onEvent(event('compositionend', 'old candidate'));
+  expect(seen).toEqual([]);
+  expect(control.snapshot()?.composing).toBe(true);
+  h.module.hooks.onMountPhase?.('detached', 1);
+});
+
+it.each(['has', 'get'] as const)(
+  'settles native completion even when callback capability %s throws',
+  (stage) => {
+    const h = createHarness(true, 'multiline', () => {}),
+      control = h.module.facade.declare();
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    h.connectionBox.current!.onEvent(event('compositionstart', 'draft', true));
+    const original = h.vault[stage].bind(h.vault);
+    const spy = vi.spyOn(h.vault, stage).mockImplementation(((cap: any) => {
+      if (cap === TEXT_CONTROL_RUN_IN_CALLBACK_CAP) throw new Error('cap lookup failed');
+      return original(cap);
+    }) as any);
+    try {
+      expect(() => h.connectionBox.current!.onEvent(event('compositionend', 'draft'))).toThrow(
+        'cap lookup failed'
+      );
+      expect(control.snapshot()?.composing).toBe(false);
+      control.sync({ value: 'recovered' });
+      expect(h.getPatchValue()).toBe('recovered');
+    } finally {
+      spy.mockRestore();
+      h.module.hooks.dispose?.();
+    }
+  }
+);
+it.each([false, true])(
+  'does not settle an old failing lookup over new composition (new lease=%s)',
+  (replace) => {
+    const h = createHarness(true, 'multiline', () => {}),
+      control = h.module.facade.declare();
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    h.connectionBox.current!.onEvent(event('compositionstart', 'old', true));
+    const original = h.vault.get.bind(h.vault);
+    let armed = true;
+    const spy = vi.spyOn(h.vault, 'get').mockImplementation(((cap: any) => {
+      if (cap === TEXT_CONTROL_RUN_IN_CALLBACK_CAP && armed) {
+        armed = false;
+        if (replace) {
+          h.module.hooks.onMountPhase?.('detached', 1);
+          h.module.hooks.onMountPhase?.('mounted', 2);
+        }
+        h.connectionBox.current!.onEvent(event('compositionstart', 'new', true));
+        throw new Error('lookup interrupted');
+      }
+      return original(cap);
+    }) as any);
+    try {
+      expect(() => h.connectionBox.current!.onEvent(event('compositionend', 'old'))).toThrow(
+        'lookup interrupted'
+      );
+      expect(control.snapshot()?.composing).toBe(true);
+      control.sync({ value: 'owner-new' });
+      expect(h.getLatestPatch().value).toBeUndefined();
+    } finally {
+      spy.mockRestore();
+      h.module.hooks.dispose?.();
+    }
+  }
+);
+it.each([false, true])(
+  'preserves latest facts and releases prelude when deferred restoration throws (nested=%s)',
+  (nested) => {
+    let fail = false;
+    const h = createHarness(true, 'multiline', () => {
+        if (fail) {
+          fail = false;
+          if (nested)
+            h.connectionBox.current!.onEvent(event('compositionstart', 'new draft', true));
+          throw new Error('restore prework');
+        }
+      }),
+      control = h.module.facade.declare();
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    h.connectionBox.current!.onEvent(event('compositionstart', 'old draft', true));
+    const tasks: Array<() => void> = [];
+    const queue = vi.spyOn(globalThis, 'queueMicrotask').mockImplementation((fn) => tasks.push(fn));
+    try {
+      h.connectionBox.current!.onEvent(event('compositionend', 'old draft'));
+      expect(tasks).toHaveLength(1);
+      fail = true;
+      expect(() => tasks.shift()!()).toThrow('restore prework');
+      expect(control.snapshot()?.composing).toBe(nested);
+      control.sync({ value: 'recovered' });
+      expect(h.getLatestPatch().value).toBe(nested ? undefined : 'recovered');
+    } finally {
+      queue.mockRestore();
+      h.module.hooks.dispose?.();
+    }
+  }
+);
+
+// C-TEXT-CONTROL-0001-B/D/E/G: a queued owner patch must reach the
+// current editor even when a change event, rather than input, drains it.
+describe.each(['single', 'multiline'] as const)('Web %s change callback preludes', (lineMode) => {
+  it.each([false, true])(
+    'projects a queued owner value while retaining native change facts (same value=%s)',
+    async (sameValue) => {
+      let pendingOwner: string | undefined;
+      const h = createHarness(false, lineMode);
+      const target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+      document.body.append(target);
+      const control = h.module.facade.declare();
+      h.vault.attach([
+        [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(() => target)],
+        [
+          TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+          (callback: () => void) => {
+            if (pendingOwner !== undefined) {
+              const value = pendingOwner;
+              pendingOwner = undefined;
+              control.sync({ value });
+            }
+            callback();
+          },
+        ],
+      ]);
+      const seen: TextControlEvent[] = [];
+      control.on('change', (_run, next) => seen.push(next));
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'original' });
+      target.focus();
+      try {
+        target.value = 'native candidate';
+        target.setSelectionRange(3, 3);
+        pendingOwner = sameValue ? target.value : 'queued owner';
+        target.dispatchEvent(new Event('change'));
+        await Promise.resolve();
+        expect(control.snapshot()).toEqual({
+          value: sameValue ? 'native candidate' : 'queued owner',
+          composing: false,
+        });
+        expect(target.value).toBe(sameValue ? 'native candidate' : 'queued owner');
+        expect(seen).toEqual([event('change', 'native candidate')]);
+        if (sameValue) {
+          expect(target.selectionStart).toBe(3);
+          expect(target.selectionEnd).toBe(3);
+        }
+      } finally {
+        h.module.hooks.dispose?.();
+        target.remove();
+      }
+    }
+  );
+
+  it('keeps change-triggered owner patches out of an active composition', async () => {
+    let beforeRun = () => {};
+    const h = createHarness(true, lineMode, () => beforeRun());
+    const control = h.module.facade.declare();
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    const connection = h.connectionBox.current!;
+    connection.onEvent(event('compositionstart', 'candidate', true));
+    h.setPatchValue('candidate');
+    beforeRun = () => {
+      beforeRun = () => {};
+      control.sync({ value: 'queued owner' });
+    };
+    connection.onEvent(event('change', 'candidate', true));
+    await Promise.resolve();
+    expect(h.getPatchValue()).toBe('candidate');
+    expect(control.snapshot()).toEqual({ value: 'queued owner', composing: true });
+    connection.onEvent(event('compositionend', 'candidate'));
+    await Promise.resolve();
+    expect(h.getPatchValue()).toBe('queued owner');
+    h.module.hooks.dispose?.();
+  });
+});
+
+it.each(['compositionstart', 'input'] as const)(
+  'does not carry an interrupted old %s into a replacement lease',
+  (type) => {
+    let beforeRun = () => {};
+    const h = createHarness(true, 'multiline', () => beforeRun());
+    const control = h.module.facade.declare();
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    const old = h.connectionBox.current!;
+    const failure = new Error('old lease prelude failure');
+    beforeRun = () => {
+      beforeRun = () => {};
+      h.module.hooks.onMountPhase?.('detached', 1);
+      h.module.hooks.onMountPhase?.('mounted', 2);
+      throw failure;
+    };
+    try {
+      expect(() => old.onEvent(event(type, 'old candidate', true))).toThrow(failure);
+      expect(control.snapshot()?.composing).toBe(false);
+      control.sync({ value: 'new owner' });
+      expect(h.getLatestPatch().value).toBe('new owner');
+    } finally {
+      h.module.hooks.dispose?.();
+    }
+  }
+);

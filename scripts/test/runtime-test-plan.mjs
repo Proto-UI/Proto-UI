@@ -43,6 +43,9 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'packages/adapters/base/test/focus-intent-retries.browser.test.ts',
+  'packages/adapters/react/test/focus-entry-readiness.browser.test.ts',
+  'packages/adapters/vue/test/focus-request-readiness.browser.test.ts',
   'apps/www/test/template-style.browser.test.ts',
   'apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts',
   'apps/www/test/evidence/brutalist-fonts.browser.test.ts',
@@ -53,6 +56,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/test/button-view-lifetime.browser.test.ts',
   'apps/www/test/radio-group-entry.browser.test.ts',
   'apps/workspace/test/lifecycle.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts',

@@ -158,7 +158,7 @@ The matrix rows remain authoritative. Each binding joins a scanned source, its c
 | `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `5ee543910fb2ff91897bb86f07c74c7758cd46463860007a08f1d5603490e04d` |
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `140db9ab8e102833342eb56707c54638337e0c8abea2e1790526474389a9d1eb` |
 | `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `0137f3bec891c2090fd6a154120b420b95ef9657b1915e3ca860c77173180ba6` |
-| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `73af0101c9c530cbb06b93061890440b73dfb809f872155a141c929280aa9315` |
+| `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `790a774f44646bb2793e03b7851eea3673b1efe61c80d97fecd20b38f1bc7cb0` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `20542fe478bcaa2865ae91a42ad2ef02069f80c9ca7e840ff1ed07f6b8f10c2a` |
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `0e66a95c763857d27f6282f6c6ba92fc7a930edf309c4cdabc49e5c7ee249ac3` |
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `f8693872f94efd3802937d3a2570eda4e190b7121301f42f403e2fe7b02d2baa` |

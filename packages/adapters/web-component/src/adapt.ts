@@ -57,6 +57,9 @@ import {
   bindLogicalEventTarget,
   resolveLogicalTriggerEventRouteForTarget,
   markProtoInstance,
+  registerNativeFocusReadiness,
+  isFocusTargetOwnerReady,
+  subscribeFocusTargetOwnerReady,
   unbindProtoInstance,
   unbindLogicalEventTarget,
 } from './platform/instance-tree';
@@ -67,7 +70,11 @@ import {
   createOwnedMaterialBinding,
 } from '@proto.ui/module-feedback/internal/owned-slot';
 import { createOpaqueMaterialVisualSink } from './material/owned-texture-sink';
-import { createWebComponentModules, createWebComponentOwnerModules } from './runtime/modules';
+import {
+  createWebComponentModules,
+  createWebComponentOwnerModules,
+  type FocusIntentState,
+} from './runtime/modules';
 import { createWebComponentHostSession } from './runtime/session';
 import type { WebComponentAdapterConstructor } from './types';
 import type {
@@ -155,6 +162,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
   class ProtoElement extends HTMLElement {
     private _mountedOnce = false;
+    private _terminalDisposing = false;
+    private _terminalReconnectRequested = false;
+    private _pendingViewCleanup: (() => void) | null = null;
+    private _releasePropsObservers: (() => void) | null = null;
+    private _terminalCleanupComplete = false;
     private _runtimeGeneration = 0;
     private _instanceToken: LogicalInstanceToken;
     private _invokeUnmounted: (() => void | Promise<void>) | null = null;
@@ -164,6 +176,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _focusTargetReadyListeners = new Set<() => void>();
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
+    private _focusIntentState: FocusIntentState = {};
 
     private _root: Element | ShadowRoot;
     private _slotProjector: SlotProjector | null = null;
@@ -219,8 +232,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     connectedCallback() {
-      this._focusTargetRetryCount = 0;
-
+      // A focus observer can reconnect this element while the old owner's
+      // cleanup is still using its fields. Start the new owner only afterward.
+      if (this._terminalDisposing) {
+        this._terminalReconnectRequested = true;
+        return;
+      }
       if (this._mountedOnce) {
         // Refresh the logical parent link after a synchronous DOM move.
         markProtoInstance(this, proto as Prototype<any>, this._instanceToken);
@@ -233,19 +250,43 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         schedule(() => this[NOTIFY_FOCUS_TARGET_READY]());
         return;
       }
+      try {
+        this.connectOwner();
+      } catch (error) {
+        // Keep the initial failure synchronous; cleanup errors cannot replace it.
+        // A still-connected failed node is not a request to retry construction.
+        void this.retireOwner().catch(() => {});
+        throw error;
+      }
+    }
+
+    private connectOwner() {
+      // A fresh logical owner gets a fresh budget; synchronous DOM moves above
+      // retain both the request snapshot and its consumed retry allowance.
+      this._terminalCleanupComplete = false;
+      this._focusIntentState = {};
+      this._focusTargetRetryCount = 0;
       if (this._runtimeGeneration > 0) {
         this._instanceToken = createLogicalInstance(proto as Prototype<any>);
       }
-      // The constructor ran before the element had a DOM parent.
-      markProtoInstance(this, proto as Prototype<any>, this._instanceToken);
+      const instanceToken = this._instanceToken;
+      // Claim the connection before marker publication can reenter through a
+      // real DOM move. That move belongs to this same initializing owner.
       this._runtimeGeneration += 1;
       this._mountedOnce = true;
+      // The constructor ran before the element had a DOM parent.
+      markProtoInstance(this, proto as Prototype<any>, instanceToken);
 
       const thisEl = this;
       const thisRoot = this._root;
       thisEl.setAttribute('data-pui-root', '');
       this._hostDisplay = installDefaultHostDisplay(thisEl);
 
+      const propsObservers = new Set<MutationObserver>();
+      this._releasePropsObservers = () => {
+        for (const observer of propsObservers) observer.disconnect();
+        propsObservers.clear();
+      };
       const rawPropsSource: RawPropsSource<Props> = {
         debugName: `${tagName}#raw-props`,
         get(): Readonly<Props & PropsBaseType> {
@@ -262,8 +303,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             }
           });
 
+          propsObservers.add(mo);
           mo.observe(thisEl, { attributes: true });
-          return () => mo.disconnect();
+          return () => {
+            mo.disconnect();
+            propsObservers.delete(mo);
+          };
         },
       };
 
@@ -281,7 +326,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       };
 
       const owner = createViewEpochOwner<Props>({ prototypeName: tagName });
+      // Register terminal ownership before initialize/setup or view callbacks.
+      this._invokeUnmounted = () => owner.dispose();
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
+      let focusIngressReady = false;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
 
       const clearSlotProjector = () => {
@@ -340,7 +388,13 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             dispose: () => owner.disposeView(),
           },
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
-          onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
+          onLifecycleEvent: (event) => {
+            opt.diagnostics?.onLifecycleEvent?.(event);
+            if (event.type === 'mount.phase') {
+              focusIngressReady = event.phase === 'mounted';
+              if (focusIngressReady) this[NOTIFY_FOCUS_TARGET_READY]();
+            }
+          },
           getSlotProjector: () => this._slotProjector,
           ensureSlotProjector: () => {
             if (!this._slotProjector) this._slotProjector = new SlotProjector(thisEl);
@@ -357,86 +411,151 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             this._hostDisplay = null;
             unbindController(this);
             removeDebugHooks(this);
+            // This tail releases resources synchronously; the returned dispose
+            // promise may still be carrying an error through later microtasks.
+            this._terminalCleanupComplete = true;
           },
           initialMount: 'manual',
         });
 
-      const attachView = () => {
+      const attachView = (initial = false) => {
         if (owner.hasView) {
           setViewDetached(false);
           return;
         }
 
-        const eventGate = createEventGate();
-        const router = createWebProtoEventRouter({
-          rootEl: thisEl,
-          instanceToken: this._instanceToken,
-          resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
-          globalEl: window,
-          isEnabled: () => eventGate.isEnabled?.() ?? true,
-        });
-        bindLogicalEventTarget(this._instanceToken, router.rootTarget);
-        const applier = createOwnedTwTokenApplier(
-          this._textControlTarget ?? this._imageViewTarget ?? thisEl,
-          {
-            onChange: () => {
-              this._hostDisplay?.sync();
-            },
-          }
-        );
-        currentEventGate = eventGate;
-        currentRouter = router;
-        this._applier = applier;
-        let disposeFocusBridge: (() => void) | null = null;
-        if (this._textControlTarget) {
-          // Native focus/blur do not bubble from the physical text control.
-          // Route the trusted physical event through the adapter-private host
-          // ingress: Proto focus facts update without emitting a second public
-          // native-looking event from the custom-element boundary.
-          const control: HTMLElement = this._textControlTarget;
-          // Bind native focus/blur directly on the known control so the
-          // callback receives the real DOM event object with target/currentTarget
-          // intact. The private transport preserves both the declared type and
-          // the physical event identity without dispatching a second public
-          // boundary event.
-          const onFocus = (event: FocusEvent) => {
-            if (event.target === control) router.dispatchHostRootEvent('focus', event);
-          };
-          const onBlur = (event: FocusEvent) => {
-            if (event.target === control) router.dispatchHostRootEvent('blur', event);
-          };
-          control.addEventListener('focus', onFocus);
-          control.addEventListener('blur', onBlur);
-          disposeFocusBridge = () => {
-            control.removeEventListener('focus', onFocus);
-            control.removeEventListener('blur', onBlur);
-          };
-        }
-
         let disposed = false;
+        let focusRetryGeneration = 0;
+        let releaseRequestedTargetReady: (() => void) | undefined;
+        let disposeFocusBridge: (() => void) | null = null;
+        const resources: {
+          eventGate?: ReturnType<typeof createEventGate>;
+          router?: ReturnType<typeof createWebProtoEventRouter>;
+          applier?: ReturnType<typeof createOwnedTwTokenApplier>;
+          nativeReadiness?: ReturnType<typeof registerNativeFocusReadiness>;
+        } = {};
         const disposeView = () => {
           if (disposed) return;
           disposed = true;
-          eventGate.disable();
-          eventGate.dispose();
-          unbindLogicalEventTarget(this._instanceToken, router.rootTarget);
-          router.dispose();
-          disposeFocusBridge?.();
-          disposeFocusBridge = null;
-          applier.clear();
-          releaseRenderedChildren();
-          if (currentEventGate === eventGate) currentEventGate = null;
-          if (currentRouter === router) currentRouter = null;
-          if (this._applier === applier) this._applier = null;
-          this._hostDisplay?.sync();
+          const releases = [
+            () => resources.eventGate?.disable(),
+            () => resources.eventGate?.dispose(),
+            () => {
+              const release = releaseRequestedTargetReady;
+              releaseRequestedTargetReady = undefined;
+              release?.();
+            },
+            () =>
+              resources.router &&
+              unbindLogicalEventTarget(instanceToken, resources.router.rootTarget),
+            () => resources.router?.dispose(),
+            () => {
+              const release = disposeFocusBridge;
+              disposeFocusBridge = null;
+              release?.();
+            },
+            () => resources.applier?.clear(),
+            releaseRenderedChildren,
+            () => {
+              if (currentEventGate === resources.eventGate) {
+                currentEventGate = null;
+                this._focusTargetRetryScheduled = false;
+              }
+              if (currentRouter === resources.router) currentRouter = null;
+              if (this._applier === resources.applier) this._applier = null;
+              this._hostDisplay?.sync();
+            },
+            // Invalidation can synchronously replay user focus. Release the
+            // old view first, and retain that failure after all cleanup.
+            () => resources.nativeReadiness?.(),
+          ];
+          let failed = false;
+          let firstError: unknown;
+          for (const release of releases) {
+            try {
+              release();
+            } catch (error) {
+              if (!failed) {
+                failed = true;
+                firstError = error;
+              }
+            }
+          }
+          if (this._pendingViewCleanup === disposeView) this._pendingViewCleanup = null;
+          if (failed) throw firstError;
         };
-
+        this._pendingViewCleanup = disposeView;
         try {
+          const eventGate = (resources.eventGate = createEventGate());
+          const router = (resources.router = createWebProtoEventRouter({
+            rootEl: thisEl,
+            instanceToken: instanceToken,
+            resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
+            globalEl: window,
+            isEnabled: () => eventGate.isEnabled?.() ?? true,
+          }));
+          bindLogicalEventTarget(instanceToken, router.rootTarget);
+          const applier = (resources.applier = createOwnedTwTokenApplier(
+            this._textControlTarget ?? this._imageViewTarget ?? thisEl,
+            {
+              onChange: () => {
+                this._hostDisplay?.sync();
+              },
+            }
+          ));
+          currentEventGate = eventGate;
+          currentRouter = router;
+          this._applier = applier;
+          if (this._textControlTarget) {
+            // Native focus/blur do not bubble from the physical text control.
+            // Route the trusted physical event through the adapter-private host
+            // ingress: Proto focus facts update without emitting a second public
+            // native-looking event from the custom-element boundary.
+            const control: HTMLElement = this._textControlTarget;
+            // Bind native focus/blur directly on the known control so the
+            // callback receives the real DOM event object with target/currentTarget
+            // intact. The private transport preserves both the declared type and
+            // the physical event identity without dispatching a second public
+            // boundary event.
+            const onFocus = (event: FocusEvent) => {
+              if (event.target === control) router.dispatchHostRootEvent('focus', event);
+            };
+            const onBlur = (event: FocusEvent) => {
+              if (event.target === control) router.dispatchHostRootEvent('blur', event);
+            };
+            disposeFocusBridge = () => {
+              control.removeEventListener('focus', onFocus);
+              control.removeEventListener('blur', onBlur);
+            };
+            control.addEventListener('focus', onFocus);
+            control.addEventListener('blur', onBlur);
+          }
+
+          resources.nativeReadiness = registerNativeFocusReadiness(
+            instanceToken,
+            {
+              isReady: () =>
+                !disposed &&
+                focusIngressReady &&
+                eventGate.isEnabled() &&
+                thisEl.isConnected &&
+                !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+              // Text controls use a physical control target while logical ownership
+              // stays on the custom element. Both are roots of this same view.
+              getNativeTarget: () => this._textControlTarget ?? thisEl,
+              subscribe: (listener) => {
+                this._focusTargetReadyListeners.add(listener);
+                return () => this._focusTargetReadyListeners.delete(listener);
+              },
+            },
+            { deferPublication: true }
+          );
+
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
               surfaceProjection: this._surfaceProjection,
-              instanceToken: this._instanceToken,
+              instanceToken: instanceToken,
               router,
               rawPropsSource,
               effectsPort: createWebEffectsPort(applier),
@@ -465,10 +584,43 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               setExposes,
               runInCallbackScope,
               isViewReady: () =>
-                thisEl.isConnected && !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+                !disposed && thisEl.isConnected && !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+              isEntryAcquisitionReady: (target) => {
+                releaseRequestedTargetReady?.();
+                releaseRequestedTargetReady = undefined;
+                if (isFocusTargetOwnerReady(target)) return true;
+                releaseRequestedTargetReady = subscribeFocusTargetOwnerReady(target, () => {
+                  if (disposed) return;
+                  releaseRequestedTargetReady?.();
+                  releaseRequestedTargetReady = undefined;
+                  this[NOTIFY_FOCUS_TARGET_READY]();
+                });
+                return false;
+              },
               subscribeTargetReady: (listener: () => void) => {
                 this._focusTargetReadyListeners.add(listener);
                 return () => this._focusTargetReadyListeners.delete(listener);
+              },
+              focusIntentState: this._focusIntentState,
+              onFocusIntent: () => {
+                this._focusTargetRetryCount = 0;
+                focusRetryGeneration += 1;
+                this._focusTargetRetryScheduled = false;
+              },
+              onFocusPendingReleased: () => {
+                focusRetryGeneration += 1;
+                this._focusTargetRetryScheduled = false;
+                const release = releaseRequestedTargetReady;
+                releaseRequestedTargetReady = undefined;
+                release?.();
+              },
+              onFocusAcquired: () => {
+                this._focusTargetRetryCount = 0;
+                // Completion retires queued work for this intent in the current view.
+                focusRetryGeneration += 1;
+                this._focusTargetRetryScheduled = false;
+                releaseRequestedTargetReady?.();
+                releaseRequestedTargetReady = undefined;
               },
               retryTargetReady: () => {
                 if (
@@ -479,9 +631,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 }
                 this._focusTargetRetryScheduled = true;
                 this._focusTargetRetryCount += 1;
+                const generation = focusRetryGeneration;
                 scheduleAfterWebLayout(
                   this,
                   () => {
+                    if (disposed || generation !== focusRetryGeneration) return;
                     this._focusTargetRetryScheduled = false;
                     this[NOTIFY_FOCUS_TARGET_READY]();
                   },
@@ -494,15 +648,23 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             createSession: createHostSession,
           });
         } catch (error) {
-          // Argument construction may fail before the epoch owner receives its disposer.
+          // Initial failure is retired by the guarded connection transaction,
+          // so callback reentry cannot race a partly cleaned logical owner.
+          if (initial) throw error;
+          // Retained remount failure releases the view while preserving its owner.
+          try {
+            if (owner.hasView) void owner.detachView().catch(() => {});
+          } catch {}
           try {
             disposeView();
-          } catch {
-            /* Preserve the construction error. */
-          }
+          } catch {}
           throw error;
         }
+        // A retained owner already has its terminal disposer and public binding.
+        // Publication failure leaves this fully owned view available for cleanup.
+        // The initial connection's enclosing transaction still rolls back on it.
         setViewDetached(false);
+        resources.nativeReadiness!.publish();
       };
 
       let latestIntentVersion = 0;
@@ -542,7 +704,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       const ownerModules = createWebComponentOwnerModules({
         el: thisEl,
-        instanceToken: this._instanceToken,
+        instanceToken: instanceToken,
         rawPropsSource,
         getMeta,
         colorSchemeSource,
@@ -563,25 +725,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       initializingOwner = false;
       runFocusCallbackScope = hostSession.invokeInCallbackScope;
 
-      this._invokeUnmounted = () => owner.dispose();
-      try {
-        if (initialPresent) attachView();
-        else setViewDetached(true);
-      } catch (error) {
-        // Failed initial projection still owns a live logical/runtime session.
-        // Retire it immediately and permit a later fresh connection attempt.
-        try {
-          void owner.dispose().catch(() => {});
-        } catch {
-          /* Keep the setup error. */
-        }
-        this._invokeUnmounted = null;
-        unbindProtoInstance(this._instanceToken, this);
-        this._controller = null;
-        this._mountedOnce = false;
-        this._pendingOwnedTokens = null;
-        throw error;
-      }
+      if (initialPresent) attachView(true);
+      else setViewDetached(true);
 
       const { controller, kernel } = hostSession;
       if (kernel && kernel.run) {
@@ -609,15 +754,19 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     private [NOTIFY_FOCUS_TARGET_READY](): void {
-      for (const listener of Array.from(this._focusTargetReadyListeners)) listener();
-      const active = this.ownerDocument.activeElement;
-      if (
-        active === this ||
-        this.contains(active) ||
-        (this.shadowRoot?.activeElement ?? null) !== null
-      ) {
-        this._focusTargetRetryCount = 0;
+      let failed = false;
+      let firstError: unknown;
+      for (const listener of Array.from(this._focusTargetReadyListeners)) {
+        try {
+          listener();
+        } catch (error) {
+          if (!failed) {
+            failed = true;
+            firstError = error;
+          }
+        }
       }
+      if (failed) throw firstError;
     }
 
     adoptedCallback() {
@@ -626,6 +775,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     disconnectedCallback() {
+      if (this._terminalDisposing) return;
       this._pendingOwnedTokens = this._applier ? Array.from(this._applier.getOwned()) : null;
       this._applier?.clear();
       this._hostDisplay?.sync();
@@ -646,26 +796,102 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
 
-        if (this._invokeUnmounted) {
-          const fn = this._invokeUnmounted;
-          this._invokeUnmounted = null;
-          const disposed = fn();
-          // Terminal invalidation is synchronous even though adapter cleanup
-          // exposes a Promise for callback errors. Publish the disconnected
-          // ownership state before yielding so a later reconnect cannot reuse
-          // the disposed session.
-          unbindProtoInstance(this._instanceToken, this);
-          this._controller = null;
-          this._mountedOnce = false;
-          this._pendingOwnedTokens = null;
-          await disposed;
-          return;
-        }
-        unbindProtoInstance(this._instanceToken, this);
-        this._controller = null;
-        this._mountedOnce = false;
-        this._pendingOwnedTokens = null;
+        await this.retireOwner();
       });
+    }
+    private async retireOwner(): Promise<void> {
+      if (this._terminalDisposing) return;
+      this._terminalDisposing = true;
+      this._terminalReconnectRequested = false;
+      const token = this._instanceToken;
+      const dispose = this._invokeUnmounted;
+      this._invokeUnmounted = null;
+      const pendingViewCleanup = this._pendingViewCleanup;
+      this._pendingViewCleanup = null;
+      const releasePropsObservers = this._releasePropsObservers;
+      this._releasePropsObservers = null;
+      let pending: void | Promise<void>;
+      let failed = false;
+      let firstError: unknown;
+      let cleanupFailed = false;
+      let cleanupError: unknown;
+      let released = false;
+      const releaseTerminal = () => {
+        if (released) return;
+        released = true;
+        const reconnectRequested = this._terminalReconnectRequested;
+        this._terminalReconnectRequested = false;
+        this._terminalDisposing = false;
+        if (reconnectRequested && this.isConnected)
+          queueMicrotask(() => {
+            if (this.isConnected && !this._mountedOnce && !this._terminalDisposing)
+              this.connectedCallback();
+          });
+      };
+      try {
+        try {
+          pending = dispose?.();
+        } catch (error) {
+          failed = true;
+          firstError = error;
+        }
+        // Retire the old published owner before awaiting its callback result.
+        // Reentrant connects are held until all session cleanup has settled.
+        for (const release of [
+          () => pendingViewCleanup?.(),
+          () => releasePropsObservers?.(),
+          () => {
+            this._slotProjector?.disconnect();
+            this._slotProjector = null;
+          },
+          () => {
+            this._applier?.clear();
+            this._applier = null;
+          },
+          () => {
+            this._hostDisplay?.disconnect();
+            this._hostDisplay = null;
+          },
+          () => {
+            this._focusTargetReadyListeners.clear();
+            this._exposes = {};
+          },
+          () => unbindController(this),
+          () => removeDebugHooks(this),
+          () => unbindProtoInstance(token, this),
+          () => {
+            this._controller = null;
+            this._mountedOnce = false;
+            this._pendingOwnedTokens = null;
+          },
+        ]) {
+          try {
+            release();
+          } catch (error) {
+            if (!cleanupFailed) {
+              cleanupFailed = true;
+              cleanupError = error;
+            }
+          }
+        }
+        // Unlock only after both the session tail and this invocation's
+        // published-owner cleanup are complete. Normal reconnect stays sync.
+        if (this._terminalCleanupComplete) releaseTerminal();
+        try {
+          await pending!;
+        } catch (error) {
+          if (!failed) {
+            failed = true;
+            firstError = error;
+          }
+        }
+      } finally {
+        // Once-only release cannot alter a newer owner while an older error
+        // promise completes after an ordinary synchronous reconnect.
+        releaseTerminal();
+      }
+      if (failed) throw firstError;
+      if (cleanupFailed) throw cleanupError;
     }
   }
 

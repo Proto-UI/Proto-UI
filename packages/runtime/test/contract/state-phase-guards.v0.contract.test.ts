@@ -59,6 +59,50 @@ describe('runtime contract: state phase guards (v0)', () => {
     executeWithHost(P, host);
   });
 
+  it.each([false, true])(
+    'preserves state mutation admission after a nested render (throws=%s)',
+    (throws) => {
+      let value!: OwnedStateHandle<boolean>;
+      let rejectRender = false;
+      const renderFailure = new Error('nested render failed');
+      const P: Prototype = {
+        name: 'x-runtime-nested-render-state',
+        setup(def) {
+          value = def.state.bool('value', false);
+          return (renderer) => {
+            if (rejectRender) throw renderFailure;
+            return [renderer.el('div', value.get() ? 'changed' : 'initial')];
+          };
+        },
+      };
+      const host: RuntimeHost<Record<string, unknown>> = {
+        prototypeName: P.name,
+        getRawProps: () => ({}),
+        commit(_children, signal) {
+          signal?.done();
+        },
+        schedule(task) {
+          task();
+        },
+      };
+      const session = executeWithHost(P, host);
+      rejectRender = throws;
+      session.invokeInCallbackScope(() => {
+        let failure: unknown;
+        try {
+          session.controller.update();
+        } catch (error) {
+          failure = error;
+        }
+        expect(failure).toBe(throws ? renderFailure : undefined);
+        value.set(true, 'reason: resume owning callback after nested render');
+      });
+      expect(value.get()).toBe(true);
+      expect(() => value.set(false)).toThrow();
+      expect(value.get()).toBe(true);
+    }
+  );
+
   it('[T-STATE-0004-CASE-CALLBACK-SCOPE] dispatches internal state watch callbacks in callback phase', () => {
     const host: RuntimeHost<any> = {
       prototypeName: 'x-runtime-state-watch-callback-scope',

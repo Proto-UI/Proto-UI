@@ -486,6 +486,8 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: Install real CJK fallback for typography glyph evidence
+        # Fail setup before a slow mirror consumes the browser execution budget.
+        timeout-minutes: 3
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk

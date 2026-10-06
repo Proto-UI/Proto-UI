@@ -49,7 +49,11 @@ const cases = [
   // internal/records/2026-10-04-material-budget-transaction.json
   // Current #832 + #809 startup reconciliation: 69,200 cap, 247-byte headroom.
   // internal/records/2026-10-06-focus-startup-budget-reconciliation.json
-  ['runtime root', 'packages/runtime/src/index.ts', 69_200],
+  // Exact bounded request/owner-release repair, measured on the full Focus union:
+  // internal/records/2026-10-06-focus-request-release-budget.json
+  // Unified preflight and owned-shadow acquisition, exact integrated artifact:
+  // internal/records/2026-10-06-focus-preflight-shadow-budget.json
+  ['runtime root', 'packages/runtime/src/index.ts', 69_591],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -66,8 +70,12 @@ const cases = [
   // internal/records/2026-10-06-focus-startup-budget-reconciliation.json
   // Necessary +29-byte ceiling for the reviewed remount/Text Control/Feedback union;
   // internal/records/2026-10-06-react-remount-text-control-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 91_029],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 90_800],
+  // Exact #832 + merged Template/Scroll integration; no speculative headroom.
+  // Subsequent bounded request/owner-release repair measured as an actual union:
+  // internal/records/2026-10-06-focus-request-release-budget.json
+  // internal/records/2026-10-06-template-scroll-focus-budget.json
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 91_653],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 91_396],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:

@@ -1,0 +1,145 @@
+{
+  "date": "2026-10-06",
+  "sourceParent": "fd6eebd24d17747d4d26c9a4da7e343dfbedc97a",
+  "sourceCommit": "df7ea701091dbef6ef631e639dcfd2aac89759de",
+  "sourceTree": "9098f90d843704e5976f1d597a169a907e4451b1",
+  "dependencyParent": "27331cebfc30565fd70835c26a32c64f838c5ca6",
+  "integratedTreeBeforeRecords": "e81d65043c2cb5f5eef342e412fd5679e86c92f7",
+  "budgets": {
+    "environment": {
+      "node": "v24.19.0",
+      "zlib": "1.3.2.1-motley-3246f1b",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "results": [
+      {
+        "name": "lucide/icons/x",
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "minifiedBytes": 4669,
+        "minifiedSha256": "36ab7f4c59923289b3e24077f675be5fc872bd414b09f78a9fa170d81de17499",
+        "gzipBytes": 1735,
+        "budget": 3000,
+        "pass": true
+      },
+      {
+        "name": "lucide root",
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "minifiedBytes": 4082850,
+        "minifiedSha256": "b3c1de783d0da55654e474e6b9334d1d6012b9b2ff4aed12b14b70b2ae4974f5",
+        "gzipBytes": 635820,
+        "budget": 700000,
+        "pass": true
+      },
+      {
+        "name": "core root",
+        "entry": "packages/core/src/index.ts",
+        "minifiedBytes": 16219,
+        "minifiedSha256": "3b031bbb45928539207ad1aba1313b4dcf84d874142b401e29321b98aba790f2",
+        "gzipBytes": 5153,
+        "budget": 6600,
+        "pass": true
+      },
+      {
+        "name": "runtime root",
+        "entry": "packages/runtime/src/index.ts",
+        "minifiedBytes": 270820,
+        "minifiedSha256": "2bf6e9d5bb27072ef12d0d31e46a266ab70f8a592414684e6f9fa2a2641311bf",
+        "gzipBytes": 69111,
+        "budget": 69200,
+        "pass": true
+      },
+      {
+        "name": "adapter-react root",
+        "entry": "packages/adapters/react/src/index.ts",
+        "minifiedBytes": 338262,
+        "minifiedSha256": "ca70e999ef51ee6657022a2e893b2ba6071727fc5e53494a6d340bfb3e4e2ff9",
+        "gzipBytes": 90770,
+        "budget": 91029,
+        "pass": true
+      },
+      {
+        "name": "adapter-vue root",
+        "entry": "packages/adapters/vue/src/index.ts",
+        "minifiedBytes": 337167,
+        "minifiedSha256": "ca344f7815a1bca6c0976c047984bf8c537e56ce8d7cc54cd80f90f42c0cf6e5",
+        "gzipBytes": 90526,
+        "budget": 90800,
+        "pass": true
+      },
+      {
+        "name": "adapter-web-component root",
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "minifiedBytes": 366321,
+        "minifiedSha256": "450736b08758cf93d4b910689107d839305a100d03553b349a3c05168502641d",
+        "gzipBytes": 99608,
+        "budget": 104500,
+        "pass": true
+      },
+      {
+        "name": "prototypes-base/button",
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "minifiedBytes": 12787,
+        "minifiedSha256": "4221a9bb097f64c7dae0c74f04d49533c50708f2470f4cc2fba7f2a7c9790ea1",
+        "gzipBytes": 3779,
+        "budget": 6000,
+        "pass": true
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "minifiedBytes": 16420,
+        "minifiedSha256": "05094d372cfa4fadef2a2fdc16d05a3b0faa755595ebe77c8ba77619dddd1603",
+        "gzipBytes": 4625,
+        "budget": 7000,
+        "pass": true
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "consumer light-dom button",
+        "entry": "scripts/analysis/fixtures/consumer-light-button.ts",
+        "minifiedBytes": 382471,
+        "minifiedSha256": "8990c33f655e8d9ad2a795034fb1403ef9c1ebff2f0f7b8d680766de5e1a9739",
+        "gzipBytes": 103714
+      },
+      {
+        "name": "consumer direct-shadow button",
+        "entry": "scripts/analysis/fixtures/consumer-shadow-button.ts",
+        "minifiedBytes": 382482,
+        "minifiedSha256": "79c0604de85ded8302ba97d9e2ceb619aa1c8f6323d817e67cc2fac987698fcf",
+        "gzipBytes": 103718
+      }
+    ]
+  },
+  "verification": {
+    "independentFocusedTests": 54,
+    "originalPairedFailures": 8,
+    "originalPairedControls": 21,
+    "realReactStartupControls": 20,
+    "centerRoleAdmissionControls": 5,
+    "packagesBuilt": 44,
+    "typeCheckFiles": 447,
+    "typeErrors": 0,
+    "typeWarnings": 0,
+    "typeHints": 4,
+    "productionPagesBuilt": 284,
+    "productionBundleGraph": "passed",
+    "coverageTestsPassed": 2400,
+    "coverageTestsSkipped": 1,
+    "agentOperationsTestsPassed": 926,
+    "publicDocsTestsPassed": 26,
+    "releaseTestsPassed": 57,
+    "generalTestsPassed": 4534,
+    "generalFilesPassed": 656,
+    "generalExistingTodos": 34,
+    "generalSkippedFiles": 3
+  },
+  "localLimitations": [
+    "Canonical tsx CLI requires an unavailable Unix IPC socket; GPUI script suite locally passed 7 pure cases and failed 17 subprocess cases before intended fixture assertions.",
+    "Four unmodified GPUI fixture generators independently pass with the installed tsx standard node --import entry and --check; this does not substitute for canonical CLI CI.",
+    "A final local general run was interrupted after six files without a terminal result; the unchanged-tree retry completed successfully.",
+    "Fresh hosted exact-head CI, original CLI paths and native browser coverage remain pending at publication."
+  ]
+}

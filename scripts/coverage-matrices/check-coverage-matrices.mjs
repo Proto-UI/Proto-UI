@@ -9069,21 +9069,45 @@ function isTestNamedSource(absolutePath) {
 // fail-closed behavior for every other configuration change.
 const PROMOTION_RESOLVER_CONFIG_SHA256 =
   'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30';
+// Exact opt-in, serve-only contrast audit profile. Its imported plugin bytes
+// are part of the reviewed resolver boundary, not an unrestricted plugin hook.
+const PROMOTION_AUDIT_CONFIG_SHA256 =
+  'b07dfc4350c16a8bee3b65717887cc5d592002f2cb492e134c60a3d18519a6de';
+const PROMOTION_AUDIT_PLUGIN_PATH = 'apps/www/scripts/contrast-provenance.mjs';
+const PROMOTION_AUDIT_PLUGIN_SHA256 =
+  'a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a';
 export function promotionBarePackageTargets(root, specifier, metadata) {
   const unverified = () =>
     new Error(`promotion package closure for ${specifier} remains unverified`);
   const configPath = path.join(root, 'apps/www/astro.config.mjs');
+  const unrecognizedConfig = () =>
+    new Error(
+      'promotion package resolver configuration is unrecognized; closure remains unverified'
+    );
   if (
     !fs.existsSync(configPath) ||
     !fs.lstatSync(configPath).isFile() ||
-    path.relative(root, fs.realpathSync(configPath)).startsWith('..') ||
-    createHash('sha256').update(fs.readFileSync(configPath)).digest('hex') !==
-      PROMOTION_RESOLVER_CONFIG_SHA256
+    path.relative(root, fs.realpathSync(configPath)).startsWith('..')
   )
-    throw new Error(
-      'promotion package resolver configuration is unrecognized; closure remains unverified'
-    );
+    throw unrecognizedConfig();
+  const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
+  if (configSha !== PROMOTION_RESOLVER_CONFIG_SHA256 && configSha !== PROMOTION_AUDIT_CONFIG_SHA256)
+    throw unrecognizedConfig();
   metadata.add(configPath);
+  if (configSha === PROMOTION_AUDIT_CONFIG_SHA256) {
+    const pluginPath = path.join(root, PROMOTION_AUDIT_PLUGIN_PATH);
+    assertPromotionModulePath(root, pluginPath);
+    if (
+      !fs.existsSync(pluginPath) ||
+      !fs.lstatSync(pluginPath).isFile() ||
+      createHash('sha256').update(fs.readFileSync(pluginPath)).digest('hex') !==
+        PROMOTION_AUDIT_PLUGIN_SHA256
+    )
+      throw new Error(
+        'promotion audit resolver plugin is unrecognized; closure remains unverified'
+      );
+    metadata.add(pluginPath);
+  }
   const assertRepositoryFile = (target) => {
     assertPromotionModulePath(root, target);
     if (!fs.existsSync(target) || !fs.statSync(target).isFile()) throw unverified();

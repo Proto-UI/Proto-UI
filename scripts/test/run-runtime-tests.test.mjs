@@ -1303,6 +1303,39 @@ describe('bounded CI runtime shards (no browser or server)', () => {
       /complete current inventory/
     );
   });
+  it('bounds real font setup without relaxing browser execution or failure gates', () => {
+    const { jobs } = YAML.parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
+    const browser = jobs['test-browser'];
+    assert.equal(browser['timeout-minutes'], 20);
+    assert.equal(browser['continue-on-error'], undefined);
+    const fontSteps = browser.steps.filter(
+      (step) => step.name === 'Install real CJK fallback for typography glyph evidence'
+    );
+    assert.equal(fontSteps.length, 1);
+    // Exact commands exclude a fake fallback, conditional skip or swallowed apt failure.
+    assert.deepEqual(fontSteps[0], {
+      name: 'Install real CJK fallback for typography glyph evidence',
+      'timeout-minutes': 3,
+      run: [
+        'sudo apt-get update -qq',
+        'sudo apt-get install -y --no-install-recommends fonts-noto-cjk',
+        '',
+      ].join('\n'),
+    });
+    const run = browser.steps.find(
+      (step) => step.name === 'Run the bounded shard with its own documentation server'
+    );
+    assert.ok(run);
+    assert.ok(browser.steps.indexOf(fontSteps[0]) < browser.steps.indexOf(run));
+    assert.equal(run.if, undefined);
+    assert.equal(run['continue-on-error'], undefined);
+    assert.match(run.run, /^set -euo pipefail$/m);
+    assert.match(
+      run.run,
+      /^timeout --signal=TERM --kill-after=10s 900s \\\n  node scripts\/test\/run-runtime-tests\.mjs 2>&1 \| tee /m
+    );
+    assert.equal(jobs.test['continue-on-error'], undefined);
+  });
   it('wires every required CI job into the existing fail-closed test gate', () => {
     const { jobs } = YAML.parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
     assert.deepEqual(jobs.test.needs, ['test-plan', 'test-general', 'test-browser']);

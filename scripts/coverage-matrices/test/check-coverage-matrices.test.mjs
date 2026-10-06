@@ -744,6 +744,18 @@ function writeGovernanceSnapshot(root, issueOverrides = {}) {
   );
 }
 
+function writeReviewedPromotionConfig(
+  root,
+  config = fs.readFileSync(new URL('../../../apps/www/astro.config.mjs', import.meta.url), 'utf8')
+) {
+  fs.mkdirSync(path.join(root, 'apps/www/scripts'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'apps/www/astro.config.mjs'), config);
+  fs.copyFileSync(
+    new URL('../../../apps/www/scripts/contrast-provenance.mjs', import.meta.url),
+    path.join(root, 'apps/www/scripts/contrast-provenance.mjs')
+  );
+}
+
 function commitFixtureRoot(root) {
   execFileSync('git', ['init', '--quiet', '--initial-branch=main'], { cwd: root });
   execFileSync('git', ['add', '.'], { cwd: root });
@@ -10783,10 +10795,7 @@ test('fresh review: changed workspace package sources invalidate promotion evide
     path.join(root, implementationPath),
     "---\nimport { label } from '../PrototypePreviewer/prototype-modules';\n---\n<main>{label}</main>"
   );
-  fs.writeFileSync(
-    path.join(root, 'apps/www/astro.config.mjs'),
-    fs.readFileSync(new URL('../../../apps/www/astro.config.mjs', import.meta.url))
-  );
+  writeReviewedPromotionConfig(root);
   fs.writeFileSync(path.join(root, registry), "export { label } from '@proto.ui/prototypes-base';");
   fs.writeFileSync(
     path.join(root, 'packages/prototypes/base/package.json'),
@@ -10953,10 +10962,7 @@ test('fresh review: promotion binds workspace manifests and rejects unbound exte
       path.join(root, file),
       "---\nimport {label} from '../PrototypePreviewer/prototype-modules';\n---\n<main>{label}</main>"
     );
-    fs.writeFileSync(
-      path.join(root, 'apps/www/astro.config.mjs'),
-      fs.readFileSync(new URL('../../../apps/www/astro.config.mjs', import.meta.url))
-    );
+    writeReviewedPromotionConfig(root);
     fs.writeFileSync(path.join(root, registry), "export {label} from '@proto.ui/prototypes-base';");
     fs.writeFileSync(
       path.join(root, 'packages/prototypes/base/package.json'),
@@ -11010,10 +11016,7 @@ test('fresh review: promotion follows transitive wildcard workspace exports usin
     path.join(root, file),
     "---\nimport {label} from '../PrototypePreviewer/prototype-modules';\n---\n<main>{label}</main>"
   );
-  fs.writeFileSync(
-    path.join(root, 'apps/www/astro.config.mjs'),
-    fs.readFileSync(new URL('../../../apps/www/astro.config.mjs', import.meta.url))
-  );
+  writeReviewedPromotionConfig(root);
   fs.writeFileSync(path.join(root, registry), "export {label} from '@proto.ui/prototypes-base';");
   fs.writeFileSync(
     path.join(root, 'packages/prototypes/base/package.json'),
@@ -11071,7 +11074,7 @@ test('fresh review: package source resolver parity covers condition order, direc
     'utf8'
   );
   fs.mkdirSync(path.join(root, 'apps/www'), { recursive: true });
-  fs.writeFileSync(path.join(root, 'apps/www/astro.config.mjs'), config);
+  writeReviewedPromotionConfig(root, config);
   const cases = [
     [
       '@proto.ui/prototypes-example',
@@ -11169,10 +11172,7 @@ test('fresh review: tracked package targets use literal Git pathspecs', () => {
     directory = path.join(root, 'packages/prototypes/example');
   fs.mkdirSync(path.join(root, 'apps/www'), { recursive: true });
   fs.mkdirSync(path.join(directory, 'src'), { recursive: true });
-  fs.writeFileSync(
-    path.join(root, 'apps/www/astro.config.mjs'),
-    fs.readFileSync(new URL('../../../apps/www/astro.config.mjs', import.meta.url))
-  );
+  writeReviewedPromotionConfig(root);
   fs.writeFileSync(
     path.join(directory, 'package.json'),
     JSON.stringify({ exports: { '.': './dist/item[1].js' } })
@@ -18017,3 +18017,102 @@ test('embed script parser preserves the separate Harness import-map gate', () =>
     issues.join('\n')
   );
 });
+
+function auditResolverFixture() {
+  const root = createRoot();
+  writeReviewedPromotionConfig(root);
+  const packageRoot = path.join(root, 'packages/core');
+  fs.mkdirSync(path.join(packageRoot, 'src'), { recursive: true });
+  fs.writeFileSync(
+    path.join(packageRoot, 'package.json'),
+    JSON.stringify({ exports: { '.': './dist/index.js' } })
+  );
+  fs.writeFileSync(path.join(packageRoot, 'src/index.ts'), 'export const value=1;');
+  commitFixtureRoot(root);
+  return {
+    root,
+    config: path.join(root, 'apps/www/astro.config.mjs'),
+    plugin: path.join(root, 'apps/www/scripts/contrast-provenance.mjs'),
+    target: path.join(packageRoot, 'src/index.ts'),
+  };
+}
+
+test('audit resolver profile: exact audited helper is mandatory evidence metadata', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(metadata.has(config));
+  assert.ok(metadata.has(plugin));
+});
+
+test('audit resolver profile: original 857 profile remains independently admitted without audit helper', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  const original = fs
+    .readFileSync(config, 'utf8')
+    .replace("import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n", '')
+    .replace(
+      `    plugins: [
+      ...(process.env.PROTO_UI_CONTRAST_AUDIT === '1'
+        ? [contrastProvenancePlugin(repositoryRoot)]
+        : []),
+      protoUiSourcePlugin,
+      websiteBundleGraphPlugin(),
+      tailwindcss(),
+    ],`,
+      '    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],'
+    );
+  assert.equal(
+    createHash('sha256').update(original).digest('hex'),
+    'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30'
+  );
+  fs.writeFileSync(config, original);
+  fs.unlinkSync(plugin);
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(!metadata.has(plugin));
+});
+
+for (const defect of [
+  'missing-helper',
+  'changed-helper',
+  'helper-symlink',
+  'helper-parent-symlink',
+  'helper-directory',
+  'unknown-config',
+  'changed-resolver',
+  'config-symlink',
+]) {
+  test(`audit resolver profile: rejects ${defect}`, () => {
+    const { root, config, plugin } = auditResolverFixture();
+    if (defect === 'missing-helper') fs.unlinkSync(plugin);
+    if (defect === 'changed-helper') fs.appendFileSync(plugin, '\n// unreviewed plugin shape\n');
+    if (defect === 'helper-symlink' || defect === 'config-symlink') {
+      const target = defect === 'helper-symlink' ? plugin : config;
+      const copy = `${target}.copy`;
+      fs.renameSync(target, copy);
+      fs.symlinkSync(copy, target);
+    }
+    if (defect === 'helper-parent-symlink') {
+      const parent = path.dirname(plugin),
+        copy = `${parent}-copy`;
+      fs.renameSync(parent, copy);
+      fs.symlinkSync(copy, parent, 'dir');
+    }
+    if (defect === 'helper-directory') {
+      fs.unlinkSync(plugin);
+      fs.mkdirSync(plugin);
+    }
+    if (defect === 'unknown-config') fs.appendFileSync(config, '\n// unknown config profile\n');
+    if (defect === 'changed-resolver')
+      fs.writeFileSync(
+        config,
+        fs
+          .readFileSync(config, 'utf8')
+          .replace(".replace('./dist/', './src/')", ".replace('./dist/', './foreign/')")
+      );
+    assert.throws(
+      () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+      /(?:resolver configuration|audit resolver plugin).*unrecognized|symlink.*unverified/
+    );
+  });
+}

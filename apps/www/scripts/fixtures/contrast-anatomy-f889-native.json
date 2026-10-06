@@ -1,0 +1,2711 @@
+{
+  "origin": "Native Chromium anatomy observations replayed by the Node model; not a new native run or a full interaction verdict. Before/after observations are byte-for-byte equivalent as parsed JSON for each retained frame. Identical surface arrays are losslessly pooled; each frame retains its original owner, generation, primary and lease.",
+  "runUrl": "https://github.com/Proto-UI/Proto-UI/actions/runs/37237502096",
+  "sourceHead": "f8894c3c8a7743842c0da267e738e2e05d942c18",
+  "sources": [
+    {
+      "shard": "popup",
+      "runID": "2026-10-04T21-50-53.616Z-8dcf7dc7-e1cf-48d9-b7aa-c4d09bb5f120",
+      "reportDigest": "sha256:b192dcbb4c6cb739e3bafde23a1cbb2fba02d7b73bde0d5cdf5f941681e9ce1e",
+      "sourceCodeVersion": {
+        "head": "f8894c3c8a7743842c0da267e738e2e05d942c18",
+        "status": "captured",
+        "kind": "complete clean Git tree plus generated CSS, bound to the opt-in dev server startup identity and current source checks",
+        "cleanTree": "517c2089aad455bdc99462066369f6b6a45fbf03",
+        "generatedCSS": {
+          "apps/www/src/styles/proto-ui-tokens.generated.css": "4bd2d4b075eeb7a0383cede2afc12a369938ff4d7c8ee57935881d81bc1bb704",
+          "apps/www/src/styles/proto-ui-style.css": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+          "apps/www/src/styles/shadcn-theme.css": "e64ed915cd40e21a42ebe5fec84afbdb814f9f6a9a337f1024e9be1ba3fb7357"
+        },
+        "sourceSetDigest": "sha256:e0b421c6bdd88ead4a28268c5f82e119161b949f393d6e6810a7be9004e0c121",
+        "runnerDigest": "sha256:b68ab0b1e46d0d244de9cc77df8bbf443d009be1112ca866dc937a186cd3ab55",
+        "probeDigest": "sha256:9d04685776a5d504451cd5d62a47be93d279d41c0ec932ec9bd162a0eb0e18c1"
+      },
+      "sources": [
+        {
+          "identity": "probe",
+          "path": "probe.source",
+          "digest": "sha256:9d04685776a5d504451cd5d62a47be93d279d41c0ec932ec9bd162a0eb0e18c1"
+        },
+        {
+          "identity": "anatomy-model",
+          "path": "anatomy-model.source",
+          "digest": "sha256:5b64ef88914bc9754850b3976377fbc2a3a6c5712a492f5f7333f76cbbdb192f"
+        },
+        {
+          "identity": "projection-manifest",
+          "path": "projection-manifest.source",
+          "digest": "sha256:ffa806e099483f8062a3097e0ae2d6825d9288adb2da3bfecf1d703e1bc0afcc"
+        },
+        {
+          "identity": "recipe-dropdown-menu",
+          "path": "recipe-dropdown-menu.source",
+          "digest": "sha256:d5150bc0613f5084d29cd7728f808057712a7230937aa70cc7b50159863ec7d6"
+        },
+        {
+          "identity": "recipe-select",
+          "path": "recipe-select.source",
+          "digest": "sha256:cc88bc8d07c0fa55229974d5aa7e32c8e5b7a3c219a09f5532652378944c5657"
+        },
+        {
+          "identity": "recipe-dialog",
+          "path": "recipe-dialog.source",
+          "digest": "sha256:956db15c1650d387a171b19a1906a8a040b205c9caa5b87a1c519ce2118f48a4"
+        }
+      ]
+    },
+    {
+      "shard": "intent",
+      "runID": "2026-10-04T21-53-24.641Z-7480afbf-2c9d-4b5d-a6ae-4edff59dfcc7",
+      "reportDigest": "sha256:8caf81314c4b9b4fcb255432201587d9df9e296cdfacf0e833cd41a49da61669",
+      "sourceCodeVersion": {
+        "head": "f8894c3c8a7743842c0da267e738e2e05d942c18",
+        "status": "captured",
+        "kind": "complete clean Git tree plus generated CSS, bound to the opt-in dev server startup identity and current source checks",
+        "cleanTree": "517c2089aad455bdc99462066369f6b6a45fbf03",
+        "generatedCSS": {
+          "apps/www/src/styles/proto-ui-tokens.generated.css": "4bd2d4b075eeb7a0383cede2afc12a369938ff4d7c8ee57935881d81bc1bb704",
+          "apps/www/src/styles/proto-ui-style.css": "446d2249e0672bdee7ddf77de55c7a8f2140adfb60c41d13ec0183d5f7199d88",
+          "apps/www/src/styles/shadcn-theme.css": "e64ed915cd40e21a42ebe5fec84afbdb814f9f6a9a337f1024e9be1ba3fb7357"
+        },
+        "sourceSetDigest": "sha256:4231173e1f8e4c8798340d7f12033a72d72a387e56c258b098374ee7a878dc8d",
+        "runnerDigest": "sha256:b68ab0b1e46d0d244de9cc77df8bbf443d009be1112ca866dc937a186cd3ab55",
+        "probeDigest": "sha256:9d04685776a5d504451cd5d62a47be93d279d41c0ec932ec9bd162a0eb0e18c1"
+      },
+      "sources": [
+        {
+          "identity": "probe",
+          "path": "probe.source",
+          "digest": "sha256:9d04685776a5d504451cd5d62a47be93d279d41c0ec932ec9bd162a0eb0e18c1"
+        },
+        {
+          "identity": "anatomy-model",
+          "path": "anatomy-model.source",
+          "digest": "sha256:5b64ef88914bc9754850b3976377fbc2a3a6c5712a492f5f7333f76cbbdb192f"
+        },
+        {
+          "identity": "projection-manifest",
+          "path": "projection-manifest.source",
+          "digest": "sha256:ffa806e099483f8062a3097e0ae2d6825d9288adb2da3bfecf1d703e1bc0afcc"
+        },
+        {
+          "identity": "recipe-tooltip",
+          "path": "recipe-tooltip.source",
+          "digest": "sha256:84805e1d892ea3262155fb69a5eff6e2b0b65d62200ce9e1e11c37614e001c02"
+        },
+        {
+          "identity": "recipe-hover-card",
+          "path": "recipe-hover-card.source",
+          "digest": "sha256:8c0301a25941e13d77880543b2af119ef08f768607b13303ee2e2eeb4ef13805"
+        },
+        {
+          "identity": "recipe-tabs",
+          "path": "recipe-tabs.source",
+          "digest": "sha256:bf517769d32494da1add986ce148cd4c8bbf131554b450c46b8055b4a718e86e"
+        }
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "name": "dropdown-menu-wc-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000000-result.json",
+      "frameDigest": "sha256:2ae009d7cf572d1ae56537d579dc26caac5325b7a6c4f1d9c701757959c0b9c5",
+      "capturedAt": "2026-10-04T21:51:09.432Z",
+      "family": "dropdown-menu",
+      "runtime": "wc",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-fvmf76jkozm",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 0
+    },
+    {
+      "name": "dropdown-menu-wc-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000001-result.json",
+      "frameDigest": "sha256:f4a259119b33bb48256cfb7b5b7eef2174ba867d0480d36e3320285742c859fc",
+      "capturedAt": "2026-10-04T21:51:12.884Z",
+      "family": "dropdown-menu",
+      "runtime": "wc",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-q6bnny9ckxm",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 0
+    },
+    {
+      "name": "dropdown-menu-react-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000002-result.json",
+      "frameDigest": "sha256:33418f6398fdf8c1184ddc112406fb612f5081a3b80fc09ede289d19423dfd35",
+      "capturedAt": "2026-10-04T21:51:16.981Z",
+      "family": "dropdown-menu",
+      "runtime": "react",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-guu0pgd0ik5",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 1
+    },
+    {
+      "name": "dropdown-menu-react-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000003-result.json",
+      "frameDigest": "sha256:e0c3f761eac6942eddae384dae725f0162d2623f46511ff067fbde197a5bc620",
+      "capturedAt": "2026-10-04T21:51:20.548Z",
+      "family": "dropdown-menu",
+      "runtime": "react",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-d77goy26zau",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 1
+    },
+    {
+      "name": "dropdown-menu-vue-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000004-result.json",
+      "frameDigest": "sha256:8ac3cef27a27b1846b2b1a130e4c973d43060bbab525fd76878ffed3746bf3c3",
+      "capturedAt": "2026-10-04T21:51:24.602Z",
+      "family": "dropdown-menu",
+      "runtime": "vue",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-ka2b1r1h3r",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 1
+    },
+    {
+      "name": "dropdown-menu-vue-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000005-result.json",
+      "frameDigest": "sha256:89397072747b8d4cfc84d597016fde73943d56bd64c1b65dcc4212e630f7bd06",
+      "capturedAt": "2026-10-04T21:51:28.214Z",
+      "family": "dropdown-menu",
+      "runtime": "vue",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-8mfohzpk3hb",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 1
+    },
+    {
+      "name": "dropdown-menu-vue2-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000006-result.json",
+      "frameDigest": "sha256:7ef72ba2c224b0f0af8a62155044c9fc216ced474196259e400442a824a7fc25",
+      "capturedAt": "2026-10-04T21:51:32.335Z",
+      "family": "dropdown-menu",
+      "runtime": "vue2",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-t6uba011f0g",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 1
+    },
+    {
+      "name": "dropdown-menu-vue2-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000007-result.json",
+      "frameDigest": "sha256:3be2a49900f54c221404b52783e59ed1a1bb7187a768c141145c463458a5496e",
+      "capturedAt": "2026-10-04T21:51:35.882Z",
+      "family": "dropdown-menu",
+      "runtime": "vue2",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-iqhox60bmwb",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 1
+    },
+    {
+      "name": "select-wc-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000008-result.json",
+      "frameDigest": "sha256:552ae82aa4fcf9c6ada1b23e66725b1aa9733c01d69f4490766792cb13533168",
+      "capturedAt": "2026-10-04T21:51:39.171Z",
+      "family": "select",
+      "runtime": "wc",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-lt6bft3fv8r",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 2
+    },
+    {
+      "name": "select-wc-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000009-result.json",
+      "frameDigest": "sha256:336854a5d66e0ffc574684aeab86bc4dcaee9b02a3e565c6526232958432763a",
+      "capturedAt": "2026-10-04T21:51:42.629Z",
+      "family": "select",
+      "runtime": "wc",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-6dwm3a825qo",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 2
+    },
+    {
+      "name": "select-react-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000010-result.json",
+      "frameDigest": "sha256:fa1a3220bd9903ac5ab71b618f5f61eace394889acea4085c2fb080552fa6809",
+      "capturedAt": "2026-10-04T21:51:46.162Z",
+      "family": "select",
+      "runtime": "react",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-gt7m0t8zice",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 3
+    },
+    {
+      "name": "select-react-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000011-result.json",
+      "frameDigest": "sha256:3ec6fae412e9b503306825d0e4e71610ebcb080499fe0bc6a5327090e4d3d5d8",
+      "capturedAt": "2026-10-04T21:51:49.762Z",
+      "family": "select",
+      "runtime": "react",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-d3d07nlq0za",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 3
+    },
+    {
+      "name": "select-vue-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000012-result.json",
+      "frameDigest": "sha256:1170351b790006537cc1f605a11e6a5b2c7241f5fc5189d1ec977261e3acbabc",
+      "capturedAt": "2026-10-04T21:51:53.312Z",
+      "family": "select",
+      "runtime": "vue",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-k51v357ddps",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 3
+    },
+    {
+      "name": "select-vue-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000013-result.json",
+      "frameDigest": "sha256:324706f2ae3c7b555b420c9e05a191c1917c25762bbd23beff5e9e4f5264a8ad",
+      "capturedAt": "2026-10-04T21:51:56.961Z",
+      "family": "select",
+      "runtime": "vue",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-fyi4b6u7eqd",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 3
+    },
+    {
+      "name": "select-vue2-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000014-result.json",
+      "frameDigest": "sha256:a3bfb9399eaf76a280513869121ed2364954c9817792e19a66b784fbf1146cda",
+      "capturedAt": "2026-10-04T21:52:00.495Z",
+      "family": "select",
+      "runtime": "vue2",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-wj3v88la08",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 3
+    },
+    {
+      "name": "select-vue2-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000015-result.json",
+      "frameDigest": "sha256:7d2182a21742facf13359379b0691186199a725a9724048d4fe9318cf06eaef3",
+      "capturedAt": "2026-10-04T21:52:04.062Z",
+      "family": "select",
+      "runtime": "vue2",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-mh92r6uhcrb",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 3
+    },
+    {
+      "name": "dialog-wc-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000016-result.json",
+      "frameDigest": "sha256:f97171933f44de1ca116c40dd511b9dc845e36be0deb4da9100a628a0e63c26d",
+      "capturedAt": "2026-10-04T21:52:07.538Z",
+      "family": "dialog",
+      "runtime": "wc",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-8zo74ap9vrd",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 4
+    },
+    {
+      "name": "dialog-wc-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000017-result.json",
+      "frameDigest": "sha256:2d868dd5583d544347d1dc59c4914b41edb3f99cc0357aed67414419f8818790",
+      "capturedAt": "2026-10-04T21:52:11.205Z",
+      "family": "dialog",
+      "runtime": "wc",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-sj98krjipgk",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 4
+    },
+    {
+      "name": "dialog-react-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000018-result.json",
+      "frameDigest": "sha256:f4a579c7d6b75cd7c9fa6e7c64b312297242c8226aab6a7ce24c6cf6a9595c8a",
+      "capturedAt": "2026-10-04T21:52:14.953Z",
+      "family": "dialog",
+      "runtime": "react",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-zp5sfxi5e5e",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 5
+    },
+    {
+      "name": "dialog-react-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000019-result.json",
+      "frameDigest": "sha256:ae8f7957d2b500213fe1b68d358f62738a25b2f5f5bbcccde92860456408ecdc",
+      "capturedAt": "2026-10-04T21:52:18.754Z",
+      "family": "dialog",
+      "runtime": "react",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-f16by2msd3f",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 5
+    },
+    {
+      "name": "dialog-vue-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000020-result.json",
+      "frameDigest": "sha256:779a141fc2bd5698810bcb86dd869e7897afe015f065a23da592d637d9fcfbf4",
+      "capturedAt": "2026-10-04T21:52:22.548Z",
+      "family": "dialog",
+      "runtime": "vue",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-u7s2u759jf",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 5
+    },
+    {
+      "name": "dialog-vue-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000021-result.json",
+      "frameDigest": "sha256:c168e83fdada1828b9ea6efbcba81198bc6580404829c12ea22be709d1264062",
+      "capturedAt": "2026-10-04T21:52:26.387Z",
+      "family": "dialog",
+      "runtime": "vue",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-pzgrwyq4opj",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 5
+    },
+    {
+      "name": "dialog-vue2-light-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000022-result.json",
+      "frameDigest": "sha256:0ca3ef0c3824a2c9b35e9b268ad09ba7d688391acbc66d287a5979c113c4d793",
+      "capturedAt": "2026-10-04T21:52:30.153Z",
+      "family": "dialog",
+      "runtime": "vue2",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-m10s5nda6lq",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 5
+    },
+    {
+      "name": "dialog-vue2-dark-rest",
+      "shard": "popup",
+      "frameFile": "report-journal/frame-000023-result.json",
+      "frameDigest": "sha256:89aa5bab4e568bb0b35bc906e2ea59fb156ab7d789509bbff7db4b4252cb355f",
+      "capturedAt": "2026-10-04T21:52:33.969Z",
+      "family": "dialog",
+      "runtime": "vue2",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-plk6hgivezh",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 5
+    },
+    {
+      "name": "tooltip-wc-light-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000000-result.json",
+      "frameDigest": "sha256:208d98c8ae7338dcb7ca0dcd06a808c24304776751b57f51abe97a21a842d09e",
+      "capturedAt": "2026-10-04T21:53:36.956Z",
+      "family": "tooltip",
+      "runtime": "wc",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-romdcr5us1",
+        "generation": "1",
+        "primary": 2,
+        "currentLease": true
+      },
+      "surfaceSet": 6
+    },
+    {
+      "name": "tooltip-wc-dark-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000001-result.json",
+      "frameDigest": "sha256:4ad88521c9e252a493458214ac074516a514cf304f6038d9fe252b20b6e007d4",
+      "capturedAt": "2026-10-04T21:53:39.750Z",
+      "family": "tooltip",
+      "runtime": "wc",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-f4dz9ewbe7",
+        "generation": "1",
+        "primary": 2,
+        "currentLease": true
+      },
+      "surfaceSet": 6
+    },
+    {
+      "name": "tooltip-react-light-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000002-result.json",
+      "frameDigest": "sha256:470bd9e1e44447e7c3f58ae30e44e275dafd59dbebb96636ff2b124f15135477",
+      "capturedAt": "2026-10-04T21:53:43.248Z",
+      "family": "tooltip",
+      "runtime": "react",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-ttxxkedbsrr",
+        "generation": "2",
+        "primary": 2,
+        "currentLease": true
+      },
+      "surfaceSet": 7
+    },
+    {
+      "name": "tooltip-react-dark-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000003-result.json",
+      "frameDigest": "sha256:224f0ec22fe812e7a0798b98d826c58a3ab9cf18ef33757f99951b4e273c7e9e",
+      "capturedAt": "2026-10-04T21:53:46.233Z",
+      "family": "tooltip",
+      "runtime": "react",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-0su6fwgsnynf",
+        "generation": "2",
+        "primary": 2,
+        "currentLease": true
+      },
+      "surfaceSet": 7
+    },
+    {
+      "name": "tooltip-vue-light-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000004-result.json",
+      "frameDigest": "sha256:983d4906be35b18ac444d9069a2821161bd6796b430fae030c522016e60f27c7",
+      "capturedAt": "2026-10-04T21:53:49.731Z",
+      "family": "tooltip",
+      "runtime": "vue",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-vhpirld62ys",
+        "generation": "2",
+        "primary": 2,
+        "currentLease": true
+      },
+      "surfaceSet": 7
+    },
+    {
+      "name": "tooltip-vue-dark-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000005-result.json",
+      "frameDigest": "sha256:6cac4d6cffc92604fe2cd2fff2d6405cddec110379377a78dca162b2dd9c03e8",
+      "capturedAt": "2026-10-04T21:53:52.732Z",
+      "family": "tooltip",
+      "runtime": "vue",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-s9rdva31nq",
+        "generation": "2",
+        "primary": 2,
+        "currentLease": true
+      },
+      "surfaceSet": 7
+    },
+    {
+      "name": "hover-card-wc-light-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000008-result.json",
+      "frameDigest": "sha256:d64f1985452120842130e3c9fa7843330441b7461426fe27f61724bd4bdae0db",
+      "capturedAt": "2026-10-04T21:53:55.924Z",
+      "family": "hover-card",
+      "runtime": "wc",
+      "theme": "light",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-ym5tzn9x6qm",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "hover-card-wc-dark-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000013-result.json",
+      "frameDigest": "sha256:82ba912fcc9085c550fd67d917ba260a488f2c32052e7f5f4375e4d152e75237",
+      "capturedAt": "2026-10-04T21:54:00.624Z",
+      "family": "hover-card",
+      "runtime": "wc",
+      "theme": "dark",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-h5i086ag2qd",
+        "generation": "1",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "hover-card-react-light-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000018-result.json",
+      "frameDigest": "sha256:517279d1d364071ba611d79e473395de0fed372f8ae7cba670ff0417a79b83d3",
+      "capturedAt": "2026-10-04T21:54:05.448Z",
+      "family": "hover-card",
+      "runtime": "react",
+      "theme": "light",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-6pcr1lrvny9",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "hover-card-react-dark-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000023-result.json",
+      "frameDigest": "sha256:9d81098add0095244c0207978fe4584885b13b31969887d63fe02b4cb9009d3d",
+      "capturedAt": "2026-10-04T21:54:10.375Z",
+      "family": "hover-card",
+      "runtime": "react",
+      "theme": "dark",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-ublrsa1ylvf",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "hover-card-vue-light-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000028-result.json",
+      "frameDigest": "sha256:14b9c164c970928e02e887789fc5f8e4891425ea3b9b8d32010df830b42211e8",
+      "capturedAt": "2026-10-04T21:54:15.139Z",
+      "family": "hover-card",
+      "runtime": "vue",
+      "theme": "light",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-g32bclcsctf",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "hover-card-vue-dark-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000033-result.json",
+      "frameDigest": "sha256:e972a8f9423f2866b722c0fa251bcf7d3ca148a329d1e1a9842cc55a825b1142",
+      "capturedAt": "2026-10-04T21:54:19.955Z",
+      "family": "hover-card",
+      "runtime": "vue",
+      "theme": "dark",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-we8x99b02i8",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "hover-card-vue2-light-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000038-result.json",
+      "frameDigest": "sha256:d8d0bf74fd3e11197ac61527904f98c1da044a3935e19ffc6056a012aba5345f",
+      "capturedAt": "2026-10-04T21:54:25.306Z",
+      "family": "hover-card",
+      "runtime": "vue2",
+      "theme": "light",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-1719jv6rdz3",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "hover-card-vue2-dark-hover-open",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000043-result.json",
+      "frameDigest": "sha256:6153ef4bba48cb03d3ea4a34319dcc79d6588d05219750a15aed73b24c3633af",
+      "capturedAt": "2026-10-04T21:54:30.190Z",
+      "family": "hover-card",
+      "runtime": "vue2",
+      "theme": "dark",
+      "requestedState": "hover-open",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": true,
+      "observed": {
+        "owner": "pp-2kfhe8ehxm4",
+        "generation": "2",
+        "primary": 1,
+        "currentLease": true
+      },
+      "surfaceSet": 8
+    },
+    {
+      "name": "tabs-wc-light-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000046-result.json",
+      "frameDigest": "sha256:d95de7c7ea3fe1e9693def53edb5860032f606080ae96e7916c2514762157659",
+      "capturedAt": "2026-10-04T21:54:34.360Z",
+      "family": "tabs",
+      "runtime": "wc",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-iu3a1xfvekq",
+        "generation": "1",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 9
+    },
+    {
+      "name": "tabs-wc-dark-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000047-result.json",
+      "frameDigest": "sha256:07fe2c0a3878e484301c1e2edd2a2a18182b6faf0eeac051738e34be05434c6a",
+      "capturedAt": "2026-10-04T21:54:37.093Z",
+      "family": "tabs",
+      "runtime": "wc",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": false,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-39f4hqz4b9o",
+        "generation": "1",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 9
+    },
+    {
+      "name": "tabs-react-light-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000048-result.json",
+      "frameDigest": "sha256:cffb9706056a2925184ea78fdefd7e1a01765a163deea27392cdff366962d514",
+      "capturedAt": "2026-10-04T21:54:39.999Z",
+      "family": "tabs",
+      "runtime": "react",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-m4uwajoagr",
+        "generation": "2",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 10
+    },
+    {
+      "name": "tabs-react-dark-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000054-result.json",
+      "frameDigest": "sha256:3e5124ff4370b8aab5d6115bb612c39b3800c9505a943b1be6395bf71991001d",
+      "capturedAt": "2026-10-04T21:54:44.566Z",
+      "family": "tabs",
+      "runtime": "react",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-x01dl67lu97",
+        "generation": "2",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 10
+    },
+    {
+      "name": "tabs-vue-light-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000060-result.json",
+      "frameDigest": "sha256:21d796f43a2cc1ad42f7b2a7f1294c02e626d5e09959340dea15b07712da63f2",
+      "capturedAt": "2026-10-04T21:54:49.092Z",
+      "family": "tabs",
+      "runtime": "vue",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-67j53id14un",
+        "generation": "2",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 10
+    },
+    {
+      "name": "tabs-vue-dark-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000066-result.json",
+      "frameDigest": "sha256:ab1127c94df547408c8932c47583dc399e1c93902239326d107458648b4e65ac",
+      "capturedAt": "2026-10-04T21:54:53.712Z",
+      "family": "tabs",
+      "runtime": "vue",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-hq38h6dpeie",
+        "generation": "2",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 10
+    },
+    {
+      "name": "tabs-vue2-light-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000072-result.json",
+      "frameDigest": "sha256:5fa040b69718f9be2e4a2752fe45b93ab95848121b046e6f6ef73141cd8f6dcc",
+      "capturedAt": "2026-10-04T21:54:58.226Z",
+      "family": "tabs",
+      "runtime": "vue2",
+      "theme": "light",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-qf83gen62d",
+        "generation": "2",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 10
+    },
+    {
+      "name": "tabs-vue2-dark-rest",
+      "shard": "intent",
+      "frameFile": "report-journal/frame-000078-result.json",
+      "frameDigest": "sha256:ca970c3a57afc8cca06045e1db1e1df3114c8e840a87deca4d4ede2e553b871d",
+      "capturedAt": "2026-10-04T21:55:02.950Z",
+      "family": "tabs",
+      "runtime": "vue2",
+      "theme": "dark",
+      "requestedState": "rest",
+      "originalAnatomyAchieved": true,
+      "requirePrimaryOpen": false,
+      "observed": {
+        "owner": "pp-pigrj2j15aa",
+        "generation": "2",
+        "primary": 3,
+        "currentLease": true
+      },
+      "surfaceSet": 10
+    }
+  ],
+  "surfaceSets": [
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-dropdown-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-dropdown-trigger",
+        "ref": null,
+        "id": "",
+        "role": "button",
+        "controls": ["pui-dropdown-1-content"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": "false",
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 0,
+        "prototypeId": "brutalist-dropdown-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 2,
+        "prototypeId": "brutalist-dropdown-item",
+        "ref": null,
+        "id": "",
+        "role": "menuitem",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 2,
+        "prototypeId": "brutalist-dropdown-item",
+        "ref": null,
+        "id": "",
+        "role": "menuitem",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-dropdown-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-dropdown-trigger",
+        "ref": null,
+        "id": "",
+        "role": "button",
+        "controls": ["pui-dropdown-2-content"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": "false",
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 0,
+        "prototypeId": "brutalist-dropdown-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 2,
+        "prototypeId": "brutalist-dropdown-item",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 2,
+        "prototypeId": "brutalist-dropdown-item",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-select-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-select-trigger",
+        "ref": null,
+        "id": "",
+        "role": "combobox",
+        "controls": ["pui-select-6-content"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": "false",
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 1,
+        "prototypeId": "brutalist-select-value",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 0,
+        "prototypeId": "brutalist-select-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 3,
+        "prototypeId": "brutalist-select-item",
+        "ref": null,
+        "id": "",
+        "role": "option",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": "true",
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 5,
+        "parent": 3,
+        "prototypeId": "brutalist-select-item",
+        "ref": null,
+        "id": "",
+        "role": "option",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": "false",
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-select-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-select-trigger",
+        "ref": null,
+        "id": "",
+        "role": "combobox",
+        "controls": ["pui-select-8-content"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": "false",
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 1,
+        "prototypeId": "brutalist-select-value",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 0,
+        "prototypeId": "brutalist-select-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 3,
+        "prototypeId": "brutalist-select-item",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 5,
+        "parent": 3,
+        "prototypeId": "brutalist-select-item",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-dialog-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-dialog-trigger",
+        "ref": null,
+        "id": "",
+        "role": "button",
+        "controls": ["pui-dialog-2-content"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": "false",
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 0,
+        "prototypeId": "brutalist-dialog-mask",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 0,
+        "prototypeId": "brutalist-dialog-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 3,
+        "prototypeId": "brutalist-dialog-header",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 5,
+        "parent": 4,
+        "prototypeId": "brutalist-dialog-title",
+        "ref": null,
+        "id": "pui-dialog-2-title",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 6,
+        "parent": 4,
+        "prototypeId": "brutalist-dialog-description",
+        "ref": null,
+        "id": "pui-dialog-2-description",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 7,
+        "parent": 3,
+        "prototypeId": "brutalist-dialog-footer",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 8,
+        "parent": 7,
+        "prototypeId": "brutalist-dialog-close",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 9,
+        "parent": 8,
+        "prototypeId": "brutalist-button",
+        "ref": null,
+        "id": "",
+        "role": "button",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 10,
+        "parent": 3,
+        "prototypeId": "brutalist-dialog-close-icon",
+        "ref": null,
+        "id": "",
+        "role": "button",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-dialog-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-dialog-trigger",
+        "ref": null,
+        "id": "",
+        "role": "button",
+        "controls": ["pui-dialog-3-content"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": "false",
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 0,
+        "prototypeId": "brutalist-dialog-mask",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 0,
+        "prototypeId": "brutalist-dialog-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 3,
+        "prototypeId": "brutalist-dialog-header",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 5,
+        "parent": 4,
+        "prototypeId": "brutalist-dialog-title",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 6,
+        "parent": 4,
+        "prototypeId": "brutalist-dialog-description",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 7,
+        "parent": 3,
+        "prototypeId": "brutalist-dialog-footer",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 8,
+        "parent": 7,
+        "prototypeId": "brutalist-dialog-close",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 9,
+        "parent": 8,
+        "prototypeId": "brutalist-button",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 10,
+        "parent": 3,
+        "prototypeId": "brutalist-dialog-close-icon",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-tooltip-group",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-tooltip-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 1,
+        "prototypeId": "brutalist-tooltip-trigger",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 1,
+        "prototypeId": "brutalist-tooltip-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 0,
+        "prototypeId": "brutalist-tooltip-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 5,
+        "parent": 4,
+        "prototypeId": "brutalist-tooltip-trigger",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 6,
+        "parent": 4,
+        "prototypeId": "brutalist-tooltip-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-tooltip-group",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-tooltip-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 1,
+        "prototypeId": "brutalist-tooltip-trigger",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 1,
+        "prototypeId": "brutalist-tooltip-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 0,
+        "prototypeId": "brutalist-tooltip-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 5,
+        "parent": 4,
+        "prototypeId": "brutalist-tooltip-trigger",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 6,
+        "parent": 4,
+        "prototypeId": "brutalist-tooltip-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["visibility-hidden-or-collapse"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-hover-card-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": true,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-hover-card-trigger",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": true,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": null,
+        "prototypeId": "brutalist-hover-card-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": false,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-tabs-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-tabs-list",
+        "ref": null,
+        "id": "",
+        "role": "tablist",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 1,
+        "prototypeId": "brutalist-tabs-trigger",
+        "ref": null,
+        "id": "pui-a11y-1",
+        "role": "tab",
+        "controls": ["pui-a11y-2"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": "true",
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 1,
+        "prototypeId": "brutalist-tabs-trigger",
+        "ref": null,
+        "id": "",
+        "role": "tab",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": "false",
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 0,
+        "prototypeId": "brutalist-tabs-content",
+        "ref": null,
+        "id": "pui-a11y-2",
+        "role": "tabpanel",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 5,
+        "parent": 0,
+        "prototypeId": "brutalist-tabs-content",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": false,
+        "visibility": {
+          "visible": false,
+          "classification": "exempt-not-visible",
+          "limits": ["no-painted-layout-box"]
+        }
+      }
+    ],
+    [
+      {
+        "uid": 0,
+        "parent": null,
+        "prototypeId": "brutalist-tabs-root",
+        "ref": null,
+        "id": "",
+        "role": null,
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 1,
+        "parent": 0,
+        "prototypeId": "brutalist-tabs-list",
+        "ref": null,
+        "id": "",
+        "role": "tablist",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 2,
+        "parent": 1,
+        "prototypeId": "brutalist-tabs-trigger",
+        "ref": null,
+        "id": "pui-a11y-4",
+        "role": "tab",
+        "controls": ["pui-a11y-3"],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": "true",
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 3,
+        "parent": 1,
+        "prototypeId": "brutalist-tabs-trigger",
+        "ref": null,
+        "id": "",
+        "role": "tab",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": "false",
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      },
+      {
+        "uid": 4,
+        "parent": 0,
+        "prototypeId": "brutalist-tabs-content",
+        "ref": null,
+        "id": "pui-a11y-3",
+        "role": "tabpanel",
+        "controls": [],
+        "descriptions": [],
+        "ariaChecked": null,
+        "ariaSelected": null,
+        "ariaExpanded": null,
+        "hovered": false,
+        "focused": false,
+        "withinContent": true,
+        "currentLease": true,
+        "painted": true,
+        "visibility": {
+          "visible": true,
+          "classification": "source-model-visible",
+          "limits": []
+        }
+      }
+    ]
+  ]
+}

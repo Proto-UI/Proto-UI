@@ -38,8 +38,8 @@ criteria:
         - D-FOCUS-ENTRY-DELEGATION-0001
   - id: C-AS-FOCUS-ENTRY-0001-E
     text:
-      zh-CN: focus entry handle 必须支持运行时禁用与启用，以便由 current、hidden、disabled 等状态控制顺序焦点参与。
-      en: The focus entry handle must support runtime disabling and enabling so states such as current, hidden, and disabled can control sequential focus participation.
+      zh-CN: focus entry handle 必须支持运行时禁用与启用，以便由 current、hidden、disabled 等状态控制顺序焦点参与。entry disabled 必须取消该 entry role 的 pending request，不得取消独立 target role 的 pending request；重新启用不得复活已取消的 request。
+      en: The focus entry handle must support runtime disabling and enabling so states such as current, hidden, and disabled can control sequential focus participation. Entry disabled must cancel that entry role's pending request without cancelling an independent target role's pending request; re-enabling must not resurrect a cancelled request.
   - id: C-AS-FOCUS-ENTRY-0001-F
     text:
       zh-CN: focus entry 不得自动声明 `focused`、`focusVisible`、`active` 或 roving membership；需要这些 target-level facts 的原型必须显式使用 `asFocusable()` 或其他对应能力。
@@ -52,6 +52,13 @@ criteria:
     text:
       zh-CN: 程序化 entry focus request 必须通过宿主 capability 解析真实 focus target；当策略无可用目标时，不得伪造 focus facts。
       en: Programmatic entry focus requests must resolve the real focus target through host capability; when the policy has no available target, focus facts must not be faked.
+    dependsOn:
+      contracts:
+        - C-FOCUS-0001
+  - id: C-AS-FOCUS-ENTRY-0001-H
+    text:
+      en: A resolved entry target whose event-owning view cannot yet observe focus must reject acquisition without fabricating facts. Focus retains only the latest distinct entry intent and re-resolves its target on readiness, respecting role disable, explicit blur, supersession, retained-view and terminal-disposal boundaries. A first entry request without any resolvable host target remains a no-op; this does not create a pending target request or transfer descendant fact ownership to the entry region.
+      zh-CN: 已解析的 entry target 若其 event-owning view 尚不能观察 focus，必须拒绝 acquisition 而不得伪造 facts。Focus 只保留最新的独立 entry intent，在 readiness 时重新解析目标，并遵守 role disable、显式 blur、取代、retained-view 与 terminal-disposal 边界。首次 entry request 若没有任何可解析 host target，仍为 no-op；这不创建 pending target request，也不把后代 fact ownership 转给 entry region。
     dependsOn:
       contracts:
         - C-FOCUS-0001
@@ -75,6 +82,12 @@ verifies:
   tests:
     - T-FOCUS-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Owner-approved rejected entry retention follows actual-owner readiness without changing first-request no-target behavior or target fact ownership.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Clarified entry-role pending cancellation and non-resurrection independently of target-role eligibility.
   - version: 0.1.0
     change: introduced
     summary: Added asFocusEntry as the first focus entry region hook for descendant-first tabpanel behavior.
