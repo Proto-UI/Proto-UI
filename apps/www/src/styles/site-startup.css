@@ -1,0 +1,73 @@
+/* Application loading/failure presentation only, never a replacement Prototype.
+   Shared family theme tokens keep the readable native shell intentional while
+   real components initialize. No animation, alpha, blur, or interaction state
+   is simulated. Each selector stops owning paint on successful enhancement. */
+.proto-previewer__skeleton,
+.site-header:not([data-site-menu-ready]) .site-header-runtime-placeholder,
+[data-site-select-root]:not([data-site-shadcn-initialized='1']) [data-site-select-trigger],
+.site-header:not([data-site-menu-ready]) [data-site-header-fallback-summary] {
+  box-sizing: border-box;
+  border: var(--site-surface-border-width, 1px) solid var(--color-border);
+  border-radius: var(--site-surface-radius, var(--pui-radius-md));
+  background: var(--color-background);
+  color: var(--color-foreground);
+}
+.site-header:not([data-site-menu-ready]) .site-header-runtime-placeholder,
+[data-site-select-root]:not([data-site-shadcn-initialized='1']) [data-site-select-trigger] {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--site-select-control-height, 2.25rem);
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.375rem 0.75rem;
+  font: inherit;
+  white-space: nowrap;
+}
+.site-header:not([data-site-menu-ready]) .site-header-runtime-placeholder {
+  width: 100%;
+}
+.proto-previewer__skeleton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: var(--runtime-box-content-padding, 1.5rem 1rem);
+}
+.proto-previewer__loading-title {
+  font-weight: 500;
+  color: var(--color-foreground);
+}
+.proto-previewer__loading-detail {
+  max-width: 32rem;
+  color: var(--color-muted-foreground);
+  text-align: center;
+  text-wrap: balance;
+}
+.site-header:not([data-site-menu-ready]) [data-site-header-fallback-summary]:focus-visible {
+  outline: 2px solid var(--color-ring);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  .proto-previewer__skeleton,
+  .site-header:not([data-site-menu-ready]) .site-header-runtime-placeholder,
+  [data-site-select-root]:not([data-site-shadcn-initialized='1']) [data-site-select-trigger],
+  .site-header:not([data-site-menu-ready]) [data-site-header-fallback-summary] {
+    border-color: CanvasText;
+    background: Canvas;
+    color: CanvasText;
+  }
+}
+
+/* Legacy renderer preparation may clear its mount. The application status and
+   real, not-yet-published mount share one reserved cell until publication. */
+[data-previewer-startup-shell] {
+  display: grid !important;
+}
+[data-previewer-startup-shell] > .proto-previewer__skeleton,
+[data-previewer-startup-shell] > .host {
+  grid-area: 1 / 1;
+}
+[data-previewer-startup-pending] {
+  visibility: hidden;
+}

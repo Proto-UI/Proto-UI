@@ -7,7 +7,7 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'shadcn-scroll-area-root',
-        className: 'h-48 w-full border bg-background',
+        className: 'h-48 w-full rounded-md border bg-background',
         children: [
           {
             kind: 'proto',

@@ -6,7 +6,7 @@ const scrollAreaThumb = definePrototype<ShadcnScrollAreaThumbProps, ShadcnScroll
   name: 'shadcn-scroll-area-thumb',
   setup(def) {
     asScrollAreaThumb();
-    def.feedback.style.use(tw('relative flex-1 rounded-full bg-border'));
+    def.feedback.style.use(tw('relative flex-1 rounded-full bg-border border border-transparent'));
   },
 });
 

@@ -29,6 +29,7 @@ const EXPECTED_COMPONENT_IDS = {
   shadcn: [...EXPECTED_SHARED_BASE_FAMILY_IDS, 'input', 'checkbox', 'radio-group'],
   brutalist: [
     ...EXPECTED_SHARED_BASE_FAMILY_IDS,
+    'checkbox',
     'badge',
     'card',
     'skeleton',
@@ -549,9 +550,48 @@ describe('Website projection-family manifests', () => {
       }
     }
 
-    expect(tryResolveProjectionRecipe('demo-brutalist-checkbox')).toBeNull();
     expect(tryResolveProjectionRecipe('demo-brutalist-radio-group')).toBeNull();
     expect(tryResolveProjectionRecipe('demo-shadcn-card')).toBeNull();
+  });
+
+  it('resolves the admitted Checkbox recipe and rejects unadmitted anatomy', () => {
+    expect(PROJECTION_FAMILY_MANIFESTS.brutalist.families.checkbox.baseFamilyId).toBe(
+      'P-BASE-CHECKBOX'
+    );
+    expect(tryResolveProjectionRecipe('demo-brutalist-checkbox')).toEqual({
+      projectionFamilyId: 'brutalist',
+      familyId: 'checkbox',
+    });
+    expect(resolveProjectionPart('brutalist', 'checkbox', 'root')).toEqual({
+      basePrototypeId: 'P-BASE-CHECKBOX',
+      prototypeId: 'brutalist-checkbox-root',
+    });
+    expect(resolveProjectionPart('brutalist', 'checkbox', 'indicator')).toEqual({
+      basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
+      prototypeId: 'brutalist-checkbox-indicator',
+    });
+    expect(() => resolveProjectionPart('brutalist', 'checkbox', 'label')).toThrow(
+      /checkbox.*no part label/i
+    );
+  });
+
+  it('rejects an incomplete Checkbox anatomy instead of borrowing the Shadcn Indicator', () => {
+    const incomplete = withoutPart(PROJECTION_FAMILY_MANIFESTS.brutalist, 'checkbox', 'indicator');
+    const registry: ProjectionFamilyManifestRegistry = {
+      ...PROJECTION_FAMILY_MANIFESTS,
+      brutalist: incomplete,
+    };
+
+    expect(() => tryResolveProjectionRecipe('demo-brutalist-checkbox', registry)).toThrow(
+      /brutalist.*checkbox.*indicator/i
+    );
+    expect(() => resolveProjectionPart('brutalist', 'checkbox', 'indicator', registry)).toThrow(
+      /brutalist.*checkbox.*indicator/i
+    );
+    expect(resolveProjectionPart('shadcn', 'checkbox', 'indicator', registry)).toEqual({
+      basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
+      prototypeId: 'shadcn-checkbox-indicator',
+    });
   });
 
   it('declares every required Base Select part with a concrete same-lane Prototype identity', () => {
@@ -719,12 +759,18 @@ describe('Website projection-family manifests', () => {
 
 describe('partial new projection families', () => {
   for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
-    it(`${family} declares only its real Button and rejects every missing kind`, () => {
+    it(`${family} declares only its real parts and rejects every missing kind`, () => {
       const manifest = PROJECTION_FAMILY_MANIFESTS[family];
-      expect(Object.keys(manifest.families)).toEqual(['button']);
+      expect(Object.keys(manifest.families)).toEqual(
+        family === 'bootstrap-2-3-2'
+          ? ['button', 'checkbox', 'switch', 'toggle', 'input', 'textarea', 'separator']
+          : ['button']
+      );
       expect(() => validateProjectionFamilyManifest(manifest)).not.toThrow();
       expect(resolveProjectionPart(family, 'button', 'root').prototypeId).toBe(`${family}-button`);
-      for (const kind of ['select', 'switch', 'dialog', 'tabs', 'checkbox']) {
+      for (const kind of family === 'bootstrap-2-3-2'
+        ? ['select', 'dialog', 'tabs', 'radio-group', 'tooltip']
+        : ['select', 'switch', 'dialog', 'tabs', 'checkbox']) {
         expect(() => resolveProjectionPart(family, kind, 'root')).toThrow(
           /no family.*fallback is forbidden/
         );

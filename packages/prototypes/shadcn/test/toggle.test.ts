@@ -16,8 +16,32 @@ import {
 } from '@proto.ui/module-as-trigger';
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
 import toggle from '../src/toggle';
+import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
+import { styleContains } from '../../test-utils/style';
+
+AdaptToWebComponent(toggle);
 
 describe('prototypes/shadcn: toggle', () => {
+  it('declares no accidental text selection on the action surface while retaining activation', async () => {
+    // T-SHADCN-TOGGLE-0001-CASE-CONTENT-SELECTION
+    const root = document.createElement('shadcn-toggle');
+    root.textContent = 'Italic';
+    document.body.appendChild(root);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    try {
+      expect(styleContains(root, 'select-none')).toBe(true);
+      expect(root.getAttribute('role')).toBe('button');
+      expect(root.getAttribute('aria-pressed')).toBe('false');
+      root.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0 }));
+      root.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, button: 0 }));
+      root.click();
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      expect(root.getAttribute('aria-pressed')).toBe('true');
+    } finally {
+      root.remove();
+    }
+  });
+
   it('maps variant, size, active and disabled to style tokens', () => {
     let rawProps: Record<string, unknown> = {
       variant: 'default',

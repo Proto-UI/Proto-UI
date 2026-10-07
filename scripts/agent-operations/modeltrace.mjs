@@ -2,12 +2,22 @@ import { createHash, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import { isDeepStrictEqual } from 'node:util';
-import { analyzeGlobalOutputs } from './vendor/modeltrace/fingerprint-core.mjs';
 
 export const MODELTRACE_POLICY = 'proto-ui.modeltrace.2026-10-04.1';
 export const MODELTRACE_REVISION = 'd4131b30243dfa05e70180b5eedde742103f1d73';
 const BANK_DIGEST = 'e514c76928ea38d23bc0f14d3935f23c97b1efb6d96b18a19bdc88ad2d830536';
 const SCORER_DIGEST = '83fa5bd611e18f8339122582335123c8ea168ed242298bb31f4e363abeeb6e4a';
+const scorerBytes = fs.readFileSync(
+  new URL('./vendor/modeltrace/fingerprint-core.mjs', import.meta.url)
+);
+assert(
+  createHash('sha256').update(scorerBytes).digest('hex') === SCORER_DIGEST,
+  'pinned scorer checksum changed; reviewed update and remeasurement required'
+);
+// Evaluate these verified bytes, not a pathname that can be replaced after verification.
+const { analyzeGlobalOutputs } = await import(
+  `data:text/javascript;base64,${scorerBytes.toString('base64')}`
+);
 const HEX = /^[a-f0-9]{64}$/;
 const REPOSITORY = /^github\.com:[^/\s]+\/[^/\s]+$/;
 const LABEL = /^[a-zA-Z0-9][a-zA-Z0-9._/+-]{0,119}$/;
@@ -618,6 +628,14 @@ export function validateModelTraceReceipt(receipt) {
       'invalid candidate statistics'
     );
   }
+  for (let index = 0; index < result.candidates.length; index += 1) {
+    for (let previous = 0; previous < index; previous += 1) {
+      assert(
+        result.candidates[index].modelId !== result.candidates[previous].modelId,
+        'candidate model identities must be distinct'
+      );
+    }
+  }
   if (result.status === 'failed') {
     assert(
       ['modelId', 'familyId', 'probability', 'margin'].every((key) => result[key] === null),
@@ -743,7 +761,13 @@ export function readModelTraceJson(path, label = 'artifact') {
   }
 }
 
-export function loadModelTraceRecord({ recordPath, contextPath, repositoryId, now = new Date() }) {
+export function loadModelTraceRecord({
+  recordPath,
+  contextPath,
+  repositoryId,
+  now = new Date(),
+  fresh = true,
+}) {
   const context = readModelTraceJson(contextPath, 'context');
   const record = readModelTraceJson(recordPath, 'record');
   exact(
@@ -762,6 +786,11 @@ export function loadModelTraceRecord({ recordPath, contextPath, repositoryId, no
     isDeepStrictEqual(record.receipt, recomputed.receipt),
     'record does not reproduce its raw-sample fingerprint and anomalies'
   );
+  if (fresh === false) {
+    validateModelTraceContext(context);
+    assertModelTraceScope(record.receipt, context, repositoryId ?? context.repositoryId);
+    return record.receipt;
+  }
   return assertModelTraceFresh(record.receipt, context, {
     repositoryId: repositoryId ?? context.repositoryId,
     now,

@@ -58,11 +58,12 @@ export function runModelTraceCli(argv, { now = new Date(), stdout = process.stdo
       throw new Error('private ModelTrace --out must name a new file');
   }
   let value;
-  if (command === 'challenge')
+  if (command === 'challenge') {
+    assertOutsideRepository(fs.realpathSync(args.get('--context')), 'context');
     value = createModelTraceChallenge(readModelTraceJson(args.get('--context'), 'context'), {
       now,
     });
-  else if (command === 'challenge-digest')
+  } else if (command === 'challenge-digest')
     value = {
       challengeDigest: computeModelTraceChallengeDigest(
         readModelTraceJson(args.get('--challenge'), 'challenge')

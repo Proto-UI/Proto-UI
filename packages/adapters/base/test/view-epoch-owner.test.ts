@@ -307,3 +307,269 @@ describe('adapter-base: view epoch owner', () => {
     expect(createSession).toHaveBeenCalledTimes(2);
   });
 });
+
+describe('adapter-base: exceptional view cleanup', () => {
+  it('rebinds owner capabilities after a real runtime view disposer throws', async () => {
+    const { definePrototype } = await import('@proto.ui/core');
+    const { asFocusable } = await import('@proto.ui/hooks');
+    const { createAdapterHost } = await import('../src');
+    const {
+      FOCUS_INSTANCE_TOKEN_CAP,
+      FOCUS_PARENT_CAP,
+      FOCUS_ROOT_TARGET_CAP,
+      FOCUS_REQUEST_FOCUS_CAP,
+    } = await import('@proto.ui/module-focus');
+    let target: any;
+    const proto = definePrototype({
+      name: 'exceptional-view-caps',
+      setup() {
+        target = asFocusable();
+      },
+    });
+    const token = {};
+    const ownerModules = {
+      focus: () =>
+        [
+          [FOCUS_INSTANCE_TOKEN_CAP, token],
+          [FOCUS_PARENT_CAP, () => null],
+        ] as const,
+    };
+    const requested: HTMLElement[] = [];
+    const physical = document.createElement('button');
+    const { EVENT_ROOT_TARGET_CAP, EVENT_GLOBAL_TARGET_CAP } =
+      await import('@proto.ui/module-event');
+    const viewModules = {
+      event: () =>
+        [
+          [EVENT_ROOT_TARGET_CAP, () => physical],
+          [EVENT_GLOBAL_TARGET_CAP, () => document],
+        ] as any,
+      focus: () =>
+        [
+          ...ownerModules.focus(),
+          [FOCUS_ROOT_TARGET_CAP, () => physical],
+          [
+            FOCUS_REQUEST_FOCUS_CAP,
+            (node: HTMLElement) => {
+              requested.push(node);
+              return false;
+            },
+          ],
+        ] as any,
+    };
+    const owner = createViewEpochOwner({ prototypeName: proto.name });
+    const session = owner.initialize({
+      modules: ownerModules,
+      createSession: (wiring) =>
+        createAdapterHost(
+          proto,
+          {
+            getRawProps: () => ({}),
+            schedule: (task) => task(),
+            commit: (_children, signal) => signal?.done(),
+          },
+          { onRuntimeReady: wiring.onRuntimeReady, afterUnmount: wiring.afterUnmount },
+          { initialMount: 'manual' }
+        ),
+    });
+    const failure = new Error('view release failure');
+    owner.attachView({
+      modules: viewModules,
+      disposeView: () => {
+        throw failure;
+      },
+      createSession: () => session,
+    });
+    await session.mount();
+    let caught: unknown;
+    try {
+      owner.detachView();
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBe(failure);
+    expect(owner.hasView).toBe(false);
+    requested.length = 0;
+    session.invokeInCallbackScope(() => target.focus());
+    try {
+      expect(requested).toEqual([]);
+    } finally {
+      await owner.dispose();
+    }
+  });
+
+  it('preserves a newer epoch attached reentrantly by the old disposer', async () => {
+    const owner = createViewEpochOwner<any>({ prototypeName: 'exceptional-reentrant-view' });
+    let currentCaps: unknown;
+    const api = {
+      attach: (_name: string, entries: unknown) => {
+        currentCaps = entries;
+        return true;
+      },
+      reset: () => {
+        currentCaps = undefined;
+      },
+    };
+    const session = {
+      viewIntent: { getSnapshot: () => ({ present: true, version: 0 }), subscribe: () => () => {} },
+      mount: vi.fn(async () => {}),
+      unmount: vi.fn(async () => {}),
+      dispose: vi.fn(async () => {}),
+    } as any;
+    owner.initialize({
+      modules: { focus: () => [['epoch', 'owner']] as any },
+      createSession: (wiring) => {
+        wiring.onRuntimeReady(api as any);
+        return session;
+      },
+    });
+    const newDispose = vi.fn();
+    const failure = new Error('old disposer failed after replacement');
+    owner.attachView({
+      modules: { focus: () => [['epoch', 'old']] as any },
+      createSession: () => session,
+      disposeView: () => {
+        owner.attachView({
+          modules: { focus: () => [['epoch', 'new']] as any },
+          disposeView: newDispose,
+          createSession: () => session,
+        });
+        throw failure;
+      },
+    });
+    let caught: unknown;
+    try {
+      owner.detachView();
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBe(failure);
+    expect(owner.hasView).toBe(true);
+    expect(currentCaps).toEqual([['epoch', 'new']]);
+    expect(newDispose).not.toHaveBeenCalled();
+    await owner.dispose();
+    expect(newDispose).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases the view even when terminal session disposal throws synchronously', () => {
+    const owner = createViewEpochOwner<any>({ prototypeName: 'exceptional-terminal-view' });
+    const failure = new Error('session disposal failed');
+    const unsubscribe = vi.fn();
+    const session = {
+      viewIntent: {
+        getSnapshot: () => ({ present: true, version: 0 }),
+        subscribe: () => unsubscribe,
+      },
+      mount: vi.fn(async () => {}),
+      unmount: vi.fn(async () => {}),
+      dispose: () => {
+        throw failure;
+      },
+    } as any;
+    owner.initialize({ modules: {}, createSession: () => session });
+    const release = vi.fn();
+    owner.attachView({ modules: {}, disposeView: release, createSession: () => session });
+    expect(() => owner.dispose()).toThrow(failure);
+    expect(release).toHaveBeenCalledTimes(1);
+    expect(unsubscribe).toHaveBeenCalledTimes(1);
+    expect(owner.hasView).toBe(false);
+  });
+});
+
+function fixture() {
+  const owner = createViewEpochOwner<any>({ prototypeName: 'review-epoch-owner' });
+  const caps = new Map<string, unknown>();
+  const session = {
+    viewIntent: { getSnapshot: () => ({ present: true, version: 0 }), subscribe: () => () => {} },
+    mount: vi.fn(async () => {}),
+    unmount: vi.fn(() => Promise.resolve()),
+    dispose: vi.fn(() => Promise.resolve()),
+  };
+  owner.initialize({
+    modules: { focus: () => [['id', 'owner']] as any },
+    createSession(wiring) {
+      wiring.onRuntimeReady({
+        attach(name: string, entries: unknown) {
+          caps.set(name, entries);
+          return true;
+        },
+        reset(name: string) {
+          caps.delete(name);
+        },
+      } as any);
+      return session as any;
+    },
+  });
+  function attach(id: string, dispose = () => {}) {
+    owner.attachView({
+      modules: { focus: () => [['id', id]] as any },
+      disposeView: dispose,
+      createSession: () => session as any,
+    });
+  }
+  return { owner, caps, session, attach };
+}
+it('cleanup still runs on synchronous session unmount error and original error wins', () => {
+  const f = fixture(),
+    error = new Error('unmount-original'),
+    cleanup = vi.fn(() => {
+      throw new Error('cleanup-secondary');
+    });
+  f.attach('old', cleanup);
+  f.session.unmount.mockImplementation(() => {
+    throw error;
+  });
+  expect(() => f.owner.detachView()).toThrow(error);
+  expect(cleanup).toHaveBeenCalledOnce();
+  expect(f.owner.hasView).toBe(false);
+  expect(f.caps.get('focus')).toEqual([['id', 'owner']]);
+  f.owner.dispose();
+});
+it('a reentrant replacement from session unmount survives the previous detach', async () => {
+  const f = fixture(),
+    oldDispose = vi.fn(),
+    nextDispose = vi.fn();
+  f.attach('old', oldDispose);
+  f.session.unmount.mockImplementation(() => {
+    f.attach('new', nextDispose);
+    return Promise.resolve();
+  });
+  await f.owner.detachView();
+  expect(oldDispose).toHaveBeenCalledOnce();
+  expect(nextDispose).not.toHaveBeenCalled();
+  expect(f.owner.hasView).toBe(true);
+  expect(f.caps.get('focus')).toEqual([['id', 'new']]);
+  await f.owner.dispose();
+  expect(nextDispose).toHaveBeenCalledOnce();
+});
+it('a rejected session unmount promise retains its error after synchronous cleanup', async () => {
+  const f = fixture(),
+    error = new Error('async-unmount'),
+    cleanup = vi.fn();
+  f.attach('old', cleanup);
+  f.session.unmount.mockImplementation(() => Promise.reject(error));
+  await expect(f.owner.detachView()).rejects.toBe(error);
+  expect(cleanup).toHaveBeenCalledOnce();
+  expect(f.owner.hasView).toBe(false);
+  expect(f.caps.get('focus')).toEqual([['id', 'owner']]);
+  await f.owner.dispose();
+});
+
+for (const action of ['detachView', 'dispose'] as const) {
+  it(`${action} observes an abandoned async rejection when cleanup throws synchronously`, async () => {
+    const f = fixture();
+    const syncError = new Error('synchronous cleanup');
+    const asyncError = new Error('asynchronous session release');
+    const result = Promise.reject(asyncError);
+    const observe = vi.spyOn(result, 'catch');
+    f.attach('old', () => {
+      throw syncError;
+    });
+    f.session[action === 'detachView' ? 'unmount' : 'dispose'].mockReturnValue(result);
+    expect(() => f.owner[action]()).toThrow(syncError);
+    expect(observe).toHaveBeenCalledOnce();
+    expect(f.owner.hasView).toBe(false);
+    await Promise.resolve();
+    if (action === 'detachView') await f.owner.dispose();
+  });
+}

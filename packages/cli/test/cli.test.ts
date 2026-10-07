@@ -141,7 +141,6 @@ describe('@proto.ui/cli', () => {
       expect(entry.importPath).not.toBe(entry.packageName);
     }
   });
-
   it('registers Shadcn Input as a direct package component on every Web adapter', () => {
     const input = COMPONENT_REGISTRY['shadcn-input'];
     expect(input).toMatchObject({

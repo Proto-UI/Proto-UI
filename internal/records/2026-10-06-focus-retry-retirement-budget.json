@@ -1,0 +1,24 @@
+{
+  "date": "2026-10-06",
+  "pr": 832,
+  "head": "13dd53858",
+  "ciRun": "37476669885",
+  "platform": "linux-ci",
+  "measured": {
+    "adapter-react": 91175,
+    "adapter-vue": 90949
+  },
+  "previousCaps": {
+    "adapter-react": 91029,
+    "adapter-vue": 90800
+  },
+  "newCaps": {
+    "adapter-react": 91300,
+    "adapter-vue": 91050
+  },
+  "headroom": {
+    "adapter-react": 125,
+    "adapter-vue": 101
+  },
+  "attribution": "0b7e278a0 focus retry-frame retirement adds 3 lines per adapter adapt.ts; minified react 339826 / vue 338708"
+}

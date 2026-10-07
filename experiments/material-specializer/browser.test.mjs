@@ -293,6 +293,125 @@ try {
     await page.waitForFunction(() => window.probe.state().quality === 'experimental-owned-texture');
   }
   await capture('12g-ancestor-filter-restored');
+  await page.evaluate(() => {
+    window.savedBlendBackground = document.body.style.backgroundColor;
+    document.body.style.backgroundColor = 'rgb(128, 128, 128)';
+    document.querySelector('#scene').style.mixBlendMode = 'difference';
+  });
+  await page.waitForFunction(() => window.probe.state().quality === 'unavailable');
+  assert.equal(
+    await page.evaluate(() => window.probe.pixels()),
+    'data:,',
+    'ancestor blending withdraws retained enhanced pixels'
+  );
+  await capture('12h-ancestor-blend-unavailable');
+  await page.evaluate(() => {
+    document.querySelector('#scene').style.mixBlendMode = 'normal';
+    document.body.style.backgroundColor = window.savedBlendBackground;
+  });
+  await page.waitForFunction(() => window.probe.state().quality === 'experimental-owned-texture');
+  await capture('12i-ancestor-blend-restored');
+  const borderGeometry = () =>
+    page.evaluate(() => {
+      const host = document.querySelector('#glass');
+      const canvas = host.querySelector('canvas');
+      const box = canvas.getBoundingClientRect();
+      const scene = document.querySelector('#scene').getBoundingClientRect();
+      const gl = canvas.getContext('webgl');
+      const pipeline = gl.getParameter(gl.CURRENT_PROGRAM);
+      const bounds = Array.from(
+        gl.getUniform(pipeline, gl.getUniformLocation(pipeline, 'u_bounds'))
+      );
+      return {
+        width: box.width,
+        height: box.height,
+        backing: [canvas.width, canvas.height],
+        dpr: devicePixelRatio,
+        radius: Number(host.dataset.materialRadius),
+        bounds,
+        expectedBounds: [
+          (box.left - scene.left) / 800,
+          (box.top - scene.top) / 480,
+          box.width / 800,
+          box.height / 480,
+        ],
+        borderColor: getComputedStyle(host).borderTopColor,
+      };
+    });
+  const assertBorderGeometry = async (width, height, radius) => {
+    const geometry = await borderGeometry();
+    assert.equal(geometry.width, width);
+    assert.equal(geometry.height, height);
+    assert.deepEqual(geometry.backing, [
+      Math.ceil(width * geometry.dpr),
+      Math.ceil(height * geometry.dpr),
+    ]);
+    assert.equal(geometry.radius, radius);
+    geometry.bounds.forEach((value, index) =>
+      assert.ok(Math.abs(value - geometry.expectedBounds[index]) < 1e-5)
+    );
+    assert.equal(geometry.borderColor, 'rgb(40, 80, 120)');
+  };
+  await page.evaluate(() => {
+    const host = document.querySelector('#glass');
+    window.savedBorderStyle = host.getAttribute('style');
+    Object.assign(host.style, {
+      boxSizing: 'border-box',
+      width: '200px',
+      height: '80px',
+      padding: '17px',
+      border: '2px solid rgb(40, 80, 120)',
+      borderRadius: '20px',
+    });
+  });
+  await page.waitForFunction(
+    () =>
+      window.probe.state().quality === 'experimental-owned-texture' &&
+      window.probe.state().radius === '18'
+  );
+  await assertBorderGeometry(196, 76, 18);
+  await capture('12j-uniform-border-padding-frame');
+  const borderGeneration = (await state()).sourceGeneration;
+  await page.evaluate(() => {
+    document.querySelector('#glass').style.borderWidth = '4px';
+  });
+  await page.waitForFunction(
+    () =>
+      window.probe.state().quality === 'experimental-owned-texture' &&
+      window.probe.state().radius === '16'
+  );
+  assert.equal((await state()).sourceGeneration, borderGeneration);
+  await assertBorderGeometry(192, 72, 16);
+  await capture('12k-border-only-invalidation');
+  await page.evaluate(() => {
+    Object.assign(document.querySelector('#glass').style, {
+      borderWidth: '1px 3px 5px 7px',
+      borderRadius: '0px',
+    });
+  });
+  await page.waitForFunction(
+    () =>
+      window.probe.state().quality === 'experimental-owned-texture' &&
+      window.probe.state().radius === '0'
+  );
+  await assertBorderGeometry(190, 74, 0);
+  await capture('12l-asymmetric-square-border');
+  await page.evaluate(() => {
+    document.querySelector('#glass').style.borderRadius = '20px';
+  });
+  await page.waitForFunction(() => window.probe.state().reason === 'geometry-unavailable');
+  await capture('12m-incompatible-inner-corners');
+  await page.evaluate(() => {
+    const host = document.querySelector('#glass');
+    if (window.savedBorderStyle === null) host.removeAttribute('style');
+    else host.setAttribute('style', window.savedBorderStyle);
+  });
+  await page.waitForFunction(
+    () =>
+      window.probe.state().quality === 'experimental-owned-texture' &&
+      window.probe.state().radius === '24'
+  );
+  await capture('12n-border-context-restored');
 
   await page.evaluate(() => {
     const iframe = document.createElement('iframe');

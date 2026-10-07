@@ -68,7 +68,12 @@ const localeActions = otherLocale
   >
     <HomeActions id="home-navigation-desktop" {actions} />
   </nav>
-  <div class="site-header-panel" id="site-header-panel" data-site-header-panel>
+  <details class="site-header-panel" id="site-header-panel" data-site-header-panel>
+    <summary
+      data-site-header-fallback-summary
+      aria-label={zh ? '导航与设置' : 'Navigation and settings'}
+      ><span class="site-header-menu-icon" aria-hidden="true"></span></summary
+    >
     <div data-site-header-surface-mount></div>
     <div data-site-header-panel-content>
       <div data-site-header-panel-body>
@@ -100,7 +105,7 @@ const localeActions = otherLocale
         </div>
       </div>
     </div>
-  </div>
+  </details>
   <div class="site-header-context" data-site-header-context>
     <div class="site-header-runtime home-runtime-preferences" data-site-header-preferences>
       <HomeActions id="home-preferences" actions={[]} runtimeControl />

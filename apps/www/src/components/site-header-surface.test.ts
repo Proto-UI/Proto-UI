@@ -318,3 +318,25 @@ describe('native Header content inside real family projection surfaces', () => {
     expect(faults.calls).toEqual(['react', 'wc']);
   }, 20000);
 });
+
+it('preserves a focused native language destination when the first homepage projection replaces its fallback', async () => {
+  document.body.innerHTML = `<header data-site-header data-homepage-runtime>
+    <details data-site-header-panel id="panel" open><summary data-site-header-fallback-summary>Navigation</summary><div data-site-header-surface-mount></div><div data-site-header-panel-content>
+      <div id="language" data-homepage-actions><div data-homepage-fallback><a href="/en/" data-home-action-variant="minimal">English</a></div><div data-homepage-mount></div></div>
+    </div></details>
+    <div id="preferences" data-homepage-actions data-homepage-controls="runtime"><div data-homepage-fallback></div><div data-homepage-mount></div></div>
+    <div id="menu" data-homepage-actions><div data-homepage-fallback><span data-homepage-menu>Navigation</span></div><div data-homepage-mount></div></div>
+  </header>`;
+  const header = document.querySelector<HTMLElement>('header')!;
+  header.querySelector<HTMLAnchorElement>('a')!.focus();
+  const handle = initHomepageRuntime(header)!;
+  handles.push(handle);
+  await vi.waitFor(() => expect(handle.getSnapshot().phase).toBe('ready'), { timeout: 15000 });
+  const projected = header.querySelector(
+    '#language [data-projection-generation-state="active"] a'
+  )!;
+  expect(projected).not.toBeNull();
+  expect(document.activeElement).toBe(projected);
+  expect(header.dataset.siteMenuOpen).toBe('true');
+  expect(projected.closest('[hidden], [inert]')).toBeNull();
+}, 30000);

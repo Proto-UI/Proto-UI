@@ -42,6 +42,9 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'packages/adapters/base/test/focus-intent-retries.browser.test.ts',
+  'packages/adapters/react/test/focus-entry-readiness.browser.test.ts',
+  'packages/adapters/vue/test/focus-request-readiness.browser.test.ts',
   'apps/www/test/template-style.browser.test.ts',
   'apps/www/test/evidence/brutalist-spinner.capture.browser.test.ts',
   'apps/www/test/evidence/brutalist-fonts.browser.test.ts',
@@ -52,11 +55,13 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/test/button-view-lifetime.browser.test.ts',
   'apps/www/test/radio-group-entry.browser.test.ts',
   'apps/workspace/test/lifecycle.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
@@ -67,6 +72,12 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts',
@@ -91,13 +102,24 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
+  'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
 ]);
 
-// Built Pagefind evidence uses its dedicated production owner, never the dev server.
+// Production-specific evidence uses dedicated built-site owners, never the dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
 ]);
+
+// Each production-only suite has an executable owner; exclusion is never a skip.
+export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts':
+    'apps/www/scripts/run-search-production-evidence.mjs',
+  'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':
+    '.github/workflows/site-startup-theme-evidence.yml',
+});
 
 // Bound each CI worker to a deterministic share of the complete development inventory.
 // Sorted round-robin assignment is deterministic and never changes local coverage.

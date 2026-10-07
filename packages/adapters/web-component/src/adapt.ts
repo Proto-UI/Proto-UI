@@ -12,9 +12,7 @@ import {
   createHostWiring,
   createHostSurfaceProjection,
   createEventGate,
-  createDefaultWebColorSchemeSource,
-  createDefaultWebPreferenceSource,
-  createDefaultWebStyleSupportSource,
+  createRebindableEventTarget,
   createScopedExposesReader,
   createWebProtoEventRouter,
   createViewEpochOwner,
@@ -42,7 +40,6 @@ import {
   setElementProps,
   unbindController,
 } from './props';
-import { createOwnedVisualSurface } from './visual-surface';
 import { SlotProjector } from './slot-projector';
 import { createOwnedTwTokenApplier } from './feedback-style';
 import { installDebugHooks, removeDebugHooks } from './debug/hooks';
@@ -54,21 +51,33 @@ import {
 import { createDefaultMetaGetter } from './platform/meta';
 import {
   createLogicalInstance,
+  bindLogicalParent,
   bindLogicalEventTarget,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   markProtoInstance,
   unbindProtoInstance,
   unbindLogicalEventTarget,
 } from './platform/instance-tree';
 import { createWebEffectsPort } from './runtime/effects-port';
-import { getExperimentalVisualConsumer } from './runtime/experimental-visual-consumer';
+import { createShadowTextControlSurface } from './shadow-text-control-surface';
 import {
-  OWNED_MATERIAL_ID,
-  createOwnedMaterialBinding,
-} from '@proto.ui/module-feedback/internal/owned-slot';
-import { createOpaqueMaterialVisualSink } from './material/owned-texture-sink';
-import { createWebComponentModules, createWebComponentOwnerModules } from './runtime/modules';
+  createRebindableWebOverlayModal,
+  createWebComponentModules,
+  createWebComponentOwnerModules,
+} from './runtime/modules';
 import { createWebComponentHostSession } from './runtime/session';
+import { createShadowOwnerShell } from './shadow-owner-shell';
+import { normalizeShadowProfile, type WebComponentShadowSplitOptions } from './shadow-profile';
+import { createShadowSplitResources, type ShadowSplitResources } from './shadow-split-resources';
+import {
+  createShadowSplitEffectsPort,
+  hasVerifiedShadowSplitBaseRecipe,
+} from './shadow-split-effects';
+import { createPortalConcealBarrier } from './portal-conceal';
+import { adoptWebComponentPortalProjections, isWebComponentPortaled } from './portal-mount';
+import { createRebindableColorSchemeSource } from './color-scheme-source';
+import { createRebindableWebKeyedMetaSources } from './keyed-meta-sources';
 import type { WebComponentAdapterConstructor } from './types';
 import type {
   RuntimeCheckpoint,
@@ -77,6 +86,9 @@ import type {
 } from '@proto.ui/runtime';
 
 export { __WC_DEBUG_SYS } from './debug/hooks';
+export type { ShadowStyleArtifactV1 } from './shadow-style-artifact';
+export type { ShadowColorSchemeSource } from './shadow-color-scheme-environment';
+export type { WebComponentShadowSplitOptions } from './shadow-profile';
 export type {
   WebComponentAdapterConstructor,
   WebComponentAdapterHandle,
@@ -85,12 +97,12 @@ export type {
 
 function assertKebabCase(tag: string) {
   if (!tag.includes('-') || tag.toLowerCase() !== tag) {
-    throw new Error(`[WC Adapter] custom element name must be kebab-case and contain '-': ${tag}`);
+    throw new Error(`custom-element:name:${tag}`);
   }
 }
 
 export interface WebComponentAdapterOptions<Props extends PropsBaseType = PropsBaseType> {
-  shadow?: boolean;
+  shadow?: boolean | WebComponentShadowSplitOptions;
   register?: boolean;
   registerAs?: string;
   getProps?: (el: HTMLElement) => Partial<Props> | null | undefined;
@@ -127,13 +139,21 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   const textControl = getModuleDeclaration(proto, TEXT_CONTROL_DECLARATION)?.config;
   const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
 
-  const shadow = opt.shadow ?? false;
+  const profile = normalizeShadowProfile(opt.shadow);
+  const split = typeof profile === 'object' ? profile : null;
+  const shadow = profile !== false;
+  if (split && imageView) {
+    throw new Error('shadow-split:image-view');
+  }
+  if (
+    split &&
+    textControl &&
+    !hasVerifiedShadowSplitBaseRecipe(split.styleArtifact, 'native-text', 'l1')
+  ) {
+    throw new Error('shadow-split:native-text-recipe');
+  }
   const getProps = opt.getProps ?? (() => ({}) as Partial<Props>);
   const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
-  const getMeta = opt.getMeta ?? createDefaultMetaGetter();
-  const colorSchemeSource = opt.getMeta ? undefined : createDefaultWebColorSchemeSource(getMeta);
-  const preferenceSource = opt.getMeta ? undefined : createDefaultWebPreferenceSource(getMeta);
-  const styleSupportSource = opt.getMeta ? undefined : createDefaultWebStyleSupportSource(getMeta);
   const exposeStateWebMode = opt.exposeStateWebMode;
   const scrollProjection = opt.scrollProjection;
   const MAX_FOCUS_TARGET_RETRIES = 3;
@@ -158,30 +178,48 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _runtimeGeneration = 0;
     private _instanceToken: LogicalInstanceToken;
     private _invokeUnmounted: (() => void | Promise<void>) | null = null;
+    private _splitOwnerDisposing = false;
     private _disconnectVersion = 0;
     private _pendingOwnedTokens: string[] | null = null;
     private _controller: RuntimeController | null = null;
     private _focusTargetReadyListeners = new Set<() => void>();
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
+    private _defaultMetaGetter = opt.getMeta
+      ? undefined
+      : createDefaultMetaGetter(this.ownerDocument);
+    private readonly _getMeta = opt.getMeta ?? ((key: string) => this._defaultMetaGetter!(key));
+    private _defaultKeyedMetaSources:
+      | ReturnType<typeof createRebindableWebKeyedMetaSources>
+      | undefined;
+    private _defaultColorSchemeSource =
+      split || opt.getMeta
+        ? undefined
+        : createRebindableColorSchemeSource(this._getMeta, this.ownerDocument);
+    private _globalEventTarget = createRebindableEventTarget();
+    private _overlayModal: ReturnType<typeof createRebindableWebOverlayModal>;
 
     private _root: Element | ShadowRoot;
+    private _splitResources: ShadowSplitResources | null = null;
+    private _initializationCleanup: (() => void) | null = null;
+    private _portalConceal = createPortalConcealBarrier(this);
     private _slotProjector: SlotProjector | null = null;
     private _hostDisplay: HostDisplayController | null = null;
     private _textControlTarget: WebTextControl | null = null;
     private _imageViewTarget: HTMLImageElement | null = null;
     private _surfaceProjection: HostSurfaceProjection<HTMLElement>;
+    private readonly _a11yProjection: HostSurfaceProjection<HTMLElement>;
 
     private _applier: ReturnType<typeof createOwnedTwTokenApplier> | null = null;
     private _exposes: Record<string, unknown> = {};
 
     constructor() {
       super();
+      this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
+      this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
       if (textControl && imageView) {
-        throw new Error(
-          '[WC Adapter] text-control and image-view declarations cannot share a root.'
-        );
+        throw new Error('WC:text/image conflict');
       }
       if (textControl) {
         this._textControlTarget = document.createElement(
@@ -195,8 +233,15 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       }
       this._surfaceProjection = createHostSurfaceProjection<HTMLElement>(
         this,
-        this._textControlTarget ?? this._imageViewTarget ?? this
+        split ? null : (this._textControlTarget ?? this._imageViewTarget ?? this)
       );
+      // C-HOST-SURFACE-PROJECTION-0001-D: an ordinary split surface only
+      // paints. Native controls retain Main's live physical a11y projection;
+      // other controls retain their logical trigger/boundary target.
+      this._a11yProjection =
+        split && !textControl && !imageView
+          ? createHostSurfaceProjection<HTMLElement>(this)
+          : this._surfaceProjection;
       bindElementSurfaceProjection(this, this._surfaceProjection);
       this._instanceToken = createLogicalInstance(proto as Prototype<any>);
       markProtoInstance(this, proto as Prototype<any>, this._instanceToken);
@@ -218,12 +263,82 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       super.blur();
     }
 
+    adoptedCallback(_oldDocument: Document, newDocument: Document) {
+      this._portalConceal.cancel();
+      if (!opt.getMeta) this._defaultMetaGetter = createDefaultMetaGetter(newDocument);
+      // Adoption detaches the host from its old physical tree before the
+      // destination can connect it. Drop that stale logical edge here; a
+      // subsequent connection will bind the destination parent. Same-document
+      // portal moves deliberately retain their projected logical ownership.
+      bindLogicalParent(this._instanceToken, null);
+      adoptWebComponentPortalProjections(this, newDocument);
+      this._defaultKeyedMetaSources?.adoptDocument(newDocument);
+      this._defaultColorSchemeSource?.adoptDocument(newDocument);
+      this._globalEventTarget.setTarget(newDocument.defaultView);
+      this._overlayModal.adoptDocument(newDocument);
+      this._splitResources?.environment.adoptDocument(newDocument);
+      this._hostDisplay?.sync();
+      this[NOTIFY_FOCUS_TARGET_READY]();
+    }
+
     connectedCallback() {
+      // Reuse is valid for synchronous moves, not once terminal teardown starts.
+      // The predecessor owns host-wide resources until its complete cleanup;
+      // coalesce reconnects and initialize only after it can no longer write.
+      if (split && this._splitOwnerDisposing) return;
+      const initializing = !this._mountedOnce;
+      try {
+        this._connectOwner();
+      } catch (error) {
+        if (split && initializing) {
+          // A failed activation is retryable on a later connection, never a half-owner.
+          try {
+            this._initializationCleanup?.();
+          } catch {}
+          this._initializationCleanup = null;
+          try {
+            this._releaseSplitResources();
+          } catch {}
+          this._hostDisplay?.disconnect();
+          this._hostDisplay = null;
+          unbindController(this);
+          removeDebugHooks(this);
+          unbindProtoInstance(this._instanceToken, this);
+          bindLogicalParent(this._instanceToken, null);
+          this._controller = null;
+          this._invokeUnmounted = null;
+          this._exposes = {};
+          this._mountedOnce = false;
+          this.setAttribute(PUI_VIEW_DETACHED_ATTR, '');
+        }
+        throw error;
+      }
+    }
+
+    private _releaseSplitResources() {
+      const resources = this._splitResources;
+      this._splitResources = null;
+      try {
+        this._surfaceProjection.setSurfaceTarget(null);
+      } finally {
+        resources?.dispose();
+      }
+    }
+
+    private _connectOwner() {
+      this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._focusTargetRetryCount = 0;
 
       if (this._mountedOnce) {
         // Refresh the logical parent link after a synchronous DOM move.
-        markProtoInstance(this, proto as Prototype<any>, this._instanceToken);
+        // Portal ownership is retained in Adapter metadata while parentNode
+        // continues to report the physical DOM tree.
+        markProtoInstance(
+          this,
+          proto as Prototype<any>,
+          this._instanceToken,
+          !isWebComponentPortaled(this)
+        );
         if (this._pendingOwnedTokens?.length) {
           this._applier?.apply(this._pendingOwnedTokens);
         }
@@ -234,6 +349,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         return;
       }
       if (this._runtimeGeneration > 0) {
+        // Confirmed terminal teardown ends the predecessor's logical
+        // participation. View detach and synchronous moves never reach this
+        // branch, so their retained token keeps its existing ancestry.
+        bindLogicalParent(this._instanceToken, null);
         this._instanceToken = createLogicalInstance(proto as Prototype<any>);
       }
       // The constructor ran before the element had a DOM parent.
@@ -244,7 +363,49 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       const thisEl = this;
       const thisRoot = this._root;
       thisEl.setAttribute('data-pui-root', '');
-      this._hostDisplay = installDefaultHostDisplay(thisEl);
+      if (split) {
+        this._splitResources = createShadowSplitResources({
+          host: thisEl,
+          shell: createShadowOwnerShell(thisRoot as ShadowRoot),
+          artifact: split.styleArtifact,
+          colorSchemeSource: split.colorSchemeSource,
+          baseGetMeta: this._getMeta,
+          factories: this._textControlTarget
+            ? {
+                createSurface: (shell) =>
+                  createShadowTextControlSurface(shell, this._textControlTarget!),
+              }
+            : undefined,
+        });
+        this._splitResources.surface.element.setAttribute(
+          'part',
+          textControl ? 'control surface' : 'surface'
+        );
+        this._surfaceProjection.setSurfaceTarget(this._splitResources.surface.element);
+      }
+      const splitResources = this._splitResources;
+      const ownerGetMeta = splitResources?.getMeta ?? this._getMeta;
+      const defaultKeyedMetaSources = opt.getMeta
+        ? undefined
+        : createRebindableWebKeyedMetaSources(ownerGetMeta, this.ownerDocument);
+      this._defaultKeyedMetaSources = defaultKeyedMetaSources;
+      const preferenceSource = defaultKeyedMetaSources?.preferenceSource;
+      const styleSupportSource = defaultKeyedMetaSources?.styleSupportSource;
+      const disposeDefaultKeyedMetaSources = () => {
+        defaultKeyedMetaSources?.dispose();
+        if (this._defaultKeyedMetaSources === defaultKeyedMetaSources)
+          this._defaultKeyedMetaSources = undefined;
+      };
+      // Split reserves colorScheme for its retained environment, not the document getter.
+      const runtimeColorSchemeSource = splitResources
+        ? {
+            getter: ownerGetMeta,
+            subscribe: (listener: () => void) => splitResources.environment.subscribe(listener),
+          }
+        : this._defaultColorSchemeSource;
+      this._hostDisplay = installDefaultHostDisplay(thisEl, {
+        displayOwner: split ? 'presentation' : 'fallback',
+      });
 
       const rawPropsSource: RawPropsSource<Props> = {
         debugName: `${tagName}#raw-props`,
@@ -281,6 +442,13 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       };
 
       const owner = createViewEpochOwner<Props>({ prototypeName: tagName });
+      this._initializationCleanup = () => {
+        try {
+          void owner.dispose().catch(() => {});
+        } finally {
+          disposeDefaultKeyedMetaSources();
+        }
+      };
       let currentEventGate: ReturnType<typeof createEventGate> | null = null;
       let currentRouter: ReturnType<typeof createWebProtoEventRouter> | null = null;
 
@@ -291,8 +459,13 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       const setViewDetached = (detached: boolean) => {
         thisEl.toggleAttribute(PUI_VIEW_DETACHED_ATTR, detached);
-        if (detached) return;
+        if (detached) {
+          currentEventGate?.disable();
+          return;
+        }
         schedule(() => {
+          if (!thisEl.isConnected || thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR)) return;
+          currentEventGate?.enable();
           thisEl[NOTIFY_FOCUS_TARGET_READY]();
           for (const descendant of thisEl.querySelectorAll<ProtoElement>('[data-pui-root]')) {
             descendant[NOTIFY_FOCUS_TARGET_READY]?.();
@@ -302,7 +475,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       const releaseRenderedChildren = () => {
         if (shadow) {
-          thisRoot.replaceChildren();
+          if (splitResources) splitResources.surface.clearRenderedChildren();
+          else thisRoot.replaceChildren();
           clearSlotProjector();
           return;
         }
@@ -326,13 +500,16 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           shadow,
           host: thisEl,
           root: thisRoot,
+          shadowViewTarget: splitResources?.surface,
           schedule,
           rawPropsSource,
           textControlTarget: this._textControlTarget,
           imageViewTarget: this._imageViewTarget,
           wiring,
           eventGate: {
-            enable: () => currentEventGate?.enable(),
+            enable: () => {
+              if (!thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR)) currentEventGate?.enable();
+            },
             disable: () => currentEventGate?.disable(),
             dispose: () => owner.disposeView(),
           },
@@ -355,8 +532,13 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             this._applier = null;
             this._hostDisplay?.disconnect();
             this._hostDisplay = null;
-            unbindController(this);
-            removeDebugHooks(this);
+            try {
+              if (splitResources && this._splitResources === splitResources)
+                this._releaseSplitResources();
+            } finally {
+              unbindController(this);
+              removeDebugHooks(this);
+            }
           },
           initialMount: 'manual',
         });
@@ -367,51 +549,40 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
 
+        if (splitResources && this._textControlTarget)
+          splitResources.surface.replaceRenderedChildren([this._textControlTarget]);
+        const splitEffects = splitResources
+          ? createShadowSplitEffectsPort({
+              host: thisEl,
+              surface: splitResources.surface.element,
+              artifact: splitResources.artifact.artifact,
+              prototypeName: proto.name,
+            })
+          : null;
         const eventGate = createEventGate();
         const router = createWebProtoEventRouter({
           rootEl: thisEl,
+          focusEventTarget: this._textControlTarget ?? undefined,
           instanceToken: this._instanceToken,
           resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
-          globalEl: window,
+          isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
+          globalEl: this._globalEventTarget,
           isEnabled: () => eventGate.isEnabled?.() ?? true,
         });
         bindLogicalEventTarget(this._instanceToken, router.rootTarget);
-        const applier = createOwnedTwTokenApplier(
-          this._textControlTarget ?? this._imageViewTarget ?? thisEl,
-          {
-            onChange: () => {
-              this._hostDisplay?.sync();
-            },
-          }
-        );
+        const applier = splitEffects
+          ? null
+          : createOwnedTwTokenApplier(this._textControlTarget ?? this._imageViewTarget ?? thisEl, {
+              onChange: () => {
+                this._hostDisplay?.sync();
+              },
+            });
         currentEventGate = eventGate;
         currentRouter = router;
         this._applier = applier;
-        let disposeFocusBridge: (() => void) | null = null;
-        if (this._textControlTarget) {
-          // Native focus/blur do not bubble from the physical text control.
-          // Route the trusted physical event through the adapter-private host
-          // ingress: Proto focus facts update without emitting a second public
-          // native-looking event from the custom-element boundary.
-          const control: HTMLElement = this._textControlTarget;
-          // Bind native focus/blur directly on the known control so the
-          // callback receives the real DOM event object with target/currentTarget
-          // intact. The private transport preserves both the declared type and
-          // the physical event identity without dispatching a second public
-          // boundary event.
-          const onFocus = (event: FocusEvent) => {
-            if (event.target === control) router.dispatchHostRootEvent('focus', event);
-          };
-          const onBlur = (event: FocusEvent) => {
-            if (event.target === control) router.dispatchHostRootEvent('blur', event);
-          };
-          control.addEventListener('focus', onFocus);
-          control.addEventListener('blur', onBlur);
-          disposeFocusBridge = () => {
-            control.removeEventListener('focus', onFocus);
-            control.removeEventListener('blur', onBlur);
-          };
-        }
+        // Focus/blur subscriptions bind directly to the physical editor.
+        // A second host listener would see Shadow-retargeted focus and could
+        // overwrite native :focus-visible with the shell's false result.
 
         let disposed = false;
         const disposeView = () => {
@@ -421,9 +592,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           eventGate.dispose();
           unbindLogicalEventTarget(this._instanceToken, router.rootTarget);
           router.dispose();
-          disposeFocusBridge?.();
-          disposeFocusBridge = null;
-          applier.clear();
+          applier?.clear();
+          splitEffects?.dispose();
           releaseRenderedChildren();
           if (currentEventGate === eventGate) currentEventGate = null;
           if (currentRouter === router) currentRouter = null;
@@ -435,31 +605,18 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
-              surfaceProjection: this._surfaceProjection,
+              surfaceProjection: this._a11yProjection,
               instanceToken: this._instanceToken,
               router,
               rawPropsSource,
-              effectsPort: createWebEffectsPort(applier),
-              materialBindingFactory: proto.modules?.some(
-                (declaration) => declaration.id === OWNED_MATERIAL_ID
-              )
-                ? createOwnedMaterialBinding
-                : undefined,
-              finalStyleSink:
-                getExperimentalVisualConsumer(proto)?.(
-                  thisEl,
-                  applier,
-                  createOwnedVisualSurface(thisEl, thisRoot)
-                ) ??
-                (proto.modules?.some((declaration) => declaration.id === OWNED_MATERIAL_ID)
-                  ? createOpaqueMaterialVisualSink(thisEl, applier)
-                  : undefined),
-              getMeta,
-              colorSchemeSource,
+              effectsPort: splitEffects ?? createWebEffectsPort(applier!),
+              getMeta: ownerGetMeta,
+              colorSchemeSource: runtimeColorSchemeSource,
               preferenceSource,
               styleSupportSource,
               textControlTarget: this._textControlTarget,
               imageViewTarget: this._imageViewTarget,
+              overlayModal: this._overlayModal,
               exposeStateWebMode,
               scrollProjection,
               setExposes,
@@ -494,12 +651,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             createSession: createHostSession,
           });
         } catch (error) {
-          // Argument construction may fail before the epoch owner receives its disposer.
-          try {
-            disposeView();
-          } catch {
-            /* Preserve the construction error. */
-          }
+          disposeView();
           throw error;
         }
         setViewDetached(false);
@@ -514,8 +666,15 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           initialPresent = snapshot.present;
           return;
         }
+        const wasConcealing = this._portalConceal.cancel();
         if (!snapshot.present) setViewDetached(true);
         const requestVersion = ++latestIntentVersion;
+        if (snapshot.present && wasConcealing && owner.hasView) {
+          // The retained epoch never unmounted. Reveal it immediately so a
+          // newer open/focus request is not queued behind the canceled barrier.
+          setViewDetached(false);
+          return;
+        }
         queueMicrotask(() => {
           reconciliation = reconciliation
             .then(async () => {
@@ -529,6 +688,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               if (snapshot.present) {
                 attachView();
               } else if (owner.hasView) {
+                const conceal = this._portalConceal.wait();
+                if (conceal) await conceal;
+                if (
+                  requestVersion !== latestIntentVersion ||
+                  !thisEl.isConnected ||
+                  this._controller !== hostSession.controller
+                )
+                  return;
                 await owner.detachView();
               }
             })
@@ -544,8 +711,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         el: thisEl,
         instanceToken: this._instanceToken,
         rawPropsSource,
-        getMeta,
-        colorSchemeSource,
+        getMeta: ownerGetMeta,
+        colorSchemeSource: runtimeColorSchemeSource,
         preferenceSource,
         styleSupportSource,
         textControlTarget: this._textControlTarget,
@@ -563,25 +730,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       initializingOwner = false;
       runFocusCallbackScope = hostSession.invokeInCallbackScope;
 
-      this._invokeUnmounted = () => owner.dispose();
-      try {
-        if (initialPresent) attachView();
-        else setViewDetached(true);
-      } catch (error) {
-        // Failed initial projection still owns a live logical/runtime session.
-        // Retire it immediately and permit a later fresh connection attempt.
-        try {
-          void owner.dispose().catch(() => {});
-        } catch {
-          /* Keep the setup error. */
-        }
-        this._invokeUnmounted = null;
-        unbindProtoInstance(this._instanceToken, this);
-        this._controller = null;
-        this._mountedOnce = false;
-        this._pendingOwnedTokens = null;
-        throw error;
-      }
+      if (initialPresent) attachView();
+      else setViewDetached(true);
 
       const { controller, kernel } = hostSession;
       if (kernel && kernel.run) {
@@ -606,6 +756,15 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       this._controller = controller;
       bindController(this, controller);
+
+      this._invokeUnmounted = () => {
+        try {
+          return owner.dispose();
+        } finally {
+          disposeDefaultKeyedMetaSources();
+        }
+      };
+      this._initializationCleanup = null;
     }
 
     private [NOTIFY_FOCUS_TARGET_READY](): void {
@@ -618,11 +777,6 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       ) {
         this._focusTargetRetryCount = 0;
       }
-    }
-
-    adoptedCallback() {
-      // A retained view must reproject against its current document and host capabilities.
-      this._controller?.update();
     }
 
     disconnectedCallback() {
@@ -646,22 +800,42 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
 
+        this._globalEventTarget.setTarget(null);
+
         if (this._invokeUnmounted) {
+          this._portalConceal.cancel();
           const fn = this._invokeUnmounted;
           this._invokeUnmounted = null;
-          const disposed = fn();
-          // Terminal invalidation is synchronous even though adapter cleanup
-          // exposes a Promise for callback errors. Publish the disconnected
-          // ownership state before yielding so a later reconnect cannot reuse
-          // the disposed session.
-          unbindProtoInstance(this._instanceToken, this);
-          this._controller = null;
-          this._mountedOnce = false;
-          this._pendingOwnedTokens = null;
-          await disposed;
+          // Install before invoking user lifecycle callbacks: they may reconnect
+          // synchronously, before fn() even returns its disposal promise.
+          if (split) this._splitOwnerDisposing = true;
+          try {
+            let disposed: void | Promise<void>;
+            try {
+              disposed = fn();
+            } finally {
+              unbindProtoInstance(this._instanceToken, this);
+              bindLogicalParent(this._instanceToken, null);
+              this._controller = null;
+              this._mountedOnce = false;
+              this._pendingOwnedTokens = null;
+            }
+            await disposed;
+          } finally {
+            if (split) {
+              this._splitOwnerDisposing = false;
+              // Keep reconnect failures separate from a rejected disposal, and
+              // recheck latest connectivity after repeated remove/append calls.
+              queueMicrotask(() => {
+                if (this.isConnected && !this._mountedOnce && !this._splitOwnerDisposing)
+                  this.connectedCallback();
+              });
+            }
+          }
           return;
         }
         unbindProtoInstance(this._instanceToken, this);
+        bindLogicalParent(this._instanceToken, null);
         this._controller = null;
         this._mountedOnce = false;
         this._pendingOwnedTokens = null;

@@ -295,13 +295,13 @@ fn switching_away_and_straight_back_leaves_only_the_current_panel(cx: &mut TestA
         [ROOT, LIST, ALPHA, BETA, INDICATOR, PANEL_ALPHA]
     );
     assert_eq!(exposed(&mut fixture, BETA, "selected"), Some(json!(false)));
-    // The panel on screen reports from its current view.
-    assert_eq!(
-        fixture
-            .with_view(|view| view.reported_a11y(PANEL_ALPHA))
-            .map(|panel| panel.role),
-        Some(Role::TabPanel)
-    );
+    // The panel on screen reports from its current view, still named by its
+    // tab.
+    let panel = fixture
+        .with_view(|view| view.reported_a11y(PANEL_ALPHA))
+        .expect("the panel is reported");
+    assert_eq!(panel.role, Role::TabPanel);
+    assert_eq!(panel.label.as_deref(), Some("Alpha"));
 }
 
 #[gpui::test]
@@ -324,4 +324,82 @@ fn a_disabled_tab_is_neither_selected_nor_focused(cx: &mut TestAppContext) {
         fixture.with_view(|view| view.rendered_sessions()),
         [ROOT, LIST, ALPHA, BETA, INDICATOR, PANEL_ALPHA]
     );
+}
+
+const GAMMA: &str = "t0-tabs-gamma";
+
+/// A root and a list of three tabs, opened alpha, gamma, beta and shown alpha,
+/// beta, gamma, with alpha focused.
+fn start_shuffled(cx: &mut TestAppContext, root: Value) -> Fixture {
+    let tab = |id: &'static str, value: &str, text: &'static str| Session {
+        id,
+        prototype_key: "base-tabs-trigger",
+        props: props(json!({ "value": value })),
+        content: vec![SurfaceChild::Text(text.into())],
+        parent: Some(LIST),
+        root_style: sized(60., 20.),
+    };
+    let sessions = vec![
+        Session {
+            id: ROOT,
+            prototype_key: "base-tabs-root",
+            props: props(root),
+            content: vec![SurfaceChild::Session(LIST.into())],
+            parent: None,
+            root_style: StyleRefinement::default(),
+        },
+        Session {
+            id: LIST,
+            prototype_key: "base-tabs-list",
+            props: props(json!({ "a11yLabel": "Sections" })),
+            content: [ALPHA, BETA, GAMMA]
+                .map(|id| SurfaceChild::Session(id.into()))
+                .to_vec(),
+            parent: Some(ROOT),
+            root_style: StyleRefinement::default(),
+        },
+        tab(ALPHA, "alpha", "Alpha"),
+        tab(GAMMA, "gamma", "Gamma"),
+        tab(BETA, "beta", "Beta"),
+    ];
+    let mut fixture = Fixture::start_viewed(cx, sessions, &[ROOT, LIST, ALPHA, GAMMA, BETA]);
+    fixture.with_view(|view| view.call_exposed(ALPHA, "focusSelf", Vec::new()));
+    fixture.session_state_becomes(ALPHA, "focused", json!(true));
+    fixture
+}
+
+/// Presses `key`, then reads back which tab is focused and which selected.
+fn after(fixture: &mut Fixture, key: &str) -> (Vec<&'static str>, Vec<&'static str>) {
+    fixture.cx.simulate_keystrokes(key);
+    for _ in 0..3 {
+        fixture.settle();
+    }
+    let with = |fixture: &mut Fixture, state: &str| {
+        [ALPHA, BETA, GAMMA]
+            .into_iter()
+            .filter(|tab| exposed(fixture, tab, state) == Some(json!(true)))
+            .collect::<Vec<_>>()
+    };
+    (with(fixture, "focused"), with(fixture, "selected"))
+}
+
+#[gpui::test]
+#[ignore = "starts the Node peer; needs `pnpm install`, run with --ignored"]
+fn arrow_keys_and_home_and_end_follow_the_order_the_tabs_show_in(cx: &mut TestAppContext) {
+    let mut fixture = start_shuffled(cx, json!({ "defaultValue": "alpha" }));
+    // Activation is automatic by default: the tab that takes focus is selected.
+    assert_eq!(after(&mut fixture, "right"), (vec![BETA], vec![BETA]));
+    assert_eq!(after(&mut fixture, "end"), (vec![GAMMA], vec![GAMMA]));
+    assert_eq!(after(&mut fixture, "home"), (vec![ALPHA], vec![ALPHA]));
+}
+
+#[gpui::test]
+#[ignore = "starts the Node peer; needs `pnpm install`, run with --ignored"]
+fn under_manual_activation_arrow_keys_only_move_focus(cx: &mut TestAppContext) {
+    let mut fixture = start_shuffled(
+        cx,
+        json!({ "defaultValue": "alpha", "activationMode": "manual" }),
+    );
+    assert_eq!(after(&mut fixture, "right"), (vec![BETA], vec![ALPHA]));
+    assert_eq!(after(&mut fixture, "end"), (vec![GAMMA], vec![ALPHA]));
 }

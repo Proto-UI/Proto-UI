@@ -715,11 +715,291 @@ for (const [entry, owner] of siteOwners) {
         dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
       })
     );
+    graph.modules = graph.chunks
+      .flatMap((item) => item.moduleIds)
+      .map((id) => ({
+        id,
+        imports: [],
+        dynamicImports: [],
+      }));
+    graph.modules.find((item) => item.id.endsWith('/demo-renderer.ts')).dynamicImports = [
+      'react',
+      'vue',
+      'vue2',
+    ].map((family) => `apps/www/src/components/PrototypePreviewer/runtimes/${family}-runtime.ts`);
+    for (const family of ['react', 'vue', 'vue2']) {
+      const runtime = `apps/www/src/components/PrototypePreviewer/runtimes/${family}-runtime.ts`;
+      graph.modules.find((item) => item.id === runtime).imports = graph.chunks
+        .find((item) => item.fileName === `_astro/${family}.js`)
+        .moduleIds.filter((id) => id !== runtime);
+    }
     return { graph, root };
   }
+  function addReviewedBridgeTarget(graph, target) {
+    const bridge = graph.chunks.find((item) => item.fileName === '_astro/site-shadcn-controls.js');
+    bridge.moduleIds.push(target);
+    graph.modules.push({ id: target, imports: [], dynamicImports: [] });
+    graph.modules
+      .find((item) => item.id === 'apps/www/src/components/site-shadcn-controls.ts')
+      .imports.push(target);
+    return bridge;
+  }
+  for (const target of [
+    'packages/adapters/web-component/src/adapt.ts',
+    'packages/adapters/web-component/src/material/owned-texture-sink.ts',
+    'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
+    'packages/adapters/web-component/src/visual-surface.ts',
+  ]) {
+    for (const placement of ['owner', 'bridge', 'renderer']) {
+      for (const field of ['imports', 'dynamicImports']) {
+        test(`bridge origin: ${entry} rejects ${placement} ${field} bypass to ${target}`, () => {
+          const { graph, root } = siteGraph();
+          const bridge = addReviewedBridgeTarget(graph, target);
+          assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+          const container =
+            placement === 'owner'
+              ? root
+              : placement === 'bridge'
+                ? bridge
+                : graph.chunks.find((item) => item.fileName === '_astro/shared-renderer.js');
+          const foreign = 'apps/www/src/components/unrelated-bridge-feature.ts';
+          container.moduleIds.push(foreign);
+          graph.modules.push({ id: foreign, imports: [], dynamicImports: [], [field]: [target] });
+          assert.ok(
+            collectWebsiteProductionBundleIssues({ graph }).some(
+              (issue) =>
+                issue.includes('unowned importer edge') &&
+                issue.includes(foreign) &&
+                issue.includes(target)
+            )
+          );
+        });
+      }
+    }
+  }
+  for (const api of ['site-shadcn-controls.ts', 'site-native-controls.ts']) {
+    test(`bridge origin: ${entry} accepts exact ${api} and its helper but rejects helper bypass`, () => {
+      const { graph, root } = siteGraph();
+      const target = 'packages/adapters/web-component/src/adapt.ts';
+      const bridge = addReviewedBridgeTarget(graph, target);
+      const id = `apps/www/src/components/${api}`;
+      let ownerRecord = graph.modules.find((item) => item.id === id);
+      if (!ownerRecord) {
+        ownerRecord = { id, imports: [], dynamicImports: [] };
+        graph.modules.push(ownerRecord);
+        bridge.moduleIds.push(id);
+      }
+      const helper = 'apps/www/src/components/reviewed-bridge-helper.ts';
+      bridge.moduleIds.push(helper);
+      graph.modules.push({ id: helper, imports: [target], dynamicImports: [] });
+      ownerRecord.imports.push(helper);
+      graph.modules.find((item) => item.id === `apps/www/src/components/${owner}`).imports.push(id);
+      assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+      const foreign = 'apps/www/src/components/unrelated-helper-caller.ts';
+      root.moduleIds.push(foreign);
+      graph.modules.push({ id: foreign, imports: [helper], dynamicImports: [] });
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes(foreign) && issue.includes(target)
+        )
+      );
+    });
+    test(`bridge origin: ${entry} rejects ${api} query lookalike`, () => {
+      const { graph, root } = siteGraph();
+      const target = 'packages/adapters/web-component/src/adapt.ts';
+      addReviewedBridgeTarget(graph, target);
+      const id = `apps/www/src/components/${api}?foreign`;
+      root.moduleIds.push(id);
+      graph.modules.push({ id, imports: [target], dynamicImports: [] });
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes(id) && issue.includes(target)
+        )
+      );
+    });
+  }
+  test(`bridge origin: ${entry} does not let controls API acquire an unreviewed framework target`, () => {
+    const { graph, root } = siteGraph();
+    const target = 'packages/adapters/web-component/src/adapt.ts';
+    addReviewedBridgeTarget(graph, target);
+    const api = graph.modules.find(
+      (item) => item.id === 'apps/www/src/components/site-shadcn-controls.ts'
+    );
+    api.dynamicImports.push('packages/adapters/react/src/index.ts');
+    root.dynamicImports.push('_astro/react.js');
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) =>
+          issue.includes('site-shadcn-controls.ts') &&
+          issue.includes('packages/adapters/react/src/index.ts')
+      )
+    );
+  });
+  test(`bridge origin: ${entry} permits an unemitted foreign record and inert cycle`, () => {
+    const { graph } = siteGraph();
+    const target = 'packages/adapters/web-component/src/adapt.ts';
+    addReviewedBridgeTarget(graph, target);
+    graph.modules.push(
+      { id: 'unemitted-one', imports: ['unemitted-two', target], dynamicImports: [] },
+      { id: 'unemitted-two', imports: ['unemitted-one'], dynamicImports: [] }
+    );
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  });
   test(`site runtime exact owner: ${entry}`, () => {
     const { graph } = siteGraph();
     assert.doesNotThrow(() => validateWebsiteProductionBundle({ graph }));
+  });
+  for (const placement of ['renderer', 'runtime', 'runtime-static-helper']) {
+    test(`site module ownership: ${entry} rejects shared ${placement} foreign adapter edge`, () => {
+      const { graph } = siteGraph();
+      const renderer = graph.chunks.find((item) => item.fileName === '_astro/shared-renderer.js');
+      const runtime = graph.chunks.find((item) => item.fileName === '_astro/react.js');
+      let importer = placement === 'renderer' ? renderer : runtime;
+      if (placement === 'runtime-static-helper') {
+        importer = chunk('_astro/shared-helper.js');
+        graph.chunks.push(importer);
+        runtime.imports.push(importer.fileName);
+      }
+      const foreign = 'apps/www/src/components/unrelated-feature.ts';
+      const adapter = 'packages/adapters/react/src/unreviewed.ts';
+      importer.moduleIds.push(foreign);
+      importer.dynamicImports.push('_astro/unreviewed.js');
+      graph.chunks.push(
+        chunk('_astro/unreviewed.js', { isDynamicEntry: true, moduleIds: [adapter] })
+      );
+      graph.modules.push(
+        { id: foreign, imports: [], dynamicImports: [adapter] },
+        { id: adapter, imports: [], dynamicImports: [] }
+      );
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('outside its renderer closure') && issue.includes(adapter)
+        )
+      );
+    });
+  }
+  for (const placement of ['renderer', 'runtime', 'helper']) {
+    for (const field of ['imports', 'dynamicImports']) {
+      for (const targetKind of ['adapter', 'runtime', 'shared-barrel']) {
+        test(`site importer edge: ${entry} rejects ${placement} ${field} to existing ${targetKind}`, () => {
+          const { graph } = siteGraph();
+          const renderer = graph.chunks.find(
+            (item) => item.fileName === '_astro/shared-renderer.js'
+          );
+          const runtime = graph.chunks.find((item) => item.fileName === '_astro/react.js');
+          let shared = placement === 'renderer' ? renderer : runtime;
+          if (placement === 'helper') {
+            shared = chunk('_astro/helper.js');
+            graph.chunks.push(shared);
+            runtime.imports.push(shared.fileName);
+          }
+          const foreign = 'apps/www/src/components/unrelated-feature.ts';
+          const adapterId = 'packages/adapters/react/src/index.ts';
+          const runtimeId = 'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts';
+          let target = targetKind === 'runtime' ? runtimeId : adapterId;
+          if (targetKind === 'shared-barrel') {
+            target = 'apps/www/src/components/runtime-barrel.ts';
+            runtime.moduleIds.push(target);
+            graph.modules.push({ id: target, imports: [adapterId], dynamicImports: [] });
+            graph.modules.find((item) => item.id === runtimeId).imports.push(target);
+          }
+          shared.moduleIds.push(foreign);
+          shared[field].push(runtime.fileName);
+          graph.modules.push({ id: foreign, imports: [], dynamicImports: [], [field]: [target] });
+          assert.ok(
+            collectWebsiteProductionBundleIssues({ graph }).some(
+              (issue) =>
+                issue.includes('unowned importer edge') &&
+                issue.includes(foreign) &&
+                issue.includes(adapterId)
+            )
+          );
+        });
+      }
+    }
+  }
+  test(`site importer edge: ${entry} rejects owner bypass directly to existing Adapter`, () => {
+    const { graph, root } = siteGraph();
+    const ownerId = `apps/www/src/components/${owner}`;
+    graph.modules
+      .find((item) => item.id === ownerId)
+      .dynamicImports.push('packages/adapters/react/src/index.ts');
+    root.dynamicImports.push('_astro/react.js');
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(ownerId)
+      )
+    );
+  });
+  test(`site importer edge: ${entry} preserves renderer API boundary and inert cycles`, () => {
+    const { graph } = siteGraph();
+    const renderer = graph.chunks.find((item) => item.fileName === '_astro/shared-renderer.js');
+    const one = 'apps/www/src/components/inert-one.ts',
+      two = 'apps/www/src/components/inert-two.ts';
+    renderer.moduleIds.push(one, two);
+    graph.modules.push(
+      { id: one, imports: [two], dynamicImports: [] },
+      {
+        id: two,
+        imports: [one, 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts'],
+        dynamicImports: [],
+      }
+    );
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  });
+  test(`site importer edge: ${entry} rejects missing co-located importer provenance`, () => {
+    const { graph } = siteGraph();
+    graph.chunks
+      .find((item) => item.fileName === '_astro/shared-renderer.js')
+      .moduleIds.push('apps/www/src/components/unrecorded.ts');
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+        issue.includes('module-edge provenance')
+      )
+    );
+  });
+  test(`site importer edge: ${entry} renderer query lookalike is not an API boundary`, () => {
+    const { graph } = siteGraph();
+    const id = 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts?foreign';
+    graph.chunks.find((item) => item.fileName === '_astro/shared-renderer.js').moduleIds.push(id);
+    graph.modules.push({
+      id,
+      imports: [],
+      dynamicImports: ['packages/adapters/react/src/index.ts'],
+    });
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(id)
+      )
+    );
+  });
+  for (const defect of ['missing', 'duplicate', 'dangling', 'malformed', 'missing-renderer']) {
+    test(`site module provenance: ${entry} rejects ${defect}`, () => {
+      const { graph } = siteGraph();
+      if (defect === 'missing') delete graph.modules;
+      if (defect === 'duplicate') graph.modules.push(graph.modules[0]);
+      if (defect === 'dangling') graph.modules[0].imports.push('missing-module');
+      if (defect === 'malformed') graph.modules[0].imports = 'not-an-array';
+      if (defect === 'missing-renderer')
+        graph.modules = graph.modules.filter((item) => !item.id.endsWith('/demo-renderer.ts'));
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+          issue.includes('module-edge provenance')
+        )
+      );
+    });
+  }
+  test(`site module ownership: ${entry} allows unrelated inert co-location`, () => {
+    const { graph } = siteGraph();
+    graph.chunks
+      .find((item) => item.fileName === '_astro/shared-renderer.js')
+      .moduleIds.push('apps/www/src/components/inert-feature.ts');
+    graph.modules.push({
+      id: 'apps/www/src/components/inert-feature.ts',
+      imports: [],
+      dynamicImports: [],
+    });
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
   });
   for (const defect of [
     'missing owner',
@@ -772,3 +1052,38 @@ test('rejects a runtime facade paired with another runtime source identity', () 
     )
   );
 });
+
+for (const moduleId of [
+  'packages/adapters/web-component/src/material/owned-texture-sink.ts',
+  'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
+  'packages/adapters/web-component/src/visual-surface.ts',
+]) {
+  test(`accepted WC support stays in exact bridge: ${moduleId}`, () => {
+    const graph = graphFixture();
+    graph.chunks
+      .find((item) => item.fileName === '_astro/site-shadcn-controls.js')
+      .moduleIds.push(moduleId);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  });
+  for (const placement of ['sibling', 'bridge-dependency', 'lookalike']) {
+    test(`accepted WC support rejects ${placement}: ${moduleId}`, () => {
+      const graph = graphFixture();
+      const bridge = graph.chunks.find(
+        (item) => item.fileName === '_astro/site-shadcn-controls.js'
+      );
+      if (placement === 'lookalike')
+        bridge.moduleIds.push(moduleId.replace('.ts', '-unreviewed.ts'));
+      else {
+        graph.chunks.push(chunk('_astro/foreign-support.js', { moduleIds: [moduleId] }));
+        (placement === 'sibling' ? graph.chunks[0] : bridge).imports.push(
+          '_astro/foreign-support.js'
+        );
+      }
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+          issue.includes('statically reaches forbidden')
+        )
+      );
+    });
+  }
+}

@@ -34,14 +34,26 @@ criteria:
     text:
       zh-CN: 契约不得强制所有 adapter 同步即时派发；调度优化不得改变 callback 语义。
       en: The contract must not force every adapter to dispatch synchronously; scheduling optimizations must not change callback semantics.
+  - id: C-CONTEXT-0010-F
+    text:
+      zh-CN: 自 0.3.0-alpha.0 的 J1 起，同一 provider 实例代次与 ContextKey 的重入通知按更新提交顺序送达持续有效的订阅者，不合并或丢弃 transition。嵌套 update 的 callback 可在当前 transition delivery 完成后执行；不同通路无全局总序要求。
+      en: From J1 in 0.3.0-alpha.0, reentrant notifications for one provider generation and ContextKey reach continuously eligible subscribers in update commit order, without coalescing or dropping transitions. Nested update callbacks may run after the current transition delivery; independent channels have no required global total order.
+  - id: C-CONTEXT-0010-G
+    text:
+      zh-CN: 更新在排队前提交 provider 当前值；read 和 updater 读取当前值，而 callback next/prev 始终描述对应 transition。通知只面向提交时已注册且 delivery 时仍有效并解析到同一 provider 代次的 callback；unsubscribe、解绑或销毁不得被排队通知撤销，新代次不接收旧代次通知。
+      en: Updates commit the provider value before queuing delivery. Reads and updater functions see current values while callback next/prev describe their transition. Only callbacks registered at commit and still eligible and resolving to the same provider generation at delivery receive it; queued work cannot undo unsubscribe, rebinding or disposal, or leak into a new generation.
+  - id: C-CONTEXT-0010-H
+    text:
+      zh-CN: 同步 callback 抛错不回滚已提交的值。有限 dispatch window 中其余仍有效的 delivery 完成、队列清理后向调用者报告错误；多个错误可聚合。后续独立更新不得重放残留任务。此规则不承诺终止作者构造的无限更新循环。
+      en: A synchronous callback error does not roll back committed values. Remaining eligible deliveries in a finite dispatch window finish and queue resources clear before errors are reported to the caller; multiple errors may be aggregated. Later independent updates must not replay stale work. This does not guarantee termination of author-created infinite update cycles.
 openQuestions:
   - id: C-CONTEXT-0010-Q-SCHEDULING
     question:
       zh-CN: 是否需要在未来为 context callback 固化更强的同步派发或批处理规则？
       en: Should future contracts stabilize stronger synchronous dispatch or batching rules for context callbacks?
     context:
-      zh-CN: 当前实现同步派发，但跨宿主治理应保留合理调度空间。
-      en: The current implementation dispatches synchronously, but cross-host governance should preserve reasonable scheduling flexibility.
+      zh-CN: J1 已明确同通路重入顺序；跨宿主同步／异步调度与跨通路总序仍保留合理空间。
+      en: J1 resolves same-channel reentrant ordering; cross-host synchronous/asynchronous scheduling and cross-channel ordering retain flexibility.
     blocks:
       - context callback scheduling policy
 sources:
@@ -60,6 +72,9 @@ dependsOn:
     - C-CONTEXT-0008
     - C-LIFECYCLE-0003
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Admitted J1 commit-order reentrant delivery with immediate current values, recipient lifetime checks and exception-safe finite draining; draft retained.
   - version: 0.1.0
     change: introduced
     summary: Captured deterministic semantic callback delivery while preserving scheduling flexibility.

@@ -5,6 +5,10 @@ description: Route one eligible transition in Proto UI's governed autonomous-mai
 
 # Proto UI maintenance
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 Route one stage while preserving independent evidence and keeping governed maintenance moving automatically.
 
 Read `internal/agent-operations/skills.yaml` as routing metadata. Do not preload maintenance leaves or guess their paths. Select one leaf ID, run `pnpm agent:skill -- <leaf-id> --mode autonomous --mode-source <maintainer-invocation|schedule|governed-queue>`, and load the returned `loadPath` only when `blocked` is false. Validate its handoff with `pnpm agent:skill -- --handoff <handoff.json>` before loading at most one next leaf.

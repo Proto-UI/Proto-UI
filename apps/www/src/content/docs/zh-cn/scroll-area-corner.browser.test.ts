@@ -2,9 +2,17 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { computedRgbAlpha } from './scroll-area-corner-color';
 import type { Browser, Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { RUNTIMES, launchBrowser, selectRuntime, startServer, stopServer } from './browser-harness';
+import {
+  RUNTIMES,
+  applyColorScheme,
+  launchBrowser,
+  selectRuntime,
+  startServer,
+  stopServer,
+} from './browser-harness';
 
 const families = [
   {
@@ -55,7 +63,10 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
   it.each(families)(
     '$name reserves a non-control corner through layout, overflow, focus, and drag transitions',
     async (family) => {
-      const context = await browser.newContext({ viewport: { width: 1100, height: 900 } });
+      const context = await browser.newContext({
+        viewport: { width: 1100, height: 900 },
+        colorScheme: 'light',
+      });
       const page = await context.newPage();
       try {
         await page.goto(`${baseUrl}${family.route}`, {
@@ -86,6 +97,10 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
               JSON.stringify(
                 {
                   sourceSha,
+                  browser: browser.version(),
+                  capturedAt: new Date().toISOString(),
+                  viewport: page.viewportSize(),
+                  colorScheme: await page.evaluate(() => document.documentElement.dataset.theme),
                   harnessSha: process.env.PROTO_UI_SCROLL_CORNER_HARNESS_SHA ?? sourceSha,
                   mode:
                     process.env.PROTO_UI_SCROLL_CORNER_CAPTURE_ONLY === '1'
@@ -95,6 +110,26 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
                   runtime,
                   state,
                   facts,
+                  thumbPaint: await Promise.all(
+                    [vThumb, hThumb].map((thumb) =>
+                      thumb.evaluate((el) => {
+                        const box = el.getBoundingClientRect();
+                        const style = getComputedStyle(el);
+                        return {
+                          x: box.x + scrollX,
+                          y: box.y + scrollY,
+                          width: box.width,
+                          height: box.height,
+                          boxSizing: style.boxSizing,
+                          backgroundClip: style.backgroundClip,
+                          background: style.backgroundColor,
+                          borderColor: style.borderTopColor,
+                          borderWidth: style.borderTopWidth,
+                          borderStyle: style.borderTopStyle,
+                        };
+                      })
+                    )
+                  ),
                 },
                 null,
                 2
@@ -115,6 +150,13 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
               horizontal: await rect(horizontal),
               viewport: await rect(viewport),
             });
+            await viewport.evaluate((el) => el.scrollTo(el.scrollWidth, el.scrollHeight));
+            await capture('end', { viewport: await rect(viewport) });
+            if (family.name === 'shadcn') {
+              await applyColorScheme(page, 'dark');
+              await capture('end-dark', { viewport: await rect(viewport) });
+              await applyColorScheme(page, 'light');
+            }
             continue;
           }
           await expect
@@ -187,6 +229,42 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
               { vRef: family.vertical, hRef: family.horizontal }
             );
             expect(hit).toEqual({ found: true, inRoot: true, isControl: false });
+            if (family.name === 'shadcn') {
+              expect(await passive.count()).toBe(0);
+              const paint = await root.evaluate((el) => {
+                const viewport = el.querySelector('[data-demo-ref="scrollViewport"]')!;
+                const rootStyle = getComputedStyle(el);
+                return {
+                  rootRadius: rootStyle.borderBottomRightRadius,
+                  viewportRadius: getComputedStyle(viewport).borderBottomRightRadius,
+                  background: rootStyle.backgroundColor,
+                };
+              });
+              expect(parseFloat(paint.rootRadius)).toBeGreaterThan(0);
+              expect(paint.viewportRadius).toBe(paint.rootRadius);
+              const trackPaint: Array<{ background: string; alpha: number | null }> = [];
+              for (const track of [vertical, horizontal]) {
+                const background = await track.evaluate(
+                  (el) => getComputedStyle(el).backgroundColor
+                );
+                const alpha = computedRgbAlpha(background);
+                expect(alpha, `computed track background: ${background}`).toBe(0);
+                trackPaint.push({ background, alpha });
+                expect(
+                  await track
+                    .locator(':scope > span[data-pui-style~="pointer-events-none"]')
+                    .count()
+                ).toBe(0);
+              }
+              return {
+                vertical: v,
+                horizontal: h,
+                viewport: surface,
+                hit,
+                continuousCorner: paint,
+                trackPaint,
+              };
+            }
             expect(await passive.count()).toBe(1);
             expect(
               await vertical.locator(':scope > span[data-pui-style~="pointer-events-none"]').count()
@@ -202,9 +280,7 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             expect(paint.hasControlIdentity).toBe(false);
             expect(paint.background).not.toBe('rgba(0, 0, 0, 0)');
             expect(paint.background).not.toBe('transparent');
-            expect(paint.carrier).toContain(
-              family.name === 'brutalist' ? 'bg-lavender' : 'bg-muted'
-            );
+            expect(paint.carrier).toContain('bg-lavender');
             expect(paint.borderColor).not.toBe('rgba(0, 0, 0, 0)');
             expect(paint.borderStyle).toBe('solid');
             expect(paint.borderLeft).toBe('2px');
@@ -213,6 +289,28 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
           };
           const initial = await checkCorner();
           await capture('initial', initial);
+          if (family.name === 'shadcn') {
+            for (const [axis, thumb] of [
+              ['vertical', vThumb],
+              ['horizontal', hThumb],
+            ] as const) {
+              const style = await thumb.evaluate((el) => {
+                const s = getComputedStyle(el);
+                return {
+                  boxSizing: s.boxSizing,
+                  backgroundClip: s.backgroundClip,
+                  borderWidth: s.borderTopWidth,
+                  borderColor: s.borderTopColor,
+                };
+              });
+              expect(style.boxSizing).toBe('border-box');
+              expect(style.backgroundClip).toBe('border-box');
+              expect(style.borderWidth).toBe('1px');
+              expect(computedRgbAlpha(style.borderColor)).toBe(0);
+              const box = await rect(thumb);
+              close(axis === 'vertical' ? box.width : box.height, 6);
+            }
+          }
           // Real input exercises the shortened travel through the shared Move host.
           for (const [axis, thumb] of [
             ['vertical', vThumb],
@@ -268,6 +366,50 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
           }
           await root.scrollIntoViewIfNeeded();
           const end = await checkCorner();
+          await capture('end', end);
+          if (family.name === 'shadcn') {
+            await applyColorScheme(page, 'dark');
+            await capture('end-dark', await checkCorner());
+            await applyColorScheme(page, 'light');
+            await page.emulateMedia({ reducedMotion: 'reduce' });
+            await capture('end-reduced-motion', await checkCorner());
+            await page.emulateMedia({ reducedMotion: 'no-preference', forcedColors: 'active' });
+            await capture('end-forced-colors-before-assertions', {
+              viewport: await rect(viewport),
+            });
+            // Retain actual forced-color output for separate visible-indicator review.
+            // Geometry passing alone is not a contrast or paint certification.
+            const forcedThumbs = await Promise.all(
+              [vThumb, hThumb].map((thumb) =>
+                thumb.evaluate((el) => {
+                  const style = getComputedStyle(el);
+                  return {
+                    background: style.backgroundColor,
+                    borderColor: style.borderTopColor,
+                    borderWidth: style.borderTopWidth,
+                    borderStyle: style.borderTopStyle,
+                    display: style.display,
+                    forcedColorAdjust: style.forcedColorAdjust,
+                  };
+                })
+              )
+            );
+            const forcedSurface = await root.evaluate((el) => getComputedStyle(el).backgroundColor);
+            await capture('end-forced-colors', {
+              geometry: await checkCorner(),
+              surface: forcedSurface,
+              thumbs: forcedThumbs,
+            });
+            for (const paint of forcedThumbs) {
+              expect(paint.display).not.toBe('none');
+              expect(paint.borderWidth).toBe('1px');
+              expect(paint.borderStyle).toBe('solid');
+              expect(computedRgbAlpha(paint.borderColor)).toBe(1);
+              expect(paint.borderColor).not.toBe(forcedSurface);
+              expect(paint.forcedColorAdjust).toBe('auto');
+            }
+            await page.emulateMedia({ forcedColors: 'none' });
+          }
           await page.keyboard.press('Tab');
           await viewport.focus();
           expect(await viewport.evaluate((el) => document.activeElement === el)).toBe(true);
@@ -291,10 +433,15 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             .poll(() => horizontal.evaluate((el, key) => el.style.getPropertyValue(key), INSET))
             .toBe('0px');
           close((await rect(horizontal)).width, before.width);
-          const zeroReservation = await readPassive();
-          close(zeroReservation.width, 0);
-          expect(zeroReservation.overflow).toBe('hidden');
-          await capture('zero-reservation', { passive: zeroReservation });
+          if (family.name === 'brutalist') {
+            const zeroReservation = await readPassive();
+            close(zeroReservation.width, 0);
+            expect(zeroReservation.overflow).toBe('hidden');
+            await capture('zero-reservation', { passive: zeroReservation });
+          } else {
+            expect(await passive.count()).toBe(0);
+            await capture('zero-reservation', { privateSurfaceCount: 0 });
+          }
           await vertical.evaluate((el) => el.style.removeProperty('display'));
           await expect
             .poll(() => horizontal.evaluate((el, key) => el.style.getPropertyValue(key), INSET))
@@ -305,13 +452,21 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             .toBe('22.5px');
           const resized = await rect(horizontal);
           close(resized.width + 22.5, before.width);
-          const fractionalCorner = await readPassive();
-          close(fractionalCorner.width, 22.5);
-          close(fractionalCorner.x, resized.x + resized.width);
-          await capture('fractional-reservation', {
-            horizontal: resized,
-            passive: fractionalCorner,
-          });
+          if (family.name === 'brutalist') {
+            const fractionalCorner = await readPassive();
+            close(fractionalCorner.width, 22.5);
+            close(fractionalCorner.x, resized.x + resized.width);
+            await capture('fractional-reservation', {
+              horizontal: resized,
+              passive: fractionalCorner,
+            });
+          } else {
+            expect(await passive.count()).toBe(0);
+            await capture('fractional-reservation', {
+              horizontal: resized,
+              privateSurfaceCount: 0,
+            });
+          }
           await vertical.evaluate((el) => el.style.removeProperty('width'));
           await expect
             .poll(() => horizontal.evaluate((el, key) => el.style.getPropertyValue(key), INSET))
@@ -332,6 +487,55 @@ describe.sequential('styled Scroll Area corner / actual family geometry', () => 
             .poll(() => vThumb.evaluate((el) => getComputedStyle(el).display))
             .not.toBe('none');
           await checkCorner();
+          if (family.name === 'shadcn') {
+            // Exercise the existing Web host's 18px minimum without changing
+            // its geometry implementation or adding a portable size guarantee.
+            const originalSize = await content.evaluate((el) => {
+              const style = (el as HTMLElement).style;
+              const original = { width: style.width, height: style.height };
+              style.width = '10000px';
+              style.height = '10000px';
+              return original;
+            });
+            await viewport.evaluate((el) => el.scrollTo(0, 0));
+            for (const thumb of [vThumb, hThumb]) {
+              await expect
+                .poll(() =>
+                  thumb.evaluate((el) => el.style.getPropertyValue('--proto-ui-scroll-thumb-size'))
+                )
+                .toBe('18px');
+              await expect
+                .poll(() =>
+                  thumb.evaluate((el) =>
+                    el.style.getPropertyValue('--proto-ui-scroll-thumb-offset')
+                  )
+                )
+                .toBe('0px');
+            }
+            close((await rect(vThumb)).height, 18);
+            close((await rect(hThumb)).width, 18);
+            await capture('minimum-thumbs-start', await checkCorner());
+            await viewport.evaluate((el) => el.scrollTo(el.scrollWidth, el.scrollHeight));
+            await expect
+              .poll(() =>
+                viewport.evaluate((el) => el.scrollHeight - el.clientHeight - el.scrollTop)
+              )
+              .toBeLessThanOrEqual(1);
+            const [v, h, vt, ht] = await Promise.all([
+              rect(vertical),
+              rect(horizontal),
+              rect(vThumb),
+              rect(hThumb),
+            ]);
+            close(vt.y + vt.height, v.y + v.height - 2);
+            close(ht.x + ht.width, h.x + h.width - 2);
+            await capture('minimum-thumbs-end', await checkCorner());
+            await content.evaluate((el, original) => {
+              const style = (el as HTMLElement).style;
+              style.width = original.width;
+              style.height = original.height;
+            }, originalSize);
+          }
         }
       } finally {
         await context.close();

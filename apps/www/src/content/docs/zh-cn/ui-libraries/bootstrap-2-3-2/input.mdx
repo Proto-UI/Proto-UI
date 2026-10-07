@@ -1,0 +1,32 @@
+---
+title: 'Bootstrap 2.3.2 Input'
+description: '将归档输入框风格投射到 Base 单行文本协议。'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Input 将 Bootstrap 2.3.2 的输入框语言投射到一个 Base Input Root。当前 Web profile 生成唯一的原生 `input[type=text]`，视觉层只增加输入框外观。
+
+Base 拥有受控与非受控值、归一化编辑与 IME 事件、原生提示属性、禁用与只读行为、无障碍命名及物理焦点。该原型不渲染子内容，不支持任意 input type，也不新增表单提交、搜索命令、校验 UI 或第二个编辑器。
+
+通过页面运行时选择器比较 Web Components、React、Vue 3 与 Vue 2。可编辑 Project name，聚焦只读输入框，并与禁用输入框比较。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-input"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## API
+
+- `value` / `defaultValue`、`disabled`、`readOnly`、`placeholder`
+- `name`、`required`、`autoComplete`、`minLength`、`maxLength`、`inputMode`、`enterKeyHint`
+- `ariaLabel`、`labelledBy`、`describedBy`
+- 继承 `valueChange`、`change`、composition 事件、`focusSelf`、`blurSelf`
+
+这是 draft 状态的源码投射，源码包仍为 private、未发布。深色宿主中继续使用归档浅色配色。Web 示例不代表通用 Prototype Compiler 或 GPUI、Flutter、Qt 一致性已经通过。[查看已实现的子集](../)。

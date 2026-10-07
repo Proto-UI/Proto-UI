@@ -17,7 +17,8 @@ use std::collections::{HashMap, HashSet};
 use gpui::{App, Context, EventEmitter, FocusHandle, Refineable, StyleRefinement, Window};
 use proto_ui_host_protocol::messages::{
     ExposeCall, FocusResult, HostToPeerMessage, InputSampleMessage, MetaSet, OpenStatus,
-    PeerToHostMessage, ProjectionAckMessage, PropsSet, SessionDispose, SessionOpen, WireRecord,
+    PeerToHostMessage, ProjectionAckMessage, ProjectionOrder, PropsSet, SessionDispose,
+    SessionOpen, WireRecord,
 };
 use proto_ui_host_protocol::model::{
     ActivationStatus, DefaultActionStatus, DeliveryResult, DetachStatus, HostSessionModel,
@@ -171,6 +172,8 @@ pub struct HostHub {
     next_call: u64,
     /// The environment the peer last heard.
     meta: Option<WireRecord>,
+    /// The order of views the peer last heard.
+    order: Vec<SessionId>,
 }
 
 impl HostHub {
@@ -980,8 +983,23 @@ impl ProtoHostView {
                 Some(place_sessions(root, &roots, &mut vec![id.clone()]))
             })
             .collect();
+        self.publish_order();
         self.subscribe_focus(window, cx);
         cx.notify();
+    }
+
+    pub(crate) fn publish_order(&mut self) {
+        // Focus orders a navigation's members by the order their views show
+        // in, so the peer hears it whenever it changes (HC-FOCUS-ORDER-0001).
+        let order = self.rendered_sessions();
+        if order != self.hub.order {
+            self.hub
+                .outbox
+                .push(HostToPeerMessage::ProjectionOrder(ProjectionOrder {
+                    sessions: order.clone(),
+                }));
+            self.hub.order = order;
+        }
     }
 
     fn note_a11y(&mut self, session_id: &str, issues: Vec<A11yIssue>) {

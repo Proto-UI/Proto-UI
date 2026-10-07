@@ -355,6 +355,7 @@ jobs:
     env:
       PROTO_UI_RUNTIME_PHASE: general
       PROTO_UI_RUNTIME_SLOT: general
+      COMPILER_EVIDENCE_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
       COVERAGE_BASE_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
       COVERAGE_HEAD_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       COVERAGE_MERGE_REVISION: ${{ github.event_name == 'pull_request' && github.sha || '' }}
@@ -429,7 +430,7 @@ jobs:
           /usr/bin/ffprobe -version | /usr/bin/grep -E '^ffprobe version 6\.1\.'
           # Real fixture decoding proves fd seek/seal and codec capabilities;
           # inventory or version strings alone do not satisfy this gate.
-          node --test scripts/coverage-matrices/test/decode-video-evidence.test.mjs
+          node --test scripts/coverage-matrices/test/decode-video-evidence.integration.mjs
 
       - name: Public documentation gate and repository tests
         env:
@@ -486,6 +487,8 @@ jobs:
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: Install real CJK fallback for typography glyph evidence
+        # Fail setup before a slow mirror consumes the browser execution budget.
+        timeout-minutes: 3
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends fonts-noto-cjk

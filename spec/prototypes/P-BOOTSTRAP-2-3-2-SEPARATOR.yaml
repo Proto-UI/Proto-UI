@@ -1,0 +1,52 @@
+id: P-BOOTSTRAP-2-3-2-SEPARATOR
+type: prototype
+title: bootstrap-2-3-2 separator root over Base
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Draft all-Base coverage increment. Source/unit availability is not release, browser paint, Compiler or native conformance admission.
+summary: A genuine asSeparatorRoot projection; Base retains separator semantics and this part contributes only appearance.
+statement:
+  en: The authored Prototype invokes asSeparatorRoot once. A one-pixel family-border divider in horizontal or vertical orientation. This is a simplified palette-derived extension of the archived hr/divider grammar; the upstream two-edge horizontal rule and default margins are not copied.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-SEPARATOR-BASE
+    text:
+      en: Invoke asSeparatorRoot once and retain every inherited state, event, focus, editing, context and anatomy owner; never copy the semantic implementation or introduce a competing value owner.
+  - id: P-BOOTSTRAP-2-3-2-SEPARATOR-API
+    text:
+      en: Base owns orientation/decorative and separator accessibility. The projection remains contentless and has no event, focus or interactive value channel.
+  - id: P-BOOTSTRAP-2-3-2-SEPARATOR-VISUAL
+    text:
+      en: A one-pixel family-border divider in horizontal or vertical orientation. This is a simplified palette-derived extension of the archived hr/divider grammar; the upstream two-edge horizontal rule and default margins are not copied.
+  - id: P-BOOTSTRAP-2-3-2-SEPARATOR-CLOSURE
+    text:
+      en: All component appearance is declared by Prototype feedback and Rules and closes through the source-derived finite physical token renderer. No website-only component CSS may supply missing default intent.
+  - id: P-BOOTSTRAP-2-3-2-SEPARATOR-BOUNDARY
+    text:
+      en: The package is private and unreleased. Documentation and demos expose the real parts. Actual four-Web browser rendering, general Compiler and GPUI/Flutter/Qt conformance need separate collected evidence; source availability alone is insufficient.
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/separator/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/theme.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/separator.mdx
+  - path: https://getbootstrap.com/2.3.2/base-css.html
+  - path: https://github.com/Proto-UI/Proto-UI/issues/799
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-PROTOTYPE-STYLE-CLOSURE-0001
+inherits:
+  prototypes:
+    - id: P-BASE-SEPARATOR
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-CONTROLS-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the bounded real Base-inheriting state/text part, with explicit browser/general Compiler/native evidence debt.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - separator
+  - draft

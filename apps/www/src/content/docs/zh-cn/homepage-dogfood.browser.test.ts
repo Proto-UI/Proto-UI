@@ -263,7 +263,14 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         .locator('#home-navigation-mobile [data-homepage-fallback] a')
         .filter({ hasText: '文档' });
       expect(await nativeMobileDocs.count()).toBe(1);
+      expect(await nativeMobileDocs.isVisible()).toBe(false);
+      const summary = page.locator('[data-site-header-fallback-summary]');
+      expect(await summary.isVisible()).toBe(true);
+      await summary.click();
       expect(await nativeMobileDocs.isVisible()).toBe(true);
+      expect(
+        await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
+      ).toBe(true);
       expect(await nativeMobileDocs.getAttribute('href')).toBe('/zh-cn/start-here/what-you-saw/');
       await nativeMobileDocs.click();
       await page.waitForURL('**/zh-cn/start-here/what-you-saw/');

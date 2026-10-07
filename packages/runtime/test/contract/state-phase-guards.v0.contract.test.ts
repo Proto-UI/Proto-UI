@@ -21,6 +21,51 @@ import { executeWithHost, RuntimeHost } from '../../src';
  * - This contract intentionally does NOT cover watch/borrowed/observed/exposed projections.
  */
 describe('runtime contract: state phase guards (v0)', () => {
+  it.each([false, true])(
+    '[T-STATE-0004-CASE-CALLBACK-SCOPE] restores the enclosing callback after nested render (throws=%s)',
+    (throws) => {
+      let failRender = false;
+      let source!: OwnedStateHandle<boolean>;
+      let derived!: OwnedStateHandle<boolean>;
+      const proto: Prototype = {
+        name: `nested-render-phase-${throws}`,
+        setup(def) {
+          source = def.state.bool('source', false);
+          derived = def.state.bool('derived', false);
+          return () => {
+            if (failRender) throw new Error('render canary');
+            return null;
+          };
+        },
+      };
+      const session = executeWithHost(proto, {
+        prototypeName: proto.name,
+        getRawProps: () => ({}),
+        schedule: (task) => task(),
+        commit(_children, signal) {
+          signal?.done();
+        },
+      });
+      const kernel = session.kernel!;
+      const state = session.caps.getPort<StatePort>('state')!;
+      state.watch(source, (_run, event) => {
+        if (event.type !== 'next') return;
+        failRender = throws;
+        if (throws) expect(() => session.controller.update()).toThrow('render canary');
+        else session.controller.update();
+        expect(kernel.getPhase()).toBe('callback');
+        derived.set(event.next);
+      });
+      state.set(source, true);
+      expect(derived.get()).toBe(true);
+      expect(kernel.getPhase()).toBe('unknown');
+      expect(() => derived.set(false)).toThrow();
+      failRender = true;
+      expect(() => session.controller.update()).toThrow('render canary');
+      expect(kernel.getPhase()).toBe('unknown');
+    }
+  );
+
   it('owned handle phase guards: setDefault setup-only; set runtime-only', () => {
     const host: RuntimeHost<any> = {
       prototypeName: 'x-runtime-state-guards',
@@ -58,6 +103,50 @@ describe('runtime contract: state phase guards (v0)', () => {
 
     executeWithHost(P, host);
   });
+
+  it.each([false, true])(
+    'preserves state mutation admission after a nested render (throws=%s)',
+    (throws) => {
+      let value!: OwnedStateHandle<boolean>;
+      let rejectRender = false;
+      const renderFailure = new Error('nested render failed');
+      const P: Prototype = {
+        name: 'x-runtime-nested-render-state',
+        setup(def) {
+          value = def.state.bool('value', false);
+          return (renderer) => {
+            if (rejectRender) throw renderFailure;
+            return [renderer.el('div', value.get() ? 'changed' : 'initial')];
+          };
+        },
+      };
+      const host: RuntimeHost<Record<string, unknown>> = {
+        prototypeName: P.name,
+        getRawProps: () => ({}),
+        commit(_children, signal) {
+          signal?.done();
+        },
+        schedule(task) {
+          task();
+        },
+      };
+      const session = executeWithHost(P, host);
+      rejectRender = throws;
+      session.invokeInCallbackScope(() => {
+        let failure: unknown;
+        try {
+          session.controller.update();
+        } catch (error) {
+          failure = error;
+        }
+        expect(failure).toBe(throws ? renderFailure : undefined);
+        value.set(true, 'reason: resume owning callback after nested render');
+      });
+      expect(value.get()).toBe(true);
+      expect(() => value.set(false)).toThrow();
+      expect(value.get()).toBe(true);
+    }
+  );
 
   it('[T-STATE-0004-CASE-CALLBACK-SCOPE] dispatches internal state watch callbacks in callback phase', () => {
     const host: RuntimeHost<any> = {

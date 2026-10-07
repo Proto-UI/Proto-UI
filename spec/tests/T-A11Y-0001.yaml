@@ -3,7 +3,7 @@ type: test
 title: A11y semantic object contract tests
 status: draft
 since: 0.1.0
-summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, Web adapter projection, portable heading-level validation, role coherence, target rebinding, and cross-adapter lifecycle behavior.
+summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, Web adapter projection, portable heading-level validation, role coherence, target rebinding, cross-adapter lifecycle behavior, and bounded React referenced-identity replay.
 cases:
   - id: T-A11Y-0001-CASE-ACCESSIBLE-HANDLE
     title: Shared setup handle, removed legacy entry, guarded declarations and both name-collision orders
@@ -99,6 +99,18 @@ cases:
       - HC-A11Y-0001-B
       - HC-A11Y-0001-C
     expectation: portable-heading-level-setup-validation-runtime-omission-recovery-role-and-target-cleanup
+  - id: T-A11Y-0001-CASE-REACT-RETAINED-REFERENCE-IDENTITY
+    title: A referenced React heading retains its generated identity and source IDREF across same-turn Activity replay
+    covers:
+      - C-A11Y-0001-H
+      - C-A11Y-0001-N
+      - C-A11Y-0001-P
+      - HC-A11Y-0001-C
+    expectation: generated-heading-id-and-dependent-aria-labelledby-survive-hidden-visible-activity-replay
+    notes:
+      - The source transports an opaque semantic-object ref, not an authored host ID. A non-empty generated target id and the source aria-labelledby must agree before replay and retain that identity after same-turn flushSync hidden/visible React.Activity replay.
+      - No heading level is declared or asserted in this fixture; this case is reference identity and dependent IDREF projection evidence, not additional aria-level coverage.
+      - Bounded installed-React replay evidence only; this does not establish every React version, replacement document, terminal-disposal branch, or complete accessibility conformance.
 implementations:
   - id: runtime-accessible-handle
     kind: runtime-test
@@ -161,8 +173,12 @@ implementations:
     required: true
     consumesCases:
       - T-A11Y-0001-CASE-HEADING-LEVEL
+      - T-A11Y-0001-CASE-REACT-RETAINED-REFERENCE-IDENTITY
     exercises:
       - HC-A11Y-0001
+      - A-REACT-18-19-0001
+    notes:
+      - "Reference-identity selector: 'retains a referenced heading identity across same-turn Activity view replay'. Passed in the retained PR #811 final affected run; shared file mapping does not turn this into heading-level evidence or a fresh execution."
   - id: vue-a11y-heading-level-integration
     kind: adapter-test
     status: passing
@@ -214,6 +230,15 @@ verifies:
         - HC-A11Y-0001-A
         - HC-A11Y-0001-B
         - HC-A11Y-0001-C
+exercises:
+  adapters:
+    - id: A-REACT-18-19-0001
+      since: 0.3.0-alpha.1
+      anchors:
+        - A-REACT-18-19-0001-G
+        - A-REACT-18-19-0001-I
+      coverageImpact: exercises-test-surface
+      note: Referenced identity and dependent IDREF retention exercise same-turn Activity replay and current committed projection; they do not verify all lifecycle/profile obligations or every supported React version.
 revisions:
   - version: 0.3.0-alpha.0
     change: revised
@@ -233,6 +258,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added passing Runtime and Web projector evidence for opaque logical refs, ordered direct-ref relations, view replacement, fail-closed targets, terminal cleanup, heading-level setup/runtime validation, role gating, rematerialization, and stale aria-level cleanup.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added addressable retained React Activity replay evidence for generated referenced-heading identity and source IDREF continuity, distinct from the shared file's heading-level case and bounded to the executed fixture.
 tags:
   - a11y
   - accessibility

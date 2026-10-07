@@ -779,6 +779,67 @@ describe('Website projection composition', () => {
     }
   });
 
+  it.each([
+    { owner: null, generation: null, accepted: true },
+    { owner: 'editor-owner', generation: '9', accepted: true },
+    { owner: 'foreign-owner', generation: '9', accepted: false },
+    { owner: 'editor-owner', generation: '8', accepted: false },
+  ])(
+    'binds native editor boundary only for an empty or current lease: $owner/$generation',
+    ({ owner, generation, accepted }) => {
+      const composition = createProjectionComposition({
+        ownerId: 'editor-owner',
+        runtimeId: 'wc',
+        projectionFamilyId: 'shadcn',
+        generation: 9,
+        componentId: 'button',
+        childDemo: {
+          type: 'demo',
+          root: { kind: 'proto', prototypeId: 'shadcn-button', ref: 'editor' },
+        },
+        controls: controls(),
+        controlIds: [],
+      });
+      const { host, refs } = mountDemoTree(composition.demo);
+      // This controlled DOM fixture models the normalized marker placement. It
+      // does not claim a native custom-element or editor rendering observation.
+      const marker = refs.editor!;
+      const boundary = document.createElement('div');
+      boundary.setAttribute('data-pui-root', '');
+      boundary.className = 'infrastructure-only';
+      boundary.style.borderWidth = '7px';
+      if (owner !== null) boundary.setAttribute('data-projection-owner', owner);
+      if (generation !== null) boundary.setAttribute('data-projection-generation', generation);
+      marker.replaceWith(boundary);
+      boundary.appendChild(marker);
+      const cleanup = composition.demo.setup?.({
+        host,
+        refs,
+        api: {
+          call: () => undefined,
+          getExposes: () => undefined,
+          setProps: () => undefined,
+        },
+      });
+      try {
+        expect(marker.getAttribute('data-projection-prototype')).toBe('shadcn-button');
+        expect(boundary.getAttribute('data-projection-prototype')).toBe(
+          accepted ? 'shadcn-button' : null
+        );
+        expect(boundary.getAttribute('data-projection-owner')).toBe(
+          accepted ? 'editor-owner' : owner
+        );
+        expect(boundary.getAttribute('data-projection-generation')).toBe(
+          accepted ? '9' : generation
+        );
+        expect(boundary.className).toBe('infrastructure-only');
+        expect(boundary.style.cssText).toBe('border-width: 7px;');
+      } finally {
+        (cleanup as () => void)();
+      }
+    }
+  );
+
   it('stamps the exact private caption Prototype identity with its control coordinate', () => {
     const composition = createProjectionComposition({
       ownerId: 'caption-owner',

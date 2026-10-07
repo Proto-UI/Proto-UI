@@ -35,6 +35,7 @@ export class SlotProjector {
     // removal, reparent, prepend or reorder. Only a no-slot commit parks nodes.
     const candidates = new Set<Node>();
     for (const node of this.projected) {
+      if (isOwnedVisualNode(this.el, node)) continue;
       if (this.el.contains(node) || (!this.slotEnd && !node.parentNode)) candidates.add(node);
     }
     for (const node of Array.from(this.el.childNodes)) {

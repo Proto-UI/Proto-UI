@@ -1,4 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type {
+  FocusableConfig,
+  FocusFacts,
+  FocusRovingConfig,
+  FocusScopeConfig,
+} from '@proto.ui/core';
 import type { FocusOrderTargets } from '../src/caps';
 import { FocusCenter, type FocusCenterEntry } from '../src/center';
 
@@ -6,7 +12,7 @@ type Member = { id: string; target: object | null };
 
 /**
  * Entries for one navigation owner and its members. Targets are plain objects,
- * as a non-DOM host's are; focus facts follow the requests the center makes.
+ * as a non-DOM host's are; each applied request reports synchronous host focus.
  */
 function navigation(options: {
   kind: 'roving' | 'scope';
@@ -22,10 +28,7 @@ function navigation(options: {
     isFocusable: () => false,
     isScopeProvider: () => options.kind === 'scope',
     isRovingProvider: () => options.kind === 'roving',
-    getFocusableConfig: () =>
-      ({ disabled: false, navParticipation: 'auto' }) as ReturnType<
-        FocusCenterEntry['getFocusableConfig']
-      >,
+    getFocusableConfig: () => ({ disabled: false, navParticipation: 'auto' }) as FocusableConfig,
     getScopeConfig: () => ({
       trap: false,
       loop: false,
@@ -42,7 +45,7 @@ function navigation(options: {
       entry: 'first',
       selectOnFocus: false,
     }),
-    getFacts: () => ({ focused: false }) as ReturnType<FocusCenterEntry['getFacts']>,
+    getFacts: () => ({ focused: false }) as FocusFacts,
     getRootTarget: () => null,
     orderTargets: options.orderTargets,
     requestFocus: () => 'applied',
@@ -53,24 +56,22 @@ function navigation(options: {
   };
   const entries = options.members.map((member): FocusCenterEntry => {
     const token = { id: member.id };
-    return {
+    const entry: FocusCenterEntry = {
       instance: token,
       getParent: (instance) => (instance === token ? ownerToken : null),
       isFocusable: () => true,
       isScopeProvider: () => false,
       isRovingProvider: () => false,
-      getFocusableConfig: () =>
-        ({ disabled: false, navParticipation: 'auto' }) as ReturnType<
-          FocusCenterEntry['getFocusableConfig']
-        >,
-      getScopeConfig: () => ({}) as ReturnType<FocusCenterEntry['getScopeConfig']>,
-      getRovingConfig: () => ({}) as ReturnType<FocusCenterEntry['getRovingConfig']>,
-      getFacts: () => ({ focused: focused.has(token) }) as ReturnType<FocusCenterEntry['getFacts']>,
+      getFocusableConfig: () => ({ disabled: false, navParticipation: 'auto' }) as FocusableConfig,
+      getScopeConfig: () => ({}) as FocusScopeConfig,
+      getRovingConfig: () => ({}) as FocusRovingConfig,
+      getFacts: () => ({ focused: focused.has(token) }) as FocusFacts,
       // The center only compares targets by identity.
       getRootTarget: () => member.target as HTMLElement | null,
       requestFocus: () => {
         requested.push(member.id);
         focused.add(token);
+        center.noteFocused(entry);
         return 'applied';
       },
       hasPendingFocus: () => false,
@@ -80,6 +81,7 @@ function navigation(options: {
       setScopeActive: () => undefined,
       pushWarning: () => undefined,
     };
+    return entry;
   });
   const center = new FocusCenter();
   // Registration order is the members' order.

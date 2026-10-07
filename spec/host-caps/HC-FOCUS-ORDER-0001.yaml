@@ -4,8 +4,8 @@ title: Host orders the targets of one Focus navigation
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: 'Draft: the maintainers chose a host-supplied total order for the ordering half of M-FOCUS-0001-Q-PORTABILITY (#721) and authorized this draft. Only the four Web Adapters provide it, cross-tree Web order is not claimed, and no non-Web host has provider evidence yet.'
-  zh-CN: 'Draft：维护者为 M-FOCUS-0001-Q-PORTABILITY 的排序部分选择了由宿主提供全序（#721），并授权本 draft。目前只有四个 Web Adapter 提供该能力，不声称跨树的 Web 顺序，也还没有非 Web 宿主的提供方证据。'
+  en: 'Draft: the maintainers chose a host-supplied total order for the ordering half of M-FOCUS-0001-Q-PORTABILITY (#721). The four Web Adapters provide it, and the bounded GPUI/T0 experiment has host-publication and horizontal Tabs evidence. Cross-tree Web order, broader non-Web evidence and official GPUI profile admission remain open.'
+  zh-CN: 'Draft：维护者为 M-FOCUS-0001-Q-PORTABILITY 的排序部分选择了由宿主提供全序（#721）。四个 Web Adapter 提供该能力，有界 GPUI/T0 实验已有宿主发布和横向 Tabs 证据。跨树的 Web 顺序、更广的非 Web 证据与正式 GPUI profile 准入仍待定。'
 summary: For one navigation, the host orders the member targets as one total order or reports that it cannot, and Focus otherwise keeps registration order for the whole navigation.
 statement:
   en: A Focus navigation over scope or roving members asks the host of the entry that owns it to order all member targets at once. The host answers with one total order or with none; Focus never combines host answers and registration order pair by pair.
@@ -40,6 +40,10 @@ sources:
   - path: packages/adapters/vue/src/runtime/modules.ts
   - path: packages/adapters/vue2/src/runtime/modules.ts
   - path: packages/adapters/web-component/src/runtime/modules.ts
+  - path: packages/adapters/gpui-peer/src/session.ts
+  - path: packages/adapters/gpui-peer/src/stdio.ts
+  - path: native/gpui/crates/proto-ui-gpui/src/host.rs
+  - path: native/gpui/crates/proto-ui-gpui/src/hub.rs
 openQuestions:
   - id: HC-FOCUS-ORDER-0001-Q-CROSS-TREE
     question:
@@ -51,16 +55,19 @@ openQuestions:
     blocks: ['criterion:HC-FOCUS-ORDER-0001#HC-FOCUS-ORDER-0001-B']
   - id: HC-FOCUS-ORDER-0001-Q-NON-WEB
     question:
-      en: How does a non-Web host keep its projected order available to a Focus Module that runs in another realm?
-      zh-CN: 非 Web 宿主如何让运行在另一个 realm 中的 Focus Module 取得它投影的顺序？
+      en: What non-Web evidence and profile boundaries remain beyond the bounded GPUI/T0 realization?
+      zh-CN: 有界 GPUI/T0 realization 之外，还需要哪些非 Web 证据和 profile 边界？
     context:
-      en: A native host such as the GPUI direction in #687 is expected to project a stable order locally rather than answer each key over a round trip. No non-Web host provides the capability yet, so such hosts keep registration order.
-      zh-CN: '#687 中 GPUI 方向这样的原生宿主，预期在本地投影稳定顺序，而不是每次按键都往返回答。目前还没有非 Web 宿主提供该能力，这类宿主保持注册顺序。'
+      en: 'The GPUI/T0 experiment in #687/#822 publishes deduplicated whole-session snapshots with projection.order when its rendered surface forest changes, including public set_surfaces replacement. The peer answers synchronously from its latest delivered snapshot and returns no order when a member is absent. Horizontal Tabs, whole-set fallback and host replacement have bounded evidence; GPUI scope and vertical-key journeys, other platforms, assistive technology, WASM and official Adapter admission are not established. This is surface-tree document order, not geometric or visual order.'
+      zh-CN: '#687/#822 的 GPUI/T0 实验在渲染表面树变化时通过 projection.order 发布去重的全量会话快照，包括公开 set_surfaces 的替换。peer 从最近收到的快照同步回答；有成员缺失时不给出顺序。横向 Tabs、整组回退与宿主替换已有有界证据；GPUI scope 和纵向按键旅程、其他平台、辅助技术、WASM 与正式 Adapter 准入尚未建立。这是表面树的文档顺序，不是几何或视觉顺序。'
     blocks: ['activation:HC-FOCUS-ORDER-0001']
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the host order for Focus navigations, with its Web document-order realization and whole-navigation registration fallback.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Recorded the bounded GPUI/T0 snapshot realization and its current source/evidence limits, retaining draft lifecycle and the remaining non-Web admission question.
 tags:
   - focus
   - host-capability

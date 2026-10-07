@@ -13,3 +13,100 @@ This page is Proto UI's executable website parity loop: every demo mounts side b
 The website code-surface slice for [#630](https://github.com/Proto-UI/Proto-UI/issues/630), tracked alongside [#420](https://github.com/Proto-UI/Proto-UI/issues/420) and [#568](https://github.com/Proto-UI/Proto-UI/issues/568), has a separate [browser regression](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts) and [retained evidence](https://github.com/Proto-UI/Proto-UI/tree/main/apps/www/test/evidence/issue-630). It compares Markdown and Previewer code in light/dark at 320px, 390px, and desktop widths, then checks CodeExample navigation, repeated `astro:page-load` initialization, and install-command styling. The current site uses full-document navigation, not Astro ClientRouter swaps; these checks do not claim SPA coverage or change Prototype/Adapter guarantees.
 
 <DemoMatrix />
+
+## Shadow split S1 integration
+
+The S1 section uses production `AdaptToWebComponent` and document CSS / Shadow artifacts generated together by the CLI. Only its two explicitly selected prototype compositions use experimental split; the other Adapter columns are unchanged. Generation and notification counts help inspect lifecycle/input, not establish wider browser support.
+
+Two differences are intentional: the light / dark controls switch only the split `colorSchemeSource`, while Light still follows the document; document CSS disturbance turns slotted Badge text red in both columns without directly repainting the split inner surface background. Badge tone is `accent | info | danger` and should cycle yellow, blue, red, and back to yellow without reconnecting.
+
+The dedicated S1 browser regression checks actual colors, glyphs, notification counts, and combined update/reconnect paths, not only equality between columns. Run from the repository root (Chrome/Chromium required; optionally set `CHROME_PATH`):
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts --pool=forks
+```
+
+It starts a test server by default. To reuse an existing server, set `PROTO_UI_BROWSER_BASE_URL=http://127.0.0.1:4321`.
+
+```ts
+import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
+import { checkboxRoot, checkboxIndicator } from '@proto.ui/prototypes-shadcn/checkbox';
+import { protoShadowStyleArtifact } from './styles/proto-ui-shadow-style.generated.js';
+
+const shadow = {
+  mode: 'open',
+  presentation: 'split',
+  styleArtifact: protoShadowStyleArtifact,
+} as const;
+const Root = AdaptToWebComponent(checkboxRoot, { shadow });
+const Indicator = AdaptToWebComponent(checkboxIndicator, { shadow });
+const checkbox = new Root();
+checkbox.append(new Indicator());
+document.body.append(checkbox);
+```
+
+Generate the companion using the current CLI: `proto-ui shadcn --styles-dir ./src/styles --shadow-out ./src/styles/proto-ui-shadow-style.generated.js`, and import the document theme/entry CSS. The object profile and guarantees remain draft; an earlier published version may not include this wiring.
+
+The site's Tailwind `base` reset clears host padding/border from the document side. This section exempts its registered split tags in that layer with `padding: revert-layer; border: revert-layer`, allowing generated non-paint sizing contributions to apply. “Disable host reset exemption” reproduces the interference. This is explicit stylesheet integration, not automatic Adapter protection against arbitrary external CSS.
+
+## Shadow split S2 settings
+
+The [S2 section](#shadow-split-s2) uses the complete Shadcn Button and Switch Root + Thumb alongside Checkbox and Badge. Its columns are Light, split, and mixed: mixed includes split Switch + Light Thumb and Light Checkbox + split Indicator. This section changes the document theme for every column, unlike S1's independent split scheme control.
+
+Cycle all six Button variants and four sizes; inspect icons/text, hover, press translation and keyboard focus rings. Change checked, disabled, theme and slots; reverse rapidly to inspect Thumb continuity. Synchronous moves should retain generation; removal followed by reconnection should increase it, preserve consumer-controlled state and avoid duplicate notifications. Slots remain Maker-owned, without protection against explicit external styling.
+
+H1 applies admitted whole-Root transforms once on the boundary; `pointer-events-none` has an independent hit-testing responsibility, not placement. Evidence is limited to this stage's exact tokens and fixed-border recipes. Animated border-width remains rejected, and other unresolved tokens are not implicitly admitted. The reset integration above still applies, without page sizing patches; the profile and guarantees remain draft.
+
+Run the dedicated path coverage (Chrome/Chromium and server reuse as for S1):
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts --pool=forks
+```
+
+These commands explicitly use process isolation: the default thread pool timed out during Chrome shutdown on the development machine; the same assertions completed successfully with `--pool=forks`. Add `--no-file-parallelism` when running both browser suites together.
+
+## Shadow split S3 Tabs settings
+
+The [S3 section](#shadow-split-s3) places S2 settings inside complete Shadcn Tabs Root/List/Trigger/Content, comparing Light, split and mixed trees. The default detaches inactive L1 views; `keepMounted` retains hidden views instead.
+
+Start with arrows and Home/End, skipping Disabled. In `manual` mode, navigation only moves focus; Enter/Space activates. In `automatic` mode, moving focus activates. Check loop and orientation, then Tab into the first Settings control, the Details button or the Empty panel itself. Returning to Settings should still enter its first control without an extra panel stop.
+
+After repeated switching, combine checked, disabled, theme, Badge tone and slot changes while Settings is absent, then return to inspect current values. Synchronous moves retain lifecycle counts; removal/reconnection creates new instances without duplicate notifications. Settings values live in the demo's consumer-controlled model, not an automatic guarantee of descendant instance or native-state retention. Slots remain Maker-owned; the split profile and this stage's semantics remain draft.
+
+I1 projects root hiding participation and `relative` positioning onto the boundary; the bounded nowrap flex recipe preserves admitted layout. J1 delivers same-provider/key synchronous nested Context notifications in commit order, without requiring microtask-delayed consumer echo. The page does not implement Tabs keyboard behavior, hiding or component sizing; it reuses the S1/S2 reset exemption.
+
+Run the native page journey (server reuse and Chrome configuration as above):
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts --pool=forks --no-file-parallelism
+```
+
+## Shadow split S4 Dialog settings
+
+The [S4 section](#shadow-split-s4) places S3 Tabs settings inside all ten official Shadcn Dialog parts, comparing Light, split and mixed, one ordinary modal at a time. Open with the keyboard, loop with Tab/Shift+Tab, navigate Tabs with arrows and change settings. Escape, Close, the corner icon and a mask press request closing and restore Trigger focus. Reopen to inspect the consumer-owned settings model.
+
+Enable “Decline close requests” to test controlled ownership: requests increase while the Dialog stays open. Disable it to accept again. Combine theme, Badge tone, slots and disabled. Moving an open Root synchronously preserves its instances; removing it clears portals, mask and scroll lock. Reconnect from its original card in the closed state, then reopen to check retained settings and unduplicated notifications.
+
+K1 admits only the recorded negative half-size centering and whole-Root fade/zoom recipe; regenerate the CLI companion. Portals inherit the physical document destination theme without copying origin-ancestor variables. L1 lets WC sample projected sequential targets while Focus retains scope policy, including this composition’s native Details button and empty-panel fallback. It does not intercept arbitrary external DOM `focus()` calls. Slots remain Maker-owned and split remains draft; nested modals, cross-document/closed-shadow trees, arbitrary portal targets, transforms and animations remain excluded.
+
+The journey checks actual AX role/name/description and closed exclusion, native focus, controlled dismissal, retained state, geometry and cleanup—not only attribute strings. Server reuse and Chrome configuration are as above:
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts --pool=forks --no-file-parallelism
+```
+
+For isolated public-package consumption, run `corepack pnpm@10.32.1 build:packages` and `corepack pnpm@10.32.1 --filter apps-www generate:proto-ui-style`, then `node scripts/analysis/shadow-s4-public-browser.mjs`. Standalone scripts accept `PUI_CHROME_EXECUTABLE`. `shadow-s4-admission-browser.mjs` additionally samples native animation frames; `shadow-s4-portal-browser.mjs` covers origin removal and cleanup after old-companion rejection.
+
+## Shadow split S5 native editing
+
+The [S5 section](#shadow-split-s5) compares Base Input, Base Textarea, Shadcn Textarea and an editor inside Tabs. Check real IME candidates/commit/cancel, selection, pointer/keyboard focus rings, controlled proposal rejection, uncontrolled edits, disabled/readOnly, rows, theme and repeated Tabs switching.
+
+The editor is the sole surface, with `part="control surface"`. Generated dimensions are bounded to native intrinsic/rows, `w-full` and `min-h-16`; regenerate older companions. Unrelated props updates must preserve editing. Terminal reconnection resets uncontrolled values, while the demo's Maker model retains controlled values. Base intentionally keeps UA appearance; the page withdraws resets without sizing repairs.
+
+Automation checks actual named AX textboxes, not arbitrary external cross-Shadow `labelledBy`/`describedBy` IDREFs. Real OS IME and Safari remain manual checks. Form, auto-resize, Image View and the separate Dialog #645 are excluded.
+
+```sh
+corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts --pool=forks --no-file-parallelism
+```
+
+Build packages and generate CLI artifacts as for S4; run `node scripts/analysis/shadow-s5-public-browser.mjs` for isolated consumption evidence.

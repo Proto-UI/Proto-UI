@@ -1,0 +1,52 @@
+id: P-BOOTSTRAP-2-3-2-TEXTAREA
+type: prototype
+title: bootstrap-2-3-2 textarea root over Base
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Draft all-Base coverage increment. Source/unit availability is not release, browser paint, Compiler or native conformance admission.
+summary: A genuine asTextareaRoot projection; Base retains textarea semantics and this part contributes only appearance.
+statement:
+  en: The authored Prototype invokes asTextareaRoot once. The compact white field, 4px corners, 6px horizontal/4px vertical padding, normal 14/20 typography and archived 7.5% inset shadow are shared with Input. Minimum height is 64px at a 16px root and resize is vertical. Stronger focus-visible ring and scalable geometry are deliberate differences.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TEXTAREA-BASE
+    text:
+      en: Invoke asTextareaRoot once and retain every inherited state, event, focus, editing, context and anatomy owner; never copy the semantic implementation or introduce a competing value owner.
+  - id: P-BOOTSTRAP-2-3-2-TEXTAREA-API
+    text:
+      en: The projection preserves asTextareaRoot.modules and one host-owned multiline editor. Base owns stable controlledness, value/change/composition signals, hints, rows/wrap, accessible naming and focus. Renderer returns null.
+  - id: P-BOOTSTRAP-2-3-2-TEXTAREA-VISUAL
+    text:
+      en: The compact white field, 4px corners, 6px horizontal/4px vertical padding, normal 14/20 typography and archived 7.5% inset shadow are shared with Input. Minimum height is 64px at a 16px root and resize is vertical. Stronger focus-visible ring and scalable geometry are deliberate differences.
+  - id: P-BOOTSTRAP-2-3-2-TEXTAREA-CLOSURE
+    text:
+      en: All component appearance is declared by Prototype feedback and Rules and closes through the source-derived finite physical token renderer. No website-only component CSS may supply missing default intent.
+  - id: P-BOOTSTRAP-2-3-2-TEXTAREA-BOUNDARY
+    text:
+      en: The package is private and unreleased. Documentation and demos expose the real parts. Actual four-Web browser rendering, general Compiler and GPUI/Flutter/Qt conformance need separate collected evidence; source availability alone is insufficient.
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/textarea/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/theme.ts
+  - path: apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/textarea.mdx
+  - path: https://getbootstrap.com/2.3.2/base-css.html#forms
+  - path: https://github.com/Proto-UI/Proto-UI/issues/799
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-PROTOTYPE-STYLE-CLOSURE-0001
+inherits:
+  prototypes:
+    - id: P-BASE-TEXTAREA
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-CONTROLS-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the bounded real Base-inheriting state/text part, with explicit browser/general Compiler/native evidence debt.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - textarea
+  - draft

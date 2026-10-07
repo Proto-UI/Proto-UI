@@ -95,7 +95,9 @@ function fixture(
     kind: 'proto-ui.live-collaboration-state',
     repositoryId: request.repositoryId,
     action: request.action,
-    observedAt: '2026-10-02T01:02:00.000Z',
+    // Live collection happens after the fixture measurement, matching the
+    // supported measuredAt <= verifiedAt receipt chronology boundary.
+    observedAt: new Date(Date.parse(identity.modelTrace.measuredAt) + 1000).toISOString(),
     viewerLogin: 'fixture-maintainer',
     viewerPermission: 'WRITE',
     current: {

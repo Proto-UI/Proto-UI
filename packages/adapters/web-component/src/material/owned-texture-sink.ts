@@ -56,32 +56,53 @@ const relevantSelector = (token: string) =>
   token.includes(':') &&
   /^(bg-|backdrop-|rounded|text-)/.test(token.split(':').at(-1)!);
 
-// A finite axis-aligned, opaque profile cannot prove contrast or texture mapping
-// through arbitrary ancestor compositing. Walk the composed tree (including slots
-// and shadow hosts) rather than treating non-inherited CSS as host-local.
-function composedPaintInputs(host: HTMLElement): string[] {
-  const inputs: string[] = [];
+// One finite list drives both admission and invalidation. It does not claim
+// complete external CSS compositing support or introduce a generic style parser.
+const COMPOSED_PAINT_FIELDS = [
+  ['opacity', '1', 'compositing'],
+  ['filter', 'none', 'compositing'],
+  ['mixBlendMode', 'normal', 'compositing'],
+  ['transform', 'none', 'geometry'],
+  ['rotate', 'none', 'geometry'],
+  ['scale', 'none', 'geometry'],
+  ['translate', 'none', 'geometry'],
+] as const;
+
+function composedPaintInputs(host: HTMLElement) {
+  const values: string[] = [];
+  let opaque = true;
+  let axisAligned = true;
   const seen = new Set<Element>();
   let element: Element | null = host;
   while (element && !seen.has(element)) {
     seen.add(element);
     const css = element.ownerDocument.defaultView?.getComputedStyle(element);
-    inputs.push(
-      css?.opacity || '1',
-      css?.transform || 'none',
-      css?.rotate || 'none',
-      css?.scale || 'none',
-      css?.translate || 'none',
-      css?.filter || 'none'
-    );
+    for (const [property, neutral, boundary] of COMPOSED_PAINT_FIELDS) {
+      const value = css?.[property] || neutral;
+      values.push(value);
+      const accepted = property === 'opacity' ? Number(value) === 1 : value === neutral;
+      if (!accepted) {
+        if (boundary === 'compositing') opaque = false;
+        else axisAligned = false;
+      }
+    }
     const root = element.getRootNode();
     element =
       element.assignedSlot ??
       element.parentElement ??
       (root.nodeType === 11 && 'host' in root ? (root as ShadowRoot).host : null);
   }
-  return inputs;
+  return { values, opaque, axisAligned };
 }
+
+// The absolute visual canvas fills the host padding box, while providers retain
+// host-border-box bounds. Include these style-owned insets in frame observation.
+const borderWidths = (css: CSSStyleDeclaration | undefined) => [
+  css?.borderTopWidth || '0px',
+  css?.borderRightWidth || '0px',
+  css?.borderBottomWidth || '0px',
+  css?.borderLeftWidth || '0px',
+];
 
 /** Private, bounded, reusable owned-RGBA consumer. Never captures DOM or loads a URL. */
 export function createOwnedTextureVisualSink(
@@ -187,9 +208,10 @@ export function createOwnedTextureVisualSink(
           css?.borderTopRightRadius ?? '',
           css?.borderBottomLeftRadius ?? '',
           css?.borderBottomRightRadius ?? '',
+          ...borderWidths(css),
           css?.color ?? '',
           css?.opacity ?? '',
-          ...composedPaintInputs(host),
+          ...composedPaintInputs(host).values,
         ];
         if (
           host.ownerDocument.defaultView !== ownerWindow ||
@@ -427,9 +449,7 @@ export function createOwnedTextureVisualSink(
           : null;
       if (
         !rgba(resolvedForeground) ||
-        paintInputs.some((value, index) =>
-          index % 6 === 0 ? Number(value) !== 1 : index % 6 === 5 && value !== 'none'
-        ) ||
+        !paintInputs.opaque ||
         contrast(c.fallback.fill, resolvedForeground) < 4.5
       ) {
         unavailable('complete-readable-fallback-unavailable');
@@ -510,6 +530,7 @@ export function createOwnedTextureVisualSink(
         preparedPixels = nextPixels;
       }
       const rect = host.getBoundingClientRect();
+      const borders = borderWidths(css);
       const radii = [
         css.borderTopLeftRadius,
         css.borderTopRightRadius,
@@ -517,17 +538,38 @@ export function createOwnedTextureVisualSink(
         css.borderBottomRightRadius,
       ];
       if (
-        paintInputs.some((value, index) => index % 6 > 0 && index % 6 < 5 && value !== 'none') ||
+        !paintInputs.axisAligned ||
         !radii.every((value) => /^\d+(\.\d+)?px$/.test(value)) ||
-        !radii.every((value) => value === radii[0])
+        !radii.every((value) => value === radii[0]) ||
+        !borders.every((value) => /^\d+(\.\d+)?px$/.test(value))
       ) {
         fallback('geometry-unavailable');
         return;
       }
+      const [top, right, bottom, left] = borders.map(parseFloat);
+      const boxWidth = rect.width - left - right;
+      const boxHeight = rect.height - top - bottom;
+      const outerRadius = Math.min(parseFloat(radii[0]), rect.width / 2, rect.height / 2);
+      // CSS derives padding-edge corners from the same style-owned outer radius.
+      // This finite shader accepts one circular inner radius, not four ellipses.
+      const innerRadii = [
+        [left, top],
+        [right, top],
+        [left, bottom],
+        [right, bottom],
+      ].flatMap(([x, y]) => {
+        const rx = Math.max(0, outerRadius - x),
+          ry = Math.max(0, outerRadius - y);
+        return rx === 0 || ry === 0 ? [0, 0] : [rx, ry];
+      });
+      if (!innerRadii.every((value) => value === innerRadii[0])) {
+        fallback('geometry-unavailable');
+        return;
+      }
       const dpr = ownerWindow?.devicePixelRatio ?? NaN;
-      const width = Math.ceil(rect.width * dpr),
-        height = Math.ceil(rect.height * dpr);
-      const radius = Math.min(parseFloat(radii[0]), rect.width / 2, rect.height / 2);
+      const width = Math.ceil(boxWidth * dpr),
+        height = Math.ceil(boxHeight * dpr);
+      const radius = innerRadii[0];
       if (
         ![width, height, radius, dpr].every(Number.isFinite) ||
         width < 1 ||
@@ -541,12 +583,40 @@ export function createOwnedTextureVisualSink(
         fallback('geometry-budget');
         return;
       }
+      const sourceBounds = texture.bounds(host);
+      if (retired) return;
+      // Cropping must not disguise an invalid original provider extent.
+      if (
+        !Array.isArray(sourceBounds) ||
+        sourceBounds.length !== 4 ||
+        ![0, 1, 2, 3].every(
+          (i) => Object.hasOwn(sourceBounds, i) && Number.isFinite(sourceBounds[i])
+        ) ||
+        sourceBounds[0] < 0 ||
+        sourceBounds[1] < 0 ||
+        sourceBounds[2] <= 0 ||
+        sourceBounds[3] <= 0 ||
+        sourceBounds[0] + sourceBounds[2] > 1 ||
+        sourceBounds[1] + sourceBounds[3] > 1
+      )
+        throw new Error('invalid-owned-source-bounds');
+      // Derive extents from inset endpoints so independently rounded origin and
+      // width cannot push a valid edge beyond its validated source interval.
+      const sourceLeft = sourceBounds[0] + sourceBounds[2] * (left / rect.width);
+      const sourceTop = sourceBounds[1] + sourceBounds[3] * (top / rect.height);
+      const sourceRight = sourceBounds[0] + sourceBounds[2] * (1 - right / rect.width);
+      const sourceBottom = sourceBounds[1] + sourceBounds[3] * (1 - bottom / rect.height);
       const frame = {
         viewport: [width, height],
         textureSize: [texture.width, texture.height],
-        bounds: texture.bounds(host),
+        bounds: [
+          sourceLeft,
+          sourceTop,
+          left === 0 && right === 0 ? sourceBounds[2] : sourceRight - sourceLeft,
+          top === 0 && bottom === 0 ? sourceBounds[3] : sourceBottom - sourceTop,
+        ],
         subpixel: [0, 0],
-        boxSize: [rect.width * dpr, rect.height * dpr],
+        boxSize: [boxWidth * dpr, boxHeight * dpr],
         dpr,
         radius,
         pressed: material.pressed,
@@ -625,12 +695,13 @@ export function createOwnedTextureVisualSink(
         rect.width,
         rect.height,
         dpr,
-        ...frame.bounds,
+        ...sourceBounds,
         css.transform,
         ...radii,
+        ...borders,
         css.color,
         css.opacity,
-        ...paintInputs,
+        ...paintInputs.values,
       ];
       watchGeometry();
     } catch (error) {

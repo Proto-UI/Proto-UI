@@ -36,6 +36,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   let pendingPositionFrame: number | null = null;
   let enhanced = false;
   let open = false;
+  const nativePanel = panel?.localName === 'details' ? (panel as HTMLDetailsElement) : null;
   let destroyed = false;
   // Docs offsets follow the actual header, including font enlargement and
   // wrapped values. The existing disclosure owns this one measurement source.
@@ -254,6 +255,11 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (!wasOpen && trigger?.isConnected && !trigger.closest('[hidden], [inert]'))
       trigger.focus({ preventScroll: true });
   };
+  // Initial pageshow can follow delayed module enhancement. Only bfcache
+  // restoration is history navigation; it must not erase native startup intent.
+  const onPageShow = (event: PageTransitionEvent) => {
+    if (event.persisted) onHistory();
+  };
   const destroy = () => {
     if (destroyed) return;
     destroyed = true;
@@ -284,13 +290,14 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     document.removeEventListener('pointerdown', onOutside);
     document.removeEventListener(SITE_CONTENTS_OPEN_EVENT, onContentsOpen);
     window?.removeEventListener('popstate', onHistory);
-    window?.removeEventListener('pageshow', onHistory);
+    window?.removeEventListener('pageshow', onPageShow);
     document.removeEventListener('astro:before-swap', destroy);
     panel?.removeEventListener('click', onNavigation);
     buttons.clear();
     if (navigation) navigation.hidden = false;
     if (desktopNavigation) desktopNavigation.hidden = false;
     if (panel) panel.hidden = false;
+    if (nativePanel) nativePanel.open = open;
     if (settings) settings.hidden = false;
     root.removeAttribute('data-site-menu-ready');
     root.removeAttribute('data-site-menu-open');
@@ -331,8 +338,17 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     },
     enhance() {
       if (destroyed) return;
+      const summaryFocused =
+        !enhanced && !!nativePanel?.querySelector('summary')?.contains(document.activeElement);
+      if (!enhanced && nativePanel) {
+        // The browser owns initial disclosure while code loads or fails. Adopt
+        // its state once; the existing application controller then takes over.
+        open = nativePanel.open;
+        nativePanel.open = true;
+      }
       enhanced = true;
       sync();
+      if (summaryFocused) activeButton()?.focus({ preventScroll: true });
     },
     toggle() {
       if (destroyed || !enhanced) return;
@@ -363,7 +379,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   document.addEventListener('pointerdown', onOutside);
   document.addEventListener(SITE_CONTENTS_OPEN_EVENT, onContentsOpen);
   window?.addEventListener('popstate', onHistory);
-  window?.addEventListener('pageshow', onHistory);
+  window?.addEventListener('pageshow', onPageShow);
   document.addEventListener('astro:before-swap', destroy);
   panel?.addEventListener('click', onNavigation);
   disclosures.set(root, handle);

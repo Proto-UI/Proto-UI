@@ -1,3 +1,10 @@
+/** Check only the requested target's own tree; do not traverse other shadow roots. */
+export function isWebFocusTargetActive(target: HTMLElement): boolean {
+  return (
+    target.isConnected && (target.getRootNode() as Document | ShadowRoot).activeElement === target
+  );
+}
+
 export function resolveWebFocusEntryTarget(
   container: HTMLElement,
   config: { strategy: 'self' | 'descendant-first'; fallback: 'self' | 'none' },

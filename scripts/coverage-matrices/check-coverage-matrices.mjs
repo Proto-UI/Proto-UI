@@ -2029,7 +2029,7 @@ function maskStringsInMdxBraceExpressions(content) {
   return characters.join('');
 }
 
-function markupSourceForJsxFallback(content, absolutePath) {
+function markupSourceForJsxFallback(content, absolutePath, { scriptsAlreadyMasked = false } = {}) {
   if (/\.mdx?$/i.test(absolutePath)) return maskStringsInMdxBraceExpressions(content);
   if (!/\.(?:html?|astro|vue|svelte)$/i.test(absolutePath)) return null;
 
@@ -2037,7 +2037,9 @@ function markupSourceForJsxFallback(content, absolutePath) {
   if (/\.astro$/i.test(absolutePath)) {
     markup = markup.replace(/^---[ \t]*\r?\n[\s\S]*?\r?\n---[ \t]*(?:\r?\n|$)/u, '');
   }
-  return markup.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/giu, '');
+  return scriptsAlreadyMasked
+    ? markup
+    : markup.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/giu, '');
 }
 
 function openingTagAttributeSyntax(candidate) {
@@ -9066,22 +9068,46 @@ function isTestNamedSource(absolutePath) {
 // sidebar entries and source-reviewed Copy render plugin; resolver functions stay intact. Parity/mutation tests retain
 // fail-closed behavior for every other configuration change.
 const PROMOTION_RESOLVER_CONFIG_SHA256 =
-  '290aa45788f3be0bb3a8fe1c42f242a774637cbc045f2d6bfd916b4484688791';
+  '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377';
+// Exact opt-in, serve-only contrast audit profile. Its imported plugin bytes
+// are part of the reviewed resolver boundary, not an unrestricted plugin hook.
+const PROMOTION_AUDIT_CONFIG_SHA256 =
+  'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee';
+const PROMOTION_AUDIT_PLUGIN_PATH = 'apps/www/scripts/contrast-provenance.mjs';
+const PROMOTION_AUDIT_PLUGIN_SHA256 =
+  'a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a';
 export function promotionBarePackageTargets(root, specifier, metadata) {
   const unverified = () =>
     new Error(`promotion package closure for ${specifier} remains unverified`);
   const configPath = path.join(root, 'apps/www/astro.config.mjs');
+  const unrecognizedConfig = () =>
+    new Error(
+      'promotion package resolver configuration is unrecognized; closure remains unverified'
+    );
   if (
     !fs.existsSync(configPath) ||
     !fs.lstatSync(configPath).isFile() ||
-    path.relative(root, fs.realpathSync(configPath)).startsWith('..') ||
-    createHash('sha256').update(fs.readFileSync(configPath)).digest('hex') !==
-      PROMOTION_RESOLVER_CONFIG_SHA256
+    path.relative(root, fs.realpathSync(configPath)).startsWith('..')
   )
-    throw new Error(
-      'promotion package resolver configuration is unrecognized; closure remains unverified'
-    );
+    throw unrecognizedConfig();
+  const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
+  if (configSha !== PROMOTION_RESOLVER_CONFIG_SHA256 && configSha !== PROMOTION_AUDIT_CONFIG_SHA256)
+    throw unrecognizedConfig();
   metadata.add(configPath);
+  if (configSha === PROMOTION_AUDIT_CONFIG_SHA256) {
+    const pluginPath = path.join(root, PROMOTION_AUDIT_PLUGIN_PATH);
+    assertPromotionModulePath(root, pluginPath);
+    if (
+      !fs.existsSync(pluginPath) ||
+      !fs.lstatSync(pluginPath).isFile() ||
+      createHash('sha256').update(fs.readFileSync(pluginPath)).digest('hex') !==
+        PROMOTION_AUDIT_PLUGIN_SHA256
+    )
+      throw new Error(
+        'promotion audit resolver plugin is unrecognized; closure remains unverified'
+      );
+    metadata.add(pluginPath);
+  }
   const assertRepositoryFile = (target) => {
     assertPromotionModulePath(root, target);
     if (!fs.existsSync(target) || !fs.statSync(target).isFile()) throw unverified();
@@ -9482,12 +9508,15 @@ function reachableSourcePaths(
 // Existing local static browser-default baseline, not a general iframe allowance.
 const REVIEWED_STYLE_BASELINE_EMBED_SHA256 =
   '6b4aab88932f3e54de9a87ff75e022630b2b1198511a8cadbc05aa1e61cf5c95';
-function maskAuthoredMarkupComments(content, sourcePath) {
+function maskAuthoredMarkupComments(content, sourcePath, { includeScripts = false } = {}) {
   const ranges = [];
   try {
     if (/\.html?$/iu.test(sourcePath)) {
       const visit = (node) => {
-        if (node.nodeName === '#comment' && node.sourceCodeLocation)
+        if (
+          (node.nodeName === '#comment' || (includeScripts && node.tagName === 'script')) &&
+          node.sourceCodeLocation
+        )
           ranges.push([node.sourceCodeLocation.startOffset, node.sourceCodeLocation.endOffset]);
         for (const child of node.childNodes ?? []) visit(child);
         if (node.content) visit(node.content);
@@ -9496,18 +9525,28 @@ function maskAuthoredMarkupComments(content, sourcePath) {
     } else if (/\.astro$/iu.test(sourcePath)) {
       const result = parseAstro(content, { position: true });
       if (result.diagnostics.some((diagnostic) => diagnostic.severity === 1)) return content;
-      const commentPositions = [];
+      const nodePositions = [];
       const visit = (node) => {
-        if (node.type === 'comment' && node.position)
-          commentPositions.push([node.position.start.offset, node.position.end.offset]);
+        if (
+          node.position &&
+          (node.type === 'comment' ||
+            (includeScripts && node.type === 'element' && node.name?.toLowerCase() === 'script'))
+        )
+          nodePositions.push({
+            startByte: node.position.start.offset,
+            endByte: node.position.end.offset,
+            comment: node.type === 'comment',
+          });
         for (const child of node.children ?? []) visit(child);
       };
       visit(result.ast);
-      if (commentPositions.length === 0) return content;
+      if (nodePositions.length === 0) return content;
       // Astro reports UTF-8 byte offsets; parse5 reports JavaScript code units.
       // Convert only requested boundaries in one pass, without allocating a
       // source-length map or repeatedly decoding prefixes for every comment.
-      const requested = new Set(commentPositions.flat());
+      const requested = new Set(
+        nodePositions.flatMap(({ startByte, endByte }) => [startByte, endByte])
+      );
       const codeUnitOffsets = new Map();
       let byteOffset = 0;
       let codeUnitOffset = 0;
@@ -9517,15 +9556,15 @@ function maskAuthoredMarkupComments(content, sourcePath) {
         codeUnitOffset += character.length;
       }
       if (requested.has(byteOffset)) codeUnitOffsets.set(byteOffset, codeUnitOffset);
-      for (const [startByte, endByte] of commentPositions) {
+      for (const { startByte, endByte, comment } of nodePositions) {
         const offset = codeUnitOffsets.get(startByte);
         const end = codeUnitOffsets.get(endByte);
         if (offset === undefined || end === undefined) continue;
         // Astro's comment start excludes the four ASCII delimiter bytes.
-        const start = content.startsWith('<!--', offset) ? offset : offset - 4;
+        const start = comment && !content.startsWith('<!--', offset) ? offset - 4 : offset;
         if (
           start >= 0 &&
-          content.startsWith('<!--', start) &&
+          (comment ? content.startsWith('<!--', start) : content[start] === '<') &&
           end >= offset &&
           end <= content.length
         )
@@ -9543,9 +9582,11 @@ function maskAuthoredMarkupComments(content, sourcePath) {
   return characters.join('');
 }
 function unreviewedWebsiteEmbeds(content, sourcePath) {
+  const parserOwned = /\.(?:html?|astro)$/iu.test(sourcePath);
   const markup = markupSourceForJsxFallback(
-    maskAuthoredMarkupComments(content, sourcePath),
-    sourcePath
+    maskAuthoredMarkupComments(content, sourcePath, { includeScripts: parserOwned }),
+    sourcePath,
+    { scriptsAlreadyMasked: parserOwned }
   );
   if (markup === null) return [];
   const pattern = /\.html?$/iu.test(sourcePath)
@@ -9879,7 +9920,11 @@ function discoverHarnessRawImports(rootDir) {
     const sourcePath = path.relative(rootDir, absolutePath).replaceAll('\\', '/');
     if (/\.html?$/i.test(absolutePath)) {
       const content = maskAuthoredMarkupComments(fs.readFileSync(absolutePath, 'utf8'), sourcePath);
-      const markup = markupSourceForJsxFallback(content, absolutePath);
+      const markup = markupSourceForJsxFallback(
+        maskAuthoredMarkupComments(content, sourcePath, { includeScripts: true }),
+        absolutePath,
+        { scriptsAlreadyMasked: true }
+      );
       if (
         jsxOpeningTagCandidates(markup).some((tag) =>
           /^<(?:iframe|object|embed|webview)\b/iu.test(tag)

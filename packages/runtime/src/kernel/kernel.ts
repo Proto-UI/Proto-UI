@@ -40,6 +40,7 @@ export type Kernel<P extends PropsBaseType> = {
   renderer: RendererHandle<P>;
   renderFn: RenderFn;
 
+  /** Preserve the caller's execution phase when rendering returns or throws. */
   renderOnce(): TemplateChildren;
 };
 
@@ -183,11 +184,13 @@ export function createKernel<P extends PropsBaseType>(
   // render
   // ----------------
   const renderOnce = () => {
+    const previousPhase = phase;
     setPhase('render');
-    const children = renderFn(renderer);
-    setPhase('unknown');
-
-    return children;
+    try {
+      return renderFn(renderer);
+    } finally {
+      setPhase(previousPhase);
+    }
   };
 
   return {

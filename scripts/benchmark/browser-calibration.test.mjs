@@ -110,6 +110,11 @@ test('unavailable Chromium is a blocked setup with raw failure evidence, never a
   const raw = JSON.parse(await readFile(path.join(evidenceDir, 'evaluator-result.json'), 'utf8'));
   assert.equal(raw.caseId, result.caseId);
   assert.equal(raw.oracleRef, result.oracleRef);
+  assert.equal(result.environment.timeouts.launchMs, 30_000);
+  assert.equal(result.environment.timeouts.actionMs, 1_200);
+  assert.equal(result.environment.timeouts.screenshotMs, 5_000);
+  assert.equal(result.environment.timeouts.totalMs, null);
+  assert.deepEqual(raw.environment.timeouts, result.environment.timeouts);
   assert.equal(result.checks.find((item) => item.id === 'host.browser-ready')?.status, 'blocked');
   assert.equal(
     result.checks.find((item) => item.id === 'scope.proto-conformance')?.status,

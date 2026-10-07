@@ -5,6 +5,10 @@ description: Release one current Proto UI work-item claim when it expired, becam
 
 # Release one claim
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 1. Require a current `pui-orient` envelope. In autonomous mode the release must be within the fresh C2-or-higher ceiling; in human-assisted mode the assessment remains advisory. Require the active context's current content-bound `modeltrace-record` in both modes. Validate it against independent context and include its generated public receipt in the authorized release notice. Missing, expired or changed-scope records route back through the entrypoint for remeasurement, never declared-label fallback.
 2. Read the original claim receipt, current issue, recent comments, linked work, assignee, and Project claim state when available.
 3. Require one explicit release reason: expiry, changed boundary, invalidated task state, blocking dependency, stopped work, or completed handoff.

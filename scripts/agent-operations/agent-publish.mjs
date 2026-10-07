@@ -17,6 +17,13 @@ import {
   assertModelTraceDisclosure,
   hasModelTraceDisclosure,
 } from './modeltrace.mjs';
+import {
+  DOT_EXEMPTION,
+  DOT_DISCLOSURE,
+  isDotExemption,
+  hasDotDisclosure,
+  assertDotDisclosure,
+} from './dot-exemption.mjs';
 
 const COMMON = [
   '--record',
@@ -26,6 +33,7 @@ const COMMON = [
   '--authorization',
   '--repository',
 ];
+const DOT_OPTIONS = ['--agent', '--dot-exemption'];
 const OWNER_OPTIONS = ['--owner-authorization', '--owner-key', '--owner-grant'];
 const OPTIONS = new Map([
   ['commit', [...COMMON, '--message-file', '--branch', '--expected-head', '--expected-tree']],
@@ -59,7 +67,11 @@ export function parsePublishCli(argv) {
   for (let i = 0; i < values.length; i += 2) {
     const key = values[i];
     const value = values[i + 1];
-    if (!OPTIONS.get(command).includes(key) && !OWNER_OPTIONS.includes(key))
+    if (
+      !OPTIONS.get(command).includes(key) &&
+      !OWNER_OPTIONS.includes(key) &&
+      !DOT_OPTIONS.includes(key)
+    )
       throw new Error(`unexpected option: ${key}`);
     if (args.has(key)) throw new Error(`duplicate option: ${key}`);
     if (!value || value.startsWith('--')) throw new Error(`missing value: ${key}`);
@@ -84,7 +96,11 @@ export function parsePublishCli(argv) {
       'publisher requires explicit-current-user or verified owner delegation; generic standing scopes are not activated here'
     );
   }
-  for (const key of OPTIONS.get(command)) if (!args.has(key)) throw new Error(`${key} is required`);
+  const dotExempt = isDotExemption(args);
+  for (const key of OPTIONS.get(command)) {
+    if (dotExempt && ['--record', '--context'].includes(key)) continue;
+    if (!args.has(key)) throw new Error(`${key} is required`);
+  }
   parseRepositoryId(args.get('--repository'));
   if (args.has('--number') && !/^[1-9][0-9]*$/.test(args.get('--number')))
     throw new Error('--number must be a positive integer');
@@ -346,6 +362,27 @@ export class PublicationUnknown extends Error {
 export function runCommitMessageHook(messagePath, options = {}) {
   const environment = options.env ?? process.env;
   if (environment.PUI_AGENT !== '1') return { status: 'human-exempt' };
+  if (
+    environment.PUI_AGENT_NAME !== undefined ||
+    environment.PUI_DOT_MODELTRACE_EXEMPTION !== undefined
+  ) {
+    const declarations = new Map([
+      ['--agent', environment.PUI_AGENT_NAME],
+      ['--dot-exemption', environment.PUI_DOT_MODELTRACE_EXEMPTION],
+    ]);
+    if (environment.PUI_MODELTRACE_RECORD)
+      declarations.set('--record', environment.PUI_MODELTRACE_RECORD);
+    if (environment.PUI_MODELTRACE_CONTEXT)
+      declarations.set('--context', environment.PUI_MODELTRACE_CONTEXT);
+    isDotExemption(declarations);
+    assertDotDisclosure(fs.readFileSync(messagePath, 'utf8'), 'commit');
+    return {
+      status: 'validated',
+      agent: 'dot',
+      modelTrace: 'not-measured',
+      exemption: DOT_EXEMPTION,
+    };
+  }
   if (!environment.PUI_MODELTRACE_RECORD || !environment.PUI_MODELTRACE_CONTEXT)
     throw new Error('Agent commit requires PUI_MODELTRACE_RECORD and PUI_MODELTRACE_CONTEXT');
   const io = tools(options);
@@ -385,25 +422,48 @@ export function runPublishCli(argv, options = {}) {
     )
       throw new Error('publisher owner delegation does not authorize this exact operation');
   };
-  const recordPath = path.resolve(args.get('--record'));
-  const contextPath = path.resolve(args.get('--context'));
+  const dotExempt = isDotExemption(args);
+  const recordPath = dotExempt ? null : path.resolve(args.get('--record'));
+  const contextPath = dotExempt ? null : path.resolve(args.get('--context'));
+  const renderDisclosure = (receipt, format) =>
+    dotExempt ? DOT_DISCLOSURE : renderModelTraceDisclosure(receipt, format);
+  const hasDisclosure = (text, receipt, format) =>
+    dotExempt ? hasDotDisclosure(text, format) : hasModelTraceDisclosure(text, receipt, format);
+  const assertDisclosure = (text, receipt, format) =>
+    dotExempt
+      ? assertDotDisclosure(text, format)
+      : assertModelTraceDisclosure(text, receipt, format);
   // Recompute the private raw samples. Never substitute a system/harness model.
-  const measure = () =>
-    loadModelTraceRecord({ recordPath, contextPath, repositoryId, now: options.now ?? new Date() });
-  const receipt = measure();
+  const measure = (fresh = true) =>
+    dotExempt
+      ? null
+      : loadModelTraceRecord({
+          recordPath,
+          contextPath,
+          repositoryId,
+          now: options.now ?? new Date(),
+          fresh,
+        });
+  // GitHub reconciliation is read-only and must retain the original disclosure
+  // after expiry. Commits have no historical reconciliation and stay fresh.
+  const receipt = measure(command === 'commit');
   const io = tools(options);
   if (command === 'commit') {
-    assertPrivateCommitInputs(io, recordPath, contextPath);
+    if (!dotExempt) assertPrivateCommitInputs(io, recordPath, contextPath);
     const binding = localCommitBinding(io, args);
     // Local commits and new GitHub objects have no existing numbered target.
     // Owner delegation must explicitly grant the repository portfolio for them.
     authorize();
     const prepared = fs.readFileSync(args.get('--message-file'), 'utf8');
-    if (!prepared.trim() || /^ModelTrace:/m.test(prepared))
+    if (
+      !prepared.trim() ||
+      /^ModelTrace:/m.test(prepared) ||
+      (dotExempt && /^[\t ]*(?:Agent|ModelTrace):/im.test(prepared))
+    )
       throw new Error(
         'prepared commit message must be nonempty and have no existing ModelTrace trailer'
       );
-    const message = `${prepared.trimEnd()}\n\n${renderModelTraceDisclosure(receipt, 'commit')}\n`;
+    const message = `${prepared.trimEnd()}\n\n${renderDisclosure(receipt, 'commit')}\n`;
     const directory = fs.mkdtempSync(path.join(tmpdir(), 'pui-agent-commit-'));
     try {
       const messagePath = path.join(directory, 'message');
@@ -412,16 +472,18 @@ export function runPublishCli(argv, options = {}) {
         ...process.env,
         GIT_INDEX_FILE: path.join(directory, 'index'),
         PUI_AGENT: '1',
-        PUI_MODELTRACE_RECORD: recordPath,
-        PUI_MODELTRACE_CONTEXT: contextPath,
+        PUI_AGENT_NAME: dotExempt ? 'dot' : undefined,
+        PUI_DOT_MODELTRACE_EXEMPTION: dotExempt ? DOT_EXEMPTION : undefined,
+        PUI_MODELTRACE_RECORD: recordPath ?? undefined,
+        PUI_MODELTRACE_CONTEXT: contextPath ?? undefined,
       };
       io.run('git', ['read-tree', binding.tree], { env: commitEnvironment });
-      assertModelTraceDisclosure(message, measure(), 'commit');
+      assertDisclosure(message, measure(), 'commit');
       if (JSON.stringify(localCommitBinding(io, args)) !== JSON.stringify(binding))
         throw new Error(
           'commit branch, HEAD, staged tree or repository default changed before write'
         );
-      assertPrivateCommitInputs(io, recordPath, contextPath);
+      if (!dotExempt) assertPrivateCommitInputs(io, recordPath, contextPath);
       authorize();
       let output;
       try {
@@ -451,7 +513,8 @@ export function runPublishCli(argv, options = {}) {
           .match(/^committer (.+) -?\d+ [+-]\d{4}$/m)?.[1];
         if (messageStart < 0 || !committer)
           throw new Error('committed object body or committer is unavailable');
-        const expectedCommitted = `${message}Signed-off-by: ${committer}\n`;
+        // Git starts a trailer block after dot's plain-language limitation line.
+        const expectedCommitted = `${message}${dotExempt ? '\n' : ''}Signed-off-by: ${committer}\n`;
         if (commitObject.slice(messageStart + 2) !== expectedCommitted)
           throw new PublicationUnknown(
             'committed message differs from the authorized preparation plus sign-off; inspect local HEAD before any retry'
@@ -482,7 +545,7 @@ export function runPublishCli(argv, options = {}) {
   const endpoint = `repos/${owner}/${name}`;
   const prepared = fs.readFileSync(args.get('--body-file'), 'utf8');
   if (!prepared.trim()) throw new Error('prepared body must be nonempty');
-  const exactPrepared = hasModelTraceDisclosure(prepared, receipt);
+  const exactPrepared = hasDisclosure(prepared, receipt);
   if (!exactPrepared && /<!-- proto-ui-agent-publication:/i.test(prepared))
     throw new Error('undisclosed prepared body must not forge a publication marker');
   const number = args.has('--number') ? Number(args.get('--number')) : null;
@@ -511,7 +574,9 @@ export function runPublishCli(argv, options = {}) {
   // bodies must not be silently reformatted or gain another marker/disclosure.
   const body = exactPrepared
     ? prepared
-    : `${prepared}${prepared.endsWith('\n') ? '\n' : '\n\n'}${renderModelTraceDisclosure(receipt, 'markdown')}\n\n${marker}\n`;
+    : dotExempt
+      ? `${renderDisclosure(receipt, 'markdown')}\n\n${prepared}${prepared.endsWith('\n') ? '\n' : '\n\n'}${marker}\n`
+      : `${prepared}${prepared.endsWith('\n') ? '\n' : '\n\n'}${renderDisclosure(receipt, 'markdown')}\n\n${marker}\n`;
   if (before?.locked) throw new Error('target is locked');
   if (command === 'update-body' && !sameLogin(before.user?.login, viewer.login))
     throw new Error('body replacement requires a credential-owned Issue or PR');
@@ -597,7 +662,6 @@ export function runPublishCli(argv, options = {}) {
     throw new Error('PR head/base changed before write');
   if (findPublished())
     throw new Error('publication appeared during preflight; rerun read-only reconciliation');
-  assertModelTraceDisclosure(body, measure(), 'markdown');
   authorize(scopeId, viewer.login);
   let route;
   let method = 'POST';
@@ -622,6 +686,9 @@ export function runPublishCli(argv, options = {}) {
     route = `${endpoint}/issues/${number}`;
     method = 'PATCH';
   }
+  // Historical admission never authorizes a write. Re-read the original record
+  // with current freshness immediately before the single mutation attempt.
+  assertDisclosure(body, measure(), 'markdown');
   let acknowledged;
   try {
     // Exactly one mutation. Transport/JSON failure may mean it succeeded.

@@ -5,6 +5,10 @@ description: Independently review a Proto UI change against current authority, b
 
 # Review independently
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 1. Use a fresh context when independence is required. Read `AGENTS.md`, the canonical review-input snapshot, raw task artifacts, base and head SHAs, actual diff, authority map, decision packet, and validation logs.
 2. Reconstruct the governing lifecycle and scope without relying on the implementer's conclusion.
 3. Check source-of-truth alignment, negative boundaries, direct and indirect consumers, compatibility, generated files, provenance, DCO, and exact evidence.
@@ -61,3 +65,11 @@ For owner-delegated submission, pass the trusted runner's --owner-authorization,
 Owner-delegated validate, inspect and eligibility accept the same trusted owner options as submission. Supply independently declared --mode and --mode-source matching the handoff; do not infer them from artifact text. A repair chain can be passed as a JSON array to agent:skill:resume; it must begin at the interruption's selected diagnostic leaf and preserve every adjacent route.
 
 For every command above, `--prior-handoff` is required when the output handoff comes from `pui-validate`; pass the actual handoff that validation received, including after a resumed repair chain. Keep this predecessor beside the validated output. Omit it only for a different intake route. It is not `--prior-packet`, and a previously successful resolver call does not remove the review CLI comparison. Missing data is for the Agent to recover, not a new human approval step.
+
+## Governed cloud publication boundary
+
+The governed tokenless owner-plugin writer is a separately admitted path, not an independent alternate writer available to arbitrary callers. Only the separately admitted proto-ui-cloud-owner-review-v1 and proto-ui-cloud-owner-initial-sweep-v1 scopes may use scripts/agent-operations/connector-review-worker.mjs with its trusted parent dispatcher, provisioned same-principal ledger, and the protocol in internal/agent-operations/connector-review-parent-handoff.md.
+
+This path remains autonomous with the truthful delegated-owner-event or delegated-owner-initial-sweep source; it never borrows CLI current-user/schedule authority or activates Poppy. Its validated parent packet and canonical v5 input, exact repository/PR/head/input binding, fresh derived assessment and trusted snapshot, live contributor independence and permissions, full active scope/principal checks, trusted CI/DCO policy, single owned ledger slot, and final dispatch fence form its own governed validation boundary. Draft members are analysis-only. Exact duplicates durably complete the pending generation without a POST, changing prior findings, adopting an unknown result, or manufacturing a receipt. Changed input, revoked policy, unavailable identity and ambiguous outcomes stop.
+
+The cloud session performs that validation before staging and again before its one connector POST; only the bound intent may reach the exact add_review_to_pr operation. Calling the raw transport or connector outside that session remains unsupported. Cloud review is not a CLI handoff or a generic writer exception, and this paragraph grants no startup, production activation, publication or integration authority. Preserve all CLI validated-handoff and independent invocation-mode rules above.

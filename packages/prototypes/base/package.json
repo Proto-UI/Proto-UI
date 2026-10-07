@@ -26,6 +26,11 @@
       "import": "./dist/index.js",
       "default": "./dist/index.js"
     },
+    "./collapsible": {
+      "types": "./dist/collapsible/index.d.ts",
+      "import": "./dist/collapsible/index.js",
+      "default": "./dist/collapsible/index.js"
+    },
     "./behaviors": {
       "types": "./dist/behaviors/index.d.ts",
       "import": "./dist/behaviors/index.js",

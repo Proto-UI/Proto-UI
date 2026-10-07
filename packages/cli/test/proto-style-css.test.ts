@@ -1,13 +1,42 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  PROTO_SHADOW_STYLE_ARTIFACT_KIND,
+  PROTO_SHADOW_STYLE_ARTIFACT_VERSION,
+  PROTO_SHADOW_STYLE_ENVIRONMENT,
   renderPrefixedThemeCss,
+  renderProtoShadowStyleArtifact,
+  renderProtoShadowStyleTokenCss,
   renderProtoStyleEntryCss,
   renderProtoStyleTokenCss,
 } from '../src/services/proto-style-css';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it.each(['auto', 'text', 'none'])(
+    'diagnoses selection:select-%s instead of emitting inert highlight CSS',
+    (value) => {
+      const token = `selection:select-${value}`;
+      const css = renderProtoStyleTokenCss([token, `dark:${token}`]);
+      expect(css).toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain(`* - ${token}`);
+      expect(css).toContain(`* - dark:${token}`);
+      expect(css).not.toContain('::selection');
+      expect(css).not.toContain('user-select:');
+    }
+  );
+  it('closes explicit content-selection affordances only on their authored subjects', () => {
+    // T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-CSS
+    const css = renderProtoStyleTokenCss(['select-auto', 'select-text', 'select-none']);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    for (const value of ['auto', 'text', 'none']) {
+      expect(css).toContain(`:where([data-pui-style~="select-${value}"])`);
+      expect(css).toContain(`-webkit-user-select: ${value};`);
+      expect(css).toContain(`user-select: ${value};`);
+    }
+    expect(css).not.toMatch(/(?:html|body|\*)\s*\{[^}]*user-select/s);
+  });
+
   it('lowers both Scroll Area track inset dimensions to valid spaced CSS math', () => {
     const css = renderProtoStyleTokenCss([
       'data-[orientation=vertical]:h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',
@@ -287,6 +316,88 @@ describe('proto style css renderer', () => {
     );
   });
 
+  it('uses the host-color-scheme-v1 marker as the only Shadow dark environment selector', () => {
+    const css = renderProtoShadowStyleTokenCss(['dark:bg-input/30']);
+
+    expect(css).toContain(
+      `:where(:host([data-pui-color-scheme='dark'])) :where([data-pui-style~="dark:bg-input/30"])`
+    );
+    expect(css).toContain(
+      'background-color: color-mix(in oklab, var(--pui-input) 30%, transparent);'
+    );
+    expect(css).not.toContain(':where(.dark)');
+    expect(css).not.toContain('[data-theme=');
+    expect(css).not.toContain(':root');
+    expect(css).not.toContain('@media (prefers-color-scheme: dark)');
+  });
+
+  it('keeps ordinary Shadow dark context at zero specificity against state rules', () => {
+    // D-WEB-COMPONENT-SHADOW-STYLE-0001 B/C: environment substitution must
+    // not give dark:p-2 precedence over the document's data-[open]:p-4.
+    const tokens = ['dark:p-2', 'data-[open]:p-4', 'dark:data-[open]:p-8'];
+    const shadow = renderProtoShadowStyleTokenCss(tokens);
+    expect(shadow).toContain(
+      `:where(:host([data-pui-color-scheme='dark'])) :where([data-pui-style~="dark:p-2"])`
+    );
+    expect(shadow).toContain(`:where([data-pui-style~="data-[open]:p-4"])[data-open]`);
+    expect(shadow).toContain(
+      `:where(:host([data-pui-color-scheme='dark'])) :where([data-pui-style~="dark:data-[open]:p-8"])[data-open]`
+    );
+    expect(shadow).not.toContain(`:host([data-pui-color-scheme='dark']) :where`);
+    for (const css of [shadow, renderProtoStyleTokenCss(tokens)]) {
+      expect(css).toContain('padding: 0.5rem;');
+      expect(css).toContain('padding: 1rem;');
+      expect(css).toContain('padding: 2rem;');
+    }
+  });
+
+  it('keeps non-environment Shadow output identical to document output', () => {
+    const tokens = [
+      'animate-in',
+      'duration-200',
+      'fade-in-0',
+      'ring-2',
+      'translate-x-0',
+      'unsupported-shadow-token',
+    ];
+
+    expect(renderProtoShadowStyleTokenCss(tokens)).toBe(renderProtoStyleTokenCss(tokens));
+  });
+
+  it('preserves declarations, ordering, keyframes, baseline, and diagnostics around Shadow dark rules', () => {
+    const css = renderProtoShadowStyleTokenCss([
+      'animate-in',
+      'dark:bg-input/30',
+      'duration-200',
+      'fade-in-0',
+      'unsupported-shadow-token',
+    ]);
+
+    expect(css).toContain('[data-pui-style]::before');
+    expect(css).toContain(':where([data-pui-style]) {');
+    expect(css).toContain('@keyframes pui-enter');
+    expect(css).toContain('--pui-enter-opacity: 0');
+    expect(css).toContain('transition-duration: 200ms;');
+    expect(css).toContain('Unsupported Proto UI style tokens:');
+    expect(css).toContain('* - unsupported-shadow-token');
+    expect(css.indexOf('[data-pui-style~="animate-in"]')).toBeLessThan(
+      css.indexOf('[data-pui-style~="duration-200"]')
+    );
+  });
+
+  it('builds a frozen versioned Shadow style artifact without exporting theme declarations', () => {
+    const artifact = renderProtoShadowStyleArtifact(['dark:bg-input/30']);
+
+    expect(artifact).toEqual({
+      kind: PROTO_SHADOW_STYLE_ARTIFACT_KIND,
+      version: PROTO_SHADOW_STYLE_ARTIFACT_VERSION,
+      cssText: renderProtoShadowStyleTokenCss(['dark:bg-input/30']),
+      environment: PROTO_SHADOW_STYLE_ENVIRONMENT,
+    });
+    expect(Object.isFrozen(artifact)).toBe(true);
+    expect(artifact.cssText).not.toContain('--pui-background:');
+  });
+
   it('adds a system dark fallback to generated theme variables', () => {
     const css = renderPrefixedThemeCss(`:root {
   --background: white;
@@ -419,6 +530,22 @@ describe('proto style css renderer', () => {
     expect(css).toContain('--pui-shadow: 0 4px 6px -1px');
     expect(css).toContain('--pui-translate-x: -0.5rem;');
     expect(css).toContain('--pui-translate-y: -0.5rem;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+  it('renders the Bootstrap 2.3.2 field inset and alignment without losing current shared tokens', () => {
+    const css = renderProtoStyleTokenCss([
+      'justify-start',
+      'font-sans',
+      'rounded-base',
+      'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]',
+    ]);
+    expect(css).toContain('justify-content: flex-start;');
+    expect(css).toContain(
+      'font-family: var(--pui-font-sans, ui-sans-serif, system-ui, sans-serif);'
+    );
+    expect(css).toContain('border-radius: var(--pui-radius);');
+    expect(css).toContain('--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075);');
+    expect(css).toContain('var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000)');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 });

@@ -217,7 +217,9 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
     if (!ctx) return;
     if (!ctx.open) return;
     requestDialogOpen(run, false, 'escape', 'keyboard');
-    if (ctx.controlled) overlay.openOverlay('controlled.sync');
+    // Request delivery may synchronously replace the owner's open input.
+    // Restore only a still-open controlled fact, never the pre-request snapshot.
+    if (currentContext?.controlled && currentContext.open) overlay.openOverlay('controlled.sync');
   });
 
   boundary.subscribeOutside(() => {

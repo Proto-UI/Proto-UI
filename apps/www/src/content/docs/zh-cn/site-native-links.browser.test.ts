@@ -1295,6 +1295,10 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
       expect(await heroCTA.locator('svg[aria-hidden="true"]').count()).toBe(1);
       const links = page.locator('#home-social a');
       expect(await links.count()).toBe(4);
+      const summary = page.locator('[data-site-header-fallback-summary]');
+      expect(await summary.isVisible()).toBe(true);
+      expect(await links.first().isVisible()).toBe(false);
+      await summary.press('Enter');
       for (let index = 0; index < 4; index++) {
         expect(await links.nth(index).isVisible()).toBe(true);
         expect(await links.nth(index).getAttribute('href')).toMatch(/^https:\/\//);
@@ -1304,8 +1308,12 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         'hero-cta-no-js',
         'shadcn',
         'native-no-js',
-        'configured-external-icon'
+        'configured-external-icon-and-native-disclosure'
       );
+      await summary.press('Enter');
+      expect(await links.first().isVisible()).toBe(false);
+      await summary.click();
+      expect(await links.first().isVisible()).toBe(true);
     } finally {
       await context.close();
     }

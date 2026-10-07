@@ -1,3 +1,4 @@
+import { createFocusRequestIntent, retainFocusRequestIntent } from './request-intent';
 import type {
   FocusRequestOptions,
   FocusRovingKey,
@@ -30,6 +31,15 @@ export type FocusCenterEntry = {
   /** The host's order for a navigation this entry owns, if the host has one. */
   orderTargets?: FocusOrderTargets;
   requestFocus(options?: FocusRequestOptions, behavior?: FocusRequestBehavior): FocusRequestOutcome;
+  /** Snapshot options under execution ownership before host getters or scope policy reenter. */
+  prepareFocusRequest?(
+    options?: FocusRequestOptions,
+    behavior?: FocusRequestBehavior
+  ): {
+    isCurrent(): boolean;
+    apply(): FocusRequestOutcome;
+    finish(failed?: boolean): void;
+  };
   hasPendingFocus(): boolean;
   clearFocus(reason: unknown): void;
   setScopeActive(active: boolean): void;
@@ -46,11 +56,13 @@ export class FocusCenter {
   private readonly activeScopes: ActiveScopeRecord[] = [];
   private readonly lastFocusedByScope = new Map<FocusInstanceToken, FocusInstanceToken>();
   private currentFocused: FocusInstanceToken | null = null;
+  private ownerEpoch = 0;
   private readonly pendingRovingEntries = new Map<
     FocusInstanceToken,
     {
       op: 'first' | 'last' | 'selected';
       options?: FocusRovingEntryRequestOptions;
+      intent: FocusRequestOptions;
       attempted?: FocusInstanceToken;
     }
   >();
@@ -63,7 +75,10 @@ export class FocusCenter {
   remove(instance: FocusInstanceToken): void {
     this.entries.delete(instance);
     this.pendingRovingEntries.delete(instance);
-    if (this.currentFocused === instance) this.currentFocused = null;
+    if (this.currentFocused === instance) {
+      this.currentFocused = null;
+      this.ownerEpoch += 1;
+    }
     this.lastFocusedByScope.delete(instance);
     for (const [scope, focused] of this.lastFocusedByScope) {
       if (focused === instance) this.lastFocusedByScope.delete(scope);
@@ -77,7 +92,10 @@ export class FocusCenter {
 
   detach(instance: FocusInstanceToken): void {
     this.entries.delete(instance);
-    if (this.currentFocused === instance) this.currentFocused = null;
+    if (this.currentFocused === instance) {
+      this.currentFocused = null;
+      this.ownerEpoch += 1;
+    }
     for (const [scope, focused] of this.lastFocusedByScope) {
       if (focused === instance) this.lastFocusedByScope.delete(scope);
     }
@@ -171,10 +189,11 @@ export class FocusCenter {
     return Array.from(this.entries.values()).find((entry) => entry.getFacts().focused) ?? null;
   }
 
-  private clearOtherFocusedEntries(next: FocusCenterEntry, reason: unknown): void {
+  private clearOtherFocusedEntries(next: FocusCenterEntry, reason: unknown, epoch: number): void {
     for (const entry of this.entries.values()) {
+      if (epoch !== this.ownerEpoch) return;
       if (entry.instance === next.instance) continue;
-      if (!entry.isFocusable()) continue;
+      if (!entry.isFocusable() && !entry.hasPendingFocus()) continue;
       const facts = entry.getFacts();
       if (!facts.focused && !facts.focusVisible && !facts.active && !entry.hasPendingFocus()) {
         continue;
@@ -189,7 +208,9 @@ export class FocusCenter {
       if (!entry.isFocusable()) return false;
       if (entry.instance === scope.instance) return false;
       const focusable = entry.getFocusableConfig();
-      if (focusable.disabled) return false;
+      // Scope Tab traversal must respect authored sequential participation;
+      // programmatic/roving focusability alone does not create a tab stop.
+      if (focusable.disabled || focusable.navParticipation === 'none') return false;
       return this.isDescendantOf(entry, scope);
     });
     return this.dedupeSharedHostTargets(this.orderEntries(scope, members));
@@ -226,30 +247,42 @@ export class FocusCenter {
     options?: FocusRequestOptions,
     behavior?: FocusRequestBehavior
   ): FocusRequestOutcome {
-    // A pre-projection request cannot be gated reliably yet: the logical parent
-    // may be established by the same adapter commit that supplies the target.
-    // Retain it on the entry and re-run the normal gate when that commit lands.
-    if (!entry.getRootTarget()) {
-      return entry.requestFocus(options, behavior);
+    const execution = entry.prepareFocusRequest?.(options, behavior);
+    if (!execution) options = retainFocusRequestIntent(options);
+    const current = () => execution?.isCurrent() ?? true;
+    const apply = () => (execution ? execution.apply() : entry.requestFocus(options, behavior));
+    let failed = false;
+    try {
+      if (!current()) return 'rejected';
+      // A pre-projection request is retained until its logical parent and target exist.
+      const target = entry.getRootTarget();
+      if (!current()) return 'rejected';
+      if (!target) {
+        const outcome = apply();
+        return current() ? outcome : 'rejected';
+      }
+      const allowed = behavior?.bypassGate || this.requestFocusAllowed(entry);
+      if (!current()) return 'rejected';
+      if (!allowed) {
+        const scope = this.getTopActiveScope();
+        entry.pushWarning(
+          `[Focus] requestFocus ignored: active scope ${String(
+            scope?.getScopeConfig().key?.meta?.debugLabel ?? scope?.instance ?? 'unknown'
+          )} does not contain the requesting focus target.`
+        );
+        return 'rejected';
+      }
+      const outcome = apply();
+      if (!current()) return 'rejected';
+      if (outcome !== 'applied') return outcome;
+      if (behavior?.syncFacts !== false) this.noteFocused(entry);
+      return current() ? 'applied' : 'rejected';
+    } catch (error) {
+      failed = true;
+      throw error;
+    } finally {
+      execution?.finish(failed);
     }
-    if (!behavior?.bypassGate && !this.requestFocusAllowed(entry)) {
-      const scope = this.getTopActiveScope();
-      entry.pushWarning(
-        `[Focus] requestFocus ignored: active scope ${String(
-          scope?.getScopeConfig().key?.meta?.debugLabel ?? scope?.instance ?? 'unknown'
-        )} does not contain the requesting focus target.`
-      );
-      return 'rejected';
-    }
-    const outcome = entry.requestFocus(options, behavior);
-    if (outcome === 'rejected') return 'rejected';
-    if (outcome === 'pending') return 'pending';
-    this.clearOtherFocusedEntries(entry, options?.reason ?? 'focus.request');
-    if (behavior?.syncFacts !== false) {
-      this.currentFocused = entry.instance;
-    }
-    this.noteFocused(entry);
-    return 'applied';
   }
 
   requestFocus(
@@ -261,8 +294,11 @@ export class FocusCenter {
   }
 
   noteFocused(entry: FocusCenterEntry): void {
-    this.clearOtherFocusedEntries(entry, 'focus.host:focus');
+    const epoch = ++this.ownerEpoch;
+    // Claim the transfer before callbacks: a nested owner must stop old cleanup.
     this.currentFocused = entry.instance;
+    this.clearOtherFocusedEntries(entry, 'focus.host:focus', epoch);
+    if (epoch !== this.ownerEpoch) return;
     for (const record of this.activeScopes) {
       const scope = this.entries.get(record.scope);
       if (!scope?.isScopeProvider()) continue;
@@ -419,6 +455,25 @@ export class FocusCenter {
       entryRequest?: FocusRovingEntryRequestOptions;
     }
   ): boolean {
+    return this.applyFocusInRoving(
+      provider,
+      op,
+      options,
+      createFocusRequestIntent({
+        reason: options?.entryRequest?.reason ?? 'keyboard',
+        preventScroll: options?.entryRequest?.preventScroll,
+      })
+    );
+  }
+
+  private applyFocusInRoving(
+    provider: FocusCenterEntry,
+    op: 'first' | 'last' | 'next' | 'prev' | 'selected',
+    options:
+      | { requireFocusedMember?: boolean; entryRequest?: FocusRovingEntryRequestOptions }
+      | undefined,
+    intent: FocusRequestOptions
+  ): boolean {
     // The provider handle survives view detachment. A deferred entry request is
     // therefore also a semantic re-registration point for the provider; Items
     // may attach before the provider's own host view callback in React/Vue.
@@ -429,6 +484,7 @@ export class FocusCenter {
         this.pendingRovingEntries.set(provider.instance, {
           op,
           options: options.entryRequest,
+          intent,
         });
         return true;
       }
@@ -471,18 +527,12 @@ export class FocusCenter {
     // intent while the host request is still on the stack. A pending outcome
     // is restored below with the member that was actually attempted.
     this.pendingRovingEntries.delete(provider.instance);
-    const outcome = this.requestFocusOutcome(
-      target,
-      {
-        reason: options?.entryRequest?.reason ?? 'keyboard',
-        preventScroll: options?.entryRequest?.preventScroll,
-      },
-      { syncFacts: true }
-    );
+    const outcome = this.requestFocusOutcome(target, intent, { syncFacts: true });
     if (outcome === 'pending' && options?.entryRequest?.defer) {
       this.pendingRovingEntries.set(provider.instance, {
         op: op as 'first' | 'last' | 'selected',
         options: options.entryRequest,
+        intent,
         attempted: target.instance,
       });
     } else {
@@ -508,7 +558,12 @@ export class FocusCenter {
         continue;
       }
       if (this.getRovingMembers(provider).length === 0) continue;
-      this.focusInRoving(provider, pending.op, { entryRequest: pending.options });
+      this.applyFocusInRoving(
+        provider,
+        pending.op,
+        { entryRequest: pending.options },
+        pending.intent
+      );
     }
   }
 }

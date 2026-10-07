@@ -1,0 +1,103 @@
+---
+title: 'Collapsible'
+description: 'Draft Base Collapsible 的状态所有权、键盘激活、Content presence 与 authoring 示例。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Collapsible 表示一个 disclosure，不是 Accordion。Root 拥有展开状态，Trigger 请求变化，Content 投射 visibility 与 presence；它不规定视觉语言。
+
+<PrototypePreviewer
+  demoId="demo-base-collapsible"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+独立 Demo 包含默认 detach 的 Content、初始展开且保留宿主的 Content、disabled 但保持展开的 Content，以及受控请求。在受控示例中，先激活 Trigger，再点击 **Accept pending controlled request**：仅发出请求不会改变展开状态。
+
+## Parts 与 ownership
+
+一个 `base-collapsible-root` 在自身 Anatomy domain 中包含且只包含一个 `base-collapsible-trigger` 和一个 `base-collapsible-content`。重复 part 立即被拒绝；必需 part 缺失的检查发生在 host readiness settled 之后，而不是宿主仍在挂载子项时。
+
+| Part | Props | Public projection |
+| --- | --- | --- |
+| Root | `open?`、`defaultOpen?`、`disabled?` | Canonical `open`；`openCollapsible`、`close`、`toggle` 请求方法；`openChange` event |
+| Trigger | `disabled?` | 派生 `expanded` 与 effective `disabled`；交互/focus states 和受保护的 `focusSelf` |
+| Content | `keepMounted?` | 派生 `open` 与 `hidden`；没有额外 semantic role |
+
+未提供 `open` 时，Root 是非受控的。`defaultOpen` 只在创建时初始化展开状态；后续修改不会重置 disclosure。提供 `open` 时，Root 是受控的：`openChange` payload 为 `{ open, reason }`，`reason` 为 `pointer`、`keyboard` 或 `programmatic`。Owner 通过提供新的 `open` prop 接纳请求。忽略请求会保持 `open`、Trigger `expanded` 和 Content visibility 不变，不会进行 optimistic controlled update。Prop 同步与 lifecycle reconciliation 不发出 change request。
+
+Root `disabled` 或 Trigger `disabled` 会使 Trigger effectively disabled 并阻止激活。Root-disabled 也阻止 imperative 开合请求。禁用一个已经展开的 disclosure 不会将其关闭，也不会重写 canonical expansion；owner 提供的 `open` 仍控制该值。
+
+## Keyboard 与 accessibility
+
+Trigger 具有 button semantics，accessible name 来自自身内容。它参与自然 Tab 顺序，Enter 或 Space 可以激活；effectively disabled 的 Trigger 不参与 sequential focus。这里没有 roving focus、arrow navigation、orientation 或 heading 要求。Content 保持 role-neutral：不会自动成为 `region` landmark、focus stop，也没有 autofocus、focus scope、overlay 或 focus-return 行为。
+
+Trigger 通过显式 protocol key `content` 声明同域的 controls relationship。这个 key 是 logical identity，**不是 DOM ID**。可复用 relationship service 与 Web Adapter 拥有 host identity 和 `aria-controls` projection。当 Content 没有物化的 host view 时，logical relationship 可以保留，而 Web IDREF 不存在。重新物化会恢复有效的宿主关系；terminal owner disposal 会清理 reservation 与 relation。不要缓存生成 ID，也不要把 detached Content 当成第二套 portable presence/ID registry。独立或嵌套 Root domains 不会交叉关联。
+
+## Content lifetime
+
+关闭的 Content 默认执行 **L1 host-view detach**。重新展开会重新物化 view，并保留 logical owner；这不是 terminal disposal。`keepMounted` 保留 host view，将关闭的 Content 标记为 hidden，包括 accessibility projection。它改变的是 retention，不是 expansion ownership 或 automatic focus behavior。Terminal Root disposal 的优先级仍高于 retention。
+
+## Authoring 与 CLI
+
+当前工作区从 `@proto.ui/prototypes-base/collapsible` 导出 `collapsibleRoot`、`collapsibleTrigger`、`collapsibleContent`，以及 composition hooks `asCollapsibleRoot`、`asCollapsibleTrigger`、`asCollapsibleContent`。Direct prototype names 为 `base-collapsible-{root,trigger,content}`。
+
+用匹配的工作区 CLI 初始化项目后，选择一个 host：
+
+```sh
+proto-ui add react base-collapsible
+# 或：proto-ui add vue base-collapsible
+# 或：proto-ui add vue2 base-collapsible
+# 或：proto-ui add wc base-collapsible
+```
+
+React/Vue/Vue 2 facades 为 `BaseCollapsibleRoot`、`BaseCollapsibleTrigger`、`BaseCollapsibleContent`。Web Component facades 增加 `Element` 后缀，并注册 `proto-ui-base-collapsible-{root,trigger,content}`。Preview 专用的 `wc-base-*` tags 不是 CLI tag names。
+
+下面完整的 React 示例直接 adapt 真实 public prototypes；generated facade 提供相同的三个组件：
+
+```tsx
+import * as React from 'react';
+import { createReactAdapter } from '@proto.ui/adapter-react';
+import {
+  collapsibleRoot,
+  collapsibleTrigger,
+  collapsibleContent,
+} from '@proto.ui/prototypes-base/collapsible';
+
+const adapt = createReactAdapter(React);
+const BaseCollapsibleRoot = adapt(collapsibleRoot);
+const BaseCollapsibleTrigger = adapt(collapsibleTrigger);
+const BaseCollapsibleContent = adapt(collapsibleContent);
+
+export function ControlledDisclosure() {
+  const [open, setOpen] = React.useState(false);
+  return (
+    <BaseCollapsibleRoot open={open} onOpenChange={(request) => setOpen(request.open)}>
+      <BaseCollapsibleTrigger>Details</BaseCollapsibleTrigger>
+      <BaseCollapsibleContent keepMounted>Additional details</BaseCollapsibleContent>
+    </BaseCollapsibleRoot>
+  );
+}
+
+export function UncontrolledDisclosure() {
+  return (
+    <BaseCollapsibleRoot defaultOpen>
+      <BaseCollapsibleTrigger>Details</BaseCollapsibleTrigger>
+      <BaseCollapsibleContent>Additional details</BaseCollapsibleContent>
+    </BaseCollapsibleRoot>
+  );
+}
+```
+
+Owner 也可以拒绝或延后处理 `onOpenChange`；在提供改变后的 `open` 之前，disclosure 保持已提供的值。Live Demo 故意延后接纳，使这个边界可见。
+
+## Draft 边界与来源
+
+`P-BASE-COLLAPSIBLE`、`P-BASE-COLLAPSIBLE-TRIGGER`、`P-BASE-COLLAPSIBLE-CONTENT` 和 `T-BASE-COLLAPSIBLE-0001` 在 `0.3.0-alpha.1` 仍为 **draft**。这是当前工作区 implementation surface，不代表已发布的 `0.3.0-alpha.1` artifacts 已包含该组件，也不是 stable compatibility commitment、native-platform proof 或 lifecycle promotion。Preview 提供四个 Web Adapter；runtime selector 可用本身不构成 conformance evidence。
+
+- [Root](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-COLLAPSIBLE.yaml)、[Trigger](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-COLLAPSIBLE-TRIGGER.yaml)、[Content](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-COLLAPSIBLE-CONTENT.yaml)
+- [映射的 draft evidence](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-BASE-COLLAPSIBLE-0001.yaml)
+- [同域关系](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml) 与 [L1 lifecycle](https://github.com/Proto-UI/Proto-UI/blob/main/spec/contracts/C-LIFECYCLE-0008.yaml)
+- [实现来源](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/collapsible)

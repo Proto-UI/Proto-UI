@@ -5,6 +5,10 @@ description: Measure the active Agent model with pinned offline ModelTrace sampl
 
 # Identify the active Agent with ModelTrace
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 Perform one finite local measurement, or validate one still-current cached record. This registered `public-read`, U0, `disposable-output-only` transition consumes `request-context` and produces `modeltrace-record`; it makes no external write and does not modify tracked content. Local edits, read-only review, and verification remain usable when sampling is unavailable. Humans and deterministic non-LLM automation have no model-testing obligation.
 
 ## Bind the current context

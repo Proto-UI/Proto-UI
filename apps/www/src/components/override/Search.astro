@@ -254,53 +254,44 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
             cancelLater(timeout);
             if (probeController === controller) probeController = undefined;
           }
-          // Preflight the runtime module so Pagefind's internal polling loop
-          // never starts for an import that is already known to fail.
+          // Both imports are independent after the index probe. Constructing
+          // Pagefind UI still waits for the runtime and the current open owner.
           const runtimeImport = import(/* @vite-ignore */ `${bundlePath}pagefind.js`);
-          let runtimeTimeout: number | undefined;
-          try {
-            await Promise.race([
-              runtimeImport,
-              disposed,
-              new Promise<never>((_, reject) => {
-                runtimeTimeout = later(
-                  () => reject(new Error('Pagefind runtime import timed out')),
-                  5000
-                );
-              }),
-            ]);
-          } finally {
-            if (runtimeTimeout !== undefined) {
-              cancelLater(runtimeTimeout);
-              pendingTimers.delete(runtimeTimeout);
-            }
-            runtimeImport.catch(() => {});
-          }
-          if (!alive) throw new Error('Search disposed');
           // @ts-expect-error — Missing types for @pagefind/default-ui package.
           const defaultUIImport = import('@pagefind/default-ui');
+          let runtimeTimeout: number | undefined;
           let defaultUITimeout: number | undefined;
-          let defaultUI: Awaited<typeof defaultUIImport>;
           try {
-            defaultUI = await Promise.race([
-              defaultUIImport,
-              disposed,
-              new Promise<never>((_, reject) => {
-                defaultUITimeout = later(
-                  () => reject(new Error('Pagefind UI import timed out')),
-                  5000
-                );
-              }),
+            const [, defaultUI] = await Promise.all([
+              Promise.race([
+                runtimeImport,
+                disposed,
+                new Promise<never>((_, reject) => {
+                  runtimeTimeout = later(
+                    () => reject(new Error('Pagefind runtime import timed out')),
+                    5000
+                  );
+                }),
+              ]),
+              Promise.race([
+                defaultUIImport,
+                disposed,
+                new Promise<never>((_, reject) => {
+                  defaultUITimeout = later(
+                    () => reject(new Error('Pagefind UI import timed out')),
+                    5000
+                  );
+                }),
+              ]),
             ]);
+            if (!alive) throw new Error('Search disposed');
+            return defaultUI;
           } finally {
-            if (defaultUITimeout !== undefined) {
-              cancelLater(defaultUITimeout);
-              pendingTimers.delete(defaultUITimeout);
-            }
+            cancelLater(runtimeTimeout);
+            cancelLater(defaultUITimeout);
+            runtimeImport.catch(() => {});
             defaultUIImport.catch(() => {});
           }
-          if (!alive) throw new Error('Search disposed');
-          return defaultUI;
         })();
         preparation = current;
         // Intent never changes the dialog/error UI and must never leak an

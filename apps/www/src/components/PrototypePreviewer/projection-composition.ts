@@ -801,6 +801,30 @@ export function createProjectionComposition(
         for (const [prototypeMarker, prototypeId] of prototypeMarkers) {
           if (!element.classList.contains(prototypeMarker)) continue;
           element.setAttribute('data-projection-prototype', prototypeId);
+          // Normalized surface classes can live on a native editor inside
+          // its logical WC boundary. Identity remains on that Proto root;
+          // never copy visual classes/styles to the infrastructure wrapper.
+          let boundary: Element | null = element;
+          while (boundary && !boundary.hasAttribute('data-pui-root')) {
+            boundary =
+              boundary.assignedSlot ??
+              boundary.parentElement ??
+              (boundary.getRootNode() instanceof view.ShadowRoot
+                ? (boundary.getRootNode() as ShadowRoot).host
+                : null);
+          }
+          if (boundary && boundary !== element) {
+            const owner = boundary.getAttribute('data-projection-owner');
+            const generation = boundary.getAttribute('data-projection-generation');
+            if (
+              (owner === null || owner === options.ownerId) &&
+              (generation === null || generation === String(options.generation))
+            ) {
+              for (const [name, value] of Object.entries(coordinateAttrs))
+                boundary.setAttribute(name, value);
+              boundary.setAttribute('data-projection-prototype', prototypeId);
+            }
+          }
           break;
         }
       }

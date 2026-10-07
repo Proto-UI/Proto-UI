@@ -14,6 +14,7 @@ import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
 import { whitepaperRedirectFragments } from './src/utils/whitepaper-redirect-fragments.mjs';
 import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
 import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
+import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';
 import { siteCopyPlugin } from './src/utils/expressive-code-copy.mjs';
 
 const PROTO_UI_PREFIX = '@proto.ui/';
@@ -95,7 +96,7 @@ function websiteManualChunk(id) {
 /** @typedef {{ type: 'chunk'; fileName: string; name: string; isEntry: boolean; isDynamicEntry: boolean; facadeModuleId: string | null; imports: string[]; dynamicImports: string[]; modules: Record<string, unknown> }} BundleChunk */
 /** @typedef {{ type: 'asset'; fileName: string; source: string | Uint8Array }} BundleAsset */
 /** @typedef {BundleChunk | BundleAsset} BundleOutput */
-/** @typedef {{ emitFile: (asset: { type: 'asset'; fileName: string; source: string }) => string }} BundlePluginContext */
+/** @typedef {{ emitFile: (asset: { type: 'asset'; fileName: string; source: string }) => string; getModuleIds: () => IterableIterator<string>; getModuleInfo: (id: string) => { importedIds: readonly string[]; dynamicallyImportedIds: readonly string[] } | null }} BundlePluginContext */
 /** @typedef {{ name: string; apply: 'build'; configResolved: (config: { build: { ssr?: boolean | string } }) => void; generateBundle: (this: BundlePluginContext, options: unknown, bundle: Record<string, BundleOutput>) => void }} WebsiteBundlePlugin */
 /** @returns {WebsiteBundlePlugin} */
 function websiteBundleGraphPlugin() {
@@ -106,7 +107,7 @@ function websiteBundleGraphPlugin() {
    *   apply: 'build';
    *   configResolved: (config: { build: { ssr?: unknown } }) => void;
    *   generateBundle: (
-   *     this: { emitFile: (asset: { type: 'asset'; fileName: string; source: string }) => void },
+   *     this: BundlePluginContext,
    *     options: unknown,
    *     bundle: Record<string, any>
    *   ) => void;
@@ -130,16 +131,41 @@ function websiteBundleGraphPlugin() {
           facadeModuleId: normalizedBundleModuleId(chunk.facadeModuleId),
           imports: [...chunk.imports].map((id) => id.replaceAll('\\', '/')).sort(),
           dynamicImports: [...chunk.dynamicImports].map((id) => id.replaceAll('\\', '/')).sort(),
+          moduleRenderInfo: Object.fromEntries(
+            Object.keys(chunk.modules).map((id) => [
+              normalizedBundleModuleId(id),
+              {
+                renderedLength: chunk.modules[id].renderedLength,
+                renderedExports: chunk.modules[id].renderedExports,
+                removedExports: chunk.modules[id].removedExports,
+              },
+            ])
+          ),
           moduleIds: Object.keys(chunk.modules)
             .map((id) => normalizedBundleModuleId(id))
             .filter((id) => id !== null)
             .sort(),
         }))
         .sort((left, right) => left.fileName.localeCompare(right.fileName));
+      // Chunk co-location is not module ownership. Preserve resolved Rollup
+      // importer edges so an unrelated module sharing the renderer chunk cannot
+      // inherit its permission to load Adapter runtimes.
+      const modules = [...this.getModuleIds()]
+        .map((id) => {
+          const info = this.getModuleInfo(id);
+          return {
+            id: normalizedBundleModuleId(id),
+            imports: (info?.importedIds ?? []).map(normalizedBundleModuleId).sort(),
+            dynamicImports: (info?.dynamicallyImportedIds ?? [])
+              .map(normalizedBundleModuleId)
+              .sort(),
+          };
+        })
+        .sort((left, right) => (left.id ?? '').localeCompare(right.id ?? ''));
       this.emitFile({
         type: 'asset',
         fileName: 'proto-ui-bundle-graph.json',
-        source: `${JSON.stringify({ version: 1, chunks }, null, 2)}\n`,
+        source: `${JSON.stringify({ version: 1, chunks, modules }, null, 2)}\n`,
       });
     },
   };
@@ -421,6 +447,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/tabs',
                 },
                 {
+                  label: 'Collapsible (Draft)',
+                  translations: { en: 'Collapsible (Draft)', 'zh-CN': 'Collapsible（Draft）' },
+                  slug: 'ui-libraries/base/collapsible',
+                },
+                {
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/base/hover-card',
@@ -614,6 +645,36 @@ export default defineConfig({
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/bootstrap-2-3-2/button',
+                },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/checkbox',
+                },
+                {
+                  label: 'Switch',
+                  translations: { en: 'Switch', 'zh-CN': 'Switch' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/switch',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toggle',
+                },
+                {
+                  label: 'Input',
+                  translations: { en: 'Input', 'zh-CN': 'Input' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/input',
+                },
+                {
+                  label: 'Textarea',
+                  translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/textarea',
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/separator',
                 },
               ],
             },
@@ -1057,7 +1118,14 @@ export default defineConfig({
       // 允许 dev server 读取到仓库根（否则访问 workspace 包会被拦）
       fs: { allow: ['../..'] },
     },
-    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],
+    plugins: [
+      ...(process.env.PROTO_UI_CONTRAST_AUDIT === '1'
+        ? [contrastProvenancePlugin(repositoryRoot)]
+        : []),
+      protoUiSourcePlugin,
+      websiteBundleGraphPlugin(),
+      tailwindcss(),
+    ],
     optimizeDeps: {
       exclude: [
         '@proto.ui/core',

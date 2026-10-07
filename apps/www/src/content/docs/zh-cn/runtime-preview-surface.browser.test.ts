@@ -498,16 +498,28 @@ describe('RuntimeBox single actual Prototype surface', () => {
     }, 90000);
 
   it('keeps overview titles, destinations and fallback readable without JavaScript', async () => {
+    const started = performance.now();
+    const phase = (name: string) =>
+      console.log(
+        '[runtime-preview-no-js]',
+        JSON.stringify({ phase: name, elapsedMs: performance.now() - started, source })
+      );
+    phase('context:start');
     const context = await browser.newContext({
       javaScriptEnabled: false,
       viewport: { width: 390, height: 844 },
     });
-    const page = await context.newPage();
+    phase('context:ready');
     try {
+      phase('page:start');
+      const page = await context.newPage();
+      phase('page:ready');
       await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/`, {
         waitUntil: 'domcontentloaded',
       });
+      phase('navigation:ready');
       const article = page.locator('#brutalist-button');
+      phase('assertions:start');
       expect(await article.locator('h2').innerText()).toBe('Button');
       expect(await article.locator('a').getAttribute('href')).toBe('./components/button/');
       expect(await article.locator('noscript').innerText()).toContain('JavaScript');
@@ -516,8 +528,11 @@ describe('RuntimeBox single actual Prototype surface', () => {
       expect(
         await article.locator('a').evaluate((element) => document.activeElement === element)
       ).toBe(true);
+      phase('assertions:passed');
     } finally {
+      phase('context:closing');
       await context.close();
+      phase('context:closed');
     }
   });
 });

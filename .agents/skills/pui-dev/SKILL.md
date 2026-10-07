@@ -5,6 +5,10 @@ description: Route ordinary Proto UI development through a minimal composition o
 
 # Proto UI development
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 Coordinate the work without absorbing the domain skills into one long procedure.
 
 Read `internal/agent-operations/skills.yaml` as routing metadata. Do not preload candidate leaf skills or guess their paths. Select one leaf ID, run `pnpm agent:skill -- <leaf-id> --mode <execution-mode> --mode-source <trusted-source>`, and load the returned `loadPath` only when `blocked` is false. After the leaf returns a handoff that conforms to `internal/agent-operations/schemas/skill-handoff.schema.json`, run `pnpm agent:skill -- --handoff <handoff.json>` and load at most the one resolved next leaf.
