@@ -87,7 +87,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 109_229],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 109_675],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];
