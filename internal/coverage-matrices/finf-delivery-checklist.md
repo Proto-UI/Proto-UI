@@ -4,7 +4,7 @@ Tracker: [#870](https://github.com/Proto-UI/Proto-UI/issues/870). Status: **work
 
 Current owner explicitly selects groups 1–6 and complete four-family projection coverage, including Bootstrap 2.3.2 and Liquid Glass, plus Overlay scrollbar coordinate repair. This is project-owned scope, not automatic adoption of comparison projects.
 
-No item is checked for an incremental/simple implementation. Every required acceptance dimension must be verified. Equal or higher aggregate counts do not compensate for missing Base identity mappings. No placeholder, CSS-only skin, invented identity or not-applicable shortcut waives the explicitly selected scope.
+No item is checked for an incremental/simple implementation. Every required acceptance dimension must be verified. Equal or higher aggregate counts do not compensate for missing Base identity mappings. No placeholder, CSS-only skin, invented identity or not-applicable shortcut waives the explicitly selected scope. Final Finf delivery requires every in-scope new and existing deliverable to leave Draft, including previously draft Table. Complete applicable prototype/module contracts, lifecycle evidence, all four projections, Adapter/Compiler/GPUI and documentation/consumer evidence, then perform formal promotion. Source-only or private draft availability is not the final state. Intermediate checkpoints remain WIP; this instruction grants no npm publication permission.
 
 ## One checkbox means all acceptance gates
 
@@ -168,7 +168,7 @@ Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/Liqu
 
 Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
-The structured ledger has 256 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+The structured ledger has 280 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
 
 ## Previous work remains equal priority
 
@@ -216,6 +216,12 @@ Existing 41-calibration profile: 790 raw / 782 achieved / 8 declared rounded-cli
 
 - **775-no-js-timeout** (unmet): Use phase diagnostics from frozen b3601697c4daef1854b64d64a6edb2102a398e6d to establish the actual cause of the 5s no-JS overview timeout. Preserve assertions/time budget and cleanup; a diagnostic commit is not the repair. [source](https://github.com/Proto-UI/Proto-UI/actions/runs/37490381737)
 
+The accepted #858 source is carried by the current main merge. Its earlier scoped results remain source-bound; the two newly requested runtime-demo acceptance subitems below are still unmet.
+
+- **runtime-demo.vertical-spacing-parity** (unmet): Reproduce and repair WC-to-React/Vue vertical-spacing changes for identical family/content/viewport/theme/font/state, with source-owned cause and matched real-input geometry/screenshots. [source](https://github.com/Proto-UI/Proto-UI/pull/872)
+
+- **runtime-demo.region-loading-mask** (unmet): Replace the bottom runtime-switch notice with a preview-region mask composed from actual Proto UI primitives; verify repeated/superseded switches, failure/retry, cancellation/unmount, keyboard/pointer, focus and accessibility, without stale completion or trapped focus. [source](https://github.com/Proto-UI/Proto-UI/pull/872)
+
 Shared CI hygiene (unmet): Real API reconciliation of 27 Issues plus PR580 showed only #377.updatedAt changed; governance fields and reviewed owners were identical. Coordinate one semantic-versus-observation timestamp correction; preserve failure and real API evidence, do not blindly refresh multiple branches or weaken owner/state validation. [failure](https://github.com/Proto-UI/Proto-UI/actions/runs/37501442006/job/112399177604)
 
 ## Atomic parity obligations
@@ -247,6 +253,12 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-DROPDOWN-MENU-CONTENT | P-SHADCN-DROPDOWN-MENU-CONTENT | P-BRUTALIST-DROPDOWN-MENU-CONTENT | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-ITEM | P-SHADCN-DROPDOWN-MENU-ITEM | P-BRUTALIST-DROPDOWN-MENU-ITEM | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | P-BRUTALIST-DROPDOWN-MENU-TRIGGER | required missing | required missing |
+| P-BASE-FIELD | P-SHADCN-FIELD | P-BRUTALIST-FIELD | P-BOOTSTRAP-2-3-2-FIELD | P-LIQUID-GLASS-FIELD |
+| P-BASE-FIELD-CONTROL | P-SHADCN-FIELD-CONTROL | P-BRUTALIST-FIELD-CONTROL | P-BOOTSTRAP-2-3-2-FIELD-CONTROL | P-LIQUID-GLASS-FIELD-CONTROL |
+| P-BASE-FIELD-DESCRIPTION | P-SHADCN-FIELD-DESCRIPTION | P-BRUTALIST-FIELD-DESCRIPTION | P-BOOTSTRAP-2-3-2-FIELD-DESCRIPTION | P-LIQUID-GLASS-FIELD-DESCRIPTION |
+| P-BASE-FIELD-ERROR | P-SHADCN-FIELD-ERROR | P-BRUTALIST-FIELD-ERROR | P-BOOTSTRAP-2-3-2-FIELD-ERROR | P-LIQUID-GLASS-FIELD-ERROR |
+| P-BASE-FIELD-LABEL | P-SHADCN-FIELD-LABEL | P-BRUTALIST-FIELD-LABEL | P-BOOTSTRAP-2-3-2-FIELD-LABEL | P-LIQUID-GLASS-FIELD-LABEL |
+| P-BASE-FIELD-VALIDITY | P-SHADCN-FIELD-VALIDITY | P-BRUTALIST-FIELD-VALIDITY | P-BOOTSTRAP-2-3-2-FIELD-VALIDITY | P-LIQUID-GLASS-FIELD-VALIDITY |
 | P-BASE-HOVER-CARD | P-SHADCN-HOVER-CARD | P-BRUTALIST-HOVER-CARD | required missing | required missing |
 | P-BASE-HOVER-CARD-CONTENT | P-SHADCN-HOVER-CARD-CONTENT | P-BRUTALIST-HOVER-CARD-CONTENT | required missing | required missing |
 | P-BASE-HOVER-CARD-TRIGGER | P-SHADCN-HOVER-CARD-TRIGGER | P-BRUTALIST-HOVER-CARD-TRIGGER | required missing | required missing |
@@ -261,11 +273,11 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-SCROLL-AREA-SCROLLBAR | P-SHADCN-SCROLL-AREA-SCROLLBAR | P-BRUTALIST-SCROLL-AREA-SCROLLBAR | required missing | required missing |
 | P-BASE-SCROLL-AREA-THUMB | P-SHADCN-SCROLL-AREA-THUMB | P-BRUTALIST-SCROLL-AREA-THUMB | required missing | required missing |
 | P-BASE-SCROLL-AREA-VIEWPORT | P-SHADCN-SCROLL-AREA-VIEWPORT | P-BRUTALIST-SCROLL-AREA-VIEWPORT | required missing | required missing |
-| P-BASE-SELECT | P-SHADCN-SELECT | P-BRUTALIST-SELECT | required missing | required missing |
-| P-BASE-SELECT-CONTENT | P-SHADCN-SELECT-CONTENT | P-BRUTALIST-SELECT-CONTENT | required missing | required missing |
-| P-BASE-SELECT-ITEM | P-SHADCN-SELECT-ITEM | P-BRUTALIST-SELECT-ITEM | required missing | required missing |
-| P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | P-BRUTALIST-SELECT-TRIGGER | required missing | required missing |
-| P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | P-BRUTALIST-SELECT-VALUE | required missing | required missing |
+| P-BASE-SELECT | P-SHADCN-SELECT | P-BRUTALIST-SELECT | P-BOOTSTRAP-2-3-2-SELECT | P-LIQUID-GLASS-SELECT |
+| P-BASE-SELECT-CONTENT | P-SHADCN-SELECT-CONTENT | P-BRUTALIST-SELECT-CONTENT | P-BOOTSTRAP-2-3-2-SELECT-CONTENT | P-LIQUID-GLASS-SELECT-CONTENT |
+| P-BASE-SELECT-ITEM | P-SHADCN-SELECT-ITEM | P-BRUTALIST-SELECT-ITEM | P-BOOTSTRAP-2-3-2-SELECT-ITEM | P-LIQUID-GLASS-SELECT-ITEM |
+| P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | P-BRUTALIST-SELECT-TRIGGER | P-BOOTSTRAP-2-3-2-SELECT-TRIGGER | P-LIQUID-GLASS-SELECT-TRIGGER |
+| P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | P-BRUTALIST-SELECT-VALUE | P-BOOTSTRAP-2-3-2-SELECT-VALUE | P-LIQUID-GLASS-SELECT-VALUE |
 | P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | P-BRUTALIST-SEPARATOR | P-BOOTSTRAP-2-3-2-SEPARATOR | required missing |
 | P-BASE-SURFACE | P-SHADCN-SURFACE | P-BRUTALIST-SURFACE | P-BOOTSTRAP-2-3-2-SURFACE | P-LIQUID-GLASS-SURFACE |
 | P-BASE-SWITCH | P-SHADCN-SWITCH | P-BRUTALIST-SWITCH | P-BOOTSTRAP-2-3-2-SWITCH | required missing |
@@ -280,7 +292,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-TABS-INDICATOR | required missing | required missing | required missing | required missing |
 | P-BASE-TABS-LIST | P-SHADCN-TABS-LIST | P-BRUTALIST-TABS-LIST | required missing | required missing |
 | P-BASE-TABS-TRIGGER | P-SHADCN-TABS-TRIGGER | P-BRUTALIST-TABS-TRIGGER | required missing | required missing |
-| P-BASE-TEXT | P-SHADCN-TEXT | P-BRUTALIST-TEXT | required missing | required missing |
+| P-BASE-TEXT | P-SHADCN-TEXT | P-BRUTALIST-TEXT | P-BOOTSTRAP-2-3-2-TEXT | P-LIQUID-GLASS-TEXT |
 | P-BASE-TEXTAREA | P-SHADCN-TEXTAREA | P-BRUTALIST-TEXTAREA | P-BOOTSTRAP-2-3-2-TEXTAREA | required missing |
 | P-BASE-TOGGLE | P-SHADCN-TOGGLE | P-BRUTALIST-TOGGLE | P-BOOTSTRAP-2-3-2-TOGGLE | required missing |
 | P-BASE-TOOLTIP | P-SHADCN-TOOLTIP | P-BRUTALIST-TOOLTIP | required missing | required missing |
