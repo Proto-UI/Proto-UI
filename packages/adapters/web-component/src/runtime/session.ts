@@ -17,6 +17,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   rawPropsSource: RawPropsSource<Props>;
   textControlTarget: HTMLElement | null;
   imageViewTarget: HTMLImageElement | null;
+  shadowViewTarget?: { element: HTMLElement; clearRenderedChildren(): void } | null;
   wiring: ReturnType<typeof createHostWiring>;
   eventGate: {
     enable(): void;
@@ -45,6 +46,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     wiring,
     textControlTarget,
     imageViewTarget,
+    shadowViewTarget,
     eventGate,
     router,
     onLifecycleCheckpoint,
