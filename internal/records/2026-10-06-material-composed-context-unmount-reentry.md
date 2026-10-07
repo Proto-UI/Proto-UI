@@ -1,0 +1,23 @@
+# Material composed context and terminal unmount reentry
+
+Baseline: PR #809 `8f737b084e593a6251451ecb04e3a66fd7841926`, the normal dependency-validation merge of material `3285b3ed` and budget proposal `882da5ae`. That baseline completed its canonical package budgets, all eight browser shards, general tests, types and the final aggregate. It has not received independent approval or main admission.
+
+## Findings and bounded decision
+
+Review comments 4193011083 and 4193011093 exposed missing ancestor inputs in the finite opaque, axis-aligned renderer. Host-only computed opacity and transform checks did not cover non-inherited ancestor properties. This is an admission defect within existing fallback semantics, not a decision to implement arbitrary transformed scene sampling. The repair conservatively rejects non-unit composed opacity and transforms (including individual rotate/scale/translate), traverses slots and shadow hosts, and watches those inputs for recovery. Opacity withdraws the whole material projection because its complete readable fallback cannot be established. Unsupported geometry retains the existing opaque fallback. No new public support/lifecycle guarantee is introduced.
+
+Review comment 4193011102 exposed nested unmount when `dispose()` is called from an unmount callback. The red test also observed the outer unmount accessing Scroll state after nested disposal. `C-LIFECYCLE-0002` requires at-most-once per-epoch callbacks and live instance handles during unmounted callbacks. Runtime now publishes the shared unmount completion before notifications; force supersession applies only during presence waiting, never during the callback pass. Independent narrow inspection found that disposal reentry from the phase observer must also skip a later presence wait. A discriminating phase/wait control reproduced that corner and the final terminal decision accounts for the already-disposing instance.
+
+The #832 owner confirmed that its current repair does not modify Runtime/session. This change does not import that feature stack or modify its branch.
+
+## Evidence and limits
+
+- Initial ancestor controls: four expected negative failures across light/shadow ancestry, observing that the old source attempted WebGL despite unsupported context; normal context proceeds to the controlled WebGL-unavailable result.
+- Initial lifecycle control: failure on disposed Scroll state during the outer callback pass. Four begin/unmounted × throw/no-throw controls verify one callback pass, live handles during it, preserved rejection and completed terminal disposal.
+- Phase/presence review control: phase reentry failed with no terminal bridge unmount; pending-presence control passed. Both are retained.
+- Runtime, Feedback, Rule expose-state and material integration: 380 passed across 61 passing files, with 34 existing todos across three skipped files. This includes six ancestor cases (light/shadow/slot × opacity/transform); assignedSlot is explicitly injected in happy-dom because that harness does not implement it. Independent lifecycle/presence rerun: 17/17. The parent independently inspected material source and the unit/browser diff without a blocking finding; its attempted unit rerun could not start because the exec-server transport disconnected. The 23 material-unit passes are author-executed evidence, not a parent rerun.
+- Material source generation: 10/10; opt-in tree-shake graph controls: 4/4.
+- Workspace/docs type checks passed (446 docs files, zero errors). The actual dependency graph built 37 public packages; the emitted fixture resolves 292 package dist inputs and zero package src inputs. Initial package-build attempts exposed temporary worktree links pointing at another tree, resolved by recreating local workspace links without changing manifests or lockfiles. Source fixture and CLI build succeeded. Local Chromium launch failed before page execution with `socket() failed: Operation not permitted`; no workaround bypass was used and no local rendered pass is claimed. New source/emitted browser CI retains opacity, ancestor rotate/skew and restoration screenshots.
+- All nine budget cases passed locally after the repair under the existing #824 ceilings: Runtime 67,808/69,200; React 88,427/91,000; Vue 88,162/90,800; WC 96,616/104,500. No cap or measurement-setting change accompanies these fixes.
+
+Remaining: exact-head CI including source/emitted rendered controls, independent review, unresolved earlier review threads, and #824 independent acceptance/main integration before #809 integration. Old evidence remains revision-bound; no stale image or earlier full-green result is relabeled as this repair.

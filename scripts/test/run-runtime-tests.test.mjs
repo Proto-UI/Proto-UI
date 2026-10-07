@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { globSync, mkdtempSync, rmSync, mkdirSync } from 'node:fs';
+import fs, { globSync, mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { describe, it } from 'node:test';
@@ -34,7 +34,10 @@ import {
   browserShards,
   selectBrowserShard,
   PRODUCTION_BROWSER_SUITES,
+  PRODUCTION_BROWSER_OWNERS,
+  corepackInvocation,
   createRuntimeTestPlan,
+  READY_ROUTES,
 } from './runtime-test-plan.mjs';
 import {
   observeReadinessFailures,
@@ -201,6 +204,43 @@ it('registers every discovered browser suite exactly once in its explicit browse
 });
 
 describe('runtime test plan', () => {
+  it('warms both Table locales before shared-server browser navigation', () => {
+    for (const route of ['/en/ui-libraries/base/table/', '/zh-cn/ui-libraries/base/table/']) {
+      assert.ok(READY_ROUTES.includes(route), `Missing readiness route: ${route}`);
+    }
+  });
+  it('runs both Table browser suites in the sequential shared-server bucket', () => {
+    for (const suite of [
+      'apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts',
+      'apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts',
+    ])
+      assert.ok(BROWSER_SUITES.includes(suite), suite);
+  });
+  it('keeps forwarded Vitest arguments out of the Windows command shell', () => {
+    const source = fs.readFileSync(new URL('./run-runtime-tests.mjs', import.meta.url), 'utf8');
+    const runVitest = source.match(/async function runVitest[\s\S]*?\n\}\n/u)?.[0] ?? '';
+    assert.match(runVitest, /spawn\(process\.execPath,[\s\S]*?shell: false/u);
+    assert.doesNotMatch(runVitest, /shell:\s*process\.platform/u);
+  });
+
+  it('keeps the direct Node and Astro child out of the Windows command shell', () => {
+    const source = fs.readFileSync(new URL('./run-runtime-tests.mjs', import.meta.url), 'utf8');
+    const startServer = source.match(/async function startServer[\s\S]*?\n\}\n/u)?.[0] ?? '';
+    assert.match(startServer, /spawn\(\s*process\.execPath,\s*\[astroCli,[\s\S]*?shell: false/u);
+    assert.doesNotMatch(startServer, /shell:\s*process\.platform/u);
+  });
+
+  it('launches the Windows Corepack shim through a shell', () => {
+    assert.deepEqual(corepackInvocation('win32'), {
+      executable: 'corepack.cmd',
+      shell: true,
+    });
+    assert.deepEqual(corepackInvocation('linux'), {
+      executable: 'corepack',
+      shell: false,
+    });
+  });
+
   it('classifies every website browser suite into the shared-server phase', () => {
     const scan = (directory) =>
       readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -225,9 +265,7 @@ describe('runtime test plan', () => {
     for (const suite of PRODUCTION_BROWSER_SUITES) {
       assert.ok(plan[0].args.includes(suite));
       assert.ok(!plan[1].args.includes(suite));
-      assert.ok(
-        readFileSync('apps/www/scripts/run-search-production-evidence.mjs', 'utf8').includes(suite)
-      );
+      assert.ok(readFileSync(PRODUCTION_BROWSER_OWNERS[suite], 'utf8').includes(suite));
     }
   });
   it('preserves focused Vitest arguments without starting the documentation server', () => {
@@ -242,14 +280,33 @@ describe('runtime test plan', () => {
     );
   });
 
+  it('lets an exact single browser suite use its standalone server', () => {
+    const suite = BROWSER_SUITES[0];
+
+    for (const filter of [suite, `./${suite}`, path.resolve(suite)]) {
+      for (const args of [[filter], ['--reporter=dot', filter], [filter, '--reporter=dot']]) {
+        assert.deepEqual(createRuntimeTestPlan(args), [
+          {
+            needsServer: false,
+            args,
+          },
+        ]);
+      }
+    }
+  });
+
   it('isolates browser suites behind one shared documentation server in a full run', () => {
     assert.deepEqual(createRuntimeTestPlan([]), [
       {
         needsServer: false,
-        args: [...BROWSER_SUITES, ...PRODUCTION_BROWSER_SUITES].flatMap((suite) => [
-          '--exclude',
-          suite,
-        ]),
+        args: [
+          '--minWorkers=1',
+          '--maxWorkers=2',
+          ...[...BROWSER_SUITES, ...PRODUCTION_BROWSER_SUITES].flatMap((suite) => [
+            '--exclude',
+            suite,
+          ]),
+        ],
       },
       {
         needsServer: true,
@@ -1234,9 +1291,7 @@ describe('bounded CI runtime shards (no browser or server)', () => {
   it('keeps production Search outside every general/dev selection and fails altered plans', () => {
     for (const suite of PRODUCTION_BROWSER_SUITES) {
       assert.ok(!selections.some((selection) => selection.suites.includes(suite)));
-      assert.ok(
-        readFileSync('apps/www/scripts/run-search-production-evidence.mjs', 'utf8').includes(suite)
-      );
+      assert.ok(readFileSync(PRODUCTION_BROWSER_OWNERS[suite], 'utf8').includes(suite));
     }
     const changed = structuredClone(plan);
     changed.browser[0].pop();
@@ -1244,6 +1299,39 @@ describe('bounded CI runtime shards (no browser or server)', () => {
       () => assertRuntimeGate(needs, changed, receipts(), sha),
       /complete current inventory/
     );
+  });
+  it('bounds real font setup without relaxing browser execution or failure gates', () => {
+    const { jobs } = YAML.parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
+    const browser = jobs['test-browser'];
+    assert.equal(browser['timeout-minutes'], 20);
+    assert.equal(browser['continue-on-error'], undefined);
+    const fontSteps = browser.steps.filter(
+      (step) => step.name === 'Install real CJK fallback for typography glyph evidence'
+    );
+    assert.equal(fontSteps.length, 1);
+    // Exact commands exclude a fake fallback, conditional skip or swallowed apt failure.
+    assert.deepEqual(fontSteps[0], {
+      name: 'Install real CJK fallback for typography glyph evidence',
+      'timeout-minutes': 3,
+      run: [
+        'sudo apt-get update -qq',
+        'sudo apt-get install -y --no-install-recommends fonts-noto-cjk',
+        '',
+      ].join('\n'),
+    });
+    const run = browser.steps.find(
+      (step) => step.name === 'Run the bounded shard with its own documentation server'
+    );
+    assert.ok(run);
+    assert.ok(browser.steps.indexOf(fontSteps[0]) < browser.steps.indexOf(run));
+    assert.equal(run.if, undefined);
+    assert.equal(run['continue-on-error'], undefined);
+    assert.match(run.run, /^set -euo pipefail$/m);
+    assert.match(
+      run.run,
+      /^timeout --signal=TERM --kill-after=10s 900s \\\n  node scripts\/test\/run-runtime-tests\.mjs 2>&1 \| tee /m
+    );
+    assert.equal(jobs.test['continue-on-error'], undefined);
   });
   it('wires every required CI job into the existing fail-closed test gate', () => {
     const { jobs } = YAML.parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
@@ -1586,4 +1674,13 @@ describe('CI evidence directory context availability', () => {
       assert.ok(declared < run.indexOf('git rev-parse HEAD'));
     });
   }
+});
+
+it('the executable runtime runner parses before any test phase starts', () => {
+  const result = spawnSync(
+    process.execPath,
+    ['--check', path.resolve('scripts/test/run-runtime-tests.mjs')],
+    { encoding: 'utf8' }
+  );
+  assert.equal(result.status, 0, result.stderr);
 });

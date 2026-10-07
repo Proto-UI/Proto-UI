@@ -101,6 +101,10 @@ export function installSearchStartupTrace() {
             tabIndex: button.tabIndex,
             inert: !!button.closest('[inert]'),
             pending: button.hasAttribute('data-pui-view-pending'),
+            owner: button.closest<HTMLElement>('[data-projection-generation-host]')?.dataset
+              .projectionOwnerHost,
+            generation: button.closest<HTMLElement>('[data-projection-generation-host]')?.dataset
+              .projectionGenerationHost,
           })
         ),
       };
@@ -212,14 +216,14 @@ export type SearchReadinessEvidence = {
   observedReadyAt: number | null;
   completedAt: number;
   currentDisabled: string | null;
+  owner?: string | null;
+  generation?: string | null;
 };
-/** Deliberate metric adjustment: the dev-environment initial-ready acceptance
- * window is 5000ms, widened from the original 1000ms. The window starts when
- * the post-navigation initial-ready stage begins (after networkidle), so this
- * relaxes the actual readiness SLA; it no longer proves the original 1s
- * metric. The separate 1s production Search retry guard is unchanged. The
- * budget still rejects a Search that never projects its open command. */
-export const SEARCH_READINESS_BUDGET_MS = 5000;
+/** The post-navigation initial-ready window is 1000ms. The clock starts after
+ * networkidle; browser observer timestamps preserve the deadline even when
+ * an IPC reply arrives later. This measures the active open command, not
+ * Pagefind module loading or query latency after opening the native dialog. */
+export const SEARCH_READINESS_BUDGET_MS = 1000;
 
 export function searchReadinessWasOnTime(evidence: SearchReadinessEvidence): boolean {
   return (
@@ -241,7 +245,7 @@ export function readSearchReadyWithinBudget({
 }): Promise<SearchReadinessEvidence> {
   return new Promise((resolve, reject) => {
     // Serialized into the page: keep the literal in sync with SEARCH_READINESS_BUDGET_MS.
-    const deadline = startedAt + 5000;
+    const deadline = startedAt + 1000;
     let observer: MutationObserver | undefined;
     let timer: ReturnType<typeof setTimeout> | undefined;
     let done = false;
@@ -259,12 +263,19 @@ export function readSearchReadyWithinBudget({
           return;
         }
         const currentDisabled = commands[0]?.getAttribute('aria-disabled') ?? null;
+        const host = commands[0]?.closest<HTMLElement>('[data-projection-generation-host]');
+        const owner = host?.dataset.projectionOwnerHost;
+        const generation = host?.dataset.projectionGenerationHost;
         const trace = (window as any).__puiSearchStartup?.snapshot();
         const ready = trace?.events.find(
           (event: any) =>
             event.state.view === 'ready' &&
             event.state.commands.some(
               (command: any) =>
+                owner !== undefined &&
+                generation !== undefined &&
+                command.owner === owner &&
+                command.generation === generation &&
                 command.command === 'open' &&
                 command.role === 'button' &&
                 command.disabled === 'false' &&
@@ -279,7 +290,15 @@ export function readSearchReadyWithinBudget({
         done = true;
         observer?.disconnect();
         if (timer !== undefined) clearTimeout(timer);
-        resolve({ startedAt, deadline, observedReadyAt, completedAt: Date.now(), currentDisabled });
+        resolve({
+          startedAt,
+          deadline,
+          observedReadyAt,
+          completedAt: Date.now(),
+          currentDisabled,
+          owner: owner ?? null,
+          generation: generation ?? null,
+        });
       },
     };
     observer = new MutationObserver(() => probe.sample());

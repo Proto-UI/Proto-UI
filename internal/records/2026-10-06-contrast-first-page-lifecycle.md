@@ -1,0 +1,9 @@
+# First calibration page belongs to bounded browser setup
+
+Exact `4eea90af001f4e956907057b8fc596c8ac773452` popup job `112337557273` retained a 39/40 failed calibration. Its added phase diagnostics locate the deadline overrun: browser setup ready at 18367ms; first context acquisition 720ms; first newPage another 6744ms; fixture/probe/reads/assertions then complete by 8695ms of the test, and context closes at 8820ms. All assertions actually passed, but the unchanged 5000ms test deadline was already exceeded. Artifact `11422647074` retains the phase receipts (ZIP SHA-256 `0cf6835379fab057a5403b3a9067aefc30d0b51ec3fb9157e571b254cf3f4620`). This does not certify page performance or establish a general flaky-test diagnosis.
+
+The first context and page acquisition now belong to the existing 30000ms browser-setup hook. That same fresh page is handed to the first visibility test; no page is discarded as a warm-up and no attempt is retried. Fixture construction, probe installation and every original paint/visibility assertion remain within the unchanged 5000ms test deadline. The test closes its context; afterAll also closes any retained setup context and always closes the browser, covering setup/test failure. Later calibrations continue to allocate their own isolated contexts.
+
+No timeout value, fixture byte, assertion, threshold, test count, product code or audit acceptance predicate changes. Local checks compare all expect expressions/shared fixture bytes against 4eea90af, compile the TypeScript and verify formatting. Independent review and the next exact-head native run determine the repaired lifecycle outcome. Earlier 30e anatomy and 1243/4ee timeout failures remain retained; no old result is relabeled.
+
+Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)

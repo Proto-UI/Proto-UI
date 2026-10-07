@@ -12,6 +12,14 @@ const afterScroll: ViewportGeometry = {
 };
 
 describe('document geometry measurement', () => {
+  it('retains fractional movement for exact-equality geometry checks', () => {
+    const moved: ViewportGeometry = {
+      ...afterScroll,
+      viewportRect: { ...afterScroll.viewportRect, y: afterScroll.viewportRect.y + 0.25 },
+    };
+    expect(documentRect(moved)).not.toEqual(documentRect(before));
+    expect(documentRect(moved).y - documentRect(before).y).toBe(0.25);
+  });
   it('retains absolute position and dimensions when the document has not scrolled', () => {
     expect(documentRect(before)).toEqual({ x: 44, y: 700, width: 212, height: 192 });
     expect(documentRect({ ...before, scrollOffset: { x: 0, y: 0 } })).toEqual(before.viewportRect);

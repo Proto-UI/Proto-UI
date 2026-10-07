@@ -174,9 +174,12 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
 
       let uiInitialized = false;
       let pagefindUI: { destroy: () => void } | null = null;
-      let indexAvailable: boolean | null = null;
-      let probePromise: Promise<boolean> | null = null;
-      let initPromise: Promise<void> | null = null;
+      // Modules belong to this service, never to a command projection. Keep a
+      // successful preparation across close/reopen and runtime switches.
+      let preparation: Promise<{
+        PagefindUI: new (options: object) => { destroy(): void };
+      }> | null = null;
+      let openSession = 0;
       let loadingWatchdog: number | undefined;
       let restoreTrigger = false;
       let retrying = false;
@@ -231,52 +234,36 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
        * index file up front so a missing or unreachable index surfaces as a
        * dedicated failure state instead of an endless "searching" spinner.
        */
-      const probeIndex = async (): Promise<boolean> => {
-        if (indexAvailable !== null) return indexAvailable;
-        if (probePromise) return probePromise;
-
-        const currentProbe = (async (): Promise<boolean> => {
+      const prepareModules = () => {
+        if (preparation) return preparation;
+        const current = (async () => {
           const controller = new AbortController();
           probeController = controller;
           const timeout = later(() => controller.abort(), 5000);
           try {
-            const res = await fetch(bundlePath + 'pagefind.js', {
-              method: 'HEAD',
-              cache: 'no-store',
-              signal: controller.signal,
-            });
-            if (!alive) return false;
-            indexAvailable = res.ok;
-            return indexAvailable;
-          } catch {
-            indexAvailable = false;
-            return false;
+            const res = await Promise.race([
+              fetch(bundlePath + 'pagefind.js', {
+                method: 'HEAD',
+                cache: 'no-store',
+                signal: controller.signal,
+              }),
+              disposed,
+            ]);
+            if (!alive || !res.ok) throw new Error('Pagefind index unavailable');
           } finally {
             cancelLater(timeout);
-            pendingTimers.delete(timeout);
+            if (probeController === controller) probeController = undefined;
           }
-        })();
-
-        probePromise = currentProbe;
-        try {
-          return await currentProbe;
-        } finally {
-          if (probePromise === currentProbe) probePromise = null;
-        }
-      };
-
-      const initPagefindUI = async () => {
-        if (uiInitialized) return;
-        if (initPromise) return initPromise;
-
-        const currentInit = (async (): Promise<void> => {
+          // Both imports are independent after the index probe. Constructing
+          // Pagefind UI still waits for the runtime and the current open owner.
+          const runtimeImport = import(/* @vite-ignore */ `${bundlePath}pagefind.js`);
+          // @ts-expect-error — Missing types for @pagefind/default-ui package.
+          const defaultUIImport = import('@pagefind/default-ui');
+          let runtimeTimeout: number | undefined;
+          let defaultUITimeout: number | undefined;
           try {
-            // Preflight the runtime module so Pagefind's internal polling loop
-            // never starts for an import that is already known to fail.
-            const runtimeImport = import(/* @vite-ignore */ `${bundlePath}pagefind.js`);
-            let runtimeTimeout: number | undefined;
-            try {
-              await Promise.race([
+            const [, defaultUI] = await Promise.all([
+              Promise.race([
                 runtimeImport,
                 disposed,
                 new Promise<never>((_, reject) => {
@@ -285,21 +272,8 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
                     5000
                   );
                 }),
-              ]);
-            } finally {
-              if (runtimeTimeout !== undefined) {
-                cancelLater(runtimeTimeout);
-                pendingTimers.delete(runtimeTimeout);
-              }
-              runtimeImport.catch(() => {});
-            }
-            if (!alive) return;
-            // @ts-expect-error — Missing types for @pagefind/default-ui package.
-            const defaultUIImport = import('@pagefind/default-ui');
-            let defaultUITimeout: number | undefined;
-            let defaultUI: Awaited<typeof defaultUIImport>;
-            try {
-              defaultUI = await Promise.race([
+              ]),
+              Promise.race([
                 defaultUIImport,
                 disposed,
                 new Promise<never>((_, reject) => {
@@ -308,51 +282,65 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
                     5000
                   );
                 }),
-              ]);
-            } finally {
-              if (defaultUITimeout !== undefined) {
-                cancelLater(defaultUITimeout);
-                pendingTimers.delete(defaultUITimeout);
-              }
-              defaultUIImport.catch(() => {});
-            }
-            if (!alive) return;
-            const { PagefindUI } = defaultUI;
-            pagefindUI = new PagefindUI({
-              ...pagefindUserConfig,
-              element: '#starlight__search',
-              baseUrl,
-              bundlePath,
-              showImages: false,
-              translations,
-              showSubResults: true,
-              processResult: (result: { url: string; sub_results: Array<{ url: string }> }) => {
-                result.url = formatURL(result.url);
-                result.sub_results = result.sub_results.map((sub_result) => {
-                  sub_result.url = formatURL(sub_result.url);
-                  return sub_result;
-                });
-              },
-            });
-            uiInitialized = true;
-            if (dialog.open) focusSearchInput();
-          } catch {
-            pagefindUI = null;
-            uiInitialized = false;
-            showFailure();
+              ]),
+            ]);
+            if (!alive) throw new Error('Search disposed');
+            return defaultUI;
+          } finally {
+            cancelLater(runtimeTimeout);
+            cancelLater(defaultUITimeout);
+            runtimeImport.catch(() => {});
+            defaultUIImport.catch(() => {});
           }
         })();
+        preparation = current;
+        // Intent never changes the dialog/error UI and must never leak an
+        // unhandled rejection. A later intent or explicit open may try again.
+        void current.catch(() => {
+          if (preparation === current) preparation = null;
+        });
+        return current;
+      };
 
-        initPromise = currentInit;
+      const prepareOnIntent = () => {
+        if (alive && !import.meta.env.DEV && !searchBlocked) void prepareModules();
+      };
+      const isCurrentOpen = (session: number) => alive && dialog.open && session === openSession;
+      const initPagefindUI = async (session: number) => {
         try {
-          await currentInit;
-        } finally {
-          if (initPromise === currentInit) initPromise = null;
+          const { PagefindUI } = await prepareModules();
+          // Closing an opening session invalidates its continuation. Module
+          // preparation can finish, but only a current open may create DOM.
+          if (!isCurrentOpen(session) || uiInitialized) return;
+
+          pagefindUI = new PagefindUI({
+            ...pagefindUserConfig,
+            element: '#starlight__search',
+            baseUrl,
+            bundlePath,
+            showImages: false,
+            translations,
+            showSubResults: true,
+            processResult: (result: { url: string; sub_results: Array<{ url: string }> }) => {
+              result.url = formatURL(result.url);
+              result.sub_results = result.sub_results.map((sub_result) => {
+                sub_result.url = formatURL(sub_result.url);
+                return sub_result;
+              });
+            },
+          });
+          uiInitialized = true;
+          if (dialog.open) focusSearchInput();
+        } catch {
+          if (!isCurrentOpen(session)) return;
+          pagefindUI = null;
+          uiInitialized = false;
+          showFailure();
         }
       };
 
-      const ensureSearchReady = async () => {
-        if (!alive) return;
+      const ensureSearchReady = async (session: number) => {
+        if (!isCurrentOpen(session)) return;
         if (import.meta.env.DEV) {
           hideInitializing();
           return;
@@ -366,15 +354,8 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
           return;
         }
         showInitializing();
-        const available = await probeIndex();
-        if (!alive) return;
-        if (!available) {
-          showFailure();
-          return;
-        }
-        hideFailure();
-        await initPagefindUI();
-        if (uiInitialized) hideInitializing();
+        await initPagefindUI(session);
+        if (isCurrentOpen(session) && uiInitialized) hideInitializing();
       };
 
       /**
@@ -417,14 +398,16 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
         document.documentElement.toggleAttribute('data-search-modal-open', true);
         document.body.toggleAttribute('data-search-modal-open', true);
         window.addEventListener('click', onClick);
-        await ensureSearchReady();
-        if (dialog.open) focusSearchInput();
+        const session = ++openSession;
+        await ensureSearchReady(session);
+        if (isCurrentOpen(session)) focusSearchInput();
       };
 
       const cleanupModal = () => {
         // Native close is queued as a task. A previous session's notification
         // must not clear listeners or return-focus ownership after a reopen.
         if (dialog.open) return;
+        openSession++;
         document.documentElement.toggleAttribute('data-search-modal-open', false);
         document.body.toggleAttribute('data-search-modal-open', false);
         window.removeEventListener('click', onClick);
@@ -449,18 +432,14 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
         commands.setRetryDisabled(true);
         try {
           resetPagefindUI();
-          indexAvailable = null;
-          showInitializing();
-          const ok = await probeIndex();
-          if (!alive) return;
-          if (ok) {
-            hideFailure();
-            await initPagefindUI();
-            if (uiInitialized && alive) {
-              hideInitializing();
-              nextFrame(focusSearchInput);
-            }
-          } else showFailure();
+          preparation = null;
+          const session = openSession;
+          hideFailure();
+          await ensureSearchReady(session);
+          if (isCurrentOpen(session) && uiInitialized)
+            nextFrame(() => {
+              if (isCurrentOpen(session)) focusSearchInput();
+            });
         } finally {
           retrying = false;
           if (alive) {
@@ -470,7 +449,7 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
           }
         }
       };
-      commands.bind({ open: openModal, close: closeModal, retry });
+      commands.bind({ open: openModal, close: closeModal, retry, prepare: prepareOnIntent });
       const docs = this.closest('[data-homepage-runtime]')
         ? null
         : initDocumentationSearchCommands(commands);

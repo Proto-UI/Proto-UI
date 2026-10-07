@@ -78,6 +78,8 @@ The following prefixes define semantic groups:
 - `shadow-`
 - `rounded`
 
+The bounded [C-CONTENT-SELECTION-AFFORDANCE-0001](../../../spec/contracts/C-CONTENT-SELECTION-AFFORDANCE-0001.yaml) revision adds one exact group containing `select-auto`, `select-text`, and `select-none`. It deliberately replaces fallback grouping for those three tokens only; `selection:*` paint stays independent. This versioned exception does not broaden prefix matching for other `select-*` tokens.
+
 This list is intentionally conservative.
 
 Expanding or redefining semantic groups is a **breaking change** and requires a new contract version.

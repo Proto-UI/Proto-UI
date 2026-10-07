@@ -49,6 +49,7 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
   let viewIntent: ViewIntentSnapshot | null = null;
   let unsubscribeIntent: (() => void) | null = null;
   let disposed = false;
+  let viewVersion = 0;
 
   const disposeView = () => {
     const current = viewDisposer;
@@ -109,6 +110,7 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
       }
 
       disposeView();
+      const version = ++viewVersion;
       viewDisposer = input.disposeView;
 
       if (!wiring) {
@@ -118,32 +120,112 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
         return session;
       }
 
-      wiring.replace(input.modules);
-      if (!session) {
-        throw new Error(`[AdapterHost] missing session for ${args.prototypeName}`);
+      try {
+        wiring.replace(input.modules);
+        if (!session) {
+          throw new Error(`[AdapterHost] missing session for ${args.prototypeName}`);
+        }
+        void session.mount();
+        return session;
+      } catch (error) {
+        // Roll back only this failed lease; cleanup can synchronously attach a
+        // replacement, whose disposer and capabilities must remain untouched.
+        if (viewVersion === version) {
+          viewDisposer = null;
+          try {
+            // A first-frame failure can leave the Runtime in its mounting phase.
+            // End that failed epoch before a replacement capability can replay.
+            void session?.unmount().catch(() => {});
+          } catch {
+            /* Continue releasing the failed view after a lifecycle error. */
+          }
+          try {
+            input.disposeView();
+          } catch {
+            /* Preserve the original attach failure while restoring owner caps. */
+          }
+          if (viewVersion === version && wiring && ownerModules) {
+            try {
+              wiring.replace(ownerModules);
+            } catch {
+              /* Keep the owning attach error, not a secondary release error. */
+            }
+          }
+        }
+        throw error;
       }
-      void session.mount();
-      return session;
     },
     detachView() {
-      const result = session?.unmount() ?? Promise.resolve();
-      disposeView();
-      if (wiring && ownerModules) wiring.replace(ownerModules);
+      const version = viewVersion;
+      let result = Promise.resolve();
+      try {
+        completeCleanup([
+          () => {
+            result = session?.unmount() ?? result;
+          },
+          // unmount and the old disposer can both attach a replacement view.
+          () => {
+            if (viewVersion === version) disposeView();
+          },
+          () => {
+            if (viewVersion === version && wiring && ownerModules) wiring.replace(ownerModules);
+          },
+        ]);
+      } catch (error) {
+        // The synchronous failure prevents returning this promise to the caller.
+        // Observe its rejection without replacing the original cleanup error.
+        void result.catch(() => {});
+        throw error;
+      }
       return result;
     },
     disposeView,
     dispose() {
       if (disposed) return session?.dispose() ?? Promise.resolve();
       disposed = true;
-      unsubscribeIntent?.();
+      const unsubscribe = unsubscribeIntent;
       unsubscribeIntent = null;
-      const result = session?.dispose() ?? Promise.resolve();
-      disposeView();
-      wiring = null;
-      ownerModules = null;
+      let result = Promise.resolve();
+      try {
+        completeCleanup([
+          () => {
+            unsubscribe?.();
+          },
+          () => {
+            result = session?.dispose() ?? result;
+          },
+          disposeView,
+          () => {
+            wiring = null;
+            ownerModules = null;
+          },
+        ]);
+      } catch (error) {
+        // The synchronous failure prevents returning this promise to the caller.
+        // Observe its rejection without replacing the original cleanup error.
+        void result.catch(() => {});
+        throw error;
+      }
       return result;
     },
   };
+}
+
+// Finish every release while preserving the original synchronous failure.
+function completeCleanup(steps: Array<() => void>) {
+  let failed = false;
+  let firstError: unknown;
+  for (const step of steps) {
+    try {
+      step();
+    } catch (error) {
+      if (!failed) {
+        failed = true;
+        firstError = error;
+      }
+    }
+  }
+  if (failed) throw firstError;
 }
 
 export function createDeferredOwnerDisposal(dispose: () => void | Promise<void>) {

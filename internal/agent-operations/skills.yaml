@@ -1,5 +1,5 @@
 schemaVersion: 2
-registryVersion: 2026-09-19.agent-forward-evidence-1
+registryVersion: 2026-10-06.modeltrace-prior-handoff-1
 entrypoints:
   development: pui-dev
   maintenance: pui-maintain
@@ -7,12 +7,22 @@ compositionRules:
   - resolve exactly one leaf for the current transition
   - load only the resolved loadPath
   - pass explicit artifacts through a validated handoff
+  - honor a source leaf's declared allowedNextSkillIds before loading its next leaf
   - treat assessment as advice in human-assisted mode
   - enforce the fresh self-assessed ceiling before every autonomous transition
   - revalidate live permission and current authorization at every external action
   - continue governed ready work through implementation, review, and integration
   - stop only for unresolved product direction or a privileged or irreversible operation
 skills:
+  - id: pui-agent-identify
+    entrypoints: [development, maintenance]
+    loadPath: .agents/skills/pui-agent-identify/SKILL.md
+    transition: request context -> current unsigned closed-set ModelTrace record
+    autonomousMinimumBand: U0
+    taskClass: public-read
+    mutation: disposable-output-only
+    requires: [request-context]
+    produces: [modeltrace-record]
   - id: pui-assess
     entrypoints: [development, maintenance]
     loadPath: .agents/skills/pui-assess/SKILL.md
@@ -47,7 +57,14 @@ skills:
     autonomousMinimumBand: C2
     taskClass: claim-work-item
     mutation: reversible-github-metadata
-    requires: [capability-envelope, work-item-proposal, evidence-assessment, mutation-authorization]
+    requires:
+      [
+        capability-envelope,
+        work-item-proposal,
+        evidence-assessment,
+        mutation-authorization,
+        modeltrace-record,
+      ]
     produces: [mutation-receipt, bounded-subject]
   - id: pui-unclaim
     entrypoints: [development]
@@ -56,7 +73,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: release-own-claim
     mutation: reversible-github-metadata
-    requires: [capability-envelope, claim-receipt, mutation-authorization]
+    requires: [capability-envelope, claim-receipt, mutation-authorization, modeltrace-record]
     produces: [mutation-receipt]
   - id: pui-trace
     entrypoints: [development]
@@ -194,7 +211,14 @@ skills:
     autonomousMinimumBand: C2
     taskClass: integrate-reviewed-pull-request
     mutation: conditional-pull-request-merge
-    requires: [review-packet, review-input, published-review-packet, mutation-authorization]
+    requires:
+      [
+        review-packet,
+        review-input,
+        published-review-packet,
+        mutation-authorization,
+        modeltrace-record,
+      ]
     produces: [mutation-receipt]
   - id: pui-collaborate
     entrypoints: [development]
@@ -203,7 +227,14 @@ skills:
     autonomousMinimumBand: C2
     taskClass: maintain-collaboration-state
     mutation: reversible-github-collaboration
-    requires: [capability-envelope, github-snapshot, mutation-authorization, collaboration-request]
+    requires:
+      [
+        capability-envelope,
+        github-snapshot,
+        mutation-authorization,
+        collaboration-request,
+        modeltrace-record,
+      ]
     produces: [mutation-receipt]
   - id: pui-issue
     entrypoints: [development]
@@ -240,7 +271,13 @@ skills:
     taskClass: publish-evidence-comment
     mutation: reversible-github-metadata
     requires:
-      [capability-envelope, issue-report, evidence-publication-packet, mutation-authorization]
+      [
+        capability-envelope,
+        issue-report,
+        evidence-publication-packet,
+        mutation-authorization,
+        modeltrace-record,
+      ]
     produces: [mutation-receipt, evidence-ledger-update]
   - id: pui-govern
     entrypoints: [development]
@@ -278,6 +315,23 @@ skills:
     mutation: feature-branch
     requires: [capability-envelope, dependency-report, authority-map, implementation-authorization]
     produces: [candidate-change]
+  - id: pui-package-budget
+    entrypoints: [development]
+    loadPath: .agents/skills/pui-package-budget/SKILL.md
+    transition: accepted capability cost evidence -> bounded numeric package-budget transaction
+    autonomousMinimumBand: C2
+    taskClass: update-governed-package-budget
+    mutation: feature-branch
+    requires:
+      [
+        capability-envelope,
+        authority-map,
+        candidate-change,
+        evidence-report,
+        implementation-authorization,
+      ]
+    produces: [candidate-change]
+    allowedNextSkillIds: [pui-validate]
   - id: pui-release-prep
     entrypoints: [development]
     loadPath: .agents/skills/pui-release-prep/SKILL.md

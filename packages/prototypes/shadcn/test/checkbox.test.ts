@@ -45,6 +45,7 @@ const ROOT_SURFACE_TOKENS = [
   'bg-transparent',
   'shadow-xs',
   'outline-none',
+  'select-none',
 ];
 
 const INDICATOR_SURFACE_TOKENS = [

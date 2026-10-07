@@ -117,7 +117,9 @@ const staticUtilities: Record<string, string[]> = {
   'cursor-not-allowed': ['cursor: not-allowed;'],
   'cursor-default': ['cursor: default;'],
   'cursor-pointer': ['cursor: pointer;'],
-  'select-none': ['user-select: none;'],
+  'select-auto': ['-webkit-user-select: auto;', 'user-select: auto;'],
+  'select-text': ['-webkit-user-select: text;', 'user-select: text;'],
+  'select-none': ['-webkit-user-select: none;', 'user-select: none;'],
   'outline-none': ['outline: 2px solid transparent;', 'outline-offset: 2px;'],
   'outline-1': ['outline-style: solid;', 'outline-width: 1px;'],
   'outline-ring': ['outline-color: var(--pui-ring);'],
@@ -623,6 +625,11 @@ function appendSystemDarkThemeFallback(css: string): string {
 function renderTokenRule(token: string): CssRule | null {
   const parts = splitVariants(token);
   const utility = parts[parts.length - 1] ?? token;
+  // Internal translation artifacts may carry variants without passing through
+  // author validation. Never report inert highlight user-select CSS as support.
+  if (parts.slice(0, -1).includes('selection') && /^select-(auto|text|none)$/.test(utility)) {
+    return null;
+  }
   const css = renderUtility(utility);
   if (!css) return null;
   return { token, css };

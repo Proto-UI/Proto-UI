@@ -6,7 +6,7 @@ import {
   resolveProjectionPart,
   type ProjectionFamilyId,
 } from '../PrototypePreviewer/projection-families';
-import type { RuntimeId } from '../PrototypePreviewer/runtimes/registry';
+import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 
 export const HOMEPAGE_SHOWCASE_ID = 'website-component-gallery';
 

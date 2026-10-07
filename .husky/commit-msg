@@ -1,0 +1,4 @@
+#!/bin/sh
+# Human and deterministic automation commits have no ModelTrace obligation.
+[ "${PUI_AGENT:-}" = "1" ] || exit 0
+node scripts/agent-operations/agent-publish.mjs check-commit-message --message-file "$1"

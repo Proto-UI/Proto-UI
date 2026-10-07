@@ -17,18 +17,46 @@ criteria:
     text:
       en: 'Target readiness has a releasable subscription, supports late/replacement views and bounded post-layout retry, and allows retained requests to be retried under current Focus policy. It does not synthesize focus facts for an absent or rejected target.'
       zh-CN: 'target readiness 具有可释放 subscription，支持延迟/替换 view 与有界 post-layout retry，使保留请求按当前 Focus policy 重试。target 缺失或拒绝时不得合成 focus facts。'
+  - id: HC-FOCUS-TARGET-0001-D
+    text:
+      en: 'The privileged FOCUS_REQUEST_FOCUS_CAP shape is (target, options, kind), with options explicitly FocusRequestOptions or undefined and required kind programmatic | native | entry; its result is void | boolean, and false rejects the current application. Native admission must follow the resolved actual current surface and the readiness of its event-owning view to deliver focus observations into its Runtime callback scope, not merely the requesting instance readiness. A closed observation gate rejects native application with false, leaving the Module target request pending for current-policy readiness retry without synthesized facts. Explicit programmatic effects retain their synchronous accepted-effect rule and must not be rejected solely by an observation gate. Entry acquisition instead requires the event-owning view of its resolved actual target to accept focus observations; a closed gate rejects that application and retains distinct entry intent until readiness re-resolves the target. Entry admission does not require the native Trigger root-only constraint. Blur of the committed target and committed A11y identity/reference binding remain independent of acquisition gates. Physical target availability, eligibility and actual application still apply; accepted programmatic effects synchronize Module-owned facts, native effects rely on observations, and entry delegates without owning target facts. Readiness subscriptions remain releasable across replacement views and terminal cleanup under criterion C.'
+      zh-CN: '特权 FOCUS_REQUEST_FOCUS_CAP 的形态为 (target, options, kind)，其中 options 显式为 FocusRequestOptions 或 undefined，必需的 kind 为 programmatic | native | entry；返回值为 void | boolean，false 拒绝当前应用。Native admission 必须跟随已解析的真实当前 surface，以及拥有其 event 的 view 向所属 Runtime callback scope 交付 focus observations 的 readiness，而非只检查请求实例的 readiness。Observation gate 关闭时必须以 false 拒绝 native application，使 Module target request 保持 pending，等待 readiness 后按当前 policy 重试，不得合成 facts。显式 programmatic effect 保持同步的 accepted-effect 规则，不得仅因 observation gate 关闭而被拒绝。Entry acquisition 则要求已解析真实 target 的 event-owning view 能接收 focus observations；gate 关闭时拒绝本次应用并保留独立 entry intent，待 readiness 后重新解析 target。Entry admission 不要求 native Trigger 的 root-only 约束。Committed target 的 blur 与 committed A11y identity/reference binding 仍独立于 acquisition gate。物理 target 可用性、eligibility 与真实应用仍须满足；已接纳的 programmatic effect 同步 Module-owned facts，native effect 依赖 observations，entry 委派效果但不拥有 target facts。Readiness subscription 仍须按 criterion C 在 replacement view 与 terminal cleanup 中可释放。'
+    rationale:
+      en: 'Kind is a request/fact ownership distinction, not input modality. The required third argument is a breaking privileged shape change with no author-facing facade change. Providers may ignore the appended kind only when their existing host application and eligibility behavior needs no distinction; two-parameter provider compatibility alone proves neither GPUI/native conformance nor conformance across all React versions. This criterion adds no host obligation to synthesize semantic facts and does not replace FocusCenter policy or entry delegation.'
+      zh-CN: 'Kind 区分 request/fact ownership，而非输入 modality。必需的第三参数是特权 shape 的 breaking change，不改变 author-facing facade。Provider 仅在既有宿主应用与 eligibility behavior 无须区分时才可忽略追加的 kind；双参数 provider 的兼容性本身既不证明 GPUI/native conformance，也不证明所有 React 版本的 conformance。本 criterion 不增加宿主合成 semantic facts 的义务，也不替换 FocusCenter policy 或 entry delegation。'
+    references:
+      contracts:
+        - id: C-AS-FOCUSABLE-0001
+          anchors: [C-AS-FOCUSABLE-0001-G]
+        - id: C-AS-FOCUS-ENTRY-0001
+          anchors: [C-AS-FOCUS-ENTRY-0001-F, C-AS-FOCUS-ENTRY-0001-G, C-AS-FOCUS-ENTRY-0001-H]
+      decisions:
+        - id: D-TRIGGER-GROUP-SURFACE-0001
+          anchors: [D-TRIGGER-GROUP-SURFACE-0001-C, D-TRIGGER-GROUP-SURFACE-0001-F]
 dependsOn:
   contracts: [C-FOCUS-0002, C-AS-FOCUSABLE-0001, C-LIFECYCLE-0006]
 verifies:
   tests: [T-FOCUS-0001, T-FOCUS-ROVING-0001, T-FOCUS-0002]
 sources:
   - path: packages/modules/focus/src/caps.ts
+  - path: packages/modules/focus/src/create.ts
   - path: packages/adapters/base/src/platform/layout-ready.ts
   - path: packages/adapters/react/src/runtime/modules.ts
+  - path: packages/adapters/react/src/adapt.ts
   - path: packages/adapters/vue/src/runtime/modules.ts
   - path: packages/adapters/vue2/src/runtime/modules.ts
   - path: packages/adapters/web-component/src/runtime/modules.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Linked criterion D's retained-entry host boundary to its governing C-AS-FOCUS-ENTRY-0001-H criterion without changing semantics or lifecycle.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Owner-approved separation preserves synchronous programmatic effects and root-scoped native admission while retaining rejected entry intent until its actual event owner is ready; committed blur and A11y remain independent.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged bounded Focus ownership and executable evidence.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Cataloged the required privileged FOCUS_REQUEST_FOCUS_CAP(target, options or undefined, kind) shape and resolved surface-owner native readiness boundary (criterion D), preserving committed one-shot effects and fact ownership; this breaking privileged change does not establish new host conformance or alter lifecycle.
+    breaking: true

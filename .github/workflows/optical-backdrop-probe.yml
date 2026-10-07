@@ -1,0 +1,45 @@
+name: Actual DOM optical backdrop probe
+on:
+  pull_request:
+    paths:
+      - 'experiments/material-optics/**'
+      - '.github/workflows/optical-backdrop-probe.yml'
+permissions:
+  contents: read
+jobs:
+  optical-carrier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked tools
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          corepack pnpm@10.32.1 --filter apps-www exec playwright-core install ffmpeg
+          echo "CHROME_PATH=$(command -v google-chrome)" >> "$GITHUB_ENV"
+      - name: Measure actual backdrop position and controls
+        env:
+          OPTICAL_EVIDENCE_DIR: ${{ runner.temp }}/optical-carrier
+        run: |
+          node --test experiments/material-optics/heightfield.test.mjs
+          node experiments/material-optics/backdrop-probe.mjs
+          node experiments/material-optics/liquid-demo-evidence.mjs
+      - name: Record current experiment independently of optical acceptance
+        if: always()
+        env:
+          OPTICAL_EVIDENCE_DIR: ${{ runner.temp }}/optical-carrier
+        run: node experiments/material-optics/liquid-demo-record.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: optical-carrier-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/optical-carrier
+          retention-days: 30
+          if-no-files-found: warn

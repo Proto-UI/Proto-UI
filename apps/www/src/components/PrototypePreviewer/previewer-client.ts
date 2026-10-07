@@ -9,7 +9,7 @@ import {
   watchProjectionThemeSurfaceStyle,
 } from './projection-theme';
 import { releaseHostMount } from './runtimes/host-mount';
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 import { refreshCodePanel } from './code-panel-client';
 import {
   initSiteShadcnControls,
@@ -30,7 +30,6 @@ interface PreviewerOptions {
   initialRuntime: RuntimeId;
   demoProps: Record<string, unknown>;
   runtimeList: RuntimeId[];
-  loader?: string; // 动态导入路径
   projectionFamilyId?: ProjectionFamilyId;
   projectionComponentId?: ProjectionComponentId;
   projectionToolbar?: boolean;
@@ -53,7 +52,7 @@ export function initPreviewer(options: PreviewerOptions) {
     });
   }
 
-  const { root, prototypeId, demoId, initialRuntime, demoProps, runtimeList, loader } = options;
+  const { root, prototypeId, demoId, initialRuntime, demoProps, runtimeList } = options;
 
   // 防重复初始化
   if (root.dataset.inited === '1') {
@@ -63,6 +62,26 @@ export function initPreviewer(options: PreviewerOptions) {
   root.dataset.inited = '1';
 
   const host = root.querySelector('.host') as HTMLElement;
+  // The renderer owns host children, including clearing them before asynchronous
+  // preparation. Keep the initial status in its application shell until publish.
+  const startupStatus = host.querySelector<HTMLElement>('.proto-previewer__skeleton');
+  const startupShell = host.parentElement;
+  const hostWasInert = host.inert;
+  let startupPending = Boolean(startupStatus && startupShell);
+  if (startupStatus && startupShell) {
+    startupShell.insertBefore(startupStatus, host);
+    startupShell.setAttribute('data-previewer-startup-shell', '');
+    host.setAttribute('data-previewer-startup-pending', '');
+    host.inert = true;
+  }
+  const finishStartup = () => {
+    if (!startupPending) return;
+    startupPending = false;
+    startupStatus!.remove();
+    startupShell?.removeAttribute('data-previewer-startup-shell');
+    host.removeAttribute('data-previewer-startup-pending');
+    host.inert = hostWasInert;
+  };
   const selectRoot = root.querySelector<SiteSelectRoot>(
     '[data-adapter-select-root], wc-shadcn-select-root'
   );
@@ -170,15 +189,6 @@ export function initPreviewer(options: PreviewerOptions) {
 
     loaderPromise = (async () => {
       try {
-        // 方式1：使用自定义 loader（废弃的旧方式，保留兼容）
-        if (loader) {
-          const baseUrl = import.meta.url.replace(/\/[^/]+$/, '/');
-          const modulePath = new URL(loader, baseUrl).href;
-          await import(/* @vite-ignore */ modulePath);
-          return;
-        }
-
-        // 方式2：自动按需加载（推荐）
         if (!prototypeId) {
           throw new Error('[PrototypePreviewer] missing prototypeId');
         }
@@ -267,6 +277,7 @@ export function initPreviewer(options: PreviewerOptions) {
         await result.destroy();
         return;
       }
+      finishStartup();
       currentDemo = { id, destroy: result.destroy };
       activeSurface = surface;
       const watchTheme = () =>
@@ -311,6 +322,7 @@ export function initPreviewer(options: PreviewerOptions) {
         '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
       pre.style.whiteSpace = 'pre-wrap';
       host.appendChild(pre);
+      finishStartup();
       console.error(err);
       dispatch('error', { error: err });
     } finally {
@@ -393,6 +405,7 @@ export function initPreviewer(options: PreviewerOptions) {
           await previous?.destroy();
         } finally {
           host.replaceChildren();
+          finishStartup();
         }
       })();
       return destroyPromise;

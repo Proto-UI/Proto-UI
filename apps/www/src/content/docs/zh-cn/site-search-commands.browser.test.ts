@@ -153,7 +153,7 @@ async function captureFailure(page: Page) {
     ) {
       entry.startupProfileRecorded = true;
       // An isolated follow-on navigation attributes CPU cost. Profiling never
-      // runs during the original 5000ms acceptance observation or replaces it.
+      // runs during the original 1000ms acceptance observation or replaces it.
       const context = await browser.newContext({ viewport: page.viewportSize() ?? undefined });
       const diagnostic = await context.newPage();
       const session = await context.newCDPSession(diagnostic);
@@ -545,6 +545,19 @@ describe.sequential('Search family Button commands', () => {
                   startedAt: entry.stageStartedAt,
                 });
                 entry.initialReadiness = evidence;
+                // Persist successful and failed observations after the browser
+                // clock has decided readiness; file I/O cannot move its deadline.
+                entry.writes = entry.writes.then(async () => {
+                  await mkdir(evidenceDirectory, { recursive: true });
+                  await writeFile(
+                    path.join(evidenceDirectory, `${id}-readiness.json`),
+                    JSON.stringify(
+                      { source, id, evidence, onTime: searchReadinessWasOnTime(evidence) },
+                      null,
+                      2
+                    )
+                  );
+                });
                 return evidence.currentDisabled;
               });
               expect(

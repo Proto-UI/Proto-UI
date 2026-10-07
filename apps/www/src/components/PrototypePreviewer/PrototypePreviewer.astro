@@ -1,10 +1,5 @@
 ---
-import {
-  AdapterIds,
-  InternalAdapterIds,
-  selectRuntimeIds,
-  type RuntimeId,
-} from './runtimes/registry';
+import { AdapterIds, InternalAdapterIds, selectRuntimeIds, type RuntimeId } from './runtimes/ids';
 import AdapterSelect from '../override/AdapterSelect.astro';
 import CodePanel from './CodePanel.astro';
 import { highlightCode, type CodeLang } from './code-highlight';
@@ -24,7 +19,6 @@ interface Props {
   class?: string;
   toolbar?: boolean; // 是否渲染运行时切换 UI，默认 true
   runtimes?: RuntimeId[]; // 可选的运行时列表，默认使用全部 public AdapterIds
-  loader?: string; // 动态导入路径，例如 './demo-inline'
   /** 可选：展示的代码片段，提供后显示 Preview | Code 标签页 */
   code?: string;
   hasCode?: boolean;
@@ -99,7 +93,6 @@ const {
   class: className = '',
   toolbar = true,
   runtimes,
-  loader,
   code: codeSnippet,
   hasCode = false,
   codePanel = true,
@@ -146,7 +139,6 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
   data-initial-runtime={effectiveInitialRuntime}
   data-props={JSON.stringify(protoProps)}
   data-runtimes={JSON.stringify(effectiveRuntimes)}
-  data-loader={loader || ''}
   data-code-map={autoCodeMap ? JSON.stringify(autoCodeMap) : ''}
   data-code-highlights={Object.keys(highlights).length ? JSON.stringify(highlights) : ''}
   data-lazy={lazy ? 'true' : 'false'}
@@ -175,14 +167,30 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
   >
     <div class="proto-previewer__preview" role="region" aria-live="polite">
       <div class="host">
-        <span class="proto-previewer__skeleton">{isZh ? '交互示例' : 'Interactive preview'}</span>
-        <noscript
-          >{
+        <div class="proto-previewer__skeleton" role="status">
+          <span class="proto-previewer__loading-title">
+            {isZh ? '正在加载交互示例…' : 'Loading interactive preview…'}
+          </span>
+          <span class="proto-previewer__loading-detail">
+            {
+              isZh
+                ? '正文和源码已可阅读，交互控件就绪后会显示在这里。'
+                : 'The article and source are ready to read. Interactive controls will appear here when ready.'
+            }
+          </span>
+        </div>
+        <noscript>
+          <style is:inline>
+            .proto-previewer__skeleton {
+              display: none !important;
+            }
+          </style>
+          {
             isZh
               ? '交互示例需要 JavaScript；正文和源码仍可阅读。'
               : 'Interactive previews require JavaScript; the article and source remain readable.'
-          }</noscript
-        >
+          }
+        </noscript>
       </div>
     </div>
   </div>
@@ -240,7 +248,7 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
     .proto-previewer__preview .host {
       min-width: 0;
       max-width: 100%;
-      min-height: 7rem;
+      min-height: var(--runtime-box-content-min, 10rem);
       width: 100%;
       display: flex;
       align-items: center;
@@ -300,6 +308,12 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
     }
 
     .proto-previewer__skeleton {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: var(--runtime-box-content-min, 10rem);
+      width: 100%;
+      color: var(--color-muted-foreground);
       font-size: 0.875rem;
       line-height: 1.5;
     }
@@ -310,7 +324,7 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
       }
 
       .proto-previewer__preview .host {
-        min-height: 7rem;
+        min-height: var(--runtime-box-content-min, 10rem);
       }
     }
   </style>

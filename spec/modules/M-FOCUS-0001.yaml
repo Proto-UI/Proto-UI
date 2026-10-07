@@ -29,6 +29,21 @@ criteria:
     text:
       en: 'Each scope or roving navigation takes one total order of its members from the host of the entry that owns it (HC-FOCUS-ORDER-0001). When the host cannot order the set, the whole navigation keeps stable registration order; host answers and registration order are never mixed pair by pair. Collection and Anatomy order do not supply Focus order.'
       zh-CN: '每次 scope 或 roving 导航都从拥有它的 entry 所在宿主取得成员的一个全序（HC-FOCUS-ORDER-0001）。宿主无法排列该集合时，整次导航保持稳定注册顺序；宿主答案与注册顺序从不逐对混用。Collection 与 Anatomy 的顺序不提供 Focus 顺序。'
+  - id: M-FOCUS-0001-G
+    text:
+      en: 'Every privileged host focus request must pass the required programmatic, native or entry kind. Programmatic requests synchronize Module-owned target facts only after accepted host application; native requests rely on host-observed focus facts rather than synchronizing them from the request result. Entry requests delegate the resolved descendant or self-fallback effect without taking ownership of the facts of that target or declaring the entry region a focus target. Kind describes this request/fact ownership distinction, not keyboard-versus-pointer modality or the request reason. Target requests retain the existing FocusCenter arbitration, latest-intent pending policy, readiness revalidation and lifecycle cancellation; an absent or rejected target produces no successful focus facts. A rejected entry application retains distinct entry intent and re-resolves its current target on readiness, without becoming a pending FocusCenter target request. The distinction adds no author-facing facade.'
+      zh-CN: '每次特权宿主 focus request 都必须传入必需的 programmatic、native 或 entry kind。Programmatic request 仅在宿主应用被接纳后同步 Module-owned target facts；native request 依赖宿主观察到的 focus facts，而不根据 request result 同步 facts。Entry request 委派已解析 descendant 或 self-fallback target 的效果，不接管该 target 的 facts，也不把 entry region 声明为 focus target。Kind 表达这一 request/fact ownership 区分，不代表 keyboard/pointer modality 或 request reason。Target request 保持既有 FocusCenter 仲裁、latest-intent pending policy、readiness 重验与生命周期取消规则；target 缺失或拒绝不得产生成功 focus facts。被拒绝的 entry application 保留独立 entry intent，并在 readiness 时重新解析当前 target，不成为 pending FocusCenter target request。此区分不增加 author-facing facade。'
+    dependsOn:
+      hostCaps:
+        - id: HC-FOCUS-TARGET-0001
+          since: 0.3.0-alpha.1
+          anchors: [HC-FOCUS-TARGET-0001-D]
+    references:
+      contracts:
+        - id: C-AS-FOCUSABLE-0001
+          anchors: [C-AS-FOCUSABLE-0001-C, C-AS-FOCUSABLE-0001-G]
+        - id: C-AS-FOCUS-ENTRY-0001
+          anchors: [C-AS-FOCUS-ENTRY-0001-F, C-AS-FOCUS-ENTRY-0001-G, C-AS-FOCUS-ENTRY-0001-H]
 satisfies:
   contracts:
     [
@@ -83,9 +98,19 @@ openQuestions:
       en: The implementation exports one shared center, and this bounded Web catalog does not admit a cross-document focus-domain policy. The ordering half of this question moved to HC-FOCUS-ORDER-0001 and criterion M-FOCUS-0001-F in 0.3.0-alpha.1.
       zh-CN: 实现导出一个共享 center，本有界 Web 编目不接纳跨 document 的 focus-domain policy。本问题的排序部分已在 0.3.0-alpha.1 移至 HC-FOCUS-ORDER-0001 与 criterion M-FOCUS-0001-F。
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Linked criterion G's retained-entry realization to its governing C-AS-FOCUS-ENTRY-0001-H criterion without changing semantics or lifecycle.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Distinguished retained entry intent from pending target requests and preserved programmatic versus native fact ownership under the approved entry-readiness rule.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged bounded Focus ownership and executable evidence.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Navigation order now comes from the host through HC-FOCUS-ORDER-0001, with whole-navigation registration fallback (criterion F); Q-PORTABILITY keeps only the focus-domain half.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Cataloged the required privileged programmatic/native/entry host request kind and its accepted-effect, observed-fact and fact-free entry distinctions (criterion G); this is a breaking privileged capability shape change, not an author-facing facade or lifecycle change.
+    breaking: true

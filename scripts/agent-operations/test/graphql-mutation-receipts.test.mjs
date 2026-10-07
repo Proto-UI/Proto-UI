@@ -3,7 +3,14 @@ import test from 'node:test';
 
 import { applyGitHubCollaborationMutation } from '../collect-live-collaboration-state.mjs';
 import { computeCollaborationRequestDigest } from '../collaboration-runtime.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 
+const { modelTrace, modelTraceContext } = modelTraceFixture();
+const modelTraceArtifact = {
+  type: 'modeltrace-record',
+  reference: 'fixture://modeltrace-record',
+  digest: modelTrace.id,
+};
 const HEAD = 'a'.repeat(40);
 const UPDATED_AT = '2026-08-27T00:59:00.000Z';
 const OBSERVED_AT = '2026-08-27T01:00:05.000Z';
@@ -11,6 +18,8 @@ const authorizationContext = {
   executionMode: 'human-assisted',
   executionModeSource: 'current-user',
   policy: {},
+  modelTrace,
+  modelTraceContext,
 };
 
 function fixture(action) {
@@ -43,6 +52,7 @@ function fixture(action) {
     expected: { [stateKey]: ready },
     desired: { [stateKey]: !ready },
     evidence: [
+      modelTraceArtifact,
       { type: 'current-user-instruction', reference: 'instruction://current-user/pr-509' },
       {
         type: ready ? 'validation-report' : 'review-thread-resolution',

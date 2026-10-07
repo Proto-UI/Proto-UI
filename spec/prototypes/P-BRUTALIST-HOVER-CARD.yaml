@@ -59,6 +59,8 @@ revisions:
     change: revised
     summary: >-
       Clarified that the unframed root does not force square geometry or hard-shadow surfaces on children; visual surfaces follow their own source-aligned projections. Base ownership and root style output are unchanged.
+
+
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

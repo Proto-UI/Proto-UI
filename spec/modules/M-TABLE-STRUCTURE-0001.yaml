@@ -4,8 +4,8 @@ title: Table Structure owns passive two-dimensional topology and header relation
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Checkpoint B implements the approved host-neutral semantic owner with Module and Base evidence, and bounded Web Component materialization now passes. React, Vue and Vue 2 materialization plus complete reader evidence remain Checkpoint C activation blockers.
-  zh-CN: Checkpoint B 实现已批准的 host-neutral semantic owner，并具备 Module/Base 证据与通过的有界 Web Component materialization；React、Vue、Vue 2 materialization 及完整 reader evidence 仍是 Checkpoint C activation blocker。
+  en: The approved host-neutral owner has Module/Base evidence and bounded passing Web Component, React, Vue 3 and Vue 2 DOM materialization, including a real React 19 consumer. Independent Checkpoint C review and explicit semantic/lifecycle admission remain incomplete, rather than those implementations being absent. No assistive-technology or non-Web conformance is claimed.
+  zh-CN: 已批准的 host-neutral owner 具备 Module/Base 证据与通过的有界 Web Component、React、Vue 3、Vue 2 DOM materialization，包括真实 React 19 consumer。尚未完成的是 Checkpoint C 独立 review 与明确 semantic/lifecycle admission，而非这些实现缺失；不宣称 assistive-technology 或 non-Web conformance。
 summary: The Table Structure Module recomputes one nearest-domain passive topology from Anatomy order and projects opaque header relationships through generic A11y.
 statement:
   en: Table Structure owns range-based placement, structural validity, diagnostics and ordered opaque header references for one nearest Base Table domain. It consumes Anatomy, State and A11y only; it owns no host service, App data or interaction state.
@@ -57,4 +57,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added bounded Web Component evidence, global authored header order, and fail-closed semantic-role cleanup while retaining three Adapter activation blockers.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Reconciled the draft rationale with four separately cataloged Web DOM paths and real React 19 evidence; independent Checkpoint C review and explicit admission remain required without claiming assistive-technology or non-Web support.
 tags: [table, structure, module, anatomy, accessibility, draft]

@@ -1,10 +1,7 @@
-import {
-  ownerAuthorizationFromArgs,
-  ownerAuthorizationAllows,
-  ownerSkillEligibility,
-} from './owner-authorization.mjs';
+import { ownerAuthorizationAllows } from './owner-authorization.mjs';
 import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
+import { assertModelTraceDisclosure, assertModelTraceFresh } from './modeltrace.mjs';
 
 // Match the existing governed live-response bound for this supplied artifact.
 export const MAX_PUBLISHED_REVIEW_PACKET_BYTES = 64 * 1024 * 1024;
@@ -1370,6 +1367,45 @@ function hasCompleteCommitContributorIdentity(input) {
   );
 }
 
+export function isExactGovernedReviewDuplicate(packet, liveInput, reviewer, priorPacket = null) {
+  const recommendedAction = packet.recommendedAction;
+  const sameDispositionState = {
+    APPROVE: 'APPROVED',
+    REQUEST_CHANGES: 'CHANGES_REQUESTED',
+    COMMENT: 'COMMENTED',
+  }[recommendedAction];
+  const renderedBody = normalizedReviewBody(renderReviewBody(packet));
+  return liveInput.reviews.some(
+    (review) =>
+      review.author !== null &&
+      review.author.toLowerCase() === reviewer.toLowerCase() &&
+      review.commitSha === liveInput.headSha &&
+      review.state === sameDispositionState &&
+      typeof review.body === 'string' &&
+      (() => {
+        const publishedBody = normalizedReviewBody(review.body);
+        if (recommendedAction === 'COMMENT') return publishedBody === renderedBody;
+        if (
+          hasUniquePublishedPacketReceipts(review.body, packet) &&
+          publishedBody === renderedBody
+        ) {
+          return true;
+        }
+        if (!priorPacket) return false;
+        try {
+          validatePublishedReviewPacket(packet, priorPacket);
+          return (
+            hasUniquePublishedPacketReceipts(review.body, priorPacket) &&
+            publishedBody === normalizedReviewBody(renderReviewBody(priorPacket)) &&
+            matchesPublishedReviewInput(priorPacket, liveInput, review)
+          );
+        } catch {
+          return false;
+        }
+      })()
+  );
+}
+
 export function authorizeReviewSubmission({
   packet,
   input,
@@ -1385,10 +1421,20 @@ export function authorizeReviewSubmission({
   dcoConclusion,
   ownerAuthorization = null,
   priorPacket = null,
+  modelTrace,
+  modelTraceContext,
 }) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
   validateReviewMutationInput(input);
   validateReviewPacket(packet, input);
+  assertModelTraceFresh(modelTrace, modelTraceContext, { repositoryId: packet.repositoryId });
+  if (packet.schemaVersion !== 2)
+    return {
+      allowed: false,
+      reason:
+        'current Agent review writes require a schema v2 evidence packet; legacy v1 is read-only',
+    };
+  assertModelTraceDisclosure(renderReviewBody(packet), modelTrace);
   verifyLiveReviewInput(packet, liveInput);
   const revision = inspectReviewRevision(packet, input, liveInput.headSha, null, liveInput.baseSha);
   if (revision.stale) {
@@ -1479,43 +1525,7 @@ export function authorizeReviewSubmission({
   // reviewer/head/disposition triple: a legacy or superseded same-disposition
   // review must never block a changed evidence packet, while resubmitting a
   // packet whose rendered body is already live stays an idempotent no-op.
-  const sameDispositionState = {
-    APPROVE: 'APPROVED',
-    REQUEST_CHANGES: 'CHANGES_REQUESTED',
-    COMMENT: 'COMMENTED',
-  }[recommendedAction];
-  const renderedBody = normalizedReviewBody(renderReviewBody(packet));
-  if (
-    liveInput.reviews.some(
-      (review) =>
-        review.author !== null &&
-        review.author.toLowerCase() === reviewer.toLowerCase() &&
-        review.commitSha === liveInput.headSha &&
-        review.state === sameDispositionState &&
-        typeof review.body === 'string' &&
-        (() => {
-          const publishedBody = normalizedReviewBody(review.body);
-          if (recommendedAction === 'COMMENT') return publishedBody === renderedBody;
-          if (
-            hasUniquePublishedPacketReceipts(review.body, packet) &&
-            publishedBody === renderedBody
-          ) {
-            return true;
-          }
-          if (!priorPacket) return false;
-          try {
-            validatePublishedReviewPacket(packet, priorPacket);
-            return (
-              hasUniquePublishedPacketReceipts(review.body, priorPacket) &&
-              publishedBody === normalizedReviewBody(renderReviewBody(priorPacket)) &&
-              matchesPublishedReviewInput(priorPacket, liveInput, review)
-            );
-          } catch {
-            return false;
-          }
-        })()
-    )
-  ) {
+  if (isExactGovernedReviewDuplicate(packet, liveInput, reviewer, priorPacket)) {
     return {
       allowed: false,
       duplicate: true,
@@ -1642,11 +1652,14 @@ export function authorizePullRequestMerge({
   dcoConclusion,
   mergeable,
   mergeStateStatus,
+  modelTrace,
+  modelTraceContext,
   ownerAuthorization = null,
 }) {
   assert(['human-assisted', 'autonomous'].includes(executionMode), 'execution mode is invalid');
   validateReviewMutationInput(input);
   validateReviewPacket(packet, input);
+  assertModelTraceFresh(modelTrace, modelTraceContext, { repositoryId: packet.repositoryId });
   verifyLiveReviewInput(packet, liveInput);
   const revision = inspectReviewRevision(packet, input, liveInput.headSha, null, liveInput.baseSha);
   if (revision.stale) {

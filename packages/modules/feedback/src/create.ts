@@ -12,6 +12,16 @@ import type {
   FeedbackRuntimeStyleDisposer,
 } from './types';
 import { EFFECTS_CAP } from './caps';
+import {
+  MATERIAL_BINDING_FACTORY_CAP,
+  type MaterialBinding,
+  type MaterialBindingFactory,
+} from './material/runtime-cap';
+import {
+  FINAL_STYLE_SINK_CAP,
+  finalStyleFrame,
+  type FinalStyleSink,
+} from './material/final-style-sink';
 
 export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
   const { init, caps, deps } = ctx;
@@ -29,18 +39,24 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private flushRequested = false;
         private disposed = false;
         private viewEpoch = 0;
+        private visualRevision = 0;
+        private visualSink: FinalStyleSink | null = null;
+        private visualSinkView = 0;
+        private pendingProjection: StyleHandle | null = null;
+        private material: MaterialBinding | null = null;
+        private materialFactory: MaterialBindingFactory | null = null;
 
         /** setup-only */
         useStyle(handles: StyleHandle[]): () => void {
           this.ensureSetup('def.feedback.style.use');
 
           const unUse = this.recorder.use(...handles);
-          this.dirty = true;
+          this.markDirty();
 
           return () => {
             this.ensureSetup('def.feedback.style.unUse');
             unUse();
-            this.dirty = true;
+            this.markDirty();
           };
         }
 
@@ -56,7 +72,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           }
 
           const unUse = this.recorder.use(...handles);
-          this.dirty = true;
+          this.markDirty();
           this.flushIfPossible();
 
           return this.createRuntimeStyleDisposer(unUse);
@@ -77,8 +93,17 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
           previous?.({ flush: false });
           const next = handles.length > 0 ? this.recorder.use(...handles) : null;
-          this.dirty = true;
-          this.flushIfPossible();
+          this.markDirty();
+          try {
+            this.flushIfPossible();
+          } catch (error) {
+            // Rule's semantic replacement is complete even if the host fails.
+            // Return its disposer so subsequent evaluations can remove it, and
+            // let later semantic observers run. Projection remains retryable.
+            queueMicrotask(() => {
+              throw error;
+            });
+          }
           return next ? this.createRuntimeStyleDisposer(next) : null;
         }
 
@@ -87,7 +112,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const op = 'run.feedback.style.patch';
           this.ensureRuntime(op);
           this.recorder.patch(...handles);
-          this.dirty = true;
+          this.markDirty();
           this.flushIfPossible();
         }
 
@@ -96,7 +121,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const op = 'run.feedback.style.suppress';
           this.ensureRuntime(op);
           this.recorder.suppress(...handles);
-          this.dirty = true;
+          this.markDirty();
           this.flushIfPossible();
         }
 
@@ -105,7 +130,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const op = 'run.feedback.style.clearPatch';
           this.ensureRuntime(op);
           this.recorder.clearPatch();
-          this.dirty = true;
+          this.markDirty();
           this.flushIfPossible();
         }
 
@@ -113,18 +138,25 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         useStyleUnsafe(handles: StyleHandle[]): () => void {
           this.ensureNotDisposed('feedback.style.useUnsafe');
           const unUse = this.recorder.useUnsafe(...handles);
-          this.dirty = true;
+          this.markDirty();
           this.flushIfPossible();
 
           return () => {
             if (this.disposed) return;
             unUse();
-            this.dirty = true;
+            this.markDirty();
             this.flushIfPossible();
           };
         }
 
         /** pure snapshot */
+        shouldRetainStyleRule(tokens: readonly string[]): boolean {
+          return (
+            this.material !== null &&
+            tokens.some((token) => /^(bg-|backdrop-|shadow|rounded|text-)/.test(token))
+          );
+        }
+
         exportMerged(): StyleHandle {
           const { tokens } = this.recorder.export();
           return { kind: 'tw', tokens };
@@ -137,8 +169,15 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         override onMountPhase(phase: MountPhase, epoch: number): void {
           super.onMountPhase(phase, epoch);
+          const oldEpoch = this.viewEpoch;
           this.viewEpoch = epoch;
+          if (phase === 'unmounting' || phase === 'detached' || epoch !== oldEpoch) {
+            this.markDirty();
+            this.releaseVisualSink();
+          }
           if (phase === 'mounting') {
+            this.ensureMaterialBinding();
+            this.material?.connect();
             // A fresh view epoch owns a fresh EffectsPort. Replay the retained
             // instance style before the host commit so the first materialized
             // frame already carries its baseline tokens.
@@ -147,7 +186,78 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         }
 
         protected override onCapsEpoch(_epoch: number): void {
+          if (this.disposed) return;
+          this.ensureMaterialBinding();
+          const next = this.caps.has(FINAL_STYLE_SINK_CAP)
+            ? this.caps.get(FINAL_STYLE_SINK_CAP)
+            : null;
+          this.markDirty();
+          if (this.visualSink && this.visualSink !== next) this.releaseVisualSink();
+          // Capability replacement must replay the current logical result even
+          // when the previous host had already consumed it.
           this.flushIfPossible();
+        }
+
+        private hasOutput(): boolean {
+          return this.caps.has(FINAL_STYLE_SINK_CAP) || this.caps.has(EFFECTS_CAP);
+        }
+
+        private ensureMaterialBinding(): void {
+          if (!this.caps.has(MATERIAL_BINDING_FACTORY_CAP)) return;
+          const factory = this.caps.get(MATERIAL_BINDING_FACTORY_CAP);
+          if (this.materialFactory) {
+            if (this.materialFactory !== factory)
+              throw new Error('Material semantics cannot change within an instance');
+            return;
+          }
+          const material = factory(init.declarations, deps, () => {
+            this.markDirty();
+            this.flushIfPossible();
+          });
+          this.material = material;
+          this.materialFactory = factory;
+          if (this.canProject()) this.material?.connect();
+        }
+
+        private releaseVisualSink(): void {
+          const sink = this.visualSink;
+          const view = this.visualSinkView;
+          this.visualSink = null;
+          if (sink) sink.release(view);
+        }
+
+        private markDirty(): void {
+          this.dirty = true;
+          this.pendingProjection = null;
+        }
+
+        private projectFinalStyle(handle: StyleHandle): void {
+          const revision = ++this.visualRevision;
+          const pending = { kind: 'tw' as const, tokens: [...handle.tokens] };
+          try {
+            if (this.caps.has(FINAL_STYLE_SINK_CAP)) {
+              const sink = this.caps.get(FINAL_STYLE_SINK_CAP);
+              this.visualSink = sink;
+              this.visualSinkView = this.viewEpoch;
+              sink.commit(
+                finalStyleFrame(handle, this.viewEpoch, revision, this.material?.snapshot() ?? null)
+              );
+            } else {
+              const effects = this.caps.get(EFFECTS_CAP);
+              effects.queueStyle(handle);
+              this.flushRequested = true;
+              effects.requestFlush();
+            }
+            if (revision === this.visualRevision) this.pendingProjection = null;
+          } catch (error) {
+            // A newer reentrant publication supersedes this attempt. Otherwise
+            // retain its exact post-patch input, including temporary Rule input.
+            if (!this.disposed && revision === this.visualRevision) {
+              this.dirty = true;
+              this.pendingProjection = pending;
+            }
+            throw error;
+          }
         }
 
         flushIfPossible(): void {
@@ -155,48 +265,39 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           if (!this.canProject()) return;
           if (!this.dirty) return;
 
-          if (!this.caps.has(EFFECTS_CAP)) {
+          if (!this.hasOutput()) {
             // onCapsEpoch retries the retained logical state.
             return;
           }
 
-          const effects = this.caps.get(EFFECTS_CAP);
-          const merged = this.exportMerged();
+          const merged = this.pendingProjection ?? this.exportMerged();
 
           // mark clean before calling host
           this.dirty = false;
 
-          effects.queueStyle(merged);
-          this.flushRequested = true;
-          effects.requestFlush();
+          this.projectFinalStyle(merged);
         }
 
         /** runtime: apply merged style directly (rule / adapter) */
         applyMergedStyle(handle: StyleHandle): void {
           if (this.protoPhase === 'setup' || !this.canProject()) return;
-          if (!this.caps.has(EFFECTS_CAP)) {
+          if (!this.hasOutput()) {
             const epoch = this.viewEpoch;
             this.defer(() => {
               if (!this.disposed && epoch === this.viewEpoch) this.applyMergedStyle(handle);
             });
             return;
           }
-          const effects = this.caps.get(EFFECTS_CAP);
           const merged = this.recorder.exportWithAdditional(handle);
-          effects.queueStyle({ kind: 'tw', tokens: merged.tokens });
-          effects.requestFlush();
-          this.flushRequested = true;
+          this.projectFinalStyle({ kind: 'tw', tokens: merged.tokens });
         }
 
         afterRenderCommit(): void {
           if (!this.canProject()) return;
           // A structural commit may replace the current materialized root.
-          if (!this.caps.has(EFFECTS_CAP)) return;
-          const effects = this.caps.get(EFFECTS_CAP);
+          if (!this.hasOutput()) return;
           const merged = this.exportMerged();
-          effects.queueStyle(merged);
-          effects.requestFlush();
-          this.flushRequested = true;
+          this.projectFinalStyle(merged);
         }
 
         private replayStyleForViewEpoch(): void {
@@ -204,17 +305,18 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           // Runtime ProtoPhase intentionally remains `setup` until the first
           // commit completes. Mounting is nevertheless after prototype setup,
           // so replay must not use flushIfPossible's setup-phase guard.
-          if (!this.caps.has(EFFECTS_CAP)) return;
-          const effects = this.caps.get(EFFECTS_CAP);
-          effects.queueStyle(this.exportMerged());
-          effects.requestFlush();
-          this.flushRequested = true;
+          if (!this.hasOutput()) return;
+          this.projectFinalStyle(this.exportMerged());
         }
 
         /** optional: runtime/adapter can call this after flush tick */
         onEffectsFlushed(): void {
           this.flushRequested = false;
           if (!this.canProject()) return;
+          if (this.dirty && this.caps.has(FINAL_STYLE_SINK_CAP)) {
+            this.flushIfPossible();
+            return;
+          }
           if (this.dirty && this.caps.has(EFFECTS_CAP)) {
             this.caps.get(EFFECTS_CAP).requestFlush();
             this.flushRequested = true;
@@ -224,11 +326,20 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         dispose(): void {
           if (this.disposed) return;
           this.disposed = true;
-          this.recorder = new FeedbackStyleRecorder();
-          this.dirty = false;
-          this.flushRequested = false;
-          // Discard deferred view work while its entry guards are terminal.
-          this.flushPending();
+          try {
+            this.releaseVisualSink();
+          } finally {
+            try {
+              this.material?.dispose();
+            } finally {
+              this.recorder = new FeedbackStyleRecorder();
+              this.dirty = false;
+              this.pendingProjection = null;
+              this.flushRequested = false;
+              // Discard deferred view work while its entry guards are terminal.
+              this.flushPending();
+            }
+          }
         }
 
         private canProject(): boolean {
@@ -268,7 +379,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           return (options = {}) => {
             if (this.disposed) return;
             unUse();
-            this.dirty = true;
+            this.markDirty();
             if (options.flush !== false) this.flushIfPossible();
           };
         }
@@ -289,6 +400,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
       return {
         facade,
         port: {
+          shouldRetainStyleRule: (tokens) => impl.shouldRetainStyleRule(tokens),
           applyMergedStyle: (h) => impl.applyMergedStyle(h),
           useStyleRuntime: (...handles) => impl.useStyleRuntime(handles),
           replaceStyleRuntime: (previous, ...handles) =>
@@ -318,5 +430,6 @@ export const FeedbackModuleDef = defineModule({
   name: 'feedback',
   resourceOwnership: 'mixed',
   deps: [],
+  optionalDeps: ['expose', 'state'],
   create: createFeedbackModule,
 });

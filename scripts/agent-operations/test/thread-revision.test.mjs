@@ -19,7 +19,14 @@ import {
   validateCollaborationReceipt,
 } from '../collaboration-runtime.mjs';
 import { runCollaborationCli } from '../collaboration-packet.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 
+const { modelTrace, modelTraceContext } = modelTraceFixture();
+const modelTraceArtifact = {
+  type: 'modeltrace-record',
+  reference: 'fixture://modeltrace-record',
+  digest: modelTrace.id,
+};
 const AT = '2026-10-01T19:57:22Z';
 const HEAD = 'a'.repeat(40);
 const REPOSITORY = 'github.com:Proto-UI/Proto-UI';
@@ -32,6 +39,8 @@ const authorizationContext = {
   executionMode: 'human-assisted',
   executionModeSource: 'current-user',
   policy: {},
+  modelTrace,
+  modelTraceContext,
 };
 
 function thread(comments = COMMENTS, overrides = {}) {
@@ -88,6 +97,7 @@ function requestFor(target) {
     expected: { isResolved: false },
     desired: { isResolved: true },
     evidence: [
+      modelTraceArtifact,
       { type: 'current-user-instruction', reference: 'instruction://current-user/pr-509' },
       {
         type: 'review-thread-resolution',
@@ -307,6 +317,7 @@ test('read-only authoring precedes sealing and an unchanged thread produces a bo
 
 test('old thread requests require recollection without changing their historical bytes', () => {
   const request = authorRequest();
+  request.evidence = request.evidence.filter((item) => item.type !== 'modeltrace-record');
   delete request.target.threadRevisionDigest;
   request.requestDigest = computeCollaborationRequestDigest(request);
   const bytes = `${JSON.stringify(request, null, 2)}\n`;

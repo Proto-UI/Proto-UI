@@ -4,10 +4,11 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { loadSkillRegistry, resolveSkill, validateSkillHandoff } from '../skill-registry.mjs';
 import { computeReviewInputDigest, computeReviewPacketDigest } from '../review-runtime.mjs';
 import { publicationRoundTrip } from './fixtures/review-publication.mjs';
+import { writeModelTraceFixture } from './fixtures/modeltrace.mjs';
 
 const root = fileURLToPath(new URL('../../..', import.meta.url));
 const registry = loadSkillRegistry({ root });
@@ -18,6 +19,7 @@ function withIntegrationFiles(run) {
   const directory = mkdtempSync(path.join(tmpdir(), 'pui-integration-handoff-'));
   try {
     const fixture = publicationRoundTrip();
+    const identity = writeModelTraceFixture(directory, fixture.collected.repositoryId);
     const artifacts = [
       ['review-packet', fixture.mergePacket, computeReviewPacketDigest],
       ['review-input', fixture.collected, computeReviewInputDigest],
@@ -28,6 +30,7 @@ function withIntegrationFiles(run) {
       return { type, reference, digest: `sha256:${digest(value)}` };
     });
     artifacts.push({ type: 'mutation-authorization', reference: 'explicit-current-user' });
+    artifacts.push(identity.artifact);
     const handoff = {
       schemaVersion: 1,
       kind: 'proto-ui.skill-handoff',
@@ -61,6 +64,7 @@ function withIntegrationFiles(run) {
       ['review-input', '--input'],
       [originalType, '--published-review-packet'],
       ['mutation-authorization', '--authorization'],
+      ['modeltrace-record', '--record'],
     ]);
     const invoke = (candidate = handoff, supplied = artifacts) => {
       writeFileSync(handoffPath, JSON.stringify(candidate));
@@ -69,7 +73,7 @@ function withIntegrationFiles(run) {
         process.execPath,
         [
           '--import',
-          preloadPath,
+          pathToFileURL(preloadPath).href,
           path.join(root, 'scripts/agent-operations/review-packet.mjs'),
           'merge-pull-request',
           '--mode',
@@ -78,6 +82,8 @@ function withIntegrationFiles(run) {
           'current-user',
           '--handoff',
           handoffPath,
+          '--context',
+          identity.contextPath,
           ...supplied.flatMap(({ type, reference }) => [options.get(type), reference]),
         ],
         {

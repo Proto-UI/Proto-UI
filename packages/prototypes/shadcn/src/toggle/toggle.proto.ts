@@ -15,6 +15,7 @@ const TOGGLE_BASE_TOKENS = [
   'outline-none',
   'border',
   'whitespace-nowrap',
+  'select-none',
 ].join(' ');
 
 const VARIANT_TOKENS: Record<NonNullable<ShadcnToggleProps['variant']>, string> = {

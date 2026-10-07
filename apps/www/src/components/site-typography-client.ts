@@ -1,5 +1,5 @@
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
-import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { createProjectionScopeController } from './PrototypePreviewer/projection-scope';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 import { resolveSiteLibraryFamily } from './site-library-family';

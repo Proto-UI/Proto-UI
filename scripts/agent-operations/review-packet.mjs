@@ -1,10 +1,7 @@
-import {
-  ownerAuthorizationFromArgs,
-  ownerAuthorizationAllows,
-  ownerSkillEligibility,
-} from './owner-authorization.mjs';
+import { ownerAuthorizationFromArgs } from './owner-authorization.mjs';
 import fs from 'node:fs';
 import process from 'node:process';
+import { loadModelTraceRecord, readModelTraceJson } from './modeltrace.mjs';
 import { readPublishedReviewPacket } from './published-review-packet.mjs';
 import {
   collectRepositorySnapshot,
@@ -33,8 +30,6 @@ import {
   collectLiveReviewInput,
   submitGitHubMerge,
   submitGitHubReview,
-  summarizeLiveChecks,
-  summarizeLiveDco,
 } from './collect-live-review-input.mjs';
 import {
   establishExecutionMode,
@@ -49,17 +44,20 @@ function usage() {
   return [
     'Usage:',
     '  pnpm agent:review -- input-digest --input <review-input.json>',
-    '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>]',
-    '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
-    '  pnpm agent:review -- eligibility --handoff <handoff.json> --review-class <class> [--assessment <result.json>]',
-    '  pnpm agent:review -- submit-review --mode human-assisted|autonomous --mode-source <source> --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1>',
-    '  pnpm agent:review -- merge-pull-request --mode human-assisted|autonomous --mode-source <source> --packet <packet.json> --input <review-input.json> --published-review-packet <original-approved-packet.json> --handoff <handoff.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1>',
+    '  pnpm agent:review -- validate --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--assessment <result.json>] [--prior-handoff <received-handoff.json>]',
+    '  pnpm agent:review -- inspect --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--prior-handoff <received-handoff.json>] --current-base <sha> --current-head <sha> [--assessment <result.json>] [--prior-head <sha>] [--seen-keys <comma-separated>] [--prior-packet <prior-packet.json>]',
+    '  pnpm agent:review -- eligibility --handoff <handoff.json> [--prior-handoff <received-handoff.json>] --review-class <class> [--assessment <result.json>]',
+    '  pnpm agent:review -- submit-review --mode human-assisted|autonomous --mode-source <source> --packet <packet.json> --input <review-input.json> --handoff <handoff.json> [--prior-handoff <received-handoff.json>]  --record <modeltrace-record.json> --context <modeltrace-context.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] [--prior-packet <prior-packet.json>] --authorization <explicit-current-user|proto-ui-scheduled-review-v1|owner-grant-id>',
+    '  pnpm agent:review -- merge-pull-request --mode human-assisted|autonomous --mode-source <source> --packet <packet.json> --input <review-input.json> --published-review-packet <original-approved-packet.json> --handoff <handoff.json>  --record <modeltrace-record.json> --context <modeltrace-context.json> [--assessment <result.json>] [--external-evidence-file <evidence.json>] --authorization <explicit-current-user|proto-ui-scheduled-merge-v1|owner-grant-id>',
     '',
     'input-digest, validate, and inspect preserve canonical v3 input for read-only legacy schema v1 COMMENT ingestion. v3 inputs cannot enter submit-review or merge-pull-request; those commands require a freshly collected v5 snapshot. v4 must also be re-collected.',
     '',
-    'submit-review and merge-pull-request require mode and source declared independently by the launcher/operator before artifact reads, matching the handoff. These arguments are declarations, not runtime attestation. Read-only commands retain their existing arguments.',
+    'Validation-origin review handoffs require --prior-handoff <received-handoff.json> for validate, inspect, eligibility and submit-review. This compares supplied structure, not authenticated provenance or execution.',
+    'submit-review and merge-pull-request require mode and source declared independently by the launcher/operator before artifact reads, matching the handoff. These arguments are declarations, not runtime attestation. Read-only review commands retain legacy ingestion, but validation-origin handoffs additionally require their received --prior-handoff.',
     '',
-    'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets (no agentEvidence) may only COMMENT; dispositions and merges require schema v2. A merge requires the original --published-review-packet artifact (at most 64 MiB), authenticated by both its complete packet and evidence tokens in the same valid exact-head independent APPROVED review. Re-collection may add only that publication and its newly required reviewer permission; base, scope and other input changes require a new review. The refreshed merge packet may change only reviewInputDigest and observedAt. The supplied file alone provides no authority. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
+    'Owner-delegated commands also require independently supplied --owner-authorization <signed-state.json> --owner-key <trusted-public.pem> --owner-grant <id>, with --authorization binding the same grant ID. Owner proof never substitutes for the current ModelTrace record or expands the live permission, contributor, CI/DCO or publication gates.',
+    '',
+    'submit-review and merge-pull-request re-collect the canonical review input live from GitHub and derive identity, permission, trusted CI, and pull-request state instead of accepting caller-provided claims. Review writes bind commit_id to the packet head; merge writes bind sha to the same head. Schema v1 packets remain read-only COMMENT ingestion; current Agent review writes and merges require schema v2. A merge requires the original --published-review-packet artifact (at most 64 MiB), authenticated by both its complete packet and evidence tokens in the same valid exact-head independent APPROVED review. Re-collection may add only that publication and its newly required reviewer permission; base, scope and other input changes require a new review. The refreshed merge packet may change only reviewInputDigest and observedAt. The supplied file alone provides no authority. externalEvidence cannot be re-collected live: pass the exact recorded array with --external-evidence-file, otherwise a packet recorded with external evidence fails the digest check.',
     '',
     '  pnpm agent:review:smoke -- <repositoryId> <pullRequest>   # exercise the live collector against the real GitHub GraphQL schema',
   ].join('\n');
@@ -105,6 +103,8 @@ const ALLOWED_OPTIONS = new Map([
       '--owner-key',
       '--owner-grant',
       '--external-evidence-file',
+      '--record',
+      '--context',
       '--prior-packet',
     ]),
   ],
@@ -123,9 +123,14 @@ const ALLOWED_OPTIONS = new Map([
       '--owner-key',
       '--owner-grant',
       '--external-evidence-file',
+      '--record',
+      '--context',
     ]),
   ],
 ]);
+
+for (const command of ['validate', 'inspect', 'eligibility', 'submit-review'])
+  ALLOWED_OPTIONS.get(command).add('--prior-handoff');
 
 for (const command of ['validate', 'inspect', 'eligibility'])
   for (const option of [
@@ -210,7 +215,7 @@ function loadInvocationContext(args) {
   });
 }
 
-function loadHandoff(path, nextSkillId, invocationContext = null) {
+function loadHandoff(path, nextSkillId, invocationContext = null, priorPath = null) {
   if (!path) throw new Error('--handoff is required');
   const handoff = JSON.parse(fs.readFileSync(path, 'utf8'));
   if (invocationContext) {
@@ -221,7 +226,8 @@ function loadHandoff(path, nextSkillId, invocationContext = null) {
     }
   }
   requireCompletedHandoff(handoff);
-  const result = validateSkillHandoff(handoff, loadSkillRegistry());
+  const priorHandoff = priorPath ? JSON.parse(fs.readFileSync(priorPath, 'utf8')) : null;
+  const result = validateSkillHandoff(handoff, loadSkillRegistry(), { priorHandoff });
   if (result.nextSkill?.id !== nextSkillId) {
     throw new Error(`handoff must select ${nextSkillId}`);
   }
@@ -363,6 +369,18 @@ function readExternalEvidence(args) {
   return parsed;
 }
 
+function loadModelTraceInvocation(args, packet, handoff) {
+  const modelTrace = loadModelTraceRecord({
+    recordPath: args.get('--record'),
+    contextPath: args.get('--context'),
+    repositoryId: packet.repositoryId,
+  });
+  const artifact = handoff.artifacts.find((item) => item.type === 'modeltrace-record');
+  if (artifact?.reference !== args.get('--record') || artifact.digest !== modelTrace.id)
+    throw new Error('review handoff must bind the --record reference and measured receipt digest');
+  return { modelTrace, modelTraceContext: readModelTraceJson(args.get('--context'), 'context') };
+}
+
 try {
   const { command, args } = parse(process.argv.slice(2));
   let output;
@@ -376,7 +394,12 @@ try {
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    const { handoff } = loadHandoff(
+      args.get('--handoff'),
+      'pui-review',
+      invocationContext,
+      args.get('--prior-handoff')
+    );
     validateReviewHandoffTarget(handoff, packet, input, args.get('--input'));
     const execution = validateExecution(
       args,
@@ -398,7 +421,12 @@ try {
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
-    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    const { handoff } = loadHandoff(
+      args.get('--handoff'),
+      'pui-review',
+      invocationContext,
+      args.get('--prior-handoff')
+    );
     validateReviewHandoffTarget(handoff, packet, input, args.get('--input'));
     const execution = validateExecution(
       args,
@@ -440,7 +468,12 @@ try {
     };
   } else if (command === 'eligibility') {
     const invocationContext = loadReadOnlyInvocationContext(args);
-    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    const { handoff } = loadHandoff(
+      args.get('--handoff'),
+      'pui-review',
+      invocationContext,
+      args.get('--prior-handoff')
+    );
     const reviewClass = args.get('--review-class');
     if (!reviewClass) throw new Error('--review-class is required');
     const policy = loadCapabilityPolicy(
@@ -460,9 +493,15 @@ try {
     });
   } else if (command === 'submit-review') {
     const invocationContext = loadInvocationContext(args);
-    const { handoff } = loadHandoff(args.get('--handoff'), 'pui-review', invocationContext);
+    const { handoff } = loadHandoff(
+      args.get('--handoff'),
+      'pui-review',
+      invocationContext,
+      args.get('--prior-handoff')
+    );
     const input = readInput(args.get('--input'));
     const packet = readPacket(args.get('--packet'), input);
+    const { modelTrace, modelTraceContext } = loadModelTraceInvocation(args, packet, handoff);
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
@@ -499,6 +538,8 @@ try {
       actor: live.viewerLogin,
       viewerPermission: live.viewerPermission,
       externalEvidence,
+      modelTrace,
+      modelTraceContext,
     };
     const authorization = authorizeLiveReviewSubmission(reviewAuthorizationContext, live);
     if (!authorization.allowed) {
@@ -517,6 +558,8 @@ try {
           reviewerLogin: live.viewerLogin,
           authorizationContext: reviewAuthorizationContext,
           invocationId: `${packet.repositoryId}:${packet.pullRequest}:${packet.headSha}:${authorization.recommendedAction}`,
+          modelTrace,
+          modelTraceContext,
         }
       );
       output = {
@@ -531,6 +574,11 @@ try {
     const routed = loadHandoff(args.get('--handoff'), 'pui-integrate', invocationContext);
     const input = readInput(args.get('--input'));
     const packet = readPacket(args.get('--packet'), input);
+    const { modelTrace, modelTraceContext } = loadModelTraceInvocation(
+      args,
+      packet,
+      routed.handoff
+    );
     const policy = loadCapabilityPolicy(
       new URL('../../internal/agent-operations/capability-policy.yaml', import.meta.url)
     );
@@ -558,6 +606,8 @@ try {
       actor: live.viewerLogin,
       viewerPermission: live.viewerPermission,
       externalEvidence,
+      modelTrace,
+      modelTraceContext,
     };
     const authorization = authorizeLivePullRequestMerge(authorizationContext, live);
     if (!authorization.allowed) {

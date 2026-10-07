@@ -493,6 +493,7 @@ describe('contract: adapter-web-component / same-domain part relationships', () 
         setExposes() {},
         runInCallbackScope: (fn) => fn(),
         isViewReady: () => true,
+        isEntryAcquisitionReady: () => false,
         subscribeTargetReady: () => () => {},
         retryTargetReady() {},
       });

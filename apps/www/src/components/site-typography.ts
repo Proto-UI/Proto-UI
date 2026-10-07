@@ -11,7 +11,7 @@ import {
   type ProjectionThemeSurfaceStyle,
 } from './PrototypePreviewer/projection-theme';
 import { releaseHostMount } from './PrototypePreviewer/runtimes/host-mount';
-import { isRuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { isRuntimeId } from './PrototypePreviewer/runtimes/ids';
 
 const ROLES = new Set<string>(SITE_TYPOGRAPHY_ROLES);
 const SEMANTIC_TARGETS = 'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption';

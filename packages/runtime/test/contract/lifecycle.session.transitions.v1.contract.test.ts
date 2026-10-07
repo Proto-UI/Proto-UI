@@ -1,3 +1,4 @@
+import { FINAL_STYLE_SINK_CAP } from '../../../modules/feedback/src/material/final-style-sink';
 import { asAccessible } from '@proto.ui/hooks';
 import { describe, expect, it, vi } from 'vitest';
 import { definePrototype, type Prototype } from '@proto.ui/core';
@@ -48,6 +49,60 @@ const simpleProto = (callbacks: string[] = []): Prototype =>
   });
 
 describe('runtime contract: lifecycle transition matrix (v1)', () => {
+  for (const stage of ['begin', 'unmounted'] as const)
+    for (const throws of [false, true])
+      it(`does not repeat unmount callbacks when disposal reenters from ${stage} (throws=${throws})`, async () => {
+        const { host, signals, scheduled, events } = createControlledHost();
+        const failure = new Error('unmount callback after disposal reentry');
+        let terminal: Promise<void> | undefined;
+        let session: ReturnType<typeof createRuntimeSession>;
+        let alive!: { get(): boolean };
+        const reenter = () => {
+          terminal = session.dispose();
+          void terminal.catch(() => {});
+          expect(alive.get()).toBe(true);
+          if (throws) throw failure;
+        };
+        const begin = vi.fn(() => {
+          if (stage === 'begin') reenter();
+        });
+        host.onUnmountBegin = begin;
+        const before = vi.fn();
+        const unmounted = vi.fn(() => {
+          if (stage === 'unmounted') reenter();
+          expect(alive.get()).toBe(true);
+        });
+        const proto = definePrototype({
+          name: 'dispose-from-unmounted',
+          setup(def) {
+            alive = def.state.bool('alive', true);
+            def.lifecycle.onUnmounted(unmounted);
+            def.lifecycle.onBeforeDispose(before);
+            return (run) => run.el('div', 'ok');
+          },
+        });
+        session = createRuntimeSession(proto, host);
+        const mounting = session.mount();
+        signals.shift()!.done();
+        scheduled.shift()!();
+        await mounting;
+        const unmounting = session.unmount();
+        if (throws) {
+          await expect(unmounting).rejects.toBe(failure);
+          await expect(terminal).rejects.toBe(failure);
+        } else {
+          await unmounting;
+          await terminal;
+        }
+        expect(unmounted).toHaveBeenCalledOnce();
+        expect(begin).toHaveBeenCalledOnce();
+        expect(before).toHaveBeenCalledOnce();
+        expect(events.filter((event) => event.type === 'unmount.begin')).toHaveLength(1);
+        expect(events.filter((event) => event.type === 'unmount.done')).toHaveLength(1);
+        expect(session.instancePhase).toBe('disposed');
+        expect(session.mountPhase).toBe('detached');
+      });
+
   it('invalidates a mount whose host commit completes after unmount', async () => {
     const project = vi.fn();
     const callbacks: string[] = [];
@@ -154,6 +209,102 @@ describe('runtime contract: lifecycle transition matrix (v1)', () => {
       { type: 'update.updated', epoch: 1, revision: 1 },
       { type: 'update.updated', epoch: 1, revision: 2 },
     ]);
+  });
+
+  for (const throws of [false, true])
+    it(`shares exact-once disposal with a reentrant material release (throws=${throws})`, async () => {
+      const { host, signals, scheduled, events } = createControlledHost();
+      const before = vi.fn();
+      const failure = new Error('release after reentry');
+      let nested: Promise<void> | undefined;
+      let session: ReturnType<typeof createRuntimeSession>;
+      const release = vi.fn(() => {
+        nested = session.dispose();
+        if (throws) throw failure;
+      });
+      host.onRuntimeReady = (wiring) => {
+        wiring.attach('feedback', [[FINAL_STYLE_SINK_CAP, { commit() {}, release }]]);
+      };
+      const proto = definePrototype({
+        name: 'reentrant-material-retirement',
+        setup(def) {
+          def.lifecycle.onBeforeDispose(before);
+          return (run) => run.el('div', 'ok');
+        },
+      });
+      session = createRuntimeSession(proto, host);
+      const mounting = session.mount();
+      signals.shift()!.done();
+      scheduled.shift()!();
+      await mounting;
+      const outer = session.dispose();
+      expect(nested).toBe(outer);
+      expect(session.instancePhase).toBe('disposed');
+      expect(session.mountPhase).toBe('detached');
+      if (throws) await expect(outer).rejects.toBe(failure);
+      else await expect(outer).resolves.toBeUndefined();
+      expect(before).toHaveBeenCalledOnce();
+      expect(release).toHaveBeenCalledOnce();
+      expect(events.filter((event) => event.type === 'instance.dispose.done')).toHaveLength(1);
+      await expect(session.dispose()).resolves.toBeUndefined();
+    });
+
+  it('preserves a release error while a later host unmount callback also fails', async () => {
+    const { host, signals, scheduled } = createControlledHost();
+    const first = new Error('first release');
+    host.onRuntimeReady = (wiring) => {
+      wiring.attach('feedback', [
+        [
+          FINAL_STYLE_SINK_CAP,
+          {
+            commit() {},
+            release() {
+              throw first;
+            },
+          },
+        ],
+      ]);
+    };
+    host.onUnmountBegin = () => {
+      throw new Error('second host');
+    };
+    const session = createRuntimeSession(simpleProto(), host);
+    const mounting = session.mount();
+    signals.shift()!.done();
+    scheduled.shift()!();
+    await mounting;
+    await expect(session.dispose()).rejects.toBe(first);
+    expect(session.mountPhase).toBe('detached');
+    expect(session.instancePhase).toBe('disposed');
+  });
+
+  it('retires later modules and the session after a material sink release throws', async () => {
+    const { host, signals, scheduled, events } = createControlledHost();
+    let state: ReturnType<Parameters<Prototype['setup']>[0]['state']['bool']>;
+    const release = vi.fn(() => {
+      throw new Error('sink release failed');
+    });
+    host.onRuntimeReady = (wiring) => {
+      wiring.attach('feedback', [[FINAL_STYLE_SINK_CAP, { commit() {}, release }]]);
+    };
+    const proto = definePrototype({
+      name: 'material-release-convergence',
+      setup(def) {
+        state = def.state.bool('retired', false);
+        return (run) => run.el('div', 'ok');
+      },
+    });
+    const session = createRuntimeSession(proto, host);
+    const mounting = session.mount();
+    signals.shift()!.done();
+    scheduled.shift()!();
+    await mounting;
+    await expect(session.dispose()).rejects.toThrow('sink release failed');
+    expect(session.instancePhase).toBe('disposed');
+    expect(() => state.get()).toThrow(/disposed/);
+    expect(events.some((event) => event.type === 'instance.dispose.done')).toBe(true);
+    await expect(session.dispose()).resolves.toBeUndefined();
+    expect(release).toHaveBeenCalledOnce();
   });
 
   it('reaches detached/disposed terminal phases even when callbacks throw', async () => {

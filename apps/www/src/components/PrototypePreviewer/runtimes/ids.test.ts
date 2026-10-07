@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
-import { AdapterIds, InternalAdapterIds, isRuntimeId, selectRuntimeIds } from './registry';
+import { AdapterIds, InternalAdapterIds, isRuntimeId, selectRuntimeIds } from './ids';
 
-describe('runtime registry', () => {
+describe('runtime ids', () => {
   it('presents Vue 2 as an official public adapter', () => {
     expect(AdapterIds).toEqual(['wc', 'react', 'vue', 'vue2']);
     expect(InternalAdapterIds).toEqual(['wc', 'react', 'vue', 'vue2']);

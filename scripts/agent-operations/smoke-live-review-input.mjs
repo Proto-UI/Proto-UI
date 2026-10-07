@@ -5,7 +5,7 @@ import {
   summarizeLiveChecks,
   summarizeLiveDco,
 } from './collect-live-review-input.mjs';
-import { reviewChangesSpecEntities } from './review-runtime.mjs';
+import { computeReviewInputDigest, reviewChangesSpecEntities } from './review-runtime.mjs';
 
 function usage() {
   return 'Usage: node scripts/agent-operations/smoke-live-review-input.mjs -- <repositoryId> <pullRequest>';
@@ -30,6 +30,7 @@ try {
         repositoryId,
         pullRequest,
         schemaVersion: live.input.schemaVersion,
+        reviewInputDigest: computeReviewInputDigest(live.input),
         pullRequestState: live.input.pullRequestState,
         isDraft: live.input.isDraft,
         baseRefName: live.input.baseRefName,

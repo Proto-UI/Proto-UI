@@ -162,7 +162,7 @@ describe('native typography browser ownership and bounded registration', () => {
       'Accessibility.getPartialAXTree',
       'page.mouse.click',
       'clickCount: 3',
-      "page.keyboard.press('Control+C')",
+      "page.keyboard.press('ControlOrMeta+C')",
       'navigator.clipboard.readText()',
       'setBaseAndExtent',
       'anchorIsLastSource',

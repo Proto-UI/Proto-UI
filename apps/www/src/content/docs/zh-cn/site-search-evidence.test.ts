@@ -159,14 +159,22 @@ function startupHarness() {
     getAttribute(name: string) {
       return name === 'role' ? this.role : this.disabled;
     },
-    closest() {
-      return this.inert ? {} : null;
+    closest(selector: string) {
+      if (selector === '[data-projection-generation-host]') return host;
+      return this.inert ? host : null;
     },
     hasAttribute() {
       return this.pending;
     },
   };
-  const host = { dataset: { projectionGenerationState: 'staging' }, inert: true };
+  const host = {
+    dataset: {
+      projectionGenerationState: 'staging',
+      projectionOwnerHost: 'open-owner',
+      projectionGenerationHost: '1',
+    },
+    inert: true,
+  };
   const mount = {
     dataset: { searchCommandMount: 'open', projectionOwner: undefined as string | undefined },
   };
@@ -336,19 +344,19 @@ it('keeps a missed deadline failed when immediate samples stay unavailable throu
   expect(await read()).toBe('false');
 });
 
-it('keeps the same 5000ms DOM-readiness budget even when the RPC reply arrives later', () => {
+it('keeps the same 1000ms DOM-readiness budget even when the RPC reply arrives later', () => {
   const sample = {
     startedAt: 10000,
-    deadline: 15000,
-    observedReadyAt: 14999,
-    completedAt: 15500,
+    deadline: 11000,
+    observedReadyAt: 10999,
+    completedAt: 11500,
     currentDisabled: 'false',
   };
   expect(searchReadinessWasOnTime(sample)).toBe(true);
-  expect(searchReadinessWasOnTime({ ...sample, observedReadyAt: 15001 })).toBe(false);
+  expect(searchReadinessWasOnTime({ ...sample, observedReadyAt: 11001 })).toBe(false);
   expect(searchReadinessWasOnTime({ ...sample, observedReadyAt: null })).toBe(false);
   expect(searchReadinessWasOnTime({ ...sample, currentDisabled: 'true' })).toBe(false);
-  expect(searchReadinessWasOnTime({ ...sample, deadline: 16000 })).toBe(false);
+  expect(searchReadinessWasOnTime({ ...sample, deadline: 12000 })).toBe(false);
 });
 
 it('uses the real recorded deadline in the serialized page waiter, including late-ready rejection', async () => {
@@ -361,7 +369,16 @@ it('uses the real recorded deadline in the serialized page waiter, including lat
       observe() {}
       disconnect() {}
     },
-    document: { querySelectorAll: () => [{ getAttribute: () => 'false' }] },
+    document: {
+      querySelectorAll: () => [
+        {
+          getAttribute: () => 'false',
+          closest: () => ({
+            dataset: { projectionOwnerHost: 'current-open', projectionGenerationHost: '1' },
+          }),
+        },
+      ],
+    },
     window: {
       __puiSearchStartup: {
         snapshot: () => ({
@@ -373,6 +390,8 @@ it('uses the real recorded deadline in the serialized page waiter, including lat
                 commands: [
                   {
                     command: 'open',
+                    owner: 'current-open',
+                    generation: '1',
                     role: 'button',
                     disabled: 'false',
                     connected: true,
@@ -391,7 +410,58 @@ it('uses the real recorded deadline in the serialized page waiter, including lat
   expect(early.observedReadyAt).toBe(999);
   expect(early.completedAt).toBe(1500);
   expect(searchReadinessWasOnTime(early)).toBe(true);
-  observed = 5001;
+  observed = 1001;
   const late = await read({ startedAt: 0 });
   expect(searchReadinessWasOnTime(late)).toBe(false);
+});
+
+it('does not reuse an old generation ready timestamp for a late current command', async () => {
+  const read = runInNewContext(`(${readSearchReadyWithinBudget.toString()})`, {
+    Date: { now: () => 1500 },
+    setTimeout: () => 1,
+    clearTimeout() {},
+    MutationObserver: class {
+      observe() {}
+      disconnect() {}
+    },
+    document: {
+      querySelectorAll: () => [
+        {
+          getAttribute: () => 'false',
+          closest: () => ({
+            dataset: { projectionOwnerHost: 'current-open', projectionGenerationHost: '2' },
+          }),
+        },
+      ],
+    },
+    window: {
+      __puiSearchStartup: {
+        snapshot: () => ({
+          events: [
+            {
+              atEpochMs: 999,
+              state: {
+                view: 'ready',
+                commands: [
+                  {
+                    command: 'open',
+                    role: 'button',
+                    disabled: 'false',
+                    connected: true,
+                    inert: false,
+                    pending: false,
+                    owner: 'retired-open',
+                    generation: '1',
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+      },
+    },
+  });
+  const evidence = await read({ startedAt: 0 });
+  expect(evidence.observedReadyAt).toBe(1500);
+  expect(searchReadinessWasOnTime(evidence)).toBe(false);
 });

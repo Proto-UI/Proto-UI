@@ -1,0 +1,36 @@
+name: Effect graph data model
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/effect-graph/**'
+      - 'internal/records/2026-10-03-typed-effect-graph-adr.md'
+      - '.github/workflows/effect-graph-model.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'experiments/effect-graph/**'
+      - 'internal/records/2026-10-03-typed-effect-graph-adr.md'
+      - '.github/workflows/effect-graph-model.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-models:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Record exact source and runtime
+        run: |
+          git rev-parse HEAD
+          node --version
+      - name: Exercise source models and negative controls
+        run: node --test experiments/effect-graph/model.test.mjs

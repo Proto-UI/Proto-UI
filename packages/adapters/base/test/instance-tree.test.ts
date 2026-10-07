@@ -257,3 +257,70 @@ describe('adapter-base: logical instance tree', () => {
     expect(root.hasAttribute('data-pui-a11y-actions')).toBe(false);
   });
 });
+
+for (const mode of ['detached anchor', 'attached member', 'instance lifecycle'] as const)
+  it.each([new Error('surface failure'), undefined])(
+    `completes ${mode} listeners despite first error %s`,
+    (failure) => {
+      const tree = createInstanceTreeMarkers('@proto.ui/test/surface-readiness-fault');
+      const proto = { name: 'anchor', setup: () => undefined };
+      const owner = tree.createLogicalInstance(proto);
+      const child = tree.createLogicalInstance(proto);
+      tree.markProtoInstance(document.createElement('button'), proto, owner);
+      if (mode !== 'instance lifecycle') tree.mergeLogicalTriggerGroup(owner, owner);
+      if (mode === 'detached anchor') tree.unbindProtoInstance(owner);
+      const seen: string[] = [];
+      const off1 = tree.subscribeLogicalTriggerSurface(owner, () => {
+        seen.push('first');
+        throw failure;
+      });
+      const off2 = tree.subscribeLogicalTriggerSurface(owner, () => {
+        seen.push('second');
+        throw new Error('secondary');
+      });
+      const off3 = tree.subscribeLogicalTriggerSurface(owner, () => {
+        seen.push('third');
+      });
+      let threw = false,
+        caught: unknown;
+      try {
+        try {
+          if (mode === 'instance lifecycle')
+            tree.markProtoInstance(document.createElement('button'), proto, owner);
+          else {
+            tree.bindLogicalParent(child, owner);
+            tree.mergeLogicalTriggerGroup(child, owner);
+          }
+        } catch (error) {
+          threw = true;
+          caught = error;
+        }
+        expect(seen).toEqual(['first', 'second', 'third']);
+        expect(threw).toBe(true);
+        expect(caught).toBe(failure);
+      } finally {
+        off1();
+        off2();
+        off3();
+      }
+    }
+  );
+
+it('snapshots listeners so a newly subscribed surface observer waits for the next notification', () => {
+  const tree = createInstanceTreeMarkers('@proto.ui/test/surface-listener-snapshot');
+  const proto = { name: 'owner', setup: () => undefined };
+  const owner = tree.createLogicalInstance(proto);
+  const seen: string[] = [];
+  const late = () => {
+    seen.push('late');
+  };
+  const off = tree.subscribeLogicalTriggerSurface(owner, () => {
+    seen.push('first');
+    tree.subscribeLogicalTriggerSurface(owner, late);
+  });
+  tree.markProtoInstance(document.createElement('button'), proto, owner);
+  expect(seen).toEqual(['first']);
+  tree.markProtoInstance(document.createElement('button'), proto, owner);
+  expect(seen).toEqual(['first', 'first', 'late']);
+  off();
+});

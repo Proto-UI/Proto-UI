@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import { pathToFileURL } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import {
   loadSkillRegistry,
   requireCompletedHandoff,
@@ -17,7 +18,9 @@ export function resumeSkillHandoff(
     throw Error('continuation must begin at the routed interruption leaf');
   for (const [index, step] of chain.entries()) {
     requireCompletedHandoff(step);
-    validateSkillHandoff(step, registry);
+    if (index && chain[index - 1].nextSkillId !== step.fromId)
+      throw Error('continuation chain skips a routed leaf');
+    validateSkillHandoff(step, registry, { priorHandoff: index ? chain[index - 1] : interrupted });
     if (step.schemaVersion !== 2 || step.resume)
       throw Error('resume requires completed v2 continuation steps');
     for (const key of ['entrypoint', 'executionMode', 'executionModeSource'])
@@ -53,34 +56,61 @@ export function resumeSkillHandoff(
   )
     throw Error('resume refresh cannot introduce approval or authorization');
   const materials = [];
-  const add = (artifact) => {
+  const origins = new Map();
+  const add = (artifact, origin = null, validationInput = null) => {
     const previous = materials.find(
       (a) => a.type === artifact.type && a.reference === artifact.reference
     );
     if (previous) {
-      if (JSON.stringify(previous) !== JSON.stringify(artifact))
+      const enriched = { ...previous };
+      if (
+        artifact.type === 'candidate-change' &&
+        validationInput !== null &&
+        origins.get(previous) === origin - 1 &&
+        validationInput.artifacts.some((input) => isDeepStrictEqual(input, previous))
+      ) {
+        // Only the already-validated adjacent input/output pair may enrich a
+        // candidate first introduced by that input. Historical references cannot
+        // be reclaimed by a repair, a later validation, or currentArtifacts.
+        for (const field of ['digest', 'revision'])
+          if (enriched[field] === undefined && artifact[field] !== undefined)
+            enriched[field] = artifact[field];
+      }
+      if (!isDeepStrictEqual(enriched, artifact))
         throw Error('resume has conflicting provenance for ' + artifact.reference);
-    } else materials.push(structuredClone(artifact));
+      Object.assign(previous, enriched);
+    } else {
+      const material = structuredClone(artifact);
+      materials.push(material);
+      origins.set(material, origin);
+    }
   };
   const replaceTypes = new Set(
     currentArtifacts
       .map((a) => a.type)
       .filter((t) => !['candidate-change', 'evidence-report'].includes(t))
   );
-  for (const artifact of [...interrupted.artifacts, ...chain.flatMap((step) => step.artifacts)]) {
-    if (
-      [
-        'review-packet',
-        'published-review-packet',
-        'interruption-receipt',
-        'prior-review-input',
-        'mutation-authorization',
-        'standing-user-authorization',
-      ].includes(artifact.type) ||
-      replaceTypes.has(artifact.type)
-    )
-      continue;
-    add(artifact);
+  for (const [position, source] of [interrupted, ...chain].entries()) {
+    const origin = position - 1;
+    const validationInput =
+      origin > 0 && source.fromId === 'pui-validate' && source.nextSkillId === 'pui-review'
+        ? chain[origin - 1]
+        : null;
+    for (const artifact of source.artifacts) {
+      if (
+        [
+          'review-packet',
+          'published-review-packet',
+          'interruption-receipt',
+          'prior-review-input',
+          'mutation-authorization',
+          'standing-user-authorization',
+        ].includes(artifact.type) ||
+        replaceTypes.has(artifact.type)
+      )
+        continue;
+      add(artifact, origin, validationInput);
+    }
   }
   const receiptDigest =
     'sha256:' + createHash('sha256').update(JSON.stringify(interrupted)).digest('hex');
@@ -119,7 +149,9 @@ export function resumeSkillHandoff(
       pendingFindingIds: [...interrupted.interruption.pendingFindingIds],
     },
   };
-  validateSkillHandoff(result, registry);
+  validateSkillHandoff(result, registry, {
+    priorHandoff: chain.length > 1 ? chain.at(-2) : interrupted,
+  });
   return result;
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

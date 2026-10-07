@@ -164,6 +164,7 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
     fetchIndex,
     buildUI,
     loadRuntime,
+    loadUI,
     initialize,
     dispose,
     docs,
@@ -195,6 +196,240 @@ function clickIcon(button: HTMLElement) {
     new MouseEvent('click', { bubbles: true, composed: true })
   );
 }
+
+describe('intent-only module preparation', () => {
+  function hover(trigger: HTMLElement) {
+    trigger.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+  }
+
+  it('does no Pagefind work without intent, then deduplicates hover and open without constructing hidden UI', async () => {
+    const f = await mount('shadcn');
+    expect(f.fetchIndex).not.toHaveBeenCalled();
+    expect(f.loadRuntime).not.toHaveBeenCalled();
+    const release = f.holdNextProbe();
+    hover(f.trigger);
+    hover(f.trigger);
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    expect(f.dialog.open).toBe(false);
+    expect(f.buildUI).not.toHaveBeenCalled();
+    clickIcon(f.trigger);
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    release();
+    await settle();
+    expect(f.loadRuntime).toHaveBeenCalledTimes(1);
+    expect(f.loadUI).toHaveBeenCalledTimes(1);
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+  });
+
+  it('starts both module imports after HEAD without serializing the cold open', async () => {
+    const f = await mount('shadcn');
+    const releaseProbe = f.holdNextProbe();
+    let releaseRuntime!: (value: {}) => void;
+    f.loadRuntime.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          releaseRuntime = resolve;
+        })
+    );
+    clickIcon(f.trigger);
+    await settle();
+    expect(f.loadRuntime).not.toHaveBeenCalled();
+    expect(f.loadUI).not.toHaveBeenCalled();
+    releaseProbe();
+    await settle();
+    try {
+      expect(f.loadRuntime).toHaveBeenCalledTimes(1);
+      expect(f.loadUI).toHaveBeenCalledTimes(1);
+      expect(f.buildUI).not.toHaveBeenCalled();
+    } finally {
+      releaseRuntime({});
+      await settle();
+    }
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+    expect(f.root.querySelector('.pagefind-ui__search-input')).toBe(document.activeElement);
+  });
+
+  it('prepares on public keyboard-focus intent but leaves the native dialog and DOM untouched', async () => {
+    const f = await mount('shadcn');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    f.trigger.focus();
+    await settle();
+    expect(f.loadRuntime).toHaveBeenCalledTimes(1);
+    expect(f.loadUI).toHaveBeenCalledTimes(1);
+    expect(f.buildUI).not.toHaveBeenCalled();
+    expect(f.dialog.open).toBe(false);
+    expect(document.activeElement).toBe(f.trigger);
+  });
+
+  it('keeps intent failure silent and permits actual open to retry once', async () => {
+    const f = await mount('shadcn', false);
+    hover(f.trigger);
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    expect(f.root.querySelector<HTMLElement>('.search-failure')!.hidden).toBe(true);
+    expect(f.dialog.open).toBe(false);
+    expect(f.buildUI).not.toHaveBeenCalled();
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    f.setProbe(true);
+    clickIcon(f.trigger);
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(2);
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not construct or focus after close during preparation; reuses modules on reopen', async () => {
+    const f = await mount('shadcn');
+    const release = f.holdNextProbe();
+    hover(f.trigger);
+    clickIcon(f.trigger);
+    await settle();
+    clickIcon(f.close);
+    await settle();
+    release();
+    await settle();
+    expect(f.dialog.open).toBe(false);
+    expect(f.loadUI).toHaveBeenCalledTimes(1);
+    expect(f.buildUI).not.toHaveBeenCalled();
+    expect(document.activeElement).toBe(f.trigger);
+    clickIcon(f.trigger);
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+  });
+
+  for (const stage of ['runtime', 'UI'] as const) {
+    it(`keeps ${stage} import failure silent until explicit open and then recovers`, async () => {
+      const f = await mount('shadcn');
+      (stage === 'runtime' ? f.loadRuntime : f.loadUI).mockRejectedValueOnce(new Error('offline'));
+      hover(f.trigger);
+      await settle();
+      expect(f.root.querySelector<HTMLElement>('.search-failure')!.hidden).toBe(true);
+      expect(f.buildUI).not.toHaveBeenCalled();
+      expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+      clickIcon(f.trigger);
+      await settle();
+      expect(f.fetchIndex).toHaveBeenCalledTimes(2);
+      expect(f.buildUI).toHaveBeenCalledTimes(1);
+    });
+  }
+
+  it('allows only the newest open to build after close and reopen during one preparation', async () => {
+    const f = await mount('shadcn');
+    const release = f.holdNextProbe();
+    clickIcon(f.trigger);
+    await settle();
+    clickIcon(f.close);
+    clickIcon(f.trigger);
+    await settle();
+    release();
+    await settle();
+    expect(f.dialog.open).toBe(true);
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    expect(document.activeElement?.matches('.pagefind-ui__search-input')).toBe(true);
+  });
+
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    for (const runtime of ['react', 'vue', 'vue2', 'wc']) {
+      it(`consumes public intent from ${family}/${runtime} and ignores retired command subscriptions`, async () => {
+        const f = await mount(family);
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
+        );
+        await vi.waitFor(() => expect(f.root.dataset.searchRuntime).toBe(runtime));
+        const current = f.root.querySelector<HTMLElement>(
+          '[data-projection-generation-state="active"] [data-open-modal]'
+        )!;
+        if (current !== f.trigger) {
+          hover(f.trigger);
+          await settle();
+          expect(f.fetchIndex).not.toHaveBeenCalled();
+        }
+        hover(current);
+        await settle();
+        expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+        expect(f.loadUI).toHaveBeenCalledTimes(1);
+        expect(f.buildUI).not.toHaveBeenCalled();
+        expect(f.dialog.open).toBe(false);
+      });
+    }
+  }
+
+  it('retains pending intent modules across a runtime swap without giving retired commands UI ownership', async () => {
+    const f = await mount('shadcn');
+    const release = f.holdNextProbe();
+    hover(f.trigger);
+    await settle();
+    document.dispatchEvent(
+      new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } })
+    );
+    await vi.waitFor(() => expect(f.root.dataset.searchRuntime).toBe('react'));
+    clickIcon(f.trigger);
+    release();
+    await settle();
+    expect(f.dialog.open).toBe(false);
+    expect(f.buildUI).not.toHaveBeenCalled();
+    const current = f.root.querySelector<HTMLElement>(
+      '[data-projection-generation-state="active"] [data-open-modal]'
+    )!;
+    current.click();
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+    expect(f.dialog.open).toBe(true);
+  });
+
+  it('allows no old import continuation to write into a reconnected service', async () => {
+    const f = await mount('shadcn');
+    let resolveRuntime!: (value: object) => void;
+    f.loadRuntime.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveRuntime = resolve;
+        })
+    );
+    hover(f.trigger);
+    await settle();
+    expect(f.loadRuntime).toHaveBeenCalledTimes(1);
+    expect(f.loadUI).toHaveBeenCalledTimes(1);
+    const uiCallsAtDisposal = f.loadUI.mock.calls.length;
+    f.dispose();
+    await f.docs.destroy();
+    f.initialize();
+    await vi.waitFor(() =>
+      expect(
+        f.root.querySelector('[data-projection-generation-state="active"] [data-open-modal]')
+      ).not.toBeNull()
+    );
+    resolveRuntime({});
+    await settle();
+    // Parallel preparation began the import while this owner was alive.
+    // Its late runtime completion cannot initiate another import or build UI.
+    expect(f.loadUI).toHaveBeenCalledTimes(uiCallsAtDisposal);
+    expect(f.buildUI).not.toHaveBeenCalled();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+    await settle();
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+  });
+
+  it('disposes an intent preparation without late UI or subscriptions', async () => {
+    const f = await mount('shadcn');
+    const release = f.holdNextProbe();
+    hover(f.trigger);
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+    f.dispose();
+    release();
+    hover(f.trigger);
+    await settle();
+    expect(f.loadRuntime).not.toHaveBeenCalled();
+    expect(f.buildUI).not.toHaveBeenCalled();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+  });
+});
 
 for (const family of ['shadcn', 'brutalist'] as const) {
   describe(`Search with real ${family} Buttons`, () => {
@@ -482,7 +717,12 @@ it('preserves pending Retry state through a real runtime swap and does not reope
   expect(f.dialog.open).toBe(false);
   expect(document.activeElement).toBe(trigger);
   expect(retry.getAttribute('aria-disabled')).not.toBe('true');
+  // Close now invalidates the UI continuation, while preserving prepared modules.
+  expect(f.buildUI).not.toHaveBeenCalled();
+  (trigger as HTMLElement).click();
+  await settle();
   expect(f.buildUI).toHaveBeenCalledTimes(1);
+  expect(f.fetchIndex).toHaveBeenCalledTimes(2);
 });
 
 it('aborts pending probe and removes service listeners before late completion after disposal', async () => {
@@ -628,3 +868,125 @@ it.each(['disconnect', 'route'] as const)(
     document.documentElement.removeAttribute('data-search-modal-open');
   }
 );
+
+describe('module-preparation lifecycle boundaries', () => {
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    for (const runtime of ['react', 'vue', 'vue2', 'wc']) {
+      it(`keyboard intent and no-lead CtrlK work on ${family}/${runtime}`, async () => {
+        const f = await mount(family);
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
+        );
+        await vi.waitFor(() => expect(f.root.dataset.searchRuntime).toBe(runtime));
+        const trigger = f.root.querySelector<HTMLElement>(
+          '[data-projection-generation-state="active"] [data-open-modal]'
+        )!;
+        expect(f.fetchIndex).not.toHaveBeenCalled();
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+        await settle();
+        expect(f.dialog.open).toBe(true);
+        expect(f.buildUI).toHaveBeenCalledTimes(1);
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
+        await settle();
+        trigger.blur();
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+        trigger.focus();
+        await settle();
+        expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+        expect(f.buildUI).toHaveBeenCalledTimes(1);
+        expect(f.dialog.open).toBe(false);
+      });
+      it(`cold keyboard intent prepares on ${family}/${runtime}`, async () => {
+        const f = await mount(family);
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
+        );
+        await vi.waitFor(() => expect(f.root.dataset.searchRuntime).toBe(runtime));
+        const trigger = f.root.querySelector<HTMLElement>(
+          '[data-projection-generation-state="active"] [data-open-modal]'
+        )!;
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+        trigger.focus();
+        await settle();
+        expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+        expect(f.loadRuntime).toHaveBeenCalledTimes(1);
+        expect(f.loadUI).toHaveBeenCalledTimes(1);
+        expect(f.buildUI).not.toHaveBeenCalled();
+      });
+    }
+  }
+  for (const stage of ['runtime', 'UI'] as const) {
+    it(`silent ${stage} timeout can recover on open; late module resolution cannot construct twice`, async () => {
+      const f = await mount('shadcn');
+      let resolve!: (value: unknown) => void;
+      const loader = stage === 'runtime' ? f.loadRuntime : f.loadUI;
+      loader.mockImplementationOnce(
+        () =>
+          new Promise((r) => {
+            resolve = r;
+          }) as never
+      );
+      vi.useFakeTimers();
+      try {
+        f.trigger.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+        await settle();
+        expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+        await vi.advanceTimersByTimeAsync(5001);
+        expect(f.root.querySelector<HTMLElement>('.search-failure')!.hidden).toBe(true);
+        expect(f.buildUI).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(15000);
+        expect(f.fetchIndex).toHaveBeenCalledTimes(1);
+        clickIcon(f.trigger);
+        await settle();
+        expect(f.fetchIndex).toHaveBeenCalledTimes(2);
+        expect(f.buildUI).toHaveBeenCalledTimes(1);
+        resolve({
+          PagefindUI: class {
+            constructor() {
+              throw new Error('Late constructor called');
+            }
+          },
+        });
+        await settle();
+        expect(f.buildUI).toHaveBeenCalledTimes(1);
+        expect(f.root.querySelector<HTMLElement>('.search-failure')!.hidden).toBe(true);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+    for (const action of ['close', 'dispose'] as const) {
+      it(`${action} suppresses late ${stage} import failure`, async () => {
+        const f = await mount('shadcn');
+        let reject!: (error: unknown) => void;
+        (stage === 'runtime' ? f.loadRuntime : f.loadUI).mockImplementationOnce(
+          () =>
+            new Promise((_r, j) => {
+              reject = j;
+            }) as never
+        );
+        clickIcon(f.trigger);
+        await settle();
+        if (action === 'close') clickIcon(f.close);
+        else f.dispose();
+        await settle();
+        reject(new Error('offline late'));
+        await settle();
+        expect(f.root.querySelector<HTMLElement>('.search-failure')!.hidden).toBe(true);
+        expect(f.buildUI).not.toHaveBeenCalled();
+        expect(f.dialog.open).toBe(false);
+      });
+    }
+  }
+  it('public hover leave/reenter starts one new attempt after silent failure', async () => {
+    const f = await mount('shadcn', false);
+    f.trigger.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    await settle();
+    f.setProbe(true);
+    f.trigger.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
+    f.trigger.dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    await settle();
+    expect(f.fetchIndex).toHaveBeenCalledTimes(2);
+    expect(f.loadUI).toHaveBeenCalledTimes(1);
+    expect(f.buildUI).not.toHaveBeenCalled();
+  });
+});

@@ -75,6 +75,16 @@ When disclosure is required, state at least:
 
 AI disclosure does not establish that generated content can legally be submitted. The contributor must still identify sources, confirm rights, and satisfy applicable licenses.
 
+### Agent-originated writes: ModelTrace
+
+The owner-authorized **dot-only exception** (2026-10-06) replaces measurement with visible `Agent: dot` and `ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)` disclosure. For supported publisher commands, dot uses `--agent dot --dot-exemption owner-authorized-2026-10-06` instead of `--record`/`--context`; never mix them or invent a measured record. This is a role declaration, not authentication or action permission. All authorization, live-account, exact-head/tree, DCO, independent-review, CI and privacy conditions remain. An already authorized real connector may perform equivalent live checks when the local CLI cannot represent this exception; it must not fabricate a receipt, a `gh` response or a passed validator. The measured flow below applies to non-exempt Agents.
+
+Separate from material AI-assistance disclosure, every current non-exempt Agent-originated commit, Issue/PR creation, material update, comment, submitted review, and collaboration write must include a current canonical ModelTrace public receipt, even in a human-assisted run. Local edits, read-only review and verification do not require sampling. Humans and deterministic non-LLM automation do not have to test a model or complete Agent-only fields. Do not rewrite previously published Git history or human original text; preserve historical ingestion and attribute current Agent follow-ups separately.
+
+Use `pui-agent-identify` for bounded active-model literal sampling and pinned offline scoring, then `agent:publish` for its supported commit/Issue/PR surfaces or the record-aware review/collaboration primitives. See [Contributor Agents](../agent-operations/contributor-agents.md#measure-and-disclose-the-active-agent-model) for the exact freshness, scope, handoff, privacy and bypass policy. Publish only the generated public receipt, not samples, private context, session IDs, private conversation, operational details or account circumstances.
+
+ModelTrace is closed-set statistical attribution, not authenticated backend/model identity. Only the fingerprint supplies measured `modelId`; declared system/harness labels remain separate claims. Candidate, ambiguous, failed, low-confidence, unsupported/unknown, mismatch and retest-disagreement outcomes must not be hidden or replaced with a declared label. Missing, expired or changed-scope records require remeasurement. This unsigned disclosure grants no rights, permission, independent review, acceptance or scheduled-scope activation; DCO and source/license obligations remain independent.
+
 ## Employer and client ownership
 
 Contributors are responsible for confirming whether:

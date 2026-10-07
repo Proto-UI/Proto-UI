@@ -96,8 +96,10 @@ describe('prototypes/shadcn: dialog', () => {
     expect(styleContains(content, 'data-[open]:fade-in-0')).toBe(true);
     expect(styleContains(content, 'data-[open]:zoom-in-95')).toBe(true);
     expect(styleContains(content, 'duration-200')).toBe(true);
-    expect(styleContains(mask, 'bg-black/50')).toBe(true);
-    expect(styleContains(mask, 'backdrop-blur-xs')).toBe(true);
+    // This Happy DOM fixture supplies no affirmative preference/support facts.
+    // The safe fallback is opaque; the live material suite covers enhancement.
+    expect(styleContains(mask, 'bg-background')).toBe(true);
+    expect(styleContains(mask, 'backdrop-blur-xs')).toBe(false);
     expect(styleContains(mask, 'animate-in')).toBe(true);
     expect(styleContains(mask, 'fade-in-0')).toBe(true);
     expect(styleContains(title, 'text-lg')).toBe(true);

@@ -45,6 +45,14 @@ criteria:
     dependsOn:
       decisions:
         - D-FOCUS-ENTRY-DELEGATION-0001
+  - id: C-FOCUS-0001-H
+    text:
+      zh-CN: 同一实例的 target 与 entry role 必须独立控制 pending request 的禁用取消；显式 blur 必须取消任一 role 的 pending request。取消必须先于可同步通知观察者的 host blur；观察者产生的更新 request 或取消决定必须保留，不得在 host blur 返回后恢复旧 pending request。
+      en: Target and entry roles on the same instance must independently control disable cancellation of pending requests; explicit blur must cancel a pending request of either role. Cancellation must precede host blur that can synchronously notify observers; newer requests or cancellation decisions from those observers must survive, and an older pending request must not be restored after host blur returns.
+    dependsOn:
+      contracts:
+        - C-AS-FOCUSABLE-0001
+        - C-AS-FOCUS-ENTRY-0001
 sources:
   - path: internal/contracts/focus/base-text/focus-domain.v0.md
   - path: internal/contracts/focus/base-text/focus-model.v0.md
@@ -69,6 +77,9 @@ relates:
     - D-FOCUS-STATE-INTERACTION-BOUNDARY-0001
     - D-FOCUS-ENTRY-DELEGATION-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Made role-scoped pending cancellation and synchronous host-blur observer ordering explicit without changing draft lifecycle.
   - version: 0.1.0
     change: introduced
     summary: Captured the baseline focus domain model after the logical-tree focus discussion.

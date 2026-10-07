@@ -1,0 +1,57 @@
+name: Static Template style evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/template-style-evidence.yml'
+      - 'packages/adapters/**'
+      - 'packages/cli/src/services/proto-style-css.ts'
+      - 'apps/www/test/template-style.browser.test.ts'
+      - 'apps/www/test/fixtures/template-style/**'
+permissions:
+  contents: read
+concurrency:
+  group: template-style-evidence-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Capture baseline and exact-head candidate with the same real fixture
+        env:
+          PROTO_UI_TEMPLATE_EVIDENCE_DIR: ${{ runner.temp }}/template-style-evidence
+          BASE_SHA: d05d1a00a353b9e72326a05569233d5bb54456a9
+        run: |
+          set -euo pipefail
+          FILES=(packages/adapters/react/src/template.ts packages/adapters/vue/src/template.ts packages/adapters/vue2/src/template.ts packages/adapters/web-component/src/style.ts)
+          # Only implementation inputs change for the baseline; fixture/CSS stay head-bound.
+          trap 'git restore -- "${FILES[@]}"' EXIT
+          for file in "${FILES[@]}"; do git show "$BASE_SHA:$file" > "$file"; done
+          PROTO_UI_TEMPLATE_BASELINE=1 PROTO_UI_TEMPLATE_SOURCE_SHA="$BASE_SHA" corepack pnpm@10.32.1 exec vitest run apps/www/test/template-style.browser.test.ts
+          git restore -- "${FILES[@]}"
+          PROTO_UI_TEMPLATE_SOURCE_SHA="$(git rev-parse HEAD)" corepack pnpm@10.32.1 exec vitest run apps/www/test/template-style.browser.test.ts
+          git diff --exit-code
+      - name: Retain source-bound captures and measured browser facts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: template-style-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/template-style-evidence/*.png
+            ${{ runner.temp }}/template-style-evidence/*-facts.json
+          if-no-files-found: warn
+          retention-days: 30

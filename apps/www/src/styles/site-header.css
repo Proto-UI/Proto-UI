@@ -680,3 +680,42 @@
     }
   }
 }
+
+/* Native startup/failure navigation: closed in server HTML, immediately usable
+   with no script, no timeout, and no expanded settings flash. Once the real
+   Button/Surface is ready, the normal controller exclusively owns disclosure. */
+.site-header:not([data-site-menu-ready]) > details.site-header-panel {
+  grid-area: menu;
+  justify-self: end;
+}
+[data-site-header-fallback-summary] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  cursor: pointer;
+  list-style: none;
+}
+[data-site-header-fallback-summary]::-webkit-details-marker {
+  display: none;
+}
+.site-header[data-site-menu-ready] [data-site-header-fallback-summary] {
+  display: none;
+}
+.site-header:not([data-site-menu-ready]) > details[open] > [data-site-header-panel-content] {
+  position: absolute;
+  z-index: 70;
+  top: 100%;
+  right: 0.5rem;
+  width: min(22rem, calc(100vw - 1rem));
+  max-height: calc(100svh - 5rem);
+  overflow: auto;
+  padding: 1rem;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+}
+.site-header:not([data-site-menu-ready]) > .site-header-menu {
+  visibility: hidden;
+}

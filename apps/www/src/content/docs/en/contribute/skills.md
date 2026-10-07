@@ -23,14 +23,15 @@ A handoff carries typed artifacts and at most one next skill. A terminal handoff
 
 ## Enter and bound the work
 
-| Skill         | One transition                                                       |
-| ------------- | -------------------------------------------------------------------- |
-| `pui-assess`  | Unassessed context to an unsigned U0-C4 local task-fit result        |
-| `pui-orient`  | Unknown context to a mode-aware contribution envelope                |
-| `pui-select`  | Unbounded request to one read-only work proposal or no-work result   |
-| `pui-claim`   | Authorized proposal to one posted claim or exact re-selection result |
-| `pui-unclaim` | One owned claim to a recorded release                                |
-| `pui-trace`   | Bounded subject to an authority and evidence map                     |
+| Skill                | One transition                                                         |
+| -------------------- | ---------------------------------------------------------------------- |
+| `pui-assess`         | Unassessed context to an unsigned U0-C4 local task-fit result          |
+| `pui-agent-identify` | Non-exempt request context to an unsigned closed-set ModelTrace record |
+| `pui-orient`         | Unknown context to a mode-aware contribution envelope                  |
+| `pui-select`         | Unbounded request to one read-only work proposal or no-work result     |
+| `pui-claim`          | Authorized proposal to one posted claim or exact re-selection result   |
+| `pui-unclaim`        | One owned claim to a recorded release                                  |
+| `pui-trace`          | Bounded subject to an authority and evidence map                       |
 
 ## Shape governed artifacts
 
@@ -67,15 +68,16 @@ A handoff carries typed artifacts and at most one next skill. A terminal handoff
 
 The inspection leaves are read-only intake and diagnosis transitions. Their credential boundary protects observation; it does not cap the follow-on skill chain. `pui-collaborate` then applies one exact-target reversible metadata, update-branch, ready-for-review, thread, review-request, status-comment, or CI-recheck action under current-user or standing authorization. Its registered runtime verifies a purpose-bound request digest and fresh live state, performs zero or one mutation, reconciles an unknown outcome once without retrying, and returns a schema-validated receipt. Review disposition and merge retain their separate exact-head leaves.
 
-| Skill                   | One transition                                                       |
-| ----------------------- | -------------------------------------------------------------------- |
-| `pui-issue`             | Bounded Issue portfolio to an operations report                      |
-| `pui-pr`                | Bounded pull-request portfolio to an integration-state report        |
-| `pui-ci`                | One workflow failure to an owning evidence map                       |
-| `pui-govern`            | One collaboration question to a governance drift report              |
-| `pui-deploy`            | One delivery surface to a revision-bound evidence report             |
-| `pui-deps`              | One dependency question to an impact and risk report                 |
+| Skill | One transition |
+| --- | --- |
+| `pui-issue` | Bounded Issue portfolio to an operations report |
+| `pui-pr` | Bounded pull-request portfolio to an integration-state report |
+| `pui-ci` | One workflow failure to an owning evidence map |
+| `pui-govern` | One collaboration question to a governance drift report |
+| `pui-deploy` | One delivery surface to a revision-bound evidence report |
+| `pui-deps` | One dependency question to an impact and risk report |
 | `pui-dependency-update` | Governed dependency report to a bounded manifest and lockfile update |
+| `pui-package-budget` | Accepted capability cost evidence to a bounded numeric package-budget transaction; preserves the blocking gate and independent review |
 
 ## Prepare and audit a release
 
@@ -98,7 +100,13 @@ The inspection leaves are read-only intake and diagnosis transitions. Their cred
 | `pui-maintenance-close` | Reviewed remediation to synchronized closure |
 | `pui-record` | Supported non-remediation terminal outcome to a synchronized run record |
 
+## dot's owner-authorized exception
+
+The owner's 2026-10-06 dot exception replaces only ModelTrace-specific sampling and record prerequisites with the exact visible not-measured dot declaration. dot uses the explicit publisher flags or a real connected-service path with equivalent live checks; it must not fabricate a `modeltrace-record`, authentication or a passed handoff validator. All other authorization, exact-state, DCO, CI and independent-review conditions remain. [Contributor Agents](/en/contribute/agents/) gives the declaration, command syntax and limits. The measured skill description below applies to non-exempt Agents.
+
 ## Capability is a ceiling when the Agent works alone
+
+`pui-agent-identify` is U0, `public-read`, and disposable-output-only: `request-context` in, `modeltrace-record` out. It uses genuine active-model literal sampling and pinned offline scoring, not a system/harness label fallback. Carry its exact private reference and canonical public-receipt digest through handoffs. Every non-exempt Agent-originated commit or Issue/PR creation, material update, comment, review or current collaboration write requires a current record in both modes; local edits, read-only review and verification do not. Humans and deterministic non-LLM automation need no model test. An independent model context measures itself. ModelTrace is unsigned closed-set attribution, not authenticated identity, permission, independent review, acceptance or activation of pending scheduled scopes. See [Contributor Agents](/en/contribute/agents/) for disclosure and freshness.
 
 C1 covers bounded facts plus factual or documentation review. C2 adds test and bounded-regression review plus exact-target collaboration mutations such as review submission and exact-head integration. C3 adds bounded semantic implementation and governed-slice review. C4 adds cross-domain semantics, governance judgment, release-evidence review, and release preparation. `pui-review` declares one content review class from C1 through C4; the review and merge write primitives themselves use the C2 exact-target mutation floor. The registry calls a leaf's threshold `autonomousMinimumBand` because it applies when an Agent chooses or advances work alone.
 

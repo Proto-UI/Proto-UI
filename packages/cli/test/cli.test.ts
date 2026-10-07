@@ -141,7 +141,6 @@ describe('@proto.ui/cli', () => {
       expect(entry.importPath).not.toBe(entry.packageName);
     }
   });
-
   it('registers Shadcn Input as a direct package component on every Web adapter', () => {
     const input = COMPONENT_REGISTRY['shadcn-input'];
     expect(input).toMatchObject({
@@ -373,6 +372,65 @@ describe('@proto.ui/cli', () => {
     expect(root).toContain("export { BaseImageRoot as VueBaseImageRoot } from './vue';");
     expect(root).toContain("export { BaseImageRoot as Vue2BaseImageRoot } from './vue2';");
     expect(root).toContain("export { BaseImageRootElement } from './wc';");
+  });
+
+  it('materializes the Base Table compound facade for each supported Web adapter', () => {
+    expect(COMPONENT_REGISTRY['base-table']).toMatchObject({
+      packageName: '@proto.ui/prototypes-base',
+      importPath: '@proto.ui/prototypes-base/table',
+      stylePreset: null,
+      items: [
+        {
+          prototypeImport: 'tableRoot',
+          reactExport: 'BaseTableRoot',
+          vueExport: 'BaseTableRoot',
+          wcExport: 'BaseTableRootElement',
+          elementName: 'proto-ui-base-table-root',
+        },
+        {
+          prototypeImport: 'tableCaption',
+          reactExport: 'BaseTableCaption',
+          vueExport: 'BaseTableCaption',
+          wcExport: 'BaseTableCaptionElement',
+          elementName: 'proto-ui-base-table-caption',
+        },
+        {
+          prototypeImport: 'tableRow',
+          reactExport: 'BaseTableRow',
+          vueExport: 'BaseTableRow',
+          wcExport: 'BaseTableRowElement',
+          elementName: 'proto-ui-base-table-row',
+        },
+        {
+          prototypeImport: 'tableHeaderCell',
+          reactExport: 'BaseTableHeaderCell',
+          vueExport: 'BaseTableHeaderCell',
+          wcExport: 'BaseTableHeaderCellElement',
+          elementName: 'proto-ui-base-table-header-cell',
+        },
+        {
+          prototypeImport: 'tableCell',
+          reactExport: 'BaseTableCell',
+          vueExport: 'BaseTableCell',
+          wcExport: 'BaseTableCellElement',
+          elementName: 'proto-ui-base-table-cell',
+        },
+      ],
+    });
+
+    for (const host of ['react', 'vue', 'vue2', 'wc'] as const) {
+      const source = renderHostIndex(host, ['base-table']);
+      expect(source).toContain("from '@proto.ui/prototypes-base/table'");
+      for (const prototypeImport of [
+        'tableRoot',
+        'tableCaption',
+        'tableRow',
+        'tableHeaderCell',
+        'tableCell',
+      ]) {
+        expect(source).toContain(prototypeImport);
+      }
+    }
   });
 
   it('registers the exact shadcn Tooltip family facade', () => {

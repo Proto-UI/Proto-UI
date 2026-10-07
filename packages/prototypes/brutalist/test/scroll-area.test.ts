@@ -318,7 +318,7 @@ describe('prototypes/brutalist: scroll-area', () => {
       'absolute',
       'right-0',
       'top-0',
-      'h-full',
+      'h-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',
       'w-4',
       'border-l-2',
       'border-foreground',
@@ -333,7 +333,7 @@ describe('prototypes/brutalist: scroll-area', () => {
       'bottom-0',
       'left-0',
       'h-4',
-      'w-full',
+      'w-[calc(100%_-_var(--proto-ui-scroll-track-end-inset,0px))]',
       'border-t-2',
       'border-foreground',
     ]) {

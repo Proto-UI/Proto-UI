@@ -19,7 +19,22 @@ cases:
         P-SHADCN-DIALOG-MASK-AS-CHILD-OMISSION,
       ]
     expectation: shadcn-dialog-mask-current-modal-fade-boundary
+  - id: T-SHADCN-DIALOG-MASK-0001-CASE-MATERIAL-PREFERENCES
+    title: Live material preferences withdraw and restore blur without replacing the open mask
+    covers: [P-SHADCN-DIALOG-MASK-CURRENT-VISUAL-SURFACE]
+    expectation: shadcn-dialog-mask-live-opaque-fallback
 implementations:
+  - id: prototypes-shadcn-dialog-mask-material
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/dialog-material.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DIALOG-MASK-0001-CASE-MATERIAL-PREFERENCES]
+    exercises: [P-SHADCN-DIALOG-MASK, P-BASE-DIALOG-MASK]
+    notes:
+      [
+        Real WC projections with injected host media facts prove token withdrawal/restoration and retained content/focus; production browser captures separately establish paint.,
+      ]
   - id: prototypes-shadcn-dialog-mask-contract
     kind: module-test
     status: passing
@@ -51,5 +66,12 @@ verifies:
         ]
 exercises: { prototypes: [P-SHADCN-DIALOG-MASK, P-BASE-DIALOG-MASK] }
 revisions:
-  [{ version: 0.2.0-rc.0, change: introduced, summary: Added Shadcn Dialog Mask delta coverage. }]
+  [
+    {
+      version: 0.3.0-alpha.1,
+      change: revised,
+      summary: Added live preference withdrawal and restoration coverage without promoting draft maturity.,
+    },
+    { version: 0.2.0-rc.0, change: introduced, summary: Added Shadcn Dialog Mask delta coverage. },
+  ]
 tags: [prototype, shadcn, dialog, mask, overlay, transition, delta, compatibility, test]

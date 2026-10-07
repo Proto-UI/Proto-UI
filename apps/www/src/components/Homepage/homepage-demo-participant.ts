@@ -3,7 +3,7 @@ import type {
   SharedBaseFamilyId,
 } from '../PrototypePreviewer/projection-families';
 import type { ProjectionScopeCommit } from '../PrototypePreviewer/projection-scope';
-import type { RuntimeId } from '../PrototypePreviewer/runtimes/registry';
+import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 import { createHomepageShowcase, HOMEPAGE_SHOWCASE_ID } from './homepage-showcase';
 
 export function homepageDemoParticipant(document: Document) {

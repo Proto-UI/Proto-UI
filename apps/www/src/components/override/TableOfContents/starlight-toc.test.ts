@@ -164,3 +164,156 @@ it('cancels detached idle setup and reconnects with one live observer/listener o
   toc.remove();
   expect(disconnects[1]).toHaveBeenCalledOnce();
 });
+
+it('projects one moving visible range without changing unique current', () => {
+  document.body.innerHTML =
+    '<header></header><main><h1 id="_top">Title</h1><h2 id="second">Second</h2><h2 id="third">Third</h2></main>';
+  const positions = [0, 300, 1200];
+  document
+    .querySelectorAll('main [id]')
+    .forEach((heading, i) =>
+      vi
+        .spyOn(heading, 'getBoundingClientRect')
+        .mockImplementation(() => new DOMRect(0, positions[i], 300, 30))
+    );
+  const toc = document.createElement('sl-toc') as StarlightTOC;
+  toc.innerHTML =
+    '<nav><a href="#_top">Title</a><a href="#second">Second</a><a href="#third">Third</a></nav><div data-site-toc-highlight aria-hidden="true"></div>';
+  vi.spyOn(toc, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 50, 200, 200));
+  toc
+    .querySelectorAll('a')
+    .forEach((link, i) =>
+      vi
+        .spyOn(link, 'getBoundingClientRect')
+        .mockReturnValue(new DOMRect(100, 80 + i * 32, 200, 32))
+    );
+  document.body.append(toc);
+  idle[0]({ didTimeout: false, timeRemaining: () => 50 });
+  const range = toc.querySelector<HTMLElement>('[data-site-toc-highlight]')!;
+  expect(range.style.transform).toBe('translate(0px, 30px)');
+  expect(range.style.height).toBe('64px');
+  expect(toc.querySelectorAll('[aria-current="true"]')).toHaveLength(1);
+  positions[0] = -1200;
+  positions[1] = -900;
+  positions[2] = 0;
+  window.dispatchEvent(new Event('scroll'));
+  expect(range.style.transform).toBe('translate(0px, 94px)');
+  expect(range.style.height).toBe('32px');
+  positions[0] = 0;
+  positions[1] = 300;
+  positions[2] = 1200;
+  window.dispatchEvent(new Event('scroll'));
+  expect(range.style.transform).toBe('translate(0px, 30px)');
+  expect(range.style.height).toBe('64px');
+  toc.remove();
+  expect(range.hasAttribute('data-toc-range-visible')).toBe(false);
+});
+
+it('coalesces geometry reads before writes, skips unchanged writes and retires pending frames', () => {
+  const frames = new Map<number, FrameRequestCallback>();
+  let serial = 0;
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+    frames.set(++serial, callback);
+    return serial;
+  });
+  vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
+  let resize: ResizeObserverCallback | undefined;
+  const disconnect = vi.fn();
+  vi.stubGlobal(
+    'ResizeObserver',
+    class {
+      constructor(callback: ResizeObserverCallback) {
+        resize = callback;
+      }
+      observe() {}
+      disconnect = disconnect;
+    }
+  );
+  document.body.innerHTML = '<main><h1 id="_top">Title</h1><h2 id="next">Next</h2></main>';
+  const events: string[] = [];
+  let secondTop = 300;
+  let rowHeight = 32;
+  document.querySelectorAll('main [id]').forEach((heading, index) =>
+    vi.spyOn(heading, 'getBoundingClientRect').mockImplementation(() => {
+      events.push('read-heading');
+      return new DOMRect(0, index ? secondTop : 0, 200, 30);
+    })
+  );
+  const toc = document.createElement('sl-toc') as StarlightTOC;
+  toc.innerHTML =
+    '<a href="#_top">Title</a><a href="#next">Next</a><div data-site-toc-highlight aria-hidden="true"></div>';
+  vi.spyOn(toc, 'getBoundingClientRect').mockImplementation(() => {
+    events.push('read-container');
+    return new DOMRect(0, 0, 200, 200);
+  });
+  toc.querySelectorAll('a').forEach((link, index) =>
+    vi.spyOn(link, 'getBoundingClientRect').mockImplementation(() => {
+      events.push('read-link');
+      return new DOMRect(0, index * rowHeight, 200, rowHeight);
+    })
+  );
+  const range = toc.querySelector<HTMLElement>('[data-site-toc-highlight]')!;
+  const nativeWrite = range.style.setProperty.bind(range.style);
+  const writes = vi.spyOn(range.style, 'setProperty').mockImplementation((...args) => {
+    events.push('write-range');
+    return nativeWrite(...args);
+  });
+  for (const link of toc.querySelectorAll('a')) {
+    const set = link.setAttribute.bind(link);
+    vi.spyOn(link, 'setAttribute').mockImplementation((...args) => {
+      events.push('write-link');
+      return set(...args);
+    });
+  }
+  document.body.append(toc);
+  idle[0]({ didTimeout: false, timeRemaining: () => 50 });
+  expect(events.lastIndexOf('read-link')).toBeLessThan(
+    events.findIndex((entry) => entry.startsWith('write'))
+  );
+  writes.mockClear();
+  events.length = 0;
+  const flush = () => {
+    const pending = [...frames.values()];
+    frames.clear();
+    pending.forEach((callback) => callback(0));
+  };
+  for (let i = 0; i < 20; i++) window.dispatchEvent(new Event('scroll'));
+  expect(frames.size).toBe(1);
+  flush();
+  expect(events.filter((event) => event === 'read-container')).toHaveLength(1);
+  expect(events.filter((event) => event === 'read-link')).toHaveLength(2);
+  expect(writes).not.toHaveBeenCalled();
+  rowHeight = 48; // Host/font reflow fixture; no scroll event.
+  resize!([], {} as ResizeObserver);
+  flush();
+  expect(range.style.height).toBe('96px');
+  // A real rendering opportunity delivers ResizeObserver after layout and
+  // before paint. Current must be repaired in that callback, without another
+  // frame in which the resized page and old selection are painted together.
+  secondTop = 0;
+  window.dispatchEvent(new Event('scroll'));
+  expect(frames.size).toBe(1);
+  resize!([], {} as ResizeObserver);
+  expect(frames.size).toBe(0);
+  expect(toc.querySelector('[aria-current="true"]')?.getAttribute('href')).toBe('#next');
+  writes.mockClear();
+  resize!([], {} as ResizeObserver);
+  expect(writes).not.toHaveBeenCalled();
+  secondTop = 1200;
+  window.dispatchEvent(new Event('hashchange'));
+  flush();
+  expect(range.style.height).toBe('48px');
+  window.dispatchEvent(new Event('scroll'));
+  const stale = [...frames.values()][0];
+  toc.remove();
+  expect(disconnect).toHaveBeenCalledOnce();
+  expect(frames.size).toBe(0);
+  writes.mockClear();
+  stale(0);
+  expect(writes).not.toHaveBeenCalled();
+  expect(range.hasAttribute('data-toc-range-visible')).toBe(false);
+  document.body.append(toc);
+  idle[1]({ didTimeout: false, timeRemaining: () => 50 });
+  expect(range.hasAttribute('data-toc-range-visible')).toBe(true);
+  expect(toc.querySelectorAll('[data-site-toc-highlight]')).toHaveLength(1);
+});

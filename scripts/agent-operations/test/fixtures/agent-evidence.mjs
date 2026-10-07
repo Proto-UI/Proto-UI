@@ -1,8 +1,10 @@
+import { modelTraceFixture } from './modeltrace.mjs';
+
 // Synthetic publication fixture, not a report of a real component reproduction.
-export function agentEvidence(headSha) {
+export function agentEvidence(headSha, repositoryId = 'github.com:Proto-UI/Proto-UI') {
   return {
     requestParaphrase: 'Review the bounded change and disclose evidence gaps.',
-    source: 'Synthetic current-user fixture; no private prompt.',
+    source: `Synthetic current-user fixture; no private prompt.\n\n${modelTraceFixture(repositoryId).disclosure}`,
     scope: 'Review publication transport only',
     baseline: 'Synthetic baseline fixture',
     headSha,

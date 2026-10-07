@@ -1,4 +1,4 @@
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 
 export type DemoTextNode = {
   kind: 'text';

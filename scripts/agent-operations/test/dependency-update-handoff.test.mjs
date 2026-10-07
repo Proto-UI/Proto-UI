@@ -103,7 +103,10 @@ test('declared dependency-update inputs carry authority through validation and r
     ...incoming,
     fromId: update.id,
     nextSkillId: 'pui-validate',
-    artifacts: [...incoming.artifacts, ...update.produces.map(artifact)],
+    artifacts: [
+      ...incoming.artifacts,
+      ...update.produces.map((type) => ({ ...artifact(type), digest: `sha256:${'a'.repeat(64)}` })),
+    ],
   };
   const validation = validateSkillHandoff(candidate, registry);
   assert.equal(validation.nextSkill.id, 'pui-validate');
@@ -114,11 +117,17 @@ test('declared dependency-update inputs carry authority through validation and r
     nextSkillId: 'pui-review',
     artifacts: [
       ...candidate.artifacts,
-      ...validation.nextSkill.produces.map(artifact),
+      ...validation.nextSkill.produces.map((type) => ({
+        ...artifact(type),
+        digest: `sha256:${'b'.repeat(64)}`,
+      })),
       artifact('review-input'),
     ],
   };
-  assert.equal(validateSkillHandoff(review, registry).nextSkill.id, 'pui-review');
+  assert.equal(
+    validateSkillHandoff(review, registry, { priorHandoff: candidate }).nextSkill.id,
+    'pui-review'
+  );
   assert.equal(
     validateSkillHandoff({ ...review, fromId: update.id }, registry).nextSkill.id,
     'pui-review'

@@ -38,6 +38,8 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
   const sessions = new Map<string, PeerSession>();
   // The environment the host last reported, which every session's rules read.
   let meta: WireRecord = {};
+  // The order the host last reported it shows the sessions' views in.
+  let order: readonly string[] = [];
   const log = options.log ?? (() => {});
   // Messages are handled strictly in arrival order. Opening a session awaits a
   // lazy import and a mount, and a message for that session must not overtake
@@ -73,6 +75,9 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
   const handle = async (message: HostToPeerMessage): Promise<void> => {
     switch (message.kind) {
       case 'host.hello':
+        return;
+      case 'projection.order':
+        order = message.sessions;
         return;
       case 'meta.set':
         meta = message.meta;
@@ -125,6 +130,7 @@ export function createPeerProcess(options: PeerProcessOptions): PeerProcess {
             send,
             parent,
             getMeta: (key) => meta[key],
+            getOrder: () => order,
           });
         } catch (error) {
           // Setup runs as the instance is created. A part opened inside an

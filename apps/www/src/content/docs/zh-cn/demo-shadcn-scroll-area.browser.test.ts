@@ -229,14 +229,22 @@ describe.sequential('shadcn Scroll Area browser acceptance', () => {
           viewportBox.x + viewportBox.width,
           `${runtime}/vertical-right`
         );
-        expectClose(verticalBox.height, viewportBox.height, `${runtime}/vertical-height`);
+        expectClose(
+          verticalBox.height + horizontalBox.height,
+          viewportBox.height,
+          `${runtime}/vertical-height`
+        );
         expectClose(horizontalBox.x, viewportBox.x, `${runtime}/horizontal-left`);
         expectClose(
           horizontalBox.y + horizontalBox.height,
           viewportBox.y + viewportBox.height,
           `${runtime}/horizontal-bottom`
         );
-        expectClose(horizontalBox.width, viewportBox.width, `${runtime}/horizontal-width`);
+        expectClose(
+          horizontalBox.width + verticalBox.width,
+          viewportBox.width,
+          `${runtime}/horizontal-width`
+        );
         expectClose(verticalBox.y - rootBox.y, 1, `${runtime}/vertical-root-border-inset`);
         expectClose(
           rootBox.x + rootBox.width - (verticalBox.x + verticalBox.width),

@@ -44,7 +44,16 @@ const cases = [
   // #747 adds 260 gzip bytes for the static selection grammar/grouping; the
   // independent bounded transaction retains the old failure and 220 headroom:
   // internal/records/2026-10-03-selection-style-runtime-budget.md
-  ['runtime root', 'packages/runtime/src/index.ts', 67_100],
+  // Independent #809 material lifetime baseline; coordinated with #819's
+  // narrower React allowance, not a feature-local gate bypass. Evidence:
+  // internal/records/2026-10-04-material-budget-transaction.json
+  // Current #832 + #809 startup reconciliation: 69,200 cap, 247-byte headroom.
+  // internal/records/2026-10-06-focus-startup-budget-reconciliation.json
+  // Exact bounded request/owner-release repair, measured on the full Focus union:
+  // internal/records/2026-10-06-focus-request-release-budget.json
+  // Unified preflight and owned-shadow acquisition, exact integrated artifact:
+  // internal/records/2026-10-06-focus-preflight-shadow-budget.json
+  ['runtime root', 'packages/runtime/src/index.ts', 69_688],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -54,8 +63,19 @@ const cases = [
   // the Vue adapter root (82,527; main 79,163). Retain ~700-1,000 bytes of
   // bounded headroom.
   // #549 adds 2,593 / 2,613 gzip bytes over main 9d9552bb: 85,351 / 85,093.
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 87_500],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 87_200],
+  // Independent terminal cleanup/reentry follow-up, with exact combined evidence:
+  // internal/records/2026-10-04-material-terminal-budget-followup.json
+  // Current #832 + #809 startup reconciliation: React 91,000 / Vue 90,800,
+  // with 217 / 193 bytes of headroom; earlier records above retain history.
+  // internal/records/2026-10-06-focus-startup-budget-reconciliation.json
+  // Necessary +29-byte ceiling for the reviewed remount/Text Control/Feedback union;
+  // internal/records/2026-10-06-react-remount-text-control-budget.json
+  // Exact #832 + merged Template/Scroll integration; no speculative headroom.
+  // Subsequent bounded request/owner-release repair measured as an actual union:
+  // internal/records/2026-10-06-focus-request-release-budget.json
+  // internal/records/2026-10-06-template-scroll-focus-budget.json
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 91_747],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 91_489],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:

@@ -1,8 +1,9 @@
-import type { RuntimeAPI } from './registry';
-import { createVue2Adapter, type Vue2Runtime as AdapterVue2Runtime } from '@proto.ui/adapter-vue2';
+import type { RuntimeAPI } from './ids';
+import type { Vue2Runtime as AdapterVue2Runtime } from '@proto.ui/adapter-vue2';
 import { claimHostMount, releaseHostMount } from './host-mount';
 
-const VUE2_SOURCE = 'https://esm.sh/vue@2.6.14';
+// The same pinned Vue 2.6.14 implementation is served by the application's
+// lazy asset graph, not an external CDN needed for each reader's mount.
 
 type Vue2Constructor = {
   extend: (options: Record<string, unknown>) => any;
@@ -12,7 +13,7 @@ type Vue2Constructor = {
 };
 
 export async function loadVue2(): Promise<Vue2Constructor> {
-  const mod = (await import(/* @vite-ignore */ VUE2_SOURCE)) as any;
+  const mod = (await import('vue2-runtime')) as any;
   return (mod.default ?? mod) as Vue2Constructor;
 }
 
@@ -86,7 +87,10 @@ export function createVue2Runtime(load = loadVue2): RuntimeAPI {
 
     async mount(host, prototype, options) {
       const lease = claimHostMount(host);
-      const Vue = await load();
+      const [Vue, { createVue2Adapter }] = await Promise.all([
+        load(),
+        import('@proto.ui/adapter-vue2'),
+      ]);
       if (!lease.isCurrent()) return;
 
       const Component = createVue2Adapter(toVue2Runtime(Vue))(prototype);

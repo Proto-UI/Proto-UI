@@ -1,0 +1,155 @@
+id: P-BASE-COLLAPSIBLE-CONTENT
+type: prototype
+title: Base Collapsible Content is role-neutral inline disclosure content
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: Issue 388 接受了 role-neutral Content、默认 L1 detach 与显式 keepMounted 策略；保留 draft，等待初始/重复 view epoch、关系 identity、终止清理与四种 Web Adapter 证据的独立审查和稳定准入。L1 active contract 不会自动激活该 Content 或 draft relationship 依赖。
+  en: Issue 388 accepts role-neutral Content, default L1 detach, and explicit keepMounted policy. This entity remains draft pending independent review and stable admission of initial/repeated view epochs, relationship identity, terminal cleanup, and four Web Adapter evidence. The active L1 contract does not automatically activate this Content or its draft relationship dependency.
+summary: One same-domain inline Content derives open and hidden from Root, expresses callback-only view intent, and preserves only the governed logical-instance lifetime across default L1 detach.
+statement:
+  zh-CN: >-
+    Collapsible Content 是 base-collapsible domain 的唯一 content part，不拥有 open 或 focus。它只从 Root canonical open 派生 open/hidden；keepMounted || open 决定 desired view presence。默认关闭时不物化 view，已打开后关闭执行 repeatable L1 detach；keepMounted=true 保留完整但隐藏的 view。逻辑 instance 可跨 view epoch 保留，但宿主子组件与 native view state 的保留不属于 L1 保证。Terminal owner disposal 优先于一切 view intent。
+
+
+  en: >-
+    Collapsible Content is the sole content part of a base-collapsible domain, owning neither open nor focus. It derives open/hidden only from Root canonical open; keepMounted || open determines desired view presence. Closed Content has no materialized view by default, and closing after opening performs repeatable L1 detach; keepMounted=true retains a complete but hidden view. The logical instance can survive view epochs, but host child components and native view state are outside the L1 preservation guarantee. Terminal owner disposal overrides every view intent.
+
+
+criteria:
+  - id: P-BASE-COLLAPSIBLE-CONTENT-ROLE-NEUTRAL
+    text:
+      zh-CN: Content 必须 claim base-collapsible content role，但不自动投射 region、tabpanel、dialog、heading 或任何额外 semantic role；它是 inline content，不是 Overlay 或 focus scope。
+      en: Content must claim the base-collapsible content role without automatically projecting region, tabpanel, dialog, heading, or another extra semantic role; it is inline content, not an Overlay or focus scope.
+    dependsOn:
+      contracts: [C-ANATOMY-0004, C-A11Y-0001]
+      prototypes: [P-BASE-COLLAPSIBLE]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-AUTHORING-ENTRIES
+    text:
+      zh-CN: '`base-collapsible-content` direct prototype（collapsibleContent）与 asCollapsibleContent 必须提供同一 Content protocol；不得通过 Tabs、Dialog 或其他 Base protocol-specific asHook 继承 panel、overlay 或 focus 行为。'
+      en: 'The base-collapsible-content direct prototype (collapsibleContent) and asCollapsibleContent must provide the same Content protocol; they must not inherit panel, overlay, or focus behavior through Tabs, Dialog, or another Base protocol-specific asHook.'
+    dependsOn:
+      contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001]
+      decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-SAME-DOMAIN
+    text:
+      zh-CN: Content 必须读取/订阅同一 anatomy domain 的 COLLAPSIBLE_CONTEXT；嵌套或并列 domain 不得互相影响 open、hidden、presence 或 relationship target resolution。
+      en: Content must read/subscribe to COLLAPSIBLE_CONTEXT in the same anatomy domain; nested or sibling domains must not affect each other's open, hidden, presence, or relationship-target resolution.
+    dependsOn:
+      contracts: [C-ANATOMY-0005, C-CONTEXT-0002, C-CONTEXT-0006, C-CONTEXT-0007]
+      prototypes: [P-BASE-COLLAPSIBLE]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-DERIVED-STATES
+    text:
+      zh-CN: Content 必须 expose open 与 hidden，始终由 canonical Root.open 与 !Root.open 派生；受控 request 未获 owner input 接受时不得改变它们，也不得通过本地 presence/perceptual state 建立第二 open truth。
+      en: Content must expose open and hidden, derived from canonical Root.open and !Root.open respectively; they must not change for a controlled request unaccepted by owner input or establish a second open truth through local presence/perceptual state.
+    dependsOn:
+      contracts: [C-STATE-0001, C-EXPOSE-STATE-0001, C-CONTEXT-0007, C-LIFECYCLE-0008]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-PRESENCE-POLICY
+    text:
+      zh-CN: >-
+        Content 只接受 keepMounted?: boolean（默认 false）作为 retention policy；created 与 context/keepMounted runtime callback 必须通过 run.lifecycle.setPresent(keepMounted || open) 更新 intent，不得在 setup/render 阶段调用该 API、直接 host mount/unmount 或维护另一套 lifecycle truth。
+
+
+      en: >-
+        Content accepts only keepMounted?: boolean (default false) as its retention policy; created and context/keepMounted runtime callbacks must update intent through run.lifecycle.setPresent(keepMounted || open), never invoke that API from setup/render, directly mount/unmount the host, or maintain another lifecycle truth.
+
+
+    dependsOn:
+      contracts:
+        - C-PROPS-0001
+        - id: C-LIFECYCLE-0008
+          anchors: [C-LIFECYCLE-0008-A, C-LIFECYCLE-0008-G, C-LIFECYCLE-0008-H]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-INITIAL-L1
+    text:
+      zh-CN: 初始 closed 且 keepMounted=false 时，created 后首次 reconciliation 必须在任何首次 render/commit/mount 前使 desired detached 生效；不得先闪现可见 Content 再撤销 view，保留的 owner shell 必须隐藏。
+      en: When initially closed with keepMounted=false, the first reconciliation after created must apply desired detached before any initial render/commit/mount. Content must not flash visibly before withdrawing the view, and any retained owner shell must remain hidden.
+    dependsOn:
+      contracts:
+        - id: C-LIFECYCLE-0008
+          anchors: [C-LIFECYCLE-0008-C, C-LIFECYCLE-0008-H, C-LIFECYCLE-0008-J]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-L1
+    text:
+      zh-CN: 默认从 open 到 closed 必须 repeatable L1 detach；再次 open 重新物化 view，并保留同一 Proto instance 的 state、props、context identity、exposes 与 setup 结果。过期 epoch/completion 必须失效；宿主子组件实例与 native view state 不保证保留。
+      en: By default, changing open to closed must perform repeatable L1 detach; reopening rematerializes the view while preserving the same Proto instance's state, props, context identity, exposes, and setup results. Stale epochs/completions must become inert; preservation of host child-component instances and native view state is not guaranteed.
+    dependsOn:
+      contracts:
+        - id: C-LIFECYCLE-0008
+          anchors: [C-LIFECYCLE-0008-D, C-LIFECYCLE-0008-E, C-LIFECYCLE-0008-I, C-LIFECYCLE-0008-J]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-KEEP-MOUNTED
+    text:
+      zh-CN: keepMounted=true 必须在 closed 时保留完整 view，同时投射 hidden 到 accessibility tree 并使用现有 hidden feedback；不触发 autofocus。运行时切换 keepMounted 必须按最新 canonical open 调和 presence，不改写 open 或产生 openChange。
+      en: keepMounted=true must retain the complete closed view while projecting hidden to the accessibility tree and using existing hidden feedback, without autofocus. Runtime keepMounted changes must reconcile presence against the latest canonical open without rewriting open or emitting openChange.
+    dependsOn:
+      contracts: [C-A11Y-0001, C-LIFECYCLE-0008]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-TERMINAL-DISPOSAL
+    text:
+      zh-CN: Terminal owner teardown 必须释放 instance/view-owned subscriptions 与 relationship leases，并使过期 callback/intent 失效；Content 不得通过 setPresent 复活 disposed owner。后续同 domain/key 新实例不得被 stale record 判为重复。
+      en: Terminal owner teardown must release instance/view-owned subscriptions and relationship leases and render stale callbacks/intents inert; Content must not revive a disposed owner through setPresent. A later new instance with the same domain/key must not be misclassified as a duplicate by stale records.
+    dependsOn:
+      contracts:
+        - id: C-LIFECYCLE-0008
+          anchors: [C-LIFECYCLE-0008-F, C-LIFECYCLE-0008-G]
+        - id: C-A11Y-PART-RELATIONSHIP-0001
+          since: 0.3.0-alpha.1
+          anchors: [C-A11Y-PART-RELATIONSHIP-0001-F]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-RELATIONSHIP-IDENTITY
+    text:
+      zh-CN: "Content 必须显式声明 asAccessible.part(COLLAPSIBLE_FAMILY,{key:'content'})。同域 Trigger controls 使用该精确 protocol key；L1 detach 必须在目标移除可见前撤销 service-owned IDREF，保留有效 opaque reservation；新 view epoch 以同一 reservation 在可见 commit 前恢复 controls。宿主作者 identity/contributions 必须保留，冲突 fail closed；Content 不拥有 host identity、target 或 presence registry。"
+      en: "Content must explicitly declare asAccessible.part(COLLAPSIBLE_FAMILY,{key:'content'}). Same-domain Trigger controls uses that exact protocol key. L1 detach must withdraw service-owned IDREF before target removal is visible while preserving a valid opaque reservation; a new view epoch restores controls with the same reservation before its visible commit. Host-authored identity/contributions remain preserved and conflicts fail closed; Content owns no host identity, target, or presence registry."
+    dependsOn:
+      contracts:
+        - id: C-A11Y-PART-RELATIONSHIP-0001
+          since: 0.3.0-alpha.1
+          anchors:
+            [
+              C-A11Y-PART-RELATIONSHIP-0001-A,
+              C-A11Y-PART-RELATIONSHIP-0001-D,
+              C-A11Y-PART-RELATIONSHIP-0001-E,
+              C-A11Y-PART-RELATIONSHIP-0001-H,
+              C-A11Y-PART-RELATIONSHIP-0001-I,
+              C-A11Y-PART-RELATIONSHIP-0001-J,
+            ]
+  - id: P-BASE-COLLAPSIBLE-CONTENT-NO-FOCUS
+    text:
+      zh-CN: Content 不得自动创建 Tab stop、focus entry、autofocus、focus return 或 focus movement；App Maker authored content 保留自身正常 focus 行为，Content 的展开/关闭不接管它。
+      en: Content must not automatically create a Tab stop, focus entry, autofocus, focus return, or focus movement; App Maker-authored content retains its own normal focus behavior without Content taking over on expansion/collapse.
+openQuestions:
+  - id: P-BASE-COLLAPSIBLE-CONTENT-Q-STABLE-ADMISSION
+    question:
+      zh-CN: 独立维护者何时在真实 initial/repeatable L1、keepMounted、identity、cleanup 与 consumer 证据审查后明确准入 Content 为 stable？
+      en: When will an independent maintainer explicitly admit Content as stable after reviewing real initial/repeatable L1, keepMounted, identity, cleanup, and consumer evidence?
+    context:
+      zh-CN: focused Base 与四种 Web Adapter T mappings 已在 synthetic DOM 通过，public-browser mapping 尚未执行；这些结果、Issue 388 实现授权和 prerequisite 合入均不是稳定准入，draft dependency 不得描述为 active 保证。L1 逻辑保留不扩大为 detached host child 或 native view state 保留。
+      en: Focused Base and four Web Adapter T mappings passed under a synthetic DOM; the public-browser mapping is unexecuted. These results, Issue 388 implementation authorization and merged prerequisites are not stable admission; draft dependencies must not be described as active guarantees. L1 logical preservation does not extend to detached host children or native view state.
+    blocks: [activation:P-BASE-COLLAPSIBLE-CONTENT]
+sources:
+  - path: https://github.com/Proto-UI/Proto-UI/issues/388
+    sections: [Accepted first-slice decisions, Base Collapsible]
+  - path: https://github.com/Proto-UI/Proto-UI/issues/388#issuecomment-5378970491
+    label: Accepted Checkpoint A as amended
+  - path: spec/contracts/C-LIFECYCLE-0008.yaml
+  - path: spec/contracts/C-A11Y-PART-RELATIONSHIP-0001.yaml
+  - path: packages/prototypes/base/src/collapsible/content.proto.ts
+  - path: packages/prototypes/base/src/collapsible/shared.ts
+  - path: packages/prototypes/base/src/collapsible/types.ts
+dependsOn:
+  prototypes: [P-BASE-COLLAPSIBLE]
+  contracts:
+    [
+      C-ANATOMY-0004,
+      C-ANATOMY-0005,
+      C-CONTEXT-0006,
+      C-PROPS-0001,
+      C-STATE-0001,
+      C-EXPOSE-STATE-0001,
+      C-A11Y-0001,
+      C-LIFECYCLE-0008,
+      C-A11Y-PART-RELATIONSHIP-0001,
+    ]
+verifies:
+  tests: [T-BASE-COLLAPSIBLE-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged role-neutral Content with callback-only default L1 presence, hidden keepMounted retention, repeatable logical lifetime, exact-key relationship identity and terminal-owner boundaries; retained draft admission.
+tags: [prototype, base, collapsible, disclosure, content, lifecycle]

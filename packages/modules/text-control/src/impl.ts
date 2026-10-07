@@ -40,10 +40,12 @@ export class TextControlModuleImpl extends ModuleBase {
   private patch: TextControlPatch = EMPTY_PATCH;
   private value = '';
   private composing = false;
+  private callbackPrelude: { epoch: number } | null = null;
   private listeners: Listener[] = [];
   private host: TextControlHost | null = null;
   private lease: TextControlHostLease | null = null;
   private leaseEpoch = 0;
+  private eventGeneration = 0;
 
   constructor(
     caps: CapsVaultView,
@@ -177,7 +179,10 @@ export class TextControlModuleImpl extends ModuleBase {
 
   private effectivePatch(): TextControlPatch {
     const { value: _declaredValue, ...patchWithoutValue } = this.patch;
-    const shouldProjectValue = !(this.valueMode === 'controlled' && this.composing);
+    const shouldProjectValue = !(
+      this.valueMode === 'controlled' &&
+      (this.composing || this.callbackPrelude?.epoch === this.leaseEpoch)
+    );
     return Object.freeze({
       ...patchWithoutValue,
       valueMode: this.valueMode ?? 'uncontrolled',
@@ -191,35 +196,88 @@ export class TextControlModuleImpl extends ModuleBase {
 
   private receive(event: TextControlEvent): void {
     const epoch = this.leaseEpoch;
+    const generation = ++this.eventGeneration;
     // Canonicalize CR/LF to LF at the module boundary before state, snapshot, and listener routing.
     const canonicalEvent: TextControlEvent = Object.freeze({
       ...event,
       value: this.canonicalize(event.value),
       data: typeof event.data === 'string' ? this.canonicalize(event.data) : event.data,
     });
-    this.composing = canonicalEvent.composing;
-    if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {
-      this.value = canonicalEvent.value;
-    }
-
-    const runInCallback = this.caps.has(TEXT_CONTROL_RUN_IN_CALLBACK_CAP)
-      ? this.caps.get(TEXT_CONTROL_RUN_IN_CALLBACK_CAP)
-      : (callback: () => void) => callback();
-    runInCallback(() => {
-      const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
-      if (!run) return;
-      for (const listener of this.listeners) {
-        if (listener.type === canonicalEvent.type) listener.callback(run, canonicalEvent);
+    // CallbackScope may drain older props before it invokes our listener.
+    // Protect both a starting composition and a finishing native candidate
+    // from those stale owner values until the actual event callback begins.
+    this.composing ||= canonicalEvent.composing;
+    try {
+      if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {
+        this.value = canonicalEvent.value;
       }
-    });
 
-    const mustRestoreControlledValue =
-      this.valueMode === 'controlled' &&
-      ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
-    if (!mustRestoreControlledValue) return;
-    queueMicrotask(() => {
-      if (epoch === this.leaseEpoch) this.syncLease();
-    });
+      const runInCallback = this.caps.has(TEXT_CONTROL_RUN_IN_CALLBACK_CAP)
+        ? this.caps.get(TEXT_CONTROL_RUN_IN_CALLBACK_CAP)
+        : (callback: () => void) => callback();
+      const inCurrentCallback = (callback: () => void) => {
+        const previousPrelude = this.callbackPrelude;
+        const prelude = { epoch };
+        // Change has no deferred native-candidate restoration. Let queued owner
+        // patches project normally; active composition remains protected separately.
+        if (canonicalEvent.type !== 'change') this.callbackPrelude = prelude;
+        const releasePrelude = () => {
+          if (this.callbackPrelude === prelude) this.callbackPrelude = previousPrelude;
+        };
+        let callbackRan = false;
+        try {
+          runInCallback(() => {
+            releasePrelude();
+            if (epoch === this.leaseEpoch) {
+              callbackRan = true;
+              callback();
+            }
+          });
+        } catch (error) {
+          // An interrupted end event must not strand the provisional `||=`
+          // above: settle the composing state the callback would have
+          // assigned so a controlled owner regains the completed candidate.
+          // A newer event owns the state now; never roll it back.
+          if (
+            !callbackRan &&
+            epoch === this.leaseEpoch &&
+            generation === this.eventGeneration &&
+            this.composing !== canonicalEvent.composing
+          ) {
+            this.composing = canonicalEvent.composing;
+          }
+          throw error;
+        } finally {
+          releasePrelude();
+        }
+      };
+      inCurrentCallback(() => {
+        if (generation !== this.eventGeneration) return;
+        this.composing = canonicalEvent.composing;
+        const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
+        if (!run) return;
+        for (const listener of this.listeners) {
+          if (listener.type === canonicalEvent.type) listener.callback(run, canonicalEvent);
+        }
+      });
+
+      const mustRestoreControlledValue =
+        this.valueMode === 'controlled' &&
+        ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
+      if (!mustRestoreControlledValue) return;
+      queueMicrotask(() => {
+        // Re-enter the current callback boundary so pending accepted owner props
+        // reconcile before restoring value, rather than writing a stale owner
+        // value and destroying the native caret before the next commit.
+        if (epoch === this.leaseEpoch) inCurrentCallback(() => this.syncLease());
+      });
+    } finally {
+      // Native composition facts survive a failed callback prelude. An older
+      // event must never settle over a newer event or a replacement lease.
+      if (epoch === this.leaseEpoch && generation === this.eventGeneration) {
+        this.composing = canonicalEvent.composing;
+      }
+    }
   }
 
   private canonicalize(value: string): string {

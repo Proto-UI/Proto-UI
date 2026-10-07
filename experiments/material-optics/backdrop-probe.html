@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" />
+  <title>Optical carrier experiment: actual DOM backdrop displacement</title>
+  <style>
+    body {
+      margin: 0;
+      background: #eee;
+      color: #111;
+      font: 16px system-ui;
+    }
+    h1,
+    p {
+      margin: 16px 28px;
+    }
+    h1 {
+      font-size: 22px;
+    }
+    #scene {
+      position: relative;
+      margin: 24px 28px;
+      width: 640px;
+      height: 360px;
+      background: white;
+    }
+    #source {
+      position: absolute;
+      inset: 0;
+    }
+    .marker {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+    }
+    #red {
+      left: 170px;
+      background: #f00;
+    }
+    #green {
+      left: 347px;
+      background: #0f0;
+    }
+    #source-text {
+      position: absolute;
+      left: 80px;
+      top: 125px;
+      font: 24px monospace;
+      color: #705000;
+    }
+    #surface {
+      position: absolute;
+      left: 100px;
+      top: 60px;
+      width: 400px;
+      height: 230px;
+      border-radius: 32px;
+      background: transparent;
+      backdrop-filter: url(#displace);
+    }
+    #foreground {
+      position: absolute;
+      left: 110px;
+      top: 170px;
+      padding: 3px;
+      background: white;
+      color: black;
+    }
+    #state {
+      font: 15px monospace;
+    }
+  </style>
+  <h1>Actual DOM backdrop displacement: optical carrier probe</h1>
+  <p>Non-periodic DOM marker lines and text. No captured/repainted background or material image.</p>
+  <p>
+    This experiment is not a Liquid Glass implementation, an Adapter profile, or a Compiler
+    guarantee.
+  </p>
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <defs>
+      <filter
+        id="displace"
+        x="-20%"
+        y="-20%"
+        width="140%"
+        height="140%"
+        color-interpolation-filters="sRGB"
+      >
+        <feFlood flood-color="rgb(255,128,128)" result="normal" />
+        <feDisplacementMap
+          id="map"
+          in="SourceGraphic"
+          in2="normal"
+          scale="0"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+    </defs>
+  </svg>
+  <div id="scene">
+    <div id="source">
+      <div id="red" class="marker"></div>
+      <div id="green" class="marker"></div>
+      <span id="source-text">LIVE DOM 0123 / A</span>
+    </div>
+    <div id="surface"><span id="foreground">Unfiltered foreground</span></div>
+  </div>
+  <p id="state">scale=0</p>
+  <script>
+    window.opticalProbe = {
+      setScale(scale) {
+        if (![0, 20, -20].includes(scale)) throw new Error('Unsupported experiment scale');
+        document.querySelector('#map').setAttribute('scale', String(scale));
+        document.querySelector('#surface').style.backdropFilter = 'url(#displace)';
+        document.querySelector('#state').textContent = `scale=${scale}`;
+      },
+      none() {
+        document.querySelector('#surface').style.backdropFilter = 'none';
+      },
+      blurOnly() {
+        document.querySelector('#surface').style.backdropFilter = 'blur(4px)';
+        document.querySelector('#state').textContent = 'blur only / negative control';
+      },
+      changeBackdrop() {
+        document.querySelector('#red').style.left = '193px';
+        document.querySelector('#source-text').textContent = 'LIVE DOM 4567 / B';
+      },
+      moveAndResize() {
+        Object.assign(document.querySelector('#surface').style, { left: '120px', width: '360px' });
+      },
+    };
+  </script>
+</html>

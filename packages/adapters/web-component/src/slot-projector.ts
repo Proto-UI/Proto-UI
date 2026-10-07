@@ -1,5 +1,7 @@
 // packages/adapters/web-component/src/slot-projector.ts
 
+import { isOwnedVisualNode } from './visual-surface';
+
 export class SlotProjector {
   private el: HTMLElement;
 
@@ -29,26 +31,27 @@ export class SlotProjector {
 
   /** rebuild 前：收集并“保住”外部节点 */
   collectSlotPoolBeforeCommit(): Node[] {
-    const pool: Node[] = [];
-
-    // 1) 先把已投影的节点从 DOM 拿出来（否则 replaceChildren 会把它们丢掉）
-    for (const n of this.projected) {
-      if (n.parentNode) {
-        n.parentNode.removeChild(n);
+    // Snapshot before detaching anything: observer delivery may lag a caller
+    // removal, reparent, prepend or reorder. Only a no-slot commit parks nodes.
+    const candidates = new Set<Node>();
+    for (const node of this.projected) {
+      if (this.el.contains(node) || (!this.slotEnd && !node.parentNode)) candidates.add(node);
+    }
+    for (const node of Array.from(this.el.childNodes)) {
+      if (!this.owned.has(node) && !isOwnedVisualNode(this.el, node)) candidates.add(node);
+    }
+    const roots = [...candidates].filter((node) => {
+      for (let parent = node.parentNode; parent && parent !== this.el; parent = parent.parentNode) {
+        if (candidates.has(parent)) return false;
       }
-      pool.push(n);
-    }
-
-    // 2) 再收集 custom element 的 direct children 中 “非 owned” 的节点（用户 appendChild 到 el）
-    for (const n of Array.from(this.el.childNodes)) {
-      if (this.owned.has(n)) continue;
-      // 注意：这里 n 可能是用户刚 append 的节点，此时还没投影
-      pool.push(n);
-    }
-
-    // 去重（顺序保留）
-    const seen = new Set<Node>();
-    return pool.filter((n) => (seen.has(n) ? false : (seen.add(n), true)));
+      return true;
+    });
+    const parked = roots.filter((node) => !this.el.contains(node));
+    const live = roots.filter((node) => this.el.contains(node));
+    live.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
+    const pool = [...parked, ...live];
+    for (const node of pool) node.parentNode?.removeChild(node);
+    return pool;
   }
 
   /** rebuild 后：更新 anchors / owned / projected，并启动 MO */
@@ -86,7 +89,7 @@ export class SlotProjector {
       if (m.type !== 'childList') continue;
       if (m.target !== this.el) continue; // 只处理 direct children 的新增
       for (const n of Array.from(m.addedNodes)) {
-        if (this.owned.has(n)) continue;
+        if (this.owned.has(n) || isOwnedVisualNode(this.el, n)) continue;
         // Ignore nodes that are already projected in-place before slotEnd.
         // This prevents re-moving the same node and creating a mutation loop.
         if (!this.shouldMoveToSlot(n)) continue;

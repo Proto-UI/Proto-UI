@@ -68,9 +68,9 @@ function interrupted(o = {}) {
     ...o,
   });
 }
-function accepted(h) {
+function accepted(h, priorHandoff = null) {
   assert.equal(structural(h), true, JSON.stringify(structural.errors));
-  return validateSkillHandoff(h, registry);
+  return validateSkillHandoff(h, registry, { priorHandoff });
 }
 test('completed v1 remains compatible; completed v2 still requires producer output', () => {
   const h = base();
@@ -89,6 +89,50 @@ test('completed v1 remains compatible; completed v2 still requires producer outp
         artifacts: [...v1.artifacts, a('evidence-report', 'fixture:second')],
       }),
     /duplicates type/
+  );
+});
+test('v1 and v2 require a content-bound identity record and keep it singleton', () => {
+  const current = base({
+    fromId: 'pui-agent-identify',
+    nextSkillId: null,
+    artifacts: [
+      a('request-context'),
+      a('modeltrace-record', 'fixture:current-model', { digest: 'sha256:' + digest }),
+    ],
+  });
+  const { outcome, binding, ...legacy } = current;
+  legacy.schemaVersion = 1;
+  for (const handoff of [legacy, current]) {
+    assert.equal(accepted(handoff).nextSkill, null);
+    for (const value of [undefined, digest]) {
+      const unbound = structuredClone(handoff);
+      const record = unbound.artifacts.find((artifact) => artifact.type === 'modeltrace-record');
+      delete record.digest;
+      if (value !== undefined) record.digest = value;
+      assert.equal(structural(unbound), false);
+      assert.throws(() => validateSkillHandoff(unbound, registry));
+    }
+    assert.throws(
+      () =>
+        validateSkillHandoff({
+          ...handoff,
+          artifacts: [
+            ...handoff.artifacts,
+            a('modeltrace-record', 'fixture:other-model', { digest: 'sha256:' + digest }),
+          ],
+        }),
+      /duplicates type/
+    );
+  }
+  assert.equal(
+    structural({
+      ...current,
+      artifacts: [
+        ...current.artifacts,
+        a('modeltrace-record', 'fixture:other-model', { digest: 'sha256:' + digest }),
+      ],
+    }),
+    false
   );
 });
 test('interruption admits exactly one read-only CI leaf or truthful terminal, never mutation', () => {
@@ -220,8 +264,15 @@ function resumeArgs() {
         revision: currentBinding.headSha,
         digest: 'sha256:' + currentBinding.reviewInputDigest,
       }),
-      a('candidate-change', 'fixture:repair', { revision: currentBinding.headSha }),
-      a('evidence-report', 'fixture:fixed', { revision: currentBinding.headSha, result: 'passed' }),
+      a('candidate-change', 'fixture:repair', {
+        revision: currentBinding.headSha,
+        digest: 'sha256:' + 'd'.repeat(64),
+      }),
+      a('evidence-report', 'fixture:fixed', {
+        revision: currentBinding.headSha,
+        result: 'passed',
+        digest: 'sha256:' + 'e'.repeat(64),
+      }),
     ],
   };
 }
@@ -297,7 +348,10 @@ test('resume preserves a routed diagnose/repair/validate chain without flattenin
     artifacts: [
       authority,
       semantic,
-      a('candidate-change', 'fixture:repair', { revision: current.headSha }),
+      a('candidate-change', 'fixture:repair', {
+        revision: current.headSha,
+        digest: 'sha256:' + 'd'.repeat(64),
+      }),
     ],
   });
   const validation = base({
@@ -307,13 +361,17 @@ test('resume preserves a routed diagnose/repair/validate chain without flattenin
     artifacts: [
       authority,
       repair.artifacts[2],
-      a('evidence-report', 'fixture:fixed', { revision: current.headSha, result: 'passed' }),
+      a('evidence-report', 'fixture:fixed', {
+        revision: current.headSha,
+        result: 'passed',
+        digest: 'sha256:' + 'e'.repeat(64),
+      }),
       review,
     ],
   });
   x.continuation = [ci, repair, validation];
   const result = resumeSkillHandoff(x, registry);
-  assert.equal(accepted(result).nextSkill.id, 'pui-review');
+  assert.equal(accepted(result, repair).nextSkill.id, 'pui-review');
   assert.equal(result.fromId, 'pui-validate');
   assert.equal(result.artifacts.filter((a) => a.reference === 'fixture:repair').length, 1);
   assert.equal(
@@ -345,4 +403,78 @@ test('resume strips mutation and standing authorization artifacts from interrupt
     );
     assert.equal(accepted(result).nextSkill.id, 'pui-review');
   }
+});
+
+test('resume retains validation enrichment of an optional candidate binding', () => {
+  const x = resumeArgs(),
+    current = x.continuation.binding,
+    review = x.currentArtifacts.find((a) => a.type === 'review-input');
+  const authority = a('authority-map'),
+    semantic = a('semantic-authorization');
+  const ci = base({
+    fromId: 'pui-ci',
+    nextSkillId: 'pui-spec',
+    binding,
+    artifacts: [a('ci-report', 'fixture:diagnosis', { result: 'failed' }), authority, semantic],
+  });
+  const repair = base({
+    fromId: 'pui-spec',
+    nextSkillId: 'pui-validate',
+    binding: current,
+    artifacts: [
+      authority,
+      semantic,
+      a('candidate-change', 'fixture:repair', {
+        revision: current.headSha,
+        digest: 'sha256:' + 'd'.repeat(64),
+      }),
+    ],
+  });
+  const validation = base({
+    fromId: 'pui-validate',
+    nextSkillId: 'pui-review',
+    binding: current,
+    artifacts: [
+      authority,
+      repair.artifacts[2],
+      a('evidence-report', 'fixture:fixed', {
+        revision: current.headSha,
+        result: 'passed',
+        digest: 'sha256:' + 'e'.repeat(64),
+      }),
+      review,
+    ],
+  });
+  validation.artifacts[1] = { ...validation.artifacts[1] };
+  delete repair.artifacts[2].digest;
+  delete repair.artifacts[2].revision;
+  x.continuation = [ci, repair, validation];
+  const result = resumeSkillHandoff(x, registry);
+  assert.equal(accepted(result, repair).nextSkill.id, 'pui-review');
+  assert.equal(result.fromId, 'pui-validate');
+  assert.equal(result.artifacts.filter((a) => a.reference === 'fixture:repair').length, 1);
+  assert.equal(
+    result.artifacts.some((a) => a.reference === 'fixture:diagnosis' && a.result === 'failed'),
+    true
+  );
+  assert.equal(
+    result.artifacts.some((a) => a.reference === 'fixture:prior' && a.result === 'partial'),
+    true
+  );
+  for (const bindAtRepair of [false, true]) {
+    const reusedHistory = structuredClone(x);
+    const historical = reusedHistory.interrupted.artifacts.find(
+      (a) => a.type === 'candidate-change'
+    );
+    historical.reference = 'fixture:repair';
+    if (bindAtRepair) reusedHistory.continuation[1].artifacts[2] = { ...validation.artifacts[1] };
+    assert.throws(() => resumeSkillHandoff(reusedHistory, registry), /conflicting provenance/);
+  }
+  const refreshReuse = resumeArgs();
+  refreshReuse.currentArtifacts.find((a) => a.type === 'candidate-change').reference =
+    refreshReuse.interrupted.artifacts.find((a) => a.type === 'candidate-change').reference;
+  assert.throws(() => resumeSkillHandoff(refreshReuse, registry), /conflicting provenance/);
+  const skipped = structuredClone(x);
+  skipped.continuation = [ci, validation];
+  assert.throws(() => resumeSkillHandoff(skipped, registry), /skips a routed leaf/);
 });

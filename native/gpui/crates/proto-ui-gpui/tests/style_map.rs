@@ -391,7 +391,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 31] = [
+const EXPECTED_UNMAPPED: [&str; 32] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -410,6 +410,8 @@ const EXPECTED_UNMAPPED: [&str; 31] = [
     "pointer-events",
     "touch-action",
     "user-select",
+    // WebKit's compatibility declaration does not add native selection support.
+    "-webkit-user-select",
     "resize",
     "will-change",
     "background-clip",
@@ -431,12 +433,34 @@ const EXPECTED_UNMAPPED: [&str; 31] = [
     "white-space",
 ];
 
+#[test]
+fn selection_affordances_keep_both_web_properties_explicitly_unmapped() {
+    // Use a supported positioning context; implicit static-position diagnostics
+    // are covered separately and must not be mistaken for selection properties.
+    let mapped = map(
+        &resolve(&["relative", "select-none"], "shadcn"),
+        LengthContext::default(),
+    );
+    let actual: BTreeSet<&str> = mapped
+        .unmapped
+        .iter()
+        .map(|(property, value, reason)| {
+            assert_eq!(value, "none");
+            assert_eq!(*reason, Unmapped::UnknownProperty);
+            property.as_str()
+        })
+        .collect();
+    let expected: BTreeSet<&str> = ["-webkit-user-select", "user-select"].into_iter().collect();
+    assert_eq!(actual, expected);
+    assert!(!mapped.is_complete());
+}
+
 /// The inventory of values a property this layer *does* implement cannot take.
 ///
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 9] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 10] = [
     (
         "color",
         "inherit",
@@ -472,6 +496,13 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 9] = [
          length or a fraction, never their sum, so this has to be resolved \
          against the parent's size at layout time. Before this was reported it \
          was mapped as a plain 100%, one pixel too tall. The Tabs slice owns it.",
+    ),
+    (
+        "height",
+        "calc(100% + 2px)",
+        "Brutalist Scroll Area's private Web corner accounts for its track's top border. \
+         GPUI cannot add a fixed border length to a parent fraction without layout context; \
+         this Web-only passive presentation is explicitly unmapped, not rounded to 100%.",
     ),
     (
         "position",

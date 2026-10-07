@@ -120,7 +120,7 @@ export const useOpenState = defineHook<
       api.store.run = run;
     });
 
-    def.lifecycle.onUnmounted(() => {
+    def.lifecycle.onBeforeDispose(() => {
       api.store.run = undefined;
     });
 

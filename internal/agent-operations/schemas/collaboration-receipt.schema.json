@@ -24,7 +24,7 @@
     "note"
   ],
   "properties": {
-    "schemaVersion": { "const": 1 },
+    "schemaVersion": { "enum": [1, 2] },
     "kind": { "const": "proto-ui.collaboration-receipt" },
     "repositoryId": { "type": "string", "pattern": "^github\\.com:[^/\\s]+/[^/\\s]+$" },
     "authorizationId": { "type": "string", "minLength": 1, "maxLength": 200 },
@@ -48,9 +48,15 @@
         "live-authorization-rejected"
       ]
     },
-    "note": { "type": "string", "minLength": 1, "maxLength": 2000 }
+    "note": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "modelTrace": { "$ref": "modeltrace-receipt.schema.json" }
   },
   "allOf": [
+    {
+      "if": { "properties": { "schemaVersion": { "const": 2 } } },
+      "then": { "required": ["modelTrace"] },
+      "else": { "not": { "required": ["modelTrace"] } }
+    },
     {
       "if": { "properties": { "action": { "const": "resolve-fixed-review-thread" } } },
       "then": { "properties": { "target": { "$ref": "#/$defs/threadTarget" } } }

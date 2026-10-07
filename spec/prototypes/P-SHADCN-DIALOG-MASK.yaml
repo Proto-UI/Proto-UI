@@ -6,11 +6,11 @@ since: 0.2.0-rc.0
 summary: Shadcn Dialog Mask maps upstream Overlay onto the Base Mask protocol, retains modal presence and passthrough behavior, narrows its declared public Transition surface, and adds current fade styling.
 statement:
   zh-CN: >-
-    Shadcn Dialog Mask 是 upstream DialogOverlay 对 `P-BASE-DIALOG-MASK` 的投射，保留 modal mask、presence、passthrough 与 no-dismiss behavior，将 enter/leave 配置为 150ms，并增加黑色半透明 blur surface 与 fade animation。公开类型只接受 `passthrough` 并只声明 `transitionState`/`isPresent`；其他 inherited Transition runtime capabilities 仍由内部实现使用，但不属于当前支持的 Shadcn public API。`asChild` 明确不提供。
+    Shadcn Dialog Mask 是 upstream DialogOverlay 对 `P-BASE-DIALOG-MASK` 的投射，保留 modal mask、presence、passthrough 与 no-dismiss behavior，将 enter/leave 配置为 150ms，并在可用的 live preference/support facts 明确允许时增加黑色半透明 blur surface 与 fade animation；减少透明度、强制色、未知材质偏好或未知支持回退为不透明背景。公开类型只接受 `passthrough` 并只声明 `transitionState`/`isPresent`；其他 inherited Transition runtime capabilities 仍由内部实现使用，但不属于当前支持的 Shadcn public API。`asChild` 明确不提供。
 
 
   en: >-
-    Shadcn Dialog Mask projects upstream DialogOverlay over `P-BASE-DIALOG-MASK`. It retains modal-mask, presence, passthrough, and no-dismiss behavior, configures enter and leave to 150ms, and adds the black translucent blurred surface and fade animation. Its public types accept only `passthrough` and declare only `transitionState` and `isPresent`; other inherited Transition runtime capabilities remain internally available but are not part of the supported Shadcn public API. `asChild` is explicitly unavailable.
+    Shadcn Dialog Mask projects upstream DialogOverlay over `P-BASE-DIALOG-MASK`. It retains modal-mask, presence, passthrough, and no-dismiss behavior, configures enter and leave to 150ms, and adds the black translucent blurred surface only when live preference/support facts explicitly permit it, alongside fade animation. Reduced transparency, forced colors, non-ordinary or unknown material preferences, and unavailable blur support use an opaque background. Its public types accept only `passthrough` and declare only `transitionState` and `isPresent`; other inherited Transition runtime capabilities remain internally available but are not part of the supported Shadcn public API. `asChild` is explicitly unavailable.
 
 
 criteria:
@@ -58,12 +58,8 @@ criteria:
       }
   - id: P-SHADCN-DIALOG-MASK-CURRENT-VISUAL-SURFACE
     text:
-      {
-        zh-CN: Mask 必须提供 fixed inset、black/50 与 backdrop-blur-xs tokens。,
-        en: Mask must provide fixed-inset,
-        black/50,
-        and backdrop-blur-xs tokens.,
-      }
+      en: Mask always provides fixed inset and starts with opaque bg-background. Only live reducedTransparency no-preference, forcedColors none, and styleSupport.backdropBlur4px true enable the existing bg-black/50 and backdrop-blur-xs treatment. Unknown, non-ordinary or lost input withdraws both tokens; returning affirmative facts restores them without replacing the open mask, content or focus. The finite alphaFill fact describes a different secondary/80 lowering and is not widened by this recipe. No new material protocol or stable Compiler/native-host claim is introduced.
+      zh-CN: Mask 始终投射 fixed inset，初始为不透明 bg-background。仅 live reducedTransparency 为 no-preference、forcedColors 为 none 且 styleSupport.backdropBlur4px 为 true 时启用既有 bg-black/50 与 backdrop-blur-xs。未知、非普通或丢失输入撤回二者；恢复肯定事实时在保留已打开 Mask、内容与焦点的前提下重新启用。有限 alphaFill fact 描述另一 secondary/80 lowering，本配方不扩张它，也不新增材质协议或稳定 Compiler/native-host 保证。
   - id: P-SHADCN-DIALOG-MASK-COMPATIBILITY-SUBSET
     text:
       {
@@ -104,10 +100,18 @@ sources:
   - path: packages/prototypes/shadcn/src/dialog/overlay.proto.ts
   - path: packages/prototypes/shadcn/src/dialog/types.ts
   - path: packages/prototypes/shadcn/test/dialog.test.ts
+  - path: packages/prototypes/shadcn/test/dialog-material.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/dialog.tsx
     label: shadcn/ui v4 new-york DialogOverlay pinned baseline
 dependsOn:
-  contracts: [C-AS-HOOK-0001, C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  contracts:
+    [
+      C-AS-HOOK-0001,
+      C-RULE-WHEN-0002,
+      C-RULE-INTENT-FEEDBACK-STYLE-0001,
+      { id: C-RULE-PREFERENCES-0001, since: 0.3.0-alpha.1 },
+      { id: C-RULE-STYLE-SUPPORT-0001, since: 0.3.0-alpha.1 },
+    ]
   decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
   prototypes: [P-SHADCN-DIALOG]
 inherits:
@@ -121,6 +125,11 @@ inherits:
 verifies: { tests: [T-SHADCN-DIALOG-MASK-0001] }
 revisions:
   [
+    {
+      version: 0.3.0-alpha.1,
+      change: revised,
+      summary: Respect live material accessibility preferences and finite blur support with opaque fallback; preserve draft status and Base semantics.,
+    },
     {
       version: 0.2.0-rc.0,
       change: introduced,

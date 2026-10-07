@@ -1,0 +1,79 @@
+name: Scroll Area corner evidence
+
+on:
+  pull_request:
+    paths:
+      - 'packages/modules/scroll/**'
+      - 'packages/prototypes/*/src/scroll-area/**'
+      - 'apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.demo.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-brutalist-scroll-area.demo.ts'
+      - 'apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/scroll-area-corner-color*.ts'
+      - '.github/workflows/scroll-area-corner-evidence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scroll-area-corner-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    strategy:
+      fail-fast: false
+      matrix:
+        subject: [baseline, candidate]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Bind the evidence harness and production source
+        env:
+          SUBJECT: ${{ matrix.subject }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '42aaca074eb4c1532545fe554d1ee9bc3d0a8891' }}
+        run: |
+          set -euo pipefail
+          echo "PROTO_UI_SCROLL_CORNER_HARNESS_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+          if [[ "$SUBJECT" == baseline ]]; then
+            cp apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts /tmp/scroll-area-corner.browser.test.ts
+            cp apps/www/src/content/docs/zh-cn/scroll-area-corner-color.ts /tmp/scroll-area-corner-color.ts
+            git checkout --detach "$BASE_SHA"
+            cp /tmp/scroll-area-corner.browser.test.ts apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts
+            cp /tmp/scroll-area-corner-color.ts apps/www/src/content/docs/zh-cn/scroll-area-corner-color.ts
+            echo 'PROTO_UI_SCROLL_CORNER_CAPTURE_ONLY=1' >> "$GITHUB_ENV"
+          fi
+          git rev-parse HEAD
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install the declared workspace
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+      - name: Disable only the development toolbar on both evidence subjects
+        run: |
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled
+      - name: Render both actual families in all four Web runtimes
+        env:
+          PROTO_UI_SCROLL_CORNER_EVIDENCE_DIR: ${{ github.workspace }}/scroll-corner-evidence
+        run: corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/scroll-area-corner.browser.test.ts --maxWorkers=1 --minWorkers=1
+      - name: Preserve both existing Scroll Area focus checks
+        if: matrix.subject == 'candidate'
+        run: >-
+          corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts --testNamePattern 'rings the focused Scroll Area|renders exact oriented chrome' --maxWorkers=1 --minWorkers=1
+
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: scroll-corner-${{ matrix.subject }}-${{ github.event.pull_request.head.sha || github.sha }}
+          path: scroll-corner-evidence/
+          if-no-files-found: warn
+          retention-days: 14

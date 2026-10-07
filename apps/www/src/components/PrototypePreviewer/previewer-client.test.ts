@@ -13,7 +13,6 @@ const demoSpies = vi.hoisted(() => ({
 }));
 
 vi.mock('./runtimes/registry', () => ({
-  AdapterIds: ['wc', 'vue2'],
   runtimeLoaders: {
     wc: async () => ({
       id: 'wc',
@@ -113,6 +112,100 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     document.body.innerHTML = '';
   });
 
+  it('retains the original live loading status through module loading and renderer preparation', async () => {
+    const root = createPreviewerRoot();
+    const host = root.querySelector<HTMLElement>('.host')!;
+    host.parentElement!.classList.add('proto-previewer__preview');
+    const status = document.createElement('div');
+    status.className = 'proto-previewer__skeleton';
+    status.setAttribute('role', 'status');
+    status.textContent = 'Loading interactive preview…';
+    host.append(status);
+    let releaseModules!: () => void;
+    let releaseRender!: () => void;
+    prototypeSpies.loadMany.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          releaseModules = resolve;
+        })
+    );
+    demoSpies.render.mockImplementationOnce(async ({ host }: { host: HTMLElement }) => {
+      host.replaceChildren(document.createElement('button'));
+      await new Promise<void>((resolve) => {
+        releaseRender = resolve;
+      });
+      return { destroy: vi.fn() };
+    });
+    initPreviewer({
+      root,
+      demoId: 'demo-custom-preview',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc'],
+    });
+    try {
+      await vi.waitFor(() => expect(prototypeSpies.loadMany).toHaveBeenCalled());
+      expect(status.isConnected).toBe(true);
+      expect(root.querySelector('[role="status"]')).toBe(status);
+      expect(host.inert).toBe(true);
+      releaseModules();
+      await vi.waitFor(() => expect(demoSpies.render).toHaveBeenCalled());
+      expect(status.isConnected).toBe(true);
+      expect(host.inert).toBe(true);
+      releaseRender();
+      await vi.waitFor(() => expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc'));
+      expect(status.isConnected).toBe(false);
+      expect(host.inert).toBe(false);
+      expect(host.hasAttribute('data-previewer-startup-pending')).toBe(false);
+      host.inert = true; // Later owners are not overwritten by repeated cleanup.
+      await (root as any).__previewer__.destroy();
+      expect(host.inert).toBe(true);
+    } finally {
+      releaseModules?.();
+      releaseRender?.();
+      await (root as any).__previewer__.destroy();
+    }
+  });
+
+  it.each(['failure', 'destroy'] as const)(
+    'releases the initial status on %s without retaining a busy shell',
+    async (outcome) => {
+      const root = createPreviewerRoot();
+      const host = root.querySelector<HTMLElement>('.host')!;
+      host.innerHTML = '<div class="proto-previewer__skeleton" role="status">Loading</div>';
+      let rejectModules!: (error: Error) => void;
+      prototypeSpies.loadMany.mockImplementationOnce(
+        () =>
+          new Promise<void>((_resolve, reject) => {
+            rejectModules = reject;
+          })
+      );
+      const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+      initPreviewer({
+        root,
+        demoId: 'demo-custom-preview',
+        initialRuntime: 'wc',
+        demoProps: {},
+        runtimeList: ['wc'],
+      });
+      try {
+        await vi.waitFor(() => expect(prototypeSpies.loadMany).toHaveBeenCalled());
+        expect(root.querySelector('[role="status"]')?.isConnected).toBe(true);
+        if (outcome === 'destroy') await (root as any).__previewer__.destroy();
+        rejectModules(new Error('controlled module failure'));
+        if (outcome === 'failure')
+          await vi.waitFor(() => expect(host.textContent).toContain('controlled module failure'));
+        expect(root.querySelector('[role="status"]')).toBeNull();
+        expect(host.inert).toBe(false);
+        expect(root.hasAttribute('data-previewer-startup-shell')).toBe(false);
+        expect(host.hasAttribute('data-previewer-startup-pending')).toBe(false);
+      } finally {
+        await (root as any).__previewer__.destroy();
+        log.mockRestore();
+      }
+    }
+  );
+
   it('keeps an uncataloged demo on the legacy demo renderer', async () => {
     const root = createPreviewerRoot();
 
@@ -140,41 +233,24 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     await (root as any).__previewer__.destroy();
   });
 
-  it('does not demand a static module loader again after a direct custom loader succeeds', async () => {
+  it('ignores legacy data-loader URLs and keeps the static prototype module path', async () => {
     const root = createPreviewerRoot();
-    const prototypeId = 'custom-loader-only-prototype';
-    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
-    prototypeSpies.loadMany.mockImplementation(async (ids: string[]) => {
-      if (ids.includes(prototypeId))
-        throw new Error('Custom Prototype has no static module loader');
-    });
-    const loader =
+    root.dataset.loader =
       'data:text/javascript,' +
       encodeURIComponent('document.documentElement.dataset.runtimeCustomLoader = "loaded";');
     initPreviewer({
       root,
-      prototypeId,
-      loader,
+      prototypeId: 'demo',
       initialRuntime: 'wc',
-      demoProps: { label: 'Original props' },
+      demoProps: {},
       runtimeList: ['wc'],
     });
     try {
-      await vi.waitFor(() =>
-        expect(document.documentElement.dataset.runtimeCustomLoader).toBe('loaded')
-      );
-      await vi.waitFor(() => expect(prototypeSpies.loadMany).toHaveBeenCalled());
+      await vi.waitFor(() => expect(demoSpies.render).toHaveBeenCalled());
+      expect(document.documentElement.dataset.runtimeCustomLoader).toBeUndefined();
       expect(prototypeSpies.loadMany).toHaveBeenCalledWith([]);
-      await vi.waitFor(() => expect((root as any).__previewer__.getCurrentRuntime()).toBe('wc'));
-      expect(demoSpies.render.mock.calls[0]![0].demo.root.children[1].children[0]).toEqual({
-        kind: 'proto',
-        prototypeId,
-        props: { label: 'Original props' },
-      });
     } finally {
       await (root as any).__previewer__.destroy();
-      delete document.documentElement.dataset.runtimeCustomLoader;
-      consoleError.mockRestore();
     }
   });
 

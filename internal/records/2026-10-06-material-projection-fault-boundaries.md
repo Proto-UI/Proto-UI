@@ -1,0 +1,23 @@
+# Bounded material projection fault repairs
+
+Baseline: PR #809 `6a6054b53558a18fabe61b3f38ae0d895bac6749`. Review comments 4193471228, 4193471239 and 4193471249 were checked against the finite private profile. This report contains project source/test evidence, not new public guarantees or independent acceptance.
+
+## Composed filter admission
+
+The existing host-level input list was compared once with its composed traversal: opacity and transform/rotate/scale/translate now already traverse light, shadow-host and assigned-slot ancestry; final foreground is computed at the host and already reflects inheritance, while host corner geometry remains local. CSS filter was missing at both host and ancestor levels. `filter: opacity(.2)` changes final contrast while computed opacity stays one, so admission and observation were both incomplete. Four negative controls reproduced the omission. The repaired matrix covers six fields across host/light/shadow/slot placements; it does not conservatively reject arbitrary unrelated ancestor properties. The source/emitted browser journey adds filter opacity/brightness withdrawal, cleared retained pixels and recovery.
+
+## Terminal resource ownership
+
+A terminal release from a provider/program callback could return into repaint, remount a canvas or republish diagnostics. An independently constructed host-unit harness uses the actual sink, token applier and visual-surface owner with explicitly mocked geometry/WebGL. Against the exact original sink blob it produced 14 failures and four passing controls. Current source checks retirement after the six provider/program boundaries, during geometry delivery and before publication; catch/fallback cannot resurrect a retired owner. All 18 controls pass, including return/throw cases, balanced resources, stale delivery, equal-generation fresh snapshots and live source replacement. `retired` is monotonic and this sink is never reacquired, so a new numeric generation is unnecessary for this terminal condition. These tests are not GPU optical or native-browser evidence.
+
+## Semantic observers versus host projection errors
+
+Real State, Rule and Feedback module implementations reproduce the reported material watcher throwing before Rule can update a contribution. Catching only the material watcher is insufficient: a persistent sink failure in the first Rule's projection still prevents a second semantic observer and leaves an orphaned contribution because replacement never returned its disposer. That second counterexample was preserved and repaired before claiming completion.
+
+Only the material observer invalidation and Rule replaceStyleRuntime's post-mutation projection flush defer the original projection error. Recorder validation remains outside the catch. Valid logical replacement returns its owner/disposer even while paint fails, pending projection retains the complete latest merged result, and explicit recovery retries it. Five controls cover persistent activation/removal across independent Rule drivers, later observer delivery, healthy cycles, no-Rule retry, synchronous successful projection, validation and direct imperative/replay/remount errors. No global State watcher policy changes.
+
+## Validation and acceptance limits
+
+Final affected validation passed 821 tests across 169 files, with 34 existing todos across three skipped files. Workspace/docs types passed (446 docs files, zero errors), source generation10/10, opt-in graph controls4/4 and the real37-package build passed; the emitted fixture resolves292 package dist inputs and zero src inputs. Nine unchanged standalone caps pass: Runtime67,834/69,200; React88,504/91,000; Vue88,238/90,800; WC96,811/104,500. An independent read-only review reran release18/18 and observer5/5, independently reproduced original-sink14 failures/four passing controls, and found no blocker within these declared boundaries. This is not GitHub approval. Source generation and actual package artifact consumption remain separate from rendered execution. The already verified local Chromium socket restriction is not bypassed; new exact-head CI must run the extended source/emitted filter journey. Prior images remain bound to their original commits. The previously cancelled dedicated screenshot publication is not retried.
+
+No budget ceiling, measurement algorithm, public lifecycle or arbitrary compositing capability is changed here. The complete Focus/material union must be measured again after this final source batch, with any necessary numeric proposal separately evidenced and reviewed. #824 independent acceptance/main integration and #809 independent approval remain distinct gates.

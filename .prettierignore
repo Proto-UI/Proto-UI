@@ -7,3 +7,5 @@ DCO.md
 # Written by scripts/gpui/generate-*-fixture.mts and verified byte-for-byte by
 # their --check mode, so a formatter rewrite would make the check fail.
 native/gpui/fixtures/
+# Pinned MIT upstream artifacts; checksums bind their unmodified UTF-8 LF bytes.
+scripts/agent-operations/vendor/modeltrace/

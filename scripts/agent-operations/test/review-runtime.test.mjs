@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parse as parseYaml } from 'yaml';
 import {
   authorizeReviewSubmission,
@@ -23,6 +23,8 @@ import {
   verifyReconciliation,
 } from '../review-runtime.mjs';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
+import { withReviewTransportMetadata } from './fixtures/review-pagination.mjs';
+import { modelTraceFixture, writeModelTraceFixture } from './fixtures/modeltrace.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 const policy = parseYaml(
@@ -210,6 +212,7 @@ function priorReviewFixture() {
   const boundary = (reviews = [review], overrides = {}) => {
     const input = reviewInput({ reviews });
     return {
+      ...modelTraceFixture(input.repositoryId),
       packet: packet({ limitations: [], recommendedAction: 'APPROVE' }, input),
       input,
       liveInput: structuredClone(input),
@@ -481,6 +484,7 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
     ];
     base.packet = packet({ limitations: [], recommendedAction: 'APPROVE' }, base.input);
     const input = base.input;
+    const identity = writeModelTraceFixture(directory, input.repositoryId);
     const connection = (nodes) => ({ nodes, pageInfo: { hasNextPage: false } });
     const actor = ({ login, name, email }) => ({ user: { login }, name, email });
     const contexts = connection(
@@ -500,7 +504,7 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
     writeFileSync(
       fixturePath,
       JSON.stringify({
-        payload: {
+        payload: withReviewTransportMetadata({
           data: {
             viewer: { login: 'agent' },
             repository: {
@@ -537,7 +541,7 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
               },
             },
           },
-        },
+        }),
         filePages: [
           input.changedFiles.map((file) => ({ filename: file.path, status: file.status })),
         ],
@@ -555,7 +559,7 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
         assert.equal(command, 'gh');
         appendFileSync(process.env.PUI_REVIEW_TEST_CALLS, JSON.stringify(args) + '\\n');
         if (args[1] === 'graphql') return JSON.stringify(fixture.payload);
-        if (args.includes('--paginate')) return JSON.stringify(fixture.filePages);
+        if (args.some((arg) => arg.includes('/files?per_page=100&page=1'))) return JSON.stringify(fixture.filePages[0]);
         if (args.includes('POST')) {
           const request = JSON.parse(options.input);
           return JSON.stringify({
@@ -582,14 +586,31 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
         nextSkillId: 'pui-review',
         artifacts: [
           { type: 'authority-map', reference: 'review authority map' },
-          { type: 'candidate-change', reference: 'bounded candidate change' },
-          { type: 'evidence-report', reference: 'validation evidence' },
+          {
+            type: 'candidate-change',
+            reference: 'bounded candidate change',
+            digest: 'sha256:' + 'c'.repeat(64),
+          },
+          {
+            type: 'evidence-report',
+            reference: 'validation evidence',
+            digest: 'sha256:' + 'd'.repeat(64),
+          },
           { type: 'review-input', reference: inputPath },
+          identity.artifact,
         ],
         humanGates: [],
         notes: [],
       })
     );
+    const receivedPath = path.join(directory, 'received-validation-input.json');
+    const receivedValidationInput = JSON.parse(readFileSync(handoffPath, 'utf8'));
+    receivedValidationInput.fromId = 'pui-regression';
+    receivedValidationInput.nextSkillId = 'pui-validate';
+    receivedValidationInput.artifacts = receivedValidationInput.artifacts.filter(
+      (a) => a.type !== 'evidence-report'
+    );
+    writeFileSync(receivedPath, JSON.stringify(receivedValidationInput));
     const submit = (candidate, priorArgs = []) => {
       writeFileSync(packetPath, JSON.stringify(candidate));
       writeFileSync(callsPath, '');
@@ -598,7 +619,7 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
           process.execPath,
           [
             '--import',
-            preloadPath,
+            pathToFileURL(preloadPath).href,
             path.join(root, 'scripts/agent-operations/review-packet.mjs'),
             'submit-review',
             '--mode',
@@ -611,8 +632,14 @@ test('submit-review CLI binds rendered live prior metadata before the mocked Git
             packetPath,
             '--handoff',
             handoffPath,
+            '--prior-handoff',
+            receivedPath,
             '--authorization',
             'explicit-current-user',
+            '--record',
+            identity.recordPath,
+            '--context',
+            identity.contextPath,
             ...priorArgs,
           ],
           {
@@ -1238,6 +1265,7 @@ test('agent:review submit-review consumes the bound prior packet before any live
     writeFileSync(inputPath, JSON.stringify(input));
     writeFileSync(packetPath, JSON.stringify(boundPacket));
     writeFileSync(priorPath, JSON.stringify(priorPacket));
+    const trace = writeModelTraceFixture(directory, input.repositoryId);
     writeFileSync(
       handoffPath,
       JSON.stringify({
@@ -1246,13 +1274,14 @@ test('agent:review submit-review consumes the bound prior packet before any live
         entrypoint: 'development',
         executionMode: 'human-assisted',
         executionModeSource: 'current-user',
-        fromId: 'pui-validate',
+        fromId: 'pui-dev', // This fixture starts at review intake, not a validation transition.
         nextSkillId: 'pui-review',
         artifacts: [
           { type: 'authority-map', reference: 'review authority map' },
           { type: 'candidate-change', reference: 'bounded candidate change' },
           { type: 'evidence-report', reference: 'validation evidence' },
           { type: 'review-input', reference: inputPath },
+          trace.artifact,
         ],
         humanGates: [],
         notes: [],
@@ -1271,6 +1300,10 @@ test('agent:review submit-review consumes the bound prior packet before any live
       inputPath,
       '--handoff',
       handoffPath,
+      '--record',
+      trace.recordPath,
+      '--context',
+      trace.contextPath,
     ];
     assert.throws(
       () => execFileSync(process.execPath, submitArgs, { cwd: root, encoding: 'utf8' }),
@@ -1413,6 +1446,7 @@ test('approval discloses a Vercel authorization failure as publication debt', ()
   });
   const review = packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input);
   const submission = {
+    ...modelTraceFixture(input.repositoryId),
     packet: review,
     input,
     liveInput: structuredClone(input),
@@ -1472,6 +1506,7 @@ test('approval discloses a Vercel authorization failure as publication debt', ()
 test('review submission preserves explicit authorization and activates the bounded scheduled scope', () => {
   const input = reviewInput();
   const base = {
+    ...modelTraceFixture(input.repositoryId),
     packet: packet(
       {
         limitations: [],
@@ -1909,6 +1944,7 @@ test('an active scheduled standing authorization can submit an exact-head review
   authorization.status = 'active';
   delete authorization.blockedBy;
   const approval = authorizeReviewSubmission({
+    ...modelTraceFixture(input.repositoryId),
     packet: packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input),
     input,
     liveInput: structuredClone(input),
@@ -1929,6 +1965,7 @@ test('an active scheduled standing authorization can submit an exact-head review
 test('submission preflight re-collects live canonical input and rejects drift and forged identities', () => {
   const input = reviewInput();
   const base = {
+    ...modelTraceFixture(input.repositoryId),
     packet: packet({ recommendedAction: 'COMMENT', limitations: [] }, input),
     input,
     liveInput: structuredClone(input),
@@ -2175,14 +2212,30 @@ test('agent:review CLI validates and inspects the same packet contract used by t
         nextSkillId: 'pui-review',
         artifacts: [
           { type: 'authority-map', reference: 'review authority map' },
-          { type: 'candidate-change', reference: 'bounded candidate change' },
-          { type: 'evidence-report', reference: 'validation evidence' },
+          {
+            type: 'candidate-change',
+            reference: 'bounded candidate change',
+            digest: 'sha256:' + 'c'.repeat(64),
+          },
+          {
+            type: 'evidence-report',
+            reference: 'validation evidence',
+            digest: 'sha256:' + 'd'.repeat(64),
+          },
           { type: 'review-input', reference: inputPath },
         ],
         humanGates: [],
         notes: [],
       })
     );
+    const receivedPath = path.join(directory, 'received-validation-input.json');
+    const receivedValidationInput = JSON.parse(readFileSync(handoffPath, 'utf8'));
+    receivedValidationInput.fromId = 'pui-regression';
+    receivedValidationInput.nextSkillId = 'pui-validate';
+    receivedValidationInput.artifacts = receivedValidationInput.artifacts.filter(
+      (a) => a.type !== 'evidence-report'
+    );
+    writeFileSync(receivedPath, JSON.stringify(receivedValidationInput));
     const validation = JSON.parse(
       execFileSync(
         process.execPath,
@@ -2195,6 +2248,8 @@ test('agent:review CLI validates and inspects the same packet contract used by t
           inputPath,
           '--handoff',
           handoffPath,
+          '--prior-handoff',
+          receivedPath,
         ],
         {
           cwd: root,
@@ -2215,6 +2270,8 @@ test('agent:review CLI validates and inspects the same packet contract used by t
           inputPath,
           '--handoff',
           handoffPath,
+          '--prior-handoff',
+          receivedPath,
           '--current-base',
           sha('a'),
           '--current-head',
@@ -2237,6 +2294,8 @@ test('agent:review CLI validates and inspects the same packet contract used by t
           'eligibility',
           '--handoff',
           handoffPath,
+          '--prior-handoff',
+          receivedPath,
           '--review-class',
           'review-cross-domain-semantics',
         ],
@@ -2306,7 +2365,7 @@ test('agent:review CLI validates and inspects the same packet contract used by t
   }
 });
 
-test('legacy schema v1 packets ingest without evidence but cannot carry dispositions', () => {
+test('legacy schema v1 packets remain readable but cannot authorize current writes', () => {
   const input = reviewInput();
   const legacy = packet({ recommendedAction: 'COMMENT' }, input);
   delete legacy.agentEvidence;
@@ -2323,6 +2382,7 @@ test('legacy schema v1 packets ingest without evidence but cannot carry disposit
   assert.throws(() => validateReviewPacket(smuggled, input), /unexpected|agentEvidence/);
 
   const base = {
+    ...modelTraceFixture(input.repositoryId),
     input,
     liveInput: structuredClone(input),
     executionMode: 'human-assisted',
@@ -2334,13 +2394,15 @@ test('legacy schema v1 packets ingest without evidence but cannot carry disposit
     pullRequestAuthor: 'contributor',
     ciConclusion: 'success',
   };
-  const comment = authorizeReviewSubmission({ ...base, packet: legacy });
-  assert.equal(comment.allowed, true);
+  assert.equal(authorizeReviewSubmission({ ...base, packet: legacy }).allowed, false);
 
   for (const recommendedAction of ['APPROVE', 'REQUEST_CHANGES']) {
     const disposition = packet({ recommendedAction }, input);
     delete disposition.agentEvidence;
     disposition.schemaVersion = 1;
+    disposition.limitations.push(
+      `Historical disposition fixture.\n\n${modelTraceFixture(input.repositoryId).disclosure}`
+    );
     const result = authorizeReviewSubmission({ ...base, packet: disposition });
     assert.equal(result.allowed, false);
     assert.match(result.reason, /schema v2/);
@@ -2349,4 +2411,143 @@ test('legacy schema v1 packets ingest without evidence but cannot carry disposit
   const invalidVersion = packet({ recommendedAction: 'COMMENT' }, input);
   invalidVersion.schemaVersion = 3;
   assert.throws(() => validateReviewPacket(invalidVersion, input), /schemaVersion/);
+});
+
+test('cloud event provenance cannot borrow local scheduled or current-user review authority', () => {
+  const input = reviewInput();
+  const base = {
+    packet: packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input),
+    input,
+    liveInput: structuredClone(input),
+    executionMode: 'autonomous',
+    executionModeSource: 'schedule',
+    authorizationId: 'proto-ui-scheduled-review-v1',
+    policy,
+    selfAssessment: assessment('C4', Object.keys(policy.reviewClasses)),
+    credentialCanReview: true,
+    reviewer: 'agent',
+    pullRequestAuthor: 'contributor',
+    ciConclusion: 'success',
+    dcoConclusion: 'success',
+  };
+  // Hold evidence, identity, permission and assessment constant: only the
+  // claimed provenance/authorization changes. These strings are not runtime proof.
+  assert.equal(authorizeReviewSubmission(base).allowed, false);
+  assert.equal(
+    authorizeReviewSubmission({
+      ...base,
+      executionMode: 'human-assisted',
+      executionModeSource: 'current-user',
+      authorizationId: 'explicit-current-user',
+    }).allowed,
+    true
+  );
+  for (const executionMode of ['autonomous', 'human-assisted']) {
+    for (const executionModeSource of ['cloud-event', 'webhook', 'governed-queue']) {
+      for (const authorizationId of [
+        'proto-ui-scheduled-review-v1',
+        'explicit-current-user',
+        'proto-ui-cloud-event-review-v1',
+      ]) {
+        // Repeat with fresh objects: a replay cannot turn unavailable authority
+        // into permission. This is not a distributed replay-store test.
+        for (let attempt = 0; attempt < 2; attempt += 1) {
+          const result = authorizeReviewSubmission(
+            structuredClone({
+              ...base,
+              executionMode,
+              executionModeSource,
+              authorizationId,
+            })
+          );
+          assert.equal(result.allowed, false);
+          assert.equal(result.reason, 'review submission authorization is unavailable');
+        }
+      }
+    }
+  }
+  for (const executionModeSource of ['schedule', 'current-user']) {
+    assert.equal(
+      authorizeReviewSubmission({
+        ...base,
+        executionModeSource,
+        authorizationId: 'proto-ui-cloud-event-review-v1',
+      }).allowed,
+      false
+    );
+  }
+});
+
+test('submit-review CLI rejects unsupported cloud provenance before live collection', () => {
+  const directory = mkdtempSync(path.join(tmpdir(), 'pui-cloud-review-'));
+  try {
+    const input = reviewInput();
+    const inputPath = path.join(directory, 'input.json');
+    const packetPath = path.join(directory, 'packet.json');
+    const handoffPath = path.join(directory, 'handoff.json');
+    writeFileSync(inputPath, JSON.stringify(input));
+    writeFileSync(packetPath, JSON.stringify(packet({}, input)));
+    for (const executionModeSource of ['cloud-event', 'webhook']) {
+      writeFileSync(
+        handoffPath,
+        JSON.stringify({
+          schemaVersion: 1,
+          kind: 'proto-ui.skill-handoff',
+          entrypoint: 'development',
+          executionMode: 'autonomous',
+          executionModeSource,
+          fromId: 'pui-validate',
+          nextSkillId: 'pui-review',
+          artifacts: [
+            { type: 'authority-map', reference: 'review authority map' },
+            { type: 'candidate-change', reference: 'bounded candidate change' },
+            { type: 'evidence-report', reference: 'validation evidence' },
+            { type: 'review-input', reference: inputPath },
+          ],
+          humanGates: [],
+          notes: [],
+        })
+      );
+      assert.throws(
+        () =>
+          execFileSync(
+            process.execPath,
+            [
+              path.join(root, 'scripts/agent-operations/review-packet.mjs'),
+              'submit-review',
+              '--mode',
+              'autonomous',
+              '--mode-source',
+              executionModeSource,
+              '--packet',
+              packetPath,
+              '--input',
+              inputPath,
+              '--handoff',
+              handoffPath,
+              '--authorization',
+              'proto-ui-scheduled-review-v1',
+            ],
+            {
+              cwd: root,
+              // No gh executable or credentials are needed for this negative boundary.
+              env: { PATH: '' },
+              stdio: 'pipe',
+            }
+          ),
+        (error) => {
+          assert.equal(error.status, 1);
+          assert.match(
+            error.stderr.toString(),
+            new RegExp(
+              `execution mode autonomous cannot be established from ${executionModeSource}`
+            )
+          );
+          return true;
+        }
+      );
+    }
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });

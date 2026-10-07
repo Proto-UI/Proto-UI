@@ -12,6 +12,10 @@ The bounded catalog is [M-ANATOMY-0001](../../../spec/modules/M-ANATOMY-0001.yam
 
 Claims and subscription declarations survive repeatable view detach/remount; host observers stop while detached. Terminal disposal removes owner claims and releases listeners. Internal domain and target ports serve downstream modules without becoming author APIs.
 
+After updating logical ancestry, the Web Component Adapter calls the internal `AnatomyPort.syncStructure()` ingress. Retained membership subscriptions reconcile independently of view mounting; this does not restart detached host-order observers or add an author API or Host Capability.
+
+On reconnect, the Web Component Adapter recomputes its inferred logical parent, including moves outside all Proto ancestors. If `syncStructure()` rejects a reused owner's structural admission, the Adapter restores the previously accepted logical binding and reconciles membership before propagating the original error. A failure of that restoration is reported together with the admission error. This is not a transaction for author-owned DOM moves; other Adapters' explicit logical ancestry remains unchanged.
+
 Family derivation, non-hook requirements and ordinary author missing-query policy remain outside this slice. Anatomy does not own A11y relationship semantics, collection interaction policy or host materialization.
 
 ## Package Role

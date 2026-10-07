@@ -11,7 +11,7 @@ import { readFileSync, rmSync } from 'node:fs';
 import { createServer } from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { corepackInvocation, createRuntimeTestPlan, READY_ROUTES } from './runtime-test-plan.mjs';
 import { runtimeSelection, assertVitestReport, writeJson, ciContext } from './runtime-ci.mjs';
 import { waitForServerReadiness } from './server-readiness.mjs';
 import {
@@ -24,42 +24,6 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 // Astro dev compiles a route on first request, so a suite probing a cold route
 // can exceed its own hook timeout and fall back to spawning its own server.
 // Warm every route the suites wait on.
-const READY_ROUTES = [
-  '/en/test/style-isolation/',
-  '/en/test/new-projection-families/',
-  '/en/test/liquid-glass-material/',
-  '/en/ui-libraries/base/image/',
-  '/en/start-here/quick-start/',
-  '/en/ui-libraries/shadcn/select/',
-  '/en/ui-libraries/shadcn/input/',
-  '/en/ui-libraries/base/scroll-area/',
-  '/en/ui-libraries/base/textarea/',
-  '/en/ui-libraries/brutalist/components/badge/',
-  '/en/ui-libraries/brutalist/components/button/',
-  '/en/ui-libraries/brutalist/components/card/',
-  '/en/ui-libraries/brutalist/components/dialog/',
-  '/en/ui-libraries/brutalist/components/hover-card/',
-  '/en/ui-libraries/brutalist/components/select/',
-  '/en/ui-libraries/brutalist/components/separator/',
-  '/en/ui-libraries/brutalist/components/skeleton/',
-  '/en/ui-libraries/brutalist/components/switch/',
-  '/en/ui-libraries/brutalist/components/tabs/',
-  '/en/ui-libraries/brutalist/components/toggle/',
-  '/en/ui-libraries/brutalist/components/tooltip/',
-  '/en/ui-libraries/shadcn/checkbox/',
-  '/en/ui-libraries/shadcn/dropdown-menu/',
-  '/en/ui-libraries/shadcn/switch/',
-  '/en/ui-libraries/shadcn/textarea/',
-  '/zh-cn/ui-libraries/base/transition/',
-  '/zh-cn/ui-libraries/shadcn/button/',
-  '/zh-cn/',
-  '/zh-cn/start-here/quick-start/',
-  '/zh-cn/internal/demo-matrix/',
-  '/zh-cn/ui-libraries/shadcn/select/',
-  '/zh-cn/ui-libraries/shadcn/scroll-area/',
-  '/zh-cn/ui-libraries/brutalist/components/checkbox/',
-  '/zh-cn/ui-libraries/shadcn/tooltip/',
-];
 const READY_TIMEOUT_MS = 180_000;
 
 const phase = process.env.PROTO_UI_RUNTIME_PHASE;
@@ -88,6 +52,7 @@ if (selection) {
 let devServer = null;
 let serverOutput = '';
 let shuttingDown = false;
+let styleGeneration = null;
 const reportedSnapshots = new Set();
 
 function reportServerSnapshot(reason) {
@@ -125,26 +90,40 @@ async function waitForServer(url) {
   });
 }
 
+async function generateProtoUiStyle() {
+  styleGeneration ??= new Promise((resolve, reject) => {
+    const appsWwwRoot = path.join(root, 'apps', 'www');
+    // The parent command requires Corepack on PATH. process.execPath may point
+    // at an unrelated distro Node binary, so do not derive Corepack from it.
+    const corepack = corepackInvocation();
+    const child = spawn(corepack.executable, ['pnpm@10.32.1', 'run', 'generate:proto-ui-style'], {
+      cwd: appsWwwRoot,
+      env: process.env,
+      shell: corepack.shell,
+      stdio: 'inherit',
+    });
+    child.on('error', reject);
+    child.on('exit', (code, signal) => {
+      if (signal) reject(new Error(`Proto UI style generation exited on ${signal}.`));
+      else if (code !== 0) reject(new Error(`Proto UI style generation exited with code ${code}.`));
+      else resolve();
+    });
+  });
+  return styleGeneration;
+}
+
 async function startServer() {
+  await generateProtoUiStyle();
   const port = await availablePort();
-  const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+  const appsWwwRoot = path.join(root, 'apps', 'www');
+  const astroCli = path.join(appsWwwRoot, 'node_modules', 'astro', 'astro.js');
   devServer = spawn(
-    executable,
-    [
-      'pnpm@10.32.1',
-      '--filter',
-      'apps-www',
-      'dev',
-      '--host',
-      '127.0.0.1',
-      '--port',
-      String(port),
-      '--strictPort',
-    ],
+    process.execPath,
+    [astroCli, 'dev', '--host', '127.0.0.1', '--port', String(port), '--strictPort'],
     {
-      cwd: root,
+      cwd: appsWwwRoot,
       detached: process.platform !== 'win32',
-      shell: process.platform === 'win32',
+      shell: false,
       env: process.env,
       stdio: ['ignore', 'pipe', 'pipe'],
     }
@@ -201,22 +180,18 @@ async function stopServer() {
 
 async function runVitest(args, baseUrl) {
   return new Promise((resolve, reject) => {
-    // spawn() does not go through a shell, so resolve the workspace binary
-    // rather than relying on node_modules/.bin being on PATH.
-    const vitestBin = path.join(
-      root,
-      'node_modules',
-      '.bin',
-      process.platform === 'win32' ? 'vitest.cmd' : 'vitest'
-    );
+    // Windows cannot execute a `.cmd` shim through spawn() without a shell.
+    // Invoke Vitest's ESM entry with the current Node executable instead so
+    // forwarded test arguments remain an argv array on every platform.
+    const vitestBin = path.join(root, 'node_modules', 'vitest', 'vitest.mjs');
     const env = baseUrl ? { ...process.env, PROTO_UI_BROWSER_BASE_URL: baseUrl } : process.env;
     const reportArgs = reportPath
       ? ['--reporter=default', '--reporter=json', `--outputFile=${reportPath}`]
       : [];
-    const child = spawn(vitestBin, ['run', ...args, ...reportArgs], {
+    const child = spawn(process.execPath, [vitestBin, 'run', ...args, ...reportArgs], {
       cwd: root,
       env,
-      shell: process.platform === 'win32',
+      shell: false,
       stdio: ['inherit', 'pipe', 'pipe'],
     });
     const inspect = observeReadinessFailures(() =>

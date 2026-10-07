@@ -449,6 +449,12 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   readonly port = {
+    syncStructure: (): void => {
+      for (const family of this.claimFamilies) {
+        AnatomyModuleImpl.notifyStructuralChange(family);
+        AnatomyModuleImpl.notifyTargetChange(family);
+      }
+    },
     getDiagnostics: (): readonly AnatomyDiagnostic[] => {
       const out: AnatomyDiagnostic[] = [];
       for (const family of this.claimFamilies) {
@@ -602,10 +608,7 @@ export class AnatomyModuleImpl extends ModuleBase {
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
     if (phase === 'mounted') {
-      for (const family of this.claimFamilies) {
-        AnatomyModuleImpl.notifyStructuralChange(family);
-        AnatomyModuleImpl.notifyTargetChange(family);
-      }
+      this.port.syncStructure();
     }
     if (phase === 'unmounted') {
       for (const family of this.claimFamilies) AnatomyModuleImpl.notifyTargetChange(family);

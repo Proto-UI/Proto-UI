@@ -37,6 +37,16 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./internal/visual-consumer": {
+      "types": "./dist/runtime/experimental-visual-consumer.d.ts",
+      "import": "./dist/runtime/experimental-visual-consumer.js",
+      "default": "./dist/runtime/experimental-visual-consumer.js"
+    },
+    "./internal/owned-texture-sink": {
+      "types": "./dist/material/owned-texture-sink.d.ts",
+      "import": "./dist/material/owned-texture-sink.js",
+      "default": "./dist/material/owned-texture-sink.js"
     }
   },
   "description": "Translates Proto UI prototypes into Web Components component functions for use with Proto UI adapters.",

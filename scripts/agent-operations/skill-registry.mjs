@@ -6,6 +6,7 @@ import {
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import YAML from 'yaml';
 
 const DEFAULT_ROOT = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
@@ -122,6 +123,7 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
         'requires',
         'produces',
         ...(Object.hasOwn(skill, 'conditionalProduces') ? ['conditionalProduces'] : []),
+        ...(Object.hasOwn(skill, 'allowedNextSkillIds') ? ['allowedNextSkillIds'] : []),
         ...(Object.hasOwn(skill, 'interruptions') ? ['interruptions'] : []),
       ],
       label
@@ -176,6 +178,19 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
     );
     assertStringList(skill.requires, `${label}.requires`, { nonempty: true });
     assertStringList(skill.produces, `${label}.produces`, { nonempty: true });
+    if (Object.hasOwn(skill, 'allowedNextSkillIds')) {
+      assert(
+        Array.isArray(skill.allowedNextSkillIds) && skill.allowedNextSkillIds.length > 0,
+        `${label}.allowedNextSkillIds must be a non-empty array`
+      );
+      const nextIds = new Set();
+      for (const nextId of skill.allowedNextSkillIds) {
+        assert(ID.test(nextId ?? ''), `${label}.allowedNextSkillIds contains an invalid id`);
+        assert(!nextIds.has(nextId), `${label}.allowedNextSkillIds duplicates ${nextId}`);
+        assert(nextId !== skill.id, `${label}.allowedNextSkillIds cannot select itself`);
+        nextIds.add(nextId);
+      }
+    }
     if (Object.hasOwn(skill, 'conditionalProduces')) {
       assert(
         Array.isArray(skill.conditionalProduces) && skill.conditionalProduces.length > 0,
@@ -205,6 +220,14 @@ export function validateSkillRegistryDocument(registry, policy, { root = DEFAULT
   }
 
   for (const skill of registry.skills) {
+    for (const nextId of skill.allowedNextSkillIds ?? []) {
+      const next = registry.skills.find((candidate) => candidate.id === nextId);
+      assert(next, `${skill.id}.allowedNextSkillIds names an unregistered leaf: ${nextId}`);
+      assert(
+        skill.entrypoints.some((entrypoint) => next.entrypoints.includes(entrypoint)),
+        `${skill.id}.allowedNextSkillIds has no compatible entrypoint with ${nextId}`
+      );
+    }
     if (skill.interruptions) {
       assertExactKeys(skill.interruptions, ['destinations', 'terminal'], 'skill interruptions');
       assert(
@@ -264,7 +287,7 @@ function validateArtifact(artifact, index, handoff) {
       artifact.reference.length <= 1000,
     `handoff.artifacts[${index}].reference is invalid`
   );
-  if (artifact.digest !== undefined)
+  if (artifact.type === 'modeltrace-record' || artifact.digest !== undefined)
     assert(DIGEST.test(artifact.digest), `handoff.artifacts[${index}].digest is invalid`);
 }
 
@@ -444,7 +467,107 @@ function validateHandoffV2State(handoff, registry) {
   }
 }
 
-export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
+function validateUnchangedTerminal(handoff, priorHandoff, source, registry) {
+  assert(
+    priorHandoff?.nextSkillId === handoff.fromId,
+    'constrained terminal requires the handoff received by its source leaf'
+  );
+  validateSkillHandoff(priorHandoff, registry);
+  for (const key of ['schemaVersion', 'entrypoint', 'executionMode', 'executionModeSource'])
+    assert(priorHandoff[key] === handoff[key], 'terminal cannot change ' + key);
+  if (handoff.schemaVersion === 2)
+    assert(
+      isDeepStrictEqual(priorHandoff.binding, handoff.binding),
+      'terminal cannot change its received binding'
+    );
+  const required = new Set(source.requires);
+  const received = new Map();
+  for (const artifact of priorHandoff.artifacts)
+    if (required.has(artifact.type))
+      received.set(artifact.type + '\u0000' + artifact.reference, artifact);
+  let retained = 0;
+  for (const artifact of handoff.artifacts) {
+    if (!required.has(artifact.type)) continue;
+    const previous = received.get(artifact.type + '\u0000' + artifact.reference);
+    assert(
+      previous && isDeepStrictEqual(previous, artifact),
+      'constrained terminal must retain its received ' + artifact.type + ' unchanged'
+    );
+    if (artifact.type === 'candidate-change')
+      assert(artifact.digest !== undefined, 'unchanged terminal candidate requires its digest');
+    retained++;
+  }
+  assert(retained === received.size, 'constrained terminal must retain every received input');
+  if (source.id === 'pui-package-budget')
+    assert(
+      handoff.notes.some((note) => note.trim().length > 0),
+      'package-budget terminal requires a blocker or refresh-work note'
+    );
+}
+
+function validateRefreshedEvidence(handoff, priorHandoff, registry) {
+  assert(
+    priorHandoff?.nextSkillId === 'pui-validate',
+    'validation review requires the handoff received by pui-validate'
+  );
+  validateSkillHandoff(priorHandoff, registry);
+  for (const key of ['schemaVersion', 'entrypoint', 'executionMode', 'executionModeSource'])
+    assert(handoff[key] === priorHandoff[key], 'validation cannot change ' + key);
+  if (handoff.schemaVersion === 2)
+    for (const key of ['repositoryId', 'scopeId', 'headSha'])
+      assert(handoff.binding[key] === priorHandoff.binding[key], 'validation cannot change ' + key);
+  const currentCandidates = (value, allowUnboundRevision = false) =>
+    getHandoffArtifacts(value, 'candidate-change').filter(
+      (artifact) =>
+        value.schemaVersion === 1 ||
+        artifact.revision === value.binding.headSha ||
+        (allowUnboundRevision && artifact.revision === undefined)
+    );
+  const received = currentCandidates(priorHandoff, true);
+  const emitted = currentCandidates(handoff);
+  assert(received.length > 0, 'validation requires current candidate materials');
+  assert(
+    received.length === emitted.length &&
+      received.every((artifact) =>
+        emitted.some((candidate) => {
+          if (candidate.digest === undefined) return false;
+          // Validation owns measuring an optional, previously unbound input.
+          // This permits only enrichment, not changes to an existing binding.
+          // It does not authenticate the supplied digest or referenced bytes.
+          const bound = { ...artifact };
+          if (bound.digest === undefined) bound.digest = candidate.digest;
+          if (handoff.schemaVersion === 2 && bound.revision === undefined)
+            bound.revision = handoff.binding.headSha;
+          return isDeepStrictEqual(candidate, bound);
+        })
+      ),
+    'validation must retain received candidate identities and existing bindings'
+  );
+  const previousReports = getHandoffArtifacts(priorHandoff, 'evidence-report');
+  const fresh = getHandoffArtifacts(handoff, 'evidence-report').filter(
+    (artifact) =>
+      artifact.digest !== undefined &&
+      !previousReports.some((previous) =>
+        previous.digest === undefined
+          ? previous.reference === artifact.reference
+          : previous.digest === artifact.digest
+      )
+  );
+  assert(
+    fresh.some(
+      (artifact) =>
+        handoff.schemaVersion === 1 ||
+        (artifact.revision === handoff.binding.headSha && artifact.result !== undefined)
+    ),
+    'validation review requires a new current-candidate evidence report'
+  );
+}
+
+export function validateSkillHandoff(
+  handoff,
+  registry = loadSkillRegistry(),
+  { priorHandoff = null } = {}
+) {
   assertExactKeys(
     handoff,
     [
@@ -585,7 +708,17 @@ export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
     );
   }
 
-  if (handoff.nextSkillId === null) return { handoff, nextSkill: null };
+  if (handoff.nextSkillId === null) {
+    if (fromLeaf?.allowedNextSkillIds)
+      validateUnchangedTerminal(handoff, priorHandoff, fromLeaf, registry);
+    return { handoff, nextSkill: null };
+  }
+  if (fromLeaf?.allowedNextSkillIds) {
+    assert(
+      fromLeaf.allowedNextSkillIds.includes(handoff.nextSkillId),
+      `handoff from ${fromLeaf.id} must continue through one of: ${fromLeaf.allowedNextSkillIds.join(', ')}`
+    );
+  }
   assert(
     handoff.nextSkillId !== handoff.fromId,
     'handoff cannot recursively select its source skill'
@@ -602,6 +735,11 @@ export function validateSkillHandoff(handoff, registry = loadSkillRegistry()) {
       `handoff lacks artifact required by ${nextSkill.id}: ${required}`
     );
   }
+  if (nextSkill.id === 'pui-package-budget')
+    for (const candidate of getHandoffArtifacts(handoff, 'candidate-change'))
+      assert(candidate.digest !== undefined, 'package-budget entry candidate requires its digest');
+  if (handoff.fromId === 'pui-validate' && nextSkill.id === 'pui-review')
+    validateRefreshedEvidence(handoff, priorHandoff, registry);
   return { handoff, nextSkill };
 }
 

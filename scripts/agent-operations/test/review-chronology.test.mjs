@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { collectCurrentReviewerPermissions } from '../collect-live-review-input.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 import {
   authorizePullRequestMerge,
   authorizeReviewSubmission,
@@ -27,6 +28,7 @@ const disposition = (overrides = {}) => ({
 function mergeHistory(reviews, inputOverrides = {}) {
   const publication = publishReview(reviewSnapshot({ reviews, ...inputOverrides }));
   return authorizePullRequestMerge({
+    ...modelTraceFixture(publication.input.repositoryId),
     ...publication,
     liveInput: structuredClone(publication.input),
     executionMode: 'human-assisted',
@@ -184,6 +186,7 @@ test('ambiguous approval subjects do not trigger permission queries or block COM
   });
   assert.equal(queries.length, 1);
   const result = authorizeReviewSubmission({
+    ...modelTraceFixture(input.repositoryId),
     packet: reviewPacket(input, {
       recommendedAction: 'COMMENT',
       limitations: ['Disposition chronology is ambiguous; merge remains blocked'],

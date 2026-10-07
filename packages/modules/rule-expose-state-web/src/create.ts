@@ -237,6 +237,7 @@ class RuleExposeStateWebImpl extends ModuleBase {
         }
       }
       if (!ok || tokens.length === 0) continue;
+      if (this.feedbackPort.shouldRetainStyleRule?.(tokens)) continue;
 
       out.push({ id: (r as any).id, order: order++, conditions, tokens });
     }

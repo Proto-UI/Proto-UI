@@ -1,5 +1,5 @@
 import { createPassiveShellComposition } from './passive-shell-composition';
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 import { surfacePrototypeId, panelSurfaceProps } from '../surface-recipes';
 import type { DemoChild, DemoSpec } from './demo-types';
 import type { ProjectionContentRecipe } from './projection-composition';

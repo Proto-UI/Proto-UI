@@ -1,7 +1,7 @@
 import { createHiddenFirstActivation } from './hidden-first-activation';
 import { surfacePrototypeId } from './surface-recipes';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
-import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import { runtimePreviewFamily } from './PrototypePreviewer/runtime-preview-surface';
 import {
   createProjectionScopeController,

@@ -13,6 +13,10 @@ const legacy = JSON.parse(
 );
 delete legacy.$schema;
 delete legacy.$id;
+Object.assign(legacy.properties.artifacts.items, {
+  if: { properties: { type: { const: 'modeltrace-record' } } },
+  then: { required: ['digest'] },
+});
 const registry = loadSkillRegistry();
 const types = [
   ...new Set(

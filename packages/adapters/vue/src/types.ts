@@ -40,9 +40,15 @@ type ProtoEmitTuples<TExposes> = UnionToIntersection<
 
 export type ProtoVueEventProps<TProto extends ProtoLike> = ProtoEventProps<ExposeOf<TProto>>;
 
-export type ProtoVueProps<TProto extends ProtoLike> = (PropsOf<TProto> extends PropsBaseType
-  ? PropsOf<TProto>
-  : never) & {
+// Empty portable props must not turn the Adapter's host fields into `never`.
+type VuePortableProps<TProto extends ProtoLike> =
+  PropsOf<TProto> extends PropsBaseType
+    ? PropsOf<TProto> extends Record<string, never>
+      ? Record<never, never>
+      : PropsOf<TProto>
+    : never;
+
+export type ProtoVueProps<TProto extends ProtoLike> = VuePortableProps<TProto> & {
   class?: string | string[] | Record<string, boolean>;
   hostClass?: string | string[] | Record<string, boolean>;
   surfaceClass?: string | string[] | Record<string, boolean>;

@@ -1,8 +1,9 @@
+import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
 import searchIcon from '../../../../packages/prototypes/lucide/src/icons/search';
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
 import { registerPrototype } from './PrototypePreviewer/registry';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
-import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import {
   createProjectionScopeController,
   type ProjectionScopeCommit,
@@ -24,10 +25,11 @@ registerPrototype('lucide-search-icon', searchIcon);
 registerPrototype('lucide-x-icon', closeIcon);
 
 export type SearchCommand = 'open' | 'close' | 'retry';
+type SearchCallbacks = Record<SearchCommand, () => unknown> & { prepare?: () => unknown };
 export type SearchCommandParticipant = {
   root: HTMLElement;
   mounts: HTMLElement[];
-  bind(callbacks: Record<SearchCommand, () => unknown>): void;
+  bind(callbacks: SearchCallbacks): void;
   setRetryDisabled(value: boolean): void;
   focus(command: SearchCommand): void;
   materialize(
@@ -58,7 +60,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     if (!mount) throw new Error(`Search ${command} mount is missing`);
     return mount;
   });
-  let callbacks: Record<SearchCommand, () => unknown> | null = null;
+  let callbacks: SearchCallbacks | null = null;
   let retryDisabled = false;
   let alive = true;
   const subscribers = new Set<() => void>();
@@ -180,6 +182,24 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         if (command === 'close') button.dataset.closeModal = '';
         let live = true;
         let queued = false;
+        // Consume public Button facts. Search owns resource preparation only;
+        // it does not recreate hover/focus semantics or an activation route.
+        const intentSubscriptions: Array<() => void> = [];
+        if (command === 'open') {
+          const exposes = context.api.getExposes('search-command');
+          for (const key of ['hovered', 'focusVisible']) {
+            const fact = exposes?.[key] as ExposeStateExternalHandle<boolean> | undefined;
+            if (!fact?.subscribe) continue;
+            intentSubscriptions.push(
+              fact.subscribe((event) => {
+                if (event.type !== 'next' || event.next !== true) return;
+                queueMicrotask(() => {
+                  if (alive && live && isActive()) callbacks?.prepare?.();
+                });
+              })
+            );
+          }
+        }
         const activate = () => {
           // Both props and native-dialog focus must happen after the WC callback exits.
           queueMicrotask(() => {
@@ -217,6 +237,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         paint();
         return () => {
           live = false;
+          for (const unsubscribe of intentSubscriptions) unsubscribe();
           subscribers.delete(paint);
           focusTargets.delete(focusTarget);
           button.removeEventListener('click', click);
@@ -227,7 +248,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   const handle = {
     root,
     mounts,
-    bind(next: Record<SearchCommand, () => unknown>) {
+    bind(next: SearchCallbacks) {
       callbacks = next;
       publishState();
     },

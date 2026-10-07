@@ -4,7 +4,11 @@ import {
   createWebImageViewHost,
 } from '@proto.ui/module-image-view';
 import type { FocusEntryConfig } from '@proto.ui/core';
-import { orderFocusTargetsByDocument, resolveWebFocusEntryTarget } from '@proto.ui/adapter-base';
+import {
+  isWebFocusTargetActive,
+  orderFocusTargetsByDocument,
+  resolveWebFocusEntryTarget,
+} from '@proto.ui/adapter-base';
 import {
   createCapsWiring,
   createWebMoveGestureHost,
@@ -46,6 +50,7 @@ import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import {
   FOCUS_BLUR_CAP,
+  FOCUS_RELEASE_PENDING_CAP,
   FOCUS_INSTANCE_TOKEN_CAP,
   FOCUS_IS_NATIVELY_FOCUSABLE_CAP,
   FOCUS_ORDER_CAP,
@@ -57,6 +62,7 @@ import {
   FOCUS_RUN_IN_CALLBACK_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
+  type FocusRequestKind,
 } from '@proto.ui/module-focus';
 import {
   createWebHitParticipationHostBridge,
@@ -110,7 +116,8 @@ import {
   getLogicalTriggerSurfaceRoot,
   mergeLogicalTriggerGroup,
   setProtoParent,
-  subscribeLogicalTriggerSurface,
+  subscribeFocusSurfaceReady,
+  isNativeFocusTargetReady,
 } from '../platform/instance-tree';
 
 type Vue2OwnerModulesArgs<Props extends PropsBaseType> = {
@@ -245,6 +252,12 @@ export function createVue2OwnerModules<Props extends PropsBaseType>(
     .build();
 }
 
+// Kept by the logical Adapter owner, across replaceable view providers.
+export type FocusIntentState = {
+  options?: FocusRequestOptions;
+  kind?: FocusRequestKind;
+};
+
 export function createVue2Modules<Props extends PropsBaseType>(args: {
   el: HTMLElement;
   instanceToken: LogicalInstanceToken;
@@ -264,9 +277,14 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
+  isEntryAcquisitionReady: (target: HTMLElement) => boolean;
   getCurrentElement: () => HTMLElement | null;
   subscribeTargetReady: (listener: () => void) => () => void;
   retryTargetReady: () => void;
+  focusIntentState?: FocusIntentState;
+  onFocusIntent?: () => void;
+  onFocusAcquired?: () => void;
+  onFocusPendingReleased?: () => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
 }) {
   const {
@@ -285,13 +303,14 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     setExposes,
   } = args;
 
+  const request = args.focusIntentState ?? {};
   const getTriggerSurface = () => {
     const target = getLogicalTriggerSurfaceRoot(instanceToken);
     return args.isViewReady() && target?.isConnected ? target : null;
   };
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
-    const offSurface = subscribeLogicalTriggerSurface(instanceToken, listener);
+    const offSurface = subscribeFocusSurfaceReady(instanceToken, listener);
     return () => {
       offReady();
       offSurface();
@@ -341,6 +360,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
       [FOCUS_TARGET_READY_CAP, subscribeFocusTarget],
+      [FOCUS_RELEASE_PENDING_CAP, () => args.onFocusPendingReleased?.()],
       [FOCUS_ROOT_TARGET_CAP, getTriggerSurface],
       [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, isNativelyFocusable],
       [FOCUS_ORDER_CAP, orderFocusTargetsByDocument],
@@ -367,15 +387,30 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       ],
       [
         FOCUS_REQUEST_FOCUS_CAP,
-        (target: HTMLElement, options?: FocusRequestOptions) => {
-          if (!target.isConnected) return false;
+        (target: HTMLElement, options: FocusRequestOptions | undefined, kind: FocusRequestKind) => {
+          if (request.options !== options || request.kind !== kind) {
+            request.options = options;
+            request.kind = kind;
+            args.onFocusIntent?.();
+          }
+          if (
+            !target.isConnected ||
+            (kind === 'native' && !isNativeFocusTargetReady(target)) ||
+            (kind === 'entry' && !args.isEntryAcquisitionReady(target))
+          )
+            return false;
           target.focus(
             typeof options?.preventScroll === 'boolean'
               ? { preventScroll: options.preventScroll }
               : undefined
           );
-          const applied = target.ownerDocument.activeElement === target;
-          if (!applied) args.retryTargetReady();
+          const applied = isWebFocusTargetActive(target);
+          // Native focus can synchronously issue a newer request. Only the
+          // still-current intent owns success or retry-budget accounting.
+          if (request.options === options && request.kind === kind) {
+            if (applied) args.onFocusAcquired?.();
+            else args.retryTargetReady();
+          }
           return applied;
         },
       ],

@@ -8,6 +8,7 @@
 @import './right-sidebar.css';
 @import './code-surfaces.css';
 @import './runtime-box.css';
+@import './site-startup.css';
 
 .proto-concept {
   position: relative;

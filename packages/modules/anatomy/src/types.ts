@@ -38,6 +38,8 @@ export type AnatomyFacade = {
 
 export type AnatomyPort = ModulePort & {
   getDiagnostics(): readonly AnatomyDiagnostic[];
+  /** Adapter ingress for logical ancestry changes, independent of view observation. */
+  syncStructure(): void;
   /** Module-internal bridge. Never expose the returned host target to prototype authors. */
   resolvePartTarget(part: AnatomyPartView): unknown | null;
   /** Opaque logical instance identity for module-to-module coordination; never author-facing. */

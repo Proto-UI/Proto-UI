@@ -12,6 +12,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "default": "./dist/index.js"
+    },
+    "./internal/owned-slot": {
+      "types": "./dist/material/owned-slot.d.ts",
+      "import": "./dist/material/owned-slot.js",
+      "default": "./dist/material/owned-slot.js"
+    },
+    "./internal/final-style-sink": {
+      "types": "./dist/material/final-style-sink.d.ts",
+      "import": "./dist/material/final-style-sink.js",
+      "default": "./dist/material/final-style-sink.js"
+    },
+    "./internal/runtime-cap": {
+      "types": "./dist/material/runtime-cap.d.ts",
+      "import": "./dist/material/runtime-cap.js",
+      "default": "./dist/material/runtime-cap.js"
     }
   },
   "description": "Proto UI module that provides feedback capability for adapters.",

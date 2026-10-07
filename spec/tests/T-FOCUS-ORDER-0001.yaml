@@ -4,9 +4,9 @@ title: Focus navigation order from the host
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: 'Draft with HC-FOCUS-ORDER-0001: the cases cover the module and the four Web Adapters, while cross-tree Web order and non-Web providers remain open.'
-  zh-CN: '与 HC-FOCUS-ORDER-0001 同为 draft：cases 覆盖模块与四个 Web Adapter，跨树的 Web 顺序与非 Web 提供方仍待定。'
-summary: Module and four-Adapter evidence that a navigation follows one host order, and otherwise keeps registration order throughout.
+  en: 'Draft with HC-FOCUS-ORDER-0001: module and four-Web evidence is joined by bounded GPUI peer, host and horizontal T0 Tabs cases. Cross-tree Web order and broader non-Web/profile admission remain open.'
+  zh-CN: '与 HC-FOCUS-ORDER-0001 同为 draft：在模块和四个 Web Adapter 证据之外，补充有界 GPUI peer、宿主和横向 T0 Tabs 用例。跨树的 Web 顺序与更广的非 Web/profile 准入仍待定。'
+summary: Module, four-Web and bounded GPUI/T0 evidence for whole host order and registration fallback.
 cases:
   - id: T-FOCUS-ORDER-0001-CASE-HOST-ORDER
     title: Roving and scope navigation follow the owner's host order, with non-DOM targets and no Node global
@@ -24,6 +24,18 @@ cases:
     title: The Web realization reports targets in different trees, or a target that is not a node, unorderable
     covers: [HC-FOCUS-ORDER-0001-B]
     expectation: web-cross-tree-or-non-node-targets-unorderable
+  - id: T-FOCUS-ORDER-0001-CASE-GPUI-ROVING-ORDER
+    title: Horizontal GPUI Tabs roving follows the delivered surface-tree order when registration order differs
+    covers: [M-FOCUS-0001-F, HC-FOCUS-ORDER-0001-A, HC-FOCUS-ORDER-0001-D]
+    expectation: gpui-horizontal-roving-follows-delivered-whole-session-order
+  - id: T-FOCUS-ORDER-0001-CASE-GPUI-REGISTRATION-FALLBACK
+    title: A GPUI peer snapshot missing one roving member leaves the whole navigation in registration order
+    covers: [M-FOCUS-0001-F, HC-FOCUS-ORDER-0001-C]
+    expectation: gpui-missing-session-keeps-whole-navigation-registration-order
+  - id: T-FOCUS-ORDER-0001-CASE-GPUI-ORDER-PUBLICATION
+    title: Install, public forest replacement, withdrawal, restoration and terminal changes publish one deduplicated whole order only when it changes
+    covers: [HC-FOCUS-ORDER-0001-A, HC-FOCUS-ORDER-0001-D]
+    expectation: gpui-current-forest-replaces-the-peer-order-without-duplicate-publications
 implementations:
   - id: module-focus-center-order
     kind: module-test
@@ -63,6 +75,36 @@ implementations:
     path: packages/adapters/web-component/test/focus-catalog.integration.test.ts
     required: true
     consumesCases: [T-FOCUS-ORDER-0001-CASE-WEB-DOCUMENT-ORDER]
+  - id: gpui-peer-focus-order
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/gpui-peer/test/peer-session.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FOCUS-ORDER-0001-CASE-GPUI-ROVING-ORDER,
+        T-FOCUS-ORDER-0001-CASE-GPUI-REGISTRATION-FALLBACK,
+      ]
+    notes:
+      - Scripted-host peer tests exercise real Base Tabs and opaque session targets; they do not run a native window.
+  - id: gpui-host-focus-order
+    kind: adapter-test
+    status: passing
+    path: native/gpui/crates/proto-ui-gpui/tests/composition.rs
+    required: true
+    consumesCases: [T-FOCUS-ORDER-0001-CASE-GPUI-ORDER-PUBLICATION]
+    notes:
+      - GPUI TestAppContext uses recorded Base Switch messages and live sessions, including the public setter's reorder, missing/restored member and duplicate-surface control.
+      - Run with cargo test --locked -p proto-ui-gpui --test composition; this is host publication evidence, not OS-visible navigation or assistive-technology evidence.
+  - id: gpui-tabs-t0-focus-order
+    kind: adapter-test
+    status: passing
+    path: native/gpui/crates/proto-ui-gpui/tests/tabs_t0.rs
+    required: true
+    consumesCases: [T-FOCUS-ORDER-0001-CASE-GPUI-ROVING-ORDER]
+    notes:
+      - Explicitly run cargo test --locked -p proto-ui-gpui --test tabs_t0 -- --ignored; a default workspace run skips these real Node-peer tests.
+      - Covers horizontal ArrowRight, Home and End with automatic/manual activation; no vertical-key, GPUI scope, VoiceOver, Windows/Linux or WASM conformance is claimed.
 verifies:
   modules: [M-FOCUS-0001]
   hostCaps: [HC-FOCUS-ORDER-0001]
@@ -71,6 +113,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added module and four-Adapter evidence for host navigation order and its whole-navigation registration fallback.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added separately bounded GPUI peer fallback, native host publication and horizontal T0 Tabs mappings without promoting the capability or an Adapter profile.
 tags:
   - focus
   - order

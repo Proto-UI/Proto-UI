@@ -18,6 +18,8 @@ For state/ownership or rendered-projection changes, selective test commands, or 
 9. Return a repairable failure to one eligible owning leaf with the evidence report and required prior artifacts. A `pui-regression` handoff needs the authority map, reproduction, and existing implementation authorization; a `pui-test` handoff needs the authority map, governed behavior, and existing implementation authorization. Do not invent missing authorization or perform source repairs inside this disposable-output-only leaf. The entrypoint resumes validation after repair.
 10. If the next repair lacks a prerequisite or crosses a gate, return a terminal handoff naming the blocker and next action. A failed or blocked check is not a completed implementation task, evidence of infeasibility, or permission to remove requested behavior or weaken its assertion.
 
+Before routing `pui-validate` to `pui-review`, retain the actual handoff received by validation and pass it with `--prior-handoff` to both `agent:skill` and `agent:review`. The validator checks unchanged mode, repository/scope/head and current candidate identities and existing bindings. Supply a new evidence-report digest, not a renamed copy of a received report. V1 replaces its singleton report; v2 may retain historical reports but needs a new explicitly result-bound report whose revision is the current head. When an input candidate has no digest, validation computes its actual artifact SHA-256 and adds only that missing field; in v2 it can likewise bind a missing revision to the current head. Retain reference and every existing field. Do not return a valid digestless input to its producer merely to add optional metadata. A missing predecessor remains evidence to recover, not permission to synthesize history. If a received report lacks a digest, the new report uses a distinct reference and a digest; this structural distinction cannot detect byte-identical aliases. These structural comparisons do not authenticate file contents or prove canonical execution; inspect the report and run the required checks independently.
+
 Passing checks establish technical evidence, not product correctness, review approval, merge permission, or release authorization.
 
 ## Evidence discipline
@@ -44,3 +46,5 @@ Apply these principles to every validation round; they are methodology, not a ch
 Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
 
 Communicate with the user in the user's current language. Keep commands and paths exact.
+
+A fresh report may record `passed`, `failed`, `partial` or `not-run`; freshness is not a green result. Review and integration independently enforce their required evidence and acceptance conditions.

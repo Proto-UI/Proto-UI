@@ -1,0 +1,11 @@
+# Generated pseudo-element paint support domain
+
+Review 4197096632 on #775 identified a false pointer-pair pass: opaque generated `::before`/`::after` layers can cover unchanged target tokens. Four controlled actual-reader cases (target/ancestor × before/after) reproduce the published source accepting an unmodeled generated layer. These CSSOM controls are not native pixel evidence.
+
+A shared finite source-domain check now withholds generated before/after paint in both the pointer pair and numeric background paths along composed ancestry. No-content/none/normal and explicit display:none remain supported. Other generated layers are unsupported regardless of their apparent geometry, rather than reconstructing a general stacking renderer or declaring them hidden. The same limit disables unmodified-ink perimeter metrics; raw images, native input facts, source colors, geometry and exterior samples remain recorded. Direct/descendant text, SVG, native values and placeholders consume the same numeric background limitation. General sibling overlay coverage remains explicitly unverified.
+
+Four paired controls and four numeric-source controls now pass within 54 serialized-probe tests; the full anatomy suite remains 86/86. The new single native calibration exercises generated target and ancestor layers, hidden/absent positives, actual held input and token preservation, actual white overlay PNG samples, and withheld direct/descendant/SVG/native/placeholder/border/fill ratios. It raises calibration count from 40 to 41 only when actually executed; local model results do not claim that native result.
+
+The completed 27f05fde native run remains an independent successful checkpoint: four shards each passed 40 calibrations, with 790 raw observations, 782 achieved/matched predicates, eight unmeasured ScrollArea frames and 40 unexecuted planned targets. WC Tooltip keyboard-focus/focus-open succeeds in both themes with the corrected exact hidden retained anatomy. A subsequent complete Focus dependency union and this new support-domain repair require new-head native evidence. Product styles, contrast thresholds and existing declared follow-ups are unchanged.
+
+Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)

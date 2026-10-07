@@ -277,9 +277,19 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
 
   setMountPhase(phase: MountPhase, epoch: number): void {
     this.mountPhase = phase;
+    let failed = false;
+    let firstError: unknown;
     for (const r of this.records) {
-      r.module.hooks.onMountPhase?.(phase, epoch);
+      try {
+        r.module.hooks.onMountPhase?.(phase, epoch);
+      } catch (error) {
+        if (!failed) {
+          failed = true;
+          firstError = error;
+        }
+      }
     }
+    if (failed) throw firstError;
   }
 
   afterRenderCommit(): void {
@@ -352,9 +362,18 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
     this.callbackCtx = undefined;
     this.afterCallbackTasks = [];
 
-    // dispose hooks first so modules can teardown while caps still readable
+    // Every module retires while capabilities remain readable, even if an earlier hook fails.
+    let failed = false;
+    let firstError: unknown;
     for (const r of this.records) {
-      r.module.hooks.dispose?.();
+      try {
+        r.module.hooks.dispose?.();
+      } catch (error) {
+        if (!failed) {
+          failed = true;
+          firstError = error;
+        }
+      }
     }
 
     // invalidate host-attached caps only (sys remains)
@@ -365,5 +384,6 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
         // ignore in v0
       }
     }
+    if (failed) throw firstError;
   }
 }

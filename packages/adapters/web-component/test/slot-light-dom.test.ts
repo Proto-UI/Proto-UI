@@ -1,6 +1,6 @@
 // packages/adapters/web-component/test/slot-light-dom.test.ts
 import { describe, it, expect } from 'vitest';
-import type { Prototype } from '@proto.ui/core';
+import { tw, type Prototype } from '@proto.ui/core';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
 
 describe('adapter-web-component light DOM slot (v0)', () => {
@@ -144,5 +144,234 @@ describe('adapter-web-component light DOM slot (v0)', () => {
     el.update();
     await new Promise<void>((r) => setTimeout(r, 0));
     expect(el.innerHTML).toBe('Actions<i>owned</i>');
+  });
+
+  it('clears owned nodes and the old observer while preserving pending and later caller mutations', async () => {
+    let decorated = true;
+    const P: Prototype = {
+      name: 'x-light-slot-cleanup-transition',
+      setup() {
+        return (r) =>
+          decorated
+            ? [
+                r.slot(),
+                r.el(
+                  'span',
+                  { style: tw('p-4') },
+                  r.el('span', { style: tw('opacity-50') }, 'owned')
+                ),
+              ]
+            : r.slot();
+      },
+    };
+    AdaptToWebComponent(P);
+    const root = document.createElement(P.name) as HTMLElement & { update(): void };
+    const caller = document.createElement('b');
+    caller.className = 'caller-class';
+    caller.setAttribute('data-pui-style', 'p-8');
+    const text = document.createTextNode('caller-text');
+    root.append(caller, text);
+    document.body.append(root);
+    const deliverMutations = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+    try {
+      await deliverMutations();
+      const oldOwned = [...root.querySelectorAll('span')];
+      const pending = document.createElement('i');
+      root.append(pending); // No observer delivery before switching to slot-only.
+      decorated = false;
+      root.update();
+      await deliverMutations();
+      expect([...root.childNodes]).toEqual([caller, text, pending]);
+      expect(root.querySelectorAll('span')).toHaveLength(0);
+      for (const node of oldOwned) expect(root.contains(node)).toBe(false);
+
+      const later = document.createElement('em');
+      root.append(later);
+      pending.remove();
+      await deliverMutations();
+      expect([...root.childNodes]).toEqual([caller, text, later]);
+      expect(caller.className).toBe('caller-class');
+      expect(caller.getAttribute('data-pui-style')).toBe('p-8');
+
+      decorated = true;
+      root.update();
+      await deliverMutations();
+      expect(root.querySelectorAll('span')).toHaveLength(2);
+      expect(root.querySelector('b')).toBe(caller);
+      expect(root.querySelector('em')).toBe(later);
+      expect(root.querySelector('i')).toBeNull();
+      for (const node of oldOwned) expect(root.contains(node)).toBe(false);
+      later.remove();
+      await deliverMutations();
+      decorated = false;
+      root.update();
+      await deliverMutations();
+      expect([...root.childNodes]).toEqual([caller, text]);
+    } finally {
+      root.remove();
+    }
+  });
+
+  it('initial and repeated slot-only commits do not mutate caller children', async () => {
+    const P: Prototype = {
+      name: 'x-light-slot-only-no-owned',
+      setup() {
+        return (r) => r.slot();
+      },
+    };
+    AdaptToWebComponent(P);
+    const root = document.createElement(P.name) as HTMLElement & { update(): void };
+    const caller = document.createElement('b');
+    const text = document.createTextNode('caller-text');
+    root.append(caller, text);
+    const mutations: MutationRecord[] = [];
+    const observer = new MutationObserver((records) => mutations.push(...records));
+    observer.observe(root, { childList: true, subtree: true });
+    try {
+      document.body.append(root);
+      root.update();
+      for (let i = 0; i < 8; i++) await Promise.resolve();
+      expect(mutations).toEqual([]);
+      expect(observer.takeRecords()).toEqual([]);
+      expect([...root.childNodes]).toEqual([caller, text]);
+    } finally {
+      observer.disconnect();
+      root.remove();
+    }
+  });
+  it.each(['remove', 'move'] as const)(
+    'honors a caller %s before observer delivery when retiring owned content',
+    async (action) => {
+      let decorated = true;
+      const P: Prototype = {
+        name: `x-light-slot-pending-${action}`,
+        setup() {
+          return (r) =>
+            decorated ? [r.slot(), r.el('span', { style: tw('p-4') }, 'owned')] : r.slot();
+        },
+      };
+      AdaptToWebComponent(P);
+      const root = document.createElement(P.name) as HTMLElement & { update(): void };
+      const caller = document.createElement('b');
+      caller.textContent = 'caller';
+      const other = document.createElement('section');
+      root.append(caller);
+      document.body.append(root, other);
+      const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+      try {
+        await settle();
+        if (action === 'move') other.append(caller);
+        else caller.remove();
+        // Do not deliver MutationObserver records before this commit.
+        decorated = false;
+        root.update();
+        await settle();
+        expect(root.contains(caller)).toBe(false);
+        expect(caller.parentNode).toBe(action === 'move' ? other : null);
+        expect(root.querySelector('span')).toBeNull();
+        decorated = true;
+        root.update();
+        await settle();
+        expect(root.contains(caller)).toBe(false);
+        expect(caller.parentNode).toBe(action === 'move' ? other : null);
+      } finally {
+        root.remove();
+        other.remove();
+      }
+    }
+  );
+  it.each(['prepend-new', 'reorder-existing'] as const)(
+    'keeps a pending caller %s in current DOM order when retiring owned content',
+    async (action) => {
+      let decorated = true;
+      const P: Prototype = {
+        name: `x-light-slot-order-${action}`,
+        setup() {
+          return (r) => (decorated ? [r.slot(), r.el('span', 'owned')] : r.slot());
+        },
+      };
+      AdaptToWebComponent(P);
+      const root = document.createElement(P.name) as HTMLElement & { update(): void };
+      const first = document.createElement('b'),
+        second = document.createElement('i');
+      root.append(first);
+      if (action === 'reorder-existing') root.append(second);
+      document.body.append(root);
+      const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+      try {
+        await settle();
+        root.prepend(second);
+        decorated = false;
+        root.update();
+        await settle();
+        expect([...root.children]).toEqual([second, first]);
+      } finally {
+        root.remove();
+      }
+    }
+  );
+
+  it('retains intentionally parked callers without reclaiming a parked caller moved elsewhere', async () => {
+    let showSlot = true;
+    const P: Prototype = {
+      name: 'x-light-slot-parked-ownership',
+      setup() {
+        return (r) => (showSlot ? r.el('div', r.slot()) : r.el('span', 'owned'));
+      },
+    };
+    AdaptToWebComponent(P);
+    const root = document.createElement(P.name) as HTMLElement & { update(): void };
+    const first = document.createElement('b'),
+      second = document.createElement('i');
+    const other = document.createElement('section');
+    root.append(first, second);
+    document.body.append(root, other);
+    const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+    try {
+      await settle();
+      showSlot = false;
+      root.update();
+      await settle();
+      expect(first.parentNode).toBeNull();
+      expect(second.parentNode).toBeNull();
+      other.append(second);
+      showSlot = true;
+      root.update();
+      await settle();
+      expect(root.querySelector('div')?.contains(first)).toBe(true);
+      expect(root.contains(first)).toBe(true);
+      expect(root.contains(second)).toBe(false);
+      expect(second.parentNode).toBe(other);
+    } finally {
+      root.remove();
+      other.remove();
+    }
+  });
+  it('keeps caller nesting instead of promoting a reparented caller to a second slot root', async () => {
+    let decorated = true;
+    const P: Prototype = {
+      name: 'x-light-slot-caller-nesting',
+      setup() {
+        return (r) => (decorated ? [r.slot(), r.el('span', 'owned')] : r.slot());
+      },
+    };
+    AdaptToWebComponent(P);
+    const root = document.createElement(P.name) as HTMLElement & { update(): void };
+    const parent = document.createElement('b'),
+      child = document.createElement('i');
+    root.append(parent, child);
+    document.body.append(root);
+    const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+    try {
+      await settle();
+      parent.append(child);
+      decorated = false;
+      root.update();
+      await settle();
+      expect([...root.children]).toEqual([parent]);
+      expect(child.parentNode).toBe(parent);
+    } finally {
+      root.remove();
+    }
   });
 });

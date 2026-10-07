@@ -5,7 +5,7 @@ import {
   type CopySnapshot,
 } from './site-copy-controller';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
-import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/registry';
+import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import {
   createProjectionScopeController,
   type ProjectionScopeController,

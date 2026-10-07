@@ -21,12 +21,13 @@ import {
 import { skillRegistryRoot } from './skill-registry.mjs';
 
 function usage() {
-  return 'Usage: pnpm agent:skill -- <leaf-id> --mode human-assisted|autonomous --mode-source <trusted-source> [--assessment <result.json>] | --handoff <handoff.json> [--assessment <result.json>]\n';
+  return 'Usage: pnpm agent:skill -- <leaf-id> --mode human-assisted|autonomous --mode-source <trusted-source> [--assessment <result.json>] | --handoff <handoff.json> [--prior-handoff <received-handoff.json>] [--assessment <result.json>]\n';
 }
 
 function parse(argv) {
   if (argv[0] === '--') argv = argv.slice(1);
   const handoffIndex = argv.indexOf('--handoff');
+  const priorHandoffIndex = argv.indexOf('--prior-handoff');
   const modeIndex = argv.indexOf('--mode');
   const modeSourceIndex = argv.indexOf('--mode-source');
   const assessmentIndex = argv.indexOf('--assessment');
@@ -36,6 +37,7 @@ function parse(argv) {
   const args = {};
   if (handoffIndex >= 0) args.handoffPath = argv[handoffIndex + 1];
   else if (argv[0] && !argv[0].startsWith('-')) args.id = argv[0];
+  if (priorHandoffIndex >= 0) args.priorHandoffPath = argv[priorHandoffIndex + 1];
   if (modeIndex >= 0) args.executionMode = argv[modeIndex + 1];
   if (modeSourceIndex >= 0) args.executionModeSource = argv[modeSourceIndex + 1];
   if (assessmentIndex >= 0) args.assessmentPath = argv[assessmentIndex + 1];
@@ -44,9 +46,10 @@ function parse(argv) {
       ((!ownerSupplied && modeIndex < 0 && modeSourceIndex < 0) ||
         (ownerSupplied && modeIndex >= 0 && modeSourceIndex >= 0))) ||
       (args.id && modeIndex >= 0 && modeSourceIndex >= 0)) &&
-    ![handoffIndex, modeIndex, modeSourceIndex, assessmentIndex].some(
+    ![handoffIndex, priorHandoffIndex, modeIndex, modeSourceIndex, assessmentIndex].some(
       (i) => i >= 0 && !argv[i + 1]
     ) &&
+    (priorHandoffIndex < 0 || handoffIndex >= 0) &&
     (modeIndex < 0 || modeSourceIndex >= 0)
   )
     return args;
@@ -73,7 +76,10 @@ try {
         if (handoff[key] !== args[key])
           throw Error('delegated handoff ' + key + ' differs from trusted invocation');
     }
-    const result = validateSkillHandoff(handoff, registry);
+    const priorHandoff = args.priorHandoffPath
+      ? JSON.parse(fs.readFileSync(args.priorHandoffPath, 'utf8'))
+      : null;
+    const result = validateSkillHandoff(handoff, registry, { priorHandoff });
     skill = result.nextSkill;
     terminal = skill === null;
   } else {
@@ -137,6 +143,9 @@ try {
             mutation: skill.mutation,
             requires: skill.requires,
             produces: skill.produces,
+            ...(skill.allowedNextSkillIds
+              ? { allowedNextSkillIds: skill.allowedNextSkillIds }
+              : {}),
           },
         };
   process.stdout.write(`${JSON.stringify(output, null, 2)}\n`);

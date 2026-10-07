@@ -102,12 +102,15 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
         );
     }
   }
+  const ranges = [...scope.querySelectorAll<HTMLElement>('[data-site-toc-highlight]')].filter(
+    (range) => !bindings.has(range)
+  );
   const links = [
     ...scope.querySelectorAll<HTMLElement>(
       'a[data-site-native-link], a[data-site-native-button], .sidebar-pane .top-level a[href], .sidebar-pane .top-level summary, .pagination-links a[href], sl-toc a[href]'
     ),
   ].filter((link) => !link.closest('[data-homepage-actions]') && !bindings.has(link));
-  if (!links.length) return () => {};
+  if (!links.length && !ranges.length) return () => {};
   const readFamily = (): SiteLibraryFamily =>
     document.documentElement.dataset.siteLibraryFamily === 'brutalist'
       ? 'brutalist'
@@ -155,6 +158,53 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
     return refreshTheme();
   };
   const releases: Array<() => void> = [];
+  // One passive public family Surface per TOC, sharing this batch's theme.
+  // The native TOC owner alone measures and moves its aria-hidden mount.
+  for (const range of ranges) {
+    let family = batchFamily;
+    let surface = document.createElement(`wc-site-${family}-surface`);
+    const props = () => ({
+      variant: 'muted',
+      radius: family === 'brutalist' ? 'default' : 'md',
+      border: 'none',
+      elevation: 'none',
+      surfaceStyle: {
+        ...batchTheme,
+        display: 'block',
+        width: '100%',
+        height: '100%',
+        pointerEvents: 'none',
+      },
+    });
+    const apply = () => {
+      const target = surface as HTMLElement & {
+        setProps?: (props: Record<string, unknown>) => void;
+      };
+      if (target.isConnected && target.setProps) target.setProps(props());
+      else setElementProps(target, props());
+    };
+    apply();
+    range.append(surface);
+    range.setAttribute('data-toc-range-ready', '');
+    const update = () => {
+      if (family !== batchFamily) {
+        const previous = surface;
+        family = batchFamily;
+        surface = document.createElement(`wc-site-${family}-surface`);
+        apply();
+        previous.replaceWith(surface);
+      } else apply();
+    };
+    updates.add(update);
+    const release = () => {
+      updates.delete(update);
+      bindings.delete(range);
+      surface.remove();
+      range.removeAttribute('data-toc-range-ready');
+    };
+    bindings.set(range, release);
+    releases.push(release);
+  }
   for (const link of links) {
     let alive = true;
     const appearance = siteLinkAppearance(link);

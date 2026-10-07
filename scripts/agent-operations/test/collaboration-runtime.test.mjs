@@ -21,6 +21,21 @@ import {
 } from '../collect-live-collaboration-state.mjs';
 import { parseCollaborationCli, runCollaborationCli } from '../collaboration-packet.mjs';
 import { collectThreadRevision } from '../thread-revision.mjs';
+import { modelTraceFixture, writeModelTraceFixture } from './fixtures/modeltrace.mjs';
+
+const { modelTrace, modelTraceContext, disclosure } = modelTraceFixture();
+const modelTraceArtifact = {
+  type: 'modeltrace-record',
+  reference: 'fixture://modeltrace-record',
+  digest: modelTrace.id,
+};
+
+// Receipt-producing observations must follow the synthetic measurement. Keep
+// old target/server metadata independent; it need not be a mutation timestamp.
+function fixtureTimestamp(seconds, fraction = '000') {
+  const second = Math.floor(Date.parse(modelTrace.measuredAt) / 1000) + 1 + seconds;
+  return new Date(second * 1000).toISOString().replace(/\.\d{3}Z$/, `.${fraction}Z`);
+}
 
 const HEAD = 'a'.repeat(40);
 const NEXT_HEAD = 'b'.repeat(40);
@@ -85,6 +100,8 @@ function applyGitHubCollaborationMutation(request, preState, options = {}) {
       executionModeSource: 'current-user',
       policy,
       selfAssessment: assessment,
+      modelTrace,
+      modelTraceContext,
     },
     ...options,
   });
@@ -92,6 +109,17 @@ function applyGitHubCollaborationMutation(request, preState, options = {}) {
 
 function seal(request) {
   const value = structuredClone(request);
+  if (!value.evidence.some((item) => item.type === 'modeltrace-record')) {
+    value.evidence.push(structuredClone(modelTraceArtifact));
+  }
+  if (
+    value.action === 'post-bounded-reconciliation-comment' ||
+    (value.action === 'update-governed-issue-or-pull-request-metadata' &&
+      value.desired.body !== null &&
+      value.desired.body !== value.expected.body)
+  ) {
+    if (!value.desired.body.includes(disclosure)) value.desired.body += `\n\n${disclosure}`;
+  }
   value.requestDigest = computeCollaborationRequestDigest(value);
   return value;
 }
@@ -144,7 +172,7 @@ function metadataLive(overrides = {}) {
     kind: 'proto-ui.live-collaboration-state',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
     action: 'update-governed-issue-or-pull-request-metadata',
-    observedAt: '2026-08-27T01:00:05.000Z',
+    observedAt: fixtureTimestamp(5),
     viewerLogin: 'maintainer',
     viewerPermission: 'WRITE',
     current: {
@@ -175,6 +203,8 @@ function authorize(request, liveState, overrides = {}) {
     executionModeSource: 'current-user',
     policy,
     selfAssessment: assessment,
+    modelTrace,
+    modelTraceContext,
     ...overrides,
   });
 }
@@ -184,8 +214,9 @@ function assertUnknownComment(callback, request, acknowledgementReceived, reason
   assert.throws(callback, (error) => {
     caught = error;
     assert.ok(error instanceof CollaborationMutationUnknown);
-    assert.equal(error.name, 'CollaborationMutationUnknown');
-    assert.deepEqual(error.result, {
+    const unknown = { ...error.result };
+    delete unknown.message;
+    assert.deepEqual(unknown, {
       schemaVersion: 1,
       kind: 'proto-ui.collaboration-unknown',
       repositoryId: request.repositoryId,
@@ -199,14 +230,50 @@ function assertUnknownComment(callback, request, acknowledgementReceived, reason
       acknowledgementReceived,
       reconciliationReadAttempts: 1,
       reason,
-      message:
-        'The comment write outcome is unknown; do not retry blindly. Re-inspect the exact target before deciding any later action.',
     });
     assert.throws(() => validateCollaborationReceipt(error.result, request));
     return true;
   });
   return caught;
 }
+
+test('missing or mismatched records cannot reach collaboration writes even with current user permission', () => {
+  const request = metadataRequest();
+  const withoutBinding = {
+    ...request,
+    evidence: request.evidence.filter((item) => item.type !== 'modeltrace-record'),
+  };
+  withoutBinding.requestDigest = computeCollaborationRequestDigest(withoutBinding);
+  const context = {
+    executionMode: 'human-assisted',
+    executionModeSource: 'current-user',
+    policy,
+    modelTrace,
+    modelTraceContext,
+  };
+  for (const [candidate, override] of [
+    [request, { modelTrace: undefined }],
+    [request, { modelTraceContext: { ...modelTraceContext, routeDigest: 'c'.repeat(64) } }],
+    [withoutBinding, {}],
+  ]) {
+    let writes = 0;
+    let reads = 0;
+    assert.throws(() =>
+      applyMutationWithContext(candidate, metadataLive(), {
+        authorizationContext: { ...context, ...override },
+        runner() {
+          writes += 1;
+        },
+        collectState() {
+          reads += 1;
+          return metadataLive();
+        },
+      })
+    );
+    assert.equal(writes, 0);
+    assert.equal(reads, 0);
+  }
+});
 
 test('request digest binds every purpose and rejects tampering', () => {
   const request = metadataRequest();
@@ -281,6 +348,7 @@ test('an autonomous handoff cannot omit its governed-outcome artifact and public
   const handoff = {
     executionMode: 'autonomous',
     artifacts: [
+      modelTraceArtifact,
       {
         type: 'collaboration-request',
         reference: 'artifact://collaboration/pr-509',
@@ -316,7 +384,10 @@ test('all seven autonomous writers stay blocked even after scope activation and 
       authorizationId: 'proto-ui-scheduled-collaboration-v1',
       evidence: [
         ...fixture.request.evidence.filter(
-          (entry) => !['current-user-instruction', 'governed-outcome'].includes(entry.type)
+          (entry) =>
+            !['current-user-instruction', 'governed-outcome', 'modeltrace-record'].includes(
+              entry.type
+            )
         ),
         ...autonomousRequest().evidence,
       ],
@@ -337,6 +408,8 @@ test('all seven autonomous writers stay blocked even after scope activation and 
             executionModeSource: 'schedule',
             policy,
             selfAssessment: assessment,
+            modelTrace,
+            modelTraceContext,
           },
           runner() {
             calls += 1;
@@ -357,6 +430,7 @@ test('handoff artifacts bind the exact request digest and authorization scope', 
   const request = metadataRequest();
   const handoff = {
     artifacts: [
+      modelTraceArtifact,
       {
         type: 'collaboration-request',
         reference: 'artifact://collaboration/pr-509',
@@ -370,13 +444,15 @@ test('handoff artifacts bind the exact request digest and authorization scope', 
   };
   assert.equal(validateCollaborationHandoffBinding(request, handoff), handoff);
   const stale = structuredClone(handoff);
-  stale.artifacts[0].digest = `sha256:${'f'.repeat(64)}`;
+  stale.artifacts.find((item) => item.type === 'collaboration-request').digest =
+    `sha256:${'f'.repeat(64)}`;
   assert.throws(
     () => validateCollaborationHandoffBinding(request, stale),
     /collaboration-request artifact does not bind requestDigest/
   );
   const wrongScope = structuredClone(handoff);
-  wrongScope.artifacts[1].reference = 'proto-ui-scheduled-review-v1';
+  wrongScope.artifacts.find((item) => item.type === 'mutation-authorization').reference =
+    'proto-ui-scheduled-review-v1';
   assert.throws(
     () => validateCollaborationHandoffBinding(request, wrongScope),
     /mutation-authorization artifact does not bind authorizationId/
@@ -419,6 +495,7 @@ test('ready-for-review handoff binds a digested validation-report artifact', () 
       reference: 'artifact://validation/pr-509',
       digest: `sha256:${'d'.repeat(64)}`,
     },
+    modelTraceArtifact,
   ];
   const handoff = { artifacts };
   assert.equal(validateCollaborationHandoffBinding(request, handoff), handoff);
@@ -1146,6 +1223,51 @@ test('metadata PATCH sends only fields whose desired values changed', () => {
   assert.deepEqual(input, { labels: ['governed', 'triaged'] });
 });
 
+test('null body replacement cannot delete disclosure and existing content through a metadata PATCH', () => {
+  const base = metadataRequest();
+  const request = seal({ ...base, desired: { ...base.expected, body: null } });
+  let writes = 0;
+  assert.throws(
+    () =>
+      applyGitHubCollaborationMutation(request, metadataLive(), {
+        runner() {
+          writes += 1;
+          return '{}';
+        },
+        collectState: () => metadataLive(),
+      }),
+    /ModelTrace disclosure/
+  );
+  assert.equal(writes, 0);
+});
+
+test('metadata body replacement publishes the complete disclosed body without rewriting prior content', () => {
+  const base = metadataRequest();
+  const request = seal({
+    ...base,
+    desired: { ...base.expected, body: 'Updated governed evidence.' },
+  });
+  const preState = metadataLive();
+  const postState = metadataLive({ body: request.desired.body });
+  let writes = 0;
+  const result = applyGitHubCollaborationMutation(request, preState, {
+    runner(command, args, options) {
+      writes += 1;
+      assert.equal(command, 'gh');
+      assert.ok(args.includes('PATCH'));
+      assert.deepEqual(JSON.parse(options.input), {
+        body: `Updated governed evidence.\n\n${disclosure}`,
+      });
+      return JSON.stringify({ id: 509, node_id: 'PR_node' });
+    },
+    collectState: () => (writes ? postState : preState),
+  });
+  assert.equal(writes, 1);
+  assert.equal(result.mutationCount, 1);
+  assert.equal(result.postState.current.body, `Updated governed evidence.\n\n${disclosure}`);
+  assert.equal(preState.current.body, 'Old body');
+});
+
 test('mutation adapter performs exactly one write and one post-write verification', () => {
   const request = metadataRequest();
   const preState = metadataLive();
@@ -1238,7 +1360,7 @@ test('an unknown comment POST stays ambiguous even when the same credential publ
         nodeId: 'IC_node',
         url: 'https://github.com/Proto-UI/Proto-UI/pull/509#issuecomment-9001',
         createdAt: '2026-08-27T01:00:09.000Z',
-        body: `Exact-head reconciliation is complete.\n\n${marker}`,
+        body: `${request.desired.body}\n\n${marker}`,
       },
     },
   };
@@ -1284,7 +1406,7 @@ test('bounded comment idempotency requires the complete canonical body', () => {
         nodeId: 'IC_node',
         url: 'https://github.com/Proto-UI/Proto-UI/pull/509#issuecomment-9002',
         createdAt: '2026-08-27T01:00:09.000Z',
-        body: `Exact-head reconciliation is complete.\nadditional text\n\n${marker}`,
+        body: `${request.desired.body}\nadditional text\n\n${marker}`,
       },
     },
   };
@@ -1316,10 +1438,142 @@ test('receipt validation binds the request and rejects impossible mutation count
     verification: 'live-state-matches-desired',
     note: 'The exact desired metadata state was observed after one write.',
   });
-  assert.equal(validateCollaborationReceipt(receipt, request), receipt);
+  validateCollaborationReceipt(receipt, request);
   assert.throws(
     () => validateCollaborationReceipt({ ...receipt, mutationCount: 0 }, request),
     /applied receipt must record exactly one mutation/
+  );
+});
+
+test('schema-v2 receipt ingestion admits GitHub casing aliases but rejects foreign attribution', () => {
+  const request = metadataRequest({ repositoryId: 'github.com:proto-ui/proto-ui' });
+  const preState = metadataLive();
+  const receipt = buildCollaborationReceipt({
+    request,
+    preState,
+    postState: preState,
+    actor: 'maintainer',
+    outcome: 'no-op',
+    mutationCount: 0,
+    reconciliationCount: 0,
+    platformObject: null,
+    verifiedAt: fixtureTimestamp(11),
+    verification: 'live-state-matches-desired',
+    note: 'Synthetic receipt ingestion control.',
+    modelTrace,
+  });
+  validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), request);
+  const foreign = {
+    ...receipt,
+    modelTrace: modelTraceFixture('github.com:Other/Other').modelTrace,
+  };
+  assert.throws(() => validateCollaborationReceipt(foreign), /repository/);
+  assert.throws(() => validateCollaborationReceipt(foreign, request), /repository/);
+  assert.throws(
+    () => validateCollaborationReceipt({ ...receipt, repositoryId: ['github.com:a', 'b/c'] }),
+    { name: 'Error' }
+  );
+});
+
+test('schema-v2 receipt ingestion rejects retroactive measurements without losing timestamp precision', () => {
+  const request = metadataRequest();
+  const preState = metadataLive();
+  const receipt = buildCollaborationReceipt({
+    request,
+    preState,
+    postState: preState,
+    actor: 'maintainer',
+    outcome: 'no-op',
+    mutationCount: 0,
+    reconciliationCount: 0,
+    platformObject: null,
+    verifiedAt: modelTrace.measuredAt,
+    verification: 'live-state-matches-desired',
+    note: 'Synthetic measurement and verification at the same instant.',
+    modelTrace,
+  });
+  const measured = Date.parse(modelTrace.measuredAt);
+  const equalOffset = new Date(measured + 60 * 60 * 1000).toISOString().replace('Z', '000+01:00');
+  validateCollaborationReceipt({ ...receipt, verifiedAt: equalOffset }, request);
+  // Verification accepts finer fractions than ModelTrace measurement. This is
+  // one microsecond before measurement, including the .000 second rollover.
+  const fractionalBefore = new Date(measured - 1).toISOString().replace('Z', '999Z');
+  assert.throws(
+    () => validateCollaborationReceipt({ ...receipt, verifiedAt: fractionalBefore }, request),
+    /measurement occurs after receipt verification/
+  );
+  const beforeOffset = new Date(measured - 1 + 60 * 60 * 1000).toISOString().replace('Z', '+01:00');
+  assert.throws(
+    () => validateCollaborationReceipt({ ...receipt, verifiedAt: beforeOffset }),
+    /measurement occurs after receipt verification/
+  );
+});
+
+test('applied thread receipts admit late verification and old PR metadata but reject later attribution', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'resolve thread');
+  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+  const postState = {
+    ...preState,
+    current: { ...fixture.before, ...fixture.after },
+  };
+  const receipt = buildCollaborationReceipt({
+    request: fixture.request,
+    preState,
+    postState,
+    actor: 'maintainer',
+    outcome: 'applied',
+    mutationCount: 1,
+    reconciliationCount: 0,
+    platformObject: {
+      id: 'PRRT_thread',
+      nodeId: 'PRRT_thread',
+      url: null,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      workflowRunId: null,
+      workflowAttempt: null,
+    },
+    verifiedAt: new Date(Date.parse(modelTrace.expiresAt) + 124).toISOString(),
+    verification: 'live-state-matches-desired',
+    note: 'Synthetic post-write readback after measurement expiry; PR metadata is unchanged.',
+    modelTrace,
+  });
+  validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), fixture.request);
+  assert.throws(
+    () =>
+      validateCollaborationReceipt({
+        ...receipt,
+        verifiedAt: new Date(Date.parse(modelTrace.measuredAt) - 1).toISOString(),
+      }),
+    /measurement occurs after receipt verification/
+  );
+});
+
+test('rejected receipts retain historical attribution without implying a write or current freshness', () => {
+  const request = metadataRequest();
+  const preState = metadataLive();
+  const receipt = buildCollaborationReceipt({
+    request,
+    preState,
+    postState: preState,
+    actor: 'maintainer',
+    outcome: 'rejected',
+    mutationCount: 0,
+    reconciliationCount: 0,
+    platformObject: null,
+    verifiedAt: modelTrace.expiresAt,
+    verification: 'live-authorization-rejected',
+    note: 'Synthetic zero-write historical rejection.',
+    modelTrace,
+  });
+  validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), request);
+  assert.throws(
+    () =>
+      validateCollaborationReceipt({
+        ...receipt,
+        verifiedAt: new Date(Date.parse(modelTrace.measuredAt) - 1).toISOString(),
+      }),
+    /measurement occurs after receipt verification/
   );
 });
 
@@ -1366,13 +1620,9 @@ test('update-branch no-op is bound to the exact base and rejects an unrelated st
     assert.equal(staleDecision.allowed, false);
     assert.match(staleDecision.reason, /head SHA is stale/);
     let writes = 0;
-    const preState = {
-      ...live,
-      current: { ...live.current, updatedAt: UPDATED_AT, headSha: HEAD },
-    };
     assert.throws(
       () =>
-        applyGitHubCollaborationMutation(request, preState, {
+        applyGitHubCollaborationMutation(request, staleSatisfied, {
           collectState: () => staleSatisfied,
           runner() {
             writes += 1;
@@ -1388,9 +1638,24 @@ test('update-branch no-op is bound to the exact base and rejects an unrelated st
     current: { ...live.current, headSha: HEAD, containsBaseSha: true },
   });
   assert.equal(satisfied.outcome, 'no-op');
+  const wrongBase = {
+    ...live,
+    current: { ...live.current, headSha: HEAD, containsBaseSha: true, baseSha: 'd'.repeat(40) },
+  };
+  assert.equal(authorize(request, wrongBase).allowed, false);
+  let writes = 0;
+  assert.throws(() =>
+    applyGitHubCollaborationMutation(request, wrongBase, {
+      runner() {
+        writes += 1;
+      },
+      collectState: () => wrongBase,
+    })
+  );
+  assert.equal(writes, 0);
 });
 
-test('update-branch post-write state requires ancestry from the requested head and base', () => {
+test('read-only update-branch verification requires ancestry from the requested head and base', () => {
   const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
   const postState = {
     ...metadataLive(),
@@ -1419,82 +1684,6 @@ test('update-branch post-write state requires ancestry from the requested head a
     }),
     false
   );
-});
-
-test('update-branch rejects an unrelated replacement head after one PUT and bounded reads', () => {
-  const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
-  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
-  const postState = {
-    ...preState,
-    current: {
-      ...fixture.before,
-      ...fixture.after,
-      containsRequestedHeadSha: false,
-    },
-  };
-  let reads = 0;
-  let writes = 0;
-  let waits = 0;
-  assert.throws(
-    () =>
-      applyGitHubCollaborationMutation(fixture.request, preState, {
-        runner(command, args, options) {
-          writes += 1;
-          assert.equal(command, 'gh');
-          assert.ok(args.includes(fixture.endpoint));
-          assert.equal(args[args.indexOf('--method') + 1], 'PUT');
-          assert.deepEqual(JSON.parse(options.input), { expected_head_sha: HEAD });
-          return fixture.response;
-        },
-        collectState() {
-          reads += 1;
-          return reads === 1 ? preState : postState;
-        },
-        asyncVerificationAttempts: 3,
-        wait() {
-          waits += 1;
-        },
-      }),
-    /bounded post-write verification polling.*do not retry blindly/
-  );
-  assert.equal(writes, 1);
-  assert.equal(reads, 4);
-  assert.equal(waits, 2);
-});
-
-test('update-branch unknown outcome remains ambiguous even with both ancestries verified', () => {
-  const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
-  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
-  let reads = 0;
-  let writes = 0;
-  assert.throws(
-    () =>
-      applyGitHubCollaborationMutation(fixture.request, preState, {
-        runner() {
-          writes += 1;
-          throw new Error('connection reset after request body was sent');
-        },
-        collectState() {
-          reads += 1;
-          return writes === 0
-            ? preState
-            : {
-                ...preState,
-                current: {
-                  ...fixture.before,
-                  ...fixture.after,
-                  containsRequestedHeadSha: true,
-                },
-              };
-        },
-        wait() {
-          assert.fail('an unknown outcome permits one reconciliation, not polling');
-        },
-      }),
-    /ambiguous after one live reconciliation.*do not retry blindly/
-  );
-  assert.equal(writes, 1);
-  assert.equal(reads, 2);
 });
 
 test('live update-branch collection compares both requested ancestors with the observed head', () => {
@@ -1548,248 +1737,56 @@ test('live update-branch collection compares both requested ancestors with the o
   }
 });
 
-for (const delayedAncestry of ['containsBaseSha', 'containsRequestedHeadSha']) {
-  test(`update-branch polls until the new head and delayed ${delayedAncestry} are visible`, () => {
-    const base = metadataRequest();
-    const request = seal({
-      ...base,
-      action: 'update-pull-request-branch-at-expected-head',
-      target: {
-        kind: 'pull-request',
-        number: 509,
-        updatedAt: UPDATED_AT,
-        headSha: HEAD,
-        baseSha: BASE,
-      },
-      expected: { containsBaseSha: false },
-      desired: { containsBaseSha: true },
-      rationale: 'Bring the exact branch head up to the exact current base.',
-    });
-    const current = {
-      kind: 'pull-request',
-      number: 509,
-      nodeId: 'PR_node',
-      url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
-      state: 'OPEN',
-      authorLogin: 'contributor',
-      updatedAt: UPDATED_AT,
-      headSha: HEAD,
-      baseSha: BASE,
-      containsBaseSha: false,
-      containsRequestedHeadSha: true,
-      maintainerCanModify: true,
+for (const [actor, maintainerCanModify, containsBaseSha] of [
+  ['contributor', false, false],
+  ['maintainer', true, false],
+  ['maintainer', false, false],
+  ['maintainer', true, true],
+]) {
+  test(`update-branch ${containsBaseSha ? 'retains an exact-base no-op' : 'rejects server-created commits'} for ${actor} with maintainer edits ${maintainerCanModify}`, () => {
+    const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
+    const preState = {
+      ...metadataLive(),
+      viewerLogin: actor,
+      action: fixture.request.action,
+      current: { ...fixture.before, maintainerCanModify, containsBaseSha },
     };
-    const preState = { ...metadataLive(), action: request.action, current };
-    const states = [
-      preState, // Final authorization read precedes bounded post-write polling.
-      preState,
-      {
-        ...preState,
-        current: {
-          ...current,
-          headSha: NEXT_HEAD,
-          containsBaseSha: true,
-          [delayedAncestry]: false,
-        },
-      },
-      {
-        ...preState,
-        observedAt: '2026-08-27T01:00:11.000Z',
-        current: {
-          ...current,
-          updatedAt: '2026-08-27T01:00:10.000Z',
-          headSha: NEXT_HEAD,
-          containsBaseSha: true,
-        },
-      },
-    ];
-    let reads = 0;
-    const waits = [];
-    const result = applyGitHubCollaborationMutation(request, preState, {
-      runner() {
-        return JSON.stringify({ message: 'Updating pull request branch.' });
-      },
-      collectState() {
-        return states[reads++];
-      },
-      asyncVerificationAttempts: 3,
-      asyncVerificationDelayMs: 25,
-      wait(delayMs) {
-        waits.push(delayMs);
-      },
-    });
-
-    assert.equal(reads, 4);
-    assert.deepEqual(waits, [25, 25]);
-    assert.equal(result.mutationCount, 1);
-    assert.equal(result.reconciliationCount, 0);
-    assert.equal(result.postState.current.headSha, NEXT_HEAD);
-    assert.equal(result.postState.current.containsBaseSha, true);
-    assert.equal(result.postState.current.containsRequestedHeadSha, true);
-  });
-}
-
-test('update-branch stops bounded polling when base or pull-request state changes', () => {
-  const base = metadataRequest();
-  const request = seal({
-    ...base,
-    action: 'update-pull-request-branch-at-expected-head',
-    target: {
-      kind: 'pull-request',
-      number: 509,
-      updatedAt: UPDATED_AT,
-      headSha: HEAD,
-      baseSha: BASE,
-    },
-    expected: { containsBaseSha: false },
-    desired: { containsBaseSha: true },
-    rationale: 'Bring the exact branch head up to the exact current base.',
-  });
-  const current = {
-    kind: 'pull-request',
-    number: 509,
-    nodeId: 'PR_node',
-    url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
-    state: 'OPEN',
-    authorLogin: 'contributor',
-    updatedAt: UPDATED_AT,
-    headSha: HEAD,
-    baseSha: BASE,
-    containsBaseSha: false,
-    maintainerCanModify: true,
-  };
-  const preState = { ...metadataLive(), action: request.action, current };
-
-  for (const drift of [{ baseSha: 'd'.repeat(40) }, { state: 'CLOSED' }]) {
+    const decision = authorize(fixture.request, preState);
+    assert.equal(decision.allowed, containsBaseSha);
+    assert.equal(decision.outcome, containsBaseSha ? 'no-op' : 'rejected');
+    let writes = 0;
     let reads = 0;
     let waits = 0;
-    assert.throws(
-      () =>
-        applyGitHubCollaborationMutation(request, preState, {
-          runner() {
-            return JSON.stringify({ message: 'Updating pull request branch.' });
-          },
-          collectState() {
-            reads += 1;
-            if (reads === 1) return preState;
-            return { ...preState, current: { ...current, ...drift } };
-          },
-          asyncVerificationAttempts: 3,
-          asyncVerificationDelayMs: 25,
-          wait() {
-            waits += 1;
-          },
-        }),
-      /bounded post-write verification polling.*do not retry blindly/
-    );
-    assert.equal(reads, 2);
-    assert.equal(waits, 0);
-  }
-});
-
-test('update-branch polling stops at the configured maximum without another write', () => {
-  const base = metadataRequest();
-  const request = seal({
-    ...base,
-    action: 'update-pull-request-branch-at-expected-head',
-    target: {
-      kind: 'pull-request',
-      number: 509,
-      updatedAt: UPDATED_AT,
-      headSha: HEAD,
-      baseSha: BASE,
-    },
-    expected: { containsBaseSha: false },
-    desired: { containsBaseSha: true },
-    rationale: 'Bring the exact branch head up to the exact current base.',
-  });
-  const current = {
-    kind: 'pull-request',
-    number: 509,
-    nodeId: 'PR_node',
-    url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
-    state: 'OPEN',
-    authorLogin: 'contributor',
-    updatedAt: UPDATED_AT,
-    headSha: HEAD,
-    baseSha: BASE,
-    containsBaseSha: false,
-    maintainerCanModify: true,
-  };
-  const preState = { ...metadataLive(), action: request.action, current };
-  let writes = 0;
-  let reads = 0;
-  let waits = 0;
-
-  assert.throws(
-    () =>
-      applyGitHubCollaborationMutation(request, preState, {
+    const apply = () =>
+      applyGitHubCollaborationMutation(fixture.request, preState, {
         runner() {
           writes += 1;
-          return JSON.stringify({ message: 'Updating pull request branch.' });
+          throw new Error('server update must never write');
         },
         collectState() {
           reads += 1;
           return preState;
         },
-        asyncVerificationAttempts: 3,
-        asyncVerificationDelayMs: 25,
         wait() {
           waits += 1;
         },
-      }),
-    /bounded post-write verification polling.*do not retry blindly/
-  );
-  assert.equal(writes, 1);
-  assert.equal(reads, 4);
-  assert.equal(waits, 2);
-});
-
-test('update-branch allows the acting pull-request author when maintainer edits are disabled', () => {
-  const base = metadataRequest();
-  const request = seal({
-    ...base,
-    action: 'update-pull-request-branch-at-expected-head',
-    target: {
-      kind: 'pull-request',
-      number: 509,
-      updatedAt: UPDATED_AT,
-      headSha: HEAD,
-      baseSha: BASE,
-    },
-    expected: { containsBaseSha: false },
-    desired: { containsBaseSha: true },
-    rationale: 'Bring the author-owned exact branch head up to the exact current base.',
+      });
+    if (containsBaseSha) {
+      const result = apply();
+      assert.equal(result.mutationCount, 0);
+      assert.deepEqual(result.postState, preState);
+    } else {
+      assert.throws(apply);
+    }
+    assert.equal(writes, 0);
+    assert.equal(reads, 0);
+    assert.equal(waits, 0);
+    const { receipt, writes: cliWrites } = runCollaborationFixture(fixture, [preState]);
+    assert.equal(receipt.outcome, containsBaseSha ? 'no-op' : 'rejected');
+    assert.equal(receipt.mutationCount, 0);
+    assert.equal(cliWrites, 0);
   });
-  const live = {
-    ...metadataLive(),
-    viewerLogin: 'contributor',
-    action: request.action,
-    current: {
-      kind: 'pull-request',
-      number: 509,
-      nodeId: 'PR_node',
-      url: 'https://github.com/Proto-UI/Proto-UI/pull/509',
-      state: 'OPEN',
-      authorLogin: 'contributor',
-      updatedAt: UPDATED_AT,
-      headSha: HEAD,
-      baseSha: BASE,
-      containsBaseSha: false,
-      maintainerCanModify: false,
-    },
-  };
-  assert.equal(authorize(request, live).outcome, 'mutate');
-
-  const unrelatedViewer = {
-    ...live,
-    viewerLogin: 'unrelated-maintainer',
-  };
-  assert.match(
-    authorize(request, unrelatedViewer).reason,
-    /neither author-owned.*maintainer-editable/
-  );
-});
+}
 
 test('collaboration CLI is strict and can seal a request without touching GitHub', () => {
   assert.throws(
@@ -1844,10 +1841,15 @@ for (const scenario of [
   },
 ]) {
   test(`collaboration CLI emits a validated zero-write receipt for ${scenario.name}`, () => {
+    const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-'));
+    const identity = writeModelTraceFixture(directory);
     const request = seal({
       ...metadataRequest(),
       authorizationId: 'explicit-current-user',
-      evidence: [{ type: 'current-user-instruction', reference: 'conversation://current-request' }],
+      evidence: [
+        { type: 'current-user-instruction', reference: 'conversation://current-request' },
+        identity.artifact,
+      ],
     });
     const handoff = {
       schemaVersion: 1,
@@ -1858,6 +1860,7 @@ for (const scenario of [
       fromId: 'pui-pr',
       nextSkillId: 'pui-collaborate',
       artifacts: [
+        identity.artifact,
         { type: 'pull-request-report', reference: 'artifact://pr/509/report' },
         { type: 'review-input', reference: 'artifact://pr/509/review-input' },
         { type: 'capability-envelope', reference: 'artifact://capability/current' },
@@ -1872,7 +1875,6 @@ for (const scenario of [
       humanGates: [],
       notes: [],
     };
-    const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-'));
     try {
       const requestPath = join(directory, 'request.json');
       const handoffPath = join(directory, 'handoff.json');
@@ -1891,6 +1893,10 @@ for (const scenario of [
           requestPath,
           '--handoff',
           handoffPath,
+          '--record',
+          identity.recordPath,
+          '--context',
+          identity.contextPath,
         ],
         {
           collectState() {
@@ -1955,6 +1961,8 @@ test('the mutation adapter requires execution authorization as well as matching 
           executionMode: 'human-assisted',
           executionModeSource: 'repository-issue',
           policy,
+          modelTrace,
+          modelTraceContext,
         },
       }),
     /authorization|source/
@@ -2001,10 +2009,6 @@ function nonMetadataMutationCases() {
         maintainerCanModify: true,
       },
       after: { headSha: NEXT_HEAD, containsBaseSha: true, containsRequestedHeadSha: true },
-      response: JSON.stringify({ message: 'Updating pull request branch.' }),
-      endpoint: 'repos/Proto-UI/Proto-UI/pulls/509/update-branch',
-      method: 'PUT',
-      input: { expected_head_sha: HEAD },
     },
     {
       name: 'ready for review',
@@ -2203,7 +2207,23 @@ function nonMetadataMutationCases() {
 function runCollaborationFixture(fixture, states) {
   const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-preflight-'));
   try {
-    const request = fixture.request;
+    const identity = writeModelTraceFixture(directory);
+    const oldMarker = collaborationMarker(fixture.request);
+    const request = seal({
+      ...fixture.request,
+      evidence: [
+        ...fixture.request.evidence.filter((item) => item.type !== 'modeltrace-record'),
+        identity.artifact,
+      ],
+    });
+    const newMarker = collaborationMarker(request);
+    const boundStates = structuredClone(states);
+    for (const state of boundStates) {
+      const comment = state.current?.markerComment;
+      if (typeof comment?.body === 'string')
+        comment.body = comment.body.replace(oldMarker, newMarker);
+    }
+    const response = fixture.response?.replace(oldMarker, newMarker);
     const requestPath = join(directory, 'request.json');
     const handoffPath = join(directory, 'handoff.json');
     writeFileSync(requestPath, JSON.stringify(request));
@@ -2218,6 +2238,7 @@ function runCollaborationFixture(fixture, states) {
         fromId: 'pui-pr',
         nextSkillId: 'pui-collaborate',
         artifacts: [
+          identity.artifact,
           { type: 'pull-request-report', reference: 'artifact://pr/509/report' },
           { type: 'review-input', reference: 'artifact://pr/509/review-input' },
           { type: 'capability-envelope', reference: 'artifact://capability/current' },
@@ -2246,12 +2267,16 @@ function runCollaborationFixture(fixture, states) {
         requestPath,
         '--handoff',
         handoffPath,
+        '--record',
+        identity.recordPath,
+        '--context',
+        identity.contextPath,
       ],
       {
-        collectState: () => states[Math.min(reads++, states.length - 1)],
+        collectState: () => boundStates[Math.min(reads++, boundStates.length - 1)],
         runner: () => {
           writes += 1;
-          return fixture.response;
+          return response;
         },
       }
     );
@@ -2273,18 +2298,16 @@ for (const scenario of [
     fixture.request = seal({
       ...fixture.request,
       requestedAt:
-        scenario === 'initial future request'
-          ? '2026-08-27T01:00:12.000Z'
-          : '2026-08-27T01:00:05.000Z',
+        scenario === 'initial future request' ? fixtureTimestamp(12) : fixtureTimestamp(5),
     });
     const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
     const finalState = structuredClone(preState);
-    if (scenario === 'subsecond future request') preState.observedAt = '2026-08-27T01:00:04.999Z';
+    if (scenario === 'subsecond future request') preState.observedAt = fixtureTimestamp(4, '999');
     if (scenario === 'clock rollback at final preflight')
-      finalState.observedAt = '2026-08-27T01:00:04.999Z';
+      finalState.observedAt = fixtureTimestamp(4, '999');
     const postState = {
       ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
+      observedAt: fixtureTimestamp(11),
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
@@ -2314,49 +2337,49 @@ for (const scenario of [
 for (const [name, requestedAt, initialAt, finalAt, expectedOutcome, expectedReads] of [
   [
     'fractional future',
-    '2026-08-27T01:00:05.0001Z',
-    '2026-08-27T01:00:05.000Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(5, '0001'),
+    fixtureTimestamp(5),
+    fixtureTimestamp(5),
     'rejected',
     1,
   ],
   [
     'offset fractional future',
-    '2026-08-27T02:00:05.0001+01:00',
-    '2026-08-27T01:00:05.000Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(3605, '0001').replace('Z', '+01:00'),
+    fixtureTimestamp(5),
+    fixtureTimestamp(5),
     'rejected',
     1,
   ],
   [
     'final fractional rollback',
-    '2026-08-27T01:00:05.0001Z',
-    '2026-08-27T01:00:05.0002Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(5, '0001'),
+    fixtureTimestamp(5, '0002'),
+    fixtureTimestamp(5),
     'rejected',
     2,
   ],
   [
     'equal padded fraction',
-    '2026-08-27T01:00:05.0001000Z',
-    '2026-08-27T01:00:05.0001Z',
-    '2026-08-27T01:00:05.0001Z',
+    fixtureTimestamp(5, '0001000'),
+    fixtureTimestamp(5, '0001'),
+    fixtureTimestamp(5, '0001'),
     'applied',
     3,
   ],
   [
     'equal offset instant',
-    '2026-08-27T02:00:05.0001+01:00',
-    '2026-08-27T01:00:05.000100Z',
-    '2026-08-27T01:00:05.000100Z',
+    fixtureTimestamp(3605, '0001').replace('Z', '+01:00'),
+    fixtureTimestamp(5, '000100'),
+    fixtureTimestamp(5, '000100'),
     'applied',
     3,
   ],
   [
     'earlier second with longer fraction',
-    '2026-08-27T01:00:04.999999Z',
-    '2026-08-27T01:00:05.000Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(4, '999999'),
+    fixtureTimestamp(5),
+    fixtureTimestamp(5),
     'applied',
     3,
   ],
@@ -2373,7 +2396,7 @@ for (const [name, requestedAt, initialAt, finalAt, expectedOutcome, expectedRead
     const finalState = { ...preState, observedAt: finalAt };
     const postState = {
       ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
+      observedAt: fixtureTimestamp(11),
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
@@ -2393,26 +2416,6 @@ for (const [name, requestedAt, initialAt, finalAt, expectedOutcome, expectedRead
   });
 }
 
-for (const maintainerCanModify of [true, false]) {
-  test(`null PR author uses maintainer edit permission ${maintainerCanModify} without throwing`, () => {
-    const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
-    fixture.before.authorLogin = null;
-    fixture.before.maintainerCanModify = maintainerCanModify;
-    const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
-    const postState = {
-      ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
-      current: { ...fixture.before, ...fixture.after },
-    };
-    const { receipt, writes } = runCollaborationFixture(fixture, [preState, preState, postState]);
-    assert.equal(receipt.outcome, maintainerCanModify ? 'applied' : 'rejected');
-    assert.equal(receipt.mutationCount, maintainerCanModify ? 1 : 0);
-    assert.equal(writes, maintainerCanModify ? 1 : 0);
-    if (!maintainerCanModify)
-      assert.match(receipt.note, /neither author-owned.*maintainer-editable/);
-  });
-}
-
 test('missing PR author rejects independent-review requests with a zero-write receipt', () => {
   const fixture = nonMetadataMutationCases().find((item) => item.name === 'request reviewer');
   fixture.before.authorLogin = null;
@@ -2425,7 +2428,7 @@ test('missing PR author rejects independent-review requests with a zero-write re
 });
 
 test('each non-metadata collaboration action maps to one exact GitHub mutation primitive', () => {
-  const cases = nonMetadataMutationCases();
+  const cases = nonMetadataMutationCases().filter((item) => item.name !== 'update branch');
   for (const fixture of cases) {
     const preState = {
       ...metadataLive(),
@@ -2469,19 +2472,13 @@ test('each non-metadata collaboration action maps to one exact GitHub mutation p
   }
 });
 
-for (const fixture of nonMetadataMutationCases()) {
+for (const fixture of nonMetadataMutationCases().filter((item) => item.name !== 'update branch')) {
   const changes = [
     ['viewer identity', (s) => (s.viewerLogin = 'another-actor')],
     ['permission', (s) => (s.viewerPermission = 'READ')],
     ['head', (s) => (s.current.headSha = NEXT_HEAD)],
     ['revision timestamp', (s) => (s.current.updatedAt = '2026-08-27T01:01:00.000Z')],
   ];
-  if (fixture.name === 'update branch')
-    changes.push(
-      ['base', (s) => (s.current.baseSha = 'd'.repeat(40))],
-      ['maintainer edit permission', (s) => (s.current.maintainerCanModify = false)],
-      ['closed target', (s) => (s.current.state = 'CLOSED')]
-    );
   if (fixture.name === 'ready for review')
     changes.push(['closed target', (s) => (s.current.state = 'CLOSED')]);
   if (fixture.name === 'request reviewer')
@@ -3036,15 +3033,13 @@ for (const fixture of [
     before: metadataLive().current,
     after: { title: 'New title' },
   },
-  ...nonMetadataMutationCases(),
+  ...nonMetadataMutationCases().filter((item) => item.name !== 'update branch'),
 ]) {
   test(`${fixture.name}: a fully authorized final desired state is a zero-write no-op`, () => {
     const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
     const postState = {
       ...preState,
       observedAt: '2026-08-27T01:00:11.000Z',
-      // A pre-write no-op must retain the requested head. A successful branch
-      // update may publish a new head only after this invocation's write.
       current: { ...fixture.before, ...fixture.after, headSha: fixture.before.headSha },
     };
     let writes = 0;
@@ -3142,7 +3137,7 @@ for (const createdAt of [
     const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
     const postState = {
       ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
+      observedAt: fixtureTimestamp(11),
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.createdAt = createdAt;

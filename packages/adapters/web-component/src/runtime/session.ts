@@ -93,11 +93,27 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
           port?.trace?.('after-unmount');
         } catch {}
 
-        wiring.afterUnmount();
-        eventGate.dispose();
-        router.dispose();
-        clearSlotProjector();
-        onAfterUnmount?.();
+        // A readiness observer may throw while the view is released. Complete
+        // the session tail too, preserving the original disposal failure.
+        let failed = false;
+        let firstError: unknown;
+        for (const release of [
+          () => wiring.afterUnmount(),
+          () => eventGate.dispose(),
+          () => router.dispose(),
+          clearSlotProjector,
+          () => onAfterUnmount?.(),
+        ]) {
+          try {
+            release();
+          } catch (error) {
+            if (!failed) {
+              failed = true;
+              firstError = error;
+            }
+          }
+        }
+        if (failed) throw firstError;
       },
     },
     { initialMount }
@@ -163,6 +179,13 @@ function commitWebComponentChildren(args: {
   }
 
   if (isSlotOnly(children)) {
+    const projector = getSlotProjector();
+    if (projector) {
+      // Preserve caller nodes before dropping the previous owned-node boundary.
+      // An initial slot-only view has no projector and leaves its children alone.
+      const slotPool = projector.collectSlotPoolBeforeCommit();
+      root.replaceChildren(...slotPool);
+    }
     clearSlotProjector();
     eventGate.enable();
     return;

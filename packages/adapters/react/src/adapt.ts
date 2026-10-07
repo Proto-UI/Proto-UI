@@ -48,11 +48,18 @@ import {
   createLogicalInstance,
   resolveLogicalTriggerEventRouteForTarget,
   markProtoInstance,
+  registerNativeFocusReadiness,
+  isFocusTargetOwnerReady,
+  subscribeFocusTargetOwnerReady,
   unbindProtoInstance,
   unbindLogicalEventTarget,
 } from './platform/instance-tree';
 import { createReactEffectsPort } from './runtime/effects-port';
-import { createReactModules, createReactOwnerModules } from './runtime/modules';
+import {
+  createReactModules,
+  createReactOwnerModules,
+  type FocusIntentState,
+} from './runtime/modules';
 import { createReactHostSession } from './runtime/session';
 import { renderTemplateToReact, type ReactRuntime as ReactRenderRuntime } from './template';
 
@@ -231,16 +238,30 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         setHostStyle({ tokens, revision });
       };
       const [shouldExist, setShouldExist] = runtime.useState(!supportsOwnerContext);
-      const viewEffectsTargetReadyRef = runtime.useRef(false);
+      const projectionReadyRef = runtime.useRef(false);
       const viewReadyRef = runtime.useRef(false);
       const focusTargetReadyListenersRef = runtime.useRef<Set<() => void>>(new Set());
       const focusTargetRetryScheduledRef = runtime.useRef(false);
       const focusTargetRetryCountRef = runtime.useRef(0);
+      const focusIntentStateRef = runtime.useRef<FocusIntentState>({});
       const notifyFocusTargetReady = () => {
         const target = rootRef.current;
-        if (!viewReadyRef.current || !target?.isConnected) return;
-        for (const listener of Array.from(focusTargetReadyListenersRef.current)) listener();
-        if (target.ownerDocument.activeElement === target) focusTargetRetryCountRef.current = 0;
+        if (!viewReadyRef.current || !eventGateRef.current?.isEnabled() || !target?.isConnected) {
+          return;
+        }
+        let failed = false;
+        let firstError: unknown;
+        for (const listener of Array.from(focusTargetReadyListenersRef.current)) {
+          try {
+            listener();
+          } catch (error) {
+            if (!failed) {
+              failed = true;
+              firstError = error;
+            }
+          }
+        }
+        if (failed) throw firstError;
       };
 
       const controllerRef = runtime.useRef<RuntimeController | null>(null);
@@ -402,9 +423,8 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           if (ownerRef.current?.hasView) void ownerRef.current.detachView();
           setHostTokens([]);
           pendingRevealStyleRevisionRef.current = null;
-          viewEffectsTargetReadyRef.current = false;
+          projectionReadyRef.current = false;
           viewReadyRef.current = false;
-          focusTargetRetryCountRef.current = 0;
           return;
         }
 
@@ -413,7 +433,19 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
         installViewVisibilityRule(rootEl.ownerDocument);
 
-        markProtoInstance(rootEl, proto as Prototype<any>, instanceTokenRef.current);
+        try {
+          markProtoInstance(rootEl, proto as Prototype<any>, instanceTokenRef.current);
+        } catch (error) {
+          // Marker publication can replay a pending request before a view
+          // disposer exists. Roll back only this root, retaining the first error.
+          try {
+            unbindProtoInstance(instanceTokenRef.current, rootEl);
+          } catch {
+            /* original error wins */
+          }
+
+          throw error;
+        }
         boundRootRef.current = rootEl;
 
         const eventGate = createEventGate();
@@ -428,16 +460,63 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         });
         bindLogicalEventTarget(instanceTokenRef.current, router.rootTarget);
         let viewDisposed = false;
+        let focusRetryGeneration = 0;
+        let releaseRequestedTargetReady: (() => void) | undefined;
+        const releaseNativeReadiness = registerNativeFocusReadiness(
+          instanceTokenRef.current,
+          {
+            isReady: () =>
+              !viewDisposed &&
+              viewReadyRef.current &&
+              eventGate.isEnabled() &&
+              rootRef.current === rootEl &&
+              rootEl.isConnected &&
+              !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+            subscribe: (listener) => {
+              focusTargetReadyListenersRef.current.add(listener);
+              return () => focusTargetReadyListenersRef.current.delete(listener);
+            },
+          },
+          { deferPublication: true }
+        );
         const disposeView = () => {
           if (viewDisposed) return;
           viewDisposed = true;
-          eventGate.disable();
-          eventGate.dispose();
-          unbindLogicalEventTarget(instanceTokenRef.current, router.rootTarget);
-          router.dispose();
-          unbindProtoInstance(instanceTokenRef.current, boundRootRef.current ?? undefined);
-          if (boundRootRef.current === rootEl) boundRootRef.current = null;
-          if (eventGateRef.current === eventGate) eventGateRef.current = null;
+          const releases = [
+            () => eventGate.disable(),
+            () => eventGate.dispose(),
+            () => {
+              const release = releaseRequestedTargetReady;
+              releaseRequestedTargetReady = undefined;
+              release?.();
+            },
+            () => unbindLogicalEventTarget(instanceTokenRef.current, router.rootTarget),
+            () => router.dispose(),
+            () => unbindProtoInstance(instanceTokenRef.current, rootEl),
+            () => {
+              if (boundRootRef.current === rootEl) boundRootRef.current = null;
+              if (eventGateRef.current === eventGate) {
+                eventGateRef.current = null;
+                focusTargetRetryScheduledRef.current = false;
+              }
+            },
+            // Publish invalidation after releasing old bindings. Pending focus
+            // callbacks may throw; every old-view release must still complete.
+            releaseNativeReadiness,
+          ];
+          let failed = false;
+          let firstError: unknown;
+          for (const release of releases) {
+            try {
+              release();
+            } catch (error) {
+              if (!failed) {
+                failed = true;
+                firstError = error;
+              }
+            }
+          }
+          if (failed) throw firstError;
         };
 
         const effectsPort = createReactEffectsPort((tokens) => {
@@ -473,13 +552,48 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           },
           // A child of a detached ancestor still mounts and attaches its own
           // view, so readiness has to consult the subtree, not just this host.
-          // A pending update also gates host events. Native focus must wait
-          // until its observer is effective, or DOM focus can apply without
-          // updating the Focus facts used by keyboard navigation.
+          // Physical/A11y binding and blur use the committed view. Acquisition
+          // separately applies the native or entry owner's observation gate;
+          // programmatic requests retain their synchronous Module-fact rule.
           isViewReady: () =>
-            viewEffectsTargetReadyRef.current &&
-            eventGate.isEnabled() &&
+            projectionReadyRef.current &&
+            !viewDisposed &&
             !rootRef.current?.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+          // Entry does not own descendant facts. Wait for the actual target's
+          // event owner without gating the shared physical target getter.
+          isEntryAcquisitionReady: (target) => {
+            releaseRequestedTargetReady?.();
+            releaseRequestedTargetReady = undefined;
+            if (isFocusTargetOwnerReady(target)) return true;
+            releaseRequestedTargetReady = subscribeFocusTargetOwnerReady(target, () => {
+              if (viewDisposed) return;
+              releaseRequestedTargetReady?.();
+              releaseRequestedTargetReady = undefined;
+              notifyFocusTargetReady();
+            });
+            return false;
+          },
+          focusIntentState: focusIntentStateRef.current,
+          onFocusIntent: () => {
+            focusTargetRetryCountRef.current = 0;
+            focusRetryGeneration += 1;
+            focusTargetRetryScheduledRef.current = false;
+          },
+          onFocusPendingReleased: () => {
+            focusRetryGeneration += 1;
+            focusTargetRetryScheduledRef.current = false;
+            const release = releaseRequestedTargetReady;
+            releaseRequestedTargetReady = undefined;
+            release?.();
+          },
+          onFocusAcquired: () => {
+            focusTargetRetryCountRef.current = 0;
+            // Completion retires queued work for this intent in the current view.
+            focusRetryGeneration += 1;
+            focusTargetRetryScheduledRef.current = false;
+            releaseRequestedTargetReady?.();
+            releaseRequestedTargetReady = undefined;
+          },
           getCurrentElement: () => rootRef.current,
           subscribeTargetReady: (listener) => {
             focusTargetReadyListenersRef.current.add(listener);
@@ -494,9 +608,11 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             }
             focusTargetRetryScheduledRef.current = true;
             focusTargetRetryCountRef.current += 1;
+            const generation = focusRetryGeneration;
             scheduleAfterWebLayout(
               rootRef.current,
               () => {
+                if (viewDisposed || generation !== focusRetryGeneration) return;
                 focusTargetRetryScheduledRef.current = false;
                 notifyFocusTargetReady();
               },
@@ -506,19 +622,55 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           overlayLayerScheduler,
         });
 
-        const hostSession = ownerRef.current!.attachView({
-          modules,
-          disposeView,
-          createSession: (wiring) => createHostSession(wiring, 'eager'),
-        });
+        const owner = ownerRef.current!;
+        const initialSession = !owner.session;
+        try {
+          const hostSession = owner.attachView({
+            modules,
+            disposeView,
+            // The optional no-Context runtime constructs its first session
+            // here, before its lifetime cleanup effect has mounted. Retain the
+            // session before mount can run author render/commit callbacks.
+            createSession: (wiring) => {
+              try {
+                return createHostSession(wiring, 'manual');
+              } catch (error) {
+                // A partially constructed Runtime has not returned its dispose
+                // handle. Revoke the caps already wired into it before view
+                // invalidation can call those abandoned subscriptions again.
+                try {
+                  wiring.afterUnmount();
+                } catch {
+                  // Preserve the construction error through best-effort release.
+                }
+                throw error;
+              }
+            },
+          });
+          if (initialSession) void hostSession.mount();
 
-        hostSessionRef.current = hostSession;
-        controllerRef.current = hostSession.controller as RuntimeController;
-        invokeInCallbackScopeRef.current = hostSession.invokeInCallbackScope;
+          hostSessionRef.current = hostSession;
+          controllerRef.current = hostSession.controller as RuntimeController;
+          invokeInCallbackScopeRef.current = hostSession.invokeInCallbackScope;
 
-        const { kernel } = hostSession;
-        if (kernel && kernel.run) {
-          (kernel.run as any).host = { get: () => rootRef.current };
+          const { kernel } = hostSession;
+          if (kernel && kernel.run) {
+            (kernel.run as any).host = { get: () => rootRef.current };
+          }
+          releaseNativeReadiness.publish();
+        } catch (error) {
+          if (initialSession) {
+            // attachView adopts disposeView before creating the session, so
+            // even a factory that has not returned can release its acquired
+            // host resources. Retire only this captured initial owner; existing
+            // owners keep the normal retained/terminal React cleanup path.
+            try {
+              void owner.dispose().catch(() => {});
+            } catch {
+              // Cleanup cannot replace the original author callback failure.
+            }
+          }
+          throw error;
         }
       }, [shouldExist]);
 
@@ -529,15 +681,18 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         ownerDisposalRef.current?.retain();
         return () => {
           pendingRevealStyleRevisionRef.current = null;
-          viewEffectsTargetReadyRef.current = false;
+          projectionReadyRef.current = false;
           viewReadyRef.current = false;
-          focusTargetRetryCountRef.current = 0;
           const cleanupRoot = rootRef.current;
           cleanupRoot?.setAttribute(PUI_VIEW_PENDING_ATTR, '');
           revealGenerationRef.current += 1;
           cleanupRoot?.removeAttribute(PUI_VIEW_REVEALING_ATTR);
-          void ownerRef.current?.detachView();
-          ownerDisposalRef.current?.release();
+          try {
+            void ownerRef.current?.detachView();
+          } finally {
+            // A failing readiness observer must not keep a removed instance alive.
+            ownerDisposalRef.current?.release();
+          }
         };
       }, []);
 
@@ -547,7 +702,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           const wasReady = viewReadyRef.current;
           const signal = pendingSignalRef.current;
           pendingSignalRef.current = null;
-          viewEffectsTargetReadyRef.current = true;
+          projectionReadyRef.current = true;
 
           // Runtime finalizes rule-driven view effects from CommitSignal.done().
           // Keep a newly attached root pending until that flush has reached a
@@ -577,7 +732,6 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
         pendingRevealStyleRevisionRef.current = null;
         viewReadyRef.current = true;
-        focusTargetRetryCountRef.current = 0;
         const revealedRoot = rootRef.current;
         const revealGeneration = ++revealGenerationRef.current;
         revealedRoot?.setAttribute(PUI_VIEW_REVEALING_ATTR, '');

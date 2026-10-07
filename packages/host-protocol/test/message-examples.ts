@@ -79,6 +79,7 @@ export const HOST_TO_PEER_EXAMPLES: ExamplesByKind<HostToPeerMessage> = {
       },
     },
   ],
+  'projection.order': [{ kind: 'projection.order', sessions: ['s-2', 's-3', 's-1'] }],
   'input.sample': [
     {
       kind: 'input.sample',

@@ -25,7 +25,7 @@ use gpui::{
     div, point, px, size, AnyWindowHandle, Modifiers, MouseButton, StyleRefinement, TestAppContext,
     VisualTestContext, WindowHandle,
 };
-use proto_ui_gpui::host::{InputBridge, ProtoHostView, SurfaceChild};
+use proto_ui_gpui::host::{InputBridge, ProtoHostView, SurfaceChild, SurfaceNode};
 use proto_ui_gpui::hub::SessionConfig;
 use proto_ui_host_protocol::messages::{
     HostToPeerMessage, PeerToHostMessage, SessionDisposed, WireRecord,
@@ -95,6 +95,10 @@ struct Composed {
 
 impl Composed {
     fn open(cx: &mut TestAppContext) -> Self {
+        Self::open_with_thumb_content(cx, vec![SurfaceChild::Session(THUMB.into())])
+    }
+
+    fn open_with_thumb_content(cx: &mut TestAppContext, content: Vec<SurfaceChild>) -> Self {
         let bridge = Rc::new(RefCell::new(InputBridge::new()));
         let shared = bridge.clone();
         let window = cx.open_window(size(px(300.), px(100.)), move |window, cx| {
@@ -106,10 +110,7 @@ impl Composed {
                     instance_id: format!("{ROOT}:instance"),
                     prototype_key: "base-switch-root".into(),
                     props: WireRecord::new(),
-                    slots: HashMap::from([(
-                        "slot-default".to_string(),
-                        vec![SurfaceChild::Session(THUMB.into())],
-                    )]),
+                    slots: HashMap::from([("slot-default".to_string(), content)]),
                     root_style: sized(60., 30.),
                     theme: None,
                     parent: None,
@@ -352,5 +353,133 @@ fn detaching_a_parent_view_does_not_promote_its_slot_session_to_the_window_root(
         composed.rendered().is_empty(),
         "the thumb is placed only inside the root's slot and must not become a top-level view: {:?}",
         composed.rendered()
+    );
+}
+
+#[gpui::test]
+fn the_peer_hears_the_order_the_views_show_in_when_it_changes(cx: &mut TestAppContext) {
+    let orders = |outbox: Vec<HostToPeerMessage>| -> Vec<Vec<String>> {
+        outbox
+            .into_iter()
+            .filter_map(|message| match message {
+                HostToPeerMessage::ProjectionOrder(order) => Some(order.sessions),
+                _ => None,
+            })
+            .collect()
+    };
+    let mut composed = Composed::open(cx);
+    composed.receive(peer(recorded("root")));
+    composed.receive(peer(recorded("thumb")));
+    // The thumb shows inside the root, so it comes after it.
+    assert_eq!(
+        orders(composed.outbox()).last(),
+        Some(&vec![ROOT.to_string(), THUMB.to_string()])
+    );
+
+    // The views show again with nothing moved: nothing is sent again.
+    composed.receive(peer(vec![json!({
+        "kind": "style.apply",
+        "sessionId": ROOT,
+        "viewEpoch": 1,
+        "tokens": [],
+    })]));
+    assert!(orders(composed.outbox()).is_empty());
+
+    // The thumb ends, and the order changes once.
+    composed.receive(vec![ended(THUMB)]);
+    assert_eq!(orders(composed.outbox()), [vec![ROOT.to_string()]]);
+}
+
+#[gpui::test]
+fn replacing_live_surfaces_replaces_the_peers_whole_order(cx: &mut TestAppContext) {
+    let mut composed = Composed::open(cx);
+    composed.receive(peer(recorded("root")));
+    composed.receive(peer(recorded("thumb")));
+    composed.outbox();
+
+    // The application replaces the forest through the public setter while
+    // both sessions stay open. Repeated surfaces still name one session.
+    for (sessions, expected) in [
+        (vec![THUMB, ROOT, THUMB], vec![THUMB, ROOT]),
+        (vec![ROOT], vec![ROOT]),
+        (vec![THUMB, ROOT], vec![THUMB, ROOT]),
+    ] {
+        let surfaces: Vec<SurfaceNode> = sessions
+            .iter()
+            .enumerate()
+            .map(|(index, session)| SurfaceNode {
+                id: format!("{session}/host-{index}"),
+                session: (*session).into(),
+                style: StyleRefinement::default(),
+                focus: None,
+                a11y: None,
+                children: Vec::new(),
+            })
+            .collect();
+        composed
+            .window
+            .update(&mut composed.cx, |view, window, cx| {
+                view.set_surfaces(surfaces.clone(), window, cx)
+            })
+            .expect("the application replaces the surfaces");
+        composed.draw();
+        assert_eq!(composed.rendered(), expected);
+        let orders: Vec<Vec<String>> = composed
+            .outbox()
+            .into_iter()
+            .filter_map(|message| match message {
+                HostToPeerMessage::ProjectionOrder(order) => Some(order.sessions),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(orders, [expected]);
+        assert!(composed.is_open(ROOT));
+        assert!(composed.is_open(THUMB));
+
+        // Publishing that same forest again sends no second order.
+        composed
+            .window
+            .update(&mut composed.cx, |view, window, cx| {
+                view.set_surfaces(surfaces, window, cx)
+            })
+            .expect("the application republishes the surfaces");
+        assert!(!composed
+            .outbox()
+            .iter()
+            .any(|message| matches!(message, HostToPeerMessage::ProjectionOrder(_))));
+    }
+}
+
+// Review regression GPUI756-F1R: a host-owned wrapper is a supported slot
+// child, and placement must remain recursive while its parent has no view.
+#[gpui::test]
+fn detaching_a_parent_keeps_a_session_inside_a_host_wrapper_out_of_the_window_root(
+    cx: &mut TestAppContext,
+) {
+    let wrapper = SurfaceNode {
+        id: format!("{ROOT}/host-wrapper"),
+        session: ROOT.into(),
+        style: StyleRefinement::default(),
+        focus: None,
+        a11y: None,
+        children: vec![SurfaceChild::Session(THUMB.into())],
+    };
+    let mut composed = Composed::open_with_thumb_content(cx, vec![wrapper.into()]);
+    composed.receive(peer(recorded("root")));
+    composed.receive(peer(recorded("thumb")));
+    assert_eq!(composed.rendered(), [ROOT, THUMB]);
+
+    composed.receive(peer(vec![json!({
+        "kind": "projection.detach",
+        "sessionId": ROOT,
+        "viewEpoch": 1,
+    })]));
+
+    assert!(composed.is_open(ROOT), "the root instance remains alive");
+    assert!(composed.is_open(THUMB), "the child instance remains alive");
+    let rendered = composed.rendered();
+    assert!(
+        rendered.is_empty(),
+        "the nested thumb belongs only in the detached slot, not at the window root: {rendered:?}"
     );
 }

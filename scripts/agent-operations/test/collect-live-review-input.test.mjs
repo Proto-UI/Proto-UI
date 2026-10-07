@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { paginationFixture, withReviewTransportMetadata } from './fixtures/review-pagination.mjs';
+import { execFileSync } from 'node:child_process';
 import {
   computeReviewInputDigest,
   agentEvidenceMarker,
@@ -8,6 +10,12 @@ import {
 import { readFileSync } from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
+import {
+  assertModelTraceDisclosure,
+  computeModelTraceReceiptDigest,
+  renderModelTraceDisclosure,
+} from '../modeltrace.mjs';
 import {
   QUERY,
   assertNoTruncation,
@@ -25,6 +33,7 @@ import {
 
 const sha = (letter) => letter.repeat(40);
 const repositoryId = 'github.com:Proto-UI/Proto-UI';
+const disclosedReviewBody = `Synthetic review body.\n\n${modelTraceFixture(repositoryId).disclosure}`;
 const trustedProvenance = {
   providerId: 'APP_github_actions',
   repository: 'Proto-UI/Proto-UI',
@@ -165,6 +174,7 @@ function payload(overrides = {}) {
                       state: 'FAILURE',
                       targetUrl: 'https://ci.example/1',
                       createdAt: '2026-08-23T06:00:00Z',
+                      creator: null,
                     },
                   ],
                   pageInfo: { hasNextPage: false },
@@ -447,7 +457,7 @@ test('lost review POST stays unknown despite a matching concurrent same-credenti
   const result = submitGitHubReview(
     repositoryId,
     487,
-    { commitId: sha('b'), event: 'APPROVE', body: 'review body' },
+    { commitId: sha('b'), event: 'APPROVE', body: disclosedReviewBody },
     (command, args) => {
       calls.push({ command, args });
       if (args[2] === 'POST') throw new Error('connection lost after write');
@@ -459,13 +469,13 @@ test('lost review POST stays unknown despite a matching concurrent same-credenti
             user: { login: 'reviewer' },
             state: 'APPROVED',
             commit_id: sha('b'),
-            body: 'review body',
+            body: disclosedReviewBody,
             html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-5678',
           },
         ],
       ]);
     },
-    { reviewerLogin: 'reviewer', invocationId: 'invocation-1' }
+    { ...modelTraceFixture(repositoryId), reviewerLogin: 'reviewer', invocationId: 'invocation-1' }
   );
 
   assert.equal(calls.length, 2);
@@ -485,7 +495,7 @@ test('lost review reconciliation preserves the documented buffer and unknown out
   // MAX_LIVE_RESPONSE_BYTES bound, so live state is read
   // exactly once instead of surfacing as an unattributed ENOBUFS
   // (PR509-REVIEW-RECONCILIATION-BUFFER-007).
-  const reviewBody = 'review body';
+  const reviewBody = disclosedReviewBody;
   const paddingReviews = Array.from({ length: 2400 }, (_, index) => ({
     id: 90000 + index,
     node_id: `PRR_pad_${index}`,
@@ -522,7 +532,11 @@ test('lost review reconciliation preserves the documented buffer and unknown out
       if (args[2] === 'POST') throw new Error('connection lost after write');
       return reconciliationJson;
     },
-    { reviewerLogin: 'reviewer', invocationId: 'invocation-large' }
+    {
+      ...modelTraceFixture(repositoryId),
+      reviewerLogin: 'reviewer',
+      invocationId: 'invocation-large',
+    }
   );
   assert.equal(seenOptions.length, 2);
   assert.ok(
@@ -539,13 +553,13 @@ test('returns an explicit unknown receipt when review reconciliation cannot prov
   const result = submitGitHubReview(
     repositoryId,
     487,
-    { commitId: sha('b'), event: 'REQUEST_CHANGES', body: 'review body' },
+    { commitId: sha('b'), event: 'REQUEST_CHANGES', body: disclosedReviewBody },
     (command, args) => {
       calls.push({ command, args });
       if (args[2] === 'POST') throw new Error('connection lost after write');
       return JSON.stringify([[]]);
     },
-    { reviewerLogin: 'reviewer', invocationId: 'invocation-2' }
+    { ...modelTraceFixture(repositoryId), reviewerLogin: 'reviewer', invocationId: 'invocation-2' }
   );
 
   assert.equal(calls.length, 2);
@@ -562,21 +576,21 @@ test('review submission binds the GitHub Review API write to the inspected commi
     {
       commitId: sha('b'),
       event: 'APPROVE',
-      body: '',
+      body: disclosedReviewBody,
     },
     (command, args, options) => {
       calls.push({ command, args, options });
       return JSON.stringify({
         id: 1234,
         user: { login: 'reviewer' },
-        body: '',
+        body: disclosedReviewBody,
         node_id: 'PRR_review_2',
         state: 'APPROVED',
         commit_id: sha('b'),
         html_url: 'https://github.com/Proto-UI/Proto-UI/pull/487#pullrequestreview-1234',
       });
     },
-    { reviewerLogin: 'reviewer' }
+    { ...modelTraceFixture(repositoryId), reviewerLogin: 'reviewer' }
   );
 
   assert.equal(calls.length, 1);
@@ -591,13 +605,18 @@ test('review submission binds the GitHub Review API write to the inspected commi
   assert.deepEqual(JSON.parse(calls[0].options.input), {
     commit_id: sha('b'),
     event: 'APPROVE',
-    body: '',
+    body: disclosedReviewBody,
   });
   assert.equal(result.commitId, sha('b'));
   assert.equal(result.state, 'APPROVED');
 });
 
-function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
+function mergeAuthorizationFixture({
+  previewAuthorization = false,
+  historicalMessage = null,
+  baseSha = sha('a'),
+  headSha = sha('b'),
+} = {}) {
   const policy = parseYaml(
     readFileSync(
       new URL('../../../internal/agent-operations/capability-policy.yaml', import.meta.url),
@@ -606,10 +625,14 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
   );
   const raw = payload();
   const pull = raw.data.repository.pullRequest;
+  pull.baseRefOid = baseSha;
+  pull.headRefOid = headSha;
+  pull.commits.nodes[0].commit.oid = headSha;
+  if (historicalMessage !== null) pull.commits.nodes[0].commit.message = historicalMessage;
   pull.changedFiles = 1;
   pull.comments.nodes = [];
   pull.reviewThreads.nodes = [];
-  const evidence = agentEvidence(sha('b'));
+  const evidence = agentEvidence(headSha);
   if (previewAuthorization) {
     pull.mergeStateStatus = 'UNSTABLE';
     evidence.debt.push({
@@ -641,6 +664,7 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
       checkSuite: {
         app: { id: 'MDM6QXBwMTg2MQ==', slug: 'dco' },
         repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
+        workflowRun: null,
       },
     },
   ];
@@ -656,9 +680,9 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
   }
   const permission = { user: { login: 'independent-reviewer' }, permission: 'write' };
   const runner = (_command, args) => {
-    if (args.includes('graphql')) return JSON.stringify(raw);
-    if (args.includes('repos/Proto-UI/Proto-UI/pulls/487/files?per_page=100'))
-      return JSON.stringify([[changedFiles[0]]]);
+    if (args.includes('graphql')) return JSON.stringify(withReviewTransportMetadata(raw));
+    if (args.includes('repos/Proto-UI/Proto-UI/pulls/487/files?per_page=100&page=1'))
+      return JSON.stringify([changedFiles[0]]);
     if (args.includes('repos/Proto-UI/Proto-UI/collaborators/independent-reviewer/permission'))
       return JSON.stringify(permission);
     throw new Error(`Unexpected authorization read: ${args.join(' ')}`);
@@ -700,7 +724,7 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
     id: 'PRR_independent',
     author: { login: 'independent-reviewer' },
     state: 'APPROVED',
-    commit: { oid: sha('b') },
+    commit: { oid: headSha },
     submittedAt: '2026-08-23T06:00:00Z',
     body: renderReviewBody(publishedPacket),
   });
@@ -710,6 +734,7 @@ function mergeAuthorizationFixture({ previewAuthorization = false } = {}) {
     reviewInputDigest: computeReviewInputDigest(publishedInput),
   };
   const authorizationContext = {
+    ...modelTraceFixture(repositoryId),
     packet,
     publishedPacket,
     input: publishedInput,
@@ -736,14 +761,20 @@ function mergeFixture({
   branchSha = null,
   alterAuthorization = null,
   previewAuthorization = false,
+  historicalMessage = null,
+  storedCommit = {},
 } = {}) {
-  const currentAuthorization = mergeAuthorizationFixture({ previewAuthorization });
+  const currentAuthorization = mergeAuthorizationFixture({
+    previewAuthorization,
+    historicalMessage,
+  });
   alterAuthorization?.(currentAuthorization);
   const calls = [];
   let writes = 0;
   let postReads = 0;
   const open = {
     number: 487,
+    body: currentAuthorization.authorizationContext.input.pullRequestBody,
     state: 'open',
     draft: false,
     merged: false,
@@ -797,7 +828,12 @@ function mergeFixture({
           object: { type: 'commit', sha: branchSha ?? open.base.sha },
         });
       if (args[1] === `repos/Proto-UI/Proto-UI/git/commits/${sha('c')}`)
-        return json({ sha: sha('c'), parents: [{ sha: parentSha }] });
+        return json({
+          sha: sha('c'),
+          parents: [{ sha: parentSha }],
+          message: `Squash commit\n\n${renderModelTraceDisclosure(currentAuthorization.authorizationContext.modelTrace, 'commit')}`,
+          ...storedCommit,
+        });
       assert.equal(args[1], 'repos/Proto-UI/Proto-UI/pulls/487');
       if (writes === 0) return json(open);
       const observation = after[postReads++] ?? merged;
@@ -815,6 +851,157 @@ const mergeOptions = {
   mergeMethod: 'squash',
 };
 const fastVerification = { verificationAttempts: 3, verificationDelayMs: 0, wait() {} };
+
+test('squash writer preserves canonical disclosure in real Git despite a ModelTrace PR-title default', (t) => {
+  // GitHub transport, credentials, reviews and CI below are explicitly simulated;
+  // the resulting squash object and its readback are finite real sandbox Git.
+  const directory = mkdtempSync(path.join(tmpdir(), 'pui-squash-title-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const env = Object.fromEntries(
+    Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_'))
+  );
+  Object.assign(env, {
+    GIT_CONFIG_NOSYSTEM: '1',
+    GIT_CONFIG_GLOBAL: '/dev/null',
+    GIT_AUTHOR_NAME: 'Synthetic sandbox contributor',
+    GIT_AUTHOR_EMAIL: 'sandbox@example.invalid',
+    GIT_COMMITTER_NAME: 'Synthetic sandbox transport',
+    GIT_COMMITTER_EMAIL: 'transport@example.invalid',
+    GIT_AUTHOR_DATE: '2026-08-23T06:00:00Z',
+    GIT_COMMITTER_DATE: '2026-08-23T06:00:00Z',
+  });
+  const git = (args, input) =>
+    execFileSync('git', args, {
+      cwd: directory,
+      env,
+      input,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 10_000,
+    });
+  git(['init', '--bare', '--template=']);
+  const tree = git(['mktree'], '').trim();
+  const baseSha = git(['commit-tree', tree], 'Synthetic base\n').trim();
+  const historicalMessage =
+    'Prior contributor change\n\nModelTrace: historical measurement\nSigned-off-by: Prior Contributor <prior@example.invalid>';
+  const headSha = git(['commit-tree', tree, '-p', baseSha], historicalMessage).trim();
+  const fixture = mergeAuthorizationFixture({ baseSha, headSha, historicalMessage });
+  const { authorizationContext } = fixture;
+  const prTitle = 'ModelTrace: improve attribution';
+  const open = {
+    number: 487,
+    title: prTitle,
+    body: authorizationContext.input.pullRequestBody,
+    state: 'open',
+    draft: false,
+    merged: false,
+    mergeable: true,
+    mergeable_state: 'clean',
+    head: { sha: headSha },
+    base: { sha: baseSha, ref: 'main', repo: { full_name: 'Proto-UI/Proto-UI' } },
+  };
+  let squashSha;
+  let writes = 0;
+  const readCommit = (oid) => {
+    const object = git(['cat-file', 'commit', oid]);
+    const boundary = object.indexOf('\n\n');
+    return {
+      sha: oid,
+      parents: object
+        .slice(0, boundary)
+        .split('\n')
+        .filter((line) => line.startsWith('parent '))
+        .map((line) => ({ sha: line.slice(7) })),
+      message: object.slice(boundary + 2),
+    };
+  };
+  const runner = (command, args, options) => {
+    assert.equal(command, 'gh');
+    if (
+      args.includes('graphql') ||
+      args.some((arg) => arg.includes('/files?per_page=100') || arg.includes('/collaborators/'))
+    )
+      return fixture.runner(command, args, options);
+    const json = (value) =>
+      `${args.includes('--include') ? 'HTTP/2.0 200 OK\r\nContent-Type: application/json\r\n\r\n' : ''}${JSON.stringify(value)}`;
+    if (args.includes('PUT')) {
+      assert.equal(args[3], 'repos/Proto-UI/Proto-UI/pulls/487/merge');
+      const request = JSON.parse(options.input);
+      assert.equal(request.sha, headSha);
+      assert.equal(request.merge_method, 'squash');
+      writes += 1;
+      // Model documented commit_title + appended commit_message semantics,
+      // falling back to the configured PR-title default only when omitted.
+      const message = `${request.commit_title ?? prTitle}\n\n${request.commit_message}\n`;
+      squashSha = git(['commit-tree', tree, '-p', baseSha], message).trim();
+      return json({ merged: true, sha: squashSha, message: 'Simulated squash' });
+    }
+    assert.equal(args[0], 'api');
+    if (args[1] === 'repos/Proto-UI/Proto-UI/pulls/487')
+      return json(
+        squashSha
+          ? {
+              ...open,
+              state: 'closed',
+              merged: true,
+              merge_commit_sha: squashSha,
+              merged_at: '2026-08-27T01:00:10Z',
+            }
+          : open
+      );
+    if (args[1] === 'repos/Proto-UI/Proto-UI/git/ref/heads/main')
+      return json({ ref: 'refs/heads/main', object: { type: 'commit', sha: baseSha } });
+    if (squashSha && args[1] === `repos/Proto-UI/Proto-UI/git/commits/${squashSha}`)
+      return json(readCommit(squashSha));
+    throw new Error(`Unexpected simulated GitHub endpoint: ${args.join(' ')}`);
+  };
+  // Control: the repository default really is rejected by the unchanged
+  // disclosure parser; no test-only acceptance exception hides a second line.
+  const defaultSha = git(
+    ['commit-tree', tree, '-p', baseSha],
+    `${prTitle}\n\n${renderModelTraceDisclosure(authorizationContext.modelTrace, 'commit')}\n`
+  ).trim();
+  assert.throws(
+    () =>
+      assertModelTraceDisclosure(
+        readCommit(defaultSha).message,
+        authorizationContext.modelTrace,
+        'commit'
+      ),
+    /ModelTrace/
+  );
+  const receipt = submitGitHubMerge(
+    repositoryId,
+    487,
+    {
+      ...mergeOptions,
+      baseRefName: 'main',
+      headSha,
+      expectedBaseSha: baseSha,
+      authorizationContext,
+    },
+    runner,
+    fastVerification
+  );
+  const stored = readCommit(receipt.mergeCommitSha);
+  assert.equal(writes, 1);
+  assert.equal(receipt.mergeCommitSha, squashSha);
+  assert.equal(receipt.headSha, headSha);
+  assert.equal(receipt.mergeParentSha, baseSha);
+  assert.deepEqual(stored.parents, [{ sha: baseSha }]);
+  assertModelTraceDisclosure(stored.message, authorizationContext.modelTrace, 'commit');
+  assert.ok(!/^ModelTrace:/i.test(stored.message.split('\n')[0]));
+  assert.ok(stored.message.includes(`Reviewed commit ${headSha}:`));
+  assert.ok(
+    stored.message.includes(
+      historicalMessage
+        .split('\n')
+        .map((line) => `> ${line}`)
+        .join('\n')
+    )
+  );
+  assert.ok(stored.message.includes(`Reviewed PR body:\n> ${open.body}`));
+});
 
 for (const permission of ['WRITE', 'MAINTAIN']) {
   test(`merge writer preserves verified preview authorization with live ${permission} permission`, () => {
@@ -998,6 +1185,105 @@ test('merge refuses missing or cross-target authorization context before any API
     );
     assert.equal(fixture.calls.length, 0);
   }
+});
+
+test('merge rejects a last-moment REST body edit without overwriting the reviewed evidence', () => {
+  const fixture = mergeFixture({
+    before: { body: 'Concurrent human edit after final GraphQL collection' },
+  });
+  assert.throws(() =>
+    submitGitHubMerge(repositoryId, 487, mergeOptions, fixture.runner, fastVerification)
+  );
+  assert.equal(fixture.writes, 0);
+});
+
+test('measurement expiry during the last base read rejects merge before its PUT', (t) => {
+  const fixture = mergeFixture();
+  const identity = fixture.authorizationContext.modelTrace;
+  const clock = Date.parse(identity.measuredAt) + 1;
+  t.mock.timers.enable({ apis: ['Date'], now: clock });
+  const runner = (command, args, options) => {
+    const result = fixture.runner(command, args, options);
+    if (args.includes('repos/Proto-UI/Proto-UI/git/ref/heads/main')) {
+      t.mock.timers.tick(Date.parse(identity.expiresAt) - clock + 1);
+    }
+    return result;
+  };
+  assert.throws(
+    () => submitGitHubMerge(repositoryId, 487, mergeOptions, runner, fastVerification),
+    /expired/
+  );
+  assert.equal(fixture.writes, 0);
+});
+
+test('merge preserves historical identity and DCO text as quotations, never current trailers', () => {
+  const historicalMessage =
+    'Prior contributor change\n\nModelTrace: prior measurement\nSigned-off-by: Prior Contributor <prior@example.invalid>';
+  const fixture = mergeFixture({ historicalMessage });
+  submitGitHubMerge(
+    repositoryId,
+    487,
+    { ...mergeOptions, authorizationContext: fixture.authorizationContext },
+    fixture.runner,
+    fastVerification
+  );
+  const message = JSON.parse(
+    fixture.calls.find((call) => call.args.includes('PUT')).options.input
+  ).commit_message;
+  assert.equal(message.split('\n').filter((line) => line.startsWith('ModelTrace:')).length, 1);
+  assert.equal(message.split('\n').filter((line) => line.startsWith('Signed-off-by:')).length, 0);
+  assert.ok(
+    message.includes(`Reviewed commit ${fixture.authorizationContext.input.commits[0].sha}:`)
+  );
+  assert.ok(
+    message.includes(
+      historicalMessage
+        .split('\n')
+        .map((line) => `> ${line}`)
+        .join('\n')
+    )
+  );
+});
+
+test('acknowledged squash without a stored ModelTrace trailer cannot report success', () => {
+  const fixture = mergeFixture({ storedCommit: { message: undefined } });
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        repositoryId,
+        487,
+        { ...mergeOptions, authorizationContext: fixture.authorizationContext },
+        fixture.runner,
+        fastVerification
+      ),
+    /merge PUT succeeded.*ModelTrace.*do not repeat the PUT/
+  );
+  assert.equal(fixture.writes, 1);
+  assert.equal(fixture.postReads, 1);
+});
+
+test('acknowledged squash cannot attribute a different stored ModelTrace receipt', () => {
+  const fixture = mergeFixture({
+    storedCommit: {
+      message: renderModelTraceDisclosure(
+        modelTraceFixture('github.com:Other/Other').modelTrace,
+        'commit'
+      ),
+    },
+  });
+  assert.throws(
+    () =>
+      submitGitHubMerge(
+        repositoryId,
+        487,
+        { ...mergeOptions, authorizationContext: fixture.authorizationContext },
+        fixture.runner,
+        fastVerification
+      ),
+    /merge PUT succeeded.*ModelTrace.*do not repeat the PUT/
+  );
+  assert.equal(fixture.writes, 1);
+  assert.equal(fixture.postReads, 1);
 });
 
 test('merge refuses a changed live base before any PUT', () => {
@@ -1544,7 +1830,14 @@ test('pull-request merge binds the successful response to the inspected head and
     fastVerification
   );
   const mutation = fixture.calls.find((call) => call.args.includes('PUT'));
-  assert.deepEqual(JSON.parse(mutation.options.input), { sha: sha('b'), merge_method: 'squash' });
+  const payload = JSON.parse(mutation.options.input);
+  assert.equal(payload.sha, sha('b'));
+  assert.equal(payload.merge_method, 'squash');
+  assert.ok(
+    payload.commit_message.includes(
+      renderModelTraceDisclosure(modelTraceFixture(repositoryId).modelTrace, 'commit')
+    )
+  );
   assert.deepEqual(mutation.args.slice(0, 5), [
     'api',
     '--method',
@@ -1552,7 +1845,7 @@ test('pull-request merge binds the successful response to the inspected head and
     'repos/Proto-UI/Proto-UI/pulls/487/merge',
     '--input',
   ]);
-  assert.equal(fixture.calls.length, 8);
+  assert.equal(fixture.calls.length, 13);
   assert.equal(fixture.writes, 1);
   assert.equal(result.liveHeadSha, sha('b'));
   assert.equal(result.mergedAt, '2026-08-27T01:00:10Z');
@@ -1594,7 +1887,7 @@ test('pull-request merge binds the successful response to the inspected head and
   );
   assert.equal(unknown.writes, 1);
   assert.equal(unknown.postReads, 1);
-  assert.equal(unknown.calls.length, 7);
+  assert.equal(unknown.calls.length, 12);
 });
 
 test('live collector fails closed when the REST changed-file list is incomplete', () => {
@@ -1920,7 +2213,7 @@ test('live collector consumes a canonical changed-file response above the legacy
     patch: `+${'changed line\n'.repeat(1000)}`,
   }));
   graphqlPayload.data.repository.pullRequest.changedFiles = files.length;
-  const filePagesJson = JSON.stringify([files]);
+  const filePagesJson = JSON.stringify(files);
   assert.ok(
     filePagesJson.length > 1024 * 1024,
     'the regression changed-file response must exceed the legacy 1 MiB default'
@@ -1929,103 +2222,29 @@ test('live collector consumes a canonical changed-file response above the legacy
   const result = collectLiveReviewInput('github.com:Proto-UI/Proto-UI', 487, {
     runner(command, args, options) {
       seenOptions.push(options);
-      return args.includes('graphql') ? JSON.stringify(graphqlPayload) : filePagesJson;
+      return args.includes('graphql')
+        ? JSON.stringify(withReviewTransportMetadata(graphqlPayload))
+        : filePagesJson;
     },
   });
   assert.equal(result.input.changedFiles.length, files.length);
   assert.ok(
-    seenOptions.length === 2 &&
+    seenOptions.length === 6 &&
       seenOptions.every((options) => options.maxBuffer === MAX_LIVE_RESPONSE_BYTES),
     'every live collection call must carry the documented payload bound'
   );
 });
 
 test('live collector paginates reviews and review threads before canonical validation', () => {
-  const initial = payload();
-  initial.data.repository.pullRequest.reviews.pageInfo = {
-    hasNextPage: true,
-    endCursor: 'reviews-page-1',
-  };
-  initial.data.repository.pullRequest.reviewThreads.pageInfo = {
-    hasNextPage: true,
-    endCursor: 'threads-page-1',
-  };
-  const calls = [];
-  const result = collectLiveReviewInput(repositoryId, 487, {
-    runner(_command, args, options) {
-      calls.push({ args, options });
-      if (args.includes('repos/Proto-UI/Proto-UI/collaborators/later-reviewer/permission'))
-        return JSON.stringify({
-          user: { login: 'later-reviewer' },
-          permission: 'write',
-          role_name: 'maintain',
-        });
-      if (!args.includes('graphql')) return JSON.stringify([changedFiles]);
-      const query = args.find((value) => value.startsWith('query='));
-      if (query.includes('reviews(first: 100, after: $cursor)')) {
-        return JSON.stringify({
-          data: {
-            repository: {
-              pullRequest: {
-                reviews: {
-                  nodes: [
-                    {
-                      id: 'PRR_review_2',
-                      author: { login: 'later-reviewer' },
-                      state: 'APPROVED',
-                      commit: { oid: sha('b') },
-                      submittedAt: '2026-08-23T07:00:00Z',
-                      body: 'Later review',
-                    },
-                  ],
-                  pageInfo: { hasNextPage: false, endCursor: 'reviews-page-2' },
-                },
-              },
-            },
-          },
-        });
-      }
-      if (query.includes('reviewThreads(first: 100, after: $cursor)')) {
-        return JSON.stringify({
-          data: {
-            repository: {
-              pullRequest: {
-                reviewThreads: {
-                  nodes: [
-                    {
-                      id: 'PRR_kwT2',
-                      isResolved: false,
-                      comments: {
-                        nodes: [
-                          {
-                            databaseId: 1002,
-                            author: { login: 'later-reviewer' },
-                            body: 'Later thread',
-                            updatedAt: '2026-08-23T07:30:00Z',
-                          },
-                        ],
-                        pageInfo: { hasNextPage: false },
-                      },
-                    },
-                  ],
-                  pageInfo: { hasNextPage: false, endCursor: 'threads-page-2' },
-                },
-              },
-            },
-          },
-        });
-      }
-      return JSON.stringify(initial);
-    },
-  });
-
-  assert.equal(result.input.reviews.length, 2);
-  assert.equal(result.input.threads.length, 2);
-  assert.equal(result.input.replies.length, 2);
-  assert.equal(calls.length, 5);
+  const { runner, calls } = paginationFixture();
+  const result = collectLiveReviewInput(repositoryId, 487, { runner });
+  assert.equal(result.input.reviews.length, 105);
+  assert.equal(result.input.threads.length, 102);
+  assert.equal(result.input.replies.length, 202);
   assert.equal(result.input.reviewerPermissions[0].permission, 'write');
-  assert.ok(calls.slice(1, 3).every(({ args }) => args.includes('-F')));
-  assert.ok(calls.slice(1, 3).every(({ args }) => args.some((value) => value.includes('cursor='))));
+  for (const operation of ['ProtoUiReviewReviews', 'ProtoUiReviewReviewThreads']) {
+    assert.equal(calls.filter((call) => call.operation === operation).length, 2);
+  }
 });
 
 test('live collector fails on the explicit documented payload bound instead of an incidental ENOBUFS', () => {
@@ -2172,7 +2391,7 @@ for (const [name, change, error] of [
       id: 1234,
       state: 'APPROVED',
       commit_id: sha('b'),
-      body: 'review body',
+      body: disclosedReviewBody,
       user: { login: 'reviewer' },
     };
     const response = structuredClone(good);
@@ -2181,13 +2400,13 @@ for (const [name, change, error] of [
     const result = submitGitHubReview(
       repositoryId,
       487,
-      { commitId: sha('b'), event: 'APPROVE', body: 'review body' },
+      { commitId: sha('b'), event: 'APPROVE', body: disclosedReviewBody },
       (command, args, options) => {
         calls.push({ command, args, options });
         // Even this exact matching readback cannot uniquely attribute the write.
         return JSON.stringify(args[2] === 'POST' ? response : [[good]]);
       },
-      { reviewerLogin: 'reviewer', invocationId: 'invalid-ack' }
+      { ...modelTraceFixture(repositoryId), reviewerLogin: 'reviewer', invocationId: 'invalid-ack' }
     );
     assert.deepEqual(
       calls.map((call) => call.args[2]),
@@ -2213,7 +2432,7 @@ for (const postBody of ['null', '[]', '{}', '"unexpected"', '{']) {
       const result = submitGitHubReview(
         repositoryId,
         487,
-        { commitId: sha('b'), event: 'COMMENT', body: 'review body' },
+        { commitId: sha('b'), event: 'COMMENT', body: disclosedReviewBody },
         (_command, args) => {
           calls.push(args[2]);
           if (args[2] === 'POST') return postBody;
@@ -2225,13 +2444,17 @@ for (const postBody of ['null', '[]', '{}', '"unexpected"', '{']) {
                 id: 1,
                 commit_id: sha('b'),
                 state: 'COMMENTED',
-                body: 'review body',
+                body: disclosedReviewBody,
                 user: { login: 'reviewer' },
               },
             ],
           ]);
         },
-        { reviewerLogin: 'reviewer', invocationId: 'malformed-ack' }
+        {
+          ...modelTraceFixture(repositoryId),
+          reviewerLogin: 'reviewer',
+          invocationId: 'malformed-ack',
+        }
       );
       assert.deepEqual(calls, ['POST', 'GET']);
       assert.equal(result.status, 'unknown');
@@ -2240,6 +2463,92 @@ for (const postBody of ['null', '[]', '{}', '"unexpected"', '{']) {
     });
   }
 }
+
+test('final review and merge writers reject missing, expired, and changed-scope ModelTrace before any API call', () => {
+  const identity = modelTraceFixture(repositoryId);
+  // Rewind this synthetic receipt while retaining its policy TTL and digest;
+  // the failure must be expiry, not a malformed receipt or missing disclosure.
+  const expired = structuredClone(identity.modelTrace);
+  const elapsed = 24 * 60 * 60 * 1000;
+  expired.measuredAt = new Date(Date.parse(expired.measuredAt) - elapsed).toISOString();
+  expired.expiresAt = new Date(Date.parse(expired.expiresAt) - elapsed).toISOString();
+  expired.id = `sha256:${computeModelTraceReceiptDigest(expired)}`;
+  for (const [label, changes, diagnostic] of [
+    ['missing receipt', { modelTrace: undefined }, /ModelTrace/],
+    ['missing context', { modelTraceContext: undefined }, /ModelTrace/],
+    ['expired receipt', { modelTrace: expired }, /measurement expired/],
+    [
+      'changed context',
+      { modelTraceContext: { ...identity.modelTraceContext, contextDigest: 'c'.repeat(64) } },
+      /context\/provider route changed/,
+    ],
+    [
+      'changed route',
+      { modelTraceContext: { ...identity.modelTraceContext, routeDigest: 'c'.repeat(64) } },
+      /context\/provider route changed/,
+    ],
+  ]) {
+    let calls = 0;
+    const runner = () => {
+      calls += 1;
+      throw new Error('unexpected network call');
+    };
+    const current = { ...identity, ...changes };
+    assert.throws(
+      () =>
+        submitGitHubReview(
+          repositoryId,
+          487,
+          {
+            commitId: sha('b'),
+            event: 'COMMENT',
+            body: renderModelTraceDisclosure(current.modelTrace ?? identity.modelTrace),
+          },
+          runner,
+          { ...current, reviewerLogin: 'reviewer' }
+        ),
+      diagnostic,
+      `review: ${label}`
+    );
+    assert.throws(
+      () =>
+        submitGitHubMerge(
+          repositoryId,
+          487,
+          {
+            ...mergeOptions,
+            authorizationContext: {
+              ...originalMergeAuthorization.authorizationContext,
+              ...current,
+            },
+          },
+          runner,
+          fastVerification
+        ),
+      diagnostic,
+      `merge: ${label}`
+    );
+    assert.equal(calls, 0, label);
+  }
+});
+
+test('final review writer rejects an undisclosed receipt before POST', () => {
+  let calls = 0;
+  assert.throws(
+    () =>
+      submitGitHubReview(
+        repositoryId,
+        487,
+        { commitId: sha('b'), event: 'COMMENT', body: 'Synthetic review without attribution.' },
+        () => {
+          calls += 1;
+        },
+        { ...modelTraceFixture(repositoryId), reviewerLogin: 'reviewer' }
+      ),
+    /ModelTrace disclosure/
+  );
+  assert.equal(calls, 0);
+});
 
 test('review submission requires the verified acting identity before writing', () => {
   let writes = 0;
@@ -2266,33 +2575,21 @@ for (const pageInfo of [undefined, null, {}, { hasNextPage: 'false' }, { hasNext
 }
 
 test('live review pagination rejects repeated continuation cursors', () => {
-  const initial = payload();
-  initial.data.repository.pullRequest.reviews.pageInfo = { hasNextPage: true, endCursor: 'repeat' };
-  let reads = 0;
+  const fixture = paginationFixture({
+    large: false,
+    mutate({ response, args, data }) {
+      if (!args.includes('graphql')) return;
+      const reviews = response.data.repository.pullRequest.reviews;
+      reviews.totalCount = 2;
+      reviews.nodes = structuredClone(data.reviews);
+      reviews.pageInfo = { hasNextPage: true, endCursor: 'repeat' };
+    },
+  });
   assert.throws(
-    () =>
-      collectLiveReviewInput(repositoryId, 487, {
-        runner(_command, args) {
-          reads += 1;
-          if (reads > 3) throw new Error('test safety guard: cursor never advances');
-          if (reads === 1) return JSON.stringify(initial);
-          return JSON.stringify({
-            data: {
-              repository: {
-                pullRequest: {
-                  reviews: {
-                    nodes: [],
-                    pageInfo: { hasNextPage: true, endCursor: 'repeat' },
-                  },
-                },
-              },
-            },
-          });
-        },
-      }),
+    () => collectLiveReviewInput(repositoryId, 487, { runner: fixture.runner }),
     /repeated.*cursor/
   );
-  assert.equal(reads, 2);
+  assert.equal(fixture.calls.length, 2);
 });
 
 function approvalPayload() {
@@ -2309,14 +2606,15 @@ for (const permission of ['admin', 'write', 'read', 'none']) {
       now: () => new Date('2026-10-01T15:00:00Z'),
       runner(_command, args) {
         calls.push(args);
-        if (args.includes('graphql')) return JSON.stringify(approvalPayload());
+        if (args.includes('graphql'))
+          return JSON.stringify(withReviewTransportMetadata(approvalPayload()));
         if (args.includes('repos/Proto-UI/Proto-UI/collaborators/earlier-reviewer/permission'))
           return JSON.stringify({
             user: { login: 'earlier-reviewer' },
             permission,
             role_name: 'admin',
           });
-        return JSON.stringify([changedFiles]);
+        return JSON.stringify(changedFiles);
       },
     });
     assert.deepEqual(live.input.reviewerPermissions, [
@@ -2330,7 +2628,7 @@ for (const permission of ['admin', 'write', 'read', 'none']) {
       },
     ]);
     assert.equal(live.permissionsObservedAt, '2026-10-01T15:00:00.000Z');
-    assert.equal(calls.length, 3);
+    assert.equal(calls.length, 8);
   });
 }
 
@@ -2374,10 +2672,11 @@ test('permission read denial remains a fail-closed read error with no alternate 
 
 test('fresh permission observations change the receipt clock but not unchanged canonical facts', () => {
   const runner = (_command, args) => {
-    if (args.includes('graphql')) return JSON.stringify(approvalPayload());
+    if (args.includes('graphql'))
+      return JSON.stringify(withReviewTransportMetadata(approvalPayload()));
     if (args.some((arg) => arg.endsWith('/permission')))
       return JSON.stringify({ user: { login: 'earlier-reviewer' }, permission: 'write' });
-    return JSON.stringify([changedFiles]);
+    return JSON.stringify(changedFiles);
   };
   const first = collectLiveReviewInput(repositoryId, 487, {
     runner,
@@ -2482,7 +2781,7 @@ function writerOwner(t, actions = ['integrate']) {
       schemaVersion: 1,
       kind: 'proto-ui.owner-delegation-state',
       revision: ++revision,
-      grants: [{ ...grant, status, ...overrides }],
+      grants: [{ ...grant, generation: revision, status, ...overrides }],
     };
     writeFileSync(
       statePath,
@@ -2502,7 +2801,7 @@ function writerOwner(t, actions = ['integrate']) {
   };
 }
 test('bound owner grant reaches actual merge writer once and is revalidated before PUT', (t) => {
-  for (const revoke of [false, true]) {
+  for (const revokeAt of ['none', 'collection', 'last-base-read']) {
     const owner = writerOwner(t),
       f = mergeFixture({
         alterAuthorization(x) {
@@ -2518,15 +2817,21 @@ test('bound owner grant reaches actual merge writer once and is revalidated befo
         },
       });
     const runner = (command, args, options) => {
-      if (revoke && args.includes('graphql')) owner.save('revoked');
-      return f.runner(command, args, options);
+      const result = f.runner(command, args, options);
+      if (
+        (revokeAt === 'collection' && args.includes('graphql')) ||
+        (revokeAt === 'last-base-read' &&
+          args.includes('repos/Proto-UI/Proto-UI/git/ref/heads/main'))
+      )
+        owner.save('revoked');
+      return result;
     };
     const opts = {
       ...mergeOptions,
       authorizationId: owner.id,
       authorizationContext: f.authorizationContext,
     };
-    if (revoke) {
+    if (revokeAt !== 'none') {
       assert.throws(
         () => submitGitHubMerge(repositoryId, 487, opts, runner, fastVerification),
         /owner|authorization|eligibility/
@@ -2584,7 +2889,12 @@ test('owner review writer rechecks grant, target and permission before its singl
         487,
         { commitId: sha('b'), event: 'COMMENT', body },
         runner,
-        { reviewerLogin: 'cyjin-yl', authorizationContext: context }
+        {
+          reviewerLogin: 'cyjin-yl',
+          authorizationContext: context,
+          modelTrace: context.modelTrace,
+          modelTraceContext: context.modelTraceContext,
+        }
       );
     if (failure === 'none') {
       assert.equal(invoke().status, 'applied');
@@ -2613,8 +2923,9 @@ test('review writer treats an exact newly published review as duplicate but neve
         ownerAuthorization: owner.proof,
       };
     let writes = 0;
+    let reads = 0;
     const runner = (command, args, options) => {
-      if (args.includes('graphql')) {
+      if (args.includes('graphql') && reads++ === 0) {
         a.raw.data.repository.pullRequest.reviews.nodes.push({
           id: 'PRR_race_duplicate',
           author: { login: 'cyjin-yl' },
@@ -2634,7 +2945,12 @@ test('review writer treats an exact newly published review as duplicate but neve
         487,
         { commitId: sha('b'), event: 'COMMENT', body },
         runner,
-        { reviewerLogin: 'cyjin-yl', authorizationContext: context }
+        {
+          reviewerLogin: 'cyjin-yl',
+          authorizationContext: context,
+          modelTrace: context.modelTrace,
+          modelTraceContext: context.modelTraceContext,
+        }
       );
     if (drift) assert.throws(invoke);
     else assert.equal(invoke().status, 'duplicate');
@@ -2658,8 +2974,9 @@ test('APPROVE publication delta may add only the bound reviewer permission and r
         ownerAuthorization: owner.proof,
       };
     let writes = 0;
+    let reads = 0;
     const runner = (command, args, options) => {
-      if (args.includes('graphql')) {
+      if (args.includes('graphql') && reads++ === 0) {
         a.raw.data.repository.pullRequest.reviews.nodes.push({
           id: 'PRR_owner_duplicate_approval',
           author: { login: 'cyjin-yl' },
@@ -2682,10 +2999,65 @@ test('APPROVE publication delta may add only the bound reviewer permission and r
         487,
         { commitId: sha('b'), event: 'APPROVE', body },
         runner,
-        { reviewerLogin: 'cyjin-yl', authorizationContext: context }
+        {
+          reviewerLogin: 'cyjin-yl',
+          authorizationContext: context,
+          modelTrace: context.modelTrace,
+          modelTraceContext: context.modelTraceContext,
+        }
       );
     if (failure === 'none') assert.equal(invoke().status, 'duplicate');
     else assert.throws(invoke);
     assert.equal(writes, 0);
   }
+});
+
+test('durable owner review grant cannot replace a measurement expiring during the final permission read', (t) => {
+  const owner = writerOwner(t, ['review']);
+  const a = mergeAuthorizationFixture();
+  a.raw.data.viewer.login = 'cyjin-yl';
+  const context = {
+    ...a.authorizationContext,
+    packet: { ...a.authorizationContext.packet, recommendedAction: 'COMMENT' },
+    actor: 'cyjin-yl',
+    executionMode: 'autonomous',
+    executionModeSource: 'schedule',
+    authorizationId: owner.id,
+    ownerAuthorization: owner.proof,
+  };
+  const body = renderReviewBody(context.packet);
+  const clock = Date.parse(context.modelTrace.measuredAt) + 1;
+  t.mock.timers.enable({ apis: ['Date'], now: clock });
+  let permissionReads = 0;
+  let writes = 0;
+  const runner = (command, args, options) => {
+    if (args.includes('POST')) writes += 1;
+    const result = a.runner(command, args, options);
+    if (args.includes('repos/Proto-UI/Proto-UI/collaborators/independent-reviewer/permission')) {
+      permissionReads += 1;
+      t.mock.timers.tick(Date.parse(context.modelTrace.expiresAt) - clock + 1);
+    }
+    return result;
+  };
+  assert.throws(
+    () =>
+      submitGitHubReview(
+        repositoryId,
+        487,
+        { commitId: sha('b'), event: 'COMMENT', body },
+        runner,
+        {
+          reviewerLogin: 'cyjin-yl',
+          authorizationContext: context,
+          modelTrace: context.modelTrace,
+          modelTraceContext: context.modelTraceContext,
+        }
+      ),
+    /expired/
+  );
+  // collectLiveReviewInput performs two complete stability scans, so the
+  // permission endpoint is read once per scan; expiry is still enforced before
+  // any POST.
+  assert.equal(permissionReads, 2);
+  assert.equal(writes, 0);
 });

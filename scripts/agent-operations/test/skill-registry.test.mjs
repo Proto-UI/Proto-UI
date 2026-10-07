@@ -14,11 +14,16 @@ import {
   validateSkillHandoff,
   validateSkillRegistryDocument,
 } from '../skill-registry.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../../..', import.meta.url)));
 
 function artifact(type) {
-  return { type, reference: `memory:${type}` };
+  return {
+    type,
+    reference: `memory:${type}`,
+    ...(type === 'modeltrace-record' ? { digest: modelTraceFixture().modelTrace.id } : {}),
+  };
 }
 
 test('verifier decision packets are conditional on unresolved product direction', () => {
@@ -87,9 +92,10 @@ test('claim and evidence publication route only with the separate evidence and a
     'work-item-proposal',
     'evidence-assessment',
     'mutation-authorization',
+    'modeltrace-record',
   ]);
   assert.equal(validateSkillHandoff(claim, registry).nextSkill.id, 'pui-claim');
-  for (const required of ['evidence-assessment', 'mutation-authorization']) {
+  for (const required of ['evidence-assessment', 'mutation-authorization', 'modeltrace-record']) {
     assert.throws(
       () =>
         validateSkillHandoff(
@@ -104,9 +110,14 @@ test('claim and evidence publication route only with the separate evidence and a
     'issue-report',
     'evidence-publication-packet',
     'mutation-authorization',
+    'modeltrace-record',
   ]);
   assert.equal(validateSkillHandoff(publication, registry).nextSkill.id, 'pui-evidence-publish');
-  for (const required of ['evidence-publication-packet', 'mutation-authorization']) {
+  for (const required of [
+    'evidence-publication-packet',
+    'mutation-authorization',
+    'modeltrace-record',
+  ]) {
     assert.throws(
       () =>
         validateSkillHandoff(
@@ -133,6 +144,62 @@ test('claim and evidence publication route only with the separate evidence and a
   assert.equal(resolveSkill('pui-issue', registry).mutation, 'none');
   assert.equal(resolveSkill('pui-select', registry).mutation, 'none');
 });
+
+for (const [nextSkillId, types] of [
+  ['pui-unclaim', ['capability-envelope', 'claim-receipt', 'mutation-authorization']],
+  [
+    'pui-collaborate',
+    ['capability-envelope', 'github-snapshot', 'mutation-authorization', 'collaboration-request'],
+  ],
+]) {
+  test(`${nextSkillId} requires a current record handoff independently of write authorization`, () => {
+    const registry = loadSkillRegistry({ root });
+    const handoff = {
+      schemaVersion: 1,
+      kind: 'proto-ui.skill-handoff',
+      entrypoint: 'development',
+      executionMode: 'human-assisted',
+      executionModeSource: 'current-user',
+      fromId: 'pui-dev',
+      nextSkillId,
+      artifacts: [...types, 'modeltrace-record'].map(artifact),
+      humanGates: [],
+      notes: [],
+    };
+    const current = {
+      ...handoff,
+      schemaVersion: 2,
+      outcome: 'completed',
+      binding: {
+        repositoryId: 'github.com:Proto-UI/Proto-UI',
+        scopeId: 'fixture:record-routing',
+        headSha: 'a'.repeat(40),
+        reviewInputDigest: null,
+      },
+    };
+    for (const version of [handoff, current]) {
+      assert.equal(validateSkillHandoff(version, registry).nextSkill.id, nextSkillId);
+      assert.throws(
+        () =>
+          validateSkillHandoff(
+            {
+              ...version,
+              artifacts: version.artifacts.filter((item) => item.type !== 'modeltrace-record'),
+            },
+            registry
+          ),
+        /modeltrace-record/
+      );
+      for (const value of [undefined, 'sha256:invalid']) {
+        const unbound = structuredClone(version);
+        const record = unbound.artifacts.find((item) => item.type === 'modeltrace-record');
+        delete record.digest;
+        if (value !== undefined) record.digest = value;
+        assert.throws(() => validateSkillHandoff(unbound, registry));
+      }
+    }
+  });
+}
 
 test('registry resolves one deterministic lazy leaf', () => {
   const registry = loadSkillRegistry({ root });
@@ -204,10 +271,7 @@ test('registry rejects duplicate ids, bad paths, and unknown task classes', () =
 
   const duplicate = structuredClone(registry);
   duplicate.skills.push(structuredClone(duplicate.skills[0]));
-  assert.throws(
-    () => validateSkillRegistryDocument(duplicate, policy, { root }),
-    /duplicates pui-assess/
-  );
+  assert.throws(() => validateSkillRegistryDocument(duplicate, policy, { root }), /duplicates/);
 
   const badPath = structuredClone(registry);
   badPath.skills[0].loadPath = '../outside/SKILL.md';
@@ -402,11 +466,23 @@ test('a review handoff can route one separately authorized exact-head integratio
       artifact('review-input'),
       artifact('published-review-packet'),
       artifact('mutation-authorization'),
+      artifact('modeltrace-record'),
     ],
     humanGates: [],
     notes: [],
   };
   assert.equal(validateSkillHandoff(handoff, registry).nextSkill.id, 'pui-integrate');
+  assert.throws(
+    () =>
+      validateSkillHandoff(
+        {
+          ...handoff,
+          artifacts: handoff.artifacts.filter((item) => item.type !== 'modeltrace-record'),
+        },
+        registry
+      ),
+    /modeltrace-record/
+  );
   const integration = resolveSkill('pui-integrate', registry);
   assert.equal(
     evaluateSkillEligibility(integration, {

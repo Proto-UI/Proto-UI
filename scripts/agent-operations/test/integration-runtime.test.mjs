@@ -13,6 +13,7 @@ import {
   validateReviewInputSnapshot,
 } from '../review-runtime.mjs';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 import {
   fixturePublishedPacket,
   publishReview,
@@ -51,6 +52,7 @@ const packet = reviewPacket;
 function scheduledMerge(overrides = {}) {
   const input = overrides.input ?? reviewInput();
   return authorizePullRequestMerge({
+    ...modelTraceFixture(input.repositoryId),
     packet: overrides.packet ?? packet(input),
     publishedPacket: fixturePublishedPacket(input),
     input,

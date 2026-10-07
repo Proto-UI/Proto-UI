@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
 import { defineAsHook } from '@proto.ui/core';
 import { getActiveAsHookContext } from '@proto.ui/core/internal';
-import { executeWithHost, RuntimeHost } from '../src';
+import { createRuntimeSession, executeWithHost, RuntimeHost } from '../src';
 import { PRESENCE_HOST_BRIDGE_CAP } from '@proto.ui/module-presence';
 import type { PresenceFacade, PresenceHandle } from '@proto.ui/module-presence';
 
@@ -116,6 +116,53 @@ describe('runtime integration: with-host presence wiring', () => {
     // transition that no longer has an owning host view.
     await res.session.dispose();
   });
+
+  for (const stage of ['phase', 'waiting'] as const)
+    it(`terminal disposal bypasses presence when reentered while ${stage}`, async () => {
+      const { host, calls, scheduled } = createMockHost();
+      let handle!: PresenceHandle;
+      let terminal: Promise<void> | undefined;
+      let session: ReturnType<typeof createRuntimeSession>;
+      let once = false;
+      host.onLifecycleEvent = (event) => {
+        if (
+          stage === 'phase' &&
+          event.type === 'mount.phase' &&
+          event.phase === 'unmounting' &&
+          !once
+        ) {
+          once = true;
+          terminal = session.dispose();
+        }
+      };
+      const proto: Prototype = {
+        name: 'presence-terminal-reentry',
+        setup(def) {
+          capturePresenceFacade();
+          handle = capturedPresenceFacade!.createHandle();
+          def.lifecycle.onUnmounted(() => calls.push('unmounted'));
+          return (run) => run.el('div', 'ok');
+        },
+      };
+      session = createRuntimeSession(proto, host);
+      const mounting = session.mount();
+      await handle.setIntent('enter');
+      scheduled.shift()!();
+      await mounting;
+      const unmounting = session.unmount();
+      if (stage === 'waiting') terminal = session.dispose();
+      try {
+        expect(calls.filter((call) => call === 'bridge:unmount')).toHaveLength(1);
+      } finally {
+        // Release the controlled gate even on the red case; never hide it with a timeout.
+        handle.setIntent('leave');
+        handle.setIntent('leave');
+        await unmounting;
+        await terminal;
+      }
+      expect(calls.filter((call) => call === 'unmounted')).toHaveLength(1);
+      expect(session.instancePhase).toBe('disposed');
+    });
 
   it('proceeds synchronously when no presence handle is created', () => {
     const { host, calls, scheduled } = createMockHost();

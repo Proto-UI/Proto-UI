@@ -1,0 +1,7 @@
+interface:
+  display_name: 'Proto UI Agent Identify'
+  short_description: 'Measure active-model closed-set ModelTrace attribution'
+  default_prompt: 'Use $pui-agent-identify to measure my active model locally and return an honest unsigned ModelTrace record without granting identity or write authority.'
+
+policy:
+  allow_implicit_invocation: false

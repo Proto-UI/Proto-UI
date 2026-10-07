@@ -1,4 +1,4 @@
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 
 type PreviewerRoot = HTMLElement & { __previewer__?: { destroy(): unknown } };
@@ -73,7 +73,6 @@ export function initPreviewerBootstrap(
         runtimeList: root.dataset.runtimes
           ? JSON.parse(root.dataset.runtimes)
           : ['wc', 'react', 'vue', 'vue2'],
-        loader: root.dataset.loader || '',
         projectionFamilyId: (root.dataset.projectionFamily || undefined) as
           | ProjectionFamilyId
           | undefined,

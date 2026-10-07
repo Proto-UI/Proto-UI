@@ -32,6 +32,21 @@ describe('Search command ownership', () => {
     expect(commands).toContain('...props,');
   });
 
+  it('prepares only from existing public Button intent facts, never a private native detector or idle task', () => {
+    expect(commands).toContain("context.api.getExposes('search-command')");
+    expect(commands).toContain("['hovered', 'focusVisible']");
+    expect(commands).toContain('fact.subscribe(');
+    expect(commands).toContain('for (const unsubscribe of intentSubscriptions) unsubscribe()');
+    expect(commands).not.toMatch(
+      /button\.addEventListener\(['"](?:pointerenter|mouseenter|focus|focusin)['"]/
+    );
+    // The existing document focusin listener belongs to deferred public focus
+    // ownership, not a Button-local detector or resource-preparation hook.
+    expect(source).not.toMatch(/requestIdleCallback|DOMContentLoaded/);
+    expect(source).toContain('prepare: prepareOnIntent');
+    expect(source).toContain('if (!isCurrentOpen(session) || uiInitialized) return');
+  });
+
   it('keeps native dialog and Pagefind as explicit remaining boundaries', () => {
     expect(source).toContain('<dialog');
     expect(source).toContain("dialog.addEventListener('cancel'");

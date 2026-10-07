@@ -96,6 +96,17 @@ export type ProjectionAckMessage = {
   readonly ack: ProjectionAck;
 };
 
+/**
+ * The order the host shows the sessions' views in, as a document order: a
+ * session placed inside another comes after it. It replaces the order sent
+ * before, whole. Focus orders a navigation's members by it
+ * (HC-FOCUS-ORDER-0001).
+ */
+export type ProjectionOrderMessage = {
+  readonly kind: 'projection.order';
+  readonly sessions: readonly SessionId[];
+};
+
 export type ProjectionActivateMessage = {
   readonly kind: 'projection.activate';
   readonly sessionId: SessionId;
@@ -251,6 +262,7 @@ export type HostToPeerMessage =
   | SessionOpenMessage
   | PropsSetMessage
   | ProjectionAckMessage
+  | ProjectionOrderMessage
   | InputSampleMessage
   | FocusResultMessage
   | ExposeCallMessage

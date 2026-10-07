@@ -1,5 +1,11 @@
 import { ownerAuthorizationAllows, ownerCollaborationScope } from './owner-authorization.mjs';
 import { createHash } from 'node:crypto';
+import {
+  assertModelTraceDisclosure,
+  assertModelTraceFresh,
+  computeModelTraceReceiptDigest,
+  validateModelTraceReceipt,
+} from './modeltrace.mjs';
 
 const SHA = /^[a-f0-9]{40,64}$/;
 const HEX64 = /^[a-f0-9]{64}$/;
@@ -770,9 +776,24 @@ export function authorizeCollaborationMutation({
   executionModeSource,
   policy,
   selfAssessment = null,
+  modelTrace,
+  modelTraceContext,
   ownerAuthorization = null,
 }) {
   validateCollaborationRequest(request);
+  assertModelTraceFresh(modelTrace, modelTraceContext, { repositoryId: request.repositoryId });
+  const record = request.evidence.find((item) => item.type === 'modeltrace-record');
+  assert(
+    record?.digest === `sha256:${computeModelTraceReceiptDigest(modelTrace)}`,
+    'collaboration request must bind the measured ModelTrace record'
+  );
+  if (request.action === 'post-bounded-reconciliation-comment')
+    assertModelTraceDisclosure(request.desired.body, modelTrace);
+  if (
+    request.action === 'update-governed-issue-or-pull-request-metadata' &&
+    request.desired.body !== request.expected.body
+  )
+    assertModelTraceDisclosure(request.desired.body, modelTrace);
   validateLiveCommon(liveState, request);
   const authorityFailure = validateAuthority({
     request,
@@ -806,21 +827,10 @@ export function authorizeCollaborationMutation({
     if (current.containsBaseSha === true) {
       return noOp(request, 'pull-request branch already contains the exact base SHA');
     }
-    if (current.updatedAt !== request.target.updatedAt) {
-      return rejected(request, 'live target updatedAt is stale');
-    }
-    const viewerOwnsPullRequest =
-      current.authorLogin?.toLowerCase() === liveState.viewerLogin.toLowerCase();
-    if (!viewerOwnsPullRequest && current.maintainerCanModify !== true) {
-      return rejected(
-        request,
-        'pull-request branch is neither author-owned by the acting credential nor maintainer-editable'
-      );
-    }
-    if (current.containsBaseSha !== request.expected.containsBaseSha) {
-      return rejected(request, 'live branch ancestry does not match the expected state');
-    }
-    return mutate(request);
+    return rejected(
+      request,
+      'GitHub update-branch cannot bind a ModelTrace commit message; prepare a local branch update and publish its commit with agent:publish'
+    );
   }
 
   if (action === 'mark-exact-head-ready-for-review') {
@@ -1020,12 +1030,23 @@ export function validateCollaborationReceipt(receipt, request = null) {
       'verifiedAt',
       'verification',
       'note',
+      ...(receipt.schemaVersion === 2 ? ['modelTrace'] : []),
     ],
     'collaboration receipt'
   );
-  assert(receipt.schemaVersion === 1, 'receipt.schemaVersion must be 1');
+  assert([1, 2].includes(receipt.schemaVersion), 'receipt.schemaVersion must be 1 or 2');
+  assert(
+    typeof receipt.repositoryId === 'string' && REPOSITORY_ID.test(receipt.repositoryId),
+    'receipt.repositoryId is invalid'
+  );
+  if (receipt.schemaVersion === 2) {
+    validateModelTraceReceipt(receipt.modelTrace);
+    assert(
+      receipt.modelTrace.scope.repositoryId.toLowerCase() === receipt.repositoryId.toLowerCase(),
+      'receipt ModelTrace repository does not match collaboration repository'
+    );
+  }
   assert(receipt.kind === 'proto-ui.collaboration-receipt', 'receipt.kind is invalid');
-  assert(REPOSITORY_ID.test(receipt.repositoryId), 'receipt.repositoryId is invalid');
   string(receipt.authorizationId, 'receipt.authorizationId', { max: 200 });
   assert(COLLABORATION_ACTIONS.includes(receipt.action), 'receipt.action is invalid');
   if (receipt.action === 'resolve-fixed-review-thread') {
@@ -1043,6 +1064,16 @@ export function validateCollaborationReceipt(receipt, request = null) {
   assert(HEX64.test(receipt.postStateDigest), 'receipt.postStateDigest is invalid');
   string(receipt.actor, 'receipt.actor', { max: 100 });
   timestamp(receipt.verifiedAt, 'receipt.verifiedAt');
+  if (receipt.schemaVersion === 2) {
+    // Verification is a readback boundary, not the pre-write freshness gate:
+    // a valid write can finish verification after the measurement expires.
+    // platformObject.updatedAt can instead be older target metadata (notably
+    // for thread resolution), so it cannot universally supply a write time.
+    assert(
+      !timestampIsAfter(receipt.modelTrace.measuredAt, receipt.verifiedAt),
+      'receipt ModelTrace measurement occurs after receipt verification'
+    );
+  }
   assert(
     [
       'live-state-matches-desired',
@@ -1103,10 +1134,11 @@ export function buildCollaborationReceipt({
   verifiedAt = new Date().toISOString(),
   verification,
   note,
+  modelTrace = null,
 }) {
   validateCollaborationRequest(request);
   const receipt = {
-    schemaVersion: 1,
+    schemaVersion: modelTrace === null ? 1 : 2,
     kind: 'proto-ui.collaboration-receipt',
     repositoryId: request.repositoryId,
     authorizationId: request.authorizationId,
@@ -1123,6 +1155,7 @@ export function buildCollaborationReceipt({
     verifiedAt,
     verification,
     note,
+    ...(modelTrace === null ? {} : { modelTrace }),
   };
   return validateCollaborationReceipt(receipt, request);
 }

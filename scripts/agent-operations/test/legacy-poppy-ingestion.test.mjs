@@ -21,6 +21,7 @@ import {
   verifyLiveReviewInput,
 } from '../review-runtime.mjs';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
+import { writeModelTraceFixture } from './fixtures/modeltrace.mjs';
 
 const root = fileURLToPath(new URL('../../..', import.meta.url));
 const command = path.join(root, 'scripts/agent-operations/review-packet.mjs');
@@ -230,6 +231,7 @@ function withCliFixtures(run) {
     const packetPath = path.join(directory, 'packet.json');
     const handoffPath = path.join(directory, 'handoff.json');
     const ghMarker = path.join(directory, 'unexpected-gh-call');
+    const trace = writeModelTraceFixture(directory);
     writeFileSync(inputPath, JSON.stringify(legacyInput()));
     writeFileSync(packetPath, JSON.stringify(legacyPacket()));
     writeFileSync(
@@ -240,13 +242,14 @@ function withCliFixtures(run) {
         entrypoint: 'development',
         executionMode: 'human-assisted',
         executionModeSource: 'current-user',
-        fromId: 'pui-validate',
+        fromId: 'pui-dev', // This fixture starts at review intake, not a validation transition.
         nextSkillId: 'pui-review',
         artifacts: [
           { type: 'authority-map', reference: 'legacy compatibility contract' },
           { type: 'candidate-change', reference: 'legacy COMMENT ingestion' },
           { type: 'evidence-report', reference: 'public-main canonical v3 golden' },
           { type: 'review-input', reference: inputPath },
+          trace.artifact,
         ],
         humanGates: [],
         notes: [],
@@ -262,7 +265,7 @@ function withCliFixtures(run) {
       encoding: 'utf8',
       env: { ...process.env, PATH: `${directory}:${process.env.PATH}` },
     };
-    run({ inputPath, packetPath, handoffPath, ghMarker, options });
+    run({ inputPath, packetPath, handoffPath, ghMarker, options, trace });
     assert.equal(existsSync(ghMarker), false, 'legacy commands must not invoke GitHub');
   } finally {
     rmSync(directory, { recursive: true, force: true });
@@ -293,7 +296,7 @@ test('CLI read-only digest, validate, and inspect retain actual v3/v1 compatibil
 });
 
 test('CLI legacy write commands reject before live collection or mutation', () => {
-  withCliFixtures(({ inputPath, packetPath, handoffPath, options }) => {
+  withCliFixtures(({ inputPath, packetPath, handoffPath, options, trace }) => {
     for (const action of ['submit-review', 'merge-pull-request']) {
       if (action === 'merge-pull-request') {
         const handoff = JSON.parse(readFileSync(handoffPath, 'utf8'));
@@ -304,6 +307,7 @@ test('CLI legacy write commands reject before live collection or mutation', () =
           { type: 'review-packet', reference: packetPath },
           { type: 'published-review-packet', reference: packetPath },
           { type: 'mutation-authorization', reference: 'explicit-current-user' },
+          trace.artifact,
         ];
         writeFileSync(handoffPath, JSON.stringify(handoff));
       }
@@ -324,6 +328,10 @@ test('CLI legacy write commands reject before live collection or mutation', () =
           handoffPath,
           '--authorization',
           'explicit-current-user',
+          '--record',
+          trace.recordPath,
+          '--context',
+          trace.contextPath,
         ],
         options
       );

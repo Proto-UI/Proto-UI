@@ -3,7 +3,7 @@ type: test
 title: Four Adapter Focus entry and logical roving translation
 status: draft
 since: 0.3.0-alpha.0
-summary: Real framework evidence distinguishes entry delegation from target facts and sequential participation from programmatic focus.
+summary: Bounded React/Vue capability and real framework evidence distinguish acquisition readiness, committed blur, entry delegation and logical roving.
 cases:
   - id: T-FOCUS-0002-CASE-UNUSABLE-NATIVE
     title: Hidden inputs and unassociated areas cannot suppress entry fallback
@@ -25,6 +25,30 @@ cases:
         HC-FOCUS-ENTRY-0001-B,
       ]
     expectation: descendant-focus-no-extra-container-tab-target-disabled-entry-self-fallback
+  - id: T-FOCUS-0002-CASE-UPDATED-ENTRY
+    title: Lifecycle entry acquisition replays after readiness independently of target disable
+    covers:
+      [
+        C-AS-FOCUS-ENTRY-0001-G,
+        C-AS-FOCUS-ENTRY-0001-H,
+        C-AS-FOCUSABLE-0001-G,
+        HC-FOCUS-TARGET-0001-D,
+      ]
+    expectation: mounted-and-updated-descendant-entry-acquires-after-readiness-and-survives-independent-target-disable-without-owning-descendant-facts
+    notes:
+      - These React lifecycle cases use fallback none. They do not exercise Tab traversal, entry-role disable, self fallback, or logical roving.
+  - id: T-FOCUS-0002-CASE-ACQUISITION-READINESS
+    title: Per-kind acquisition guards preserve committed target access for blur and A11y projection
+    covers: [HC-FOCUS-TARGET-0001-D]
+    expectation: closed-ingress-rejects-native-and-entry-but-allows-programmatic-focus-blur-and-a11y-projection
+    notes:
+      - The controlled capability test checks one registered root; it does not establish roving navigation, nested owner replacement or full Adapter conformance.
+  - id: T-FOCUS-0002-CASE-UPDATED-BLUR
+    title: onUpdated blur clears the committed physical target and its observed focused fact
+    covers: [HC-FOCUS-TARGET-0001-B, HC-FOCUS-TARGET-0001-D]
+    expectation: updated-blur-removes-physical-focus-and-clears-observed-focused-fact-despite-acquisition-gate
+    notes:
+      - The real React and Vue lifecycle tests use one focusable target for this blur case and do not establish roving navigation.
   - id: T-FOCUS-0002-CASE-ROVING
     title: Logical roving moves to eligible targets outside Tab order and clears stale facts across fresh owners
     covers:
@@ -40,6 +64,38 @@ cases:
       ]
     expectation: logical-roving-programmatic-focus-observed-owner-replacement-disabled-rejection
 implementations:
+  - id: vue-focus-acquisition-readiness
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/focus-target-readiness.test.ts
+    required: true
+    consumesCases: [T-FOCUS-0002-CASE-ACQUISITION-READINESS]
+  - id: vue-focus-updated-native-blur
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/focus-request-readiness.integration.test.ts
+    required: true
+    consumesCases: [T-FOCUS-0002-CASE-UPDATED-BLUR]
+  - id: react-focus-acquisition-readiness
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/focus-target-readiness.test.ts
+    required: true
+    consumesCases: [T-FOCUS-0002-CASE-ACQUISITION-READINESS]
+  - id: react-focus-updated-native-blur
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/focus-readiness-blur.integration.test.ts
+    required: true
+    consumesCases: [T-FOCUS-0002-CASE-UPDATED-BLUR]
+  - id: react-focus-updated-entry-replay
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/focus-readiness-entry.integration.test.ts
+    required: true
+    consumesCases: [T-FOCUS-0002-CASE-UPDATED-ENTRY]
+    notes:
+      - A dual-role instance retains enabled descendant entry across target disable during onUpdated and clears the disabled target's facts.
   - id: react-focus-catalog
     kind: adapter-test
     status: passing
@@ -94,6 +150,18 @@ verifies:
   hostCaps: [HC-FOCUS-TARGET-0001, HC-FOCUS-ENTRY-0001]
   adapters: [A-REACT-18-19-0001, A-VUE-3-0001, A-VUE-2-0001, A-WEB-COMPONENT-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Scoped lifecycle entry replay to readiness and independent target-disable evidence without claiming Tab traversal, entry-role disable, or self fallback.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Scoped React acquisition-readiness and updated-blur evidence to their host-capability cases instead of crediting unrelated roving and Adapter criteria.
+  - version: 0.3.0-alpha.1
+    change: strengthened
+    summary: Added real React updated entry replay when the same instance disables its independent focusable target.
+  - version: 0.3.0-alpha.1
+    change: strengthened
+    summary: Bound React acquisition readiness to real updated blur and entry replay evidence while retaining target and A11y projection access.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Added four-Adapter hidden-input and invalid-area fallback regressions; corrected the area positive fixture to use a named map and associated image.

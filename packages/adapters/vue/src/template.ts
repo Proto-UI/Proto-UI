@@ -117,7 +117,11 @@ function renderChild(
   }
 
   const props: Record<string, any> = {};
-  if (className) props.class = className;
+  if (className) {
+    props.class = className;
+    // Only this newly materialized ordinary Template element owns the carrier.
+    props['data-pui-style'] = className;
+  }
 
   return runtime.h(t, props, kids as any);
 }

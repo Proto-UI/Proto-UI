@@ -61,7 +61,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
         DemoRenderResult,
         DemoSpec,
       } from '../../../components/PrototypePreviewer/demo-types';
-      import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/registry';
+      import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/ids';
       if (new URLSearchParams(location.search).has('unknown'))
         Object.defineProperty(window, 'matchMedia', { value: undefined, configurable: true });
       registerPrototype('liquid-glass-button', button);

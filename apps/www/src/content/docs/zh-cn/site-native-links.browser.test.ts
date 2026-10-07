@@ -1295,6 +1295,10 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
       expect(await heroCTA.locator('svg[aria-hidden="true"]').count()).toBe(1);
       const links = page.locator('#home-social a');
       expect(await links.count()).toBe(4);
+      const summary = page.locator('[data-site-header-fallback-summary]');
+      expect(await summary.isVisible()).toBe(true);
+      expect(await links.first().isVisible()).toBe(false);
+      await summary.press('Enter');
       for (let index = 0; index < 4; index++) {
         expect(await links.nth(index).isVisible()).toBe(true);
         expect(await links.nth(index).getAttribute('href')).toMatch(/^https:\/\//);
@@ -1304,8 +1308,12 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         'hero-cta-no-js',
         'shadcn',
         'native-no-js',
-        'configured-external-icon'
+        'configured-external-icon-and-native-disclosure'
       );
+      await summary.press('Enter');
+      expect(await links.first().isVisible()).toBe(false);
+      await summary.click();
+      expect(await links.first().isVisible()).toBe(true);
     } finally {
       await context.close();
     }
@@ -1423,7 +1431,27 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         await expect
           .poll(async () => (await linkPaint(toc)).tokens)
           .toContain(family === 'brutalist' ? 'bg-main' : 'bg-accent');
-        expect(await page.locator('sl-toc > div[aria-hidden]').count()).toBe(0);
+        // #843 restores one passive geometry mount, painted only by the
+        // existing public family Surface. Keep rejecting legacy private paint.
+        const range = page.locator('sl-toc > [data-site-toc-highlight][aria-hidden="true"]');
+        expect(await range.count()).toBe(1);
+        expect(await range.getAttribute('role')).toBeNull();
+        expect(await range.getAttribute('tabindex')).toBeNull();
+        const rangeSurface = range.locator(`:scope > wc-site-${family}-surface[data-pui-root]`);
+        expect(await rangeSurface.count()).toBe(1);
+        await expect.poll(() => rangeSurface.getAttribute('data-pui-style')).toContain('bg-muted');
+        expect(
+          await range.locator('[role], [tabindex], a, button, input, select, textarea').count()
+        ).toBe(0);
+        expect(await range.evaluate((element) => getComputedStyle(element).pointerEvents)).toBe(
+          'none'
+        );
+        expect(await range.evaluate((element) => getComputedStyle(element).visibility)).toBe(
+          'visible'
+        );
+        expect(
+          await page.locator('sl-toc > div[aria-hidden]:not([data-site-toc-highlight])').count()
+        ).toBe(0);
         await captureLinks(
           page,
           `nav-${family}-${colorScheme}-toc-current`,

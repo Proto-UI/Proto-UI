@@ -2,6 +2,8 @@
 
 <!-- Humans may submit a plain description; no Agent evidence checklist is required from you. Agents: follow internal/agent-operations/visual-evidence.md, adding a sanitized request paraphrase, uploaded subject-appropriate evidence, and any evidence debt in your own section/comment. This is a soft gate, not an image-presence merge blocker. Upload tutorial: internal/agent-operations/github-evidence-upload.md. -->
 
+<!-- Agents only: before creating or materially updating this PR, commenting, reviewing, or making any current collaboration write, obtain a current pui-agent-identify record (including human-assisted runs). Use agent:publish for supported writes and record-aware review/collaboration primitives otherwise; include the generated ## ModelTrace public JSON disclosure. Every Agent-originated commit requires its exact single-line ModelTrace disclosure too. Keep raw samples, private context/session IDs, private conversation, operational and account circumstances out of artifacts/publication. Candidate/ambiguous/failed results and anomalies remain honest; this unsigned closed-set attribution is not authenticated identity, permission, independent review or acceptance. Do not rewrite human original text or old Git history. Humans and deterministic non-LLM automation have no model-testing obligation. Full policy: internal/agent-operations/contributor-agents.md. -->
+
 <!-- What does this PR change? -->
 
 ## Related context

@@ -8,7 +8,7 @@ import {
   type ProjectionThemeSurfaceStyle,
 } from './projection-theme';
 import type { DemoRenderResult, DemoSpec } from './demo-types';
-import type { RuntimeId } from './runtimes/registry';
+import type { RuntimeId } from './runtimes/ids';
 
 /** Composition lease, not a host runtime: existing public renderers own each
  * shell; the original renderer exclusively owns the borrowed content subtree.

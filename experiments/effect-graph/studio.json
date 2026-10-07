@@ -1,0 +1,608 @@
+{
+  "schemaVersion": 1,
+  "id": "studio-four-pass-inspection",
+  "purpose": "Model pinned source requirements; no kernel copied or executed",
+  "kernels": [
+    {
+      "id": "bg",
+      "upstream": {
+        "repo": "iyinchao/liquid-glass-studio",
+        "commit": "f7b28c36305a862f5cffed3ddd51511cf1204f56",
+        "path": "src/shaders-wgsl/fragment-bg.wgsl",
+        "gitBlob": "f84212a1aa4e3687fd404218fdd197cce18b2080"
+      },
+      "license": "blocked-IQ-transitive-provenance",
+      "execution": "not-admitted",
+      "entryPoint": "fs_main",
+      "stage": "fragment",
+      "uniformBlocks": ["main"],
+      "samplers": [
+        {
+          "name": "u_bgTexture",
+          "ownership": "application-bound",
+          "resourceKind": "application-texture",
+          "resource": "media",
+          "sourceKinds": ["owned-image", "owned-video-frame"]
+        }
+      ],
+      "samplerBinding": "named",
+      "dataBindings": [],
+      "invalidation": {
+        "kind": "any-dirty",
+        "dependencies": [
+          "source:media",
+          "uniform:main",
+          "geometry",
+          "derived-morph-state",
+          "pointer-spring-state"
+        ]
+      },
+      "targetProfile": "webgpu-wgsl-fragment"
+    },
+    {
+      "id": "blur-v",
+      "upstream": {
+        "repo": "iyinchao/liquid-glass-studio",
+        "commit": "f7b28c36305a862f5cffed3ddd51511cf1204f56",
+        "path": "src/shaders-wgsl/fragment-bg-vblur.wgsl",
+        "gitBlob": "eabd5091ad5f6166673c01173bad2f2629cadfea"
+      },
+      "license": "MIT-chain-review",
+      "execution": "not-admitted",
+      "entryPoint": "fs_main",
+      "stage": "fragment",
+      "uniformBlocks": ["blur"],
+      "samplers": [
+        {
+          "name": "u_prevPassTexture",
+          "ownership": "application-bound",
+          "resourceKind": "color-texture",
+          "resource": "background"
+        }
+      ],
+      "samplerBinding": "named",
+      "dataBindings": [
+        {
+          "name": "u_blurWeights",
+          "type": "bounded-array<f32>"
+        }
+      ],
+      "invalidation": "upstream-or-blur-parameter-dirty",
+      "targetProfile": "webgpu-wgsl-fragment"
+    },
+    {
+      "id": "blur-h",
+      "upstream": {
+        "repo": "iyinchao/liquid-glass-studio",
+        "commit": "f7b28c36305a862f5cffed3ddd51511cf1204f56",
+        "path": "src/shaders-wgsl/fragment-bg-hblur.wgsl",
+        "gitBlob": "b35758ed6498b3b42d81fd6063b292e6e5a6f603"
+      },
+      "license": "MIT-chain-review",
+      "execution": "not-admitted",
+      "entryPoint": "fs_main",
+      "stage": "fragment",
+      "uniformBlocks": ["blur"],
+      "samplers": [
+        {
+          "name": "u_prevPassTexture",
+          "ownership": "application-bound",
+          "resourceKind": "color-texture",
+          "resource": "vertical-blur"
+        }
+      ],
+      "samplerBinding": "named",
+      "dataBindings": [
+        {
+          "name": "u_blurWeights",
+          "type": "bounded-array<f32>"
+        }
+      ],
+      "invalidation": "upstream-or-blur-parameter-dirty",
+      "targetProfile": "webgpu-wgsl-fragment"
+    },
+    {
+      "id": "main",
+      "upstream": {
+        "repo": "iyinchao/liquid-glass-studio",
+        "commit": "f7b28c36305a862f5cffed3ddd51511cf1204f56",
+        "path": "src/shaders-wgsl/fragment-main.wgsl",
+        "gitBlob": "9063a39f000fcb0fd69848dc4c3e51618f0dc3da"
+      },
+      "license": "blocked-IQ-transitive-provenance",
+      "execution": "not-admitted",
+      "entryPoint": "fs_main",
+      "stage": "fragment",
+      "uniformBlocks": ["main"],
+      "samplers": [
+        {
+          "name": "u_bg",
+          "ownership": "application-bound",
+          "resourceKind": "color-texture",
+          "resource": "background"
+        },
+        {
+          "name": "u_blurredBg",
+          "ownership": "application-bound",
+          "resourceKind": "color-texture",
+          "resource": "blurred"
+        }
+      ],
+      "samplerBinding": "named",
+      "dataBindings": [],
+      "invalidation": "frame-bindings-dirty",
+      "targetProfile": "webgpu-wgsl-fragment"
+    }
+  ],
+  "sources": [
+    {
+      "id": "media",
+      "kind": "application-texture",
+      "sourceKinds": ["owned-image", "owned-video-frame"],
+      "format": "rgba8unorm",
+      "space": "normalized-uv",
+      "alpha": {
+        "status": "unresolved",
+        "obligation": "source-declared mode must be resolved before lowering"
+      },
+      "freshness": "provider-frame",
+      "fallback": "owned-neutral-1px",
+      "colorSpace": {
+        "status": "unresolved",
+        "obligation": "target/source profile must declare transfer and data-versus-color conversion"
+      },
+      "orientation": {
+        "status": "unresolved",
+        "obligation": "verify local/physical/UV axes and transforms for the target variant"
+      }
+    }
+  ],
+  "resources": [
+    {
+      "id": "background",
+      "kind": "color-texture",
+      "format": "rgba16float",
+      "extent": {
+        "basis": "viewport",
+        "scale": [1, 1]
+      },
+      "space": "normalized-uv",
+      "alpha": {
+        "status": "unresolved",
+        "obligation": "kernel-declared mode must be resolved before lowering"
+      },
+      "filter": "linear",
+      "wrap": "clamp-to-edge",
+      "usages": ["render-attachment", "texture-binding"],
+      "clear": "transparent",
+      "observedDepth": {
+        "webgl2": {
+          "format": "DEPTH_COMPONENT24",
+          "usage": "attached-depth-buffer"
+        },
+        "webgpu": {
+          "format": "depth24plus",
+          "usage": "allocated-unused-helper-resource"
+        }
+      },
+      "colorSpace": {
+        "status": "unresolved",
+        "obligation": "target/source profile must declare transfer and data-versus-color conversion"
+      },
+      "orientation": {
+        "status": "unresolved",
+        "obligation": "verify local/physical/UV axes and transforms for the target variant"
+      }
+    },
+    {
+      "id": "vertical-blur",
+      "kind": "color-texture",
+      "format": "rgba16float",
+      "extent": {
+        "basis": "viewport",
+        "scale": [1, 1]
+      },
+      "space": "normalized-uv",
+      "alpha": {
+        "status": "unresolved",
+        "obligation": "kernel-declared mode must be resolved before lowering"
+      },
+      "filter": "linear",
+      "wrap": "clamp-to-edge",
+      "usages": ["render-attachment", "texture-binding"],
+      "clear": "transparent",
+      "observedDepth": {
+        "webgl2": {
+          "format": "DEPTH_COMPONENT24",
+          "usage": "attached-depth-buffer"
+        },
+        "webgpu": {
+          "format": "depth24plus",
+          "usage": "allocated-unused-helper-resource"
+        }
+      },
+      "colorSpace": {
+        "status": "unresolved",
+        "obligation": "target/source profile must declare transfer and data-versus-color conversion"
+      },
+      "orientation": {
+        "status": "unresolved",
+        "obligation": "verify local/physical/UV axes and transforms for the target variant"
+      }
+    },
+    {
+      "id": "blurred",
+      "kind": "color-texture",
+      "format": "rgba16float",
+      "extent": {
+        "basis": "viewport",
+        "scale": [1, 1]
+      },
+      "space": "normalized-uv",
+      "alpha": {
+        "status": "unresolved",
+        "obligation": "kernel-declared mode must be resolved before lowering"
+      },
+      "filter": "linear",
+      "wrap": "clamp-to-edge",
+      "usages": ["render-attachment", "texture-binding"],
+      "clear": "transparent",
+      "observedDepth": {
+        "webgl2": {
+          "format": "DEPTH_COMPONENT24",
+          "usage": "attached-depth-buffer"
+        },
+        "webgpu": {
+          "format": "depth24plus",
+          "usage": "allocated-unused-helper-resource"
+        }
+      },
+      "colorSpace": {
+        "status": "unresolved",
+        "obligation": "target/source profile must declare transfer and data-versus-color conversion"
+      },
+      "orientation": {
+        "status": "unresolved",
+        "obligation": "verify local/physical/UV axes and transforms for the target variant"
+      }
+    }
+  ],
+  "data": [
+    {
+      "id": "blur-weights",
+      "type": "bounded-array<f32>",
+      "maxCount": 201,
+      "targetBindings": {
+        "webgpu": "read-only-storage-buffer",
+        "webgl2": "uniform-array",
+        "flutter": "requires-specialization-or-unavailable"
+      },
+      "abi": {
+        "minimumBytes": 16,
+        "maxLogicalBytes": 804
+      }
+    }
+  ],
+  "passes": [
+    {
+      "id": "background-pass",
+      "kind": "fragment",
+      "kernel": "bg",
+      "reads": ["media"],
+      "writes": "background",
+      "dependsOn": [],
+      "bindings": {
+        "u_bgTexture": "media"
+      },
+      "update": {
+        "kind": "any-dirty",
+        "dependencies": [
+          "source:media",
+          "uniform:main",
+          "geometry",
+          "derived-morph-state",
+          "pointer-spring-state"
+        ]
+      },
+      "uniformBlocks": ["main"],
+      "drawDomain": "upstream-fullscreen-quad"
+    },
+    {
+      "id": "vertical-blur-pass",
+      "kind": "fragment",
+      "kernel": "blur-v",
+      "reads": ["background", "blur-weights"],
+      "writes": "vertical-blur",
+      "dependsOn": ["background-pass"],
+      "bindings": {
+        "u_prevPassTexture": "background",
+        "u_blurWeights": "blur-weights"
+      },
+      "update": "upstream-or-blur-parameter-dirty",
+      "uniformBlocks": ["blur"],
+      "drawDomain": "upstream-fullscreen-quad"
+    },
+    {
+      "id": "horizontal-blur-pass",
+      "kind": "fragment",
+      "kernel": "blur-h",
+      "reads": ["vertical-blur", "blur-weights"],
+      "writes": "blurred",
+      "dependsOn": ["vertical-blur-pass"],
+      "bindings": {
+        "u_prevPassTexture": "vertical-blur",
+        "u_blurWeights": "blur-weights"
+      },
+      "update": "upstream-or-blur-parameter-dirty",
+      "uniformBlocks": ["blur"],
+      "drawDomain": "upstream-fullscreen-quad"
+    },
+    {
+      "id": "main-pass",
+      "kind": "fragment",
+      "kernel": "main",
+      "reads": ["background", "blurred"],
+      "writes": "presentation",
+      "dependsOn": ["background-pass", "horizontal-blur-pass"],
+      "bindings": {
+        "u_bg": "background",
+        "u_blurredBg": "blurred"
+      },
+      "update": "frame-bindings-dirty",
+      "uniformBlocks": ["main"],
+      "drawDomain": "upstream-fullscreen-quad"
+    }
+  ],
+  "uniformBlocks": [
+    {
+      "id": "main",
+      "abi": "wgsl-uniform-buffer",
+      "bytes": 160,
+      "fields": [
+        {
+          "name": "u_resolution",
+          "type": "vec2f",
+          "offset": 0,
+          "bytes": 8
+        },
+        {
+          "name": "u_dpr",
+          "type": "f32",
+          "offset": 8,
+          "bytes": 4
+        },
+        {
+          "name": "_pad0",
+          "type": "f32",
+          "offset": 12,
+          "bytes": 4
+        },
+        {
+          "name": "u_mouse",
+          "type": "vec2f",
+          "offset": 16,
+          "bytes": 8
+        },
+        {
+          "name": "u_mouseSpring",
+          "type": "vec2f",
+          "offset": 24,
+          "bytes": 8
+        },
+        {
+          "name": "u_shapeWidth",
+          "type": "f32",
+          "offset": 32,
+          "bytes": 4
+        },
+        {
+          "name": "u_shapeHeight",
+          "type": "f32",
+          "offset": 36,
+          "bytes": 4
+        },
+        {
+          "name": "u_shapeRadius",
+          "type": "f32",
+          "offset": 40,
+          "bytes": 4
+        },
+        {
+          "name": "u_shapeRoundness",
+          "type": "f32",
+          "offset": 44,
+          "bytes": 4
+        },
+        {
+          "name": "u_mergeRate",
+          "type": "f32",
+          "offset": 48,
+          "bytes": 4
+        },
+        {
+          "name": "u_glareAngle",
+          "type": "f32",
+          "offset": 52,
+          "bytes": 4
+        },
+        {
+          "name": "u_shadowExpand",
+          "type": "f32",
+          "offset": 56,
+          "bytes": 4
+        },
+        {
+          "name": "u_shadowFactor",
+          "type": "f32",
+          "offset": 60,
+          "bytes": 4
+        },
+        {
+          "name": "u_shadowPosition",
+          "type": "vec2f",
+          "offset": 64,
+          "bytes": 8
+        },
+        {
+          "name": "u_bgTextureRatio",
+          "type": "f32",
+          "offset": 72,
+          "bytes": 4
+        },
+        {
+          "name": "u_bgType",
+          "type": "i32",
+          "offset": 76,
+          "bytes": 4
+        },
+        {
+          "name": "u_bgTextureReady",
+          "type": "i32",
+          "offset": 80,
+          "bytes": 4
+        },
+        {
+          "name": "u_showShape1",
+          "type": "i32",
+          "offset": 84,
+          "bytes": 4
+        },
+        {
+          "name": "u_blurRadius",
+          "type": "i32",
+          "offset": 88,
+          "bytes": 4
+        },
+        {
+          "name": "u_blurEdge",
+          "type": "i32",
+          "offset": 92,
+          "bytes": 4
+        },
+        {
+          "name": "u_tint",
+          "type": "vec4f",
+          "offset": 96,
+          "bytes": 16
+        },
+        {
+          "name": "u_refThickness",
+          "type": "f32",
+          "offset": 112,
+          "bytes": 4
+        },
+        {
+          "name": "u_refFactor",
+          "type": "f32",
+          "offset": 116,
+          "bytes": 4
+        },
+        {
+          "name": "u_refDispersion",
+          "type": "f32",
+          "offset": 120,
+          "bytes": 4
+        },
+        {
+          "name": "u_refFresnelRange",
+          "type": "f32",
+          "offset": 124,
+          "bytes": 4
+        },
+        {
+          "name": "u_refFresnelHardness",
+          "type": "f32",
+          "offset": 128,
+          "bytes": 4
+        },
+        {
+          "name": "u_refFresnelFactor",
+          "type": "f32",
+          "offset": 132,
+          "bytes": 4
+        },
+        {
+          "name": "u_glareRange",
+          "type": "f32",
+          "offset": 136,
+          "bytes": 4
+        },
+        {
+          "name": "u_glareHardness",
+          "type": "f32",
+          "offset": 140,
+          "bytes": 4
+        },
+        {
+          "name": "u_glareConvergence",
+          "type": "f32",
+          "offset": 144,
+          "bytes": 4
+        },
+        {
+          "name": "u_glareOppositeFactor",
+          "type": "f32",
+          "offset": 148,
+          "bytes": 4
+        },
+        {
+          "name": "u_glareFactor",
+          "type": "f32",
+          "offset": 152,
+          "bytes": 4
+        },
+        {
+          "name": "u_refDistance",
+          "type": "f32",
+          "offset": 156,
+          "bytes": 4
+        }
+      ]
+    },
+    {
+      "id": "blur",
+      "abi": "wgsl-uniform-buffer",
+      "bytes": 16,
+      "fields": [
+        {
+          "name": "u_resolution",
+          "type": "vec2f",
+          "offset": 0,
+          "bytes": 8
+        },
+        {
+          "name": "u_blurRadius",
+          "type": "i32",
+          "offset": 8,
+          "bytes": 4
+        },
+        {
+          "name": "_pad",
+          "type": "i32",
+          "offset": 12,
+          "bytes": 4
+        }
+      ]
+    }
+  ],
+  "requirements": [
+    "renderable-filterable-rgba16float",
+    "fragment-texture-sampling",
+    "bounded-read-only-data-buffer-or-specialized-uniform-array",
+    "same-frame-topological-order"
+  ],
+  "limits": {
+    "passes": 4,
+    "blurRadius": 200,
+    "historyFrames": 0,
+    "storageWrites": false
+  },
+  "caveats": [
+    "No live DOM source exists in this upstream graph",
+    "GLSL/WGSL blur filename axes require per-variant mapping; names are not parity evidence",
+    "WGSL is the upstream STEP9 specialization only",
+    "No physical format/filter/ABI/target compilation or visual validation has run"
+  ],
+  "frameInputs": [],
+  "interfaceId": "studio-f7b28c3-four-pass-v1"
+}

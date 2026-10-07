@@ -67,6 +67,9 @@ export class StarlightTOC extends HTMLElement {
   private _initialized = false;
   private _observer: IntersectionObserver | undefined;
   private _resizeTimer: number | undefined;
+  private _layoutObserver: ResizeObserver | undefined;
+  private _highlight: HTMLElement | null = null;
+  private _onLayout = () => this.scheduleVisibleUpdate();
   private _onScroll = () => this.scheduleVisibleUpdate();
   private _onResize = () => {
     this.collectHeadings();
@@ -176,6 +179,7 @@ export class StarlightTOC extends HTMLElement {
         this._visible = [];
         this.emitVisibleChange();
       }
+      this.writeHighlight(null);
       return;
     }
 
@@ -185,7 +189,6 @@ export class StarlightTOC extends HTMLElement {
     const currentLink = this._links.find(
       (link) => link.hash === '#' + encodeURIComponent(currentHeading.id)
     );
-    if (currentLink) this.current = currentLink;
 
     const next: VisibleSection[] = [];
     for (let i = 0; i < n; i++) {
@@ -202,6 +205,12 @@ export class StarlightTOC extends HTMLElement {
       }
     }
 
+    // Finish the shared range reads before publishing current/in-view writes.
+    // This adds at most three rect reads per existing TOC frame, not one per link.
+    const geometry = this.readHighlight(next);
+    if (currentLink) this.current = currentLink;
+    this.writeHighlight(geometry);
+
     // 只在实际变化时触发
     const { added, removed } = diffBy(this._visible, next, (s) => s.id);
     const changed = added.length > 0 || removed.length > 0;
@@ -216,6 +225,54 @@ export class StarlightTOC extends HTMLElement {
       this._visible = next;
       this.emitVisibleChange();
     }
+  }
+
+  private readHighlight(sections: readonly VisibleSection[]) {
+    if (!this._highlight || !sections.length) return null;
+    const first = sections[0].link;
+    const last = sections[sections.length - 1].link;
+    if (!first || !last) return null;
+    const container = this.getBoundingClientRect();
+    const start = first.getBoundingClientRect();
+    const end = last === first ? start : last.getBoundingClientRect();
+    if (!container.width || !start.width || !end.height) return null;
+    const left = Math.min(start.left, end.left) - container.left + this.scrollLeft;
+    const top = start.top - container.top + this.scrollTop;
+    const width = Math.max(start.right, end.right) - Math.min(start.left, end.left);
+    const height = end.bottom - start.top;
+    return height > 0 ? { left, top, width, height } : null;
+  }
+
+  private writeHighlight(geometry: ReturnType<StarlightTOC['readHighlight']>) {
+    const range = this._highlight;
+    if (!range) return;
+    if (!geometry) {
+      range.removeAttribute('data-toc-range-visible');
+      return;
+    }
+    const values = {
+      transform: `translate(${geometry.left}px, ${geometry.top}px)`,
+      width: `${geometry.width}px`,
+      height: `${geometry.height}px`,
+    };
+    for (const [property, value] of Object.entries(values)) {
+      if (range.style.getPropertyValue(property) !== value)
+        range.style.setProperty(property, value);
+    }
+    if (!range.hasAttribute('data-toc-range-visible'))
+      range.setAttribute('data-toc-range-visible', '');
+  }
+
+  private flushObservedLayout() {
+    if (!this._initialized || !this.isConnected) return;
+    // ResizeObserver runs after layout and before paint. Deferring this
+    // invalidation to another rAF paints one frame with the old current/range
+    // after fonts or wrapping have already moved the headings. Reuse the same
+    // read-before-write pass and consume any queued scroll invalidation.
+    if (this._rafId !== undefined) cancelAnimationFrame(this._rafId);
+    this._rafId = undefined;
+    this._rafScheduled = false;
+    this.updateVisibleNow();
   }
 
   /** ===== 新增：rAF 节流封装 ===== */
@@ -236,11 +293,21 @@ export class StarlightTOC extends HTMLElement {
     /** ===== 新增：初始化“可见小节”维护 ===== */
     this.minH = parseInt(this.dataset.minH || '2', 10);
     this.maxH = parseInt(this.dataset.maxH || '3', 10);
+    this._highlight = this.querySelector<HTMLElement>('[data-site-toc-highlight]');
     this.collectHeadings(); // 1) 收集标题
     this.observeCurrent();
     this.updateVisibleNow(); // 2) 初始化完成后立刻计算一次
     window.addEventListener('scroll', this._onScroll, { passive: true }); // 3) 监听滚动
     window.addEventListener('resize', this._onResize); //    监听尺寸变化
+    window.addEventListener('hashchange', this._onLayout);
+    window.addEventListener('pageshow', this._onLayout);
+    document.fonts?.addEventListener('loadingdone', this._onLayout);
+    if (typeof ResizeObserver !== 'undefined') {
+      this._layoutObserver = new ResizeObserver(() => this.flushObservedLayout());
+      // Content/font/runtime layout can change without a viewport resize.
+      for (const target of [this, document.querySelector('main'), document.querySelector('header')])
+        if (target) this._layoutObserver.observe(target);
+    }
   };
 
   private observeCurrent() {
@@ -268,6 +335,13 @@ export class StarlightTOC extends HTMLElement {
   disconnectedCallback() {
     window.removeEventListener('scroll', this._onScroll);
     window.removeEventListener('resize', this._onResize);
+    window.removeEventListener('hashchange', this._onLayout);
+    window.removeEventListener('pageshow', this._onLayout);
+    document.fonts?.removeEventListener('loadingdone', this._onLayout);
+    this._layoutObserver?.disconnect();
+    this._layoutObserver = undefined;
+    this.writeHighlight(null);
+    this._highlight = null;
     if (this._idleId !== undefined) {
       if (this._idleUsesTimeout) window.clearTimeout(this._idleId);
       else window.cancelIdleCallback?.(this._idleId);

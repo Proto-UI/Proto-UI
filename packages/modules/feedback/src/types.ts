@@ -23,6 +23,8 @@ export interface FeedbackFacade extends ModuleFacade {
 }
 
 export type FeedbackPort = {
+  /** Private material integration: keep relevant Rules in the evaluator. */
+  shouldRetainStyleRule?: (tokens: readonly string[]) => boolean;
   /**
    * Runtime-only: apply merged style tokens directly.
    * Intended for rule execution or adapter-driven updates.

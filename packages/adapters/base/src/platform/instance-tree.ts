@@ -136,19 +136,40 @@ export function createInstanceTreeMarkers(
   const TRIGGER_SURFACE_LISTENERS = new WeakMap<LogicalInstanceToken, Set<() => void>>();
   const TRIGGER_TOKENS = new WeakSet<LogicalInstanceToken>();
 
+  function notifySurfaceListeners(token: LogicalInstanceToken, failures: unknown[]): void {
+    for (const listener of [...(TRIGGER_SURFACE_LISTENERS.get(token) ?? [])]) {
+      try {
+        listener();
+      } catch (error) {
+        if (failures.length === 0) failures.push(error);
+      }
+    }
+  }
+
   function notifyTriggerSurface(owner: LogicalInstanceToken): void {
     syncTriggerGroupEventTargets(owner);
     const members = TRIGGER_GROUP_MEMBERS_BY_ANCHOR.get(owner);
     if (!members) return;
     const surface = TRIGGER_GROUP_SURFACE_BY_ANCHOR.get(owner);
-    for (const member of members) {
+    const failures: unknown[] = [];
+    const memberSnapshot = [...members];
+    for (const member of memberSnapshot) {
       const memberRoot = INSTANCE_BY_TOKEN.get(member);
       if (memberRoot && member !== surface) options.releaseTriggerSurface?.(memberRoot);
-      for (const listener of TRIGGER_SURFACE_LISTENERS.get(member) ?? []) listener();
+      notifySurfaceListeners(member, failures);
     }
+    // The logical group anchor outlives its own physical membership. Retained
+    // observers must see later fallback/replacement surfaces even while its
+    // view is detached (including an empty group receiving a new member).
+    if (!memberSnapshot.includes(owner)) {
+      notifySurfaceListeners(owner, failures);
+    }
+    if (failures.length) throw failures[0];
   }
   function notifyInstanceLifecycle(token: LogicalInstanceToken): void {
-    for (const listener of TRIGGER_SURFACE_LISTENERS.get(token) ?? []) listener();
+    const failures: unknown[] = [];
+    notifySurfaceListeners(token, failures);
+    if (failures.length) throw failures[0];
   }
 
   function syncTriggerGroupEventTargets(owner: LogicalInstanceToken): void {

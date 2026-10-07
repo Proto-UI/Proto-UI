@@ -4,8 +4,8 @@ title: Base Table Row establishes one ordered logical row
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Real source, topology evidence and bounded Web Component Row projection exist; React, Vue and Vue 2 remain planned.
-  zh-CN: 已有真实 source、topology 证据与有界 Web Component Row projection；React、Vue 与 Vue 2 仍为 planned。
+  en: Real source, topology evidence and bounded passing Row projection exist for Web Component, React, Vue 3 and Vue 2, including a real React 19 consumer. Independent Checkpoint C review and explicit semantic/lifecycle admission remain incomplete; assistive-technology and non-Web support are not claimed.
+  zh-CN: 已有真实 source、topology 证据与通过的有界 Web Component、React、Vue 3、Vue 2 Row projection，包括真实 React 19 consumer。尚未完成 Checkpoint C 独立 review 与明确 semantic/lifecycle admission；不宣称 assistive-technology 或 non-Web support。
 summary: Row groups authored HeaderCell and Cell parts into one Anatomy-ordered topology row.
 statement:
   en: Base Table Row is a transparent structural part whose current same-domain order determines its zero-based row index and cell sequence.
@@ -27,8 +27,8 @@ verifies: { tests: [T-TABLE-STRUCTURE-0001] }
 openQuestions:
   - id: P-BASE-TABLE-ROW-Q-ADAPTERS
     question:
-      en: Is Row projection proven across the official Adapter profiles?
-      zh-CN: Row projection 是否已在 official Adapter profiles 中取证？
+      en: Has the bounded four-Web-Adapter Row evidence received independent Checkpoint C review and explicit admission?
+      zh-CN: 有界四 Web Adapter Row 证据是否已完成 Checkpoint C 独立 review 与明确 admission？
     blocks: [activation:P-BASE-TABLE-ROW]
 sources:
   - path: packages/prototypes/base/src/table/row.proto.ts
@@ -40,4 +40,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Recorded bounded Web Component Row projection while retaining three planned Adapter paths.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Recorded bounded Row projection evidence across four Web Adapters, including real React 19, while retaining independent Checkpoint C review and explicit admission as the draft boundary.
 tags: [table, row, base, prototype, draft]

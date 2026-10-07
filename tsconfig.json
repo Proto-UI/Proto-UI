@@ -45,7 +45,14 @@
         "packages/prototypes/bootstrap-2-3-2/src/*/index.ts"
       ],
       "@proto.ui/prototypes-liquid-glass": ["packages/prototypes/liquid-glass/src/index.ts"],
-      "@proto.ui/prototypes-liquid-glass/*": ["packages/prototypes/liquid-glass/src/*/index.ts"]
+      "@proto.ui/prototypes-liquid-glass/*": ["packages/prototypes/liquid-glass/src/*/index.ts"],
+      "@proto.ui/module-feedback/internal/*": ["packages/modules/feedback/src/material/*"],
+      "@proto.ui/adapter-web-component/internal/visual-consumer": [
+        "packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts"
+      ],
+      "@proto.ui/adapter-web-component/internal/owned-texture-sink": [
+        "packages/adapters/web-component/src/material/owned-texture-sink.ts"
+      ]
     },
     "target": "ES2022",
     "jsx": "react-jsx",

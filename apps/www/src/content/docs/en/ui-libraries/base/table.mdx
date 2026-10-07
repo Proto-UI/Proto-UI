@@ -1,9 +1,21 @@
 ---
 title: 'Table (Draft)'
-description: 'The draft Base Table structural protocol, implemented host-neutral topology, accessibility boundary, and remaining Adapter evidence.'
+description: 'The draft Base Table structural protocol, bounded Web Adapter projection, CLI facade, and static preview.'
 ---
 
-Base Table is a **draft protocol with Checkpoint B host-neutral implementation**, not a released Adapter conformance claim. `D-BASE-TABLE-STRUCTURE-0001`, `C-TABLE-STRUCTURE-0001`, `M-TABLE-STRUCTURE-0001`, the five `P-BASE-TABLE*` identities, and `T-TABLE-STRUCTURE-0001` govern the current slice. React, Vue, and Vue 2 Adapter profile evidence, CLI facade registration, usable runtime previews, and design-language work remain planned under #621 Checkpoint C.
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Base Table remains a **draft protocol**, not a stable release or assistive-technology certification. `D-BASE-TABLE-STRUCTURE-0001`, `C-TABLE-STRUCTURE-0001`, `M-TABLE-STRUCTURE-0001`, the five `P-BASE-TABLE*` identities, and `T-TABLE-STRUCTURE-0001` govern its current slice. The workspace now includes bounded Web DOM projection evidence for Web Components, React 18/19, Vue 3, and Vue 2, a `base-table` CLI facade, and the static preview below. Design-language work remains outside this slice.
+
+<div>
+  <PrototypePreviewer
+    demoId="demo-base-table"
+    initialRuntime="wc"
+    runtimes={['wc', 'react', 'vue', 'vue2']}
+  />
+</div>
+
+The preview uses the same authored Base Table family in all four Web runtimes. It is a static structural example: Table itself does not add sorting, selection, editing, data operations, or keyboard-grid behavior. The runtime picker belongs to the documentation previewer, not to the Table protocol.
 
 ## Why Table is a protocol
 
@@ -19,7 +31,7 @@ Maker-authored parts, spans, and header keys
   -> User-observable table relationships
 ```
 
-The definition now has a portable Module and Base family plus bounded Web Component host-projection evidence; it does not claim complete Adapter conformance.
+The definition has a portable Module and Base family plus bounded Web DOM projection evidence across four Adapter profiles; it does not claim complete Web or assistive-technology conformance.
 
 ## Implemented host-neutral family
 
@@ -51,7 +63,7 @@ Insert, removal, and reorder recompute the snapshot from the actual parts. Tempo
 
 Base Table reuses the draft generic A11y direction and `HC-A11Y-0001`; it does not introduce `HC-TABLE`. Table Structure asks for no physical widget, measurement, input, resource, or system service.
 
-The generic A11y path supports opaque semantic-object references and ordered multi-target relationships through the merged #625 prerequisite. The Web Component evidence now verifies one-based ARIA row and column counts, indices, spans, caption naming, and explicit header labels that retain each cell's authored content. React, Vue, and Vue 2 Table projection tests remain planned; the passing Web Component slice does not imply complete cross-Adapter or assistive-technology conformance.
+The generic A11y path supports opaque semantic-object references and ordered multi-target relationships through the merged #625 prerequisite. Web Component, React, Vue 3, and Vue 2 evidence verifies Web DOM roles, one-based ARIA row and column counts/indices/spans, caption naming, ordered header references, and invalidation/recovery while preserving authored content. These are bounded Adapter and browser observations; they do not certify assistive-technology behavior or every browser/platform combination.
 
 The external host comparison establishes a shared information shape only:
 
@@ -83,7 +95,11 @@ A later Data Table composition may consume the passive structure while composing
 
 ## Evidence status
 
-The host-neutral reference probe and Module/Base tests cover deterministic placement, multiple-header resolution, diagnostics, nearest-domain isolation, authored-fact churn, exact anatomy, passive negative boundaries, generic A11y emission, and projection cleanup. The Web Component Adapter test covers ARIA materialization for counts, indices, spans, caption identity, and content-preserving header identity. The new `@proto.ui/module-table-structure` and `@proto.ui/prototypes-base/table` exports remain draft; React, Vue, and Vue 2 Adapter tests remain `planned`, and this page provides no interactive Table preview yet.
+The host-neutral reference probe and Module/Base tests cover deterministic placement, multiple-header resolution, diagnostics, nearest-domain isolation, authored-fact churn, exact anatomy, passive negative boundaries, generic A11y emission, and projection cleanup. Adapter integration tests cover all four Web profiles; the public browser case exercises the same static example in each runtime. The workspace CLI facade `base-table` generates the five Table authoring parts for React, Vue 3, Vue 2, or Web Components. The `@proto.ui/module-table-structure` and `@proto.ui/prototypes-base/table` exports and their semantics remain draft.
+
+The React unit case uses a synthetic hook runtime, while the public preview above loads React 18. A separate `table-react19.browser.test.ts` consumer runs the public Adapter and Table exports with real React 19.2.6 and ReactDOM 19.2.6 and asserts both versions. It verifies counts, indices, row/column spans, caption naming, ordered opaque headers, reactive invalidation/recovery, preserved cell content, and unmount. It loads pinned browser modules from esm.sh, so that check requires network access. Both Table browser suites run in the sequential shared-server test bucket.
+
+These passing DOM checks are not independent Checkpoint C acceptance or lifecycle promotion. The Table family remains draft pending independent review and explicit admission; no assistive-technology or non-Web conformance is claimed.
 
 ## References
 
