@@ -18049,7 +18049,7 @@ test('audit resolver profile: exact audited helper is mandatory evidence metadat
   assert.ok(metadata.has(plugin));
 });
 
-test('audit resolver profile: original 857 profile remains independently admitted without audit helper', () => {
+test('audit resolver profile: reviewed standard profile remains independently admitted without audit helper', () => {
   const { root, config, plugin, target } = auditResolverFixture();
   const original = fs.readFileSync(
     new URL('./fixtures/promotion-resolver-original-857.txt', import.meta.url),
@@ -18391,5 +18391,82 @@ for (const scenario of [
         message
       );
     else assert.equal(message, '');
+  });
+}
+
+for (const audit of [true, false]) {
+  test(`main #875 profile remains exact and independently admitted (audit=${audit})`, () => {
+    const { root, config, plugin, target } = auditResolverFixture();
+    let source = fs.readFileSync(
+      new URL('./fixtures/promotion-resolver-main-f64-audit.txt', import.meta.url),
+      'utf8'
+    );
+    assert.equal(
+      createHash('sha256').update(source).digest('hex'),
+      'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee'
+    );
+    if (!audit) {
+      source = source
+        .replace(
+          "import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n",
+          ''
+        )
+        .replace(
+          `    plugins: [
+      ...(process.env.PROTO_UI_CONTRAST_AUDIT === '1'
+        ? [contrastProvenancePlugin(repositoryRoot)]
+        : []),
+      protoUiSourcePlugin,
+      websiteBundleGraphPlugin(),
+      tailwindcss(),
+    ],`,
+          '    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],'
+        );
+      assert.equal(
+        createHash('sha256').update(source).digest('hex'),
+        '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377'
+      );
+      fs.unlinkSync(plugin);
+    }
+    fs.writeFileSync(config, source);
+    const metadata = new Set();
+    assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+    assert.equal(metadata.has(plugin), audit);
+    if (audit) {
+      fs.appendFileSync(plugin, '\n// unreviewed helper');
+      assert.throws(
+        () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+        /audit resolver plugin.*unrecognized/
+      );
+    } else {
+      fs.appendFileSync(config, '\n// unreviewed config');
+      assert.throws(
+        () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+        /configuration is unrecognized/
+      );
+    }
+  });
+}
+
+for (const name of ['acceptance', 's2', 's3', 's4', 's5']) {
+  test(`Shadow split exact import boundary: ${name}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const relative = `apps/www/src/components/PrototypePreviewer/shadow-split-${name}.ts`;
+    const original = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const absolute = path.join(root, relative);
+    const copied = relative.replace('.ts', '-unreviewed.ts');
+    fs.mkdirSync(path.dirname(absolute), { recursive: true });
+    fs.writeFileSync(absolute, original);
+    fs.writeFileSync(path.join(root, copied), original);
+    const raw = (file, specifier = '@proto.ui/adapter-web-component') =>
+      `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    const before = validationMessage(root);
+    assert.ok(!before.includes(raw(relative)), before);
+    assert.ok(before.includes(raw(copied)), before);
+    fs.writeFileSync(absolute, original + '\n// changed source requires another review\n');
+    assert.ok(validationMessage(root).includes(raw(relative)));
+    fs.writeFileSync(absolute, original + "\nimport '@proto.ui/runtime';\n");
+    assert.ok(validationMessage(root).includes(raw(relative, '@proto.ui/runtime')));
   });
 }

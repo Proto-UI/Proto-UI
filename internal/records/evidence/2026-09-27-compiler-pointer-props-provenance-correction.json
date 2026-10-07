@@ -1,0 +1,107 @@
+{
+  "preservedOriginals": {
+    "green-replay.json": "2d4074ea125b03e193d8cf2f7f046e33e9a263a1aab3b0f0d77de4e5ff720906",
+    "green-case.json": "df3d222d3393dbbfb73f69cd166e8dc9e5f5c0d49c39a6885870ecbb06161df8",
+    "sha256.json": "81db92790d56759b341b3e182a30982d2e45b2173f9cbea02a0e9f67bbc35bb8"
+  },
+  "mislabel": {
+    "greenReplaySourceRevision": "c74b698dc651d11aea842336218de745287deeba",
+    "greenCaseRevision": "c74b698dc651d11aea842336218de745287deeba",
+    "meaning": "Manually supplied dependency/base tag during a dirty working-tree run; NOT the exact executed Git tree."
+  },
+  "contentProvenance": {
+    "sourceSha256": "95c28746d28f4bdc1371e55acb01cda9e58377eb884c3eb619325cc905c887da",
+    "lockfileSha256": "004539cde4d5bf48063fc6fe77530fbd3458d5e663e9509818ac0ceaa0446fa9",
+    "cssSha256": "90a01987912095fe33b86a53ec77232d9a963f940745cce7afdc6eebd5fcec6e",
+    "harnessSha256": "9f6ef5fc5e7cf8dc0e91ee45573bca2e97f8d271daaa1f8f6c1cf54a14b77db2",
+    "fixtureSha256": "b2f89566a54409c4816f79b4ea712856368e65e60bccb2ebd5a1925185198abf"
+  },
+  "limitation": "File-content hashes do not establish an exact commit or clean-tree execution retroactively.",
+  "implementationCommit": "7e5205bba2f96e0ee40cdb8d48245211263ab124",
+  "postCommitReplayHead": "4f6ee4d5948684912c9131a2ee2d004b2eac65d9",
+  "postCommitProducerEvidence": ".cache/compiler-pointer-props/exact-4f6ee4d5",
+  "mainCI": {
+    "run": 36323808604,
+    "head": "4f6ee4d5948684912c9131a2ee2d004b2eac65d9",
+    "conclusion": "success"
+  },
+  "coordinatorIndependentReport": {
+    "head": "4f6ee4d5948684912c9131a2ee2d004b2eac65d9",
+    "files": 8,
+    "testsPassed": 49,
+    "astroFiles": 232,
+    "typeDiagnostics": 0,
+    "caseCollection": "6 PASS / 1 UNTESTED",
+    "additionalGeneratedOnlyMutants": ["payload", "prop-omission"],
+    "referenceContracts": "passing"
+  },
+  "shadow": {
+    "path": ".github/workflows/reposteward-portfolio-shadow.yml",
+    "sameBlobAtAllFourHeads": "ba71b4328b6560dcb84c16eef2110856a8af0126",
+    "runs": {
+      "752": [
+        {
+          "id": 36323728419,
+          "name": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "path": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "head_sha": "4f6ee4d5948684912c9131a2ee2d004b2eac65d9",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/36323728419",
+          "event": "push",
+          "check_suite_id": 98356019296,
+          "created_at": "2026-09-27T13:49:26Z",
+          "updated_at": "2026-09-27T13:49:26Z"
+        }
+      ],
+      "742": [
+        {
+          "id": 36317062624,
+          "name": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "path": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "head_sha": "c74b698dc651d11aea842336218de745287deeba",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/36317062624",
+          "event": "push",
+          "check_suite_id": 98338574055,
+          "created_at": "2026-09-27T11:51:05Z",
+          "updated_at": "2026-09-27T11:51:05Z"
+        }
+      ],
+      "739": [
+        {
+          "id": 36316254048,
+          "name": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "path": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "head_sha": "ab8031e2b62809170848035dc015c1efcb22a8a0",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/36316254048",
+          "event": "push",
+          "check_suite_id": 98336477986,
+          "created_at": "2026-09-27T11:36:04Z",
+          "updated_at": "2026-09-27T11:36:04Z"
+        }
+      ],
+      "736": [
+        {
+          "id": 36313565533,
+          "name": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "path": ".github/workflows/reposteward-portfolio-shadow.yml",
+          "head_sha": "8e782e0f29b45dc8d517aad054df497b9d284a8a",
+          "status": "completed",
+          "conclusion": "failure",
+          "html_url": "https://github.com/Proto-UI/Proto-UI/actions/runs/36313565533",
+          "event": "push",
+          "check_suite_id": 98329476094,
+          "created_at": "2026-09-27T10:45:37Z",
+          "updated_at": "2026-09-27T10:45:37Z"
+        }
+      ]
+    },
+    "observed752Jobs": 0,
+    "observed752CheckRuns": 0,
+    "staticDiagnosis": "runner.temp appears in job-level env at lines 31-35, where GitHub context availability excludes runner. Consistent with workflow validation failure; API exposed no annotation or job log. RepoSteward code did not execute in #752 run."
+  }
+}

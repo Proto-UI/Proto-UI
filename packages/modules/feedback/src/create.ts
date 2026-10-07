@@ -29,6 +29,7 @@ import {
 import {
   FINAL_STYLE_SINK_CAP,
   finalStyleFrame,
+  snapshotFinalStyle,
   type FinalStyleSink,
 } from './material/final-style-sink';
 
@@ -113,7 +114,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             throw new Error('Material Rule requires a declared slot');
           // Validate complete replacements before retiring the previous owner.
           const copied = candidates.map(snapshotMaterialCandidate);
-          const unUse = handles.length ? this.recorder.use(...handles) : null;
+          const unUse = handles.length ? this.recorder.useRuntime(...handles) : null;
           const key = {};
           previous?.({ flush: false });
           if (copied.length) this.materialContributions.set(key, copied);
@@ -162,7 +163,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             });
           }
 
-          const unUse = this.recorder.use(...handles);
+          const unUse = this.recorder.useRuntime(...handles);
           this.markDirty();
           this.flushIfPossible();
 
@@ -183,7 +184,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           }
 
           previous?.({ flush: false });
-          const next = handles.length > 0 ? this.recorder.use(...handles) : null;
+          const next = handles.length > 0 ? this.recorder.useRuntime(...handles) : null;
           this.markDirty();
           try {
             this.flushIfPossible();
@@ -341,7 +342,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         private projectFinalStyle(handle: StyleHandle): void {
           const revision = ++this.visualRevision;
-          const pending = { kind: 'tw' as const, tokens: [...handle.tokens] };
+          const style = snapshotFinalStyle(handle);
+          const pending = { ...style, tokens: [...style.tokens] };
           try {
             if (this.caps.has(VISUAL_FEEDBACK_SINK_CAP)) {
               const sink = this.caps.get(VISUAL_FEEDBACK_SINK_CAP);
@@ -352,10 +354,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
                 Object.freeze({
                   view: this.viewEpoch,
                   revision,
-                  style: Object.freeze({
-                    kind: 'tw' as const,
-                    tokens: Object.freeze([...handle.tokens]),
-                  }),
+                  style,
                   material: this.exportMaterialFrame(),
                 })
               );
@@ -395,7 +394,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             return;
           }
 
-          const merged = this.pendingProjection ?? this.exportMerged();
+          const merged = this.pendingProjection ?? this.recorder.exportRootEffect();
 
           // mark clean before calling host
           this.dirty = false;
@@ -413,15 +412,15 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             });
             return;
           }
-          const merged = this.recorder.exportWithAdditional(handle);
-          this.projectFinalStyle({ kind: 'tw', tokens: merged.tokens });
+          const merged = this.recorder.exportRootEffect(handle);
+          this.projectFinalStyle(merged);
         }
 
         afterRenderCommit(): void {
           if (!this.canProject()) return;
           // A structural commit may replace the current materialized root.
           if (!this.hasOutput()) return;
-          const merged = this.exportMerged();
+          const merged = this.recorder.exportRootEffect();
           this.projectFinalStyle(merged);
         }
 
@@ -431,7 +430,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           // commit completes. Mounting is nevertheless after prototype setup,
           // so replay must not use flushIfPossible's setup-phase guard.
           if (!this.hasOutput()) return;
-          this.projectFinalStyle(this.exportMerged());
+          this.projectFinalStyle(this.recorder.exportRootEffect());
         }
 
         /** optional: runtime/adapter can call this after flush tick */

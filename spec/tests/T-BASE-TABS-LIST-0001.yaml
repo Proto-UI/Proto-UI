@@ -48,6 +48,36 @@ cases:
       - D-FOCUS-ROVING-NAVIGATION-OWNERSHIP-0001-A
     expectation: vertical-tabs-list-roves-with-vertical-arrow-keys
 implementations:
+  - id: website-s3-tabs-list-native-journey
+    kind: workspace-check
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-AUTOMATIC
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-MANUAL
+      - T-BASE-TABS-LIST-0001-CASE-TAB-SEQUENTIAL
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-ORIENTATION
+    exercises:
+      - P-BASE-TABS-LIST
+      - P-SHADCN-TABS-LIST
+    notes:
+      - Exercises the same bounded native keyboard assertions as the public-dist journey on zh-cn/en demo-matrix, with both view policies. No upstream vertical visual parity or programmatic method claim.
+  - id: public-s3-tabs-list-native-journey
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s3-public-browser.mjs
+    required: true
+    consumesCases:
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-AUTOMATIC
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-MANUAL
+      - T-BASE-TABS-LIST-0001-CASE-TAB-SEQUENTIAL
+      - T-BASE-TABS-LIST-0001-CASE-ROVING-ORIENTATION
+    exercises:
+      - P-BASE-TABS-LIST
+      - P-SHADCN-TABS-LIST
+    notes:
+      - Native arrows, Home/End, disabled skip, loop, manual Enter/Space activation, automatic synchronous controlled echo, orientation and sequential panel entry across Light/split/mixed and both view policies. This does not claim full upstream vertical visual parity or programmatic List method coverage.
   - id: prototypes-base-tabs-list-contract
     kind: module-test
     status: passing
@@ -100,6 +130,9 @@ exercises:
   prototypes:
     - P-BASE-TABS-LIST
 revisions:
+  - version: 0.3.0-alpha.0
+    change: expanded
+    summary: Added S3 public consumer native navigation evidence through complete Shadcn Tabs and synchronous controlled selection.
   - version: 0.1.0
     change: introduced
     summary: Introduced Base Tabs List protocol test entity aligned to P-BASE-TABS-LIST criteria.

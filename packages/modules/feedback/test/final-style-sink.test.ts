@@ -172,7 +172,18 @@ describe('private Feedback final-style sink', () => {
     expect(next.release).toHaveBeenCalledTimes(1);
     expect(next.release).toHaveBeenCalledWith(1);
     f.caps.attach([[EFFECTS_CAP, f.effects]]);
-    expect(f.effects.queueStyle).toHaveBeenLastCalledWith(tw('rounded-lg'));
+    expect(f.effects.queueStyle).toHaveBeenLastCalledWith({
+      ...tw('rounded-lg'),
+      entries: [
+        {
+          token: 'rounded-lg',
+          authorToken: 'rounded-lg',
+          origin: 'setup',
+          role: 'surface',
+          roleSource: 'canonical',
+        },
+      ],
+    });
   });
 
   it('does not write while detached and gives a remount a new view identity', () => {

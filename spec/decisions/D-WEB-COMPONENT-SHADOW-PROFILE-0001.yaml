@@ -1,0 +1,117 @@
+id: D-WEB-COMPONENT-SHADOW-PROFILE-0001
+type: decision
+title: Shadow split presentation extends the official Web Component Adapter through an atomic object profile
+status: draft
+lifecycleRationale:
+  zh-CN: S1–S5 人工验收关闭了初次建设目标，未批准稳定化；本 profile 仍限于显式 open split、同步 artifact 和已准入的 Root/原生文本 recipe，不承诺任意 CSS、Image View 或全浏览器兼容。
+  en: S1-S5 manual acceptance closes the initial implementation goal, not stable admission. This profile remains limited to explicit open split, synchronous artifacts and admitted Root/native-text recipes, without arbitrary CSS, Image View or all-browser conformance.
+since: 0.3.0-alpha.0
+summary: The experimental Shadow split profile extends AdaptToWebComponent through an explicit synchronous artifact configuration, preserves boolean profiles, and bounds generated sizing guarantees separately from consumer CSS escapes.
+statement:
+  zh-CN: >-
+    Shadow split presentation 继续属于同一个 `AdaptToWebComponent` identity 和 runtime owner。Omitted/false 保持 Light，true 保持 direct Shadow 的 DOM shape、slot 与 host Root style target。G1 批准通过 `shadow: { mode: 'open', presentation: 'split', styleArtifact, colorSchemeSource? }` 显式启用实验性 split；必须原子提供 stable inner surface、同步 v1 artifact、环境与 Root routing，不得半初始化或退化到 direct profile。生成式 token 保证与消费者 raw CSS escape 分开；不提升 draft lifecycle。
+
+
+  en: >-
+    Shadow split presentation retains the same AdaptToWebComponent identity and runtime owner. Omitted/false retain Light; true retains direct Shadow DOM shape, slots, and host Root styling. G1 approves explicit experimental activation through `shadow: { mode: 'open', presentation: 'split', styleArtifact, colorSchemeSource? }`, atomically providing a stable inner surface, synchronous v1 artifact, environment, and Root routing without partial initialization or direct-profile fallback. Generated token guarantees remain separate from consumer raw CSS escapes, with no draft lifecycle promotion.
+
+
+criteria:
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-A
+    text:
+      zh-CN: Split presentation 必须复用 `AdaptToWebComponent`、现有 Custom Element owner 与 RuntimeSession，不得新增独立公开 Adapter identity 或复制 lifecycle/event/module wiring。
+      en: Split presentation must reuse `AdaptToWebComponent`, the existing Custom Element owner, and its RuntimeSession; it must not add a separate public Adapter identity or duplicate lifecycle, event, or module wiring.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-B
+    text:
+      zh-CN: '`shadow` omitted/`false` 必须保持既有 Light DOM profile，`shadow: true` 必须保持既有 direct Shadow profile；后者的 Template children 直接位于 ShadowRoot、native slot shape 与 Root style 继续位于 host 的行为不得静默迁移。'
+      en: >-
+        Omitted or false `shadow` must retain the existing Light DOM profile, while `shadow: true` must retain the existing direct Shadow profile; its Template children directly under the ShadowRoot, native-slot shape, and Root styling on the host must not migrate silently.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-C
+    text:
+      zh-CN: Split profile 必须由 `shadow` 的 backward-compatible discriminated object form 显式选择，使 boolean call site 无需迁移且不能意外获得 split DOM 或 style target。
+      en: The split profile must be selected explicitly by a backward-compatible discriminated object form of `shadow`, so boolean call sites require no migration and cannot acquire a split DOM or style target accidentally.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-D
+    text:
+      zh-CN: Object form 的公开启用必须是原子的：同一配置同时建立 stable inner presentation surface，并接收满足后续 contract 的显式 Shadow-local stylesheet input；缺少任一保证时不得公开或退化到 direct profile。
+      en: >-
+        Public activation of the object form must be atomic: the same configuration establishes a stable inner presentation surface and receives an explicit Shadow-local stylesheet input satisfying the later contract; it must not be published or degrade to the direct profile while either guarantee is absent.
+
+
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-E
+    text:
+      zh-CN: Owner-shell、stylesheet owner 与 inner-surface helper 可以在 object form 公开前作为非导出的实现基础独立落地，但不得改变现有 boolean profile 的 DOM、style、slot、lifecycle 或 package export。
+      en: Owner-shell, stylesheet-owner, and inner-surface helpers may land independently as unexported implementation foundations before the object form is public, but they must not change the DOM, styling, slots, lifecycle, or package exports of existing boolean profiles.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-F
+    text:
+      zh-CN: Shadow owner resources 属于 Custom Element owner lifetime，view-epoch detach/remount 只能替换 view-owned contents；terminal owner teardown 必须撤销 Adapter-owned stylesheet 与 surface resources，且不得改变 Proto lifecycle truth。
+      en: Shadow owner resources belong to the Custom Element owner lifetime, so view-epoch detach and remount may replace only view-owned contents; terminal owner teardown must revoke Adapter-owned stylesheet and surface resources without changing Proto lifecycle truth.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-G
+    text:
+      zh-CN: "公开对象必须为 `shadow: { mode: 'open', presentation: 'split', styleArtifact, colorSchemeSource? }`；artifact 必填且同步，source 可选。WC root 导出 ShadowStyleArtifactV1 与 ShadowColorSchemeSource 类型，不公开 renderer、builder 或 coordinator；无效配置不得默认为其它 profile。"
+      en: "The public object must be `shadow: { mode: 'open', presentation: 'split', styleArtifact, colorSchemeSource? }`, with a required synchronous artifact and optional source. The WC root exports ShadowStyleArtifactV1 and ShadowColorSchemeSource types, not a renderer, builder, or coordinator; invalid configuration must not default to another profile."
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-H
+    text:
+      zh-CN: Inner surface 必须暴露 part="surface" 并接收 normalized surfaceStyle/surfaceClassName；类只保证投递，不自动引入 document CSS。Theme variables 继续继承，host、继承与 slotted content 不属于完全隔离保证。
+      en: The inner surface must expose part="surface" and receive normalized surfaceStyle/surfaceClassName; classes are forwarded without importing document CSS. Theme variables continue to inherit, and complete isolation is not guaranteed for the host, inheritance, or slotted content.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-I
+    text:
+      zh-CN: 自动 sizing/cascade 等价仅覆盖已治理的生成式 token recipe；native host CSS、part、raw surfaceStyle 与 Shadow-local consumer CSS 是显式 escape，覆盖 layout/font/padding/border/display 等后不保证自动尺寸等价，不得通过猜测转发或新增作者 role 前缀扩大保证。
+      en: Automatic sizing/cascade parity covers governed generated token recipes only. Native host CSS, parts, raw surfaceStyle, and Shadow-local consumer CSS are explicit escapes; layout/font/padding/border/display overrides can invalidate automatic sizing parity. Guessed forwarding or new author role prefixes must not expand the guarantee.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-J
+    text:
+      zh-CN: Split 支持普通 Root presentation 与 S5 plain-text host Text Control；image-view 声明继续明确拒绝。未治理的 unresolved/composite token 与缺失编译 recipe 必须 fail closed，不得静默回退、重分类或留下半初始化资源。
+      en: Split supports ordinary Root presentation and S5 plain-text host Text Control; image-view declarations remain explicitly rejected. Ungoverned unresolved/composite tokens and missing compiled recipes must fail closed without silent fallback, reclassification, or partially initialized resources.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-K
+    text:
+      zh-CN: S5 Text Control 必须以单一原生 input[type=text] 或 textarea 同时承担编辑引擎与 surface，直接挂载在 ShadowRoot 并暴露 part="control surface"，复用既有 value、composition、selection 保留、focus 与 a11y 协议。普通 commit 不得重插 editor；view detach 必须撤销其挂载与 native leases，remount 重建 leases；不得清空 textarea 的 defaultValue 子节点来模拟 view 卸载。
+      en: S5 Text Control must use one native input[type=text] or textarea as both editing engine and surface, directly under the ShadowRoot with part="control surface", reusing existing value, composition, selection preservation, focus and a11y protocols. Ordinary commits must not reinsert the editor; view detach revokes its attachment and native leases and remount renews leases. Clearing textarea defaultValue children must not simulate view detachment.
+  - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001-L
+    text:
+      zh-CN: S5 原生尺寸 recipe 保留编辑器 intrinsic sizing 与 rows，并只准入 w-full、min-h-16 尺寸 token；其他 dimension/aspect token 必须在更完整 recipe 获准前拒绝。原生 editor 自身计算 padding/border，不套用普通 div 的负 margin 补偿；canonical role 不变，必要 editor 尺寸投射必须同源、同条件。旧 companion 缺少 native receipt 时必须在注册前拒绝。
+      en: The S5 native sizing recipe retains editor intrinsic sizing and rows and admits only w-full and min-h-16 dimension tokens; other dimension/aspect tokens must be rejected pending a fuller approved recipe. The editor accounts for its own padding/border without ordinary div negative-margin compensation. Canonical roles remain unchanged and necessary editor sizing projections share their declaration and conditions. Older companions lacking the native receipt must be rejected before registration.
+sources:
+  - path: internal/records/2026-09-14-shadow-s5-approved-goal.zh-CN.md
+  - path: internal/records/2026-09-13-shadow-g1-s1-approved-goal.zh-CN.md
+  - path: internal/records/2026-09-12-shadow-split-surface-decision-packet.zh-CN.md
+  - path: packages/adapters/web-component/src/adapt.ts
+  - path: packages/adapters/web-component/src/shadow-owner-shell.ts
+  - path: packages/adapters/web-component/src/runtime/session.ts
+  - path: packages/adapters/web-component/test/contract/slot-shadow-dom.v0.contract.test.ts
+  - path: packages/adapters/web-component/test/shadow-owner-shell.test.ts
+dependsOn:
+  contracts:
+    - C-HOST-SURFACE-PROJECTION-0001
+    - C-HOST-VIEW-ATTACHMENT-0001
+    - C-TEXT-CONTROL-0001
+  knowledge:
+    - K-HOST-SURFACE-ROLES-0001
+relates:
+  adapters:
+    - A-WEB-COMPONENT-0001
+  decisions:
+    - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
+    - D-WEB-COMPONENT-SHADOW-STYLE-0001
+verifies:
+  tests:
+    - T-WEB-COMPONENT-SHADOW-PROFILE-0001
+revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved bounded S5 native Text Control surface admission and view attachment; retained Image View refusal and draft lifecycle.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Approved G1 exact public profile and type exports, explicit customization escapes, and fail-closed ordinary-Root boundary; draft retained.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Delegated the resolved Shadow stylesheet artifact and color-scheme environment questions to D-WEB-COMPONENT-SHADOW-STYLE-0001 while retaining customization as an open gate.
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Cataloged the approved A1 direction for one Adapter identity, unchanged boolean profiles, and atomic future split-object activation.
+tags:
+  - adapter
+  - web-component
+  - shadow-dom
+  - split-surface
+  - compatibility

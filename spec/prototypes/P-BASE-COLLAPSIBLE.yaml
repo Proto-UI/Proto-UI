@@ -11,8 +11,10 @@ statement:
   zh-CN: >-
     Base Collapsible 表示一个 inline disclosure subject，而非 Accordion、Overlay 或 focus scope。Root 是唯一 canonical open owner；受控 request 不产生 optimistic truth，defaultOpen 只初始化非受控实例，disabled 只抑制请求而不改写展开状态。Trigger 与 Content 消费同域 context。默认关闭 Content 使用 L1 detach，keepMounted 显式保留隐藏 view。direct 与 authored asHook 使用同一 protocol；协议中没有宿主 identity 或 presence registry。
 
+
   en: >-
     Base Collapsible represents one inline disclosure subject, not an Accordion, Overlay, or focus scope. Root is the sole canonical open owner; controlled requests create no optimistic truth, defaultOpen initializes only an uncontrolled instance, and disabled suppresses requests without rewriting expansion. Trigger and Content consume same-domain context. Closed Content uses L1 detach by default; keepMounted explicitly retains a hidden view. Direct and authored-asHook entries share one protocol without host identity or a presence registry.
+
 
 anatomy:
   family: base-collapsible
@@ -76,8 +78,10 @@ criteria:
       zh-CN: >-
         Root 必须接受 open?: boolean、defaultOpen?: boolean、disabled?: boolean；提供 open 时由 owner input 控制，defaultOpen 与 disabled 默认 false。Props 不得添加 onOpenChange 回调来替代 expose event。
 
+
       en: >-
         Root must accept open?: boolean, defaultOpen?: boolean, and disabled?: boolean. Providing open selects owner-input control; defaultOpen and disabled default to false. Props must not add an onOpenChange callback as a substitute for the expose event.
+
 
     dependsOn:
       contracts: [C-PROPS-0001, C-EXPOSE-EVENT-0001]

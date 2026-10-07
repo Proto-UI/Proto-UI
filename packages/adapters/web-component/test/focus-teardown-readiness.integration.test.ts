@@ -70,7 +70,7 @@ it('does not focus the departing nested Trigger owner through an otherwise-ready
   }
 });
 
-it.each(['apply', 'disable', 'blur', 'empty'] as const)(
+it.each(['apply', 'pending-apply', 'disable', 'blur', 'empty'] as const)(
   're-resolves an ordinary descendant owner and respects entry %s',
   async (completion) => {
     let run: any;
@@ -79,6 +79,29 @@ it.each(['apply', 'disable', 'blur', 'empty'] as const)(
     let inner: any;
     let fallback: any;
     const during: Array<{ active: boolean; focused: boolean }> = [];
+    // The composed resolver correctly skips the hidden departing inner view.
+    // For cancellation cases keep the visible fallback's real native source
+    // temporarily unready, so the test proves cancellation of a pending request
+    // rather than trying to cancel an already completed focus acquisition.
+    let holdFallback = ['pending-apply', 'disable', 'blur'].includes(completion);
+    let publishFallback: (() => void) | undefined;
+    const registerReadiness = readiness.registerNativeFocusReadiness;
+    const readinessSpy = vi
+      .spyOn(readiness, 'registerNativeFocusReadiness')
+      .mockImplementation((instance, source, options) => {
+        const lease = registerReadiness(
+          instance,
+          {
+            ...source,
+            isReady: () =>
+              !(holdFallback && instance === fallback?._instanceToken) && source.isReady(),
+          },
+          options
+        );
+        if (instance === fallback?._instanceToken) publishFallback = lease.publish;
+        return lease;
+      });
+
     const outerProto = definePrototype({
       name: `wc-entry-requester-${completion}`,
       setup(def) {
@@ -108,7 +131,11 @@ it.each(['apply', 'disable', 'blur', 'empty'] as const)(
           request = false;
           outer.getExposes().enter();
           during.push({ active: document.activeElement === inner, focused: target.focused.get() });
-          if (completion === 'disable' || completion === 'blur') outer.getExposes()[completion]();
+          if (completion === 'disable' || completion === 'blur') {
+            expect(document.activeElement).not.toBe(fallback);
+            expect(fallback.getExposes().focused.get()).toBe(false);
+            outer.getExposes()[completion]();
+          }
         });
         return () => 'Retained ordinary owner';
       },
@@ -136,16 +163,25 @@ it.each(['apply', 'disable', 'blur', 'empty'] as const)(
       inner.getExposes().view.hide();
       await flush();
       expect(during).toEqual([{ active: false, focused: false }]);
+      if (completion === 'pending-apply') expect(document.activeElement).not.toBe(fallback);
+      holdFallback = false;
+      publishFallback?.();
+      await flush();
       inner.getExposes().view.show();
       await flush();
       // A later empty policy result ends entry intent. Reopening that view does
       // not resurrect it; a ready sibling instead consumes the invalidation.
       const expected = completion === 'empty' ? inner : fallback;
-      expect(document.activeElement === expected).toBe(completion === 'apply');
-      expect(expected.getExposes().focused.get()).toBe(completion === 'apply');
+      expect(document.activeElement === expected).toBe(
+        completion === 'apply' || completion === 'pending-apply'
+      );
+      expect(expected.getExposes().focused.get()).toBe(
+        completion === 'apply' || completion === 'pending-apply'
+      );
     } finally {
       outer.remove();
       await flush();
+      readinessSpy.mockRestore();
     }
   }
 );

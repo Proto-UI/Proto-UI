@@ -51,6 +51,7 @@ import {
   bindLogicalEventTarget,
   createLogicalInstance,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   markProtoInstance,
   registerNativeFocusReadiness,
   isFocusTargetOwnerReady,
@@ -474,6 +475,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           rootEl,
           instanceToken: instanceTokenRef.current,
           resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
+          isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
           globalEl: typeof window === 'undefined' ? rootEl : window,
           isEnabled: () => eventGate.isEnabled?.() ?? true,
         });
@@ -557,7 +559,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             ? createDeferredViewVisualSink(
                 () => opt.createVisualSink!(rootEl, effectsPort),
                 (frame) => {
-                  effectsPort.queueStyle({ kind: 'tw', tokens: [...frame.style.tokens] });
+                  effectsPort.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
                   effectsPort.requestFlush();
                 }
               )

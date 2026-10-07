@@ -50,6 +50,7 @@ import {
   bindLogicalEventTarget,
   createLogicalInstance,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   markProtoInstance,
   registerNativeFocusReadiness,
   isFocusTargetOwnerReady,
@@ -451,6 +452,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             rootEl,
             instanceToken,
             resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
+            isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
             globalEl: typeof window === 'undefined' ? rootEl : window,
             isEnabled: () => eventGate.isEnabled?.() ?? true,
           });
@@ -534,7 +536,7 @@ export function createVueAdapter(runtime: VueRuntime) {
               ? createDeferredViewVisualSink(
                   () => opt.createVisualSink!(rootEl, effectsPort),
                   (frame) => {
-                    effectsPort.queueStyle({ kind: 'tw', tokens: [...frame.style.tokens] });
+                    effectsPort.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
                     effectsPort.requestFlush();
                   }
                 )

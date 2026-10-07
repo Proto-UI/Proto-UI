@@ -227,6 +227,96 @@
         "candidates": {
           "type": "array",
           "maxItems": 3,
+          "$comment": "Identity projection of models[].id in the pinned unified_bank.json (sha256:e514c76928ea38d23bc0f14d3935f23c97b1efb6d96b18a19bdc88ad2d830536). Each enrolled identity may occur at most once regardless of probability or score; uniqueItems alone compares whole candidate objects. A reviewed bank update must refresh this projection.",
+          "allOf": [
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-5.4" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-5.5" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-5.6-sol" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-5.6-terra" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-5.6-luna" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-6-astra" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-6-sol" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "gpt-6-luna" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "properties": { "modelId": { "const": "claude-haiku-4-5-20251001" } }
+              },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-sonnet-4-6" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-sonnet-5" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-opus-4-6" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-opus-4-7" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-opus-4-8" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-opus-5" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-opus-5-5" } } },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": { "properties": { "modelId": { "const": "claude-sonnet-5-5" } } },
+              "minContains": 0,
+              "maxContains": 1
+            }
+          ],
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -234,7 +324,25 @@
             "properties": {
               "modelId": {
                 "type": "string",
-                "minLength": 1
+                "enum": [
+                  "gpt-5.4",
+                  "gpt-5.5",
+                  "gpt-5.6-sol",
+                  "gpt-5.6-terra",
+                  "gpt-5.6-luna",
+                  "gpt-6-astra",
+                  "gpt-6-sol",
+                  "gpt-6-luna",
+                  "claude-haiku-4-5-20251001",
+                  "claude-sonnet-4-6",
+                  "claude-sonnet-5",
+                  "claude-opus-4-6",
+                  "claude-opus-4-7",
+                  "claude-opus-4-8",
+                  "claude-opus-5",
+                  "claude-opus-5-5",
+                  "claude-sonnet-5-5"
+                ]
               },
               "familyId": {
                 "type": "string",

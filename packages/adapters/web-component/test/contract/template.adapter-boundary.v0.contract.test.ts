@@ -35,16 +35,16 @@ describe('contract: adapter-web-component / template adapter boundary fixture (v
       const host = document.createElement('div');
       const slot = { type: { kind: 'slot' }, children: null } as any;
 
-      expect(() => commitChildren(host, [slot, slot] as any)).toThrow(/multiple slot/);
+      expect(() => commitChildren(host, [slot, slot] as any)).toThrow(/slot:multiple/);
       expect(() => commitChildren(host, { type: { kind: 'slot', name: 'named' } } as any)).toThrow(
-        /named slot/
+        /slot:named/
       );
       expect(() =>
         commitChildren(host, { type: { kind: 'slot' }, children: ['x'] } as any)
-      ).toThrow(/slot node must not have children/);
+      ).toThrow(/slot:children/);
       expect(() =>
         commitChildren(host, { type: { kind: 'slot' }, style: { kind: 'tw', tokens: [] } } as any)
-      ).toThrow(/slot node must not have style/);
+      ).toThrow(/slot:style/);
     }
   );
 

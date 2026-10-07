@@ -1064,6 +1064,16 @@ export function validateCollaborationReceipt(receipt, request = null) {
   assert(HEX64.test(receipt.postStateDigest), 'receipt.postStateDigest is invalid');
   string(receipt.actor, 'receipt.actor', { max: 100 });
   timestamp(receipt.verifiedAt, 'receipt.verifiedAt');
+  if (receipt.schemaVersion === 2) {
+    // Verification is a readback boundary, not the pre-write freshness gate:
+    // a valid write can finish verification after the measurement expires.
+    // platformObject.updatedAt can instead be older target metadata (notably
+    // for thread resolution), so it cannot universally supply a write time.
+    assert(
+      !timestampIsAfter(receipt.modelTrace.measuredAt, receipt.verifiedAt),
+      'receipt ModelTrace measurement occurs after receipt verification'
+    );
+  }
   assert(
     [
       'live-state-matches-desired',

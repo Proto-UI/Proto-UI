@@ -7,6 +7,15 @@ import * as tree from '../src/platform/instance-tree';
 const flush = async () => {
   for (let i = 0; i < 30; i++) await Promise.resolve();
 };
+const settlePortalConceal = async () => {
+  // The admitted portal paint barrier owns two rendering opportunities before
+  // view-epoch teardown; microtasks alone do not exercise that boundary.
+  await flush();
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  );
+  await flush();
+};
 
 it.each(
   (['external-remove', 'close-then-move'] as const).flatMap((mode) =>
@@ -64,7 +73,8 @@ it.each(
       content.getExposes().actions.open();
       await flush();
       expect(Array.from(document.body.children)).toContain(content);
-      expect(content.parentNode).toBe(originalParent);
+      expect(content.parentElement).toBe(document.body);
+      expect(Object.getOwnPropertyDescriptor(content, 'parentNode')).toEqual(expectedDescriptor);
       expect(tree.getLogicalParent(oldToken)).toBe(originalParent._instanceToken);
       if (property === 'replacement') {
         Object.defineProperty(content, 'parentNode', hostDescriptor);
@@ -73,7 +83,8 @@ it.each(
 
       if (mode === 'external-remove') content.remove();
       else content.getExposes().actions.close();
-      await flush();
+      if (mode === 'external-remove') await flush();
+      else await settlePortalConceal();
       const releasedDescriptor = Object.getOwnPropertyDescriptor(content, 'parentNode');
       const releasedParent = content.parentNode;
       const releasedConnected = content.isConnected;
@@ -104,12 +115,13 @@ it.each(
 
       content.getExposes().actions.open();
       await flush();
-      expect(content.parentNode).toBe(newParent);
+      expect(content.parentElement).toBe(document.body);
+      expect(tree.getLogicalParent(content._instanceToken)).toBe(newParent._instanceToken);
       expect(Array.from(document.body.children)).toContain(content);
       content.getExposes().actions.focus();
       expect(document.activeElement).toBe(content);
       content.getExposes().actions.close();
-      await flush();
+      await settlePortalConceal();
       expect(content.parentNode).toBe(newParent);
       expect(Array.from(newParent.children)).toContain(content);
       expect(Object.getOwnPropertyDescriptor(content, 'parentNode')).toEqual(expectedDescriptor);

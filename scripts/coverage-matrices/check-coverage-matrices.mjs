@@ -161,6 +161,54 @@ const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
   'Results:',
 ]);
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
+  // Exact #652 acceptance compositions. Their App controls remain blocked
+  // consumers, not an infrastructure or stable-prototype exemption.
+  'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
+    sourceSha256: '6ec435217573ac35458cd1ea79b27a9cc95f5137e942cf72b7118a825978cb7a',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-brutalist/badge',
+      '@proto.ui/prototypes-shadcn/checkbox',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s2.ts': Object.freeze({
+    sourceSha256: '6ef1cb15c224e47045993911e1e6b7c14ad0f93f65df5014c86282118a3a83be',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-brutalist/badge',
+      '@proto.ui/prototypes-shadcn/button',
+      '@proto.ui/prototypes-shadcn/checkbox',
+      '@proto.ui/prototypes-shadcn/switch',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts': Object.freeze({
+    sourceSha256: '3b7d4778ff754adde59b7cd77862070416e5dcfbcc429a3eef3c99a6eb8df108',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-brutalist/badge',
+      '@proto.ui/prototypes-shadcn/button',
+      '@proto.ui/prototypes-shadcn/checkbox',
+      '@proto.ui/prototypes-shadcn/switch',
+      '@proto.ui/prototypes-shadcn/tabs',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts': Object.freeze({
+    sourceSha256: '4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/dialog',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts': Object.freeze({
+    sourceSha256: 'fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-base/input',
+      '@proto.ui/prototypes-base/textarea',
+      '@proto.ui/prototypes-shadcn/tabs',
+      '@proto.ui/prototypes-shadcn/textarea',
+    ]),
+  }),
   // Exact opt-in optical host and its owned-source diagnostics, not app controls.
   'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-feedback']),
@@ -9165,10 +9213,17 @@ function isTestNamedSource(absolutePath) {
 // sidebar entries and source-reviewed Copy render plugin; resolver functions stay intact. Parity/mutation tests retain
 // fail-closed behavior for every other configuration change.
 const PROMOTION_RESOLVER_CONFIG_SHA256 =
-  'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30';
+  '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377';
 // Exact opt-in, serve-only contrast audit profile. Its imported plugin bytes
 // are part of the reviewed resolver boundary, not an unrestricted plugin hook.
 const PROMOTION_AUDIT_CONFIG_SHA256 =
+  'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee';
+// Retain the exact previously reviewed main configurations. The accepted #875
+// profile differs only by the Base Collapsible sidebar item; resolver bytes
+// and the required audit helper remain unchanged.
+const PROMOTION_HISTORICAL_CONFIG_SHA256 =
+  'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30';
+const PROMOTION_HISTORICAL_AUDIT_CONFIG_SHA256 =
   'b07dfc4350c16a8bee3b65717887cc5d592002f2cb492e134c60a3d18519a6de';
 // Finf source-reviewed sidebar additions and the one lazy association chunk
 // exclusion leave the mirrored resolver unchanged. Retain both historic profiles.
@@ -9205,10 +9260,12 @@ export function promotionBarePackageTargets(root, specifier, metadata) {
   const retryProfile = configSha === PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256;
   const auditProfile =
     configSha === PROMOTION_AUDIT_CONFIG_SHA256 ||
+    configSha === PROMOTION_HISTORICAL_AUDIT_CONFIG_SHA256 ||
     configSha === PROMOTION_FINF_AUDIT_CONFIG_SHA256 ||
     retryProfile;
   if (
     configSha !== PROMOTION_RESOLVER_CONFIG_SHA256 &&
+    configSha !== PROMOTION_HISTORICAL_CONFIG_SHA256 &&
     configSha !== PROMOTION_FINF_CONFIG_SHA256 &&
     !auditProfile
   )

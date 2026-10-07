@@ -34,6 +34,34 @@ cases:
       - P-BASE-TABS-CONTENT-PRESENCE-POLICY
     expectation: tabs-content-view-policy-detaches-and-rebinds-without-instance-recreation
 implementations:
+  - id: website-s3-tabs-content-native-journey
+    kind: workspace-check
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-TABS-CONTENT-0001-CASE-HIDDEN
+      - T-BASE-TABS-CONTENT-0001-CASE-FOCUS-ENTRY
+      - T-BASE-TABS-CONTENT-0001-CASE-PRESENCE-POLICY
+    exercises:
+      - P-BASE-TABS-CONTENT
+      - P-SHADCN-TABS-CONTENT
+    notes:
+      - Runs the shared public native journey on both localized demo-matrix pages, each with L1/keepMounted and all three WC profiles, plus 320px overflow checks. AX assertions identify S3 panels by backend DOM identity, not global panel counts. Consumer scrolling and controlled model retention are not Adapter sizing or descendant-state guarantees.
+  - id: public-s3-tabs-content-native-journey
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s3-public-browser.mjs
+    required: true
+    consumesCases:
+      - T-BASE-TABS-CONTENT-0001-CASE-HIDDEN
+      - T-BASE-TABS-CONTENT-0001-CASE-FOCUS-ENTRY
+      - T-BASE-TABS-CONTENT-0001-CASE-PRESENCE-POLICY
+    exercises:
+      - P-BASE-TABS-CONTENT
+      - P-SHADCN-TABS-CONTENT
+    notes:
+      - Complete public Shadcn Tabs with S2 settings, actual CLI companion, Light/split/mixed and L1/keepMounted. Shared native journey checks panel display/geometry and DOM-identity-bound AX labelledby, descendant/empty/disabled re-entry, repeated views, current consumer values, move/reconnect and lifecycle counters. Not a guarantee of arbitrary descendant/native-state retention or all-browser support.
   - id: prototypes-base-tabs-content-contract
     kind: module-test
     status: passing
@@ -75,6 +103,9 @@ exercises:
   prototypes:
     - P-BASE-TABS-CONTENT
 revisions:
+  - version: 0.3.0-alpha.0
+    change: expanded
+    summary: Added complete S3 public consumer native evidence for hidden views, entry fallback refresh, lifecycle and controlled settings composition.
   - version: 0.1.0
     change: introduced
     summary: Introduced Base Tabs Content protocol test entity aligned to P-BASE-TABS-CONTENT criteria.

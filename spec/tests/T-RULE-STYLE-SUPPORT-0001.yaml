@@ -19,6 +19,10 @@ cases:
     title: Getter pairing and source loss control the actual Rule contribution
     covers: [C-RULE-STYLE-SUPPORT-0001-A, C-RULE-STYLE-SUPPORT-0001-C]
     expectation: active-lease-only-source-loss-unknown-and-no-late-callback
+  - id: T-RULE-STYLE-SUPPORT-0001-CASE-WC-ADOPTION
+    title: Actual Web Component owner pairing and destination support gate consumer styles
+    covers: [C-RULE-STYLE-SUPPORT-0001-A, C-RULE-STYLE-SUPPORT-0001-C]
+    expectation: controlled-support-facts-repaint-three-native-wc-profiles-rejected-destination-and-unpaired-custom-fallback
 implementations:
   - id: source
     kind: adapter-test
@@ -32,6 +36,12 @@ implementations:
     path: packages/runtime/test/contract/rule.style-support-lifecycle.contract.test.ts
     required: true
     consumesCases: [T-RULE-STYLE-SUPPORT-0001-CASE-LIFETIME]
+  - id: wc-adoption
+    kind: adapter-test
+    status: needs-review
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases: [T-RULE-STYLE-SUPPORT-0001-CASE-WC-ADOPTION]
 verifies:
   contracts: [C-RULE-STYLE-SUPPORT-0001]
   hostCaps: [HC-STYLE-SUPPORT-INVALIDATION-0001]

@@ -7,6 +7,7 @@ import { type PropsBaseType } from '@proto.ui/types';
 
 import { commitChildren } from '../commit';
 import { SlotProjector } from '../slot-projector';
+import type { ShadowInnerSurface } from '../shadow-inner-surface';
 
 export function createWebComponentHostSession<Props extends PropsBaseType>(args: {
   proto: Prototype<Props>;
@@ -14,6 +15,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   shadow: boolean;
   host: HTMLElement;
   root: Element | ShadowRoot;
+  shadowViewTarget?: ShadowInnerSurface;
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
   getInstanceAssociations?: () => InstanceAssociations;
@@ -71,6 +73,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       commit: (children, signal) => {
         commitWebComponentChildren({
           root,
+          shadowViewTarget: args.shadowViewTarget,
           children,
           shadow,
           textControlTarget,
@@ -128,6 +131,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
 
 function commitWebComponentChildren(args: {
   root: Element | ShadowRoot;
+  shadowViewTarget?: ShadowInnerSurface;
   children: TemplateChildren;
   shadow: boolean;
   textControlTarget: HTMLElement | null;
@@ -153,7 +157,10 @@ function commitWebComponentChildren(args: {
     if (hasChildren) {
       throw new Error('[WC Adapter] text-control prototypes must return empty Template children.');
     }
-    if (root.firstChild !== textControlTarget || root.childNodes.length !== 1) {
+    if (args.shadowViewTarget) {
+      if (!args.shadowViewTarget.hasOnlyRenderedNode(textControlTarget))
+        args.shadowViewTarget.replaceRenderedChildren([textControlTarget]);
+    } else if (root.firstChild !== textControlTarget || root.childNodes.length !== 1) {
       root.replaceChildren(textControlTarget);
     }
     clearSlotProjector();
@@ -175,7 +182,16 @@ function commitWebComponentChildren(args: {
   }
 
   if (shadow) {
-    commitChildren(root as any, children, { mode: 'shadow' });
+    if (args.shadowViewTarget) {
+      // Validate the complete next view before changing the stable owner shell.
+      // The surface owns equivalent-slot preservation; native text uses its own
+      // retained-editor branch above and never clears textarea defaultValue.
+      const fragment = root.ownerDocument.createDocumentFragment();
+      commitChildren(fragment, children, { mode: 'shadow' });
+      args.shadowViewTarget.replaceRenderedChildren(Array.from(fragment.childNodes));
+    } else {
+      commitChildren(root as any, children, { mode: 'shadow' });
+    }
     clearSlotProjector();
     eventGate.enable();
     return;

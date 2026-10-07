@@ -11,8 +11,10 @@ statement:
   zh-CN: >-
     Collapsible Content 是 base-collapsible domain 的唯一 content part，不拥有 open 或 focus。它只从 Root canonical open 派生 open/hidden；keepMounted || open 决定 desired view presence。默认关闭时不物化 view，已打开后关闭执行 repeatable L1 detach；keepMounted=true 保留完整但隐藏的 view。逻辑 instance 可跨 view epoch 保留，但宿主子组件与 native view state 的保留不属于 L1 保证。Terminal owner disposal 优先于一切 view intent。
 
+
   en: >-
     Collapsible Content is the sole content part of a base-collapsible domain, owning neither open nor focus. It derives open/hidden only from Root canonical open; keepMounted || open determines desired view presence. Closed Content has no materialized view by default, and closing after opening performs repeatable L1 detach; keepMounted=true retains a complete but hidden view. The logical instance can survive view epochs, but host child components and native view state are outside the L1 preservation guarantee. Terminal owner disposal overrides every view intent.
+
 
 criteria:
   - id: P-BASE-COLLAPSIBLE-CONTENT-ROLE-NEUTRAL
@@ -47,8 +49,10 @@ criteria:
       zh-CN: >-
         Content 只接受 keepMounted?: boolean（默认 false）作为 retention policy；created 与 context/keepMounted runtime callback 必须通过 run.lifecycle.setPresent(keepMounted || open) 更新 intent，不得在 setup/render 阶段调用该 API、直接 host mount/unmount 或维护另一套 lifecycle truth。
 
+
       en: >-
         Content accepts only keepMounted?: boolean (default false) as its retention policy; created and context/keepMounted runtime callbacks must update intent through run.lifecycle.setPresent(keepMounted || open), never invoke that API from setup/render, directly mount/unmount the host, or maintain another lifecycle truth.
+
 
     dependsOn:
       contracts:

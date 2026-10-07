@@ -394,6 +394,7 @@ jobs:
     env:
       PROTO_UI_RUNTIME_PHASE: general
       PROTO_UI_RUNTIME_SLOT: general
+      COMPILER_EVIDENCE_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
       COVERAGE_BASE_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.sha }}
       COVERAGE_HEAD_REVISION: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
       COVERAGE_MERGE_REVISION: ${{ github.event_name == 'pull_request' && github.sha || '' }}

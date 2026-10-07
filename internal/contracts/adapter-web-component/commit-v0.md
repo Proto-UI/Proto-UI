@@ -1,5 +1,7 @@
 # WC Adapter Contract: Commit Semantics (v0)
 
+> Historical v0 explanation, not a mode-independent current contract. The full-rebuild description below does not apply to retained Shadow split owner resources, equivalent native-slot commits, or a retained native editor. Current authority is [D-WEB-COMPONENT-SHADOW-PROFILE-0001](../../../spec/decisions/D-WEB-COMPONENT-SHADOW-PROFILE-0001.yaml), [D-WEB-COMPONENT-SHADOW-STYLE-0001](../../../spec/decisions/D-WEB-COMPONENT-SHADOW-STYLE-0001.yaml) and [C-HOST-VIEW-ATTACHMENT-0001](../../../spec/contracts/C-HOST-VIEW-ATTACHMENT-0001.yaml). Their lifecycle status and scoped criteria take precedence; see the [current Adapter guide](../../../packages/adapters/web-component/README.md) for mode selection.
+
 ## Status
 
 - Version: v0

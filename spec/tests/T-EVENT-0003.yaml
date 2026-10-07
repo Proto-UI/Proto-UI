@@ -82,6 +82,17 @@ cases:
       - M-EVENT-0001-H
     expectation: event-facade-and-wiring-exclude-the-standalone-expose-event-bridge
 implementations:
+  - id: shared-web-router-work-regression
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/event-router-work.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0003-CASE-SCOPED-TRANSLATION
+      - T-EVENT-0003-CASE-REBIND-CLEANUP
+    notes:
+      - Candidate filtering retains final ownership checks, Portal and slot routes, same-Event redispatch and fresh rebinding. Native listener bookkeeping covers once, abort, capture and options snapshots without introducing author semantic listener options.
+      - Deterministic traversal-work assertions are engineering regression bounds, not a normative frame-rate guarantee. Host-specific performance samples remain in the dated S5 record.
   - id: module-event-boundary-types
     kind: workspace-check
     status: passing
@@ -247,6 +258,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Rebinding and disposal evidence exercises Event lifecycle guarantees.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Connected shared Web routing and subscription-bookkeeping evidence from the S5 performance repair without introducing cross-machine timing guarantees.
   - version: 0.3.0-alpha.0
     change: strengthened
     summary: Added official Vue 2 Event wiring, commit-gate, and cleanup evidence.

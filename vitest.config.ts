@@ -1,8 +1,10 @@
 import { runtimeRetryUrlsPlugin } from './apps/www/scripts/runtime-retry-urls.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
+import { createRequire } from 'node:module';
 import { defineConfig } from 'vitest/config';
 
+const require = createRequire(import.meta.url);
 const PROTO_UI_PREFIX = '@proto.ui/';
 
 function resolveProtoUiImport(id: string): string | null {
@@ -74,6 +76,18 @@ export default defineConfig({
       enforce: 'pre',
       resolveId(id) {
         return resolveProtoUiImport(id);
+      },
+    },
+    {
+      name: 'floating-ui-dom-resolver',
+      enforce: 'pre',
+      resolveId(id) {
+        if (id === '@floating-ui/dom') {
+          const manifestPath = require.resolve(id + '/package.json', { paths: [path.resolve(__dirname, 'packages/modules/positioning')] });
+          const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+          return path.resolve(path.dirname(manifestPath), manifest.exports['.'].import.default);
+        }
+        return null;
       },
     },
   ],

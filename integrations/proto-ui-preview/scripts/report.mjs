@@ -69,7 +69,9 @@ if (fallbackMode) {
     throw new Error('fallback origin must be an HTTPS origin without a path');
   }
   if (fallbackOrigin.origin === controlPlane.origin) {
-    throw new Error('fallback preview origin must be an HTTPS origin isolated from the control plane');
+    throw new Error(
+      'fallback preview origin must be an HTTPS origin isolated from the control plane'
+    );
   }
 } else if (configuredOrigin !== canonicalOrigin) {
   throw new Error('origin is not the canonical per-PR Pages origin');

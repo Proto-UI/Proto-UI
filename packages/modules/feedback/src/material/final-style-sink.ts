@@ -1,11 +1,33 @@
 import { cap, type StyleHandle } from '@proto.ui/core';
+import type { RootStyleEntry } from '@proto.ui/core/internal';
 import type { OwnedMaterialFrame } from './owned-slot';
+
+/** Internal Root provenance survives private host sinks; author exports remain token-only. */
+export type FinalStyleSnapshot = Readonly<{
+  kind: 'tw';
+  tokens: readonly string[];
+  entries?: readonly RootStyleEntry[];
+}>;
+
+export function snapshotFinalStyle(style: StyleHandle): FinalStyleSnapshot {
+  const entries =
+    'entries' in style
+      ? (style as StyleHandle & { entries: readonly RootStyleEntry[] }).entries
+      : undefined;
+  return Object.freeze({
+    kind: 'tw' as const,
+    tokens: Object.freeze([...style.tokens]),
+    ...(entries
+      ? { entries: Object.freeze(entries.map((entry) => Object.freeze({ ...entry }))) }
+      : {}),
+  });
+}
 
 /** Private draft seam. A final style input is not an admitted material frame. */
 export type FinalStyleFrame = Readonly<{
   view: number;
   revision: number;
-  style: Readonly<{ kind: 'tw'; tokens: readonly string[] }>;
+  style: FinalStyleSnapshot;
   material: OwnedMaterialFrame | null;
 }>;
 
@@ -34,6 +56,6 @@ export function finalStyleFrame(
     view,
     revision,
     material,
-    style: Object.freeze({ kind: 'tw' as const, tokens: Object.freeze([...style.tokens]) }),
+    style: snapshotFinalStyle(style),
   });
 }

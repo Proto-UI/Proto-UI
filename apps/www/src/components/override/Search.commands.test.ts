@@ -223,6 +223,34 @@ describe('intent-only module preparation', () => {
     expect(f.buildUI).toHaveBeenCalledTimes(1);
   });
 
+  it('starts both module imports after HEAD without serializing the cold open', async () => {
+    const f = await mount('shadcn');
+    const releaseProbe = f.holdNextProbe();
+    let releaseRuntime!: (value: {}) => void;
+    f.loadRuntime.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          releaseRuntime = resolve;
+        })
+    );
+    clickIcon(f.trigger);
+    await settle();
+    expect(f.loadRuntime).not.toHaveBeenCalled();
+    expect(f.loadUI).not.toHaveBeenCalled();
+    releaseProbe();
+    await settle();
+    try {
+      expect(f.loadRuntime).toHaveBeenCalledTimes(1);
+      expect(f.loadUI).toHaveBeenCalledTimes(1);
+      expect(f.buildUI).not.toHaveBeenCalled();
+    } finally {
+      releaseRuntime({});
+      await settle();
+    }
+    expect(f.buildUI).toHaveBeenCalledTimes(1);
+    expect(f.root.querySelector('.pagefind-ui__search-input')).toBe(document.activeElement);
+  });
+
   it('prepares on public keyboard-focus intent but leaves the native dialog and DOM untouched', async () => {
     const f = await mount('shadcn');
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
@@ -366,6 +394,8 @@ describe('intent-only module preparation', () => {
     hover(f.trigger);
     await settle();
     expect(f.loadRuntime).toHaveBeenCalledTimes(1);
+    expect(f.loadUI).toHaveBeenCalledTimes(1);
+    const uiCallsAtDisposal = f.loadUI.mock.calls.length;
     f.dispose();
     await f.docs.destroy();
     f.initialize();
@@ -376,7 +406,9 @@ describe('intent-only module preparation', () => {
     );
     resolveRuntime({});
     await settle();
-    expect(f.loadUI).not.toHaveBeenCalled();
+    // Parallel preparation began the import while this owner was alive.
+    // Its late runtime completion cannot initiate another import or build UI.
+    expect(f.loadUI).toHaveBeenCalledTimes(uiCallsAtDisposal);
     expect(f.buildUI).not.toHaveBeenCalled();
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }));
     await settle();

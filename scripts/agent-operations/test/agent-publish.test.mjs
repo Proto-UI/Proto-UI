@@ -173,6 +173,7 @@ function server({
         },
       });
     if (method !== 'GET') {
+      writes.push({ method, endpoint, input });
       if (pull && endpoint.endsWith('/pulls')) {
         const parts = input.head.split(':');
         const requestedOwner = parts.length === 2 ? parts[0] : fullName.split('/')[0];
@@ -191,7 +192,6 @@ function server({
         input.head_repo !== sourceFullName.split('/')[1]
       )
         throw new Error('fork request must select its actual head repository');
-      writes.push({ method, endpoint, input });
       const number = 10 + comments.length + issues.length;
       let published;
       if (method === 'PATCH')
@@ -483,9 +483,33 @@ test('strict options and independent authorization cannot be supplied by an arti
   );
 });
 
-test('missing and expired records are rejected before even a live permission read', (t) => {
+test('missing records are rejected before even a live permission read', (t) => {
   const f = fixture(t, { failed: true });
   const argv = ['comment', ...f.args, '--number', '7', '--body-file', f.bodyPath];
+  let calls = 0;
+  const runner = () => {
+    calls++;
+    throw new Error('unexpected IO');
+  };
+  fs.rmSync(f.recordPath);
+  assert.throws(() => runPublishCli(argv, { runner }), /ENOENT/);
+  assert.equal(calls, 0);
+});
+
+test('expired commit records cannot enter historical reconciliation or attempt git operations', (t) => {
+  const f = fixture(t, { failed: true });
+  const argv = [
+    'commit',
+    ...f.args,
+    '--message-file',
+    f.bodyPath,
+    '--branch',
+    'fixture-contributor-branch',
+    '--expected-head',
+    'c'.repeat(40),
+    '--expected-tree',
+    'd'.repeat(40),
+  ];
   let calls = 0;
   const runner = () => {
     calls++;
@@ -495,8 +519,6 @@ test('missing and expired records are rejected before even a live permission rea
     () => runPublishCli(argv, { runner, now: new Date(f.record.receipt.expiresAt) }),
     /expired/
   );
-  fs.rmSync(f.recordPath);
-  assert.throws(() => runPublishCli(argv, { runner }), /ENOENT/);
   assert.equal(calls, 0);
 });
 
@@ -872,6 +894,66 @@ test('Issue creation can reuse disclosed bytes without borrowing another title o
 });
 
 for (const command of ['issue create', 'pull-request create', 'comment', 'update-body']) {
+  for (const prior of ['acknowledged', 'disclosed', 'lost-acknowledgement', 'absent']) {
+    const outcome =
+      prior === 'absent'
+        ? 'cannot authorize a new write'
+        : `reconciles ${prior} publication without a second write`;
+    test(`${command} expired record ${outcome}`, (t) => {
+      const f = fixture(t, { failed: true });
+      if (prior === 'disclosed')
+        fs.writeFileSync(
+          f.bodyPath,
+          `${f.body}\n${renderModelTraceDisclosure(f.record.receipt)}\n`
+        );
+      const gh = server({
+        pull: command === 'pull-request create',
+        unknown: prior === 'lost-acknowledgement',
+        applyUnknown: prior === 'lost-acknowledgement',
+      });
+      const argv = [command.split(' '), f.args, '--body-file', f.bodyPath].flat();
+      if (command.endsWith(' create')) argv.push('--title', 'Synthetic historical publication');
+      if (command === 'pull-request create')
+        argv.push('--base', 'main', '--head', 'fixture-contributor-branch');
+      if (command === 'comment' || command === 'update-body') argv.push('--number', '7');
+      if (command === 'update-body')
+        argv.push(
+          '--target-updated-at',
+          gh.target.updated_at,
+          '--target-body-digest',
+          sha256(gh.target.body)
+        );
+      let acknowledged;
+      if (prior === 'lost-acknowledgement')
+        assert.throws(
+          () => runPublishCli(argv, { runner: gh.runner, now: f.now }),
+          PublicationUnknown
+        );
+      else if (prior !== 'absent') {
+        acknowledged = runPublishCli(argv, { runner: gh.runner, now: f.now });
+        assert.equal(acknowledged.status, 'published');
+      }
+      const atExpiry = new Date(f.record.receipt.expiresAt);
+      if (prior === 'absent') {
+        assert.throws(() => runPublishCli(argv, { runner: gh.runner, now: atExpiry }), /expired/);
+        assert.equal(gh.writes.length, 0);
+      } else {
+        const published =
+          command === 'comment'
+            ? gh.comments[0]
+            : command === 'update-body'
+              ? gh.target
+              : gh.issues[0];
+        const originalBody = published.body;
+        const result = runPublishCli(argv, { runner: gh.runner, now: atExpiry });
+        assert.equal(result.status, 'already-published');
+        assert.equal(result.url, acknowledged?.url ?? published.html_url);
+        assert.equal(published.body, originalBody);
+        assert.equal(gh.writes.length, 1);
+      }
+    });
+  }
+
   test(`${command} appends a current visible receipt after prepared Markdown examples`, (t) => {
     const f = fixture(t, { failed: true });
     const disclosure = renderModelTraceDisclosure(f.record.receipt);
@@ -904,6 +986,106 @@ for (const command of ['issue create', 'pull-request create', 'comment', 'update
     assert.equal(gh.writes.length, 1);
   });
 }
+
+test('historical publication readback rejects changed private scope and tampered raw records before transport', (t) => {
+  for (const changed of ['repository', 'session', 'context', 'route', 'declared', 'record']) {
+    const f = fixture(t, { failed: true });
+    const gh = server();
+    const argv = ['comment', ...f.args, '--number', '7', '--body-file', f.bodyPath];
+    assert.equal(runPublishCli(argv, { runner: gh.runner, now: f.now }).status, 'published');
+    const context = structuredClone(f.context);
+    if (changed === 'repository') context.repositoryId = 'github.com:other-owner/other-repo';
+    if (changed === 'session') context.sessionId = randomBytes(32).toString('hex');
+    if (changed === 'context') context.contextDigest = 'c'.repeat(64);
+    if (changed === 'route') context.routeDigest = 'd'.repeat(64);
+    if (changed === 'declared') context.declared.systemModel = 'different-synthetic-fixture';
+    fs.writeFileSync(f.contextPath, JSON.stringify(context));
+    if (changed === 'record') {
+      const record = structuredClone(f.record);
+      record.response.completedAt = new Date(
+        Date.parse(record.response.completedAt) + 1
+      ).toISOString();
+      fs.writeFileSync(f.recordPath, JSON.stringify(record));
+    }
+    let reads = 0;
+    const runner = (...args) => {
+      reads++;
+      return gh.runner(...args);
+    };
+    assert.throws(
+      () => runPublishCli(argv, { runner, now: new Date(f.record.receipt.expiresAt) }),
+      changed === 'record'
+        ? /does not reproduce/
+        : changed === 'declared'
+          ? /labels changed/
+          : /repository\/session\/context\/provider route changed/
+    );
+    assert.equal(reads, 0);
+    assert.equal(gh.writes.length, 1);
+  }
+});
+
+test('expired reconciliation cannot borrow a marker with altered full body or a different actor', (t) => {
+  for (const changed of ['body', 'actor']) {
+    const f = fixture(t, { failed: true });
+    const gh = server();
+    const argv = ['comment', ...f.args, '--number', '7', '--body-file', f.bodyPath];
+    assert.equal(runPublishCli(argv, { runner: gh.runner, now: f.now }).status, 'published');
+    if (changed === 'body') gh.comments[0].body = `Altered content\n${gh.comments[0].body}`;
+    else gh.comments[0].user.login = 'another-contributor';
+    assert.throws(
+      () => runPublishCli(argv, { runner: gh.runner, now: new Date(f.record.receipt.expiresAt) }),
+      /full body or author does not match/
+    );
+    assert.equal(gh.writes.length, 1);
+  }
+});
+
+test('expired reconciliation cannot borrow a PR with a changed published revision', (t) => {
+  const f = fixture(t, { failed: true });
+  const gh = server({ pull: true });
+  const argv = [
+    'pull-request',
+    'create',
+    ...f.args,
+    '--title',
+    'Synthetic revision-bound publication',
+    '--body-file',
+    f.bodyPath,
+    '--base',
+    'main',
+    '--head',
+    'fixture-contributor-branch',
+  ];
+  assert.equal(runPublishCli(argv, { runner: gh.runner, now: f.now }).status, 'published');
+  gh.issues[0].head.sha = 'e'.repeat(40);
+  assert.throws(
+    () => runPublishCli(argv, { runner: gh.runner, now: new Date(f.record.receipt.expiresAt) }),
+    /existing PR head\/base binding changed/
+  );
+  assert.equal(gh.writes.length, 1);
+});
+
+test('record expiry during read-only preflight prevents the first mutation', (t) => {
+  const f = fixture(t, { failed: true });
+  const gh = server();
+  const clock = new Date(f.now);
+  const runner = (binary, args, options) => {
+    const result = gh.runner(binary, args, options);
+    if (args.some((arg) => arg.includes('/issues/7/comments?')))
+      clock.setTime(Date.parse(f.record.receipt.expiresAt));
+    return result;
+  };
+  assert.throws(
+    () =>
+      runPublishCli(['comment', ...f.args, '--number', '7', '--body-file', f.bodyPath], {
+        runner,
+        now: clock,
+      }),
+    /expired/
+  );
+  assert.equal(gh.writes.length, 0);
+});
 
 test('visible wrong malformed or duplicate receipts and still-hidden appends cannot reach a GitHub mutation', (t) => {
   const f = fixture(t, { failed: true });

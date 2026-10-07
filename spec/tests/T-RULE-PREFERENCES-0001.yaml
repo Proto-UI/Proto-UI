@@ -29,6 +29,10 @@ cases:
     title: Four real Web hosts repaint without interaction and fail closed for unavailable or custom sources
     covers: [C-RULE-PREFERENCES-0001-D, HC-PREFERENCE-INVALIDATION-0001-D]
     expectation: native-media-query-change-paint-and-unknown-fallback
+  - id: T-RULE-PREFERENCES-0001-CASE-WC-ADOPTION
+    title: Default light, Shadow and split instance sources follow document adoption
+    covers: [C-RULE-PREFERENCES-0001-B, C-RULE-PREFERENCES-0001-C]
+    expectation: controlled-host-facts-repaint-native-consumer-destination-rebind-stale-notification-rejection-and-remount
 implementations:
   - id: source
     kind: adapter-test
@@ -48,6 +52,12 @@ implementations:
     path: apps/www/test/preferences.browser.test.ts
     required: true
     consumesCases: [T-RULE-PREFERENCES-0001-CASE-WEB]
+  - id: wc-adoption
+    kind: adapter-test
+    status: needs-review
+    path: packages/adapters/web-component/test/shadow-closeout.browser.test.ts
+    required: true
+    consumesCases: [T-RULE-PREFERENCES-0001-CASE-WC-ADOPTION]
 verifies:
   contracts: [C-RULE-PREFERENCES-0001]
   hostCaps: [HC-PREFERENCE-INVALIDATION-0001]

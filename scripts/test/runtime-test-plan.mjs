@@ -107,6 +107,12 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-ring-offset-default.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s1.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s3.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s4.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s4-paint.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadow-split-s5.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts',
@@ -141,6 +147,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
+  'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
 ]);
 
 // Production-specific evidence uses dedicated built-site owners, never the dev server.

@@ -266,7 +266,9 @@ describe('adapter-web-component: dialog overlay', () => {
     await completeTransitions(content);
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
 
-    innerButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    // An independent pointer gesture, not the zero-detail synthetic follow-up
+    // to the earlier Enter. The retained epoch must not reset keyboard dedup.
+    innerButton.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     await Promise.resolve();
     await Promise.resolve();
     await Promise.resolve();

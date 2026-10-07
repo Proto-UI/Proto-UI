@@ -61,6 +61,7 @@ import {
   bindLogicalEventTarget,
   createLogicalInstance,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   markProtoInstance,
   registerNativeFocusReadiness,
   isFocusTargetOwnerReady,
@@ -689,6 +690,7 @@ function initSession<Props extends PropsBaseType>(
     rootEl,
     instanceToken: state.instanceToken,
     resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
+    isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
     globalEl: typeof window === 'undefined' ? rootEl : window,
     isEnabled: () => eventGate.isEnabled?.() ?? true,
   });
@@ -777,7 +779,7 @@ function initSession<Props extends PropsBaseType>(
       ? createDeferredViewVisualSink(
           () => targetOptions.createVisualSink!(rootEl, effectsPort),
           (frame) => {
-            effectsPort.queueStyle({ kind: 'tw', tokens: [...frame.style.tokens] });
+            effectsPort.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
             effectsPort.requestFlush();
           }
         )

@@ -11,8 +11,10 @@ statement:
   zh-CN: >-
     Collapsible Trigger 是 base-collapsible domain 内唯一 controlling part，而非 open owner。它使用 reusable activation/focus/accessibility 能力，消费 Root canonical open，派生 expanded 与 Root.disabled || Trigger.disabled。Enabled Trigger 保持自然 sequential focus，Enter/Space 或成功 pointer press 请求 toggle。两端显式 protocol key 'content' 由同域 relationship 服务解析；Trigger 不拼接宿主 ID 或维护 presence registry。
 
+
   en: >-
     Collapsible Trigger is the sole controlling part in a base-collapsible domain, not an open owner. It uses reusable activation/focus/accessibility capabilities, consumes Root canonical open, and derives expanded and Root.disabled || Trigger.disabled. Enabled Trigger remains naturally sequentially focusable; Enter/Space or successful pointer press requests toggle. Both endpoints declare the explicit protocol key 'content' for same-domain relationship resolution; Trigger constructs no host id and maintains no presence registry.
+
 
 criteria:
   - id: P-BASE-COLLAPSIBLE-TRIGGER-A11Y
@@ -53,8 +55,10 @@ criteria:
       zh-CN: >-
         Trigger 必须接受 disabled?: boolean（默认 false），expose 并投射 effective disabled = Root.disabled || Trigger.disabled；effective disabled 必须抑制 press activation 与 Root request，不改写 canonical open 或 expanded。
 
+
       en: >-
         Trigger must accept disabled?: boolean (default false), expose and project effective disabled = Root.disabled || Trigger.disabled; effective disabled must suppress press activation and Root requests without rewriting canonical open or expanded.
+
 
     dependsOn:
       contracts: [C-PROPS-0001, C-STATE-INTERACTION-0001, C-A11Y-0001]

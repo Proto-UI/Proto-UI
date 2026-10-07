@@ -120,6 +120,11 @@ it('Web Component portal tracks its original physical wrapper and releases on cl
   await settle();
   expect(content.dir).toBe('rtl');
   content.getExposes().actions.close();
+  // WC's compositor conceal barrier retires its portal lease after two frames.
+  await settle();
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  );
   await settle();
   expect(content.getAttribute('dir')).toBe(null);
   second.append(content);
