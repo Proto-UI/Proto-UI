@@ -1,0 +1,37 @@
+{
+  "source": "f91b80c45edc992beb0cdb2e77224a67c9c998a5",
+  "retention": "Evidence-only branch; retain for PR #872 comparison. Never merge.",
+  "capture": "GitHub Actions Chromium 154.0.8037.57",
+  "images": [
+    {
+      "file": "cb880-dialog-before.png",
+      "sha256": "b7ee09e72e30b2f01f06a864a8181230915e344d3ab1834f6e6da15d67b89c76",
+      "source": "cb880767 (historical baseline)",
+      "conditions": "Brutalist Dialog React; 430x900 CSS px; CDP scale2; light; DM Sans16px/500/28px"
+    },
+    {
+      "file": "f91-dialog-after.png",
+      "sha256": "d492b8a96bb8f73a8a15ef2d43adbe691113d77e1ebf0b2fbbf0b06ff99454a8",
+      "run": 37616450333,
+      "conditions": "Same as historical Dialog baseline"
+    },
+    {
+      "file": "f91-mobile-runtime-parity.png",
+      "sha256": "758f25e9f30a7b30cd836e27cefc95de584bcada6e5a41c9ba9fe266a867f60e",
+      "run": 37616450610,
+      "conditions": "Shadcn 390x1000/light; WC representative of five byte-identical WC-React-Vue-Vue2-WC captures"
+    },
+    {
+      "file": "f91-runtime-loading-mask.png",
+      "sha256": "a9ab68b88cbdc9fc2cbfa499384b93e7a3018966da9906b0871525221540df36",
+      "run": 37616450610,
+      "conditions": "Shadcn 1280x1000/light local loading overlay"
+    }
+  ],
+  "limits": [
+    "Dialog8/8 passed; native browser, not physical mobile.",
+    "Runtime11/14 passed; two failed-target Retry cases and Brutalist mask family mismatch remain red.",
+    "Quick-start first-frame harness timed out before case results; no screenshot proof.",
+    "No full Finf or optical acceptance."
+  ]
+}
