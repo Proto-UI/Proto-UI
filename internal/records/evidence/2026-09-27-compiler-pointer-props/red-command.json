@@ -1,0 +1,20 @@
+{
+  "cwd": "/workspace/worktrees/proto-ui-compiler/pointer-props-implementation",
+  "argv": [
+    "env",
+    "GITHUB_SHA=c74b698dc651d11aea842336218de745287deeba",
+    "COMPILER_EVIDENCE_DIR=/workspace/worktrees/proto-ui-compiler/pointer-props-implementation/.cache/compiler-pointer-props/red",
+    "COMPILER_EVIDENCE_RUN_ID=pointer-props-red",
+    "COMPILER_POINTER_SEED=20260927",
+    "CHROME_PATH=/home/ezra/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome",
+    "corepack",
+    "pnpm@10.32.1",
+    "exec",
+    "vitest",
+    "run",
+    "packages/compiler/test/browser-pointer-props.test.ts",
+    "--minWorkers=1",
+    "--maxWorkers=1"
+  ],
+  "exit": 1
+}

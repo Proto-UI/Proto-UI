@@ -1,0 +1,31 @@
+{
+  "name": "@proto.ui/compiler",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "protoUi": {
+    "release": {
+      "scan": false
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "dependencies": {
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/hooks": "workspace:*",
+    "@proto.ui/adapter-react": "workspace:*",
+    "@proto.ui/prototypes-base": "workspace:*",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "description": "Private restricted-TypeScript compiler and differential conformance tooling; no published compiler profile."
+}
