@@ -2,11 +2,7 @@
   "date": "2026-10-06",
   "base": "74a86acbf360298d2d4c3ff24a05e3a32405c32f",
   "sourceTreeBeforeRecord": "1b81a121d6d1fa4e3109082bb01faf9667c8e18f",
-  "claims": [
-    4197186992,
-    4197351113,
-    4197351131
-  ],
+  "claims": [4197186992, 4197351113, 4197351131],
   "changes": {
     "preflight": "Use a shared operation.preflight phase for explicit options, Center-originated options and host/Center preflight. Admission remains a separate role-cancellation/rollback concept. Reserve before user reads, retain existing private snapshots and never reread author getters during application.",
     "readiness": "Defer older readiness through the active preflight and pass it forward to an unfinished Center preparation. Coalesce target/entry replay signals rather than recursively draining the same absent target. Stamp deferred readiness with the actual focus application version. Accepted acquisition settles without default-option reprojection; rejected current attempts can coalesce one replacement replay. Newer intent, blur and original errors retain ownership.",

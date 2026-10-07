@@ -5,11 +5,7 @@
   "sourceCandidateTree": "1b81a121d6d1fa4e3109082bb01faf9667c8e18f",
   "pairedSourceAndCapsTree": "12440acc17a78b951443fb8ae050a8d453c13161",
   "proposalParent": "33480751a22a52fc1afcdb68f7de20c38d369592",
-  "claims": [
-    4197186992,
-    4197351113,
-    4197351131
-  ],
+  "claims": [4197186992, 4197351113, 4197351131],
   "sourceScope": [
     "One shared operation.preflight phase covers explicit and Center-originated author option snapshots plus host preflight. Admission remains separate for role cancellation and first-unresolved-entry rollback.",
     "Deferred-readiness settlement preserves original errors and coalesces replay signals instead of renewing an older request or recursively draining it.",
