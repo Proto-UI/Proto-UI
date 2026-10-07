@@ -14,7 +14,7 @@ No item is checked for an incremental/simple implementation. Every required acce
 
 3. Every applicable Module/Host Capability/Adapter profile and generated Compiler target has verified conformance; unsupported/omitted scope explicitly governed, never counted as a pass
 
-4. Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action.
+4. Complete source/dist exports, build and type artifacts, install/consumer smoke from local packed artifacts, package/CLI surface, DemoSpec, reachable real demos and bilingual documentation. Registry publication is a separate explicitly authorized release action. Every newly introduced prototype also requires a catalog-driven interactive homepage exhibition and state set built from its real atoms. Bootstrap 2.3.2 Classic and Liquid Glass homepage selection remains ineligible until complete Base atomic parity and mature applicable evidence.
 
 5. Controlled/uncontrolled, disabled/readOnly, keyboard/pointer/touch/IME where applicable, accessibility, repeated mount/unmount and interruption paths
 
@@ -24,7 +24,7 @@ No item is checked for an incremental/simple implementation. Every required acce
 
 8. Complete the per-family and per-atomic-identity safe-area/spacing audit and accepted repairs across Base and all four design languages: explicit viewport/container/leaf ownership, outer and inner spacing, long content, scaling and keyboard reflow. Use family-specific evidence, not a universal inset or an unsupported not-applicable shortcut.
 
-9. Deliver GPUI with the same applicable semantic capability as the other runtimes for this prototype and all four design-language projections: actual input, focus, accessibility, layout, theme, demo and Adapter/Compiler evidence. Existing private/experimental status or unsupported diagnostics are current gaps, never a final omission or completion shortcut.
+9. Deliver GPUI with the same applicable semantic capability as the other runtimes for this prototype and all four design-language projections: actual input, focus, accessibility, layout, theme, demo and Adapter/Compiler evidence. Existing private/experimental status or unsupported diagnostics are current gaps, never a final omission or completion shortcut. The homepage Runtime entry must launch or display actual native GPUI with an explicit integration boundary and native input/layout/accessibility evidence; a Web projection must never impersonate GPUI.
 
 Each final Base atomic identity has a real conforming identity/implementation and evidence in each of four design families. Each final family count and atomic identity count is at least Base. Existing extra family identities may remain but cannot compensate for a missing Base mapping.
 
@@ -151,6 +151,16 @@ Every implemented Base and four-family atomic identity, including Lucide depende
 - Dialog acceptance: Test enlarged fonts/zoom, keyboard-reduced available space and applicable safe-area facts
 
 - Dialog acceptance: Implement the reusable prototype/projection/host responsibility, not a homepage-only CSS patch
+
+## Homepage exhibition and eligibility
+
+- [ ] Every newly introduced prototype has a catalog-driven, genuinely interactive homepage recipe and state set using its actual atoms, with source-bound interaction, accessibility and visual evidence.
+
+- [ ] Bootstrap 2.3.2 Classic and Liquid Glass become homepage-selectable only after complete Base identity/atomic parity and mature applicable source, tests, demos/docs, optics and native capability; keep eligibility closed until accepted.
+
+- [ ] GPUI appears as a homepage Runtime through an actual native running/exhibition entry with a clear launch or embedding boundary. Verify real native input/layout/accessibility and never present a Web projection as GPUI.
+
+Source-stage additions do not establish homepage eligibility. No unfinished family or Web-only substitute is enabled as an accepted native Runtime.
 
 ## GPUI same-capability delivery
 
