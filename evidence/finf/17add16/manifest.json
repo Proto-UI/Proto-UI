@@ -1,0 +1,20 @@
+{
+  "revision": "17add16ab769dd3a32f1910ceecb4d774b20548b",
+  "run": 37666207383,
+  "artifact": 11503331468,
+  "archive_sha256": "4558f6f5eb144552127a329336a0bba3ad3425398ea778e67c64b8e70cd4a083",
+  "scope": "Four Web adapters, controlled visible application Canvas, light and dark, actual browser source and emitted-public-runtime paths. Liquid Glass prototype remains explicit private source. No arbitrary-DOM, GPUI, performance acceptance or complete Finf acceptance claim.",
+  "images": [
+    {
+      "name": "17add16-liquid-glass-four-web-light.png",
+      "sha256": "e40696928f1f0515ce7ea6489be8c9d55cae4de7d4fbcbcce42c79cddb4601f6"
+    },
+    {
+      "name": "17add16-liquid-glass-four-web-dark.png",
+      "sha256": "b2d9bfb6b2c08d93b8c748a3fc3f5d94813e393536321d3d0d2a1c3b91c78447"
+    }
+  ],
+  "execution": "passed",
+  "publicSourceInputs": [],
+  "note": "Evidence-only branch. Never merge this branch into product source."
+}
