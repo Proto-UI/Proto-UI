@@ -1,0 +1,17 @@
+{
+  "date": "2026-10-06",
+  "sourceParent": "88df5b57775b7ea5fd319d35940043b1a93d1960",
+  "checkerParent": "a10374ab07793811f4d3b8d0d9edd4d68ed80668",
+  "automaticMergeTreeBeforeRecord": "06961cbbcddc28839d2f009b0396a4a53436beba",
+  "merge": "Ordinary conflict-free dependency merge of the stricter shared WC bridge importer-origin checker. Keeps existing main859 duplicate Set entries; no775 audit profile copied.",
+  "checkerBlob": "9ad46f7e03e264a61c7c5fe4ebb2c71fa56ed360",
+  "validation": {
+    "graphControls": "391 passed",
+    "sourceMatrices": "2 passed",
+    "coverage": "2660 passed plus1 portable integration skip; exit0",
+    "actualGraph": "The actual284-page artifact freshly built for the byte-identical a4a80/88df packages passes. All8 static/dynamic foreign-importer mutations of4 actual WC targets are rejected.",
+    "sourceIdentity": "No packages or product build configuration changes relative to88df; the existing4863 general,541 focused,44build/types and284-page production evidence remains source-parent evidence. No redundant full-source rerun claimed.",
+    "hosted": "New exact-head hosted CI/native still required; a checker merge is not a native regression pass."
+  },
+  "attribution": "Agent: dot; ModelTrace: not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}

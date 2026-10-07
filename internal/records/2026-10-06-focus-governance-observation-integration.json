@@ -1,0 +1,16 @@
+{
+  "date": "2026-10-06",
+  "sourceParent": "f6a62aea190bbd4dcb7dfea1f7baf4a63d439358",
+  "sharedGovernanceParent": "83327215fc617e23e012c083ace8765d35e9aa20",
+  "automaticMergeTreeBeforeRecord": "7902c59325817c5afff8e5b2824825260371bce7",
+  "failure": "Coverage37502546510/job112402951110 failed because Issue377.updatedAt changed from2026-09-27T00:53:27Z to2026-10-06T17:14:14Z. Actual27Issues+PR580API comparison found no other field changes. Not classified as infrastructure.",
+  "merge": "Normal conflict-free integration of the shared3-file repair; no product, package, graph, build configuration or retained snapshot changes.",
+  "validation": "28/28 focused governance controls and2 source matrices pass. Reconciliation of retained actual27+1 connector API values passes; observation timestamps remain available. No synthetic fixture represented as live data and no unauthenticated gh invocation claimed.",
+  "priorExactHeadEvidence": {
+    "general": "f6a62 CI37502546500/job112407225715:4863passed,673files,34todo,3skip on2026-10-06T17:51:41Z",
+    "canonicalBudget": "f6a62 job112403809142:44builds and9gates pass; all11 minifiedSHA/length/gzip identities equal local final measurement. Runtime69591/React91653/Vue91396/WC100643.",
+    "native": "Oldhead8browser shards were stillqueued at merge preparation;40newnative controls require finalheadCI."
+  },
+  "scope": "The separate roving options follow-up is not included; it remains Finf872 work.",
+  "attribution": "Agent: dot; ModelTrace: not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}
