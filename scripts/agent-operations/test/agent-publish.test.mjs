@@ -439,7 +439,8 @@ function localRepository(
 
 for (const declaration of ['--record', '--context', '--mode', '--mode-source', '--authorization']) {
   test(`rejects missing ${declaration} before mutation`, (t) => {
-    const f = fixture(t);
+    // Parser rejection does not need successful synthetic fingerprint samples.
+    const f = fixture(t, { failed: true });
     const argv = ['comment', ...f.args, '--number', '7', '--body-file', f.bodyPath];
     const index = argv.indexOf(declaration);
     argv.splice(index, 2);
@@ -459,7 +460,8 @@ for (const declaration of ['--record', '--context', '--mode', '--mode-source', '
 }
 
 test('strict options and independent authorization cannot be supplied by an artifact', (t) => {
-  const f = fixture(t);
+  // These checks inspect declarations only, never execute the fingerprint scorer.
+  const f = fixture(t, { failed: true });
   const argv = ['comment', ...f.args, '--number', '7', '--body-file', f.bodyPath];
   assert.throws(() => parsePublishCli([...argv, '--labels', 'feature']), /unexpected option/);
   assert.throws(() => parsePublishCli([...argv, '--record', f.recordPath]), /duplicate option/);
@@ -1072,7 +1074,29 @@ test('hook exempts human commits and rejects missing or expired Agent disclosure
 test('contributor commit executes git signoff and the independent installed hook in a throwaway repository', (t) => {
   const f = fixture(t, { failed: true });
   const { git, before, runner, args, directory, commitAttempts } = localRepository(f);
-  const result = runPublishCli(['commit', ...f.args, ...args], { runner, cwd: directory });
+  const observedRunner = (binary, argv, options) => {
+    if (binary === 'git' && argv[0] === 'commit') {
+      const child = execFileSync(
+        process.execPath,
+        [
+          '-e',
+          "console.log(JSON.stringify({agent:Object.hasOwn(process.env,'PUI_AGENT_NAME'),exemption:Object.hasOwn(process.env,'PUI_DOT_MODELTRACE_EXEMPTION'),record:process.env.PUI_MODELTRACE_RECORD,context:process.env.PUI_MODELTRACE_CONTEXT}))",
+        ],
+        { env: options.env, encoding: 'utf8' }
+      );
+      assert.deepEqual(JSON.parse(child), {
+        agent: false,
+        exemption: false,
+        record: f.recordPath,
+        context: f.contextPath,
+      });
+    }
+    return runner(binary, argv, options);
+  };
+  const result = runPublishCli(['commit', ...f.args, ...args], {
+    runner: observedRunner,
+    cwd: directory,
+  });
   assert.equal(result.status, 'published');
   assert.notEqual(git(['rev-parse', 'HEAD']).trim(), before);
   assert.equal(git(['rev-parse', `${result.head}^1`]).trim(), before);

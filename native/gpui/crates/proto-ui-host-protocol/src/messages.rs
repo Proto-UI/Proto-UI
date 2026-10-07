@@ -192,6 +192,15 @@ pub struct PropsSet {
     pub props: WireRecord,
 }
 
+/// The order the host shows the sessions' views in, as a document order: a
+/// session placed inside another comes after it. It replaces the order sent
+/// before, whole. Focus orders a navigation's members by it
+/// (HC-FOCUS-ORDER-0001).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProjectionOrder {
+    pub sessions: Vec<SessionId>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProjectionInstall {
     pub transaction: ProjectionTransaction,
@@ -440,6 +449,7 @@ envelopes!(
         SessionOpen(SessionOpen) => "session.open",
         PropsSet(PropsSet) => "props.set",
         ProjectionAck(ProjectionAckMessage) => "projection.ack",
+        ProjectionOrder(ProjectionOrder) => "projection.order",
         InputSample(InputSampleMessage) => "input.sample",
         FocusResult(FocusResult) => "focus.result",
         ExposeCall(ExposeCall) => "expose.call",

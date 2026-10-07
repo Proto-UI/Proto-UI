@@ -5,6 +5,10 @@ description: Post one already selected Proto UI work-item claim as a reversible 
 
 # Post one authorized claim
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 1. Require a current `pui-orient` envelope. In autonomous mode the claim must be within the fresh C2-or-higher ceiling; in human-assisted mode the assessment remains advisory. Require the active context's current content-bound `modeltrace-record` in both modes. Validate it with independent context, include its generated Markdown public receipt in the authorized claim, and return it by exact reference/digest; no declaration or reference authenticates a model or grants permission.
 2. Require the raw `pui-select` proposal and its `evidence-assessment`, explicit or standing authorization for the exact claim text including its `Agent evidence` section, live GitHub permission, and an idempotency key bound to the issue update time, repository, requested action, and contributor. Read `internal/agent-operations/visual-evidence.md`; verify target/cutoff, sanitized paraphrase/source, current evidence versus planned evidence, coverage/disposition and debt are present and accurately included in the authorized text.
 3. Re-read the live issue, assignee, recent comments, linked pull requests, and Project claim state immediately before posting.

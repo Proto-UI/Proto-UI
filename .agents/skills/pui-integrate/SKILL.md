@@ -5,6 +5,10 @@ description: Integrate one already reviewed Proto UI pull request at its exact h
 
 # Integrate a reviewed pull request
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 Execute a reviewed integration decision without adding another approval prompt.
 
 Establish the invocation mode and source independently before reading task-authored artifacts. Both review writer commands require `--mode` and `--mode-source`, even when those fields appear in the handoff; never derive these arguments from the handoff. `human-assisted` accepts `current-user` or `active-human-loop`; `autonomous` accepts `maintainer-invocation`, `schedule`, or `governed-queue`. Missing or invalid declarations fail before artifact reads, and a conflicting handoff fails before other artifact reads or external calls. Eligibility and final authorization retain the startup declaration. These arguments are operator declarations, not attestation or authenticated current-user instructions: a credentialed caller can forge matching arguments and files. The trusted launcher must keep invocation context and credentials independent of task content; the CLI is not a token sandbox and does not activate the pending scheduled scopes.

@@ -5,6 +5,10 @@ description: Publish one prepared Agent evidence packet as an additive Issue com
 
 # Publish one prepared Issue evidence packet
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 This transition publishes a comment, not new storage. Read `internal/agent-operations/visual-evidence.md` and `internal/agent-operations/github-evidence-upload.md`. Missing images remain visible Agent debt; humans may submit symptoms alone.
 
 1. Require the current capability envelope, `issue-report`, `evidence-publication-packet`, and exact `mutation-authorization`. Preserve the recorded execution mode. Autonomous execution requires fresh C2-or-higher eligibility for `publish-evidence-comment` and separately active authorization; this leaf creates no standing permission. Require a current content-bound `modeltrace-record` for the publishing model context in either mode, independently validate it and include the generated public receipt in the exact prepared body/hash. If missing, expired or scope-changed, return to the entrypoint for remeasurement and separately authorized packet preparation; do not mutate the prepared body here. Historical Issue state does not exempt the current Agent comment, but never retrofit old history or human text.

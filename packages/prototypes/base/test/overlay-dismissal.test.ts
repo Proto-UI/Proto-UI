@@ -3,6 +3,7 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import { dialogRoot, dialogContent, dialogTrigger } from '../src/dialog';
 import { dropdownRoot, dropdownContent, dropdownTrigger } from '../src/dropdown';
 
+const lifecycle = { created: 0, disposed: 0 };
 for (const proto of [
   dialogRoot,
   dialogContent,
@@ -11,7 +12,14 @@ for (const proto of [
   dropdownContent,
   dropdownTrigger,
 ])
-  AdaptToWebComponent(proto as any);
+  AdaptToWebComponent(proto as any, {
+    diagnostics: {
+      onLifecycleEvent(event) {
+        if (event.type === 'instance.created') lifecycle.created++;
+        if (event.type === 'instance.dispose.done') lifecycle.disposed++;
+      },
+    },
+  });
 const flush = async () => {
   for (let i = 0; i < 8; i++) await Promise.resolve();
 };
@@ -19,10 +27,12 @@ const flush = async () => {
 it.each(['dialog', 'dropdown'])(
   'T-OVERLAY-CATALOG-0001-CASE-CONSUMER: nested controlled %s requests stay with the selected Root',
   async (kind) => {
+    const ownedElements = new Set<HTMLElement>();
     function create() {
       const root = document.createElement(`base-${kind}-root`) as any;
       const trigger = document.createElement(`base-${kind}-trigger`);
       const content = document.createElement(`base-${kind}-content`) as any;
+      for (const element of [root, trigger, content]) ownedElements.add(element);
       setElementProps(root, { open: true });
       root.append(trigger, content);
       const requests: any[] = [];
@@ -48,9 +58,12 @@ it.each(['dialog', 'dropdown'])(
         expect(outer.root.getExposes().open.get()).toBe(true);
       }
     } finally {
-      inner.root.remove();
-      outer.root.remove();
-      await flush();
+      // Portalled parts still belong to this fixture. End every instance
+      // before Happy DOM destroys the document their cleanup needs.
+      for (const element of ownedElements) {
+        if (element.isConnected) element.remove();
+      }
+      await expect.poll(() => lifecycle.disposed).toBe(lifecycle.created);
     }
   }
 );

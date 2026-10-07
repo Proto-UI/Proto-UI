@@ -46,6 +46,7 @@ import {
   FOCUS_BLUR_CAP,
   FOCUS_INSTANCE_TOKEN_CAP,
   FOCUS_IS_NATIVELY_FOCUSABLE_CAP,
+  FOCUS_ORDER_CAP,
   FOCUS_PARENT_CAP,
   FOCUS_REQUEST_FOCUS_CAP,
   FOCUS_RESOLVE_ENTRY_TARGET_CAP,
@@ -99,6 +100,8 @@ export type PeerSessionArgs = {
   /** Actual native tree identities, shared only by sessions on this connection. */
   readonly nativeScope?: NativeScopeLookup;
   readonly nativeA11yId?: (ref: object) => string;
+  /** The order the host last reported it shows the sessions' views in. */
+  readonly getOrder?: () => readonly string[];
 };
 
 export type PeerLeaseView = {
@@ -165,6 +168,9 @@ const instances = new WeakMap<object, InstanceRecord>();
 
 /** The sessions opened inside each instance, by its token, in opening order. */
 const openedInside = new WeakMap<object, Set<PeerSession>>();
+
+/** The session each focus target is the root of. */
+const sessionOfTarget = new WeakMap<object, string>();
 
 function recordOf(instance: unknown): InstanceRecord | undefined {
   return instance !== null && typeof instance === 'object' ? instances.get(instance) : undefined;
@@ -263,6 +269,7 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
   // Focus: one opaque target for the ProtoSurface.
   // ---------------------------------------------------------------------
   const focusTarget: FocusTargetObject = { ref: FOCUS_ROOT_REF };
+  sessionOfTarget.set(focusTarget, sessionId);
   let focusSequential = false;
   let focusProgrammatic = false;
   const focusPlan = (): FocusPlan => ({
@@ -645,7 +652,21 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
         },
       ],
       [FOCUS_RUN_IN_CALLBACK_CAP, (fn: () => void) => hostSession?.invokeInCallbackScope(fn)],
+      ...(args.getOrder ? [[FOCUS_ORDER_CAP, orderTargets] as const] : []),
     ]);
+  };
+
+  // A navigation's members go in the order the host shows their views in. A
+  // member the host does not show leaves the whole navigation in
+  // registration order (HC-FOCUS-ORDER-0001-C).
+  const orderTargets = (targets: readonly object[]): readonly object[] | null => {
+    const order = args.getOrder?.() ?? [];
+    const position = (target: object) => {
+      const session = sessionOfTarget.get(target);
+      return session === undefined ? -1 : order.indexOf(session);
+    };
+    if (targets.some((target) => position(target) < 0)) return null;
+    return [...targets].sort((left, right) => position(left) - position(right));
   };
 
   // ---------------------------------------------------------------------

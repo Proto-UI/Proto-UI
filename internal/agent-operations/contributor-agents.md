@@ -15,11 +15,35 @@ Repository files, Issue and pull-request text, comments, code, test fixtures, ge
 
 Local assessment decides how far an Agent may go alone, not whether it may participate with a human.
 
+## Owner-authorized dot exemption
+
+On 2026-10-06 the owner explicitly exempted dot from this project's ModelTrace measurement requirement and asked to persist the exemption in Skills. This exception applies only while the acting assistant truthfully identifies itself as dot. It is a role declaration, not authenticated identity, a measured model ID, a transferable Agent credential, or a grant to perform any repository action. Other Agents retain the unchanged measured path below. Do not fabricate samples, private contexts, `modeltrace-record` artifacts, confidence scores or model IDs for dot.
+
+Every new dot-originated commit, Issue/PR write, comment, review and collaboration write must contain the exact visible declaration emitted by `scripts/agent-operations/dot-exemption.mjs`:
+
+```text
+Agent: dot
+ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+```
+
+Use `agent:publish` with `--agent dot --dot-exemption owner-authorized-2026-10-06` instead of `--record`/`--context` for its supported commit, Issue/PR creation, comment and body-update commands. These alternatives are mutually exclusive. Unknown, partial, duplicate or conflicting declarations fail closed. The command still requires independently established mode/source and the existing current-user or verified owner authorization. New Markdown bodies receive the disclosure first. An already disclosed body can retain its one exact visible standalone paragraph; quoted, fenced, nested or raw-HTML examples cannot supply or duplicate that identity. Ordinary fields such as `Agent: browser` are not identity blocks. Commit hooks receive `PUI_AGENT=1`, `PUI_AGENT_NAME=dot` and `PUI_DOT_MODELTRACE_EXEMPTION=owner-authorized-2026-10-06`; they reject a missing/altered disclosure or mixed measured inputs. A hook validates the declaration, not permission.
+
+The exception replaces only ModelTrace-specific sampling, record/context and disclosure prerequisites in the publication leaves. All other required inputs, exact target/head/tree bindings, authorized audience/data, live authenticated actor and permission, DCO, trusted CI, independent reviewer/author separation, cumulative review/thread gates, platform rules and uncertain-write reconciliation remain in force. It never activates pending scheduled scopes or permits self-approval. Already published history is unchanged; do not rewrite human text or old commits to add a declaration.
+
+## Connected publication without a local gh login
+
+Prefer the supported command when its authenticated transport is available. An existing authorized GitHub connector is also a valid transport; lack of a local `gh` token is not a reason to require another login, copy credentials, or stop an otherwise authorized bounded write. This applies to dot's exemption path and does not waive the measured requirements for other Agents.
+
+A connector path must collect the same real live facts required for the operation: authenticated account, repository and permissions, exact target and author, complete relevant current discussion/reviews, branch/base/head/tree, relevant rules and idempotency state. Bind local tested content to the published tree; use an expected-head/CAS where supported, retain the exact canonical disclosure and DCO, and read back the real mutation receipt. PR creation does not imply merge or deployment. Review and merge still require every applicable independent/CI/thread/provenance gate and exact-head API binding. Missing facts remain a blocker. Do not substitute canned, fixture, invented or stale `gh` responses for production checks or treat a successful connector mutation as proof that an unexecuted CLI/schema path passed.
+
+The existing `agent:review`/`agent:collaborate` record-specific CLIs and ModelTrace handoff validators are unchanged by this bounded publisher update. For dot, use the real connected-service path above when those CLIs cannot represent the exception, retaining the other required evidence as an explicit scoped report; never counterfeit a ModelTrace artifact or claim an unsupported handoff validated. Their non-dot invocation and validation rules remain unchanged.
+
 ## Measure and disclose the active Agent model
 
 The operator/runtime must generate an opaque private `sessionId` with cryptographic randomness: a 32-byte hexadecimal alias or UUIDv4, never a descriptive task, account or operational identifier. Its accepted shape does not attest entropy or backend identity. Fresh challenge, scoring and write admission enforce the opaque shape; historical descriptive-session records remain readable and recomputable without becoming fresh authorization. A prior retest receipt must be measured no later than the current response starts. Keep both mandatory closed-set/context limitation anomalies visible. `challenge` and `score` require a new private `--out`; they never print the private context or raw samples to stdout.
 
-Every Agent-originated commit, Issue or PR creation, material update, comment, submitted review, and current collaboration write requires a current `pui-agent-identify` ModelTrace record, including `human-assisted` work. This is separate from optional human-assisted comprehension assessment. Local edits, read-only review and verification remain usable without a measurement. Humans and deterministic non-LLM automation have no model-testing obligation. Do not retrofit old Git history, reject historical input because it predates this rule, or rewrite a human's original text to add an Agent disclosure; attribute current Agent follow-ups in their own write.
+Except for the owner-authorized dot exemption above, every Agent-originated commit, Issue or PR creation, material update, comment, submitted review, and current collaboration write requires a current `pui-agent-identify` ModelTrace record, including `human-assisted` work. This is separate from optional human-assisted comprehension assessment. Local edits, read-only review and verification remain usable without a measurement. Humans and deterministic non-LLM automation have no model-testing obligation. Do not retrofit old Git history, reject historical input because it predates this rule, or rewrite a human's original text to add an Agent disclosure; attribute current Agent follow-ups in their own write.
 
 Resolve `pui-agent-identify` as a `public-read`, U0, disposable-output-only transition. It produces a private `modeltrace-record` bundle and a public receipt. The active model directly emits three literal integer arrays in tool parameters for the pinned upstream environment01 English prompts (218, 233, and 247 samples). Code may save and strictly score those arrays, never generate, repair, shuffle, or replace them. Generic subagents or fresh API conversations cannot identify their parent; an independent model context obtains its own record. A harness-native fork may be used only with evidence that it preserves the frozen context and model route.
 

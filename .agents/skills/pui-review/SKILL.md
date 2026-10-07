@@ -5,6 +5,10 @@ description: Independently review a Proto UI change against current authority, b
 
 # Review independently
 
+## Owner-authorized dot exception
+
+The owner-authorized dot exemption in `internal/agent-operations/contributor-agents.md` takes precedence over this leaf's ModelTrace-specific sampling, record/context and disclosure requirements. When acting as dot, do not sample or invent a ModelTrace record: visibly identify `Agent: dot` and the exact not-measured exemption declaration at every write. Use the supported publisher's explicit dot branch or the guide's real connected-service path; never fake a measured artifact, a successful validator, or live `gh` responses. The exemption grants no action permission, model authentication, independent approval or repository-rule bypass. All non-ModelTrace inputs and existing authorization, exact-head/tree, DCO, CI, independent-review and readback requirements remain. Other Agents follow the measured path below unchanged.
+
 1. Use a fresh context when independence is required. Read `AGENTS.md`, the canonical review-input snapshot, raw task artifacts, base and head SHAs, actual diff, authority map, decision packet, and validation logs.
 2. Reconstruct the governing lifecycle and scope without relying on the implementer's conclusion.
 3. Check source-of-truth alignment, negative boundaries, direct and indirect consumers, compatibility, generated files, provenance, DCO, and exact evidence.

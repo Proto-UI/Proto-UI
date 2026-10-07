@@ -393,7 +393,7 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 31] = [
+const EXPECTED_UNMAPPED: [&str; 32] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
@@ -1011,7 +1011,10 @@ fn intrinsic_dialog_tokens_reach_the_exact_public_gpui_fields() {
     );
     assert!(mapped.is_complete(), "{:?}", mapped.unmapped);
     assert_eq!(mapped.refinement.size.height, Some(Length::Auto));
-    assert_eq!(mapped.refinement.flex_wrap, Some(gpui::FlexWrap::WrapReverse));
+    assert_eq!(
+        mapped.refinement.flex_wrap,
+        Some(gpui::FlexWrap::WrapReverse)
+    );
     let columns = mapped
         .refinement
         .grid_cols

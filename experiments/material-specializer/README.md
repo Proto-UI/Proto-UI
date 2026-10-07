@@ -74,3 +74,22 @@ The follow-up preserves the already accepted single `selection:` pseudo-element 
 The next bounded fault checks include composed CSS filters: a non-`none` filter on the host or its composed ancestors withdraws material admission and remains observed for recovery. This closes the same post-compositing contrast gap as opacity; it does not provide a general CSS compositing proof. Terminal sink retirement is monotonic. Provider/program callbacks and geometry delivery recheck it before continuing or publishing, including when a callback releases and then throws. Mocked WebGL ownership tests distinguish this resource guarantee from real optical evidence.
 
 Projection errors from the material State observer and Rule's completed contribution replacement are reported after semantic observer delivery. Valid Rule replacements still return their disposer during persistent paint failure, keeping later observers and removal/retry correct. Recorder validation, direct imperative style operations, structural replay and mount errors retain their existing synchronous behavior; State's general watcher policy is unchanged.
+
+## Finite host geometry and compositing inputs
+
+The private renderer uses the following explicit assumptions. One shared descriptor reads, rejects and observes the composed fields; unlisted external CSS is not a compatibility or contrast guarantee.
+
+| Input | Current admitted condition | Other values |
+| --- | --- | --- |
+| Host and composed ancestor opacity | `1` | Withdraw material; observe for recovery |
+| Host and composed ancestor filter | `none` | Withdraw material; observe for recovery |
+| Host and composed ancestor mix-blend-mode | `normal` | Withdraw material; observe for recovery |
+| Host and composed ancestor transform/rotate/scale/translate | `none` | Opaque geometry fallback; observe for recovery |
+| Host foreground | Resolvable opaque RGB and the existing local fallback-contrast check | Withdraw material |
+| Host outer corners | Equal finite pixel radii, clamped once to the outer host box | Opaque geometry fallback |
+| Canvas interior | Padding box with a representable common circular radius or square corners, within the existing DPR/texel limits | Opaque geometry fallback |
+| Provider extent | Original finite contained normalized host-border-box `[x,y,width,height]` | Existing invalid-source cleanup/fallback |
+
+The absolutely positioned canvas fills the padding box, including padding but excluding style-owned borders. Its backing size, shader box, inset source bounds and inner clip now derive from that same box. Provider coordinates keep their existing full-host meaning; the renderer does not mutate the returned tuple or enlarge the canvas over the border. Uniform borders and representable asymmetric square corners are supported. Unequal/elliptical inner corners are diagnosed rather than approximated with a guessed radius. Border widths join observation even when outer bounds stay fixed; comparison retains original provider bounds, avoiding a redraw loop caused by comparing host and inset tuples.
+
+The corresponding source/emitted browser controls check actual canvas/backing dimensions, active GL source bounds, unchanged style-owned border color, border-only changes, bounded fallback and recovery. These remain private-profile evidence; the material catalog contract stays draft, with no new stable host or generic CSS-interpreter claim.

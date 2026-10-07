@@ -11,6 +11,7 @@
       "session.open",
       "props.set",
       "projection.ack",
+      "projection.order",
       "input.sample",
       "focus.result",
       "expose.call",
@@ -166,6 +167,14 @@
           }
         ]
       }
+    },
+    {
+      "kind": "projection.order",
+      "sessions": [
+        "s-2",
+        "s-3",
+        "s-1"
+      ]
     },
     {
       "kind": "input.sample",

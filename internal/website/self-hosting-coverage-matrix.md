@@ -176,7 +176,6 @@ The matrix rows remain authoritative. Each binding joins a scanned source, its c
 | `apps/www/src/components/SiteLibraryStyle.astro` | `www.build.style-generation` | `f5c612c3841e7dd9e5441db733f6ac991aac7b9875338c167ffa1caa7667584e` |
 | `apps/www/src/components/SiteTypographyBootstrap.astro` | `www.content.typography-presentation` | `11298b3b53d1deff5656fbea1db03d34c57c19ba10d243534c337e370d759447` |
 | `apps/www/src/components/WikiTerm.astro` | `www.docs.wiki-term` | `8af4d68412ce23bb64052fe76be3e4253525f938d2d681d08cfa36445ac24339` |
-| `apps/www/src/components/adapter-preference-key.ts` | `www.demo.runtime-select`, `www.shell.adapter-select` | `dcb061fb0a309f086c586da2e4051d9e2ee8e4b81977289e2d183a6fdc6d4998` |
 | `apps/www/src/components/adapter-preference.ts` | `www.demo.runtime-select`, `www.shell.adapter-select` | `f7101a19317c58dcc0901172e7da9afe71086a8544c6e9db9570fbbe5d8d38f8` |
 | `apps/www/src/components/code-example-client.ts` | `www.docs.code-example-file-tabs`, `www.docs.code-example-host-tabs` | `633770a9da7279618a88f53af9a0cb9d69058e238fe14b88f93d1f795b0629ad` |
 | `apps/www/src/components/documentation-image-controls.ts` | `www.docs.whitepaper-diagram-viewer` | `1c983f2780d83f4a4e8cd83ef45bb36e01e873510638ecadbe5ada6966943bd6` |

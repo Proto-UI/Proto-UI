@@ -215,6 +215,7 @@ describe('private material through real WC and Feedback', () => {
     'scale',
     'translate',
     'filter',
+    'mixBlendMode',
   ] as const)
     for (const placement of ['host', 'light', 'shadow', 'slot'] as const)
       it(`rejects unsupported composed ancestor ${boundary} and recovers (placement=${placement})`, () => {
@@ -246,6 +247,7 @@ describe('private material through real WC and Feedback', () => {
           scale: 'none',
           translate: 'none',
           filter: 'none',
+          mixBlendMode: 'normal',
           position: 'static',
           borderTopLeftRadius: '8px',
           borderTopRightRadius: '8px',
@@ -261,6 +263,7 @@ describe('private material through real WC and Feedback', () => {
             scale: '1.2',
             translate: '4px',
             filter: 'opacity(0.2)',
+            mixBlendMode: 'difference',
           }[boundary],
         };
         const computed = vi
@@ -319,12 +322,13 @@ describe('private material through real WC and Feedback', () => {
           );
           expect(context).not.toHaveBeenCalled();
           expect(host.dataset.materialReason).toBe(
-            boundary === 'opacity' || boundary === 'filter'
+            boundary === 'opacity' || boundary === 'filter' || boundary === 'mixBlendMode'
               ? 'complete-readable-fallback-unavailable'
               : 'geometry-unavailable'
           );
           tick();
-          ancestorCss[boundary] = boundary === 'opacity' ? '1' : 'none';
+          ancestorCss[boundary] =
+            boundary === 'opacity' ? '1' : boundary === 'mixBlendMode' ? 'normal' : 'none';
           tick();
           expect(context).toHaveBeenCalledOnce();
           expect(host.dataset.materialReason).toBe('webgl-unavailable');

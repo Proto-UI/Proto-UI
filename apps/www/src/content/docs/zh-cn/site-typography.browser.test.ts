@@ -301,7 +301,7 @@ async function overflow(page: Page) {
   }));
 }
 async function copySelection(page: Page) {
-  await page.keyboard.press('Control+C');
+  await page.keyboard.press('ControlOrMeta+C');
   return page.evaluate(() => navigator.clipboard.readText());
 }
 

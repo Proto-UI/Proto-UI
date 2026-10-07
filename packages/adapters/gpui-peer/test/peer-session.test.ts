@@ -974,3 +974,66 @@ describe('gpui peer: Base Transition timers', () => {
     expect(host.sent).toHaveLength(sent);
   });
 });
+
+describe('gpui peer: host order', () => {
+  let order: readonly string[] = [];
+
+  function open(
+    sessionId: string,
+    prototype: Parameters<typeof createPeerSession>[0]['prototype'],
+    props: WireRecord,
+    parent?: PeerSession
+  ) {
+    const host = new ScriptedHost(sessionId);
+    const peer = createPeerSession({
+      sessionId,
+      instanceId: `${sessionId}:instance`,
+      prototype,
+      props,
+      send: (message) => host.receive(message),
+      schedule: (task) => task(),
+      parent,
+      getOrder: () => order,
+    });
+    host.bind((message) => peer.handle(message));
+    return { host, peer };
+  }
+
+  /** Tabs a, c and b, opened in that order into one list. */
+  async function tabs() {
+    const root = open('root', tabsRoot, { defaultValue: 'a' });
+    await root.peer.mount();
+    const list = open('list', tabsList, {}, root.peer);
+    await list.peer.mount();
+    const opened: ReturnType<typeof open>[] = [];
+    for (const value of ['a', 'c', 'b']) {
+      const trigger = open(value, tabsTrigger, { value }, list.peer);
+      await trigger.peer.mount();
+      opened.push(trigger);
+    }
+    const [a, c, b] = opened;
+    // The host hands a key to every instance that listens for it globally.
+    const press = (key: string) => {
+      for (const { host } of [root, list, ...opened]) host.input('key.down', { key });
+    };
+    return { a: a!, b: b!, c: c!, press };
+  }
+
+  it('moves roving focus in the order the host shows the tabs in', async () => {
+    const { a, b, c, press } = await tabs();
+    order = ['root', 'list', 'a', 'b', 'c'];
+    a.host.input('host:focus');
+    press('ArrowRight');
+    expect(b.host.of('focus.request')).toHaveLength(1);
+    expect(c.host.of('focus.request')).toHaveLength(0);
+  });
+
+  it('keeps registration order when the host does not show every member', async () => {
+    const { a, b, c, press } = await tabs();
+    order = ['root', 'list', 'a', 'b'];
+    a.host.input('host:focus');
+    press('ArrowRight');
+    expect(c.host.of('focus.request')).toHaveLength(1);
+    expect(b.host.of('focus.request')).toHaveLength(0);
+  });
+});

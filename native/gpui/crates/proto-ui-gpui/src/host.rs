@@ -647,6 +647,7 @@ impl ProtoHostView {
         cx: &mut Context<Self>,
     ) {
         self.surfaces = surfaces;
+        self.publish_order();
         self.subscribe_focus(window, cx);
         cx.notify();
     }
