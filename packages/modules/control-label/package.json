@@ -15,7 +15,8 @@
     "@proto.ui/core": "workspace:*",
     "@proto.ui/types": "workspace:*",
     "@proto.ui/module-base": "workspace:*",
-    "@proto.ui/module-a11y": "workspace:*"
+    "@proto.ui/module-a11y": "workspace:*",
+    "@proto.ui/module-anatomy": "workspace:*"
   },
   "description": "Proto UI explicit independent control-label association protocol.",
   "license": "MIT",

@@ -86,6 +86,28 @@ describe('prototypes/shadcn: button', () => {
     expect(tokens).toContain('size-8');
     expect(tokens).not.toContain('whitespace-normal');
 
+    // Preserve every public size/wrap combination while keeping icon density fixed.
+    for (const size of ['default', 'sm', 'lg', 'icon'] as const) {
+      for (const wrap of [false, true]) {
+        rawProps = { size, wrap };
+        controller.applyRawProps(rawProps as any);
+        const actual = controller.getRuleStyleTokens();
+        if (size === 'icon') {
+          expect(actual).toContain('size-8');
+          expect(actual).toContain('whitespace-nowrap');
+          expect(actual).not.toContain('h-auto');
+          expect(actual).not.toContain('whitespace-normal');
+        } else {
+          const height = { default: '8', sm: '7', lg: '9' }[size];
+          expect(actual).toContain(`${wrap ? 'min-h' : 'h'}-${height}`);
+          expect(actual).toContain(wrap ? 'whitespace-normal' : 'whitespace-nowrap');
+          expect(actual).not.toContain(wrap ? 'whitespace-nowrap' : 'whitespace-normal');
+          expect(actual.includes('h-auto')).toBe(wrap);
+          expect(actual.includes('max-w-full')).toBe(wrap);
+        }
+      }
+    }
+
     rawProps = {};
     controller.applyRawProps(rawProps as any);
     tokens = controller.getRuleStyleTokens();

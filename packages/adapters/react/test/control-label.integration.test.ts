@@ -140,3 +140,61 @@ it('withdraws and restores an actual Adapter naming lease inside a ShadowRoot', 
     await mutations();
   }
 });
+
+it.each(['open', 'closed'] as const)(
+  'renews retained Adapter naming after delayed movement into another %s ShadowRoot',
+  async (mode) => {
+    const { createMountedReactAdapterInto } = await import('./utils/fake-react');
+    const first = document.createElement('div');
+    const second = document.createElement('div');
+    document.body.append(first, second);
+    const oldScope = first.attachShadow({ mode });
+    const newScope = second.attachShadow({ mode });
+    const labelHost = document.createElement('div');
+    const targetHost = document.createElement('div');
+    oldScope.append(labelHost, targetHost);
+    const instanceAssociations = { controlLabel: createControlLabelRef() };
+    const label = createMountedReactAdapterInto(labelRoot, labelHost, {
+      instanceAssociations,
+      naming: true,
+      activation: true,
+    });
+    const target = createMountedReactAdapterInto(checkboxRoot, targetHost, {
+      instanceAssociations,
+    });
+    const labelNode = label.root as HTMLElement;
+    const targetNode = target.root as HTMLElement;
+    const mutations = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+    const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    try {
+      await mutations();
+      expect(targetNode.getAttribute('aria-labelledby')).toBe(labelNode.id);
+      labelHost.remove();
+      await mutations();
+      // Removal already withdraws the old name; the regression is renewal.
+      expect(targetNode.hasAttribute('aria-labelledby')).toBe(false);
+      newScope.append(labelHost);
+      await frame();
+      await mutations();
+      expect(targetNode.hasAttribute('aria-labelledby')).toBe(false);
+      targetHost.remove();
+      await mutations();
+      newScope.append(targetHost);
+      await frame();
+      await mutations();
+      expect(targetNode.getAttribute('aria-labelledby')).toBe(labelNode.id);
+      expect(labelNode.id).not.toBe('');
+      pointerClick(labelNode);
+      expect(target.ref.current.getExposes().checked.get()).toBe(true);
+      label.unmount();
+      await mutations();
+      expect(targetNode.hasAttribute('aria-labelledby')).toBe(false);
+    } finally {
+      label.unmount();
+      target.unmount();
+      first.remove();
+      second.remove();
+      await mutations();
+    }
+  }
+);

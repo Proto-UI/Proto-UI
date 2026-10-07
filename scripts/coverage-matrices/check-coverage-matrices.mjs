@@ -161,6 +161,10 @@ const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
   'Results:',
 ]);
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
+  // Reviewed Field validation request type consumed by the blocked demo controller.
+  'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
+  }),
   // Accepted main integrations: exact source owners and public inputs only.
   // These bindings do not promote draft components or admit sibling imports.
   'apps/www/src/components/Homepage/homepage-text.ts': Object.freeze({
@@ -9084,6 +9088,12 @@ const PROMOTION_RESOLVER_CONFIG_SHA256 =
 // are part of the reviewed resolver boundary, not an unrestricted plugin hook.
 const PROMOTION_AUDIT_CONFIG_SHA256 =
   'b07dfc4350c16a8bee3b65717887cc5d592002f2cb492e134c60a3d18519a6de';
+// Finf source-reviewed sidebar additions and the one lazy association chunk
+// exclusion leave the mirrored resolver unchanged. Retain both historic profiles.
+const PROMOTION_FINF_CONFIG_SHA256 =
+  '368441f22060c0a9adec23a98320e87fb68df4b64c1a3d8e7e3ff3877944f475';
+const PROMOTION_FINF_AUDIT_CONFIG_SHA256 =
+  '37e3dc63ada011e330c32ed2c97af28600a87cdef0d892c3ed9adb8b3b84e705';
 const PROMOTION_AUDIT_PLUGIN_PATH = 'apps/www/scripts/contrast-provenance.mjs';
 const PROMOTION_AUDIT_PLUGIN_SHA256 =
   'a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a';
@@ -9102,10 +9112,16 @@ export function promotionBarePackageTargets(root, specifier, metadata) {
   )
     throw unrecognizedConfig();
   const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
-  if (configSha !== PROMOTION_RESOLVER_CONFIG_SHA256 && configSha !== PROMOTION_AUDIT_CONFIG_SHA256)
+  const auditProfile =
+    configSha === PROMOTION_AUDIT_CONFIG_SHA256 || configSha === PROMOTION_FINF_AUDIT_CONFIG_SHA256;
+  if (
+    configSha !== PROMOTION_RESOLVER_CONFIG_SHA256 &&
+    configSha !== PROMOTION_FINF_CONFIG_SHA256 &&
+    !auditProfile
+  )
     throw unrecognizedConfig();
   metadata.add(configPath);
-  if (configSha === PROMOTION_AUDIT_CONFIG_SHA256) {
+  if (auditProfile) {
     const pluginPath = path.join(root, PROMOTION_AUDIT_PLUGIN_PATH);
     assertPromotionModulePath(root, pluginPath);
     if (

@@ -37,7 +37,7 @@ const required = {
 
 describe('Text public compiler consumption', () => {
   // T-TEXT-0001-CASE-COMPILER
-  it.each(['shadcn', 'brutalist'])(
+  it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])(
     'closes all %s Text tokens from actual source and emits owned Web CSS',
     async (family) => {
       const tokens = (await collectProtoStyleTokens(
@@ -89,6 +89,26 @@ describe('Text public compiler consumption', () => {
           runtime === 'wc' ? entry.items[0].wcExport : entry.items[0].reactExport
         );
       }
+    }
+  );
+
+  it.each(['bootstrap-2-3-2', 'liquid-glass'])(
+    'keeps %s Text source-only and generates complete four-Web facades only explicitly',
+    (family) => {
+      for (const runtime of ['wc', 'react', 'vue', 'vue2']) {
+        expect(() => renderHostIndex(runtime, [`${family}-text`])).toThrow(/workspace-source-only/);
+        expect(renderHostIndex(runtime, [`${family}-text`], { sourceMode: 'workspace' })).toContain(
+          `from '@proto.ui/prototypes-${family}/text'`
+        );
+      }
+      const manifest = JSON.parse(
+        readFileSync(`packages/prototypes/${family}/package.json`, 'utf8')
+      );
+      expect(manifest.private).toBe(true);
+      expect(manifest.exports['./text']).toEqual({
+        types: './src/text/index.ts',
+        default: './src/text/index.ts',
+      });
     }
   );
 

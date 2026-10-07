@@ -35,8 +35,8 @@ afterEach(async () => {
 });
 const runtimes = ['wc', 'react', 'vue', 'vue2'] as const;
 for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
-  describe(`${family} public Collapsible without an invented family Select`, () => {
-    it('both locale pages use the real header preference channel rather than requiring missing Select parts', () => {
+  describe(`${family} public Collapsible with its actual family Select`, () => {
+    it('both locale pages expose the implemented family Select toolbar', () => {
       for (const language of ['en', 'zh-cn']) {
         const page = readFileSync(
           path.resolve(
@@ -44,7 +44,7 @@ for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
           ),
           'utf8'
         );
-        expect(page).toContain('toolbar={false}');
+        expect(page).toContain('toolbar={true}');
         expect(page).toContain(`demo-${family}-collapsible`);
       }
     });
@@ -61,13 +61,14 @@ for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
           runtimeList: [...runtimes],
           projectionFamilyId: family,
           componentId: 'collapsible',
-          toolbar: false,
+          toolbar: true,
         });
-        await vi.waitFor(() =>
-          expect(root.dataset.projectionState, root.textContent ?? '').toBe('ready')
+        await vi.waitFor(
+          () => expect(root.dataset.projectionState, root.textContent ?? '').toBe('ready'),
+          { timeout: 5000 }
         );
         expect(root.dataset.projectionRuntime).toBe(runtime);
-        expect(root.querySelector('[data-projection-control="runtime"]')).toBeNull();
+        expect(root.querySelector('[data-projection-control="runtime"]')).not.toBeNull();
         const disclosure = root.querySelector('[data-demo-ref="uncontrolled"]')!;
         const trigger = disclosure.querySelector<HTMLElement>('[role="button"]')!;
         expect(trigger.getAttribute('aria-expanded')).toBe('false');
@@ -77,7 +78,10 @@ for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
         document.dispatchEvent(
           new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: next } })
         );
-        await vi.waitFor(() => expect(root.dataset.projectionRuntime).toBe(next));
+        await vi.waitFor(() => {
+          expect(root.dataset.projectionState).toBe('ready');
+          expect(root.dataset.projectionRuntime).toBe(next);
+        }, { timeout: 5000 });
         expect(trigger.isConnected).toBe(false);
         expect(
           root

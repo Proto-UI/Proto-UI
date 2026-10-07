@@ -1758,3 +1758,103 @@ describe('contrast probe / real Chromium instrument calibration', () => {
     }
   });
 });
+
+it('calibrates translucent paint and zero-area straight SVG stroke witnesses without widening ratios', async () => {
+  const context = await browser.newContext({ viewport: { width: 800, height: 900 } });
+  try {
+    const page = await context.newPage();
+    const path = (d: string, style = '') =>
+      `<svg viewBox="0 0 24 24" style="width:14px;height:14px" fill="none" stroke="#000" stroke-width="3"><path d="${d}" style="${style}"/></svg>`;
+    const root = (id: string, child = '', style = '') =>
+      `<div id="${id}" data-pui-root data-demo-ref="${id}" style="background:transparent;color:transparent;${style}">${child}</div>`;
+    await page.setContent(
+      fixture(
+        [
+          root('translucent', '', 'background:rgba(0,0,0,0.8)'),
+          root('alpha-zero', '', 'background:rgba(0,0,0,0)'),
+          root('horizontal', path('M5 12h14')),
+          root('vertical', path('M12 5v14')),
+          root('stroke-zero', path('M5 12h14', 'stroke:transparent')),
+          root('stroke-hidden', path('M5 12h14', 'opacity:0')),
+          root('stroke-dashed', path('M5 12h14', 'stroke-dasharray:2 2')),
+          root('stroke-css-none', path('M5 12h14', 'd:none')),
+          root('stroke-outside', path('M5 12h14', 'transform:translateX(900px)')),
+          root('stroke-clipped', `<div style="height:0;overflow:hidden">${path('M5 12h14')}</div>`),
+          root('stroke-rotated', path('M5 12h14', 'transform:rotate(30deg)')),
+        ].join('')
+      )
+    );
+    await page.locator('[data-pui-root]').evaluateAll((elements) => {
+      for (const element of elements) {
+        element.setAttribute('data-projection-owner', 'calibration');
+        element.setAttribute('data-projection-generation', '1');
+      }
+    });
+    await page.addScriptTag({ content: bundle });
+    const observations = await page.locator('[data-pui-root]').evaluateAll((elements) =>
+      elements.map((element) => ({
+        id: element.id,
+        observation: window.puiContrastProbe.readContrastTargetObservation(element),
+        centerline: element.querySelector('path')?.getBoundingClientRect().toJSON(),
+      }))
+    );
+    const png = await page.screenshot({ type: 'png', caret: 'initial' });
+    const frame = await page.evaluate(
+      (image) =>
+        window.puiContrastProbe.collectContrastFrame({ image, family: 'instrument-calibration' }),
+      png.toString('base64')
+    );
+    await recordCalibrationFile('translucent-and-straight-stroke.png', png);
+    await recordCalibrationFile(
+      'translucent-and-straight-stroke.json',
+      JSON.stringify(
+        {
+          probeBundleSha256: createHash('sha256').update(bundle).digest('hex'),
+          pngSha256: createHash('sha256').update(png).digest('hex'),
+          observations,
+          frame,
+        },
+        null,
+        2
+      )
+    );
+    for (const row of observations)
+      expect(row.observation.achieved, row.id).toBe(
+        ['translucent', 'horizontal', 'vertical'].includes(row.id)
+      );
+    const beforeVectorEffect = await page.evaluate(() =>
+      window.puiContrastProbe.readContrastState()
+    );
+    const vectorStyle = await page.addStyleTag({
+      content: '#horizontal path { vector-effect: non-scaling-stroke; }',
+    });
+    expect(await page.evaluate(() => window.puiContrastProbe.readContrastState())).not.toBe(
+      beforeVectorEffect
+    );
+    expect(
+      await page
+        .locator('#horizontal')
+        .evaluate(
+          (element) => window.puiContrastProbe.readContrastTargetObservation(element).achieved
+        )
+    ).toBe(false);
+    await vectorStyle.evaluate((element) => element.parentNode?.removeChild(element));
+    expect(await page.evaluate(() => window.puiContrastProbe.readContrastState())).toBe(
+      beforeVectorEffect
+    );
+    expect(observations.find((row) => row.id === 'horizontal')!.centerline!.height).toBe(0);
+    expect(observations.find((row) => row.id === 'vertical')!.centerline!.width).toBe(0);
+    expect(surface(frame, 'translucent').paint.fillAlpha).toBe(0.8);
+    expect(surface(frame, 'translucent').exterior.length).toBeGreaterThan(0);
+    expect(
+      surface(frame, 'translucent').exterior.every((edge) => edge.opaqueFillVsPixel === null)
+    ).toBe(true);
+    // Stroke existence does not promote zero-area numeric glyph samples.
+    for (const id of ['horizontal', 'vertical']) {
+      expect(surface(frame, id).glyphs.some((glyph) => glyph.tag === 'path')).toBe(true);
+      expect(surface(frame, id).glyphs.every((glyph) => glyph.strokeContrast === null)).toBe(true);
+    }
+  } finally {
+    await context.close();
+  }
+}, 30_000);

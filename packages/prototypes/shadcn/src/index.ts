@@ -267,3 +267,5 @@ export * from './label';
 
 export * from './collapsible';
 export * from './accordion';
+
+export * from './field';

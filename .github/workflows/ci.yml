@@ -238,8 +238,12 @@ jobs:
           mkdir -p evidence
           printf 'checkout=%s\npr_head=%s\n' "$(git rev-parse HEAD)" "${{ github.event.pull_request.head.sha || github.sha }}" > evidence/source.txt
           sw_vers >> evidence/source.txt
+          xcrun --sdk macosx --show-sdk-version >> evidence/source.txt
           cargo test -p proto-ui-gpui --features macos-accessibility-test --test accesskit_macos 2>&1 | tee evidence/accesskit.log
           grep -Eq "test result: ok\. [1-9][0-9]* passed" evidence/accesskit.log
+          test -s evidence/control-label-action-enabled.png
+          test -s evidence/control-label-action-disabled.png
+          shasum -a 256 evidence/control-label-*.png > evidence/png-sha256.txt
 
       - name: Upload native source-bound evidence
         if: always()

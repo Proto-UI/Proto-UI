@@ -1,7 +1,9 @@
 import type { DemoSpec } from './demo-types';
 
 /** Consumer layout only. Typography comes from each real package Text prototype. */
-export function createTextAtomDemo(family: 'base' | 'shadcn' | 'brutalist'): DemoSpec {
+export function createTextAtomDemo(
+  family: 'base' | 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass'
+): DemoSpec {
   const prototypeId = `${family}-text-root`;
   return {
     type: 'demo',

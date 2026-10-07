@@ -24,9 +24,11 @@ export function createAssociationLedger() {
         Object.getOwnPropertySymbols(input).length
       )
         throw new TypeError('instance.associations requires a bounded record');
-      for (const key of Object.keys(input))
+      for (const key of Object.getOwnPropertyNames(input))
         if (key !== 'controlLabel') throw new TypeError(`unknown instance association: ${key}`);
-      const key = (input as { controlLabel?: unknown }).controlLabel;
+      const key = Object.prototype.hasOwnProperty.call(input, 'controlLabel')
+        ? (input as { controlLabel?: unknown }).controlLabel
+        : undefined;
       if (key != null && (typeof key !== 'string' || !/^[A-Za-z0-9:._-]{1,128}$/.test(key)))
         throw new TypeError('controlLabel requires a bounded renderer key');
       const next = key == null ? undefined : (key as string);

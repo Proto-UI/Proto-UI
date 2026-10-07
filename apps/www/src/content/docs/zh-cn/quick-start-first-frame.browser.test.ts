@@ -70,6 +70,10 @@ function readPageFrame({
             fontFamily: css.fontFamily,
             lineHeight: css.lineHeight,
             color: css.color,
+            fontFaceReady: document.fonts.check(
+              `${css.fontStyle} ${css.fontWeight} ${css.fontSize} ${css.fontFamily}`,
+              owner.textContent ?? ''
+            ),
             visible:
               !!rect.width && !!rect.height && getComputedStyle(owner).visibility === 'visible',
           },
@@ -118,11 +122,87 @@ function readPageFrame({
 async function measure(page: Page) {
   return page.evaluate(readPageFrame, { selectors: targets });
 }
+async function beforeReleaseDeadline<T>(work: Promise<T>, label: string): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      work,
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error(`Pre-module ${label} did not settle within 15s`)),
+          15_000
+        );
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+async function captureViewport(page: Page, file: string) {
+  // Playwright's screenshot convenience method also awaits document.fonts.ready.
+  // Chromium's public captureScreenshot captures the real current surface
+  // without waiting for the intentionally paused deferred-module document load.
+  const session = await page.context().newCDPSession(page);
+  try {
+    const screenshot = await beforeReleaseDeadline(
+      session.send('Page.captureScreenshot', {
+        format: 'png',
+        fromSurface: true,
+        captureBeyondViewport: false,
+      }),
+      'viewport capture'
+    );
+    await writeFile(file, Buffer.from(screenshot.data, 'base64'));
+  } finally {
+    await session.detach();
+  }
+}
+async function waitForCapturedFonts(page: Page) {
+  // FontFaceSet.ready also waits for document loading. Deferred module requests
+  // are intentionally paused here, so that whole-document promise would await
+  // this test's own release gate. Load only the already-painted target faces.
+  // CSS Font Loading §3: https://drafts.csswg.org/css-font-loading/#fontfaceset-interface
+  await beforeReleaseDeadline(
+    page.evaluate(async (selectors) => {
+      await Promise.all(
+        Object.values(selectors).map((selector) => {
+          const owner = document.querySelector<HTMLElement>(selector)!;
+          const leaf = owner.querySelector<HTMLElement>('[data-typography-prototype]') ?? owner;
+          const css = getComputedStyle(leaf);
+          return document.fonts.load(
+            `${css.fontStyle} ${css.fontWeight} ${css.fontSize} ${css.fontFamily}`,
+            owner.textContent ?? ''
+          );
+        })
+      );
+    }, targets),
+    'required fonts'
+  );
+}
+async function checkpoint(page: Page, name: string, phase: string) {
+  await writeFile(
+    path.join(directory, `${name}-progress.json`),
+    JSON.stringify({ source, url: page.url(), phase, checkedAt: new Date().toISOString() }, null, 2)
+  );
+}
+async function captureFailure(page: Page, name: string, failure: unknown) {
+  const detail: { source: typeof source; failure: string; captureError?: string } = {
+    source,
+    failure: failure instanceof Error ? (failure.stack ?? failure.message) : String(failure),
+  };
+  // This cannot depend on the selectors or font/ready conditions that failed.
+  try {
+    await captureViewport(page, path.join(directory, `${name}-failure.png`));
+  } catch (error) {
+    detail.captureError = String(error);
+  }
+  await writeFile(path.join(directory, `${name}-failure.json`), JSON.stringify(detail, null, 2));
+}
 async function record(page: Page, name: string) {
   const result = await measure(page);
   // The whole document viewport stays visible, including content outside the
   // note; a hidden-page/skeleton workaround cannot satisfy these artifacts.
-  await page.screenshot({ path: path.join(directory, `${name}.png`), fullPage: false });
+  await captureViewport(page, path.join(directory, `${name}.png`));
   await writeFile(
     path.join(directory, `${name}.json`),
     JSON.stringify(
@@ -164,6 +244,8 @@ function compare(
     const initial = before.values[key]!;
     const final = after.values[key]!;
     expect(initial.visible, `${key} readable before modules`).toBe(true);
+    expect(initial.fontFaceReady, `${key} required font faces ready before modules`).toBe(true);
+    expect(final.fontFaceReady, `${key} required font faces ready after modules`).toBe(true);
     expect(final.visible, `${key} readable after modules`).toBe(true);
     expect(final.text, `${key} authored text preserved`).toBe(initial.text);
     for (const coordinate of ['x', 'y', 'width', 'height'] as const)
@@ -224,10 +306,13 @@ describe('quick-start first-frame continuity', () => {
               navigation === 'cold'
                 ? page.goto(`${baseUrl}${route}`, { waitUntil: 'commit' })
                 : page.reload({ waitUntil: 'commit' });
-            await loading;
             const prefix = `${runtime}-${condition.width}-${condition.colorScheme}-${navigation}`;
             try {
+              await checkpoint(page, prefix, 'navigation-commit');
+              await loading;
+              await checkpoint(page, prefix, 'native-content');
               await page.locator(targets.noteBody).waitFor({ state: 'visible' });
+              await checkpoint(page, prefix, 'native-styles');
               await page.waitForFunction(() => {
                 const title = document.querySelector('h1[data-site-typography="h1"]');
                 return (
@@ -236,11 +321,14 @@ describe('quick-start first-frame continuity', () => {
                   document.styleSheets.length > 0
                 );
               });
-              await page.evaluate(() => document.fonts.ready.then(() => undefined));
+              await checkpoint(page, prefix, 'target-font-faces');
+              await waitForCapturedFonts(page);
+              await checkpoint(page, prefix, 'first-frame-capture');
               const before = await record(page, `${prefix}-first-frame`);
               expect(before.ready).toBeUndefined();
               await page.evaluate(readPageFrame, { selectors: targets, observe: true });
               release();
+              await checkpoint(page, prefix, 'hydration');
               await page.waitForFunction(
                 (runtime) => {
                   const note = document.querySelector<HTMLElement>('.starlight-aside--note');
@@ -270,6 +358,10 @@ describe('quick-start first-frame continuity', () => {
               compare(before, after);
               for (const frame of frames) compare(before, frame);
               expect(errors).toEqual([]);
+              await checkpoint(page, prefix, 'passed');
+            } catch (error) {
+              await captureFailure(page, prefix, error);
+              throw error;
             } finally {
               release();
               // Preserve collected transitions even when readiness or geometry fails.

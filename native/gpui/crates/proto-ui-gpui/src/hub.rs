@@ -15,11 +15,12 @@
 use std::collections::{HashMap, HashSet};
 
 use gpui::{App, Context, EventEmitter, FocusHandle, Refineable, StyleRefinement, Window};
+use proto_ui_host_protocol::available_space::AvailableSpaceLeaseState;
 use proto_ui_host_protocol::messages::{
-    ControlLabelKind, ControlLabelPlan, ControlLabelView, ExposeCall, FocusResult,
-    HostToPeerMessage, InputSampleMessage, InstanceAssociations, InstanceAssociationsSet, MetaSet,
-    NativeControlLabelView, OpenStatus, PeerToHostMessage, ProjectionAckMessage, ProjectionOrder,
-    PropsSet, SessionDispose, SessionOpen, WireRecord,
+    AvailableSpaceFrame, AvailableSpaceRect, ControlLabelKind, ControlLabelPlan, ControlLabelView,
+    ExposeCall, FocusResult, HostToPeerMessage, InputSampleMessage, InstanceAssociations,
+    InstanceAssociationsSet, MetaSet, NativeControlLabelView, OpenStatus, PeerToHostMessage,
+    ProjectionAckMessage, ProjectionOrder, PropsSet, SessionDispose, SessionOpen, WireRecord,
 };
 use proto_ui_host_protocol::model::{
     ActivationStatus, DefaultActionStatus, DeliveryResult, DetachStatus, HostSessionModel,
@@ -37,7 +38,7 @@ use crate::a11y::{project, A11yIssue, A11yProjection, A11yReference};
 use crate::control_label::{ControlLabelRef, LabelRoute, NativeTreeIdentity};
 use crate::host::{ProtoHostView, SurfaceChild, SurfaceNode, FOCUS_ROOT_REF};
 use crate::input::{SessionRoute, SurfaceId};
-use crate::style::{style_for_feedback_tokens, StyleIssue};
+use crate::style::{needs_available_space, style_for_feedback_in_region, StyleIssue};
 use crate::template::{build, parse, BuildContext, BuildIssue};
 
 /// What the host application decides about one instance it opens.
@@ -72,6 +73,11 @@ struct HubSession {
     projection: Option<A11yProjection>,
     /// The root's feedback style, as the Prototype last set it.
     feedback: StyleRefinement,
+    feedback_tokens: Vec<String>,
+    available_lease: AvailableSpaceLeaseState,
+    available_rect: Option<AvailableSpaceRect>,
+    available_frame: Option<AvailableSpaceFrame>,
+    fixed_centered: bool,
     /// Whether the focus plan lets the host focus the root on request.
     focus_programmatic: bool,
     native_identity: NativeTreeIdentity,
@@ -186,9 +192,23 @@ pub struct HostHub {
     next_label_revision: u64,
     /// The order of views the peer last heard.
     order: Vec<SessionId>,
+    next_available_revision: u64,
 }
 
 impl HostHub {
+    fn physically_placed(&self, session_id: &str) -> bool {
+        self.sessions
+            .iter()
+            .flat_map(|(_, session)| session.config.slots.values().flatten())
+            .any(|child| match child {
+                SurfaceChild::Session(id) => id == session_id,
+                SurfaceChild::Surface(surface) => {
+                    surface.placed_sessions().iter().any(|id| id == session_id)
+                }
+                SurfaceChild::Text(_) => false,
+            })
+    }
+
     fn session_mut(&mut self, session_id: &str) -> Option<&mut HubSession> {
         self.sessions
             .iter_mut()
@@ -422,6 +442,11 @@ impl ProtoHostView {
                 a11y: None,
                 projection: None,
                 feedback: StyleRefinement::default(),
+                feedback_tokens: Vec::new(),
+                available_lease: AvailableSpaceLeaseState::default(),
+                available_rect: None,
+                available_frame: None,
+                fixed_centered: false,
                 focus_programmatic: false,
                 native_identity: NativeTreeIdentity::default(),
                 control_label_plan: None,
@@ -518,6 +543,17 @@ impl ProtoHostView {
         cx: &mut Context<Self>,
     ) {
         match message {
+            PeerToHostMessage::AvailableSpaceLease(message) => {
+                let Some(session) = self.hub.session_mut(&message.session_id) else {
+                    self.note_unknown(&message.session_id, "available-space.lease");
+                    return;
+                };
+                let current = session.model.snapshot().current_epoch;
+                if !session.available_lease.accept(message, current) {
+                    return;
+                }
+                self.refresh_available_space(window, cx);
+            }
             PeerToHostMessage::ControlLabelPlan(message) => {
                 let Some(session) = self.hub.session_mut(&message.session_id) else {
                     self.note_unknown(&message.session_id, "control-label.plan");
@@ -590,6 +626,9 @@ impl ProtoHostView {
                 // nothing of it is shown, reported or routed until a greater
                 // epoch installs another, so no empty shell stays visible (-J).
                 session.surface = None;
+                session.available_lease.retire(detach.view_epoch);
+                session.available_rect = None;
+                session.available_frame = None;
                 session.a11y = None;
                 session.projection = None;
                 self.refresh_route(&detach.session_id);
@@ -686,6 +725,7 @@ impl ProtoHostView {
                 self.publish_surfaces(window, cx);
             }
             PeerToHostMessage::StyleApply(style) => {
+                let physically_placed = self.hub.physically_placed(&style.session_id);
                 let Some(session) = self.hub.session_mut(&style.session_id) else {
                     self.note_unknown(&style.session_id, "style.apply");
                     return;
@@ -700,13 +740,23 @@ impl ProtoHostView {
                     });
                     return;
                 }
-                let resolved = style_for_feedback_tokens(
+                let resolved = style_for_feedback_in_region(
                     style.tokens.iter().map(String::as_str),
                     session.config.theme,
                     LengthContext::default(),
+                    session.available_rect,
                 );
                 if resolved.issues.is_empty() {
+                    if resolved.fixed_centered
+                        && (physically_placed || session.config.root_style.position.is_some())
+                    {
+                        self.hub.notes.push(HubNote::PeerDiagnostic { session_id: Some(style.session_id),
+                            diagnostic: diagnostic("available-space-root-layout-conflict", "fixed-center lowering requires an unpositioned application root at the native window boundary") });
+                        return;
+                    }
                     session.feedback = resolved.refinement;
+                    session.fixed_centered = resolved.fixed_centered;
+                    session.feedback_tokens = style.tokens;
                     self.publish_surfaces(window, cx);
                     return;
                 }
@@ -937,7 +987,18 @@ impl ProtoHostView {
             }
         };
 
+        let region = crate::available_space::root_region(window, cx.entity_id());
+        let physically_placed = self.hub.physically_placed(&session_id);
         let session = self.hub.session_mut(&session_id).expect("checked above");
+        let available = session
+            .available_lease
+            .current(transaction.view_epoch)
+            .and(region);
+        if needs_available_space(transaction.style.iter().map(String::as_str))
+            && available.is_none()
+        {
+            return failed_ack(&transaction, diagnostic("available-space-required", "root-content style requires the current native view/Module lease and actual window root"));
+        }
         let (root, mut issues) = build(
             &template,
             BuildContext {
@@ -951,11 +1012,17 @@ impl ProtoHostView {
         );
         // The root's feedback style is part of the view, so a token the host
         // cannot render refuses the projection as a template token does.
-        let feedback = style_for_feedback_tokens(
+        let feedback = style_for_feedback_in_region(
             transaction.style.iter().map(String::as_str),
             session.config.theme,
             LengthContext::default(),
+            available,
         );
+        if feedback.fixed_centered
+            && (physically_placed || session.config.root_style.position.is_some())
+        {
+            return failed_ack(&transaction, diagnostic("available-space-root-layout-conflict", "fixed-center lowering requires an unpositioned application root at the native window boundary"));
+        }
         issues.extend(feedback.issues.into_iter().map(|issue| BuildIssue::Style {
             surface: session.root_id.clone(),
             issue,
@@ -991,6 +1058,9 @@ impl ProtoHostView {
         session.surface = Some(root);
         apply_focus_plan(session, &transaction.focus);
         session.feedback = feedback.refinement;
+        session.feedback_tokens = transaction.style.clone();
+        session.fixed_centered = feedback.fixed_centered;
+        session.available_rect = available;
         // The installed view's own snapshot, which may be `null`: a new view
         // does not inherit the old one's.
         let (projection, issues) = transaction.a11y.as_ref().map(project).unwrap_or_default();
@@ -1033,6 +1103,11 @@ impl ProtoHostView {
             .sessions
             .iter()
             .filter_map(|(id, session)| {
+                if needs_available_space(session.feedback_tokens.iter().map(String::as_str))
+                    && session.available_rect.is_none()
+                {
+                    return None;
+                }
                 let mut root = session.surface.clone()?;
                 root.a11y = self.hub.reported(id);
                 // The Prototype's feedback style first, then the application's
@@ -1042,6 +1117,20 @@ impl ProtoHostView {
                 style.refine(&session.config.root_style);
                 root.style = style;
                 Some((id.as_str(), root))
+            })
+            .collect();
+        self.bridge.borrow_mut().fixed_centers = self
+            .hub
+            .sessions
+            .iter()
+            .filter_map(|(_, session)| {
+                if session.fixed_centered {
+                    session
+                        .available_rect
+                        .map(|rect| (session.root_id.clone(), rect))
+                } else {
+                    None
+                }
             })
             .collect();
         // A session placed in another's slot renders only there, also while
@@ -1071,6 +1160,62 @@ impl ProtoHostView {
         self.publish_order();
         self.subscribe_focus(window, cx);
         cx.notify();
+    }
+
+    /// Recompute center and max-size from a single same-frame host region.
+    /// This queues diagnostics to the peer; it never waits for guest IPC in paint.
+    pub(crate) fn refresh_available_space(&mut self, window: &mut Window, cx: &mut Context<Self>) {
+        let region = crate::available_space::root_region(window, cx.entity_id());
+        let mut changed = false;
+        for (session_id, session) in &mut self.hub.sessions {
+            let epoch = session.model.snapshot().current_epoch;
+            let lease = epoch
+                .and_then(|epoch| session.available_lease.current(epoch))
+                .cloned();
+            let next = lease.as_ref().and(region);
+            if next != session.available_rect {
+                session.available_rect = next;
+                changed = true;
+                let resolved = style_for_feedback_in_region(
+                    session.feedback_tokens.iter().map(String::as_str),
+                    session.config.theme,
+                    LengthContext::default(),
+                    next,
+                );
+                if resolved.issues.is_empty() {
+                    session.feedback = resolved.refinement;
+                    session.fixed_centered = resolved.fixed_centered;
+                }
+            }
+            let Some(lease) = lease else {
+                session.available_frame = None;
+                continue;
+            };
+            let same = session.available_frame.as_ref().is_some_and(|frame| {
+                frame.lease_id == lease.lease_id
+                    && frame.view_epoch == lease.view_epoch
+                    && frame.module_epoch == lease.module_epoch
+                    && frame.rect == next
+            });
+            if !same {
+                self.hub.next_available_revision += 1;
+                let frame = AvailableSpaceFrame {
+                    session_id: session_id.clone(),
+                    view_epoch: lease.view_epoch,
+                    module_epoch: lease.module_epoch,
+                    lease_id: lease.lease_id,
+                    revision: self.hub.next_available_revision,
+                    rect: next,
+                };
+                self.hub
+                    .outbox
+                    .push(HostToPeerMessage::AvailableSpaceFrame(frame.clone()));
+                session.available_frame = Some(frame);
+            }
+        }
+        if changed {
+            self.publish_surfaces(window, cx);
+        }
     }
 
     /// Publishes only host-owned views in the actual GPUI window/tree. This

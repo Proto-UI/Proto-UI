@@ -818,6 +818,34 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
       require(['shadcn/ui', 'Base UI'].includes(reference.project) &&
         !projects.has(reference.project), `Comparison reference project drift: ${row.id}`);
       projects.add(reference.project);
+      const source =
+        reference.project === 'shadcn/ui'
+          ? { repository: 'shadcn-ui/ui', revision: data.referenceSnapshots.shadcn.sha }
+          : reference.project === 'Base UI'
+            ? { repository: 'mui/base-ui', revision: data.referenceSnapshots.baseUi.sha }
+            : null;
+      let pin;
+      try {
+        pin = new URL(reference.pinnedSource);
+      } catch {
+        /* Invalid URLs fail the check below. */
+      }
+      const segments = pin?.pathname.split('/').slice(1) ?? [];
+      require(Boolean(
+        source &&
+        pin &&
+        pin.origin === 'https://github.com' &&
+        !pin.username &&
+        !pin.password &&
+        !pin.search &&
+        !pin.hash &&
+        segments.slice(0, 2).join('/') === source.repository &&
+        ['blob', 'tree'].includes(segments[2]) &&
+        /^[a-f0-9]{40}$/.test(source.revision) &&
+        segments[3] === source.revision &&
+        segments.length > 4 &&
+        segments.slice(4).every(Boolean)
+      ), `Reference snapshot pin mismatch: ${row.id}.${reference.project}`);
       for (const field of ['url', 'pinnedSource']) {
         const identity = field + '|' + normalizedUrl(reference[field]);
         require(!referenceUrls.has(identity), `Duplicate comparison reference: ${row.id}.${field}`);

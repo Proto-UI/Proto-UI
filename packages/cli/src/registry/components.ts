@@ -209,7 +209,217 @@ const baseCompound = (
     parts
   );
 
-export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
+const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
+  'base-field': {
+    ...defineCompound(
+      'base-field',
+      'Base Field (workspace source)',
+      '@proto.ui/prototypes-base',
+      '@proto.ui/prototypes-base/field',
+      [
+        {
+          prototypeImport: 'fieldRoot',
+          exportBaseName: 'BaseFieldRoot',
+          elementName: 'proto-ui-base-field-root',
+        },
+        {
+          prototypeImport: 'fieldLabel',
+          exportBaseName: 'BaseFieldLabel',
+          elementName: 'proto-ui-base-field-label',
+        },
+        {
+          prototypeImport: 'fieldControl',
+          exportBaseName: 'BaseFieldControl',
+          elementName: 'proto-ui-base-field-control',
+        },
+        {
+          prototypeImport: 'fieldDescription',
+          exportBaseName: 'BaseFieldDescription',
+          elementName: 'proto-ui-base-field-description',
+        },
+        {
+          prototypeImport: 'fieldError',
+          exportBaseName: 'BaseFieldError',
+          elementName: 'proto-ui-base-field-error',
+        },
+        {
+          prototypeImport: 'fieldValidity',
+          exportBaseName: 'BaseFieldValidity',
+          elementName: 'proto-ui-base-field-validity',
+        },
+      ],
+      { stylePreset: null }
+    ),
+    sourceOnly: true,
+  },
+  'shadcn-field': {
+    ...defineCompound(
+      'shadcn-field',
+      'Shadcn Field (workspace source)',
+      '@proto.ui/prototypes-shadcn',
+      '@proto.ui/prototypes-shadcn/field',
+      [
+        {
+          prototypeImport: 'fieldRoot',
+          exportBaseName: 'ShadcnFieldRoot',
+          elementName: 'proto-ui-shadcn-field-root',
+        },
+        {
+          prototypeImport: 'fieldLabel',
+          exportBaseName: 'ShadcnFieldLabel',
+          elementName: 'proto-ui-shadcn-field-label',
+        },
+        {
+          prototypeImport: 'fieldControl',
+          exportBaseName: 'ShadcnFieldControl',
+          elementName: 'proto-ui-shadcn-field-control',
+        },
+        {
+          prototypeImport: 'fieldDescription',
+          exportBaseName: 'ShadcnFieldDescription',
+          elementName: 'proto-ui-shadcn-field-description',
+        },
+        {
+          prototypeImport: 'fieldError',
+          exportBaseName: 'ShadcnFieldError',
+          elementName: 'proto-ui-shadcn-field-error',
+        },
+        {
+          prototypeImport: 'fieldValidity',
+          exportBaseName: 'ShadcnFieldValidity',
+          elementName: 'proto-ui-shadcn-field-validity',
+        },
+      ],
+      { stylePreset: 'shadcn' }
+    ),
+    sourceOnly: true,
+  },
+  'brutalist-field': {
+    ...defineCompound(
+      'brutalist-field',
+      'Brutalist Field (workspace source)',
+      '@proto.ui/prototypes-brutalist',
+      '@proto.ui/prototypes-brutalist/field',
+      [
+        {
+          prototypeImport: 'fieldRoot',
+          exportBaseName: 'BrutalistFieldRoot',
+          elementName: 'proto-ui-brutalist-field-root',
+        },
+        {
+          prototypeImport: 'fieldLabel',
+          exportBaseName: 'BrutalistFieldLabel',
+          elementName: 'proto-ui-brutalist-field-label',
+        },
+        {
+          prototypeImport: 'fieldControl',
+          exportBaseName: 'BrutalistFieldControl',
+          elementName: 'proto-ui-brutalist-field-control',
+        },
+        {
+          prototypeImport: 'fieldDescription',
+          exportBaseName: 'BrutalistFieldDescription',
+          elementName: 'proto-ui-brutalist-field-description',
+        },
+        {
+          prototypeImport: 'fieldError',
+          exportBaseName: 'BrutalistFieldError',
+          elementName: 'proto-ui-brutalist-field-error',
+        },
+        {
+          prototypeImport: 'fieldValidity',
+          exportBaseName: 'BrutalistFieldValidity',
+          elementName: 'proto-ui-brutalist-field-validity',
+        },
+      ],
+      { stylePreset: 'brutalist' }
+    ),
+    sourceOnly: true,
+  },
+  'bootstrap-2-3-2-field': {
+    ...defineCompound(
+      'bootstrap-2-3-2-field',
+      'Bootstrap232 Field (workspace source)',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      '@proto.ui/prototypes-bootstrap-2-3-2/field',
+      [
+        {
+          prototypeImport: 'fieldRoot',
+          exportBaseName: 'Bootstrap232FieldRoot',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-root',
+        },
+        {
+          prototypeImport: 'fieldLabel',
+          exportBaseName: 'Bootstrap232FieldLabel',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-label',
+        },
+        {
+          prototypeImport: 'fieldControl',
+          exportBaseName: 'Bootstrap232FieldControl',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-control',
+        },
+        {
+          prototypeImport: 'fieldDescription',
+          exportBaseName: 'Bootstrap232FieldDescription',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-description',
+        },
+        {
+          prototypeImport: 'fieldError',
+          exportBaseName: 'Bootstrap232FieldError',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-error',
+        },
+        {
+          prototypeImport: 'fieldValidity',
+          exportBaseName: 'Bootstrap232FieldValidity',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-validity',
+        },
+      ],
+      { stylePreset: 'bootstrap-2-3-2' }
+    ),
+    sourceOnly: true,
+  },
+  'liquid-glass-field': {
+    ...defineCompound(
+      'liquid-glass-field',
+      'LiquidGlass Field (workspace source)',
+      '@proto.ui/prototypes-liquid-glass',
+      '@proto.ui/prototypes-liquid-glass/field',
+      [
+        {
+          prototypeImport: 'fieldRoot',
+          exportBaseName: 'LiquidGlassFieldRoot',
+          elementName: 'proto-ui-liquid-glass-field-root',
+        },
+        {
+          prototypeImport: 'fieldLabel',
+          exportBaseName: 'LiquidGlassFieldLabel',
+          elementName: 'proto-ui-liquid-glass-field-label',
+        },
+        {
+          prototypeImport: 'fieldControl',
+          exportBaseName: 'LiquidGlassFieldControl',
+          elementName: 'proto-ui-liquid-glass-field-control',
+        },
+        {
+          prototypeImport: 'fieldDescription',
+          exportBaseName: 'LiquidGlassFieldDescription',
+          elementName: 'proto-ui-liquid-glass-field-description',
+        },
+        {
+          prototypeImport: 'fieldError',
+          exportBaseName: 'LiquidGlassFieldError',
+          elementName: 'proto-ui-liquid-glass-field-error',
+        },
+        {
+          prototypeImport: 'fieldValidity',
+          exportBaseName: 'LiquidGlassFieldValidity',
+          elementName: 'proto-ui-liquid-glass-field-validity',
+        },
+      ],
+      { stylePreset: 'liquid-glass' }
+    ),
+    sourceOnly: true,
+  },
   'base-label': base('base-label', 'Base Label', 'labelRoot', 'BaseLabelRoot'),
   'shadcn-label': shadcn('shadcn-label', 'Shadcn Label', 'labelRoot', 'ShadcnLabelRoot'),
   'brutalist-label': brutalist(
@@ -249,6 +459,30 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     'surfaceRoot',
     'BrutalistSurfaceRoot'
   ),
+  'bootstrap-2-3-2-text': {
+    ...defineSimple(
+      'bootstrap-2-3-2-text',
+      'Bootstrap232 Text (workspace source)',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      '@proto.ui/prototypes-bootstrap-2-3-2/text',
+      'textRoot',
+      'Bootstrap232TextRoot',
+      { stylePreset: 'bootstrap-2-3-2' }
+    ),
+    sourceOnly: true,
+  },
+  'liquid-glass-text': {
+    ...defineSimple(
+      'liquid-glass-text',
+      'LiquidGlass Text (workspace source)',
+      '@proto.ui/prototypes-liquid-glass',
+      '@proto.ui/prototypes-liquid-glass/text',
+      'textRoot',
+      'LiquidGlassTextRoot',
+      { stylePreset: 'liquid-glass' }
+    ),
+    sourceOnly: true,
+  },
   'base-text': base('base-text', 'Base Text', 'textRoot', 'BaseTextRoot'),
   'shadcn-text': shadcn('shadcn-text', 'shadcn Text', 'shadcnTextRoot', 'ShadcnTextRoot'),
   'brutalist-text': brutalist(
@@ -1014,6 +1248,82 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
     ),
   },
 
+  'bootstrap-2-3-2-select': {
+    ...defineCompound(
+      'bootstrap-2-3-2-select',
+      'Bootstrap232 Select',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      '@proto.ui/prototypes-bootstrap-2-3-2/select',
+      [
+        {
+          prototypeImport: 'selectRoot',
+          exportBaseName: 'Bootstrap232SelectRoot',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-root',
+        },
+        {
+          prototypeImport: 'selectTrigger',
+          exportBaseName: 'Bootstrap232SelectTrigger',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-trigger',
+        },
+        {
+          prototypeImport: 'selectValue',
+          exportBaseName: 'Bootstrap232SelectValue',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-value',
+        },
+        {
+          prototypeImport: 'selectContent',
+          exportBaseName: 'Bootstrap232SelectContent',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-content',
+        },
+        {
+          prototypeImport: 'selectItem',
+          exportBaseName: 'Bootstrap232SelectItem',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-item',
+        },
+      ],
+      { stylePreset: 'bootstrap-2-3-2' }
+    ),
+    sourceOnly: true,
+  },
+
+  'liquid-glass-select': {
+    ...defineCompound(
+      'liquid-glass-select',
+      'LiquidGlass Select',
+      '@proto.ui/prototypes-liquid-glass',
+      '@proto.ui/prototypes-liquid-glass/select',
+      [
+        {
+          prototypeImport: 'selectRoot',
+          exportBaseName: 'LiquidGlassSelectRoot',
+          elementName: 'proto-ui-liquid-glass-select-root',
+        },
+        {
+          prototypeImport: 'selectTrigger',
+          exportBaseName: 'LiquidGlassSelectTrigger',
+          elementName: 'proto-ui-liquid-glass-select-trigger',
+        },
+        {
+          prototypeImport: 'selectValue',
+          exportBaseName: 'LiquidGlassSelectValue',
+          elementName: 'proto-ui-liquid-glass-select-value',
+        },
+        {
+          prototypeImport: 'selectContent',
+          exportBaseName: 'LiquidGlassSelectContent',
+          elementName: 'proto-ui-liquid-glass-select-content',
+        },
+        {
+          prototypeImport: 'selectItem',
+          exportBaseName: 'LiquidGlassSelectItem',
+          elementName: 'proto-ui-liquid-glass-select-item',
+        },
+      ],
+      { stylePreset: 'liquid-glass' }
+    ),
+    sourceOnly: true,
+  },
+
   'bootstrap-2-3-2-collapsible': {
     ...defineCompound(
       'bootstrap-2-3-2-collapsible',
@@ -1263,9 +1573,18 @@ export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = {
   ]),
 };
 
+/** Installed/public discovery must never enumerate a workspace-only package. */
+export const COMPONENT_REGISTRY: Record<string, ComponentEntry> = Object.fromEntries(
+  Object.entries(ALL_COMPONENT_ENTRIES).filter(([, entry]) => !entry.sourceOnly)
+);
+/** Explicit workspace generation retains complete draft atoms without public admission. */
+export const WORKSPACE_COMPONENT_REGISTRY: Record<string, ComponentEntry> = Object.fromEntries(
+  Object.entries(ALL_COMPONENT_ENTRIES).filter(([, entry]) => entry.sourceOnly)
+);
+
 export function getComponentEntry(componentId: string | undefined): ComponentEntry | null {
   if (!componentId) return null;
-  return COMPONENT_REGISTRY[componentId] ?? null;
+  return COMPONENT_REGISTRY[componentId] ?? WORKSPACE_COMPONENT_REGISTRY[componentId] ?? null;
 }
 
 export function listComponentChoices(): { title: string; value: string }[] {

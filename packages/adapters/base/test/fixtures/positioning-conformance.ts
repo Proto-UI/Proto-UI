@@ -14,6 +14,28 @@ export function positioningAdapterConformance(
 ) {
   describe(`${name}: anchored positioning`, () => {
     it('projects available-space only for the active opted-in view and releases its projection on close', async () => {
+      // Geometry is injected in this DOM harness. The viewport alone cannot
+      // supply a known root-content box; zero root geometry stays unsupported.
+      const documentRoot = document.documentElement;
+      const rootDimensions = ['clientWidth', 'clientHeight', 'clientLeft'].map(
+        (key) => [key, Object.getOwnPropertyDescriptor(documentRoot, key)] as const
+      );
+      Object.defineProperties(documentRoot, {
+        clientWidth: { configurable: true, value: 390 },
+        clientHeight: { configurable: true, value: 800 },
+        clientLeft: { configurable: true, value: 0 },
+      });
+      const rootRect = vi.spyOn(documentRoot, 'getBoundingClientRect').mockReturnValue({
+        x: 0,
+        y: 0,
+        left: 0,
+        top: 0,
+        right: 390,
+        bottom: 800,
+        width: 390,
+        height: 800,
+        toJSON() {},
+      });
       const originalViewport = Object.getOwnPropertyDescriptor(window, 'visualViewport');
       const viewport = Object.assign(new EventTarget(), {
         width: 390,
@@ -77,6 +99,11 @@ export function positioningAdapterConformance(
         style.mockRestore();
         if (originalViewport) Object.defineProperty(window, 'visualViewport', originalViewport);
         else Reflect.deleteProperty(window, 'visualViewport');
+        rootRect.mockRestore();
+        for (const [key, descriptor] of rootDimensions) {
+          if (descriptor) Object.defineProperty(documentRoot, key, descriptor);
+          else Reflect.deleteProperty(documentRoot, key);
+        }
       }
     });
 

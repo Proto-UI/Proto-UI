@@ -1,0 +1,11 @@
+# Bootstrap and Liquid Text toolbar dependency
+
+Actual fixed-family toolbar materialization exposed missing `bootstrap-2-3-2-text-root` and `liquid-glass-text-root` after Select existed. The current user-directed full-family task covers Text; the parent assigned the concrete dependency to this worker. This is a separately reviewable addition, not a placeholder or an alias to Shadcn.
+
+Both prototypes directly consume `asTextRoot()` and map every value of size, tone, weight, font, leading, tracking, emphasis and decoration to standard typography feedback. Defaults and the authored slot remain Base-owned. Explicit leading wins over size line-height; prop removal restores defaults on the same native subject. The family theme supplies body/heading/mono font stacks and contrast-safe muted foreground; no third-party font assets are bundled. Liquid Select also receives explicit family radius tokens instead of accidentally relying on website theme inheritance.
+
+Text never emits user-select, role, tabindex, editing or activation behavior. Document text keeps its natural selection, and Text within native/Proto controls inherits that actual owner's selection policy. Native h1/p/label/a/button semantics and for/href remain with the surrounding owner.
+
+The complete `/text` and package-root source exports include generic/family aliases and Base types. Both packages remain private/unreleased. Four Web CLI facades require explicit workspace source mode; installed-consumer mode and unsupported GPUI host are rejected. Bilingual documentation and genuine four-example DemoSpecs are registered. The corresponding family manifests and toolbar labels use the real prototypes.
+
+The actual five-family, four-Adapter Text conformance suite passes 100 cases, covering every finite input/default and five native owner types. The accompanying compiler and recipe checks bring that focused command to 120 passing cases. These are synthetic-DOM/compiler results, not native selection or typography acceptance. The source-bound native Select/Text workflow registers the separate native selection check. Independent review, exact-head native paint/selection, GPUI typography and stable admission remain open; new entities stay draft.

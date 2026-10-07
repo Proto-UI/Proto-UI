@@ -11,6 +11,7 @@ const presence = new Map([
   ['P-BASE-TABS-CONTENT', 'selected'],
   ['P-BASE-COLLAPSIBLE-CONTENT', 'inline-expanded'],
   ['P-BASE-ACCORDION-CONTENT', 'inline-expanded'],
+  ['P-BASE-FIELD-ERROR', 'field-invalid'],
 ]);
 
 export function compileContrastAnatomy(demo, manifest) {
@@ -162,6 +163,40 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
     }
     const owner = ownerFor(instance);
     const ownerPhysical = owner && matched.get(owner.path);
+    if (instance.policy === 'field-invalid') {
+      const controls = owner
+        ? plan.instances.filter(
+            (node) =>
+              node.basePrototypeId === 'P-BASE-FIELD-CONTROL' && ownerFor(node)?.path === owner.path
+          )
+        : [];
+      const control = controls.length === 1 && matched.get(controls[0].path);
+      if (!ownerPhysical || !control || !['true', 'false'].includes(control.ariaInvalid)) {
+        reject(instance, 'No unambiguous authored Field control validity witness.');
+        continue;
+      }
+      const invalid = control.ariaInvalid === 'true';
+      const candidates = actual.filter(
+        (surface) =>
+          sameParent(surface, parent) &&
+          surface.prototypeId === instance.prototypeId &&
+          surface.ref === instance.ref
+      );
+      if (candidates.length > 1)
+        reject(instance, 'Ambiguous or duplicate materialized Field error.');
+      accept(instance, candidates, invalid || !!instance.props.keepMounted, 'field-invalid');
+      const error = matched.get(instance.path);
+      if (error && (!error.withinContent || error.currentLease !== true))
+        reject(instance, 'Field error escaped its current authored lease.');
+      if (error && (invalid ? !error.painted : !knownHidden(error)))
+        reject(
+          instance,
+          invalid
+            ? 'Invalid Field requires painted error content.'
+            : 'Valid Field error must remain hidden.'
+        );
+      continue;
+    }
     const triggers = owner
       ? plan.instances.filter(
           (node) => node.part === 'trigger' && ownerFor(node)?.path === owner.path

@@ -1,0 +1,331 @@
+id: T-BASE-FIELD-0001
+type: test
+title: Field semantic, adapter and native journeys
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: Finf Field 的 draft 契约及投影。稳定准入仍需独立审查、精确 head 的原生输入、辅助技术、视觉/材质与 GPUI 证据；synthetic DOM 测试不建立这些保证。
+  en: Draft Finf Field contract and projections. Stable admission requires independent review and exact-head
+    native input, assistive technology, visual/material and GPUI evidence; synthetic DOM checks do not
+    establish those guarantees.
+summary: Separate canonical semantic tests, four real Web adapters, public native-browser journeys and open
+  GPUI evidence.
+statement:
+  zh-CN: A synthetic DOM pass only covers its named assertions. Native keyboard, accessibility, layout and
+    optical/GPUI gates remain separate.
+  en: A synthetic DOM pass only covers its named assertions. Native keyboard, accessibility, layout and
+    optical/GPUI gates remain separate.
+cases:
+  - id: T-BASE-FIELD-0001-CASE-OWNER
+    title: Field owner boundary
+    covers:
+      - C-FIELD-0001-OWNER
+    expectation: Root alone owns field validation, touched and dirty facts. Control alone owns its value and
+      editor. A generic control author explicitly reports finite JSON canonical value through asFieldControl
+      and consumes effective disabled/readOnly/required; no DOM, unrelated expose, callback Prop, hidden
+      input, native form or submission discovery is admitted.
+  - id: T-BASE-FIELD-0001-CASE-ANATOMY
+    title: Field anatomy boundary
+    covers:
+      - C-FIELD-0001-ANATOMY
+    expectation: A Root establishes an opaque family domain with one Control, at most one Label, Description and
+      Error, and zero or more passive Validity consumers. Progressive mounting may temporarily omit Control;
+      missing/ambiguous or retired Control cannot validate or accept a result. Duplicate registered singleton
+      roles fail closed; nested Roots never share values, requests or IDREF targets.
+  - id: T-BASE-FIELD-0001-CASE-VALUES
+    title: Field values boundary
+    covers:
+      - C-FIELD-0001-VALUES
+    expectation: Admitted values are null, finite number, boolean, string or a string array; values and result
+      snapshots are defensively copied. required treats null, false, empty string and empty array as empty; 0,
+      whitespace and a nonempty array containing an empty string are filled. No trim, coercion or generic
+      object validation occurs. Optional empty strings bypass length checks; Root minLength/maxLength use
+      UTF-16 code-unit length only for nonempty strings and also project to the default editor.
+  - id: T-BASE-FIELD-0001-CASE-OWNERSHIP
+    title: Field ownership boundary
+    covers:
+      - C-FIELD-0001-OWNERSHIP
+    expectation: invalid presence selects controlled validity; errors accompany that owner value.
+      defaultInvalid/defaultErrors initialize uncontrolled validity once. Validation emits one validityChange
+      proposal without optimistically rewriting a controlled owner. Owner synchronization, mounting, value
+      revision, cancellation and reset emit no result proposal. Newer synchronous owner acceptance wins.
+      Control value/defaultValue ownership is independently fixed by TextControl initialization.
+  - id: T-BASE-FIELD-0001-CASE-VALIDATION
+    title: Field validation boundary
+    covers:
+      - C-FIELD-0001-VALIDATION
+    expectation: validationMode is onBlur by default, onChange or manual. Only an active non-disabled registered
+      Control is eligible. Built-in flags are valueMissing, tooShort and tooLong; a composing control cannot
+      validate. blur sets touched; canonical value differs from its initialization baseline to derive dirty.
+      Starting or editing composition invalidates old work and onChange waits for compositionend. Readonly
+      blocks editing but retains focus and explicit validation; disabled blocks validation/focus and editing
+      without silently rewriting owner values.
+  - id: T-BASE-FIELD-0001-CASE-ASYNC
+    title: Field async boundary
+    covers:
+      - C-FIELD-0001-ASYNC
+    expectation: "externalValidation emits validationRequest only after built-in constraints pass:
+      {requestId,value,reason}. The consumer owns asynchronous execution. Each opaque JSON requestId binds the
+      Root, current Control lease and value/policy revision. Replacement, detach, retirement, value change,
+      composition start, disable/readOnly transition, prop policy change, cancel, reset and superseding
+      request invalidate old results. resolveValidation accepts only the current request once and a finite
+      {invalid,errors?} result; malformed, cross-root, canceled or stale results are rejected. Pending is not
+      valid; absent Control is unvalidated even when invalid=false is controlled."
+  - id: T-BASE-FIELD-0001-CASE-RELATIONS
+    title: Field relations boundary
+    covers:
+      - C-FIELD-0001-RELATIONS
+    expectation: Field names and help/error targets are exact Anatomy relationships projected by A11y, never
+      authored DOM IDs. The default physical editor receives labelledBy Label, describedBy Description, and
+      errorMessage Error only while canonical invalid=true. Web projects required to aria-required and
+      errorMessage to aria-errormessage using the existing owned-IDREF ledger. Target removal, replacement,
+      hidden error, remount and terminal cleanup follow the same relation lease rules.
+  - id: T-BASE-FIELD-0001-CASE-PARTS
+    title: Field parts boundary
+    covers:
+      - C-FIELD-0001-PARTS
+    expectation: "Label contributes visible naming without a role or Tab stop; optional activation focuses the
+      same enabled Control. Description remains selectable passive content. Error has one visible message:
+      explicit message, otherwise owner/validation errors, otherwise finite built-in English messages;
+      localization is an author concern. Error follows invalid with default L1 detach or keepMounted hidden
+      retention, and creates no automatic alert/live region. Validity exposes defensive snapshots without a
+      second owner or render callback Props."
+  - id: T-BASE-FIELD-0001-CASE-HOST
+    title: Field host boundary
+    covers:
+      - C-FIELD-0001-HOST
+    expectation: All four visual families consume Base atoms directly and preserve module declarations and expose
+      semantics. Existing TextControl, Focus, Context, Anatomy, State, A11y and lifecycle modules remain the
+      owners of host transport and cleanup. Unsupported native required/invalid/busy/readOnly or
+      description/error relations remain explicit capability gaps; JS transport is no evidence of GPUI
+      accessibility or optical paint.
+  - id: T-BASE-FIELD-0001-CASE-BOUNDS
+    title: Field bounds boundary
+    covers:
+      - C-FIELD-0001-BOUNDS
+    expectation: This Field contract admits no Fieldset/Form, submission, form reset, serialized form values,
+      server request implementation, debounce, native browser validity API forwarding or arbitrary
+      cross-control value inference. Generic compositions reuse the reporting bridge and must explicitly own
+      control-specific keyboard/value semantics. Base UI, shadcn, archived Bootstrap and Apple HIG are
+      independent comparisons, not normative authority or implementation inheritance.
+  - id: T-BASE-FIELD-0001-CASE-MATERIAL
+    title: Static optical intent is separate from actual optical paint
+    covers:
+      - P-LIQUID-GLASS-FIELD-CONTROL-MATERIAL
+    expectation: Actual Liquid Glass Field Control submits one static candidate, retains opaque fallback and
+      diagnostic without a visual sink, releases/remounts fresh epochs and does not revive disposed sinks.
+  - id: T-BASE-FIELD-0001-CASE-REVIEW-R1
+    title: Control-local readOnly invalidates pending work on both effective transition edges
+    covers:
+      - C-FIELD-0001-ASYNC
+      - C-FIELD-0001-VALIDATION
+    expectation: An editable request is rejected after readOnly=true; a request started while readonly is rejected
+      after readOnly=false. The canonical editor policy updates and a fresh request remains usable.
+  - id: T-BASE-FIELD-0001-CASE-REVIEW-R2
+    title: Dense payload normalization precedes pending consumption and retained-state mutation
+    covers:
+      - C-FIELD-0001-VALUES
+      - C-FIELD-0001-ASYNC
+    expectation: Sparse value/initialValue/errors arrays, including inherited slots, fail without changing
+      canonical state. The same pending id accepts a subsequent valid result. Payload fields/items are
+      captured once; thrown read errors retain identity and newer reentrant reports/requests win.
+verifies:
+  contracts:
+    - C-FIELD-0001
+exercises:
+  prototypes:
+    - P-BASE-FIELD
+    - P-BASE-FIELD-LABEL
+    - P-BASE-FIELD-CONTROL
+    - P-BASE-FIELD-DESCRIPTION
+    - P-BASE-FIELD-ERROR
+    - P-BASE-FIELD-VALIDITY
+    - P-SHADCN-FIELD
+    - P-SHADCN-FIELD-LABEL
+    - P-SHADCN-FIELD-CONTROL
+    - P-SHADCN-FIELD-DESCRIPTION
+    - P-SHADCN-FIELD-ERROR
+    - P-SHADCN-FIELD-VALIDITY
+    - P-BRUTALIST-FIELD
+    - P-BRUTALIST-FIELD-LABEL
+    - P-BRUTALIST-FIELD-CONTROL
+    - P-BRUTALIST-FIELD-DESCRIPTION
+    - P-BRUTALIST-FIELD-ERROR
+    - P-BRUTALIST-FIELD-VALIDITY
+    - P-BOOTSTRAP-2-3-2-FIELD
+    - P-BOOTSTRAP-2-3-2-FIELD-LABEL
+    - P-BOOTSTRAP-2-3-2-FIELD-CONTROL
+    - P-BOOTSTRAP-2-3-2-FIELD-DESCRIPTION
+    - P-BOOTSTRAP-2-3-2-FIELD-ERROR
+    - P-BOOTSTRAP-2-3-2-FIELD-VALIDITY
+    - P-LIQUID-GLASS-FIELD
+    - P-LIQUID-GLASS-FIELD-LABEL
+    - P-LIQUID-GLASS-FIELD-CONTROL
+    - P-LIQUID-GLASS-FIELD-DESCRIPTION
+    - P-LIQUID-GLASS-FIELD-ERROR
+    - P-LIQUID-GLASS-FIELD-VALIDITY
+implementations:
+  - id: field-base
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-OWNER
+      - T-BASE-FIELD-0001-CASE-ANATOMY
+      - T-BASE-FIELD-0001-CASE-VALUES
+      - T-BASE-FIELD-0001-CASE-OWNERSHIP
+      - T-BASE-FIELD-0001-CASE-VALIDATION
+      - T-BASE-FIELD-0001-CASE-ASYNC
+      - T-BASE-FIELD-0001-CASE-RELATIONS
+      - T-BASE-FIELD-0001-CASE-PARTS
+    notes:
+      - Twenty-four source-bound happy-dom tests; no native AT or optical acceptance inferred.
+  - id: field-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-OWNER
+      - T-BASE-FIELD-0001-CASE-OWNERSHIP
+      - T-BASE-FIELD-0001-CASE-VALIDATION
+      - T-BASE-FIELD-0001-CASE-ASYNC
+      - T-BASE-FIELD-0001-CASE-RELATIONS
+      - T-BASE-FIELD-0001-CASE-PARTS
+      - T-BASE-FIELD-0001-CASE-REVIEW-R1
+      - T-BASE-FIELD-0001-CASE-REVIEW-R2
+    notes:
+      - Twenty-five shared cases execute Base and four actual styled prototypes through this Adapter,
+        including both readonly policy edges and sparse-result lease recovery.
+  - id: field-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-OWNER
+      - T-BASE-FIELD-0001-CASE-OWNERSHIP
+      - T-BASE-FIELD-0001-CASE-VALIDATION
+      - T-BASE-FIELD-0001-CASE-ASYNC
+      - T-BASE-FIELD-0001-CASE-RELATIONS
+      - T-BASE-FIELD-0001-CASE-PARTS
+      - T-BASE-FIELD-0001-CASE-REVIEW-R1
+      - T-BASE-FIELD-0001-CASE-REVIEW-R2
+    notes:
+      - Twenty-five shared cases execute Base and four actual styled prototypes through this Adapter,
+        including both readonly policy edges and sparse-result lease recovery.
+  - id: field-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-OWNER
+      - T-BASE-FIELD-0001-CASE-OWNERSHIP
+      - T-BASE-FIELD-0001-CASE-VALIDATION
+      - T-BASE-FIELD-0001-CASE-ASYNC
+      - T-BASE-FIELD-0001-CASE-RELATIONS
+      - T-BASE-FIELD-0001-CASE-PARTS
+      - T-BASE-FIELD-0001-CASE-REVIEW-R1
+      - T-BASE-FIELD-0001-CASE-REVIEW-R2
+    notes:
+      - Twenty-five shared cases execute Base and four actual styled prototypes through this Adapter,
+        including both readonly policy edges and sparse-result lease recovery.
+  - id: field-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-OWNER
+      - T-BASE-FIELD-0001-CASE-OWNERSHIP
+      - T-BASE-FIELD-0001-CASE-VALIDATION
+      - T-BASE-FIELD-0001-CASE-ASYNC
+      - T-BASE-FIELD-0001-CASE-RELATIONS
+      - T-BASE-FIELD-0001-CASE-PARTS
+      - T-BASE-FIELD-0001-CASE-REVIEW-R1
+      - T-BASE-FIELD-0001-CASE-REVIEW-R2
+    notes:
+      - Twenty-five shared cases execute Base and four actual styled prototypes through this Adapter,
+        including both readonly policy edges and sparse-result lease recovery.
+  - id: field-native-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-VALIDATION
+      - T-BASE-FIELD-0001-CASE-ASYNC
+      - T-BASE-FIELD-0001-CASE-RELATIONS
+      - T-BASE-FIELD-0001-CASE-PARTS
+      - T-BASE-FIELD-0001-CASE-HOST
+    notes:
+      - Native Chromium keyboard/pointer, stale reply, layout/theme captures and source-bound evidence must
+        run against the final integrated source.
+  - id: field-material
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/liquid-glass/test/field-material.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-MATERIAL
+    exercises:
+      - P-LIQUID-GLASS-FIELD-CONTROL
+    notes:
+      - Three actual Runtime intent/lifetime tests. Native optical paint is not established.
+  - id: field-gpui-peer
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/gpui-peer/test/field-projections.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-OWNERSHIP
+      - T-BASE-FIELD-0001-CASE-ASYNC
+      - T-BASE-FIELD-0001-CASE-RELATIONS
+    notes:
+      - Ten real peer semantic transport cases across five families. The peer has no physical TextControl host
+        and native accessibility/material mappings remain unproven.
+  - id: field-review-r1r2
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/field-review-regressions.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-REVIEW-R1
+      - T-BASE-FIELD-0001-CASE-REVIEW-R2
+    notes:
+      - Thirteen regression cases. The original three independently reproduced failures before the successor
+        fix; all thirteen pass on the successor, without native-browser/GPUI acceptance claims.
+  - id: field-public-boundaries
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/field-public-boundaries.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELD-0001-CASE-BOUNDS
+    notes:
+      - Executable negatives for absent Form APIs/hidden controls, validation-only reset and consumer-owned
+        asynchronous execution. Independent comparison authority remains the contract/governance boundary.
+sources:
+  - path: packages/adapters/base/test/fixtures/field-conformance.ts
+openQuestions:
+  - id: T-BASE-FIELD-0001-Q-NATIVE
+    question:
+      zh-CN: Exact-head native browser and GPUI required/invalid/busy/readOnly and description/error-relation
+        projection remain evidence gates. When will actual native accessibility and optical evidence close
+        them?
+      en: Exact-head native browser and GPUI required/invalid/busy/readOnly and description/error-relation
+        projection remain evidence gates. When will actual native accessibility and optical evidence close
+        them?
+    blocks:
+      - activation:T-BASE-FIELD-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Recorded distinct synthetic-DOM and native-browser acceptance evidence without representing unrun
+      native work as passing.
+tags:
+  - field
+  - conformance
+  - draft

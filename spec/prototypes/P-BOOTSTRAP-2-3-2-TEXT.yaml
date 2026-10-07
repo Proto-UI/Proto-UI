@@ -1,0 +1,53 @@
+id: P-BOOTSTRAP-2-3-2-TEXT
+type: prototype
+title: bootstrap-2-3-2 passive Text presentation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft source projection with bounded real Web and compiler evidence; native typography, visual admission and independent review remain open.
+summary: A complete direct Base Text consumer used by family document content and control captions.
+statement:
+  en: Consume asTextRoot exactly once. Preserve the complete eight-axis vocabulary, defaults, slot, independent presentation, absent exposes and passive semantic boundary. Family theme supplies typography and contrasting ink without bundling font assets.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TEXT-INHERITANCE
+    text:
+      en: Directly consume Base Text without importing another projection or taking over native heading/paragraph/link/label/button ownership.
+  - id: P-BOOTSTRAP-2-3-2-TEXT-PROJECTION
+    text:
+      en: Map every size, tone, weight, font, leading, tracking, emphasis and decoration value to one corresponding standard style token; explicit leading overrides size line-height and omitted props restore defaults on the same canonical subject.
+  - id: P-BOOTSTRAP-2-3-2-TEXT-SELECTION
+    text:
+      en: Do not set user-select or introduce interaction. Document text preserves normal selection while content inside controls inherits their actual owner selection policy. No forced select-text or select-none patch belongs to the passive atom.
+  - id: P-BOOTSTRAP-2-3-2-TEXT-CONSUMPTION
+    text:
+      en: Provide root and /text exports, family aliases and exact Base types; four-Web CLI generation requires explicit workspace source mode. Real family demos and toolbar captions consume these entries. A private source package is not a registry publication, and source/DOM checks are not native or GPUI acceptance.
+inherits:
+  prototypes:
+    - P-BASE-TEXT
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0002
+    - C-FEEDBACK-STYLE-0003
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+verifies:
+  tests:
+    - T-TEXT-DRAFT-PROJECTIONS-0001
+openQuestions:
+  - id: P-BOOTSTRAP-2-3-2-TEXT-Q-ADMISSION
+    question:
+      en: When do source-bound native typography/selection and GPUI evidence plus independent review justify stable admission?
+    blocks:
+      - activation:P-BOOTSTRAP-2-3-2-TEXT
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/text/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/text/index.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Add direct complete Base Text projection with source-only package and compiler boundaries.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - text
+  - typography
+  - passive

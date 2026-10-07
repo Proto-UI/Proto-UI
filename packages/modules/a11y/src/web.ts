@@ -25,6 +25,7 @@ const ARIA_STATE_ATTRS: Record<string, string> = {
   rowSpan: 'aria-rowspan',
   columnSpan: 'aria-colspan',
   readOnly: 'aria-readonly',
+  required: 'aria-required',
   selected: 'aria-selected',
   modal: 'aria-modal',
 };
@@ -35,6 +36,7 @@ const POSITIVE_INTEGER_STATE_KEYS = new Set(['rowIndex', 'columnIndex', 'rowSpan
 const ARIA_RELATION_ATTRS: Record<string, string> = {
   controls: 'aria-controls',
   describedBy: 'aria-describedby',
+  errorMessage: 'aria-errormessage',
   labelledBy: 'aria-labelledby',
 };
 

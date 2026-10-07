@@ -705,6 +705,15 @@ async function capture(
 }
 function primary(previewer: Locator, family: string): Locator | null {
   if (family === 'tabs') return previewer.getByRole('tab', { name: 'Details', exact: true });
+  if (family === 'field') {
+    const control =
+      '[data-pui-root][data-projection-prototype="brutalist-field-control"][data-demo-ref="requiredControl"]';
+    // WC exposes a direct owned native part; React/Vue roots are the input.
+    // No first(): missing or duplicate physical editors remain an audit error.
+    return previewer.locator(
+      `[data-projection-content] input${control}, [data-projection-content] ${control} > input[part="control"]:not([data-pui-root])`
+    );
+  }
   const named = (
     {
       label:

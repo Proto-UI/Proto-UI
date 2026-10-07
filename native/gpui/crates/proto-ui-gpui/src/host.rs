@@ -153,6 +153,8 @@ impl SurfaceNode {
 pub struct InputBridge {
     router: InputRouter,
     pub(crate) label_input: LabelInput,
+    pub(crate) fixed_centers:
+        HashMap<SurfaceId, proto_ui_host_protocol::messages::AvailableSpaceRect>,
     /// Surfaces whose listener saw the current mouse event, innermost first.
     collected: Vec<SurfaceId>,
     owner_of: HashMap<SurfaceId, SessionId>,
@@ -658,6 +660,7 @@ impl Render for ProtoHostView {
         // GPUI redraws every window when the application changes its reduce
         // motion setting, which is when the peer hears of it.
         self.send_meta(cx);
+        self.refresh_available_space(window, cx);
         self.publish_control_labels(window);
         self.bridge.borrow_mut().index(&self.surfaces);
         let (down, up) = (self.bridge.clone(), self.bridge.clone());
@@ -791,9 +794,13 @@ fn render_surface(surface: &SurfaceNode, bridge: &Rc<RefCell<InputBridge>>) -> A
             SurfaceChild::Session(_) => Empty.into_any_element(),
         }
     }));
-    match &surface.a11y {
+    let element = match &surface.a11y {
         Some(a11y) if a11y.disabled => Disabled(element).into_any_element(),
         _ => element.into_any_element(),
+    };
+    match bridge.borrow().fixed_centers.get(&surface.id).copied() {
+        Some(rect) => crate::available_space::centered_root(element, rect),
+        None => element,
     }
 }
 

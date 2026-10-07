@@ -90,6 +90,58 @@ function observeScope(scope: Node, anchor: Node, notify: () => void): () => void
   };
 }
 
+type DetachedMember = { element: HTMLElement; notify(): void };
+type DetachedTracker = { members: Set<DetachedMember>; frame: number | null };
+const detachedTrackers = new WeakMap<Window, DetachedTracker>();
+
+/** Only live, previously connected views enter this shared discovery loop.
+ * An unknown (including closed) ShadowRoot cannot be observed in advance. */
+function observeDetached(element: HTMLElement, notify: () => void): () => void {
+  const window = element.ownerDocument.defaultView;
+  if (!window?.requestAnimationFrame) return () => {};
+  let entry = detachedTrackers.get(window);
+  if (!entry) {
+    entry = { members: new Set(), frame: null };
+    detachedTrackers.set(window, entry);
+  }
+  const ownEntry = entry;
+  const member = { element, notify };
+  const retire = () => {
+    if (ownEntry.frame !== null) window.cancelAnimationFrame(ownEntry.frame);
+    ownEntry.frame = null;
+    if (detachedTrackers.get(window) === ownEntry) detachedTrackers.delete(window);
+  };
+  const schedule = () => {
+    if (
+      detachedTrackers.get(window) !== ownEntry ||
+      ownEntry.frame !== null ||
+      !ownEntry.members.size
+    )
+      return;
+    ownEntry.frame = window.requestAnimationFrame(() => {
+      if (detachedTrackers.get(window) !== ownEntry) return;
+      ownEntry.frame = null;
+      try {
+        for (const current of [...ownEntry.members]) {
+          if (!ownEntry.members.has(current) || !current.element.isConnected) continue;
+          ownEntry.members.delete(current);
+          current.notify();
+        }
+      } finally {
+        // Notification may dispose this tracker and install a successor.
+        if (!ownEntry.members.size) retire();
+        else schedule();
+      }
+    });
+  };
+  ownEntry.members.add(member);
+  schedule();
+  return () => {
+    ownEntry.members.delete(member);
+    if (!ownEntry.members.size) retire();
+  };
+}
+
 /** A trusted non-pointer activation can be supplied by accessibility tooling.
  * This classifier is not evidence that a particular assistive technology was run. */
 export function isTrustedNonPointerLabelActivation(facts: {
@@ -119,6 +171,8 @@ export function createWebControlLabelHost(
       let eventDocument: Document | null = null;
       let observedChain: readonly Node[] = [];
       let scopeOffs: Array<() => void> = [];
+      let lastConnected: HTMLElement | null = null;
+      let detachedOff: (() => void) | null = null;
       let cleanListeners = () => {};
       let pending: {
         id: number;
@@ -136,10 +190,16 @@ export function createWebControlLabelHost(
           : null;
       };
       const observeCurrentScopes = (element: HTMLElement | null) => {
-        // Retain the last connected scopes while a physical node is temporarily
-        // absent, so reinsertion into its ShadowRoot is observable without a
-        // document-wide shadow-tree search.
-        if (element && !element.isConnected && observedChain.length > 0) return;
+        if (element && !element.isConnected && element === lastConnected) {
+          // Keep the previous observers for same-scope reinsertion, plus one
+          // shared Window frame for movement into an otherwise unknown scope.
+          detachedOff ??= observeDetached(element, sync);
+          return;
+        }
+        const off = detachedOff;
+        detachedOff = null;
+        off?.();
+        lastConnected = element?.isConnected ? element : null;
         const chain: Node[] = [];
         const anchors: Node[] = [];
         let anchor: Node | null = element;
@@ -301,6 +361,10 @@ export function createWebControlLabelHost(
           pending = null;
           off?.();
           cleanListeners();
+          const stopDetached = detachedOff;
+          detachedOff = null;
+          stopDetached?.();
+          lastConnected = null;
           for (const off of scopeOffs) off();
           scopeOffs = [];
           observedChain = [];

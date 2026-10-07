@@ -16,7 +16,9 @@ export type ProjectionComponentId =
   | SharedBaseFamilyId
   | 'collapsible'
   | 'accordion'
+  | 'field'
   | 'label'
+  | 'text'
   | 'checkbox'
   | 'input'
   | 'radio-group'
@@ -57,7 +59,9 @@ export type ProjectionFamilyManifestRegistry = Readonly<Record<string, Projectio
 const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[]>> = {
   collapsible: ['root', 'trigger', 'content'],
   accordion: ['root', 'item', 'heading', 'trigger', 'content'],
+  field: ['root', 'label', 'control', 'description', 'error', 'validity'],
   label: ['root'],
+  text: ['root'],
   button: ['root'],
   toggle: ['root'],
   switch: ['root', 'thumb'],
@@ -95,6 +99,34 @@ const SHADCN_MANIFEST = {
   themeArtifactId: 'website-shadcn-theme',
   themeInputId: 'website-root-computed-pui-theme',
   families: {
+    field: {
+      baseFamilyId: 'P-BASE-FIELD',
+      recipeId: 'demo-shadcn-field',
+      recipePrototypeIds: [
+        'shadcn-field-root',
+        'shadcn-field-label',
+        'shadcn-field-control',
+        'shadcn-field-description',
+        'shadcn-field-error',
+        'shadcn-field-validity',
+        'shadcn-button',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'shadcn-field-root' },
+        label: { basePrototypeId: 'P-BASE-FIELD-LABEL', prototypeId: 'shadcn-field-label' },
+        control: { basePrototypeId: 'P-BASE-FIELD-CONTROL', prototypeId: 'shadcn-field-control' },
+        description: {
+          basePrototypeId: 'P-BASE-FIELD-DESCRIPTION',
+          prototypeId: 'shadcn-field-description',
+        },
+        error: { basePrototypeId: 'P-BASE-FIELD-ERROR', prototypeId: 'shadcn-field-error' },
+        validity: {
+          basePrototypeId: 'P-BASE-FIELD-VALIDITY',
+          prototypeId: 'shadcn-field-validity',
+        },
+      },
+    },
     accordion: {
       baseFamilyId: 'P-BASE-ACCORDION',
       recipeId: 'demo-shadcn-accordion',
@@ -430,6 +462,37 @@ const BRUTALIST_MANIFEST = {
   themeArtifactId: 'prototype-brutalist-theme',
   themeInputId: 'website-brutalist-theme-mode',
   families: {
+    field: {
+      baseFamilyId: 'P-BASE-FIELD',
+      recipeId: 'demo-brutalist-field',
+      recipePrototypeIds: [
+        'brutalist-field-root',
+        'brutalist-field-label',
+        'brutalist-field-control',
+        'brutalist-field-description',
+        'brutalist-field-error',
+        'brutalist-field-validity',
+        'brutalist-button',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'brutalist-field-root' },
+        label: { basePrototypeId: 'P-BASE-FIELD-LABEL', prototypeId: 'brutalist-field-label' },
+        control: {
+          basePrototypeId: 'P-BASE-FIELD-CONTROL',
+          prototypeId: 'brutalist-field-control',
+        },
+        description: {
+          basePrototypeId: 'P-BASE-FIELD-DESCRIPTION',
+          prototypeId: 'brutalist-field-description',
+        },
+        error: { basePrototypeId: 'P-BASE-FIELD-ERROR', prototypeId: 'brutalist-field-error' },
+        validity: {
+          basePrototypeId: 'P-BASE-FIELD-VALIDITY',
+          prototypeId: 'brutalist-field-validity',
+        },
+      },
+    },
     accordion: {
       baseFamilyId: 'P-BASE-ACCORDION',
       recipeId: 'demo-brutalist-accordion',
@@ -833,6 +896,82 @@ const BOOTSTRAP_232_MANIFEST = {
   themeInputId: 'website-bootstrap-2-3-2-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    text: {
+      baseFamilyId: 'P-BASE-TEXT',
+      recipeId: 'demo-bootstrap-2-3-2-text',
+      recipePrototypeIds: ['bootstrap-2-3-2-text-root'],
+      parts: { root: { basePrototypeId: 'P-BASE-TEXT', prototypeId: 'bootstrap-2-3-2-text-root' } },
+    },
+    select: {
+      baseFamilyId: 'P-BASE-SELECT',
+      recipeId: 'demo-bootstrap-2-3-2-select',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-select-root',
+        'bootstrap-2-3-2-select-trigger',
+        'bootstrap-2-3-2-select-value',
+        'bootstrap-2-3-2-select-content',
+        'bootstrap-2-3-2-select-item',
+        'bootstrap-2-3-2-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'bootstrap-2-3-2-select-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-SELECT-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-select-trigger',
+        },
+        value: {
+          basePrototypeId: 'P-BASE-SELECT-VALUE',
+          prototypeId: 'bootstrap-2-3-2-select-value',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-SELECT-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-select-content',
+        },
+        item: { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'bootstrap-2-3-2-select-item' },
+      },
+    },
+    field: {
+      baseFamilyId: 'P-BASE-FIELD',
+      recipeId: 'demo-bootstrap-2-3-2-field',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-field-root',
+        'bootstrap-2-3-2-field-label',
+        'bootstrap-2-3-2-field-control',
+        'bootstrap-2-3-2-field-description',
+        'bootstrap-2-3-2-field-error',
+        'bootstrap-2-3-2-field-validity',
+        'bootstrap-2-3-2-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'bootstrap-2-3-2-field-root' },
+        label: {
+          basePrototypeId: 'P-BASE-FIELD-LABEL',
+          prototypeId: 'bootstrap-2-3-2-field-label',
+        },
+        control: {
+          basePrototypeId: 'P-BASE-FIELD-CONTROL',
+          prototypeId: 'bootstrap-2-3-2-field-control',
+        },
+        description: {
+          basePrototypeId: 'P-BASE-FIELD-DESCRIPTION',
+          prototypeId: 'bootstrap-2-3-2-field-description',
+        },
+        error: {
+          basePrototypeId: 'P-BASE-FIELD-ERROR',
+          prototypeId: 'bootstrap-2-3-2-field-error',
+        },
+        validity: {
+          basePrototypeId: 'P-BASE-FIELD-VALIDITY',
+          prototypeId: 'bootstrap-2-3-2-field-validity',
+        },
+      },
+    },
     accordion: {
       baseFamilyId: 'P-BASE-ACCORDION',
       recipeId: 'demo-bootstrap-2-3-2-accordion',
@@ -995,6 +1134,73 @@ const LIQUID_GLASS_MANIFEST = {
   themeInputId: 'website-liquid-glass-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    text: {
+      baseFamilyId: 'P-BASE-TEXT',
+      recipeId: 'demo-liquid-glass-text',
+      recipePrototypeIds: ['liquid-glass-text-root'],
+      parts: { root: { basePrototypeId: 'P-BASE-TEXT', prototypeId: 'liquid-glass-text-root' } },
+    },
+    select: {
+      baseFamilyId: 'P-BASE-SELECT',
+      recipeId: 'demo-liquid-glass-select',
+      recipePrototypeIds: [
+        'liquid-glass-select-root',
+        'liquid-glass-select-trigger',
+        'liquid-glass-select-value',
+        'liquid-glass-select-content',
+        'liquid-glass-select-item',
+        'liquid-glass-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'liquid-glass-select-root' },
+        trigger: {
+          basePrototypeId: 'P-BASE-SELECT-TRIGGER',
+          prototypeId: 'liquid-glass-select-trigger',
+        },
+        value: { basePrototypeId: 'P-BASE-SELECT-VALUE', prototypeId: 'liquid-glass-select-value' },
+        content: {
+          basePrototypeId: 'P-BASE-SELECT-CONTENT',
+          prototypeId: 'liquid-glass-select-content',
+        },
+        item: { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'liquid-glass-select-item' },
+      },
+    },
+    field: {
+      baseFamilyId: 'P-BASE-FIELD',
+      recipeId: 'demo-liquid-glass-field',
+      recipePrototypeIds: [
+        'liquid-glass-field-root',
+        'liquid-glass-field-label',
+        'liquid-glass-field-control',
+        'liquid-glass-field-description',
+        'liquid-glass-field-error',
+        'liquid-glass-field-validity',
+        'liquid-glass-button',
+      ],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'liquid-glass-field-root' },
+        label: { basePrototypeId: 'P-BASE-FIELD-LABEL', prototypeId: 'liquid-glass-field-label' },
+        control: {
+          basePrototypeId: 'P-BASE-FIELD-CONTROL',
+          prototypeId: 'liquid-glass-field-control',
+        },
+        description: {
+          basePrototypeId: 'P-BASE-FIELD-DESCRIPTION',
+          prototypeId: 'liquid-glass-field-description',
+        },
+        error: { basePrototypeId: 'P-BASE-FIELD-ERROR', prototypeId: 'liquid-glass-field-error' },
+        validity: {
+          basePrototypeId: 'P-BASE-FIELD-VALIDITY',
+          prototypeId: 'liquid-glass-field-validity',
+        },
+      },
+    },
     accordion: {
       baseFamilyId: 'P-BASE-ACCORDION',
       recipeId: 'demo-liquid-glass-accordion',

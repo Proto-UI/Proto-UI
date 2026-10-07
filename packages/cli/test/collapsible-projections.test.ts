@@ -43,6 +43,8 @@ describe('Collapsible compiler consumption boundaries', () => {
       const css = renderProtoStyleTokenCss(stringTokens);
       expect(css).not.toContain('Unsupported Proto UI style tokens');
       expect(css).toContain('color: var(--pui-foreground)');
+      expect(stringTokens).toContain('whitespace-break-spaces');
+      expect(css).toContain('white-space: break-spaces;');
     }
   );
   it('diagnoses a host without facade lowering', () => {

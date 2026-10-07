@@ -147,6 +147,7 @@ const staticUtilities: Record<string, string[]> = {
   'resize-y': ['resize: vertical;'],
   'whitespace-nowrap': ['white-space: nowrap;'],
   'whitespace-pre-wrap': ['white-space: pre-wrap;'],
+  'whitespace-break-spaces': ['white-space: break-spaces;'],
   'wrap-anywhere': ['overflow-wrap: anywhere;'],
   'bg-clip-padding': ['background-clip: padding-box;'],
   'will-change-transform': ['will-change: transform;'],
@@ -306,6 +307,15 @@ const staticUtilities: Record<string, string[]> = {
   'bg-[linear-gradient(#08c,#04c)]': [
     'background-color: #006dcc;',
     'background-image: linear-gradient(to bottom, #08c, #04c);',
+  ],
+  // Bootstrap 2.3.2 dropdown option highlight and popup elevation.
+  'bg-[linear-gradient(#0077b3,#005580)]': [
+    'background-color: #006699;',
+    'background-image: linear-gradient(to bottom, #0077b3, #005580);',
+  ],
+  'shadow-[0_5px_10px_rgb(0_0_0/20%)]': [
+    '--pui-shadow: 0 5px 10px rgb(0 0 0 / 0.2);',
+    ...composedShadow(),
   ],
   'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]': [
     '--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075);',
@@ -732,6 +742,7 @@ function renderRoundedUtility(utility: string): string[] | null {
   if (utility === 'rounded-md') return ['border-radius: var(--pui-radius-md);'];
   if (utility === 'rounded-sm') return ['border-radius: var(--pui-radius-sm);'];
   if (utility === 'rounded-[4px]') return ['border-radius: 4px;'];
+  if (utility === 'rounded-[6px]') return ['border-radius: 6px;'];
   if (utility === 'rounded-[min(var(--radius-md),12px)]') {
     return ['border-radius: min(var(--pui-radius-md), 12px);'];
   }

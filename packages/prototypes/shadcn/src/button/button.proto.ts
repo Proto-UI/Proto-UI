@@ -100,11 +100,17 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
     // Size rules are isolated so later icon-density refinements can layer on
     // top without re-encoding every variant.
     (Object.keys(SIZE_TOKENS) as ShadcnButtonSize[]).forEach((size) => {
+      // Keep each rule callback in the statically modeled DSL shape. The
+      // setup-time size branch must not hide rule dependencies in a ternary.
+      if (size === 'icon') {
+        def.rule({
+          when: (w) => w.prop('size').eq(size),
+          intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
+        });
+        return;
+      }
       def.rule({
-        when: (w) =>
-          size === 'icon'
-            ? w.prop('size').eq(size)
-            : w.all(w.prop('size').eq(size), w.prop('wrap').eq(false)),
+        when: (w) => w.all(w.prop('size').eq(size), w.prop('wrap').eq(false)),
         intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
       });
     });

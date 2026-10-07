@@ -350,3 +350,26 @@ it('keeps the full left-gutter client width when visualViewport is unavailable',
     else Reflect.deleteProperty(view, 'visualViewport');
   }
 });
+
+it('refreshes only the current available-space lease on an updated phase', () => {
+  const caps = new CapsVault();
+  const module = new PositioningModuleImpl(caps);
+  const requestUpdate = vi.fn();
+  const dispose = vi.fn();
+  const attach = vi.fn(() => ({ requestUpdate, dispose }));
+  caps.attach([[AVAILABLE_SPACE_HOST_CAP, { attach }]]);
+  module.onProtoPhase('updated');
+  expect(attach).not.toHaveBeenCalled();
+  module.availableHandle.connect({ target: {}, boundary: 'root-content' });
+  module.onProtoPhase('updated');
+  expect(requestUpdate).toHaveBeenCalledOnce();
+  expect(attach).toHaveBeenCalledOnce();
+  module.availableHandle.disconnect();
+  module.onProtoPhase('updated');
+  expect(requestUpdate).toHaveBeenCalledOnce();
+  module.availableHandle.connect({ target: {}, boundary: 'root-content' });
+  module.onProtoPhase('unmounted');
+  module.onProtoPhase('updated');
+  expect(requestUpdate).toHaveBeenCalledOnce();
+  expect(dispose).toHaveBeenCalledTimes(2);
+});

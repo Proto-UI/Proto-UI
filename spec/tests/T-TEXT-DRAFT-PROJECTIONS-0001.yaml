@@ -1,0 +1,82 @@
+id: T-TEXT-DRAFT-PROJECTIONS-0001
+type: test
+title: Bootstrap and Liquid Text direct projection evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Synthetic DOM and source compiler evidence are separate from native typography, optical content contrast and independent admission.
+summary: All eight passive Text axes, ordinary selection inheritance and explicit source-consumer boundaries.
+cases:
+  - id: T-TEXT-DRAFT-PROJECTIONS-0001-CASE-PASSIVE
+    title: All finite axes and native owner boundaries
+    covers:
+      - P-BOOTSTRAP-2-3-2-TEXT-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-TEXT-PROJECTION
+      - P-BOOTSTRAP-2-3-2-TEXT-SELECTION
+      - P-LIQUID-GLASS-TEXT-INHERITANCE
+      - P-LIQUID-GLASS-TEXT-PROJECTION
+      - P-LIQUID-GLASS-TEXT-SELECTION
+    expectation: Actual WC/React/Vue/Vue2 mounts preserve content, h1/p/label/a/button ownership, every finite prop value and default restoration. No Text user-select override is emitted.
+  - id: T-TEXT-DRAFT-PROJECTIONS-0001-CASE-CONSUMPTION
+    title: Source exports, finite CSS and workspace-only facades
+    covers:
+      - P-BOOTSTRAP-2-3-2-TEXT-CONSUMPTION
+      - P-LIQUID-GLASS-TEXT-CONSUMPTION
+    expectation: Both source packages and each of four Web facades resolve only under explicit workspace mode; all typography tokens lower and every demo uses the exact family Text identity.
+implementations:
+  - id: real-web-text
+    kind: adapter-test
+    status: passing
+    required: true
+    path: packages/web-conformance/test/text.journey.test.ts
+    consumesCases:
+      - T-TEXT-DRAFT-PROJECTIONS-0001-CASE-PASSIVE
+    exercises: &a1
+      - P-BOOTSTRAP-2-3-2-TEXT
+      - P-LIQUID-GLASS-TEXT
+  - id: text-source-compiler
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/cli/test/text-prototype.test.ts
+    consumesCases:
+      - T-TEXT-DRAFT-PROJECTIONS-0001-CASE-CONSUMPTION
+    exercises: *a1
+  - id: text-demo-recipes
+    kind: module-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/passive-atom-demos.test.ts
+    consumesCases:
+      - T-TEXT-DRAFT-PROJECTIONS-0001-CASE-CONSUMPTION
+    exercises: *a1
+  - id: native-text-selection
+    kind: workspace-check
+    status: planned
+    required: true
+    path: apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts
+    consumesCases:
+      - T-TEXT-DRAFT-PROJECTIONS-0001-CASE-PASSIVE
+    exercises:
+      - P-BOOTSTRAP-2-3-2-TEXT
+      - P-LIQUID-GLASS-TEXT
+verifies:
+  prototypes: *a1
+exercises:
+  prototypes: *a1
+openQuestions:
+  - id: T-TEXT-DRAFT-PROJECTIONS-0001-Q-NATIVE
+    question:
+      en: When do native Text selection/typography and true GPUI paint/input prove the declared host surface?
+    blocks:
+      - activation:T-TEXT-DRAFT-PROJECTIONS-0001
+      - implementation:T-TEXT-DRAFT-PROJECTIONS-0001#native-text-selection
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Record complete Base-input and private source-consumer evidence without claiming native parity.
+tags:
+  - test
+  - text
+  - typography
+  - projection

@@ -45,8 +45,20 @@ criteria:
       en: The first Web projection requires connected participants in the same Document and getRootNode tree scope. It uses the existing A11y semantic-reference and IDREF ownership projection for naming, plus a narrowly scoped input-intent host bridge for activation. Scope observers are shared, include shadow-tree containment changes, and retire only their own subscriptions. Cross-document and cross-shadow-root associations are unsupported and diagnosed even when an App Maker shares a reference. View identity and callback epoch are rechecked before every target effect.
   - id: C-CONTROL-LABEL-0001-BOUNDS
     text:
-      en: This slice admits no Form, submission, validation, error summary, multiple-label ordering, arbitrary action dispatch, native selection model or platform-wide support claim. Missing host capability is an explicit unsupported state, not success. Passing instance-association input or rendering label text alone does not certify a working association.
+      en: This module does not own Form, submission, validation or error summaries. Its bounded anatomy bridge may be consumed by an independent Field protocol; it admits no multiple-label ordering, arbitrary action dispatch, native selection model or platform-wide support claim. Missing host capability is an explicit unsupported state, not success. Passing instance-association input or rendering label text alone does not certify a working association.
+  - id: C-CONTROL-LABEL-0001-ANATOMY
+    text:
+      en: A participant may instead declare one setup-only {family,labelRole,targetRole} anatomy pair. ControlLabel
+        alone resolves the opaque nearest-root domain and exact self role through AnatomyPort, retains a module-private
+        pair reference for that domain/role tuple, and uses its existing live registry and physical tree-scope
+        guard. The descriptor contains no host IDs or callbacks; the internal reference never enters Props/Context.
+        Explicit non-null InstanceAssociations conflicts with this mode and is rejected. Missing domain, mismatched
+        role, zero/multiple live targets, adoption, detach, replacement and terminal cleanup fail closed or refresh
+        exact leases. Anatomy supplies structure, not a new value or activation owner. Naming may be disabled
+        so a pre-existing A11y part relationship remains the sole name owner.
 dependsOn:
+  modules:
+    - M-ANATOMY-0001
   contracts:
     - C-PROPS-0003
     - C-PROPS-0008
@@ -64,6 +76,8 @@ references:
       P-BASE-TEXT,
     ]
 sources:
+  - path: packages/modules/control-label/src/anatomy-pair.ts
+  - path: packages/modules/control-label/test/anatomy-pair.test.ts
   - path: packages/core/src/a11y.ts
   - path: packages/modules/a11y/src/types.ts
   - path: packages/modules/a11y/src/web.ts

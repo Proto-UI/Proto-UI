@@ -37,6 +37,18 @@
     "./accordion": {
       "types": "./src/accordion/index.ts",
       "default": "./src/accordion/index.ts"
+    },
+    "./select": {
+      "types": "./src/select/index.ts",
+      "default": "./src/select/index.ts"
+    },
+    "./text": {
+      "types": "./src/text/index.ts",
+      "default": "./src/text/index.ts"
+    },
+    "./field": {
+      "types": "./src/field/index.ts",
+      "default": "./src/field/index.ts"
     }
   },
   "dependencies": {

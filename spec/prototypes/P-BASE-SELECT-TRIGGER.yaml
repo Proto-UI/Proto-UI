@@ -32,15 +32,26 @@ criteria:
     text:
       zh-CN: Trigger 不得因 open 或 navigation 改写 committed value；Value part 负责可见值回显，Root 负责 selection ownership。
       en: Trigger must not rewrite committed value because of open or navigation; Value owns visible value display and Root owns selection.
+  - id: P-BASE-SELECT-TRIGGER-VIEW-LIFETIME
+    text:
+      en: A Trigger logical instance that survives view withdrawal must clear hovered and pressed state on unmount. Remount must not replay a prior pointer interaction or its downstream material deformation.
+      zh-CN: Trigger logical instance 在 view 撤回后存活时，unmount 必须清除 hovered 与 pressed；remount 不得重放上一 view 的指针交互或下游材质形变。
 sources:
   - path: packages/prototypes/base/src/select/trigger.proto.ts
   - path: packages/prototypes/base/src/select/command.ts
 dependsOn:
   prototypes: [P-BASE-SELECT]
   contracts: [C-A11Y-0001, C-AS-FOCUSABLE-0001, C-AS-TRIGGER-0001]
-verifies: { tests: [T-BASE-SELECT-TRIGGER-0001] }
+verifies:
+  {
+    tests:
+      [T-BASE-SELECT-TRIGGER-0001, { id: T-SELECT-DRAFT-PROJECTIONS-0001, since: 0.3.0-alpha.1 }],
+  }
 revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged Trigger command, a11y relationship, keyboard entry, disabled gating, and selection boundaries.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Require clearing transient pointer state when a view unmounts while its logical Select Trigger survives.
 tags: [prototype, base, select, trigger, combobox, keyboard, a11y]

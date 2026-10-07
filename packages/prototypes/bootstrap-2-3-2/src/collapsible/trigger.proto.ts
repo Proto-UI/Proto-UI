@@ -19,7 +19,7 @@ const collapsibleTrigger = definePrototype<
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground wrap-anywhere whitespace-pre-wrap text-left cursor-pointer select-none inline-flex items-center justify-start rounded-[4px] px-[0.9375rem] py-2 text-sm font-normal text-primary'
+        'min-w-0 max-w-full text-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start rounded-[4px] px-[0.9375rem] py-2 text-sm font-normal text-primary'
       )
     );
     def.rule({

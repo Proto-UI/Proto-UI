@@ -14,6 +14,8 @@ The source includes end-to-end T0 tests for Button, Toggle, Switch, Tabs, Transi
 
 In particular, recorded theme/token availability, a successful layout/paint callback, a rejected unsupported declaration, or a Web preview does not prove native visual/material conformance. See `internal/records/2026-10-06-gpui-parity-and-liquid-glass-plan.md` for source-bound gaps and the implementation sequence.
 
+The root-content AvailableSpace candidate now carries separate Module, peer-view and opaque lease generations. The actual window root uses one `Window.fully_visible_bounds()` frame for max-size and the exact fixed-center recipe. It withdraws unknown or retired geometry and checks the real root entity. Nested physical roots, consumer-positioned roots, general fixed/transformed surfaces, anchored Select/Popover positioning and complete Dialog/Overlay behavior still require their corresponding implementation and native acceptance. See `internal/records/2026-10-07-gpui-available-space-reconstruction.md`; passing protocol tests alone does not close those gaps.
+
 ## Verification
 
 Run from the repository root for peer/protocol tests:

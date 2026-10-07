@@ -36,6 +36,30 @@ cases:
       ]
     expectation: live-region-insets-long-content-and-full-window-mask
 implementations:
+  - id: web-component-available-space-adoption
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/available-space-adoption.integration.test.ts
+    required: true
+    consumesCases: [T-AVAILABLE-SPACE-0001-CASE-HOST, T-AVAILABLE-SPACE-0001-CASE-ADAPTER]
+    notes:
+      - The actual Web Component Adapter callback follows DOM adoption with injected root geometry. happy-dom does not dispatch adoptedCallback, so the test calls it explicitly; native callback dispatch and physical viewport behavior are not certified.
+  - id: gpui-peer-available-space
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/gpui-peer/test/available-space-session.test.ts
+    required: true
+    consumesCases: [T-AVAILABLE-SPACE-0001-CASE-HOST]
+    notes:
+      - Real Base Dialog peer lifecycle and bounded lease retry controls; this is not native layout or pixel acceptance.
+  - id: gpui-native-root-space
+    kind: adapter-test
+    status: passing
+    path: native/gpui/crates/proto-ui-gpui/tests/available_space.rs
+    required: true
+    consumesCases: [T-AVAILABLE-SPACE-0001-CASE-HOST]
+    notes:
+      - Actual GPUI headless layout controls for same-frame region bounds and fixed-center non-shrinking geometry; platform window pixels and full Dialog/Overlay remain separate evidence.
   - id: shared-root-space-observation
     kind: module-test
     status: passing

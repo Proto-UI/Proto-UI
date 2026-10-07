@@ -93,3 +93,48 @@ describe('vue2 explicit instance-associated Label', () => {
     }
   });
 });
+
+it.each(['open', 'closed'] as const)(
+  'renews naming after retained views move into a previously unknown %s ShadowRoot',
+  async (mode) => {
+    const instanceAssociations = { controlLabel: createControlLabelRef() };
+    const target = createMountedVue2Adapter(checkboxRoot, { instanceAssociations });
+    const label = createMountedVue2Adapter(labelRoot, {
+      instanceAssociations,
+      naming: true,
+      activation: true,
+    });
+    const outer = document.createElement('div');
+    document.body.append(outer);
+    const destination = outer.attachShadow({ mode });
+    const targetNode = target.root as HTMLElement;
+    const labelNode = label.root as HTMLElement;
+    const mutations = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+    const frame = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+    try {
+      await flushVue2();
+      expect(targetNode.getAttribute('aria-labelledby')).toBe(labelNode.id);
+      labelNode.remove();
+      await mutations();
+      expect(targetNode.hasAttribute('aria-labelledby')).toBe(false);
+      destination.append(labelNode);
+      await frame();
+      await mutations();
+      expect(targetNode.hasAttribute('aria-labelledby')).toBe(false);
+      targetNode.remove();
+      await mutations();
+      destination.append(targetNode);
+      await frame();
+      await mutations();
+      expect(targetNode.getAttribute('aria-labelledby')).toBe(labelNode.id);
+      expect(labelNode.id).not.toBe('');
+      pointerClick(labelNode);
+      expect(target.vm.getExposes().checked.get()).toBe(true);
+    } finally {
+      label.unmount();
+      target.unmount();
+      outer.remove();
+      await flushVue2();
+    }
+  }
+);

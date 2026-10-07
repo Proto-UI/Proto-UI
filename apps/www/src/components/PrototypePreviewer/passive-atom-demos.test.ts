@@ -12,7 +12,13 @@ function atoms(demo: DemoSpec): DemoNode[] {
 const registry = readFileSync(new URL('./prototype-modules.ts', import.meta.url), 'utf8');
 
 describe('Passive atom documentation recipes', () => {
-  for (const family of ['base', 'shadcn', 'brutalist'] as const) {
+  for (const family of [
+    'base',
+    'shadcn',
+    'brutalist',
+    'bootstrap-2-3-2',
+    'liquid-glass',
+  ] as const) {
     it(`${family} Text uses real public identities and only passive inputs`, () => {
       const demo = createTextAtomDemo(family);
       expect(() => assertDemoSpec(demo)).not.toThrow();

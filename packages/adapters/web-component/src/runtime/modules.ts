@@ -197,11 +197,13 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     styleSupportSource,
     setExposes,
   } = args;
-  const getTriggerSurface = () => {
+  const getControlLabelSurface = () => {
     if (args.textControlTarget) return args.textControlTarget;
     if (args.imageViewTarget) return args.imageViewTarget;
-    const target = getLogicalTriggerSurfaceRoot(instanceToken);
-    const surface = resolveWebComponentTriggerSurface(el, target);
+    return resolveWebComponentTriggerSurface(el, getLogicalTriggerSurfaceRoot(instanceToken));
+  };
+  const getTriggerSurface = () => {
+    const surface = getControlLabelSurface();
     return surface?.isConnected ? surface : null;
   };
   const normalizeOwnedSurface = () => {
@@ -217,7 +219,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
 
   return createCapsWiring()
     .use('control-label', [
-      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getTriggerSurface, undefined)],
+      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getControlLabelSurface, undefined)],
       [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('text-control', [
@@ -386,9 +388,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   let originalParent: Node | null = null;
   let originalNext: Node | null = null;
   let releaseParentProjection: (() => void) | null = null;
+  const getPhysicalTriggerSurface = () =>
+    resolveWebComponentTriggerSurface(el, getLogicalTriggerSurfaceRoot(instanceToken));
   const getConnectedTriggerSurface = () => {
-    const target = getLogicalTriggerSurfaceRoot(instanceToken);
-    const surface = resolveWebComponentTriggerSurface(el, target);
+    const surface = getPhysicalTriggerSurface();
     return surface?.isConnected ? surface : null;
   };
   // A11y must project while the rematerialized host is still behind the reveal
@@ -409,7 +412,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     const surface = args.surfaceProjection.getSurfaceTarget();
     return surface === el ? getConnectedTriggerSurface() : surface;
   };
-  const getControlLabelSurface = () => (args.isViewReady() ? getAccessibilitySurface() : null);
+  const getControlLabelSurface = () => {
+    if (!args.isViewReady()) return null;
+    const surface = args.surfaceProjection.getSurfaceTarget();
+    return surface === el ? getPhysicalTriggerSurface() : surface;
+  };
   const subscribeControlLabelSurface = (listener: () => void) => {
     const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
     const offReady = subscribeFocusTarget(listener);

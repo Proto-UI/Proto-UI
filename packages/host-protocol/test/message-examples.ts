@@ -21,6 +21,26 @@ type ExamplesByKind<M extends { kind: string }> = {
 const diagnostic = { code: 'ready-surface-missing', message: 'surface not rendered yet' } as const;
 
 export const HOST_TO_PEER_EXAMPLES: ExamplesByKind<HostToPeerMessage> = {
+  'available-space.frame': [
+    {
+      kind: 'available-space.frame',
+      sessionId: 'dialog',
+      viewEpoch: 2,
+      moduleEpoch: 7,
+      leaseId: 'region:1',
+      revision: 3,
+      rect: { x: 10, y: 20, width: 390, height: 900 },
+    },
+    {
+      kind: 'available-space.frame',
+      sessionId: 'dialog',
+      viewEpoch: 2,
+      moduleEpoch: 7,
+      leaseId: 'region:1',
+      revision: 4,
+      rect: null,
+    },
+  ],
   'host.hello': [
     {
       kind: 'host.hello',
@@ -161,6 +181,28 @@ export const HOST_TO_PEER_EXAMPLES: ExamplesByKind<HostToPeerMessage> = {
 };
 
 export const PEER_TO_HOST_EXAMPLES: ExamplesByKind<PeerToHostMessage> = {
+  'available-space.lease': [
+    {
+      kind: 'available-space.lease',
+      sessionId: 'dialog',
+      viewEpoch: 2,
+      moduleEpoch: 7,
+      leaseId: 'region:1',
+      root: 'proto-surface',
+      boundary: 'root-content',
+      active: true,
+    },
+    {
+      kind: 'available-space.lease',
+      sessionId: 'dialog',
+      viewEpoch: 2,
+      moduleEpoch: 7,
+      leaseId: 'region:1',
+      root: 'proto-surface',
+      boundary: 'root-content',
+      active: false,
+    },
+  ],
   'control-label.plan': [
     {
       kind: 'control-label.plan',

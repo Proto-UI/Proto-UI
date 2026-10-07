@@ -52,6 +52,8 @@ export type {
   ControlLabelPlanMessage,
   ControlLabelViewMessage,
   ControlLabelActivateMessage,
+  AvailableSpaceLeaseMessage,
+  AvailableSpaceFrameMessage,
   A11ySnapshotMessage,
   StyleApplyMessage,
   DefaultActionPreventMessage,

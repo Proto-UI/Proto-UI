@@ -88,6 +88,7 @@ export class PositioningModuleImpl extends ModuleBase {
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
+    if (phase === 'updated') this.availableHandle.requestUpdate();
     if (phase === 'unmounted') {
       this.terminal = true;
       this.disconnect();

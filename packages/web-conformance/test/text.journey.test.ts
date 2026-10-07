@@ -11,11 +11,19 @@ import { AdaptToWebComponent, setElementProps } from '../../adapters/web-compone
 import baseText from '../../prototypes/base/src/text';
 import shadcnText from '../../prototypes/shadcn/src/text';
 import brutalistText from '../../prototypes/brutalist/src/text';
+import bootstrapText from '../../prototypes/bootstrap-2-3-2/src/text';
+import liquidText from '../../prototypes/liquid-glass/src/text';
 import type { TextRootProps } from '../../prototypes/base/src/text';
 import type { Prototype } from '../../core/src';
 
 const TEXT = 'Preserved 文本, emphasis & link';
-const families = { base: baseText, shadcn: shadcnText, brutalist: brutalistText };
+const families = {
+  base: baseText,
+  shadcn: shadcnText,
+  brutalist: brutalistText,
+  'bootstrap-2-3-2': bootstrapText,
+  'liquid-glass': liquidText,
+};
 const wcClasses = new Map(
   Object.values(families).map((proto) => [proto, AdaptToWebComponent(proto)])
 );
@@ -133,7 +141,7 @@ const defaults = [
 describe.each(runtimes)('real %s Adapter Text', (runtime) => {
   describe.each(Object.entries(families))('%s projection', (family, proto) => {
     // T-TEXT-0001-CASE-CONTENT, T-TEXT-0001-CASE-PASSIVE, T-TEXT-0001-CASE-PROJECTION
-    it.each(['h1', 'p', 'label', 'a'])(
+    it.each(['h1', 'p', 'label', 'a', 'button'])(
       'preserves native %s ownership and updates one canonical presentation subject',
       async (tag) => {
         const owner = document.createElement(tag);
@@ -149,6 +157,13 @@ describe.each(runtimes)('real %s Adapter Text', (runtime) => {
           expect(element.getAttribute('role')).toBeNull();
           expect(element.getAttribute('tabindex')).toBeNull();
           expect(element.getAttribute('aria-live')).toBeNull();
+          expect(element.getAttribute('data-pui-style') ?? '').not.toMatch(
+            /select-(none|text|all|auto)/
+          );
+          if (tag === 'button') {
+            owner.style.userSelect = 'none';
+            expect(element.style.userSelect).toBe('');
+          }
           if (tag === 'label') expect(owner.getAttribute('for')).toBe('text-owned-input');
           if (tag === 'a') expect(owner.getAttribute('href')).toBe('/native-destination');
           for (const [prop, values] of Object.entries(options)) {

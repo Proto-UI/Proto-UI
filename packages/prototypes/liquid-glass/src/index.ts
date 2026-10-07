@@ -10,3 +10,7 @@ export * from './label';
 
 export * from './collapsible';
 export * from './accordion';
+export * from './select';
+export * from './text';
+
+export * from './field';

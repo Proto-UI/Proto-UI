@@ -1,6 +1,7 @@
 import {
   isControlLabelRef,
   type ControlLabelFacade,
+  type ControlLabelAnatomyPair,
   type ControlLabelHandle,
   type ControlLabelOptions,
   type ControlLabelRef,
@@ -17,6 +18,8 @@ import {
   type ModuleFactoryArgs,
 } from '@proto.ui/module-base';
 import type { A11yPort } from '@proto.ui/module-a11y';
+import type { AnatomyPort } from '@proto.ui/module-anatomy';
+import { acquireAnatomyControlLabelPair, validateAnatomyControlLabelPair } from './anatomy-pair';
 import {
   CONTROL_LABEL_HOST_CAP,
   CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
@@ -42,16 +45,22 @@ class ControlLabelModuleImpl extends ModuleBase {
   private disposed = false;
   private generation = 0;
   private diagnostic: string | null = null;
+  private anatomyPair: ControlLabelAnatomyPair | null = null;
+  private anatomyScope: unknown = null;
+  private anatomyLease: ReturnType<typeof acquireAnatomyControlLabelPair> | null = null;
+  private anatomyOffs: Array<() => void> = [];
+
   constructor(
     caps: ModuleFactoryArgs['caps'],
     private readonly a11y: A11yPort,
+    private readonly anatomy: AnatomyPort | undefined,
     private readonly prototypeName: string
   ) {
     super(caps);
   }
   readonly facade: ControlLabelFacade = {
-    label: () => this.declare('label'),
-    target: (activate) => this.declare('target', activate as typeof this.activate),
+    label: (pair) => this.declare('label', null, pair),
+    target: (activate, pair) => this.declare('target', activate as typeof this.activate, pair),
   };
   readonly port: ControlLabelPort = {
     prepareViewPresence: (present) => {
@@ -62,6 +71,13 @@ class ControlLabelModuleImpl extends ModuleBase {
     getDiagnostic: () => this.diagnostic,
     setReference: (ref) => {
       this.sys.ensureNotDisposed('controlLabel.setReference');
+      if (this.anatomyPair) {
+        if (ref != null)
+          throw new Error(
+            '[ControlLabel] explicit and anatomy association modes are mutually exclusive'
+          );
+        return;
+      }
       if (ref != null && !isControlLabelRef(ref))
         throw new TypeError('[ControlLabel] invalid opaque association reference');
       if (ref != null && !this.kind)
@@ -77,12 +93,21 @@ class ControlLabelModuleImpl extends ModuleBase {
   };
   private declare(
     kind: 'label' | 'target',
-    activate: typeof this.activate = null
+    activate: typeof this.activate = null,
+    pair?: ControlLabelAnatomyPair
   ): ControlLabelHandle {
     this.sys.ensureSetup('controlLabel.declare');
     if (this.kind) throw new Error('[ControlLabel] one subject or target declaration per instance');
+    if (pair) validateAnatomyControlLabelPair(pair);
     this.kind = kind;
     this.activate = activate;
+    this.anatomyPair = pair ? Object.freeze({ ...pair }) : null;
+    if (pair && this.anatomy) {
+      this.anatomyOffs.push(
+        this.anatomy.subscribeOrder(pair.family, () => this.refresh()),
+        this.anatomy.subscribeTargets(pair.family, () => this.refresh())
+      );
+    }
     return {
       sync: (options) => {
         this.sys.ensureNotDisposed('controlLabel.sync');
@@ -117,13 +142,17 @@ class ControlLabelModuleImpl extends ModuleBase {
     this.release();
     this.ref = null;
     this.activate = null;
+    for (const off of this.anatomyOffs.splice(0)) off();
+    this.anatomyLease?.dispose();
+    this.anatomyLease = null;
+    this.anatomyScope = null;
   }
   private setDiagnostic(code: string | null): void {
     if (code === this.diagnostic) return;
     this.diagnostic = code;
     // A temporarily absent sibling during ordinary mounting is observable in
     // the port, not a warning on every valid pair's construction/teardown.
-    if (code && code !== 'missing-binding')
+    if (code && code !== 'missing-binding' && code !== 'missing-anatomy-domain')
       console.warn(`[ControlLabel] ${this.prototypeName}: ${code}`);
   }
   private release(): number {
@@ -141,6 +170,28 @@ class ControlLabelModuleImpl extends ModuleBase {
     return retiredGeneration;
   }
   private refresh(): void {
+    if (this.anatomyPair && !this.disposed) {
+      const pair = this.anatomyPair;
+      const expectedRole = this.kind === 'label' ? pair.labelRole : pair.targetRole;
+      const scope =
+        this.anatomy?.resolveSelfRole(pair.family) === expectedRole
+          ? this.anatomy.resolveDomainScope(pair.family)
+          : null;
+      if (scope !== this.anatomyScope || (scope && !this.anatomyLease)) {
+        const generation = this.release();
+        if (this.disposed || generation !== this.generation) return;
+        this.anatomyLease?.dispose();
+        this.anatomyLease = null;
+        this.ref = null;
+        this.anatomyScope = scope;
+        if (scope) {
+          this.anatomyLease = acquireAnatomyControlLabelPair(pair, scope);
+          this.ref = this.anatomyLease.ref;
+        }
+      }
+      if (!scope)
+        this.setDiagnostic(this.anatomy ? 'missing-anatomy-domain' : 'unsupported-anatomy');
+    }
     if (
       this.disposed ||
       !this.kind ||
@@ -209,7 +260,7 @@ class ControlLabelModuleImpl extends ModuleBase {
       // only this attempt, and clear intent before cleanup can install a newer
       // association. A failed reference is then eligible for an explicit retry.
       if (generation === this.generation && !this.disposed) {
-        this.ref = null;
+        if (!this.anatomyPair) this.ref = null;
         try {
           this.release();
         } catch {
@@ -229,6 +280,7 @@ export function createControlLabelModule(ctx: ModuleFactoryArgs) {
       const impl = new ControlLabelModuleImpl(
         caps,
         deps.requirePort<A11yPort>('a11y'),
+        deps.tryPort<AnatomyPort>('anatomy'),
         init.prototypeName
       );
       return {
@@ -247,5 +299,6 @@ export const ControlLabelModuleDef = defineModule({
   name: 'control-label',
   resourceOwnership: 'mixed',
   deps: ['a11y'],
+  optionalDeps: ['anatomy'],
   create: createControlLabelModule,
 });

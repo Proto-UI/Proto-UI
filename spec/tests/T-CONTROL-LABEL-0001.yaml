@@ -4,8 +4,11 @@ title: Control Label identity, ownership, lowering and Adapter evidence
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
-summary: Executable evidence is separated into portable ownership, synthetic host integration, compiler and real browser admission.
+  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable
+    admission remains blocked on independent review, complete native input/lifetime and assistive-technology
+    evidence.
+summary: Executable evidence is separated into portable ownership, synthetic host integration, compiler and
+  real browser admission.
 cases:
   - id: T-CONTROL-LABEL-0001-CASE-IDENTITY
     title: Opaque identity and explicit channel preserve JSON Props
@@ -82,7 +85,23 @@ cases:
       - P-LIQUID-GLASS-LABEL-STYLE
       - P-LIQUID-GLASS-LABEL-CONSUMPTION
     expectation: public-family-projection-of-one-independent-base-protocol
+  - id: T-CONTROL-LABEL-0001-CASE-ANATOMY
+    title: Module-owned nearest-root pairing uses the real Label input guard
+    covers:
+      - C-CONTROL-LABEL-0001-ANATOMY
+    expectation: Nested scope isolation, missing/duplicate targets, moved ancestry and in-flight pointer turn,
+      drag/cancel/modified/nested input, prevented click and text selection, reentrant disable and explicit
+      association conflict are independently asserted.
 implementations:
+  - id: control-label-view-discovery
+    kind: module-test
+    status: passing
+    path: packages/modules/control-label/test/web-lifecycle.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-PAIR
+    notes:
+      - DOM-harness scope delivery and controlled animation-frame callbacks cover delayed open/closed-root discovery, shared scheduling, replacement, disposal, stale frames and reentry; this is not native-browser or assistive-technology evidence.
   - id: control-label-acquisition-recovery
     kind: module-test
     status: passing
@@ -91,7 +110,8 @@ implementations:
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-PAIR
     notes:
-      - Injected host/projection failures exercise same-reference retry, partial-lease cleanup, original-error preservation and newer reentrant association ownership; this is not native host evidence.
+      - Injected host/projection failures exercise same-reference retry, partial-lease cleanup, original-error
+        preservation and newer reentrant association ownership; this is not native host evidence.
   - id: control-label-action-projection
     kind: module-test
     status: passing
@@ -157,6 +177,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-TARGETS
+      - T-CONTROL-LABEL-0001-CASE-PAIR
   - id: control-label-vue-integration
     kind: adapter-test
     status: passing
@@ -164,6 +185,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-TARGETS
+      - T-CONTROL-LABEL-0001-CASE-PAIR
   - id: control-label-vue2-integration
     kind: adapter-test
     status: passing
@@ -171,6 +193,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-TARGETS
+      - T-CONTROL-LABEL-0001-CASE-PAIR
   - id: control-label-native
     kind: adapter-test
     status: planned
@@ -179,7 +202,8 @@ implementations:
     consumesCases:
       - T-CONTROL-LABEL-0001-CASE-NATIVE
     notes:
-      - Native candidate execution and revision-bound captures remain pending; no synthetic fixture is substituted.
+      - Native candidate execution and revision-bound captures remain pending; no synthetic fixture is
+        substituted.
   - id: control-label-family-projections
     kind: adapter-test
     status: passing
@@ -194,6 +218,16 @@ implementations:
       - P-BRUTALIST-LABEL
       - P-BOOTSTRAP-2-3-2-LABEL
       - P-LIQUID-GLASS-LABEL
+  - id: control-label-anatomy
+    kind: runtime-test
+    status: passing
+    path: packages/modules/control-label/test/anatomy-pair.test.ts
+    required: true
+    consumesCases:
+      - T-CONTROL-LABEL-0001-CASE-ANATOMY
+    notes:
+      - Seven happy-dom module integration tests; native AT/browser event generation remains separately
+        required.
 verifies:
   contracts:
     - C-CONTROL-LABEL-0001

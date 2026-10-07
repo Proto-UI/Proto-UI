@@ -56,7 +56,22 @@ async function observeLayout(page: Page) {
         .map((element) => {
           const rect = element.getBoundingClientRect();
           const style = getComputedStyle(element);
+          const clipping = [];
+          for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+            if (['auto', 'scroll', 'hidden', 'clip'].includes(getComputedStyle(parent).overflowX)) {
+              const bounds = parent.getBoundingClientRect();
+              clipping.push({
+                tag: parent.tagName,
+                className: parent.className,
+                left: bounds.left,
+                right: bounds.right,
+                clientWidth: parent.clientWidth,
+                scrollWidth: parent.scrollWidth,
+              });
+            }
+          }
           return {
+            clipping,
             tag: element.tagName.toLowerCase(),
             ref: element.dataset.demoRef ?? null,
             role: element.getAttribute('role'),
@@ -74,9 +89,16 @@ async function observeLayout(page: Page) {
             minWidth: style.minWidth,
             whiteSpace: style.whiteSpace,
             overflowWrap: style.overflowWrap,
+            gridTemplateColumns: style.gridTemplateColumns,
           };
         })
-        .filter((item) => item.width > 0 && (item.right > viewportWidth + 1 || item.left < -1)),
+        .filter(
+          (item) =>
+            item.width > 0 &&
+            (item.right > viewportWidth + 1 ||
+              item.left < -1 ||
+              item.scrollWidth > item.clientWidth + 1)
+        ),
     };
   });
 }
@@ -98,6 +120,10 @@ async function capture(
     path: path.join(base, `${source.slice(0, 12)}-${name}.png`),
     style: 'astro-dev-toolbar { visibility: hidden; }',
   });
+  if (name.includes('320-text200'))
+    await previewer
+      .page()
+      .screenshot({ path: path.join(base, `${source.slice(0, 12)}-${name}-viewport.png`) });
   await writeFile(
     path.join(base, `${source.slice(0, 12)}-${name}.json`),
     JSON.stringify(

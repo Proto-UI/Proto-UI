@@ -119,6 +119,34 @@ export type ControlLabelActivateMessage = {
   readonly source: 'pointer' | 'accessibility';
 };
 
+/** The exact peer view and Module lease permitted to use its host root region. */
+export type AvailableSpaceLeaseMessage = {
+  readonly kind: 'available-space.lease';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly moduleEpoch: number;
+  readonly leaseId: string;
+  readonly root: 'proto-surface';
+  readonly boundary: 'root-content';
+  readonly active: boolean;
+};
+
+/** Host-logical facts for diagnostics; production layout consumes the same frame locally. */
+export type AvailableSpaceFrameMessage = {
+  readonly kind: 'available-space.frame';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly moduleEpoch: number;
+  readonly leaseId: string;
+  readonly revision: number;
+  readonly rect: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  } | null;
+};
+
 export type SessionOpenedMessage = {
   readonly kind: 'session.opened';
   readonly sessionId: SessionId;
@@ -308,6 +336,7 @@ export type HostToPeerMessage =
   | InstanceAssociationsSetMessage
   | ControlLabelViewMessage
   | ControlLabelActivateMessage
+  | AvailableSpaceFrameMessage
   | SessionOpenMessage
   | PropsSetMessage
   | ProjectionAckMessage
@@ -320,6 +349,7 @@ export type HostToPeerMessage =
 export type PeerToHostMessage =
   | PeerHelloMessage
   | ControlLabelPlanMessage
+  | AvailableSpaceLeaseMessage
   | SessionOpenedMessage
   | ProjectionInstallMessage
   | ProjectionActivateMessage

@@ -109,3 +109,55 @@ describe('Base Accordion content layout across runtime hosts', () => {
     }, 20000);
   }
 });
+
+describe('Accordion demo narrow-width ownership', () => {
+  for (const family of ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+    it(`${family} constrains the recipe grid, preserves long content, and wraps its action label`, () => {
+      const root = createAccordionDemo(family).root;
+      expect(root.kind).toBe('box');
+      if (root.kind !== 'box') throw new Error('Expected recipe layout box');
+      expect(root.className?.split(' ')).toContain('grid-cols-1');
+      const all = (node: DemoChild): DemoChild[] =>
+        typeof node === 'string' || node.kind === 'text'
+          ? [node]
+          : [node, ...(node.children ?? []).flatMap(all)];
+      const nodes = all(root);
+      for (const node of nodes) {
+        if (
+          typeof node !== 'string' &&
+          node.kind === 'proto' &&
+          node.prototypeId.endsWith('-accordion-trigger')
+        )
+          expect(node.className?.split(' ')).toContain('wrap-anywhere');
+      }
+      const long = nodes.find(
+        (node) =>
+          typeof node !== 'string' &&
+          node.kind === 'box' &&
+          node.children?.some(
+            (child) => typeof child === 'string' && child.startsWith('UnbrokenContentBoundary_')
+          )
+      );
+      expect(
+        long && typeof long !== 'string' && long.kind === 'box' && long.className?.split(' ')
+      ).toContain('wrap-anywhere');
+      const accept = nodes.find(
+        (node) => typeof node !== 'string' && node.kind === 'proto' && node.ref === 'accept'
+      );
+      expect(
+        accept &&
+          typeof accept !== 'string' &&
+          accept.kind === 'proto' &&
+          accept.className?.split(' ')
+      ).toEqual(
+        expect.arrayContaining([
+          'min-w-0',
+          'max-w-full',
+          'h-auto',
+          'whitespace-normal',
+          'wrap-anywhere',
+        ])
+      );
+    });
+  }
+});

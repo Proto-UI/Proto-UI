@@ -118,6 +118,15 @@ cases:
     notes:
       - Planned host evidence; this case claims no present Web/native provider support, Apple resemblance or complete compiler support.
 implementations:
+  - id: feedback-sink-kind-lifetime
+    kind: module-test
+    status: planned
+    path: packages/modules/feedback/test/sink-kind-retirement.test.ts
+    required: true
+    consumesCases:
+      - T-MATERIAL-VISUAL-RESULT-0001-CASE-SHARED-CONTRIBUTION
+    notes:
+      - Eight executed controls cover same-object capability-kind migration, unchanged-kind/object controls, throwing retirement and reentrant replacement/commit. Independent review remains pending; this proves sink lifecycle only, not physical material paint.
   - id: material-shared-runtime
     kind: runtime-test
     status: planned

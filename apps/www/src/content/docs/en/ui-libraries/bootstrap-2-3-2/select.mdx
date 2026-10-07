@@ -1,0 +1,53 @@
+---
+title: 'Select'
+description: 'Bootstrap 2.3.2 Select: five direct Base parts, controlled selection and anchored popup.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Bootstrap 2.3.2 Select provides Root, Trigger, Value, Content and Item. Each part directly consumes its matching Base hook. These are draft workspace sources; native host acceptance remains separate from source and synthetic-DOM tests.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## Try it
+
+The four examples show an uncontrolled value, disabled control, controlled value and RTL long label. Select an option in the controlled example, then use **Accept selection** to provide the owner value. Its popup can close while the committed value remains unchanged. The preview toolbar uses this family's actual Select parts to switch among WC, React, Vue and Vue 2.
+
+## Five parts, one owner
+
+- Root owns `open`, `value`, selected text, collection and requests. `open`/`value` opt independently into controlled mode; `defaultOpen`/`defaultValue` initialize uncontrolled state. `disabled` and `closeOnSelect` remain inherited.
+- Trigger exposes combobox relationships, effective disabled and interaction states. Pointer activation toggles; Enter/Space opens; ArrowDown/ArrowUp opens at the selected or first/last enabled option.
+- Value displays selected text, raw value, placeholder or empty content in that order. It does not own input or focus.
+- Content owns the listbox, anchored fixed portal, collision handling and keyboard navigation. `side`, `align`, `sideOffset`, `alignOffset`, `avoidCollisions`, `collisionPadding` and Transition props remain available. This projection uses zero-duration presence.
+- Item owns its option identity and derived selected/active states. Pointer, Enter or Space commits an enabled option. Navigation and hover never commit a value. Disabled options are skipped.
+
+Escape closes without changing the value and restores Trigger focus. Tab closes without preventing traversal. Outside press closes. Root requests remain `openChange` and `valueChange`; Item also emits `select`. Changing the selected Item's `textValue` refreshes the displayed label.
+
+Long labels wrap rather than truncate; Trigger and Value can shrink, and Content is bounded by the host's available width/height. Text alignment and trailing indicators follow logical direction. Authors must leave space outside the Trigger for the focus ring. This is a select-only single-selection protocol; form submission, editable search, multi-select, virtualized options and item-aligned positioning are outside the current Base contract.
+
+## Use the workspace source
+
+```ts
+import {
+  selectRoot,
+  selectTrigger,
+  selectValue,
+  selectContent,
+  selectItem,
+} from '@proto.ui/prototypes-bootstrap-2-3-2/select';
+```
+
+The source-only CLI component `bootstrap-2-3-2-select` generates all five parts for WC, React, Vue or Vue 2 only when workspace source mode is explicit. The package is private and has not been published to the registry. GPUI facade generation is not implemented.
+
+## Design reference
+
+Bootstrap 2.3.2 used native HTML select controls; this custom Select is an explicit Proto UI design-language extension using its button-dropdown visual grammar. The projection retains 4px Trigger corners, 6px panel corners, the 0/5/10px popup shadow and 3px/20px option padding (expressed in rem). It changes nowrap to wrapping, uses bounded portal width, preserves a focus outline and darkens the blue highlight for readable white text. It does not load jQuery, Glyphicons or upstream JavaScript. Bootstrap Apache 2.0 attribution remains in the source package.
+
+- [Base Select](/en/ui-libraries/base/select/)
+- [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/bootstrap-2-3-2/src/select)
+- [Evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SELECT-DRAFT-PROJECTIONS-0001.yaml)

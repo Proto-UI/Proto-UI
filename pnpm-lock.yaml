@@ -277,12 +277,12 @@ importers:
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
-      '@proto.ui/module-control-label':
-        specifier: workspace:*
-        version: link:../../modules/control-label
       '@proto.ui/module-context':
         specifier: workspace:*
         version: link:../../modules/context
+      '@proto.ui/module-control-label':
+        specifier: workspace:*
+        version: link:../../modules/control-label
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../../modules/event
@@ -301,6 +301,12 @@ importers:
       '@proto.ui/module-focus':
         specifier: workspace:*
         version: link:../../modules/focus
+      '@proto.ui/module-overlay':
+        specifier: workspace:*
+        version: link:../../modules/overlay
+      '@proto.ui/module-positioning':
+        specifier: workspace:*
+        version: link:../../modules/positioning
       '@proto.ui/module-rule-meta':
         specifier: workspace:*
         version: link:../../modules/rule-meta
@@ -825,6 +831,9 @@ importers:
       '@proto.ui/module-a11y':
         specifier: workspace:*
         version: link:../a11y
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../anatomy
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base

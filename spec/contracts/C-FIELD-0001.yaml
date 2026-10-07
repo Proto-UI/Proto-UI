@@ -1,0 +1,167 @@
+id: C-FIELD-0001
+type: contract
+title: Independent Field validation and control association
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: Finf Field 的 draft 契约及投影。稳定准入仍需独立审查、精确 head 的原生输入、辅助技术、视觉/材质与 GPUI 证据；synthetic DOM 测试不建立这些保证。
+  en: Draft Finf Field contract and projections. Stable admission requires independent review and exact-head
+    native input, assistive technology, visual/material and GPUI evidence; synthetic DOM checks do not
+    establish those guarantees.
+summary: Finite canonical values, controlled validity, versioned consumer validation and atomic accessibility parts.
+statement:
+  zh-CN: Field is a reusable independent semantic family over existing modules; its explicit validation bridge
+    is host neutral.
+  en: Field is a reusable independent semantic family over existing modules; its explicit validation bridge is
+    host neutral.
+criteria:
+  - id: C-FIELD-0001-OWNER
+    text:
+      zh-CN: Root 独占字段校验、touched 与 dirty 状态，Control 独占值及编辑器。通用控件通过 asFieldControl 明确报告有限 JSON canonical 值，并消费
+        disabled/readOnly/required；不得猜测 DOM、无关 expose、callback Props、隐藏 input 或原生 Form/submission。
+      en: Root alone owns field validation, touched and dirty facts. Control alone owns its value and editor. A
+        generic control author explicitly reports finite JSON canonical value through asFieldControl and
+        consumes effective disabled/readOnly/required; no DOM, unrelated expose, callback Prop, hidden input,
+        native form or submission discovery is admitted.
+  - id: C-FIELD-0001-ANATOMY
+    text:
+      zh-CN: Root 建立 opaque 域，恰有一个 Control，最多一个 Label、Description、Error，及任意数量的被动 Validity。渐进挂载可暂缺 Control；缺失、歧义或退役
+        Control 不得校验或接受结果。重复唯一角色 fail closed；嵌套 Root 隔离值、请求与 IDREF。
+      en: A Root establishes an opaque family domain with one Control, at most one Label, Description and Error, and
+        zero or more passive Validity consumers. Progressive mounting may temporarily omit Control;
+        missing/ambiguous or retired Control cannot validate or accept a result. Duplicate registered
+        singleton roles fail closed; nested Roots never share values, requests or IDREF targets.
+  - id: C-FIELD-0001-VALUES
+    text:
+      zh-CN: 值域为 null、有限数值、boolean、string 或稠密自有元素 string[]，边界返回防御性副本。required 将
+        null、false、空字符串和空数组判为空；0、空白字符串及包含空字符串的非空数组有效。不隐式 trim/coerce，不校验任意对象。可选空字符串跳过长度；Root
+        minLength/maxLength 仅按非空字符串 UTF-16 code units 计数，并投射默认编辑器。
+      en: Admitted values are null, finite number, boolean, string or a dense own-item string array; values and
+        result snapshots are defensively copied. required treats null, false, empty string and empty array as
+        empty; 0, whitespace and a nonempty array containing an empty string are filled. No trim, coercion or
+        generic object validation occurs. Optional empty strings bypass length checks; Root
+        minLength/maxLength use UTF-16 code-unit length only for nonempty strings and also project to the
+        default editor.
+  - id: C-FIELD-0001-OWNERSHIP
+    text:
+      zh-CN: 是否提供 invalid 决定 validity 受控所有权，errors 随 owner 值；defaultInvalid/defaultErrors 仅初始化非受控状态一次。校验发一次
+        validityChange 提案，不乐观改写 owner。owner 同步、挂载、值修订、取消、reset 不发校验提案；同步重入的新 owner 接受优先。编辑值/defaultValue 的所有权由
+        TextControl 初始化独立固定。
+      en: invalid presence selects controlled validity; errors accompany that owner value.
+        defaultInvalid/defaultErrors initialize uncontrolled validity once. Validation emits one
+        validityChange proposal without optimistically rewriting a controlled owner. Owner synchronization,
+        mounting, value revision, cancellation and reset emit no result proposal. Newer synchronous owner
+        acceptance wins. Control value/defaultValue ownership is independently fixed by TextControl
+        initialization.
+  - id: C-FIELD-0001-VALIDATION
+    text:
+      zh-CN: validationMode 默认 onBlur，可选 onChange/manual。仅 active、非 disabled 的登记 Control 可校验。内置 flags 为
+        valueMissing、tooShort、tooLong；composition 期间不得校验。blur 置 touched，canonical 值相对初始基线变化派生
+        dirty。composition 开始/编辑使旧工作失效，onChange 等待 compositionend。readOnly 阻止编辑但保留焦点与显式校验；disabled
+        阻止编辑/焦点/校验，不暗改 owner 值。
+      en: validationMode is onBlur by default, onChange or manual. Only an active non-disabled registered Control is
+        eligible. Built-in flags are valueMissing, tooShort and tooLong; a composing control cannot validate.
+        blur sets touched; canonical value differs from its initialization baseline to derive dirty. Starting
+        or editing composition invalidates old work and onChange waits for compositionend. Readonly blocks
+        editing but retains focus and explicit validation; disabled blocks validation/focus and editing
+        without silently rewriting owner values.
+  - id: C-FIELD-0001-ASYNC
+    text:
+      zh-CN: externalValidation 仅在内置约束通过后发 {requestId,value,reason}；异步执行由消费者拥有。opaque JSON requestId 绑定 Root、当前
+        Control lease 及值/策略修订。替换、detach、退役、值改变、composition 开始、disabled/readOnly
+        切换、策略改变、取消、reset、新请求使旧结果失效。resolveValidation 仅接受当前请求一次及有限 {invalid,errors?}；拒绝畸形、跨
+        Root、取消与过期结果。pending 不表示 valid；缺失 Control 即使受控 invalid=false 仍是 unvalidated。 Control 本地 effective
+        readOnly 任一方向变化都使 pending lease 失效。完整结果/报告先归一化，再改变保留状态或 pending 所有权；含 initialValue/errors
+        的稀疏数组被拒绝且不消耗当前请求。读取 payload 抛出的异常保留原身份，重入产生的新报告/请求优先于旧读取。
+      en: "externalValidation emits validationRequest only after built-in constraints pass:
+        {requestId,value,reason}. The consumer owns asynchronous execution. Each opaque JSON requestId binds
+        the Root, current Control lease and value/policy revision. Replacement, detach, retirement, value
+        change, composition start, disable/readOnly transition, prop policy change, cancel, reset and
+        superseding request invalidate old results. resolveValidation accepts only the current request once
+        and a finite {invalid,errors?} result; malformed, cross-root, canceled or stale results are rejected.
+        Pending is not valid; absent Control is unvalidated even when invalid=false is controlled. A change of
+        effective Control-local readOnly in either direction invalidates the pending lease. Entire
+        result/report payloads are normalized before retained state or pending ownership changes; sparse
+        arrays, including initialValue/errors, are rejected without spending a current request. Payload-read
+        exceptions retain their original identity, and a newer reentrant report or validation request wins
+        over an older read."
+  - id: C-FIELD-0001-RELATIONS
+    text:
+      zh-CN: Field 名称、帮助及错误通过精确 Anatomy 关系交给 A11y 投射，不编写 DOM ID。默认物理编辑器 labelledBy Label、describedBy Description；仅
+        canonical invalid=true 时 errorMessage Error。Web 复用现有 IDREF ledger 投射
+        aria-required/aria-errormessage。移除、替换、隐藏错误、重挂载及终止清理遵循同一关系 lease。
+      en: Field names and help/error targets are exact Anatomy relationships projected by A11y, never authored DOM
+        IDs. The default physical editor receives labelledBy Label, describedBy Description, and errorMessage
+        Error only while canonical invalid=true. Web projects required to aria-required and errorMessage to
+        aria-errormessage using the existing owned-IDREF ledger. Target removal, replacement, hidden error,
+        remount and terminal cleanup follow the same relation lease rules.
+  - id: C-FIELD-0001-PARTS
+    text:
+      zh-CN: Label 提供可见名称，不添加 role/Tab stop，可选激活聚焦同一 enabled Control。Description 保持被动可选择内容。Error 显示 message
+        override，否则 owner/校验 errors，否则有限内置英文提示；本地化由作者明确提供。Error 随 invalid 默认 L1 detach，或 keepMounted
+        隐藏保留，不自动创建 alert/live region。Validity 只提供防御性状态快照，不自建 owner 或 render callback Props。 Label 通过
+        naming=false 的 ControlLabel anatomy pairing 复用原生输入与 isCurrent 守卫，不能以 asTrigger 替代。默认文本 Control 声明
+        paired target；通用控件作者明确声明同一目标配对并复用自身操作。
+      en: "Label contributes visible naming without a role or Tab stop; optional activation focuses the same enabled
+        Control. Description remains selectable passive content. Error has one visible message: explicit
+        message, otherwise owner/validation errors, otherwise finite built-in English messages; localization
+        is an author concern. Error follows invalid with default L1 detach or keepMounted hidden retention,
+        and creates no automatic alert/live region. Validity exposes defensive snapshots without a second
+        owner or render callback Props. Label activation uses ControlLabel anatomy pairing with naming=false
+        and all native input/isCurrent guards; asTrigger is not a substitute. The default text Control
+        declares its paired target; a generic control author explicitly declares the same target pair and
+        shares its existing operation."
+  - id: C-FIELD-0001-HOST
+    text:
+      zh-CN: 四个视觉 family 直接消费 Base atoms，保留 modules/exposes。TextControl、Focus、Context、Anatomy、State、A11y
+        及生命周期模块继续拥有宿主传输/清理。原生 required/invalid/busy/readOnly 或描述/错误关系缺失仍是明确能力缺口；JS transport 不是 GPUI
+        无障碍/光学绘制证据。
+      en: All four visual families consume Base atoms directly and preserve module declarations and expose
+        semantics. Existing TextControl, Focus, Context, Anatomy, State, A11y and lifecycle modules remain the
+        owners of host transport and cleanup. Unsupported native required/invalid/busy/readOnly or
+        description/error relations remain explicit capability gaps; JS transport is no evidence of GPUI
+        accessibility or optical paint.
+  - id: C-FIELD-0001-BOUNDS
+    text:
+      zh-CN: 此 Field 不准入 Fieldset/Form、submission、form reset、表单值序列化、服务器请求实现、debounce、原生 validity API forwarding
+        或任意跨控件值推断。通用组合复用报告桥，明确拥有自身键盘/值语义。Base UI、shadcn、归档 Bootstrap、Apple HIG 仅作独立比较，不作为规范权威或实现继承。
+      en: This Field contract admits no Fieldset/Form, submission, form reset, serialized form values, server
+        request implementation, debounce, native browser validity API forwarding or arbitrary cross-control
+        value inference. Generic compositions reuse the reporting bridge and must explicitly own
+        control-specific keyboard/value semantics. Base UI, shadcn, archived Bootstrap and Apple HIG are
+        independent comparisons, not normative authority or implementation inheritance.
+dependsOn:
+  contracts:
+    - C-PROPS-0003
+    - C-CONTEXT-0006
+    - C-A11Y-PART-RELATIONSHIP-0001
+    - C-LIFECYCLE-0008
+    - C-CONTROL-LABEL-0001
+  decisions:
+    - D-BASE-PROTOTYPE-INDEPENDENCE-0001
+sources:
+  - path: packages/prototypes/base/src/field/root.proto.ts
+  - path: packages/prototypes/base/src/field/control-binding.proto.ts
+  - path: packages/modules/a11y/src/web.ts
+openQuestions:
+  - id: C-FIELD-0001-Q-ADMISSION
+    question:
+      zh-CN: When do exact-head native/browser, AT, visual/material, GPUI and independent review evidence satisfy
+        this draft?
+      en: When do exact-head native/browser, AT, visual/material, GPUI and independent review evidence satisfy this
+        draft?
+    blocks:
+      - activation:C-FIELD-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Admitted a draft Field contract candidate within the user-directed Finf scope; no stable or complete
+      native guarantee.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Independent review FIELD-R1/R2 made two-way policy invalidation and dense atomic payload admission
+      explicit; preserved pending recovery and error identity.
+tags:
+  - field
+  - validation
+  - draft

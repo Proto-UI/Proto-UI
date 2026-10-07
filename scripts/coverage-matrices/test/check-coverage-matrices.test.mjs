@@ -18047,7 +18047,45 @@ test('audit resolver profile: exact audited helper is mandatory evidence metadat
 
 test('audit resolver profile: original 857 profile remains independently admitted without audit helper', () => {
   const { root, config, plugin, target } = auditResolverFixture();
-  const original = fs
+  const original = fs.readFileSync(
+    new URL('./fixtures/promotion-resolver-original-857.txt', import.meta.url),
+    'utf8'
+  );
+  assert.equal(
+    createHash('sha256').update(original).digest('hex'),
+    'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30'
+  );
+  fs.writeFileSync(config, original);
+  fs.unlinkSync(plugin);
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(!metadata.has(plugin));
+});
+
+test('audit resolver profile: exact historical audit configuration remains admitted with its helper', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  const historical = fs.readFileSync(
+    new URL('./fixtures/promotion-resolver-original-audit.txt', import.meta.url),
+    'utf8'
+  );
+  assert.equal(
+    createHash('sha256').update(historical).digest('hex'),
+    'b07dfc4350c16a8bee3b65717887cc5d592002f2cb492e134c60a3d18519a6de'
+  );
+  fs.writeFileSync(config, historical);
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(metadata.has(plugin));
+  fs.appendFileSync(plugin, '\n// unreviewed change');
+  assert.throws(
+    () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+    /audit resolver plugin.*unrecognized/
+  );
+});
+
+test('audit resolver profile: reviewed Finf non-audit counterpart needs no audit helper', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  const current = fs
     .readFileSync(config, 'utf8')
     .replace("import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n", '')
     .replace(
@@ -18062,10 +18100,10 @@ test('audit resolver profile: original 857 profile remains independently admitte
       '    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],'
     );
   assert.equal(
-    createHash('sha256').update(original).digest('hex'),
-    'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30'
+    createHash('sha256').update(current).digest('hex'),
+    '368441f22060c0a9adec23a98320e87fb68df4b64c1a3d8e7e3ff3877944f475'
   );
-  fs.writeFileSync(config, original);
+  fs.writeFileSync(config, current);
   fs.unlinkSync(plugin);
   const metadata = new Set();
   assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
@@ -18130,6 +18168,10 @@ test('Finf demo raw imports remain bounded to reviewed association and Bootstrap
     ],
     ['apps/www/src/pages/en/test/bootstrap-state-controls.astro', '@proto.ui/adapter-react', true],
     ['apps/www/src/components/OrdinaryAssociationController.ts', '@proto.ui/core', true],
+    ['apps/www/src/content/docs/field-demo.shared.ts', '@proto.ui/prototypes-base/field', false],
+    ['apps/www/src/content/docs/field-demo.shared.ts', '@proto.ui/runtime', true],
+    ['apps/www/src/content/docs/field-demo.shared.ts', '@proto.ui/prototypes-base/select', true],
+    ['apps/www/src/content/docs/unreviewed-field.demo.ts', '@proto.ui/prototypes-base/field', true],
   ];
   for (const [sourcePath, specifier] of cases) {
     const absolute = path.join(root, sourcePath);

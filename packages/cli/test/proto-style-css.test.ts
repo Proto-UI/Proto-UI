@@ -8,6 +8,11 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it('keeps authored spaces and newlines without hanging preserved spaces into padding', () => {
+    const css = renderProtoStyleTokenCss(['whitespace-break-spaces']);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('white-space: break-spaces;');
+  });
   it('lowers intrinsic action wrapping and bounded grid tracks without media variants', () => {
     const css = renderProtoStyleTokenCss([
       'flex-wrap-reverse',

@@ -68,7 +68,9 @@ describe('Bootstrap 2.3.2 partial-family public recipes', () => {
         const page = read(`apps/www/src/content/docs/${locale}/ui-libraries/${family}/${kind}.mdx`);
         expect(page).toContain(`demoId="demo-${family}-${kind}"`);
         expect(page).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
-        expect(page).toContain('toolbar={false}');
+        // The actual family Select now supplies the common toolbar. Absence
+        // of an override uses PrototypePreviewer's normal enabled default.
+        expect(page).not.toContain('toolbar={false}');
         expect(page).not.toContain('data-adapter-panel');
         expect(page).toContain('private');
         expect(page).toContain('draft');

@@ -50,6 +50,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private viewEpoch = 0;
         private visualRevision = 0;
         private visualSink: FinalStyleSink | VisualFeedbackSink | null = null;
+        private visualSinkKind: 'visual' | 'final' | null = null;
         private visualSinkView = 0;
         private pendingProjection: StyleHandle | null = null;
         private material: MaterialBinding | null = null;
@@ -287,8 +288,14 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             : this.caps.has(FINAL_STYLE_SINK_CAP)
               ? this.caps.get(FINAL_STYLE_SINK_CAP)
               : null;
+          const nextKind = this.caps.has(VISUAL_FEEDBACK_SINK_CAP)
+            ? 'visual'
+            : this.caps.has(FINAL_STYLE_SINK_CAP)
+              ? 'final'
+              : null;
           this.markDirty();
-          if (this.visualSink && this.visualSink !== next) this.releaseVisualSink();
+          if (this.visualSink && (this.visualSink !== next || this.visualSinkKind !== nextKind))
+            this.releaseVisualSink();
           // Capability replacement must replay the current logical result even
           // when the previous host had already consumed it.
           this.flushIfPossible();
@@ -323,6 +330,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const sink = this.visualSink;
           const view = this.visualSinkView;
           this.visualSink = null;
+          this.visualSinkKind = null;
           if (sink) sink.release(view);
         }
 
@@ -338,6 +346,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             if (this.caps.has(VISUAL_FEEDBACK_SINK_CAP)) {
               const sink = this.caps.get(VISUAL_FEEDBACK_SINK_CAP);
               this.visualSink = sink;
+              this.visualSinkKind = 'visual';
               this.visualSinkView = this.viewEpoch;
               sink.commit(
                 Object.freeze({
@@ -353,6 +362,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             } else if (this.caps.has(FINAL_STYLE_SINK_CAP)) {
               const sink = this.caps.get(FINAL_STYLE_SINK_CAP);
               this.visualSink = sink;
+              this.visualSinkKind = 'final';
               this.visualSinkView = this.viewEpoch;
               sink.commit(
                 finalStyleFrame(handle, this.viewEpoch, revision, this.material?.snapshot() ?? null)

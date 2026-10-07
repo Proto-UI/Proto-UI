@@ -836,3 +836,65 @@ test('candidate refresh does not erase known unresolved GPUI blockers', () => {
   assert.deepEqual(retained.blockers, row.blockers);
   assert.equal(retained.status, 'required-unassessed');
 });
+
+for (const project of ['shadcn/ui', 'Base UI']) {
+  for (const [name, mutate] of [
+    [
+      'another revision',
+      (u) => {
+        u.pathname = u.pathname.replace(
+          /\/(blob|tree)\/[a-f0-9]{40}\//,
+          '/$1/' + '1'.repeat(40) + '/'
+        );
+      },
+    ],
+    [
+      'another repository',
+      (u) => {
+        u.pathname = u.pathname.replace(/^\/[^/]+\/[^/]+\//, '/unreviewed/repository/');
+      },
+    ],
+    [
+      'another host',
+      (u) => {
+        u.hostname = 'example.com';
+      },
+    ],
+    [
+      'non-HTTPS transport',
+      (u) => {
+        u.protocol = 'http:';
+      },
+    ],
+    [
+      'query override',
+      (u) => {
+        u.search = '?ref=unreviewed';
+      },
+    ],
+    [
+      'fragment alias',
+      (u) => {
+        u.hash = '#unreviewed';
+      },
+    ],
+  ]) {
+    test(`${project} pins reject ${name} even when the URL is unique`, () => {
+      const data = copy();
+      const reference = data.comparisonRows
+        .flatMap((row) => row.referenceProjects)
+        .find((r) => r.project === project);
+      const url = new URL(reference.pinnedSource);
+      mutate(url);
+      reference.pinnedSource = url.href;
+      assert(validate(data).some((error) => error.includes('Reference snapshot pin mismatch')));
+    });
+  }
+  test(`${project} pins reject a malformed URL without throwing`, () => {
+    const data = copy();
+    data.comparisonRows
+      .flatMap((row) => row.referenceProjects)
+      .find((r) => r.project === project).pinnedSource = 'not-a-url';
+    assert(validate(data).some((error) => error.includes('Reference snapshot pin mismatch')));
+  });
+}

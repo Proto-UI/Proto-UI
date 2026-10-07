@@ -629,3 +629,63 @@ for (const family of ['collapsible', 'accordion']) {
     assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
   });
 }
+
+const fieldObservation = async (invalid, keepMounted = false) => {
+  const plan = await load('field');
+  for (const instance of plan.instances)
+    if (instance.basePrototypeId === 'P-BASE-FIELD-ERROR')
+      instance.props = { ...instance.props, keepMounted };
+  const sample = model(plan, 'field');
+  for (const surface of sample.surfaces) {
+    surface.currentLease = true;
+    const instance = plan.instances.find((node) => node.path === surface.uid);
+    if (instance.basePrototypeId === 'P-BASE-FIELD-CONTROL') surface.ariaInvalid = String(invalid);
+    if (instance.basePrototypeId === 'P-BASE-FIELD-ERROR' && !invalid) {
+      surface.painted = false;
+      surface.visibility = { visible: false, classification: 'exempt-not-visible' };
+    }
+  }
+  return { plan, sample };
+};
+for (const invalid of [false, true])
+  test(`Field error presence follows explicit control invalid=${invalid}`, async () => {
+    const { plan, sample } = await fieldObservation(invalid);
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
+    sample.surfaces = sample.surfaces.filter(
+      (surface) => !surface.prototypeId.endsWith('-field-error')
+    );
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, !invalid);
+  });
+test('Field keepMounted requires a hidden retained error while valid', async () => {
+  const { plan, sample } = await fieldObservation(false, true);
+  assert.equal(compareContrastAnatomy(plan, sample).achieved, true);
+  sample.surfaces = sample.surfaces.filter(
+    (surface) => !surface.prototypeId.endsWith('-field-error')
+  );
+  assert.equal(compareContrastAnatomy(plan, sample).achieved, false);
+});
+for (const broken of [
+  'missing-validity',
+  'malformed-validity',
+  'visible-valid-error',
+  'hidden-invalid-error',
+  'wrong-lease',
+  'duplicate-error',
+])
+  test(`Field error oracle rejects ${broken}`, async () => {
+    const { plan, sample } = await fieldObservation(broken === 'hidden-invalid-error');
+    const control = sample.surfaces.find((surface) =>
+      surface.prototypeId.endsWith('-field-control')
+    );
+    const error = sample.surfaces.find((surface) => surface.prototypeId.endsWith('-field-error'));
+    if (broken === 'missing-validity') delete control.ariaInvalid;
+    if (broken === 'malformed-validity') control.ariaInvalid = 'unknown';
+    if (broken === 'visible-valid-error') {
+      error.painted = true;
+      error.visibility = { visible: true, classification: 'source-model-visible' };
+    }
+    if (broken === 'hidden-invalid-error') error.painted = false;
+    if (broken === 'wrong-lease') error.currentLease = false;
+    if (broken === 'duplicate-error') sample.surfaces.push({ ...error, uid: 'duplicate' });
+    assert.equal(compareContrastAnatomy(plan, sample).achieved, false);
+  });

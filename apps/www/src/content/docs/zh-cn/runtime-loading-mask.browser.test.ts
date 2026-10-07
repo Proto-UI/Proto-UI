@@ -48,18 +48,23 @@ async function choose(page: Page, control: 'runtime' | 'family', value: string) 
     .getByRole('option', { name: value, exact: true })
     .click();
 }
-async function ready(page: Page, runtime: string) {
+async function ready(page: Page, runtime: string, family?: string) {
   await page.waitForFunction(
-    (runtime) => {
+    ({ runtime, family }) => {
       const root = document.querySelector<HTMLElement>('[data-homepage-runtime]');
       const demo = document.querySelector<HTMLElement>('[data-home-showcase]');
       return (
         root?.dataset.runtimeState === 'ready' &&
         root.dataset.runtime === runtime &&
-        demo?.dataset.runnerState === 'ready'
+        demo?.dataset.runnerState === 'ready' &&
+        demo.dataset.runnerRuntime === runtime &&
+        (!family ||
+          (demo.dataset.projectionFamily === family &&
+            demo.dataset.runtimeMaskFamily === family &&
+            demo.dataset.runtimeMaskReady === 'true'))
       );
     },
-    runtime,
+    { runtime, family },
     { timeout: 45_000 }
   );
 }
@@ -72,11 +77,9 @@ async function setup(page: Page, family: string, colorScheme: 'light' | 'dark' =
   await ready(page, 'wc');
   if (family === 'brutalist') {
     await choose(page, 'family', 'Brutalist');
-    await ready(page, 'wc');
+    await ready(page, 'wc', family);
   }
-  await page.waitForFunction(() =>
-    document.querySelector('[data-home-showcase][data-runtime-mask-ready="true"]')
-  );
+  await ready(page, 'wc', family);
 }
 async function capture(page: Page, name: string) {
   const facts = await page.evaluate(() => {
@@ -84,6 +87,8 @@ async function capture(page: Page, name: string) {
     const mask = region.querySelector<HTMLElement>('[data-runtime-loading-mask]')!;
     return {
       state: region.dataset.runnerState,
+      family: region.dataset.projectionFamily,
+      maskFamily: region.dataset.runtimeMaskFamily,
       runtime: region.dataset.runnerRuntime,
       maskHidden: mask.hidden,
       maskState: mask.dataset.state,

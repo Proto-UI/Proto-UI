@@ -12,6 +12,7 @@ import {
   readContrastPopupEscapeBefore,
   readContrastPopupEscapeAfter,
 } from '../scripts/contrast-popup-escape.mjs';
+import { discoverContrastSources } from '../scripts/contrast-audit-plan.mjs';
 import { compileContrastAnatomy, compareContrastAnatomy } from '../scripts/contrast-anatomy.mjs';
 import {
   KnownUnsupportedContrastDomain,
@@ -90,6 +91,13 @@ vi.mock('../src/components/PrototypePreviewer/runtime-preview-surface', async (i
   };
 });
 
+// Use the same bounded source discovery as the CLI. Every admitted family
+// must resolve to one real recipe and one actual public MDX route.
+const authoredSources = await discoverContrastSources({
+  contentRoot: resolve(process.cwd(), 'apps/www/src/content'),
+  manifest: PROJECTION_FAMILY_MANIFESTS.brutalist,
+  families: Object.keys(PROJECTION_FAMILY_MANIFESTS.brutalist.families),
+});
 const runtimes = AdapterIds;
 type Runtime = (typeof runtimes)[number];
 function pageDeclaration(family: string): {
@@ -101,15 +109,7 @@ function pageDeclaration(family: string): {
   const document = unified()
     .use(remarkParse)
     .use(remarkMdx)
-    .parse(
-      readFileSync(
-        resolve(
-          process.cwd(),
-          `apps/www/src/content/docs/en/ui-libraries/brutalist/components/${family}.mdx`
-        ),
-        'utf8'
-      )
-    );
+    .parse(readFileSync(resolve(process.cwd(), authoredSources[family].pagePath), 'utf8'));
   const previewers: any[] = [];
   const visit = (node: any): void => {
     if (node.type === 'mdxJsxFlowElement' && node.name === 'PrototypePreviewer')
@@ -337,7 +337,7 @@ async function preview(
   };
   try {
     await atStartup?.(root);
-    await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+    await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'), { timeout: 5000 });
     return {
       ...elements(root),
       destroy,
@@ -373,8 +373,8 @@ for (const declaration of declarations)
     });
   }
 
-it('preserves the 17 declared primary recipes and 134 page/runtime/theme cases, including explicit Tooltip limits', () => {
-  expect(declarations).toHaveLength(17);
+it('preserves every declared primary recipe and page/runtime/theme case, including explicit Tooltip limits', () => {
+  expect(declarations.map(({ family }) => family)).toEqual(Object.keys(authoredSources));
   for (const declaration of declarations) {
     expect(declaration.recipeId).toBe(
       (PROJECTION_FAMILY_MANIFESTS.brutalist.families as any)[declaration.family].recipeId
@@ -386,7 +386,7 @@ it('preserves the 17 declared primary recipes and 134 page/runtime/theme cases, 
   }
   expect(
     declarations.reduce((count, declaration) => count + declaration.runtimes.length * 2, 0)
-  ).toBe(134);
+  ).toBe(declarations.length * 8 - 2);
   expect(declarations.find((declaration) => declaration.family === 'tooltip')?.runtimes).toEqual([
     'wc',
     'react',
@@ -403,7 +403,7 @@ it('preserves the 17 declared primary recipes and 134 page/runtime/theme cases, 
 it('binds every admitted family to the actual producer recipe without importing its renderer into the CLI', async () => {
   const { projectionExpectation } = auditor();
   const families = Object.keys(PROJECTION_FAMILY_MANIFESTS.brutalist.families);
-  expect(families).toHaveLength(17);
+  expect(families).toEqual(Object.keys(authoredSources));
   for (const family of families) {
     const expected = projectionExpectation(item('wc', family));
     const production = runtimePreviewRecipe('brutalist', family as ProjectionComponentId);
@@ -868,12 +868,15 @@ function installActualProbe() {
   }).code;
   (globalThis as any).puiContrastProbe = new Function(compiled + ';return puiContrastProbe;')();
 }
-const productionDemos = import.meta.glob('../src/content/docs/zh-cn/demo-brutalist-*.demo.ts', {
+const productionDemos = import.meta.glob('../src/content/**/demo-brutalist-*.demo.ts', {
   eager: true,
   import: 'default',
 });
 function pipeline(family: string) {
-  const recipe = productionDemos[`../src/content/docs/zh-cn/demo-brutalist-${family}.demo.ts`];
+  const recipe =
+    productionDemos[
+      '../src/content/' + authoredSources[family].recipePath.slice('apps/www/src/content/'.length)
+    ];
   expect(recipe, family).toBeDefined();
   const names = [
     ...subjectFunctions,
@@ -929,6 +932,7 @@ function pipeline(family: string) {
   const replay = ts.createPrinter().printFile(transformed.transformed[0]);
   transformed.dispose();
   const namesAndValues = {
+    authoredSources,
     PROJECTION_FAMILY_MANIFESTS,
     runtimeAvailability: Object.fromEntries(
       declarations.map((entry) => [entry.family, { serialized: JSON.stringify(entry.runtimes) }])
@@ -1356,9 +1360,7 @@ it('loads the serialized shared probe before the production readiness call and s
 // and readiness. Accessible native runtime selection is outside this no-browser
 // test: the real producer has already been given the requested initial runtime.
 function actualReadinessEntry() {
-  const start = runnerSource.lastIndexOf(
-    "      let previewer = page.locator('[data-previewer-id]').first();"
-  );
+  const start = runnerSource.lastIndexOf('      let previewer = page.locator(');
   const end = runnerSource.indexOf('      await applyColorScheme(page, theme', start);
   expect(start).toBeGreaterThan(0);
   expect(end).toBeGreaterThan(start);
@@ -1369,8 +1371,9 @@ function actualReadinessEntry() {
     'audit',
     'choosePreviewRuntime',
     'browserProbe',
+    'authoredSources',
     javascript(
-      `return async function() { const {assertProjectionReadiness,bindCaseSubject,casePreviewer} = audit; let phase; ${runnerSource.slice(start, end)} return phase; }`
+      `return async function() { const {family} = item; const {assertProjectionReadiness,bindCaseSubject,casePreviewer} = audit; let phase; ${runnerSource.slice(start, end)} return phase; }`
     )
   );
 }
@@ -1472,7 +1475,8 @@ for (const runtime of runtimes) {
           async () => {
             events.push('requested-runtime-already-selected');
           },
-          'actual-probe'
+          'actual-probe',
+          authoredSources
         );
         const pending = run();
         await vi.waitFor(() =>
@@ -1529,7 +1533,8 @@ it('actual production entry fails a missing shell without entering generic calib
         auditCase,
         auditor(true),
         async () => {},
-        'actual-probe'
+        'actual-probe',
+        authoredSources
       );
       await expect(run()).rejects.toThrow('Ready previewer');
       expect(auditCase.projectionReadinessFailure?.achieved).toBe(false);
@@ -2206,6 +2211,107 @@ for (const outcome of ['retained', 'dismissed', 'changed-lease'] as const) {
       expect(auditCase.escapeTransition?.achieved).toBe(false);
       expect(calls).not.toContain('pointer-reset');
       expect(calls).not.toContain('focus-reset');
+    }
+  });
+}
+
+for (const runtime of runtimes) {
+  it(`field/${runtime}: error anatomy follows actual public validation and reset`, async () => {
+    const mounted = await preview(runtime, 'field');
+    const restore = controlledMeasurementInputs();
+    try {
+      const readers = pipeline('field');
+      const page = pipelinePage(mounted.root);
+      const observe = () => readers.anatomyObservation(page, item(runtime, 'field'), 'validation');
+      const requiredError = (result: any) =>
+        result.expectations.find((entry: any) => entry.path === 'root.children.0.children.3');
+      expect(requiredError(await observe()).required).toBe(false);
+      mounted.root.querySelector<HTMLElement>('[data-demo-ref="validate"]')!.click();
+      await vi.waitFor(
+        async () => {
+          const result = await observe();
+          expect(requiredError(result).required).toBe(true);
+          expect(result.achieved, JSON.stringify(result.failures)).toBe(true);
+        },
+        { timeout: 5000 }
+      );
+      mounted.root.querySelector<HTMLElement>('[data-demo-ref="reset"]')!.click();
+      await vi.waitFor(
+        async () => {
+          const result = await observe();
+          expect(requiredError(result).required).toBe(false);
+          expect(result.achieved, JSON.stringify(result.failures)).toBe(true);
+        },
+        { timeout: 5000 }
+      );
+    } finally {
+      restore();
+      await mounted.destroy();
+    }
+  });
+}
+
+it('WC Field validity cannot borrow an ambiguous or foreign native editor witness', async () => {
+  const mounted = await preview('wc', 'field');
+  const restore = controlledMeasurementInputs();
+  const host = mounted.root.querySelector<HTMLElement>('[data-demo-ref="requiredControl"]')!;
+  const ownerRoot = host.shadowRoot ?? host;
+  const editor = [...ownerRoot.children].find(
+    (node) => node instanceof HTMLInputElement && node.getAttribute('part') === 'control'
+  )!;
+  const duplicate = document.createElement('input');
+  duplicate.setAttribute('part', 'control');
+  duplicate.setAttribute('aria-invalid', 'false');
+  const readers = pipeline('field'),
+    page = pipelinePage(mounted.root);
+  const observe = () => readers.anatomyObservation(page, item('wc', 'field'), 'rest');
+  try {
+    expect((await observe()).achieved).toBe(true);
+    ownerRoot.append(duplicate);
+    await expect(observe()).rejects.toThrow('Actual audit selector is missing or ambiguous');
+    duplicate.remove();
+    editor.setAttribute('data-projection-owner', 'foreign-owner');
+    expect((await observe()).achieved).toBe(false);
+    editor.removeAttribute('data-projection-owner');
+    expect((await observe()).achieved).toBe(true);
+  } finally {
+    duplicate.remove();
+    editor.removeAttribute('data-projection-owner');
+    restore();
+    await mounted.destroy();
+  }
+});
+
+for (const runtime of runtimes) {
+  it(`field/${runtime}: audit primary is the unique actual editor and observes its real focus`, async () => {
+    const mounted = await preview(runtime, 'field');
+    const restore = controlledMeasurementInputs();
+    try {
+      const readers = pipeline('field'),
+        page = pipelinePage(mounted.root);
+      const target = readers.primary(page.locator('[data-previewer-id]'), 'field');
+      const result = await target.evaluate((element: HTMLElement) => {
+        element.focus();
+        return {
+          tag: element.tagName,
+          observation: (globalThis as any).puiContrastProbe.readContrastTargetObservation(element),
+        };
+      });
+      expect(result.tag).toBe('INPUT');
+      expect(result.observation.focused).toBe(true);
+      const anatomy = await readers.anatomyObservation(
+        page,
+        item(runtime, 'field'),
+        'keyboard-focus'
+      );
+      expect(anatomy.achieved, JSON.stringify(anatomy.failures)).toBe(true);
+      expect(anatomy.observed.primary).not.toBeNull();
+      expect(
+        anatomy.observed.surfaces.find((part: any) => part.uid === anatomy.observed.primary)?.ref
+      ).toBe('requiredControl');
+    } finally {
+      restore();
+      await mounted.destroy();
     }
   });
 }

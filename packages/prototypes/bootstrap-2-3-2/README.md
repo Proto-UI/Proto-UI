@@ -16,6 +16,14 @@ Text controls and Toggle use normal 14/20 typography at a 16px root. Checkbox/Sw
 
 All component paint lives in Prototype tokens, Rule contributions and the shared finite physical token translator. Load family `renderThemeCss()` plus CSS generated from its source by `collectProtoStyleTokens` / `renderProtoStyleTokenCss`. The generated draft preset uses that same source vocabulary. Consumers own fonts, outer layout and theme activation. [Attribution and deliberate changes](THIRD_PARTY_NOTICES.md) travel with the source; the public CLI archive independently contains the Apache license and notice for its derived values.
 
-The bilingual `/en/ui-libraries/bootstrap-2-3-2/` and `/zh-cn/ui-libraries/bootstrap-2-3-2/` pages expose all seven implemented kinds and their genuine recipes. Their toolbar-free previews follow the page's four-Web runtime selector without requiring a missing Bootstrap Select. Missing kinds continue to fail explicitly, and the incomplete family is not offered by the eleven-kind homepage selector.
+The bilingual `/en/ui-libraries/bootstrap-2-3-2/` and `/zh-cn/ui-libraries/bootstrap-2-3-2/` pages expose the implemented kinds and their genuine recipes. Their preview toolbars now use genuine Bootstrap Select parts and Text labels, while retaining the page's four-Web runtime preference. Missing kinds continue to fail explicitly, and the incomplete family is not offered by the eleven-kind homepage selector.
 
 The Button fixture is `/en/test/new-projection-families/`; the controls fixture is `/en/test/bootstrap-state-controls/`. A prepared read-only Actions workflow binds real browser evidence to the exact candidate SHA. Local simulated-host, physical CSS, source/preset and package checks do not establish real browser paint, general Prototype Compiler, GPUI, Flutter or Qt conformance. Source-derived GPUI token data preserves unsupported-property diagnostics and is not native component execution. #792 stays open for all remaining Base parts and host/compiler evidence.
+
+Select Root/Trigger/Value/Content/Item and Text now have independent direct Base consumers and private `/select` and `/text` source exports. Select is a button-dropdown design-language extension, not native HTML select or jQuery API parity. Both CLI entries require explicit workspace source mode. All eight Text axes are retained, with no user-selection override.
+
+## Field (draft workspace source)
+
+The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
+
+This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.

@@ -81,7 +81,9 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     const ids = new Set<string>();
     collectPrototypeIds(content.demo.root, ids);
     expect([...ids].sort()).toEqual([...content.recipe.prototypeIds].sort());
-    expect(ids.size).toBe(36);
+    // The closed recipe now includes the actual family Label relation owner.
+    expect(ids.size).toBe(37);
+    expect(ids.has(`${family}-label-root`)).toBe(true);
     expect(
       [...ids].every((id) => id.startsWith(`${family}-`) || id === PREVIEW_SURFACE_ID(family))
     ).toBe(true);

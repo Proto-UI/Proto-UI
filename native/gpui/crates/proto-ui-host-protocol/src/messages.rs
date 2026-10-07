@@ -169,6 +169,71 @@ pub struct ControlLabelActivate {
     pub source: ControlLabelActivationSource,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AvailableSpaceLease {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
+    pub module_epoch: u64,
+    pub lease_id: String,
+    pub root: String,
+    pub boundary: String,
+    pub active: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AvailableSpaceRect {
+    #[serde(serialize_with = "serialize_coordinate")]
+    pub x: f32,
+    #[serde(serialize_with = "serialize_coordinate")]
+    pub y: f32,
+    #[serde(serialize_with = "serialize_coordinate")]
+    pub width: f32,
+    #[serde(serialize_with = "serialize_coordinate")]
+    pub height: f32,
+}
+
+fn serialize_coordinate<S: serde::Serializer>(
+    value: &f32,
+    serializer: S,
+) -> Result<S::Ok, S::Error> {
+    if !value.is_finite() {
+        return Err(serde::ser::Error::custom(
+            "nonfinite available-space coordinate",
+        ));
+    }
+    // JavaScript serializes integral coordinates without a decimal suffix.
+    // Preserve the canonical fixture's number shape rather than rewriting it.
+    if value.fract() == 0.0 && value.abs() as f64 <= 9_007_199_254_740_991.0 {
+        serializer.serialize_i64(*value as i64)
+    } else {
+        serializer.serialize_f32(*value)
+    }
+}
+
+impl AvailableSpaceRect {
+    pub fn is_valid(&self) -> bool {
+        [self.x, self.y, self.width, self.height]
+            .into_iter()
+            .all(f32::is_finite)
+            && self.width >= 0.0
+            && self.height >= 0.0
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AvailableSpaceFrame {
+    pub session_id: SessionId,
+    pub view_epoch: ViewEpoch,
+    pub module_epoch: u64,
+    pub lease_id: String,
+    pub revision: u64,
+    #[serde(deserialize_with = "crate::wire::required_nullable")]
+    pub rect: Option<AvailableSpaceRect>,
+}
+
 /// `ok` or `failed`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -446,6 +511,7 @@ envelopes!(
         InstanceAssociations(InstanceAssociationsSet) => "instance.associations",
         ControlLabelView(ControlLabelView) => "control-label.view",
         ControlLabelActivate(ControlLabelActivate) => "control-label.activate",
+        AvailableSpaceFrame(AvailableSpaceFrame) => "available-space.frame",
         SessionOpen(SessionOpen) => "session.open",
         PropsSet(PropsSet) => "props.set",
         ProjectionAck(ProjectionAckMessage) => "projection.ack",
@@ -462,6 +528,7 @@ envelopes!(
     PeerToHostMessage {
         PeerHello(PeerHello) => "peer.hello",
         ControlLabelPlan(ControlLabelPlanMessage) => "control-label.plan",
+        AvailableSpaceLease(AvailableSpaceLease) => "available-space.lease",
         SessionOpened(SessionOpened) => "session.opened",
         // Boxed: a transaction carries a whole template and plan, several
         // times the size of any other message.

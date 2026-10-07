@@ -280,6 +280,7 @@ const stateProperties = [
   'stroke-opacity',
   'stroke-width',
   'stroke-dasharray',
+  'vector-effect',
   'content',
 ] as const;
 
@@ -654,17 +655,18 @@ const paintedBoxVisibility = (element: Element, boxes: readonly DOMRect[], clipS
 };
 
 // Paint existence does not require a luminance conversion. Keep unsupported
-// color spaces out of numeric ratios while recognizing their known opaque alpha.
-const opaqueSourcePaint = (value: string): boolean => {
+// color spaces out of numeric ratios while recognizing known nonzero alpha.
+// This is paint existence only; ratio readers retain their opaque/compositing rules.
+const nontransparentSourcePaint = (value: string): boolean => {
   if (typeof value !== 'string' || !value) return false;
   const resolved = paint(value);
-  if (!resolved.limits.length) return resolved.alpha === 1;
+  if (!resolved.limits.length) return resolved.alpha !== null && resolved.alpha > 0;
   const hex = value.match(/^#([\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i)?.[1];
   if (hex)
     return (
       hex.length === 3 ||
       hex.length === 6 ||
-      /^(?:f|ff)$/i.test(hex.slice(hex.length === 4 ? 3 : 6))
+      Number.parseInt(hex.slice(hex.length === 4 ? 3 : 6), 16) > 0
     );
   const functional = value.match(/^(?:lab|lch|oklab|oklch|color)\(([^()]*)\)$/i);
   if (!functional || !CSS.supports('color', value)) return false;
@@ -672,7 +674,82 @@ const opaqueSourcePaint = (value: string): boolean => {
   if (parts.length === 1) return true;
   if (parts.length !== 2 || !/^\s*(?:\d+(?:\.\d*)?|\.\d+)%?\s*$/.test(parts[1])) return false;
   const alpha = parts[1].trim();
-  return Number.parseFloat(alpha) === (alpha.endsWith('%') ? 100 : 1);
+  return Number.parseFloat(alpha) > 0;
+};
+
+// Chromium reports a zero-height/width centerline box for an axis-aligned SVG
+// stroke. Admit only one effective straight path segment under an axis-aligned
+// screen transform. Its interior stroke rectangle is paint; arbitrary paths,
+// dashes, non-scaling strokes, rotations and unresolved geometry remain unknown.
+const straightStrokeBox = (element: Element): DOMRect | null => {
+  if (element.namespaceURI !== 'http://www.w3.org/2000/svg' || !element.matches('path'))
+    return null;
+  const style = getComputedStyle(element);
+  const strokeWidth = Number.parseFloat(style.strokeWidth);
+  if (
+    !nontransparentSourcePaint(style.stroke) ||
+    !(Number(style.strokeOpacity) > 0) ||
+    !/^\d+(?:\.\d+)?px$/.test(style.strokeWidth) ||
+    !(strokeWidth > 0) ||
+    style.strokeDasharray !== 'none' ||
+    style.vectorEffect !== 'none'
+  )
+    return null;
+  const path = style.getPropertyValue('d').match(/^path\((["'])([^"']+)\1\)$/)?.[2];
+  if (!path) return null;
+  const number = String.raw`[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?`;
+  const tokens = path.match(new RegExp(`[MmLlHhVv]|${number}`, 'g')) ?? [];
+  if (path.replace(new RegExp(`[MmLlHhVv]|${number}|[\\s,]+`, 'g'), '') !== '') return null;
+  if (!/^[Mm]$/.test(tokens[0] ?? '') || !/^[LlHhVv]$/.test(tokens[3] ?? '')) return null;
+  const [x, y] = tokens.slice(1, 3).map(Number);
+  const command = tokens[3];
+  const values = tokens.slice(4).map(Number);
+  if (values.length !== (command.toLowerCase() === 'l' ? 2 : 1)) return null;
+  const relative = command === command.toLowerCase();
+  const endX = command.toLowerCase() === 'v' ? x : values[0] + (relative ? x : 0);
+  const endY = command.toLowerCase() === 'h' ? y : values.at(-1)! + (relative ? y : 0);
+  if (![x, y, endX, endY].every(Number.isFinite) || (x === endX) === (y === endY)) return null;
+  try {
+    const matrix = (element as SVGGraphicsElement).getScreenCTM();
+    if (
+      !matrix ||
+      ![matrix.a, matrix.b, matrix.c, matrix.d, matrix.e, matrix.f].every(Number.isFinite) ||
+      matrix.b !== 0 ||
+      matrix.c !== 0 ||
+      matrix.a === 0 ||
+      matrix.d === 0
+    )
+      return null;
+    const x1 = x * matrix.a + matrix.e,
+      x2 = endX * matrix.a + matrix.e;
+    const y1 = y * matrix.d + matrix.f,
+      y2 = endY * matrix.d + matrix.f;
+    // Exclude caps: the nonempty interior is shared by butt, square and round.
+    const halfX = x === endX ? (Math.abs(matrix.a) * strokeWidth) / 2 : 0;
+    const halfY = y === endY ? (Math.abs(matrix.d) * strokeWidth) / 2 : 0;
+    const left = Math.min(x1, x2) - halfX,
+      right = Math.max(x1, x2) + halfX;
+    const top = Math.min(y1, y2) - halfY,
+      bottom = Math.max(y1, y2) + halfY;
+    if (![left, right, top, bottom].every(Number.isFinite)) return null;
+    return {
+      x: left,
+      y: top,
+      left,
+      right,
+      top,
+      bottom,
+      width: right - left,
+      height: bottom - top,
+    } as DOMRect;
+  } catch {
+    return null;
+  }
+};
+const paintWitnessBoxes = (element: Element, boxes: readonly DOMRect[]): readonly DOMRect[] => {
+  if (boxes.some((box) => box.width > 0 && box.height > 0)) return boxes;
+  const stroke = straightStrokeBox(element);
+  return stroke ? [stroke] : boxes;
 };
 
 // This is a bounded source witness, not pixel segmentation or an occlusion
@@ -693,7 +770,7 @@ const hasSupportedPaint = (element: Element): boolean => {
       const style = getComputedStyle(parent);
       if (
         !(parseFloat(style.fontSize) > 0) ||
-        !opaqueSourcePaint(style.webkitTextFillColor || style.color)
+        !nontransparentSourcePaint(style.webkitTextFillColor || style.color)
       )
         return false;
       const range = document.createRange();
@@ -703,19 +780,22 @@ const hasSupportedPaint = (element: Element): boolean => {
     }
     if (!(node instanceof Element)) return false;
     const style = getComputedStyle(node);
-    const visibility = paintedBoxVisibility(node, [...node.getClientRects()]);
+    const visibility = paintedBoxVisibility(
+      node,
+      paintWitnessBoxes(node, [...node.getClientRects()])
+    );
     if (visibility.visible && visibility.classification === 'source-model-visible') {
       if (node.namespaceURI === 'http://www.w3.org/2000/svg') {
         if (!node.closest('defs,clipPath,mask,marker,pattern')) {
           if (
             style.fillOpacity === '1' &&
-            opaqueSourcePaint(style.fill) &&
+            nontransparentSourcePaint(style.fill) &&
             supportedSvgFillArea(node, style)
           )
             return true;
           if (
             style.strokeOpacity === '1' &&
-            opaqueSourcePaint(style.stroke) &&
+            nontransparentSourcePaint(style.stroke) &&
             parseFloat(style.strokeWidth) > 0 &&
             style.strokeDasharray === 'none'
           ) {
@@ -731,7 +811,11 @@ const hasSupportedPaint = (element: Element): boolean => {
         const fillBox =
           style.backgroundClip === 'border-box' ||
           (style.backgroundClip === 'padding-box' && node.clientWidth > 0 && node.clientHeight > 0);
-        if (fillBox && style.backgroundImage === 'none' && opaqueSourcePaint(style.backgroundColor))
+        if (
+          fillBox &&
+          style.backgroundImage === 'none' &&
+          nontransparentSourcePaint(style.backgroundColor)
+        )
           return true;
         if (
           style.borderImageSource === 'none' &&
@@ -739,7 +823,7 @@ const hasSupportedPaint = (element: Element): boolean => {
             (side) =>
               style.getPropertyValue(`border-${side}-style`) === 'solid' &&
               parseFloat(style.getPropertyValue(`border-${side}-width`)) > 0 &&
-              opaqueSourcePaint(style.getPropertyValue(`border-${side}-color`))
+              nontransparentSourcePaint(style.getPropertyValue(`border-${side}-color`))
           )
         )
           return true;
@@ -771,7 +855,7 @@ const paintedVisibility = (element: Element, boxes: readonly DOMRect[], clipSelf
 // opacity-zero and fully clipped boxes. This observes the same paint limits as
 // the captured frame and never mutates the subject.
 export const readContrastPaintedVisibility = (element: Element) =>
-  paintedVisibility(element, [...element.getClientRects()]);
+  paintedVisibility(element, paintWitnessBoxes(element, [...element.getClientRects()]));
 
 // The runner and instrument calibration consume this exact browser function.
 // Supported bounds/opacity/clipping are required in addition to native state;
@@ -1046,6 +1130,28 @@ const readContrastAnatomyInScope = (
     let parent = composedParent(element);
     while (parent && !indices.has(parent as HTMLElement)) parent = composedParent(parent);
     const visibility = readContrastPaintedVisibility(element);
+    // TextControl's WC Adapter keeps its native editor as a direct owned
+    // part; the other Web Adapters use the native input itself as the root.
+    // Missing or ambiguous physical editors do not imply valid=false.
+    let validityTarget: Element | null = element;
+    if (
+      element.dataset.projectionPrototype === 'brutalist-field-control' &&
+      !(element instanceof HTMLInputElement)
+    ) {
+      const editors = [...(element.shadowRoot ?? element).children].filter(
+        (child) => child instanceof HTMLInputElement && child.getAttribute('part') === 'control'
+      );
+      validityTarget = editors.length === 1 ? editors[0] : null;
+      if (
+        validityTarget &&
+        (validityTarget.hasAttribute('data-pui-root') ||
+          (validityTarget.hasAttribute('data-projection-owner') &&
+            validityTarget.getAttribute('data-projection-owner') !== owner) ||
+          (validityTarget.hasAttribute('data-projection-generation') &&
+            validityTarget.getAttribute('data-projection-generation') !== generation))
+      )
+        validityTarget = null;
+    }
     return {
       uid,
       parent: parent ? indices.get(parent as HTMLElement)! : null,
@@ -1058,6 +1164,7 @@ const readContrastAnatomyInScope = (
       ariaChecked: element.getAttribute('aria-checked'),
       ariaSelected: element.getAttribute('aria-selected'),
       ariaExpanded: element.getAttribute('aria-expanded'),
+      ariaInvalid: validityTarget?.getAttribute('aria-invalid') ?? null,
       hovered: element.matches(':hover'),
       focused: document.activeElement === element,
       withinContent: !!authoredContent?.contains(element),
@@ -1068,10 +1175,13 @@ const readContrastAnatomyInScope = (
       visibility,
     };
   });
+  let primaryRoot = primary;
+  while (primaryRoot && !indices.has(primaryRoot as HTMLElement))
+    primaryRoot = composedParent(primaryRoot);
   return {
     owner: owner ?? null,
     generation: generation ?? null,
-    primary: primary ? (indices.get(primary as HTMLElement) ?? null) : null,
+    primary: primaryRoot ? (indices.get(primaryRoot as HTMLElement) ?? null) : null,
     currentLease:
       (boundary
         ? boundary.observation.achieved

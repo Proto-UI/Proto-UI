@@ -32,23 +32,35 @@ describe('Bootstrap 2.3.2 partial control registration', () => {
       });
     });
   }
-  it('does not alias missing parts, kinds or claim a complete family', () => {
-    expect(Object.keys(PROJECTION_FAMILY_MANIFESTS['bootstrap-2-3-2'].families)).toEqual([
-      'accordion',
-      'collapsible',
-      'label',
-      'button',
-      'checkbox',
-      'switch',
-      'toggle',
-      'input',
-      'textarea',
-      'separator',
-    ]);
+  it('retains original controls and resolves newly admitted atoms without aliasing', async () => {
+    expect(Object.keys(PROJECTION_FAMILY_MANIFESTS['bootstrap-2-3-2'].families)).toEqual(
+      expect.arrayContaining([
+        'accordion',
+        'collapsible',
+        'label',
+        'button',
+        'checkbox',
+        'switch',
+        'toggle',
+        'input',
+        'textarea',
+        'separator',
+        'text',
+        'select',
+        'field',
+      ])
+    );
     expect(() => resolveProjectionPart('bootstrap-2-3-2', 'switch', 'indicator')).toThrow(
       /no part indicator/
     );
-    for (const kind of ['select', 'tabs', 'radio-group', 'dialog', 'tooltip', 'scroll-area']) {
+    for (const kind of ['text', 'select', 'field']) {
+      const resolved = resolveProjectionPart('bootstrap-2-3-2', kind, 'root');
+      expect(resolved.prototypeId).toBe(`bootstrap-2-3-2-${kind}-root`);
+      await loadPrototype(resolved.prototypeId);
+      expect(getPrototype(resolved.prototypeId).name).toBe(resolved.prototypeId);
+      expect(resolved.basePrototypeId).toBe(`P-BASE-${kind.toUpperCase()}`);
+    }
+    for (const kind of ['__unregistered_component__']) {
       expect(() => resolveProjectionPart('bootstrap-2-3-2', kind, 'root')).toThrow(
         /fallback is forbidden/
       );

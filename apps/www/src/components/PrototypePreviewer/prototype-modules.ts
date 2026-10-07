@@ -23,6 +23,174 @@ function getPrototypeIdFromPath(path: string): string | null {
  * value: 动态导入函数
  */
 const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
+  'liquid-glass-text-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/text');
+    registerPrototype('liquid-glass-text-root', mod.textRoot);
+  },
+  'bootstrap-2-3-2-text-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/text');
+    registerPrototype('bootstrap-2-3-2-text-root', mod.textRoot);
+  },
+  'bootstrap-2-3-2-select-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-root', mod.selectRoot);
+  },
+  'bootstrap-2-3-2-select-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-trigger', mod.selectTrigger);
+  },
+  'bootstrap-2-3-2-select-value': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-value', mod.selectValue);
+  },
+  'bootstrap-2-3-2-select-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-content', mod.selectContent);
+  },
+  'bootstrap-2-3-2-select-item': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-item', mod.selectItem);
+  },
+  'liquid-glass-select-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-root', mod.selectRoot);
+  },
+  'liquid-glass-select-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-trigger', mod.selectTrigger);
+  },
+  'liquid-glass-select-value': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-value', mod.selectValue);
+  },
+  'liquid-glass-select-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-content', mod.selectContent);
+  },
+  'liquid-glass-select-item': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-item', mod.selectItem);
+  },
+  'base-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-root', mod.fieldRoot);
+  },
+  'base-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-label', mod.fieldLabel);
+  },
+  'base-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-control', mod.fieldControl);
+  },
+  'base-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-description', mod.fieldDescription);
+  },
+  'base-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-error', mod.fieldError);
+  },
+  'base-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-validity', mod.fieldValidity);
+  },
+  'shadcn-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-root', mod.fieldRoot);
+  },
+  'shadcn-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-label', mod.fieldLabel);
+  },
+  'shadcn-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-control', mod.fieldControl);
+  },
+  'shadcn-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-description', mod.fieldDescription);
+  },
+  'shadcn-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-error', mod.fieldError);
+  },
+  'shadcn-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-validity', mod.fieldValidity);
+  },
+  'brutalist-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-root', mod.fieldRoot);
+  },
+  'brutalist-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-label', mod.fieldLabel);
+  },
+  'brutalist-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-control', mod.fieldControl);
+  },
+  'brutalist-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-description', mod.fieldDescription);
+  },
+  'brutalist-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-error', mod.fieldError);
+  },
+  'brutalist-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-validity', mod.fieldValidity);
+  },
+  'bootstrap-2-3-2-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-root', mod.fieldRoot);
+  },
+  'bootstrap-2-3-2-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-label', mod.fieldLabel);
+  },
+  'bootstrap-2-3-2-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-control', mod.fieldControl);
+  },
+  'bootstrap-2-3-2-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-description', mod.fieldDescription);
+  },
+  'bootstrap-2-3-2-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-error', mod.fieldError);
+  },
+  'bootstrap-2-3-2-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-validity', mod.fieldValidity);
+  },
+  'liquid-glass-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-root', mod.fieldRoot);
+  },
+  'liquid-glass-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-label', mod.fieldLabel);
+  },
+  'liquid-glass-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-control', mod.fieldControl);
+  },
+  'liquid-glass-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-description', mod.fieldDescription);
+  },
+  'liquid-glass-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-error', mod.fieldError);
+  },
+  'liquid-glass-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-validity', mod.fieldValidity);
+  },
   'base-accordion-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/accordion');
     registerPrototype('base-accordion-root', mod.accordionRoot);

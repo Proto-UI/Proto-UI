@@ -14,3 +14,9 @@ internal/coverage-matrices/prototype-coverage-matrix.md
 internal/coverage-matrices/finf-delivery-checklist.md
 # Exact pre-migration Issue body snapshots retain their original formatting.
 internal/coverage-matrices/snapshots/
+
+# Immutable reviewed upstream bytes are checked by provenance.test.mjs.
+experiments/liquidgl-baseline/vendor/
+
+# Historical resolver profiles retain their exact reviewed source fingerprints.
+scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt

@@ -4039,9 +4039,11 @@ dependencies = [
 name = "proto-ui-gpui"
 version = "0.0.0"
 dependencies = [
+ "block2 0.5.1",
  "gpui",
  "gpui_platform",
  "objc2 0.5.2",
+ "objc2-foundation 0.2.2",
  "proto-ui-host-protocol",
  "proto-ui-style",
  "raw-window-handle",

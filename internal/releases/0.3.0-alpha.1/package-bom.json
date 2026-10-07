@@ -225,6 +225,7 @@
       "internalDependencies": [
         "@proto.ui/core",
         "@proto.ui/module-a11y",
+        "@proto.ui/module-anatomy",
         "@proto.ui/module-base",
         "@proto.ui/types"
       ]

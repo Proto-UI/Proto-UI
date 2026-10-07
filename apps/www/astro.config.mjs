@@ -505,6 +505,11 @@ export default defineConfig({
                   slug: 'ui-libraries/base/label',
                 },
                 {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/base/field',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
@@ -623,6 +628,11 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/label',
                 },
                 {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/shadcn/field',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/shadcn/textarea',
@@ -694,6 +704,21 @@ export default defineConfig({
                   translations: { en: 'Label', 'zh-CN': 'Label' },
                   slug: 'ui-libraries/bootstrap-2-3-2/label',
                 },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/select',
+                },
+                {
+                  label: 'Text',
+                  translations: { en: 'Text', 'zh-CN': 'Text' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/text',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/field',
+                },
               ],
             },
             {
@@ -714,6 +739,21 @@ export default defineConfig({
                   label: 'Label',
                   translations: { en: 'Label', 'zh-CN': 'Label' },
                   slug: 'ui-libraries/liquid-glass/label',
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/liquid-glass/select',
+                },
+                {
+                  label: 'Text',
+                  translations: { en: 'Text', 'zh-CN': 'Text' },
+                  slug: 'ui-libraries/liquid-glass/text',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/liquid-glass/field',
                 },
               ],
             },
@@ -770,6 +810,11 @@ export default defineConfig({
                   label: 'Label',
                   translations: { en: 'Label', 'zh-CN': 'Label' },
                   slug: 'ui-libraries/brutalist/components/label',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/brutalist/field',
                 },
                 {
                   label: 'Button',

@@ -29,6 +29,7 @@ const EXPECTED_COMPONENT_IDS = {
   shadcn: [
     ...EXPECTED_SHARED_BASE_FAMILY_IDS,
     'accordion',
+    'field',
     'collapsible',
     'label',
     'input',
@@ -38,6 +39,7 @@ const EXPECTED_COMPONENT_IDS = {
   brutalist: [
     ...EXPECTED_SHARED_BASE_FAMILY_IDS,
     'accordion',
+    'field',
     'collapsible',
     'checkbox',
     'label',
@@ -51,6 +53,7 @@ const EXPECTED_COMPONENT_IDS = {
 } as const;
 
 const EXPECTED_REQUIRED_PART_IDS = {
+  field: ['root', 'label', 'control', 'description', 'error', 'validity'],
   label: ['root'],
   button: ['root'],
   toggle: ['root'],
@@ -697,6 +700,21 @@ describe('Website projection-family manifests', () => {
 
   it('classifies every recipe Prototype with explicit part or auxiliary lineage', () => {
     const expectedAuxiliaries = {
+      'bootstrap-2-3-2/select': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      'liquid-glass/select': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
+      'shadcn/field': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      'brutalist/field': [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'brutalist-button' }],
+      'bootstrap-2-3-2/field': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+      ],
+      'liquid-glass/field': [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+      ],
+
       'shadcn/label': [
         { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
         { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
@@ -829,6 +847,9 @@ describe('partial new projection families', () => {
       expect(Object.keys(manifest.families)).toEqual(
         family === 'bootstrap-2-3-2'
           ? [
+              'text',
+              'select',
+              'field',
               'accordion',
               'collapsible',
               'label',
@@ -840,17 +861,27 @@ describe('partial new projection families', () => {
               'textarea',
               'separator',
             ]
-          : ['accordion', 'collapsible', 'label', 'button']
+          : ['text', 'select', 'field', 'accordion', 'collapsible', 'label', 'button']
       );
       expect(() => validateProjectionFamilyManifest(manifest)).not.toThrow();
       expect(resolveProjectionPart(family, 'button', 'root').prototypeId).toBe(`${family}-button`);
       for (const kind of family === 'bootstrap-2-3-2'
-        ? ['select', 'dialog', 'tabs', 'radio-group', 'tooltip']
-        : ['select', 'switch', 'dialog', 'tabs', 'checkbox']) {
+        ? ['dialog', 'tabs', 'radio-group', 'tooltip']
+        : ['switch', 'dialog', 'tabs', 'checkbox']) {
         expect(() => resolveProjectionPart(family, kind, 'root')).toThrow(
           /no family.*fallback is forbidden/
         );
       }
+      for (const part of ['root', 'trigger', 'value', 'content', 'item']) {
+        expect(resolveProjectionPart(family, 'select', part)).toEqual({
+          prototypeId: `${family}-select-${part}`,
+          basePrototypeId: `P-BASE-SELECT${part === 'root' ? '' : '-' + part.toUpperCase()}`,
+        });
+      }
+      expect(resolveProjectionPart(family, 'text', 'root')).toEqual({
+        basePrototypeId: 'P-BASE-TEXT',
+        prototypeId: `${family}-text-root`,
+      });
       expect(resolveProjectionRecipe(`demo-${family}-button`)).toEqual({
         projectionFamilyId: family,
         familyId: 'button',

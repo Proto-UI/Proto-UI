@@ -31,7 +31,8 @@ for (const [family, entries, visualToken] of families) {
       const root = document.createElement(`${family}-collapsible-root`) as any;
       const trigger = document.createElement(`${family}-collapsible-trigger`) as any;
       const content = document.createElement(`${family}-collapsible-content`) as any;
-      trigger.textContent = 'A very long disclosure label '.repeat(10);
+      const authoredLabel = '  A very long disclosure label  \n'.repeat(10);
+      trigger.textContent = authoredLabel;
       content.textContent = 'A very long content word '.repeat(30);
       setElementProps(content, { keepMounted: true });
       root.append(trigger, content);
@@ -45,7 +46,8 @@ for (const [family, entries, visualToken] of families) {
         expect(styleContains(host, 'min-w-0')).toBe(true);
         expect(styleContains(host, 'max-w-full')).toBe(true);
       }
-      expect(styleContains(trigger, 'whitespace-pre-wrap')).toBe(true);
+      expect(styleContains(trigger, 'whitespace-break-spaces')).toBe(true);
+      expect(trigger.textContent).toBe(authoredLabel);
       expect(styleContains(trigger, 'text-left')).toBe(true);
       expect(
         styleContains(

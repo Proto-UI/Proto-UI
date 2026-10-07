@@ -44,3 +44,5 @@ export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
 export * from './label';
 
 export * from "./accordion";
+
+export * from './field';

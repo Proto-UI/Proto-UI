@@ -50,8 +50,15 @@ export function createRuntimeLoadingMask(options: {
   let revision = 0;
 
   const sync = () => {
-    if (!alive || !context) return;
+    if (!alive) return;
+    if (!context || activeFamily !== options.family()) {
+      delete root.dataset.runtimeMaskReady;
+      delete root.dataset.runtimeMaskFamily;
+      mount.hidden = true;
+      return;
+    }
     root.dataset.runtimeMaskReady = 'true';
+    root.dataset.runtimeMaskFamily = activeFamily;
     if (state === 'ready') {
       mount.hidden = true;
       mount.dataset.state = state;
@@ -111,6 +118,10 @@ export function createRuntimeLoadingMask(options: {
       const ids = [`${family}-surface-root`, `${family}-text-root`, `${family}-button`];
       await loadPrototypes(ids);
       if (!alive || currentRevision !== revision) return;
+      mount.hidden = true;
+      activeFamily = null;
+      context = undefined;
+      sync();
       await rendered?.destroy();
       stopTheme?.();
       stopTheme = undefined;
@@ -251,6 +262,9 @@ export function createRuntimeLoadingMask(options: {
       })
       .finally(() => {
         pending = undefined;
+        // A committed family can change while public atoms are loading. Never
+        // publish that obsolete family, and make ready await the replacement.
+        if (alive && options.family() !== family) return prepare();
       });
     return pending;
   };
@@ -269,14 +283,14 @@ export function createRuntimeLoadingMask(options: {
       content.setAttribute('aria-busy', String(next === 'loading'));
       if (next === 'ready') mount.hidden = true;
       sync();
-      if (next === 'loading' && ownedFocus && context) {
+      if (next === 'loading' && ownedFocus && context && activeFamily === options.family()) {
         if (cancellable) context.refs.cancel.focus({ preventScroll: true });
         else {
           context.refs.frame.tabIndex = -1;
           context.refs.frame.focus({ preventScroll: true });
         }
       }
-      if (next !== 'ready') void prepare();
+      void prepare();
       if (next === 'ready' && ownedFocus) options.restoreFocus?.(focus);
     },
     async destroy() {
@@ -289,6 +303,7 @@ export function createRuntimeLoadingMask(options: {
       await rendered?.destroy();
       mount.remove();
       delete root.dataset.runtimeMaskReady;
+      delete root.dataset.runtimeMaskFamily;
       if (!position && root.style.position === 'relative') root.style.position = '';
     },
   };

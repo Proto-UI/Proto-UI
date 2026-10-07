@@ -521,6 +521,8 @@ pub enum StyleIssue {
 pub struct TokenStyle {
     pub refinement: StyleRefinement,
     pub issues: Vec<StyleIssue>,
+    /// A separately owned root-window layout wrapper consumes this geometry.
+    pub fixed_centered: bool,
 }
 
 /// Resolves a token list in cascade order, substitutes the design language's
@@ -556,7 +558,90 @@ fn tokens_for_target<'a>(
     context: LengthContext,
     target: StyleTarget,
 ) -> TokenStyle {
+    tokens_for_target_in_region(tokens, theme, context, target, None)
+}
+
+pub fn needs_available_space<'a>(tokens: impl IntoIterator<Item = &'a str>) -> bool {
+    proto_ui_style::vocabulary()
+        .resolve_all(tokens)
+        .declarations
+        .values()
+        .any(|value| value.contains("--proto-ui-available-region-"))
+}
+
+pub fn style_for_feedback_in_region<'a>(
+    tokens: impl IntoIterator<Item = &'a str>,
+    theme: Option<&proto_ui_style::Theme>,
+    context: LengthContext,
+    region: Option<proto_ui_host_protocol::messages::AvailableSpaceRect>,
+) -> TokenStyle {
+    tokens_for_target_in_region(
+        tokens,
+        theme,
+        context,
+        StyleTarget::ExistingHostRoot,
+        region,
+    )
+}
+
+fn tokens_for_target_in_region<'a>(
+    tokens: impl IntoIterator<Item = &'a str>,
+    theme: Option<&proto_ui_style::Theme>,
+    context: LengthContext,
+    target: StyleTarget,
+    region: Option<proto_ui_host_protocol::messages::AvailableSpaceRect>,
+) -> TokenStyle {
     let mut resolved = proto_ui_style::vocabulary().resolve_all(tokens);
+    let region = region.filter(|rect| rect.is_valid());
+    let d = &resolved.declarations;
+    let fixed_centered = region.is_some()
+        && matches!(target, StyleTarget::ExistingHostRoot)
+        && d.get("position").map(String::as_str) == Some("fixed")
+        && d.get("left").map(String::as_str) == Some("var(--proto-ui-available-region-center-x,50%)")
+        && d.get("top").map(String::as_str) == Some("var(--proto-ui-available-region-center-y,50%)")
+        && d.get("--pui-translate-x").map(String::as_str) == Some("-50%")
+        && d.get("--pui-translate-y").map(String::as_str) == Some("-50%")
+        && d.get("--pui-scale-x").is_none_or(|value| value == "1")
+        && d.get("--pui-scale-y").is_none_or(|value| value == "1")
+        && d.get("transform").map(String::as_str) == Some("translate(var(--pui-translate-x, 0), var(--pui-translate-y, 0)) scale(var(--pui-scale-x, 1), var(--pui-scale-y, 1))");
+    if fixed_centered {
+        // This exact recipe is realized by a window-root center wrapper. It
+        // is not a blanket claim that GPUI supports CSS fixed or transforms.
+        for property in ["position", "left", "top", "transform"] {
+            resolved.declarations.remove(property);
+        }
+        resolved
+            .declarations
+            .insert("position".into(), "relative".into());
+        // A centered fixed box does not participate in a flex shrink budget.
+        resolved
+            .declarations
+            .insert("flex-shrink".into(), "0".into());
+    }
+    let frame_theme = region.map(|rect| {
+        proto_ui_style::Theme::with_overrides(
+            theme,
+            [
+                (
+                    "--proto-ui-available-region-width".into(),
+                    format!("{}px", rect.width),
+                ),
+                (
+                    "--proto-ui-available-region-height".into(),
+                    format!("{}px", rect.height),
+                ),
+                (
+                    "--proto-ui-available-region-center-x".into(),
+                    format!("{}px", rect.x + rect.width / 2.0),
+                ),
+                (
+                    "--proto-ui-available-region-center-y".into(),
+                    format!("{}px", rect.y + rect.height / 2.0),
+                ),
+            ],
+        )
+    });
+    let theme = frame_theme.as_ref().or(theme);
     let mut issues: Vec<StyleIssue> = resolved
         .unknown
         .iter()
@@ -594,6 +679,19 @@ fn tokens_for_target<'a>(
     for property in unresolved {
         resolved.declarations.remove(&property);
     }
+    if region.is_some() {
+        // CSS clamps negative computed size constraints to their nonnegative
+        // range. A known tiny/zero region is distinct from an unknown region.
+        for property in ["max-width", "max-height"] {
+            if let Some(value) = resolved.declarations.get_mut(property) {
+                if evaluate_length(value, context)
+                    .is_ok_and(|length| length.is_absolute() && length.px < 0.0)
+                {
+                    *value = "0px".into();
+                }
+            }
+        }
+    }
 
     let mapped = map_for_target(&resolved, context, target);
     issues.extend(
@@ -610,6 +708,7 @@ fn tokens_for_target<'a>(
     TokenStyle {
         refinement: mapped.refinement,
         issues,
+        fixed_centered,
     }
 }
 

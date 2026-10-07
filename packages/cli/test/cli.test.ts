@@ -168,12 +168,15 @@ describe('@proto.ui/cli', () => {
       .filter((id) => id.startsWith('brutalist-'))
       .sort();
     expect(brutalistIds).toEqual([
+      'brutalist-accordion',
       'brutalist-badge',
       'brutalist-button',
       'brutalist-card',
+      'brutalist-collapsible',
       'brutalist-dialog',
       'brutalist-dropdown',
       'brutalist-hover-card',
+      'brutalist-label',
       'brutalist-scroll-area',
       'brutalist-select',
       'brutalist-separator',

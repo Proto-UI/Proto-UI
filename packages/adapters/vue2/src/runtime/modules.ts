@@ -315,6 +315,9 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     const target = getLogicalTriggerSurfaceRoot(instanceToken);
     return args.isViewReady() && target?.isConnected ? target : null;
   };
+  // Label owns physical-detachment discovery; focus still requires connection.
+  const getControlLabelSurface = () =>
+    args.isViewReady() ? getLogicalTriggerSurfaceRoot(instanceToken) : null;
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
     const offSurface = subscribeFocusSurfaceReady(instanceToken, listener);
@@ -327,7 +330,10 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
 
   return createCapsWiring()
     .use('control-label', [
-      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getTriggerSurface, subscribeFocusTarget)],
+      [
+        CONTROL_LABEL_HOST_CAP,
+        createWebControlLabelHost(getControlLabelSurface, subscribeFocusTarget),
+      ],
       [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('text-control', [

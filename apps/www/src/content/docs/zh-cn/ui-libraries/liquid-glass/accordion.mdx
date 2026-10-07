@@ -11,11 +11,11 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   demoId="demo-liquid-glass-accordion"
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
-  toolbar={false}
+  toolbar={true}
   codePanel={false}
 />
 
-通过页面页眉的 **预览 Runtime** 选择 WC、React、Vue、Vue 2；窄屏先打开站点菜单。这个站点自有 Select 位于体系 Demo 之外；当前 private family 尚未声明 Select 投影，因此预览工具栏不伪造该体系的 Select。
+通过预览工具栏中本体系的真实 Select 选择 WC、React、Vue 或 Vue 2。页面页眉的 Runtime 偏好仍然可用，并与当前选择保持同步。
 
 ## 解剖结构与所有权
 

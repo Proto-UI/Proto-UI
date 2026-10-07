@@ -26,7 +26,18 @@ function fixture(family: 'shadcn' | 'brutalist' = 'shadcn') {
     cancel,
     restoreFocus,
   });
-  return { root, content, status, mask, retry, cancel, restoreFocus };
+  return {
+    root,
+    content,
+    status,
+    mask,
+    retry,
+    cancel,
+    restoreFocus,
+    setFamily(next: typeof family) {
+      family = next;
+    },
+  };
 }
 for (const family of ['shadcn', 'brutalist'] as const) {
   describe(`${family} stable public-atom loading mask`, () => {
@@ -134,4 +145,44 @@ it('moves retry focus to a visible pending action and restores it only after the
   f.mask.setState('ready', 'react');
   expect(f.restoreFocus).toHaveBeenCalledWith(cancel);
   await f.mask.destroy();
+});
+
+it('prepares the committed family while ready and never exposes atoms from an older family', async () => {
+  const f = fixture();
+  await f.mask.ready;
+  f.setFamily('brutalist');
+  f.mask.setState('ready', 'wc');
+  expect(f.root.dataset.runtimeMaskReady).not.toBe('true');
+  f.mask.setState('loading', 'react', true);
+  const mount = f.root.querySelector<HTMLElement>('[data-runtime-loading-mask]')!;
+  expect(mount.hidden).toBe(true);
+  await f.mask.ready;
+  expect(mount.hidden).toBe(false);
+  expect(f.root.dataset.runtimeMaskFamily).toBe('brutalist');
+  expect(
+    [...mount.querySelectorAll('[data-pui-root]')].every((atom) =>
+      atom.tagName.startsWith('WC-BRUTALIST-')
+    )
+  ).toBe(true);
+  await f.mask.destroy();
+});
+
+it('catches up to the latest committed family when preparation is already pending', async () => {
+  const f = fixture();
+  f.setFamily('brutalist');
+  f.mask.setState('loading', 'vue', true);
+  await f.mask.ready;
+  const mount = f.root.querySelector<HTMLElement>('[data-runtime-loading-mask]')!;
+  expect(f.root.dataset.runtimeMaskFamily).toBe('brutalist');
+  expect(
+    [...mount.querySelectorAll('[data-pui-root]')].every((atom) =>
+      atom.tagName.startsWith('WC-BRUTALIST-')
+    )
+  ).toBe(true);
+  expect(mount.hidden).toBe(false);
+  f.setFamily('shadcn');
+  f.mask.setState('ready', 'wc');
+  await f.mask.destroy();
+  expect(f.root.dataset.runtimeMaskReady).toBeUndefined();
+  expect(f.root.querySelector('[data-runtime-loading-mask]')).toBeNull();
 });

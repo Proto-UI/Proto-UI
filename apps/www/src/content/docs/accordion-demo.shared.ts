@@ -17,12 +17,14 @@ export function createAccordionDemo(family: string): DemoSpec {
       ? {
           className:
             role === 'trigger'
-              ? 'block w-full rounded border p-3 text-left whitespace-normal'
+              ? 'block w-full min-w-0 max-w-full rounded border p-3 text-left whitespace-normal wrap-anywhere'
               : role === 'content'
                 ? 'data-[open]:block p-3'
                 : 'block min-w-0',
         }
-      : {}),
+      : role === 'trigger'
+        ? { className: 'wrap-anywhere' }
+        : {}),
     children,
   });
   const item = (
@@ -50,7 +52,7 @@ export function createAccordionDemo(family: string): DemoSpec {
     type: 'demo',
     root: {
       kind: 'box',
-      className: 'grid w-full min-w-0 gap-6 p-2',
+      className: 'grid grid-cols-1 w-full min-w-0 gap-6 p-2',
       children: [
         group('single', { defaultOpenItems: ['overview'] }, [
           item('single', 'overview', 'Overview · 概览', {}, false, [
@@ -73,7 +75,7 @@ export function createAccordionDemo(family: string): DemoSpec {
             [
               {
                 kind: 'box',
-                className: 'min-w-0',
+                className: 'min-w-0 wrap-anywhere',
                 children: [
                   'UnbrokenContentBoundary_0123456789012345678901234567890123456789012345678901234567890123456789',
                 ],
@@ -104,7 +106,8 @@ export function createAccordionDemo(family: string): DemoSpec {
           kind: 'proto',
           prototypeId: `${family}-button`,
           ref: 'accept',
-          className: 'rounded border px-3 py-2',
+          className:
+            'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere rounded border px-3 py-2',
           children: ['Accept pending request · 接受请求'],
         },
       ],

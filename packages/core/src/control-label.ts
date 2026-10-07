@@ -1,3 +1,4 @@
+import type { AnatomyFamily } from './anatomy';
 import type { PropsBaseType } from '@proto.ui/types';
 import type { RunHandle } from './handles';
 
@@ -31,10 +32,17 @@ export type ControlLabelRequest = Readonly<{
 export type ControlLabelHandle = {
   sync(options: ControlLabelOptions): void;
 };
+/** Setup-only semantic anatomy tuple, never JSON Props or a caller-supplied host identity. */
+export type ControlLabelAnatomyPair = Readonly<{
+  family: AnatomyFamily;
+  labelRole: string;
+  targetRole: string;
+}>;
 export type ControlLabelFacade = {
-  label(): ControlLabelHandle;
+  label(pair?: ControlLabelAnatomyPair): ControlLabelHandle;
   target<P extends PropsBaseType>(
-    activate: (run: RunHandle<P>, request: ControlLabelRequest) => void
+    activate: (run: RunHandle<P>, request: ControlLabelRequest) => void,
+    pair?: ControlLabelAnatomyPair
   ): ControlLabelHandle;
 };
 

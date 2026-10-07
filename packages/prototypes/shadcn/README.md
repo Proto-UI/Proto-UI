@@ -87,3 +87,9 @@ The Proto UI integration code is MIT-licensed. The pinned shadcn/ui attribution 
 `ShadcnButtonProps.wrap` is an optional Proto UI presentation extension. It keeps the default single-line recipe when omitted or false. With `wrap: true`, text sizes use their original height as a minimum and allow the label to wrap within the containing inline width. `size: 'icon'` remains fixed-size. Activation, focus, disabled state and accessible names still come from Base Button.
 
 Dialog Footer uses intrinsic reverse wrapping, rather than reproducing the upstream `sm` media-query breakpoint. Footer does not restyle arbitrary child components. Use wrapping-capable actions when labels can exceed available space; the public Dialog example explicitly opts into Button wrapping. Custom wrappers must also supply a bounded inline size. This is not a guarantee that arbitrary unbounded or fixed-width descendants will fit every viewport.
+
+## Field (draft workspace source)
+
+The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
+
+This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.

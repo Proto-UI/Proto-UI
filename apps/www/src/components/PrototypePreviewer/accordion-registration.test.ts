@@ -49,17 +49,22 @@ describe('Accordion actual DemoSpec registration', () => {
 });
 
 describe('Accordion private-family public runtime route', () => {
-  for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
+  for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
     for (const locale of ['en', 'zh-cn']) {
-      it(`${locale}/${family} uses the existing site Header instead of an undeclared Select`, () => {
+      it(`${locale}/${family} uses its declared family Select toolbar`, async () => {
         const source = readFileSync(
           `apps/www/src/content/docs/${locale}/ui-libraries/${family}/accordion.mdx`,
           'utf8'
         );
         expect(source).toContain(`demoId="demo-${family}-accordion"`);
-        expect(source).toContain('toolbar={false}');
+        expect(source).toContain('toolbar={true}');
         expect(source).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
-        expect(source).toContain(locale === 'en' ? '**Preview runtime**' : '**预览 Runtime**');
+        expect(source).toContain(locale === 'en' ? 'real family Select' : '真实 Select');
+        for (const role of ['root', 'trigger', 'value', 'content', 'item']) {
+          const id = `${family}-select-${role}`;
+          await loadPrototype(id);
+          expect(getPrototype(id)?.name).toBe(id);
+        }
       });
     }
   }

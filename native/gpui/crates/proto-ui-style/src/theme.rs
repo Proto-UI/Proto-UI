@@ -65,6 +65,18 @@ pub enum Substitution {
 }
 
 impl Theme {
+    /// Host-owned variables for one immutable frame. Never mutates a catalog theme.
+    pub fn with_overrides(
+        base: Option<&Self>,
+        overrides: impl IntoIterator<Item = (String, String)>,
+    ) -> Self {
+        let mut variables = base
+            .map(|theme| theme.variables.clone())
+            .unwrap_or_default();
+        variables.extend(overrides);
+        Self { variables }
+    }
+
     pub fn variable(&self, name: &str) -> Option<&str> {
         self.variables.get(name).map(String::as_str)
     }

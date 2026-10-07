@@ -1256,3 +1256,182 @@ for (const hidden of [false, true]) {
     assert.equal(f.observe().achieved, !hidden);
   });
 }
+
+for (const color of ['rgba(0, 0, 0, 0.8)', '#0008', 'oklch(0.7 0.1 40 / 20%)']) {
+  test(`shared paint witness accepts nonzero alpha ${color} without claiming opaque pair`, async () => {
+    const f = await targetObservationFixture();
+    eraseTargetPaint(f);
+    f.style.backgroundColor = color;
+    assert.equal(f.observe().achieved, true);
+    assert.equal(f.observePair().achieved, false);
+    f.style.opacity = '0';
+    assert.equal(f.observe().achieved, false);
+  });
+}
+
+async function straightStrokeFixture({ vertical = false, scale = 1 } = {}) {
+  const f = await targetObservationFixture();
+  eraseTargetPaint(f);
+  const box = vertical
+    ? { x: 25, y: 15, left: 25, top: 15, right: 25, bottom: 29, width: 0, height: 14 }
+    : { x: 15, y: 25, left: 15, top: 25, right: 29, bottom: 25, width: 14, height: 0 };
+  const matrix = { a: scale, b: 0, c: 0, d: scale, e: 10, f: 13 };
+  const path = {
+    ...f.element,
+    namespaceURI: 'http://www.w3.org/2000/svg',
+    childNodes: [],
+    parentElement: f.element,
+    closest: () => null,
+    matches: (selector) => selector === 'path',
+    getClientRects: () => [box],
+    getBoundingClientRect: () => box,
+    getBBox: () => ({ width: vertical ? 0 : 14, height: vertical ? 14 : 0 }),
+    getScreenCTM: () => matrix,
+    getTotalLength: () => 14,
+  };
+  const style = {
+    ...f.style,
+    fill: 'none',
+    fillOpacity: '1',
+    stroke: '#000',
+    strokeOpacity: '1',
+    strokeWidth: '3px',
+    strokeDasharray: 'none',
+    vectorEffect: 'none',
+    d: vertical ? 'path("M15 2v14")' : 'path("M5 12h14")',
+  };
+  style.getPropertyValue = (property) =>
+    style[property.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] ?? '';
+  f.element.childNodes = [path];
+  f.styleByElement.set(path, style);
+  return { ...f, path, pathStyle: style, matrix };
+}
+
+for (const vertical of [false, true])
+  for (const scale of [1, 14 / 24]) {
+    test(`straight SVG ${vertical ? 'vertical' : 'horizontal'} stroke witnesses zero-area centerline at scale ${scale}`, async () => {
+      const f = await straightStrokeFixture({ vertical, scale });
+      assert.equal(f.observe().achieved, true);
+    });
+  }
+
+for (const [name, mutate] of [
+  [
+    'transparent stroke',
+    (f) => {
+      f.pathStyle.stroke = 'rgba(0,0,0,0)';
+    },
+  ],
+  [
+    'zero stroke opacity',
+    (f) => {
+      f.pathStyle.strokeOpacity = '0';
+    },
+  ],
+  [
+    'zero stroke width',
+    (f) => {
+      f.pathStyle.strokeWidth = '0px';
+    },
+  ],
+  [
+    'dashed stroke',
+    (f) => {
+      f.pathStyle.strokeDasharray = '2px, 2px';
+    },
+  ],
+  [
+    'unknown path geometry',
+    (f) => {
+      f.pathStyle.d = 'path("M5 12C5 12 9 12 19 12")';
+    },
+  ],
+  [
+    'multiple disconnected segments',
+    (f) => {
+      f.pathStyle.d = 'path("M5 12h4 M15 12h4")';
+    },
+  ],
+  [
+    'CSS geometry absent despite authored attribute',
+    (f) => {
+      f.pathStyle.d = 'none';
+      f.path.getAttribute = () => 'M5 12h14';
+    },
+  ],
+  [
+    'zero-length path',
+    (f) => {
+      f.pathStyle.d = 'path("M5 12h0")';
+    },
+  ],
+  [
+    'non-scaling stroke',
+    (f) => {
+      f.pathStyle.vectorEffect = 'non-scaling-stroke';
+    },
+  ],
+  [
+    'rotated screen transform',
+    (f) => {
+      f.matrix.b = 0.5;
+    },
+  ],
+  [
+    'singular screen transform',
+    (f) => {
+      f.matrix.a = 0;
+    },
+  ],
+  [
+    'unresolved screen transform',
+    (f) => {
+      f.path.getScreenCTM = () => null;
+    },
+  ],
+  [
+    'offscreen stroke',
+    (f) => {
+      f.matrix.e = 900;
+    },
+  ],
+  [
+    'partially offscreen stroke',
+    (f) => {
+      f.matrix.e = -10;
+    },
+  ],
+  [
+    'hidden ancestor',
+    (f) => {
+      f.ancestorStyle.opacity = '0';
+    },
+  ],
+  [
+    'filtered ancestor',
+    (f) => {
+      f.ancestorStyle.filter = 'opacity(0)';
+    },
+  ],
+  [
+    'masked ancestor',
+    (f) => {
+      f.ancestorStyle.maskImage = 'url(mask.svg)';
+    },
+  ],
+  [
+    'clipped stroke',
+    (f) => {
+      f.style.overflowX = 'hidden';
+      f.element.clientLeft = 0;
+      f.element.clientWidth = 2;
+    },
+  ],
+]) {
+  test(`straight SVG paint witness rejects ${name}`, async () => {
+    const f = await straightStrokeFixture();
+    assert.equal(f.observe().achieved, true, 'positive control');
+    mutate(f);
+    assert.equal(f.observe().achieved, false);
+  });
+}

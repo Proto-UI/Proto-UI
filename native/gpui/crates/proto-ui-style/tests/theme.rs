@@ -162,3 +162,30 @@ fn new_family_variables_preserve_the_source_policies() {
     assert_eq!(dark.variable("--pui-secondary"), Some("#2c2c2e"));
     assert_eq!(dark.variable("--pui-radius"), Some("9999px"));
 }
+#[test]
+fn host_frame_overrides_are_isolated_from_catalog_themes() {
+    let base = proto_ui_style::themes()
+        .get("shadcn", proto_ui_style::ColorScheme::Light)
+        .unwrap();
+    let current = proto_ui_style::Theme::with_overrides(
+        Some(base),
+        [("--proto-ui-available-region-width".into(), "390px".into())],
+    );
+    let next = proto_ui_style::Theme::with_overrides(
+        Some(base),
+        [("--proto-ui-available-region-width".into(), "200px".into())],
+    );
+    assert_eq!(base.variable("--proto-ui-available-region-width"), None);
+    assert_eq!(
+        current.variable("--proto-ui-available-region-width"),
+        Some("390px")
+    );
+    assert_eq!(
+        next.variable("--proto-ui-available-region-width"),
+        Some("200px")
+    );
+    assert_eq!(
+        current.variable("--pui-background"),
+        base.variable("--pui-background")
+    );
+}

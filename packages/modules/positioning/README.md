@@ -12,6 +12,8 @@ The draft catalog is defined by `C-ANCHORED-POSITIONING-0001`, `M-POSITIONING-00
 
 Only the current computation of a live lease may publish coordinates, size variables, or resolved placement. Replacement and disposal invalidate pending work; disposal stops observation and cannot be reversed by updating the old lease. A missing host retains the declaration without projecting geometry.
 
+The separate available-space lease refreshes on the Runtime's updated phase. A retained Web Component's document-adoption update can therefore release its former document's observation and measure the new root-content region without waiting for a resize from the former document. Inactive, missing and terminal leases acquire no resources from this notification. Repeatable mount phases remain distinct from the legacy terminal `unmounted` notification.
+
 ## Package Role
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.

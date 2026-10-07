@@ -1411,6 +1411,42 @@ function resolveKnownAsHookStateHandles(node) {
     return new Map(COMMAND_STATE_VARIANTS);
   }
 
+  if (hookName === 'asCollapsibleTrigger' || hookName === 'asAccordionTrigger') {
+    return new Map([
+      ...COMMAND_STATE_VARIANTS,
+      ['expanded', 'data-[expanded]'],
+      ...(hookName === 'asAccordionTrigger'
+        ? [['collapseBlocked', 'data-[collapse-blocked]']]
+        : []),
+    ]);
+  }
+
+  if (hookName === 'asFieldLabel') {
+    return new Map([
+      ['disabled', 'data-[disabled]'],
+      ['required', 'data-[required]'],
+    ]);
+  }
+
+  if (hookName === 'asFieldTextControl') {
+    // The binding's declared fieldRequired identity wins over its additional
+    // public `required` expose key, just as __stateSemantic does at runtime.
+    return new Map([
+      ['value', 'data-[value]'],
+      ['disabled', 'data-[disabled]'],
+      ['readOnly', 'data-[read-only]'],
+      ['focused', 'data-[focused]'],
+      ['focusVisible', 'data-[focus-visible]'],
+      ['composing', 'data-[composing]'],
+      ['fieldDisabled', 'data-[field-disabled]'],
+      ['fieldReadOnly', 'data-[field-read-only]'],
+      ['fieldRequired', 'data-[field-required]'],
+      ['required', 'data-[field-required]'],
+      ['invalid', 'data-[invalid]'],
+      ['pending', 'data-[pending]'],
+    ]);
+  }
+
   if (hookName === 'asSelectTrigger') {
     // Select Trigger is the one command surface that also reports whether it is
     // still showing its placeholder.
