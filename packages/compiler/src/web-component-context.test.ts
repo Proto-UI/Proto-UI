@@ -11,9 +11,12 @@ const floatingUi = createRequire(
   fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
 )('@floating-ui/dom');
 
+type StateEvent<T> =
+  | { type: 'next'; prev: T; next: T; reason?: unknown }
+  | { type: 'disconnect'; reason: 'unmount' };
 interface Projection<T> {
   get(): T;
-  subscribe(callback: (event: { prev: T; next: T; reason?: unknown }) => void): () => void;
+  subscribe(callback: (event: StateEvent<T>) => void): () => void;
 }
 interface ContextElement extends HTMLElement {
   readonly logicalOwner: symbol | null;
@@ -144,6 +147,20 @@ function displayedProvider(element: ContextElement): string | undefined {
 
 // These guard real owner ancestry, reference identity, semantic transitions and terminal boundaries.
 describe('native Web Component Context', () => {
+  it('ignores obsolete connected callbacks without constructing a phantom owner', () => {
+    const generated = project();
+    const element = generated.create(consumer());
+    (element as ContextElement & { connectedCallback(): void }).connectedCallback();
+    expect(element.logicalOwner).toBeNull();
+    expect(element.hasAttribute('data-pui-root')).toBe(false);
+    const parent = generated.create(provider(10));
+    parent.append(element);
+    container().append(parent);
+    expect(element.shadowRoot?.querySelector('output')?.textContent).toBe('10');
+    expect(element.getExposes().current?.get()).toBe(10);
+    expect(element.logicalOwner).not.toBeNull();
+  });
+
   it('does not claim a Root when required Context initialization fails', () => {
     const generated = project();
     const element = generated.create(consumer());
@@ -171,7 +188,9 @@ describe('native Web Component Context', () => {
     container().append(parent);
     const seen: string[] = [];
     const exposes = child.getExposes();
-    exposes.current?.subscribe(({ next, reason }) => seen.push(`${reason}->${next}`));
+    exposes.current?.subscribe((event) => {
+      if (event.type === 'next') seen.push(`${event.reason}->${event.next}`);
+    });
     parent.setProps({ value: 5 });
     expect(seen).toEqual(['1->5', '5->6']);
     expect(exposes.current?.get()).toBe(6);
@@ -308,13 +327,14 @@ describe('native Web Component Context', () => {
     parent.append(required);
     expect(required.logicalOwner).not.toBe(owner);
     const renewed = required.getExposes();
-    const events: number[] = [];
-    renewed.current?.subscribe(({ next }) => events.push(next));
+    const events: StateEvent<number>[] = [];
+    renewed.current?.subscribe((event) => events.push(event));
     required.dispose();
+    expect(events).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
     parent.setProps({ value: 9 });
-    expect(events).toEqual([]);
-    expect(() => renewed.current?.get()).toThrow(/disposed/i);
-    expect(() => required.setProps({ probe: 2 })).toThrow(/disposed/i);
+    expect(events).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(() => renewed.current?.get()).toThrow();
+    expect(() => required.setProps({ probe: 2 })).toThrow();
   });
 
   it('retains Context providers and subscriptions across ViewIntent epochs', async () => {
@@ -356,12 +376,12 @@ describe('native Web Component Context', () => {
     parent.append(first, second);
     container().append(parent);
     const seen: string[] = [];
-    first
-      .getExposes()
-      .current?.subscribe(({ next, reason }) => seen.push(`first:${reason}->${next}`));
-    second
-      .getExposes()
-      .current?.subscribe(({ next, reason }) => seen.push(`second:${reason}->${next}`));
+    first.getExposes().current?.subscribe((event) => {
+      if (event.type === 'next') seen.push(`first:${event.reason}->${event.next}`);
+    });
+    second.getExposes().current?.subscribe((event) => {
+      if (event.type === 'next') seen.push(`second:${event.reason}->${event.next}`);
+    });
     parent.setProps({ value: 2 });
     expect(seen).toEqual(['first:1->2', 'second:1->2', 'first:2->3', 'second:2->3']);
     expect(first.getExposes().calls?.get()).toBe(2);

@@ -212,6 +212,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     connectedCallback() {
+      if (!this.isConnected) return;
       this._focusTargetRetryCount = 0;
 
       if (this._mountedOnce) {
@@ -236,6 +237,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       const thisEl = this;
       const thisRoot = this._root;
+      const rootMarkerBaseline = thisEl.getAttribute('data-pui-root');
       thisEl.setAttribute('data-pui-root', '');
       this._hostDisplay = installDefaultHostDisplay(thisEl);
 
@@ -312,6 +314,18 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         thisEl.replaceChildren(...externalChildren);
       };
 
+      const releaseOwnerResources = () => {
+        scopedExposesReader.invalidate();
+        runFocusCallbackScope = null;
+        this._exposes = {};
+        this._applier?.clear();
+        this._applier = null;
+        this._hostDisplay?.disconnect();
+        this._hostDisplay = null;
+        unbindController(this);
+        removeDebugHooks(this);
+      };
+
       const createHostSession = (wiring: ReturnType<typeof createHostWiring>) =>
         createWebComponentHostSession({
           proto,
@@ -340,17 +354,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             return this._slotProjector;
           },
           clearSlotProjector,
-          onAfterUnmount: () => {
-            scopedExposesReader.invalidate();
-            runFocusCallbackScope = null;
-            this._exposes = {};
-            this._applier?.clear();
-            this._applier = null;
-            this._hostDisplay?.disconnect();
-            this._hostDisplay = null;
-            unbindController(this);
-            removeDebugHooks(this);
-          },
+          onAfterUnmount: releaseOwnerResources,
           initialMount: 'manual',
         });
 
@@ -508,57 +512,87 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         });
       };
 
-      const ownerModules = createWebComponentOwnerModules({
-        el: thisEl,
-        instanceToken: this._instanceToken,
-        rawPropsSource,
-        getMeta,
-        colorSchemeSource,
-        preferenceSource,
-        styleSupportSource,
-        textControlTarget: this._textControlTarget,
-        imageViewTarget: this._imageViewTarget,
-        exposeStateWebMode,
-        setExposes,
-        runInCallbackScope,
-        overlayLayerScheduler,
-      });
-      const hostSession = owner.initialize({
-        modules: ownerModules,
-        createSession: createHostSession,
-        onViewIntent: reconcileIntent,
-      });
-      initializingOwner = false;
-      runFocusCallbackScope = hostSession.invokeInCallbackScope;
+      let hostSession: ReturnType<typeof owner.initialize>;
+      try {
+        const ownerModules = createWebComponentOwnerModules({
+          el: thisEl,
+          instanceToken: this._instanceToken,
+          rawPropsSource,
+          getMeta,
+          colorSchemeSource,
+          preferenceSource,
+          styleSupportSource,
+          textControlTarget: this._textControlTarget,
+          imageViewTarget: this._imageViewTarget,
+          exposeStateWebMode,
+          setExposes,
+          runInCallbackScope,
+          overlayLayerScheduler,
+        });
+        hostSession = owner.initialize({
+          modules: ownerModules,
+          createSession: createHostSession,
+          onViewIntent: reconcileIntent,
+        });
+        initializingOwner = false;
+        runFocusCallbackScope = hostSession.invokeInCallbackScope;
 
-      if (initialPresent) attachView();
-      else setViewDetached(true);
+        if (initialPresent) attachView();
+        else setViewDetached(true);
 
-      const { controller, kernel } = hostSession;
-      if (kernel && kernel.run) {
-        (kernel.run as any).host = { get: () => thisEl };
+        const { controller, kernel } = hostSession;
+        if (kernel && kernel.run) {
+          (kernel.run as any).host = { get: () => thisEl };
+        }
+
+        installDebugHooks(thisEl, hostSession.caps);
+
+        (this as any).update = () => controller.update();
+
+        (this as any).getExposes = () => {
+          if (!this.isConnected) return {};
+          return scopedExposesReader.read(this._exposes ?? {});
+        };
+
+        (this as unknown as { setProps?(v: Record<string, unknown>): void }).setProps = (
+          next: Record<string, unknown>
+        ) => {
+          setElementProps(thisEl, next);
+          controller.update();
+        };
+
+        this._controller = controller;
+        bindController(this, controller);
+
+        this._invokeUnmounted = () => owner.dispose();
+      } catch (error) {
+        initializingOwner = false;
+        latestIntentVersion += 1;
+        try {
+          void owner.dispose().catch((cleanup) => {
+            queueMicrotask(() => {
+              throw cleanup;
+            });
+          });
+          releaseOwnerResources();
+        } catch (cleanup) {
+          throw new AggregateError(
+            [error, cleanup],
+            '[WC Adapter] initialization and disposal failed.'
+          );
+        } finally {
+          unbindProtoInstance(this._instanceToken, this);
+          this._controller = null;
+          this._invokeUnmounted = null;
+          this._mountedOnce = false;
+          this._pendingOwnedTokens = null;
+          if (thisEl.getAttribute('data-pui-root') === '') {
+            if (rootMarkerBaseline === null) thisEl.removeAttribute('data-pui-root');
+            else thisEl.setAttribute('data-pui-root', rootMarkerBaseline);
+          }
+        }
+        throw error;
       }
-
-      installDebugHooks(thisEl, hostSession.caps);
-
-      (this as any).update = () => controller.update();
-
-      (this as any).getExposes = () => {
-        if (!this.isConnected) return {};
-        return scopedExposesReader.read(this._exposes ?? {});
-      };
-
-      (this as unknown as { setProps?(v: Record<string, unknown>): void }).setProps = (
-        next: Record<string, unknown>
-      ) => {
-        setElementProps(thisEl, next);
-        controller.update();
-      };
-
-      this._controller = controller;
-      bindController(this, controller);
-
-      this._invokeUnmounted = () => owner.dispose();
     }
 
     private [NOTIFY_FOCUS_TARGET_READY](): void {

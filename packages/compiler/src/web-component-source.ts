@@ -513,6 +513,7 @@ export class ${className} extends HTMLElement {
   get viewEpoch(): number { return this.${prefix}Owner?.epoch ?? 0; }
   get present(): boolean { return this.${prefix}Owner?.view ?? false; }
   connectedCallback(): void {
+    if (!this.isConnected) return;
     ++this.${prefix}Disconnect;
     if (this.${prefix}Closed) return;
     if (this.${prefix}Owner) { this.${prefix}Owner.reconcile(); return; }
@@ -634,7 +635,8 @@ ${
 }
 `
     : '';
-  return `type ${p}ExternalState<T> = { get(): T; subscribe(cb: (event: {type: 'next'; prev: T; next: T; reason?: unknown}) => void): () => void; unsubscribe(off: () => void): void; spec: Readonly<${p}StateOptions & {kind: string}> };
+  return `type ${p}StateEvent<T> = {type: 'next'; prev: T; next: T; reason?: unknown} | {type: 'disconnect'; reason: 'unmount'};
+type ${p}ExternalState<T> = { get(): T; subscribe(cb: (event: ${p}StateEvent<T>) => void): () => void; unsubscribe(off: () => void): void; spec: Readonly<${p}StateOptions & {kind: string}> };
 type ${p}Scalar = string | number | boolean | null;
 type ${p}Snapshot = Readonly<Record<string, unknown>>;
 type ${p}PropSpec = {type: string; schema?: Parameters<typeof ${p}Accepts>[0]; default?: unknown; options?: readonly string[]; empty?: 'accept' | 'fallback' | 'error'; range?: {min?: number; max?: number}};
@@ -716,7 +718,7 @@ ${
       else expose(key, value);
     },
     createOwnedState: (name, value, spec) => state(spec?.kind ?? (typeof value === 'boolean' ? 'bool' : typeof value === 'number' ? 'number.discrete' : 'string'), name, value, spec),
-    watchState<T>(handle: {get():T}, fn: (run: ${p}Run, event: {type:'next';prev:T;next:T;reason?:unknown}|{type:'disconnect';reason:'unmount'}) => void) {
+    watchState<T>(handle: {get():T}, fn: (run: ${p}Run, event: ${p}StateEvent<T>) => void) {
       ensureSetup();
       const external = ('external' in handle ? handle.external : observedProjections.get(handle)?.external) as ${p}ExternalState<T> | undefined;
       if (!external) throw new Error('Unknown owner State watch target');
@@ -864,6 +866,15 @@ ${interacting ? `    ${p}Interaction.refresh();\n` : ''}
     if (emitting) return;
     emitting = true;
     try { while (emissions.length && alive) emissions.shift()!(); } finally { emitting = false; }
+  }
+  function disconnectStateSubscribers(subscribers: Set<Function>): void {
+    let failure: unknown;
+    for (const callback of subscribers) {
+      try { callback({type: 'disconnect', reason: 'unmount'}); }
+      catch (error) { failure ??= error; }
+    }
+    subscribers.clear();
+    if (failure !== undefined) throw failure;
   }
   function state<T extends ${p}Scalar>(kind: string, semantic: string, initial: T, options: ${p}StateOptions = {}): ${p}State<T> {
     ensureSetup();
@@ -1115,13 +1126,17 @@ ${
   interacting
     ? `        try { ${p}Interaction.dispose(); } catch (caught) { error ??= caught; }
         for (const off of observedSubscriptions.splice(0)) off();
-        for (const projection of observedProjections.values()) projection.subscribers.clear();
+        for (const projection of observedProjections.values()) {
+          try { disconnectStateSubscribers(projection.subscribers); } catch (caught) { error ??= caught; }
+        }
         observedProjections.clear();\n`
     : ''
 }
 ${styled ? `        ${p}Style.dispose(); ${ssr ? "host.attribute('data-pui-style', null);" : "host.removeAttribute('data-pui-style');"}\n` : ''}
 ${context ? `        ${p}OwnerScopes.delete(host); context.dispose(); ${ssr ? 'host.bindContext(null);' : ''}\n` : ''}        alive = false; ++epoch; dirty = false; watchers.length = 0; emissions.length = 0;
-        for (const handle of states) handle.subscribers.clear();
+        for (const handle of states) {
+          try { disconnectStateSubscribers(handle.subscribers); } catch (caught) { error ??= caught; }
+        }
         for (const callbacks of Object.values(lifecycle)) callbacks.length = 0;
 ${
   ssr

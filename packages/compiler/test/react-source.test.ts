@@ -12,11 +12,12 @@ import { emitReactSource } from '../src/react-source';
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
 
+type StateEvent<T> =
+  | { type: 'next'; prev: T; next: T; reason?: unknown }
+  | { type: 'disconnect'; reason: 'unmount' };
 interface ExternalState<T> {
   get(): T;
-  subscribe(
-    callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void
-  ): () => void;
+  subscribe(callback: (event: StateEvent<T>) => void): () => void;
   unsubscribe(off: () => void): void;
   readonly spec: Readonly<{ kind: string }>;
 }
@@ -174,7 +175,18 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
       ref.current!.getExposes() as unknown as { projection: ExternalState<string> }
     ).projection;
     const transitions: [string, string][] = [];
-    projection.subscribe((event) => transitions.push([event.prev, event.next]));
+    const disconnects: StateEvent<string>[] = [],
+      ownedDisconnects: StateEvent<number>[] = [];
+    const cancelled: StateEvent<string>[] = [];
+    const off = projection.subscribe((event) => cancelled.push(event));
+    off();
+    projection.subscribe((event) => {
+      if (event.type === 'next') transitions.push([event.prev, event.next]);
+      else disconnects.push(event);
+    });
+    ref.current!.getExposes().count.subscribe((event) => {
+      if (event.type === 'disconnect') ownedDisconnects.push(event);
+    });
     const first = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(projection.get()).toBe('system');
     expect(first.getAttribute('data-pui-scroll-projection')).toBe(projection.get());
@@ -192,7 +204,11 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
     });
     expect(projection.get()).toBe('unresolved');
     expect(ref.current!.getExposes().count.get()).toBe(1);
+    expect(
+      (ref.current!.getExposes() as unknown as { projection: ExternalState<string> }).projection
+    ).toBe(projection);
     expect(transitions).toEqual([['system', 'unresolved']]);
+    expect(disconnects).toEqual([]);
     expect(first.getAttribute('data-pui-scroll-projection')).toBeNull();
     expect(first.style.overflowX).toBe('');
     expect(first.style.overflowY).toBe('');
@@ -201,12 +217,16 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
     });
     const second = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(second).not.toBe(first);
+    expect(
+      (ref.current!.getExposes() as unknown as { projection: ExternalState<string> }).projection
+    ).toBe(projection);
     expect(second.getAttribute('data-pui-scroll-projection')).toBe(projection.get());
     expect(second.style.overflowY).toBe('auto');
     expect(transitions).toEqual([
       ['system', 'unresolved'],
       ['unresolved', 'system'],
     ]);
+    expect(disconnects).toEqual([]);
     await React.act(async () => {
       root.unmount();
     });
@@ -215,6 +235,9 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
       ['unresolved', 'system'],
       ['system', 'unresolved'],
     ]);
+    expect(disconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(ownedDisconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
+    expect(cancelled).toEqual([]);
     expect(() => projection.get()).toThrow();
     second.dispatchEvent(new Event('scroll'));
     expect(transitions).toEqual([
@@ -222,6 +245,7 @@ export default definePrototype({name:'scroll-root-policy',setup(def){
       ['unresolved', 'system'],
       ['system', 'unresolved'],
     ]);
+    expect(disconnects).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
   });
 
   it('selects the physical Root from aliased pre-render Module requirements', async () => {
@@ -309,7 +333,9 @@ export default definePrototype({name:'ordinary-root',setup(def){
     expect(lifecycle).toEqual(['created', 'mounted']);
 
     const transitions: number[] = [];
-    const off = heldState.subscribe((event) => transitions.push(event.next));
+    const off = heldState.subscribe((event) => {
+      if (event.type === 'next') transitions.push(event.next);
+    });
     await React.act(async () => {
       heldMethod(3);
     });
@@ -682,7 +708,9 @@ export default definePrototype({name:'merged-enum',setup(def){
     expect(exposed.focused.spec).toEqual({ kind: 'bool' });
     expect('set' in exposed.focused).toBe(false);
     const transitions: boolean[] = [];
-    const off = exposed.focused.subscribe((event) => transitions.push(event.next));
+    const off = exposed.focused.subscribe((event) => {
+      if (event.type === 'next') transitions.push(event.next);
+    });
     await React.act(async () => {
       exposed.focusSelf({ reason: 'keyboard', preventScroll: true });
     });
@@ -917,7 +945,9 @@ export default definePrototype({name:'merged-enum',setup(def){
     };
     expect(exposed.range.get()).toBe(0);
     const rangeChanges: number[] = [];
-    exposed.range.subscribe((event) => rangeChanges.push(event.next));
+    exposed.range.subscribe((event) => {
+      if (event.type === 'next') rangeChanges.push(event.next);
+    });
     expect(() => exposed.setRange(-1)).toThrow(/outside range/);
     expect(() => exposed.setRange(5)).toThrow(/outside range/);
     expect(() => exposed.nonfinite()).toThrow(/invalid state value/);

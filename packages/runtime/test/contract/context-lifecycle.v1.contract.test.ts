@@ -94,4 +94,74 @@ describe('Context instance lifetime', () => {
       await p.dispose();
     }
   });
+
+  it('does not expose an abandoned setup provider to a later owner', async () => {
+    const key = createContextKey<{ value: number }>('failed-setup-provider');
+    const missing = createContextKey<{ value: number }>('failed-setup-required');
+    const failedToken = {};
+    const observerToken = {};
+    const freshToken = {};
+    let parentToken = failedToken;
+    const host = (name: string, token: object): RuntimeHost<Record<string, unknown>> => ({
+      prototypeName: name,
+      getRawProps: () => ({}),
+      commit(_children, signal) {
+        signal?.done();
+      },
+      schedule(task) {
+        task();
+      },
+      onRuntimeReady(wiring) {
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, token],
+          [
+            CONTEXT_PARENT_CAP,
+            (instance: unknown) => (instance === observerToken ? parentToken : null),
+          ],
+        ]);
+      },
+    });
+    const failing = definePrototype({
+      name: 'context-failed-setup-provider',
+      setup(def) {
+        def.context.provide(key, { value: 9 });
+        def.context.subscribe(missing);
+      },
+    });
+    let error: unknown;
+    try {
+      createRuntimeSession(failing, host(failing.name, failedToken));
+    } catch (caught) {
+      error = caught;
+    }
+    expect(error).toMatchObject({ code: 'CONTEXT_PROVIDER_MISSING' });
+
+    const observerProto = definePrototype({
+      name: 'context-failed-setup-observer',
+      setup(def) {
+        def.context.trySubscribe(key);
+        return (r) => r.el('span', String(r.read.context.tryRead(key)?.value ?? 'absent'));
+      },
+    });
+    const observer = createRuntimeSession(observerProto, host(observerProto.name, observerToken));
+    let fresh: ReturnType<typeof createRuntimeSession> | undefined;
+    try {
+      await observer.mount();
+      expect(observer.children).toMatchObject({ type: 'span', children: 'absent' });
+
+      const provider = definePrototype({
+        name: 'context-fresh-setup-provider',
+        setup(def) {
+          def.context.provide(key, { value: 12 });
+        },
+      });
+      fresh = createRuntimeSession(provider, host(provider.name, freshToken));
+      parentToken = freshToken;
+      observer.controller.update();
+      expect(observer.children).toMatchObject({ type: 'span', children: '12' });
+    } finally {
+      await observer.dispose();
+      await fresh?.dispose();
+    }
+  });
 });

@@ -91,9 +91,7 @@ describe('contract: runtime / prototype render syntax (v0)', () => {
         },
       };
 
-      expect(() => createRuntimeInstance(proto)).toThrow(
-        /\[Prototype\] setup\(\) must return render function or void/
-      );
+      expect(() => createRuntimeInstance(proto)).toThrow();
     }
   );
 

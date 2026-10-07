@@ -37,6 +37,7 @@ export class ${className} extends HTMLElement {
   get viewEpoch(): number { return this.owner?.epoch ?? 0; }
   get present(): boolean { return this.owner?.view ?? false; }
   connectedCallback(): void {
+    if (!this.isConnected) return;
     ++this.disconnectVersion;
     if (this.closed) return;
     if (this.owner) { this.owner.reconcile(); return; }
