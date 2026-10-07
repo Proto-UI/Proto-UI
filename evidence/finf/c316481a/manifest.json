@@ -1,0 +1,24 @@
+{
+  "sourceCommit": "c316481ab18007601e47d7e298f3729456c2cb22",
+  "workflowRun": 37634782533,
+  "job": 112838019343,
+  "artifact": 11488880814,
+  "viewportWidth": 1280,
+  "runtime": "react",
+  "theme": "light",
+  "capture": "unmodified component crop, browser screenshot",
+  "scope": "Accordion only; not full Finf acceptance",
+  "evidenceBranchPolicy": "Storage only. Do not merge.",
+  "files": [
+    {
+      "path": "evidence/finf/c316481a/c316-shadcn-accordion-react.png",
+      "sha256": "9f349ccff9dd38abfde1b903d6a679be3bb115870058719ffd55351028844281"
+    },
+    {
+      "path": "evidence/finf/c316481a/c316-bootstrap-accordion-react.png",
+      "sha256": "469dbd5b58ab2213e06e7fbca650f41fa521c2563fa8ff98910c7e44ab53a585"
+    }
+  ],
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)"
+}
