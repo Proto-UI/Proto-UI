@@ -50,6 +50,11 @@ criteria:
     text:
       zh-CN: active scope 内部因指针点击空白区域或宿主差异暂时没有 focused child 时，后续 Tab 导航必须能从 scope 记忆的最近 scoped focus 或首尾 eligible child 恢复，不能让焦点遍历逃离 scope。
       en: If an active scope temporarily has no focused child due to pointer interaction on blank space or host variance, subsequent Tab navigation must recover from the scope's remembered scoped focus or the first/last eligible child and must not let traversal escape the scope.
+  - id: C-AS-FOCUS-SCOPE-0002-J
+    since: 0.3.0-alpha.0
+    text:
+      zh-CN: 支持顺序焦点采样的宿主可以提供当前 scope 内的有序可 Tab targets 与实际 focused target。Focus 必须仍拥有 top active scope、方向、loop 与默认遍历阻止策略；采样必须尊重已投射的导航参与、隐藏与 entry fallback，不得把程序化可聚焦等同于可 Tab。采样仅用于当前顺序遍历，不得伪造 logical focus facts；无该能力时保留 logical member 路径。
+      en: A host supporting sequential-focus sampling may supply ordered tabbable targets inside the current scope and the actual focused target. Focus retains ownership of the top active scope, direction, loop and default-traversal prevention. Sampling must respect projected navigation participation, hiding and entry fallback, and must not equate programmatic focusability with tabbability. Samples serve current sequential traversal only and must not fabricate logical focus facts; hosts without the capability retain the logical-member path.
 sources:
   - path: internal/contracts/focus/base-text/focus-scope.v0.md
     sections:
@@ -87,6 +92,9 @@ verifies:
   tests:
     - T-FOCUS-SCOPE-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: refined
+    summary: Bound optional host sequential sampling so trapped traversal composes native entry and projected tab stops without moving scope policy to the host.
   - version: 0.1.0
     change: introduced
     summary: Captured explicit focus scope activation, outside request gating, and previous owner restore.

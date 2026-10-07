@@ -1,0 +1,80 @@
+.s3 {
+  margin-block: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--color-border, currentColor);
+  border-radius: 0.75rem;
+  min-width: 0;
+}
+.s3-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 1rem;
+}
+.s3-control {
+  font: inherit;
+  font-size: 0.8rem;
+  padding: 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 0.3rem;
+  cursor: pointer;
+  max-width: 100%;
+}
+.s3-controls label {
+  font-size: 0.8rem;
+}
+.s3-controls [aria-pressed='true'] {
+  background: var(--color-foreground, #172033);
+  color: var(--color-background, white);
+}
+.s3-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+.s3-columns article {
+  min-width: 0;
+  border: 1px solid var(--color-border, currentColor);
+  padding: 0.75rem;
+}
+.s3 [data-home],
+.s3 [data-destination] {
+  font:
+    16px/normal Arial,
+    sans-serif;
+  --pui-canary: #ffd83d;
+  --pui-canary-foreground: #172033;
+  --pui-sky: #85d7ff;
+  --pui-sky-foreground: #172033;
+  --pui-coral: #ff937f;
+  --pui-coral-foreground: #172033;
+}
+.s3-line {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-block: 1rem;
+}
+.s3-tabs-scroll {
+  overflow-x: auto;
+}
+.s3 output {
+  display: block;
+  white-space: pre-line;
+  font: 11px/1.6 monospace;
+  overflow-wrap: anywhere;
+  margin-block: 1rem;
+}
+/* Withdraw only the site's reset, never calculate or patch component geometry. */
+@layer base {
+  .s3 [data-s3-split] {
+    padding: revert-layer;
+    border: revert-layer;
+  }
+}
+@media (max-width: 1100px) {
+  .s3-columns {
+    grid-template-columns: 1fr;
+  }
+}

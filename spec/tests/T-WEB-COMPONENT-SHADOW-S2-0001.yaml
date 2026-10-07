@@ -1,0 +1,95 @@
+id: T-WEB-COMPONENT-SHADOW-S2-0001
+type: test
+title: Bounded S2 public split Button and composed settings browser evidence
+status: draft
+lifecycleRationale:
+  zh-CN: 当前是 Button/Switch/settings 的 Chrome 有界组合证据，不是完整 upstream parity、所有浏览器或任意 CSS 准入；相关 split profile 保持实验性。
+  en: Current evidence is bounded Chrome Button/Switch/settings composition, not full upstream parity, all browsers or arbitrary CSS admission; the associated split profile remains experimental.
+since: 0.3.0-alpha.0
+summary: Chrome-only public split and Light/mixed settings evidence; does not promote lifecycle or expand token families, upstream parity, or arbitrary CSS guarantees.
+cases:
+  - id: T-WEB-COMPONENT-SHADOW-S2-0001-CASE-VISUAL
+    title: Six Button variants and four sizes use actual inherited theme paint in Light split and mixed columns
+    covers:
+      - P-SHADCN-BUTTON-VARIANT-PROP
+      - P-SHADCN-BUTTON-SIZE-PROP
+      - P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
+      - P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE
+      - P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE
+    expectation: fixed-border-endpoints-and-theme-recipe-paint
+  - id: T-WEB-COMPONENT-SHADOW-S2-0001-CASE-INPUT
+    title: Native pointer and keyboard routes retain boundary focus activation and disabled gating
+    covers:
+      - P-SHADCN-BUTTON-INTERACTION-STYLES
+      - P-BASE-BUTTON-KEYBOARD-ACTIVATION
+      - P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
+      - P-BASE-SWITCH-KEYBOARD-SPACE-ACTIVATION
+      - P-BASE-SWITCH-DISABLED-SUPPRESS-ACTIVATION
+    expectation: native-hold-release-focus-ring-and-exact-outward-notification-counts
+  - id: T-WEB-COMPONENT-SHADOW-S2-0001-CASE-COMPOSITION
+    title: Mixed Root and Thumb or Indicator retain context state slot ownership and generation through moves and reconnection
+    covers:
+      - P-SHADCN-SWITCH-THUMB-CONTEXT-INDICATOR
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-F
+      - D-WEB-COMPONENT-SHADOW-PROFILE-0001-H
+    expectation: same-generation-move-new-generation-reconnect-and-consumer-owned-slots
+  - id: T-WEB-COMPONENT-SHADOW-S2-0001-CASE-CONSUMER
+    title: Public dist package exports and CLI companion activate complete settings outside the website
+    covers: [D-WEB-COMPONENT-SHADOW-PROFILE-0001-G]
+    expectation: package-only-composed-input-and-cleanup-without-source-aliases-or-website-reset
+implementations:
+  - id: website-s2-settings-browser
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/zh-cn/demo-shadow-split-s2.browser.test.ts
+    required: true
+    consumesCases:
+      - T-WEB-COMPONENT-SHADOW-S2-0001-CASE-VISUAL
+      - T-WEB-COMPONENT-SHADOW-S2-0001-CASE-INPUT
+      - T-WEB-COMPONENT-SHADOW-S2-0001-CASE-COMPOSITION
+    notes:
+      - Both locales, 48 variant/size/theme combinations per locale across three profiles; endpoints, recipe paint, native Button hold/Tab/Space/Enter, Switch hold/Space, Checkbox pointer/Space, disabled gating, rapid changes, slots, move/reconnect and 320px section overflow. Not a screen-reader or all-browser test.
+      - Intermediate geometry and reversal frames are separately mapped by T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 to scripts/analysis/shadow-s2-motion-browser.mjs. Animated border-width is excluded and rejected; these prototypes retain fixed borders.
+  - id: public-dist-s2-consumer
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s2-public-consumer.mjs
+    required: true
+    consumesCases: [T-WEB-COMPONENT-SHADOW-S2-0001-CASE-CONSUMER]
+    notes:
+      - Bundler inputs assert dist exports and generated CLI companion with no package source aliases. A blank Chrome document exercises full Button/Switch/Checkbox/Badge in Light/split/mixed, 18px Thumb travel, native notifications, move and terminal cleanup/reconnect. No website reset or sizing correction.
+verifies:
+  decisions:
+    - id: D-WEB-COMPONENT-SHADOW-PROFILE-0001
+      anchors:
+        [
+          D-WEB-COMPONENT-SHADOW-PROFILE-0001-F,
+          D-WEB-COMPONENT-SHADOW-PROFILE-0001-G,
+          D-WEB-COMPONENT-SHADOW-PROFILE-0001-H,
+        ]
+  prototypes:
+    - id: P-SHADCN-BUTTON
+      anchors:
+        [
+          P-SHADCN-BUTTON-VARIANT-PROP,
+          P-SHADCN-BUTTON-SIZE-PROP,
+          P-SHADCN-BUTTON-COLOR-SCHEME-STYLES,
+          P-SHADCN-BUTTON-INTERACTION-STYLES,
+        ]
+    - id: P-SHADCN-SWITCH
+      anchors: [P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE]
+    - id: P-SHADCN-SWITCH-THUMB
+      anchors:
+        [P-SHADCN-SWITCH-THUMB-CONTEXT-INDICATOR, P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE]
+    - id: P-BASE-BUTTON
+      anchors: [P-BASE-BUTTON-KEYBOARD-ACTIVATION, P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION]
+    - id: P-BASE-SWITCH
+      anchors: [P-BASE-SWITCH-KEYBOARD-SPACE-ACTIVATION, P-BASE-SWITCH-DISABLED-SUPPRESS-ACTIVATION]
+exercises:
+  adapters: [A-WEB-COMPONENT-0001]
+  prototypes: [P-SHADCN-CHECKBOX, P-SHADCN-CHECKBOX-INDICATOR, P-BRUTALIST-BADGE]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Mapped bounded public S2 composition evidence separately from the H1 intermediate motion and S1 customization suites; all subject lifecycles remain draft.
+tags: [test, web-component, shadow-dom, composition, browser]

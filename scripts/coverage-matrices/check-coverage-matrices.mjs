@@ -9068,11 +9068,11 @@ function isTestNamedSource(absolutePath) {
 // sidebar entries and source-reviewed Copy render plugin; resolver functions stay intact. Parity/mutation tests retain
 // fail-closed behavior for every other configuration change.
 const PROMOTION_RESOLVER_CONFIG_SHA256 =
-  'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30';
+  '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377';
 // Exact opt-in, serve-only contrast audit profile. Its imported plugin bytes
 // are part of the reviewed resolver boundary, not an unrestricted plugin hook.
 const PROMOTION_AUDIT_CONFIG_SHA256 =
-  'b07dfc4350c16a8bee3b65717887cc5d592002f2cb492e134c60a3d18519a6de';
+  'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee';
 const PROMOTION_AUDIT_PLUGIN_PATH = 'apps/www/scripts/contrast-provenance.mjs';
 const PROMOTION_AUDIT_PLUGIN_SHA256 =
   'a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a';

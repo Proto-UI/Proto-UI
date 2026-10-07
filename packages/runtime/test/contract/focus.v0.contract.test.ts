@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   createFocusScopeKey,
+  createFocusRovingKey,
   definePrototype,
   tw,
   type FocusScopeHandle,
@@ -137,6 +138,69 @@ const createTreeHost = (
 });
 
 describe('runtime contract: focus (v0)', () => {
+  it('preserves configuration warning order, key labels and metadata merge', () => {
+    // Existing configure diagnostics: explicit fields, not patch insertion order.
+    const first = createFocusScopeKey({ debugLabel: 'first' });
+    const second = createFocusScopeKey({ debugLabel: 'second' });
+    const groupFirst = createFocusRovingKey({ debugLabel: 'group-first' });
+    const groupSecond = createFocusRovingKey({ debugLabel: 'group-second' });
+    const P = definePrototype({
+      name: 'x-focus-config-diagnostics',
+      setup() {
+        const focusable = asFocusable();
+        focusable.configure({ scopeKey: first, groupKey: groupFirst, meta: { retained: true } });
+        const patch = {
+          groupKey: groupSecond,
+          scopeKey: second,
+          navParticipation: 'none' as const,
+          disabled: true,
+          autoFocus: true,
+          meta: { changed: true },
+        };
+        focusable.configure(patch);
+        focusable.configure(patch); // equal values do not create warnings
+        const entry = asFocusEntry();
+        entry.configure({ disabled: true, fallback: 'none', strategy: 'descendant-first' });
+        const scope = asFocusScope();
+        scope.configure({ key: first });
+        scope.configure({
+          emptyPolicy: 'container',
+          restore: 'previous',
+          entry: 'manual',
+          orientation: 'horizontal',
+          navigation: 'arrow',
+          loop: true,
+          trap: true,
+          key: second,
+        });
+        return (r) => r.el('div', 'ok');
+      },
+    });
+    const result = executeWithHost(P as any, createHost(P.name).host as any);
+    const port = result.caps.getPort<FocusPort>('focus')!;
+    expect(port.getWarnings()).toEqual([
+      '[Focus] focusable.autoFocus overridden: false -> true',
+      '[Focus] focusable.disabled overridden: false -> true',
+      '[Focus] focusable.navParticipation overridden: auto -> none',
+      '[Focus] focusable.scopeKey overridden: first -> second',
+      '[Focus] focusable.groupKey overridden: group-first -> group-second',
+      '[Focus] entry.strategy overridden: self -> descendant-first',
+      '[Focus] entry.fallback overridden: self -> none',
+      '[Focus] entry.disabled overridden: false -> true',
+      '[Focus] scope.key overridden: first -> second',
+      '[Focus] scope.trap overridden: false -> true',
+      '[Focus] scope.loop overridden: false -> true',
+      '[Focus] scope.navigation overridden: tab -> arrow',
+      '[Focus] scope.orientation overridden: vertical -> horizontal',
+      '[Focus] scope.entry overridden: first -> manual',
+      '[Focus] scope.restore overridden: none -> previous',
+      '[Focus] scope.emptyPolicy overridden: none -> container',
+    ]);
+    expect(port.getFocusableConfig().meta).toEqual({ retained: true, changed: true });
+    expect(Object.isFrozen(port.getFocusableConfig())).toBe(true);
+    expect(Object.isFrozen(port.getWarnings())).toBe(true);
+  });
+
   it('FOCUS-0100: repeated asFocusable calls reuse one handle and last compatible scopeKey wins', () => {
     const first = createFocusScopeKey({ debugLabel: 'first' });
     const second = createFocusScopeKey({ debugLabel: 'second' });

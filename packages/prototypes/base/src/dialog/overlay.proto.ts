@@ -53,6 +53,15 @@ function setupDialogMask(def: DefHandle<DialogMaskProps, DialogMaskExposes>): vo
 
   // P-BASE-DIALOG-MASK-PRESENCE
   const transition = asTransition();
+  // A backdrop press must not steal native focus after Content synchronously
+  // restores Trigger. Presence includes leaving; dismissal still belongs to Content.
+  def.event.on('pointer.down', (run, event) => {
+    if (!transition.isPresent.get() || run.props.get().passthrough) return;
+    event.control.requestDefaultActionPrevention({
+      reason: 'dialog.mask.preserve-focus',
+      source: 'base-dialog-mask',
+    });
+  });
   overlay.bindPresence({
     enter: transition.controls.enter,
     leave: transition.controls.leave,

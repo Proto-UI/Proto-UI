@@ -19,6 +19,8 @@ describe('adapter-web-component v0', () => {
 
     const root = el.shadowRoot ?? el;
     expect(root.innerHTML).toBe('<div>hello</div>');
+    expect(el.shadowRoot).toBeNull();
+    expect(el.hasAttribute('data-pui-color-scheme')).toBe(false);
   });
 
   it('supports array expansion', () => {
@@ -53,6 +55,9 @@ describe('adapter-web-component v0', () => {
 
     const root = el.shadowRoot ?? el;
     expect(root.innerHTML).toBe('<slot></slot>');
+    expect(el.shadowRoot).not.toBeNull();
+    expect(el.hasAttribute('data-pui-color-scheme')).toBe(false);
+    expect(root.querySelector('[data-pui-shadow-stylesheet]')).toBeNull();
   });
 
   it('renders svg nodes from renderer.svg namespace', () => {

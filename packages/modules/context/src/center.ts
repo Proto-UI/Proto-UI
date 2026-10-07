@@ -16,6 +16,19 @@ type SubscriptionRecord = {
   callbacks: Array<ContextCallback<any>>;
 };
 
+type Delivery = {
+  next: JsonObject;
+  prev: JsonObject;
+  ctx: unknown;
+  getParent: ContextParentGetter;
+  recipients: Array<{
+    instance: ContextInstanceToken;
+    record: SubscriptionRecord;
+    callbacks: Array<ContextCallback<any>>;
+  }>;
+};
+type DispatchChannel = { pending: Delivery[]; draining: boolean };
+
 export class ContextCenter {
   private readonly providers = new Map<ContextKey<any>, Map<ContextInstanceToken, JsonObject>>();
 
@@ -25,6 +38,11 @@ export class ContextCenter {
   >();
 
   private callbackQueue: ContextCallbackTask[] = [];
+  // One queue per provider lifetime/key, not a process-wide scheduling policy.
+  private readonly channels = new Map<
+    ContextKey<any>,
+    Map<ContextInstanceToken, DispatchChannel>
+  >();
 
   // -------------------------
   // providers
@@ -42,6 +60,9 @@ export class ContextCenter {
     }
 
     byKey.set(instance, value);
+    let channels = this.channels.get(key);
+    if (!channels) this.channels.set(key, (channels = new Map()));
+    channels.set(instance, { pending: [], draining: false });
   }
 
   unprovide(instance: ContextInstanceToken, key: ContextKey<any>): void {
@@ -49,6 +70,11 @@ export class ContextCenter {
     if (!byKey) return;
     byKey.delete(instance);
     if (byKey.size === 0) this.providers.delete(key);
+    const channels = this.channels.get(key);
+    const channel = channels?.get(instance);
+    if (channel) channel.pending.length = 0;
+    channels?.delete(instance);
+    if (channels?.size === 0) this.channels.delete(key);
   }
 
   getProviderValue(instance: ContextInstanceToken, key: ContextKey<any>): JsonObject | null {
@@ -169,32 +195,57 @@ export class ContextCenter {
     ctx: unknown,
     getParent: ContextParentGetter
   ): void {
-    this.callbackQueue = [];
-
+    const channel = this.channels.get(key)!.get(provider)!;
+    const recipients: Delivery['recipients'] = [];
     for (const [instance, byKey] of this.subscriptions.entries()) {
       const rec = byKey.get(key);
       if (!rec || rec.callbacks.length === 0) continue;
-
       const bound = this.resolveProvider(instance, key, getParent);
-      // Match the SameValueZero identity used by the provider Map (including NaN).
+      // SameValueZero must agree with Map identity, including NaN providers.
       if (bound !== provider && !Object.is(bound, provider)) continue;
-
-      const task: ContextCallbackTask = {
-        instance,
-        key,
-        next,
-        prev,
-        callbackCount: rec.callbacks.length,
-      };
-      this.callbackQueue.push(task);
-
-      for (const cb of rec.callbacks) {
-        cb(ctx, next, prev);
-      }
+      recipients.push({ instance, record: rec, callbacks: [...rec.callbacks] });
     }
-
-    // callbacks are synchronous; clear queue after dispatch
-    this.callbackQueue = [];
+    channel.pending.push({ next, prev, ctx, getParent, recipients });
+    if (channel.draining) return;
+    channel.draining = true;
+    const errors: unknown[] = [];
+    try {
+      while (channel.pending.length) {
+        const delivery = channel.pending.shift()!;
+        for (const { instance, record, callbacks } of delivery.recipients) {
+          const task: ContextCallbackTask = {
+            instance,
+            key,
+            next: delivery.next,
+            prev: delivery.prev,
+            callbackCount: callbacks.length,
+          };
+          this.callbackQueue.push(task);
+          try {
+            for (const cb of callbacks) {
+              // Re-check between callbacks: a previous callback can dispose,
+              // replace or rebind either participant in the current delivery.
+              if (this.channels.get(key)?.get(provider) !== channel) break;
+              if (this.subscriptions.get(instance)?.get(key) !== record) break;
+              const bound = this.resolveProvider(instance, key, delivery.getParent);
+              if (bound !== provider && !Object.is(bound, provider)) break;
+              try {
+                cb(delivery.ctx, delivery.next, delivery.prev);
+              } catch (error) {
+                errors.push(error);
+              }
+            }
+          } finally {
+            this.callbackQueue.splice(this.callbackQueue.indexOf(task), 1);
+          }
+        }
+      }
+    } finally {
+      channel.pending.length = 0;
+      channel.draining = false;
+    }
+    if (errors.length === 1) throw errors[0];
+    if (errors.length > 1) throw new AggregateError(errors, '[Context] callback delivery failed');
   }
 
   // -------------------------
@@ -239,10 +290,7 @@ export class ContextCenter {
     this.subscriptions.delete(instance);
 
     // remove providers
-    for (const [key, byInstance] of this.providers.entries()) {
-      byInstance.delete(instance);
-      if (byInstance.size === 0) this.providers.delete(key);
-    }
+    for (const key of this.providers.keys()) this.unprovide(instance, key);
   }
 }
 
