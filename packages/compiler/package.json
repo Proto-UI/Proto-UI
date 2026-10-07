@@ -12,15 +12,23 @@
     ".": {
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./browser": {
+      "types": "./src/browser/index.ts",
+      "default": "./src/browser/index.ts"
     }
   },
   "dependencies": {
+    "@jitl/quickjs-wasmfile-release-sync": "0.32.0",
+    "@noble/hashes": "2.4.0",
+    "path-browserify": "1.0.1",
+    "quickjs-emscripten-core": "0.32.0",
     "typescript": "^5.0.0"
   },
   "devDependencies": {
+    "@proto.ui/adapter-react": "workspace:*",
     "@proto.ui/core": "workspace:*",
     "@proto.ui/hooks": "workspace:*",
-    "@proto.ui/adapter-react": "workspace:*",
     "@proto.ui/prototypes-base": "workspace:*",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

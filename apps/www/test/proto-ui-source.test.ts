@@ -1,36 +1,45 @@
 // @vitest-environment node
-import fs from 'node:fs';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { runInNewContext } from 'node:vm';
 import { describe, expect, it } from 'vitest';
+import { createServer as createViteServer } from '../../workspace/node_modules/vite/dist/node/index.js';
+import { resolveProtoUiSource } from '../src/utils/proto-ui-source.mjs';
+import type { ActiveRuntimeDelayContext } from '../../../packages/core/src/internal';
 
-const configUrl = new URL('../astro.config.mjs', import.meta.url);
-const config = fs.readFileSync(configUrl, 'utf8');
-// Run the configured resolver without loading unrelated Astro integrations.
-const sourcePluginCode = config
-  .slice(config.indexOf('const PROTO_UI_PREFIX'), config.indexOf('const inProgressBadge'))
-  .replaceAll('import.meta.url', JSON.stringify(configUrl.href));
-
-describe('website workspace source IDs', () => {
-  for (const [platform, paths, root] of [
-    ['POSIX', path.posix, '/proto-ui'],
-    ['Windows', path.win32, 'C:\\proto-ui'],
-  ] as const) {
-    it(`uses the canonical Core context ID on ${platform}`, () => {
-      const nativePath = paths.resolve(root, 'packages/core/src/internal.ts');
-      // Model the native filesystem boundary while keeping the real package exports.
-      const sourcePlugin = runInNewContext(`${sourcePluginCode}\nprotoUiSourcePlugin;`, {
-        fs: {
-          readFileSync: fs.readFileSync,
-          existsSync: (file: string) => file === nativePath || fs.existsSync(file),
-        },
-        path: { ...path, sep: paths.sep, resolve: () => nativePath },
-        fileURLToPath,
-        URL,
-      }) as { resolveId: (id: string) => string | null };
-      const id = sourcePlugin.resolveId('@proto.ui/core/internal');
-      expect(id).toBe(`${root.replaceAll('\\', '/')}/packages/core/src/internal.ts`);
+describe('website workspace source identity', () => {
+  it('shares active Core context across package and native file consumers', async () => {
+    const cacheDir = await mkdtemp(path.join(tmpdir(), 'proto-ui-source-'));
+    const vite = await createViteServer({
+      configFile: false,
+      root: fileURLToPath(new URL('../', import.meta.url)),
+      cacheDir,
+      plugins: [{ name: 'proto-ui-source', enforce: 'pre', resolveId: resolveProtoUiSource }],
+      optimizeDeps: { noDiscovery: true, include: [] },
+      server: { middlewareMode: true, hmr: false, watch: null },
     });
-  }
+    try {
+      const packageConsumer = await vite.ssrLoadModule('@proto.ui/core/internal');
+      const nativeConsumer = await vite.ssrLoadModule(
+        fileURLToPath(new URL('../../../packages/core/src/internal.ts', import.meta.url))
+      );
+      const context: ActiveRuntimeDelayContext = {
+        prototypeName: 'shared-source-owner',
+        scheduleDelay() {
+          throw new Error('The source-identity probe must not schedule work.');
+        },
+      };
+      packageConsumer.enterActiveRuntimeDelayContext(context);
+      try {
+        expect(nativeConsumer.getActiveRuntimeDelayContext()).toBe(context);
+      } finally {
+        packageConsumer.exitActiveRuntimeDelayContext();
+      }
+      expect(nativeConsumer.getActiveRuntimeDelayContext()).toBeUndefined();
+    } finally {
+      await vite.close();
+      await rm(cacheDir, { recursive: true, force: true });
+    }
+  });
 });

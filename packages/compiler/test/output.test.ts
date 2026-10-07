@@ -3,7 +3,8 @@ import { mkdtemp, mkdir, open, readFile, readdir, rm, stat, writeFile } from 'no
 import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
-import { compileFile, compilePrototype, writeCompilation } from '../src/compile';
+import { compileFile, writeCompilation } from '../src/compile';
+import { compilePrototype } from '../src/memory';
 
 const temporary: string[] = [];
 const source = `import {definePrototype} from '@proto.ui/core'; export default definePrototype({name:'fixture',setup(def){ const flag=def.state.bool('flag',false); def.expose.state('flag',flag); }});`;
@@ -51,7 +52,9 @@ describe('transactional create-only compiler delivery', () => {
       expect(await readFile(path.join(directory, 'Component.tsx'), 'utf8')).toBe(
         compilation.output.code + '\n//# sourceMappingURL=Component.tsx.map\n'
       );
-      expect(JSON.parse(await readFile(path.join(directory, 'Component.tsx.map'), 'utf8')).version).toBe(3);
+      expect(
+        JSON.parse(await readFile(path.join(directory, 'Component.tsx.map'), 'utf8')).version
+      ).toBe(3);
       expect(
         JSON.parse(await readFile(path.join(directory, 'provenance.json'), 'utf8')).profile
       ).toBe('react-runtime-v1');

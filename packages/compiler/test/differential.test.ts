@@ -7,7 +7,7 @@ import * as React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { button } from '@proto.ui/prototypes-base';
 import { createReactAdapter } from '@proto.ui/adapter-react';
-import { compilePrototype } from '../src/compile';
+import { compilePrototype } from '../src/memory';
 import {
   compareTraces,
   type IdentityNormalization,
