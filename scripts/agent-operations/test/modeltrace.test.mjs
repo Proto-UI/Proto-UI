@@ -96,6 +96,41 @@ function rejectsStatusReceipt(receipt, expectedError) {
   assert.throws(() => validateModelTraceReceipt(receipt), expectedError);
 }
 
+test('receipt rankings require distinct enrolled model identities even with different statistics', () => {
+  const produced = fixture().record.receipt;
+  assert.equal(structuralReceipt(produced), true, JSON.stringify(structuralReceipt.errors));
+  assert.equal(validateModelTraceReceipt(produced), produced);
+  const { models } = JSON.parse(
+    fs.readFileSync(new URL('../vendor/modeltrace/unified_bank.json', import.meta.url), 'utf8')
+  );
+  const template = statusReceipt('candidate');
+  for (let index = 0; index < models.length; index++) {
+    // Synthetic admission controls, not model measurements or claims about scorer ordering.
+    const receipt = structuredClone(template);
+    receipt.result.candidates.forEach((candidate, offset) => {
+      const model = models[(index + offset) % models.length];
+      candidate.modelId = model.id;
+      candidate.familyId = model.family;
+    });
+    const top = receipt.result.candidates[0];
+    receipt.result.modelId = top.modelId;
+    receipt.result.familyId = top.familyId;
+    receipt.id = `sha256:${computeModelTraceReceiptDigest(receipt)}`;
+    assert.equal(structuralReceipt(receipt), true, JSON.stringify(structuralReceipt.errors));
+    assert.equal(validateModelTraceReceipt(receipt), receipt);
+
+    const forged = structuredClone(receipt);
+    const lower = forged.result.candidates[2];
+    lower.modelId = top.modelId;
+    lower.familyId = top.familyId;
+    lower.score = top.score - 1;
+    // Complete-object uniqueItems would accept these distinct objects despite their shared identity.
+    assert.notEqual(lower.probability, top.probability);
+    assert.notEqual(lower.score, top.score);
+    rejectsStatusReceipt(forged);
+  }
+});
+
 test('receipt schema and runtime admit candidate, ambiguous and partial failed controls', () => {
   const partial = fixture();
   partial.response.outputs[2].text = null;
@@ -674,7 +709,9 @@ test('fresh private admission rejects descriptive sessions without breaking hist
     };
     const historical = buildModelTraceRecord(challenge, response);
     const recordPath = path.join(directory, 'legacy.json');
+    const contextPath = path.join(directory, 'legacy-context.json');
     fs.writeFileSync(recordPath, JSON.stringify(historical));
+    fs.writeFileSync(contextPath, JSON.stringify(context));
     const readback = readModelTraceJson(recordPath, 'historical record');
     assert.deepEqual(
       buildModelTraceRecord(readback.challenge, readback.response).receipt,
@@ -682,6 +719,11 @@ test('fresh private admission rejects descriptive sessions without breaking hist
     );
     assert.equal(validateModelTraceReceipt(readback.receipt), readback.receipt);
     assertModelTraceDisclosure(renderModelTraceDisclosure(readback.receipt), readback.receipt);
+    assert.deepEqual(
+      loadModelTraceRecord({ recordPath, contextPath, now: NOW, fresh: false }),
+      historical.receipt
+    );
+    assert.throws(() => loadModelTraceRecord({ recordPath, contextPath, now: NOW }));
     assert.throws(
       () => assertModelTraceFresh(readback.receipt, context, { now: NOW }),
       /opaque.*session/
@@ -763,6 +805,46 @@ test('raw samples are re-scored before use and never appear in public disclosure
       now: NOW,
     })
   );
+});
+
+test('historical loading skips expiry but retains exact scope and raw-sample recomputation', (t) => {
+  const directory = fs.mkdtempSync(path.join(tmpdir(), 'modeltrace-historical-loader-'));
+  t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
+  const f = fixture();
+  const recordPath = path.join(directory, 'record.json');
+  const contextPath = path.join(directory, 'context.json');
+  fs.writeFileSync(recordPath, JSON.stringify(f.record));
+  fs.writeFileSync(contextPath, JSON.stringify(f.context));
+  const now = new Date(f.record.receipt.expiresAt);
+  const options = { recordPath, contextPath, now };
+  assert.throws(() => loadModelTraceRecord(options));
+  assert.deepEqual(loadModelTraceRecord({ ...options, fresh: false }), f.record.receipt);
+
+  for (const context of [
+    { ...f.context, repositoryId: 'github.com:another/repository' },
+    { ...f.context, sessionId: 'e'.repeat(64) },
+    { ...f.context, contextDigest: 'c'.repeat(64) },
+    { ...f.context, routeDigest: 'c'.repeat(64) },
+    { ...f.context, declared: { systemModel: 'gpt-5.4', harnessModel: null } },
+    { ...f.context, declared: { systemModel: null, harnessModel: 'gpt-5.4' } },
+    { ...f.context, sessionId: null },
+  ]) {
+    fs.writeFileSync(contextPath, JSON.stringify(context));
+    assert.throws(() => loadModelTraceRecord({ ...options, fresh: false }));
+  }
+  fs.writeFileSync(contextPath, JSON.stringify(f.context));
+  assert.throws(() =>
+    loadModelTraceRecord({
+      ...options,
+      fresh: false,
+      repositoryId: 'github.com:another/repository',
+    })
+  );
+
+  const tampered = structuredClone(f.record);
+  tampered.response.outputs[0].text = JSON.stringify(Array(218).fill(138));
+  fs.writeFileSync(recordPath, JSON.stringify(tampered));
+  assert.throws(() => loadModelTraceRecord({ ...options, fresh: false }));
 });
 
 test('public receipt bytes and sealed disclosures survive nested JSON key reordering', () => {

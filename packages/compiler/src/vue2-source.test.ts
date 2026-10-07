@@ -56,10 +56,14 @@ interface Vue2Runtime {
 }
 type CreateElement = (tag: unknown, dataOrChildren?: unknown, children?: unknown) => unknown;
 
-const requireVue2 = createRequire(fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url)));
+const requireVue2 = createRequire(
+  fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url))
+);
 // Resolve the concrete consumer through its existing package, not the root Vue3 dependency.
 const Vue2 = requireVue2('vue') as Vue2Runtime;
-const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+const floatingUi = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+)('@floating-ui/dom');
 const hosts: { vm: HostInstance; host: HTMLElement }[] = [];
 afterEach(() => {
   for (const mounted of hosts.splice(0)) {
@@ -68,7 +72,11 @@ afterEach(() => {
   }
 });
 
-function loadNative(source: string, options?: Vue2SourceOptions, files?: Readonly<Record<string, string>>): unknown {
+function loadNative(
+  source: string,
+  options?: Vue2SourceOptions,
+  files?: Readonly<Record<string, string>>
+): unknown {
   const parsed = parsePrototype(source, { fileName: 'native-vue2.proto.ts', files });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitVue2Source(parsed.value, options);
@@ -77,7 +85,9 @@ function loadNative(source: string, options?: Vue2SourceOptions, files?: Readonl
 }
 
 function loadGenerated(module: GeneratedModule): unknown {
-  const sources = new Map((module.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents]));
+  const sources = new Map(
+    (module.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents])
+  );
   sources.set('generated-vue2.js', module.code);
   const cache = new Map<string, Record<string, unknown>>();
   function load(path: string): Record<string, unknown> {
@@ -89,12 +99,17 @@ function loadGenerated(module: GeneratedModule): unknown {
     cache.set(path, exports);
     const program = ts.transpileModule(source, {
       fileName: path,
-      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, allowJs: true },
+      compilerOptions: {
+        module: ts.ModuleKind.CommonJS,
+        target: ts.ScriptTarget.ES2022,
+        allowJs: true,
+      },
     }).outputText;
     // Only checked output and its emitted artifacts execute; authored modules remain parsed data.
     new Function('require', 'exports', program)((specifier: string) => {
       if (specifier === '@floating-ui/dom') return floatingUi;
-      if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency ${specifier}`);
+      if (!specifier.startsWith('.'))
+        throw new Error(`Unexpected generated dependency ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);
     return exports;
@@ -104,9 +119,16 @@ function loadGenerated(module: GeneratedModule): unknown {
 
 function mountNative(component: unknown, raw: Record<string, unknown> = {}, scopedSlot = false) {
   const events: string[] = [];
-  const listeners = Object.fromEntries(['created', 'mounted', 'updated', 'unmounted', 'beforeDispose'].map((key) => [key, () => events.push(key)]));
+  const listeners = Object.fromEntries(
+    ['created', 'mounted', 'updated', 'unmounted', 'beforeDispose'].map((key) => [
+      key,
+      () => events.push(key),
+    ])
+  );
   const Root = Vue2.extend<HostInstance>({
-    data() { return { input: { ...raw }, slotText: 'slot' }; },
+    data() {
+      return { input: { ...raw }, slotText: 'slot' };
+    },
     render(this: HostInstance, h: CreateElement) {
       const data: Record<string, unknown> = { props: this.input, on: listeners };
       if (scopedSlot) data.scopedSlots = { default: () => [h('b', this.slotText)] };
@@ -199,7 +221,15 @@ describe('Vue2 native source consumer', () => {
 
     off();
     mounted.vm.$destroy();
-    expect(mounted.events).toEqual(['created', 'mounted', 'updated', 'unmounted', 'mounted', 'unmounted', 'beforeDispose']);
+    expect(mounted.events).toEqual([
+      'created',
+      'mounted',
+      'updated',
+      'unmounted',
+      'mounted',
+      'unmounted',
+      'beforeDispose',
+    ]);
     expect(() => add(1)).toThrow(/terminal/);
     expect(() => count.get()).toThrow(/terminal/);
     expect(() => count.subscribe(() => {})).toThrow(/terminal/);
@@ -331,7 +361,14 @@ describe('Vue2 native source consumer', () => {
     mounted.instance.update();
     mounted.vm.$destroy();
     await flushVue2();
-    expect(mounted.events).toEqual(['created', 'mounted', 'unmounted', 'mounted', 'unmounted', 'beforeDispose']);
+    expect(mounted.events).toEqual([
+      'created',
+      'mounted',
+      'unmounted',
+      'mounted',
+      'unmounted',
+      'beforeDispose',
+    ]);
     expect(events).toEqual([{ type: 'disconnect', reason: 'unmount' }]);
   });
 
@@ -358,7 +395,8 @@ describe('Vue2 native source consumer', () => {
     await flushVue2();
     expect(mounted.instance.getExposes().read()).toBe(5);
     expect(mounted.host.textContent).toBe('slot');
-    const unsupported = parsePrototype(`import {definePrototype} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
+    const unsupported =
+      parsePrototype(`import {definePrototype} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
       export default definePrototype({name:'unsupported',setup(){const focus=asFocusable();focus.configure({scopeKey:'unsupported'});}});`);
     if (!unsupported.ok) throw new Error(JSON.stringify(unsupported.diagnostics));
     const result = emitVue2Source(unsupported.value);
@@ -421,13 +459,19 @@ describe('Vue2 native source consumer', () => {
 
     mounted.vm.input = { step: 3 };
     await flushVue2();
-    root.querySelector('output')!.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    root
+      .querySelector('output')!
+      .dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
     window.dispatchEvent(new Event('vue2-global-input'));
     expect(api.count.get()).toBe(3);
     expect(api.globalCount.get()).toBe(1);
     expect(root.getAttribute('aria-pressed')).toBe('true');
     expect(root.querySelector('output')?.textContent).toBe('0');
-    expect(root.dispatchEvent(new KeyboardEvent('keydown', { key: 'x', bubbles: true, cancelable: true }))).toBe(false);
+    expect(
+      root.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'x', bubbles: true, cancelable: true })
+      )
+    ).toBe(false);
 
     mounted.vm.input = { step: 3, disabled: true };
     await flushVue2();
@@ -521,7 +565,8 @@ describe('Vue2 native source consumer', () => {
         // In-process IR contains ordinary data records; preserve every typed use of the key.
         const record = value as Record<string, unknown>;
         for (const [key, child] of Object.entries(record)) {
-          if (['name', 'key', 'property'].includes(key) && child === 'label') record[key] = hostileKey;
+          if (['name', 'key', 'property'].includes(key) && child === 'label')
+            record[key] = hostileKey;
           else rename(child);
         }
       }

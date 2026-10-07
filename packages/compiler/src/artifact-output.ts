@@ -84,7 +84,12 @@ function failure(error: unknown, filename: string, action: string): PublicationF
 }
 
 function sameIdentity(actual: Stats, expected: Identity | undefined): boolean {
-  return !!expected && actual.dev === expected.dev && actual.ino === expected.ino && actual.birthtimeMs === expected.birthtimeMs;
+  return (
+    !!expected &&
+    actual.dev === expected.dev &&
+    actual.ino === expected.ino &&
+    actual.birthtimeMs === expected.birthtimeMs
+  );
 }
 
 function validateArtifacts(artifacts: readonly OutputArtifact[]): string | undefined {
@@ -138,17 +143,32 @@ function validateArtifacts(artifacts: readonly OutputArtifact[]): string | undef
 }
 
 /** Compare generated candidates with owned files; never mutate or follow artifact symlinks. */
-export async function diffArtifactSet(artifacts: readonly OutputArtifact[], directory: string): Promise<CompileResult<ArtifactDiff>> {
+export async function diffArtifactSet(
+  artifacts: readonly OutputArtifact[],
+  directory: string
+): Promise<CompileResult<ArtifactDiff>> {
   const absolute = path.resolve(directory);
-  const location = (filename: string) => ({ file: filename, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 });
-  const reject = (message: string, filename = absolute): CompileResult<ArtifactDiff> => ({ ok: false, diagnostics: [
-    { code: 'PUI5001', category: 'output-conflict', message, span: location(filename) },
-  ] });
+  const location = (filename: string) => ({
+    file: filename,
+    start: 0,
+    end: 0,
+    line: 1,
+    column: 1,
+    endLine: 1,
+    endColumn: 1,
+  });
+  const reject = (message: string, filename = absolute): CompileResult<ArtifactDiff> => ({
+    ok: false,
+    diagnostics: [
+      { code: 'PUI5001', category: 'output-conflict', message, span: location(filename) },
+    ],
+  });
   const problem = validateArtifacts(artifacts);
   if (problem) return reject(problem);
   try {
     const rootStat = await lstat(absolute);
-    if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) return reject('Diff requires an existing real compiler output directory.');
+    if (!rootStat.isDirectory() || rootStat.isSymbolicLink())
+      return reject('Diff requires an existing real compiler output directory.');
     async function contents(filename: string): Promise<Buffer | null> {
       let current = absolute;
       const directories = [{ filename: absolute, identity: rootStat }];
@@ -156,49 +176,96 @@ export async function diffArtifactSet(artifacts: readonly OutputArtifact[], dire
       for (const part of parts.slice(0, -1)) {
         current = path.join(current, part);
         let stat: Stats;
-        try { stat = await lstat(current); }
-        catch (error) { if (errorCode(error) === 'ENOENT') return null; throw error; }
-        if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error(`Diff refuses a non-directory or symbolic-link artifact parent: ${current}`);
+        try {
+          stat = await lstat(current);
+        } catch (error) {
+          if (errorCode(error) === 'ENOENT') return null;
+          throw error;
+        }
+        if (!stat.isDirectory() || stat.isSymbolicLink())
+          throw new Error(
+            `Diff refuses a non-directory or symbolic-link artifact parent: ${current}`
+          );
         directories.push({ filename: current, identity: stat });
       }
       const target = path.join(current, parts[parts.length - 1]);
       let before: Stats;
-      try { before = await lstat(target); }
-      catch (error) { if (errorCode(error) === 'ENOENT') return null; throw error; }
-      if (!before.isFile() || before.isSymbolicLink()) throw new Error(`Diff refuses a non-regular or symbolic-link artifact: ${target}`);
+      try {
+        before = await lstat(target);
+      } catch (error) {
+        if (errorCode(error) === 'ENOENT') return null;
+        throw error;
+      }
+      if (!before.isFile() || before.isSymbolicLink())
+        throw new Error(`Diff refuses a non-regular or symbolic-link artifact: ${target}`);
       const file = await open(target, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0));
       try {
-        if (!sameIdentity(await file.stat(), before)) throw new Error(`Artifact changed during diff: ${target}`);
+        if (!sameIdentity(await file.stat(), before))
+          throw new Error(`Artifact changed during diff: ${target}`);
         const data = await file.readFile();
-        for (const parent of directories) if (!sameIdentity(await lstat(parent.filename), parent.identity))
-          throw new Error(`Artifact parent changed during diff: ${parent.filename}`);
+        for (const parent of directories)
+          if (!sameIdentity(await lstat(parent.filename), parent.identity))
+            throw new Error(`Artifact parent changed during diff: ${parent.filename}`);
         const after = await file.stat();
-        if (!sameIdentity(await lstat(target), before) || after.size !== before.size || after.mtimeMs !== before.mtimeMs)
+        if (
+          !sameIdentity(await lstat(target), before) ||
+          after.size !== before.size ||
+          after.mtimeMs !== before.mtimeMs
+        )
           throw new Error(`Artifact changed during diff: ${target}`);
         return data;
-      } finally { await file.close(); }
+      } finally {
+        await file.close();
+      }
     }
     const manifestBytes = await contents('provenance.json');
-    if (!manifestBytes) return reject('Diff requires the compiler-owned provenance.json; arbitrary consumer directories are not baselines.');
+    if (!manifestBytes)
+      return reject(
+        'Diff requires the compiler-owned provenance.json; arbitrary consumer directories are not baselines.'
+      );
     const manifest: unknown = JSON.parse(manifestBytes.toString('utf8'));
-    if (!manifest || typeof manifest !== 'object' || !('artifacts' in manifest) || !Array.isArray(manifest.artifacts)
-      || !('irVersion' in manifest) || !Number.isSafeInteger(manifest.irVersion) || Number(manifest.irVersion) < 1
-      || !('backend' in manifest) || typeof manifest.backend !== 'string'
-      || !('profile' in manifest) || manifest.profile !== manifest.backend)
+    if (
+      !manifest ||
+      typeof manifest !== 'object' ||
+      !('artifacts' in manifest) ||
+      !Array.isArray(manifest.artifacts) ||
+      !('irVersion' in manifest) ||
+      !Number.isSafeInteger(manifest.irVersion) ||
+      Number(manifest.irVersion) < 1 ||
+      !('backend' in manifest) ||
+      typeof manifest.backend !== 'string' ||
+      !('profile' in manifest) ||
+      manifest.profile !== manifest.backend
+    )
       return reject('Existing provenance is not a compiler artifact ownership manifest.');
     const recorded = new Map<string, string>();
     const recordedArtifacts: OutputArtifact[] = [];
     for (const record of manifest.artifacts) {
-      if (!record || typeof record !== 'object' || typeof record.path !== 'string'
-        || typeof record.sha256 !== 'string' || !/^[0-9a-f]{64}$/.test(record.sha256)
-        || typeof record.kind !== 'string' || record.path === 'provenance.json')
+      if (
+        !record ||
+        typeof record !== 'object' ||
+        typeof record.path !== 'string' ||
+        typeof record.sha256 !== 'string' ||
+        !/^[0-9a-f]{64}$/.test(record.sha256) ||
+        typeof record.kind !== 'string' ||
+        record.path === 'provenance.json'
+      )
         return reject('Existing provenance contains an invalid artifact ownership record.');
-      recordedArtifacts.push({ path: record.path, contents: '', kind: record.kind as OutputArtifact['kind'] });
+      recordedArtifacts.push({
+        path: record.path,
+        contents: '',
+        kind: record.kind as OutputArtifact['kind'],
+      });
       recorded.set(record.path, record.sha256);
     }
     const recordedProblem = validateArtifacts(recordedArtifacts);
     if (recordedProblem) return reject(recordedProblem);
-    const generated = new Map(artifacts.map((artifact) => [artifact.path, createHash('sha256').update(artifact.contents).digest('hex')]));
+    const generated = new Map(
+      artifacts.map((artifact) => [
+        artifact.path,
+        createHash('sha256').update(artifact.contents).digest('hex'),
+      ])
+    );
     const names = [...new Set([...recorded.keys(), ...generated.keys()])].sort();
     const changes: ArtifactDiff['changes'] = [];
     for (const filename of names) {
@@ -206,32 +273,55 @@ export async function diffArtifactSet(artifacts: readonly OutputArtifact[], dire
       const currentSha256 = data === null ? null : createHash('sha256').update(data).digest('hex');
       const generatedSha256 = generated.get(filename) ?? null;
       const recordedSha256 = recorded.get(filename) ?? null;
-      changes.push({ path: filename,
-        status: currentSha256 === generatedSha256 ? 'unchanged' : currentSha256 === null ? 'added' : generatedSha256 === null ? 'removed' : 'modified',
+      changes.push({
+        path: filename,
+        status:
+          currentSha256 === generatedSha256
+            ? 'unchanged'
+            : currentSha256 === null
+              ? 'added'
+              : generatedSha256 === null
+                ? 'removed'
+                : 'modified',
         consumerModified: filename !== 'provenance.json' && currentSha256 !== recordedSha256,
-        currentSha256, generatedSha256, recordedSha256,
+        currentSha256,
+        generatedSha256,
+        recordedSha256,
       });
     }
-    if (!sameIdentity(await lstat(absolute), rootStat)) return reject('Output directory changed during diff.');
+    if (!sameIdentity(await lstat(absolute), rootStat))
+      return reject('Output directory changed during diff.');
     return { ok: true, value: { directory: absolute, changes } };
   } catch (error) {
     return reject(`Cannot compare compiler-owned output: ${errorMessage(error)}`);
   }
 }
 
-async function directoryProblem(directory: OwnedDirectory): Promise<PublicationFailure | undefined> {
+async function directoryProblem(
+  directory: OwnedDirectory
+): Promise<PublicationFailure | undefined> {
   for (let current: OwnedDirectory | undefined = directory; current; current = current.parent) {
     if (!current.identity)
-      return new PublicationFailure(`ownership could not be established for ${current.filename}`, current.filename, 'output-write');
+      return new PublicationFailure(
+        `ownership could not be established for ${current.filename}`,
+        current.filename,
+        'output-write'
+      );
     try {
       const actual = await lstat(current.filename);
       if (!actual.isDirectory() || !sameIdentity(actual, current.identity))
-        return new PublicationFailure(`owned directory was replaced: ${current.filename}`, current.filename, 'output-conflict');
+        return new PublicationFailure(
+          `owned directory was replaced: ${current.filename}`,
+          current.filename,
+          'output-conflict'
+        );
     } catch (error) {
       return new PublicationFailure(
         `owned directory is unavailable: ${current.filename}: ${errorMessage(error)}`,
         current.filename,
-        errorCode(error) === 'ENOENT' || errorCode(error) === 'ENOTDIR' ? 'output-conflict' : 'output-write'
+        errorCode(error) === 'ENOENT' || errorCode(error) === 'ENOTDIR'
+          ? 'output-conflict'
+          : 'output-write'
       );
     }
   }
@@ -250,14 +340,18 @@ async function rollback(files: readonly OwnedFile[], directories: readonly Owned
     const file = files[index];
     const parentProblem = await directoryProblem(file.parent);
     if (parentProblem || !file.identity) {
-      unresolved.push(`${file.filename} (${parentProblem?.message ?? 'file ownership could not be established'})`);
+      unresolved.push(
+        `${file.filename} (${parentProblem?.message ?? 'file ownership could not be established'})`
+      );
       continue;
     }
     try {
       const actual = await lstat(file.filename);
       if (!actual.isFile() || !sameIdentity(actual, file.identity)) {
         preserved.push(`${file.filename} (foreign replacement)`);
-        unresolved.push(`${file.filename} (original owned file cleanup could not be verified after replacement)`);
+        unresolved.push(
+          `${file.filename} (original owned file cleanup could not be verified after replacement)`
+        );
         continue;
       }
       await unlink(file.filename);
@@ -284,7 +378,9 @@ async function rollback(files: readonly OwnedFile[], directories: readonly Owned
       const actual = await lstat(directory.filename);
       if (!actual.isDirectory() || !sameIdentity(actual, directory.identity)) {
         preserved.push(`${directory.filename} (foreign replacement)`);
-        unresolved.push(`${directory.filename} (original owned directory cleanup could not be verified after replacement)`);
+        unresolved.push(
+          `${directory.filename} (original owned directory cleanup could not be verified after replacement)`
+        );
         continue;
       }
       await rmdir(directory.filename);
@@ -310,12 +406,11 @@ export async function writeArtifactSet(
   openExclusive: (filename: string) => Promise<ExclusiveOutputFile> = (filename) =>
     open(filename, 'wx')
 ): Promise<CompileResult<{ directory: string; files: string[] }>> {
-  const invalid =
-    !Array.isArray(artifacts)
-      ? 'Output artifacts must be an array'
-      : typeof directory !== 'string' || !directory || directory.includes('\0')
-        ? 'Output destination must be a non-empty path without NUL characters'
-        : validateArtifacts(artifacts);
+  const invalid = !Array.isArray(artifacts)
+    ? 'Output artifacts must be an array'
+    : typeof directory !== 'string' || !directory || directory.includes('\0')
+      ? 'Output destination must be a non-empty path without NUL characters'
+      : validateArtifacts(artifacts);
   if (invalid)
     return {
       ok: false,
@@ -326,7 +421,12 @@ export async function writeArtifactSet(
           message: invalid,
           span: {
             file: typeof directory === 'string' ? directory : '<output>',
-            start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1,
+            start: 0,
+            end: 0,
+            line: 1,
+            column: 1,
+            endLine: 1,
+            endColumn: 1,
           },
         },
       ],
@@ -351,7 +451,11 @@ export async function writeArtifactSet(
     byPath.set(output, root);
     const rootStat = await lstat(output);
     if (!rootStat.isDirectory())
-      throw new PublicationFailure('Reserved output directory was replaced', output, 'output-conflict');
+      throw new PublicationFailure(
+        'Reserved output directory was replaced',
+        output,
+        'output-conflict'
+      );
     root.identity = { dev: rootStat.dev, ino: rootStat.ino, birthtimeMs: rootStat.birthtimeMs };
 
     for (const artifact of planned) {
@@ -373,7 +477,11 @@ export async function writeArtifactSet(
         byPath.set(dirname, created);
         const actual = await lstat(dirname);
         if (!actual.isDirectory())
-          throw new PublicationFailure('Created artifact directory was replaced', dirname, 'output-conflict');
+          throw new PublicationFailure(
+            'Created artifact directory was replaced',
+            dirname,
+            'output-conflict'
+          );
         created.identity = { dev: actual.dev, ino: actual.ino, birthtimeMs: actual.birthtimeMs };
         parent = created;
       }
@@ -388,19 +496,32 @@ export async function writeArtifactSet(
       try {
         action = 'Cannot establish artifact file ownership';
         if (typeof handle.stat !== 'function')
-          throw new PublicationFailure('Exclusive output handle cannot prove descriptor ownership', current, 'output-write');
+          throw new PublicationFailure(
+            'Exclusive output handle cannot prove descriptor ownership',
+            current,
+            'output-write'
+          );
         const actual = await handle.stat();
         if (!actual.isFile())
-          throw new PublicationFailure('Created artifact file is not a regular file', current, 'output-conflict');
+          throw new PublicationFailure(
+            'Created artifact file is not a regular file',
+            current,
+            'output-conflict'
+          );
         owned.identity = { dev: actual.dev, ino: actual.ino, birthtimeMs: actual.birthtimeMs };
         await requireDirectory(parent);
         const named = await lstat(current);
         if (!named.isFile() || !sameIdentity(named, owned.identity))
-          throw new PublicationFailure('Created artifact file was replaced', current, 'output-conflict');
+          throw new PublicationFailure(
+            'Created artifact file was replaced',
+            current,
+            'output-conflict'
+          );
         action = 'Cannot write an artifact file';
         await handle.writeFile(artifact.contents);
       } catch (error) {
-        writeFailure = error instanceof PublicationFailure ? error : failure(error, current, action);
+        writeFailure =
+          error instanceof PublicationFailure ? error : failure(error, current, action);
       }
       try {
         await handle.close();
@@ -421,11 +542,19 @@ export async function writeArtifactSet(
         await requireDirectory(file.parent);
         const actual = await lstat(current);
         if (!actual.isFile() || !sameIdentity(actual, file.identity))
-          throw new PublicationFailure('Committed artifact file was replaced', current, 'output-conflict');
+          throw new PublicationFailure(
+            'Committed artifact file was replaced',
+            current,
+            'output-conflict'
+          );
       } catch (error) {
         completed.delete(file.artifactPath);
         if (errorCode(error) === 'ENOENT' || errorCode(error) === 'ENOTDIR')
-          throw new PublicationFailure(`Committed artifact file is unavailable: ${errorMessage(error)}`, current, 'output-conflict');
+          throw new PublicationFailure(
+            `Committed artifact file is unavailable: ${errorMessage(error)}`,
+            current,
+            'output-conflict'
+          );
         throw error;
       }
     }
@@ -434,7 +563,9 @@ export async function writeArtifactSet(
   } catch (error) {
     const primary = error instanceof PublicationFailure ? error : failure(error, current, action);
     const cleanup = await rollback(files, directories);
-    const incomplete = planned.filter((artifact) => !completed.has(artifact.path)).map((artifact) => artifact.path);
+    const incomplete = planned
+      .filter((artifact) => !completed.has(artifact.path))
+      .map((artifact) => artifact.path);
     const diagnostic: CompilerDiagnostic = {
       code: primary.category === 'output-conflict' ? 'PUI3002' : 'PUI3003',
       category: primary.category,
@@ -442,10 +573,24 @@ export async function writeArtifactSet(
         primary.message,
         `publication failed; no artifact set committed; incomplete artifacts: ${incomplete.length ? incomplete.join(', ') : '(none before rollback)'}`,
         secondaryErrors.length ? `additional failures: ${secondaryErrors.join('; ')}` : '',
-        cleanup.unresolved.length ? `rollback incomplete; unresolved owned entries: ${cleanup.unresolved.join('; ')}` : '',
-        cleanup.preserved.length ? `foreign replacements preserved: ${cleanup.preserved.join('; ')}` : '',
-      ].filter(Boolean).join('; '),
-      span: { file: primary.filename, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
+        cleanup.unresolved.length
+          ? `rollback incomplete; unresolved owned entries: ${cleanup.unresolved.join('; ')}`
+          : '',
+        cleanup.preserved.length
+          ? `foreign replacements preserved: ${cleanup.preserved.join('; ')}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join('; '),
+      span: {
+        file: primary.filename,
+        start: 0,
+        end: 0,
+        line: 1,
+        column: 1,
+        endLine: 1,
+        endColumn: 1,
+      },
     };
     return { ok: false, diagnostics: [diagnostic] };
   }

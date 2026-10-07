@@ -19,16 +19,13 @@ export const Choice=definePrototype({name:'${name}',setup(def){}});`;
 // These exercise the public frontend, not generated-source text or resolver wiring.
 describe('static local source graph', () => {
   it('resolves a default import alias through explicit default forwarding', () => {
-    const result = parsePrototype(
-      `import Renamed from './bridge'; export {Renamed as default};`,
-      {
-        fileName: 'entry.proto.ts',
-        files: {
-          'bridge.ts': `export {default} from './subject';`,
-          'subject.ts': prototype,
-        },
-      }
-    );
+    const result = parsePrototype(`import Renamed from './bridge'; export {Renamed as default};`, {
+      fileName: 'entry.proto.ts',
+      files: {
+        'bridge.ts': `export {default} from './subject';`,
+        'subject.ts': prototype,
+      },
+    });
     expect(result).toMatchObject({
       ok: true,
       value: { name: 'subject', exposes: [{ name: 'enabled', kind: 'state', type: 'boolean' }] },
@@ -54,7 +51,11 @@ export default defineAsHook({name:'logic',setup(def){
     );
     expect(result).toMatchObject({
       ok: true,
-      value: { name: 'caller', hooks: [{ name: 'logic' }], exposes: [{ name: 'ready', kind: 'state' }] },
+      value: {
+        name: 'caller',
+        hooks: [{ name: 'logic' }],
+        exposes: [{ name: 'ready', kind: 'state' }],
+      },
     });
   });
 
@@ -94,7 +95,11 @@ export {Choice, Choice as default} from './left';`,
   it('rejects different bindings with the same star export name deterministically', () => {
     const source = `export * from './left';\nexport * from './right';`;
     const files = { 'left.ts': named('left'), 'right.ts': named('right') };
-    const result = parsePrototype(source, { fileName: 'entry.proto.ts', exportName: 'Choice', files });
+    const result = parsePrototype(source, {
+      fileName: 'entry.proto.ts',
+      exportName: 'Choice',
+      files,
+    });
     expect(result).toMatchObject({
       ok: false,
       diagnostics: [{ code: 'PUI1002', span: { file: 'entry.proto.ts', line: 2 } }],
@@ -176,7 +181,11 @@ ${prototype}`,
   });
 
   it('checks runtime effects reached only through a star or empty forwarding list', () => {
-    for (const edge of [`export * from './effects';`, `export {} from './effects';`, `import {} from './effects';`]) {
+    for (const edge of [
+      `export * from './effects';`,
+      `export {} from './effects';`,
+      `import {} from './effects';`,
+    ]) {
       const result = parsePrototype(`${prototype}\n${edge}`, {
         fileName: 'entry.proto.ts',
         files: { 'effects.ts': `throw new Error('Input code must never execute');` },
@@ -189,7 +198,10 @@ ${prototype}`,
     const result = parsePrototype(`import {definePrototype} from '@proto.ui/core';
 export default Later;
 const Later=definePrototype({name:'late',setup(def){}});`);
-    expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1008', span: { line: 2 } }] });
+    expect(result).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1008', span: { line: 2 } }],
+    });
   });
 
   it('admits a forward ESM export binding and a hoisted setup function/import', () => {
@@ -197,7 +209,10 @@ const Later=definePrototype({name:'late',setup(def){}});`);
 const Later=definePrototype({name:'forward',setup});
 function setup(def) { const ready=def.state.bool('ready',true); def.expose.state('ready',ready); }
 import {definePrototype} from '@proto.ui/core';`);
-    expect(result).toMatchObject({ ok: true, value: { name: 'forward', exposes: [{ name: 'ready' }] } });
+    expect(result).toMatchObject({
+      ok: true,
+      value: { name: 'forward', exposes: [{ name: 'ready' }] },
+    });
   });
 
   it('rejects arbitrary package defaults and indirect core factory calls', () => {
@@ -206,9 +221,14 @@ import {definePrototype} from '@proto.ui/core';`);
       diagnostics: [{ code: 'PUI1003' }],
     });
     expect(
-      parsePrototype(`import {factory} from './bridge'; export default factory({name:'x',setup(def){}});`, {
-        files: { 'bridge.ts': `import {definePrototype as factory} from '@proto.ui/core'; export {factory};` },
-      })
+      parsePrototype(
+        `import {factory} from './bridge'; export default factory({name:'x',setup(def){}});`,
+        {
+          files: {
+            'bridge.ts': `import {definePrototype as factory} from '@proto.ui/core'; export {factory};`,
+          },
+        }
+      )
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1002' }] });
   });
 
@@ -217,7 +237,10 @@ import {definePrototype} from '@proto.ui/core';`);
       fileName: 'entry.proto.ts',
       files: { 'outside.ts': prototype },
     });
-    expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1003', category: 'invalid-input' }] });
+    expect(result).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1003', category: 'invalid-input' }],
+    });
   });
 
   it('preserves type edges and canonical declarations for consumers of an alias', () => {
@@ -240,7 +263,9 @@ import {definePrototype} from '@proto.ui/core';`);
   it('resolves trusted static style declarations through an imported alias', () => {
     const graph = new SourceGraph(`import {STYLE as Local} from './styles'; export {Local};`, {
       fileName: 'entry.proto.ts',
-      files: { 'styles.ts': `import {tw as style} from '@proto.ui/core'; export const STYLE=style('hidden','opacity-0');` },
+      files: {
+        'styles.ts': `import {tw as style} from '@proto.ui/core'; export const STYLE=style('hidden','opacity-0');`,
+      },
     });
     const module = graph.load('entry.proto.ts');
     graph.validateExports();
@@ -254,10 +279,12 @@ import {definePrototype} from '@proto.ui/core';`);
     const source = `import {tw} from '@proto.ui/core'; export const STYLE=tw(globalThis.readStyle());`;
     const graph = new SourceGraph(source, { fileName: 'styles.ts' });
     expect(() => graph.load('styles.ts')).toThrow(CompilerRejection);
-    expect(parsePrototype(`${source}\n${prototype}`, { fileName: 'entry.proto.ts' })).toMatchObject({
-      ok: false,
-      diagnostics: [{ code: 'PUI1004' }],
-    });
+    expect(parsePrototype(`${source}\n${prototype}`, { fileName: 'entry.proto.ts' })).toMatchObject(
+      {
+        ok: false,
+        diagnostics: [{ code: 'PUI1004' }],
+      }
+    );
   });
 });
 

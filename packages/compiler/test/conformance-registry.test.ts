@@ -44,13 +44,28 @@ function definition(patch: Partial<CaseDefinition<Action>> = {}): CaseDefinition
 function observations(ownerId = 'field'): SemanticCheckpoint[] {
   return [
     {
-      step: 'input', phase: 'settled', ownerId, parentId: null, viewEpoch: 1,
-      kind: 'snapshot', inputSources: ['synthetic-dispatch'],
-      data: { value: 'hello', events: [{ name: 'change', payload: { value: 'hello', isTrusted: false } }], extra: 'allowed' },
+      step: 'input',
+      phase: 'settled',
+      ownerId,
+      parentId: null,
+      viewEpoch: 1,
+      kind: 'snapshot',
+      inputSources: ['synthetic-dispatch'],
+      data: {
+        value: 'hello',
+        events: [{ name: 'change', payload: { value: 'hello', isTrusted: false } }],
+        extra: 'allowed',
+      },
     },
     {
-      step: 'dispose', phase: 'settled', ownerId, parentId: null, viewEpoch: 1,
-      kind: 'snapshot', inputSources: ['host-api'], data: { valid: false, events: [] },
+      step: 'dispose',
+      phase: 'settled',
+      ownerId,
+      parentId: null,
+      viewEpoch: 1,
+      kind: 'snapshot',
+      inputSources: ['host-api'],
+      data: { valid: false, events: [] },
     },
   ];
 }
@@ -60,19 +75,35 @@ describe('target-neutral case registry', () => {
     for (const profile of ['target-a', 'target-b']) {
       const registry = new CaseRegistry([definition({ profile })]);
       const result = registry.evaluateReport({
-        id: 'field.input-disposal', profile,
-        reference: observations('reference-owner'), candidate: observations('candidate-owner'),
+        id: 'field.input-disposal',
+        profile,
+        reference: observations('reference-owner'),
+        candidate: observations('candidate-owner'),
         identities: {
-          reference: { reason: 'Target-local opaque owner', aliases: { 'reference-owner': 'field' } },
-          candidate: { reason: 'Target-local opaque owner', aliases: { 'candidate-owner': 'field' } },
+          reference: {
+            reason: 'Target-local opaque owner',
+            aliases: { 'reference-owner': 'field' },
+          },
+          candidate: {
+            reason: 'Target-local opaque owner',
+            aliases: { 'candidate-owner': 'field' },
+          },
         },
       });
       expect(result.status).toBe('PASS');
-      expect(result.oracleCoverage?.reference.map((entry) => [entry.criterion, entry.outcome])).toEqual([
-        ['FIELD-VALUE', 'PASS'], ['FIELD-CHANGE', 'PASS'], ['FIELD-DISPOSAL', 'PASS'],
+      expect(
+        result.oracleCoverage?.reference.map((entry) => [entry.criterion, entry.outcome])
+      ).toEqual([
+        ['FIELD-VALUE', 'PASS'],
+        ['FIELD-CHANGE', 'PASS'],
+        ['FIELD-DISPOSAL', 'PASS'],
       ]);
-      expect(result.oracleCoverage?.candidate.map((entry) => [entry.criterion, entry.outcome])).toEqual([
-        ['FIELD-VALUE', 'PASS'], ['FIELD-CHANGE', 'PASS'], ['FIELD-DISPOSAL', 'PASS'],
+      expect(
+        result.oracleCoverage?.candidate.map((entry) => [entry.criterion, entry.outcome])
+      ).toEqual([
+        ['FIELD-VALUE', 'PASS'],
+        ['FIELD-CHANGE', 'PASS'],
+        ['FIELD-DISPOSAL', 'PASS'],
       ]);
     }
   });
@@ -81,7 +112,9 @@ describe('target-neutral case registry', () => {
     const registry = new CaseRegistry([definition()]);
     const trace = observations();
     for (const broken of [
-      [trace[0]], [trace[1], trace[0]], [trace[0], trace[0], trace[1]],
+      [trace[0]],
+      [trace[1], trace[0]],
+      [trace[0], trace[0], trace[1]],
       [trace[0], { ...trace[1], step: 'unregistered-step' }],
     ]) {
       const result = evaluate(registry, 'field.input-disposal', broken, broken);
@@ -99,7 +132,8 @@ describe('target-neutral case registry', () => {
     expect(registry.evaluate('field.input-disposal', reference, candidate).status).toBe('PASS');
     candidate[0].data = { created: 2 };
     expect(registry.evaluate('field.input-disposal', reference, candidate)).toMatchObject({
-      status: 'FAIL', failures: ['compiler-mismatch'],
+      status: 'FAIL',
+      failures: ['compiler-mismatch'],
     });
   });
 
@@ -109,7 +143,10 @@ describe('target-neutral case registry', () => {
       [{ name: 'change', payload: { value: 'wrong', isTrusted: false } }],
       [{ name: 'change', payload: { value: 'hello' } }],
       [{ name: 'change', payload: { value: 'hello', isTrusted: false, invented: true } }],
-      [{ name: 'unwanted', payload: null }, { name: 'change', payload: { value: 'hello', isTrusted: false } }],
+      [
+        { name: 'unwanted', payload: null },
+        { name: 'change', payload: { value: 'hello', isTrusted: false } },
+      ],
     ];
     for (const events of mutations) {
       const trace = observations();
@@ -119,10 +156,15 @@ describe('target-neutral case registry', () => {
       expect(result.comparison).toEqual({ equal: true });
     }
     const original = definition();
-    const ordered = new CaseRegistry([{
-      ...original,
-      steps: [{ ...original.steps[0], expected: { events: ['first', 'second'] } }, original.steps[1]],
-    }]);
+    const ordered = new CaseRegistry([
+      {
+        ...original,
+        steps: [
+          { ...original.steps[0], expected: { events: ['first', 'second'] } },
+          original.steps[1],
+        ],
+      },
+    ]);
     const reversed = observations();
     reversed[0].data = { events: ['second', 'first'] };
     expect(ordered.evaluate('field.input-disposal', reversed, reversed).status).toBe('FAIL');
@@ -134,12 +176,16 @@ describe('target-neutral case registry', () => {
     wrongSource[0].inputSources = ['browser-automation'];
     expect(registry.evaluate('field.input-disposal', wrongSource, wrongSource).status).toBe('FAIL');
     const wrongTrust = observations();
-    wrongTrust[0].data = { value: 'hello', events: [{ name: 'change', payload: { value: 'hello', isTrusted: true } }] };
+    wrongTrust[0].data = {
+      value: 'hello',
+      events: [{ name: 'change', payload: { value: 'hello', isTrusted: true } }],
+    };
     expect(registry.evaluate('field.input-disposal', wrongTrust, wrongTrust).status).toBe('FAIL');
     const malformed = observations();
     malformed[0].inputSources = ['trusted-event'] as unknown as SemanticCheckpoint['inputSources'];
     expect(registry.evaluate('field.input-disposal', malformed, malformed)).toMatchObject({
-      status: 'BLOCKED', failures: ['harness-defect'],
+      status: 'BLOCKED',
+      failures: ['harness-defect'],
     });
   });
 
@@ -148,14 +194,32 @@ describe('target-neutral case registry', () => {
     expect(registry.evaluateReports([]).map((result) => result.status)).toEqual(['UNTESTED']);
     expect(registry.evaluate('field.input-disposal', observations()).status).toBe('UNTESTED');
     expect(registry.evaluate('field.input-disposal', [], []).status).toBe('UNTESTED');
-    const unsupported = new CaseRegistry([definition({ applicability: { status: 'UNSUPPORTED', reason: 'Target lacks the declared input contract' } })]);
-    expect(unsupported.evaluate('field.input-disposal', observations(), observations()).status).toBe('UNSUPPORTED');
+    const unsupported = new CaseRegistry([
+      definition({
+        applicability: {
+          status: 'UNSUPPORTED',
+          reason: 'Target lacks the declared input contract',
+        },
+      }),
+    ]);
+    expect(
+      unsupported.evaluate('field.input-disposal', observations(), observations()).status
+    ).toBe('UNSUPPORTED');
     expect(unsupported.evaluateReports([])[0].status).toBe('UNSUPPORTED');
-    expect(registry.evaluateReport({ id: 'field.input-disposal', authorityBlocker: 'Authority is unresolved' })).toMatchObject({
-      status: 'BLOCKED', failures: ['shared-contract-defect-or-ambiguity'],
+    expect(
+      registry.evaluateReport({
+        id: 'field.input-disposal',
+        authorityBlocker: 'Authority is unresolved',
+      })
+    ).toMatchObject({
+      status: 'BLOCKED',
+      failures: ['shared-contract-defect-or-ambiguity'],
     });
-    expect(registry.evaluateReport({ id: 'field.input-disposal', harnessError: 'Driver crashed' })).toMatchObject({
-      status: 'BLOCKED', failures: ['harness-defect'],
+    expect(
+      registry.evaluateReport({ id: 'field.input-disposal', harnessError: 'Driver crashed' })
+    ).toMatchObject({
+      status: 'BLOCKED',
+      failures: ['harness-defect'],
     });
   });
 
@@ -163,32 +227,73 @@ describe('target-neutral case registry', () => {
     const registry = new CaseRegistry([definition()]);
     expect(() => registry.evaluate('unknown', observations(), observations())).toThrow('Unknown');
     expect(() => registry.evaluateReports([{ id: 'unknown' }])).toThrow('Unknown');
-    expect(() => registry.evaluateReports([{ id: 'field.input-disposal' }, { id: 'field.input-disposal' }])).toThrow('Duplicate');
-    expect(registry.evaluateReport({ id: 'field.input-disposal', profile: 'target-b', reference: observations(), candidate: observations() }).status).toBe('BLOCKED');
-    const forged = { id: 'field.input-disposal', status: 'PASS', oracleExecutions: [{ criterion: 'FIELD-VALUE', outcome: 'PASS' }] } as unknown as CaseObservationReport;
+    expect(() =>
+      registry.evaluateReports([{ id: 'field.input-disposal' }, { id: 'field.input-disposal' }])
+    ).toThrow('Duplicate');
+    expect(
+      registry.evaluateReport({
+        id: 'field.input-disposal',
+        profile: 'target-b',
+        reference: observations(),
+        candidate: observations(),
+      }).status
+    ).toBe('BLOCKED');
+    const forged = {
+      id: 'field.input-disposal',
+      status: 'PASS',
+      oracleExecutions: [{ criterion: 'FIELD-VALUE', outcome: 'PASS' }],
+    } as unknown as CaseObservationReport;
     expect(registry.evaluateReport(forged).status).toBe('UNTESTED');
     const broken = observations();
     broken[0].data = { value: 'wrong', events: [] };
-    expect(registry.evaluateReport({ ...forged, reference: broken, candidate: broken }).status).toBe('FAIL');
+    expect(
+      registry.evaluateReport({ ...forged, reference: broken, candidate: broken }).status
+    ).toBe('FAIL');
   });
 
   it('rejects vacuous or ambiguous definitions before any runner can claim coverage', () => {
     const original = definition();
     expect(() => new CaseRegistry([original, original])).toThrow('Duplicate');
-    expect(() => new CaseRegistry([definition({ requiredCriteria: ['FIELD-VALUE'] })])).toThrow('exactly cover');
-    expect(() => new CaseRegistry([definition({ requiredCriteria: [...original.requiredCriteria, 'UNOWNED'] })])).toThrow('exactly cover');
-    expect(() => new CaseRegistry([definition({ requiredCriteria: ['FIELD-VALUE', 'FIELD-VALUE'] })])).toThrow('unique');
-    expect(() => new CaseRegistry([definition({ steps: [original.steps[0], original.steps[0]] })])).toThrow('unique');
-    expect(() => new CaseRegistry([definition({ steps: [{ ...original.steps[0], expected: {} }, original.steps[1]] })])).toThrow('structured data expectations');
-    expect(() => new CaseRegistry([definition({ applicability: { status: 'UNSUPPORTED', reason: '' } })])).toThrow('reason');
+    expect(() => new CaseRegistry([definition({ requiredCriteria: ['FIELD-VALUE'] })])).toThrow(
+      'exactly cover'
+    );
+    expect(
+      () =>
+        new CaseRegistry([
+          definition({ requiredCriteria: [...original.requiredCriteria, 'UNOWNED'] }),
+        ])
+    ).toThrow('exactly cover');
+    expect(
+      () => new CaseRegistry([definition({ requiredCriteria: ['FIELD-VALUE', 'FIELD-VALUE'] })])
+    ).toThrow('unique');
+    expect(
+      () => new CaseRegistry([definition({ steps: [original.steps[0], original.steps[0]] })])
+    ).toThrow('unique');
+    expect(
+      () =>
+        new CaseRegistry([
+          definition({ steps: [{ ...original.steps[0], expected: {} }, original.steps[1]] }),
+        ])
+    ).toThrow('structured data expectations');
+    expect(
+      () => new CaseRegistry([definition({ applicability: { status: 'UNSUPPORTED', reason: '' } })])
+    ).toThrow('reason');
   });
 
   it('retains independent declaration values after nested caller mutation', () => {
     const original = definition();
     const registry = new CaseRegistry([original]);
-    const events = original.steps[0].expected.events as { name: string; payload: { value: string; isTrusted: boolean } }[];
+    const events = original.steps[0].expected.events as {
+      name: string;
+      payload: { value: string; isTrusted: boolean };
+    }[];
     events[0].payload.value = 'changed-after-registration';
-    expect(registry.evaluate('field.input-disposal', observations(), observations()).status).toBe('PASS');
-    expect(() => { (registry.get('field.input-disposal').steps[0].expected as Record<string, unknown>).value = 'rewrite'; }).toThrow();
+    expect(registry.evaluate('field.input-disposal', observations(), observations()).status).toBe(
+      'PASS'
+    );
+    expect(() => {
+      (registry.get('field.input-disposal').steps[0].expected as Record<string, unknown>).value =
+        'rewrite';
+    }).toThrow();
   });
 });

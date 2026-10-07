@@ -5,6 +5,10 @@ status: draft
 since: 0.1.0
 summary: Runtime and Base integration tests for no-argument Overlay installation, immediate ViewIntent projection, Transition binding, single-writer conflict diagnostics, and leaving resource retention.
 cases:
+  - id: T-AS-OVERLAY-0001-CASE-WC-PORTAL-OWNER
+    title: WC portal projection does not outlive its disconnected origin subtree
+    covers: [A-WEB-COMPONENT-0001-G, C-LIFECYCLE-0008-F, C-AS-OVERLAY-0001-F, C-AS-OVERLAY-0001-K]
+    expectation: sync-moves-retain-generations-and-terminal-origin-removal-reclaims-portals
   - id: T-AS-OVERLAY-0001-CASE-NO-ARG-ONCE
     title: repeated no-argument asOverlay calls reuse one configurable handle
     covers:
@@ -71,6 +75,20 @@ cases:
       - M-OVERLAY-0001-A
     expectation: one-logical-owner-and-one-presence-driver-with-distinct-view-lifetime
 implementations:
+  - id: wc-portal-origin-ownership
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/dialog-portal-owner.test.ts
+    required: true
+    consumesCases: [T-AS-OVERLAY-0001-CASE-WC-PORTAL-OWNER]
+  - id: s4-public-portal-owner-browser
+    kind: workspace-check
+    status: passing
+    path: scripts/analysis/shadow-s4-portal-browser.mjs
+    required: true
+    consumesCases: [T-AS-OVERLAY-0001-CASE-WC-PORTAL-OWNER]
+    notes:
+      - Light/split/mixed public Dialog retains generations on sync move, tears down all ten parts after open Root removal, and recreates cleanly on reconnect. Old Content companion failure remains observable; owner close/removal releases the valid Mask without automatic parent-state rollback.
   - id: runtime-overlay-contract
     kind: runtime-test
     status: passing
@@ -151,11 +169,16 @@ verifies:
     - id: C-LIFECYCLE-0008
       anchors:
         - C-LIFECYCLE-0008-E
+        - C-LIFECYCLE-0008-F
   modules:
     - id: M-OVERLAY-0001
       since: 0.3.0-alpha.0
       anchors:
         - M-OVERLAY-0001-A
+  adapters:
+    - id: A-WEB-COMPONENT-0001
+      since: 0.3.0-alpha.0
+      anchors: [A-WEB-COMPONENT-0001-G]
 exercises:
   decisions:
     - id: D-AS-HOOK-PRIVILEGED-NO-ARG-MIGRATION-0001
@@ -163,6 +186,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: asOverlay now uses a no-argument once caller and returned configuration/binding handle.
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound same-document WC portal origin liveness and complete public Dialog teardown/reconnect evidence without extending renderer-owned portals or parent-state rollback.
   - version: 0.1.0
     change: introduced
     summary: Added Overlay Presence coordination and resource lifetime coverage.

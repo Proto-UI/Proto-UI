@@ -7,7 +7,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitVue2Source } from './vue2-source';
 
-const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+const floatingUi = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+)('@floating-ui/dom');
 
 interface StyleExposes {
   pressed: { get(): boolean };
@@ -33,7 +35,9 @@ interface VueRuntime {
   nextTick(): Promise<void>;
 }
 type H = (tag: unknown, data?: unknown, children?: unknown) => unknown;
-const requireVue2 = createRequire(fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url)));
+const requireVue2 = createRequire(
+  fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url))
+);
 const Vue2 = requireVue2('vue') as VueRuntime;
 
 const source = `import {definePrototype,tw} from '@proto.ui/core';
@@ -77,7 +81,9 @@ function build(): unknown {
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitVue2Source(parsed.value, { autoUpdateOnPropsChange: false });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-  const sources = new Map((emitted.value.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents]));
+  const sources = new Map(
+    (emitted.value.supportingFiles ?? []).map((file) => [posix.normalize(file.path), file.contents])
+  );
   sources.set('component.js', emitted.value.code);
   const cache = new Map<string, Record<string, unknown>>();
   function load(path: string): Record<string, unknown> {
@@ -89,11 +95,16 @@ function build(): unknown {
     cache.set(path, exports);
     const javascript = ts.transpileModule(code, {
       fileName: path,
-      compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, allowJs: true },
+      compilerOptions: {
+        target: ts.ScriptTarget.ES2022,
+        module: ts.ModuleKind.CommonJS,
+        allowJs: true,
+      },
     }).outputText;
     new Function('require', 'exports', javascript)((specifier: string) => {
       if (specifier === '@floating-ui/dom') return floatingUi;
-      if (!specifier.startsWith('.')) throw new Error(`Unexpected generated dependency ${specifier}`);
+      if (!specifier.startsWith('.'))
+        throw new Error(`Unexpected generated dependency ${specifier}`);
       return load(posix.normalize(posix.join(posix.dirname(path), `${specifier}.ts`)));
     }, exports);
     return exports;
@@ -105,11 +116,16 @@ function mount(input: Record<string, unknown> = {}) {
   const component = build();
   const events: string[] = [];
   const Root = Vue2.extend({
-    data() { return { input }; },
+    data() {
+      return { input };
+    },
     render(this: HostInstance, h: H) {
-      return h(component, { props: this.input, on: Object.fromEntries(
-        ['mounted', 'updated', 'unmounted'].map((kind) => [kind, () => events.push(kind)]),
-      ) });
+      return h(component, {
+        props: this.input,
+        on: Object.fromEntries(
+          ['mounted', 'updated', 'unmounted'].map((kind) => [kind, () => events.push(kind)])
+        ),
+      });
     },
   });
   const vm = new Root();
@@ -164,7 +180,10 @@ describe('Vue2 generated native style projection', () => {
       expect(host.querySelector('[data-pui-root]')).toBe(root);
       expect(events).toEqual(['mounted', 'updated']);
       force.mockRestore();
-    } finally { vm.$destroy(); host.remove(); }
+    } finally {
+      vm.$destroy();
+      host.remove();
+    }
   });
 
   it('applies patches and suppression above live Rules and restores the retained base', async () => {
@@ -172,14 +191,18 @@ describe('Vue2 generated native style projection', () => {
     try {
       await settle();
       const root = host.querySelector('[data-pui-root]');
-      vm.input = { mode: 'patch' }; await settle();
+      vm.input = { mode: 'patch' };
+      await settle();
       expect(tokens(root)).toEqual(['bg-yellow', 'opacity-50']);
-      vm.input = { mode: 'suppress' }; await settle();
+      vm.input = { mode: 'suppress' };
+      await settle();
       expect(tokens(root)).toEqual(['opacity-50']);
       instance.getExposes().press(false);
-      vm.input = { mode: 'suppress', active: false }; await settle();
+      vm.input = { mode: 'suppress', active: false };
+      await settle();
       expect(tokens(root)).toEqual(['opacity-50']);
-      vm.input = { mode: 'clear', active: false }; await settle();
+      vm.input = { mode: 'clear', active: false };
+      await settle();
       expect(tokens(root)).toEqual(['bg-red', 'opacity-50']);
       instance.getExposes().withdrawBase();
       expect(tokens(root)).toEqual([]);
@@ -188,7 +211,10 @@ describe('Vue2 generated native style projection', () => {
       expect(host.querySelector('[data-pui-root]')).toBe(root);
       expect(host.querySelector('output')?.textContent).toBe('pressed:initial');
       expect(events).toEqual(['mounted']);
-    } finally { vm.$destroy(); host.remove(); }
+    } finally {
+      vm.$destroy();
+      host.remove();
+    }
   });
 
   it('replays retained patches and current Rule conditions in a new epoch and clears terminal ownership', async () => {
@@ -197,18 +223,22 @@ describe('Vue2 generated native style projection', () => {
       await settle();
       const api = instance.getExposes();
       const firstRoot = host.querySelector('[data-pui-root]');
-      vm.input = { present: false }; await settle();
+      vm.input = { present: false };
+      await settle();
       expect(host.querySelector('[data-pui-root]')).toBeNull();
       expect(firstRoot?.hasAttribute('data-pui-style')).toBe(false);
       api.press(false);
-      vm.input = { present: false, active: false, mode: 'patch', label: 'retained' }; await settle();
-      vm.input = { present: true, active: false, mode: 'patch', label: 'retained' }; await settle();
+      vm.input = { present: false, active: false, mode: 'patch', label: 'retained' };
+      await settle();
+      vm.input = { present: true, active: false, mode: 'patch', label: 'retained' };
+      await settle();
       const secondRoot = host.querySelector('[data-pui-root]');
       expect(secondRoot).not.toBe(firstRoot);
       expect(tokens(secondRoot)).toEqual(['bg-yellow', 'opacity-50']);
       expect(instance.getExposes().pressed).toBe(api.pressed);
       expect(host.querySelector('output')?.textContent).toBe('released:retained');
-      vm.input = { present: true, active: false, mode: 'clear', label: 'retained' }; await settle();
+      vm.input = { present: true, active: false, mode: 'clear', label: 'retained' };
+      await settle();
       expect(tokens(secondRoot)).toEqual(['bg-red', 'opacity-50']);
       api.press(true);
       expect(tokens(secondRoot)).toEqual(['bg-blue', 'opacity-50']);
@@ -219,6 +249,9 @@ describe('Vue2 generated native style projection', () => {
       expect(() => api.withdrawBase()).toThrow(/terminal/);
       expect(() => api.pressed.get()).toThrow(/terminal/);
       expect(instance.getExposes()).toEqual({});
-    } finally { vm.$destroy(); host.remove(); }
+    } finally {
+      vm.$destroy();
+      host.remove();
+    }
   });
 });

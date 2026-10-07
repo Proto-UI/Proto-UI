@@ -13,12 +13,18 @@ export function buildQtContextArtifacts(ir: PrototypeIR): {
   keys: ReadonlyMap<string, { name: string; file: string }>;
   scopeFile: string;
 } {
-  const keys = new Map(ir.contextKeys.map((key) => {
-    const hash = createHash('sha256').update(key.id).digest('hex');
-    return [key.id, { name: `__puiQtContextKey_${hash}`, file: `./.proto-ui/qt/context/key-${hash}.mjs` }] as const;
-  }));
+  const keys = new Map(
+    ir.contextKeys.map((key) => {
+      const hash = createHash('sha256').update(key.id).digest('hex');
+      return [
+        key.id,
+        { name: `__puiQtContextKey_${hash}`, file: `./.proto-ui/qt/context/key-${hash}.mjs` },
+      ] as const;
+    })
+  );
   const files = ir.contextKeys.map((key) => ({
-    path: keys.get(key.id)!.file.slice(2), kind: 'source' as const,
+    path: keys.get(key.id)!.file.slice(2),
+    kind: 'source' as const,
     contents: `// Source declaration ${JSON.stringify(key.id)}\n// Checked value schema ${JSON.stringify(key.type)}\nexport const key = Object.freeze({ debugName: ${JSON.stringify(key.name)} });\n`,
   }));
   files.push({ path: scopeFile, kind: 'source', contents: qtContextScopeSource });
@@ -31,11 +37,13 @@ export function emitQtContextValidation(
   keyNames: ReadonlyMap<string, string>,
   acceptsName: string
 ): string {
-  const checks = ir.contextKeys.map((key) => {
-    const name = keyNames.get(key.id);
-    if (!name) throw new Error(`Missing Qt Context key import: ${key.id}`);
-    return `key === ${name} ? ${acceptsName}(${JSON.stringify(key.type)}, value) : `;
-  }).join('');
+  const checks = ir.contextKeys
+    .map((key) => {
+      const name = keyNames.get(key.id);
+      if (!name) throw new Error(`Missing Qt Context key import: ${key.id}`);
+      return `key === ${name} ? ${acceptsName}(${JSON.stringify(key.type)}, value) : `;
+    })
+    .join('');
   return `(key, value) => ${checks}false`;
 }
 

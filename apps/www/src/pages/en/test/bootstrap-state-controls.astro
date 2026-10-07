@@ -1,0 +1,421 @@
+---
+import { renderProtoStyleTokenCss } from '../../../../../../packages/cli/src/services/proto-style-css';
+import { DRAFT_FAMILY_STYLE_TOKENS } from '../../../../../../packages/cli/src/generated/draft-family-style-tokens';
+import { renderThemeCss } from '../../../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
+
+// Generated from real Prototype feedback; no site reset or component stylesheet.
+const tokens = [...DRAFT_FAMILY_STYLE_TOKENS['bootstrap-2-3-2']];
+const themeCss = renderThemeCss({
+  lightSelector: '[data-family="bootstrap-2-3-2"]',
+  darkSelector: '[data-theme="dark"] [data-family="bootstrap-2-3-2"]',
+});
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Bootstrap 2.3.2: real Base state and text controls</title>
+    <style
+      is:global
+      data-source-projection-css
+      set:html={themeCss + renderProtoStyleTokenCss(tokens)}
+    ></style>
+    <script is:inline>
+      document.documentElement.dataset.theme =
+        new URLSearchParams(location.search).get('theme') === 'dark' ? 'dark' : 'light';
+    </script>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p>Draft Bootstrap 2.3.2 · eight Base-inheriting parts</p>
+        <h1>State, context and real text editing</h1>
+        <p>
+          Checkbox Root/Indicator, Switch Root/Thumb, Toggle, Input, Textarea and Separator through
+          four Web runtimes. Component paint comes only from Prototype source feedback.
+        </p>
+        <p>
+          Both schemes retain the historical light palette. Switch and Toggle are design-language
+          extensions, not upstream 2.3.2 plugins. This fixture establishes no native or Compiler
+          conformance.
+        </p>
+      </header>
+      <section data-family="bootstrap-2-3-2" class="runtime-grid">
+        {
+          ['wc', 'react', 'vue', 'vue2'].map((runtime) => (
+            <article data-runtime-card={runtime}>
+              <h2>
+                {runtime === 'wc'
+                  ? 'Web Components'
+                  : runtime === 'vue'
+                    ? 'Vue 3'
+                    : runtime === 'vue2'
+                      ? 'Vue 2'
+                      : 'React'}
+              </h2>
+              <div data-runtime-host={runtime} />
+              <output data-events={runtime} aria-live="polite">
+                No value requests yet
+              </output>
+            </article>
+          ))
+        }
+      </section>
+    </main>
+    <script>
+      import {
+        checkboxRoot,
+        checkboxIndicator,
+        switchRoot,
+        switchThumb,
+        toggle,
+        inputRoot,
+        textareaRoot,
+        separatorRoot,
+      } from '@proto.ui/prototypes-bootstrap-2-3-2';
+      import { registerPrototype } from '../../../components/PrototypePreviewer/registry';
+      import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer';
+      import type {
+        DemoChild,
+        DemoNode,
+        DemoSpec,
+        DemoRenderResult,
+        DemoRuntimeApi,
+      } from '../../../components/PrototypePreviewer/demo-types';
+      import type { RuntimeId } from '../../../components/PrototypePreviewer/runtimes/registry';
+
+      const prototypes = {
+        checkboxRoot,
+        checkboxIndicator,
+        switchRoot,
+        switchThumb,
+        toggle,
+        inputRoot,
+        textareaRoot,
+        separatorRoot,
+      };
+      for (const [id, prototype] of Object.entries(prototypes))
+        registerPrototype(`bootstrap-state-${id}`, prototype);
+
+      type RecordedEvent = { ref: string; event: string; detail: unknown };
+      const records: DemoRenderResult[] = [];
+      const apis = new Map<string, DemoRuntimeApi>();
+      const events = new Map<string, RecordedEvent[]>();
+      const props = new Map<string, Map<string, Record<string, unknown>>>();
+      function setProps(runtime: string, ref: string, next: Record<string, unknown>) {
+        const retained = props.get(runtime)?.get(ref);
+        const api = apis.get(runtime);
+        if (!retained || !api) throw new Error(`Unknown fixture target ${runtime}/${ref}`);
+        Object.assign(retained, next);
+        api.setProps(ref, { ...retained });
+      }
+      const fixture = {
+        setProps,
+        events(runtime: string, ref: string, event: string) {
+          return (events.get(runtime) ?? []).filter(
+            (entry) => entry.ref === ref && entry.event === event
+          );
+        },
+        state(runtime: string, ref: string, key: string) {
+          const state = apis.get(runtime)?.getExposes(ref)?.[key] as
+            | { get?: () => unknown }
+            | undefined;
+          return state?.get?.();
+        },
+        async dispose() {
+          for (const record of records.splice(0).reverse()) await record.destroy();
+          apis.clear();
+          props.clear();
+          document.documentElement.dataset.bootstrapFixtureReady = 'disposed';
+        },
+      };
+      (
+        window as unknown as { bootstrapStateControlsFixture: typeof fixture }
+      ).bootstrapStateControlsFixture = fixture;
+
+      async function mount() {
+        for (const runtime of ['wc', 'react', 'vue', 'vue2'] as RuntimeId[]) {
+          const host = document.querySelector<HTMLElement>(`[data-runtime-host="${runtime}"]`)!;
+          const retained = new Map<string, Record<string, unknown>>();
+          props.set(runtime, retained);
+          events.set(runtime, []);
+          const proto = (
+            id: keyof typeof prototypes,
+            ref: string,
+            initial: Record<string, unknown> = {},
+            children: DemoChild[] = []
+          ): DemoNode => {
+            retained.set(ref, { ...initial });
+            return {
+              kind: 'proto',
+              prototypeId: `bootstrap-state-${id}`,
+              ref,
+              props: initial,
+              children,
+            };
+          };
+          const label = (text: string): DemoNode => ({
+            kind: 'box',
+            className: 'fixture-sr-only',
+            children: [text],
+          });
+          const row = (
+            title: string,
+            children: DemoNode[],
+            className = 'fixture-control-row'
+          ): DemoNode => ({
+            kind: 'box',
+            className: 'fixture-field',
+            children: [
+              { kind: 'box', className: 'fixture-label', children: [title] },
+              { kind: 'box', className, children },
+            ],
+          });
+          const eventNames: Record<string, string[]> = {
+            checkbox: ['checkedChange', 'indeterminateChange'],
+            checkboxControlled: ['checkedChange', 'indeterminateChange'],
+            switch: ['checkedChange'],
+            switchControlled: ['checkedChange'],
+            toggle: ['activeChange'],
+            toggleControlled: ['activeChange'],
+            input: ['valueChange', 'change'],
+            inputControlled: ['valueChange', 'change'],
+            textarea: ['valueChange', 'change'],
+            textareaControlled: ['valueChange', 'change'],
+          };
+          const demo: DemoSpec = {
+            type: 'demo',
+            root: {
+              kind: 'box',
+              className: 'fixture-stack',
+              children: [
+                row('Checkbox · uncontrolled / controlled mixed', [
+                  proto('checkboxRoot', 'checkbox', { defaultChecked: false }, [
+                    proto('checkboxIndicator', 'indicator'),
+                    label('Notifications'),
+                  ]),
+                  proto(
+                    'checkboxRoot',
+                    'checkboxControlled',
+                    { checked: false, indeterminate: true },
+                    [
+                      proto('checkboxIndicator', 'indicatorControlled'),
+                      label('Controlled notifications'),
+                    ]
+                  ),
+                ]),
+                row('Switch · uncontrolled / controlled', [
+                  proto('switchRoot', 'switch', { defaultChecked: false }, [
+                    proto('switchThumb', 'thumb'),
+                    label('Email alerts'),
+                  ]),
+                  proto('switchRoot', 'switchControlled', { checked: false }, [
+                    proto('switchThumb', 'thumbControlled'),
+                    label('Controlled email alerts'),
+                  ]),
+                ]),
+                row('Toggle · uncontrolled / controlled', [
+                  proto('toggle', 'toggle', { defaultActive: false }, ['Bold']),
+                  proto('toggle', 'toggleControlled', { active: false }, ['Italic']),
+                ]),
+                row(
+                  'Input · uncontrolled / controlled',
+                  [
+                    proto('inputRoot', 'input', {
+                      defaultValue: 'Draft',
+                      ariaLabel: 'Draft title',
+                      autoComplete: 'off',
+                    }),
+                    proto('inputRoot', 'inputControlled', {
+                      value: 'Approved',
+                      ariaLabel: 'Controlled title',
+                      autoComplete: 'off',
+                    }),
+                  ],
+                  'fixture-editors'
+                ),
+                row(
+                  'Textarea · uncontrolled / controlled',
+                  [
+                    proto('textareaRoot', 'textarea', {
+                      defaultValue: 'First line\nSecond line',
+                      ariaLabel: 'Draft notes',
+                      rows: 3,
+                    }),
+                    proto('textareaRoot', 'textareaControlled', {
+                      value: 'Approved notes',
+                      ariaLabel: 'Controlled notes',
+                      rows: 3,
+                    }),
+                  ],
+                  'fixture-editors'
+                ),
+                row(
+                  'Separator · horizontal semantic / vertical decorative',
+                  [
+                    proto('separatorRoot', 'separator', {
+                      decorative: false,
+                      orientation: 'horizontal',
+                    }),
+                    proto('separatorRoot', 'separatorDecorative', {
+                      decorative: true,
+                      orientation: 'vertical',
+                    }),
+                  ],
+                  'fixture-separators'
+                ),
+              ],
+            },
+            setup({ refs, api }) {
+              apis.set(runtime, api);
+              const cleanup: Array<() => void> = [];
+              for (const [ref, names] of Object.entries(eventNames)) {
+                const callbacks: Record<string, unknown> = {};
+                for (const event of names) {
+                  const record = (detail: unknown) => {
+                    const entries = events.get(runtime)!;
+                    entries.push({ ref, event, detail });
+                    document.querySelector<HTMLOutputElement>(`[data-events="${runtime}"]`)!.value =
+                      `${entries.length} requests · ${ref}.${event}`;
+                  };
+                  if (runtime === 'wc') {
+                    const listener = (value: Event) => {
+                      if (value instanceof CustomEvent) record(value.detail);
+                    };
+                    refs[ref].addEventListener(event, listener);
+                    cleanup.push(() => refs[ref].removeEventListener(event, listener));
+                  } else {
+                    callbacks[`on${event[0].toUpperCase()}${event.slice(1)}`] = record;
+                  }
+                }
+                if (runtime !== 'wc') setProps(runtime, ref, callbacks);
+              }
+              return () => cleanup.forEach((remove) => remove());
+            },
+          };
+          records.push(await renderDemo({ runtime, demo, host }));
+          host.dataset.mounted = 'true';
+        }
+        document.documentElement.dataset.bootstrapFixtureReady = 'true';
+      }
+      window.addEventListener(
+        'pagehide',
+        () => {
+          void fixture.dispose();
+        },
+        { once: true }
+      );
+      void mount().catch((error) => {
+        document.documentElement.dataset.bootstrapFixtureError = String(error?.stack ?? error);
+        document.documentElement.dataset.bootstrapFixtureReady = 'error';
+        console.error(error);
+      });
+    </script>
+    <style is:global>
+      /* Consumer layout, backdrop and labels only. Never paint a Prototype surface. */
+      body {
+        margin: 0;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        background: #f3f4f6;
+        color: #333;
+      }
+      main {
+        max-width: 1360px;
+        padding: 32px 20px;
+        margin: auto;
+      }
+      header {
+        max-width: 950px;
+        margin-bottom: 28px;
+      }
+      h1 {
+        font-size: 30px;
+        line-height: 1.2;
+      }
+      h2 {
+        font-size: 18px;
+        margin: 0 0 22px;
+      }
+      p {
+        line-height: 1.55;
+      }
+      .runtime-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+      }
+      article {
+        min-width: 0;
+        padding: 18px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background: var(--pui-background);
+      }
+      .fixture-stack,
+      .fixture-editors {
+        display: grid;
+        gap: 14px;
+        min-width: 0;
+      }
+      .fixture-field {
+        min-width: 0;
+      }
+      .fixture-label {
+        font-size: 11px;
+        line-height: 1.4;
+        min-height: 30px;
+        margin-bottom: 8px;
+      }
+      .fixture-control-row {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+      }
+      .fixture-separators {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        height: 36px;
+      }
+      .fixture-sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+      }
+      output {
+        display: block;
+        margin-top: 20px;
+        font-size: 11px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        min-height: 34px;
+      }
+      [data-theme='dark'] body {
+        background: #242424;
+      }
+      [data-theme='dark'] header {
+        color: #f3f4f6;
+      }
+      @media (max-width: 1100px) {
+        .runtime-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 600px) {
+        .runtime-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        main {
+          padding: 20px 14px;
+        }
+      }
+    </style>
+  </body>
+</html>

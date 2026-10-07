@@ -53,7 +53,9 @@ describe('root-owned incremental multi-entry compiler', () => {
     expect(changed.entries[0].compilation.ir.name).toBe('changed');
     expect(changed.entries[0].compilation.output).not.toEqual(first.entries[0].compilation.output);
     expect(changed.entries[1].compilation).toBe(first.entries[1].compilation);
-    expect(changed.entries.map((entry) => entry.compilation)).toEqual(full.entries.map((entry) => entry.compilation));
+    expect(changed.entries.map((entry) => entry.compilation)).toEqual(
+      full.entries.map((entry) => entry.compilation)
+    );
     expect(changed.identity).toBe(full.identity);
   });
 
@@ -62,7 +64,10 @@ describe('root-owned incremental multi-entry compiler', () => {
     const first = success(await compileProject(options));
     const generation = first.project.lastSuccessful;
     await writeFile(path.join(options.root, 'leaf.ts'), prototype('changed'));
-    await writeFile(path.join(options.root, 'b.proto.ts'), `${prototype('independent')}\nglobalThis.executed = true;`);
+    await writeFile(
+      path.join(options.root, 'b.proto.ts'),
+      `${prototype('independent')}\nglobalThis.executed = true;`
+    );
     const failed = await compileProject(options, first.project);
     expect(failed.ok).toBe(false);
     expect('value' in failed).toBe(false);
@@ -92,18 +97,28 @@ describe('root-owned incremental multi-entry compiler', () => {
     expect(repaired.project.graph.get('barrel.ts')).toEqual(['renamed.ts']);
     expect(repaired.dependencies).not.toContain('leaf.ts');
     const full = success(await compileProject(options));
-    expect(repaired.entries.map((entry) => entry.compilation)).toEqual(full.entries.map((entry) => entry.compilation));
+    expect(repaired.entries.map((entry) => entry.compilation)).toEqual(
+      full.entries.map((entry) => entry.compilation)
+    );
   });
 
   it('retains resolved sibling closure and all missing candidates on a failed graph', async () => {
     const options = await fixture();
-    await writeFile(path.join(options.root, 'a.proto.ts'), "export {missing} from './absent';\nexport {default} from './barrel';");
+    await writeFile(
+      path.join(options.root, 'a.proto.ts'),
+      "export {missing} from './absent';\nexport {default} from './barrel';"
+    );
     const result = await compileProject(options);
     expect(result.ok).toBe(false);
     if (result.ok) throw new Error('Missing source must fail the whole project.');
-    expect(result.dependencies).toEqual(expect.arrayContaining(['absent.ts', 'barrel.ts', 'leaf.ts', 'b.proto.ts']));
+    expect(result.dependencies).toEqual(
+      expect.arrayContaining(['absent.ts', 'barrel.ts', 'leaf.ts', 'b.proto.ts'])
+    );
     expect(result.project.lastSuccessful).toBeUndefined();
-    await writeFile(path.join(options.root, 'absent.ts'), `import {definePrototype} from '@proto.ui/core'; export const missing=definePrototype({name:'unused',setup(def){}});`);
+    await writeFile(
+      path.join(options.root, 'absent.ts'),
+      `import {definePrototype} from '@proto.ui/core'; export const missing=definePrototype({name:'unused',setup(def){}});`
+    );
     const repaired = success(await compileProject(options, result.project));
     expect(repaired.entries[0].compilation.ir.name).toBe('first');
   });
@@ -117,8 +132,13 @@ describe('root-owned incremental multi-entry compiler', () => {
     const changed = success(await compileProject(configured, first.project));
     expect(changed.entries.map((entry) => entry.cacheHit)).toEqual([false, false]);
     expect(changed.identity).not.toBe(first.identity);
-    expect(changed.entries.map((entry) => entry.compilation)).toEqual(first.entries.map((entry) => entry.compilation));
-    const rejected = await compileProject({ ...configured, profile: 'not-a-profile' }, first.project);
+    expect(changed.entries.map((entry) => entry.compilation)).toEqual(
+      first.entries.map((entry) => entry.compilation)
+    );
+    const rejected = await compileProject(
+      { ...configured, profile: 'not-a-profile' },
+      first.project
+    );
     expect(rejected.ok).toBe(false);
     expect(first.project.lastSuccessful?.identity).toBe(changed.identity);
     await unlink(path.join(options.root, 'compiler.json'));
@@ -132,7 +152,9 @@ describe('root-owned incremental multi-entry compiler', () => {
   it('keeps cache identity local to the root and drops entries no longer requested', async () => {
     const options = await fixture();
     const first = success(await compileProject(options));
-    const reduced = success(await compileProject({ ...options, entries: ['b.proto.ts'] }, first.project));
+    const reduced = success(
+      await compileProject({ ...options, entries: ['b.proto.ts'] }, first.project)
+    );
     expect(reduced.entries[0].compilation).toBe(first.entries[1].compilation);
     expect(reduced.dependencies).not.toContain('leaf.ts');
     const restored = success(await compileProject(options, reduced.project));

@@ -1,7 +1,8 @@
 import type { PrototypeIR } from './ir';
 
 export const reactSSRTransportArtifact = {
-  path: '.proto-ui/context/react-ssr-v1.ts', kind: 'source' as const,
+  path: '.proto-ui/context/react-ssr-v1.ts',
+  kind: 'source' as const,
   contents: `import { createContext } from 'react';
 // Framework transport only. Request ownership and projections remain in editable target source.
 export const ServerTransport = createContext<unknown>(null);

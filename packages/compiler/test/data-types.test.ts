@@ -15,7 +15,10 @@ const payload: DataType = {
   fields: [
     { name: 'id', type: 'number' },
     { name: 'label', type: 'string', optional: true },
-    { name: 'items', type: { kind: 'array', element: { kind: 'union', members: ['string', 'null'] } } },
+    {
+      name: 'items',
+      type: { kind: 'array', element: { kind: 'union', members: ['string', 'null'] } },
+    },
   ],
 };
 
@@ -31,7 +34,8 @@ describe('portable data types', () => {
       { id: 1, items: [undefined] },
       { id: '1', items: [] },
       { id: 1, items: [false] },
-    ]) expect(acceptsValue(type, value)).toBe(false);
+    ])
+      expect(acceptsValue(type, value)).toBe(false);
     expect(acceptsValue('void', undefined)).toBe(true);
     expect(acceptsValue('void', null)).toBe(false);
     expect(acceptsValue('null', undefined)).toBe(false);
@@ -57,10 +61,14 @@ describe('portable data types', () => {
 
   it('uses structural width assignment while retaining required and optional field obligations', () => {
     const required: DataType = { kind: 'record', fields: [{ name: 'id', type: 'number' }] };
-    const optional: DataType = { kind: 'record', fields: [{ name: 'id', type: 'number', optional: true }] };
+    const optional: DataType = {
+      kind: 'record',
+      fields: [{ name: 'id', type: 'number', optional: true }],
+    };
     const empty: DataType = { kind: 'record', fields: [] };
     const nullable: DataType = {
-      kind: 'record', fields: [{ name: 'id', type: { kind: 'union', members: ['number', 'null'] } }],
+      kind: 'record',
+      fields: [{ name: 'id', type: { kind: 'union', members: ['number', 'null'] } }],
     };
     expect(isAssignable(required, optional)).toBe(true);
     expect(isAssignable(optional, required)).toBe(false);
@@ -69,7 +77,9 @@ describe('portable data types', () => {
     expect(isAssignable(required, nullable)).toBe(true);
     expect(isAssignable(nullable, required)).toBe(false);
     expect(isAssignable(inferDataType({ id: 2, extra: false }), required)).toBe(true);
-    expect(isAssignable({ kind: 'array', element: optional }, { kind: 'array', element: required })).toBe(false);
+    expect(
+      isAssignable({ kind: 'array', element: optional }, { kind: 'array', element: required })
+    ).toBe(false);
   });
 
   it('infers heterogeneous JSON arrays and a bottom element for empty arrays', () => {
@@ -91,11 +101,26 @@ describe('portable data types', () => {
     const symbolKey = { [Symbol('hidden')]: true };
     const hidden = Object.defineProperty({}, 'hidden', { value: true });
     const extendedArray = Object.assign([1], { extra: true });
-    class HostRecord { id = 1; }
+    class HostRecord {
+      id = 1;
+    }
     for (const value of [
-      NaN, Infinity, -Infinity, 1n, Symbol('value'), () => 1,
-      new Date(0), new Map(), new HostRecord(), cyclic, symbolKey, hidden,
-      [, 1], extendedArray, { item: undefined }, [undefined],
+      NaN,
+      Infinity,
+      -Infinity,
+      1n,
+      Symbol('value'),
+      () => 1,
+      new Date(0),
+      new Map(),
+      new HostRecord(),
+      cyclic,
+      symbolKey,
+      hidden,
+      [, 1],
+      extendedArray,
+      { item: undefined },
+      [undefined],
       { extra: new Date(0) },
     ]) {
       expect(() => inferDataType(value)).toThrow(TypeError);
@@ -111,8 +136,14 @@ describe('portable data types', () => {
 
   it('never invokes schema or payload accessors', () => {
     let calls = 0;
-    const getter = () => { calls += 1; return 'number'; };
-    const schema = Object.defineProperty({ kind: 'array' }, 'element', { enumerable: true, get: getter });
+    const getter = () => {
+      calls += 1;
+      return 'number';
+    };
+    const schema = Object.defineProperty({ kind: 'array' }, 'element', {
+      enumerable: true,
+      get: getter,
+    });
     const value = Object.defineProperty({}, 'id', { enumerable: true, get: getter });
     const array = Object.defineProperty([1], '0', { enumerable: true, get: getter });
     expect(() => parseDataType(schema)).toThrow(TypeError);
@@ -127,46 +158,77 @@ describe('portable data types', () => {
     cycle.element = cycle;
     const inherited = Object.create({ kind: 'array', element: 'number' });
     for (const schema of [
-      'any', 'undefined', 'record', null, undefined, [],
-      { kind: 'array' }, { kind: 'array', element: 'number', extra: true },
-      { kind: 'union' }, { kind: 'union', members: 'number' },
+      'any',
+      'undefined',
+      'record',
+      null,
+      undefined,
+      [],
+      { kind: 'array' },
+      { kind: 'array', element: 'number', extra: true },
+      { kind: 'union' },
+      { kind: 'union', members: 'number' },
       { kind: 'union', members: ['number', 'unknown'] },
-      { kind: 'literal', value: Infinity }, { kind: 'literal', value: undefined },
+      { kind: 'literal', value: Infinity },
+      { kind: 'literal', value: undefined },
       { kind: 'literal', value: {} },
       { kind: 'record', fields: {} },
       { kind: 'record', fields: [{ name: 1, type: 'number' }] },
       { kind: 'record', fields: [{ name: 'id', type: 'number', optional: undefined }] },
       { kind: 'record', fields: [{ name: 'id', type: 'number', extra: true }] },
-      { kind: 'record', fields: [{ name: 'id', type: 'number' }, { name: 'id', type: 'string' }] },
+      {
+        kind: 'record',
+        fields: [
+          { name: 'id', type: 'number' },
+          { name: 'id', type: 'string' },
+        ],
+      },
       { kind: 'record', fields: [, { name: 'id', type: 'number' }] },
       { kind: 'array', element: 'number', [Symbol('hidden')]: true },
-      inherited, cycle,
-    ]) expect(() => parseDataType(schema)).toThrow(TypeError);
+      inherited,
+      cycle,
+    ])
+      expect(() => parseDataType(schema)).toThrow(TypeError);
   });
 
   it('treats record and union ordering as immaterial but not field optionality', () => {
     const a = parseDataType(payload);
     const b = parseDataType({ ...payload, fields: [...payload.fields].reverse() });
     expect(dataTypeEqual(a, b)).toBe(true);
-    expect(dataTypeEqual({ kind: 'union', members: ['string', 'number', 'string'] },
-      { kind: 'union', members: ['number', 'string'] })).toBe(true);
+    expect(
+      dataTypeEqual(
+        { kind: 'union', members: ['string', 'number', 'string'] },
+        { kind: 'union', members: ['number', 'string'] }
+      )
+    ).toBe(true);
     expect(dataTypeEqual({ kind: 'union', members: ['number'] }, 'number')).toBe(true);
-    expect(dataTypeEqual({ kind: 'record', fields: [{ name: 'id', type: 'number' }] },
-      { kind: 'record', fields: [{ name: 'id', type: 'number', optional: true }] })).toBe(false);
+    expect(
+      dataTypeEqual(
+        { kind: 'record', fields: [{ name: 'id', type: 'number' }] },
+        { kind: 'record', fields: [{ name: 'id', type: 'number', optional: true }] }
+      )
+    ).toBe(false);
   });
 
   it('formats deterministic declarations with hygienic property and literal quoting', () => {
     const type: DataType = {
-      kind: 'record', fields: [
+      kind: 'record',
+      fields: [
         { name: 'z"; injected: never; //', type: { kind: 'literal', value: 'line\n"\\\u2028' } },
-        { name: '__proto__', type: { kind: 'array', element: { kind: 'union', members: ['string', 'null'] } }, optional: true },
+        {
+          name: '__proto__',
+          type: { kind: 'array', element: { kind: 'union', members: ['string', 'null'] } },
+          optional: true,
+        },
         { name: '', type: 'void' },
       ],
     };
     expect(formatDataType(type)).toBe(
       '{ "": void; "__proto__"?: Array<null | string>; "z\\\"; injected: never; //": "line\\n\\\"\\\\\\u2028"; }'
     );
-    expect(formatDataType(type)).toBe(formatDataType({ ...type, fields: [...type.fields].reverse() }));
+    expect(formatDataType(type)).toBe(
+      formatDataType({ ...type, fields: [...type.fields].reverse() })
+    );
     expect(formatDataType({ kind: 'union', members: [] })).toBe('never');
   });
 });

@@ -5,7 +5,11 @@ import type { StyleTokenHandle } from './style-plan';
 
 /** Groups are resolved by the existing portable grammar at compile time, never a host grammar. */
 export function emitNativeStyleHandle(handle: StyleTokenHandle, typescript = true): string {
-  const value = JSON.stringify({ kind: 'tw', tokens: handle.tokens, groups: handle.tokens.map(getSemanticGroupKeyV0) });
+  const value = JSON.stringify({
+    kind: 'tw',
+    tokens: handle.tokens,
+    groups: handle.tokens.map(getSemanticGroupKeyV0),
+  });
   return typescript ? `(${value} as const)` : value;
 }
 
@@ -21,9 +25,10 @@ export function emitNativeRule(
   function condition(node: RuleCondition): string {
     if (node.type === 'true' || node.type === 'false') return node.type;
     if (node.type === 'eq') {
-      const signal = node.left.type === 'prop'
-        ? `${props}[${JSON.stringify(node.left.key)}]`
-        : `${expression(states.get(node.left.id)!)}.get()`;
+      const signal =
+        node.left.type === 'prop'
+          ? `${props}[${JSON.stringify(node.left.key)}]`
+          : `${expression(states.get(node.left.id)!)}.get()`;
       return `(${signal} === ${JSON.stringify(node.right)})`;
     }
     if (node.type === 'not') return `!(${condition(node.expr)})`;

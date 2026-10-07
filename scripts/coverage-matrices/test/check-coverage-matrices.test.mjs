@@ -18045,7 +18045,7 @@ test('audit resolver profile: exact audited helper is mandatory evidence metadat
   assert.ok(metadata.has(plugin));
 });
 
-test('audit resolver profile: original 857 profile remains independently admitted without audit helper', () => {
+test('audit resolver profile: reviewed standard profile remains independently admitted without audit helper', () => {
   const { root, config, plugin, target } = auditResolverFixture();
   const original = fs
     .readFileSync(config, 'utf8')
@@ -18063,7 +18063,7 @@ test('audit resolver profile: original 857 profile remains independently admitte
     );
   assert.equal(
     createHash('sha256').update(original).digest('hex'),
-    'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30'
+    '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377'
   );
   fs.writeFileSync(config, original);
   fs.unlinkSync(plugin);

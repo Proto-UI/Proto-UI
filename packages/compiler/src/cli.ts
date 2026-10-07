@@ -51,7 +51,10 @@ Options:
   --output <dir>     Required for compile/watch/diff; never implicitly selected.
                      compile: fresh destination; watch: version container;
                      diff: existing owned artifact directory (never written).
-  --profile <id>     ${Object.values(TARGET_PROFILES).filter((target) => target.implemented).map((target) => target.id).join(', ')}.
+  --profile <id>     ${Object.values(TARGET_PROFILES)
+    .filter((target) => target.implemented)
+    .map((target) => target.id)
+    .join(', ')}.
                      Default: react-runtime-v1; no implicit target fallback.
   --native-sdk-path <dir>  GPUI SDK source crate shared by composed prototypes.
                      Omit to bundle the editable SDK in the output directory.
@@ -79,7 +82,10 @@ status reflects the latest revision. SIGINT: 130; SIGTERM: 143.
 `;
 
 class CliUsageError extends Error {
-  constructor(message: string, readonly file = '<cli>') {
+  constructor(
+    message: string,
+    readonly file = '<cli>'
+  ) {
     super(message);
   }
 }
@@ -96,7 +102,9 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
   if (argv[0] && !argv[0].startsWith('-')) {
     const command = argv[index++];
     if (!['compile', 'check', 'inspect', 'explain', 'watch', 'diff'].includes(command))
-      throw new CliUsageError(`Unsupported command ${JSON.stringify(command)}; use --help for supported commands`);
+      throw new CliUsageError(
+        `Unsupported command ${JSON.stringify(command)}; use --help for supported commands`
+      );
     result.command = command as Command;
   }
   const seen = new Set<string>();
@@ -117,7 +125,19 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
     const flag = equals < 0 ? token : token.slice(0, equals);
     const attached = equals < 0 ? undefined : token.slice(equals + 1);
     const name = flag.slice(2);
-    if (!['--entry', '--root', '--export', '--output', '--profile', '--native-sdk-path', '--config', '--json', '--help'].includes(flag))
+    if (
+      ![
+        '--entry',
+        '--root',
+        '--export',
+        '--output',
+        '--profile',
+        '--native-sdk-path',
+        '--config',
+        '--json',
+        '--help',
+      ].includes(flag)
+    )
       throw new CliUsageError(`Unknown flag ${JSON.stringify(flag)}`);
     if (seen.has(name)) throw new CliUsageError(`Repeated flag ${flag}`);
     seen.add(name);
@@ -129,16 +149,32 @@ function parseArguments(argv: readonly string[]): ParsedArguments {
     }
     const value = attached ?? argv[++index];
     if (value === undefined || (attached === undefined && value.startsWith('-')))
-      throw new CliUsageError(`${flag} requires a value; use ${flag}=<value> for a value beginning with '-'`);
+      throw new CliUsageError(
+        `${flag} requires a value; use ${flag}=<value> for a value beginning with '-'`
+      );
     const checked = nonEmptyString(value, flag);
     switch (name) {
-      case 'entry': result.options.entry = checked; break;
-      case 'root': result.options.root = checked; break;
-      case 'export': result.options.export = checked; break;
-      case 'output': result.options.output = checked; break;
-      case 'profile': result.options.profile = checked; break;
-      case 'native-sdk-path': result.options.nativeSdkPath = checked; break;
-      case 'config': result.config = checked; break;
+      case 'entry':
+        result.options.entry = checked;
+        break;
+      case 'root':
+        result.options.root = checked;
+        break;
+      case 'export':
+        result.options.export = checked;
+        break;
+      case 'output':
+        result.options.output = checked;
+        break;
+      case 'profile':
+        result.options.profile = checked;
+        break;
+      case 'native-sdk-path':
+        result.options.nativeSdkPath = checked;
+        break;
+      case 'config':
+        result.config = checked;
+        break;
     }
   }
   if (!result.command && !result.help) throw new CliUsageError('A command is required; use --help');
@@ -150,31 +186,49 @@ async function readConfiguration(filename: string): Promise<Options> {
   try {
     data = JSON.parse(await readFile(filename, 'utf8'));
   } catch (error) {
-    throw new CliUsageError(`Cannot read JSON configuration: ${error instanceof Error ? error.message : String(error)}`, filename);
+    throw new CliUsageError(
+      `Cannot read JSON configuration: ${error instanceof Error ? error.message : String(error)}`,
+      filename
+    );
   }
   if (data === null || typeof data !== 'object' || Array.isArray(data))
     throw new CliUsageError('Configuration must be a JSON object', filename);
   const options: Options = {};
   for (const [key, value] of Object.entries(data)) {
     switch (key) {
-      case 'entry': case 'root': case 'output': case 'nativeSdkPath':
+      case 'entry':
+      case 'root':
+      case 'output':
+      case 'nativeSdkPath':
         options[key] = path.resolve(path.dirname(filename), nonEmptyString(value, key, filename));
         break;
-      case 'export': options.export = nonEmptyString(value, key, filename); break;
-      case 'profile': options.profile = nonEmptyString(value, key, filename); break;
+      case 'export':
+        options.export = nonEmptyString(value, key, filename);
+        break;
+      case 'profile':
+        options.profile = nonEmptyString(value, key, filename);
+        break;
       case 'json':
         if (typeof value !== 'boolean') throw new CliUsageError('json must be a boolean', filename);
         options.json = value;
         break;
-      default: throw new CliUsageError(`Unknown configuration field ${JSON.stringify(key)}`, filename);
+      default:
+        throw new CliUsageError(`Unknown configuration field ${JSON.stringify(key)}`, filename);
     }
   }
   return options;
 }
 
-function cliDiagnostic(code: string, category: CompilerDiagnostic['category'], message: string, file = '<cli>'): CompilerDiagnostic {
+function cliDiagnostic(
+  code: string,
+  category: CompilerDiagnostic['category'],
+  message: string,
+  file = '<cli>'
+): CompilerDiagnostic {
   return {
-    code, category, message,
+    code,
+    category,
+    message,
     span: { file, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 },
   };
 }
@@ -190,7 +244,7 @@ async function runWatch(
   cwd: string,
   environment: CompilerCliEnvironment,
   stdout: (text: string) => void,
-  stderr: (text: string) => void,
+  stderr: (text: string) => void
 ): Promise<number> {
   const session = randomUUID();
   const json = initial.json ?? false;
@@ -212,10 +266,15 @@ async function runWatch(
     let current = path.parse(absolute).root;
     for (const segment of absolute.slice(current.length).split(path.sep).filter(Boolean)) {
       current = path.join(current, segment);
-      try { await mkdir(current); }
-      catch (error) { if (!error || typeof error !== 'object' || !('code' in error) || error.code !== 'EEXIST') throw error; }
+      try {
+        await mkdir(current);
+      } catch (error) {
+        if (!error || typeof error !== 'object' || !('code' in error) || error.code !== 'EEXIST')
+          throw error;
+      }
       const stat = await lstat(current);
-      if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error(`Watch output parent is not a real directory: ${current}`);
+      if (!stat.isDirectory() || stat.isSymbolicLink())
+        throw new Error(`Watch output parent is not a real directory: ${current}`);
     }
     const sessionDirectory = path.join(absolute, session);
     if (!reservedSessions.has(sessionDirectory)) {
@@ -223,7 +282,8 @@ async function runWatch(
       reservedSessions.add(sessionDirectory);
     }
     const stat = await lstat(sessionDirectory);
-    if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error(`Watch session was replaced: ${sessionDirectory}`);
+    if (!stat.isDirectory() || stat.isSymbolicLink())
+      throw new Error(`Watch session was replaced: ${sessionDirectory}`);
   }
   function stop(code: number): void {
     stopping = true;
@@ -238,14 +298,31 @@ async function runWatch(
     process.on('SIGINT', interrupted);
     process.on('SIGTERM', terminated);
   }
-  function rejected(diagnostics: readonly CompilerDiagnostic[], revision: number, code: number, fatal: boolean): void {
+  function rejected(
+    diagnostics: readonly CompilerDiagnostic[],
+    revision: number,
+    code: number,
+    fatal: boolean
+  ): void {
     status = code;
     if (fatal) reportedFatal = true;
-    if (json) stdout(JSON.stringify({ ok: false, command: 'watch', revision, fatal,
-      lastSuccessful: lastSuccessful ?? null, ...diagnosticsJson([...diagnostics]) }) + '\n');
+    if (json)
+      stdout(
+        JSON.stringify({
+          ok: false,
+          command: 'watch',
+          revision,
+          fatal,
+          lastSuccessful: lastSuccessful ?? null,
+          ...diagnosticsJson([...diagnostics]),
+        }) + '\n'
+      );
     else {
       stderr(formatCompilerDiagnostics([...diagnostics]) + '\n');
-      if (lastSuccessful) stderr(`Retaining revision ${lastSuccessful.revision} at ${lastSuccessful.directory}; revision ${revision} failed.\n`);
+      if (lastSuccessful)
+        stderr(
+          `Retaining revision ${lastSuccessful.revision} at ${lastSuccessful.directory}; revision ${revision} failed.\n`
+        );
     }
   }
   async function reportResult(report: ProjectWatchReport, revision: number): Promise<void> {
@@ -253,8 +330,9 @@ async function runWatch(
     if (config) {
       let reloaded: Options;
       try {
-        reloaded = { ...await readConfiguration(config), ...parsed.options };
-        if (!reloaded.entry || !reloaded.output) throw new CliUsageError('watch configuration requires entry and output', config);
+        reloaded = { ...(await readConfiguration(config)), ...parsed.options };
+        if (!reloaded.entry || !reloaded.output)
+          throw new CliUsageError('watch configuration requires entry and output', config);
         const selected = resolveTargetProfile(reloaded.profile ?? 'react-runtime-v1');
         if (!selected.ok) {
           rejected(selected.diagnostics, revision, 1, false);
@@ -263,12 +341,33 @@ async function runWatch(
         reloaded.profile = selected.value.id;
       } catch (error) {
         if (!(error instanceof CliUsageError)) throw error;
-        rejected([cliDiagnostic('PUI9001', 'invalid-input', error.message, error.file)], revision, 2, false);
+        rejected(
+          [cliDiagnostic('PUI9001', 'invalid-input', error.message, error.file)],
+          revision,
+          2,
+          false
+        );
         return;
       }
       if (stopping || revision !== latest) return;
-      if (JSON.stringify([reloaded.entry, reloaded.root, reloaded.export, reloaded.output, reloaded.profile, reloaded.nativeSdkPath]) !==
-          JSON.stringify([options.entry, options.root, options.export, options.output, options.profile, options.nativeSdkPath])) {
+      if (
+        JSON.stringify([
+          reloaded.entry,
+          reloaded.root,
+          reloaded.export,
+          reloaded.output,
+          reloaded.profile,
+          reloaded.nativeSdkPath,
+        ]) !==
+        JSON.stringify([
+          options.entry,
+          options.root,
+          options.export,
+          options.output,
+          options.profile,
+          options.nativeSdkPath,
+        ])
+      ) {
         restart = reloaded;
         await controller?.stop();
         return;
@@ -279,14 +378,31 @@ async function runWatch(
       return;
     }
     const compilation = report.compilation.entries[0].compilation;
-    try { await reserveSession(options.output!); }
-    catch (error) {
-      rejected([cliDiagnostic('PUI5001', 'output-conflict', error instanceof Error ? error.message : String(error), options.output!)], revision, 1, true);
+    try {
+      await reserveSession(options.output!);
+    } catch (error) {
+      rejected(
+        [
+          cliDiagnostic(
+            'PUI5001',
+            'output-conflict',
+            error instanceof Error ? error.message : String(error),
+            options.output!
+          ),
+        ],
+        revision,
+        1,
+        true
+      );
       stopping = true;
       await controller?.stop();
       return;
     }
-    const directory = path.join(path.resolve(cwd, options.output!), session, `revision-${++publication}`);
+    const directory = path.join(
+      path.resolve(cwd, options.output!),
+      session,
+      `revision-${++publication}`
+    );
     const written = await writeCompilation(compilation, directory);
     if (stopping) return;
     if (!written.ok) {
@@ -299,14 +415,36 @@ async function runWatch(
     // remains available, but must not be presented as the successful current revision.
     lastSuccessful = { revision, ...written.value };
     if (revision !== latest) {
-      if (json) stdout(JSON.stringify({ ok: false, command: 'watch', revision, status: 'superseded', lastSuccessful, diagnostics: [] }) + '\n');
+      if (json)
+        stdout(
+          JSON.stringify({
+            ok: false,
+            command: 'watch',
+            revision,
+            status: 'superseded',
+            lastSuccessful,
+            diagnostics: [],
+          }) + '\n'
+        );
       else stdout(`Retained superseded revision ${revision} at ${written.value.directory}\n`);
       return;
     }
     status = 0;
-    if (json) stdout(JSON.stringify({ ok: true, command: 'watch', revision, result: written.value,
-      changedFiles: report.changedFiles, diagnostics: [] }) + '\n');
-    else stdout(`Compiled revision ${revision}: ${compilation.ir.name} (${compilation.output.profile}) to ${written.value.directory}\n`);
+    if (json)
+      stdout(
+        JSON.stringify({
+          ok: true,
+          command: 'watch',
+          revision,
+          result: written.value,
+          changedFiles: report.changedFiles,
+          diagnostics: [],
+        }) + '\n'
+      );
+    else
+      stdout(
+        `Compiled revision ${revision}: ${compilation.ir.name} (${compilation.output.profile}) to ${written.value.directory}\n`
+      );
   }
   try {
     while (!stopping) {
@@ -317,15 +455,31 @@ async function runWatch(
         entries: [path.resolve(cwd, options.entry!)],
         exportName: options.export,
         profile: options.profile,
-        nativeSdkPath: options.nativeSdkPath === undefined ? undefined : path.resolve(cwd, options.nativeSdkPath),
+        nativeSdkPath:
+          options.nativeSdkPath === undefined
+            ? undefined
+            : path.resolve(cwd, options.nativeSdkPath),
         configFiles: config ? [config] : undefined,
         onReport(report) {
           const revision = ++latest;
-          queue = queue.then(() => reportResult(report, revision)).catch(async (error: unknown) => {
-            rejected([cliDiagnostic('PUI9002', 'compiler-defect', error instanceof Error ? error.message : String(error))], revision, 3, true);
-            stopping = true;
-            await controller?.stop();
-          });
+          queue = queue
+            .then(() => reportResult(report, revision))
+            .catch(async (error: unknown) => {
+              rejected(
+                [
+                  cliDiagnostic(
+                    'PUI9002',
+                    'compiler-defect',
+                    error instanceof Error ? error.message : String(error)
+                  ),
+                ],
+                revision,
+                3,
+                true
+              );
+              stopping = true;
+              await controller?.stop();
+            });
         },
       });
       if (!started.ok) {
@@ -337,7 +491,8 @@ async function runWatch(
       const finished = await controller.finished;
       await queue;
       if (!finished.ok) {
-        if (!reportedFatal) rejected(finished.diagnostics, latest, failureExit(finished.diagnostics), true);
+        if (!reportedFatal)
+          rejected(finished.diagnostics, latest, failureExit(finished.diagnostics), true);
         break;
       }
       if (!restart) break;
@@ -357,15 +512,30 @@ async function runWatch(
 }
 
 /** argv excludes the executable and script names. Input modules are parsed, never imported. */
-export async function runCompilerCli(argv: readonly string[], environment: CompilerCliEnvironment = {}): Promise<number> {
+export async function runCompilerCli(
+  argv: readonly string[],
+  environment: CompilerCliEnvironment = {}
+): Promise<number> {
   const cwd = path.resolve(environment.cwd ?? process.cwd());
-  const stdout = environment.stdout ?? ((text: string) => { process.stdout.write(text); });
-  const stderr = environment.stderr ?? ((text: string) => { process.stderr.write(text); });
+  const stdout =
+    environment.stdout ??
+    ((text: string) => {
+      process.stdout.write(text);
+    });
+  const stderr =
+    environment.stderr ??
+    ((text: string) => {
+      process.stderr.write(text);
+    });
   // Preserve machine-readable usage errors even if parsing fails before --json is reached.
   let json = argv.includes('--json');
   let command: Command | undefined;
   function fail(diagnostics: CompilerDiagnostic[], exitCode: number): number {
-    if (json) stdout(JSON.stringify({ ok: false, command: command ?? null, ...diagnosticsJson(diagnostics) }) + '\n');
+    if (json)
+      stdout(
+        JSON.stringify({ ok: false, command: command ?? null, ...diagnosticsJson(diagnostics) }) +
+          '\n'
+      );
     else stderr(formatCompilerDiagnostics(diagnostics) + '\n');
     return exitCode;
   }
@@ -377,43 +547,88 @@ export async function runCompilerCli(argv: readonly string[], environment: Compi
       else stdout(HELP);
       return 0;
     }
-    const configured = parsed.config ? await readConfiguration(path.resolve(cwd, parsed.config)) : {};
+    const configured = parsed.config
+      ? await readConfiguration(path.resolve(cwd, parsed.config))
+      : {};
     const options: Options = { ...configured, ...parsed.options };
     json = options.json ?? false;
-    if (!options.entry) throw new CliUsageError('An entry is required (--entry or positional entry)');
+    if (!options.entry)
+      throw new CliUsageError('An entry is required (--entry or positional entry)');
     const usesOutput = command === 'compile' || command === 'watch' || command === 'diff';
     if (usesOutput && !options.output)
-      throw new CliUsageError(`${command} requires an explicit --output directory or configuration output`);
+      throw new CliUsageError(
+        `${command} requires an explicit --output directory or configuration output`
+      );
     if (!usesOutput && parsed.options.output !== undefined)
       throw new CliUsageError('--output is only valid for compile/watch/diff');
     const selected = resolveTargetProfile(options.profile ?? 'react-runtime-v1');
     if (!selected.ok) return fail(selected.diagnostics, 1);
     if (command === 'watch')
-      return await runWatch({ ...options, profile: selected.value.id }, parsed, cwd, environment, stdout, stderr);
+      return await runWatch(
+        { ...options, profile: selected.value.id },
+        parsed,
+        cwd,
+        environment,
+        stdout,
+        stderr
+      );
     const entry = path.resolve(cwd, options.entry);
     const compilationOptions = {
       root: path.resolve(cwd, options.root ?? cwd),
       exportName: options.export,
       profile: selected.value.id,
-      nativeSdkPath: options.nativeSdkPath === undefined ? undefined : path.resolve(cwd, options.nativeSdkPath),
+      nativeSdkPath:
+        options.nativeSdkPath === undefined ? undefined : path.resolve(cwd, options.nativeSdkPath),
     };
     const result = await compileFile(entry, compilationOptions);
-    if (!result.ok) return fail(result.diagnostics, result.diagnostics.some((diagnostic) => diagnostic.category === 'compiler-defect') ? 3 : 1);
+    if (!result.ok)
+      return fail(
+        result.diagnostics,
+        result.diagnostics.some((diagnostic) => diagnostic.category === 'compiler-defect') ? 3 : 1
+      );
     const compilation = result.value;
     if (command === 'compile') {
       const written = await writeCompilation(compilation, path.resolve(cwd, options.output!));
-      if (!written.ok) return fail(written.diagnostics, written.diagnostics.some((diagnostic) => diagnostic.category === 'compiler-defect') ? 3 : 1);
-      if (json) stdout(JSON.stringify({ ok: true, command, result: written.value, diagnostics: [] }) + '\n');
-      else stdout(`Compiled ${compilation.ir.name} (${compilation.output.profile}) to ${written.value.directory}\n${written.value.files.map((file) => `  ${file}`).join('\n')}\n`);
+      if (!written.ok)
+        return fail(
+          written.diagnostics,
+          written.diagnostics.some((diagnostic) => diagnostic.category === 'compiler-defect')
+            ? 3
+            : 1
+        );
+      if (json)
+        stdout(
+          JSON.stringify({ ok: true, command, result: written.value, diagnostics: [] }) + '\n'
+        );
+      else
+        stdout(
+          `Compiled ${compilation.ir.name} (${compilation.output.profile}) to ${written.value.directory}\n${written.value.files.map((file) => `  ${file}`).join('\n')}\n`
+        );
     } else if (command === 'diff') {
       const compared = await diffCompilation(compilation, path.resolve(cwd, options.output!));
       if (!compared.ok) return fail(compared.diagnostics, failureExit(compared.diagnostics));
-      if (json) stdout(JSON.stringify({ ok: true, command, result: compared.value, diagnostics: [] }) + '\n');
-      else stdout(`Artifact diff: ${compared.value.directory}\n${compared.value.changes.map((change) =>
-        `  ${change.status} ${change.path}${change.consumerModified ? ' (consumer-modified; preserved)' : ''}`).join('\n')}\n`);
+      if (json)
+        stdout(
+          JSON.stringify({ ok: true, command, result: compared.value, diagnostics: [] }) + '\n'
+        );
+      else
+        stdout(
+          `Artifact diff: ${compared.value.directory}\n${compared.value.changes
+            .map(
+              (change) =>
+                `  ${change.status} ${change.path}${change.consumerModified ? ' (consumer-modified; preserved)' : ''}`
+            )
+            .join('\n')}\n`
+        );
       return compared.value.changes.some((change) => change.status !== 'unchanged') ? 1 : 0;
     } else if (command === 'inspect') {
-      stdout(JSON.stringify(json ? { ok: true, command, result: compilation.ir, diagnostics: [] } : compilation.ir, null, 2) + '\n');
+      stdout(
+        JSON.stringify(
+          json ? { ok: true, command, result: compilation.ir, diagnostics: [] } : compilation.ir,
+          null,
+          2
+        ) + '\n'
+      );
     } else if (command === 'explain') {
       const explanation = {
         name: compilation.ir.name,
@@ -424,25 +639,53 @@ export async function runCompilerCli(argv: readonly string[], environment: Compi
         dependencies: compilation.output.dependencies,
         provenance: compilation.output.provenance,
       };
-      if (json) stdout(JSON.stringify({ ok: true, command, result: explanation, diagnostics: [] }, null, 2) + '\n');
-      else stdout([
-        `${explanation.name}: ${explanation.profile}`,
-        `Source: ${explanation.source.file} (export ${explanation.source.exportName})`,
-        `Semantic requirements: ${explanation.requirements.join(', ') || '(none)'}`,
-        'Actual emitted dependencies:',
-        ...explanation.dependencies.map((dependency) => `  ${dependency.name}@${dependency.version} [${dependency.role}]`),
-        'Dependency roles describe this emitted profile, not support for every capability of its framework.',
-      ].join('\n') + '\n');
+      if (json)
+        stdout(
+          JSON.stringify({ ok: true, command, result: explanation, diagnostics: [] }, null, 2) +
+            '\n'
+        );
+      else
+        stdout(
+          [
+            `${explanation.name}: ${explanation.profile}`,
+            `Source: ${explanation.source.file} (export ${explanation.source.exportName})`,
+            `Semantic requirements: ${explanation.requirements.join(', ') || '(none)'}`,
+            'Actual emitted dependencies:',
+            ...explanation.dependencies.map(
+              (dependency) => `  ${dependency.name}@${dependency.version} [${dependency.role}]`
+            ),
+            'Dependency roles describe this emitted profile, not support for every capability of its framework.',
+          ].join('\n') + '\n'
+        );
     } else {
-      if (json) stdout(JSON.stringify({ ok: true, command, result: { name: compilation.ir.name, profile: compilation.output.profile }, diagnostics: [] }) + '\n');
+      if (json)
+        stdout(
+          JSON.stringify({
+            ok: true,
+            command,
+            result: { name: compilation.ir.name, profile: compilation.output.profile },
+            diagnostics: [],
+          }) + '\n'
+        );
       else stdout(`Checked ${compilation.ir.name} (${compilation.output.profile})\n`);
     }
     return 0;
   } catch (error) {
     if (error instanceof CliUsageError) {
-      const file = path.isAbsolute(error.file) ? path.relative(cwd, error.file).split(path.sep).join('/') : error.file;
+      const file = path.isAbsolute(error.file)
+        ? path.relative(cwd, error.file).split(path.sep).join('/')
+        : error.file;
       return fail([cliDiagnostic('PUI9001', 'invalid-input', error.message, file)], 2);
     }
-    return fail([cliDiagnostic('PUI9002', 'compiler-defect', error instanceof Error ? error.message : String(error))], 3);
+    return fail(
+      [
+        cliDiagnostic(
+          'PUI9002',
+          'compiler-defect',
+          error instanceof Error ? error.message : String(error)
+        ),
+      ],
+      3
+    );
   }
 }

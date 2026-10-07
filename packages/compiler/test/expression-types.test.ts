@@ -27,14 +27,19 @@ describe('target-independent expression types', () => {
     expect(inferBinaryType('*', 'boolean', 'void')).toBe('number');
     expect(inferUnaryType('+', 'string')).toBe('number');
     expect(inferUnaryType('-', 'null')).toBe('number');
-    expectType(inferBinaryType('+', either('string', 'number'), 'number'), either('string', 'number'));
+    expectType(
+      inferBinaryType('+', either('string', 'number'), 'number'),
+      either('string', 'number')
+    );
     expect(inferBinaryType('+', either('string', 'number'), 'string')).toBe('string');
   });
 
   it('rejects implicit object coercion including an invalid union alternative', () => {
     expect(() => inferUnaryType('-', record)).toThrow(TypeError);
     expect(() => inferBinaryType('+', record, 'string')).toThrow(TypeError);
-    expect(() => inferBinaryType('*', { kind: 'array', element: 'number' }, 'number')).toThrow(TypeError);
+    expect(() => inferBinaryType('*', { kind: 'array', element: 'number' }, 'number')).toThrow(
+      TypeError
+    );
     expect(() => inferBinaryType('<', either('number', record), 'number')).toThrow(TypeError);
     expect(() => inferBinaryType('**', 'number', 'number')).toThrow(TypeError);
     expect(() => inferUnaryType('~', 'number')).toThrow(TypeError);
@@ -63,7 +68,10 @@ describe('target-independent expression types', () => {
   });
 
   it('removes only nullish alternatives for coalescing, not other falsy values', () => {
-    expectType(inferBinaryType('??', either('null', 'void', 'number'), 'string'), either('number', 'string'));
+    expectType(
+      inferBinaryType('??', either('null', 'void', 'number'), 'string'),
+      either('number', 'string')
+    );
     expectType(inferBinaryType('??', literal(false), 'string'), literal(false));
     expectType(inferBinaryType('??', literal(''), 'number'), literal(''));
     expect(inferBinaryType('??', 'void', 'string')).toBe('string');
@@ -97,7 +105,9 @@ describe('target-independent expression types', () => {
     expect(() => memberDataType(nullable, 'missing', { optional: true })).toThrow(TypeError);
     expect(() => memberDataType('string', 'missing', { optional: true })).toThrow(TypeError);
     const missingOnOneBranch = either(record, { kind: 'record', fields: [] });
-    expect(() => memberDataType(missingOnOneBranch, 'title', { optional: true })).toThrow(TypeError);
+    expect(() => memberDataType(missingOnOneBranch, 'title', { optional: true })).toThrow(
+      TypeError
+    );
     expect(() => memberDataType(record, 'toString')).toThrow(TypeError);
   });
 

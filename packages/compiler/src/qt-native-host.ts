@@ -1,5 +1,8 @@
 export const qtHostArtifacts = [
-  { path: '.proto-ui/qt/QtNativeHost.h', kind: 'source' as const, contents: `#pragma once
+  {
+    path: '.proto-ui/qt/QtNativeHost.h',
+    kind: 'source' as const,
+    contents: `#pragma once
 #include <QQuickItem>
 #include <QPointer>
 #include <QEvent>
@@ -67,8 +70,12 @@ private:
     QPointF pointerStart_;
 };
 void registerQtNativeTypes();
-` },
-  { path: '.proto-ui/qt/QtNativeHost.cpp', kind: 'source' as const, contents: `#include "QtNativeHost.h"
+`,
+  },
+  {
+    path: '.proto-ui/qt/QtNativeHost.cpp',
+    kind: 'source' as const,
+    contents: `#include "QtNativeHost.h"
 #include <QGuiApplication>
 #include <QQuickWindow>
 #include <QQmlEngine>
@@ -364,8 +371,12 @@ void registerQtNativeTypes() {
         return node ? new QtNodeAccessible(node) : nullptr;
     });
 }
-` },
-  { path: '.proto-ui/qt/main.cpp', kind: 'source' as const, contents: `#include "QtNativeHost.h"
+`,
+  },
+  {
+    path: '.proto-ui/qt/main.cpp',
+    kind: 'source' as const,
+    contents: `#include "QtNativeHost.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlError>
@@ -383,21 +394,30 @@ int main(int argc,char **argv) {
     if(engine.rootObjects().isEmpty()||failed)return 1;
     return app.exec();
 }
-` },
-  { path: 'CMakeLists.txt', kind: 'source' as const, contents: `cmake_minimum_required(VERSION 3.16)
+`,
+  },
+  {
+    path: 'CMakeLists.txt',
+    kind: 'source' as const,
+    contents: `cmake_minimum_required(VERSION 3.16)
 project(CompiledQtComponent LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_AUTOMOC ON)
 find_package(Qt6 6.4.2 EXACT REQUIRED COMPONENTS Core Gui Qml Quick)
 add_executable(compiled-qt .proto-ui/qt/main.cpp .proto-ui/qt/QtNativeHost.cpp .proto-ui/qt/QtNativeHost.h)
 target_link_libraries(compiled-qt PRIVATE Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick)
-` },
-  { path: 'App.qml', kind: 'source' as const, contents: `import QtQuick 6.4
+`,
+  },
+  {
+    path: 'App.qml',
+    kind: 'source' as const,
+    contents: `import QtQuick 6.4
 import QtQuick.Window 6.4
 import "." as Generated
 Window {
     width: 640; height: 480; visible: true
     Generated.Component { id: compiled; anchors.centerIn: parent }
 }
-` },
+`,
+  },
 ];

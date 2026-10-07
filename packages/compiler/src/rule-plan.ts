@@ -3,7 +3,12 @@ import { assertTwTokenV0 } from '../../core/src/spec/feedback/tokens';
 import { acceptsValue, type DataType } from './data-types';
 import { CompilerRejection, reject } from './diagnostics';
 import type { CompileResult, Primitive, SourceSpan } from './ir';
-import type { RuleCondition, RuleDeclarationIR, RuleDependency, RuleValue } from './rule-declarations';
+import type {
+  RuleCondition,
+  RuleDeclarationIR,
+  RuleDependency,
+  RuleValue,
+} from './rule-declarations';
 import type { StylePlan } from './style-plan';
 
 export interface RulePlan {
@@ -33,10 +38,17 @@ export interface RuleEvaluation {
 }
 
 const fallbackSpan: SourceSpan = {
-  file: '<rule-plan>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1,
+  file: '<rule-plan>',
+  start: 0,
+  end: 0,
+  line: 1,
+  column: 1,
+  endLine: 1,
+  endColumn: 1,
 };
 const declarationArrayType: DataType = {
-  kind: 'array', element: { kind: 'record', fields: [] },
+  kind: 'array',
+  element: { kind: 'record', fields: [] },
 };
 function fail(message: string, span: SourceSpan): never {
   return reject('PUI2024', message, span, 'invalid-ir');
@@ -47,11 +59,19 @@ const dependencyKey = (dependency: RuleDependency | RuleValue): string => {
   return dependency.type === 'prop' ? `prop:${dependency.key}` : `state:${dependency.id}`;
 };
 
-function record(value: unknown, required: readonly string[], optional: readonly string[], span: SourceSpan): Record<string, unknown> {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) fail('Expected a Rule plan record.', span);
+function record(
+  value: unknown,
+  required: readonly string[],
+  optional: readonly string[],
+  span: SourceSpan
+): Record<string, unknown> {
+  if (!value || typeof value !== 'object' || Array.isArray(value))
+    fail('Expected a Rule plan record.', span);
   const result = value as Record<string, unknown>;
-  if (required.some((key) => !Object.hasOwn(result, key)) ||
-    Object.keys(result).some((key) => !required.includes(key) && !optional.includes(key)))
+  if (
+    required.some((key) => !Object.hasOwn(result, key)) ||
+    Object.keys(result).some((key) => !required.includes(key) && !optional.includes(key))
+  )
     fail('Rule plan record has missing or unexpected fields.', span);
   return result;
 }
@@ -62,22 +82,34 @@ function array(value: unknown, span: SourceSpan): unknown[] {
 }
 
 function name(value: unknown, span: SourceSpan): string {
-  if (typeof value !== 'string' || !value.length) fail('Expected a nonempty portable Rule identity.', span);
+  if (typeof value !== 'string' || !value.length)
+    fail('Expected a nonempty portable Rule identity.', span);
   return value;
 }
 
 function sourceLocation(value: unknown, fallback: SourceSpan): SourceSpan {
-  const span = record(value, ['file', 'start', 'end', 'line', 'column', 'endLine', 'endColumn'], [], fallback);
+  const span = record(
+    value,
+    ['file', 'start', 'end', 'line', 'column', 'endLine', 'endColumn'],
+    [],
+    fallback
+  );
   name(span.file, fallback);
   for (const field of ['start', 'end', 'line', 'column', 'endLine', 'endColumn']) {
     const position = span[field];
-    if (typeof position !== 'number' || !Number.isSafeInteger(position) ||
-      position < (field === 'start' || field === 'end' ? 0 : 1))
+    if (
+      typeof position !== 'number' ||
+      !Number.isSafeInteger(position) ||
+      position < (field === 'start' || field === 'end' ? 0 : 1)
+    )
       fail('Rule source span positions must be valid safe integers.', fallback);
   }
   const result = value as SourceSpan;
-  if (result.end < result.start || result.endLine < result.line ||
-    (result.endLine === result.line && result.endColumn < result.column))
+  if (
+    result.end < result.start ||
+    result.endLine < result.line ||
+    (result.endLine === result.line && result.endColumn < result.column)
+  )
     fail('Rule source span end precedes its start.', fallback);
   return result;
 }
@@ -86,7 +118,8 @@ function validateCondition(value: unknown, fallback: SourceSpan, dependencies: S
   const raw = record(value, ['type', 'span'], ['left', 'right', 'expr', 'exprs'], fallback);
   const span = sourceLocation(raw.span, fallback);
   switch (raw.type) {
-    case 'true': case 'false':
+    case 'true':
+    case 'false':
       record(value, ['type', 'span'], [], span);
       return;
     case 'eq': {
@@ -103,18 +136,22 @@ function validateCondition(value: unknown, fallback: SourceSpan, dependencies: S
       if (raw.right !== null && !['boolean', 'string', 'number'].includes(typeof raw.right))
         fail('Rule comparisons require concrete finite primitive literals.', span);
       const key = dependencyKey(raw.left as RuleValue);
-      if (!dependencies.has(key)) fail('Rule condition reads a signal missing from its dependency list.', leftSpan);
+      if (!dependencies.has(key))
+        fail('Rule condition reads a signal missing from its dependency list.', leftSpan);
       return;
     }
     case 'not':
       record(value, ['type', 'expr', 'span'], [], span);
       validateCondition(raw.expr, span, dependencies);
       return;
-    case 'all': case 'any':
+    case 'all':
+    case 'any':
       record(value, ['type', 'exprs', 'span'], [], span);
-      for (const expression of array(raw.exprs, span)) validateCondition(expression, span, dependencies);
+      for (const expression of array(raw.exprs, span))
+        validateCondition(expression, span, dependencies);
       return;
-    default: fail('Unknown Rule WhenExpr operator.', span);
+    default:
+      fail('Unknown Rule WhenExpr operator.', span);
   }
 }
 
@@ -126,18 +163,37 @@ export function lowerRulePlan(
   try {
     // Shared JSON boundary checks descriptors before reading values, rejecting live/host objects.
     if (!acceptsValue(declarationArrayType, declarations))
-      fail('Rule declarations must contain only finite JSON data, without functions, getters, cycles or live handles.', diagnosticSpan);
+      fail(
+        'Rule declarations must contain only finite JSON data, without functions, getters, cycles or live handles.',
+        diagnosticSpan
+      );
     const rules: RuleDeclarationIR[] = [];
     const ids = new Set<number>();
     const orders = new Set<number>();
     const operationIds = new Set<string>();
     for (const value of declarations) {
-      const raw = record(value, ['operation', 'id', 'order', 'deps', 'when', 'intent', 'span'], ['label', 'note'], diagnosticSpan);
+      const raw = record(
+        value,
+        ['operation', 'id', 'order', 'deps', 'when', 'intent', 'span'],
+        ['label', 'note'],
+        diagnosticSpan
+      );
       const span = sourceLocation(raw.span, diagnosticSpan);
-      if (raw.operation !== 'rule.declare') fail('Expected the typed rule.declare operation.', span);
-      if (typeof raw.id !== 'number' || !Number.isSafeInteger(raw.id) || raw.id < 1 || ids.has(raw.id))
+      if (raw.operation !== 'rule.declare')
+        fail('Expected the typed rule.declare operation.', span);
+      if (
+        typeof raw.id !== 'number' ||
+        !Number.isSafeInteger(raw.id) ||
+        raw.id < 1 ||
+        ids.has(raw.id)
+      )
         fail('Rule declaration IDs must be unique positive safe integers.', span);
-      if (typeof raw.order !== 'number' || !Number.isSafeInteger(raw.order) || raw.order < 0 || orders.has(raw.order))
+      if (
+        typeof raw.order !== 'number' ||
+        !Number.isSafeInteger(raw.order) ||
+        raw.order < 0 ||
+        orders.has(raw.order)
+      )
         fail('Rule declaration orders must be unique nonnegative safe integers.', span);
       ids.add(raw.id);
       orders.add(raw.order);
@@ -155,10 +211,12 @@ export function lowerRulePlan(
         } else if (dep.kind === 'state') {
           record(dependency, ['kind', 'id', 'span'], [], depSpan);
           name(dep.id, depSpan);
-        } else fail('Only declared prop/state dependencies are supported by this Rule plan.', depSpan);
+        } else
+          fail('Only declared prop/state dependencies are supported by this Rule plan.', depSpan);
         const typed = dependency as RuleDependency;
         const key = dependencyKey(typed);
-        if (dependencies.has(key)) fail('Rule dependency identities must not be repeated.', depSpan);
+        if (dependencies.has(key))
+          fail('Rule dependency identities must not be repeated.', depSpan);
         dependencies.add(key);
       }
       validateCondition(raw.when, span, dependencies);
@@ -168,17 +226,22 @@ export function lowerRulePlan(
         const op = record(operation, ['kind', 'id', 'handles', 'span'], [], span);
         const opSpan = sourceLocation(op.span, span);
         if (op.kind !== 'feedback.style.use')
-          fail('Only reversible feedback.style.use intents are supported in this Rule plan.', opSpan);
+          fail(
+            'Only reversible feedback.style.use intents are supported in this Rule plan.',
+            opSpan
+          );
         const id = name(op.id, opSpan);
         if (operationIds.has(id)) fail('Rule intent operation IDs must be unique.', opSpan);
         operationIds.add(id);
         for (const handle of array(op.handles, opSpan)) {
           const style = record(handle, ['kind', 'tokens'], [], opSpan);
-          if (style.kind !== 'tw') fail('Rule v0 style intents support tw token handles only.', opSpan);
+          if (style.kind !== 'tw')
+            fail('Rule v0 style intents support tw token handles only.', opSpan);
           for (const token of array(style.tokens, opSpan)) {
             if (typeof token !== 'string') fail('Rule style tokens must be strings.', opSpan);
-            try { assertTwTokenV0(token, 'compiler rule plan'); }
-            catch (error) {
+            try {
+              assertTwTokenV0(token, 'compiler rule plan');
+            } catch (error) {
               if (!(error instanceof Error)) throw error;
               fail(error.message, opSpan);
             }
@@ -198,10 +261,16 @@ export function lowerRulePlan(
         allDependencies.push(dependency);
       }
     }
-    return { ok: true, value: {
-      kind: 'rule.plan', schemaVersion: 1, precedence: 'declaration-order',
-      rules, dependencies: allDependencies,
-    } };
+    return {
+      ok: true,
+      value: {
+        kind: 'rule.plan',
+        schemaVersion: 1,
+        precedence: 'declaration-order',
+        rules,
+        dependencies: allDependencies,
+      },
+    };
   } catch (error) {
     if (error instanceof CompilerRejection) return { ok: false, diagnostics: [error.diagnostic] };
     throw error;
@@ -217,15 +286,21 @@ function readSignal(value: RuleValue, context: RuleEvaluationContext): Primitive
 
 function evaluateCondition(condition: RuleCondition, context: RuleEvaluationContext): boolean {
   switch (condition.type) {
-    case 'true': return true;
-    case 'false': return false;
-    case 'eq': return readSignal(condition.left, context) === condition.right;
-    case 'not': return !evaluateCondition(condition.expr, context);
+    case 'true':
+      return true;
+    case 'false':
+      return false;
+    case 'eq':
+      return readSignal(condition.left, context) === condition.right;
+    case 'not':
+      return !evaluateCondition(condition.expr, context);
     case 'all':
-      for (const expression of condition.exprs) if (!evaluateCondition(expression, context)) return false;
+      for (const expression of condition.exprs)
+        if (!evaluateCondition(expression, context)) return false;
       return true;
     case 'any':
-      for (const expression of condition.exprs) if (evaluateCondition(expression, context)) return true;
+      for (const expression of condition.exprs)
+        if (evaluateCondition(expression, context)) return true;
       return false;
   }
 }
@@ -245,8 +320,14 @@ export function evaluateRulePlan(
   for (const rule of plan.rules) {
     const enabled = evaluateCondition(rule.when, context);
     contributions.push({
-      id: `rule:${rule.id}`, scope: 'host', layer: 'rule', enabled,
-      intents: rule.intent.ops.map((operation) => ({ kind: operation.kind, handles: operation.handles })),
+      id: `rule:${rule.id}`,
+      scope: 'host',
+      layer: 'rule',
+      enabled,
+      intents: rule.intent.ops.map((operation) => ({
+        kind: operation.kind,
+        handles: operation.handles,
+      })),
       span: rule.span,
     });
     if (!enabled) continue;

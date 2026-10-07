@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
+import { getLogicalParent } from '../../src/platform/instance-tree';
 
 describe('contract: adapter-web-component / lifecycle (v0)', () => {
   it('created before mounted; mounted scheduled by adapter.schedule', async () => {
@@ -147,5 +148,47 @@ describe('contract: adapter-web-component / lifecycle (v0)', () => {
     await Promise.resolve();
     await Promise.resolve();
     expect(calls.disposed).toBe(2);
+  });
+
+  it('detaches every terminal predecessor token before reconnecting a fresh logical instance', async () => {
+    const Parent = AdaptToWebComponent(
+      { name: 'x-wc-life-contract-logical-parent', setup: () => undefined },
+      { shadow: false }
+    );
+    const Child = AdaptToWebComponent(
+      { name: 'x-wc-life-contract-logical-child', setup: () => undefined },
+      { shadow: false }
+    );
+    const parent = new Parent();
+    const child = new Child();
+    parent.append(child);
+    document.body.append(parent);
+    await Promise.resolve();
+    const parentToken = (parent as any)._instanceToken;
+    const predecessors: object[] = [];
+
+    try {
+      for (let generation = 0; generation < 3; generation += 1) {
+        const predecessor = (child as any)._instanceToken as object;
+        predecessors.push(predecessor);
+        expect(getLogicalParent(predecessor)).toBe(parentToken);
+
+        child.remove();
+        await Promise.resolve();
+        await Promise.resolve();
+        expect(getLogicalParent(predecessor)).toBeNull();
+
+        parent.append(child);
+        await Promise.resolve();
+        const successor = (child as any)._instanceToken as object;
+        expect(successor).not.toBe(predecessor);
+        expect(getLogicalParent(successor)).toBe(parentToken);
+      }
+      expect(new Set(predecessors).size).toBe(3);
+    } finally {
+      parent.remove();
+      await Promise.resolve();
+      await Promise.resolve();
+    }
   });
 });

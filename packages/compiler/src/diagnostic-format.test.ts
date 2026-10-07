@@ -1,7 +1,11 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import type { CompilerDiagnostic } from './ir';
-import { diagnosticsJson, formatCompilerDiagnostic, formatCompilerDiagnostics } from './diagnostic-format';
+import {
+  diagnosticsJson,
+  formatCompilerDiagnostic,
+  formatCompilerDiagnostics,
+} from './diagnostic-format';
 import { parsePrototype } from './parser';
 
 function diagnostic(start: number, end: number, file = 'src/example.proto.ts'): CompilerDiagnostic {
@@ -16,19 +20,15 @@ function diagnostic(start: number, end: number, file = 'src/example.proto.ts'): 
 function excerpt(source: string, start: number, end: number): string[] {
   return formatCompilerDiagnostic(diagnostic(start, end), {
     sources: { 'src/example.proto.ts': source },
-  }).split('\n').slice(1);
+  })
+    .split('\n')
+    .slice(1);
 }
 
 describe('original-source diagnostic presentation', () => {
   it('uses four-column tab stops at the current visible column for both text and carets', () => {
-    expect(excerpt('ab\tx\ty', 5, 6)).toEqual([
-      ' 1 | ab  x   y',
-      '   |         ^',
-    ]);
-    expect(excerpt('ab\tx', 2, 3)).toEqual([
-      ' 1 | ab  x',
-      '   |   ^~',
-    ]);
+    expect(excerpt('ab\tx\ty', 5, 6)).toEqual([' 1 | ab  x   y', '   |         ^']);
+    expect(excerpt('ab\tx', 2, 3)).toEqual([' 1 | ab  x', '   |   ^~']);
   });
 
   it('maps UTF-16 offsets through emoji, combining marks, wide text and grapheme clusters', () => {
@@ -37,11 +37,10 @@ describe('original-source diagnostic presentation', () => {
     const formatted = formatCompilerDiagnostic(diagnostic(start, source.length), {
       sources: { 'src/example.proto.ts': source },
     });
-    expect(formatted.split('\n')[0]).toContain('src/example.proto.ts:1:7-1:10: PUI1004 [unsupported-input]');
-    expect(formatted.split('\n').slice(1)).toEqual([
-      ' 1 | 😀é界   bad',
-      '   |         ^~~',
-    ]);
+    expect(formatted.split('\n')[0]).toContain(
+      'src/example.proto.ts:1:7-1:10: PUI1004 [unsupported-input]'
+    );
+    expect(formatted.split('\n').slice(1)).toEqual([' 1 | 😀é界   bad', '   |         ^~~']);
     const family = '👩‍👩‍👦';
     expect(excerpt(`${family}bad`, family.length, family.length + 3)).toEqual([
       ` 1 | ${family}bad`,
@@ -65,9 +64,7 @@ describe('original-source diagnostic presentation', () => {
       ' 3 |     beta',
       '   | ^~~~~~~~',
     ]);
-    expect(excerpt('a\nbc\nd', 0, 4)).toEqual([
-      ' 1 | a', '   | ^', ' 2 | bc', '   | ^~',
-    ]);
+    expect(excerpt('a\nbc\nd', 0, 4)).toEqual([' 1 | a', '   | ^', ' 2 | bc', '   | ^~']);
   });
 
   it('renders an EOF point and an empty selected line without dropping the location', () => {
@@ -112,8 +109,9 @@ describe('original-source diagnostic presentation', () => {
       expect(text).toContain('<source>:1:1: PUI1004 [unsupported-input]');
     }
     const relative = diagnostic(0, 1, '.\\src\\example.proto.ts');
-    expect(formatCompilerDiagnostic(relative, { sources: { 'src/example.proto.ts': 'x' } }))
-      .toBe('src/example.proto.ts:1:1-1:2: PUI1004 [unsupported-input] This operation is not supported.\n 1 | x\n   | ^');
+    expect(formatCompilerDiagnostic(relative, { sources: { 'src/example.proto.ts': 'x' } })).toBe(
+      'src/example.proto.ts:1:1-1:2: PUI1004 [unsupported-input] This operation is not supported.\n 1 | x\n   | ^'
+    );
   });
 
   it('escapes authored terminal controls and adds only optional formatter color', () => {
@@ -133,7 +131,10 @@ export default definePrototype({name:'bad',async setup(def){}});`;
     const unsupported = parsePrototype(source, { fileName: 'bad.proto.ts' });
     const invalid = parsePrototype(source, { fileName: '../bad.proto.ts' });
     if (unsupported.ok || invalid.ok) throw new Error('Expected actual frontend rejections');
-    expect(unsupported.diagnostics[0]).toMatchObject({ code: 'PUI1004', category: 'unsupported-input' });
+    expect(unsupported.diagnostics[0]).toMatchObject({
+      code: 'PUI1004',
+      category: 'unsupported-input',
+    });
     expect(invalid.diagnostics[0]).toMatchObject({ code: 'PUI1003', category: 'invalid-input' });
     const diagnostics = [...unsupported.diagnostics, ...invalid.diagnostics];
     const text = formatCompilerDiagnostics(diagnostics, { sources: { 'bad.proto.ts': source } });
@@ -144,7 +145,8 @@ export default definePrototype({name:'bad',async setup(def){}});`;
     const json = diagnosticsJson(diagnostics);
     expect(JSON.stringify(json)).toBe(JSON.stringify(diagnosticsJson(diagnostics)));
     expect(json.diagnostics.map(({ code, category }) => [code, category])).toEqual([
-      ['PUI1004', 'unsupported-input'], ['PUI1003', 'invalid-input'],
+      ['PUI1004', 'unsupported-input'],
+      ['PUI1003', 'invalid-input'],
     ]);
   });
 });

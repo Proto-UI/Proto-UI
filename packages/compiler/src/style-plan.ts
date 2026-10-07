@@ -39,10 +39,15 @@ export type StyleTargetValue =
 export interface StyleTargetMapping {
   target: string;
   tokens: Readonly<Record<string, readonly StyleTargetValue[]>>;
-  properties?: Readonly<Record<string, {
-    name: string;
-    values: readonly { input: StyleValue; output: StyleValue }[];
-  }>>;
+  properties?: Readonly<
+    Record<
+      string,
+      {
+        name: string;
+        values: readonly { input: StyleValue; output: StyleValue }[];
+      }
+    >
+  >;
 }
 export type StyleTargetEntry = StyleTargetValue & { scope: StyleScope };
 export type StyleProjectionEntry = StyleTargetEntry & {
@@ -55,13 +60,20 @@ export interface StyleProjection {
 }
 
 const syntheticSpan: SourceSpan = {
-  file: '<style-plan>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1,
+  file: '<style-plan>',
+  start: 0,
+  end: 0,
+  line: 1,
+  column: 1,
+  endLine: 1,
+  endColumn: 1,
 };
 const layerRank = { base: 0, rule: 1, patch: 2 } as const;
 const keyOf = (entry: { scope: StyleScope; kind: string; name: string }): string =>
   JSON.stringify([entry.scope, entry.kind, entry.name]);
 const scalar = (value: unknown): value is StyleValue =>
-  typeof value === 'string' || typeof value === 'boolean' ||
+  typeof value === 'string' ||
+  typeof value === 'boolean' ||
   (typeof value === 'number' && Number.isFinite(value));
 const nameValid = (name: string): boolean =>
   typeof name === 'string' && name.length > 0 && name.trim() === name && !/[\r\n\0]/.test(name);
@@ -104,22 +116,37 @@ export function evaluateStylePlan(
   if (!nameValid(mapping.target)) fail('A style target mapping requires a target identity.');
   for (const contribution of plan.contributions) {
     if (!nameValid(contribution.id) || ids.has(contribution.id))
-      fail(`Style contributor identity must be nonempty and unique: ${contribution.id}.`, contribution);
+      fail(
+        `Style contributor identity must be nonempty and unique: ${contribution.id}.`,
+        contribution
+      );
     ids.add(contribution.id);
-    if (!(contribution.scope === 'host' || contribution.scope === 'surface' || contribution.scope === 'boundary'))
+    if (
+      !(
+        contribution.scope === 'host' ||
+        contribution.scope === 'surface' ||
+        contribution.scope === 'boundary'
+      )
+    )
       fail(`Unknown style scope: ${contribution.scope}.`, contribution);
     if (!Object.prototype.hasOwnProperty.call(layerRank, contribution.layer))
       fail(`Unknown style layer: ${contribution.layer}.`, contribution);
     if (!Number.isFinite(contribution.priority ?? 0))
       fail(`Style priority must be finite for ${contribution.id}.`, contribution);
     for (const intent of contribution.intents) {
-      if (intent.kind !== 'feedback.style.use' && intent.kind !== 'feedback.style.patch' &&
-          intent.kind !== 'feedback.style.suppress') {
+      if (
+        intent.kind !== 'feedback.style.use' &&
+        intent.kind !== 'feedback.style.patch' &&
+        intent.kind !== 'feedback.style.suppress'
+      ) {
         fail(`Unsupported style intent: ${intent.kind}.`, contribution, true);
         continue;
       }
       const suppress = intent.kind === 'feedback.style.suppress';
-      const rank = Math.max(layerRank[contribution.layer], intent.kind === 'feedback.style.use' ? 0 : 2);
+      const rank = Math.max(
+        layerRank[contribution.layer],
+        intent.kind === 'feedback.style.use' ? 0 : 2
+      );
       for (const handle of intent.handles) {
         if (handle.kind === 'tw') {
           for (const token of handle.tokens) {
@@ -130,23 +157,48 @@ export function evaluateStylePlan(
               continue;
             }
             if (token === 'data-pui-style') {
-              fail('Host style artifacts cannot be authored as feedback tokens.', contribution, true);
+              fail(
+                'Host style artifacts cannot be authored as feedback tokens.',
+                contribution,
+                true
+              );
               continue;
             }
             const writes = own(mapping.tokens, token);
             if (!writes?.length) {
-              fail(`Style token ${JSON.stringify(token)} has no mapping for ${mapping.target}.`, contribution, true);
+              fail(
+                `Style token ${JSON.stringify(token)} has no mapping for ${mapping.target}.`,
+                contribution,
+                true
+              );
               continue;
             }
-            if (writes.some((write) => !nameValid(write.name) ||
-                (write.kind !== 'token' && write.kind !== 'property') ||
-                (write.kind === 'token' ? write.value !== true : !scalar(write.value)))) {
-              fail(`Invalid mapped value for style token ${JSON.stringify(token)} on ${mapping.target}.`, contribution, true);
+            if (
+              writes.some(
+                (write) =>
+                  !nameValid(write.name) ||
+                  (write.kind !== 'token' && write.kind !== 'property') ||
+                  (write.kind === 'token' ? write.value !== true : !scalar(write.value))
+              )
+            ) {
+              fail(
+                `Invalid mapped value for style token ${JSON.stringify(token)} on ${mapping.target}.`,
+                contribution,
+                true
+              );
               continue;
             }
-            resolved.push({ scope: contribution.scope, kind: 'tw',
-              group: getSemanticGroupKeyV0(token), suppress, writes, contributor: contribution,
-              rank, priority: contribution.priority ?? 0, order: order++ });
+            resolved.push({
+              scope: contribution.scope,
+              kind: 'tw',
+              group: getSemanticGroupKeyV0(token),
+              suppress,
+              writes,
+              contributor: contribution,
+              rank,
+              priority: contribution.priority ?? 0,
+              order: order++,
+            });
           }
         } else if (handle.kind === 'property') {
           const property = mapping.properties && own(mapping.properties, handle.name);
@@ -156,12 +208,24 @@ export function evaluateStylePlan(
             continue;
           }
           if (!property || !nameValid(property.name) || !value || !scalar(value.output)) {
-            fail(`Style property ${JSON.stringify(handle.name)} value ${JSON.stringify(handle.value)} has no supported mapping for ${mapping.target}.`, contribution, true);
+            fail(
+              `Style property ${JSON.stringify(handle.name)} value ${JSON.stringify(handle.value)} has no supported mapping for ${mapping.target}.`,
+              contribution,
+              true
+            );
             continue;
           }
-          resolved.push({ scope: contribution.scope, kind: 'property', group: handle.name,
-            suppress, writes: [{ kind: 'property', name: property.name, value: value.output }],
-            contributor: contribution, rank, priority: contribution.priority ?? 0, order: order++ });
+          resolved.push({
+            scope: contribution.scope,
+            kind: 'property',
+            group: handle.name,
+            suppress,
+            writes: [{ kind: 'property', name: property.name, value: value.output }],
+            contributor: contribution,
+            rank,
+            priority: contribution.priority ?? 0,
+            order: order++,
+          });
         } else {
           fail('Unsupported style handle kind.', contribution, true);
         }
@@ -186,7 +250,9 @@ export function evaluateStylePlan(
   for (const atom of [...groups.values()].sort(compare)) {
     for (const write of atom.writes) {
       const entry: StyleProjectionEntry = {
-        ...write, scope: atom.scope, contributor: atom.contributor.id,
+        ...write,
+        scope: atom.scope,
+        contributor: atom.contributor.id,
         ...(atom.contributor.span ? { span: atom.contributor.span } : {}),
       };
       entries.set(keyOf(entry), entry);
@@ -225,7 +291,9 @@ export function diffStyleProjection(
   current: readonly StyleTargetEntry[]
 ): StyleProjectionDiff {
   if (previous && previous.target !== next.target)
-    throw new Error('Cannot diff style projections for different targets; release the old target first.');
+    throw new Error(
+      'Cannot diff style projections for different targets; release the old target first.'
+    );
   const observed = new Map(current.map((entry) => [keyOf(entry), entry]));
   const desired = new Map(next.entries.map((entry) => [keyOf(entry), entry]));
   const old = new Map(previous?.owned.map((owned) => [keyOf(owned.entry), owned]) ?? []);
@@ -237,7 +305,12 @@ export function diffStyleProjection(
     // Missing or externally replaced values no longer belong to us.
     if (!actual || actual.value !== ownership.entry.value) continue;
     if (ownership.restore === undefined) {
-      changes.push({ kind: 'remove', scope: actual.scope, channel: actual.kind, name: actual.name });
+      changes.push({
+        kind: 'remove',
+        scope: actual.scope,
+        channel: actual.kind,
+        name: actual.name,
+      });
     } else if (actual.value !== ownership.restore) {
       changes.push({ kind: 'set', entry: targetEntry(actual, ownership.restore) });
     }
@@ -245,8 +318,8 @@ export function diffStyleProjection(
   for (const [key, entry] of desired) {
     const actual = observed.get(key);
     const ownership = old.get(key);
-    const restore = ownership && actual?.value === ownership.entry.value
-      ? ownership.restore : actual?.value;
+    const restore =
+      ownership && actual?.value === ownership.entry.value ? ownership.restore : actual?.value;
     const target = targetEntry(entry, entry.value);
     if (!actual || actual.value !== entry.value) changes.push({ kind: 'set', entry: target });
     owned.push({ entry: target, ...(restore !== undefined ? { restore } : {}) });

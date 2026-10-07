@@ -1,6 +1,6 @@
 ---
 title: 'Bootstrap 2.3.2'
-description: 'Bootstrap 2.3.2 prototype library and current implemented coverage.'
+description: 'Bootstrap 2.3.2 prototype library and its partial implemented coverage.'
 ---
 
 import PrototypeLibraryOverview from '@/components/PrototypeLibraryOverview.astro';
@@ -8,9 +8,13 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-The archived 2.3.2 gradient and inset-shadow grammar, with interaction owned by Base.
+The archived 2.3.2 gradient, raised-control, field, and divider language, with all interaction and value ownership inherited from Base.
 
-Button is registered now. Other Base parts are being added explicitly, never aliased to another family. General Compiler and full GPUI/Flutter/Qt realization remain unverified. The source package is private and unreleased.
+The implemented draft subset contains Button, Checkbox Root / Indicator, Switch Root / Thumb, Toggle, Input, Textarea, and Separator: seven component kinds and nine prototype parts. This is a partial family, not the complete Bootstrap or Base component set, and it is not offered by the homepage full-family selector.
+
+Switch and Toggle are design-language extensions, not original Bootstrap 2.3.2 components. Checkbox uses custom Root / Indicator parts rather than reproducing the archived native checkbox. No legacy jQuery runtime or Glyphicons are bundled.
+
+Use the page runtime selector to run the same shared demo recipes through Web Components, React, Vue 3, or Vue 2. The archived light palette remains fixed in dark hosts. The source package is private and unreleased; these draft Web projections do not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance.
 
 <PrototypeLibraryOverview library="bootstrap-2-3-2" locale="en" />
 

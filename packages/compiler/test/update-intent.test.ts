@@ -3,7 +3,9 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { compileFile, compilePrototype } from '../src/compile';
 
-const fixture = fileURLToPath(new URL('./fixtures/differential-browser/update-intent.proto.ts', import.meta.url));
+const fixture = fileURLToPath(
+  new URL('./fixtures/differential-browser/update-intent.proto.ts', import.meta.url)
+);
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 
 describe('explicit update intent admission', () => {

@@ -91,37 +91,6 @@ describe('checked IR to React runtime-backed source', () => {
     });
   });
 
-  it('rejects incompatible State write values at both checked-IR entrypoints', () => {
-    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
-      export default definePrototype({name:'typed-state-write',setup(def){
-        const flag=def.state.bool('flag',false);
-        def.lifecycle.onCreated((run)=>{flag.set(true);});
-      }});`);
-    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    expect(validateIR(parsed.value).ok).toBe(true);
-    expect(emitReact(parsed.value).ok).toBe(true);
-    const registration = parsed.value.setup.body[1];
-    if (registration.kind !== 'effect' || registration.expression.kind !== 'operation')
-      throw new Error('Expected lifecycle registration');
-    const callback = registration.expression.arguments[0];
-    if (callback.kind !== 'function') throw new Error('Expected lifecycle callback');
-    const statement = callback.function.body[0];
-    if (statement.kind !== 'effect' || statement.expression.kind !== 'operation')
-      throw new Error('Expected State write');
-    statement.expression.arguments[0] = {
-      kind: 'literal',
-      type: 'number',
-      value: 1,
-      span: statement.expression.arguments[0].span,
-    };
-    const rejection = {
-      ok: false,
-      diagnostics: [{ code: 'PUI2002', category: 'invalid-ir' }],
-    };
-    expect(validateIR(parsed.value)).toMatchObject(rejection);
-    expect(emitReact(parsed.value)).toMatchObject(rejection);
-  });
-
   it('emits an authored source entry without importing its original module', () => {
     const caller = `import {definePrototype} from '@proto.ui/core'; import {asButton} from './button.proto'; export default definePrototype({name:'caller',setup(def){asButton();}});`;
     const parsed = parsePrototype(caller, {

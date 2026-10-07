@@ -236,7 +236,19 @@ describe('default Web color scheme source', () => {
 
   it('still observes root markers when matchMedia is unavailable', async () => {
     const host = createHost();
-    vi.stubGlobal('window', { matchMedia: undefined });
+    host.matchMedia.mockRestore();
+    const originalMatchMedia = window.matchMedia;
+    Object.defineProperty(window, 'matchMedia', {
+      configurable: true,
+      value: undefined,
+    });
+    cleanups.push(() => {
+      Object.defineProperty(window, 'matchMedia', {
+        configurable: true,
+        value: originalMatchMedia,
+        writable: true,
+      });
+    });
     const { getter, invalidate } = subscribe();
     expect(getter('colorScheme')).toBe('light');
     expect(host.media.addEventListener).not.toHaveBeenCalled();

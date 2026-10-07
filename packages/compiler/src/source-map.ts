@@ -189,7 +189,9 @@ export function buildSourceMap(input: SourceMapInput): SourceMapV3 {
     version: 3,
     file,
     sources,
-    ...(hasContents ? { sourcesContent: sources.map((source) => contents.get(source) ?? null) } : {}),
+    ...(hasContents
+      ? { sourcesContent: sources.map((source) => contents.get(source) ?? null) }
+      : {}),
     names,
     mappings: chunks.join(''),
   };

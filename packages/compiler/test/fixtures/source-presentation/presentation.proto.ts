@@ -6,14 +6,19 @@ export default definePrototype({
   name: 'compiler-source-presentation',
   setup(def) {
     asButton();
-    def.props.define({ present: { type: 'boolean', default: true }, accent: { type: 'boolean', default: false } });
+    def.props.define({
+      present: { type: 'boolean', default: true },
+      accent: { type: 'boolean', default: false },
+    });
     const earlier = def.state.bool('earlier', true);
     const later = def.state.bool('later', false);
     const count = def.state.numberDiscrete('count', 0);
     const dimmed = def.state.bool('dimmed', true);
     def.expose.state('count', count);
     def.expose.state('later', later);
-    def.expose.method('setLater', (value: boolean) => { later.set(value); });
+    def.expose.method('setLater', (value: boolean) => {
+      later.set(value);
+    });
     def.expose.event('updated', { payload: 'void' });
     def.feedback.style.use(tw('bg-blue-500 w-48 h-16 opacity-100'));
     def.rule({
@@ -28,9 +33,15 @@ export default definePrototype({
       when: (w) => w.any(w.state(later).eq(true), w.prop('accent').eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-red-500 w-64')),
     });
-    def.lifecycle.onCreated((run) => { run.lifecycle.setPresent(run.props.get().present); });
-    def.props.watch(['present'], (run, next) => { run.lifecycle.setPresent(next.present); });
-    def.lifecycle.onUpdated((run) => { run.expose.emit('updated'); });
+    def.lifecycle.onCreated((run) => {
+      run.lifecycle.setPresent(run.props.get().present);
+    });
+    def.props.watch(['present'], (run, next) => {
+      run.lifecycle.setPresent(next.present);
+    });
+    def.lifecycle.onUpdated((run) => {
+      run.expose.emit('updated');
+    });
     def.event.on('press.commit', (run) => {
       if (run.props.get().disabled) return;
       count.set(count.get() + 1);

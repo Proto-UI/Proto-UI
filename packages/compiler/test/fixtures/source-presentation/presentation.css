@@ -1,21 +1,78 @@
 /* Deliberately finite preset, shared by all three paths; not a Tailwind browser claim.
    Feedback projects on Root[data-pui-style]; Adapter template style uses class,
    native template style uses child[data-pui-style]. Both map to identical CSS. */
-* { box-sizing: border-box; }
-body { margin: 24px; font: 16px/20px sans-serif; background: rgb(255, 255, 255); }
-#presentation-host { margin-top: 24px; }
-[data-pui-root] { display: flex; align-items: center; justify-content: center; width: 160px; height: 40px; background-color: rgb(240, 240, 240); }
-[data-pui-root]:focus-visible { outline: 3px solid rgb(0, 0, 0); outline-offset: 3px; }
-[data-pui-style~="bg-blue-500"], .bg-blue-500 { background-color: rgb(59, 130, 246); }
-[data-pui-style~="bg-green-500"], .bg-green-500 { background-color: rgb(34, 197, 94); }
-[data-pui-style~="bg-red-500"], .bg-red-500 { background-color: rgb(239, 68, 68); }
-[data-pui-style~="bg-purple-500"], .bg-purple-500 { background-color: rgb(168, 85, 247); }
-[data-pui-style~="bg-yellow-500"], .bg-yellow-500 { background-color: rgb(234, 179, 8); }
-[data-pui-style~="w-48"], .w-48 { width: 192px; }
-[data-pui-style~="w-56"], .w-56 { width: 224px; }
-[data-pui-style~="w-64"], .w-64 { width: 256px; }
-[data-pui-style~="w-72"], .w-72 { width: 288px; }
-[data-pui-style~="h-16"], .h-16 { height: 64px; }
-[data-pui-style~="opacity-100"], .opacity-100 { opacity: 1; }
-[data-pui-style~="opacity-40"], .opacity-40 { opacity: 0.4; }
-[data-pui-style~="p-2"], .p-2 { padding: 8px; }
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 24px;
+  font: 16px/20px sans-serif;
+  background: rgb(255, 255, 255);
+}
+#presentation-host {
+  margin-top: 24px;
+}
+[data-pui-root] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 40px;
+  background-color: rgb(240, 240, 240);
+}
+[data-pui-root]:focus-visible {
+  outline: 3px solid rgb(0, 0, 0);
+  outline-offset: 3px;
+}
+[data-pui-style~='bg-blue-500'],
+.bg-blue-500 {
+  background-color: rgb(59, 130, 246);
+}
+[data-pui-style~='bg-green-500'],
+.bg-green-500 {
+  background-color: rgb(34, 197, 94);
+}
+[data-pui-style~='bg-red-500'],
+.bg-red-500 {
+  background-color: rgb(239, 68, 68);
+}
+[data-pui-style~='bg-purple-500'],
+.bg-purple-500 {
+  background-color: rgb(168, 85, 247);
+}
+[data-pui-style~='bg-yellow-500'],
+.bg-yellow-500 {
+  background-color: rgb(234, 179, 8);
+}
+[data-pui-style~='w-48'],
+.w-48 {
+  width: 192px;
+}
+[data-pui-style~='w-56'],
+.w-56 {
+  width: 224px;
+}
+[data-pui-style~='w-64'],
+.w-64 {
+  width: 256px;
+}
+[data-pui-style~='w-72'],
+.w-72 {
+  width: 288px;
+}
+[data-pui-style~='h-16'],
+.h-16 {
+  height: 64px;
+}
+[data-pui-style~='opacity-100'],
+.opacity-100 {
+  opacity: 1;
+}
+[data-pui-style~='opacity-40'],
+.opacity-40 {
+  opacity: 0.4;
+}
+[data-pui-style~='p-2'],
+.p-2 {
+  padding: 8px;
+}

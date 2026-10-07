@@ -208,9 +208,13 @@ export function loadCapabilityRubric(path) {
   return rubric;
 }
 
+// Pending merges and binary patches can exceed Node's default one-MiB buffer.
+// Keep a finite output boundary without clipping or dropping snapshot evidence.
+const MAX_GIT_RESPONSE_BYTES = 64 * 1024 * 1024;
+
 function git(root, args, options = {}) {
   const encoding = Object.hasOwn(options, 'encoding') ? options.encoding : 'utf8';
-  return execFileSync('git', args, { cwd: root, encoding });
+  return execFileSync('git', args, { cwd: root, encoding, maxBuffer: MAX_GIT_RESPONSE_BYTES });
 }
 
 function normalizeRemote(remote) {

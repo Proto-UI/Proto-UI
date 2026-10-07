@@ -1,28 +1,75 @@
-import { isDataValueType, type CompilerDiagnostic, type ExpressionIR, type FunctionIR, type PrototypeIR, type StatementIR } from './ir';
+import {
+  isDataValueType,
+  type CompilerDiagnostic,
+  type ExpressionIR,
+  type FunctionIR,
+  type PrototypeIR,
+  type StatementIR,
+} from './ir';
 import { isAssignable } from './data-types';
 import { FOCUS_OPTIONS_TYPE } from './operations';
 
 const interactionFile = '.proto-ui/interaction/native-v1.ts';
 const semanticEvents = [
-  'press.start', 'press.end', 'press.cancel', 'press.commit', 'key.down', 'key.up',
-  'pointer.down', 'pointer.move', 'pointer.up', 'pointer.cancel', 'pointer.enter', 'pointer.leave',
-  'nav.focus', 'nav.blur', 'text.focus', 'text.blur', 'input', 'change', 'context.menu',
+  'press.start',
+  'press.end',
+  'press.cancel',
+  'press.commit',
+  'key.down',
+  'key.up',
+  'pointer.down',
+  'pointer.move',
+  'pointer.up',
+  'pointer.cancel',
+  'pointer.enter',
+  'pointer.leave',
+  'nav.focus',
+  'nav.blur',
+  'text.focus',
+  'text.blur',
+  'input',
+  'change',
+  'context.menu',
 ];
 const stateAttributes: Record<string, string> = {
-  atomic: 'aria-atomic', busy: 'aria-busy', checked: 'aria-checked', disabled: 'aria-disabled',
-  expanded: 'aria-expanded', hasPopup: 'aria-haspopup', invalid: 'aria-invalid', live: 'aria-live',
-  orientation: 'aria-orientation', pressed: 'aria-pressed', rowCount: 'aria-rowcount',
-  columnCount: 'aria-colcount', rowIndex: 'aria-rowindex', columnIndex: 'aria-colindex',
-  rowSpan: 'aria-rowspan', columnSpan: 'aria-colspan', readOnly: 'aria-readonly',
-  selected: 'aria-selected', modal: 'aria-modal', hidden: 'aria-hidden',
+  atomic: 'aria-atomic',
+  busy: 'aria-busy',
+  checked: 'aria-checked',
+  disabled: 'aria-disabled',
+  expanded: 'aria-expanded',
+  hasPopup: 'aria-haspopup',
+  invalid: 'aria-invalid',
+  live: 'aria-live',
+  orientation: 'aria-orientation',
+  pressed: 'aria-pressed',
+  rowCount: 'aria-rowcount',
+  columnCount: 'aria-colcount',
+  rowIndex: 'aria-rowindex',
+  columnIndex: 'aria-colindex',
+  rowSpan: 'aria-rowspan',
+  columnSpan: 'aria-colspan',
+  readOnly: 'aria-readonly',
+  selected: 'aria-selected',
+  modal: 'aria-modal',
+  hidden: 'aria-hidden',
 };
-export const nativeAccessibleStateKeys: readonly string[] = Object.freeze(Object.keys(stateAttributes));
+export const nativeAccessibleStateKeys: readonly string[] = Object.freeze(
+  Object.keys(stateAttributes)
+);
 
 /** Validate checked interaction declarations before direct native helper emission. */
-export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet<FunctionIR>): CompilerDiagnostic[] {
+export function validateNativeInteraction(
+  ir: PrototypeIR,
+  reached?: ReadonlySet<FunctionIR>
+): CompilerDiagnostic[] {
   const diagnostics: CompilerDiagnostic[] = [];
   function reject(expression: ExpressionIR, message: string) {
-    diagnostics.push({ code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED', category: 'unsupported-input', message, span: expression.span });
+    diagnostics.push({
+      code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED',
+      category: 'unsupported-input',
+      message,
+      span: expression.span,
+    });
   }
   function visitFunction(fn: FunctionIR, inherited = new Map<string, ExpressionIR>()) {
     if (reached && !reached.has(fn)) return;
@@ -30,16 +77,25 @@ export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet
     const resolve = (value: ExpressionIR): ExpressionIR => {
       const seen = new Set<string>();
       while (value.kind === 'reference' && bindings.has(value.name) && !seen.has(value.name)) {
-        seen.add(value.name); value = bindings.get(value.name)!;
+        seen.add(value.name);
+        value = bindings.get(value.name)!;
       }
       return value;
     };
-    function shape(value: ExpressionIR | undefined, fields: readonly string[], operation: ExpressionIR) {
+    function shape(
+      value: ExpressionIR | undefined,
+      fields: readonly string[],
+      operation: ExpressionIR
+    ) {
       if (!value) return;
       const record = resolve(value);
-      if (record.kind !== 'record') { reject(operation, 'Native interaction options require a statically known record shape.'); return; }
+      if (record.kind !== 'record') {
+        reject(operation, 'Native interaction options require a statically known record shape.');
+        return;
+      }
       for (const entry of record.entries) {
-        if (!fields.includes(entry.key)) reject(entry.value, 'Native interaction v1 does not support option ' + entry.key + '.');
+        if (!fields.includes(entry.key))
+          reject(entry.value, 'Native interaction v1 does not support option ' + entry.key + '.');
       }
     }
     function expression(value: ExpressionIR) {
@@ -47,42 +103,88 @@ export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet
         const args = value.arguments;
         if (value.operation === 'event.on' || value.operation === 'event.onGlobal') {
           const type = args[0] && resolve(args[0]);
-          if (!type || type.kind !== 'literal' || typeof type.value !== 'string' ||
-            !(semanticEvents.includes(type.value) || type.value.startsWith('host:') && type.value.length > 5)) {
-            reject(value, 'Native interaction requires a supported static Proto input type or nonempty host:* extension.');
+          if (
+            !type ||
+            type.kind !== 'literal' ||
+            typeof type.value !== 'string' ||
+            !(
+              semanticEvents.includes(type.value) ||
+              (type.value.startsWith('host:') && type.value.length > 5)
+            )
+          ) {
+            reject(
+              value,
+              'Native interaction requires a supported static Proto input type or nonempty host:* extension.'
+            );
           } else if (!type.value.startsWith('host:') && args[2]) {
-            reject(value, 'Portable semantic listeners do not accept capture/once/passive options; only host:* does.');
+            reject(
+              value,
+              'Portable semantic listeners do not accept capture/once/passive options; only host:* does.'
+            );
           }
           shape(args[2], ['capture', 'once', 'passive'], value);
         }
         if (value.operation === 'focus.configure') {
-          shape(args[0], ['scopeKey', 'groupKey', 'autoFocus', 'disabled', 'navParticipation', 'meta'], value);
+          shape(
+            args[0],
+            ['scopeKey', 'groupKey', 'autoFocus', 'disabled', 'navParticipation', 'meta'],
+            value
+          );
           const patch = args[0] && resolve(args[0]);
-          if (patch?.kind === 'record') for (const entry of patch.entries) {
-            const setting = resolve(entry.value);
-            if (entry.key === 'scopeKey' && setting.type !== 'focus-scope-key') reject(entry.value,'Focus scopeKey requires a declared scope identity.');
-            if (entry.key === 'groupKey' && setting.type !== 'focus-roving-key') reject(entry.value,'Focus groupKey requires a declared roving identity.');
-            if (entry.key === 'navParticipation' && !(setting.kind === 'literal' && ['auto', 'none'].includes(String(setting.value))))
-              reject(entry.value, 'Native focus navParticipation must be the static value auto or none.');
-            if (['autoFocus', 'disabled'].includes(entry.key) && setting.type !== 'boolean')
-              reject(entry.value, 'Native focus ' + entry.key + ' must be boolean.');
-          }
+          if (patch?.kind === 'record')
+            for (const entry of patch.entries) {
+              const setting = resolve(entry.value);
+              if (entry.key === 'scopeKey' && setting.type !== 'focus-scope-key')
+                reject(entry.value, 'Focus scopeKey requires a declared scope identity.');
+              if (entry.key === 'groupKey' && setting.type !== 'focus-roving-key')
+                reject(entry.value, 'Focus groupKey requires a declared roving identity.');
+              if (
+                entry.key === 'navParticipation' &&
+                !(setting.kind === 'literal' && ['auto', 'none'].includes(String(setting.value)))
+              )
+                reject(
+                  entry.value,
+                  'Native focus navParticipation must be the static value auto or none.'
+                );
+              if (['autoFocus', 'disabled'].includes(entry.key) && setting.type !== 'boolean')
+                reject(entry.value, 'Native focus ' + entry.key + ' must be boolean.');
+            }
         }
-        if (value.operation === 'focus.focusSelf' && args[0] &&
-          !(isDataValueType(args[0].type) && isAssignable(args[0].type, {kind:'union',members:[FOCUS_OPTIONS_TYPE,'void']}))) {
+        if (
+          value.operation === 'focus.focusSelf' &&
+          args[0] &&
+          !(
+            isDataValueType(args[0].type) &&
+            isAssignable(args[0].type, { kind: 'union', members: [FOCUS_OPTIONS_TYPE, 'void'] })
+          )
+        ) {
           shape(args[0], ['reason', 'preventScroll'], value);
           const options = args[0] && resolve(args[0]);
-          if (options?.kind === 'record') for (const entry of options.entries) {
-            const setting = resolve(entry.value);
-            if (entry.key === 'reason' && !(setting.kind === 'literal' && ['programmatic', 'keyboard', 'pointer'].includes(String(setting.value))))
-              reject(entry.value, 'Native focus reason must be programmatic, keyboard or pointer.');
-            if (entry.key === 'preventScroll' && setting.type !== 'boolean') reject(entry.value, 'Native focus preventScroll must be boolean.');
-          }
+          if (options?.kind === 'record')
+            for (const entry of options.entries) {
+              const setting = resolve(entry.value);
+              if (
+                entry.key === 'reason' &&
+                !(
+                  setting.kind === 'literal' &&
+                  ['programmatic', 'keyboard', 'pointer'].includes(String(setting.value))
+                )
+              )
+                reject(
+                  entry.value,
+                  'Native focus reason must be programmatic, keyboard or pointer.'
+                );
+              if (entry.key === 'preventScroll' && setting.type !== 'boolean')
+                reject(entry.value, 'Native focus preventScroll must be boolean.');
+            }
         }
         if (value.operation === 'accessible.action') {
           shape(args[1], ['event'], value);
           const spec = args[1] && resolve(args[1]);
-          if (spec?.kind === 'record' && spec.entries.some((entry) => entry.value.type !== 'string'))
+          if (
+            spec?.kind === 'record' &&
+            spec.entries.some((entry) => entry.value.type !== 'string')
+          )
             reject(value, 'Accessible action event must be an outward Expose event name.');
         }
         if (value.receiver) expression(value.receiver);
@@ -90,18 +192,35 @@ export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet
       } else if (value.kind === 'function') visitFunction(value.function, bindings);
       else if (value.kind === 'member') expression(value.object);
       else if (value.kind === 'unary') expression(value.operand);
-      else if (value.kind === 'binary') { expression(value.left); expression(value.right); }
-      else if (value.kind === 'array') value.elements.forEach(expression);
+      else if (value.kind === 'binary') {
+        expression(value.left);
+        expression(value.right);
+      } else if (value.kind === 'array') value.elements.forEach(expression);
       else if (value.kind === 'record') value.entries.forEach((entry) => expression(entry.value));
       else if (value.kind === 'helper-call') value.arguments.forEach(expression);
-      else if (value.kind === 'rule') { expression(value.receiver); value.states.forEach((entry) => expression(entry.value)); }
+      else if (value.kind === 'rule') {
+        expression(value.receiver);
+        value.states.forEach((entry) => expression(entry.value));
+      }
     }
     function statements(body: readonly StatementIR[]) {
       for (const statement of body) {
-        if (statement.kind === 'const') { expression(statement.value); bindings.set(statement.name, statement.value); }
-        else if (statement.kind === 'effect') expression(statement.expression);
-        else if (statement.kind === 'return') { if (statement.value) expression(statement.value); }
-        else { expression(statement.condition); const saved = new Map(bindings); statements(statement.then); bindings.clear(); saved.forEach((v,k) => bindings.set(k,v)); statements(statement.otherwise); bindings.clear(); saved.forEach((v,k) => bindings.set(k,v)); }
+        if (statement.kind === 'const') {
+          expression(statement.value);
+          bindings.set(statement.name, statement.value);
+        } else if (statement.kind === 'effect') expression(statement.expression);
+        else if (statement.kind === 'return') {
+          if (statement.value) expression(statement.value);
+        } else {
+          expression(statement.condition);
+          const saved = new Map(bindings);
+          statements(statement.then);
+          bindings.clear();
+          saved.forEach((v, k) => bindings.set(k, v));
+          statements(statement.otherwise);
+          bindings.clear();
+          saved.forEach((v, k) => bindings.set(k, v));
+        }
       }
     }
     statements(fn.body);
@@ -111,7 +230,11 @@ export function validateNativeInteraction(ir: PrototypeIR, reached?: ReadonlySet
   return diagnostics;
 }
 
-export const nativeInteractionArtifact = { path: interactionFile, kind: 'source' as const, contents: nativeInteractionSource() };
+export const nativeInteractionArtifact = {
+  path: interactionFile,
+  kind: 'source' as const,
+  contents: nativeInteractionSource(),
+};
 
 function nativeInteractionSource(): string {
   return `// Native DOM interaction v1. No Proto package, interpreter or template rendering dependency.

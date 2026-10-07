@@ -10,7 +10,8 @@ import { gpuiNativeImageSource } from './gpui-native-image';
 import { gpuiNativePositioningSource } from './gpui-native-positioning';
 import { gpuiNativeOverlaySource } from './gpui-native-overlay';
 
-export const gpuiNativeOwnerSource = String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
+export const gpuiNativeOwnerSource =
+  String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
 use serde_json::{Value as Json, Map};
 use gpui::{prelude::*, AnyElement, App, Bounds, FocusHandle, Pixels, Window, div, canvas};
 pub type OwnerRef = Rc<RefCell<Owner>>;
@@ -534,4 +535,13 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
     for owner in &owners{let end={let mut owner=owner.borrow_mut();if owner.press.key.as_deref()==key.as_deref(){owner.press.key.take().is_some()}else{false}};if end{prevented|=dispatch_root_route(owner,"press.end",press_fields("press.end",&fields));}}
     if prevented{window.prevent_default();cx.stop_propagation();}drive_owners(window,cx);
 }
-` + gpuiNativeModulesSource + gpuiNativeTopologySource + gpuiNativeTableSource + gpuiNativeBoundarySource + gpuiNativeScrollSource + gpuiNativeTextSource + gpuiNativeImageSource + gpuiNativePositioningSource + gpuiNativeOverlaySource;
+` +
+  gpuiNativeModulesSource +
+  gpuiNativeTopologySource +
+  gpuiNativeTableSource +
+  gpuiNativeBoundarySource +
+  gpuiNativeScrollSource +
+  gpuiNativeTextSource +
+  gpuiNativeImageSource +
+  gpuiNativePositioningSource +
+  gpuiNativeOverlaySource;

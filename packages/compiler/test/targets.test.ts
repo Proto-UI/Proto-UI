@@ -37,29 +37,48 @@ describe('explicit target capability admission', () => {
   });
 
   it('rejects unknown and unimplemented profiles instead of substituting a bridge', () => {
-    expect(resolveTargetProfile('react-native-source-v1')).toMatchObject({ok:false,diagnostics:[{category:'unsupported-input',code:'PUI4001'}]});
-    expect(resolveTargetProfile({framework:'qt',mode:'source'})).toMatchObject({ok:false,diagnostics:[{code:'PUI4001'}]});
-    expect(resolveTargetProfile({profile:'react-dom-source-v1',mode:'runtime-backed'})).toMatchObject({ok:false,diagnostics:[{code:'PUI4001'}]});
-    expect(resolveTargetProfile({profile:'react-dom-source-v1',version:'18.0.0'})).toMatchObject({ok:false,diagnostics:[{code:'PUI4002'}]});
+    expect(resolveTargetProfile('react-native-source-v1')).toMatchObject({
+      ok: false,
+      diagnostics: [{ category: 'unsupported-input', code: 'PUI4001' }],
+    });
+    expect(resolveTargetProfile({ framework: 'qt', mode: 'source' })).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI4001' }],
+    });
+    expect(
+      resolveTargetProfile({ profile: 'react-dom-source-v1', mode: 'runtime-backed' })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4001' }] });
+    expect(
+      resolveTargetProfile({ profile: 'react-dom-source-v1', version: '18.0.0' })
+    ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4002' }] });
   });
 
   it('follows nested authored hook bodies and reports the actual unsupported source location', () => {
-    const ir = parse(`import {definePrototype} from '@proto.ui/core';
+    const ir = parse(
+      `import {definePrototype} from '@proto.ui/core';
 import {outer} from './outer';
-export default definePrototype({name:'entry',setup(){outer();}});`, {
-      'outer.ts': `import {defineAsHook} from '@proto.ui/core';
+export default definePrototype({name:'entry',setup(){outer();}});`,
+      {
+        'outer.ts': `import {defineAsHook} from '@proto.ui/core';
 import {inner} from './inner';
 export const outer=defineAsHook({name:'outer',setup(){inner();}});`,
-      'inner.ts': `import {defineAsHook} from '@proto.ui/core';
+        'inner.ts': `import {defineAsHook} from '@proto.ui/core';
 import {asTrigger} from '@proto.ui/hooks';
 export const inner=defineAsHook({name:'inner',setup(){asTrigger();}});`,
-    });
+      }
+    );
     // Requirements are descriptive metadata, not an admission authority.
     ir.requirements = [];
-    const restricted = resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:['view-render']});
+    const restricted = resolveTargetProfile({
+      profile: 'react-dom-source-v1',
+      hostCapabilities: ['view-render'],
+    });
     if (!restricted.ok) throw new Error(JSON.stringify(restricted.diagnostics));
     const native = checkTargetOperations(ir, restricted.value);
-    expect(native).toMatchObject({ok:false,diagnostics:[{code:'PUI4004',span:{file:'inner.ts',line:3}}]});
+    expect(native).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI4004', span: { file: 'inner.ts', line: 3 } }],
+    });
     const runtime = checkTargetOperations(ir, profile('react-runtime-v1'));
     expect(runtime.ok).toBe(true);
     if (!runtime.ok) throw new Error(JSON.stringify(runtime.diagnostics));
@@ -82,43 +101,74 @@ export default definePrototype({name:'helper',setup(def){
     if (!unused.ok || !reached.ok) throw new Error('Runtime capability admission failed');
     expect(unused.value.operations).not.toContain('focus.focusSelf');
     expect(reached.value.operations).toContain('focus.focusSelf');
-    const restricted = resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:['view-render']});
+    const restricted = resolveTargetProfile({
+      profile: 'react-dom-source-v1',
+      hostCapabilities: ['view-render'],
+    });
     if (!restricted.ok) throw new Error(JSON.stringify(restricted.diagnostics));
     const native = checkTargetOperations(helperIR(true), restricted.value);
     if (native.ok) throw new Error('Capability-restricted output admitted focus');
-    expect(native.diagnostics).toContainEqual(expect.objectContaining({code:'PUI4004',span:expect.objectContaining({file:'entry.proto.ts',line:5,column:22})}));
+    expect(native.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'PUI4004',
+        span: expect.objectContaining({ file: 'entry.proto.ts', line: 5, column: 22 }),
+      })
+    );
   });
 
   it('checks actual host capabilities and cannot enable unsupported lowering through a manifest label', () => {
-    const selected = resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:[]});
+    const selected = resolveTargetProfile({ profile: 'react-dom-source-v1', hostCapabilities: [] });
     if (!selected.ok) throw new Error(JSON.stringify(selected.diagnostics));
     const result = checkTargetOperations(parse(basicSource), selected.value);
-    expect(result).toMatchObject({ok:false,diagnostics:[{code:'PUI4004',span:{file:'entry.proto.ts',line:8}},{code:'PUI4004',span:{file:'entry.proto.ts',line:8}}]});
-    expect(resolveTargetProfile({profile:'react-dom-source-v1',hostCapabilities:['focus-target']}).ok).toBe(true);
+    expect(result).toMatchObject({
+      ok: false,
+      diagnostics: [
+        { code: 'PUI4004', span: { file: 'entry.proto.ts', line: 8 } },
+        { code: 'PUI4004', span: { file: 'entry.proto.ts', line: 8 } },
+      ],
+    });
+    expect(
+      resolveTargetProfile({ profile: 'react-dom-source-v1', hostCapabilities: ['focus-target'] })
+        .ok
+    ).toBe(true);
   });
 
   it('requires a logical Context capability even for a key reference without an operation', () => {
-    const ir = parse(`import {definePrototype} from '@proto.ui/core';
+    const ir = parse(
+      `import {definePrototype} from '@proto.ui/core';
 import {Shared} from './keys';
 export default definePrototype({name:'key',setup(){
   const capability=Shared;
-}});`, {
-      'keys.ts': `import {createContextKey} from '@proto.ui/core';
+}});`,
+      {
+        'keys.ts': `import {createContextKey} from '@proto.ui/core';
 export const Shared=createContextKey<{label:string}>('shared');`,
-    });
+      }
+    );
     expect(checkTargetOperations(ir, profile('react-runtime-v1')).ok).toBe(true);
     expect(checkTargetOperations(ir, profile('react-dom-source-v1')).ok).toBe(true);
-    const withoutContext = resolveTargetProfile({ profile:'react-dom-source-v1', hostCapabilities:['view-render'] });
+    const withoutContext = resolveTargetProfile({
+      profile: 'react-dom-source-v1',
+      hostCapabilities: ['view-render'],
+    });
     if (!withoutContext.ok) throw new Error(JSON.stringify(withoutContext.diagnostics));
     expect(checkTargetOperations(ir, withoutContext.value)).toMatchObject({
-      ok:false,diagnostics:[{code:'PUI4007',span:{file:'entry.proto.ts',line:4,column:20}}],
+      ok: false,
+      diagnostics: [{ code: 'PUI4007', span: { file: 'entry.proto.ts', line: 4, column: 20 } }],
     });
   });
 
   it('ignores uncalled authored declarations but checks a returned render function', () => {
     const ir = parse(basicSource);
-    const unsupported = parse(`import {definePrototype} from '@proto.ui/core';import {asTrigger} from '@proto.ui/hooks';export default definePrototype({name:'unused',setup(){asTrigger();}});`);
-    ir.hooks.push({id:'unused#hook',name:'unused',setup:unsupported.setup,span:unsupported.setup.span});
+    const unsupported = parse(
+      `import {definePrototype} from '@proto.ui/core';import {asTrigger} from '@proto.ui/hooks';export default definePrototype({name:'unused',setup(){asTrigger();}});`
+    );
+    ir.hooks.push({
+      id: 'unused#hook',
+      name: 'unused',
+      setup: unsupported.setup,
+      span: unsupported.setup.span,
+    });
     const result = checkTargetOperations(ir, profile('react-dom-source-v1'));
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));

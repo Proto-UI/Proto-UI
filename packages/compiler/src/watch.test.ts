@@ -22,7 +22,11 @@ class WatchHost implements ProjectWatchRuntime {
   watchDirectory(directory: string, change: WatchHandle['change'], error: WatchHandle['error']) {
     const handle = { directory, closed: false, change, error };
     this.handles.push(handle);
-    return { close() { handle.closed = true; } };
+    return {
+      close() {
+        handle.closed = true;
+      },
+    };
   }
 
   current(directory: string): WatchHandle {
@@ -73,7 +77,9 @@ const controllers: ProjectWatch[] = [];
 const source = (name: string) => `import { definePrototype } from '@proto.ui/core';
 export default definePrototype({ name: '${name}', setup(def) {} });`;
 
-async function fixture(files: Record<string, string> = { 'entry.proto.ts': source('initial') }): Promise<WatchFixture> {
+async function fixture(
+  files: Record<string, string> = { 'entry.proto.ts': source('initial') }
+): Promise<WatchFixture> {
   const root = await mkdtemp(path.join(tmpdir(), 'proto-compiler-watch-'));
   roots.push(root);
   for (const [filename, contents] of Object.entries(files)) {
@@ -89,10 +95,16 @@ async function start(
   configFiles?: readonly string[],
   debounceMs = 0
 ): Promise<ProjectWatch> {
-  const result = await watchProject({
-    root: data.root, entries: ['entry.proto.ts'], configFiles,
-    debounceMs, onReport: data.reports.accept,
-  }, runtime);
+  const result = await watchProject(
+    {
+      root: data.root,
+      entries: ['entry.proto.ts'],
+      configFiles,
+      debounceMs,
+      onReport: data.reports.accept,
+    },
+    runtime
+  );
   if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
   controllers.push(result.value);
   return result.value;
@@ -216,7 +228,8 @@ describe('project-scoped incremental watch', () => {
     data.host.current(path.join(data.root, 'nested')).change('rename', 'leaf.ts');
     const failure = await data.reports.next();
     expect(failure.status).toBe('failure');
-    if (failure.status !== 'failure' || edited.status !== 'success') throw new Error('Expected deletion failure');
+    if (failure.status !== 'failure' || edited.status !== 'success')
+      throw new Error('Expected deletion failure');
     expect(failure.fatal).toBe(false);
     expect(failure.lastSuccessful?.identity).toBe(edited.compilation.identity);
     expect('compilation' in failure).toBe(false);
@@ -314,7 +327,8 @@ describe('project-scoped incremental watch', () => {
     data.host.current(data.root).change('change', 'compiler.config.json');
     const changed = await data.reports.next();
     expect(compiledName(changed)).toBe('configured');
-    if (changed.status !== 'success' || initial.status !== 'success') throw new Error('Expected success');
+    if (changed.status !== 'success' || initial.status !== 'success')
+      throw new Error('Expected success');
     expect(changed.compilation.identity).not.toBe(initial.compilation.identity);
     await rm(path.join(data.root, 'compiler.config.json'));
     data.host.current(data.root).change('rename', 'compiler.config.json');
@@ -350,15 +364,24 @@ describe('project-scoped incremental watch', () => {
 
   it('fails unsupported watcher startup and releases already-acquired directory watchers', async () => {
     const data = await fixture();
-    const result = await watchProject({
-      root: data.root, entries: ['entry.proto.ts'], onReport: data.reports.accept,
-    }, {
-      watchDirectory(directory, change, error) {
-        if (directory === data.root) throw Object.assign(new Error('Watch capability unavailable'), { code: 'ENOSYS' });
-        return data.host.watchDirectory(directory, change, error);
+    const result = await watchProject(
+      {
+        root: data.root,
+        entries: ['entry.proto.ts'],
+        onReport: data.reports.accept,
       },
+      {
+        watchDirectory(directory, change, error) {
+          if (directory === data.root)
+            throw Object.assign(new Error('Watch capability unavailable'), { code: 'ENOSYS' });
+          return data.host.watchDirectory(directory, change, error);
+        },
+      }
+    );
+    expect(result).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI4002', category: 'unsupported-input' }],
     });
-    expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4002', category: 'unsupported-input' }] });
     expect(data.host.handles.every((handle) => handle.closed)).toBe(true);
     expect(data.reports.received).toEqual([]);
   });
@@ -367,25 +390,44 @@ describe('project-scoped incremental watch', () => {
     const data = await fixture();
     const controller = await start(data);
     const initial = await data.reports.next();
-    data.host.current(data.root).error(Object.assign(new Error('Watcher resource limit'), { code: 'ENOSPC' }));
+    data.host
+      .current(data.root)
+      .error(Object.assign(new Error('Watcher resource limit'), { code: 'ENOSPC' }));
     const failure = await data.reports.next();
-    expect(failure).toMatchObject({ status: 'failure', fatal: true, diagnostics: [{ code: 'PUI4002' }] });
-    if (failure.status !== 'failure' || initial.status !== 'success') throw new Error('Expected watch failure');
+    expect(failure).toMatchObject({
+      status: 'failure',
+      fatal: true,
+      diagnostics: [{ code: 'PUI4002' }],
+    });
+    if (failure.status !== 'failure' || initial.status !== 'success')
+      throw new Error('Expected watch failure');
     expect(failure.lastSuccessful?.identity).toBe(initial.compilation.identity);
     expect(controller.closed).toBe(true);
     expect(data.host.handles.every((handle) => handle.closed)).toBe(true);
-    expect(await controller.finished).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4002' }] });
+    expect(await controller.finished).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI4002' }],
+    });
   });
 
   it('closes cleanly when a consumer callback throws instead of leaking watchers or rejecting in the background', async () => {
     const data = await fixture();
-    const result = await watchProject({
-      root: data.root, entries: ['entry.proto.ts'],
-      onReport() { throw new Error('Consumer callback failed'); },
-    }, data.host);
+    const result = await watchProject(
+      {
+        root: data.root,
+        entries: ['entry.proto.ts'],
+        onReport() {
+          throw new Error('Consumer callback failed');
+        },
+      },
+      data.host
+    );
     if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
     controllers.push(result.value);
-    expect(await result.value.finished).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI4004' }] });
+    expect(await result.value.finished).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI4004' }],
+    });
     expect(data.host.handles.every((handle) => handle.closed)).toBe(true);
   });
 });

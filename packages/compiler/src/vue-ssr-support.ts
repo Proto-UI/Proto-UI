@@ -1,6 +1,7 @@
 /** Target-native request ownership and render-data transport; never semantic IR. */
 export const vueSsrSupportArtifact = {
-  path: '.proto-ui/vue/ssr-v1.ts', kind: 'source' as const,
+  path: '.proto-ui/vue/ssr-v1.ts',
+  kind: 'source' as const,
   contents: `import * as Vue from 'vue';
 export type Data = null | boolean | number | string | ['undefined'] | ['negative-zero'] | ['array', Data[]] | ['record', [string, Data][]];
 export type Projection = null | string | number | Projection[] | { tag: string; attrs: Record<string, unknown> | null; children: Projection[] } | { slot: true };

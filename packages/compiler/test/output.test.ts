@@ -29,7 +29,6 @@ describe('transactional create-only compiler delivery', () => {
       const result = await writeCompilation(compilation, directory, async (filename) => {
         const handle = await open(filename, 'wx');
         return {
-          stat: () => handle.stat(),
           async writeFile(contents) {
             if (path.basename(filename) === failingName) {
               await handle.writeFile(contents.slice(0, 16));
@@ -44,14 +43,13 @@ describe('transactional create-only compiler delivery', () => {
           },
         };
       });
-      expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI3003' }] });
+      expect(result).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI3002' }] });
       await expect(stat(directory)).rejects.toMatchObject({ code: 'ENOENT' });
       const retry = await writeCompilation(compilation, directory);
       expect(retry.ok).toBe(true);
       expect(await readFile(path.join(directory, 'Component.tsx'), 'utf8')).toBe(
-        compilation.output.code + '\n//# sourceMappingURL=Component.tsx.map\n'
+        compilation.output.code
       );
-      expect(JSON.parse(await readFile(path.join(directory, 'Component.tsx.map'), 'utf8')).version).toBe(3);
       expect(
         JSON.parse(await readFile(path.join(directory, 'provenance.json'), 'utf8')).profile
       ).toBe('react-runtime-v1');

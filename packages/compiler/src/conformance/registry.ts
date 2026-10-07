@@ -6,7 +6,12 @@ import {
   type CaseResult,
   type ContractOracle,
 } from './result';
-import { snapshotTrace, type IdentityNormalization, type SemanticCheckpoint, type TraceValue } from './trace';
+import {
+  snapshotTrace,
+  type IdentityNormalization,
+  type SemanticCheckpoint,
+  type TraceValue,
+} from './trace';
 
 export type CaseApplicability =
   | { readonly status: 'SUPPORTED' }
@@ -74,12 +79,19 @@ const inputSources: Readonly<Record<string, true>> = {
 };
 
 function requireInputSources(value: unknown): void {
-  if (!Array.isArray(value) || value.some((source) => typeof source !== 'string' || !Object.hasOwn(inputSources, source))) {
-    throw new Error('Input provenance must contain only explicit host-api, synthetic-dispatch or browser-automation sources');
+  if (
+    !Array.isArray(value) ||
+    value.some((source) => typeof source !== 'string' || !Object.hasOwn(inputSources, source))
+  ) {
+    throw new Error(
+      'Input provenance must contain only explicit host-api, synthetic-dispatch or browser-automation sources'
+    );
   }
 }
 
-function copyDefinition<Action extends { kind: string }>(definition: CaseDefinition<Action>): CaseDefinition<Action> {
+function copyDefinition<Action extends { kind: string }>(
+  definition: CaseDefinition<Action>
+): CaseDefinition<Action> {
   for (const field of ['id', 'source', 'domain', 'profile', 'styleFamily'] as const) {
     requireName(definition[field], `Case ${field}`);
   }
@@ -88,7 +100,10 @@ function copyDefinition<Action extends { kind: string }>(definition: CaseDefinit
   if (!Array.isArray(definition.steps) || !definition.steps.length) {
     throw new Error(`Case ${definition.id} must define ordered steps`);
   }
-  requireUniqueNames(definition.steps.map((step) => step.id), 'Step IDs');
+  requireUniqueNames(
+    definition.steps.map((step) => step.id),
+    'Step IDs'
+  );
   const covered = new Set<string>();
   for (const step of definition.steps) {
     if (!step.action || typeof step.action !== 'object' || Array.isArray(step.action)) {
@@ -97,15 +112,25 @@ function copyDefinition<Action extends { kind: string }>(definition: CaseDefinit
     requireName(step.action.kind, `Step ${step.id} action kind`);
     requireUniqueNames(step.criteria, `Step ${step.id} criterion IDs`);
     for (const criterion of step.criteria) covered.add(criterion);
-    if (!step.expected || typeof step.expected !== 'object' || Array.isArray(step.expected) || !Object.keys(step.expected).length) {
+    if (
+      !step.expected ||
+      typeof step.expected !== 'object' ||
+      Array.isArray(step.expected) ||
+      !Object.keys(step.expected).length
+    ) {
       throw new Error(`Step ${step.id} must define structured data expectations`);
     }
     if (step.observation) {
-      if (step.observation.phase !== undefined) requireName(step.observation.phase, 'Observation phase');
-      if (step.observation.inputSources !== undefined) requireInputSources(step.observation.inputSources);
+      if (step.observation.phase !== undefined)
+        requireName(step.observation.phase, 'Observation phase');
+      if (step.observation.inputSources !== undefined)
+        requireInputSources(step.observation.inputSources);
     }
   }
-  if (covered.size !== definition.requiredCriteria.length || definition.requiredCriteria.some((criterion) => !covered.has(criterion))) {
+  if (
+    covered.size !== definition.requiredCriteria.length ||
+    definition.requiredCriteria.some((criterion) => !covered.has(criterion))
+  ) {
     throw new Error(`Case ${definition.id} required criteria must exactly cover its step criteria`);
   }
   if (definition.applicability) {
@@ -134,33 +159,52 @@ function copyDefinition<Action extends { kind: string }>(definition: CaseDefinit
     requiredCriteria: definition.requiredCriteria,
     ...(definition.applicability === undefined ? {} : { applicability: definition.applicability }),
   };
-  return snapshotTrace([{
-    step: 'declaration', phase: 'declaration', ownerId: 'registry', parentId: null,
-    viewEpoch: 0, kind: 'declaration', data: data as unknown as TraceValue,
-  }])[0].data as unknown as CaseDefinition<Action>;
+  return snapshotTrace([
+    {
+      step: 'declaration',
+      phase: 'declaration',
+      ownerId: 'registry',
+      parentId: null,
+      viewEpoch: 0,
+      kind: 'declaration',
+      data: data as unknown as TraceValue,
+    },
+  ])[0].data as unknown as CaseDefinition<Action>;
 }
 
-function oraclesFor<Action extends { kind: string }>(definition: CaseDefinition<Action>): ContractOracle[] {
+function oraclesFor<Action extends { kind: string }>(
+  definition: CaseDefinition<Action>
+): ContractOracle[] {
   const stepIds = new Set(definition.steps.map((step) => step.id));
   return definition.requiredCriteria.map((criterion) => ({
     criterion,
     description: `Declared ${criterion} expectations for ${definition.id}`,
     test(trace) {
-      const snapshots = trace.filter((entry) => entry.kind === 'snapshot' && stepIds.has(entry.step));
+      const snapshots = trace.filter(
+        (entry) => entry.kind === 'snapshot' && stepIds.has(entry.step)
+      );
       // Matching errors on both paths are still contract failures, including ordering and extras.
       // Ancillary observations remain in the full trace comparison, as in the existing Button runners.
-      if (snapshots.length !== definition.steps.length || snapshots.some((entry, index) => entry.step !== definition.steps[index].id)) {
+      if (
+        snapshots.length !== definition.steps.length ||
+        snapshots.some((entry, index) => entry.step !== definition.steps[index].id)
+      ) {
         return false;
       }
       return definition.steps.every((step, index) => {
         if (!step.criteria.includes(criterion)) return true;
         const entry = snapshots[index];
-        if (step.observation?.phase !== undefined && entry.phase !== step.observation.phase) return false;
-        if (step.observation?.inputSources !== undefined && !isDeepStrictEqual(entry.inputSources, step.observation.inputSources)) return false;
+        if (step.observation?.phase !== undefined && entry.phase !== step.observation.phase)
+          return false;
+        if (
+          step.observation?.inputSources !== undefined &&
+          !isDeepStrictEqual(entry.inputSources, step.observation.inputSources)
+        )
+          return false;
         const data = entry.data;
         if (data === null || typeof data !== 'object' || Array.isArray(data)) return false;
-        return Object.entries(step.expected).every(([key, value]) =>
-          Object.hasOwn(data, key) && isDeepStrictEqual(data[key], value)
+        return Object.entries(step.expected).every(
+          ([key, value]) => Object.hasOwn(data, key) && isDeepStrictEqual(data[key], value)
         );
       });
     },
@@ -171,7 +215,8 @@ export class CaseRegistry<Action extends { kind: string } = { kind: string }> {
   private readonly definitions = new Map<string, CaseDefinition<Action>>();
 
   constructor(definitions: readonly CaseDefinition<Action>[]) {
-    if (!Array.isArray(definitions) || !definitions.length) throw new Error('Case definitions must be nonempty');
+    if (!Array.isArray(definitions) || !definitions.length)
+      throw new Error('Case definitions must be nonempty');
     for (const definition of definitions) {
       const copy = copyDefinition<Action>(definition);
       if (this.definitions.has(copy.id)) throw new Error(`Duplicate registered case ${copy.id}`);
@@ -203,15 +248,25 @@ export class CaseRegistry<Action extends { kind: string } = { kind: string }> {
     const base = { id: definition.id, requiredCriteria: definition.requiredCriteria };
     for (const field of ['source', 'domain', 'profile', 'styleFamily'] as const) {
       if (report[field] !== undefined && report[field] !== definition[field]) {
-        return assessCase({ ...base, harnessError: `Case ${report.id} report ${field} does not match its registered definition` });
+        return assessCase({
+          ...base,
+          harnessError: `Case ${report.id} report ${field} does not match its registered definition`,
+        });
       }
     }
-    if (report.harnessError || report.authorityBlocker || definition.applicability?.status === 'UNSUPPORTED') {
+    if (
+      report.harnessError ||
+      report.authorityBlocker ||
+      definition.applicability?.status === 'UNSUPPORTED'
+    ) {
       return assessCase({
         ...base,
         harnessError: report.harnessError,
         authorityBlocker: report.authorityBlocker,
-        unsupported: definition.applicability?.status === 'UNSUPPORTED' ? definition.applicability.reason : undefined,
+        unsupported:
+          definition.applicability?.status === 'UNSUPPORTED'
+            ? definition.applicability.reason
+            : undefined,
       });
     }
     const oracles = oraclesFor(definition);
@@ -225,8 +280,10 @@ export class CaseRegistry<Action extends { kind: string } = { kind: string }> {
       }
       return assessCase({
         ...base,
-        reference: report.reference === undefined ? undefined : runOracleSuite(report.reference, oracles),
-        candidate: report.candidate === undefined ? undefined : runOracleSuite(report.candidate, oracles),
+        reference:
+          report.reference === undefined ? undefined : runOracleSuite(report.reference, oracles),
+        candidate:
+          report.candidate === undefined ? undefined : runOracleSuite(report.candidate, oracles),
         identities: report.identities,
       });
     } catch (error) {
@@ -242,7 +299,9 @@ export class CaseRegistry<Action extends { kind: string } = { kind: string }> {
       if (collected.has(report.id)) throw new Error(`Duplicate case report ${report.id}`);
       collected.set(report.id, report);
     }
-    const results = this.cases().map((definition) => this.evaluateReport(collected.get(definition.id) ?? { id: definition.id }));
+    const results = this.cases().map((definition) =>
+      this.evaluateReport(collected.get(definition.id) ?? { id: definition.id })
+    );
     requireCaseCollection([...this.definitions.keys()], results);
     return Object.freeze(results);
   }

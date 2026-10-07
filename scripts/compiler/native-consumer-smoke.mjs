@@ -12,8 +12,20 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import {
+<<<<<<< HEAD
+  copyFileSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  realpathSync,
+  statSync,
+  writeFileSync,
+=======
   copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync,
   readFileSync, realpathSync, statSync, writeFileSync,
+>>>>>>> origin/main
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -21,12 +33,30 @@ import { performance } from 'node:perf_hooks';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import {
+<<<<<<< HEAD
+  compileFile,
+  compileProject,
+  compilationArtifacts,
+  writeArtifactSet,
+  TARGET_PROFILES,
+  verifyConsumerClosure,
+=======
   compileFile, compileProject, compilationArtifacts, writeArtifactSet, TARGET_PROFILES, verifyConsumerClosure,
+>>>>>>> origin/main
 } from '../../packages/compiler/src/index.ts';
 
 const repoRoot = realpathSync(fileURLToPath(new URL('../../', import.meta.url)));
 const script = fileURLToPath(import.meta.url);
+<<<<<<< HEAD
+const supported = [
+  'react-dom-source-v1',
+  'vue-source-v1',
+  'vue2-source-v1',
+  'web-component-source-v1',
+];
+=======
 const supported = ['react-dom-source-v1', 'vue-source-v1', 'vue2-source-v1', 'web-component-source-v1'];
+>>>>>>> origin/main
 const toolVersions = { typescript: '5.9.3', 'happy-dom': '15.11.7' };
 const reactTypeVersions = { '@types/react': '19.2.14', '@types/react-dom': '19.2.3' };
 const numericSource = `import {definePrototype,tw} from '@proto.ui/core';
@@ -86,16 +116,40 @@ const save = (filename, value) => writeFileSync(filename, JSON.stringify(value, 
 const sha = (value) => createHash('sha256').update(value).digest('hex');
 function within(root, filename) {
   const relative = path.relative(root, filename);
+<<<<<<< HEAD
+  return (
+    relative === '' ||
+    (!path.isAbsolute(relative) && relative !== '..' && !relative.startsWith(`..${path.sep}`))
+  );
+}
+function packageName(name) {
+  if (!/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/i.test(name))
+    throw new Error(`Unsafe package name: ${name}`);
+=======
   return relative === '' || (!path.isAbsolute(relative) && relative !== '..' && !relative.startsWith(`..${path.sep}`));
 }
 function packageName(name) {
   if (!/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/i.test(name)) throw new Error(`Unsafe package name: ${name}`);
+>>>>>>> origin/main
   if (name.startsWith('@proto.ui/')) throw new Error(`Native consumer dependency leak: ${name}`);
   return name;
 }
 function filesUnder(directory, skipModules = false) {
   const files = [];
   function visit(current) {
+<<<<<<< HEAD
+    for (const entry of readdirSync(current, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )) {
+      if (skipModules && entry.name === 'node_modules') continue;
+      const filename = path.join(current, entry.name);
+      const canonical = realpathSync(filename);
+      if (!within(directory, canonical))
+        throw new Error(`Escaping consumer file: ${filename} -> ${canonical}`);
+      if (statSync(filename).isDirectory()) {
+        if (entry.isSymbolicLink())
+          throw new Error(`Directory symlink is not accepted in consumer inventory: ${filename}`);
+=======
     for (const entry of readdirSync(current, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
       if (skipModules && entry.name === 'node_modules') continue;
       const filename = path.join(current, entry.name);
@@ -103,6 +157,7 @@ function filesUnder(directory, skipModules = false) {
       if (!within(directory, canonical)) throw new Error(`Escaping consumer file: ${filename} -> ${canonical}`);
       if (statSync(filename).isDirectory()) {
         if (entry.isSymbolicLink()) throw new Error(`Directory symlink is not accepted in consumer inventory: ${filename}`);
+>>>>>>> origin/main
         visit(filename);
       } else if (statSync(filename).isFile()) files.push(filename);
       else throw new Error(`Non-regular consumer artifact: ${filename}`);
@@ -118,7 +173,17 @@ function payload(directory) {
   for (const filename of files) {
     const content = readFileSync(filename);
     bytes += content.length;
+<<<<<<< HEAD
+    digest.update(
+      JSON.stringify([
+        path.relative(directory, filename).split(path.sep).join('/'),
+        content.length,
+        sha(content),
+      ])
+    );
+=======
     digest.update(JSON.stringify([path.relative(directory, filename).split(path.sep).join('/'), content.length, sha(content)]));
+>>>>>>> origin/main
   }
   return { files: files.length, bytes, treeSha256: digest.digest('hex') };
 }
@@ -131,16 +196,40 @@ function installedPackages(consumer, lock) {
       const manifest = json(path.join(packageDirectory, 'package.json'));
       assert.equal(manifest.name, expectedName, `Installed package identity mismatch: ${location}`);
       packageName(manifest.name);
+<<<<<<< HEAD
+      assert.equal(
+        lock.packages[location]?.version,
+        manifest.version,
+        `Physical installed package has no matching inventory/lock record: ${location}`
+      );
+      result.push({
+        name: manifest.name,
+        version: manifest.version,
+        location,
+        ...payload(packageDirectory),
+      });
+=======
       assert.equal(lock.packages[location]?.version, manifest.version, `Physical installed package has no matching inventory/lock record: ${location}`);
       result.push({ name: manifest.name, version: manifest.version, location, ...payload(packageDirectory) });
+>>>>>>> origin/main
       visitModules(path.join(packageDirectory, 'node_modules'));
     }
     for (const entry of readdirSync(directory, { withFileTypes: true })) {
       if (entry.name.startsWith('.')) continue;
       const candidate = path.join(directory, entry.name);
+<<<<<<< HEAD
+      assert.ok(
+        statSync(candidate).isDirectory(),
+        `Unexpected node_modules artifact: ${candidate}`
+      );
+      if (entry.name.startsWith('@')) {
+        for (const child of readdirSync(candidate))
+          inspect(path.join(candidate, child), `${entry.name}/${child}`);
+=======
       assert.ok(statSync(candidate).isDirectory(), `Unexpected node_modules artifact: ${candidate}`);
       if (entry.name.startsWith('@')) {
         for (const child of readdirSync(candidate)) inspect(path.join(candidate, child), `${entry.name}/${child}`);
+>>>>>>> origin/main
       } else inspect(candidate, entry.name);
     }
   }
@@ -151,12 +240,31 @@ function recordCommand(evidence, name, command, args, cwd, env = {}, expectFailu
   const start = performance.now();
   const cleanEnv = { ...process.env, NODE_PATH: '', NODE_OPTIONS: '', ...env };
   delete cleanEnv.TSX_TSCONFIG_PATH;
+<<<<<<< HEAD
+  const result = spawnSync(command, args, {
+    cwd,
+    env: cleanEnv,
+    encoding: 'utf8',
+    maxBuffer: 32 * 1024 * 1024,
+  });
+  writeFileSync(path.join(evidence, `${name}.stdout.log`), result.stdout ?? '');
+  writeFileSync(path.join(evidence, `${name}.stderr.log`), result.stderr ?? '');
+  save(path.join(evidence, `${name}.result.json`), {
+    command,
+    args,
+    cwd,
+    wallMs: performance.now() - start,
+    status: result.status,
+    signal: result.signal,
+    error: result.error?.message ?? null,
+=======
   const result = spawnSync(command, args, { cwd, env: cleanEnv, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 });
   writeFileSync(path.join(evidence, `${name}.stdout.log`), result.stdout ?? '');
   writeFileSync(path.join(evidence, `${name}.stderr.log`), result.stderr ?? '');
   save(path.join(evidence, `${name}.result.json`), {
     command, args, cwd, wallMs: performance.now() - start,
     status: result.status, signal: result.signal, error: result.error?.message ?? null,
+>>>>>>> origin/main
     environment: { NODE_PATH: '', NODE_OPTIONS: '', TSX_TSCONFIG_PATH: null },
   });
   if (name !== 'installed-tree') {
@@ -164,23 +272,63 @@ function recordCommand(evidence, name, command, args, cwd, env = {}, expectFailu
     process.stderr.write(result.stderr ?? '');
   }
   if (expectFailure) {
+<<<<<<< HEAD
+    assert.equal(
+      result.error,
+      undefined,
+      `${name} failed to start instead of reporting a source diagnostic`
+    );
+    assert.equal(
+      result.signal,
+      null,
+      `${name} was killed instead of reporting a source diagnostic`
+    );
+    assert.ok(result.status !== null && result.status !== 0, `${name} unexpectedly succeeded`);
+  } else if (result.error || result.status !== 0)
+    throw new Error(
+      `${name} failed: ${result.error?.message ?? `exit ${result.status}, signal ${result.signal}`}; see ${evidence}`
+    );
+=======
     assert.equal(result.error, undefined, `${name} failed to start instead of reporting a source diagnostic`);
     assert.equal(result.signal, null, `${name} was killed instead of reporting a source diagnostic`);
     assert.ok(result.status !== null && result.status !== 0, `${name} unexpectedly succeeded`);
   } else if (result.error || result.status !== 0) throw new Error(`${name} failed: ${result.error?.message ?? `exit ${result.status}, signal ${result.signal}`}; see ${evidence}`);
+>>>>>>> origin/main
   return result;
 }
 function runNpm(evidence, name, args, consumer) {
   const npmCli = [path.dirname(process.execPath), ...(process.env.PATH ?? '').split(path.delimiter)]
+<<<<<<< HEAD
+    .filter(Boolean)
+    .map((directory) => path.join(directory, 'node_modules/npm/bin/npm-cli.js'))
+    .find(existsSync);
+  if (process.platform === 'win32' && !npmCli) throw new Error('Cannot locate npm CLI on Windows');
+  return recordCommand(
+    evidence,
+    name,
+    npmCli ? process.execPath : 'npm',
+    npmCli ? [npmCli, ...args] : args,
+    consumer
+  );
+=======
     .filter(Boolean).map((directory) => path.join(directory, 'node_modules/npm/bin/npm-cli.js'))
     .find(existsSync);
   if (process.platform === 'win32' && !npmCli) throw new Error('Cannot locate npm CLI on Windows');
   return recordCommand(evidence, name, npmCli ? process.execPath : 'npm', npmCli ? [npmCli, ...args] : args, consumer);
+>>>>>>> origin/main
 }
 
 /** Copy real package payloads and reproduce Node's reachable dependency/peer graph. */
 function copyInstalledClosure(consumer, dependencies, devDependencies, installedRoot) {
+<<<<<<< HEAD
+  const roots = [
+    installedRoot,
+    path.join(installedRoot, 'packages/compiler'),
+    path.join(installedRoot, 'packages/adapters/react'),
+  ];
+=======
   const roots = [installedRoot, path.join(installedRoot, 'packages/compiler'), path.join(installedRoot, 'packages/adapters/react')];
+>>>>>>> origin/main
   const store = path.join(installedRoot, 'node_modules/.pnpm');
   const storeEntries = existsSync(store) ? readdirSync(store).sort() : [];
   const records = new Map();
@@ -191,7 +339,12 @@ function copyInstalledClosure(consumer, dependencies, devDependencies, installed
     const canonical = realpathSync(directory);
     const manifest = json(path.join(canonical, 'package.json'));
     if (manifest.name !== name) throw new Error(`Package identity mismatch: ${directory}`);
+<<<<<<< HEAD
+    if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(manifest.version))
+      throw new Error(`Non-exact package version: ${directory}`);
+=======
     if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/.test(manifest.version)) throw new Error(`Non-exact package version: ${directory}`);
+>>>>>>> origin/main
     return { source: canonical, manifest };
   }
   function rootPackage(name, version) {
@@ -204,7 +357,13 @@ function copyInstalledClosure(consumer, dependencies, devDependencies, installed
       const record = manifestAt(path.join(store, entry, 'node_modules', name), name);
       if (record?.manifest.version === version) return record;
     }
+<<<<<<< HEAD
+    throw new Error(
+      `Offline package ${name}@${version} is not installed beneath ${installedRoot}; select registry mode or a complete installed package root`
+    );
+=======
     throw new Error(`Offline package ${name}@${version} is not installed beneath ${installedRoot}; select registry mode or a complete installed package root`);
+>>>>>>> origin/main
   }
   function sourceDependency(name, importer) {
     packageName(name);
@@ -233,8 +392,15 @@ function copyInstalledClosure(consumer, dependencies, devDependencies, installed
     mkdirSync(destination, { recursive: true });
     function copy(current, target, active = new Set()) {
       const canonical = realpathSync(current);
+<<<<<<< HEAD
+      if (!within(source, canonical))
+        throw new Error(`Installed package payload escapes package root: ${current}`);
+      if (active.has(canonical))
+        throw new Error(`Cyclic installed package payload link: ${current}`);
+=======
       if (!within(source, canonical)) throw new Error(`Installed package payload escapes package root: ${current}`);
       if (active.has(canonical)) throw new Error(`Cyclic installed package payload link: ${current}`);
+>>>>>>> origin/main
       const info = statSync(current);
       if (info.isDirectory()) {
         mkdirSync(target, { recursive: true });
@@ -251,7 +417,12 @@ function copyInstalledClosure(consumer, dependencies, devDependencies, installed
   function add(record, destination, by) {
     const existing = records.get(destination);
     if (existing) {
+<<<<<<< HEAD
+      if (existing.source !== record.source)
+        throw new Error(`Conflicting copied dependency at ${destination}`);
+=======
       if (existing.source !== record.source) throw new Error(`Conflicting copied dependency at ${destination}`);
+>>>>>>> origin/main
       existing.requiredBy.push(by);
       return existing;
     }
@@ -270,6 +441,28 @@ function copyInstalledClosure(consumer, dependencies, devDependencies, installed
     const required = manifest.dependencies ?? {};
     const optional = manifest.optionalDependencies ?? {};
     const peers = manifest.peerDependencies ?? {};
+<<<<<<< HEAD
+    for (const name of new Set([
+      ...Object.keys(required),
+      ...Object.keys(optional),
+      ...Object.keys(peers),
+    ])) {
+      packageName(name);
+      const specifications = [optional[name] ?? required[name], peers[name]].filter(Boolean);
+      if (specifications.some((specifier) => /^(?:workspace:|link:|file:)/.test(specifier)))
+        throw new Error(`Unpacked local/workspace dependency: ${manifest.name} -> ${name}`);
+      const source = sourceDependency(name, parent.source);
+      const mayBeAbsent =
+        Object.hasOwn(optional, name) ||
+        (Object.hasOwn(peers, name) &&
+          manifest.peerDependenciesMeta?.[name]?.optional === true &&
+          !Object.hasOwn(required, name));
+      if (!source) {
+        if (!mayBeAbsent)
+          throw new Error(
+            `Incomplete offline closure: ${manifest.name}@${manifest.version} requires ${name}`
+          );
+=======
     for (const name of new Set([...Object.keys(required), ...Object.keys(optional), ...Object.keys(peers)])) {
       packageName(name);
       const specifications = [optional[name] ?? required[name], peers[name]].filter(Boolean);
@@ -278,22 +471,261 @@ function copyInstalledClosure(consumer, dependencies, devDependencies, installed
       const mayBeAbsent = Object.hasOwn(optional, name) || (Object.hasOwn(peers, name) && manifest.peerDependenciesMeta?.[name]?.optional === true && !Object.hasOwn(required, name));
       if (!source) {
         if (!mayBeAbsent) throw new Error(`Incomplete offline closure: ${manifest.name}@${manifest.version} requires ${name}`);
+>>>>>>> origin/main
         absentOptional.push({ importer: manifest.name, name, specifications });
         continue;
       }
       for (const specification of specifications) {
+<<<<<<< HEAD
+        if (
+          /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(specification) &&
+          specification !== source.manifest.version
+        )
+          throw new Error(
+            `Installed edge version mismatch: ${manifest.name} requires ${name}@${specification}`
+          );
+      }
+      const resolved = destinationDependency(name, parent.destination);
+      if (resolved?.source === source.source) {
+        resolved.requiredBy.push(`${manifest.name}@${manifest.version}`);
+        continue;
+      }
+      const rootDestination = path.join(consumer, 'node_modules', name);
+      const destination = !records.has(rootDestination)
+        ? rootDestination
+        : path.join(parent.destination, 'node_modules', name);
+=======
         if (/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(specification) && specification !== source.manifest.version) throw new Error(`Installed edge version mismatch: ${manifest.name} requires ${name}@${specification}`);
       }
       const resolved = destinationDependency(name, parent.destination);
       if (resolved?.source === source.source) { resolved.requiredBy.push(`${manifest.name}@${manifest.version}`); continue; }
       const rootDestination = path.join(consumer, 'node_modules', name);
       const destination = !records.has(rootDestination) ? rootDestination : path.join(parent.destination, 'node_modules', name);
+>>>>>>> origin/main
       add(source, destination, `${manifest.name}@${manifest.version}`);
     }
   }
   // Explicitly an inventory in npm-lock schema for the existing offline verifier, NOT an
   // npm-generated lock or registry/tarball integrity attestation. Real byte digests are below.
   const manifest = json(path.join(consumer, 'package.json'));
+<<<<<<< HEAD
+  const packages = {
+    '': { name: manifest.name, version: manifest.version, dependencies, devDependencies },
+  };
+  const copied = [];
+  for (const record of records.values()) {
+    const location = path.relative(consumer, record.destination).split(path.sep).join('/');
+    packages[location] = Object.fromEntries(
+      [
+        'name',
+        'version',
+        'dependencies',
+        'optionalDependencies',
+        'peerDependencies',
+        'peerDependenciesMeta',
+        'os',
+        'cpu',
+      ]
+        .filter((field) => record.manifest[field] !== undefined)
+        .map((field) => [field, record.manifest[field]])
+    );
+    const original = payload(record.source);
+    const delivered = payload(record.destination);
+    assert.deepEqual(delivered, original, `Offline copy differs from package payload: ${location}`);
+    copied.push({
+      name: record.manifest.name,
+      version: record.manifest.version,
+      location,
+      copiedFrom: record.source,
+      requiredBy: [...new Set(record.requiredBy)].sort(),
+      ...delivered,
+    });
+  }
+  save(path.join(consumer, 'package-lock.json'), {
+    name: manifest.name,
+    version: manifest.version,
+    lockfileVersion: 3,
+    requires: true,
+    _nativeSmokeOrigin: 'copied-closure-inventory-not-npm-install',
+    packages,
+  });
+  return {
+    mode: 'offline-payload-copy',
+    provenance: 'Original installed payload bytes matched; no registry/tarball authenticity claim',
+    packages: copied,
+    absentOptional,
+  };
+}
+
+async function compilerWorker(inputRoot, outputRoot, profile, evidence) {
+  const timing = {
+    scope:
+      'No performance threshold or Adapter comparison. firstCompileFileMs excludes module loading; coldProcessStartToCompilationMs includes fresh-process initialization/imports. Project timings include source reads and semantic lowering/cache lookup in that already-loaded process. Command wall time includes the entire benchmark worker, not just its first compilation.',
+    profile,
+    node: process.version,
+    typescript: ts.version,
+  };
+  timing.memory = {
+    platform: process.platform,
+    snapshotUnit: 'bytes',
+    scope:
+      'Whole compiler worker process, including module imports, retained compilations and evidence bookkeeping. Coarse process.memoryUsage snapshots; no forced GC, allocation count, per-component attribution or reclamation proof. arrayBuffers is included in external.',
+    snapshots: [],
+  };
+  const memorySnapshot = (stage) =>
+    timing.memory.snapshots.push({ stage, ...process.memoryUsage() });
+  memorySnapshot('worker-initialized-after-module-imports');
+  const entry = path.join(inputRoot, 'entry.proto.ts');
+  try {
+    const start = performance.now();
+    const first = await compileFile(entry, { root: inputRoot, profile });
+    timing.firstCompileFileMs = performance.now() - start;
+    timing.coldProcessStartToCompilationMs = performance.now();
+    memorySnapshot('first-compile-completed');
+    save(
+      path.join(evidence, 'compile-result.json'),
+      first.ok ? { ok: true, profile: first.value.output.profile } : first
+    );
+    if (!first.ok) throw new Error(JSON.stringify(first.diagnostics));
+    const artifacts = new Map(
+      compilationArtifacts(first.value).map((artifact) => [artifact.path, artifact])
+    );
+    // Publish independent native components into one module closure. Shared key/style/scope
+    // modules must be byte-identical and are delivered once, not copied per component.
+    const provenance = JSON.parse(artifacts.get('provenance.json').contents);
+    save(path.join(evidence, 'Component-compiler-provenance.json'), provenance);
+    for (const [filename, componentName] of [
+      ['provider.proto.ts', 'Provider'],
+      ['context.proto.ts', 'ContextConsumer'],
+    ]) {
+      const compiled = await compileFile(path.join(inputRoot, filename), {
+        root: inputRoot,
+        profile,
+        componentName,
+      });
+      save(
+        path.join(evidence, `${componentName}-compile-result.json`),
+        compiled.ok ? { ok: true } : compiled
+      );
+      if (!compiled.ok) throw new Error(JSON.stringify(compiled.diagnostics));
+      const output = compiled.value.output;
+      save(path.join(evidence, `${componentName}-compiler-provenance.json`), {
+        ...output.provenance,
+        profile: output.profile,
+        dependencies: output.dependencies,
+        sourceFiles: compiled.value.ir.sourceFiles.map((file) => ({
+          file: file.file,
+          sha256: file.sha256,
+        })),
+      });
+      const extension = provenance.artifacts
+        .find((file) => file.kind === 'source')
+        .path.match(/\.[^.]+$/)[0];
+      const sourcePath = componentName + extension;
+      const candidates = compilationArtifacts(compiled.value, {
+        sourcePath,
+        manifestPath: `${componentName}.provenance.json`,
+      });
+      for (const artifact of candidates) {
+        const previous = artifacts.get(artifact.path);
+        if (previous)
+          assert.equal(
+            previous.contents,
+            artifact.contents,
+            `Incompatible shared artifact: ${artifact.path}`
+          );
+        else artifacts.set(artifact.path, artifact);
+      }
+      for (const file of compiled.value.ir.sourceFiles) {
+        const previous = provenance.sourceFiles.find((item) => item.file === file.file);
+        if (previous) assert.equal(previous.sha256, file.sha256);
+        else provenance.sourceFiles.push({ file: file.file, sha256: file.sha256 });
+      }
+    }
+    provenance.consumerAssembly =
+      'Three separately compiled prototypes; deduplicated byte-identical supporting modules';
+    provenance.artifacts = [...artifacts.values()]
+      .filter((file) => file.path !== 'provenance.json')
+      .map((file) => ({ path: file.path, kind: file.kind, sha256: sha(file.contents) }));
+    artifacts.set('provenance.json', {
+      path: 'provenance.json',
+      kind: 'manifest',
+      contents: JSON.stringify(provenance, null, 2) + '\n',
+    });
+    const written = await writeArtifactSet([...artifacts.values()], outputRoot);
+    save(path.join(evidence, 'write-result.json'), written);
+    if (!written.ok) throw new Error(JSON.stringify(written.diagnostics));
+    memorySnapshot('three-component-artifacts-written');
+    const options = { root: inputRoot, entries: ['entry.proto.ts'], profile };
+    const coldStart = performance.now();
+    let generation = await compileProject(options);
+    timing.newProjectMs = performance.now() - coldStart;
+    if (!generation.ok) throw new Error(JSON.stringify(generation.diagnostics));
+    memorySnapshot('new-project-completed');
+    timing.unchangedProject = [];
+    for (let index = 0; index < 5; index++) {
+      const sample = performance.now();
+      generation = await compileProject(options, generation.value.project);
+      if (!generation.ok) throw new Error(JSON.stringify(generation.diagnostics));
+      timing.unchangedProject.push({
+        ms: performance.now() - sample,
+        cacheHit: generation.value.entries[0].cacheHit,
+      });
+    }
+    memorySnapshot('five-unchanged-project-compilations-completed');
+    const original = readFileSync(entry, 'utf8');
+    try {
+      writeFileSync(entry, original.replace('max:100', 'max:101'));
+      const editedStart = performance.now();
+      generation = await compileProject(options, generation.value.project);
+      timing.editedProjectMs = performance.now() - editedStart;
+      if (!generation.ok) throw new Error(JSON.stringify(generation.diagnostics));
+      memorySnapshot('changed-project-completed');
+      timing.editedCacheHit = generation.value.entries[0].cacheHit;
+      timing.edit =
+        'Numeric state upper bound changed from 100 to 101; generated consumer uses original bound';
+      timing.originalGeneratedSha256 = sha(first.value.output.code);
+      timing.editedGeneratedSha256 = sha(generation.value.entries[0].compilation.output.code);
+      assert.equal(timing.editedCacheHit, false, 'Semantic input edit reused an old compilation');
+      assert.notEqual(
+        timing.originalGeneratedSha256,
+        timing.editedGeneratedSha256,
+        'Semantic input edit did not alter emitted output'
+      );
+    } finally {
+      writeFileSync(entry, original);
+    }
+    // The same valid input is rejected only when the real host denies style projection.
+    const rejection = await compileFile(entry, {
+      root: inputRoot,
+      profile: {
+        profile,
+        hostCapabilities: TARGET_PROFILES[profile].hostCapabilities.filter(
+          (capability) => capability !== 'style-projection'
+        ),
+      },
+    });
+    save(path.join(evidence, 'unsupported-result.json'), rejection.ok ? { ok: true } : rejection);
+    assert.equal(
+      rejection.ok,
+      false,
+      'Capability-restricted host silently admitted style projection'
+    );
+    assert.ok(
+      rejection.diagnostics.some(
+        (diagnostic) => diagnostic.category === 'unsupported-input' && diagnostic.code === 'PUI4004'
+      ),
+      'Restricted control must fail host capability admission, not input syntax'
+    );
+  } finally {
+    memorySnapshot('worker-finally');
+    timing.memory.peakResidentSet = {
+      value: process.resourceUsage().maxRSS,
+      unit: 'KiB (1024 bytes)',
+      platform: process.platform,
+      scope:
+        'Node process.resourceUsage().maxRSS: whole-process resident-set high-water mark through worker finally, including initialization/imports, all compilations and evidence bookkeeping; not sampled heap or per-compilation memory.',
+=======
   const packages = { '': { name: manifest.name, version: manifest.version, dependencies, devDependencies } };
   const copied = [];
   for (const record of records.values()) {
@@ -403,6 +835,7 @@ async function compilerWorker(inputRoot, outputRoot, profile, evidence) {
     timing.memory.peakResidentSet = {
       value: process.resourceUsage().maxRSS, unit: 'KiB (1024 bytes)', platform: process.platform,
       scope: 'Node process.resourceUsage().maxRSS: whole-process resident-set high-water mark through worker finally, including initialization/imports, all compilations and evidence bookkeeping; not sampled heap or per-compilation memory.',
+>>>>>>> origin/main
     };
     save(path.join(evidence, 'timing.json'), timing);
   }
@@ -667,19 +1100,62 @@ function declarationCosts(filename) {
   const source = ts.createSourceFile(filename, code, ts.ScriptTarget.Latest, true);
   const declarations = [];
   for (const node of source.statements) {
+<<<<<<< HEAD
+    if (
+      !(
+        ts.isFunctionDeclaration(node) ||
+        ts.isClassDeclaration(node) ||
+        ts.isVariableStatement(node) ||
+        ts.isTypeAliasDeclaration(node) ||
+        ts.isInterfaceDeclaration(node)
+      )
+    )
+      continue;
+    const exported = node.modifiers?.some(
+      (modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword
+    );
+    const names = ts.isVariableStatement(node)
+      ? node.declarationList.declarations.map((item) => item.name.getText(source))
+      : [node.name?.text ?? '<anonymous>'];
+    const start = node.getStart(source);
+    declarations.push({
+      names,
+      exported: !!exported,
+      erasedType: ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node),
+      start,
+      end: node.end,
+      bytes: Buffer.byteLength(code.slice(start, node.end)),
+    });
+=======
     if (!(ts.isFunctionDeclaration(node) || ts.isClassDeclaration(node) || ts.isVariableStatement(node) || ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node))) continue;
     const exported = node.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.ExportKeyword);
     const names = ts.isVariableStatement(node) ? node.declarationList.declarations.map((item) => item.name.getText(source)) : [node.name?.text ?? '<anonymous>'];
     const start = node.getStart(source);
     declarations.push({ names, exported: !!exported, erasedType: ts.isTypeAliasDeclaration(node) || ts.isInterfaceDeclaration(node), start, end: node.end, bytes: Buffer.byteLength(code.slice(start, node.end)) });
+>>>>>>> origin/main
   }
   return declarations;
 }
 function importCosts(filename) {
   const code = readFileSync(filename, 'utf8');
   const source = ts.createSourceFile(filename, code, ts.ScriptTarget.Latest, true);
+<<<<<<< HEAD
+  return source.statements
+    .filter(
+      (node) =>
+        ts.isImportDeclaration(node) ||
+        ts.isImportEqualsDeclaration(node) ||
+        (ts.isExportDeclaration(node) && node.moduleSpecifier)
+    )
+    .map((node) => ({
+      start: node.getStart(source),
+      end: node.end,
+      bytes: Buffer.byteLength(code.slice(node.getStart(source), node.end)),
+    }));
+=======
   return source.statements.filter((node) => ts.isImportDeclaration(node) || ts.isImportEqualsDeclaration(node) || (ts.isExportDeclaration(node) && node.moduleSpecifier))
     .map((node) => ({ start: node.getStart(source), end: node.end, bytes: Buffer.byteLength(code.slice(node.getStart(source), node.end)) }));
+>>>>>>> origin/main
 }
 async function checkAndMeasure(consumer, evidence, profile, delivery) {
   // Audit the entire physical installation, including smoke tooling, not just its lock.
@@ -687,13 +1163,67 @@ async function checkAndMeasure(consumer, evidence, profile, delivery) {
   const provenance = json(path.join(consumer, 'generated/provenance.json'));
   assert.equal(provenance.profile, profile.id);
   assert.deepEqual(provenance.dependencies, profile.dependencies);
+<<<<<<< HEAD
+  for (const dependency of provenance.dependencies)
+    assert.equal(
+      dependency.role,
+      'target',
+      `Native output retained a ${dependency.role} dependency`
+    );
+  for (const helper of provenance.helpers ?? profile.helpers) {
+    assert.equal(
+      helper.classification,
+      'native-lowering',
+      `Native output retained unsupported helper ${helper.name}`
+    );
+=======
   for (const dependency of provenance.dependencies) assert.equal(dependency.role, 'target', `Native output retained a ${dependency.role} dependency`);
   for (const helper of provenance.helpers ?? profile.helpers) {
     assert.equal(helper.classification, 'native-lowering', `Native output retained unsupported helper ${helper.name}`);
+>>>>>>> origin/main
     assert.notEqual(helper.delivery, 'dependency', `Native helper dependency leak: ${helper.name}`);
   }
   const sourceFiles = provenance.artifacts.filter((file) => file.kind === 'source');
   assert.ok(sourceFiles.length, 'Compiler produced no source artifacts');
+<<<<<<< HEAD
+  assert.equal(
+    sourceFiles.filter((file) => file.path === '.proto-ui/style/native-v1.ts').length,
+    1,
+    'Shared native style artifact must be delivered exactly once'
+  );
+  assert.equal(
+    sourceFiles.filter((file) => file.path === '.proto-ui/context/scope-v1.ts').length,
+    1,
+    'Shared Context scope must be delivered exactly once'
+  );
+  assert.equal(
+    sourceFiles.filter((file) => /^\.proto-ui\/context\/key-/.test(file.path)).length,
+    2,
+    'Distinct declarations with the same debug name need distinct reference artifacts'
+  );
+  for (const artifact of provenance.artifacts) {
+    assert.ok(
+      ['source', 'source-map', 'declaration', 'manifest'].includes(artifact.kind),
+      `Unsupported generated artifact kind: ${artifact.kind}`
+    );
+    const filename = path.resolve(consumer, 'generated', artifact.path);
+    assert.ok(
+      within(path.join(consumer, 'generated'), filename),
+      'Compiler artifact escaped output directory'
+    );
+    assert.equal(
+      sha(readFileSync(filename)),
+      artifact.sha256,
+      `Artifact digest mismatch: ${artifact.path}`
+    );
+    if (artifact.kind === 'source-map') {
+      const map = json(filename);
+      assert.equal(map.version, 3);
+      assert.ok(
+        map.mappings && map.sources.length && map.sourcesContent?.length === map.sources.length,
+        `Original portable-to-generated source map is incomplete: ${artifact.path}`
+      );
+=======
   assert.equal(sourceFiles.filter(file => file.path === '.proto-ui/style/native-v1.ts').length, 1, 'Shared native style artifact must be delivered exactly once');
   assert.equal(sourceFiles.filter(file => file.path === '.proto-ui/context/scope-v1.ts').length, 1, 'Shared Context scope must be delivered exactly once');
   assert.equal(sourceFiles.filter(file => /^\.proto-ui\/context\/key-/.test(file.path)).length, 2, 'Distinct declarations with the same debug name need distinct reference artifacts');
@@ -706,6 +1236,7 @@ async function checkAndMeasure(consumer, evidence, profile, delivery) {
       const map = json(filename);
       assert.equal(map.version, 3);
       assert.ok(map.mappings && map.sources.length && map.sourcesContent?.length === map.sources.length, `Original portable-to-generated source map is incomplete: ${artifact.path}`);
+>>>>>>> origin/main
     }
   }
   // Keep compiler provenance untouched. This explicitly dependency-only projection lets
@@ -714,6 +1245,128 @@ async function checkAndMeasure(consumer, evidence, profile, delivery) {
   const dependencyProvenance = { ...provenance };
   delete dependencyProvenance.helpers;
   save(path.join(consumer, 'dependency-provenance.json'), dependencyProvenance);
+<<<<<<< HEAD
+  const expected = {
+    profile: profile.id,
+    dependencies: profile.dependencies,
+    generatedFiles: sourceFiles.map((file) => `generated/${file.path}`),
+    provenanceFile: 'dependency-provenance.json',
+  };
+  const closure = await verifyConsumerClosure(consumer, expected);
+  save(path.join(evidence, 'closure-result.json'), closure);
+  if (!closure.ok) throw new Error(JSON.stringify(closure.failures));
+  assert.equal(
+    closure.value.internal.length,
+    0,
+    'Native output reaches an internal Proto-UI package'
+  );
+  mkdirSync(path.join(consumer, 'negative-controls'));
+  const negativeSource = path.join(consumer, 'negative-controls/import.ts');
+  writeFileSync(negativeSource, "import '@proto.ui/runtime';\n");
+  const importNegative = await verifyConsumerClosure(consumer, {
+    ...expected,
+    generatedFiles: [...expected.generatedFiles, 'negative-controls/import.ts'],
+  });
+  assert.equal(importNegative.ok, false, 'Closure accepted a hidden Runtime import');
+  assert.ok(importNegative.failures.some((failure) => failure.code === 'undeclared-import'));
+  const helperNegative = await verifyConsumerClosure(consumer, {
+    ...expected,
+    helpers: [
+      {
+        name: '__missingNativeHelperNegativeControl',
+        version: '1',
+        classification: 'native-lowering',
+        delivery: 'inline',
+      },
+    ],
+  });
+  assert.equal(helperNegative.ok, false, 'Closure accepted an absent helper');
+  assert.ok(helperNegative.failures.some((failure) => failure.code === 'missing-helper'));
+  save(path.join(evidence, 'closure-negative-controls.json'), {
+    importLeak: importNegative,
+    absentHelper: helperNegative,
+  });
+  const sources = sourceFiles.map((file) => {
+    const filename = path.join(consumer, 'generated', file.path);
+    return {
+      path: file.path,
+      bytes: statSync(filename).size,
+      sha256: sha(readFileSync(filename)),
+      declarations: declarationCosts(filename),
+      importStatements: importCosts(filename),
+    };
+  });
+  const packages = [...closure.value.external].map((record) => ({
+    name: record.name,
+    version: record.version,
+    location: record.lockPath,
+    roles: record.roles,
+    ...payload(record.realPath),
+  }));
+  const lock = json(path.join(consumer, 'package-lock.json'));
+  const allPackages = installedPackages(consumer, lock);
+  for (const [name, version] of Object.entries(toolVersions))
+    assert.equal(
+      allPackages.find((record) => record.location === `node_modules/${name}`)?.version,
+      version,
+      `Smoke tooling version mismatch: ${name}`
+    );
+  const costs = {
+    profile: profile.id,
+    targetVersion: profile.version,
+    dependencyDelivery: delivery.mode,
+    comparison: {
+      mode: 'native-only / one-sided',
+      reference: null,
+      claim:
+        'No independently installed packed Adapter closure is exercised; no faster or parity claim',
+    },
+    measurement:
+      'Size fields are actual uncompressed UTF-8/source and installed regular-file payload bytes; no gzip, tree-shaking or shared amortization claim. Compiler memory and runtime observations have separate whole-process/DOM scopes; no exact allocation, native-browser/layout or Adapter comparison claim.',
+    compilerMemory: json(path.join(evidence, 'timing.json')).memory,
+    unavailableMeasurements: {
+      exactHeapAllocationCounts:
+        'No allocation instrumentation; memoryUsage snapshots and maxRSS are not allocation counts.',
+      nativeBrowserLayoutPerformance:
+        'Happy DOM is not a native browser and supplies no layout-performance oracle.',
+      adapterRelativePerformance:
+        'No independently installed packed Adapter baseline is exercised.',
+    },
+    compilerProvenanceBytes: statSync(path.join(consumer, 'generated/provenance.json')).size,
+    emittedSourceBytes: sources.reduce((sum, file) => sum + file.bytes, 0),
+    emittedSupportingSourceBytes: sources
+      .filter((file) => file.path.startsWith('.proto-ui/'))
+      .reduce((sum, file) => sum + file.bytes, 0),
+    emittedSourceMapBytes: provenance.artifacts
+      .filter((file) => file.kind === 'source-map')
+      .reduce((sum, file) => sum + statSync(path.join(consumer, 'generated', file.path)).size, 0),
+    imports: closure.value.imports,
+    importCount: closure.value.imports.length,
+    staticImportStatementBytes: sources.reduce(
+      (sum, file) =>
+        sum + file.importStatements.reduce((total, statement) => total + statement.bytes, 0),
+      0
+    ),
+    declaredHelperMetadata: provenance.helpers ?? profile.helpers,
+    helperMeasurement:
+      'Exact top-level declaration spans; unexported executable declarations are an inline-lowering footprint, not a one-to-one attestation of metadata helper names. Supporting modules are additionally reported whole, without subtracting their imports/types/comments.',
+    inlineExecutableDeclarationBytes: sources.reduce(
+      (sum, file) =>
+        sum +
+        file.declarations
+          .filter((item) => !item.exported && !item.erasedType)
+          .reduce((total, item) => total + item.bytes, 0),
+      0
+    ),
+    sources,
+    outputDependencyPackages: packages,
+    outputDependencyPayloadBytes: packages.reduce((sum, record) => sum + record.bytes, 0),
+    allInstalledPackagesIncludingSmokeTooling: allPackages,
+    allInstalledPayloadBytesIncludingSmokeTooling: allPackages.reduce(
+      (sum, record) => sum + record.bytes,
+      0
+    ),
+=======
   const expected = { profile: profile.id, dependencies: profile.dependencies, generatedFiles: sourceFiles.map((file) => `generated/${file.path}`), provenanceFile: 'dependency-provenance.json' };
   const closure = await verifyConsumerClosure(consumer, expected);
   save(path.join(evidence, 'closure-result.json'), closure);
@@ -761,6 +1414,7 @@ async function checkAndMeasure(consumer, evidence, profile, delivery) {
     outputDependencyPayloadBytes: packages.reduce((sum, record) => sum + record.bytes, 0),
     allInstalledPackagesIncludingSmokeTooling: allPackages,
     allInstalledPayloadBytesIncludingSmokeTooling: allPackages.reduce((sum, record) => sum + record.bytes, 0),
+>>>>>>> origin/main
     smokeTooling: toolVersions,
   };
   save(path.join(evidence, 'costs.json'), costs);
@@ -769,7 +1423,13 @@ async function checkAndMeasure(consumer, evidence, profile, delivery) {
 
 function editConsumerSource(consumer, evidence) {
   const provenance = json(path.join(consumer, 'generated/provenance.json'));
+<<<<<<< HEAD
+  const sourcePath = provenance.artifacts.find(
+    (file) => /^Component\.[^.]+$/.test(file.path) && file.kind === 'source'
+  ).path;
+=======
   const sourcePath = provenance.artifacts.find(file => /^Component\.[^.]+$/.test(file.path) && file.kind === 'source').path;
+>>>>>>> origin/main
   const filename = path.join(consumer, 'generated', sourcePath);
   const original = readFileSync(filename, 'utf8');
   const source = ts.createSourceFile(sourcePath, original, ts.ScriptTarget.Latest, true);
@@ -779,15 +1439,35 @@ function editConsumerSource(consumer, evidence) {
     ts.forEachChild(node, visit);
   }
   visit(source);
+<<<<<<< HEAD
+  assert.equal(
+    candidates.length,
+    1,
+    'Generated template section edit must have exactly one ownership boundary'
+  );
+  const node = candidates[0];
+  const edited =
+    original.slice(0, node.getStart(source)) + JSON.stringify('article') + original.slice(node.end);
+=======
   assert.equal(candidates.length, 1, 'Generated template section edit must have exactly one ownership boundary');
   const node = candidates[0];
   const edited = original.slice(0, node.getStart(source)) + JSON.stringify('article') + original.slice(node.end);
+>>>>>>> origin/main
   copyFileSync(filename, path.join(evidence, 'Component.before-edit.txt'));
   writeFileSync(filename, edited);
   copyFileSync(filename, path.join(evidence, 'Component.after-edit.txt'));
   const ownership = {
+<<<<<<< HEAD
+    source: sourcePath,
+    edit: 'Consumer-owned generated template element changed from section to article without invoking compiler',
+    beforeSha256: sha(original),
+    afterSha256: sha(edited),
+    beforeBytes: Buffer.byteLength(original),
+    afterBytes: Buffer.byteLength(edited),
+=======
     source: sourcePath, edit: 'Consumer-owned generated template element changed from section to article without invoking compiler',
     beforeSha256: sha(original), afterSha256: sha(edited), beforeBytes: Buffer.byteLength(original), afterBytes: Buffer.byteLength(edited),
+>>>>>>> origin/main
     maps: 'Compiler portable-to-generated map/provenance remain immutable historical evidence and are stale after this local edit. Rebuild creates current executable-to-edited-generated-source maps with embedded sources.',
   };
   save(path.join(evidence, 'source-ownership.json'), ownership);
@@ -797,36 +1477,162 @@ function editConsumerSource(consumer, evidence) {
     const invalid = edited + '\nconst = ;\n';
     writeFileSync(filename, invalid);
     writeFileSync(path.join(evidence, 'Component.invalid-edit.txt'), invalid);
+<<<<<<< HEAD
+    recordCommand(
+      evidence,
+      'edited-source-diagnostic',
+      process.execPath,
+      ['build.mjs'],
+      consumer,
+      {},
+      true
+    );
+    const diagnostic = json(path.join(consumer, 'typecheck-diagnostics.json'));
+    assert.ok(
+      diagnostic.some(
+        (item) =>
+          item.file?.split(path.sep).join('/') === `generated/${sourcePath}` &&
+          item.start >= edited.length
+      ),
+      'Consumer build must locate the introduced syntax error in generated source'
+    );
+    save(path.join(evidence, 'edited-source-diagnostic.json'), diagnostic);
+  } finally {
+    writeFileSync(filename, edited);
+  }
+=======
     recordCommand(evidence, 'edited-source-diagnostic', process.execPath, ['build.mjs'], consumer, {}, true);
     const diagnostic = json(path.join(consumer, 'typecheck-diagnostics.json'));
     assert.ok(diagnostic.some(item => item.file?.split(path.sep).join('/') === `generated/${sourcePath}` && item.start >= edited.length), 'Consumer build must locate the introduced syntax error in generated source');
     save(path.join(evidence, 'edited-source-diagnostic.json'), diagnostic);
   } finally { writeFileSync(filename, edited); }
+>>>>>>> origin/main
   return ownership;
 }
 
 async function main() {
+<<<<<<< HEAD
+  const selected =
+    process.env.NATIVE_CONSUMER_PROFILES?.split(',')
+      .map((value) => value.trim())
+      .filter(Boolean) ?? supported;
+  assert.ok(
+    selected.length && new Set(selected).size === selected.length,
+    'Choose a non-empty unique profile list'
+  );
+  for (const id of selected) assert.ok(supported.includes(id), `Unsupported smoke profile: ${id}`);
+  const mode = process.env.NATIVE_CONSUMER_DEPENDENCIES ?? 'copy';
+  assert.ok(
+    ['copy', 'registry'].includes(mode),
+    'NATIVE_CONSUMER_DEPENDENCIES must be copy or registry'
+  );
+=======
   const selected = process.env.NATIVE_CONSUMER_PROFILES?.split(',').map((value) => value.trim()).filter(Boolean) ?? supported;
   assert.ok(selected.length && new Set(selected).size === selected.length, 'Choose a non-empty unique profile list');
   for (const id of selected) assert.ok(supported.includes(id), `Unsupported smoke profile: ${id}`);
   const mode = process.env.NATIVE_CONSUMER_DEPENDENCIES ?? 'copy';
   assert.ok(['copy', 'registry'].includes(mode), 'NATIVE_CONSUMER_DEPENDENCIES must be copy or registry');
+>>>>>>> origin/main
   const installedRoot = realpathSync(process.env.NATIVE_CONSUMER_PACKAGE_ROOT ?? repoRoot);
   const work = mkdtempSync(path.join(tmpdir(), 'proto-native-consumers-'));
   assert.ok(!within(repoRoot, work), 'Consumer evidence must be outside the source repository');
   console.log(`NATIVE_CONSUMER_EVIDENCE: ${work}`);
+<<<<<<< HEAD
+  const summary = {
+    evidence: work,
+    node: process.version,
+    dependencyMode: mode,
+    oneSided: true,
+    surface: 'Happy DOM real framework mounts; no native-browser/layout evidence',
+    results: [],
+  };
+=======
   const summary = { evidence: work, node: process.version, dependencyMode: mode, oneSided: true, surface: 'Happy DOM real framework mounts; no native-browser/layout evidence', results: [] };
+>>>>>>> origin/main
   for (const id of selected) {
     const evidence = path.join(work, id);
     const consumer = path.join(evidence, 'consumer');
     const inputs = path.join(evidence, 'compiler-input');
+<<<<<<< HEAD
+    mkdirSync(consumer, { recursive: true });
+    mkdirSync(inputs);
+=======
     mkdirSync(consumer, { recursive: true });mkdirSync(inputs);
+>>>>>>> origin/main
     writeFileSync(path.join(inputs, 'entry.proto.ts'), numericSource);
     writeFileSync(path.join(inputs, 'keys.ts'), contextKeysSource);
     writeFileSync(path.join(inputs, 'provider.proto.ts'), providerSource);
     writeFileSync(path.join(inputs, 'context.proto.ts'), contextConsumerSource);
     const profile = TARGET_PROFILES[id];
     try {
+<<<<<<< HEAD
+      assert.ok(
+        profile?.implemented && profile.mode === 'source',
+        `Native profile not implemented: ${id}`
+      );
+      recordCommand(
+        evidence,
+        'cold-compiler-process',
+        process.execPath,
+        [
+          ...process.execArgv,
+          script,
+          '--compiler-worker',
+          inputs,
+          path.join(consumer, 'generated'),
+          id,
+          evidence,
+        ],
+        repoRoot
+      );
+      const dependencies = Object.fromEntries(
+        profile.dependencies.map((dependency) => [dependency.name, dependency.version])
+      );
+      for (const name of Object.keys(dependencies)) packageName(name);
+      const devDependencies = {
+        ...toolVersions,
+        ...(id === 'react-dom-source-v1' ? reactTypeVersions : {}),
+      };
+      save(path.join(consumer, 'package.json'), {
+        name: `native-consumer-${id}`,
+        version: '1.0.0',
+        private: true,
+        type: 'module',
+        dependencies,
+        devDependencies,
+      });
+      let delivery;
+      if (mode === 'copy')
+        delivery = copyInstalledClosure(consumer, dependencies, devDependencies, installedRoot);
+      else {
+        writeFileSync(
+          path.join(consumer, '.npmrc'),
+          'registry=https://registry.npmjs.org/\naudit=false\nfund=false\n'
+        );
+        runNpm(
+          evidence,
+          'install',
+          [
+            'install',
+            '--ignore-scripts',
+            '--no-audit',
+            '--no-fund',
+            '--cache',
+            path.join(consumer, '.npm-cache'),
+            '--userconfig',
+            path.join(consumer, '.npmrc'),
+          ],
+          consumer
+        );
+        runNpm(evidence, 'installed-tree', ['ls', '--all', '--json'], consumer);
+        delivery = {
+          mode: 'exact-registry-install',
+          registry: 'https://registry.npmjs.org/',
+          direct: dependencies,
+          tooling: toolVersions,
+          installScripts: false,
+        };
+=======
       assert.ok(profile?.implemented && profile.mode === 'source', `Native profile not implemented: ${id}`);
       recordCommand(evidence, 'cold-compiler-process', process.execPath, [...process.execArgv, script, '--compiler-worker', inputs, path.join(consumer, 'generated'), id, evidence], repoRoot);
       const dependencies = Object.fromEntries(profile.dependencies.map((dependency) => [dependency.name, dependency.version]));
@@ -840,6 +1646,7 @@ async function main() {
         runNpm(evidence, 'install', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--cache', path.join(consumer, '.npm-cache'), '--userconfig', path.join(consumer, '.npmrc')], consumer);
         runNpm(evidence, 'installed-tree', ['ls', '--all', '--json'], consumer);
         delivery = { mode: 'exact-registry-install', registry: 'https://registry.npmjs.org/', direct: dependencies, tooling: toolVersions, installScripts: false };
+>>>>>>> origin/main
       }
       save(path.join(evidence, 'dependency-delivery.json'), delivery);
       const costs = await checkAndMeasure(consumer, evidence, profile, delivery);
@@ -855,6 +1662,97 @@ async function main() {
       const originalTrace = json(path.join(consumer, 'runtime-trace.json'));
       assert.equal(originalTrace.ok, true);
       costs.runtimeObservations = {
+<<<<<<< HEAD
+        scope:
+          'Separate isolated runtime processes for original and consumer-edited source. Process snapshots include framework/Happy DOM/evidence overhead and deliberately held references; resource observations cover the numeric component only. No GC is forced and no allocation, browser layout, throughput or relative speed is inferred.',
+        original: { measurements: originalTrace.measurements, resources: originalTrace.resources },
+      };
+      save(path.join(evidence, 'costs.json'), costs);
+      copyFileSync(
+        path.join(consumer, 'runtime-trace.json'),
+        path.join(evidence, 'runtime-original.json')
+      );
+      copyFileSync(
+        path.join(consumer, 'build-report.json'),
+        path.join(evidence, 'build-original.json')
+      );
+      const ownership = editConsumerSource(consumer, evidence);
+      recordCommand(evidence, 'edited-build', process.execPath, ['build.mjs'], consumer);
+      recordCommand(
+        evidence,
+        'edited-runtime',
+        process.execPath,
+        ['smoke.mjs', id, 'edited'],
+        consumer
+      );
+      const editedTrace = json(path.join(consumer, 'runtime-trace.json'));
+      assert.equal(editedTrace.ok, true);
+      assert.equal(editedTrace.sourceOwnership, 'edited');
+      const editedBuild = json(path.join(consumer, 'build-report.json'));
+      costs.editedConsumer = {
+        generatedEntryBytes: ownership.afterBytes,
+        executableOutputBytes: editedBuild.files.reduce((sum, file) => sum + file.bytes, 0),
+        executableSourceMapBytes: editedBuild.files.reduce((sum, file) => sum + file.mapBytes, 0),
+      };
+      costs.runtimeObservations.edited = {
+        measurements: editedTrace.measurements,
+        resources: editedTrace.resources,
+      };
+      save(path.join(evidence, 'costs.json'), costs);
+      copyFileSync(
+        path.join(consumer, 'runtime-trace.json'),
+        path.join(evidence, 'runtime-edited.json')
+      );
+      copyFileSync(
+        path.join(consumer, 'build-report.json'),
+        path.join(evidence, 'build-edited.json')
+      );
+      filesUnder(path.join(consumer, 'node_modules'));
+      const afterPackages = installedPackages(
+        consumer,
+        json(path.join(consumer, 'package-lock.json'))
+      );
+      assert.deepEqual(
+        afterPackages,
+        costs.allInstalledPackagesIncludingSmokeTooling,
+        'Build/edit/runtime mutated the physical installed dependency tree'
+      );
+      save(path.join(evidence, 'installed-tree-integrity.json'), {
+        before: costs.allInstalledPackagesIncludingSmokeTooling,
+        after: afterPackages,
+        equal: true,
+      });
+      summary.results.push({
+        profile: id,
+        ok: true,
+        targetVersion: profile.version,
+        consumer,
+        ownership,
+        costs: path.join(evidence, 'costs.json'),
+        compilerTiming: path.join(evidence, 'timing.json'),
+        originalRuntime: path.join(evidence, 'runtime-original.json'),
+        editedRuntime: path.join(evidence, 'runtime-edited.json'),
+        installedTreeIntegrity: path.join(evidence, 'installed-tree-integrity.json'),
+      });
+      console.log(
+        'NATIVE_CONSUMER_PASS',
+        id,
+        JSON.stringify({
+          emittedBytes: costs.emittedSourceBytes,
+          executableBytes: costs.executableOutputBytes,
+          dependencyPayloadBytes: costs.outputDependencyPayloadBytes,
+        })
+      );
+    } catch (error) {
+      const failure = { message: error.message, stack: error.stack };
+      save(path.join(evidence, 'failure.json'), failure);
+      summary.results.push({
+        profile: id,
+        ok: false,
+        consumer,
+        failure: path.join(evidence, 'failure.json'),
+      });
+=======
         scope: 'Separate isolated runtime processes for original and consumer-edited source. Process snapshots include framework/Happy DOM/evidence overhead and deliberately held references; resource observations cover the numeric component only. No GC is forced and no allocation, browser layout, throughput or relative speed is inferred.',
         original: { measurements: originalTrace.measurements, resources: originalTrace.resources },
       };
@@ -882,6 +1780,7 @@ async function main() {
       const failure = { message: error.message, stack: error.stack };
       save(path.join(evidence, 'failure.json'), failure);
       summary.results.push({ profile: id, ok: false, consumer, failure: path.join(evidence, 'failure.json') });
+>>>>>>> origin/main
       console.error('NATIVE_CONSUMER_FAIL', id, error.message);
     }
     save(path.join(work, 'summary.json'), summary);

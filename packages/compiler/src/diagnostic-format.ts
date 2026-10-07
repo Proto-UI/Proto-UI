@@ -16,7 +16,10 @@ const graphemes = new Intl.Segmenter('en', { granularity: 'grapheme' });
 const controls = /[\u0000-\u0008\u000b-\u001f\u007f-\u009f\u202a-\u202e\u2066-\u2069]/g;
 
 function escapeControls(text: string): string {
-  return text.replace(controls, (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`);
+  return text.replace(
+    controls,
+    (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, '0')}`
+  );
 }
 
 /** Unsafe file identities are redacted, never resolved against cwd or the environment. */
@@ -27,18 +30,25 @@ function displayFile(file: string): string {
     /^[A-Za-z][A-Za-z\d+.-]*:/.test(file) ||
     /^[\\/~]/.test(file) ||
     /[\u0000-\u001f\u007f-\u009f?#\u2028\u2029\u202a-\u202e\u2066-\u2069]/.test(file)
-  ) return '<source>';
+  )
+    return '<source>';
   const normalized = path.posix.normalize(file.replace(/\\/g, '/'));
-  if (normalized === '.' || normalized === '..' || normalized.startsWith('../') || normalized.endsWith('/'))
+  if (
+    normalized === '.' ||
+    normalized === '..' ||
+    normalized.startsWith('../') ||
+    normalized.endsWith('/')
+  )
     return '<source>';
   return normalized;
 }
 
 function displayMessage(message: string, originalFile: string): string {
   // Error messages can contain workstation paths even when their span is relative.
-  const withoutFile = displayFile(originalFile) === '<source>' && originalFile
-    ? message.split(originalFile).join('<source>')
-    : message;
+  const withoutFile =
+    displayFile(originalFile) === '<source>' && originalFile
+      ? message.split(originalFile).join('<source>')
+      : message;
   return escapeControls(withoutFile).replace(
     /(^|[\s'"`(=:[{])(?:file:\/\/\/|[A-Za-z]:[\\/]|\/(?=\S)|\\\\)[^\s'"`<>{}\[\],;)]*/g,
     '$1<absolute-path>'
@@ -65,7 +75,9 @@ function publicDiagnostic(diagnostic: CompilerDiagnostic): CompilerDiagnostic {
 }
 
 /** Deterministic JSON-ready diagnostics, preserving order, categories and UTF-16 spans. */
-export function diagnosticsJson(diagnostics: readonly CompilerDiagnostic[]): CompilerDiagnosticsJson {
+export function diagnosticsJson(
+  diagnostics: readonly CompilerDiagnostic[]
+): CompilerDiagnosticsJson {
   return { diagnostics: diagnostics.map(publicDiagnostic) };
 }
 
@@ -99,13 +111,19 @@ function lineAt(lines: readonly SourceLine[], offset: number): number {
 }
 
 function isWide(code: number): boolean {
-  return code >= 0x1100 && (
-    code <= 0x115f || code === 0x2329 || code === 0x232a ||
-    (code >= 0x2e80 && code <= 0xa4cf && code !== 0x303f) ||
-    (code >= 0xac00 && code <= 0xd7a3) || (code >= 0xf900 && code <= 0xfaff) ||
-    (code >= 0xfe10 && code <= 0xfe19) || (code >= 0xfe30 && code <= 0xfe6f) ||
-    (code >= 0xff00 && code <= 0xff60) || (code >= 0xffe0 && code <= 0xffe6) ||
-    (code >= 0x20000 && code <= 0x3fffd)
+  return (
+    code >= 0x1100 &&
+    (code <= 0x115f ||
+      code === 0x2329 ||
+      code === 0x232a ||
+      (code >= 0x2e80 && code <= 0xa4cf && code !== 0x303f) ||
+      (code >= 0xac00 && code <= 0xd7a3) ||
+      (code >= 0xf900 && code <= 0xfaff) ||
+      (code >= 0xfe10 && code <= 0xfe19) ||
+      (code >= 0xfe30 && code <= 0xfe6f) ||
+      (code >= 0xff00 && code <= 0xff60) ||
+      (code >= 0xffe0 && code <= 0xffe6) ||
+      (code >= 0x20000 && code <= 0x3fffd))
   );
 }
 
@@ -135,8 +153,11 @@ function displayLine(text: string, start: number, end: number): DisplayLine {
     const from = part.index;
     const to = from + part.segment.length;
     const escaped = escapeControls(part.segment);
-    const rendered = part.segment === '\t' ? ' '.repeat(TAB_WIDTH - column % TAB_WIDTH) : escaped;
-    const width = part.segment === '\t' || escaped !== part.segment ? rendered.length : graphemeWidth(part.segment);
+    const rendered = part.segment === '\t' ? ' '.repeat(TAB_WIDTH - (column % TAB_WIDTH)) : escaped;
+    const width =
+      part.segment === '\t' || escaped !== part.segment
+        ? rendered.length
+        : graphemeWidth(part.segment);
     if (start >= to) startColumn = column + width;
     else if (start >= from) startColumn = column;
     if (end >= to) endColumn = column + width;
@@ -177,9 +198,13 @@ export function formatCompilerDiagnostic(
 ): string {
   const visible = publicDiagnostic(diagnostic);
   const source = sourceFor(diagnostic.span.file, options.sources);
-  const validOffsets = source !== undefined &&
-    Number.isInteger(diagnostic.span.start) && Number.isInteger(diagnostic.span.end) &&
-    diagnostic.span.start >= 0 && diagnostic.span.end >= diagnostic.span.start && diagnostic.span.end <= source.length;
+  const validOffsets =
+    source !== undefined &&
+    Number.isInteger(diagnostic.span.start) &&
+    Number.isInteger(diagnostic.span.end) &&
+    diagnostic.span.start >= 0 &&
+    diagnostic.span.end >= diagnostic.span.start &&
+    diagnostic.span.end <= source.length;
   const lines = validOffsets ? sourceLines(source!) : undefined;
   let first = 0;
   let last = 0;
@@ -188,14 +213,17 @@ export function formatCompilerDiagnostic(
     last = lineAt(lines, diagnostic.span.end);
     // Source offsets, not stale line/column metadata, are authoritative when text is supplied.
     visible.span.line = first + 1;
-    visible.span.column = Math.min(diagnostic.span.start, lines[first].end) - lines[first].start + 1;
+    visible.span.column =
+      Math.min(diagnostic.span.start, lines[first].end) - lines[first].start + 1;
     visible.span.endLine = last + 1;
     visible.span.endColumn = Math.min(diagnostic.span.end, lines[last].end) - lines[last].start + 1;
     if (last > first && diagnostic.span.end === lines[last].start) last--;
   }
-  const paint = (text: string, code: number) => options.color ? `\u001b[${code}m${text}\u001b[0m` : text;
+  const paint = (text: string, code: number) =>
+    options.color ? `\u001b[${code}m${text}\u001b[0m` : text;
   const header = `${position(visible.span)}: ${paint(visible.code, 31)} [${visible.category}] ${visible.message.replace(/\n/g, '\n  ')}`;
-  if (!lines) return `${header}\n  (${source === undefined ? 'source unavailable' : 'source span unavailable'})`;
+  if (!lines)
+    return `${header}\n  (${source === undefined ? 'source unavailable' : 'source span unavailable'})`;
   const output = [header];
   const gutterWidth = String(last + 1).length;
   for (let index = first; index <= last; index++) {
@@ -204,8 +232,14 @@ export function formatCompilerDiagnostic(
     const end = Math.max(start, Math.min(diagnostic.span.end - line.start, line.text.length));
     const rendered = displayLine(line.text, start, end);
     const gutter = String(index + 1).padStart(gutterWidth, ' ');
-    const marker = ' '.repeat(rendered.startColumn) + '^' + '~'.repeat(Math.max(1, rendered.endColumn - rendered.startColumn) - 1);
-    output.push(` ${gutter} | ${rendered.text}`, ` ${' '.repeat(gutterWidth)} | ${paint(marker, 31)}`);
+    const marker =
+      ' '.repeat(rendered.startColumn) +
+      '^' +
+      '~'.repeat(Math.max(1, rendered.endColumn - rendered.startColumn) - 1);
+    output.push(
+      ` ${gutter} | ${rendered.text}`,
+      ` ${' '.repeat(gutterWidth)} | ${paint(marker, 31)}`
+    );
   }
   return output.join('\n');
 }
@@ -215,5 +249,7 @@ export function formatCompilerDiagnostics(
   diagnostics: readonly CompilerDiagnostic[],
   options: DiagnosticFormatOptions = {}
 ): string {
-  return diagnostics.map((diagnostic) => formatCompilerDiagnostic(diagnostic, options)).join('\n\n');
+  return diagnostics
+    .map((diagnostic) => formatCompilerDiagnostic(diagnostic, options))
+    .join('\n\n');
 }

@@ -210,7 +210,9 @@ function collaboration(
     kind: 'proto-ui.live-collaboration-state',
     repositoryId: request.repositoryId,
     action: request.action,
-    observedAt: timestamp,
+    // Live collection happens after the fixture measurement, matching the
+    // supported measuredAt <= verifiedAt receipt chronology boundary.
+    observedAt: new Date(Date.parse(measurement.modelTrace.measuredAt) + 1000).toISOString(),
     viewerLogin: 'cyjin-yl',
     viewerPermission: 'MAINTAIN',
     current: {
@@ -690,7 +692,7 @@ test('actual delegated collaboration apply CLI uses the real adapter and never w
         reads = 0;
       const post = {
         ...liveState,
-        observedAt: '2026-10-04T10:00:10.000Z',
+        observedAt: new Date(Date.parse(measurement.modelTrace.measuredAt) + 2000).toISOString(),
         current: {
           ...liveState.current,
           title: 'Corrected',

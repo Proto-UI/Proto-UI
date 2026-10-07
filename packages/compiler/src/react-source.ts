@@ -35,16 +35,31 @@ export function emitReactSource(
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
   if (!admitted.ok) return admitted;
-  const unsupportedMethods = ir.exposes.filter((value) => value.kind === 'method' &&
-    !isPublicValueType(value.returnType) || value.kind === 'method' && value.parameters.some(parameter => !isDataValueType(parameter.type)));
-  if (unsupportedMethods.length) return {
-    ok: false,
-    diagnostics: unsupportedMethods.map((value) => ({ code: 'PUI4003', category: 'unsupported-input',
-      message: 'react-dom-source-v1 exposed methods require checked serializable parameter and return types, not semantic capabilities or unknown.', span: value.span })),
-  };
+  const unsupportedMethods = ir.exposes.filter(
+    (value) =>
+      (value.kind === 'method' && !isPublicValueType(value.returnType)) ||
+      (value.kind === 'method' &&
+        value.parameters.some((parameter) => !isDataValueType(parameter.type)))
+  );
+  if (unsupportedMethods.length)
+    return {
+      ok: false,
+      diagnostics: unsupportedMethods.map((value) => ({
+        code: 'PUI4003',
+        category: 'unsupported-input',
+        message:
+          'react-dom-source-v1 exposed methods require checked serializable parameter and return types, not semantic capabilities or unknown.',
+        span: value.span,
+      })),
+    };
   const reachedFunctions = new Set(admitted.value.functions);
-  const interaction = ir.moduleDeclarations.length > 0 || admitted.value.operations.some((operation) =>
-    /^(hook\.|event\.|focus\.|accessible\.|anatomy\.|collection\.|collectionItem\.|boundary\.|hitParticipation\.|positioning\.|overlay\.|scroll\.|textControl\.|imageView\.|transition\.|tableStructure\.)/.test(operation));
+  const interaction =
+    ir.moduleDeclarations.length > 0 ||
+    admitted.value.operations.some((operation) =>
+      /^(hook\.|event\.|focus\.|accessible\.|anatomy\.|collection\.|collectionItem\.|boundary\.|hitParticipation\.|positioning\.|overlay\.|scroll\.|textControl\.|imageView\.|transition\.|tableStructure\.)/.test(
+        operation
+      )
+    );
   const unsupportedTemplates: ExpressionIR[] = [];
   function inspectTemplate(value: unknown): void {
     if (Array.isArray(value)) for (const item of value) inspectTemplate(item);
@@ -53,8 +68,13 @@ export function emitReactSource(
       if (node.kind === 'function' && !reachedFunctions.has(node.function)) return;
       if (node.kind === 'operation' && node.operation === 'render.el') {
         const props = node.arguments[1];
-        if (props?.kind === 'record' && props.entries.length &&
-            props.entries.some((entry) => entry.key !== 'style' || entry.value.type !== 'style-handle'))
+        if (
+          props?.kind === 'record' &&
+          props.entries.length &&
+          props.entries.some(
+            (entry) => entry.key !== 'style' || entry.value.type !== 'style-handle'
+          )
+        )
           unsupportedTemplates.push(node);
       }
       for (const item of Object.values(value)) inspectTemplate(item);
@@ -66,31 +86,62 @@ export function emitReactSource(
       if (statement.kind === 'return') break;
     }
   }
-  if (unsupportedTemplates.length) return {
-    ok: false,
-    diagnostics: unsupportedTemplates.map((node) => ({ code: 'PUI4003', category: 'unsupported-input',
-      message: 'react-dom-source-v1 template props support only one static tw handle under style.', span: node.span })),
-  };
-  const componentName = options.componentName ?? 'CompiledComponent';
-  const reservedNames: Record<string, true> = {
-    GeneratedProps: true, GeneratedExposes: true, GeneratedHandle: true, GeneratedComponentProps: true,
-    Object: true, Array: true, Number: true, Math: true, Set: true, WeakMap: true, Reflect: true,
-    JSON: true, Error: true, TypeError: true, Infinity: true, queueMicrotask: true,
-    console: true,
-  };
-  if (ssr) Object.assign(reservedNames, {
-    AggregateError: true, Map: true, WeakSet: true, GeneratedTemplateProjection: true, GeneratedInitialData: true,
-    GeneratedRenderProjection: true, GeneratedHydrationCarrier: true, GeneratedServerResult: true,
-    GeneratedHydratedRoot: true, renderGeneratedToString: true, hydrateGeneratedRoot: true,
-  });
-  if (
-    !validIdentifier(componentName) ||
-    Object.hasOwn(reservedNames, componentName)
-  ) {
+  if (unsupportedTemplates.length)
     return {
       ok: false,
-      diagnostics: [{ code: 'PUI3001', category: 'invalid-input',
-        message: 'Choose a valid, non-reserved generated component identifier.', span: ir.setup.span }],
+      diagnostics: unsupportedTemplates.map((node) => ({
+        code: 'PUI4003',
+        category: 'unsupported-input',
+        message:
+          'react-dom-source-v1 template props support only one static tw handle under style.',
+        span: node.span,
+      })),
+    };
+  const componentName = options.componentName ?? 'CompiledComponent';
+  const reservedNames: Record<string, true> = {
+    GeneratedProps: true,
+    GeneratedExposes: true,
+    GeneratedHandle: true,
+    GeneratedComponentProps: true,
+    Object: true,
+    Array: true,
+    Number: true,
+    Math: true,
+    Set: true,
+    WeakMap: true,
+    Reflect: true,
+    JSON: true,
+    Error: true,
+    TypeError: true,
+    Infinity: true,
+    queueMicrotask: true,
+    console: true,
+  };
+  if (ssr)
+    Object.assign(reservedNames, {
+      AggregateError: true,
+      Map: true,
+      WeakSet: true,
+      GeneratedTemplateProjection: true,
+      GeneratedInitialData: true,
+      GeneratedRenderProjection: true,
+      GeneratedHydrationCarrier: true,
+      GeneratedServerResult: true,
+      GeneratedHydratedRoot: true,
+      renderGeneratedToString: true,
+      hydrateGeneratedRoot: true,
+    });
+  if (!validIdentifier(componentName) || Object.hasOwn(reservedNames, componentName)) {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI3001',
+          category: 'invalid-input',
+          message: 'Choose a valid, non-reserved generated component identifier.',
+          span: ir.setup.span,
+        },
+      ],
     };
   }
   const names = new Set<string>([componentName]);
@@ -108,26 +159,43 @@ export function emitReactSource(
   while ([...names].some((name) => name.startsWith(p))) p += '_';
   const hooks = new Map(ir.hooks.map((hook, index) => [hook.id, `${p}Hook${index}`]));
   const contextArtifacts = buildNativeContextArtifacts(ir);
-  const staticArtifacts = buildNativeStaticDeclarations(ir.staticDeclarations, ir.moduleDeclarations);
-  const staticCapabilities = new Map(ir.staticDeclarations.map((declaration, index) => [declaration.id, `${p}Declaration${index}`]));
-  const staticImports = ir.staticDeclarations.map(declaration =>
-    `import { declaration as ${staticCapabilities.get(declaration.id)} } from ${JSON.stringify('./' + staticArtifacts.capabilities.get(declaration.id)!.file.replace(/\.ts$/, ''))};`
-  ).join('\n');
-  const contextKeys = new Map(ir.contextKeys.map((key, index) => [key.id, `${p}ContextKey${index}`]));
-  const contextImports = ir.contextKeys.map((key) =>
-    `import { key as ${contextKeys.get(key.id)} } from ${JSON.stringify(contextArtifacts.keys.get(key.id)!.file.replace(/\.ts$/, ''))};`
-  ).join('\n');
+  const staticArtifacts = buildNativeStaticDeclarations(
+    ir.staticDeclarations,
+    ir.moduleDeclarations
+  );
+  const staticCapabilities = new Map(
+    ir.staticDeclarations.map((declaration, index) => [declaration.id, `${p}Declaration${index}`])
+  );
+  const staticImports = ir.staticDeclarations
+    .map(
+      (declaration) =>
+        `import { declaration as ${staticCapabilities.get(declaration.id)} } from ${JSON.stringify('./' + staticArtifacts.capabilities.get(declaration.id)!.file.replace(/\.ts$/, ''))};`
+    )
+    .join('\n');
+  const contextKeys = new Map(
+    ir.contextKeys.map((key, index) => [key.id, `${p}ContextKey${index}`])
+  );
+  const contextImports = ir.contextKeys
+    .map(
+      (key) =>
+        `import { key as ${contextKeys.get(key.id)} } from ${JSON.stringify(contextArtifacts.keys.get(key.id)!.file.replace(/\.ts$/, ''))};`
+    )
+    .join('\n');
   const contextValidation = emitNativeContextValidation(ir, contextKeys, `${p}Accepts`);
   const transportFile = '.proto-ui/context/react-v1.ts';
 
   function typeName(type: ValueType): string {
-    if (typeof type !== 'string') return interaction && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
-      ? `${p}NativeFocusOptions` : formatDataType(type as DataType);
+    if (typeof type !== 'string')
+      return interaction && dataTypeEqual(type, FOCUS_OPTIONS_TYPE)
+        ? `${p}NativeFocusOptions`
+        : formatDataType(type as DataType);
     if (type.startsWith('nullable:')) return `${typeName(type.slice(9) as ValueType)} | null`;
     if (type.startsWith('optional:')) return `${typeName(type.slice(9) as ValueType)} | undefined`;
-    if (type.startsWith('borrowed:')) return `${p}State<${type.slice(9)}> & { watch(callback: (run: ${p}Run, event: ${p}StateEvent<${type.slice(9)}>) => void): () => void }`;
+    if (type.startsWith('borrowed:'))
+      return `${p}State<${type.slice(9)}> & { watch(callback: (run: ${p}Run, event: ${p}StateEvent<${type.slice(9)}>) => void): () => void }`;
     if (type.startsWith('state-event:')) return `${p}StateEvent<${type.slice(12)}>`;
-    if (type.startsWith('state-next:')) return `Extract<${p}StateEvent<${type.slice(11)}>, {type:'next'}>`;
+    if (type.startsWith('state-next:'))
+      return `Extract<${p}StateEvent<${type.slice(11)}>, {type:'next'}>`;
     if (type === 'state-disconnect') return `{type:'disconnect';reason:'unmount'}`;
     if (type === 'def') return `typeof ${p}Def`;
     if (type === 'run') return `${p}Run`;
@@ -151,35 +219,59 @@ export function emitReactSource(
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return values.map((value) => `${value.name}${value.optional ? '?' : ''}: ${typeName(value.type)}`).join(', ');
+    return values
+      .map((value) => `${value.name}${value.optional ? '?' : ''}: ${typeName(value.type)}`)
+      .join(', ');
   }
   function fn(value: FunctionIR, depth: number): string {
     return `(${parameters(value.parameters)}) => {\n${statements(value.body, depth + 1)}${'  '.repeat(depth)}}`;
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
-      case 'literal': return JSON.stringify(value.value);
-      case 'reference': return value.name;
-      case 'context-key': return contextKeys.get(value.keyId)!;
-      case 'static-capability': return staticCapabilities.get(value.declarationId)!;
-      case 'style-handle': return emitNativeStyleHandle(value.handle);
-      case 'rule': return emitNativeRule(value, (item) => expression(item, depth), `${p}Style`, 'resolved');
-      case 'member': return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
-      case 'unary': return `(${value.operator}${expression(value.operand, depth)})`;
-      case 'binary': return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
-      case 'array': return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
-      case 'record': return `{ ${value.entries.map((item) => `${item.key === '__proto__' ? `[${JSON.stringify(item.key)}]` : JSON.stringify(item.key)}: ${expression(item.value, depth)}`).join(', ')} }`;
-      case 'function': return fn(value.function, depth);
-      case 'helper-call': return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
-      case 'authored-hook': return `${hooks.get(value.hookId)}()`;
+      case 'literal':
+        return JSON.stringify(value.value);
+      case 'reference':
+        return value.name;
+      case 'context-key':
+        return contextKeys.get(value.keyId)!;
+      case 'static-capability':
+        return staticCapabilities.get(value.declarationId)!;
+      case 'style-handle':
+        return emitNativeStyleHandle(value.handle);
+      case 'rule':
+        return emitNativeRule(value, (item) => expression(item, depth), `${p}Style`, 'resolved');
+      case 'member':
+        return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+      case 'unary':
+        return `(${value.operator}${expression(value.operand, depth)})`;
+      case 'binary':
+        return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
+      case 'array':
+        return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
+      case 'record':
+        return `{ ${value.entries.map((item) => `${item.key === '__proto__' ? `[${JSON.stringify(item.key)}]` : JSON.stringify(item.key)}: ${expression(item.value, depth)}`).join(', ')} }`;
+      case 'function':
+        return fn(value.function, depth);
+      case 'helper-call':
+        return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+      case 'authored-hook':
+        return `${hooks.get(value.hookId)}()`;
       case 'operation': {
         const rule = OPERATION_RULES[value.operation];
-        if (rule.path === 'call') return `${expression(value.receiver!, depth)}(${value.arguments.map(item => expression(item, depth)).join(', ')})`;
-        if (value.operation === 'host.get') return '(mounted && connected ? (root as HTMLElement) : null)';
+        if (rule.path === 'call')
+          return `${expression(value.receiver!, depth)}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+        if (value.operation === 'host.get')
+          return '(mounted && connected ? (root as HTMLElement) : null)';
         if (value.operation.startsWith('hook.') || value.operation.startsWith('anatomy.'))
           return `${p}Interaction.${rule.path}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
-        const type = ['context.read', 'context.tryRead', 'render.read.context.read', 'render.read.context.tryRead'].includes(value.operation)
-          ? `<${typeName(value.type)}>` : '';
+        const type = [
+          'context.read',
+          'context.tryRead',
+          'render.read.context.read',
+          'render.read.context.tryRead',
+        ].includes(value.operation)
+          ? `<${typeName(value.type)}>`
+          : '';
         return `${expression(value.receiver!, depth)}.${rule.path}${type}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
       }
     }
@@ -187,49 +279,94 @@ export function emitReactSource(
   function statements(body: readonly StatementIR[], depth: number): string {
     const indent = '  '.repeat(depth);
     const terminator = body.findIndex((value) => value.kind === 'return');
-    return body.slice(0, terminator < 0 ? body.length : terminator + 1).map((value) => {
-      if (value.kind === 'const' && value.value.kind === 'function' && !reachedFunctions.has(value.value.function)) return '';
-      const sourceFile = JSON.stringify(value.span.file).replaceAll('\u2028', '\\u2028').replaceAll('\u2029', '\\u2029');
-      const origin = `${indent}// Source ${sourceFile}:${value.span.line}:${value.span.column}\n`;
-      switch (value.kind) {
-        case 'const': return `${origin}${indent}const ${value.name} = ${expression(value.value, depth)};\n`;
-        case 'effect': return `${origin}${indent}${expression(value.expression, depth)};\n`;
-        case 'return': return `${origin}${indent}return${value.value ? ` ${expression(value.value, depth)}` : ''};\n`;
-        case 'if': return `${origin}${indent}if (${expression(value.condition, depth)}) {\n${statements(value.then, depth + 1)}${indent}}${value.otherwise.length ? ` else {\n${statements(value.otherwise, depth + 1)}${indent}}` : ''}\n`;
-      }
-    }).join('');
+    return body
+      .slice(0, terminator < 0 ? body.length : terminator + 1)
+      .map((value) => {
+        if (
+          value.kind === 'const' &&
+          value.value.kind === 'function' &&
+          !reachedFunctions.has(value.value.function)
+        )
+          return '';
+        const sourceFile = JSON.stringify(value.span.file)
+          .replaceAll('\u2028', '\\u2028')
+          .replaceAll('\u2029', '\\u2029');
+        const origin = `${indent}// Source ${sourceFile}:${value.span.line}:${value.span.column}\n`;
+        switch (value.kind) {
+          case 'const':
+            return `${origin}${indent}const ${value.name} = ${expression(value.value, depth)};\n`;
+          case 'effect':
+            return `${origin}${indent}${expression(value.expression, depth)};\n`;
+          case 'return':
+            return `${origin}${indent}return${value.value ? ` ${expression(value.value, depth)}` : ''};\n`;
+          case 'if':
+            return `${origin}${indent}if (${expression(value.condition, depth)}) {\n${statements(value.then, depth + 1)}${indent}}${value.otherwise.length ? ` else {\n${statements(value.otherwise, depth + 1)}${indent}}` : ''}\n`;
+        }
+      })
+      .join('');
   }
-  const props = ir.props.map((value) => `  ${JSON.stringify(value.name)}?: ${formatDataType(value.type as DataType)} | null;`).join('\n');
-  const exposed = ir.exposes.map((value) => {
-    const type = value.kind === 'state' ? `${p}ExternalState<${formatDataType(value.type as DataType)}>`
-      : value.kind === 'value' ? typeName(value.type)
-      : value.kind === 'event' ? `{ readonly kind: 'event'; readonly payload: ${JSON.stringify(value.payload)} }`
-      : `(${parameters(value.parameters)}) => ${typeName(value.returnType)}`;
-    return `  ${JSON.stringify(value.name)}: ${type};`;
-  }).join('\n');
-  const eventProps = ir.exposes.filter((value) => value.kind === 'event').map((value) =>
-    `  ${JSON.stringify(`on${value.name.charAt(0).toUpperCase()}${value.name.slice(1)}`)}?: (${value.payload === 'void' ? '' : `payload: ${formatDataType(value.payload as DataType)}`}) => void;`
-  ).join('\n');
-  const methodSchemas = ir.exposes.filter((value) => value.kind === 'method').map((value) =>
-    `    ${JSON.stringify(value.name)}: { parameters: ${JSON.stringify(value.parameters.map((parameter) => ({ type: parameter.type, ...(parameter.optional ? { optional: true } : {}) })))}, result: ${JSON.stringify(isDataValueType(value.returnType) ? value.returnType : null)} },`
-  ).join('\n');
-  const eventSchemas = ir.exposes.filter((value) => value.kind === 'event').map((value) =>
-    `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.payload)},`
-  ).join('\n');
-  const propSchemas = ir.props.map((value) => `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.type)},`).join('\n');
-  const hookDefinitions = ir.hooks.filter((hook) => admitted.value.authoredHooks.includes(hook.id)).map((hook) => `  const ${hooks.get(hook.id)} = () => {
+  const props = ir.props
+    .map(
+      (value) =>
+        `  ${JSON.stringify(value.name)}?: ${formatDataType(value.type as DataType)} | null;`
+    )
+    .join('\n');
+  const exposed = ir.exposes
+    .map((value) => {
+      const type =
+        value.kind === 'state'
+          ? `${p}ExternalState<${formatDataType(value.type as DataType)}>`
+          : value.kind === 'value'
+            ? typeName(value.type)
+            : value.kind === 'event'
+              ? `{ readonly kind: 'event'; readonly payload: ${JSON.stringify(value.payload)} }`
+              : `(${parameters(value.parameters)}) => ${typeName(value.returnType)}`;
+      return `  ${JSON.stringify(value.name)}: ${type};`;
+    })
+    .join('\n');
+  const eventProps = ir.exposes
+    .filter((value) => value.kind === 'event')
+    .map(
+      (value) =>
+        `  ${JSON.stringify(`on${value.name.charAt(0).toUpperCase()}${value.name.slice(1)}`)}?: (${value.payload === 'void' ? '' : `payload: ${formatDataType(value.payload as DataType)}`}) => void;`
+    )
+    .join('\n');
+  const methodSchemas = ir.exposes
+    .filter((value) => value.kind === 'method')
+    .map(
+      (value) =>
+        `    ${JSON.stringify(value.name)}: { parameters: ${JSON.stringify(value.parameters.map((parameter) => ({ type: parameter.type, ...(parameter.optional ? { optional: true } : {}) })))}, result: ${JSON.stringify(isDataValueType(value.returnType) ? value.returnType : null)} },`
+    )
+    .join('\n');
+  const eventSchemas = ir.exposes
+    .filter((value) => value.kind === 'event')
+    .map((value) => `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.payload)},`)
+    .join('\n');
+  const propSchemas = ir.props
+    .map((value) => `    ${JSON.stringify(value.name)}: ${JSON.stringify(value.type)},`)
+    .join('\n');
+  const hookDefinitions = ir.hooks
+    .filter((hook) => admitted.value.authoredHooks.includes(hook.id))
+    .map(
+      (hook) => `  const ${hooks.get(hook.id)} = () => {
     if (${p}HookNames.has(${JSON.stringify(hook.name)})) return;
     ${p}HookNames.add(${JSON.stringify(hook.name)});
     (${fn(hook.setup, 2)})(${p}Def);
-  };`).join('\n');
+  };`
+    )
+    .join('\n');
 
   const code = `// Editable generated React DOM source. Profile: ${profile}.
 // Inline owner lowering and emitted shared checked-data/Context helpers v1; no Proto-UI Runtime/Core/Adapter dependencies.
 // Source graph SHA-256: ${ir.source.sha256}
 import * as ${p}React from 'react';
 ${interaction ? `import { createPortal as ${p}CreatePortal } from 'react-dom';` : ''}
-${ssr ? `import { renderToString as ${p}RenderToString } from 'react-dom/server';
-import { hydrateRoot as ${p}HydrateRoot, type HydrationOptions as ${p}HydrationOptions, type Root as ${p}ReactRoot } from 'react-dom/client';` : ''}
+${
+  ssr
+    ? `import { renderToString as ${p}RenderToString } from 'react-dom/server';
+import { hydrateRoot as ${p}HydrateRoot, type HydrationOptions as ${p}HydrationOptions, type Root as ${p}ReactRoot } from 'react-dom/client';`
+    : ''
+}
 ${ssr ? `import { ServerTransport as ${p}SharedServerTransport, HydrationTransport as ${p}SharedHydrationTransport, OwnerReady as ${p}SharedOwnerReady } from './.proto-ui/context/react-ssr-v1';` : ''}
 import { createContextScope as ${p}CreateContextScope, acceptsContextValue as ${p}Accepts } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
 import type { ContextScope as ${p}ContextScope } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
@@ -292,9 +429,13 @@ ${interaction ? '  connectView(): void;\n  disconnectView(): void;\n' : ''}  sta
   applyProps(props: GeneratedComponentProps): void;
   accept(frame: ${p}Frame): boolean;
   disconnect(): void;
-${ssr ? `  prepareServer(): GeneratedRenderProjection;
+${
+  ssr
+    ? `  prepareServer(): GeneratedRenderProjection;
   disposeNow(): void;
-` : ''}
+`
+    : ''
+}
 };
 
 const ${p}Slots = new WeakSet<object>();
@@ -395,8 +536,12 @@ function ${p}CreateOwner(initial: GeneratedComponentProps, publish: (frame: ${p}
   let cleanupVersion = 0;
   let desiredPresent = true;
   let mounted = false;
-${interaction ? `  let viewConnected = false;
-${ssr ? '  let hydrationAttributes: Readonly<Record<string, string | null>> | null = null;\n' : ''}` : ''}  let epoch = 0;
+${
+  interaction
+    ? `  let viewConnected = false;
+${ssr ? '  let hydrationAttributes: Readonly<Record<string, string | null>> | null = null;\n' : ''}`
+    : ''
+}  let epoch = 0;
   let revision = 0;
   let acceptedRevision = 0;
   let latest: ${p}Frame | null = null;
@@ -626,7 +771,9 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}        pendingState
     return state;
   }
   const externalStates = new WeakMap<object, unknown>();
-${interaction ? `  const observedStateCleanups: (() => void)[] = [];
+${
+  interaction
+    ? `  const observedStateCleanups: (() => void)[] = [];
   function registerObservedState<T extends boolean | string | number>(state: ${p}NativeObservedState<T>) {
     const subscribers = new Set<(event: ${p}StateEvent<T>) => void>();
     stateSubscribers.add(subscribers as Set<(event: ${p}StateEvent<unknown>) => void>);
@@ -702,7 +849,9 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
     try { ${p}Interaction.dispose(); }
     finally { for (const off of observedStateCleanups.splice(0)) off(); for (const off of authorStateWatchCleanups.splice(0)) off(); }
   }
-` : ''}  const ${p}RunHandle: ${p}Run = {
+`
+    : ''
+}  const ${p}RunHandle: ${p}Run = {
     feedback: { style: ${p}Style },
     update() {
       ensurePhase('callback');
@@ -902,7 +1051,9 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
     getExposes() { ensureExternal(); return exposes as GeneratedExposes; },
     invokeInCallbackScope<T>(callback: () => T): T { ensureExternal(); return invoke(callback); },
   });
-${ssr ? `  function disposeNow() {
+${
+  ssr
+    ? `  function disposeNow() {
     if (lifetime !== 'alive') return;
     lifetime = 'disposing'; phase = 'callback';
     let failure: unknown;
@@ -918,11 +1069,15 @@ ${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??=
     }
     if (failure !== undefined) throw failure;
   }
-` : ''}  return {
+`
+    : ''
+}  return {
     handle,
     scope: context,
     getHostProjection() { return { tag: ${interaction ? `${p}Interaction.rootTag() ?? 'div'` : "'div'"}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, portalTarget: ${interaction ? `${p}Interaction.portalTarget()` : 'null'} }; },
-${ssr ? `    disposeNow,
+${
+  ssr
+    ? `    disposeNow,
     prepareServer() {
       if (!server) throw new Error('[SSR] preparation requires a request-owned server instance.');
       try {
@@ -940,7 +1095,9 @@ ${interaction ? `        ${p}Interaction.projectAttributes();\n` : ''}        sl
 ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}          }, raw: ${p}EncodeData(raw) };
       } catch (error) { try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[SSR] preparation and disposal failed.'); } throw error; }
     },
-` : ''}
+`
+    : ''
+}
     bindRoot(nextRoot) {
       if (root === nextRoot) return;
 ${interaction ? `      ${p}Interaction.unmount();\n` : ''}      root?.removeAttribute('data-pui-style');
@@ -948,23 +1105,39 @@ ${interaction ? `      ${p}Interaction.unmount();\n` : ''}      root?.removeAttr
       if (mounted) projectStyle(${p}Style.tokens());
 ${interaction ? `      if (mounted && desiredPresent && viewConnected) ${p}Interaction.mount();\n` : ''}    },
     connect() { connected = true; ++cleanupVersion; },
-${interaction ? `    connectView() {
+${
+  interaction
+    ? `    connectView() {
       viewConnected = true;
-${ssr ? `      if (root && hydrationAttributes) {
+${
+  ssr
+    ? `      if (root && hydrationAttributes) {
         ${p}Interaction.adoptAttributes(hydrationAttributes);
         hydrationAttributes = null;
       }
-` : ''}      if (mounted && desiredPresent) ${p}Interaction.mount();
+`
+    : ''
+}      if (mounted && desiredPresent) ${p}Interaction.mount();
     },
     disconnectView() { viewConnected = false; ${p}Interaction.unmount(); },
-` : ''}    start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}) {
+`
+    : ''
+}    start(${ssr ? 'expected?: GeneratedRenderProjection' : ''}) {
       try {
         applyProps(initial); dispatch(callbacks.created);
-${ssr ? `        if (expected && expected.present !== desiredPresent)
+${
+  ssr
+    ? `        if (expected && expected.present !== desiredPresent)
           throw new Error('[Hydration] client initial presence disagrees with the server projection.');
-${interaction ? `        if (expected) hydrationAttributes = Object.fromEntries(Object.entries(expected.attributes).filter(([key]) => key !== 'data-pui-root' && key !== 'data-pui-style'));
-` : ''}
-` : ''}        schedule();
+${
+  interaction
+    ? `        if (expected) hydrationAttributes = Object.fromEntries(Object.entries(expected.attributes).filter(([key]) => key !== 'data-pui-root' && key !== 'data-pui-style'));
+`
+    : ''
+}
+`
+    : ''
+}        schedule();
       }
       catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${p}Style.dispose(); context.dispose(); lifetime = 'disposed'; connected = false;`} throw error; }
     },
@@ -996,15 +1169,23 @@ ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callb
         lifetime = 'disposing';
         phase = 'callback';
         let failure: unknown;
-${interaction ? `        try { ${p}Interaction.unmount(); }
+${
+  interaction
+    ? `        try { ${p}Interaction.unmount(); }
         catch (error) { failure = error; }
-` : ''}        try { if (mounted) { mounted = false; ${p}Style.unmount(); dispatch(callbacks.unmounted); } }
+`
+    : ''
+}        try { if (mounted) { mounted = false; ${p}Style.unmount(); dispatch(callbacks.unmounted); } }
         catch (error) { failure ??= error; }
         try { dispatch(callbacks.beforeDispose); }
         catch (error) { failure ??= error; }
         finally {
-${interaction ? `          try { disposeInteraction(); } catch (error) { failure ??= error; }
-` : ''}          root?.removeAttribute('data-pui-style');
+${
+  interaction
+    ? `          try { disposeInteraction(); } catch (error) { failure ??= error; }
+`
+    : ''
+}          root?.removeAttribute('data-pui-style');
           root = null;
           ${p}Style.dispose();
           context.dispose();
@@ -1029,7 +1210,9 @@ export const ${componentName} = ${p}React.forwardRef<GeneratedHandle, GeneratedC
   const parentRef = ${p}React.useRef<${p}ContextScope | null>(null);
   const [frame, setFrame] = ${p}React.useState<${p}Frame | null>(null);
   const [, publishHost] = ${p}React.useReducer((version: number) => version + 1, 0);
-${ssr ? `  const shellId = ${p}React.useId();
+${
+  ssr
+    ? `  const shellId = ${p}React.useId();
   const [started, setStarted] = ${p}React.useState(false);
   const serverRequest = ${p}React.useContext(${p}ServerTransport);
   const session = ${p}React.useContext(${p}HydrationTransport);
@@ -1045,14 +1228,22 @@ ${ssr ? `  const shellId = ${p}React.useId();
   });
   const rootRef = ${p}React.useRef<HTMLElement | null>(null);
   const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => { rootRef.current = root; ownerRef.current?.bindRoot(root); }, []);
-` : `  const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => { ownerRef.current?.bindRoot(root); }, []);
-`}  // All irreversible work begins after an accepted shell commit, never during React render.
+`
+    : `  const bindRoot = ${p}React.useCallback((root: HTMLElement | null) => { ownerRef.current?.bindRoot(root); }, []);
+`
+}  // All irreversible work begins after an accepted shell commit, never during React render.
   ${p}React.useLayoutEffect(() => {
-${ssr ? `    if (serverRequest || !parentReady) return;
-` : ''}    parentRef.current = parentScope;
+${
+  ssr
+    ? `    if (serverRequest || !parentReady) return;
+`
+    : ''
+}    parentRef.current = parentScope;
     let owner = ownerRef.current;
     if (!owner) {
-${ssr ? `      const initial: GeneratedComponentProps = projection ? { ...${p}DecodeData(projection.raw) as GeneratedProps, children: props.children } : props;
+${
+  ssr
+    ? `      const initial: GeneratedComponentProps = projection ? { ...${p}DecodeData(projection.raw) as GeneratedProps, children: props.children } : props;
       if (projection) for (const [key, value] of Object.entries(props)) if (key.startsWith('on') && typeof value === 'function') initial[key as \`on\${string}\`] = value;
       let first = projection?.present ?? true;
       owner = ${p}CreateOwner(initial, next => {
@@ -1067,16 +1258,26 @@ ${ssr ? `      const initial: GeneratedComponentProps = projection ? { ...${p}De
         }
         setFrame(next);
       }, () => parentRef.current, publishHost);
-` : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost);
-`}      ownerRef.current = owner;
+`
+    : `      owner = ${p}CreateOwner(props, setFrame, () => parentRef.current, publishHost);
+`
+}      ownerRef.current = owner;
       owner.start(${ssr ? 'projection' : ''});
-${ssr ? `      owner.bindRoot(rootRef.current);
+${
+  ssr
+    ? `      owner.bindRoot(rootRef.current);
       if (projection && !projection.present) session!.pending.delete(shellId);
       setStarted(true);
-` : ''}    } else owner.connect();
-${interaction ? `    owner.connectView();
+`
+    : ''
+}    } else owner.connect();
+${
+  interaction
+    ? `    owner.connectView();
     return () => { owner.disconnectView(); };
-` : ''}  }, [${ssr ? 'parentReady' : ''}]);
+`
+    : ''
+}  }, [${ssr ? 'parentReady' : ''}]);
   ${p}React.useLayoutEffect(() => { parentRef.current = parentScope; }, [parentScope]);
   // Suspense can disconnect layout effects without unmounting the owner shell.
   // Passive cleanup identifies shell unmount; same-turn StrictMode replay cancels disposal.
@@ -1087,13 +1288,19 @@ ${interaction ? `    owner.connectView();
   }, [${ssr ? 'parentReady' : ''}]);
   ${p}React.useLayoutEffect(() => { ${ssr ? 'if (projection && (!started || projection.present && !frame)) return; ownerRef.current?.' : 'ownerRef.current!.'}applyProps(props); }, [props${ssr ? ', parentReady, started, !!frame' : ''}]);
   ${p}React.useLayoutEffect(() => { if (frame${ssr ? ` && ownerRef.current!.accept(frame) && projection && frame.kind !== 'detach'` : ''}) ${ssr ? 'session!.pending.delete(shellId)' : 'ownerRef.current!.accept(frame)'}; }, [frame]);
-  ${p}React.useImperativeHandle(ref, () => ${ssr ? `({
+  ${p}React.useImperativeHandle(ref, () => ${
+    ssr
+      ? `({
     update() { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); ownerRef.current.handle.update(); },
     getExposes() { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); return ownerRef.current.handle.getExposes(); },
     invokeInCallbackScope<T>(callback: () => T): T { if (!ownerRef.current) throw new Error('[Hydration] owner is not ready.'); return ownerRef.current.handle.invokeInCallbackScope(callback); },
-  })` : 'ownerRef.current!.handle'}, []);
+  })`
+      : 'ownerRef.current!.handle'
+  }, []);
   const template = ${p}React.useMemo(() => ${p}BindSlots(frame?.node, props.children), [frame?.node, props.children]);
-${ssr ? `  if (serverRequest) {
+${
+  ssr
+    ? `  if (serverRequest) {
     const entry = serverRequest.prepare(shellId, () => {
       const owner = ${p}CreateOwner(props, () => { throw new Error('[SSR] server cannot publish a physical commit.'); }, () => parentScope, () => {}, true);
       return { owner, projection: owner.prepareServer() };
@@ -1102,15 +1309,25 @@ ${ssr ? `  if (serverRequest) {
       ${p}DecodeTemplate(entry.projection.template, props.children)) : null;
     return ${p}React.createElement(${p}ContextTransport.Provider, { value: entry.owner.scope }, view);
   }
-` : ''}  const host = ownerRef.current?.getHostProjection();
+`
+    : ''
+}  const host = ownerRef.current?.getHostProjection();
   const rootView = frame && frame.kind !== 'detach'
-    ? ${p}RenderRoot(host!.tag, { ${ssr ? '...(projection ? ' + p + 'RootAttributes(projection) : {}), ' : ''}...${p}RootProperties(host!.properties), 'data-pui-root': '', ref: bindRoot }, template)${ssr ? ` : !frame && projection?.present
-      ? ${p}RenderRoot(projection.rootTag, { ...${p}RootAttributes(projection), ref: bindRoot }, ${p}DecodeTemplate(projection.template, props.children))` : ''} : null;
+    ? ${p}RenderRoot(host!.tag, { ${ssr ? '...(projection ? ' + p + 'RootAttributes(projection) : {}), ' : ''}...${p}RootProperties(host!.properties), 'data-pui-root': '', ref: bindRoot }, template)${
+      ssr
+        ? ` : !frame && projection?.present
+      ? ${p}RenderRoot(projection.rootTag, { ...${p}RootAttributes(projection), ref: bindRoot }, ${p}DecodeTemplate(projection.template, props.children))`
+        : ''
+    } : null;
   const view = ${interaction ? `rootView && host?.portalTarget ? ${p}CreatePortal(rootView, host.portalTarget) : rootView` : 'rootView'};
-${ssr ? `  return ${p}React.createElement(${p}OwnerReady.Provider, { value: started },
+${
+  ssr
+    ? `  return ${p}React.createElement(${p}OwnerReady.Provider, { value: started },
     ${p}React.createElement(${p}ContextTransport.Provider, { value: ownerRef.current?.scope ?? null }, view));
-` : `  return ${p}React.createElement(${p}ContextTransport.Provider, { value: ownerRef.current?.scope ?? null }, view);
-`}
+`
+    : `  return ${p}React.createElement(${p}ContextTransport.Provider, { value: ownerRef.current?.scope ?? null }, view);
+`
+}
 });
 ${componentName}.displayName = ${JSON.stringify(ir.name)};
 `;
@@ -1119,10 +1336,18 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
     value: {
       code,
       profile,
-      supportingFiles: [...contextArtifacts.files, ...staticArtifacts.files, nativeStyleArtifact, ...(interaction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []), ...(ssr ? [reactSSRTransportArtifact] : []), {
-        path: transportFile, kind: 'source',
-        contents: `import { createContext } from 'react';\nimport type { ContextScope } from './scope-v1';\nexport const ContextTransport = createContext<ContextScope | null>(null);\n`,
-      }],
+      supportingFiles: [
+        ...contextArtifacts.files,
+        ...staticArtifacts.files,
+        nativeStyleArtifact,
+        ...(interaction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []),
+        ...(ssr ? [reactSSRTransportArtifact] : []),
+        {
+          path: transportFile,
+          kind: 'source',
+          contents: `import { createContext } from 'react';\nimport type { ContextScope } from './scope-v1';\nexport const ContextTransport = createContext<ContextScope | null>(null);\n`,
+        },
+      ],
       dependencies: selected.value.dependencies.map((dependency) => ({ ...dependency })),
       provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
     },

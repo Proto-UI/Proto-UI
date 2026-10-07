@@ -81,7 +81,13 @@ export default defineConfig({
       enforce: 'pre',
       resolveId(id) {
         if (id === '@floating-ui/dom') {
+<<<<<<< HEAD
+          const manifestPath = require.resolve(id + '/package.json', {
+            paths: [path.resolve(__dirname, 'packages/modules/positioning')],
+          });
+=======
           const manifestPath = require.resolve(id + '/package.json', { paths: [path.resolve(__dirname, 'packages/modules/positioning')] });
+>>>>>>> origin/main
           const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
           return path.resolve(path.dirname(manifestPath), manifest.exports['.'].import.default);
         }

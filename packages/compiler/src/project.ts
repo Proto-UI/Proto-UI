@@ -44,7 +44,12 @@ export interface ProjectCompilation extends SuccessfulProjectGeneration {
 
 export type ProjectCompileResult =
   | { ok: true; value: ProjectCompilation }
-  | { ok: false; diagnostics: CompilerDiagnostic[]; project: CompilerProject; dependencies: readonly string[] };
+  | {
+      ok: false;
+      diagnostics: CompilerDiagnostic[];
+      project: CompilerProject;
+      dependencies: readonly string[];
+    };
 
 export interface ProjectAttempt {
   readonly revision: number;
@@ -72,15 +77,24 @@ interface CachedCompilation {
 const MAX_SOURCE_CACHE = 512;
 const PROJECT_CACHE_SCHEMA = 1;
 const span = (file: string): SourceSpan => ({
-  file, start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1,
+  file,
+  start: 0,
+  end: 0,
+  line: 1,
+  column: 1,
+  endLine: 1,
+  endColumn: 1,
 });
-const hash = (value: string | Uint8Array): string => createHash('sha256').update(value).digest('hex');
+const hash = (value: string | Uint8Array): string =>
+  createHash('sha256').update(value).digest('hex');
 
 function diagnostic(error: unknown, file: string): CompilerDiagnostic {
   if (error instanceof CompilerRejection) return error.diagnostic;
   return {
-    code: 'PUI4101', category: 'invalid-input',
-    message: error instanceof Error ? error.message : String(error), span: span(file),
+    code: 'PUI4101',
+    category: 'invalid-input',
+    message: error instanceof Error ? error.message : String(error),
+    span: span(file),
   };
 }
 
@@ -101,15 +115,26 @@ export class CompilerProject {
   }
 
   /** Attempted source/config closure and local-resolution candidates, including missing paths. */
-  get dependencies(): readonly string[] { return this.currentDependencies; }
-  get graph(): ReadonlyMap<string, readonly string[]> { return this.currentGraph; }
-  get lastSuccessful(): SuccessfulProjectGeneration | undefined { return this.successful; }
-  get lastAttempt(): ProjectAttempt | undefined { return this.attempt; }
+  get dependencies(): readonly string[] {
+    return this.currentDependencies;
+  }
+  get graph(): ReadonlyMap<string, readonly string[]> {
+    return this.currentGraph;
+  }
+  get lastSuccessful(): SuccessfulProjectGeneration | undefined {
+    return this.successful;
+  }
+  get lastAttempt(): ProjectAttempt | undefined {
+    return this.attempt;
+  }
 
   /** @internal Serialize attempts that intentionally share the same project. */
   compile(options: CompileProjectOptions): Promise<ProjectCompileResult> {
     const result = this.pending.then(() => this.compileAttempt(options));
-    this.pending = result.then(() => undefined, () => undefined);
+    this.pending = result.then(
+      () => undefined,
+      () => undefined
+    );
     return result;
   }
 
@@ -125,7 +150,9 @@ export class CompilerProject {
     const entries: string[] = [];
     const identities: [string, string][] = [];
     const relativeName = (filename: string): string =>
-      sourceName(path.relative(this.root, path.resolve(this.root, filename)).split(path.sep).join('/'));
+      sourceName(
+        path.relative(this.root, path.resolve(this.root, filename)).split(path.sep).join('/')
+      );
 
     const load = (filename: string): Promise<LoadedSource> => {
       const existing = loaded.get(filename);
@@ -136,7 +163,8 @@ export class CompilerProject {
         const canonical = relativeName(absolute);
         // A resolved identity must remain stable while its bytes are read. A symlink
         // retarget during the attempt cannot silently pair one graph with another file.
-        if (canonical !== filename) throw new Error(`Source identity changed while reading ${filename}.`);
+        if (canonical !== filename)
+          throw new Error(`Source identity changed while reading ${filename}.`);
         const bytes = await readFile(absolute);
         const text = bytes.toString('utf8');
         const digest = hash(bytes);
@@ -147,8 +175,12 @@ export class CompilerProject {
           this.sourceCache.delete(filename);
         } else {
           const file = ts.createSourceFile(filename, text, ts.ScriptTarget.Latest, true);
-          parsed = { digest, specifiers: runtimeSourceEdges(file)
-            .map((edge) => edge.specifier).filter(isLocalSourceSpecifier) };
+          parsed = {
+            digest,
+            specifiers: runtimeSourceEdges(file)
+              .map((edge) => edge.specifier)
+              .filter(isLocalSourceSpecifier),
+          };
         }
         this.sourceCache.set(filename, parsed);
         if (this.sourceCache.size > MAX_SOURCE_CACHE)
@@ -162,7 +194,9 @@ export class CompilerProject {
             const target = await resolveLocalSource(this.root, filename, specifier);
             dependencies.add(target);
             edges.push({ specifier, target });
-          } catch (error) { failures.push(error); }
+          } catch (error) {
+            failures.push(error);
+          }
         }
         graph.set(filename, [...new Set(edges.map((edge) => edge.target))].sort());
         // Retain resolved siblings even beside broken imports so their transitive
@@ -182,8 +216,11 @@ export class CompilerProject {
         entries.push(relative);
       }
       if (!entries.length) throw new Error('A compiler project requires at least one entry.');
-      if (new Set(entries).size !== entries.length) throw new Error('Project entries must be unique.');
-    } catch (error) { diagnostics.push(diagnostic(error, '<project>')); }
+      if (new Set(entries).size !== entries.length)
+        throw new Error('Project entries must be unique.');
+    } catch (error) {
+      diagnostics.push(diagnostic(error, '<project>'));
+    }
 
     for (const filename of [...new Set(options.configFiles ?? [])].sort()) {
       try {
@@ -192,66 +229,102 @@ export class CompilerProject {
         const absolute = await realpath(path.resolve(this.root, relative));
         const canonical = relativeName(absolute);
         dependencies.add(canonical);
-        configuration.push([relative, hash(JSON.stringify([canonical, hash(await readFile(absolute))]))]);
-      } catch (error) { diagnostics.push(diagnostic(error, '<project>')); }
+        configuration.push([
+          relative,
+          hash(JSON.stringify([canonical, hash(await readFile(absolute))])),
+        ]);
+      } catch (error) {
+        diagnostics.push(diagnostic(error, '<project>'));
+      }
     }
     const configurationFailed = diagnostics.length > 0;
 
-    const configIdentity = hash(JSON.stringify({
-      schema: PROJECT_CACHE_SCHEMA, ir: IR_VERSION, profile: options.profile ?? 'react-runtime-v1',
-      exportName: options.exportName ?? 'default', componentName: options.componentName ?? null,
-      nativeSdkPath: options.nativeSdkPath ?? null,
-      configuration,
-    }));
+    const configIdentity = hash(
+      JSON.stringify({
+        schema: PROJECT_CACHE_SCHEMA,
+        ir: IR_VERSION,
+        profile: options.profile ?? 'react-runtime-v1',
+        exportName: options.exportName ?? 'default',
+        componentName: options.componentName ?? null,
+        nativeSdkPath: options.nativeSdkPath ?? null,
+        configuration,
+      })
+    );
 
     for (const requestedEntry of entries) {
-        try {
-          const absolute = await realpath(path.resolve(this.root, requestedEntry));
-          const entry = relativeName(absolute);
-          const closure = new Map<string, LoadedSource>();
-          const visiting = new Set<string>();
-          const visit = async (filename: string): Promise<void> => {
-            if (visiting.has(filename)) return;
-            visiting.add(filename);
-            const source = await load(filename);
-            closure.set(filename, source);
-            const failures: unknown[] = [...source.failures];
-            for (const edge of source.edges) {
-              try { await visit(edge.target); } catch (error) { failures.push(error); }
+      try {
+        const absolute = await realpath(path.resolve(this.root, requestedEntry));
+        const entry = relativeName(absolute);
+        const closure = new Map<string, LoadedSource>();
+        const visiting = new Set<string>();
+        const visit = async (filename: string): Promise<void> => {
+          if (visiting.has(filename)) return;
+          visiting.add(filename);
+          const source = await load(filename);
+          closure.set(filename, source);
+          const failures: unknown[] = [...source.failures];
+          for (const edge of source.edges) {
+            try {
+              await visit(edge.target);
+            } catch (error) {
+              failures.push(error);
             }
-            if (failures.length) throw failures[0];
-          };
-          await visit(entry);
-          if (configurationFailed) continue;
-          const names = [...closure.keys()].sort();
-          const identity = hash(JSON.stringify([configIdentity, entry,
+          }
+          if (failures.length) throw failures[0];
+        };
+        await visit(entry);
+        if (configurationFailed) continue;
+        const names = [...closure.keys()].sort();
+        const identity = hash(
+          JSON.stringify([
+            configIdentity,
+            entry,
             names.map((name) => {
               const source = closure.get(name)!;
               return [name, source.digest, source.edges];
             }),
-          ]));
-          identities.push([requestedEntry, identity]);
-          const cached = this.compilationCache.get(requestedEntry);
-          let result: CompileResult<Compilation>;
-          if (cached?.identity === identity) {
-            result = { ok: true, value: cached.compilation };
-          } else {
-            const files: Record<string, string> = Object.create(null);
-            for (const name of names) files[name] = closure.get(name)!.text;
-            result = await compileFile(absolute, {
-              root: this.root, profile: options.profile, exportName: options.exportName,
-              componentName: options.componentName, nativeSdkPath: options.nativeSdkPath, sourceSnapshot: { entry, files },
-            });
-          }
-          if (!result.ok) { diagnostics.push(...result.diagnostics); continue; }
-          entryResults.push({ entry: requestedEntry, compilation: result.value, cacheHit: cached?.identity === identity });
-          nextCache.set(requestedEntry, { identity, compilation: result.value });
-        } catch (error) { diagnostics.push(diagnostic(error, requestedEntry)); }
+          ])
+        );
+        identities.push([requestedEntry, identity]);
+        const cached = this.compilationCache.get(requestedEntry);
+        let result: CompileResult<Compilation>;
+        if (cached?.identity === identity) {
+          result = { ok: true, value: cached.compilation };
+        } else {
+          const files: Record<string, string> = Object.create(null);
+          for (const name of names) files[name] = closure.get(name)!.text;
+          result = await compileFile(absolute, {
+            root: this.root,
+            profile: options.profile,
+            exportName: options.exportName,
+            componentName: options.componentName,
+            nativeSdkPath: options.nativeSdkPath,
+            sourceSnapshot: { entry, files },
+          });
+        }
+        if (!result.ok) {
+          diagnostics.push(...result.diagnostics);
+          continue;
+        }
+        entryResults.push({
+          entry: requestedEntry,
+          compilation: result.value,
+          cacheHit: cached?.identity === identity,
+        });
+        nextCache.set(requestedEntry, { identity, compilation: result.value });
+      } catch (error) {
+        diagnostics.push(diagnostic(error, requestedEntry));
+      }
     }
 
     this.currentDependencies = [...dependencies].sort();
     this.currentGraph = graph;
-    this.attempt = { revision, ok: !diagnostics.length, dependencies: this.currentDependencies, diagnostics };
+    this.attempt = {
+      revision,
+      ok: !diagnostics.length,
+      dependencies: this.currentDependencies,
+      diagnostics,
+    };
     if (diagnostics.length) {
       return { ok: false, diagnostics, project: this, dependencies: this.currentDependencies };
     }
@@ -259,8 +332,10 @@ export class CompilerProject {
     // Failed attempts may update graph parses, but never publish partial generation.
     this.compilationCache = nextCache;
     this.successful = {
-      revision, identity: hash(JSON.stringify([configIdentity, identities])),
-      entries: entryResults, dependencies: this.currentDependencies,
+      revision,
+      identity: hash(JSON.stringify([configIdentity, identities])),
+      entries: entryResults,
+      dependencies: this.currentDependencies,
     };
     return { ok: true, value: { ...this.successful, project: this } };
   }
@@ -269,10 +344,14 @@ export class CompilerProject {
 /** Compile an entire requested generation without writing any artifacts. */
 export async function compileProject(
   options: CompileProjectOptions,
-  previous?: CompilerProject,
+  previous?: CompilerProject
 ): Promise<ProjectCompileResult> {
   let root = path.resolve(options.root);
-  try { root = await realpath(root); } catch { /* The attempt reports the filesystem failure. */ }
+  try {
+    root = await realpath(root);
+  } catch {
+    /* The attempt reports the filesystem failure. */
+  }
   const project = previous?.root === root ? previous : new CompilerProject(root);
   return project.compile(options);
 }

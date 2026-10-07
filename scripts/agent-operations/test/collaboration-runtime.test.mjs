@@ -30,6 +30,13 @@ const modelTraceArtifact = {
   digest: modelTrace.id,
 };
 
+// Receipt-producing observations must follow the synthetic measurement. Keep
+// old target/server metadata independent; it need not be a mutation timestamp.
+function fixtureTimestamp(seconds, fraction = '000') {
+  const second = Math.floor(Date.parse(modelTrace.measuredAt) / 1000) + 1 + seconds;
+  return new Date(second * 1000).toISOString().replace(/\.\d{3}Z$/, `.${fraction}Z`);
+}
+
 const HEAD = 'a'.repeat(40);
 const NEXT_HEAD = 'b'.repeat(40);
 const BASE = 'c'.repeat(40);
@@ -165,7 +172,7 @@ function metadataLive(overrides = {}) {
     kind: 'proto-ui.live-collaboration-state',
     repositoryId: 'github.com:Proto-UI/Proto-UI',
     action: 'update-governed-issue-or-pull-request-metadata',
-    observedAt: '2026-08-27T01:00:05.000Z',
+    observedAt: fixtureTimestamp(5),
     viewerLogin: 'maintainer',
     viewerPermission: 'WRITE',
     current: {
@@ -1450,7 +1457,7 @@ test('schema-v2 receipt ingestion admits GitHub casing aliases but rejects forei
     mutationCount: 0,
     reconciliationCount: 0,
     platformObject: null,
-    verifiedAt: '2026-08-27T01:00:11.000Z',
+    verifiedAt: fixtureTimestamp(11),
     verification: 'live-state-matches-desired',
     note: 'Synthetic receipt ingestion control.',
     modelTrace,
@@ -1465,6 +1472,108 @@ test('schema-v2 receipt ingestion admits GitHub casing aliases but rejects forei
   assert.throws(
     () => validateCollaborationReceipt({ ...receipt, repositoryId: ['github.com:a', 'b/c'] }),
     { name: 'Error' }
+  );
+});
+
+test('schema-v2 receipt ingestion rejects retroactive measurements without losing timestamp precision', () => {
+  const request = metadataRequest();
+  const preState = metadataLive();
+  const receipt = buildCollaborationReceipt({
+    request,
+    preState,
+    postState: preState,
+    actor: 'maintainer',
+    outcome: 'no-op',
+    mutationCount: 0,
+    reconciliationCount: 0,
+    platformObject: null,
+    verifiedAt: modelTrace.measuredAt,
+    verification: 'live-state-matches-desired',
+    note: 'Synthetic measurement and verification at the same instant.',
+    modelTrace,
+  });
+  const measured = Date.parse(modelTrace.measuredAt);
+  const equalOffset = new Date(measured + 60 * 60 * 1000).toISOString().replace('Z', '000+01:00');
+  validateCollaborationReceipt({ ...receipt, verifiedAt: equalOffset }, request);
+  // Verification accepts finer fractions than ModelTrace measurement. This is
+  // one microsecond before measurement, including the .000 second rollover.
+  const fractionalBefore = new Date(measured - 1).toISOString().replace('Z', '999Z');
+  assert.throws(
+    () => validateCollaborationReceipt({ ...receipt, verifiedAt: fractionalBefore }, request),
+    /measurement occurs after receipt verification/
+  );
+  const beforeOffset = new Date(measured - 1 + 60 * 60 * 1000).toISOString().replace('Z', '+01:00');
+  assert.throws(
+    () => validateCollaborationReceipt({ ...receipt, verifiedAt: beforeOffset }),
+    /measurement occurs after receipt verification/
+  );
+});
+
+test('applied thread receipts admit late verification and old PR metadata but reject later attribution', () => {
+  const fixture = nonMetadataMutationCases().find((item) => item.name === 'resolve thread');
+  const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
+  const postState = {
+    ...preState,
+    current: { ...fixture.before, ...fixture.after },
+  };
+  const receipt = buildCollaborationReceipt({
+    request: fixture.request,
+    preState,
+    postState,
+    actor: 'maintainer',
+    outcome: 'applied',
+    mutationCount: 1,
+    reconciliationCount: 0,
+    platformObject: {
+      id: 'PRRT_thread',
+      nodeId: 'PRRT_thread',
+      url: null,
+      updatedAt: UPDATED_AT,
+      headSha: HEAD,
+      workflowRunId: null,
+      workflowAttempt: null,
+    },
+    verifiedAt: new Date(Date.parse(modelTrace.expiresAt) + 124).toISOString(),
+    verification: 'live-state-matches-desired',
+    note: 'Synthetic post-write readback after measurement expiry; PR metadata is unchanged.',
+    modelTrace,
+  });
+  validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), fixture.request);
+  assert.throws(
+    () =>
+      validateCollaborationReceipt({
+        ...receipt,
+        verifiedAt: new Date(Date.parse(modelTrace.measuredAt) - 1).toISOString(),
+      }),
+    /measurement occurs after receipt verification/
+  );
+});
+
+test('rejected receipts retain historical attribution without implying a write or current freshness', () => {
+  const request = metadataRequest();
+  const preState = metadataLive();
+  const receipt = buildCollaborationReceipt({
+    request,
+    preState,
+    postState: preState,
+    actor: 'maintainer',
+    outcome: 'rejected',
+    mutationCount: 0,
+    reconciliationCount: 0,
+    platformObject: null,
+    verifiedAt: modelTrace.expiresAt,
+    verification: 'live-authorization-rejected',
+    note: 'Synthetic zero-write historical rejection.',
+    modelTrace,
+  });
+  validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), request);
+  assert.throws(
+    () =>
+      validateCollaborationReceipt({
+        ...receipt,
+        verifiedAt: new Date(Date.parse(modelTrace.measuredAt) - 1).toISOString(),
+      }),
+    /measurement occurs after receipt verification/
   );
 });
 
@@ -2189,18 +2298,16 @@ for (const scenario of [
     fixture.request = seal({
       ...fixture.request,
       requestedAt:
-        scenario === 'initial future request'
-          ? '2026-08-27T01:00:12.000Z'
-          : '2026-08-27T01:00:05.000Z',
+        scenario === 'initial future request' ? fixtureTimestamp(12) : fixtureTimestamp(5),
     });
     const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
     const finalState = structuredClone(preState);
-    if (scenario === 'subsecond future request') preState.observedAt = '2026-08-27T01:00:04.999Z';
+    if (scenario === 'subsecond future request') preState.observedAt = fixtureTimestamp(4, '999');
     if (scenario === 'clock rollback at final preflight')
-      finalState.observedAt = '2026-08-27T01:00:04.999Z';
+      finalState.observedAt = fixtureTimestamp(4, '999');
     const postState = {
       ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
+      observedAt: fixtureTimestamp(11),
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
@@ -2230,49 +2337,49 @@ for (const scenario of [
 for (const [name, requestedAt, initialAt, finalAt, expectedOutcome, expectedReads] of [
   [
     'fractional future',
-    '2026-08-27T01:00:05.0001Z',
-    '2026-08-27T01:00:05.000Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(5, '0001'),
+    fixtureTimestamp(5),
+    fixtureTimestamp(5),
     'rejected',
     1,
   ],
   [
     'offset fractional future',
-    '2026-08-27T02:00:05.0001+01:00',
-    '2026-08-27T01:00:05.000Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(3605, '0001').replace('Z', '+01:00'),
+    fixtureTimestamp(5),
+    fixtureTimestamp(5),
     'rejected',
     1,
   ],
   [
     'final fractional rollback',
-    '2026-08-27T01:00:05.0001Z',
-    '2026-08-27T01:00:05.0002Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(5, '0001'),
+    fixtureTimestamp(5, '0002'),
+    fixtureTimestamp(5),
     'rejected',
     2,
   ],
   [
     'equal padded fraction',
-    '2026-08-27T01:00:05.0001000Z',
-    '2026-08-27T01:00:05.0001Z',
-    '2026-08-27T01:00:05.0001Z',
+    fixtureTimestamp(5, '0001000'),
+    fixtureTimestamp(5, '0001'),
+    fixtureTimestamp(5, '0001'),
     'applied',
     3,
   ],
   [
     'equal offset instant',
-    '2026-08-27T02:00:05.0001+01:00',
-    '2026-08-27T01:00:05.000100Z',
-    '2026-08-27T01:00:05.000100Z',
+    fixtureTimestamp(3605, '0001').replace('Z', '+01:00'),
+    fixtureTimestamp(5, '000100'),
+    fixtureTimestamp(5, '000100'),
     'applied',
     3,
   ],
   [
     'earlier second with longer fraction',
-    '2026-08-27T01:00:04.999999Z',
-    '2026-08-27T01:00:05.000Z',
-    '2026-08-27T01:00:05.000Z',
+    fixtureTimestamp(4, '999999'),
+    fixtureTimestamp(5),
+    fixtureTimestamp(5),
     'applied',
     3,
   ],
@@ -2289,7 +2396,7 @@ for (const [name, requestedAt, initialAt, finalAt, expectedOutcome, expectedRead
     const finalState = { ...preState, observedAt: finalAt };
     const postState = {
       ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
+      observedAt: fixtureTimestamp(11),
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.body = `${fixture.request.desired.body}\n\n${collaborationMarker(fixture.request)}`;
@@ -3030,7 +3137,7 @@ for (const createdAt of [
     const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
     const postState = {
       ...preState,
-      observedAt: '2026-08-27T01:00:11.000Z',
+      observedAt: fixtureTimestamp(11),
       current: { ...fixture.before, ...structuredClone(fixture.after) },
     };
     postState.current.markerComment.createdAt = createdAt;

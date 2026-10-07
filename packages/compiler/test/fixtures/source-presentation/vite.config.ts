@@ -54,7 +54,9 @@ const generated: Plugin = {
       const side = parent.slice(prefix.length).split('/')[0] as keyof typeof profiles;
       await compile(side);
       const resolved = path.posix.normalize(path.posix.join(path.posix.dirname(parent), id));
-      const candidate = [resolved, `${resolved}.ts`, `${resolved}.tsx`].find((name) => modules.has(name));
+      const candidate = [resolved, `${resolved}.ts`, `${resolved}.tsx`].find((name) =>
+        modules.has(name)
+      );
       if (!candidate) throw new Error(`Missing generated supporting artifact ${id} from ${parent}`);
       return `\0${candidate}`;
     }

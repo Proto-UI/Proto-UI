@@ -7,9 +7,13 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitWebComponentSource } from './web-component-source';
 
-const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+const floatingUi = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+)('@floating-ui/dom');
 
-interface Projection<T> { get(): T }
+interface Projection<T> {
+  get(): T;
+}
 interface StyleElement extends HTMLElement {
   readonly logicalOwner: symbol | null;
   readonly viewEpoch: number;
@@ -27,7 +31,10 @@ interface StyleElement extends HTMLElement {
 let nextTag = 0;
 const elements: StyleElement[] = [];
 afterEach(() => {
-  for (const element of elements.splice(0)) { element.dispose(); element.remove(); }
+  for (const element of elements.splice(0)) {
+    element.dispose();
+    element.remove();
+  }
 });
 
 function create(source: string): StyleElement {
@@ -35,7 +42,9 @@ function create(source: string): StyleElement {
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitWebComponentSource(parsed.value, { shadow: true });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-  const sources = new Map((emitted.value.supportingFiles ?? []).map((file) => [file.path, file.contents]));
+  const sources = new Map(
+    (emitted.value.supportingFiles ?? []).map((file) => [file.path, file.contents])
+  );
   sources.set('component.ts', emitted.value.code);
   const modules = new Map<string, Record<string, unknown>>();
   function load(file: string): Record<string, unknown> {
@@ -138,20 +147,20 @@ describe('generated Custom Element native styles', () => {
     document.body.append(element);
     element.getExposes().setActive?.(true);
     const child = element.shadowRoot?.querySelector('output');
-    element.setProps({command: 'patch', accent: true});
+    element.setProps({ command: 'patch', accent: true });
     expect(tokens(element)).toEqual(['bg-red-500', 'opacity-20', 'text-white']);
     expect(element.shadowRoot?.querySelector('output')).toBe(child);
     await Promise.resolve();
-    element.setProps({command: 'suppress', accent: true});
+    element.setProps({ command: 'suppress', accent: true });
     expect(tokens(element)).toEqual(['opacity-20', 'text-white']);
     await Promise.resolve();
-    element.setProps({command: 'clear', accent: true});
+    element.setProps({ command: 'clear', accent: true });
     expect(tokens(element)).toEqual(['bg-black', 'opacity-40', 'text-white']);
     element.getExposes().setActive?.(false);
     expect(tokens(element)).toEqual(['bg-white', 'opacity-80', 'text-white']);
     element.getExposes().withdraw?.();
     expect(tokens(element)).toEqual(['bg-white', 'opacity-100', 'text-white']);
-    element.setProps({command: 'clear', accent: false});
+    element.setProps({ command: 'clear', accent: false });
     expect(tokens(element)).toEqual(['bg-white', 'opacity-100']);
   });
 
@@ -187,21 +196,21 @@ describe('generated Custom Element native styles', () => {
     await Promise.resolve();
     expect(element.logicalOwner).toBe(owner);
     expect(element.viewEpoch).toBe(initialEpoch);
-    element.setProps({visible: false});
+    element.setProps({ visible: false });
     await Promise.resolve();
     expect(element.present).toBe(false);
     expect(element.hasAttribute('data-pui-style')).toBe(false);
     exposes.setActive?.(true);
-    element.setProps({visible: false, command: 'patch', accent: true});
+    element.setProps({ visible: false, command: 'patch', accent: true });
     expect(element.hasAttribute('data-pui-style')).toBe(false);
     await Promise.resolve();
-    element.setProps({visible: true, command: 'patch', accent: true});
+    element.setProps({ visible: true, command: 'patch', accent: true });
     await Promise.resolve();
     expect(element.logicalOwner).toBe(owner);
     expect(element.viewEpoch).toBeGreaterThan(initialEpoch);
     expect(tokens(element)).toEqual(['bg-red-500', 'opacity-20', 'text-white']);
     expect(element.shadowRoot?.querySelector('output')?.textContent).toBe('1');
-    element.setProps({command: 'clear', accent: true});
+    element.setProps({ command: 'clear', accent: true });
     expect(tokens(element)).toEqual(['bg-black', 'opacity-40', 'text-white']);
     element.dispose();
     expect(element.hasAttribute('data-pui-style')).toBe(false);

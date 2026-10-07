@@ -23,6 +23,7 @@ export const {
   getLogicalEventRouteOwner,
   getLogicalEventRouteSurfaceForTarget,
   resolveLogicalTriggerEventRouteForTarget,
+  isLogicalEventRouteCandidate,
   getLogicalTriggerSurfaceOwner,
   getLogicalTriggerSurfaceRoot,
   subscribeLogicalTriggerSurface,

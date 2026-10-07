@@ -71,15 +71,27 @@ interface Value extends Base {
   note?: string | null;
 }
 export const KEY = key<Value>('record');`);
-    expect(acceptsValue(key.type, {
-      count: 3, mode: 'open', items: [{ label: 'row', active: true }],
-    })).toBe(true);
-    expect(acceptsValue(key.type, {
-      count: 3, mode: 'invalid', items: [],
-    })).toBe(false);
-    expect(acceptsValue(key.type, {
-      count: 3, mode: 'closed', items: [{ label: 'row', active: 'yes' }],
-    })).toBe(false);
+    expect(
+      acceptsValue(key.type, {
+        count: 3,
+        mode: 'open',
+        items: [{ label: 'row', active: true }],
+      })
+    ).toBe(true);
+    expect(
+      acceptsValue(key.type, {
+        count: 3,
+        mode: 'invalid',
+        items: [],
+      })
+    ).toBe(false);
+    expect(
+      acceptsValue(key.type, {
+        count: 3,
+        mode: 'closed',
+        items: [{ label: 'row', active: 'yes' }],
+      })
+    ).toBe(false);
     expect(acceptsValue(key.type, { mode: 'open', items: [] })).toBe(false);
     expect(JSON.parse(JSON.stringify(key))).toEqual(key);
   });

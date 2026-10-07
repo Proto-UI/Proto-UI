@@ -9,11 +9,14 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { emitReactSource } from '../src/react-source';
 
-(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+(globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
+  true;
 
 interface ExternalState<T> {
   get(): T;
-  subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void;
+  subscribe(
+    callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void
+  ): () => void;
   unsubscribe(off: () => void): void;
   readonly spec: Readonly<{ kind: string }>;
 }
@@ -26,23 +29,35 @@ interface NativeHandle {
   };
 }
 interface NativeModule {
-  CompiledComponent: React.ForwardRefExoticComponent<Record<string, unknown> & React.RefAttributes<NativeHandle>>;
+  CompiledComponent: React.ForwardRefExoticComponent<
+    Record<string, unknown> & React.RefAttributes<NativeHandle>
+  >;
 }
 const directories: string[] = [];
 const roots: Root[] = [];
 let moduleIdentity = 0;
 afterEach(async () => {
-  await React.act(async () => { for (const root of roots.splice(0)) root.unmount(); });
+  await React.act(async () => {
+    for (const root of roots.splice(0)) root.unmount();
+  });
   document.body.replaceChildren();
-  for (const directory of directories.splice(0)) await rm(directory, { recursive: true, force: true });
+  for (const directory of directories.splice(0))
+    await rm(directory, { recursive: true, force: true });
 });
 
-async function loadNative(source: string, files?: Readonly<Record<string, string>>): Promise<NativeModule> {
+async function loadNative(
+  source: string,
+  files?: Readonly<Record<string, string>>
+): Promise<NativeModule> {
   const parsed = parsePrototype(source, { fileName: 'native.proto.ts', files });
   if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
   const emitted = emitReactSource(parsed.value);
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
-  const directory = path.join(path.dirname(fileURLToPath(import.meta.url)), 'generated-modules', `native-${process.pid}-${moduleIdentity++}`);
+  const directory = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    'generated-modules',
+    `native-${process.pid}-${moduleIdentity++}`
+  );
   await mkdir(directory, { recursive: true });
   directories.push(directory);
   const file = path.join(directory, 'Component.tsx');
@@ -53,7 +68,7 @@ async function loadNative(source: string, files?: Readonly<Record<string, string
     await writeFile(destination, supporting.contents, 'utf8');
   }
   // The emitted program and its temporary module path are selected at runtime; no static import can name them.
-  return await import(/* @vite-ignore */ file) as NativeModule;
+  return (await import(/* @vite-ignore */ file)) as NativeModule;
 }
 
 const numericSource = `import {definePrototype} from '@proto.ui/core';
@@ -98,11 +113,17 @@ describe('checked semantics to native React DOM source', () => {
     const ref = React.createRef<NativeHandle>();
     const lifecycle: string[] = [];
     const props = {
-      ref, onCreated: () => lifecycle.push('created'), onMounted: () => lifecycle.push('mounted'),
-      onUpdated: () => lifecycle.push('updated'), onUnmounted: () => lifecycle.push('unmounted'),
-      onBeforeDispose: () => lifecycle.push('beforeDispose'), children: React.createElement('b', null, 'slot'),
+      ref,
+      onCreated: () => lifecycle.push('created'),
+      onMounted: () => lifecycle.push('mounted'),
+      onUpdated: () => lifecycle.push('updated'),
+      onUnmounted: () => lifecycle.push('unmounted'),
+      onBeforeDispose: () => lifecycle.push('beforeDispose'),
+      children: React.createElement('b', null, 'slot'),
     };
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, props)); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, props));
+    });
     const handle = ref.current!;
     const exposes = handle.getExposes();
     const heldState = exposes.count;
@@ -113,33 +134,58 @@ describe('checked semantics to native React DOM source', () => {
 
     const transitions: number[] = [];
     const off = heldState.subscribe((event) => transitions.push(event.next));
-    await React.act(async () => { heldMethod(3); });
+    await React.act(async () => {
+      heldMethod(3);
+    });
     expect(heldState.get()).toBe(7);
     expect(exposes.read()).toBe(7);
     expect(host.querySelector('output')?.textContent).toBe('2slot');
     expect(transitions).toEqual([7]);
-    await React.act(async () => { handle.update(); handle.update(); handle.update(); });
+    await React.act(async () => {
+      handle.update();
+      handle.update();
+      handle.update();
+    });
     expect(host.querySelector('output')?.textContent).toBe('7slot');
     expect(lifecycle).toEqual(['created', 'mounted', 'updated']);
 
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ...props, present: false })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ...props, present: false }));
+    });
     expect(host.querySelector('output')).toBeNull();
     expect(handle.getExposes().count).toBe(heldState);
-    await React.act(async () => { heldMethod(2); handle.update(); });
+    await React.act(async () => {
+      heldMethod(2);
+      handle.update();
+    });
     expect(heldState.get()).toBe(9);
     expect(host.querySelector('output')).toBeNull();
     expect(lifecycle).toEqual(['created', 'mounted', 'updated', 'unmounted']);
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ...props, present: true })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ...props, present: true }));
+    });
     expect(host.querySelector('output')?.textContent).toBe('9slot');
     expect(handle.getExposes().add).toBe(heldMethod);
     expect(lifecycle).toEqual(['created', 'mounted', 'updated', 'unmounted', 'mounted']);
     off();
-    await React.act(async () => { heldMethod(1); });
+    await React.act(async () => {
+      heldMethod(1);
+    });
     expect(transitions).toEqual([7, 9, 4]);
 
-    await React.act(async () => { root.unmount(); });
+    await React.act(async () => {
+      root.unmount();
+    });
     roots.splice(roots.indexOf(root), 1);
-    expect(lifecycle).toEqual(['created', 'mounted', 'updated', 'unmounted', 'mounted', 'unmounted', 'beforeDispose']);
+    expect(lifecycle).toEqual([
+      'created',
+      'mounted',
+      'updated',
+      'unmounted',
+      'mounted',
+      'unmounted',
+      'beforeDispose',
+    ]);
     expect(() => heldMethod(1)).toThrow(/terminal disposal/);
     expect(() => heldState.get()).toThrow(/terminal disposal/);
     expect(() => heldState.subscribe(() => undefined)).toThrow(/terminal disposal/);
@@ -150,17 +196,37 @@ describe('checked semantics to native React DOM source', () => {
     const { CompiledComponent } = await loadNative(numericSource);
     const { root } = mountHost();
     const callbacks: string[] = [];
-    await React.act(async () => { root.render(React.createElement(React.StrictMode, null,
-      React.createElement(CompiledComponent, { onCreated: () => callbacks.push('created'), onMounted: () => callbacks.push('mounted') })));
+    await React.act(async () => {
+      root.render(
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(CompiledComponent, {
+            onCreated: () => callbacks.push('created'),
+            onMounted: () => callbacks.push('mounted'),
+          })
+        )
+      );
     });
     expect(callbacks).toEqual(['created', 'mounted']);
-    await React.act(async () => { root.unmount(); });
+    await React.act(async () => {
+      root.unmount();
+    });
     roots.splice(roots.indexOf(root), 1);
     const abandoned = mountHost();
     const pending = new Promise<never>(() => {});
-    function Suspender(): React.ReactNode { throw pending; }
-    await React.act(async () => { abandoned.root.render(React.createElement(React.Suspense, { fallback: 'pending' },
-      React.createElement(CompiledComponent, { onCreated: () => callbacks.push('abandoned') }), React.createElement(Suspender)));
+    function Suspender(): React.ReactNode {
+      throw pending;
+    }
+    await React.act(async () => {
+      abandoned.root.render(
+        React.createElement(
+          React.Suspense,
+          { fallback: 'pending' },
+          React.createElement(CompiledComponent, { onCreated: () => callbacks.push('abandoned') }),
+          React.createElement(Suspender)
+        )
+      );
     });
     expect(abandoned.host.textContent).toBe('pending');
     expect(callbacks).toEqual(['created', 'mounted']);
@@ -180,16 +246,26 @@ describe('checked semantics to native React DOM source', () => {
     const { CompiledComponent } = await loadNative(source);
     const { host, root } = mountHost();
     const ref = React.createRef<NativeHandle>();
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref, seed: 10 })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref, seed: 10 }));
+    });
     const state = ref.current!.getExposes().count;
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref, seed: null })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref, seed: null }));
+    });
     expect(state.get()).toBe(10);
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref }));
+    });
     expect(state.get()).toBe(2);
     expect(host.textContent).toBe('10');
-    await React.act(async () => { ref.current!.update(); });
+    await React.act(async () => {
+      ref.current!.update();
+    });
     expect(host.textContent).toBe('2');
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref, seed: 'invalid' })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref, seed: 'invalid' }));
+    });
     expect(state.get()).toBe(10);
     expect(host.textContent).toBe('2');
   });
@@ -219,25 +295,41 @@ describe('checked semantics to native React DOM source', () => {
     const ref = React.createRef<NativeHandle>();
     const events: unknown[] = [];
     const onChanged = (value: unknown) => events.push(value);
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref, onChanged })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref, onChanged }));
+    });
     const exposes = ref.current!.getExposes();
-    const hookExposes = exposes as unknown as { enabled: ExternalState<boolean>; label: ExternalState<string>; finish(): void };
-    await React.act(async () => { hookExposes.finish(); });
+    const hookExposes = exposes as unknown as {
+      enabled: ExternalState<boolean>;
+      label: ExternalState<string>;
+      finish(): void;
+    };
+    await React.act(async () => {
+      hookExposes.finish();
+    });
     expect(hookExposes.enabled.get()).toBe(false);
     expect(hookExposes.label.get()).toBe('done');
-    expect(() => (exposes.add as unknown as (value: unknown) => void)('wrong')).toThrow(/invalid method arguments/);
+    expect(() => (exposes.add as unknown as (value: unknown) => void)('wrong')).toThrow(
+      /invalid method arguments/
+    );
     expect(exposes.read()).toBe(0);
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref, seed: 12, onChanged })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref, seed: 12, onChanged }));
+    });
     expect(events).toEqual([12]);
     expect(exposes.read()).toBe(12);
     expect(host.textContent).toBe('12');
   });
 
   it('rejects reached host capabilities before output instead of silently bridging native source', () => {
-    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core'; import {asFocusable} from '@proto.ui/hooks';
+    const parsed =
+      parsePrototype(`import {definePrototype} from '@proto.ui/core'; import {asFocusable} from '@proto.ui/hooks';
       export default definePrototype({name:'unsupported-native',setup(def){const focus=asFocusable();focus.configure({scopeKey:'unsupported'});return r=>r.el('div','value');}});`);
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
-    expect(emitReactSource(parsed.value)).toMatchObject({ ok: false, diagnostics: [{ category: 'unsupported-input' }] });
+    expect(emitReactSource(parsed.value)).toMatchObject({
+      ok: false,
+      diagnostics: [{ category: 'unsupported-input' }],
+    });
   });
 
   it('routes native input in owner scope and projects readonly focus/ARIA facts without a template update', async () => {
@@ -274,11 +366,21 @@ describe('checked semantics to native React DOM source', () => {
     const ref = React.createRef<NativeHandle>();
     const events: string[] = [];
     const props = { ref, onClick: () => events.push('click') };
-    await React.act(async () => { root.render(React.createElement(React.StrictMode, null, React.createElement(CompiledComponent, props))); });
+    await React.act(async () => {
+      root.render(
+        React.createElement(React.StrictMode, null, React.createElement(CompiledComponent, props))
+      );
+    });
     const handle = ref.current!;
     const exposed = handle.getExposes() as unknown as {
-      count: ExternalState<number>; focused: ExternalState<boolean>; focusVisible: ExternalState<boolean>; focusable: ExternalState<boolean>;
-      focusSelf(options?: { reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean }): void;
+      count: ExternalState<number>;
+      focused: ExternalState<boolean>;
+      focusVisible: ExternalState<boolean>;
+      focusable: ExternalState<boolean>;
+      focusSelf(options?: {
+        reason?: 'programmatic' | 'keyboard' | 'pointer';
+        preventScroll?: boolean;
+      }): void;
     };
     const first = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(first.getAttribute('role')).toBe('button');
@@ -288,20 +390,35 @@ describe('checked semantics to native React DOM source', () => {
     expect('set' in exposed.focused).toBe(false);
     const transitions: boolean[] = [];
     const off = exposed.focused.subscribe((event) => transitions.push(event.next));
-    await React.act(async () => { exposed.focusSelf({ reason: 'keyboard', preventScroll: true }); });
+    await React.act(async () => {
+      exposed.focusSelf({ reason: 'keyboard', preventScroll: true });
+    });
     expect(document.activeElement).toBe(first);
     expect(exposed.focused.get()).toBe(true);
     expect(exposed.focusVisible.get()).toBe(true);
     expect(first.getAttribute('aria-pressed')).toBe('true');
     expect(first.getAttribute('data-pui-style')).toBe('ring-2');
     const key = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
-    await React.act(async () => { first.dispatchEvent(key); first.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 })); });
+    await React.act(async () => {
+      first.dispatchEvent(key);
+      first.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+    });
     expect(key.defaultPrevented).toBe(true);
     expect(exposed.count.get()).toBe(1);
     expect(events).toEqual(['click']);
     expect(host.textContent).toBe('0');
-    expect(() => exposed.focusSelf({ reason: 'wrong' } as never)).toThrow(/invalid method arguments/);
-    await React.act(async () => { root.render(React.createElement(React.StrictMode, null, React.createElement(CompiledComponent, { ...props, disabled: true }))); });
+    expect(() => exposed.focusSelf({ reason: 'wrong' } as never)).toThrow(
+      /invalid method arguments/
+    );
+    await React.act(async () => {
+      root.render(
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(CompiledComponent, { ...props, disabled: true })
+        )
+      );
+    });
     expect(exposed.focused.get()).toBe(false);
     expect(exposed.focusable.get()).toBe(false);
     expect(first.getAttribute('aria-disabled')).toBe('true');
@@ -309,22 +426,49 @@ describe('checked semantics to native React DOM source', () => {
     expect(first.hasAttribute('data-pui-style')).toBe(false);
     expect(transitions).toEqual([true, false]);
     exposed.focused.unsubscribe(off);
-    await React.act(async () => { root.render(React.createElement(React.StrictMode, null, React.createElement(CompiledComponent, { ...props, disabled: false, present: false }))); });
+    await React.act(async () => {
+      root.render(
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(CompiledComponent, { ...props, disabled: false, present: false })
+        )
+      );
+    });
     expect(host.querySelector('[data-pui-root]')).toBeNull();
-    await React.act(async () => { first.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+    await React.act(async () => {
+      first.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    });
     expect(exposed.count.get()).toBe(1);
-    await React.act(async () => { root.render(React.createElement(React.StrictMode, null, React.createElement(CompiledComponent, { ...props, present: true }))); });
+    await React.act(async () => {
+      root.render(
+        React.createElement(
+          React.StrictMode,
+          null,
+          React.createElement(CompiledComponent, { ...props, present: true })
+        )
+      );
+    });
     const second = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(second).not.toBe(first);
     expect(ref.current!.getExposes()).toBe(exposed);
-    await React.act(async () => { exposed.focusSelf(); second.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); });
+    await React.act(async () => {
+      exposed.focusSelf();
+      second.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    });
     expect(exposed.count.get()).toBe(2);
     expect(transitions).toEqual([true, false]);
     const heldFocused = exposed.focused;
     const heldFocusSelf = exposed.focusSelf;
-    await React.act(async () => { root.unmount(); });
+    await React.act(async () => {
+      root.unmount();
+    });
     roots.splice(roots.indexOf(root), 1);
-    await React.act(async () => { second.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true })); });
+    await React.act(async () => {
+      second.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    });
     expect(events).toEqual(['click', 'click']);
     expect(() => heldFocused.get()).toThrow();
     expect(() => heldFocused.subscribe(() => undefined)).toThrow();
@@ -345,7 +489,14 @@ describe('checked semantics to native React DOM source', () => {
     const { host, root } = mountHost();
     const ref = React.createRef<NativeHandle>();
     const samples: number[] = [];
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref, onSample: (value: number) => samples.push(value) })); });
+    await React.act(async () => {
+      root.render(
+        React.createElement(CompiledComponent, {
+          ref,
+          onSample: (value: number) => samples.push(value),
+        })
+      );
+    });
     const inputRoot = host.querySelector<HTMLElement>('[data-pui-root]')!;
     const count = ref.current!.getExposes().count;
     await React.act(async () => {
@@ -356,7 +507,9 @@ describe('checked semantics to native React DOM source', () => {
     expect(count.get()).toBe(11);
     expect(samples).toEqual([1, 11]);
     expect(host.textContent).toBe('0');
-    await React.act(async () => { root.unmount(); });
+    await React.act(async () => {
+      root.unmount();
+    });
     roots.splice(roots.indexOf(root), 1);
     await React.act(async () => {
       inputRoot.dispatchEvent(new CustomEvent('sample', { bubbles: true }));
@@ -383,16 +536,35 @@ describe('checked semantics to native React DOM source', () => {
     const { host, root } = mountHost();
     const ref = React.createRef<NativeHandle>();
     const lifecycle: string[] = [];
-    const props = { ref, onMounted: () => lifecycle.push('mounted'), onUnmounted: () => lifecycle.push('unmounted') };
+    const props = {
+      ref,
+      onMounted: () => lifecycle.push('mounted'),
+      onUnmounted: () => lifecycle.push('unmounted'),
+    };
     const pending = new Promise<never>(() => {});
-    function Gate({ blocked }: { blocked: boolean }): React.ReactNode { if (blocked) throw pending; return null; }
-    const view = (blocked: boolean) => React.createElement(React.Suspense, { fallback: 'pending' },
-      React.createElement(CompiledComponent, props), React.createElement(Gate, { blocked }));
-    await React.act(async () => { root.render(view(false)); });
-    const held = ref.current!.getExposes() as unknown as { count: ExternalState<number>; focused: ExternalState<boolean> };
+    function Gate({ blocked }: { blocked: boolean }): React.ReactNode {
+      if (blocked) throw pending;
+      return null;
+    }
+    const view = (blocked: boolean) =>
+      React.createElement(
+        React.Suspense,
+        { fallback: 'pending' },
+        React.createElement(CompiledComponent, props),
+        React.createElement(Gate, { blocked })
+      );
+    await React.act(async () => {
+      root.render(view(false));
+    });
+    const held = ref.current!.getExposes() as unknown as {
+      count: ExternalState<number>;
+      focused: ExternalState<boolean>;
+    };
     const activeRoot = host.querySelector<HTMLElement>('[data-pui-root]')!;
     expect(held.focused.get()).toBe(true);
-    await React.act(async () => { root.render(view(true)); });
+    await React.act(async () => {
+      root.render(view(true));
+    });
     expect(held.focused.get()).toBe(false);
     await React.act(async () => {
       activeRoot.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
@@ -400,14 +572,20 @@ describe('checked semantics to native React DOM source', () => {
     });
     expect(held.count.get()).toBe(0);
     expect(lifecycle).toEqual(['mounted']);
-    await React.act(async () => { root.render(view(false)); });
+    await React.act(async () => {
+      root.render(view(false));
+    });
     expect(ref.current!.getExposes()).toBe(held);
     expect(held.focused.get()).toBe(true);
     const resumedRoot = host.querySelector<HTMLElement>('[data-pui-root]')!;
-    await React.act(async () => { resumedRoot.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 })); });
+    await React.act(async () => {
+      resumedRoot.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    });
     expect(held.count.get()).toBe(1);
     expect(lifecycle).toEqual(['mounted']);
-    await React.act(async () => { root.unmount(); });
+    await React.act(async () => {
+      root.unmount();
+    });
     roots.splice(roots.indexOf(root), 1);
     expect(lifecycle).toEqual(['mounted', 'unmounted']);
   });
@@ -430,10 +608,19 @@ describe('checked semantics to native React DOM source', () => {
     const { CompiledComponent } = await loadNative(source);
     const { host, root } = mountHost();
     const ref = React.createRef<NativeHandle>();
-    await React.act(async () => { root.render(React.createElement(CompiledComponent, { ref })); });
+    await React.act(async () => {
+      root.render(React.createElement(CompiledComponent, { ref }));
+    });
     const exposed = ref.current!.getExposes() as unknown as {
-      range: ExternalState<number>; stepped: ExternalState<number>; choice: ExternalState<number>; label: ExternalState<string>;
-      setRange(value: number): void; step(value: number): void; choose(value: number): void; setLabel(value: string): void; nonfinite(): void;
+      range: ExternalState<number>;
+      stepped: ExternalState<number>;
+      choice: ExternalState<number>;
+      label: ExternalState<string>;
+      setRange(value: number): void;
+      step(value: number): void;
+      choose(value: number): void;
+      setLabel(value: string): void;
+      nonfinite(): void;
     };
     expect(exposed.range.get()).toBe(0);
     const rangeChanges: number[] = [];
@@ -443,7 +630,9 @@ describe('checked semantics to native React DOM source', () => {
     expect(() => exposed.nonfinite()).toThrow(/invalid state value/);
     expect(exposed.range.get()).toBe(0);
     expect(rangeChanges).toEqual([]);
-    await React.act(async () => { exposed.setRange(4); });
+    await React.act(async () => {
+      exposed.setRange(4);
+    });
     expect(exposed.range.get()).toBe(4);
     expect(rangeChanges).toEqual([4]);
     expect(host.textContent).toBe('0');
@@ -454,7 +643,11 @@ describe('checked semantics to native React DOM source', () => {
     expect(exposed.choice.get()).toBe(9);
     expect(() => exposed.setLabel('unknown')).toThrow(/outside options/);
     expect(exposed.label.get()).toBe('ready');
-    await React.act(async () => { exposed.step(5); exposed.choose(11); exposed.setLabel('done'); });
+    await React.act(async () => {
+      exposed.step(5);
+      exposed.choose(11);
+      exposed.setLabel('done');
+    });
     expect(exposed.stepped.get()).toBe(5);
     expect(exposed.choice.get()).toBe(11);
     expect(exposed.label.get()).toBe('done');
@@ -464,7 +657,8 @@ describe('checked semantics to native React DOM source', () => {
     const parsed = parsePrototype(numericSource);
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
     expect(emitReactSource(parsed.value, { componentName: 'Object' })).toMatchObject({
-      ok: false, diagnostics: [{ category: 'invalid-input' }],
+      ok: false,
+      diagnostics: [{ category: 'invalid-input' }],
     });
   });
 });
