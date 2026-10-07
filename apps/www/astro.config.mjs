@@ -646,6 +646,36 @@ export default defineConfig({
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/bootstrap-2-3-2/button',
                 },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/checkbox',
+                },
+                {
+                  label: 'Switch',
+                  translations: { en: 'Switch', 'zh-CN': 'Switch' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/switch',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toggle',
+                },
+                {
+                  label: 'Input',
+                  translations: { en: 'Input', 'zh-CN': 'Input' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/input',
+                },
+                {
+                  label: 'Textarea',
+                  translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/textarea',
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/separator',
+                },
               ],
             },
             {

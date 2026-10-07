@@ -102,6 +102,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-new-projection-families.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts',
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
 ]);

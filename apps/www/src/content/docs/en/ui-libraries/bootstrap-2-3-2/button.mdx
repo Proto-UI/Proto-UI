@@ -4,7 +4,6 @@ description: 'Real Base Button projection through four Web adapters.'
 ---
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
-import AdapterPanelScript from '@/components/PrototypePreviewer/AdapterPanelScript.astro';
 import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
@@ -13,44 +12,13 @@ The archived 2.3.2 gradient and inset-shadow grammar, with interaction owned by 
 
 Use the page runtime selector to compare the same real Prototype. Click Back to observe its activation count.
 
-<div data-adapter-panel="wc">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="wc"
-    toolbar={false}
-    runtimes={['wc']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="react" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="react"
-    toolbar={false}
-    runtimes={['react']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue"
-    toolbar={false}
-    runtimes={['vue']}
-    codePanel={false}
-  />
-</div>
-<div data-adapter-panel="vue2" style="display:none;">
-  <PrototypePreviewer
-    demoId="demo-bootstrap-2-3-2-button"
-    initialRuntime="vue2"
-    toolbar={false}
-    runtimes={['vue2']}
-    codePanel={false}
-  />
-</div>
-
-<AdapterPanelScript />
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-button"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
 
 ## API
 
@@ -58,4 +26,4 @@ Use the page runtime selector to compare the same real Prototype. Click Back to 
 - disabled: boolean, default false
 - Activation, focus, keyboard and disabled behavior are inherited from Base Button; the visual layer owns no second interaction state.
 
-Button is registered now. Other Base parts are being added explicitly, never aliased to another family. General Compiler and full GPUI/Flutter/Qt realization remain unverified. The source package is private and unreleased.
+This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).

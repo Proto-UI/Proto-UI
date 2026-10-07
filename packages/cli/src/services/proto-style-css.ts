@@ -143,6 +143,7 @@ const staticUtilities: Record<string, string[]> = {
   'items-center': ['align-items: center;'],
   'items-start': ['align-items: flex-start;'],
   'items-end': ['align-items: flex-end;'],
+  'justify-start': ['justify-content: flex-start;'],
   'justify-center': ['justify-content: center;'],
   'justify-between': ['justify-content: space-between;'],
   'justify-end': ['justify-content: flex-end;'],
@@ -329,6 +330,10 @@ const staticUtilities: Record<string, string[]> = {
   'bg-[linear-gradient(#08c,#04c)]': [
     'background-color: #006dcc;',
     'background-image: linear-gradient(to bottom, #08c, #04c);',
+  ],
+  'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]': [
+    '--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075);',
+    ...composedShadow(),
   ],
   'shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)]': [
     '--pui-shadow: inset 0 1px 0 rgb(255 255 255 / 0.2), 0 1px 2px rgb(0 0 0 / 0.05);',

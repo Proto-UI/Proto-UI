@@ -31,6 +31,60 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
         : '2.3.2 raised gradients and inset shadows over Base Button.',
       href: './button/',
     },
+    {
+      id: 'checkbox',
+      name: 'Checkbox',
+      demoId: 'demo-bootstrap-2-3-2-checkbox',
+      description: isZh
+        ? '自定义 Root / Indicator，checked 与 mixed 由 Base 拥有。'
+        : 'Custom Root / Indicator with Base-owned checked and mixed state.',
+      href: './checkbox/',
+    },
+    {
+      id: 'switch',
+      name: 'Switch',
+      demoId: 'demo-bootstrap-2-3-2-switch',
+      description: isZh
+        ? '设计语言扩展：由 Base 拥有的 Root / Thumb 开关。'
+        : 'Design-language extension: a Base-owned Root / Thumb switch.',
+      href: './switch/',
+    },
+    {
+      id: 'toggle',
+      name: 'Toggle',
+      demoId: 'demo-bootstrap-2-3-2-toggle',
+      description: isZh
+        ? '设计语言扩展：由 Base 拥有持久 active 状态。'
+        : 'Design-language extension with persistent Base-owned active state.',
+      href: './toggle/',
+    },
+    {
+      id: 'input',
+      name: 'Input',
+      demoId: 'demo-bootstrap-2-3-2-input',
+      description: isZh
+        ? '单一原生文本输入，值与编辑生命周期由 Base 拥有。'
+        : 'One native text input with Base-owned value and editing lifecycle.',
+      href: './input/',
+    },
+    {
+      id: 'textarea',
+      name: 'Textarea',
+      demoId: 'demo-bootstrap-2-3-2-textarea',
+      description: isZh
+        ? '单一原生多行输入，值与 IME 归属保持在 Base。'
+        : 'One native multiline editor with Base-owned value and IME.',
+      href: './textarea/',
+    },
+    {
+      id: 'separator',
+      name: 'Separator',
+      demoId: 'demo-bootstrap-2-3-2-separator',
+      description: isZh
+        ? '水平、竖向与语义分隔，由 Base 定义无交互边界。'
+        : 'Horizontal, vertical, and semantic dividers with a passive Base boundary.',
+      href: './separator/',
+    },
   ],
   'liquid-glass': [
     {
@@ -544,6 +598,7 @@ const copy = isZh
             <PrototypePreviewer
               demoId={entry.demoId}
               initialRuntime="wc"
+              runtimes={library === 'bootstrap-2-3-2' ? ['wc', 'react', 'vue', 'vue2'] : undefined}
               toolbar={false}
               codePanel={false}
               lazy

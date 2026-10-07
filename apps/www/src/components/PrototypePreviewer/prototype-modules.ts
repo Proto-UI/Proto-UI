@@ -59,6 +59,38 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/button');
     registerPrototype('bootstrap-2-3-2-button', mod.default);
   },
+  'bootstrap-2-3-2-checkbox-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/checkbox');
+    registerPrototype('bootstrap-2-3-2-checkbox-root', mod.checkboxRoot);
+  },
+  'bootstrap-2-3-2-checkbox-indicator': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/checkbox');
+    registerPrototype('bootstrap-2-3-2-checkbox-indicator', mod.checkboxIndicator);
+  },
+  'bootstrap-2-3-2-switch-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/switch');
+    registerPrototype('bootstrap-2-3-2-switch-root', mod.switchRoot);
+  },
+  'bootstrap-2-3-2-switch-thumb': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/switch');
+    registerPrototype('bootstrap-2-3-2-switch-thumb', mod.switchThumb);
+  },
+  'bootstrap-2-3-2-toggle': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/toggle');
+    registerPrototype('bootstrap-2-3-2-toggle', mod.toggle);
+  },
+  'bootstrap-2-3-2-input-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/input');
+    registerPrototype('bootstrap-2-3-2-input-root', mod.inputRoot);
+  },
+  'bootstrap-2-3-2-textarea-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/textarea');
+    registerPrototype('bootstrap-2-3-2-textarea-root', mod.textareaRoot);
+  },
+  'bootstrap-2-3-2-separator-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/separator');
+    registerPrototype('bootstrap-2-3-2-separator-root', mod.separatorRoot);
+  },
   'liquid-glass-button': async () => {
     const mod = await import('@proto.ui/prototypes-liquid-glass/button');
     registerPrototype('liquid-glass-button', mod.default);

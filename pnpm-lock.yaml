@@ -637,6 +637,12 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.6(react@19.2.6)
+<<<<<<< HEAD
+=======
+      vue:
+        specifier: 3.5.31
+        version: 3.5.31(typescript@5.9.3)
+>>>>>>> origin/main
 
   packages/compositions/chatui:
     dependencies:

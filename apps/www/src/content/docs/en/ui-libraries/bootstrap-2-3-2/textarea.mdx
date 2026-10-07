@@ -1,0 +1,32 @@
+---
+title: 'Bootstrap 2.3.2 Textarea'
+description: 'Archived field styling over the Base multiline text protocol.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
+
+<DraftProjectionStyle />
+
+Textarea applies the Bootstrap 2.3.2 field language to one Base Textarea Root. The current Web profile materializes one native multiline editor.
+
+Base owns controlled and uncontrolled values, normalized input, change and IME events, native properties, disabled and read-only behavior, accessible naming, and focus. Appearance is projected onto that same editor. Authored children never become another editor, and this slice adds no form workflow, validation message, auto-resize, or rich text.
+
+Use the page runtime selector to compare Web Components, React, Vue 3, and Vue 2. Edit the release note, focus the read-only editor, and compare the disabled editor.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-textarea"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  toolbar={false}
+  codePanel={false}
+/>
+
+## API
+
+- `value` / `defaultValue`, `disabled`, `readOnly`, and `placeholder`
+- `rows`, `wrap`, `maxLength`, `minLength`, `name`, `required`, and `autoComplete`
+- `ariaLabel`, `labelledBy`, and `describedBy`
+- Inherited `valueChange`, `change`, composition events, `focusSelf`, and `blurSelf`
+
+This is a draft, private, unreleased source projection. The archived light palette stays fixed in dark hosts. The Web demo does not establish general Prototype Compiler or GPUI, Flutter, or Qt conformance. [Browse the implemented subset](../).
