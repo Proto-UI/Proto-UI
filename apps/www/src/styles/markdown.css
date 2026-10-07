@@ -75,7 +75,7 @@
     :is(h1[data-site-typography='h1'], [data-doc-flow] h1):not(
       :where(aside *, .starlight-aside *, [data-previewer-id] *)
     ) {
-    @apply text-3xl leading-tight;
+    @apply text-3xl leading-tight text-foreground;
   }
 
   [data-site-family-scope][data-site-library-family='shadcn']:not(:has([data-homepage-runtime]))
@@ -110,9 +110,13 @@
     @apply leading-[1.625] [&:not(:first-child)]:mt-4;
   }
 
-  /* Prose has a roomier rhythm; embedded MDX roots retain the 1rem flow gap. */
+  /* Native paragraphs use the same public Text leading=relaxed recipe before
+     enhancement. Lists keep their separately authored reading rhythm. */
   main[data-pagefind-body] .docs-content-flow > p,
-  main[data-pagefind-body] .docs-content-flow > blockquote p,
+  main[data-pagefind-body] .docs-content-flow > blockquote p {
+    line-height: 1.625;
+  }
+
   main[data-pagefind-body] .docs-content-flow > :is(ul, ol) li {
     line-height: 1.8;
   }

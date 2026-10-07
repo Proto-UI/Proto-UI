@@ -77,6 +77,8 @@ describe('prototypes/shadcn: dialog', () => {
     await Promise.resolve();
 
     expect(trigger.getAttribute('data-pui-style')).toBeNull();
+    // P-SHADCN-DIALOG-CLOSE-UNSTYLED-SURFACE also forbids layout tokens.
+    expect(close.getAttribute('data-pui-style')).toBeNull();
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
     expect(mask.hasAttribute('data-pui-view-detached')).toBe(true);
 
@@ -117,6 +119,7 @@ describe('prototypes/shadcn: dialog', () => {
     expect(styleContains(description, 'text-muted-foreground')).toBe(true);
     expect(styleContains(header, 'flex-col')).toBe(true);
     expect(styleContains(footer, 'items-center')).toBe(true);
+    expect(close.getAttribute('data-pui-style')).toBeNull();
     expect(styleContains(close, 'rounded-lg')).toBe(false);
     expect(styleContains(close, 'bg-primary')).toBe(false);
     expect(styleContains(closeIcon, 'absolute')).toBe(true);

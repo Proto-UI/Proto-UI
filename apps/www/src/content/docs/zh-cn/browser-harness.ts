@@ -239,6 +239,16 @@ export async function selectRuntime(
   expectedCount: number
 ): Promise<void> {
   await choosePreviewRuntime(page, previewer, runtime);
+  await waitForPreviewRuntime(page, runtime, readySelector, expectedCount);
+}
+
+/** Observe a public runtime selection without changing application state. */
+export async function waitForPreviewRuntime(
+  page: Page,
+  runtime: RuntimeId,
+  readySelector: string,
+  expectedCount: number
+): Promise<void> {
   await page.waitForFunction(
     ({ expectedCount: count, readySelector: selector, runtime: selectedRuntime }) => {
       const root = document.querySelector<HTMLElement>('[data-previewer-id]');

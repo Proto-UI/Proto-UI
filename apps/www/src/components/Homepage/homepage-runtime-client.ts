@@ -371,7 +371,16 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     /* Optional preference. */
   }
   const headerSurface = headerSurfaceParticipant(root);
-  const demo = homepageDemoParticipant(document);
+  const demo = homepageDemoParticipant(document, {
+    retry: () => retrySwitch(),
+    cancel: () => cancelSwitch(),
+    restoreFocus: () =>
+      restoreProjectionControlFocus(
+        selectorGroup.mount,
+        PROJECTION_FOCUS_KEYS.runtime,
+        controller.getSnapshot().generation
+      ),
+  });
   const searchRoot = root.querySelector<HTMLElement>('site-search');
   const search = searchRoot ? searchCommandParticipant(searchRoot) : null;
   const initialFamily = requireSiteLibraryFamily(demo?.initialFamily ?? 'shadcn');
@@ -383,6 +392,12 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
   let destroyed = false;
   let epoch = 0;
   let desiredRuntime = initialRuntime;
+  let retryCancellation = false;
+  let failedIntent: {
+    runtime: RuntimeId;
+    family: SiteLibraryFamily;
+    component: SharedBaseFamilyId;
+  } | null = null;
   let pendingRuntimePreference: Readonly<{ runtime: RuntimeId }> | undefined;
   let activeCandidates: MaterializedProjectionCandidate[] = [];
   let activeTypography: MaterializedProjectionCandidate | undefined;
@@ -398,11 +413,15 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     }
   >();
   const status = root.querySelector<HTMLElement>('[data-homepage-runtime-status]');
-  const setStatus = (state: 'loading' | 'ready' | 'error', runtime: RuntimeId) => {
+  const setStatus = (
+    state: 'loading' | 'ready' | 'error',
+    runtime: RuntimeId,
+    maskRuntime: RuntimeId = runtime
+  ) => {
     root.dataset.runtimeState = state;
     root.dataset.runtime = runtime;
     root.setAttribute('aria-busy', String(state === 'loading'));
-    demo?.setStatus(state, runtime);
+    demo?.setStatus(state, runtime, maskRuntime);
     if (status)
       status.textContent = `${LABELS[runtime]} · ${root.dataset[`status${state[0]!.toUpperCase()}${state.slice(1)}`] || state}`;
   };
@@ -654,6 +673,13 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     );
   };
   const observe = (promise: Promise<ProjectionScopeSnapshot>) => {
+    const attempted = {
+      runtime: desiredRuntime,
+      family: desiredFamily,
+      component: desiredComponent,
+    };
+    failedIntent = null;
+    retryCancellation = false;
     const preferenceIntent = pendingRuntimePreference;
     const requestEpoch = ++epoch;
     setStatus('loading', desiredRuntime);
@@ -673,7 +699,8 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         desiredRuntime = snapshot.selection.runtimeId as RuntimeId;
         desiredFamily = requireSiteLibraryFamily(snapshot.selection.projectionFamilyId);
         desiredComponent = committedComponent;
-        setStatus('error', desiredRuntime);
+        failedIntent = attempted;
+        setStatus('error', desiredRuntime, attempted.runtime);
         console.error('[HomepageRuntime] retained previous generation or native SSR links.', error);
         onTypographyChange();
         // A failed family/component request may retain a runtime that already
@@ -682,6 +709,50 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         if (pendingRuntimePreference === preferenceIntent) pendingRuntimePreference = undefined;
       });
   };
+  function retrySwitch(): void {
+    if (destroyed) return;
+    if (retryCancellation) {
+      cancelSwitch();
+      return;
+    }
+    if (!failedIntent) return;
+    const intent = failedIntent;
+    desiredRuntime = intent.runtime;
+    desiredFamily = intent.family;
+    desiredComponent = intent.component;
+    pendingRuntimePreference = { runtime: intent.runtime };
+    observe(
+      controller.getSnapshot().phase === 'idle'
+        ? controller.start()
+        : controller.request(
+            { runtimeId: intent.runtime, projectionFamilyId: intent.family },
+            { force: true }
+          )
+    );
+  }
+  function cancelSwitch(): void {
+    if (destroyed || controller.getSnapshot().generation === 0) return;
+    const cancelledEpoch = ++epoch;
+    failedIntent = null;
+    pendingRuntimePreference = undefined;
+    void controller
+      .cancelPending()
+      .then((snapshot) => {
+        if (destroyed || cancelledEpoch !== epoch) return;
+        desiredRuntime = snapshot.selection.runtimeId as RuntimeId;
+        desiredFamily = requireSiteLibraryFamily(snapshot.selection.projectionFamilyId);
+        desiredComponent = committedComponent;
+        retryCancellation = false;
+        setStatus('ready', desiredRuntime);
+      })
+      .catch((error) => {
+        if (!destroyed && cancelledEpoch === epoch) {
+          retryCancellation = true;
+          setStatus('error', desiredRuntime);
+        }
+        console.error('[HomepageRuntime] Failed to restore retained preview.', error);
+      });
+  }
   function requestRuntime(runtime: RuntimeId): void {
     if (destroyed || runtime === desiredRuntime) return;
     desiredRuntime = runtime;
@@ -768,6 +839,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       activeCandidates = [];
       activeTypography = undefined;
       await controller.destroy();
+      await demo?.destroy();
       await typographyRefresh;
       staged.clear();
       for (const group of groups) group.fallback.hidden = false;

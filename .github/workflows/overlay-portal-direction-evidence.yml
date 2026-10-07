@@ -1,0 +1,84 @@
+name: Overlay portal direction native evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/overlay-portal-direction-evidence.yml'
+      - 'apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'packages/modules/overlay/**'
+      - 'packages/adapters/**'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: overlay-portal-direction-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and identify Chromium
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/overlay-portal-direction"
+          "$CHROME" --version > "$RUNNER_TEMP/overlay-portal-direction/browser-environment.txt"
+          node --version > "$RUNNER_TEMP/overlay-portal-direction/node-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/overlay-portal-direction/source-sha.txt"
+      - name: Install the matching public CJK font fallback
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$RUNNER_TEMP/overlay-portal-direction/font-environment.txt"
+      - name: Disable the development toolbar on the real evidence surface
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
+          printf '%s\n' "$TOOLBAR_SETTING"
+          grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
+      - name: Run all 8 paired portal-direction journeys and retain failing paint
+        timeout-minutes: 20
+        env:
+          PROTO_UI_PORTAL_DIRECTION_SCREENSHOT_DIR: ${{ runner.temp }}/overlay-portal-direction/screenshots
+        run: |
+          set -euo pipefail
+          # Supplementary direct evidence only. The standard required CI inventory
+          # and its historical failures remain intact; this does not replace them.
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/overlay-portal-direction/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/overlay-portal-direction/browser.log"
+          node --input-type=module - "$RUNNER_TEMP/overlay-portal-direction/vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numTotalTests, 8, 'The complete native portal-direction inventory must run.');
+          assert.equal(report.numPassedTests, 8, 'All paired native portal-direction journeys must pass.');
+          assert.equal(report.numFailedTests, 0);
+          JS
+      - name: Retain exact-source results, screenshots and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: overlay-portal-direction-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/overlay-portal-direction
+          if-no-files-found: error
+          retention-days: 30

@@ -2,17 +2,20 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import type { Browser, Locator } from 'playwright-core';
+import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES,
   applyColorScheme,
+  choosePreviewRuntime,
   launchBrowser,
   openRoute,
   selectRuntime,
   startServer,
   stopServer,
+  waitForPreviewRuntime,
 } from './browser-harness';
+import { revealHeaderPreferences } from './site-header-browser';
 const families = ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'];
 const route = (family: string, locale = 'en') => `/${locale}/ui-libraries/${family}/accordion/`;
 let browser: Browser,
@@ -24,6 +27,60 @@ const expanded = async (button: Locator, value: boolean) => {
 const focused = async (button: Locator) => {
   await expect.poll(() => button.evaluate((el) => document.activeElement === el)).toBe(true);
 };
+async function selectAccordionRuntime(
+  page: Page,
+  previewer: Locator,
+  runtime: (typeof RUNTIMES)[number]
+): Promise<void> {
+  if ((await previewer.getAttribute('data-projection-toolbar')) !== 'false')
+    return selectRuntime(page, previewer, runtime, '[aria-expanded]', 11);
+  // A page that explicitly omits its family toolbar uses the visible Header
+  // preference. When a real family Select is introduced, exercise that toolbar.
+  const openedMenu = await revealHeaderPreferences(page);
+  const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
+  await choosePreviewRuntime(page, preferences, runtime);
+  if (openedMenu) {
+    const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+    if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+  }
+  await waitForPreviewRuntime(page, runtime, '[aria-expanded]', 11);
+}
+
+async function observeLayout(page: Page) {
+  return page.evaluate(() => {
+    const viewportWidth = document.documentElement.clientWidth;
+    return {
+      viewportWidth,
+      pageOverflow: document.documentElement.scrollWidth - viewportWidth,
+      overflowing: Array.from(document.querySelectorAll<HTMLElement>('body *'))
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          const style = getComputedStyle(element);
+          return {
+            tag: element.tagName.toLowerCase(),
+            ref: element.dataset.demoRef ?? null,
+            role: element.getAttribute('role'),
+            className: element.getAttribute('class'),
+            text: element.textContent?.slice(0, 120),
+            left: rect.left,
+            right: rect.right,
+            width: rect.width,
+            clientWidth: element.clientWidth,
+            scrollWidth: element.scrollWidth,
+            display: style.display,
+            visibility: style.visibility,
+            position: style.position,
+            overflowX: style.overflowX,
+            minWidth: style.minWidth,
+            whiteSpace: style.whiteSpace,
+            overflowWrap: style.overflowWrap,
+          };
+        })
+        .filter((item) => item.width > 0 && (item.right > viewportWidth + 1 || item.left < -1)),
+    };
+  });
+}
+
 async function capture(
   previewer: Locator,
   name: string,
@@ -46,6 +103,11 @@ async function capture(
     JSON.stringify(
       {
         sourceSha: source,
+        sourceDirty:
+          execFileSync('git', ['status', '--porcelain', '--untracked-files=no'], {
+            encoding: 'utf8',
+          }).trim().length > 0,
+        layout: await observeLayout(previewer.page()),
         fixture: 'demo-accordion-family.browser.test.ts',
         name,
         ...subject,
@@ -115,7 +177,7 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
               );
           });
           await applyColorScheme(page, 'light');
-          await selectRuntime(page, previewer, runtime, '[aria-expanded]', 11);
+          await selectAccordionRuntime(page, previewer, runtime);
           const first = ref(previewer, 'single-overview-trigger'),
             second = ref(previewer, 'single-lifetime-trigger'),
             long = ref(previewer, 'single-long-trigger');
@@ -203,12 +265,10 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
             state: 'controlled-accepted-and-nested-open',
           });
           const old = await first.elementHandle();
-          await selectRuntime(
+          await selectAccordionRuntime(
             page,
             previewer,
-            RUNTIMES[(RUNTIMES.indexOf(runtime) + 1) % RUNTIMES.length]!,
-            '[aria-expanded]',
-            11
+            RUNTIMES[(RUNTIMES.indexOf(runtime) + 1) % RUNTIMES.length]!
           );
           expect(await old?.evaluate((el) => el.isConnected)).toBe(false);
         } finally {
@@ -225,24 +285,23 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
       );
       try {
         await applyColorScheme(page, 'light');
-        await selectRuntime(page, previewer, 'react', '[aria-expanded]', 11);
+        await selectAccordionRuntime(page, previewer, 'react');
         await page.evaluate(() => {
           document.documentElement.style.fontSize = '200%';
         });
         const button = ref(previewer, 'single-long-trigger');
         await button.click();
         await expanded(button, true);
-        expect(await button.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
-        expect(
-          await page.evaluate(
-            () => document.documentElement.scrollWidth - document.documentElement.clientWidth
-          )
-        ).toBeLessThanOrEqual(1);
+        // Preserve the exact failing paint and read-only geometry before the
+        // strict assertion; a red run must still contain its useful evidence.
         await capture(previewer, `${family}-react-zh-320-text200`, {
           family,
           runtime: 'react',
           state: 'long-label-320-text200',
         });
+        expect(await button.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
+        const layout = await observeLayout(page);
+        expect(layout.pageOverflow, JSON.stringify(layout.overflowing)).toBeLessThanOrEqual(1);
       } finally {
         await context.close();
       }

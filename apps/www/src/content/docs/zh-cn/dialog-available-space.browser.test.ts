@@ -168,10 +168,81 @@ async function settle(dialog: Locator) {
     await Promise.all(e.getAnimations({ subtree: true }).map((a) => a.finished.catch(() => {})));
   });
 }
-async function reachableActions(page: Page, dialog: Locator) {
+async function readableBrutalistTitle(dialog: Locator, id: string) {
+  const fact = await dialog.evaluate((e) => {
+    const title = (e.getAttribute('aria-labelledby') ?? '')
+      .split(/\s+/)
+      .map((id) => document.getElementById(id))
+      .find((node) => node && e.contains(node));
+    const close = e.querySelector<HTMLElement>('[aria-label="Close"][role="button"]');
+    if (!title || !close) return { missing: true as const };
+    const titleRect = title.getBoundingClientRect();
+    const closeRect = close.getBoundingClientRect();
+    const intersect = (rect: DOMRect) =>
+      Math.max(0, Math.min(rect.right, closeRect.right) - Math.max(rect.left, closeRect.left)) *
+      Math.max(0, Math.min(rect.bottom, closeRect.bottom) - Math.max(rect.top, closeRect.top));
+    // Range rectangles follow the painted title lines. A panel fitting the
+    // viewport, or its CloseIcon being clickable, cannot establish readable text.
+    const lines: Array<{
+      rect: Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom' | 'width' | 'height'>;
+      overlapArea: number;
+    }> = [];
+    const walker = document.createTreeWalker(title, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (!node.textContent?.trim()) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      for (const rect of range.getClientRects()) {
+        if (rect.width > 0 && rect.height > 0) {
+          lines.push({ rect: rect.toJSON(), overlapArea: intersect(rect) });
+        }
+      }
+    }
+    const titleStyle = getComputedStyle(title);
+    const closeStyle = getComputedStyle(close);
+    return {
+      missing: false as const,
+      text: title.textContent?.trim(),
+      title: titleRect.toJSON(),
+      close: closeRect.toJSON(),
+      titleOverlapArea: intersect(titleRect),
+      lines,
+      titleVisible: title.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+      closeVisible: close.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+      titleOverflow: [titleStyle.overflowX, titleStyle.overflowY],
+      closePosition: closeStyle.position,
+      closeShadow: closeStyle.boxShadow,
+      scrollTop: e.scrollTop,
+    };
+  });
+  // The caller captures the real screenshot first; preserve geometry too even
+  // if this newly discriminating assertion rejects an older source revision.
+  observations.push({ id: `${id}-title-clearance`, sourceSha, fact });
+  expect(fact.missing, 'Dialog retains its named Title and CloseIcon').toBe(false);
+  if (fact.missing) return;
+  expect(fact.text).toBe('Neo-Brutalist modal');
+  expect(fact.titleVisible, 'Title remains painted').toBe(true);
+  expect(fact.closeVisible, 'CloseIcon remains painted').toBe(true);
+  expect(fact.title.width).toBeGreaterThan(0);
+  expect(fact.title.height).toBeGreaterThan(0);
+  expect(fact.close.width).toBeGreaterThan(0);
+  expect(fact.close.height).toBeGreaterThan(0);
+  expect(fact.lines.length, 'Title has actual laid-out text ranges').toBeGreaterThan(0);
+  expect(fact.titleOverlapArea, 'CloseIcon must not cover the Title box').toBe(0);
+  for (const line of fact.lines) {
+    expect(line.overlapArea, 'CloseIcon must not cover a painted title line').toBe(0);
+  }
+}
+async function reachableActions(
+  page: Page,
+  dialog: Locator,
+  family: 'shadcn' | 'brutalist',
+  id: string
+) {
   const actions = dialog.getByRole('button');
   const count = await actions.count();
   expect(count).toBeGreaterThan(0);
+  if (family === 'shadcn') expect(count, 'Two footer Buttons and one CloseIcon').toBe(3);
   const names: string[] = [];
   for (let index = 0; index < count; index++) {
     const action = actions.nth(index);
@@ -181,8 +252,30 @@ async function reachableActions(page: Page, dialog: Locator) {
       const r = e.getBoundingClientRect(),
         d = dialog.getBoundingClientRect();
       const hit = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+      const close = e.parentElement?.closest<HTMLElement>('[data-pui-root]');
+      const layout = close?.parentElement;
+      const layoutRect = layout?.getBoundingClientRect();
       return {
         text: e.textContent?.trim() ?? '',
+        closeIcon: e.getAttribute('aria-label') === 'Close',
+        scrollWidth: e.scrollWidth,
+        clientWidth: e.clientWidth,
+        whiteSpace: getComputedStyle(e).whiteSpace,
+        rootFontSize: getComputedStyle(document.documentElement).fontSize,
+        semanticParent: close && {
+          style: close.getAttribute('data-pui-style'),
+          role: close.getAttribute('role'),
+          tabIndex: close.tabIndex,
+        },
+        layout: layout && {
+          prototype: layout.hasAttribute('data-pui-root'),
+          role: layout.getAttribute('role'),
+          tabIndex: layout.tabIndex,
+          minWidth: getComputedStyle(layout).minWidth,
+          maxWidth: getComputedStyle(layout).maxWidth,
+          left: layoutRect!.left,
+          right: layoutRect!.right,
+        },
         left: r.left,
         right: r.right,
         contentLeft: d.left + dialog.clientLeft,
@@ -193,6 +286,31 @@ async function reachableActions(page: Page, dialog: Locator) {
       };
     });
     names.push(fact.text);
+    observations.push({
+      id: `${id}-action-${index}`,
+      sourceSha,
+      viewport: page.viewportSize(),
+      fact,
+    });
+    if (family === 'shadcn' && !fact.closeIcon) {
+      // P-SHADCN-DIALOG-CLOSE: the passive consumer box owns sizing while
+      // the unstyled Close > Button chain retains just one input surface.
+      expect(fact.semanticParent).toEqual({ style: null, role: null, tabIndex: -1 });
+      expect(fact.layout).toMatchObject({
+        prototype: false,
+        role: null,
+        tabIndex: -1,
+        minWidth: '0px',
+        maxWidth: '100%',
+      });
+      expect(fact.layout!.left).toBeGreaterThanOrEqual(fact.contentLeft - 1);
+      expect(fact.layout!.right).toBeLessThanOrEqual(fact.contentRight + 1);
+      expect(fact.whiteSpace).toBe('normal');
+      expect(
+        fact.scrollWidth,
+        'The long action label remains inside its Button'
+      ).toBeLessThanOrEqual(fact.clientWidth + 1);
+    }
     expect(fact.left).toBeGreaterThanOrEqual(fact.contentLeft - 1);
     expect(fact.right).toBeLessThanOrEqual(fact.contentRight + 1);
     expect(fact.width).toBeGreaterThan(0);
@@ -293,6 +411,9 @@ for (const family of ['shadcn', 'brutalist'] as const)
           await settle(dialog);
           await frames(page);
           const data = await capture(page, dialog, `${family}-${runtime}-${width}-settled`);
+          if (family === 'brutalist') {
+            await readableBrutalistTitle(dialog, `${family}-${runtime}-${width}-settled`);
+          }
           bounded(immediate);
           expect(immediate.paint.transitionProperty).not.toBe('all');
           bounded(data);
@@ -332,6 +453,9 @@ for (const family of ['shadcn', 'brutalist'] as const)
         await settle(dialog);
         await frames(page);
         const long = await capture(page, dialog, `${family}-${runtime}-long-font200`);
+        if (family === 'brutalist') {
+          await readableBrutalistTitle(dialog, `${family}-${runtime}-long-font200`);
+        }
         bounded(long);
         expect(long.scrollWidth, 'Long-content actions fit the inline region').toBeLessThanOrEqual(
           long.clientWidth + 1
@@ -343,7 +467,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
         });
         await frames(page);
         expect((await facts(dialog)).scrollTop).toBeGreaterThan(0);
-        await reachableActions(page, dialog);
+        await reachableActions(page, dialog, family, `${family}-${runtime}-long-font200`);
         const longClose = dialog.locator('[data-pui-a11y-actions="activate"]').first();
         await longClose.scrollIntoViewIfNeeded();
         expect(
@@ -354,6 +478,21 @@ for (const family of ['shadcn', 'brutalist'] as const)
           })
         ).toBe(true);
         await capture(page, dialog, `${family}-${runtime}-long-action-reachable`);
+        if (family === 'shadcn') {
+          // Keep the 390px control and pair it with the actual narrower viewport.
+          // Font and long-label fixtures remain identical; no component CSS is injected.
+          await page.setViewportSize({ width: 320, height: 360 });
+          await settle(dialog);
+          await frames(page);
+          const narrow = await capture(page, dialog, `${family}-${runtime}-320-long-font200`);
+          bounded(narrow);
+          expect(
+            narrow.scrollWidth,
+            '320px / 200% text footer fits the inline region'
+          ).toBeLessThanOrEqual(narrow.clientWidth + 1);
+          await reachableActions(page, dialog, family, `${family}-${runtime}-320-long-font200`);
+          await capture(page, dialog, `${family}-${runtime}-320-long-action-reachable`);
+        }
         await page.evaluate(() => document.documentElement.style.removeProperty('font-size'));
         await dialog.locator('[data-dialog-long-fixture]').evaluate((e) => e.remove());
         await page.setViewportSize({ width: 430, height: 900 });
@@ -362,11 +501,14 @@ for (const family of ['shadcn', 'brutalist'] as const)
         await settle(dialog);
         await frames(page);
         const zoom = await capture(page, dialog, `${family}-${runtime}-scale2`);
+        if (family === 'brutalist') {
+          await readableBrutalistTitle(dialog, `${family}-${runtime}-scale2`);
+        }
         bounded(zoom);
         expect(zoom.scrollWidth, 'Zoomed actions fit the inline region').toBeLessThanOrEqual(
           zoom.clientWidth + 1
         );
-        await reachableActions(page, dialog);
+        await reachableActions(page, dialog, family, `${family}-${runtime}-scale2`);
         await cdp.send('Emulation.setPageScaleFactor', { pageScaleFactor: 1 });
         await cdp.detach();
         await frames(page);

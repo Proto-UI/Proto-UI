@@ -75,8 +75,10 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
   }
-  .home-demo-previewer[data-runner-state='error'] .home-demo-previewer__status,
-  .home-demo-previewer[data-runner-state='loading'] .home-demo-previewer__status {
+  .home-demo-previewer:not([data-runtime-mask-ready='true'])[data-runner-state='error']
+    .home-demo-previewer__status,
+  .home-demo-previewer:not([data-runtime-mask-ready='true'])[data-runner-state='loading']
+    .home-demo-previewer__status {
     position: static;
     display: block;
     width: auto;

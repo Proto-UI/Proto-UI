@@ -63,6 +63,7 @@ type ClaimRecord = {
   prototype: Prototype<any> | null;
   exposePort: ExposePort;
   getRootTarget: AnatomyRootTargetGetter;
+  getParent: AnatomyParentGetter | null;
   invoke: AnatomyOrderCallbackDispatcher;
 };
 
@@ -74,6 +75,34 @@ const ORDER_PRECEDING = typeof Node !== 'undefined' ? Node.DOCUMENT_POSITION_PRE
 const CENTER = (() => {
   const families = new Map<AnatomyFamily, NormalizedFamily>();
   const claimsByInstance = new Map<AnatomyInstanceToken, Map<AnatomyFamily, ClaimRecord>>();
+  // A terminal owner can be disposed before its framework descendants. Keep
+  // only its logical boundary (not its claim/exposes) while live claims still
+  // traverse it, so those descendants cannot briefly join an outer domain.
+  const retiredBoundaries = new Map<AnatomyFamily, Set<AnatomyInstanceToken>>();
+  const pruneRetiredBoundaries = (family: AnatomyFamily) => {
+    const retired = retiredBoundaries.get(family);
+    if (!retired) return;
+    const needed = new Set<AnatomyInstanceToken>();
+    for (const [instance, claims] of claimsByInstance) {
+      const claim = claims.get(family);
+      if (!claim) continue;
+      // Different renderer connections may carry independent logical trees.
+      // A foreign disposer cannot interpret or retire this claim's ancestry.
+      const getParent = claim.getParent;
+      // No known logical bridge is uncertainty, not evidence that a retired
+      // boundary is unused. Keep boundaries until this claim acquires caps.
+      if (!getParent) return;
+      let current = getParent(instance);
+      const visited = new Set<AnatomyInstanceToken>();
+      while (current && !visited.has(current)) {
+        visited.add(current);
+        if (retired.has(current)) needed.add(current);
+        current = getParent(current);
+      }
+    }
+    for (const instance of retired) if (!needed.has(instance)) retired.delete(instance);
+    if (!retired.size) retiredBoundaries.delete(family);
+  };
 
   const getClaim = (instance: AnatomyInstanceToken, family: AnatomyFamily) =>
     claimsByInstance.get(instance)?.get(family) ?? null;
@@ -86,6 +115,9 @@ const CENTER = (() => {
       return families.get(family) ?? null;
     },
     setClaim(record: ClaimRecord) {
+      const retired = retiredBoundaries.get(record.family);
+      retired?.delete(record.instance);
+      if (retired?.size === 0) retiredBoundaries.delete(record.family);
       let byFamily = claimsByInstance.get(record.instance);
       if (!byFamily) {
         byFamily = new Map();
@@ -94,11 +126,21 @@ const CENTER = (() => {
       byFamily.set(record.family, record);
     },
     getClaim,
-    deleteClaim(instance: AnatomyInstanceToken, family: AnatomyFamily) {
+    isRetiredBoundary: (instance: AnatomyInstanceToken, family: AnatomyFamily) =>
+      retiredBoundaries.get(family)?.has(instance) ?? false,
+    pruneRetiredBoundaries,
+    retireClaims(instance: AnatomyInstanceToken, families: readonly AnatomyFamily[]) {
       const byFamily = claimsByInstance.get(instance);
       if (!byFamily) return;
-      byFamily.delete(family);
+      for (const family of families) {
+        if (!byFamily.has(family)) continue;
+        let retired = retiredBoundaries.get(family);
+        if (!retired) retiredBoundaries.set(family, (retired = new Set()));
+        retired.add(instance);
+        byFamily.delete(family);
+      }
       if (byFamily.size === 0) claimsByInstance.delete(instance);
+      for (const family of families) pruneRetiredBoundaries(family);
     },
     listClaims(family: AnatomyFamily): ClaimRecord[] {
       const out: ClaimRecord[] = [];
@@ -288,6 +330,7 @@ export class AnatomyModuleImpl extends ModuleBase {
       prototype: this.getPrototypeGetter()(instance),
       exposePort: this.exposePort,
       getRootTarget: this.getRootTargetGetter(),
+      getParent: this.caps.has(ANATOMY_PARENT_CAP) ? this.getParentGetter() : null,
       invoke: (fn) => this.orderDispatch(fn),
     });
     this.claimFamilies.add(family);
@@ -451,6 +494,7 @@ export class AnatomyModuleImpl extends ModuleBase {
   readonly port = {
     syncStructure: (): void => {
       for (const family of this.claimFamilies) {
+        CENTER.pruneRetiredBoundaries(family);
         AnatomyModuleImpl.notifyStructuralChange(family);
         AnatomyModuleImpl.notifyTargetChange(family);
       }
@@ -632,6 +676,18 @@ export class AnatomyModuleImpl extends ModuleBase {
   }
 
   protected override onCapsEpoch(_epoch: number): void {
+    if (this.disposed) return;
+    // A retained owner may temporarily lose its view capabilities. Keep its
+    // last valid logical getter (not a cached parent result) through that gap;
+    // replace it only when the new host supplies a valid bridge.
+    if (this.caps.has(ANATOMY_INSTANCE_TOKEN_CAP) && this.caps.has(ANATOMY_PARENT_CAP)) {
+      const instance = this.getSelfToken();
+      const getParent = this.getParentGetter();
+      for (const family of this.claimFamilies) {
+        const claim = CENTER.getClaim(instance, family);
+        if (claim) claim.getParent = getParent;
+      }
+    }
     for (const family of this.claimFamilies) AnatomyModuleImpl.notifyTargetChange(family);
     if (this.mountPhase !== 'mounted') return;
     for (const family of Array.from(this.observedOrderRoots.keys())) {
@@ -654,11 +710,12 @@ export class AnatomyModuleImpl extends ModuleBase {
     if (!this.caps.has(ANATOMY_INSTANCE_TOKEN_CAP)) return;
 
     const instance = this.caps.get(ANATOMY_INSTANCE_TOKEN_CAP) as AnatomyInstanceToken;
-    for (const family of this.claimFamilies) {
-      CENTER.deleteClaim(instance, family);
-      AnatomyModuleImpl.notifyStructuralChange(family);
-    }
+    const families = [...this.claimFamilies];
     this.claimFamilies.clear();
+    // Revoke every family before the first callback can inspect another one.
+    // Descendant modules retain their own claims until their own terminal path.
+    CENTER.retireClaims(instance, families);
+    for (const family of families) AnatomyModuleImpl.notifyStructuralChange(family);
   }
 
   private getOrderedClaimsOf(family: AnatomyFamily, role: string): ClaimRecord[] {
@@ -1062,6 +1119,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     const getParent = this.getParentGetter();
     let cur: AnatomyInstanceToken | null = instance;
     while (cur) {
+      if (CENTER.isRetiredBoundary(cur, family)) return null;
       const claim = CENTER.getClaim(cur, family);
       if (claim?.role === 'root') return cur;
       cur = getParent(cur);

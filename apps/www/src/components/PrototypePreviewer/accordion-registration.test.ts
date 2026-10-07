@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { loadDemo } from './demo-modules';
 import { loadPrototype } from './prototype-modules';
@@ -44,5 +45,22 @@ describe('Accordion actual DemoSpec registration', () => {
         ).toEqual(ids);
       }
     });
+  }
+});
+
+describe('Accordion private-family public runtime route', () => {
+  for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
+    for (const locale of ['en', 'zh-cn']) {
+      it(`${locale}/${family} uses the existing site Header instead of an undeclared Select`, () => {
+        const source = readFileSync(
+          `apps/www/src/content/docs/${locale}/ui-libraries/${family}/accordion.mdx`,
+          'utf8'
+        );
+        expect(source).toContain(`demoId="demo-${family}-accordion"`);
+        expect(source).toContain('toolbar={false}');
+        expect(source).toContain("runtimes={['wc', 'react', 'vue', 'vue2']}");
+        expect(source).toContain(locale === 'en' ? '**Preview runtime**' : '**预览 Runtime**');
+      });
+    }
   }
 });

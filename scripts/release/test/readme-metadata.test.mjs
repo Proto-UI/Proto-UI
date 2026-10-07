@@ -12,6 +12,7 @@ const PRESERVED_README_DIRS = [
   'packages/hooks',
   'packages/modules/a11y',
   'packages/modules/collection',
+  'packages/modules/control-label',
   'packages/modules/positioning',
   'packages/modules/text-control',
   'packages/prototypes/base',
@@ -50,6 +51,7 @@ test('metadata synchronization preserves authored color-scheme README semantics'
     ['packages/adapters/vue', 'same-document light DOM'],
     ['packages/adapters/web-component', 'same-document light DOM'],
     ['packages/modules/rule-meta', 'mounted `colorScheme` invalidation lease'],
+    ['packages/modules/control-label', 'factory-branded ControlLabelRef'],
   ];
 
   try {
@@ -70,7 +72,15 @@ test('metadata synchronization preserves authored color-scheme README semantics'
       const manifest = JSON.parse(readFileSync(join(packageDir, 'package.json'), 'utf8'));
       const contents = readFileSync(join(packageDir, 'README.md'), 'utf8');
       assert.match(contents, new RegExp(semanticText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-      assert.match(contents, new RegExp(`npm install ${manifest.name}@${manifest.version}`));
+      if (relativeDir !== 'packages/modules/control-label') {
+        assert.match(contents, new RegExp(`npm install ${manifest.name}@${manifest.version}`));
+      } else {
+        assert.equal(contents, readFileSync(join(ROOT_DIR, relativeDir, 'README.md'), 'utf8'));
+        assert.equal(
+          manifest.description,
+          'Proto UI explicit independent control-label association protocol.'
+        );
+      }
     }
   } finally {
     rmSync(fixture, { recursive: true, force: true });

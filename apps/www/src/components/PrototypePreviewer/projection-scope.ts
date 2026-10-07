@@ -82,6 +82,8 @@ export type ProjectionScopeController = Readonly<{
     options?: ProjectionScopeRequestOptions
   ): Promise<ProjectionScopeSnapshot>;
   getSnapshot(): ProjectionScopeSnapshot;
+  /** Revoke only pending work and reopen the retained committed generation. */
+  cancelPending(): Promise<ProjectionScopeSnapshot>;
   destroy(): Promise<void>;
 }>;
 
@@ -125,6 +127,7 @@ export function createProjectionScopeController(
   let latestRequestGeneration = 0;
   let phase: ProjectionScopePhase = 'idle';
   let activeCandidate: ProjectionScopeCandidate | null = null;
+  let cancellationRecovery: ProjectionScopeCandidate | null = null;
   let startPromise: Promise<ProjectionScopeSnapshot> | null = null;
   let destroyPromise: Promise<void> | null = null;
   let candidateCallbackDepth = 0;
@@ -543,6 +546,33 @@ export function createProjectionScopeController(
     requestOptions: ProjectionScopeRequestOptions = {}
   ): Promise<ProjectionScopeSnapshot> => trackRequest(() => runRequest(patch, requestOptions));
 
+  const cancelPending = (): Promise<ProjectionScopeSnapshot> =>
+    trackRequest(async () => {
+      if (destroyed) throw new Error('[ProjectionScope] Cannot cancel a destroyed controller.');
+      if (phase !== 'preparing' && (!activeCandidate || cancellationRecovery !== activeCandidate))
+        return getSnapshot();
+      const generation = ++nextGeneration;
+      latestRequestGeneration = generation;
+      desiredSelection = copySelection(committedSelection);
+      const retained = activeCandidate;
+      // Mark recovery before invoking a possibly async unlock. A second
+      // cancellation then joins the serialized lock queue instead of reporting
+      // ready while the first unlock is still pending or may fail.
+      cancellationRecovery = retained;
+      // The pending target is revoked even if reopening the retained surface
+      // fails. Keep that failure retryable without rematerializing user state.
+      phase = retained ? 'ready' : 'idle';
+      try {
+        const unlock = setCandidateLocked(retained, false);
+        if (isPromiseLike(unlock)) await unlock;
+        if (isCurrentRequest(generation)) cancellationRecovery = null;
+      } catch (error) {
+        if (isCurrentRequest(generation)) cancellationRecovery = retained;
+        throw error;
+      }
+      return getSnapshot();
+    });
+
   const destroy = (): Promise<void> => {
     const calledFromCandidateCallback = candidateCallbackDepth > 0;
     if (destroyPromise) {
@@ -574,6 +604,7 @@ export function createProjectionScopeController(
     start,
     request,
     getSnapshot,
+    cancelPending,
     destroy,
   };
 }

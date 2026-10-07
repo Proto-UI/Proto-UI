@@ -60,3 +60,26 @@ it('compiles scoped native document fallback declarations without targeting Text
     expect(rule[1]).not.toContain('data-pui-style');
   }
 });
+
+it('preserves notice title emphasis through the same public Text inputs as SSR', () => {
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    expect(siteTextRecipe('notice-title', family)).toMatchObject({
+      size: 'base',
+      weight: 'semibold',
+      leading: 'relaxed',
+      tone: 'default',
+      font: 'body',
+    });
+  }
+  const source = readFileSync('apps/www/src/components/DocStageNotice.astro', 'utf8');
+  expect(source).toContain('data-site-typography="notice-title"');
+  expect(source).toMatch(/font-size: 1rem/);
+  expect(source).toMatch(/line-height: 1.625/);
+  expect(source).not.toMatch(/font-size: 0\.(98|92)rem/);
+});
+
+it('matches pre-module paragraph rhythm and document heading ink to public Text inputs', () => {
+  const css = readFileSync('apps/www/src/styles/markdown.css', 'utf8');
+  expect(css).toContain('@apply text-3xl leading-tight text-foreground;');
+  expect(css).toMatch(/docs-content-flow > blockquote p\s*\{\s*line-height: 1\.625;/);
+});

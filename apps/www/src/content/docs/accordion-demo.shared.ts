@@ -11,13 +11,15 @@ export function createAccordionDemo(family: string): DemoSpec {
     prototypeId: `${family}-accordion-${role}`,
     ref,
     props,
+    // The Base demo owns panel layout. Make its open panels block-formatted
+    // without overriding the Prototype's retained hidden state.
     ...(family === 'base'
       ? {
           className:
             role === 'trigger'
               ? 'block w-full rounded border p-3 text-left whitespace-normal'
               : role === 'content'
-                ? 'p-3'
+                ? 'data-[open]:block p-3'
                 : 'block min-w-0',
         }
       : {}),

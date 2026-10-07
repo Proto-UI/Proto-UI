@@ -98,6 +98,12 @@ describe('batched real typography adapters and stable native semantic owners', (
       first.activate();
       await settle();
       expect(root.querySelector('h1')).toBe(heading);
+      expect(
+        heading.querySelector('[data-typography-prototype]')?.classList.contains('block')
+      ).toBe(true);
+      expect(
+        root.querySelector('label [data-typography-prototype]')?.classList.contains('block')
+      ).toBe(false);
       expect(root.querySelector('#body a')).toBe(link);
       expect(root.querySelector('em')).toBe(emphasis);
       expect(root.querySelector('#body [data-site-typography-slot]')!.firstChild).toBe(sourceText);
@@ -393,7 +399,7 @@ describe('Shadcn document reading composition', () => {
             <p class="starlight-aside__title" data-site-typography="label" id="note-title">Note title</p>
             <div class="starlight-aside__content"><p id="note-body">Note body</p></div>
           </aside>
-          <aside class="doc-stage-notice"><p id="stage-body">Stage notice</p></aside>
+          <aside class="doc-stage-notice"><p data-site-typography="notice-title" id="stage-title">Release title</p><p id="stage-body">Stage notice</p></aside>
         </div>
       </main>
     </div>`;
@@ -432,6 +438,9 @@ describe('Shadcn document reading composition', () => {
         expect(tokens(root, id)).toContain('text-foreground');
         expect(tokens(root, id)).not.toContain('text-inherit');
       }
+      expect(tokens(root, 'stage-title')).toEqual(
+        expect.arrayContaining(['text-base', 'font-semibold', 'leading-relaxed', 'text-foreground'])
+      );
       expect(tokens(root, 'note-title')).toEqual(
         expect.arrayContaining(['text-sm', 'font-medium', 'text-foreground'])
       );
@@ -510,4 +519,11 @@ describe('Shadcn document reading composition', () => {
       expect(tokens(root, 'prose')).toContain('text-foreground');
     });
   }
+});
+
+it('discovers native note-title intent before any asynchronous Surface bootstrap', () => {
+  document.body.innerHTML =
+    '<div data-doc-flow><aside class="starlight-aside--note"><p class="starlight-aside__title">Title</p><p>Body</p></aside></div>';
+  const collected = collectSiteTypographyTargets(document.body, true);
+  expect(collected.map((target) => target.role)).toEqual(['label', 'body']);
 });

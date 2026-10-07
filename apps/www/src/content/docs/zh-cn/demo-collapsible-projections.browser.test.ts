@@ -48,10 +48,10 @@ async function selectCollapsibleRuntime(
   family: string,
   runtime: (typeof RUNTIMES)[number]
 ): Promise<void> {
-  if (family === 'shadcn' || family === 'brutalist')
+  if ((await previewer.getAttribute('data-projection-toolbar')) !== 'false')
     return selectRuntime(page, previewer, runtime, '[aria-expanded]', 4);
-  // These two families do not claim a Select. The existing site Header owns
-  // preference UI outside the demo; select through its actual native clicks.
+  // Only pages explicitly omitting their toolbar use the real site Header.
+  // A subsequently declared family Select must be exercised through its toolbar.
   const openedMenu = await revealHeaderPreferences(page);
   const preferences = page.locator('[data-site-header] [data-site-header-preferences]');
   await choosePreviewRuntime(page, preferences, runtime);
@@ -397,6 +397,14 @@ for (const family of FAMILIES) {
               const style = getComputedStyle(host);
               const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
               const lines: Array<{ left: number; right: number }> = [];
+              const glyphs: Array<{
+                text: string;
+                whitespace: boolean;
+                left: number;
+                right: number;
+                top: number;
+                bottom: number;
+              }> = [];
               while (walker.nextNode()) {
                 const text = walker.currentNode;
                 if (!text.textContent?.trim()) continue;
@@ -404,6 +412,27 @@ for (const family of FAMILIES) {
                 range.selectNodeContents(text);
                 for (const rect of range.getClientRects())
                   if (rect.width > 0) lines.push({ left: rect.left, right: rect.right });
+                // Observe individual code points separately, but retain the
+                // original whole-Range assertion until actual paint evidence
+                // distinguishes hanging pre-wrap whitespace from visible text.
+                let offset = 0;
+                for (const glyph of text.textContent ?? '') {
+                  const character = document.createRange();
+                  character.setStart(text, offset);
+                  offset += glyph.length;
+                  character.setEnd(text, offset);
+                  for (const rect of character.getClientRects()) {
+                    if (rect.width > 0)
+                      glyphs.push({
+                        text: glyph,
+                        whitespace: /^\s$/u.test(glyph),
+                        left: rect.left,
+                        right: rect.right,
+                        top: rect.top,
+                        bottom: rect.bottom,
+                      });
+                  }
+                }
               }
               return {
                 left: box.left,
@@ -413,8 +442,68 @@ for (const family of FAMILIES) {
                 contentRight:
                   box.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight),
                 lines,
+                glyphs,
+                whiteSpace: style.whiteSpace,
+                overflowWrap: style.overflowWrap,
               };
             });
+            // Preserve the failed target before any padding assertion. The
+            // previous capture was after the assertion, losing all16 narrow
+            // failures. A Trigger-only original avoids sticky site-header
+            // occlusion in a tall whole-previewer screenshot.
+            const evidenceDirectory = process.env.PROTO_UI_COLLAPSIBLE_SCREENSHOT_DIR;
+            if (evidenceDirectory) {
+              await mkdir(evidenceDirectory, { recursive: true });
+              const name = `${family}-${runtime}-320-text200-${theme}-text-bounds`;
+              const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], {
+                encoding: 'utf8',
+              }).trim();
+              await trigger(root).screenshot({
+                path: path.join(evidenceDirectory, `${name}-trigger.png`),
+              });
+              await writeFile(
+                path.join(evidenceDirectory, `${name}.json`),
+                JSON.stringify(
+                  {
+                    sourceSha,
+                    sourceDirty:
+                      execFileSync('git', ['status', '--porcelain', '--untracked-files=no'], {
+                        encoding: 'utf8',
+                      }).trim().length > 0,
+                    family,
+                    runtime,
+                    theme,
+                    viewport: page.viewportSize(),
+                    rootFontSize: await page.evaluate(
+                      () => getComputedStyle(document.documentElement).fontSize
+                    ),
+                    screenshot: `${name}-trigger.png`,
+                    screenshotSubject:
+                      'actual Collapsible Trigger, no image editing or visibility mutation',
+                    originalOracleRetained: true,
+                    textBounds,
+                    outlyingVisibleGlyphs: textBounds.glyphs.filter(
+                      (glyph) =>
+                        !glyph.whitespace &&
+                        (glyph.left < textBounds.contentLeft - 1 ||
+                          glyph.right > textBounds.contentRight + 1)
+                    ),
+                    outlyingWhitespaceGlyphs: textBounds.glyphs.filter(
+                      (glyph) =>
+                        glyph.whitespace &&
+                        (glyph.left < textBounds.contentLeft - 1 ||
+                          glyph.right > textBounds.contentRight + 1)
+                    ),
+                  },
+                  null,
+                  2
+                )
+              );
+              await capture(
+                previewer,
+                `${family}-${runtime}-320-text200-${theme}-before-text-assertion`
+              );
+            }
             expect(textBounds.left).toBeGreaterThanOrEqual(0);
             expect(textBounds.right).toBeLessThanOrEqual(320);
             expect(textBounds.lines.length).toBeGreaterThan(0);

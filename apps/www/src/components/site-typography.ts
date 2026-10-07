@@ -78,11 +78,13 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
         ? (explicit as SiteTypographyRole)
         : /^h[1-6]$/.test(tag)
           ? (tag as SiteTypographyRole)
-          : tag === 'label' || tag === 'legend'
+          : native.matches('.starlight-aside--note > .starlight-aside__title')
             ? 'label'
-            : tag === 'figcaption'
-              ? 'caption'
-              : 'body';
+            : tag === 'label' || tag === 'legend'
+              ? 'label'
+              : tag === 'figcaption'
+                ? 'caption'
+                : 'body';
     // Only phrasing content can pass through a span. Leaf paragraphs/headings
     // and authored label/legend keep native semantics; block compositions stay
     // with their separately inventoried owner instead of producing invalid DOM.
@@ -324,7 +326,7 @@ export function siteTypographyParticipant(
             kind: 'box',
             tag: 'span',
             ref: 'typography-batch',
-            children: selected.map(({ role, context }, index) => ({
+            children: selected.map(({ native, role, context }, index) => ({
               kind: 'box',
               tag: 'span',
               ref: `carrier-${index}`,
@@ -334,6 +336,10 @@ export function siteTypographyParticipant(
                   kind: 'proto',
                   prototypeId: `${family}-text-root`,
                   rootTag: 'span',
+                  // These native semantic owners are block reading units. WC
+                  // host fallback and inline React/Vue spans must not choose
+                  // different line boxes; labels/legends remain legal inline.
+                  className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption') ? 'block' : undefined,
                   ref: `surface-${index}`,
                   props: { ...siteTextRecipe(role, family, isCompact, context) },
                   surfaceStyle: theme,
