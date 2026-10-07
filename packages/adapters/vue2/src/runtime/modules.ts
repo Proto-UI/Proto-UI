@@ -16,6 +16,7 @@ import {
 } from '@proto.ui/adapter-base';
 import {
   createCapsWiring,
+  retainWebPortalDirection,
   createWebMoveGestureHost,
   type LogicalInstanceToken,
 } from '@proto.ui/adapter-base';
@@ -43,7 +44,11 @@ import {
 import { A11Y_PROJECT_CAP, createWebA11yProjector } from '@proto.ui/module-a11y';
 import { createWebBoundaryHostBridge, BOUNDARY_HOST_BRIDGE_CAP } from '@proto.ui/module-boundary';
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
-import { EFFECTS_CAP } from '@proto.ui/module-feedback';
+import {
+  EFFECTS_CAP,
+  VISUAL_FEEDBACK_SINK_CAP,
+  type VisualFeedbackSink,
+} from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   type EventDefaultActionCancelRequest,
@@ -141,14 +146,23 @@ type Vue2OwnerModulesArgs<Props extends PropsBaseType> = {
 };
 
 export function createVue2OverlayGlobalMount(
-  instanceToken: LogicalInstanceToken
+  instanceToken: LogicalInstanceToken,
+  getPortalOrigin?: () => Node | null
 ): OverlayGlobalMount<HTMLElement> {
+  const directionLeases = new WeakMap<HTMLElement, () => void>();
   const anchors = new WeakMap<HTMLElement, Comment>();
 
   return {
     mount(hostEl: HTMLElement) {
       const parentToken = getLogicalParent(instanceToken);
       setProtoParent(hostEl, parentToken ? getLogicalRoot(parentToken) : null);
+      if (!directionLeases.has(hostEl)) {
+        const originalParent = hostEl.parentNode;
+        directionLeases.set(
+          hostEl,
+          retainWebPortalDirection(hostEl, () => getPortalOrigin?.() ?? originalParent)
+        );
+      }
 
       const document = hostEl.ownerDocument;
       const body = document?.body;
@@ -161,6 +175,9 @@ export function createVue2OverlayGlobalMount(
       anchors.set(hostEl, anchor);
     },
     unmount(hostEl: HTMLElement) {
+      const releaseDirection = directionLeases.get(hostEl);
+      directionLeases.delete(hostEl);
+      releaseDirection?.();
       const anchor = anchors.get(hostEl);
       anchors.delete(hostEl);
       // Only a host this mount moved is ours to put back. Returning it to the
@@ -275,6 +292,8 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
   emit: (key: string, payload?: unknown, options?: Record<string, unknown>) => void;
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
+  /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
+  visualFeedbackSink?: VisualFeedbackSink;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -348,7 +367,12 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
-    .use('feedback', [[EFFECTS_CAP, effectsPort]])
+    .use('feedback', [
+      [EFFECTS_CAP, effectsPort],
+      ...(args.visualFeedbackSink
+        ? [[VISUAL_FEEDBACK_SINK_CAP, args.visualFeedbackSink] as const]
+        : []),
+    ])
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,

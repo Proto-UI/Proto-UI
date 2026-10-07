@@ -36,6 +36,7 @@ type Vue2PortableProps<TProto extends ProtoLike> =
 
 export type ProtoVue2Props<TProto extends ProtoLike> = Vue2PortableProps<TProto> & {
   instanceAssociations?: InstanceAssociations;
+  dir?: 'ltr' | 'rtl' | 'auto';
   class?: Vue2HostClass;
   hostClass?: Vue2HostClass;
   surfaceClass?: Vue2HostClass;

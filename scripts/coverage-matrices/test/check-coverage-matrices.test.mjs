@@ -754,6 +754,10 @@ function writeReviewedPromotionConfig(
     new URL('../../../apps/www/scripts/contrast-provenance.mjs', import.meta.url),
     path.join(root, 'apps/www/scripts/contrast-provenance.mjs')
   );
+  fs.copyFileSync(
+    new URL('../../../apps/www/scripts/runtime-retry-urls.mjs', import.meta.url),
+    path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs')
+  );
 }
 
 function commitFixtureRoot(root) {
@@ -18085,6 +18089,10 @@ test('audit resolver profile: exact historical audit configuration remains admit
 
 test('audit resolver profile: reviewed Finf non-audit counterpart needs no audit helper', () => {
   const { root, config, plugin, target } = auditResolverFixture();
+  fs.copyFileSync(
+    new URL('./fixtures/promotion-resolver-original-finf-audit.txt', import.meta.url),
+    config
+  );
   const current = fs
     .readFileSync(config, 'utf8')
     .replace("import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n", '')
@@ -18195,3 +18203,193 @@ test('Finf demo raw imports remain bounded to reviewed association and Bootstrap
   // An import allowance does not classify or approve new surrounding UI owners.
   assert.match(message, /OrdinaryAssociationController/);
 });
+
+test('retry resolver profile: exact helper is bound as immutable metadata', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  const retry = path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs');
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(metadata.has(config));
+  assert.ok(metadata.has(plugin));
+  assert.ok(metadata.has(retry));
+});
+for (const defect of ['missing', 'changed', 'symlink', 'parent-symlink', 'directory']) {
+  test(`retry resolver profile: rejects ${defect} helper`, () => {
+    const { root } = auditResolverFixture();
+    const retry = path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs');
+    if (defect === 'missing') fs.unlinkSync(retry);
+    if (defect === 'changed') fs.appendFileSync(retry, '\n// changed closed URL map');
+    if (defect === 'symlink') {
+      fs.renameSync(retry, retry + '.copy');
+      fs.symlinkSync(retry + '.copy', retry);
+    }
+    if (defect === 'parent-symlink') {
+      const parent = path.dirname(retry);
+      fs.renameSync(parent, parent + '.copy');
+      fs.symlinkSync(parent + '.copy', parent, 'dir');
+    }
+    if (defect === 'directory') {
+      fs.unlinkSync(retry);
+      fs.mkdirSync(retry);
+    }
+    assert.throws(
+      () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+      /retry resolver plugin.*unrecognized|symlink.*unverified/
+    );
+  });
+}
+
+for (const scenario of [
+  'renderer',
+  'react',
+  'vue',
+  'vue2',
+  'foreign-owner',
+  'unknown-virtual',
+  'missing-plugin',
+  'changed-config',
+]) {
+  test(`Finf retry virtual boundary: ${scenario}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    writeReviewedPromotionConfig(root);
+    const owner =
+      scenario === 'foreign-owner'
+        ? 'apps/www/src/components/ForeignRuntime.ts'
+        : ['react', 'vue', 'vue2'].includes(scenario)
+          ? `apps/www/src/components/PrototypePreviewer/runtimes/${scenario}-runtime.ts`
+          : 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts';
+    const specifier =
+      scenario === 'unknown-virtual'
+        ? 'virtual:proto-ui/foreign'
+        : 'virtual:proto-ui/runtime-retry-urls';
+    const absolute = path.join(root, owner);
+    fs.mkdirSync(path.dirname(absolute), { recursive: true });
+    fs.writeFileSync(absolute, `import urls from '${specifier}'; export const observed=urls;`);
+    if (scenario === 'missing-plugin')
+      fs.unlinkSync(path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs'));
+    if (scenario === 'changed-config')
+      fs.appendFileSync(
+        path.join(root, 'apps/www/astro.config.mjs'),
+        '\n// changed virtual binding'
+      );
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    assert.equal(
+      message.includes(
+        `external executable script \`${specifier}\` in \`${owner}\` is not reviewed`
+      ),
+      ['foreign-owner', 'unknown-virtual', 'missing-plugin', 'changed-config'].includes(scenario)
+    );
+  });
+}
+for (const scenario of ['exact', 'changed-source', 'foreign-owner']) {
+  test(`Finf retry dynamic import boundary: ${scenario}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const owner =
+      scenario === 'foreign-owner'
+        ? 'apps/www/src/components/ForeignRetry.ts'
+        : 'apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts';
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(
+      new URL(
+        '../../../apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts',
+        import.meta.url
+      ),
+      target
+    );
+    if (scenario === 'changed-source') fs.appendFileSync(target, '\n// changed import source');
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    assert.equal(
+      message.includes(`@vite-ignore dynamic import in \`${owner}\` is not reviewed`),
+      scenario !== 'exact'
+    );
+  });
+}
+test('Finf optical imports admit exact host helpers and reject unrelated runtime imports', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts',
+      '@proto.ui/core',
+      false,
+    ],
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts',
+      '@proto.ui/runtime',
+      true,
+    ],
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      '@proto.ui/adapter-base/web-material',
+      false,
+    ],
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      '@proto.ui/adapter-react',
+      true,
+    ],
+    ['apps/www/src/components/ForeignMaterial.ts', '@proto.ui/adapter-base/web-material', true],
+  ];
+  for (const [owner, specifier] of cases) {
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.appendFileSync(target, `import '${specifier}';\n`);
+  }
+  const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+  for (const [owner, specifier, rejected] of cases)
+    assert.equal(
+      message.includes(`raw Proto UI import \`${specifier}\` in \`${owner}\` escapes`),
+      rejected
+    );
+});
+
+for (const scenario of [
+  'exact',
+  'unrelated-path',
+  'changed-bytes',
+  'symlink',
+  'foreign-consumer',
+]) {
+  test(`Finf optical host binding: ${scenario}`, () => {
+    const root = createRoot();
+    const owner = 'www.demo.raw-adapter-runtimes';
+    const source =
+      scenario === 'unrelated-path'
+        ? 'packages/adapters/base/src/material/unreviewed.ts'
+        : 'packages/adapters/base/src/material/program-pool.ts';
+    const target = path.join(root, source);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(
+      new URL('../../../packages/adapters/base/src/material/program-pool.ts', import.meta.url),
+      target
+    );
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[source, [owner]]] });
+    if (scenario === 'changed-bytes') fs.appendFileSync(target, '\n// changed host resource owner');
+    if (scenario === 'symlink') {
+      fs.renameSync(target, target + '.copy');
+      fs.symlinkSync(target + '.copy', target);
+    }
+    let foreign;
+    if (scenario === 'foreign-consumer') {
+      foreign = 'apps/www/src/components/ForeignOptical.ts';
+      const absolute = path.join(root, foreign);
+      fs.mkdirSync(path.dirname(absolute), { recursive: true });
+      let specifier = path.relative(path.dirname(absolute), target).replaceAll('\\', '/');
+      fs.writeFileSync(absolute, `import '${specifier}';`);
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'unrelated-path')
+      assert.match(message, /source binding must name exactly one/);
+    else if (scenario === 'changed-bytes' || scenario === 'symlink')
+      assert.match(message, /exact optical host source, digest and owner remain unverified/);
+    else if (scenario === 'foreign-consumer')
+      assert.ok(
+        message.includes(`in \`${foreign}\` escapes the website consumer-wall allowlist`),
+        message
+      );
+    else assert.equal(message, '');
+  });
+}

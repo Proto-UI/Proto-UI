@@ -58,6 +58,17 @@ cases:
     covers:
       - C-AS-OVERLAY-0001-P
     expectation: only-selected-root-receives-escape-request-while-owner-keeps-open
+  - id: T-OVERLAY-CATALOG-0001-CASE-PORTAL-DIRECTION
+    title: Web Portal direction follows author ancestry without overriding local direction
+    covers:
+      - HC-OVERLAY-PORTAL-0001-A
+    expectation: The Web host projection retains the actual author scope across body projection, live dir changes, origin reparenting and view epochs; explicit local dir and CSS retain priority and revoked leases cannot write retired hosts. Simulated-DOM controls are separate from native computed-style evidence.
+  - id: T-OVERLAY-CATALOG-0001-CASE-HOST-REENTRY
+    title: Host callbacks cannot retain or continue a superseded resource acquisition
+    covers:
+      - M-OVERLAY-0001-C
+      - HC-OVERLAY-PORTAL-0001-A
+    expectation: Revalidate view activity, mount epoch and capability generation after portal, layer, positioning and modal callbacks. In-flight resources retire through the acquiring provider after its callback returns; deactivation, detach, provider replacement and reentry cannot restore stale ownership.
 implementations:
   - id: modal-gutter-delta-controls
     kind: module-test
@@ -163,6 +174,46 @@ implementations:
     required: true
     consumesCases:
       - T-OVERLAY-CATALOG-0001-CASE-PORTAL
+  - id: web-portal-direction-lease
+    kind: adapter-test
+    status: needs-review
+    path: packages/adapters/base/test/portal-direction.test.ts
+    required: true
+    consumesCases: [T-OVERLAY-CATALOG-0001-CASE-PORTAL-DIRECTION]
+    notes:
+      - happy-dom uses an explicitly declared HTML-dir presentation-rule fixture; no native cascade or paint claim.
+  - id: web-portal-direction-four-adapters
+    kind: adapter-test
+    status: needs-review
+    path: packages/adapters/base/test/portal-direction-adapters.test.ts
+    required: true
+    consumesCases: [T-OVERLAY-CATALOG-0001-CASE-PORTAL-DIRECTION]
+  - id: react-portal-direction-renderer
+    kind: adapter-test
+    status: needs-review
+    path: packages/adapters/react/test/portal-direction.integration.test.ts
+    required: true
+    consumesCases: [T-OVERLAY-CATALOG-0001-CASE-PORTAL-DIRECTION]
+  - id: vue-portal-direction-renderer
+    kind: adapter-test
+    status: needs-review
+    path: packages/adapters/vue/test/portal-direction.integration.test.ts
+    required: true
+    consumesCases: [T-OVERLAY-CATALOG-0001-CASE-PORTAL-DIRECTION]
+  - id: web-portal-direction-native-consumer
+    kind: adapter-test
+    status: needs-review
+    path: apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts
+    required: true
+    consumesCases: [T-OVERLAY-CATALOG-0001-CASE-PORTAL-DIRECTION]
+    notes:
+      - The f91 baseline failed all eight native journeys in run 37616450178. Candidate native results remain required; the local sandbox cannot launch Chromium sockets.
+  - id: overlay-host-callback-reentry
+    kind: module-test
+    status: needs-review
+    path: packages/modules/overlay/test/host-callback-reentrancy.test.ts
+    required: true
+    consumesCases: [T-OVERLAY-CATALOG-0001-CASE-HOST-REENTRY]
 verifies:
   contracts:
     - id: C-AS-OVERLAY-0001
@@ -216,6 +267,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added scoped input arbitration and bounded Overlay host cleanup coverage.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added source-bound Web direction inheritance and reentrant host acquisition controls without admitting native paint or stable lifecycle.
 tags:
   - overlay
   - test

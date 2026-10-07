@@ -1,0 +1,76 @@
+id: T-FIELD-CURRENT-VALUE-0001
+type: test
+title: Field change-only canonical value and own result admission
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Focused source and four-Web synthetic regression evidence; exact-head CI, native and independent acceptance remain separate.
+  zh-CN: 仅为 focused 源码及四 Web 合成回归证据；精确 head CI、原生及独立验收仍为独立门槛。
+summary: Repairs verified PR review findings without changing controlled ownership.
+cases:
+  - id: T-FIELD-CURRENT-VALUE-0001-CHANGE
+    title: Change-only canonical admission
+    covers:
+      - C-FIELD-0001-CHANGE-ONLY
+      - C-TEXT-CONTROL-0001-CHANGE-COMMIT
+    expectation: An accepted native change-only commit must update the Field control snapshot and reporting bridge after synchronous controlled-owner callbacks. Uncontrolled input/change both update TextControl canonical value. Rejected controlled candidates never become accepted values; the accepted change retires old validation and drives onChange mode.
+  - id: T-FIELD-CURRENT-VALUE-0001-RESULT
+    title: Own finite validation result
+    covers:
+      - C-FIELD-0001-RESULT-RECORD
+    expectation: Validation results must be explicit plain or null-prototype records, with own required invalid and only admitted own string properties. Arrays, custom prototypes, symbols and hidden unknown names fail without spending a current request. Optional errors is read only when owned; an inherited optional property is never consulted.
+verifies:
+  contracts:
+    - C-FIELD-0001
+    - C-TEXT-CONTROL-0001
+implementations:
+  - id: field-current-boundary
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/field-current-value-admission-review.test.ts
+    required: true
+    consumesCases:
+      - T-FIELD-CURRENT-VALUE-0001-CHANGE
+      - T-FIELD-CURRENT-VALUE-0001-RESULT
+  - id: field-current-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-FIELD-CURRENT-VALUE-0001-CHANGE
+      - T-FIELD-CURRENT-VALUE-0001-RESULT
+  - id: field-current-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-FIELD-CURRENT-VALUE-0001-CHANGE
+      - T-FIELD-CURRENT-VALUE-0001-RESULT
+  - id: field-current-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-FIELD-CURRENT-VALUE-0001-CHANGE
+      - T-FIELD-CURRENT-VALUE-0001-RESULT
+  - id: field-current-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/field.test.ts
+    required: true
+    consumesCases:
+      - T-FIELD-CURRENT-VALUE-0001-CHANGE
+      - T-FIELD-CURRENT-VALUE-0001-RESULT
+sources:
+  - path: packages/adapters/base/test/fixtures/field-conformance.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Reproduced change-only and inherited validation result review findings on c316481ab, then verified bounded fixes.
+tags:
+  - field
+  - text-control
+  - regression

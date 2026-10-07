@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "paths": {
       "@proto.ui/core/internal": ["packages/core/src/internal.ts"],
+      "@proto.ui/adapter-base/web-material": ["packages/adapters/base/src/material/index.ts"],
       "@proto.ui/adapter-base/internal/instance-associations": [
         "packages/adapters/base/src/host/instance-associations.ts"
       ],

@@ -7,7 +7,8 @@
     "@proto.ui/core": "workspace:*",
     "@proto.ui/module-expose-state": "workspace:*",
     "@proto.ui/runtime": "workspace:*",
-    "@proto.ui/types": "workspace:*"
+    "@proto.ui/types": "workspace:*",
+    "@proto.ui/module-feedback": "workspace:*"
   },
   "devDependencies": {},
   "exports": {
@@ -20,6 +21,11 @@
       "types": "./dist/host/instance-associations.d.ts",
       "import": "./dist/host/instance-associations.js",
       "default": "./dist/host/instance-associations.js"
+    },
+    "./web-material": {
+      "types": "./dist/material/index.d.ts",
+      "import": "./dist/material/index.js",
+      "default": "./dist/material/index.js"
     }
   },
   "description": "Base package for building Proto UI adapters.",

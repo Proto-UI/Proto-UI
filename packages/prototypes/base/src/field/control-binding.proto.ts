@@ -102,7 +102,7 @@ function setup(def: DefHandle<FieldControlBindingProps>) {
     const reason = normalized.reason ?? 'sync';
     if (
       (fieldDisabled.get() || fieldReadOnly.get()) &&
-      (reason === 'input' || reason === 'compositionend')
+      (reason === 'input' || reason === 'change' || reason === 'compositionend')
     )
       return false;
     report = {

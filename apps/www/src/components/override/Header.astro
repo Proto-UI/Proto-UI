@@ -74,7 +74,14 @@ const navigation = [
                 </a>
               ))}
             </nav>
-            <div data-site-header-compact-context />
+            <div data-site-header-compact-context>
+              <div class="site-header-runtime" data-site-header-preferences>
+                <span class="site-header-runtime-label">
+                  {zh ? '预览 Runtime' : 'Preview runtime'}
+                </span>
+                <AdapterSelect brutalistTriggerAppearance="elevated" />
+              </div>
+            </div>
             <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
               <span class="site-header-group-label">
                 {zh ? '偏好与社区' : 'Preferences and community'}
@@ -91,11 +98,7 @@ const navigation = [
           </div>
         </div>
       </details>
-      <div class="site-header-context" data-site-header-context>
-        <div class="site-header-runtime" data-site-header-preferences>
-          <span class="site-header-runtime-label">{zh ? '预览 Runtime' : 'Preview runtime'}</span>
-          <AdapterSelect brutalistTriggerAppearance="elevated" />
-        </div>
+      <div class="site-header-context" data-site-header-context data-site-header-wide-preferences>
         {Astro.locals.starlightRoute.hasSidebar && (
           <div
             class="site-header-docs-navigation"

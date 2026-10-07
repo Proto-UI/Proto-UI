@@ -35,6 +35,23 @@ afterAll(async () => {
   await browser?.close();
   await stopServer();
 }, 60_000);
+// Production evidence binds the injection to the emitted chunk containing the
+// same reviewed source module. Development keeps the original failing route.
+async function runtimeModuleRoute(page: Page): Promise<string | ((url: URL) => boolean)> {
+  if (process.env.PUI_RUNTIME_MODULE_MODE !== 'production') return '**/runtimes/react-runtime.ts*';
+  const response = await page.request.get(`${baseUrl}/proto-ui-bundle-graph.json`);
+  expect(response.ok()).toBe(true);
+  const graph = await response.json();
+  const source = 'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts';
+  const matches = graph.chunks.filter((chunk: { moduleIds: string[] }) =>
+    chunk.moduleIds.includes(source)
+  );
+  expect(matches).toHaveLength(1);
+  const target = new URL(matches[0].fileName, `${baseUrl}/`);
+  expect(target.origin).toBe(new URL(baseUrl).origin);
+  return (url) => url.origin === target.origin && url.pathname === target.pathname;
+}
+
 async function choose(page: Page, control: 'runtime' | 'family', value: string) {
   await revealHeaderPreferences(page);
   const trigger = page.locator(
@@ -157,7 +174,7 @@ for (const family of ['shadcn', 'brutalist']) {
           await note.fill('Keep this authored value');
           const oldOverflow = await page.evaluate(() => getComputedStyle(document.body).overflow);
           let requested = false;
-          await page.route('**/runtimes/react-runtime.ts*', async (route) => {
+          await page.route(await runtimeModuleRoute(page), async (route) => {
             requested = true;
             await gate;
             await route.continue();
@@ -209,10 +226,25 @@ for (const family of ['shadcn', 'brutalist']) {
     }
     it('retains a visible error and retries the failed target through its public Button', async () => {
       const page = await browser.newPage({ viewport: { width: 1280, height: 1000 } });
+      const requests: string[] = [];
+      const errors: string[] = [];
+      let navigations = 0;
+      page.on('pageerror', (error) => errors.push(error.message));
+      page.on('console', (message) => {
+        if (message.type() === 'error') errors.push(message.text());
+      });
       try {
         await setup(page, family);
+        page.on('framenavigated', (frame) => {
+          if (frame === page.mainFrame()) navigations += 1;
+        });
+        const note = page
+          .locator('[data-home-demo-host]')
+          .getByRole('textbox', { name: 'Additional note', exact: true });
+        await note.fill('Retain this value until the target is ready');
         let failed = false;
-        await page.route('**/runtimes/react-runtime.ts*', async (route) => {
+        await page.route(await runtimeModuleRoute(page), async (route) => {
+          requests.push(route.request().url());
           if (!failed) {
             failed = true;
             await route.abort('failed');
@@ -226,6 +258,8 @@ for (const family of ['shadcn', 'brutalist']) {
         );
         const mask = page.locator('[data-runtime-loading-mask]');
         await capture(page, `${family}-failed-target`);
+        expect(await note.inputValue()).toBe('Retain this value until the target is ready');
+        expect(requests).toHaveLength(1);
         const retry = mask.getByRole('button', { name: 'Retry', exact: true });
         await retry.focus();
         await page.keyboard.press('Enter');
@@ -238,7 +272,22 @@ for (const family of ['shadcn', 'brutalist']) {
           .poll(() => restoredFocus.evaluate((element) => document.activeElement === element))
           .toBe(true);
         await capture(page, `${family}-retried-target-ready`);
+        expect(requests).toHaveLength(2);
+        expect(new URL(requests[1]).pathname).toBe(new URL(requests[0]).pathname);
+        expect(new URL(requests[1]).searchParams.get('pui-runtime-retry')).toBe('1');
+        expect(navigations).toBe(0);
+      } catch (error) {
+        if (output)
+          await page.screenshot({ path: path.join(output, `${family}-retry-failure.png`) });
+        throw error;
       } finally {
+        observations.push({
+          name: `${family}-retry-module-network`,
+          mode: process.env.PUI_RUNTIME_MODULE_MODE ?? 'development',
+          requests,
+          errors,
+          navigations,
+        });
         await page.close();
       }
     }, 90_000);

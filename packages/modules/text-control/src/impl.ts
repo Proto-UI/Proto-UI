@@ -208,7 +208,10 @@ export class TextControlModuleImpl extends ModuleBase {
     // from those stale owner values until the actual event callback begins.
     this.composing ||= canonicalEvent.composing;
     try {
-      if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {
+      if (
+        this.valueMode === 'uncontrolled' &&
+        (canonicalEvent.type === 'input' || canonicalEvent.type === 'change')
+      ) {
         this.value = canonicalEvent.value;
       }
 

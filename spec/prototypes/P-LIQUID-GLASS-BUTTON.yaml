@@ -1,12 +1,12 @@
 id: P-LIQUID-GLASS-BUTTON
 type: prototype
-title: Liquid Glass fallback Button projection over Base Button
+title: Liquid Glass optical-intent Button projection over Base Button
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale: A user-directed, independently authored visual foundation. Full family/component coverage, material capability where applicable, generated/native evidence and stable admission remain open; source package availability is not release or conformance admission.
-summary: A regular functional Button with live preference/support-gated 80% fill and 4px backdrop blur, plus deterministic opaque fallback and solid prominent action.
+summary: A regular functional Button submits V2 liquid-glass optical intent with Base press deformation, source-owned opaque fallback and solid prominent action.
 statement:
-  en: A regular functional Button with live preference/support-gated 80% fill and 4px backdrop blur, plus deterministic opaque fallback and solid prominent action. material is auto | opaque (default auto); variant is regular | prominent. Base remains the sole interaction owner. Unknown, reduction, contrast, forced-colors or missing support withdraws translucency immediately.
+  en: A regular functional Button submits V2 liquid-glass optical intent with Base press deformation, source-owned opaque fallback and solid prominent action. material is auto | opaque (default auto); variant is regular | prominent. Base remains the sole interaction owner. The host owns source, preference and actual paint admission; missing support retains opaque style. Reduced motion limits deformation without implying reduced transparency.
 criteria:
   - id: P-LIQUID-GLASS-BUTTON-BASE
     text:
@@ -16,7 +16,7 @@ criteria:
       en: variant is regular | prominent (default regular), material is auto | opaque (default auto), and inherited disabled defaults false. Removing a visual prop restores its default.
   - id: P-LIQUID-GLASS-BUTTON-VISUAL
     text:
-      en: The regular functional surface uses capsule geometry and readable source-owned light/dark colors. Auto may apply 80% secondary fill and 4px backdrop blur only under the admitted live policy. Prominent remains solid. No movement, refraction, adaptive luminosity or proprietary Apple material is promised.
+      en: The regular functional surface uses capsule geometry and readable source-owned light/dark colors. Auto requests explicit liquid-glass through the shared material slot; only an evidenced self-optical provider may enhance it. CSS blur and native adaptive blur are not substitutes. Prominent remains solid. No Apple-private or cross-engine equivalence is promised.
   - id: P-LIQUID-GLASS-BUTTON-CLOSURE
     text:
       en: Appearance is authored in feedback tokens and state/prop Rules; every token has an explicit physical translation. Standalone Web output must not depend on website component CSS or reset rules.
@@ -25,7 +25,7 @@ criteria:
       en: The package is private and unreleased. Initial source and Web evidence do not establish general Prototype Compiler, GPUI, Flutter or Qt support. Homepage and full component coverage remain separate work.
   - id: P-LIQUID-GLASS-BUTTON-MATERIAL
     text:
-      en: Auto enhancement requires regular variant, all four preference.* keys in their safe no-preference/none states, and both styleSupport.alphaFill and styleSupport.backdropBlur4px equal true. Opaque opt-out, unknown or lost/mismatched sources, any reduction/contrast/forced-colors request, or unsupported style fact removes both translucent fill and backdrop blur without moving interaction ownership.
+      en: Regular auto contributes one complete V2 liquid-glass candidate with finite press deformation driven by existing Base state. Opaque opt-out and prominent contribute zero candidates, retaining the declared opaque fallback. Provider policy resolves final style ownership, current source scope, geometry and preferences. Reduced or unknown motion selects static optics when supported; reduced/unknown transparency and unsafe contrast withdraw enhancement. No browser observer, GPU uniform or input owner belongs to this Prototype.
 sources:
   - path: packages/prototypes/liquid-glass/src/button/button.proto.ts
   - path: packages/prototypes/liquid-glass/src/theme.ts
@@ -38,8 +38,8 @@ dependsOn:
     - C-AS-HOOK-0001
     - C-RULE-INTENT-FEEDBACK-STYLE-0001
     - C-PROTOTYPE-STYLE-CLOSURE-0001
-    - C-RULE-PREFERENCES-0001
-    - C-RULE-STYLE-SUPPORT-0001
+    - C-FEEDBACK-MATERIAL-0001
+    - C-RULE-INTENT-FEEDBACK-MATERIAL-0001
 inherits:
   prototypes:
     - id: P-BASE-BUTTON
@@ -54,6 +54,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added bounded live material policy and opt-out; real-Web material evidence remains planned until the exact-head consumer fixture runs.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Replaced the stage-0 alpha/blur rule with explicit V2 optical intent; real provider admission and source-bound browser evidence remain draft obligations.
 tags:
   - prototype
   - liquid-glass

@@ -54,6 +54,7 @@ describe('adapter-vue2: type helpers', () => {
   it('combines proto props with only the explicitly supported Vue 2 host props', () => {
     expectTypeOf<ProtoVue2Props<typeof proto>>().toEqualTypeOf<{
       instanceAssociations?: InstanceAssociations;
+      dir?: 'ltr' | 'rtl' | 'auto';
       label?: string;
       disabled?: boolean;
       class?: string | string[] | Record<string, boolean>;

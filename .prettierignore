@@ -20,3 +20,6 @@ experiments/liquidgl-baseline/vendor/
 
 # Historical resolver profiles retain their exact reviewed source fingerprints.
 scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt
+
+# Exact audited shader bytes and legal text are emitted by the checked generator.
+packages/adapters/base/src/material/liquidgl-kernel.generated.ts

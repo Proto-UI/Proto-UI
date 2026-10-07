@@ -9,7 +9,10 @@ const families = new WeakMap<
   AnatomyFamily,
   Map<unknown, Map<string, { ref: ControlLabelRef; count: number }>>
 >();
-export function acquireAnatomyControlLabelPair(pair: ControlLabelAnatomyPair, scope: unknown) {
+export function acquireAnatomyControlLabelPair(
+  pair: ControlLabelAnatomyPair,
+  scope: unknown
+): { ref: ControlLabelRef; dispose(): void } {
   let domains = families.get(pair.family);
   if (!domains) families.set(pair.family, (domains = new Map()));
   let entries = domains.get(scope);

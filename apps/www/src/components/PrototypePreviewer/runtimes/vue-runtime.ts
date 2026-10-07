@@ -1,11 +1,15 @@
+import runtimeUrls from 'virtual:proto-ui/runtime-retry-urls';
+import { retryableModule } from './retryable-module';
 import type { RuntimeAPI } from './ids';
 import type { VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import { claimHostMount, releaseHostMount } from './host-mount';
 
+const vueModule = retryableModule(() => import('vue'), runtimeUrls.vue);
+
 // Deliver the existing locked Vue 3 dependency through lazy same-origin assets.
 // The reader runtime must not depend on an external CDN being reachable.
 export async function loadVue(): Promise<VueRuntimeModule> {
-  return (await import('vue')) as unknown as VueRuntimeModule;
+  return (await vueModule()) as unknown as VueRuntimeModule;
 }
 
 type VueApp = {

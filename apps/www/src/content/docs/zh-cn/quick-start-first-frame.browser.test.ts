@@ -5,6 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { changedFirstFrameGeometry } from './quick-start-first-frame-geometry';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
 
@@ -85,7 +86,60 @@ function readPageFrame({
       ? note.querySelector<HTMLElement>('.site-note-surface-paint')
       : null;
     const paint = plane ? getComputedStyle(plane) : getComputedStyle(note, '::before');
+    const header = document
+      .querySelector<HTMLElement>('[data-docs-site-header]')!
+      .getBoundingClientRect();
+    const pageOverflow =
+      document.documentElement.scrollWidth - document.documentElement.clientWidth;
+    const overflowing =
+      pageOverflow > 1
+        ? [...document.querySelectorAll<HTMLElement>('body *')].flatMap((element) => {
+            const rect = element.getBoundingClientRect();
+            if (
+              !rect.width ||
+              (rect.right <= document.documentElement.clientWidth + 1 &&
+                rect.left >= -1 &&
+                element.scrollWidth <= element.clientWidth + 1)
+            )
+              return [];
+            const css = getComputedStyle(element);
+            return [
+              {
+                tag: element.tagName,
+                id: element.id,
+                className: element.getAttribute('class'),
+                text: element.textContent?.slice(0, 70),
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                right: rect.right,
+                clientWidth: element.clientWidth,
+                scrollWidth: element.scrollWidth,
+                position: css.position,
+                display: css.display,
+                visibility: css.visibility,
+                opacity: css.opacity,
+                overflowX: css.overflowX,
+                inertOwner: element.closest('[inert]')?.outerHTML.slice(0, 500),
+                generation: element
+                  .closest('[data-projection-generation-state]')
+                  ?.getAttribute('data-projection-generation-state'),
+              },
+            ];
+          })
+        : [];
     return {
+      geometry: {
+        header: { x: header.x, y: header.y, width: header.width, height: header.height },
+        title: {
+          viewportX: anchor.x,
+          viewportY: anchor.y,
+          documentX: anchor.x + scrollX,
+          documentY: anchor.y + scrollY,
+        },
+        scroll: { x: scrollX, y: scrollY },
+      },
+      overflowing,
       values,
       paint: {
         background: paint.backgroundColor,
@@ -97,7 +151,7 @@ function readPageFrame({
       runtime: note.dataset.noteSurfaceRuntime,
       fontStatus: document.fonts.status,
       theme: document.documentElement.dataset.theme,
-      pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      pageOverflow,
     };
   };
   if (observe) {
@@ -264,9 +318,13 @@ function compare(
         expect(final[property], `${key}.${property}`).toBe(initial[property]);
     }
   }
+  expect(
+    changedFirstFrameGeometry(before.geometry, after.geometry),
+    'header and complete page position remain stable in every frame'
+  ).toEqual([]);
   expect(after.paint).toEqual(before.paint);
   expect(before.pageOverflow).toBeLessThanOrEqual(1);
-  expect(after.pageOverflow).toBeLessThanOrEqual(1);
+  expect(after.pageOverflow, JSON.stringify(after.overflowing)).toBeLessThanOrEqual(1);
 }
 
 const conditions = [
@@ -395,6 +453,13 @@ describe('quick-start first-frame continuity', () => {
         expect(result.paint.borderWidth).toBe('1px');
         expect(result.ready).toBeUndefined();
         expect(result.pageOverflow).toBeLessThanOrEqual(1);
+        const summary = page.locator('[data-site-header-fallback-summary]');
+        expect(await summary.isVisible()).toBe(true);
+        expect(
+          await page.locator('[data-site-header-panel] [data-site-header-preferences]').count()
+        ).toBe(1);
+        await summary.click();
+        expect(await page.locator('[data-site-header-preferences]').isVisible()).toBe(true);
       } finally {
         await context.close();
       }

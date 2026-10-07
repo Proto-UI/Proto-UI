@@ -8,6 +8,8 @@
     "baseUrl": "../..",
     "paths": {
       "@/*": ["apps/www/src/*"],
+      "@proto.ui/adapter-base/web-material": ["packages/adapters/base/src/material/index.ts"],
+      "@proto.ui/module-feedback/internal/*": ["packages/modules/feedback/src/material/*"],
       "@proto.ui/core/internal": ["packages/core/src/internal.ts"],
       "@proto.ui/module-*": ["packages/modules/*/src"],
       "@proto.ui/adapter-*": ["packages/adapters/*/src"],

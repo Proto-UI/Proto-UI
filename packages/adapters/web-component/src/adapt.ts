@@ -1,3 +1,5 @@
+import type { EffectsPort } from '@proto.ui/core';
+import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
 // packages/adapters/web-component/src/adapt.ts
 import {
   getModuleDeclaration,
@@ -102,6 +104,8 @@ function assertKebabCase(tag: string) {
 }
 
 export interface WebComponentAdapterOptions<Props extends PropsBaseType = PropsBaseType> {
+  /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
+  createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   shadow?: boolean;
   register?: boolean;
   registerAs?: string;
@@ -593,6 +597,16 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             { deferPublication: true }
           );
 
+          const effectsPort = createWebEffectsPort(applier);
+          const visualFeedbackSink = opt.createVisualSink
+            ? createDeferredViewVisualSink(
+                () => opt.createVisualSink!(thisEl, effectsPort),
+                (frame) => {
+                  effectsPort.queueStyle({ kind: 'tw', tokens: [...frame.style.tokens] });
+                  effectsPort.requestFlush();
+                }
+              )
+            : undefined;
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
@@ -600,21 +614,23 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               instanceToken: instanceToken,
               router,
               rawPropsSource,
-              effectsPort: createWebEffectsPort(applier),
+              effectsPort,
+              visualFeedbackSink,
               materialBindingFactory: proto.modules?.some(
                 (declaration) => declaration.id === OWNED_MATERIAL_ID
               )
                 ? createOwnedMaterialBinding
                 : undefined,
-              finalStyleSink:
-                getExperimentalVisualConsumer(proto)?.(
-                  thisEl,
-                  applier,
-                  createOwnedVisualSurface(thisEl, thisRoot)
-                ) ??
-                (proto.modules?.some((declaration) => declaration.id === OWNED_MATERIAL_ID)
-                  ? createOpaqueMaterialVisualSink(thisEl, applier)
-                  : undefined),
+              finalStyleSink: visualFeedbackSink
+                ? undefined
+                : (getExperimentalVisualConsumer(proto)?.(
+                    thisEl,
+                    applier,
+                    createOwnedVisualSurface(thisEl, thisRoot)
+                  ) ??
+                  (proto.modules?.some((declaration) => declaration.id === OWNED_MATERIAL_ID)
+                    ? createOpaqueMaterialVisualSink(thisEl, applier)
+                    : undefined)),
               getMeta,
               colorSchemeSource,
               preferenceSource,

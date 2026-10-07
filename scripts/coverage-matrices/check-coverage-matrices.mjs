@@ -161,6 +161,35 @@ const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
   'Results:',
 ]);
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
+  // Exact opt-in optical host and its owned-source diagnostics, not app controls.
+  'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/core', '@proto.ui/module-feedback']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/adapter-base/web-material']),
+    resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
+  }),
+  'packages/adapters/base/src/material/program-pool.ts': Object.freeze({
+    resolvedPaths: Object.freeze([
+      'packages/adapters/base/src/material/image-prepare',
+      'packages/adapters/base/src/material/program',
+    ]),
+  }),
+  'packages/adapters/base/src/material/program.ts': Object.freeze({
+    resolvedPaths: Object.freeze([
+      'packages/adapters/base/src/material/liquidgl-kernel.generated',
+      'packages/adapters/base/src/material/style',
+      'packages/adapters/base/src/material/source',
+    ]),
+  }),
+  'packages/adapters/base/src/material/style.ts': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/core']),
+  }),
+  'apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts': Object.freeze({
+    viteIgnoredDynamicImports: Object.freeze(['url']),
+    sourceSha256: '32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2',
+  }),
+
   // Reviewed Field validation request type consumed by the blocked demo controller.
   'apps/www/src/content/docs/field-demo.shared.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/prototypes-base/field']),
@@ -290,8 +319,16 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/pages/en/test/liquid-glass-material.astro': Object.freeze({
-    specifiers: Object.freeze(['@proto.ui/prototypes-liquid-glass/button']),
-    resolvedPaths: Object.freeze(['packages/prototypes/liquid-glass/src/theme']),
+    specifiers: Object.freeze([
+      '@proto.ui/prototypes-liquid-glass/button',
+      '@proto.ui/adapter-base/web-material',
+    ]),
+    resolvedPaths: Object.freeze([
+      'packages/prototypes/liquid-glass/src/theme',
+      'packages/adapters/base/src/material/program-pool',
+      'packages/adapters/base/src/material/program',
+      'packages/adapters/base/src/material/style',
+    ]),
   }),
   // Bounded four-runtime fixture of the actual eight Bootstrap source parts.
   // Its authored commands remain separately blocked consumer compositions.
@@ -8321,11 +8358,41 @@ function relativeImportSpecifier(sourcePath, rootDir, targetPath) {
   return specifier;
 }
 
-function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier) {
+function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, metadata = new Set()) {
   // Public assets and entry HTML execute directly in the browser. They cannot
   // inherit the Node/Astro/Vite resolvers used by compiled application sources.
   if (/\/public\/|\.html?$/iu.test(sourcePath)) return false;
   if (isNodeBuiltinSpecifier(specifier)) return true;
+  if (specifier === 'virtual:proto-ui/runtime-retry-urls') {
+    const owners = new Set([
+      'apps/www/src/components/PrototypePreviewer/demo-renderer.ts',
+      'apps/www/src/components/PrototypePreviewer/runtimes/react-runtime.ts',
+      'apps/www/src/components/PrototypePreviewer/runtimes/vue-runtime.ts',
+      'apps/www/src/components/PrototypePreviewer/runtimes/vue2-runtime.ts',
+    ]);
+    if (!owners.has(sourcePath) || !rootDir) return false;
+    const inputs = [
+      ['apps/www/astro.config.mjs', PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256],
+      [PROMOTION_RETRY_PLUGIN_PATH, PROMOTION_RETRY_PLUGIN_SHA256],
+      [PROMOTION_AUDIT_PLUGIN_PATH, PROMOTION_AUDIT_PLUGIN_SHA256],
+    ];
+    try {
+      for (const [relative, sha] of inputs) {
+        const target = path.join(rootDir, relative);
+        assertPromotionModulePath(rootDir, target);
+        if (
+          !fs.lstatSync(target).isFile() ||
+          createHash('sha256').update(fs.readFileSync(target)).digest('hex') !== sha
+        )
+          return false;
+      }
+    } catch {
+      return false;
+    }
+    for (const [relative] of inputs) metadata.add(path.join(rootDir, relative));
+    return true;
+  }
+
   return (
     sourcePath.startsWith('apps/www/src/') &&
     new Set([
@@ -8419,7 +8486,7 @@ function guardedWebsiteImport(
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (
     /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(classifiedSpecifier) &&
-    !isReviewedBuildTimeModuleSpecifier(sourcePath, classifiedSpecifier)
+    !isReviewedBuildTimeModuleSpecifier(sourcePath, classifiedSpecifier, rootDir)
   ) {
     return {
       category: 'external-executable-script',
@@ -8983,7 +9050,7 @@ function guardedHarnessImport(rootDir, canonicalRootDir, sourcePath, specifier) 
   const classifiedSpecifier = importSpecifierWithoutViteSuffix(specifier);
   if (
     /^(?:[a-z][a-z0-9+.-]*:|\/\/)/iu.test(classifiedSpecifier) &&
-    !isReviewedBuildTimeModuleSpecifier(sourcePath, classifiedSpecifier)
+    !isReviewedBuildTimeModuleSpecifier(sourcePath, classifiedSpecifier, rootDir)
   ) {
     return {
       category: 'external-executable-script',
@@ -9039,10 +9106,25 @@ function isReviewedPrototypePackageDependency(sourcePath, guardedImport) {
   );
 }
 
-function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport) {
+function websiteRawImportIsAllowed(sourcePath, specifier, guardedImport, rootDir) {
   if (isReviewedPrototypePackageDependency(sourcePath, guardedImport)) return true;
   const allowance = WEBSITE_RAW_IMPORT_ALLOWLIST[sourcePath];
   if (!allowance) return false;
+  if (allowance.sourceSha256) {
+    const target = path.join(rootDir, sourcePath);
+    try {
+      assertPromotionModulePath(rootDir, target);
+      if (
+        !fs.lstatSync(target).isFile() ||
+        createHash('sha256').update(fs.readFileSync(target)).digest('hex') !==
+          allowance.sourceSha256
+      )
+        return false;
+    } catch {
+      return false;
+    }
+  }
+
   if (
     guardedImport.category === 'vite-ignored-dynamic-import' &&
     allowance.viteIgnoredDynamicImports?.includes(guardedImport.boundary)
@@ -9097,6 +9179,14 @@ const PROMOTION_FINF_AUDIT_CONFIG_SHA256 =
 const PROMOTION_AUDIT_PLUGIN_PATH = 'apps/www/scripts/contrast-provenance.mjs';
 const PROMOTION_AUDIT_PLUGIN_SHA256 =
   'a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a';
+// Reviewed closed runtime recovery URL plugin. It only resolves its two virtual
+// modules and delegates the fixed eleven acquisition entries to the same resolver.
+// Its exact helper bytes are evidence metadata; arbitrary plugins stay rejected.
+const PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256 =
+  'a7947553aeba5d5efb4b5806326b833e8c31dd924d3555411099feb0b8c898e8';
+const PROMOTION_RETRY_PLUGIN_PATH = 'apps/www/scripts/runtime-retry-urls.mjs';
+const PROMOTION_RETRY_PLUGIN_SHA256 =
+  '510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224';
 export function promotionBarePackageTargets(root, specifier, metadata) {
   const unverified = () =>
     new Error(`promotion package closure for ${specifier} remains unverified`);
@@ -9112,8 +9202,11 @@ export function promotionBarePackageTargets(root, specifier, metadata) {
   )
     throw unrecognizedConfig();
   const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
+  const retryProfile = configSha === PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256;
   const auditProfile =
-    configSha === PROMOTION_AUDIT_CONFIG_SHA256 || configSha === PROMOTION_FINF_AUDIT_CONFIG_SHA256;
+    configSha === PROMOTION_AUDIT_CONFIG_SHA256 ||
+    configSha === PROMOTION_FINF_AUDIT_CONFIG_SHA256 ||
+    retryProfile;
   if (
     configSha !== PROMOTION_RESOLVER_CONFIG_SHA256 &&
     configSha !== PROMOTION_FINF_CONFIG_SHA256 &&
@@ -9132,6 +9225,20 @@ export function promotionBarePackageTargets(root, specifier, metadata) {
     )
       throw new Error(
         'promotion audit resolver plugin is unrecognized; closure remains unverified'
+      );
+    metadata.add(pluginPath);
+  }
+  if (retryProfile) {
+    const pluginPath = path.join(root, PROMOTION_RETRY_PLUGIN_PATH);
+    assertPromotionModulePath(root, pluginPath);
+    if (
+      !fs.existsSync(pluginPath) ||
+      !fs.lstatSync(pluginPath).isFile() ||
+      createHash('sha256').update(fs.readFileSync(pluginPath)).digest('hex') !==
+        PROMOTION_RETRY_PLUGIN_SHA256
+    )
+      throw new Error(
+        'promotion retry resolver plugin is unrecognized; closure remains unverified'
       );
     metadata.add(pluginPath);
   }
@@ -9330,7 +9437,9 @@ function reachableSourcePaths(
         !promotionPackages ||
         isReviewedBuildTimeModuleSpecifier(
           path.relative(root, sourcePath).replaceAll('\\', '/'),
-          classifiedSpecifier
+          classifiedSpecifier,
+          root,
+          packageMetadata
         )
       )
         return null;
@@ -9865,7 +9974,8 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       continue;
     }
     if (rawImport.category === 'external-stylesheet') {
-      if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
+      if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport, rootDir))
+        continue;
       issues.push(
         `${relativePath}: external stylesheet \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` is not reviewed`
       );
@@ -9902,7 +10012,8 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       continue;
     }
     if (rawImport.category === 'vite-ignored-dynamic-import') {
-      if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
+      if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport, rootDir))
+        continue;
       issues.push(
         `${relativePath}: @vite-ignore dynamic import in \`${rawImport.sourcePath}\` is not reviewed against an exact URL boundary`
       );
@@ -9932,7 +10043,8 @@ function validateWebsiteRawImports(rootDir, relativePath, issues) {
       );
       continue;
     }
-    if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport)) continue;
+    if (websiteRawImportIsAllowed(rawImport.sourcePath, rawImport.specifier, rawImport, rootDir))
+      continue;
     issues.push(
       `${relativePath}: raw Proto UI import \`${rawImport.specifier}\` in \`${rawImport.sourcePath}\` escapes the website consumer-wall allowlist${rawImport.category?.startsWith('transitive-') ? ` (found ${rawImport.category} in \`${rawImport.resolvedPath}\`)` : ''}`
     );
@@ -12067,6 +12179,12 @@ function validateMainRows(
   return { stateCounts, targetClassCounts, seenIds, sourceOwners, rowDispositions };
 }
 
+// The public optical diagnostic fixture reaches this reviewed host resource
+// owner directly. It remains an exact source+digest+owner binding, never a
+// packages/** exemption or admission of another application's controller.
+const WEBSITE_OPTICAL_HOST_SOURCE = 'packages/adapters/base/src/material/program-pool.ts';
+const WEBSITE_OPTICAL_HOST_SHA256 =
+  '9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658';
 function parseSourceBindings(lines, afterIndex, relativePath, issues) {
   const headingIndexes = findExactLineIndexes(lines, '## Source-scan bindings').filter(
     (index) => index > afterIndex
@@ -12104,9 +12222,13 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
     const isPublicExecutable =
       sourcePath?.startsWith('apps/www/public/') &&
       /\.(?:cjs|html?|js|mjs|svg)$/iu.test(sourcePath);
-    if (sourcePaths.length !== 1 || (!isWebsiteSource && !isPublicExecutable)) {
+    const isReviewedOpticalHost = sourcePath === WEBSITE_OPTICAL_HOST_SOURCE;
+    if (
+      sourcePaths.length !== 1 ||
+      (!isWebsiteSource && !isPublicExecutable && !isReviewedOpticalHost)
+    ) {
       issues.push(
-        `${context}: source binding must name exactly one \`apps/www/src/**\` path or executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path`
+        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or the exact reviewed optical host source`
       );
       continue;
     }
@@ -12142,6 +12264,25 @@ function validateWebsiteSourceBindings(
   const bindings = parseSourceBindings(lines, afterIndex, relativePath, issues);
   for (const [sourcePath, binding] of bindings) {
     const absolutePath = path.resolve(rootDir, sourcePath);
+    if (sourcePath === WEBSITE_OPTICAL_HOST_SOURCE) {
+      try {
+        assertPromotionModulePath(rootDir, absolutePath);
+        if (
+          !fs.lstatSync(absolutePath).isFile() ||
+          createHash('sha256').update(fs.readFileSync(absolutePath)).digest('hex') !==
+            WEBSITE_OPTICAL_HOST_SHA256 ||
+          binding.digest !== WEBSITE_OPTICAL_HOST_SHA256 ||
+          binding.ownerIds.length !== 1 ||
+          binding.ownerIds[0] !== 'www.demo.raw-adapter-runtimes'
+        )
+          throw new Error('unexpected host bytes or owner');
+      } catch {
+        issues.push(
+          `${relativePath}:${binding.line}: exact optical host source, digest and owner remain unverified`
+        );
+        continue;
+      }
+    }
     if (!fs.existsSync(absolutePath) || !fs.statSync(absolutePath).isFile()) {
       issues.push(
         `${relativePath}:${binding.line}: source binding references missing path \`${sourcePath}\``

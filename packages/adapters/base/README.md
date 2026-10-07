@@ -37,6 +37,7 @@ npm install @proto.ui/adapter-base@0.3.0-alpha.1
 
 - `@proto.ui/core`
 - `@proto.ui/module-expose-state`
+- `@proto.ui/module-feedback`
 - `@proto.ui/runtime`
 - `@proto.ui/types`
 
@@ -51,3 +52,9 @@ MIT
 Rule Meta exposes the new keys only with a matching active mounted lease. Source loss or getter mismatch immediately removes the current Rule contribution, rather than retaining stale enhancement. Subscriptions are dependency-driven, shared per Document/query and released on detach/disposal. These facts do not claim native/Compiler support or any material rendering fidelity; see `C-RULE-PREFERENCES-0001` and #793.
 
 `createDefaultWebStyleSupportSource(getter)` separately declares two finite default-Web pipeline facts: `styleSupport.alphaFill` and `styleSupport.backdropBlur4px` (`true | false | 'unknown'`). The exact alpha path is the token pipeline's 80% `color-mix(in oklab, var(--pui-secondary) 80%, transparent)` fill; blur is only `backdrop-filter: blur(4px)`. The provider applies necessary CSS syntax checks, while real consumer pixel evidence remains a separate admission requirement. This is not full Glass, arbitrary optical rendering, native or Compiler support. Source loss fails closed through the same mounted lease discipline; custom getters are never implicitly paired.
+
+### Web Portal direction
+
+`retainWebPortalDirection(target, getOrigin)` is the shared Web host projection used by the four Overlay portal bridges. It leases an inherited `dir` from the actual author position, follows ancestor `dir`/class/style changes and origin reparenting, and releases its own attribute and observers on detach. An explicit target `dir` (`ltr`, `rtl` or `auto`) and target CSS keep their authored priority. React and Vue retain a hidden, inert renderer-owned origin marker so ordinary DOM wrappers between Proto owners are included. Minimal renderer runtimes without `Fragment` retain the logical Proto-root fallback.
+
+This is bounded Web direction preservation under draft `HC-OVERLAY-PORTAL-0001`; it is not a portable Proto direction state, a blanket copy of inherited CSS, or a native paint certification. React, Vue and Vue 2 expose `dir` as a host prop as well as retaining a Prototype's declared `dir` input when present.

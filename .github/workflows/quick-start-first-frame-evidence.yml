@@ -3,10 +3,17 @@ on:
   pull_request:
     paths:
       - '.github/workflows/quick-start-first-frame-evidence.yml'
+      - 'packages/**'
+      - 'apps/www/astro.config.mjs'
+      - 'apps/www/package.json'
+      - 'package.json'
       - 'apps/www/src/components/**'
       - 'apps/www/src/styles/**'
       - 'apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx'
-      - 'apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/quick-start-first-frame*.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/server-readiness.mjs'
+      - 'vitest.config.ts'
       - 'scripts/test/runtime-test-plan.mjs'
       - 'pnpm-lock.yaml'
   workflow_dispatch:

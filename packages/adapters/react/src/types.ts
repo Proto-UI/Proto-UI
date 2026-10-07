@@ -34,6 +34,7 @@ type ReactPortableProps<TProto extends ProtoLike> =
 
 export type ProtoReactProps<TProto extends ProtoLike> = ReactPortableProps<TProto> & {
   instanceAssociations?: InstanceAssociations;
+  dir?: 'ltr' | 'rtl' | 'auto';
   children?: any;
   className?: string;
   hostClassName?: string;

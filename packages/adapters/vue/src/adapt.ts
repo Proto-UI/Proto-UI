@@ -1,3 +1,5 @@
+import type { EffectsPort } from '@proto.ui/core';
+import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import {
@@ -66,6 +68,7 @@ export type VueRuntime = VueRenderRuntime & {
   defineComponent: (opt: any) => any;
   h: (type: any, props?: any, children?: any) => any;
   Teleport?: any;
+  Fragment?: any;
   ref: <T>(v: T) => { value: T };
   shallowRef: <T>(v: T) => { value: T };
   watch: (source: any, cb: (...args: any[]) => void | Promise<void>, options?: any) => unknown;
@@ -93,6 +96,8 @@ export type VueAdapterProps<Props extends PropsBaseType> = Props &
   };
 
 export interface VueAdapterOptions<Props extends PropsBaseType> {
+  /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
+  createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   schedule?: (task: () => void) => void;
   getProps?: (props: VueAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -214,6 +219,7 @@ export function createVueAdapter(runtime: VueRuntime) {
       },
       setup(props: any, ctx: any) {
         const rootRef = runtime.ref<HTMLElement | null>(null);
+        const portalOriginRef = runtime.ref<HTMLElement | null>(null);
         const renderChildren = runtime.shallowRef<any>(null);
         const commitVersion = runtime.ref(0);
         const hostTokens = runtime.shallowRef<string[]>([]);
@@ -515,6 +521,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           });
 
           const modules = createVueModules({
+            getPortalOrigin: () => portalOriginRef.value,
             el: rootEl,
             instanceToken,
             router,
@@ -523,6 +530,15 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             rawPropsSource,
             effectsPort,
+            visualFeedbackSink: opt.createVisualSink
+              ? createDeferredViewVisualSink(
+                  () => opt.createVisualSink!(rootEl, effectsPort),
+                  (frame) => {
+                    effectsPort.queueStyle({ kind: 'tw', tokens: [...frame.style.tokens] });
+                    effectsPort.requestFlush();
+                  }
+                )
+              : undefined,
             getMeta,
             colorSchemeSource,
             preferenceSource,
@@ -728,6 +744,7 @@ export function createVueAdapter(runtime: VueRuntime) {
               },
               class: mergeHostClass([props.surfaceClass, props.hostClass, ctx.attrs.class]),
               style: mergeHostStyle([props.surfaceStyle, props.hostStyle, ctx.attrs.style]),
+              dir: ctx.attrs.dir ?? props.dir,
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: viewReady ? undefined : '',
@@ -737,7 +754,20 @@ export function createVueAdapter(runtime: VueRuntime) {
             rendered as any
           );
           if (present && overlayPort?.getConfig().portal === true && runtime.Teleport) {
-            return runtime.h(runtime.Teleport, { to: 'body' }, [content]);
+            const portal = runtime.h(runtime.Teleport, { to: 'body' }, [content]);
+            return runtime.Fragment
+              ? runtime.h(runtime.Fragment, null, [
+                  runtime.h('span', {
+                    ref: (el: HTMLElement | null) => {
+                      portalOriginRef.value = el;
+                    },
+                    hidden: true,
+                    'aria-hidden': true,
+                    'data-pui-portal-origin': '',
+                  }),
+                  portal,
+                ])
+              : portal;
           }
           return content;
         };

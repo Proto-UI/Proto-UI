@@ -8,9 +8,8 @@ export interface ButtonProjectionProps {
   material?: 'auto' | 'opaque';
 }
 
-// Regular functional surfaces may use a bounded translucent/4px-blur treatment.
-// Unknown/lost/reduced inputs remain opaque. No refraction, moving highlight,
-// background-adaptive luminosity or Apple-native material parity is claimed.
+// Explicit optical intent uses the shared host provider. The same final opaque
+// fill remains available without a source; CSS blur is not a substitute.
 const FILLS = {
   regular: 'bg-secondary text-secondary-foreground',
   prominent: 'bg-primary text-primary-foreground',
@@ -46,22 +45,28 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
         intent: (i) => i.feedback.style.use(tw(HOVER[variant])),
       });
     });
-    // Live source leases own these fixed Meta inputs. The Prototype owns
-    // only this visual policy; it never observes a browser or native API.
-    def.rule({
-      when: (w) =>
-        w.all(
-          w.prop('variant').eq('regular'),
-          w.prop('material').eq('auto'),
-          w.meta('preference.reducedTransparency').eq('no-preference'),
-          w.meta('preference.reducedMotion').eq('no-preference'),
-          w.meta('preference.contrast').eq('no-preference'),
-          w.meta('preference.forcedColors').eq('none'),
-          w.meta('styleSupport.alphaFill').eq(true),
-          w.meta('styleSupport.backdropBlur4px').eq(true)
-        ),
-      intent: (i) => i.feedback.style.use(tw('bg-secondary/80 backdrop-blur-xs')),
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
     });
+    for (const phase of [false, true]) {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('variant').eq('regular'),
+            w.prop('material').eq('auto'),
+            w.state(pressed).eq(phase)
+          ),
+        intent: (i) =>
+          i.feedback.material.use({
+            intent: 'liquid-glass',
+            variant: 'regular',
+            deformation: { kind: 'press', phase: phase ? 'pressed' : 'rest' },
+          }),
+      });
+    }
     def.rule({
       when: (w) => w.state(pressed).eq(true),
       intent: (i) => i.feedback.style.use(tw('shadow-xs')),

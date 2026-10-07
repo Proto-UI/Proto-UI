@@ -85,6 +85,7 @@ relates:
 references:
   tests:
     - T-MATERIAL-VISUAL-RESULT-0001
+    - T-WEB-MATERIAL-PROVIDER-0001
 sources:
   - path: packages/core/src/material.ts
     label: Version 2 public data grammar; not a host support claim

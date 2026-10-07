@@ -297,7 +297,8 @@ function setupFieldRoot(def: DefHandle<FieldRootProps, FieldRootExposes>) {
     const mode = run.props.get().validationMode;
     if (
       (reason === 'blur' && mode === 'onBlur') ||
-      ((reason === 'input' || reason === 'compositionend') && mode === 'onChange')
+      ((reason === 'input' || reason === 'change' || reason === 'compositionend') &&
+        mode === 'onChange')
     )
       validate(reason === 'blur' ? 'blur' : 'change');
   });

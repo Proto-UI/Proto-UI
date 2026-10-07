@@ -155,10 +155,105 @@ for (const runtime of RUNTIMES) {
           reopened,
           `${runtime}-${bodyDirection}-matching-restored`
         );
+        // A local author override must survive the global bridge. This is real
+        // DOM author input, not a patched computed-style result.
+        await author.evaluate((element) => element.setAttribute('dir', 'rtl'));
+        await reopened.evaluate((element) => element.setAttribute('dir', 'ltr'));
+        const explicit = await sample(
+          page,
+          anchor,
+          reopened,
+          `${runtime}-${bodyDirection}-explicit-ltr`
+        );
+        await reopened.evaluate((element) => element.removeAttribute('dir'));
+        const inherited = await sample(
+          page,
+          anchor,
+          reopened,
+          `${runtime}-${bodyDirection}-override-removed`
+        );
+        const firstOption = reopened.locator('[role="option"]').first();
+        await firstOption.evaluate((element) => element.setAttribute('dir', 'ltr'));
+        const nested = await sample(
+          page,
+          anchor,
+          reopened,
+          `${runtime}-${bodyDirection}-nested-ltr`
+        );
+        await firstOption.evaluate((element) => element.removeAttribute('dir'));
+
+        // Move only the consumer's author container within its existing parent.
+        // The portal target stays renderer-owned at body throughout migration.
+        await author.evaluate((element) => {
+          const wrapper = element.ownerDocument.createElement('div');
+          wrapper.setAttribute('data-portal-direction-migration', '');
+          wrapper.setAttribute('dir', 'ltr');
+          element.parentNode!.insertBefore(wrapper, element);
+          element.removeAttribute('dir');
+          wrapper.appendChild(element);
+        });
+        const migrated = await sample(
+          page,
+          anchor,
+          reopened,
+          `${runtime}-${bodyDirection}-origin-migrated`
+        );
+        await page
+          .locator('[data-portal-direction-migration]')
+          .evaluate((element) => element.setAttribute('dir', 'rtl'));
+        const migrationChanged = await sample(
+          page,
+          anchor,
+          reopened,
+          `${runtime}-${bodyDirection}-migrated-live`
+        );
+        // CSS authored on the physical popup still outranks the projected dir.
+        await reopened.evaluate((element) => {
+          (element as HTMLElement).style.direction = 'ltr';
+        });
+        const localCss = await sample(
+          page,
+          anchor,
+          reopened,
+          `${runtime}-${bodyDirection}-local-css`
+        );
+        await reopened.evaluate((element) => {
+          (element as HTMLElement).style.removeProperty('direction');
+        });
+        const retired = await reopened.elementHandle();
         await page.keyboard.press('Escape');
         await reopened.waitFor({ state: 'hidden' });
+        await frames(page);
+        const retiredDir = await retired!.getAttribute('dir');
+        await page
+          .locator('[data-portal-direction-migration]')
+          .evaluate((element) => element.setAttribute('dir', 'ltr'));
+        await frames(page);
+        const retiredAfterSourceChange = await retired!.getAttribute('dir');
+        await author.evaluate((element, direction) => {
+          const wrapper = element.parentElement!;
+          element.setAttribute('dir', direction);
+          wrapper.parentNode!.insertBefore(element, wrapper);
+          wrapper.remove();
+        }, bodyDirection);
+        observations.push({
+          name: `${runtime}-${bodyDirection}-released`,
+          retiredDir,
+          retiredAfterSourceChange,
+        });
         // Retain every paired state and its screenshot even when the mismatch
         // is red. No new host behavior is inferred from source inspection alone.
+        expect(explicit.popupDirection).toBe('ltr');
+        expect(explicit.popupDirAttribute).toBe('ltr');
+        expect(inherited.popupDirection).toBe('rtl');
+        expect(nested.popupDirection).toBe('rtl');
+        expect(nested.optionDirections[0]).toBe('ltr');
+        expect(migrated.popupDirection).toBe('ltr');
+        expect(migrationChanged.popupDirection).toBe('rtl');
+        expect(localCss.popupDirection).toBe('ltr');
+        expect(localCss.popupInlineDirection).toBe('ltr');
+        expect(retiredDir).toBe(null);
+        expect(retiredAfterSourceChange).toBe(null);
         expect(matching.authorDirection).toBe(bodyDirection);
         expect(changed.authorDirection).toBe(opposite);
         expect(reacquired.authorDirection).toBe(opposite);

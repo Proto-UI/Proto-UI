@@ -247,6 +247,9 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
+      '@proto.ui/module-feedback':
+        specifier: workspace:*
+        version: link:../../modules/feedback
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state

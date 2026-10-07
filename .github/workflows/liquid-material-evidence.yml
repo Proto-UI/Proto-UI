@@ -42,9 +42,14 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-material-evidence
         run: |
+          node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
           corepack pnpm@10.32.1 exec vitest run \
             packages/prototypes/liquid-glass/test/material.test.ts \
+            packages/adapters/base/test/web-material-program.test.ts \
+            packages/adapters/base/test/web-material-style.test.ts \
+            packages/adapters/base/test/web-material-source.test.ts \
+            packages/adapters/base/test/web-material-sink.test.ts \
             apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts \
             --maxWorkers=1 --minWorkers=1
       - name: Retain exact-source evidence

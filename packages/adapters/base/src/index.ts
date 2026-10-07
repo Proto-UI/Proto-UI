@@ -23,3 +23,5 @@ export * from './platform/focus-order';
 export * from './platform/web-preference-source';
 
 export * from './platform/web-style-support-source';
+
+export * from './platform/portal-direction';

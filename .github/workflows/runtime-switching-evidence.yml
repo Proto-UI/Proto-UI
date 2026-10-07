@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - '.github/workflows/runtime-switching-evidence.yml'
+      - 'apps/www/astro.config.mjs'
+      - 'apps/www/scripts/runtime-retry-urls.mjs'
       - 'apps/www/src/components/Homepage/**'
       - 'apps/www/src/components/PrototypePreviewer/**'
       - 'apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts'
@@ -87,5 +89,66 @@ jobs:
         with:
           name: runtime-switching-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/runtime-switching
+          if-no-files-found: error
+          retention-days: 30
+
+  production-retry-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and identify Chromium
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/runtime-production-retry"
+          "$CHROME" --version > "$RUNNER_TEMP/runtime-production-retry/browser-environment.txt"
+          node --version > "$RUNNER_TEMP/runtime-production-retry/node-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/runtime-production-retry/source-sha.txt"
+      - name: Build the actual emitted website
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 docs:build 2>&1 | tee "$RUNNER_TEMP/runtime-production-retry/build.log"
+          cp apps/www/dist/proto-ui-bundle-graph.json "$RUNNER_TEMP/runtime-production-retry/"
+      - name: Run both families’ Retry and cancellation journeys on emitted runtime entries
+        env:
+          PROTO_UI_BROWSER_BASE_URL: http://127.0.0.1:4321
+          PUI_RUNTIME_MODULE_MODE: production
+          PUI_RUNTIME_MASK_EVIDENCE_DIR: ${{ runner.temp }}/runtime-production-retry/mask
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www preview --host 127.0.0.1 --port 4321 > "$RUNNER_TEMP/runtime-production-retry/preview.log" 2>&1 &
+          PREVIEW_PID=$!
+          trap 'kill "$PREVIEW_PID" 2>/dev/null || true' EXIT
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/runtime-production-retry/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/runtime-production-retry/browser.log"
+          node --input-type=module - "$RUNNER_TEMP/runtime-production-retry/vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numTotalTests, 6, 'The emitted-runtime mask inventory must run in full.');
+          assert.equal(report.numPassedTests, 6, 'Both family Retry and cancellation journeys must pass on emitted chunks.');
+          assert.equal(report.numFailedTests, 0);
+          JS
+      - name: Retain exact-source production Retry results and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runtime-production-retry-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/runtime-production-retry
           if-no-files-found: error
           retention-days: 30

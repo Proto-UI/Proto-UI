@@ -1,3 +1,5 @@
+import type { EffectsPort } from '@proto.ui/core';
+import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
@@ -89,6 +91,8 @@ export type Vue2AdapterProps<Props extends PropsBaseType> = Props &
   };
 
 export interface Vue2AdapterOptions<Props extends PropsBaseType> {
+  /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
+  createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   schedule?: (task: () => void) => void;
   getProps?: (props: Vue2AdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -113,6 +117,7 @@ type Vue2InternalState<Props extends PropsBaseType> = {
   initOptions: {
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
+    createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -242,6 +247,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
       const state = {
         proto,
         initOptions: {
+          createVisualSink: opt.createVisualSink,
           schedule,
           getMeta,
           colorSchemeSource,
@@ -427,6 +433,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         if (rootEl) installViewVisibilityRule(rootEl.ownerDocument);
         if ((this as any).__puiShouldExist) {
           initSession(runtime, this, proto, {
+            createVisualSink: opt.createVisualSink,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -447,6 +454,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           afterVueCommit(runtime, this, () => {
             if (getRootElement(this) === target && (this as any).__puiShouldExist) {
               initSession(runtime, this, proto, {
+                createVisualSink: opt.createVisualSink,
                 schedule,
                 getMeta,
                 colorSchemeSource,
@@ -472,6 +480,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         afterVueCommit(runtime, this, () => {
           if (state.terminalDisposed || activationVersion !== state.activationVersion) return;
           initSession(runtime, this, proto, {
+            createVisualSink: opt.createVisualSink,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -559,6 +568,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               attrs.style,
             ]),
             attrs: {
+              dir: attrs.dir ?? (this as any).dir,
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: state.viewReady ? undefined : '',
@@ -636,6 +646,7 @@ function initSession<Props extends PropsBaseType>(
   options: {
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
+    createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -762,6 +773,15 @@ function initSession<Props extends PropsBaseType>(
     },
     rawPropsSource: state.rawPropsSource,
     effectsPort,
+    visualFeedbackSink: targetOptions.createVisualSink
+      ? createDeferredViewVisualSink(
+          () => targetOptions.createVisualSink!(rootEl, effectsPort),
+          (frame) => {
+            effectsPort.queueStyle({ kind: 'tw', tokens: [...frame.style.tokens] });
+            effectsPort.requestFlush();
+          }
+        )
+      : undefined,
     getMeta: targetOptions.getMeta,
     colorSchemeSource: targetOptions.colorSchemeSource,
     preferenceSource: targetOptions.preferenceSource,
@@ -906,6 +926,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
 ): {
   schedule: (task: () => void) => void;
   getMeta: (key: string) => unknown;
+  createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
   styleSupportSource?: StyleSupportInvalidationSource;

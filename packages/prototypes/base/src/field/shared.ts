@@ -90,6 +90,7 @@ export function normalizeFieldControlReport(input: unknown): FieldControlReport 
     (reason !== undefined &&
       reason !== 'sync' &&
       reason !== 'input' &&
+      reason !== 'change' &&
       reason !== 'blur' &&
       reason !== 'compositionend')
   )
@@ -103,13 +104,16 @@ export function normalizeFieldValidationResult(
   if (
     !input ||
     typeof input !== 'object' ||
-    Object.keys(input).some((key) => key !== 'invalid' && key !== 'errors')
+    (Object.getPrototypeOf(input) !== Object.prototype && Object.getPrototypeOf(input) !== null) ||
+    !Object.hasOwn(input, 'invalid') ||
+    Object.getOwnPropertySymbols(input).length > 0 ||
+    Object.getOwnPropertyNames(input).some((key) => key !== 'invalid' && key !== 'errors')
   )
     return undefined;
   const candidate = input as Record<string, unknown>;
   const invalid = candidate.invalid;
   if (typeof invalid !== 'boolean') return undefined;
-  const rawErrors = candidate.errors;
+  const rawErrors = Object.hasOwn(candidate, 'errors') ? candidate.errors : undefined;
   const errors = rawErrors === undefined ? [] : normalizeFieldStringArray(rawErrors);
   return errors === undefined ? undefined : { invalid, errors };
 }

@@ -205,7 +205,6 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {
     'z-50',
   ],
   'liquid-glass': [
-    'backdrop-blur-xs',
     'bg-accent',
     'bg-background',
     'bg-black/80',
@@ -213,7 +212,6 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {
     'bg-primary',
     'bg-primary/80',
     'bg-secondary',
-    'bg-secondary/80',
     'bg-transparent',
     'block',
     'border',

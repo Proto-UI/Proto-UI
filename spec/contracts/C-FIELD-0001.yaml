@@ -130,6 +130,14 @@ criteria:
         value inference. Generic compositions reuse the reporting bridge and must explicitly own
         control-specific keyboard/value semantics. Base UI, shadcn, archived Bootstrap and Apple HIG are
         independent comparisons, not normative authority or implementation inheritance.
+  - id: C-FIELD-0001-CHANGE-ONLY
+    text:
+      en: An accepted native change-only commit must update the Field control snapshot and reporting bridge after synchronous controlled-owner callbacks. Uncontrolled input/change both update TextControl canonical value. Rejected controlled candidates never become accepted values; the accepted change retires old validation and drives onChange mode.
+      zh-CN: 已接受的原生 change-only commit 必须在同步受控 owner 回调后更新 Field control 快照及报告桥；TextControl 的非受控 input/change 均更新 canonical 值。被拒绝的受控 candidate 不得当成已接受值；已接受变化使旧校验失效并驱动 onChange 模式。
+  - id: C-FIELD-0001-RESULT-RECORD
+    text:
+      en: Validation results must be explicit plain or null-prototype records, with own required invalid and only admitted own string properties. Arrays, custom prototypes, symbols and hidden unknown names fail without spending a current request. Optional errors is read only when owned; an inherited optional property is never consulted.
+      zh-CN: 校验结果必须是显式普通或 null-prototype record，invalid 必须为自有必填属性，仅允许已准入的自有字符串属性。数组、自定义 prototype、symbol 或隐藏未知名均不得消费当前请求。可选 errors 只在自有时读取，绝不查询继承的可选属性。
 dependsOn:
   contracts:
     - C-PROPS-0003

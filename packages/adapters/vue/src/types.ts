@@ -51,6 +51,7 @@ type VuePortableProps<TProto extends ProtoLike> =
 
 export type ProtoVueProps<TProto extends ProtoLike> = VuePortableProps<TProto> & {
   instanceAssociations?: InstanceAssociations;
+  dir?: 'ltr' | 'rtl' | 'auto';
   class?: string | string[] | Record<string, boolean>;
   hostClass?: string | string[] | Record<string, boolean>;
   surfaceClass?: string | string[] | Record<string, boolean>;

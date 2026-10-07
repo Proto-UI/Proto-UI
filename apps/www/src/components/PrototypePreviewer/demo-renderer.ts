@@ -1,3 +1,7 @@
+import {
+  createPreviewMaterialSink,
+  findPreviewMaterialProvider,
+} from './preview-material-provider';
 import { createDemoAssociationScope } from './demo-associations';
 import { setElementProps, setElementAssociations } from '@proto.ui/adapter-web-component';
 import type { ReactRuntime } from '@proto.ui/adapter-react';
@@ -15,27 +19,30 @@ import type {
 import { ensurePreviewWcRegistered } from './wc-registry';
 import type { RuntimeId } from './runtimes/ids';
 
-// Share acquisition across concurrently prepared commands/surfaces. Failed
-// acquisition remains retryable; successful module namespaces are stable.
-function lazyModules<T>(load: () => Promise<T>): () => Promise<T> {
-  let pending: Promise<T> | undefined;
-  return () => {
-    pending ??= load().catch((error) => {
-      pending = undefined;
-      throw error;
-    });
-    return pending;
-  };
-}
-const reactModules = lazyModules(() =>
-  Promise.all([import('@proto.ui/adapter-react'), import('./runtimes/react-runtime')])
+import runtimeUrls from 'virtual:proto-ui/runtime-retry-urls';
+import { retryableModule } from './runtimes/retryable-module';
+
+const reactAdapter = retryableModule(
+  () => import('@proto.ui/adapter-react'),
+  runtimeUrls.reactAdapter
 );
-const vueModules = lazyModules(() =>
-  Promise.all([import('@proto.ui/adapter-vue'), import('./runtimes/vue-runtime')])
+const reactRuntime = retryableModule(
+  () => import('./runtimes/react-runtime'),
+  runtimeUrls.reactRuntime
 );
-const vue2Modules = lazyModules(() =>
-  Promise.all([import('@proto.ui/adapter-vue2'), import('./runtimes/vue2-runtime')])
+const vueAdapter = retryableModule(() => import('@proto.ui/adapter-vue'), runtimeUrls.vueAdapter);
+const vueRuntime = retryableModule(() => import('./runtimes/vue-runtime'), runtimeUrls.vueRuntime);
+const vue2Adapter = retryableModule(
+  () => import('@proto.ui/adapter-vue2'),
+  runtimeUrls.vue2Adapter
 );
+const vue2Runtime = retryableModule(
+  () => import('./runtimes/vue2-runtime'),
+  runtimeUrls.vue2Runtime
+);
+const reactModules = () => Promise.all([reactAdapter(), reactRuntime()]);
+const vueModules = () => Promise.all([vueAdapter(), vueRuntime()]);
+const vue2Modules = () => Promise.all([vue2Adapter(), vue2Runtime()]);
 
 type PropsBaseType = Record<string, unknown>;
 
@@ -166,7 +173,12 @@ function callInScope(inst: DemoInstance, fn: () => void) {
   return fn();
 }
 
-function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLElement[], associations: ReturnType<typeof createDemoAssociationScope>) {
+function renderDemoNodeWc(
+  node: DemoChild,
+  parent: HTMLElement,
+  instances: HTMLElement[],
+  associations: ReturnType<typeof createDemoAssociationScope>
+) {
   if (typeof node === 'string') {
     parent.appendChild(document.createTextNode(node));
     return;
@@ -341,7 +353,10 @@ async function renderDemoReact(
     const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
     let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      Component = adapter(proto as Prototype<PropsBaseType>, {
+        rootTag: node.rootTag,
+        createVisualSink: createPreviewMaterialSink,
+      });
       scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child));
@@ -504,7 +519,10 @@ async function renderDemoVue(
     const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
     let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      Component = adapter(proto as Prototype<PropsBaseType>, {
+        rootTag: node.rootTag,
+        createVisualSink: createPreviewMaterialSink,
+      });
       scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child));
@@ -642,7 +660,10 @@ async function renderDemoVue2(
     const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
     let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      Component = adapter(proto as Prototype<PropsBaseType>, {
+        rootTag: node.rootTag,
+        createVisualSink: createPreviewMaterialSink,
+      });
       scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child, h));
@@ -676,8 +697,12 @@ async function renderDemoVue2(
     },
   });
 
-  const app = new Root().$mount();
-  host.appendChild(app.$el);
+  // Vue2 runs descendant mounted hooks inside $mount. Attach its replacement
+  // point first so first-commit host capabilities see the actual owner ancestry.
+  // Vue2 replaces this point with the authored root; no extra wrapper remains.
+  const mountPoint = host.ownerDocument.createElement('div');
+  host.appendChild(mountPoint);
+  const app = new Root().$mount(mountPoint);
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
@@ -747,20 +772,58 @@ function nextVue2(Vue: { nextTick: (fn?: () => void) => Promise<void> | void }) 
   });
 }
 
+function hasLiquidSurface(node: DemoChild): boolean {
+  return (
+    typeof node !== 'string' &&
+    node.kind !== 'text' &&
+    ((node.kind === 'proto' && node.prototypeId.startsWith('liquid-glass-')) ||
+      (node.children ?? []).some(hasLiquidSurface))
+  );
+}
 export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResult> {
   if (opt.isCurrent?.() === false) return EMPTY_DEMO_RENDER;
-  const lease = claimHostMount(opt.host);
-  switch (opt.runtime) {
-    case 'wc':
-      return renderDemoWc(opt, lease);
-    case 'react':
-      return renderDemoReact(opt, lease);
-    case 'vue':
-      return renderDemoVue(opt, lease);
-    case 'vue2':
-      return renderDemoVue2(opt, lease);
-    default:
-      lease.release();
-      throw unsupportedRuntime(opt.runtime);
+  let lease = claimHostMount(opt.host);
+  let scene: ReturnType<
+    typeof import('./preview-material-scene').createPreviewMaterialScene
+  > | null = null;
+  if (hasLiquidSurface(opt.demo.root) && !findPreviewMaterialProvider(opt.host)) {
+    const { createPreviewMaterialScene } = await import('./preview-material-scene');
+    if (!ownsLease(opt, lease)) return abandonLease(lease);
+    scene = createPreviewMaterialScene(opt.host);
+    const original = lease;
+    lease = {
+      ...original,
+      commit(cleanup) {
+        return original.commit(() => {
+          try {
+            cleanup();
+          } finally {
+            scene?.dispose();
+          }
+        });
+      },
+    };
+    const retiringScene = scene;
+    original.commit(() => retiringScene.dispose());
+    opt = { ...opt, host: scene.mount };
+  }
+  try {
+    switch (opt.runtime) {
+      case 'wc':
+        return await renderDemoWc(opt, lease);
+      case 'react':
+        return await renderDemoReact(opt, lease);
+      case 'vue':
+        return await renderDemoVue(opt, lease);
+      case 'vue2':
+        return await renderDemoVue2(opt, lease);
+      default:
+        lease.release();
+        throw unsupportedRuntime(opt.runtime);
+    }
+  } catch (error) {
+    scene?.dispose();
+    lease.release();
+    throw error;
   }
 }

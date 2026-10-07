@@ -1,13 +1,6 @@
 name: Overlay portal direction native evidence
 on:
   pull_request:
-    paths:
-      - '.github/workflows/overlay-portal-direction-evidence.yml'
-      - 'apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'packages/modules/overlay/**'
-      - 'packages/adapters/**'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
 permissions:
   contents: read

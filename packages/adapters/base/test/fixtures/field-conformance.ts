@@ -238,6 +238,52 @@ export function fieldAdapterConformance(
           await view.unmount();
         }
       });
+      it('reports change-only canonical commits and revokes old validation', async () => {
+        const f = recipe(
+          family,
+          { externalValidation: true, validationMode: 'manual' },
+          { defaultValue: 'initial' }
+        );
+        const view = await mount([f.root]);
+        try {
+          await until(view, () => !!editor(view));
+          const root = view.exposes(f.root.key);
+          let old: string | null = null;
+          await view.flush(() => {
+            old = root.validate();
+          });
+          await view.flush(() => {
+            editor(view).value = 'change-only';
+            editor(view).dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+          });
+          expect(view.exposes(f.control.key).value.get()).toBe('change-only');
+          expect(root.dirty.get()).toBe(true);
+          expect(root.resolveValidation(old, { invalid: true })).toBe(false);
+          await view.flush(() => root.validate());
+          expect(f.requests.at(-1)?.value).toBe('change-only');
+        } finally {
+          await view.unmount();
+        }
+      });
+      it('rejects inherited validation result properties without consuming the pending lease', async () => {
+        const f = recipe(family, { externalValidation: true }, { defaultValue: 'accepted' });
+        const view = await mount([f.root]);
+        try {
+          await until(view, () => !!editor(view));
+          const root = view.exposes(f.root.key);
+          let request: string | null = null;
+          await view.flush(() => {
+            request = root.validate();
+          });
+          expect(root.resolveValidation(request, Object.create({ invalid: true }))).toBe(false);
+          expect(root.pending.get()).toBe(true);
+          await view.flush(() =>
+            expect(root.resolveValidation(request, { invalid: false })).toBe(true)
+          );
+        } finally {
+          await view.unmount();
+        }
+      });
       it('label activation and Tab focus stay on the editor; Root and Label add no focus stop', async () => {
         const f = recipe(family, { required: true }),
           view = await mount([f.root]);

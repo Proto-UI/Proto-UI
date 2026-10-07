@@ -1,0 +1,83 @@
+id: T-WEB-LIQUID-OPTICAL-0001
+type: test
+title: V2 Web optical provider ownership and visible canvas source evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Pure provenance and mocked GPU ownership checks pass locally; actual four-Web optical output, emitted-package parity and independent visual acceptance require exact-head CI. No native or arbitrary DOM capture support is admitted.
+summary: Governs the bounded visible application canvas provider without relabeling owned textures as captured DOM or policy eligibility as paint.
+cases:
+  - id: T-WEB-LIQUID-OPTICAL-0001-CASE-STYLE
+    title: Complete post-patch tokens and palette roles establish ownership
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-FALLBACK
+      - C-FEEDBACK-MATERIAL-0001-PROVENANCE
+    expectation: reject-ambiguous-alpha-cyclic-selector-or-competing-style
+  - id: T-WEB-LIQUID-OPTICAL-0001-CASE-SOURCE
+    title: Visible canvas lease excludes self output and unrepresented paint
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-SAFETY
+      - C-FEEDBACK-MATERIAL-0001-QUALITY
+    expectation: revoke-stale-cross-scope-overlap-and-composited-source
+  - id: T-WEB-LIQUID-OPTICAL-0001-CASE-VIEW
+    title: Physical view waits for style delivery and cannot publish a superseded lease
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-OWNERSHIP
+      - C-FEEDBACK-MATERIAL-0001-SAFETY
+      - C-FEEDBACK-MATERIAL-0001-SEMANTICS
+    expectation: delayed-style-static-motion-revocation-and-release-controls
+  - id: T-WEB-LIQUID-OPTICAL-0001-CASE-OPTICS
+    title: Four runtime GPU output against opaque and zero-refraction controls
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-GEOMETRY
+      - C-FEEDBACK-MATERIAL-0001-QUALITY
+    expectation: exact-source-rendered-pixels-and-independent-visual-review
+implementations:
+  - id: web-optical-style
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-material-style.test.ts
+    required: true
+    consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-STYLE]
+  - id: web-optical-source
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-material-source.test.ts
+    required: true
+    consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-SOURCE]
+  - id: web-optical-view
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-material-sink.test.ts
+    required: true
+    consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-VIEW]
+    notes:
+      - GPU calls are mocked in this ownership test; no optical visual result is inferred.
+  - id: web-optical-program
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-material-program.test.ts
+    required: true
+    consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-OPTICS]
+    notes:
+      - Spy-only fixed ABI, same-generation preparation/upload reuse and zero-refraction control; actual GPU visual evidence remains in the planned browser implementation.
+  - id: web-optical-browser
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-liquid-glass-material.browser.test.ts
+    required: true
+    consumesCases: [T-WEB-LIQUID-OPTICAL-0001-CASE-OPTICS]
+    notes:
+      - Actual dynamic canvas background, press/rest, zero-refraction, opaque, source revocation and overlap controls must bind the exact published head.
+      - No arbitrary DOM capture, native engine, cross-language or full Compiler equivalence follows from this finite profile.
+exercises:
+  contracts: [C-FEEDBACK-MATERIAL-0001]
+sources:
+  - path: packages/adapters/base/src/material/sink.ts
+  - path: packages/adapters/base/src/material/source.ts
+  - path: packages/adapters/base/src/material/program.ts
+  - path: scripts/build/generate-web-material-kernel.mjs
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded V2 Web ownership and source checks with actual GPU evidence explicitly pending.
+tags: [material, web, optical, draft]

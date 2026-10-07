@@ -80,7 +80,10 @@ export function createRuntimePreviewSurface(
         family: currentFamily,
         theme: currentTheme,
         prototypeId: (next) => surfacePrototypeId(next as ProjectionFamilyId),
-        props: () => ({ ...panelSurfaceProps('canvas') }),
+        props: (next) => ({
+          ...panelSurfaceProps('canvas'),
+          ...(next === 'liquid-glass' ? { variant: 'transparent' } : {}),
+        }),
         layout: {
           display: 'flex',
           alignItems: 'center',

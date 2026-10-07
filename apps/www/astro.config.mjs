@@ -14,6 +14,7 @@ import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
 import { whitepaperRedirectFragments } from './src/utils/whitepaper-redirect-fragments.mjs';
 import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
 import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
+import { runtimeRetryUrlsPlugin } from './scripts/runtime-retry-urls.mjs';
 import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';
 import { siteCopyPlugin } from './src/utils/expressive-code-copy.mjs';
 
@@ -1196,6 +1197,7 @@ export default defineConfig({
         ? [contrastProvenancePlugin(repositoryRoot)]
         : []),
       protoUiSourcePlugin,
+      runtimeRetryUrlsPlugin(),
       websiteBundleGraphPlugin(),
       tailwindcss(),
     ],

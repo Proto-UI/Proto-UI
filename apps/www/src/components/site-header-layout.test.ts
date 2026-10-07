@@ -141,16 +141,26 @@ for (const family of ['shadcn', 'brutalist']) {
 
 describe('shared compact Header ownership and layout', () => {
   for (const path of ['Homepage/HomepageRuntime.astro', 'override/Header.astro']) {
-    it(`${path} provides one movable preference owner and one empty compact destination`, () => {
+    it(`${path} provides one movable preference owner with an explicit native startup location`, () => {
       const source = readFileSync(`apps/www/src/components/${path}`, 'utf8');
       expect(source.match(/data-site-header-preferences/g)).toHaveLength(1);
       expect(source.match(/data-site-header-compact-context/g)).toHaveLength(1);
       expect(source.indexOf('data-site-header-compact-context')).toBeGreaterThan(
         source.indexOf('data-site-header-panel-content')
       );
-      expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
-        source.indexOf('data-site-header-context')
-      );
+      if (path === 'override/Header.astro') {
+        expect(source).toContain('data-site-header-wide-preferences');
+        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
+          source.indexOf('data-site-header-compact-context')
+        );
+        expect(source.indexOf('data-site-header-preferences')).toBeLessThan(
+          source.indexOf('data-site-header-context')
+        );
+      } else {
+        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
+          source.indexOf('data-site-header-context')
+        );
+      }
       expect(source).not.toMatch(/role=["'](?:menu|dialog)["']/);
     });
   }
@@ -217,4 +227,13 @@ it('spaces unframed text separately from framed controls without changing compac
   )![1];
   expect(framed).toContain('--site-header-navigation-gap: 0.75rem');
   expect(framed).toContain('--site-header-brand-navigation-gap: 0.75rem');
+});
+
+it('keeps the compact docs header offset identical before and after enhancement', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(frame).toMatch(/@media \(max-width: 47\.999rem\)[\s\S]*?--header-height: 3\.5rem;/);
+  expect(css).toMatch(
+    /\.site-header\[data-docs-site-header\] \{\s*grid-template-areas: 'brand search theme menu';/
+  );
+  expect(css).toContain('.site-header[data-docs-site-header]:has(.site-header-docs-navigation)');
 });

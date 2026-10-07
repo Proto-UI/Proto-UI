@@ -87,7 +87,7 @@ export type FieldControlReport = {
   initialValue?: FieldValue;
   focused?: boolean;
   composing?: boolean;
-  reason?: 'sync' | 'input' | 'blur' | 'compositionend';
+  reason?: 'sync' | 'input' | 'change' | 'blur' | 'compositionend';
 };
 export type FieldControlBindingStates = {
   fieldDisabled: State<boolean>;

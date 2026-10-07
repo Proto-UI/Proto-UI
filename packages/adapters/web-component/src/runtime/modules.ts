@@ -11,6 +11,7 @@ import {
 import {
   cancelWebEventDefaultAction,
   createCapsWiring,
+  retainWebPortalDirection,
   createWebMoveGestureHost,
   type HostSurfaceProjection,
   type LogicalInstanceToken,
@@ -40,7 +41,11 @@ import {
 import { A11Y_PROJECT_CAP, createWebA11yProjector } from '@proto.ui/module-a11y';
 import { createWebBoundaryHostBridge, BOUNDARY_HOST_BRIDGE_CAP } from '@proto.ui/module-boundary';
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
-import { EFFECTS_CAP } from '@proto.ui/module-feedback';
+import {
+  EFFECTS_CAP,
+  VISUAL_FEEDBACK_SINK_CAP,
+  type VisualFeedbackSink,
+} from '@proto.ui/module-feedback';
 import {
   MATERIAL_BINDING_FACTORY_CAP,
   type MaterialBindingFactory,
@@ -344,6 +349,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   };
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
+  /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
+  visualFeedbackSink?: VisualFeedbackSink;
   finalStyleSink?: FinalStyleSink;
   materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
@@ -384,6 +391,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     setExposes,
   } = args;
 
+  let releaseDirection: (() => void) | null = null;
   let mountedEl: HTMLElement | null = null;
   let originalParent: Node | null = null;
   let originalNext: Node | null = null;
@@ -455,6 +463,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
       [EFFECTS_CAP, effectsPort],
+      ...(args.visualFeedbackSink
+        ? [[VISUAL_FEEDBACK_SINK_CAP, args.visualFeedbackSink] as const]
+        : []),
       ...(args.materialBindingFactory
         ? [[MATERIAL_BINDING_FACTORY_CAP, args.materialBindingFactory] as const]
         : []),
@@ -653,6 +664,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             mountedEl = el;
             originalParent = el.parentNode;
             originalNext = el.nextSibling;
+            const directionOrigin = originalParent;
+            releaseDirection = retainWebPortalDirection(el, () => directionOrigin);
             try {
               const descriptor = Object.getOwnPropertyDescriptor(el, 'parentNode');
               const parent = originalParent;
@@ -679,6 +692,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             originalParent = null;
             originalNext = null;
             releaseParentProjection = null;
+            const direction = releaseDirection;
+            releaseDirection = null;
+            direction?.();
             // Revoke this provider's parent projection before a DOM move can
             // reconnect the host, without overwriting a replacement property.
             try {

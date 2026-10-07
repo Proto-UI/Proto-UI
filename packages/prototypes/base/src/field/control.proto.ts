@@ -182,6 +182,14 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
   control.on('change', (run, event) => {
     value.set(control.snapshot()?.value ?? event.value, 'reason: field control change value');
     run.expose.emit('change', Object.freeze({ value: event.value }));
+    // A change-only commit is canonical input too. Re-read after the controlled owner's callback.
+    value.set(control.snapshot()?.value ?? value.get(), 'reason: field change owner value');
+    binding.report({
+      value: value.get(),
+      composing: event.composing,
+      focused: focused.get(),
+      reason: 'change',
+    });
   });
   const emitComposition = (
     run: RunHandle<FieldControlProps>,

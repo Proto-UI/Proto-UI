@@ -13,6 +13,13 @@ on:
       - 'apps/www/src/content/docs/**/select.mdx'
       - 'apps/www/src/content/docs/demo-*-select.demo.ts'
       - 'apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/server-readiness.mjs'
+      - 'apps/www/astro.config.mjs'
+      - 'apps/www/package.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'vitest.config.ts'
       - 'apps/www/src/components/PrototypePreviewer/**'
 permissions:
   contents: read

@@ -281,7 +281,16 @@ function setupSelectContent(
     if (store.run !== run) return;
     const ctx = readContext(run);
     if (!ctx?.open || ctx.disabled || ev?.key !== 'Tab') return;
-    if (!getNavigationEntries(run).some((entry: any) => entry.focused)) return;
+    // Entry focus is deferred until the current item collection is stable.
+    // Tab can arrive while the current Trigger still owns focus; it must close
+    // without allowing the queued entry action to steal the host's next focus.
+    const triggers = run.anatomy.partsOf(SELECT_FAMILY, 'trigger');
+    const triggerFocus =
+      triggers.length === 1
+        ? (triggers[0].getExpose('focused') as { get?: () => boolean } | null)
+        : null;
+    const triggerFocused = triggerFocus?.get?.() === true;
+    if (!triggerFocused && !getNavigationEntries(run).some((entry: any) => entry.focused)) return;
     requestSelectOpen(run, { open: false, reason: 'tab', focusReason: 'keyboard' });
   });
 

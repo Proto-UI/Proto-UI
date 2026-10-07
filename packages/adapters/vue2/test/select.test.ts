@@ -74,6 +74,29 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
         expect(refs.root?.getExposes().textValue.get()).toBe('Beta');
         expect(refs.trigger?.$el.getAttribute('aria-expanded')).toBe('false');
         expect(refs.value?.$el.textContent).toBe('Beta');
+
+        // The popup can become visible before its deferred focus-entry task.
+        // A real Tab from the still-focused Trigger must dismiss immediately.
+        refs.trigger.$el.focus();
+        refs.trigger.$el.click();
+        await Vue2Any.nextTick();
+        await Promise.resolve();
+        expect(refs.root.getExposes().open.get()).toBe(true);
+        expect(document.activeElement).toBe(refs.trigger.$el);
+        const tab = new KeyboardEvent('keydown', {
+          key: 'Tab',
+          bubbles: true,
+          cancelable: true,
+        });
+        refs.trigger.$el.dispatchEvent(tab);
+        await Vue2Any.nextTick();
+        await Promise.resolve();
+        expect(refs.root.getExposes().open.get()).toBe(false);
+        expect(refs.trigger.$el.getAttribute('aria-expanded')).toBe('false');
+        expect(tab.defaultPrevented).toBe(false);
+        await settleVue2();
+        expect(refs.root.getExposes().value.get()).toBe('beta');
+        expect(document.activeElement).toBe(refs.trigger.$el);
       } finally {
         vm.$destroy();
         host.remove();

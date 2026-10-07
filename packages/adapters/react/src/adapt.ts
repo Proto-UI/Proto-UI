@@ -1,3 +1,5 @@
+import type { EffectsPort } from '@proto.ui/core';
+import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import {
@@ -75,6 +77,7 @@ export type ReactRuntime = ReactRenderRuntime & {
   useImperativeHandle: (ref: any, create: () => any, deps?: any[]) => void;
   forwardRef: (render: (props: any, ref: any) => any) => any;
   createElement: (type: any, props?: any, ...children: any[]) => any;
+  Fragment?: any;
   createPortal?: (children: any, container: Element) => any;
   createContext?: <T>(defaultValue: T) => { Provider: any };
   // Context is an opaque runtime handle to the adapter. Keeping the input
@@ -88,6 +91,7 @@ export type { ReactAdapterHandle } from './types';
 export type ReactAdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
     instanceAssociations?: InstanceAssociations;
+    dir?: 'ltr' | 'rtl' | 'auto';
     children?: any;
     className?: string;
     hostClassName?: string;
@@ -99,6 +103,8 @@ export type ReactAdapterProps<Props extends PropsBaseType> = Props &
   };
 
 export interface ReactAdapterOptions<Props extends PropsBaseType> {
+  /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
+  createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   schedule?: (task: () => void) => void;
   getProps?: (props: ReactAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -220,6 +226,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
     const Component = runtime.forwardRef((props: ReactAdapterProps<Props>, ref: any) => {
       const rootRef = runtime.useRef<HTMLElement | null>(null);
+      const portalOriginRef = runtime.useRef<HTMLElement | null>(null);
       const instanceTokenRef = runtime.useRef(createLogicalInstance(proto as Prototype<any>));
       const parentToken =
         logicalOwnerContext && runtime.useContext
@@ -537,6 +544,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
         const rawPropsSource = rawPropsSourceRef.current as RawPropsSource<Props>;
         const modules = createReactModules({
+          getPortalOrigin: () => portalOriginRef.current,
           el: rootEl,
           instanceToken: instanceTokenRef.current,
           router,
@@ -545,6 +553,15 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           },
           rawPropsSource,
           effectsPort,
+          visualFeedbackSink: opt.createVisualSink
+            ? createDeferredViewVisualSink(
+                () => opt.createVisualSink!(rootEl, effectsPort),
+                (frame) => {
+                  effectsPort.queueStyle({ kind: 'tw', tokens: [...frame.style.tokens] });
+                  effectsPort.requestFlush();
+                }
+              )
+            : undefined,
           getMeta,
           colorSchemeSource,
           preferenceSource,
@@ -816,6 +833,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
                   props.className,
                 ]),
                 style: mergeHostStyle([props.surfaceStyle, props.hostStyle, props.style]),
+                dir: props.dir,
                 'data-pui-root': '',
                 [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
                 [PUI_VIEW_PENDING_ATTR]: viewReadyRef.current ? undefined : '',
@@ -826,8 +844,21 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
               // authored children stand in for it.
               ...(shouldExist ? renderedChildren : [props.children])
             );
+      const portal = portalContainer ? runtime.createPortal!(content, portalContainer) : null;
       const projectedContent = portalContainer
-        ? runtime.createPortal!(content, portalContainer)
+        ? runtime.Fragment
+          ? runtime.createElement(
+              runtime.Fragment,
+              null,
+              runtime.createElement('span', {
+                ref: portalOriginRef,
+                hidden: true,
+                'aria-hidden': true,
+                'data-pui-portal-origin': '',
+              }),
+              portal
+            )
+          : portal
         : content;
       if (!logicalOwnerContext) return projectedContent;
       return runtime.createElement(
