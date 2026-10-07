@@ -615,7 +615,7 @@ ${
       if (vm.$props) void vm.$props[hostKey];
       if (PUIOwn(provided, hostKey)) input[key] = provided[hostKey];
     }
-    for (const key of Object.keys(input)) out[key] = input[key];
+    for (const key of Object.keys(input)) out[key] = input[key] === undefined ? null : input[key];
     return Object.freeze(out);
   };
   const same = (a, b) => {
@@ -682,7 +682,7 @@ ${
     if (!hydrated) { hydrated = true; ${refresh} return; }
     const changedKeys = Object.keys(specs).filter((key) => !Object.is(previous[key], resolved[key]));
     const changedRawKeys = watchers.some((watch) => watch.active && (watch.kind === 'raw' || watch.kind === 'raw-all'))
-      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => PUIOwn(previousRaw, key) !== PUIOwn(raw, key) || !Object.is(previousRaw[key], raw[key])) : [];
+      ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : [];
     ${refresh ? `if (changedKeys.length) { ${refresh} }` : ''}
     if ((changedKeys.length || changedRawKeys.length) && !dispatchingProps) {
       dispatchingProps = true;
@@ -696,8 +696,11 @@ ${
               const isRaw = group < 2;
               const changedKeysAll = isRaw ? changedRawKeys : changedKeys;
               const changedKeysMatched = watch.keys === null ? changedKeysAll : watch.keys.filter((key) => changedKeysAll.includes(key));
-              if (changedKeysMatched.length) watch.fn(run, isRaw ? nextRaw : next.snapshot,
-                isRaw ? previousRaw : previous, { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] });
+              if (changedKeysMatched.length) {
+                if (isRaw) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+                watch.fn(run, isRaw ? nextRaw : next.snapshot,
+                  isRaw ? previousRaw : previous, { changedKeysAll: [...changedKeysAll], changedKeysMatched: [...changedKeysMatched] });
+              }
             }
           }
         }, false);
@@ -876,6 +879,7 @@ ${context.owner}
     setupOnly();
     const next = { ...specs };
     const rank = { accept: 0, fallback: 1, error: 2 };
+    let warnings;
     for (const key of Object.keys(input)) {
       const spec = input[key];
       if (!spec || !['boolean', 'number', 'string', 'object', 'any', 'enum'].includes(spec.type)) throw new Error('[Vue2 native] invalid prop declaration: ' + key);
@@ -888,11 +892,21 @@ ${context.owner}
         if (prior.type !== spec.type || PUIOwn(spec, 'empty') && rank[spec.empty] > rank[prior.empty ?? 'fallback']) throw new Error('[Vue2 native] conflicting prop declaration: ' + key);
         if (prior.options && !prior.options.every((value) => spec.options && spec.options.includes(value))) throw new Error('[Vue2 native] prop options cannot narrow: ' + key);
         if (prior.range && spec.range && ((spec.range.min ?? -Infinity) > (prior.range.min ?? -Infinity) || (spec.range.max ?? Infinity) < (prior.range.max ?? Infinity))) throw new Error('[Vue2 native] prop range cannot narrow: ' + key);
+        if (PUIOwn(spec, 'empty') && rank[spec.empty] < rank[prior.empty ?? 'fallback'])
+          (warnings ??= []).push('empty behavior relaxed; retaining established policy: ' + key);
+        if (prior.options && spec.options.some(value => !prior.options.includes(value)))
+          (warnings ??= []).push('enum options widened: ' + key);
+        if (prior.range && spec.range && ((spec.range.min ?? -Infinity) < (prior.range.min ?? -Infinity)
+          || (spec.range.max ?? Infinity) > (prior.range.max ?? Infinity)))
+          (warnings ??= []).push('range widened: ' + key);
+        if (PUIOwn(prior, 'default') && PUIOwn(spec, 'default') && !Object.is(prior.default, spec.default))
+          (warnings ??= []).push('default changed; retaining established default: ' + key);
         next[key] = { ...prior, ...spec, empty: prior.empty ?? 'fallback', range: spec.range ?? prior.range };
         if (PUIOwn(prior, 'default')) next[key].default = prior.default;
       } else next[key] = { ...spec };
     }
     specs = next; resolved = resolveProps(raw, false).snapshot;
+    warnings?.forEach(message => console.warn('[Props] ' + message));
   };
   const registerPropsWatch = (kind, keys, fn) => {
     setupOnly();

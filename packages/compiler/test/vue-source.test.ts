@@ -155,6 +155,50 @@ async function settle(): Promise<void> {
 }
 
 describe('Vue 3 native source', () => {
+  it('observes normalized Vue attrs rather than reviving VNode-only signed-zero changes', async () => {
+    const Generated = component(`import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'vue-normalized-snapshot',setup(def){
+  def.props.define({count:{type:'number',default:0}});
+  def.expose.event('observation',{payload:'json'});
+  def.props.watchRawAll((run,next,prev,info)=>{run.expose.emit('observation',{kind:'raw',keys:info.changedKeysAll});});
+  def.props.watchAll((run,next)=>{run.expose.emit('observation',{kind:'resolved',count:next.count});});
+  return r=>r.el('output',r.read.props.get().count);
+}});`);
+    const input = Vue.shallowRef({ count: 0 });
+    const handle = Vue.shallowRef<{ update(): void }>();
+    const observations: Array<{ kind: string; keys?: string[]; count?: number }> = [];
+    const host = document.createElement('div');
+    const app = Vue.createApp({
+      render: () => Vue.h(Generated, {
+        ...input.value,
+        ref: handle,
+        onObservation: (event: typeof observations[number]) => observations.push(event),
+      }),
+    });
+    app.mount(host);
+    try {
+      await settle();
+      expect(observations).toEqual([]);
+      input.value = { count: -0 };
+      await settle();
+      handle.value!.update();
+      await settle();
+      expect(observations).toEqual([]);
+      input.value = { count: 2 };
+      await settle();
+      handle.value!.update();
+      await settle();
+      expect(observations).toEqual([
+        { kind: 'raw', keys: ['count'] },
+        { kind: 'resolved', count: 2 },
+      ]);
+      expect(host.textContent).toBe('2');
+    } finally {
+      app.unmount();
+      host.remove();
+    }
+  });
+
   it('keeps the Module-owned editing value through explicit updates and composition', async () => {
     const Generated = component(`import {definePrototype} from '@proto.ui/core';
 import {asTextControl} from '@proto.ui/hooks';

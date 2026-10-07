@@ -358,12 +358,13 @@ export function createVueAdapter(runtime: VueRuntime) {
           async () => {
             if (!pendingCommit) return;
             pendingCommit = false;
+            const signal = pendingSignal;
+            pendingSignal = null;
             await runtime.nextTick();
             viewReady = true;
             focusTargetRetryCount = 0;
             notifyFocusTargetReady();
-            pendingSignal?.done?.();
-            pendingSignal = null;
+            signal?.done?.();
             rootRef.value?.removeAttribute(PUI_VIEW_PENDING_ATTR);
             eventGateRef.value?.enable();
           },

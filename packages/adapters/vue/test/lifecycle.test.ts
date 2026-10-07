@@ -1,9 +1,44 @@
 import { describe, expect, it } from 'vitest';
-import type { Prototype } from '@proto.ui/core';
+import { definePrototype, type Prototype } from '@proto.ui/core';
 
-import { createMountedVueAdapter, flushVue } from './utils/vue';
+import { createVueAdapter } from '../src/adapt';
+import { createMountedVueAdapter, flushVue, VueAny } from './utils/vue';
 
 describe('adapter-vue: lifecycle', () => {
+  it('completes queued watcher updates before the next Props replacement', async () => {
+    const seen: string[] = [];
+    const proto = definePrototype({
+      name: 'vue-queued-props-update',
+      setup(def) {
+        def.props.define({ label: { type: 'string', default: 'fallback' } });
+        def.props.watch(['label'], (run, next) => {
+          seen.push(next.label);
+          run.update();
+        });
+        return (r) => r.el('output', r.read.props.get().label);
+      },
+    });
+    const Component = createVueAdapter(VueAny)(proto);
+    const raw = VueAny.shallowRef({ label: 'First' });
+    const host = document.createElement('div');
+    document.body.append(host);
+    const app = VueAny.createApp({ render: () => VueAny.h(Component, raw.value) });
+    try {
+      app.mount(host);
+      for (let turn = 0; turn < 3; turn++) await flushVue();
+      expect(host.querySelector('output')?.textContent).toBe('First');
+      for (const label of ['Second', 'Third']) {
+        raw.value = { label };
+        for (let turn = 0; turn < 3; turn++) await flushVue();
+        expect(host.querySelector('output')?.textContent).toBe(label);
+      }
+      expect(seen).toEqual(['Second', 'Third']);
+    } finally {
+      app.unmount();
+      host.remove();
+    }
+  });
+
   it('created runs before mounted and unmounted runs on app unmount', async () => {
     const calls: string[] = [];
 

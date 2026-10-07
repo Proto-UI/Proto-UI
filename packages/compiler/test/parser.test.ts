@@ -181,8 +181,11 @@ export default definePrototype({name:'style-phase',setup(def){
       parsePrototype(source, { files: { 'effect.ts': 'globalThis.changed = true;' } })
     ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1004' }] });
     // An explicitly empty requirements array is now a checked no-op, not a silent discard.
-    expect(parsePrototype(simple.replace('setup(def) {}', 'modules: [], setup(def) {}'))).toMatchObject({
-      ok: true, value: { moduleDeclarations: [] },
+    expect(
+      parsePrototype(simple.replace('setup(def) {}', 'modules: [], setup(def) {}'))
+    ).toMatchObject({
+      ok: true,
+      value: { moduleDeclarations: [] },
     });
   });
 
@@ -282,6 +285,38 @@ export default prototype({name:'counter',setup(def){
     expect(result.value.exposes).toMatchObject([{ name: 'count', kind: 'state', type: 'number' }]);
     expect(result.value.name).toBe('counter');
   });
+  it('rejects malformed prop descriptors before emitting a target', () => {
+    for (const schema of [
+      "{type:'enum',options:[]}",
+      "{type:'enum',options:['valid',1]}",
+      "{type:'string',options:['invalid']}",
+      "{type:'boolean',empty:'invalid'}",
+      "{type:'number',range:{min:'invalid'}}",
+      "{type:'string',enum:['legacy']}",
+    ]) {
+      expect(
+        parsePrototype(
+          simple.replace('setup(def) {}', `setup(def) {def.props.define({value:${schema}});}`)
+        )
+      ).toMatchObject({ ok: false, diagnostics: [{ code: 'PUI1006' }] });
+    }
+  });
+
+  it('rejects enum narrowing rather than compiling a changed app-maker input domain', () => {
+    const result = parsePrototype(
+      `import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'narrow-enum',setup(def){
+  def.props.define({fit:{type:'enum',options:['contain','cover']}});
+  def.props.define({fit:{type:'enum',options:['contain']}});
+}});`,
+      { fileName: 'narrow.proto.ts' }
+    );
+    expect(result).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1006', span: { file: 'narrow.proto.ts', line: 4 } }],
+    });
+  });
+
   it('rejects non-boolean, wrong-arity and setup-time view-presence requests', () => {
     for (const [body, code] of [
       ["def.lifecycle.onCreated((run)=>run.lifecycle.setPresent('false'));", 'PUI1006'],

@@ -793,12 +793,13 @@ function finishPendingCommit(vm: any) {
   const state = getState(vm);
   if (!state.pendingCommit) return;
   state.pendingCommit = false;
+  const signal = state.pendingSignal;
+  state.pendingSignal = null;
   state.viewReady = true;
   state.focusTargetRetryCount = 0;
   state.eventGate?.enable();
   notifyFocusTargetReady(vm);
-  state.pendingSignal?.done?.();
-  state.pendingSignal = null;
+  signal?.done?.();
 }
 
 function notifyFocusTargetReady(vm: any) {

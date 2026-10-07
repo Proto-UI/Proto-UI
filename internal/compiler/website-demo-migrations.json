@@ -6,7 +6,7 @@
   "frameDependency": {
     "carrierPr": 777,
     "issue": 786,
-    "note": "Existing RuntimeBox frame work is an open, unmerged carrier; do not create a competing frame convention."
+    "note": "Reuse canonical RuntimeBox frame ownership from #777 / #786; browser/WASM migration must not establish a competing frame convention."
   },
   "pages": [
     {
@@ -303,7 +303,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-hover-card"],
+          "demoIds": [
+            "demo-shadcn-hover-card"
+          ],
           "prototypeIds": [
             "shadcn-hover-card-content",
             "shadcn-hover-card-root",
@@ -322,8 +324,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-async-region"],
-          "prototypeIds": ["base-async-region-root"],
+          "demoIds": [
+            "demo-base-async-region"
+          ],
+          "prototypeIds": [
+            "base-async-region-root"
+          ],
           "unresolved": []
         }
       ],
@@ -337,8 +343,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-button"],
-          "prototypeIds": ["base-button"],
+          "demoIds": [
+            "demo-base-button"
+          ],
+          "prototypeIds": [
+            "base-button"
+          ],
           "unresolved": []
         }
       ],
@@ -352,8 +362,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-checkbox"],
-          "prototypeIds": ["base-checkbox-indicator", "base-checkbox-root"],
+          "demoIds": [
+            "demo-base-checkbox"
+          ],
+          "prototypeIds": [
+            "base-checkbox-indicator",
+            "base-checkbox-root"
+          ],
           "unresolved": []
         }
       ],
@@ -367,7 +382,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 13,
-          "demoIds": ["demo-base-dialog"],
+          "demoIds": [
+            "demo-base-dialog"
+          ],
           "prototypeIds": [
             "base-dialog-close",
             "base-dialog-content",
@@ -390,7 +407,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-dropdown-menu"],
+          "demoIds": [
+            "demo-base-dropdown-menu"
+          ],
           "prototypeIds": [
             "base-dropdown-content",
             "base-dropdown-item",
@@ -410,7 +429,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-hover-card"],
+          "demoIds": [
+            "demo-base-hover-card"
+          ],
           "prototypeIds": [
             "base-hover-card-content",
             "base-hover-card-root",
@@ -429,8 +450,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-image"],
-          "prototypeIds": ["base-button", "base-image-root"],
+          "demoIds": [
+            "demo-base-image"
+          ],
+          "prototypeIds": [
+            "base-button",
+            "base-image-root"
+          ],
           "unresolved": []
         }
       ],
@@ -526,8 +552,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-live-region"],
-          "prototypeIds": ["base-live-region-root"],
+          "demoIds": [
+            "demo-base-live-region"
+          ],
+          "prototypeIds": [
+            "base-live-region-root"
+          ],
           "unresolved": []
         }
       ],
@@ -541,7 +571,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 11,
-          "demoIds": ["demo-base-radio-group"],
+          "demoIds": [
+            "demo-base-radio-group"
+          ],
           "prototypeIds": [
             "base-radio-group-indicator",
             "base-radio-group-item",
@@ -560,7 +592,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-scroll-area"],
+          "demoIds": [
+            "demo-base-scroll-area"
+          ],
           "prototypeIds": [
             "base-scroll-area-root",
             "base-scroll-area-scrollbar",
@@ -580,7 +614,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-select"],
+          "demoIds": [
+            "demo-base-select"
+          ],
           "prototypeIds": [
             "base-select-content",
             "base-select-item",
@@ -601,8 +637,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-separator"],
-          "prototypeIds": ["base-separator-root"],
+          "demoIds": [
+            "demo-base-separator"
+          ],
+          "prototypeIds": [
+            "base-separator-root"
+          ],
           "unresolved": []
         }
       ],
@@ -616,8 +656,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-switch"],
-          "prototypeIds": ["base-switch-root", "base-switch-thumb"],
+          "demoIds": [
+            "demo-base-switch"
+          ],
+          "prototypeIds": [
+            "base-switch-root",
+            "base-switch-thumb"
+          ],
           "unresolved": []
         }
       ],
@@ -631,7 +676,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-tabs"],
+          "demoIds": [
+            "demo-base-tabs"
+          ],
           "prototypeIds": [
             "base-tabs-content",
             "base-tabs-indicator",
@@ -652,8 +699,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-textarea"],
-          "prototypeIds": ["base-textarea-root"],
+          "demoIds": [
+            "demo-base-textarea"
+          ],
+          "prototypeIds": [
+            "base-textarea-root"
+          ],
           "unresolved": []
         }
       ],
@@ -667,8 +718,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-toggle"],
-          "prototypeIds": ["base-toggle"],
+          "demoIds": [
+            "demo-base-toggle"
+          ],
+          "prototypeIds": [
+            "base-toggle"
+          ],
           "unresolved": []
         }
       ],
@@ -682,7 +737,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 20,
-          "demoIds": ["demo-base-tooltip"],
+          "demoIds": [
+            "demo-base-tooltip"
+          ],
           "prototypeIds": [
             "base-tooltip-content",
             "base-tooltip-group",
@@ -702,15 +759,23 @@
         {
           "surface": "PrototypePreviewer",
           "line": 15,
-          "demoIds": ["demo-base-transition-command"],
-          "prototypeIds": ["base-transition"],
+          "demoIds": [
+            "demo-base-transition-command"
+          ],
+          "prototypeIds": [
+            "base-transition"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 38,
-          "demoIds": ["demo-base-transition-controlled"],
-          "prototypeIds": ["base-transition"],
+          "demoIds": [
+            "demo-base-transition-controlled"
+          ],
+          "prototypeIds": [
+            "base-transition"
+          ],
           "unresolved": []
         }
       ],
@@ -724,29 +789,45 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 26,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 35,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 44,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         }
       ],
@@ -760,8 +841,12 @@
         {
           "surface": "PrototypeLibraryOverview",
           "line": 15,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         }
       ],
@@ -775,8 +860,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 24,
-          "demoIds": ["demo-brutalist-badge"],
-          "prototypeIds": ["brutalist-badge-root"],
+          "demoIds": [
+            "demo-brutalist-badge"
+          ],
+          "prototypeIds": [
+            "brutalist-badge-root"
+          ],
           "unresolved": []
         }
       ],
@@ -790,8 +879,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-button"],
-          "prototypeIds": ["brutalist-button"],
+          "demoIds": [
+            "demo-brutalist-button"
+          ],
+          "prototypeIds": [
+            "brutalist-button"
+          ],
           "unresolved": []
         }
       ],
@@ -805,7 +898,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 24,
-          "demoIds": ["demo-brutalist-card"],
+          "demoIds": [
+            "demo-brutalist-card"
+          ],
           "prototypeIds": [
             "brutalist-button",
             "brutalist-card-content",
@@ -826,8 +921,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 18,
-          "demoIds": ["demo-brutalist-checkbox"],
-          "prototypeIds": ["brutalist-checkbox-indicator", "brutalist-checkbox-root"],
+          "demoIds": [
+            "demo-brutalist-checkbox"
+          ],
+          "prototypeIds": [
+            "brutalist-checkbox-indicator",
+            "brutalist-checkbox-root"
+          ],
           "unresolved": []
         }
       ],
@@ -841,7 +941,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 23,
-          "demoIds": ["demo-brutalist-dialog"],
+          "demoIds": [
+            "demo-brutalist-dialog"
+          ],
           "prototypeIds": [
             "brutalist-button",
             "brutalist-dialog-close",
@@ -868,7 +970,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-dropdown-menu"],
+          "demoIds": [
+            "demo-brutalist-dropdown-menu"
+          ],
           "prototypeIds": [
             "brutalist-dropdown-content",
             "brutalist-dropdown-item",
@@ -888,7 +992,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-hover-card"],
+          "demoIds": [
+            "demo-brutalist-hover-card"
+          ],
           "prototypeIds": [
             "brutalist-hover-card-content",
             "brutalist-hover-card-root",
@@ -907,7 +1013,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-brutalist-scroll-area"],
+          "demoIds": [
+            "demo-brutalist-scroll-area"
+          ],
           "prototypeIds": [
             "brutalist-scroll-area-root",
             "brutalist-scroll-area-scrollbar",
@@ -927,7 +1035,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-select"],
+          "demoIds": [
+            "demo-brutalist-select"
+          ],
           "prototypeIds": [
             "brutalist-select-content",
             "brutalist-select-item",
@@ -948,8 +1058,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 18,
-          "demoIds": ["demo-brutalist-separator"],
-          "prototypeIds": ["brutalist-separator-root"],
+          "demoIds": [
+            "demo-brutalist-separator"
+          ],
+          "prototypeIds": [
+            "brutalist-separator-root"
+          ],
           "unresolved": []
         }
       ],
@@ -963,8 +1077,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 18,
-          "demoIds": ["demo-brutalist-skeleton"],
-          "prototypeIds": ["brutalist-skeleton-root"],
+          "demoIds": [
+            "demo-brutalist-skeleton"
+          ],
+          "prototypeIds": [
+            "brutalist-skeleton-root"
+          ],
           "unresolved": []
         }
       ],
@@ -978,8 +1096,14 @@
         {
           "surface": "PrototypePreviewer",
           "line": 22,
-          "demoIds": ["demo-brutalist-spinner"],
-          "prototypeIds": ["base-async-region-root", "brutalist-button", "brutalist-spinner-root"],
+          "demoIds": [
+            "demo-brutalist-spinner"
+          ],
+          "prototypeIds": [
+            "base-async-region-root",
+            "brutalist-button",
+            "brutalist-spinner-root"
+          ],
           "unresolved": []
         }
       ],
@@ -993,8 +1117,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 24,
-          "demoIds": ["demo-brutalist-switch"],
-          "prototypeIds": ["brutalist-switch-root", "brutalist-switch-thumb"],
+          "demoIds": [
+            "demo-brutalist-switch"
+          ],
+          "prototypeIds": [
+            "brutalist-switch-root",
+            "brutalist-switch-thumb"
+          ],
           "unresolved": []
         }
       ],
@@ -1008,7 +1137,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-tabs"],
+          "demoIds": [
+            "demo-brutalist-tabs"
+          ],
           "prototypeIds": [
             "brutalist-tabs-content",
             "brutalist-tabs-list",
@@ -1028,8 +1159,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 16,
-          "demoIds": ["demo-brutalist-textarea"],
-          "prototypeIds": ["brutalist-textarea-root"],
+          "demoIds": [
+            "demo-brutalist-textarea"
+          ],
+          "prototypeIds": [
+            "brutalist-textarea-root"
+          ],
           "unresolved": []
         }
       ],
@@ -1043,8 +1178,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-toggle"],
-          "prototypeIds": ["brutalist-toggle"],
+          "demoIds": [
+            "demo-brutalist-toggle"
+          ],
+          "prototypeIds": [
+            "brutalist-toggle"
+          ],
           "unresolved": []
         }
       ],
@@ -1058,7 +1197,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-brutalist-tooltip"],
+          "demoIds": [
+            "demo-brutalist-tooltip"
+          ],
           "prototypeIds": [
             "brutalist-tooltip-content",
             "brutalist-tooltip-group",
@@ -1162,8 +1303,14 @@
             "surface": "PrototypePreviewer",
             "line": 262
           },
-          "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button",
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button",
+            "liquid-glass-button"
+          ],
           "unresolved": []
         }
       ],
@@ -1177,29 +1324,45 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 26,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 35,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 44,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         }
       ],
@@ -1213,8 +1376,12 @@
         {
           "surface": "PrototypeLibraryOverview",
           "line": 15,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         }
       ],
@@ -1228,29 +1395,45 @@
         {
           "surface": "PrototypePreviewer",
           "line": 15,
-          "demoIds": ["demo-button"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 26,
-          "demoIds": ["demo-button"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 37,
-          "demoIds": ["demo-button"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 48,
-          "demoIds": ["demo-button"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         }
       ],
@@ -1264,8 +1447,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-checkbox"],
-          "prototypeIds": ["shadcn-checkbox-indicator", "shadcn-checkbox-root"],
+          "demoIds": [
+            "demo-shadcn-checkbox"
+          ],
+          "prototypeIds": [
+            "shadcn-checkbox-indicator",
+            "shadcn-checkbox-root"
+          ],
           "unresolved": []
         }
       ],
@@ -1279,7 +1467,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 13,
-          "demoIds": ["demo-shadcn-dialog"],
+          "demoIds": [
+            "demo-shadcn-dialog"
+          ],
           "prototypeIds": [
             "shadcn-button",
             "shadcn-dialog-close",
@@ -1306,7 +1496,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-dropdown-menu"],
+          "demoIds": [
+            "demo-shadcn-dropdown-menu"
+          ],
           "prototypeIds": [
             "shadcn-dropdown-content",
             "shadcn-dropdown-item",
@@ -1326,7 +1518,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-hover-card"],
+          "demoIds": [
+            "demo-shadcn-hover-card"
+          ],
           "prototypeIds": [
             "shadcn-hover-card-content",
             "shadcn-hover-card-root",
@@ -1424,8 +1618,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-input"],
-          "prototypeIds": ["shadcn-input-root"],
+          "demoIds": [
+            "demo-shadcn-input"
+          ],
+          "prototypeIds": [
+            "shadcn-input-root"
+          ],
           "unresolved": []
         }
       ],
@@ -1439,7 +1637,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-radio-group"],
+          "demoIds": [
+            "demo-shadcn-radio-group"
+          ],
           "prototypeIds": [
             "shadcn-radio-group-indicator",
             "shadcn-radio-group-item",
@@ -1458,7 +1658,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-scroll-area"],
+          "demoIds": [
+            "demo-shadcn-scroll-area"
+          ],
           "prototypeIds": [
             "shadcn-scroll-area-root",
             "shadcn-scroll-area-scrollbar",
@@ -1478,7 +1680,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-select"],
+          "demoIds": [
+            "demo-shadcn-select"
+          ],
           "prototypeIds": [
             "shadcn-select-content",
             "shadcn-select-item",
@@ -1499,8 +1703,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-separator"],
-          "prototypeIds": ["shadcn-separator-root"],
+          "demoIds": [
+            "demo-shadcn-separator"
+          ],
+          "prototypeIds": [
+            "shadcn-separator-root"
+          ],
           "unresolved": []
         }
       ],
@@ -1514,8 +1722,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-switch"],
-          "prototypeIds": ["shadcn-switch-root", "shadcn-switch-thumb"],
+          "demoIds": [
+            "demo-shadcn-switch"
+          ],
+          "prototypeIds": [
+            "shadcn-switch-root",
+            "shadcn-switch-thumb"
+          ],
           "unresolved": []
         }
       ],
@@ -1529,7 +1742,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -1541,7 +1756,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 23,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -1553,7 +1770,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 34,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -1565,7 +1784,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 45,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -1585,8 +1806,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-textarea"],
-          "prototypeIds": ["shadcn-textarea-root"],
+          "demoIds": [
+            "demo-shadcn-textarea"
+          ],
+          "prototypeIds": [
+            "shadcn-textarea-root"
+          ],
           "unresolved": []
         }
       ],
@@ -1600,8 +1825,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-toggle"],
-          "prototypeIds": ["lucide-icon", "shadcn-toggle"],
+          "demoIds": [
+            "demo-shadcn-toggle"
+          ],
+          "prototypeIds": [
+            "lucide-icon",
+            "shadcn-toggle"
+          ],
           "unresolved": []
         }
       ],
@@ -1615,7 +1845,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-tooltip"],
+          "demoIds": [
+            "demo-shadcn-tooltip"
+          ],
           "prototypeIds": [
             "shadcn-tooltip-content",
             "shadcn-tooltip-group",
@@ -1922,7 +2154,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-hover-card"],
+          "demoIds": [
+            "demo-shadcn-hover-card"
+          ],
           "prototypeIds": [
             "shadcn-hover-card-content",
             "shadcn-hover-card-root",
@@ -1941,8 +2175,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-async-region"],
-          "prototypeIds": ["base-async-region-root"],
+          "demoIds": [
+            "demo-base-async-region"
+          ],
+          "prototypeIds": [
+            "base-async-region-root"
+          ],
           "unresolved": []
         }
       ],
@@ -1956,8 +2194,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-button"],
-          "prototypeIds": ["base-button"],
+          "demoIds": [
+            "demo-base-button"
+          ],
+          "prototypeIds": [
+            "base-button"
+          ],
           "unresolved": []
         }
       ],
@@ -1971,8 +2213,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-checkbox"],
-          "prototypeIds": ["base-checkbox-indicator", "base-checkbox-root"],
+          "demoIds": [
+            "demo-base-checkbox"
+          ],
+          "prototypeIds": [
+            "base-checkbox-indicator",
+            "base-checkbox-root"
+          ],
           "unresolved": []
         }
       ],
@@ -1986,7 +2233,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 13,
-          "demoIds": ["demo-base-dialog"],
+          "demoIds": [
+            "demo-base-dialog"
+          ],
           "prototypeIds": [
             "base-dialog-close",
             "base-dialog-content",
@@ -2009,7 +2258,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-dropdown-menu"],
+          "demoIds": [
+            "demo-base-dropdown-menu"
+          ],
           "prototypeIds": [
             "base-dropdown-content",
             "base-dropdown-item",
@@ -2029,7 +2280,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-hover-card"],
+          "demoIds": [
+            "demo-base-hover-card"
+          ],
           "prototypeIds": [
             "base-hover-card-content",
             "base-hover-card-root",
@@ -2048,8 +2301,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-image"],
-          "prototypeIds": ["base-button", "base-image-root"],
+          "demoIds": [
+            "demo-base-image"
+          ],
+          "prototypeIds": [
+            "base-button",
+            "base-image-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2145,8 +2403,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-live-region"],
-          "prototypeIds": ["base-live-region-root"],
+          "demoIds": [
+            "demo-base-live-region"
+          ],
+          "prototypeIds": [
+            "base-live-region-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2160,7 +2422,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 11,
-          "demoIds": ["demo-base-radio-group"],
+          "demoIds": [
+            "demo-base-radio-group"
+          ],
           "prototypeIds": [
             "base-radio-group-indicator",
             "base-radio-group-item",
@@ -2179,7 +2443,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-scroll-area"],
+          "demoIds": [
+            "demo-base-scroll-area"
+          ],
           "prototypeIds": [
             "base-scroll-area-root",
             "base-scroll-area-scrollbar",
@@ -2199,7 +2465,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-select"],
+          "demoIds": [
+            "demo-base-select"
+          ],
           "prototypeIds": [
             "base-select-content",
             "base-select-item",
@@ -2220,8 +2488,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-separator"],
-          "prototypeIds": ["base-separator-root"],
+          "demoIds": [
+            "demo-base-separator"
+          ],
+          "prototypeIds": [
+            "base-separator-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2235,8 +2507,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-switch"],
-          "prototypeIds": ["base-switch-root", "base-switch-thumb"],
+          "demoIds": [
+            "demo-base-switch"
+          ],
+          "prototypeIds": [
+            "base-switch-root",
+            "base-switch-thumb"
+          ],
           "unresolved": []
         }
       ],
@@ -2250,7 +2527,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-tabs"],
+          "demoIds": [
+            "demo-base-tabs"
+          ],
           "prototypeIds": [
             "base-tabs-content",
             "base-tabs-indicator",
@@ -2271,8 +2550,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 12,
-          "demoIds": ["demo-base-textarea"],
-          "prototypeIds": ["base-textarea-root"],
+          "demoIds": [
+            "demo-base-textarea"
+          ],
+          "prototypeIds": [
+            "base-textarea-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2286,8 +2569,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-base-toggle"],
-          "prototypeIds": ["base-toggle"],
+          "demoIds": [
+            "demo-base-toggle"
+          ],
+          "prototypeIds": [
+            "base-toggle"
+          ],
           "unresolved": []
         }
       ],
@@ -2301,7 +2588,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 20,
-          "demoIds": ["demo-base-tooltip"],
+          "demoIds": [
+            "demo-base-tooltip"
+          ],
           "prototypeIds": [
             "base-tooltip-content",
             "base-tooltip-group",
@@ -2321,15 +2610,23 @@
         {
           "surface": "PrototypePreviewer",
           "line": 15,
-          "demoIds": ["demo-base-transition-command"],
-          "prototypeIds": ["base-transition"],
+          "demoIds": [
+            "demo-base-transition-command"
+          ],
+          "prototypeIds": [
+            "base-transition"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 38,
-          "demoIds": ["demo-base-transition-controlled"],
-          "prototypeIds": ["base-transition"],
+          "demoIds": [
+            "demo-base-transition-controlled"
+          ],
+          "prototypeIds": [
+            "base-transition"
+          ],
           "unresolved": []
         }
       ],
@@ -2343,29 +2640,45 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 26,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 35,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 44,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         }
       ],
@@ -2379,8 +2692,12 @@
         {
           "surface": "PrototypeLibraryOverview",
           "line": 15,
-          "demoIds": ["demo-bootstrap-2-3-2-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button"
+          ],
           "unresolved": []
         }
       ],
@@ -2394,8 +2711,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 24,
-          "demoIds": ["demo-brutalist-badge"],
-          "prototypeIds": ["brutalist-badge-root"],
+          "demoIds": [
+            "demo-brutalist-badge"
+          ],
+          "prototypeIds": [
+            "brutalist-badge-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2409,8 +2730,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-button"],
-          "prototypeIds": ["brutalist-button"],
+          "demoIds": [
+            "demo-brutalist-button"
+          ],
+          "prototypeIds": [
+            "brutalist-button"
+          ],
           "unresolved": []
         }
       ],
@@ -2424,7 +2749,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 24,
-          "demoIds": ["demo-brutalist-card"],
+          "demoIds": [
+            "demo-brutalist-card"
+          ],
           "prototypeIds": [
             "brutalist-button",
             "brutalist-card-content",
@@ -2445,8 +2772,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 18,
-          "demoIds": ["demo-brutalist-checkbox"],
-          "prototypeIds": ["brutalist-checkbox-indicator", "brutalist-checkbox-root"],
+          "demoIds": [
+            "demo-brutalist-checkbox"
+          ],
+          "prototypeIds": [
+            "brutalist-checkbox-indicator",
+            "brutalist-checkbox-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2460,7 +2792,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 22,
-          "demoIds": ["demo-brutalist-dialog"],
+          "demoIds": [
+            "demo-brutalist-dialog"
+          ],
           "prototypeIds": [
             "brutalist-button",
             "brutalist-dialog-close",
@@ -2487,7 +2821,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-dropdown-menu"],
+          "demoIds": [
+            "demo-brutalist-dropdown-menu"
+          ],
           "prototypeIds": [
             "brutalist-dropdown-content",
             "brutalist-dropdown-item",
@@ -2507,7 +2843,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-hover-card"],
+          "demoIds": [
+            "demo-brutalist-hover-card"
+          ],
           "prototypeIds": [
             "brutalist-hover-card-content",
             "brutalist-hover-card-root",
@@ -2526,7 +2864,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-brutalist-scroll-area"],
+          "demoIds": [
+            "demo-brutalist-scroll-area"
+          ],
           "prototypeIds": [
             "brutalist-scroll-area-root",
             "brutalist-scroll-area-scrollbar",
@@ -2546,7 +2886,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-select"],
+          "demoIds": [
+            "demo-brutalist-select"
+          ],
           "prototypeIds": [
             "brutalist-select-content",
             "brutalist-select-item",
@@ -2567,8 +2909,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 18,
-          "demoIds": ["demo-brutalist-separator"],
-          "prototypeIds": ["brutalist-separator-root"],
+          "demoIds": [
+            "demo-brutalist-separator"
+          ],
+          "prototypeIds": [
+            "brutalist-separator-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2582,8 +2928,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 18,
-          "demoIds": ["demo-brutalist-skeleton"],
-          "prototypeIds": ["brutalist-skeleton-root"],
+          "demoIds": [
+            "demo-brutalist-skeleton"
+          ],
+          "prototypeIds": [
+            "brutalist-skeleton-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2597,8 +2947,14 @@
         {
           "surface": "PrototypePreviewer",
           "line": 22,
-          "demoIds": ["demo-brutalist-spinner"],
-          "prototypeIds": ["base-async-region-root", "brutalist-button", "brutalist-spinner-root"],
+          "demoIds": [
+            "demo-brutalist-spinner"
+          ],
+          "prototypeIds": [
+            "base-async-region-root",
+            "brutalist-button",
+            "brutalist-spinner-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2612,8 +2968,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 24,
-          "demoIds": ["demo-brutalist-switch"],
-          "prototypeIds": ["brutalist-switch-root", "brutalist-switch-thumb"],
+          "demoIds": [
+            "demo-brutalist-switch"
+          ],
+          "prototypeIds": [
+            "brutalist-switch-root",
+            "brutalist-switch-thumb"
+          ],
           "unresolved": []
         }
       ],
@@ -2627,7 +2988,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-tabs"],
+          "demoIds": [
+            "demo-brutalist-tabs"
+          ],
           "prototypeIds": [
             "brutalist-tabs-content",
             "brutalist-tabs-list",
@@ -2647,8 +3010,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 16,
-          "demoIds": ["demo-brutalist-textarea"],
-          "prototypeIds": ["brutalist-textarea-root"],
+          "demoIds": [
+            "demo-brutalist-textarea"
+          ],
+          "prototypeIds": [
+            "brutalist-textarea-root"
+          ],
           "unresolved": []
         }
       ],
@@ -2662,8 +3029,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-brutalist-toggle"],
-          "prototypeIds": ["brutalist-toggle"],
+          "demoIds": [
+            "demo-brutalist-toggle"
+          ],
+          "prototypeIds": [
+            "brutalist-toggle"
+          ],
           "unresolved": []
         }
       ],
@@ -2677,7 +3048,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-brutalist-tooltip"],
+          "demoIds": [
+            "demo-brutalist-tooltip"
+          ],
           "prototypeIds": [
             "brutalist-tooltip-content",
             "brutalist-tooltip-group",
@@ -2781,8 +3154,14 @@
             "surface": "PrototypePreviewer",
             "line": 262
           },
-          "demoIds": ["demo-bootstrap-2-3-2-button", "demo-liquid-glass-button"],
-          "prototypeIds": ["bootstrap-2-3-2-button", "liquid-glass-button"],
+          "demoIds": [
+            "demo-bootstrap-2-3-2-button",
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "bootstrap-2-3-2-button",
+            "liquid-glass-button"
+          ],
           "unresolved": []
         }
       ],
@@ -2796,29 +3175,45 @@
         {
           "surface": "PrototypePreviewer",
           "line": 17,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 26,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 35,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 44,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         }
       ],
@@ -2832,8 +3227,12 @@
         {
           "surface": "PrototypeLibraryOverview",
           "line": 15,
-          "demoIds": ["demo-liquid-glass-button"],
-          "prototypeIds": ["liquid-glass-button"],
+          "demoIds": [
+            "demo-liquid-glass-button"
+          ],
+          "prototypeIds": [
+            "liquid-glass-button"
+          ],
           "unresolved": []
         }
       ],
@@ -2847,225 +3246,353 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-button-variants"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-variants"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 25,
-          "demoIds": ["demo-button-variants"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-variants"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 36,
-          "demoIds": ["demo-button-variants"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-variants"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 47,
-          "demoIds": ["demo-button-variants"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-variants"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 76,
-          "demoIds": ["demo-button-default"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-default"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 87,
-          "demoIds": ["demo-button-default"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-default"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 98,
-          "demoIds": ["demo-button-default"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-default"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 109,
-          "demoIds": ["demo-button-default"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-default"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 122,
-          "demoIds": ["demo-button-secondary"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-secondary"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 133,
-          "demoIds": ["demo-button-secondary"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-secondary"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 144,
-          "demoIds": ["demo-button-secondary"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-secondary"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 155,
-          "demoIds": ["demo-button-secondary"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-secondary"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 168,
-          "demoIds": ["demo-button-outline"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-outline"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 179,
-          "demoIds": ["demo-button-outline"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-outline"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 190,
-          "demoIds": ["demo-button-outline"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-outline"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 201,
-          "demoIds": ["demo-button-outline"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-outline"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 214,
-          "demoIds": ["demo-button-ghost"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-ghost"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 225,
-          "demoIds": ["demo-button-ghost"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-ghost"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 236,
-          "demoIds": ["demo-button-ghost"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-ghost"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 247,
-          "demoIds": ["demo-button-ghost"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-ghost"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 260,
-          "demoIds": ["demo-button-destructive"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-destructive"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 271,
-          "demoIds": ["demo-button-destructive"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-destructive"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 282,
-          "demoIds": ["demo-button-destructive"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-destructive"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 293,
-          "demoIds": ["demo-button-destructive"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-destructive"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 306,
-          "demoIds": ["demo-button-sizes"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-sizes"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 317,
-          "demoIds": ["demo-button-sizes"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-sizes"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 328,
-          "demoIds": ["demo-button-sizes"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-sizes"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 339,
-          "demoIds": ["demo-button-sizes"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-sizes"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 352,
-          "demoIds": ["demo-button-disabled"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-disabled"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 363,
-          "demoIds": ["demo-button-disabled"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-disabled"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 374,
-          "demoIds": ["demo-button-disabled"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-disabled"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         },
         {
           "surface": "PrototypePreviewer",
           "line": 385,
-          "demoIds": ["demo-button-disabled"],
-          "prototypeIds": ["shadcn-button"],
+          "demoIds": [
+            "demo-button-disabled"
+          ],
+          "prototypeIds": [
+            "shadcn-button"
+          ],
           "unresolved": []
         }
       ],
@@ -3079,8 +3606,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-checkbox"],
-          "prototypeIds": ["shadcn-checkbox-indicator", "shadcn-checkbox-root"],
+          "demoIds": [
+            "demo-shadcn-checkbox"
+          ],
+          "prototypeIds": [
+            "shadcn-checkbox-indicator",
+            "shadcn-checkbox-root"
+          ],
           "unresolved": []
         }
       ],
@@ -3094,7 +3626,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 13,
-          "demoIds": ["demo-shadcn-dialog"],
+          "demoIds": [
+            "demo-shadcn-dialog"
+          ],
           "prototypeIds": [
             "shadcn-button",
             "shadcn-dialog-close",
@@ -3121,7 +3655,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-dropdown-menu"],
+          "demoIds": [
+            "demo-shadcn-dropdown-menu"
+          ],
           "prototypeIds": [
             "shadcn-dropdown-content",
             "shadcn-dropdown-item",
@@ -3141,7 +3677,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-hover-card"],
+          "demoIds": [
+            "demo-shadcn-hover-card"
+          ],
           "prototypeIds": [
             "shadcn-hover-card-content",
             "shadcn-hover-card-root",
@@ -3239,8 +3777,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-input"],
-          "prototypeIds": ["shadcn-input-root"],
+          "demoIds": [
+            "demo-shadcn-input"
+          ],
+          "prototypeIds": [
+            "shadcn-input-root"
+          ],
           "unresolved": []
         }
       ],
@@ -3254,7 +3796,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-radio-group"],
+          "demoIds": [
+            "demo-shadcn-radio-group"
+          ],
           "prototypeIds": [
             "shadcn-radio-group-indicator",
             "shadcn-radio-group-item",
@@ -3273,7 +3817,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-scroll-area"],
+          "demoIds": [
+            "demo-shadcn-scroll-area"
+          ],
           "prototypeIds": [
             "shadcn-scroll-area-root",
             "shadcn-scroll-area-scrollbar",
@@ -3293,7 +3839,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-select"],
+          "demoIds": [
+            "demo-shadcn-select"
+          ],
           "prototypeIds": [
             "shadcn-select-content",
             "shadcn-select-item",
@@ -3314,8 +3862,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-separator"],
-          "prototypeIds": ["shadcn-separator-root"],
+          "demoIds": [
+            "demo-shadcn-separator"
+          ],
+          "prototypeIds": [
+            "shadcn-separator-root"
+          ],
           "unresolved": []
         }
       ],
@@ -3329,8 +3881,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-switch"],
-          "prototypeIds": ["shadcn-switch-root", "shadcn-switch-thumb"],
+          "demoIds": [
+            "demo-shadcn-switch"
+          ],
+          "prototypeIds": [
+            "shadcn-switch-root",
+            "shadcn-switch-thumb"
+          ],
           "unresolved": []
         }
       ],
@@ -3344,7 +3901,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 13,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -3356,7 +3915,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 25,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -3368,7 +3929,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 37,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -3380,7 +3943,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 49,
-          "demoIds": ["demo-shadcn-tabs"],
+          "demoIds": [
+            "demo-shadcn-tabs"
+          ],
           "prototypeIds": [
             "shadcn-tabs-content",
             "shadcn-tabs-list",
@@ -3400,8 +3965,12 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-textarea"],
-          "prototypeIds": ["shadcn-textarea-root"],
+          "demoIds": [
+            "demo-shadcn-textarea"
+          ],
+          "prototypeIds": [
+            "shadcn-textarea-root"
+          ],
           "unresolved": []
         }
       ],
@@ -3415,8 +3984,13 @@
         {
           "surface": "PrototypePreviewer",
           "line": 10,
-          "demoIds": ["demo-shadcn-toggle"],
-          "prototypeIds": ["lucide-icon", "shadcn-toggle"],
+          "demoIds": [
+            "demo-shadcn-toggle"
+          ],
+          "prototypeIds": [
+            "lucide-icon",
+            "shadcn-toggle"
+          ],
           "unresolved": []
         }
       ],
@@ -3430,7 +4004,9 @@
         {
           "surface": "PrototypePreviewer",
           "line": 14,
-          "demoIds": ["demo-shadcn-tooltip"],
+          "demoIds": [
+            "demo-shadcn-tooltip"
+          ],
           "prototypeIds": [
             "shadcn-tooltip-content",
             "shadcn-tooltip-group",
@@ -3448,19 +4024,26 @@
     {
       "id": "demo-base-async-region",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-async-region.demo.ts",
-      "prototypeIds": ["base-async-region-root"],
+      "prototypeIds": [
+        "base-async-region-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-base-button",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-button.demo.ts",
-      "prototypeIds": ["base-button"],
+      "prototypeIds": [
+        "base-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-base-checkbox",
       "file": "apps/www/src/content/docs/demo_components/base-checkbox/demo-base-checkbox.demo.ts",
-      "prototypeIds": ["base-checkbox-indicator", "base-checkbox-root"],
+      "prototypeIds": [
+        "base-checkbox-indicator",
+        "base-checkbox-root"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3501,13 +4084,18 @@
     {
       "id": "demo-base-image",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-image.demo.ts",
-      "prototypeIds": ["base-button", "base-image-root"],
+      "prototypeIds": [
+        "base-button",
+        "base-image-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-base-live-region",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-live-region.demo.ts",
-      "prototypeIds": ["base-live-region-root"],
+      "prototypeIds": [
+        "base-live-region-root"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3546,13 +4134,18 @@
     {
       "id": "demo-base-separator",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-separator.demo.ts",
-      "prototypeIds": ["base-separator-root"],
+      "prototypeIds": [
+        "base-separator-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-base-switch",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-switch.demo.ts",
-      "prototypeIds": ["base-switch-root", "base-switch-thumb"],
+      "prototypeIds": [
+        "base-switch-root",
+        "base-switch-thumb"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3570,13 +4163,17 @@
     {
       "id": "demo-base-textarea",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-textarea.demo.ts",
-      "prototypeIds": ["base-textarea-root"],
+      "prototypeIds": [
+        "base-textarea-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-base-toggle",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-toggle.demo.ts",
-      "prototypeIds": ["base-toggle"],
+      "prototypeIds": [
+        "base-toggle"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3593,37 +4190,49 @@
     {
       "id": "demo-base-transition",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-transition.demo.ts",
-      "prototypeIds": ["base-transition"],
+      "prototypeIds": [
+        "base-transition"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-base-transition-command",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-transition-command.demo.ts",
-      "prototypeIds": ["base-transition"],
+      "prototypeIds": [
+        "base-transition"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-base-transition-controlled",
       "file": "apps/www/src/content/docs/zh-cn/demo-base-transition-controlled.demo.ts",
-      "prototypeIds": ["base-transition"],
+      "prototypeIds": [
+        "base-transition"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-bootstrap-2-3-2-button",
       "file": "apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts",
-      "prototypeIds": ["bootstrap-2-3-2-button"],
+      "prototypeIds": [
+        "bootstrap-2-3-2-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-brutalist-badge",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-badge.demo.ts",
-      "prototypeIds": ["brutalist-badge-root"],
+      "prototypeIds": [
+        "brutalist-badge-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-brutalist-button",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-button.demo.ts",
-      "prototypeIds": ["brutalist-button"],
+      "prototypeIds": [
+        "brutalist-button"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3641,7 +4250,10 @@
     {
       "id": "demo-brutalist-checkbox",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.demo.ts",
-      "prototypeIds": ["brutalist-checkbox-indicator", "brutalist-checkbox-root"],
+      "prototypeIds": [
+        "brutalist-checkbox-indicator",
+        "brutalist-checkbox-root"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3709,25 +4321,36 @@
     {
       "id": "demo-brutalist-separator",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-separator.demo.ts",
-      "prototypeIds": ["brutalist-separator-root"],
+      "prototypeIds": [
+        "brutalist-separator-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-brutalist-skeleton",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-skeleton.demo.ts",
-      "prototypeIds": ["brutalist-skeleton-root"],
+      "prototypeIds": [
+        "brutalist-skeleton-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-brutalist-spinner",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-spinner.demo.ts",
-      "prototypeIds": ["base-async-region-root", "brutalist-button", "brutalist-spinner-root"],
+      "prototypeIds": [
+        "base-async-region-root",
+        "brutalist-button",
+        "brutalist-spinner-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-brutalist-switch",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-switch.demo.ts",
-      "prototypeIds": ["brutalist-switch-root", "brutalist-switch-thumb"],
+      "prototypeIds": [
+        "brutalist-switch-root",
+        "brutalist-switch-thumb"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3744,13 +4367,17 @@
     {
       "id": "demo-brutalist-textarea",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-textarea.demo.ts",
-      "prototypeIds": ["brutalist-textarea-root"],
+      "prototypeIds": [
+        "brutalist-textarea-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-brutalist-toggle",
       "file": "apps/www/src/content/docs/zh-cn/demo-brutalist-toggle.demo.ts",
-      "prototypeIds": ["brutalist-toggle"],
+      "prototypeIds": [
+        "brutalist-toggle"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3767,85 +4394,114 @@
     {
       "id": "demo-button",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-default",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-default.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-destructive",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-destructive.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-disabled",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-disabled.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-ghost",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-ghost.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-outline",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-outline.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-secondary",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-secondary.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-secondary-example",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-secondary-example.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-sizes",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-sizes.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-states",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-states.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-button-variants",
       "file": "apps/www/src/content/docs/demo_components/button/demo-button-variants.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-liquid-glass-button",
       "file": "apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts",
-      "prototypeIds": ["liquid-glass-button"],
+      "prototypeIds": [
+        "liquid-glass-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-shadcn-button",
       "file": "apps/www/src/content/docs/zh-cn/demo-shadcn-button.demo.ts",
-      "prototypeIds": ["shadcn-button"],
+      "prototypeIds": [
+        "shadcn-button"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-shadcn-checkbox",
       "file": "apps/www/src/content/docs/zh-cn/demo-shadcn-checkbox.demo.ts",
-      "prototypeIds": ["shadcn-checkbox-indicator", "shadcn-checkbox-root"],
+      "prototypeIds": [
+        "shadcn-checkbox-indicator",
+        "shadcn-checkbox-root"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3890,7 +4546,9 @@
     {
       "id": "demo-shadcn-input",
       "file": "apps/www/src/content/docs/zh-cn/demo-shadcn-input.demo.ts",
-      "prototypeIds": ["shadcn-input-root"],
+      "prototypeIds": [
+        "shadcn-input-root"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3929,13 +4587,18 @@
     {
       "id": "demo-shadcn-separator",
       "file": "apps/www/src/content/docs/zh-cn/demo-shadcn-separator.demo.ts",
-      "prototypeIds": ["shadcn-separator-root"],
+      "prototypeIds": [
+        "shadcn-separator-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-shadcn-switch",
       "file": "apps/www/src/content/docs/zh-cn/demo-shadcn-switch.demo.ts",
-      "prototypeIds": ["shadcn-switch-root", "shadcn-switch-thumb"],
+      "prototypeIds": [
+        "shadcn-switch-root",
+        "shadcn-switch-thumb"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -3952,13 +4615,18 @@
     {
       "id": "demo-shadcn-textarea",
       "file": "apps/www/src/content/docs/zh-cn/demo-shadcn-textarea.demo.ts",
-      "prototypeIds": ["shadcn-textarea-root"],
+      "prototypeIds": [
+        "shadcn-textarea-root"
+      ],
       "unresolvedBindings": []
     },
     {
       "id": "demo-shadcn-toggle",
       "file": "apps/www/src/content/docs/zh-cn/demo-shadcn-toggle.demo.ts",
-      "prototypeIds": ["lucide-icon", "shadcn-toggle"],
+      "prototypeIds": [
+        "lucide-icon",
+        "shadcn-toggle"
+      ],
       "unresolvedBindings": []
     },
     {
@@ -4541,17 +5209,17 @@
       "nodeAdmission": "rejected",
       "diagnostics": [
         {
-          "code": "PUI1006",
+          "code": "PUI1004",
           "category": "unsupported-input",
-          "message": "Only declared primitive props are currently admitted.",
+          "message": "Unsupported expression AsExpression; no input code is executed.",
           "span": {
             "file": "packages/prototypes/base/src/image/root.proto.ts",
-            "start": 387,
-            "end": 743,
-            "line": 13,
-            "column": 3,
-            "endLine": 26,
-            "endColumn": 5
+            "start": 1618,
+            "end": 1672,
+            "line": 53,
+            "column": 7,
+            "endLine": 53,
+            "endColumn": 61
           }
         }
       ],
@@ -4572,17 +5240,17 @@
       "nodeAdmission": "rejected",
       "diagnostics": [
         {
-          "code": "PUI1006",
+          "code": "PUI1020",
           "category": "unsupported-input",
-          "message": "Only declared primitive props are currently admitted.",
+          "message": "Data type LiveRegionRootProps must resolve to a supported local declaration.",
           "span": {
             "file": "packages/prototypes/base/src/live-region/root.proto.ts",
-            "start": 653,
-            "end": 815,
-            "line": 21,
-            "column": 3,
-            "endLine": 24,
-            "endColumn": 5
+            "start": 1260,
+            "end": 1279,
+            "line": 36,
+            "column": 33,
+            "endLine": 36,
+            "endColumn": 52
           }
         }
       ],
@@ -4724,21 +5392,21 @@
       "exportName": "default",
       "entrySha256": "4b137b5d5b29aa4b0d585dc4a72de04ca72a37a3645c1c88967c4960bc835486",
       "target": "web-component-source-v1",
-      "nodeAdmission": "rejected",
-      "diagnostics": [
+      "nodeAdmission": "compiled",
+      "definitionFile": "packages/prototypes/base/src/scroll-area/scrollbar.proto.ts",
+      "source": {
+        "file": "packages/prototypes/base/src/scroll-area/scrollbar.proto.ts",
+        "exportName": "default",
+        "sha256": "61615f98c160421f00f314c2f2c27e98dd0e19a5e1816195eb83b773e5e09b78"
+      },
+      "sourceFiles": [
         {
-          "code": "PUI1006",
-          "category": "unsupported-input",
-          "message": "Only declared primitive props are currently admitted.",
-          "span": {
-            "file": "packages/prototypes/base/src/scroll-area/scrollbar.proto.ts",
-            "start": 438,
-            "end": 552,
-            "line": 14,
-            "column": 3,
-            "endLine": 16,
-            "endColumn": 5
-          }
+          "file": "packages/prototypes/base/src/scroll-area/scrollbar.proto.ts",
+          "sha256": "4b137b5d5b29aa4b0d585dc4a72de04ca72a37a3645c1c88967c4960bc835486"
+        },
+        {
+          "file": "packages/prototypes/base/src/scroll-area/shared.ts",
+          "sha256": "5d43a8ec1203b12d7ec42a7113851fa8b658e36d37ae77f8be84813b8ced0030"
         }
       ],
       "browserWasm": "not-exercised-for-this-registration-graph",
@@ -4975,17 +5643,17 @@
       "nodeAdmission": "rejected",
       "diagnostics": [
         {
-          "code": "PUI1006",
+          "code": "PUI1020",
           "category": "unsupported-input",
-          "message": "Only declared primitive props are currently admitted.",
+          "message": "Data type SeparatorRootProps must resolve to a supported local declaration.",
           "span": {
             "file": "packages/prototypes/base/src/separator/root.proto.ts",
-            "start": 624,
-            "end": 794,
-            "line": 21,
-            "column": 3,
-            "endLine": 24,
-            "endColumn": 5
+            "start": 1623,
+            "end": 1641,
+            "line": 43,
+            "column": 33,
+            "endLine": 43,
+            "endColumn": 51
           }
         }
       ],
@@ -5127,21 +5795,21 @@
       "exportName": "default",
       "entrySha256": "5aa062b0bf19f7e8899b0ebd9ea899f81d5545bc4597387f043f9b6d7a76930b",
       "target": "web-component-source-v1",
-      "nodeAdmission": "rejected",
-      "diagnostics": [
+      "nodeAdmission": "compiled",
+      "definitionFile": "packages/prototypes/base/src/tabs/list.proto.ts",
+      "source": {
+        "file": "packages/prototypes/base/src/tabs/list.proto.ts",
+        "exportName": "default",
+        "sha256": "eda5131143070f36c64c3614f0601b8119cce45ad3631aa218ad5d5f9a1d0601"
+      },
+      "sourceFiles": [
         {
-          "code": "PUI1006",
-          "category": "unsupported-input",
-          "message": "Only declared primitive props are currently admitted.",
-          "span": {
-            "file": "packages/prototypes/base/src/tabs/list.proto.ts",
-            "start": 660,
-            "end": 878,
-            "line": 12,
-            "column": 3,
-            "endLine": 16,
-            "endColumn": 5
-          }
+          "file": "packages/prototypes/base/src/tabs/list.proto.ts",
+          "sha256": "5aa062b0bf19f7e8899b0ebd9ea899f81d5545bc4597387f043f9b6d7a76930b"
+        },
+        {
+          "file": "packages/prototypes/base/src/tabs/shared.ts",
+          "sha256": "2f795d8d32f92760a22e819677959cd90686b7ec212dd5b7e7e2c00068266df8"
         }
       ],
       "browserWasm": "not-exercised-for-this-registration-graph",
@@ -5163,15 +5831,15 @@
         {
           "code": "PUI1006",
           "category": "unsupported-input",
-          "message": "Only declared primitive props are currently admitted.",
+          "message": "Context value does not match its declared key type.",
           "span": {
             "file": "packages/prototypes/base/src/tabs/root.proto.ts",
-            "start": 2226,
-            "end": 2538,
-            "line": 52,
-            "column": 3,
-            "endLine": 57,
-            "endColumn": 5
+            "start": 2726,
+            "end": 2927,
+            "line": 65,
+            "column": 37,
+            "endLine": 74,
+            "endColumn": 4
           }
         }
       ],
@@ -5223,17 +5891,17 @@
       "nodeAdmission": "rejected",
       "diagnostics": [
         {
-          "code": "PUI1006",
+          "code": "PUI1020",
           "category": "unsupported-input",
-          "message": "Only declared primitive props are currently admitted.",
+          "message": "Data type TextareaRootProps must resolve to a supported local declaration.",
           "span": {
             "file": "packages/prototypes/base/src/textarea/root.proto.ts",
-            "start": 746,
-            "end": 1596,
-            "line": 24,
-            "column": 3,
-            "endLine": 40,
-            "endColumn": 5
+            "start": 3557,
+            "end": 3574,
+            "line": 95,
+            "column": 33,
+            "endLine": 95,
+            "endColumn": 50
           }
         }
       ],

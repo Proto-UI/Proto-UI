@@ -407,7 +407,7 @@ type ${p}ExternalState<T> = {
 type ${p}State<T> = { get(): T; setDefault(value: T): void; set(value: T, reason?: unknown): void };
 type ${p}StateSpec = { kind: 'bool' | 'enum' | 'string' | 'number.discrete' | 'number.range'; options?: readonly (string | number)[]; min?: number; max?: number; step?: number; clamp?: boolean };
 type ${p}DataSchema = string | { kind: string; fields?: readonly { name: string; type: ${p}DataSchema; optional?: boolean }[]; element?: ${p}DataSchema; members?: readonly ${p}DataSchema[]; value?: unknown };
-type ${p}PropSpec = { type: ${p}DataSchema; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; options?: readonly string[]; range?: { min?: number; max?: number } };
+type ${p}PropSpec = { type: string; schema?: ${p}DataSchema; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; options?: readonly string[]; range?: { min?: number; max?: number } };
 type ${p}Run = {
   update(): void;
   feedback: { style: Pick<${p}NativeStyle, 'patch' | 'suppress' | 'clearPatch'> };
@@ -502,7 +502,8 @@ function ${p}ResolveProps(
     const provided = Object.hasOwn(raw, key);
     const value = raw[key];
     const empty = value === null || value === undefined;
-    const valid = (candidate: unknown) => ${p}Accepts(spec.type, candidate)
+    const valid = (candidate: unknown) => spec.schema !== undefined && ${p}Accepts(spec.schema, candidate)
+      && (!spec.options || typeof candidate === 'string' && spec.options.includes(candidate))
       && (!spec.range || typeof candidate === 'number'
         && candidate >= (spec.range.min ?? -Infinity) && candidate <= (spec.range.max ?? Infinity));
     if (provided && !empty && valid(value)) {
@@ -565,8 +566,9 @@ ${ssr ? '  let serverPrepared = false;\n' : ''}  let propsWindow: { raw: Readonl
   const pendingStateEvents: (() => void)[] = [];
   const authorStateWatchCleanups: (() => void)[] = [];
   let emittingState = false;
-  type ${p}ResolvedWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: Readonly<Record<string, unknown>>) => void };
-  type ${p}RawWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: Readonly<Record<string, unknown>>, prev: Readonly<Record<string, unknown>>, info: Readonly<Record<string, unknown>>) => void };
+  type ${p}WatchInfo = { changedKeysAll: string[]; changedKeysMatched: string[] };
+  type ${p}ResolvedWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: ${p}WatchInfo) => void };
+  type ${p}RawWatcher = { active: boolean; keys: readonly string[] | null; callback: (run: ${p}Run, next: Readonly<Record<string, unknown>>, prev: Readonly<Record<string, unknown>>, info: ${p}WatchInfo) => void };
   const watchers: ${p}ResolvedWatcher[] = [];
   const rawWatchers: ${p}RawWatcher[] = [], rawAllWatchers: ${p}RawWatcher[] = [];
   const exposes: Record<string, unknown> = Object.create(null);
@@ -934,20 +936,33 @@ ${interaction ? `    event: ${p}Interaction.event,\n` : ''}    feedback: { style
       define(incoming: Record<string, ${p}PropSpec>) {
         ensurePhase('setup');
         const next = { ...specs };
+        let warnings: string[] | undefined;
         for (const [key, authored] of Object.entries(incoming)) {
-          const spec = { ...authored, type: propSchemas[key] ?? authored.type };
+          if (!Object.hasOwn(propSchemas, key)) throw new Error('[Props] undeclared checked schema: ' + key);
+          const spec = { ...authored, schema: propSchemas[key] };
           const previous = specs[key];
           if (!previous) { next[key] = { ...spec }; continue; }
           const rank = (empty: ${p}PropSpec['empty']) => empty === 'accept' ? 0 : empty === 'error' ? 2 : 1;
-          if (JSON.stringify(previous.type) !== JSON.stringify(spec.type) || Object.hasOwn(spec, 'empty') && rank(spec.empty) > rank(previous.empty)
+          if (previous.type !== spec.type || Object.hasOwn(spec, 'empty') && rank(spec.empty) > rank(previous.empty)
+            || previous.options && (!spec.options || previous.options.some(option => !spec.options!.includes(option)))
             || previous.range && spec.range && ((spec.range.min ?? -Infinity) > (previous.range.min ?? -Infinity)
               || (spec.range.max ?? Infinity) < (previous.range.max ?? Infinity)))
             throw new Error('[Props] conflicting or stricter prop definition: ' + key);
+          if (Object.hasOwn(spec, 'empty') && rank(spec.empty) < rank(previous.empty))
+            (warnings ??= []).push('empty behavior relaxed; retaining established policy: ' + key);
+          if (previous.options && spec.options?.some(option => !previous.options!.includes(option)))
+            (warnings ??= []).push('enum options widened: ' + key);
+          if (previous.range && spec.range && ((spec.range.min ?? -Infinity) < (previous.range.min ?? -Infinity)
+            || (spec.range.max ?? Infinity) > (previous.range.max ?? Infinity)))
+            (warnings ??= []).push('range widened: ' + key);
+          if (Object.hasOwn(previous, 'default') && Object.hasOwn(spec, 'default') && !Object.is(previous.default, spec.default))
+            (warnings ??= []).push('default changed; retaining established default: ' + key);
           next[key] = { ...previous, ...spec, empty: previous.empty ?? 'fallback', range: spec.range ?? previous.range };
           if (Object.hasOwn(previous, 'default')) next[key].default = previous.default;
         }
         Object.assign(specs, next);
         resolved = ${p}ResolveProps(specs, defaults, previousValid, raw, false);
+        warnings?.forEach(message => console.warn('[Props] ' + message));
 ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
       setDefaults(partial: Record<string, unknown>) {
         ensurePhase('setup');
@@ -955,7 +970,7 @@ ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
         defaults.unshift({ ...partial });
         resolved = ${p}ResolveProps(specs, defaults, previousValid, raw, false);
 ${interaction ? `        ${p}Interaction.refresh();\n` : ''}      },
-      watch(keys: readonly string[], callback: (run: ${p}Run, next: ${p}ResolvedProps, prev: ${p}ResolvedProps, info: Readonly<Record<string, unknown>>) => void) {
+      watch(keys: readonly string[], callback: ${p}ResolvedWatcher['callback']) {
         ensurePhase('setup');
         if (!keys.length || keys.some((key) => !Object.hasOwn(specs, key))) throw new Error('[Props] watchers require declared keys.');
         const watcher = { keys: [...keys], callback, active: true };
@@ -1036,7 +1051,7 @@ ${hookDefinitions}
     const nextRaw: Record<string, unknown> = Object.create(null);
     for (const [key, value] of Object.entries(nextHost)) {
       if (key === 'children' || key.startsWith('on') && typeof value === 'function') continue;
-      nextRaw[key] = value;
+      nextRaw[key] = value === undefined ? null : value;
     }
     if (hydrated && Object.keys(raw).length === Object.keys(nextRaw).length
       && Object.keys(nextRaw).every((key) => Object.hasOwn(raw, key) && Object.is(raw[key], nextRaw[key]))) return;
@@ -1052,7 +1067,7 @@ ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hyd
       propsWindow = { raw: nextRawSnapshot, resolved: nextResolved };
       try {
       if (rawAllWatchers.length || rawWatchers.length) {
-        const changedRaw = [...new Set([...Object.keys(previousRaw), ...Object.keys(nextRawSnapshot)])].filter(key => Object.hasOwn(previousRaw, key) !== Object.hasOwn(nextRawSnapshot, key) || !Object.is(previousRaw[key], nextRawSnapshot[key]));
+        const changedRaw = [...new Set([...Object.keys(previousRaw), ...Object.keys(nextRawSnapshot)])].filter(key => !Object.is(previousRaw[key], nextRawSnapshot[key]));
         if (changedRaw.length) for (let groupIndex = 0; groupIndex < 2; ++groupIndex) for (const watcher of groupIndex === 0 ? rawAllWatchers : rawWatchers) {
           if (!watcher.active) continue;
           const changedKeysMatched = watcher.keys ? watcher.keys.filter(key => changedRaw.includes(key)) : changedRaw;

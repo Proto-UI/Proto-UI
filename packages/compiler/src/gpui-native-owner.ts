@@ -10,7 +10,8 @@ import { gpuiNativeImageSource } from './gpui-native-image';
 import { gpuiNativePositioningSource } from './gpui-native-positioning';
 import { gpuiNativeOverlaySource } from './gpui-native-overlay';
 
-export const gpuiNativeOwnerSource = String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
+export const gpuiNativeOwnerSource =
+  String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
 use serde_json::{Value as Json, Map};
 use gpui::{prelude::*, AnyElement, App, Bounds, FocusHandle, Pixels, Window, div, canvas};
 pub type OwnerRef = Rc<RefCell<Owner>>;
@@ -138,18 +139,54 @@ pub fn life(owner:&OwnerRef,kind:&'static str){let callbacks=owner.borrow().life
 pub fn register_life(owner:&OwnerWeak,kind:&str,callback:Value)->Value{setup(owner).borrow_mut().lifecycle.entry(kind.into()).or_default().push(callback);Value::Undefined}
 pub fn request_update(owner:&OwnerWeak)->Value{let owner=runtime(owner);let mut o=owner.borrow_mut();o.update_requested=true;o.dirty=true;Value::Undefined}
 pub fn set_present(owner:&OwnerWeak,present:Value)->Value{let owner=runtime(owner);let present=present.bool();{let mut o=owner.borrow_mut();if o.present==present{return Value::Undefined}o.present=present;o.dirty=true;if present{o.projection=Value::Undefined;o.update_requested=true;}}if !present{detach_native_view(&owner);}Value::Undefined}
-pub fn props_define(owner:&OwnerWeak,schema:Value)->Value{let owner=setup(owner);match schema{Value::Record(entries)=>{owner.borrow_mut().schemas.extend(entries.iter().map(|(k,v)|(k.clone(),v.clone())));},_=>panic!("checked Props schema record")};resolve_props(&owner);Value::Undefined}
-pub fn set_defaults(owner:&OwnerWeak,defaults:Value)->Value{let owner=setup(owner);match defaults{Value::Record(entries)=>owner.borrow_mut().default_layers.push((*entries).clone()),_=>panic!("checked defaults record")};resolve_props(&owner);Value::Undefined}
+fn prop_json(value:&Value)->bool{match value{Value::Number(number)=>number.is_finite(),Value::Json(_)=>true,Value::Record(fields)=>fields.values().all(prop_json),Value::Array(values)=>values.iter().all(prop_json),_=>false}}
+fn prop_empty_rank(spec:&BTreeMap<String,Value>)->u8{match spec.get("empty"){None=>1,Some(Value::Json(Json::String(value)))=>match value.as_str(){"accept"=>0,"fallback"=>1,"error"=>2,_=>panic!("invalid Props empty behavior")},_=>panic!("invalid Props empty behavior")}}
+fn prop_range(spec:&BTreeMap<String,Value>)->Option<(f64,f64)>{match spec.get("range"){None|Some(Value::Json(Json::Null))=>None,Some(Value::Record(range))=>{let min=range.get("min").map_or(f64::NEG_INFINITY,Value::num);let max=range.get("max").map_or(f64::INFINITY,Value::num);assert!(!min.is_nan()&&!max.is_nan(),"invalid Props range");Some((min,max))},_=>panic!("checked Props range record")}}
+pub fn props_define(owner:&OwnerWeak,schema:Value)->Value{
+    let owner=setup(owner);let Value::Record(entries)=schema else{panic!("checked Props schema record")};
+    let mut merged=owner.borrow().schemas.clone();let mut warnings=Vec::new();
+    for(key,incoming)in entries.iter(){
+        let Value::Record(fields)=incoming else{panic!("checked Props descriptor record")};
+        let Some(Value::Json(Json::String(kind)))=fields.get("type") else{panic!("explicit Props type required")};
+        assert!(["boolean","number","string","enum","object","any"].contains(&kind.as_str()),"invalid Props type");
+        let rank=prop_empty_rank(fields);let range=prop_range(fields);
+        let options=match fields.get("options"){Some(Value::Array(options))if kind=="enum"=>{assert!(!options.is_empty()&&options.iter().all(|value|matches!(value,Value::Json(Json::String(_)))),"nonempty string Props enum options required");Some(options)},None if kind!="enum"=>None,_=>panic!("Props options require type enum")};
+        assert!(!fields.contains_key("enum"),"legacy Props enum descriptor field");
+        assert!(fields.get("default").is_none_or(prop_json),"non-JSON Props default");
+        if let Some(previous)=merged.get(key){
+            let Value::Record(prior)=previous else{panic!("checked prior Props descriptor")};
+            assert!(strict_equal(prior.get("type").unwrap(),fields.get("type").unwrap()),"conflicting Props type");
+            let previous_rank=prop_empty_rank(prior);assert!(rank<=previous_rank||!fields.contains_key("empty"),"Props empty policy cannot become stricter");
+            if fields.contains_key("empty")&&rank<previous_rank{warnings.push(format!("empty behavior relaxed; retaining established policy: {key}"));}
+            if let Some(Value::Array(previous_options))=prior.get("options"){
+                let options=options.expect("Props enum options cannot be removed");
+                assert!(previous_options.iter().all(|previous|options.iter().any(|next|strict_equal(previous,next))),"Props enum options cannot narrow");
+                if options.iter().any(|next|!previous_options.iter().any(|previous|strict_equal(previous,next))){warnings.push(format!("enum options widened: {key}"));}
+            }
+            if let(Some((previous_min,previous_max)),Some((min,max)))=(prop_range(prior),range){assert!(min<=previous_min&&max>=previous_max,"Props range cannot narrow");if min<previous_min||max>previous_max{warnings.push(format!("range widened: {key}"));}}
+            let mut next=(**prior).clone();next.extend(fields.iter().map(|(key,value)|(key.clone(),value.clone())));
+            if let Some(empty)=prior.get("empty"){next.insert("empty".into(),empty.clone());}else{next.insert("empty".into(),Value::string("fallback"));}
+            if fields.get("range").is_none_or(Value::nullish){if let Some(range)=prior.get("range"){next.insert("range".into(),range.clone());}}
+            if let Some(default)=prior.get("default"){
+                if fields.get("default").is_some_and(|next|!strict_equal(default,next)){warnings.push(format!("default changed; retaining established default: {key}"));}
+                next.insert("default".into(),default.clone());
+            }
+            merged.insert(key.clone(),Value::Record(Rc::new(next)));
+        }else{merged.insert(key.clone(),incoming.clone());}
+    }
+    owner.borrow_mut().schemas=merged;resolve_props(&owner);for warning in warnings{eprintln!("[Props] {warning}");}Value::Undefined
+}
+pub fn set_defaults(owner:&OwnerWeak,defaults:Value)->Value{let owner=setup(owner);match defaults{Value::Record(entries)=>{let mut state=owner.borrow_mut();assert!(entries.iter().all(|(key,value)|state.schemas.contains_key(key)&&prop_json(value)),"undeclared or non-JSON Props default");state.default_layers.push((*entries).clone());},_=>panic!("checked defaults record")};resolve_props(&owner);Value::Undefined}
 fn resolve_props(owner:&OwnerRef){
 let(raw,schemas,layers,previous_valid,valid,strict)={let o=owner.borrow();(o.raw.clone(),o.schemas.clone(),o.default_layers.clone(),o.previous_valid.clone(),o.prop_valid,o.phase!="setup")};
 let mut resolved=Map::new();let mut previous_valid=previous_valid;
 for(key,schema)in schemas{
 let provided=raw.get(&key);let empty_policy=schema.member("empty",false);let error=strict&&matches!(&empty_policy,Value::Json(Json::String(s))if s=="error");
-let range=schema.member("range",false);
-let accepts=|candidate:&Json|{if !(valid)(&key,candidate){return false}if !range.nullish(){let min=range.member("min",false);let max=range.member("max",false);let Some(number)=candidate.as_f64()else{return false};if !min.nullish()&&number<min.num(){return false}if !max.nullish()&&number>max.num(){return false}}true};
+let range=schema.member("range",false);let options=schema.member("options",false);
+let accepts=|candidate:&Json|{if !(valid)(&key,candidate){return false}if let Value::Array(options)=&options{if !options.iter().any(|option|matches!(option,Value::Json(Json::String(value))if Some(value.as_str())==candidate.as_str())){return false}}if !range.nullish(){let min=range.member("min",false);let max=range.member("max",false);let Some(number)=candidate.as_f64()else{return false};if !min.nullish()&&number<min.num(){return false}if !max.nullish()&&number>max.num(){return false}}true};
 let mut value=None;
 if let Some(raw)=provided{if !raw.is_null()&&accepts(raw){value=Some(raw.clone());previous_valid.insert(key.clone(),raw.clone());}else if raw.is_null()&&matches!(&empty_policy,Value::Json(Json::String(s))if s=="accept"){value=Some(Json::Null);}else if let Some(previous)=previous_valid.get(&key){if !previous.is_null()&&accepts(previous){value=Some(previous.clone());}}}
-if value.is_none(){for layer in &layers{if let Some(candidate)=layer.get(&key){let candidate=candidate.data();if candidate.is_null()&&!error||!candidate.is_null()&&accepts(&candidate){value=Some(candidate);break}}}}
+if value.is_none(){for layer in layers.iter().rev(){if let Some(candidate)=layer.get(&key){let candidate=candidate.data();if candidate.is_null()&&!error||!candidate.is_null()&&accepts(&candidate){value=Some(candidate);break}}}}
 if value.is_none(){let default=schema.member("default",false);if !matches!(default,Value::Undefined){let default=default.data();if default.is_null()&&!error||!default.is_null()&&accepts(&default){value=Some(default);}}}
 let value=value.unwrap_or_else(||{assert!(!error,"missing, empty or invalid prop without nonempty fallback: {key}");Json::Null});if provided.is_some()&&!value.is_null(){previous_valid.insert(key.clone(),value.clone());}resolved.insert(key,value);
 }
@@ -158,7 +195,35 @@ let props=Json::Object(resolved);let mut o=owner.borrow_mut();assert!((o.props_a
 pub fn read_props(owner:&OwnerWeak,raw:bool)->Value{let owner=ensure(owner);let o=owner.borrow();if raw{o.raw_value.clone()}else{o.props_value.clone()}}
 pub fn is_provided(owner:&OwnerWeak,key:Value)->Value{Value::boolean(ensure(owner).borrow().raw.get(key.text()).is_some())}
 pub fn watch_props(owner:&OwnerWeak,keys:Option<Value>,raw:bool,callback:Value)->Value{let owner=setup(owner);let active=Rc::new(Cell::new(true));let keys=keys.map(|v|match v{Value::Json(Json::String(s))=>vec![s],_=>v.items().iter().map(Value::text).collect()});owner.borrow_mut().watchers.push(Watcher{active:active.clone(),keys,raw,callback});disposer(owner,active,false)}
-pub fn replace_props(owner:&OwnerRef,raw:Json){assert!(raw.is_object(),"raw props must be a record");let (old_raw,old_props,watchers)={let o=owner.borrow();assert!(!o.disposed);(o.raw.clone(),o.props.clone(),o.watchers.clone())};{let mut o=owner.borrow_mut();o.raw_value=Value::json(raw.clone());o.raw=raw;o.dirty=true;}resolve_props(owner);let (new_raw,new_props)={let o=owner.borrow();(o.raw.clone(),o.props.clone())};let mut pending=Vec::new();for watcher in watchers{let(previous,next)=if watcher.raw{(&old_raw,&new_raw)}else{(&old_props,&new_props)};let all:BTreeSet<String>=previous.as_object().unwrap().keys().chain(next.as_object().unwrap().keys()).cloned().collect();let changed:Vec<String>=all.into_iter().filter(|key|previous.get(key)!=next.get(key)).collect();if changed.is_empty()||watcher.keys.as_ref().is_some_and(|keys|!changed.iter().any(|key|keys.contains(key))){continue}let info=record(vec![("changedKeys",Value::Array(Rc::new(changed.iter().map(|k|Value::string(k)).collect())))]);pending.push((watcher,next.clone(),previous.clone(),info));}for(watcher,next,previous,info)in pending{if watcher.active.get(){invoke(owner,"props-watch",&watcher.callback,vec![capability(&Rc::downgrade(owner)),Value::json(next),Value::json(previous),info]);}}}
+pub fn replace_props(owner:&OwnerRef,raw:Json){
+    assert!(raw.is_object(),"raw props must be a record");
+    let (old_raw,old_props,watchers)={let o=owner.borrow();assert!(!o.disposed);(o.raw_value.clone(),o.props_value.clone(),o.watchers.clone())};
+    {let mut o=owner.borrow_mut();o.raw_value=Value::json(raw.clone());o.raw=raw;o.dirty=true;}
+    resolve_props(owner);
+    if !watchers.iter().any(|watcher|watcher.active.get()){return}
+    let (new_raw,new_props)={let o=owner.borrow();(o.raw_value.clone(),o.props_value.clone())};
+    let changed=|previous:&Value,next:&Value|->Vec<String>{
+        let(Value::Record(previous),Value::Record(next))=(previous,next)else{panic!("Props snapshots must be records")};
+        let keys:BTreeSet<_>=previous.keys().chain(next.keys()).collect();
+        keys.into_iter().filter(|key|!same_value(previous.get(*key).unwrap_or(&Value::Undefined),next.get(*key).unwrap_or(&Value::Undefined))).cloned().collect()
+    };
+    let raw_changed=if watchers.iter().any(|watcher|watcher.raw&&watcher.active.get()){changed(&old_raw,&new_raw)}else{Vec::new()};
+    let resolved_changed=if watchers.iter().any(|watcher|!watcher.raw&&watcher.active.get()){changed(&old_props,&new_props)}else{Vec::new()};
+    let raw_keys=Value::Array(Rc::new(raw_changed.iter().map(|key|Value::string(key)).collect()));
+    let resolved_keys=Value::Array(Rc::new(resolved_changed.iter().map(|key|Value::string(key)).collect()));
+    for group in 0..3{for watcher in &watchers{
+        if !watcher.active.get()||group!=if watcher.raw{if watcher.keys.is_none(){0}else{1}}else{2}{continue}
+        let(previous,next,changed,all)=if watcher.raw{(&old_raw,&new_raw,&raw_changed,&raw_keys)}else{(&old_props,&new_props,&resolved_changed,&resolved_keys)};
+        if changed.is_empty(){continue}
+        let matched=if let Some(keys)=&watcher.keys{
+            let matched:Vec<Value>=keys.iter().filter(|key|changed.contains(key)).map(|key|Value::string(key)).collect();
+            if matched.is_empty(){continue}Value::Array(Rc::new(matched))
+        }else{all.clone()};
+        let info=record(vec![("changedKeysAll",all.clone()),("changedKeysMatched",matched)]);
+        if watcher.raw{eprintln!("[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.");}
+        invoke(owner,"props-watch",&watcher.callback,vec![capability(&Rc::downgrade(owner)),next.clone(),previous.clone(),info]);
+    }}
+}
 pub fn create_state(owner:&OwnerWeak,kind:&'static str,key:Value,value:Value,spec:Value)->Value{let owner_ref=setup(owner);let key=key.text();assert!(!key.is_empty()&&!owner_ref.borrow().states.contains_key(&key),"State name must be nonempty and same-frame unique");let state=Rc::new(State{value:RefCell::new(normalize_state(kind,value,&spec,true)),kind,spec,owner:owner.clone()});owner_ref.borrow_mut().states.insert(key,state.clone());Value::State(state)}
 fn normalize_state(kind:&str,value:Value,spec:&Value,initial:bool)->Value{match kind{"bool"=>{value.bool();},"string"|"enum"=>{assert!(matches!(value,Value::Json(Json::String(_))),"State string required");let options=spec.member("options",true);assert!(!options.nullish()||kind!="enum","enum options required");if !options.nullish(){assert!(options.items().iter().any(|option|strict_equal(option,&value)),"State value outside options");}},"discrete"|"range"=>{let number=value.num();assert!(number.is_finite(),"State finite number required");let min=spec.member("min",true);let max=spec.member("max",true);if kind=="range"{assert!(!min.nullish()&&!max.nullish()&&min.num()<=max.num(),"invalid range");let clamp=spec.member("clamp",true);if initial&&!clamp.nullish()&&clamp.bool(){return Value::number(number.max(min.num()).min(max.num()))}assert!(number>=min.num()&&number<=max.num(),"State range violation");}else{if !min.nullish(){assert!(number>=min.num(),"State below min")}if !max.nullish(){assert!(number<=max.num(),"State above max")}let step=spec.member("step",true);if !step.nullish(){assert!(step.num()>0.,"State step must be positive");let origin=if min.nullish(){0.}else{min.num()};assert!(((number-origin)/step.num()).fract().abs()<1e-9,"State step violation");}}},_=>panic!("unknown State constructor")};let options=spec.member("options",true);if !options.nullish(){assert!(options.items().iter().any(|item|strict_equal(item,&value)),"State option violation")}value}
 pub fn state_set(receiver:Value,value:Value,reason:Value)->Value{match receiver{Value::State(state)=>{runtime(&state.owner);write_state_value(&state,value,reason);},_=>panic!("State handle required")};Value::Undefined}
@@ -534,4 +599,13 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
     for owner in &owners{let end={let mut owner=owner.borrow_mut();if owner.press.key.as_deref()==key.as_deref(){owner.press.key.take().is_some()}else{false}};if end{prevented|=dispatch_root_route(owner,"press.end",press_fields("press.end",&fields));}}
     if prevented{window.prevent_default();cx.stop_propagation();}drive_owners(window,cx);
 }
-` + gpuiNativeModulesSource + gpuiNativeTopologySource + gpuiNativeTableSource + gpuiNativeBoundarySource + gpuiNativeScrollSource + gpuiNativeTextSource + gpuiNativeImageSource + gpuiNativePositioningSource + gpuiNativeOverlaySource;
+` +
+  gpuiNativeModulesSource +
+  gpuiNativeTopologySource +
+  gpuiNativeTableSource +
+  gpuiNativeBoundarySource +
+  gpuiNativeScrollSource +
+  gpuiNativeTextSource +
+  gpuiNativeImageSource +
+  gpuiNativePositioningSource +
+  gpuiNativeOverlaySource;

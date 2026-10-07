@@ -840,18 +840,24 @@ ${ssr ? '  host.bindContext(context);\n' : ''}
   function hydrate(input: Record<string, unknown>): void {
     ensure();
     const prev = resolved, previousRaw = raw;
-    raw = Object.freeze({...input});
+    const nextInput = {...input};
+    for (const key of Object.keys(nextInput)) if (nextInput[key] === undefined) nextInput[key] = null;
+    raw = Object.freeze(nextInput);
     resolved = resolve(true);
 ${styled ? `    ${p}Style.refresh();\n` : ''}
 ${interacting ? `    ${p}Interaction.refresh();\n` : ''}
     if (!hydrated) { hydrated = true; return; }
     const changed = Object.keys(specs).filter((key) => !Object.is(prev[key], resolved[key]));
-    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => own(previousRaw, key) !== own(raw, key) || !Object.is(previousRaw[key], raw[key])) : changed;
+    const rawChanged = watchers.some((watcher) => watcher.raw && watcher.active) ? [...new Set([...Object.keys(previousRaw), ...Object.keys(raw)])].filter((key) => !Object.is(previousRaw[key], raw[key])) : [];
     const next = resolved, nextRaw = raw;
-    for (const watcher of [...watchers]) {
+    const snapshot = [...watchers];
+    for (let group = 0; group < 3; ++group) for (const watcher of snapshot) {
+      if (!watcher.active || (watcher.raw ? watcher.keys === null ? 0 : 1 : 2) !== group) continue;
       const all = watcher.raw ? rawChanged : changed;
-      const matched = watcher.keys === null ? all : all.filter((key) => watcher.keys!.includes(key));
-      if (watcher.active && matched.length) invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
+      const matched = watcher.keys === null ? all : watcher.keys.filter((key) => all.includes(key));
+      if (!matched.length) continue;
+      if (watcher.raw) console.warn('[Props] raw watchers are an adapter-snapshot escape hatch; avoid in official prototypes.');
+      invoke(watcher.fn, [watcher.raw ? nextRaw : next, watcher.raw ? previousRaw : prev, {changedKeysAll: all, changedKeysMatched: matched}]);
     }
   }
   function drainEmissions(): void {
@@ -1039,6 +1045,7 @@ ${
       define(input: Record<string, ${p}PropSpec>) {
         ensureSetup();
         const merged = {...specs};
+        let warnings: string[] | undefined;
         for (const key of Object.keys(input)) {
           const next = input[key], prev = specs[key];
           if (!['boolean', 'number', 'string', 'enum', 'object', 'any'].includes(next.type)) throw new Error('Unsupported prop type');
@@ -1047,10 +1054,21 @@ ${
           if (prev && (prev.type !== next.type || (prev.range && next.range && ((next.range.min ?? -Infinity) > (prev.range.min ?? -Infinity) || (next.range.max ?? Infinity) < (prev.range.max ?? Infinity))))) throw new Error('Conflicting prop declaration');
           const rank = (empty: string) => empty === 'accept' ? 0 : empty === 'error' ? 2 : 1;
           if (prev && next.empty !== undefined && rank(next.empty) > rank(prev.empty ?? 'fallback')) throw new Error('Conflicting prop empty policy');
+          if (prev?.options && (!next.options || prev.options.some(value => !next.options!.includes(value)))) throw new Error('Prop options cannot narrow');
+          if (prev && next.empty !== undefined && rank(next.empty) < rank(prev.empty ?? 'fallback'))
+            (warnings ??= []).push('empty behavior relaxed; retaining established policy: ' + key);
+          if (prev?.options && next.options?.some(value => !prev.options!.includes(value)))
+            (warnings ??= []).push('enum options widened: ' + key);
+          if (prev?.range && next.range && ((next.range.min ?? -Infinity) < (prev.range.min ?? -Infinity)
+            || (next.range.max ?? Infinity) > (prev.range.max ?? Infinity)))
+            (warnings ??= []).push('range widened: ' + key);
+          if (prev && own(prev, 'default') && own(next, 'default') && !Object.is(prev.default, next.default))
+            (warnings ??= []).push('default changed; retaining established default: ' + key);
           merged[key] = {...prev, ...next, schema: (${p}PropTypes as Record<string, Parameters<typeof ${p}Accepts>[0]>)[key], empty: prev?.empty ?? next.empty ?? 'fallback', range: next.range ?? prev?.range, ...(prev && own(prev, 'default') ? {default: prev.default} : {})};
         }
         Object.assign(specs, merged);
         resolved = resolve(false);
+        warnings?.forEach(message => console.warn('[Props] ' + message));
 ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
       },
       setDefaults(input: Record<string, unknown>) { ensureSetup(); for (const key of Object.keys(input)) if (!own(specs, key)) throw new Error('Undeclared prop default: ' + key); defaults.unshift({...input}); resolved = resolve(false); ${interacting ? `${p}Interaction.refresh(); ` : ''}},

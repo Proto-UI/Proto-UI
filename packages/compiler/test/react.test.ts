@@ -91,6 +91,26 @@ describe('checked IR to React runtime-backed source', () => {
     });
   });
 
+  it('rejects malformed Props policy in external IR before target emission', () => {
+    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'props-policy',setup(def){
+  def.props.define({label:{type:'string',empty:'accept',default:'initial'}});
+}});`);
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const statement = parsed.value.setup.body[0];
+    if (statement.kind !== 'effect' || statement.expression.kind !== 'operation')
+      throw new Error('Expected Props declaration');
+    const input = statement.expression.arguments[0];
+    if (input.kind !== 'record' || input.entries[0].value.kind !== 'record')
+      throw new Error('Expected Props descriptor');
+    const empty = input.entries[0].value.entries.find((entry) => entry.key === 'empty')!.value;
+    if (empty.kind !== 'literal') throw new Error('Expected literal policy');
+    empty.value = 'invalid';
+    const rejection = { ok: false, diagnostics: [{ code: 'PUI2002', category: 'invalid-ir' }] };
+    expect(validateIR(parsed.value)).toMatchObject(rejection);
+    expect(emitReact(parsed.value)).toMatchObject(rejection);
+  });
+
   it('rejects incompatible State write values at both checked-IR entrypoints', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'typed-state-write',setup(def){
