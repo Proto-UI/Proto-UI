@@ -57,13 +57,14 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
           w.all(
             w.prop('variant').eq('regular'),
             w.prop('material').eq('auto'),
+            w.state(disabled).eq(false),
             w.state(pressed).eq(phase)
           ),
         intent: (i) =>
           i.feedback.material.use({
             intent: 'liquid-glass',
             variant: 'regular',
-            deformation: { kind: 'press', phase: phase ? 'pressed' : 'rest' },
+            deformation: { kind: 'press', phase: phase ? 'pressed' : 'rest', contact: 'pointer' },
           }),
       });
     }

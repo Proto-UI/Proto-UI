@@ -3,7 +3,7 @@ export type MaterialCandidate =
   | Readonly<{
       intent: 'liquid-glass';
       variant?: 'regular' | 'clear';
-      deformation?: Readonly<{ kind: 'press'; phase: 'rest' | 'pressed' }>;
+      deformation?: Readonly<{ kind: 'press'; phase: 'rest' | 'pressed'; contact?: 'pointer' }>;
     }>
   | Readonly<{ intent: 'adaptive-blur'; tone?: 'system' | 'light' | 'dark' }>;
 
@@ -57,10 +57,16 @@ export function snapshotMaterialCandidate(value: unknown): MaterialCandidate {
       throw new Error('Invalid liquid-glass variant');
     let deformation: Extract<MaterialCandidate, { intent: 'liquid-glass' }>['deformation'];
     if (Object.hasOwn(candidate, 'deformation')) {
-      const data = record(candidate.deformation, ['kind', 'phase']);
+      const data = record(candidate.deformation, ['kind', 'phase'], ['contact']);
       if (data?.kind !== 'press' || (data.phase !== 'rest' && data.phase !== 'pressed'))
         throw new Error('Invalid finite material deformation');
-      deformation = Object.freeze({ kind: 'press', phase: data.phase });
+      if (Object.hasOwn(data, 'contact') && data.contact !== 'pointer')
+        throw new Error('Invalid finite material contact');
+      deformation = Object.freeze({
+        kind: 'press',
+        phase: data.phase,
+        ...(data.contact === 'pointer' ? { contact: 'pointer' as const } : {}),
+      });
     }
     return Object.freeze({
       intent: 'liquid-glass',

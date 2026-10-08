@@ -187,6 +187,11 @@ describe('prototypes/base: Button view lifetime', () => {
         ctx.emit('pointer.down');
         ctx.emit('pointer.cancel');
         expect(ctx.facts()).toEqual({ pressed: false, hovered: false });
+        ctx.emit('pointer.enter');
+        ctx.emit('pointer.down');
+        ctx.emit('press.cancel');
+        expect(ctx.facts()).toEqual({ pressed: false, hovered: false });
+        expect(ctx.clicks).toEqual([]);
 
         ctx.emit('pointer.enter');
         ctx.emit('pointer.down');

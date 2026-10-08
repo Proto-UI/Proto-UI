@@ -112,6 +112,10 @@ function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
     pressed.set(false, 'reason: button pointer.cancel => pressed');
   });
 
+  def.event.on('press.cancel', () => {
+    clearTransientInteraction('reason: button press.cancel => reset transient interaction');
+  });
+
   // P-BASE-BUTTON-PRESS-LIFECYCLE
   def.event.on('pointer.down', () => {
     if (disabled.get()) return;

@@ -39,3 +39,7 @@ Select Root/Trigger/Value/Content/Item and Text now have independent direct Base
 The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
 
 This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
+
+### Held pointer contact (draft Web slice)
+
+The enabled regular Button requests finite `contact: pointer` visual feedback. The existing Web input router owns the sampled primary-pointer session; the renderer does not capture pointers or emit activation. Contact coordinates use the undeformed down bounds, and visual dragging can continue after pointer leave without changing Base activation semantics. Disabled/opaque/prominent withdraw the request. This source slice does not establish browser GPU smoothness, arbitrary DOM capture, native host support, or Apple-private equivalence. Reduced motion retains static feedback and disables elastic motion.

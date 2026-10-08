@@ -67,19 +67,23 @@ describe('Liquid Glass Button V2 portable intent, not an optical paint claim', (
     expect(f.frames.at(-1)?.material.slot?.source).toEqual({ kind: 'in-app-backdrop' });
     expect(f.frames.at(-1)?.style.tokens).toContain('bg-secondary');
     expect(f.frames.at(-1)?.material.candidates).toEqual([
-      { intent: 'liquid-glass', variant: 'regular', deformation: { kind: 'press', phase: 'rest' } },
+      {
+        intent: 'liquid-glass',
+        variant: 'regular',
+        deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+      },
     ]);
     f.root.dispatchEvent(new Event('pointer.down'));
     expect(f.frames.at(-1)?.material.candidates).toEqual([
       {
         intent: 'liquid-glass',
         variant: 'regular',
-        deformation: { kind: 'press', phase: 'pressed' },
+        deformation: { kind: 'press', phase: 'pressed', contact: 'pointer' },
       },
     ]);
     f.root.dispatchEvent(new Event('pointer.up'));
     expect(f.frames.at(-1)?.material.candidates[0]).toMatchObject({
-      deformation: { phase: 'rest' },
+      deformation: { phase: 'rest', contact: 'pointer' },
     });
     expect(
       f.frames
@@ -110,13 +114,15 @@ describe('Liquid Glass Button V2 portable intent, not an optical paint claim', (
     const f = await fixture();
     f.root.dispatchEvent(new Event('pointer.down'));
     f.setProps({ disabled: true });
-    expect(f.frames.at(-1)?.material.candidates[0]).toMatchObject({
-      deformation: { phase: 'rest' },
-    });
+    expect(f.frames.at(-1)?.material.candidates).toHaveLength(0);
     await f.session.unmount();
     expect(f.release).toHaveBeenCalledOnce();
     await f.session.mount();
-    expect(f.frames.at(-1)?.material.candidates).toHaveLength(1);
+    expect(f.frames.at(-1)?.material.candidates).toHaveLength(0);
+    f.setProps({ disabled: false });
+    expect(f.frames.at(-1)?.material.candidates[0]).toMatchObject({
+      deformation: { phase: 'rest', contact: 'pointer' },
+    });
     await f.session.dispose();
   });
 });

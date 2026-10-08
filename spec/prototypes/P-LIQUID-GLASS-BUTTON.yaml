@@ -25,7 +25,7 @@ criteria:
       en: The package is private and unreleased. Initial source and Web evidence do not establish general Prototype Compiler, GPUI, Flutter or Qt support. Homepage and full component coverage remain separate work.
   - id: P-LIQUID-GLASS-BUTTON-MATERIAL
     text:
-      en: Regular auto contributes one complete V2 liquid-glass candidate with finite press deformation driven by existing Base state. Opaque opt-out and prominent contribute zero candidates, retaining the declared opaque fallback. Provider policy resolves final style ownership, current source scope, geometry and preferences. Reduced or unknown motion selects static optics when supported; reduced/unknown transparency and unsafe contrast withdraw enhancement. No browser observer, GPU uniform or input owner belongs to this Prototype.
+      en: Enabled regular auto contributes one complete V2 liquid-glass candidate with finite press deformation driven by existing Base state and a finite pointer-contact request to the existing host input owner. Held drag tracking is visual-only and does not change Base activation or pointer-leave semantics. Disabled, opaque opt-out and prominent contribute zero candidates, retaining the declared opaque fallback. Provider policy resolves final style ownership, current source scope, geometry and preferences. Reduced or unknown motion selects static optics when supported; reduced/unknown transparency and unsafe contrast withdraw enhancement. No browser observer, GPU uniform or input owner belongs to this Prototype.
 sources:
   - path: packages/prototypes/liquid-glass/src/button/button.proto.ts
   - path: packages/prototypes/liquid-glass/src/theme.ts

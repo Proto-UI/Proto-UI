@@ -21,7 +21,18 @@ cases:
     covers:
       - C-FEEDBACK-MATERIAL-0001-SEMANTICS
     expectation: A host click changes the semantic owner's intent, one provider receives final frames, and unmount releases exactly once. This establishes no browser GPU paint.
+  - id: T-WEB-MATERIAL-PROVIDER-0001-CASE-CONTACT
+    title: Existing router owns bounded visual contact independently of activation
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-CONTACT
+    expectation: Frozen down geometry, finite normalized samples, one primary pointer, outside drag, no capture or activation, cancellation and stale-router retirement are exercised as source-level tests, not GPU visual evidence.
 implementations:
+  - id: web-material-pointer-contact
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/pointer-contact.test.ts
+    required: true
+    consumesCases: [T-WEB-MATERIAL-PROVIDER-0001-CASE-CONTACT]
   - id: web-material-provider-wiring
     kind: module-test
     status: passing
@@ -40,6 +51,9 @@ implementations:
     path: packages/adapters/react/test/material-provider.integration.test.ts
     required: true
     consumesCases: [T-WEB-MATERIAL-PROVIDER-0001-CASE-INTEGRATION]
+exercises:
+  contracts:
+    - C-FEEDBACK-MATERIAL-0001
 sources:
   - path: packages/modules/feedback/src/material/deferred-view-sink.ts
   - path: packages/adapters/web-component/src/runtime/modules.ts

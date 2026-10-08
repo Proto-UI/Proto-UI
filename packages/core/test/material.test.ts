@@ -73,3 +73,22 @@ describe('shared finite material intent vectors', () => {
       expect(() => snapshotMaterialSlot(data)).toThrow();
   });
 });
+
+it('admits only a finite pointer contact request, never author coordinates or programs', () => {
+  expect(
+    snapshotMaterialCandidate({
+      intent: 'liquid-glass',
+      deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+    })
+  ).toEqual({
+    intent: 'liquid-glass',
+    deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+  });
+  for (const contact of [null, 'mouse', { x: 0.5, y: 0.5 }, Infinity])
+    expect(() =>
+      snapshotMaterialCandidate({
+        intent: 'liquid-glass',
+        deformation: { kind: 'press', phase: 'rest', contact },
+      })
+    ).toThrow();
+});

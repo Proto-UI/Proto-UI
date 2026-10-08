@@ -13,7 +13,7 @@ statement:
 criteria:
   - id: C-FEEDBACK-MATERIAL-0001-GRAMMAR
     text:
-      en: 'Version 2 slots admit distinct liquid-glass and adaptive-blur intents. Liquid glass requires a self optical renderer; model/profile version belongs to the backend, and static surfaces need no model or interaction declaration. Optional regular/clear variant and finite press deformation are independent parameters, not a button requirement. Adaptive blur admits an eligible system-native material or an evidenced in-app browser compositor, with optional system/light/dark tone. Neither intent can silently become the other. Logical owned-scene, in-app-backdrop and behind-window source requests are distinct and do not grant capture access. Reject unknown fields, arbitrary anchors/paths/URLs/textures/CSS/shaders and non-finite values.'
+      en: 'Version 2 slots admit distinct liquid-glass and adaptive-blur intents. Liquid glass requires a self optical renderer; model/profile version belongs to the backend, and static surfaces need no model or interaction declaration. Optional regular/clear variant and finite press deformation (with an optional finite contact: pointer request) are independent parameters, not a button requirement. Adaptive blur admits an eligible system-native material or an evidenced in-app browser compositor, with optional system/light/dark tone. Neither intent can silently become the other. Logical owned-scene, in-app-backdrop and behind-window source requests are distinct and do not grant capture access. Reject unknown fields, arbitrary anchors/paths/URLs/textures/CSS/shaders and non-finite values.'
       zh-CN: 'Version 2 slot 区分 liquid-glass 与 adaptive-blur。显式液态玻璃要求自实现光学 renderer；model/profile 版本属于后端，静态面板无需声明模型或交互。regular/clear 与有限 press deformation 是可选参数，不要求 Button 状态。适应模糊可由实证 system-native 材质或 in-app 浏览器 compositor 提供，可选 system/light/dark tone；两意图不可静默替代。owned-scene、in-app-backdrop、behind-window 是不同逻辑来源，不授予捕获权限。拒绝未知字段、任意 anchor/path/URL/texture/CSS/shader 和非有限值。'
   - id: C-FEEDBACK-MATERIAL-0001-SLOT
     text:
@@ -43,6 +43,10 @@ criteria:
     text:
       en: 'Material is visual-only. Static surfaces require no interaction state. Optional finite deformation consumes existing semantic state handles through Feedback/Rule contributions; no exposed-name convention or button-press profile is universal. Resolution, fallback and resources never invent input, activation, disabled state, structural render or a second semantic owner. Pure schema/policy functions acquire no resources and publish no host paint.'
       zh-CN: 'material 仅属视觉。静态 surface 不要求交互状态；可选有限形变经 Feedback/Rule contribution 消费已有语义 state handle，不能将 expose 名字约定或 button-press profile 作为通用要求。解析、fallback 与资源不得虚构输入、激活、disabled、structural render 或第二个语义 owner。纯 schema/policy 不获取资源也不发布 host paint。'
+  - id: C-FEEDBACK-MATERIAL-0001-CONTACT
+    text:
+      en: 'Finite press deformation may request contact: pointer. This is a visual-only request for the existing input owner’s primary pointer session, not author coordinates, native-event access, pointer capture, activation, or a second input owner. An evidenced host may observe normalized contact and bounded displacement relative to the undeformed layout bounds captured at down. Visual tracking may continue outside the hit area independently of activation state. Matching up ends tracking; cancel, lost capture, window blur, disable, view retirement and replacement invalidate it. A new session cannot inherit old completion. Providers without evidenced contact support retain their finite static/press path and must not claim continuous contact. Reduced or unknown motion suppresses elastic motion; static readable feedback and transparency policy remain independent.'
+      zh-CN: '有限 press deformation 可请求 contact: pointer；仅观察既有输入 owner 的主 pointer 会话，不授予作者坐标、nativeEvent、capture、activation 或第二输入 owner。归一化触点和有界位移相对 down 时未形变 layout bounds，视觉追踪可在命中区域外继续而不改变激活语义。up 结束，cancel/lost capture/window blur/禁用/卸载/替换立即失效；新会话不得继承旧 completion。未实证 contact 的 provider 保留有限 static/press 路径并不得声称连续追踪。reduced/unknown motion 禁止弹性运动，静态可读反馈与透明度策略独立。'
   - id: C-FEEDBACK-MATERIAL-0001-QUALITY
     text:
       en: 'Report requested intent, actual source scope, selected backend/profile, motion override, quality and diagnostic reasons separately. Pure policy eligibility is not enhanced paint. Committed self-optical, adaptive system-native, adaptive browser-compositor, opaque-fallback and unavailable outcomes require their respective evidence; native glass cannot certify explicit liquid-glass. No finite model or successful code generation claims Apple-private parameters, cross-engine equivalence, perceived resemblance or full Prototype Compiler support.'
@@ -100,6 +104,9 @@ sources:
   - path: packages/modules/feedback/src/create.ts
     label: Existing style-only module lifecycle; not material integration evidence
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded router-owned pointer contact intent without author coordinates or activation ownership; continuous host evidence remains draft.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Drafted one finite independent material slot, explicit opaque fallback, post-patch ownership checks and conservative safety boundaries.
