@@ -10,6 +10,7 @@ import {
   applyDoubleRootTextScale,
   captureCurrentViewport,
   closeEvidenceContext,
+  writeFailureRecord,
 } from './library-card-capture';
 import { recordLibraryFontTrace } from './library-card-font-trace';
 import { readLibraryPlatformFonts } from './library-card-platform-fonts';
@@ -448,10 +449,14 @@ describe('actual library Cards preserve their first frame', () => {
       await captureCurrentViewport(page, path.join(directory, `${name}-failure.png`)).catch(
         () => {}
       );
-      await writeFile(
-        path.join(directory, `${name}-failure.json`),
-        JSON.stringify({ sha, tree, dirty, phase, textScale, error: String(error) }, null, 2)
-      );
+      await writeFailureRecord(path.join(directory, `${name}-failure.json`), {
+        sha,
+        tree,
+        dirty,
+        phase,
+        textScale,
+        error: String(error),
+      });
       throw error;
     } finally {
       await closeEvidenceContext(context, failed);

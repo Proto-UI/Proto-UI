@@ -15,3 +15,9 @@ The same no-script page now synchronously sets only the root inline `font-size: 
 Fourteen capture/injection controls pass, including the eleven previously accepted cleanup/publication controls, synchronous 16px-to-32px controlled CSSOM values, rejected unapplied scaling, and the pinned old injector's withheld-event control. The CSSOM values are injected controls; actual Chromium scaling and completion remain for the next official exact-head run. This is a validation-harness stall repair, not a claim to fix product geometry, fonts or the original native failure completely.
 
 No production code or font bytes changed. Local full docs/types/build are deferred to the coordinated final integration. No new native screenshots exist for this candidate yet; published 5445 screenshots remain evidence of that failed source only.
+
+## Independent failure-record precedence correction
+
+Independent review reproduced an existing diagnostic defect in both published 5445 and the first candidate: after a no-script scale/assertion failure, rejected failure-JSON I/O replaced that original error. The failure screenshot rejection was already contained, and context cleanup still ran. This is not a new product regression and does not explain all native failures.
+
+Only the already-failed no-script path now calls `writeFailureRecord`: serialization/write errors are separately reported as `failure-record.write`, including protection against a faulty reporter, and control returns to the original `throw error`. Successful result publication still uses the original unguarded write, so its I/O failure remains a primary failure. No physical filesystem completion deadline is claimed. Three additional controls retain the exact original Error object across failed I/O and failed reporting, and preserve the original JSON body on success; the complete capture/injection helper suite passes 17 tests. Native browser gates and timing remain unchanged.

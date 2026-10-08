@@ -1,13 +1,16 @@
 // @vitest-environment node
 import { writeFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import type { Page } from 'playwright-core';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
   applyDoubleRootTextScale,
   captureCurrentViewport,
   closeEvidenceContext,
+  writeFailureRecord,
   type CleanupIssue,
 } from './library-card-capture';
+vi.mock('node:fs/promises', () => ({ writeFile: vi.fn(async () => {}) }));
 vi.mock('node:fs', () => ({ writeFileSync: vi.fn(() => {}) }));
 beforeEach(() => {
   vi.useFakeTimers();
@@ -319,4 +322,34 @@ it('retains the old injector pending when its style load callback is absent', as
   style.onload!();
   await pending;
   expect(settled).toBe(true);
+});
+
+for (const reporterRejects of [false, true])
+  it(`retains the original no-script error when the failure record rejects (reporter throws=${reporterRejects})`, async () => {
+    const primary = new Error('original scale failure');
+    const secondary = new Error('failure JSON write failed');
+    const issues: CleanupIssue[] = [];
+    vi.mocked(writeFile).mockRejectedValueOnce(secondary);
+    const run = async () => {
+      try {
+        throw primary;
+      } catch (error) {
+        await writeFailureRecord('/tmp/control-failure.json', { error: String(error) }, (issue) => {
+          issues.push(issue);
+          if (reporterRejects) throw new Error('reporter failed');
+        });
+        throw error;
+      }
+    };
+    expect(await run().catch((error) => error)).toBe(primary);
+    expect(issues).toEqual([{ operation: 'failure-record.write', error: String(secondary) }]);
+  });
+
+it('writes the original failure record unchanged when local I/O succeeds', async () => {
+  const record = { phase: '200-percent-text', error: 'original scale failure' };
+  await writeFailureRecord('/tmp/control-failure.json', record);
+  expect(writeFile).toHaveBeenCalledWith(
+    '/tmp/control-failure.json',
+    JSON.stringify(record, null, 2)
+  );
 });

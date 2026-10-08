@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { writeFileSync } from 'node:fs';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { BrowserContext, CDPSession, Page } from 'playwright-core';
 
@@ -104,4 +105,22 @@ export function applyDoubleRootTextScale() {
     value: root.style.getPropertyValue('font-size'),
     priority: root.style.getPropertyPriority('font-size'),
   };
+}
+
+/** A failure record is secondary to the test's original error. Local filesystem
+ * completion has no claimed physical deadline; a rejection must not replace it. */
+export async function writeFailureRecord(
+  file: string,
+  record: unknown,
+  report: ReportCleanup = reportCleanup
+) {
+  try {
+    await writeFile(file, JSON.stringify(record, null, 2));
+  } catch (error) {
+    try {
+      report({ operation: 'failure-record.write', error: String(error) });
+    } catch {
+      // A broken diagnostic reporter must not replace the original test error.
+    }
+  }
 }
