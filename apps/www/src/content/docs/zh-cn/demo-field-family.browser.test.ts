@@ -13,11 +13,17 @@ import {
   startServer,
   stopServer,
 } from './browser-harness';
+import {
+  fieldControlSelector,
+  fieldEditorOwnerRef,
+  fieldEditorSelector,
+} from './field-browser-oracle';
 const families = ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'];
 let browser: Browser,
   baseUrl = '';
 const ref = (previewer: Locator, id: string) => previewer.locator(`.host [data-demo-ref="${id}"]`);
-const editor = (previewer: Locator, id: string) => ref(previewer, `${id}Control`).locator('input');
+const editor = (previewer: Locator, id: string) =>
+  previewer.locator('.host').locator(fieldEditorSelector(id));
 const route = (family: string, locale = 'en') => `/${locale}/ui-libraries/${family}/field/`;
 async function capture(previewer: Locator, name: string, subject: Record<string, unknown>) {
   const directory =
@@ -90,7 +96,13 @@ describe('Field real browser journeys', () => {
         try {
           previewer = mountedPreviewer;
           await selectRuntime(page, previewer, runtime, 'input', 6);
-          await expect.poll(() => editor(previewer!, 'required').count()).toBe(1);
+          for (const id of ['required', 'async', 'controlled', 'readonly', 'disabled', 'long']) {
+            await expect
+              .poll(() => previewer!.locator('.host').locator(fieldControlSelector(id)).count())
+              .toBe(1);
+            await expect.poll(() => editor(previewer!, id).count()).toBe(1);
+            expect(await editor(previewer, id).evaluate(fieldEditorOwnerRef)).toBe(`${id}Control`);
+          }
           await page.evaluate(() => {
             (window as any).__fieldInputEvidence = [];
             for (const type of ['pointerdown', 'keydown', 'input', 'focusin'])
