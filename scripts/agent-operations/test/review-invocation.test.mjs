@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -97,6 +97,7 @@ function fixture(t, command) {
     `
   );
   return {
+    ...identity,
     handoff,
     files,
     invoke(invocationArgs, candidate = handoff, extraArgs = []) {
@@ -144,6 +145,82 @@ function fixture(t, command) {
         calls: readFileSync(callsPath, 'utf8'),
       };
     },
+  };
+}
+
+// Spawn review-packet with overridden --record/--context paths and observe
+// whether either raw input was opened before the process exited. Mirrors the
+// existing preload boundary observer but intercepts fs.openSync, since the
+// no-follow reader opens files directly rather than through readFileSync.
+function observeInputs(t, command, f, recordPath, contextPath) {
+  const directory = mkdtempSync(path.join(tmpdir(), 'pui-review-observe-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const readsPath = path.join(directory, 'reads.jsonl');
+  const callsPath = path.join(directory, 'calls.jsonl');
+  const preloadPath = path.join(directory, 'observe-open.mjs');
+  writeFileSync(readsPath, '');
+  writeFileSync(callsPath, '');
+  writeFileSync(
+    preloadPath,
+    `
+    import cp from 'node:child_process';
+    import fs from 'node:fs';
+    import { syncBuiltinESMExports } from 'node:module';
+    const watched = new Set(JSON.parse(process.env.PUI_INVOCATION_FILES));
+    const openSync = fs.openSync;
+    fs.openSync = (file, ...args) => {
+      if (watched.has(String(file))) {
+        fs.appendFileSync(process.env.PUI_INVOCATION_READS, JSON.stringify(String(file)) + '\\n');
+      }
+      return openSync(file, ...args);
+    };
+    cp.execFileSync = (command, args) => {
+      fs.appendFileSync(process.env.PUI_INVOCATION_CALLS, JSON.stringify({ command, args }) + '\\n');
+      throw new Error('mock live collection boundary reached');
+    };
+    syncBuiltinESMExports();
+    `
+  );
+  writeFileSync(f.files.handoff, JSON.stringify(f.handoff));
+  const merge = command === 'merge-pull-request';
+  const result = spawnSync(
+    process.execPath,
+    [
+      '--import',
+      pathToFileURL(preloadPath).href,
+      path.join(root, 'scripts/agent-operations/review-packet.mjs'),
+      command,
+      ...HUMAN_ARGS,
+      '--input',
+      f.files.input,
+      '--packet',
+      f.files.packet,
+      '--handoff',
+      f.files.handoff,
+      '--authorization',
+      'explicit-current-user',
+      '--record',
+      recordPath,
+      '--context',
+      contextPath,
+      ...(merge ? ['--published-review-packet', f.files.published] : []),
+    ],
+    {
+      cwd: root,
+      encoding: 'utf8',
+      env: {
+        ...process.env,
+        PUI_INVOCATION_FILES: JSON.stringify([recordPath, contextPath]),
+        PUI_INVOCATION_READS: readsPath,
+        PUI_INVOCATION_CALLS: callsPath,
+      },
+    }
+  );
+  assert.ifError(result.error);
+  return {
+    ...result,
+    reads: readFileSync(readsPath, 'utf8').trim().split('\n').filter(Boolean).map(JSON.parse),
+    calls: readFileSync(callsPath, 'utf8'),
   };
 }
 
@@ -196,6 +273,51 @@ for (const command of ['submit-review', 'merge-pull-request']) {
       assert.deepEqual(result.reads, [f.files.handoff]);
       assert.equal(result.calls, '');
     }
+  });
+
+  test(`${command} rejects in-checkout ModelTrace record/context before raw JSON reading`, (t) => {
+    const f = fixture(t, command);
+    // Synthetic in-checkout copies of the fixture inputs. The containment
+    // guard must reject them before any raw JSON is opened.
+    const insideDir = mkdtempSync(path.join(root, '.modeltrace-inside-fixture-'));
+    t.after(() => rmSync(insideDir, { recursive: true, force: true }));
+    const insideRecord = path.join(insideDir, 'record.json');
+    const insideContext = path.join(insideDir, 'context.json');
+    writeFileSync(insideRecord, JSON.stringify(f.record));
+    writeFileSync(insideContext, JSON.stringify(f.modelTraceContext));
+    for (const [recordPath, contextPath] of [
+      [insideRecord, f.files.context],
+      [f.files.record, insideContext],
+    ]) {
+      const observed = observeInputs(t, command, f, recordPath, contextPath);
+      assert.equal(observed.status, 1);
+      assert.deepEqual(observed.reads, []);
+      assert.equal(observed.calls, '');
+      assert.match(observed.stderr, /outside the checkout/);
+      assert.equal(observed.stdout, '');
+    }
+
+    // A directory alias resolving into the checkout must also be rejected.
+    const aliasDir = mkdtempSync(path.join(tmpdir(), 'pui-review-alias-'));
+    t.after(() => rmSync(aliasDir, { recursive: true, force: true }));
+    const aliasRoot = path.join(aliasDir, 'checkout-inputs');
+    symlinkSync(insideDir, aliasRoot, 'dir');
+    const aliasRecord = path.join(aliasRoot, 'record.json');
+    const aliasContext = path.join(aliasRoot, 'context.json');
+    const aliased = observeInputs(t, command, f, aliasRecord, aliasContext);
+    assert.equal(aliased.status, 1);
+    assert.deepEqual(aliased.reads, []);
+    assert.equal(aliased.calls, '');
+    assert.match(aliased.stderr, /outside the checkout/);
+  });
+
+  test(`${command} accepts outside-checkout ModelTrace record/context as control`, (t) => {
+    const f = fixture(t, command);
+    // Default fixture paths live in tmpdir (outside checkout); the loader
+    // must proceed past the containment check to reach the gh boundary.
+    const result = f.invoke(HUMAN_ARGS);
+    assert.match(result.stderr, /mock live collection boundary reached/);
+    assert.match(result.calls, /"command":"gh"/);
   });
 
   test(`${command} migrates explicit human launchers and preserves autonomous assessment gates`, (t) => {

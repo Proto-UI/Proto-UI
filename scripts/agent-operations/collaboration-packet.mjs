@@ -1,6 +1,10 @@
 import { ownerAuthorizationFromArgs, ownerCollaborationScope } from './owner-authorization.mjs';
 import fs from 'node:fs';
-import { loadModelTraceRecord, readModelTraceJson } from './modeltrace.mjs';
+import {
+  assertModelTraceInputsOutsideCheckout,
+  loadModelTraceRecord,
+  readModelTraceJson,
+} from './modeltrace.mjs';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
@@ -253,6 +257,11 @@ export function runCollaborationCli(argv, dependencies = {}) {
     };
   }
 
+  assertModelTraceInputsOutsideCheckout({
+    recordPath: args.get('--record'),
+    contextPath: args.get('--context'),
+    checkoutRoot: skillRegistryRoot,
+  });
   const modelTrace = loadModelTraceRecord({
     recordPath: args.get('--record'),
     contextPath: args.get('--context'),

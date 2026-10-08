@@ -450,6 +450,20 @@
     {
       "if": {
         "properties": {
+          "priorReceiptDigest": { "type": "null" }
+        }
+      },
+      "then": {
+        "properties": {
+          "anomalies": {
+            "not": { "contains": { "const": "retest-inconsistent" } }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
           "result": {
             "properties": {
               "status": { "const": "failed" }

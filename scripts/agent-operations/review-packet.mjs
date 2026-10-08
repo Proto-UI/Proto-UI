@@ -1,7 +1,11 @@
 import { ownerAuthorizationFromArgs } from './owner-authorization.mjs';
 import fs from 'node:fs';
 import process from 'node:process';
-import { loadModelTraceRecord, readModelTraceJson } from './modeltrace.mjs';
+import {
+  assertModelTraceInputsOutsideCheckout,
+  loadModelTraceRecord,
+  readModelTraceJson,
+} from './modeltrace.mjs';
 import { readPublishedReviewPacket } from './published-review-packet.mjs';
 import {
   collectRepositorySnapshot,
@@ -370,6 +374,11 @@ function readExternalEvidence(args) {
 }
 
 function loadModelTraceInvocation(args, packet, handoff) {
+  assertModelTraceInputsOutsideCheckout({
+    recordPath: args.get('--record'),
+    contextPath: args.get('--context'),
+    checkoutRoot: skillRegistryRoot,
+  });
   const modelTrace = loadModelTraceRecord({
     recordPath: args.get('--record'),
     contextPath: args.get('--context'),

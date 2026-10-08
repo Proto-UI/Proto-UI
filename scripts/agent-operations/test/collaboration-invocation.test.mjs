@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import fs from 'node:fs';
+import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
 import { runCollaborationCli } from '../collaboration-packet.mjs';
+import { fileURLToPath } from 'node:url';
 import {
   authorizeCollaborationMutation,
   collaborationMarker,
@@ -347,6 +349,87 @@ for (const scenario of [
     assert.deepEqual(calls, []);
   });
 }
+
+for (const scenario of ['in-checkout record', 'in-checkout context', 'in-checkout alias']) {
+  test(`apply rejects ${scenario} before raw JSON reading or external dependencies`, (t) => {
+    const f = fixture(t);
+    const root = fileURLToPath(new URL('../../..', import.meta.url));
+    const insideDir = mkdtempSync(join(root, '.modeltrace-inside-fixture-'));
+    t.after(() => rmSync(insideDir, { recursive: true, force: true }));
+    const insideRecord = join(insideDir, 'record.json');
+    const insideContext = join(insideDir, 'context.json');
+    writeFileSync(insideRecord, JSON.stringify(f.record));
+    writeFileSync(insideContext, JSON.stringify(f.modelTraceContext));
+    let args = [...f.args];
+    if (scenario === 'in-checkout record') {
+      const idx = args.indexOf('--record');
+      args[idx + 1] = insideRecord;
+    } else if (scenario === 'in-checkout context') {
+      const idx = args.indexOf('--context');
+      args[idx + 1] = insideContext;
+    } else {
+      // A directory alias outside checkout still reaches stageable raw inputs.
+      const aliasDir = mkdtempSync(join(tmpdir(), 'collab-alias-'));
+      t.after(() => rmSync(aliasDir, { recursive: true, force: true }));
+      const aliasRoot = join(aliasDir, 'checkout-inputs');
+      symlinkSync(insideDir, aliasRoot, 'dir');
+      const aliasRecord = join(aliasRoot, 'record.json');
+      const aliasContext = join(aliasRoot, 'context.json');
+      const recIdx = args.indexOf('--record');
+      args[recIdx + 1] = aliasRecord;
+      const ctxIdx = args.indexOf('--context');
+      args[ctxIdx + 1] = aliasContext;
+    }
+    const rawPaths = new Set([
+      f.recordPath,
+      f.contextPath,
+      insideRecord,
+      insideContext,
+      args[args.indexOf('--record') + 1],
+      args[args.indexOf('--context') + 1],
+    ]);
+    const opened = [];
+    const openSync = fs.openSync;
+    fs.openSync = (file, ...options) => {
+      if (rawPaths.has(String(file))) opened.push(String(file));
+      return openSync(file, ...options);
+    };
+    t.after(() => {
+      fs.openSync = openSync;
+    });
+    const { calls, dependencies } = untouchedDependencies();
+    assert.throws(
+      () =>
+        runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...args], {
+          ...dependencies,
+          loadPolicy: () => ({}),
+        }),
+      /outside the checkout/
+    );
+    assert.deepEqual(calls, []);
+    assert.deepEqual(opened, []);
+  });
+}
+
+test('apply accepts outside-checkout ModelTrace record/context as control', (t) => {
+  const f = fixture(t);
+  // Default fixture paths live in tmpdir (outside checkout); the apply path
+  // must proceed past the containment check to reach live collection.
+  let liveReads = 0;
+  const liveBoundary = new Error('controlled live collection boundary');
+  assert.throws(
+    () =>
+      runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...f.args], {
+        loadPolicy: () => ({}),
+        collectState() {
+          liveReads += 1;
+          throw liveBoundary;
+        },
+      }),
+    (error) => error === liveBoundary
+  );
+  assert.equal(liveReads, 1);
+});
 
 for (const scenario of [
   'missing --record and --context flags',

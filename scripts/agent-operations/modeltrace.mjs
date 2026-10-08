@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
 export const MODELTRACE_POLICY = 'proto-ui.modeltrace.2026-10-04.1';
@@ -715,6 +716,10 @@ export function validateModelTraceReceipt(receipt) {
     'invalid previous receipt digest'
   );
   assert(
+    receipt.priorReceiptDigest !== null || !receipt.anomalies.includes('retest-inconsistent'),
+    'retest inconsistency requires a prior receipt digest'
+  );
+  assert(
     isDeepStrictEqual(receipt.trust, {
       signed: false,
       backendAuthenticated: false,
@@ -740,6 +745,19 @@ export function assertModelTraceFresh(
   );
   assertModelTraceScope(receipt, context, repositoryId);
   return receipt;
+}
+
+export function assertModelTraceInputsOutsideCheckout({ recordPath, contextPath, checkoutRoot }) {
+  assert(typeof recordPath === 'string' && recordPath.length > 0, 'record path is required');
+  assert(typeof contextPath === 'string' && contextPath.length > 0, 'context path is required');
+  const checkout = fs.realpathSync(checkoutRoot);
+  for (const input of [recordPath, contextPath]) {
+    const relative = path.relative(checkout, fs.realpathSync(input));
+    assert(
+      relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative),
+      'private ModelTrace record/context inputs must remain outside the checkout'
+    );
+  }
 }
 
 export function readModelTraceJson(path, label = 'artifact') {

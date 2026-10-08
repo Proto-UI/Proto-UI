@@ -648,6 +648,37 @@ for (const key of ['systemModel', 'harnessModel']) {
   });
 }
 
+test('public receipts reject retest inconsistency without a prior after digest and TTL rebinding', () => {
+  const receipt = statusReceipt('candidate');
+  assert.equal(receipt.priorReceiptDigest, null);
+  assert.equal(structuralReceipt(receipt), true, JSON.stringify(structuralReceipt.errors));
+  assert.equal(validateModelTraceReceipt(receipt), receipt);
+
+  receipt.anomalies.push('retest-inconsistent');
+  receipt.anomalies.sort();
+  receipt.expiresAt = new Date(Date.parse(receipt.measuredAt) + 15 * 60_000).toISOString();
+  rejectsStatusReceipt(receipt, /prior receipt digest/);
+});
+
+test('a conflicting retest with a linked prior remains a valid public receipt', () => {
+  const prior = statusReceipt('candidate');
+  const receipt = structuredClone(prior);
+  const first = receipt.result.candidates[0];
+  const second = receipt.result.candidates[1];
+  [first.modelId, second.modelId] = [second.modelId, first.modelId];
+  [first.familyId, second.familyId] = [second.familyId, first.familyId];
+  receipt.result.modelId = first.modelId;
+  receipt.result.familyId = first.familyId;
+  receipt.priorReceiptDigest = computeModelTraceReceiptDigest(prior);
+  receipt.anomalies.push('retest-inconsistent');
+  receipt.anomalies.sort();
+  receipt.expiresAt = new Date(Date.parse(receipt.measuredAt) + 15 * 60_000).toISOString();
+  receipt.id = `sha256:${computeModelTraceReceiptDigest(receipt)}`;
+  assert.notEqual(receipt.result.modelId, prior.result.modelId);
+  assert.equal(structuralReceipt(receipt), true, JSON.stringify(structuralReceipt.errors));
+  assert.equal(validateModelTraceReceipt(receipt), receipt);
+});
+
 test('same-scope expired prior evidence retains its digest across equivalent GitHub casing', () => {
   const f = fixture({ failed: true });
   for (const repositoryId of [
@@ -664,6 +695,7 @@ test('same-scope expired prior evidence retains its digest across equivalent Git
     const record = buildModelTraceRecord(f.challenge, f.response, { previous: prior });
     assert.equal(record.receipt.priorReceiptDigest, prior.id.slice(7));
     assert.equal(record.receipt.anomalies.includes('retest-inconsistent'), false);
+    assert.equal(structuralReceipt(record.receipt), true, JSON.stringify(structuralReceipt.errors));
     assert.equal(JSON.stringify(record.previous), original);
     assert.equal(assertModelTraceFresh(record.receipt, f.context, { now: NOW }), record.receipt);
   }
