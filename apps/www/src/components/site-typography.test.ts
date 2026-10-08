@@ -623,3 +623,35 @@ it('keeps native ownership evidence pending while real React Typography publicat
     await published;
   }
 });
+
+describe('Library Card ownership before any runtime marker exists', () => {
+  for (const docsOnly of [false, true])
+    it(`does not recollect empty-token Base/Lucide parts (docsOnly=${docsOnly})`, () => {
+      document.body.innerHTML = `<main data-doc-flow>
+        <h2 id="ordinary-title">Ordinary documentation</h2><p id="ordinary-body">Ordinary prose</p>
+        ${['base', 'lucide']
+          .map(
+            (family) => `<article data-library="${family}">
+          <wc-library-base-surface data-library-part="base-surface">
+            <header><h2><wc-library-base-text data-library-part="base-text">${family}</wc-library-base-text></h2></header>
+            <p><wc-library-base-text data-library-part="base-text">Description</wc-library-base-text></p>
+            <p data-site-typography="body"><wc-library-base-text data-library-part="base-text">Caption</wc-library-base-text></p>
+          </wc-library-base-surface>
+        </article>`
+          )
+          .join('')}
+      </main>`;
+      const root = document.querySelector<HTMLElement>('main')!;
+      expect(root.querySelector('[data-pui-root],[data-pui-style]')).toBeNull();
+      const html = root.innerHTML;
+      const sources = [...root.querySelectorAll('[data-library] h2,[data-library] p')];
+      const collect = () =>
+        collectSiteTypographyTargets(root, docsOnly).map(({ native }) => native.id);
+      expect(collect()).toEqual(['ordinary-title', 'ordinary-body']);
+      expect(root.innerHTML).toBe(html);
+      expect([...root.querySelectorAll('[data-library] h2,[data-library] p')]).toEqual(sources);
+      for (const part of root.querySelectorAll('[data-library-part]'))
+        part.setAttribute('data-pui-root', '');
+      expect(collect()).toEqual(['ordinary-title', 'ordinary-body']);
+    });
+});

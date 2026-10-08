@@ -16,7 +16,7 @@ import { isRuntimeId } from './PrototypePreviewer/runtimes/ids';
 const ROLES = new Set<string>(SITE_TYPOGRAPHY_ROLES);
 const SEMANTIC_TARGETS = 'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption';
 const COMPONENT_OWNED =
-  '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-site-native-link],[data-site-native-button],pre,code,script,style,template';
+  '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-native-button],pre,code,script,style,template';
 const PASSIVE_HEADER_FRAME =
   '.site-header-popup-surface:is([data-projection-prototype="shadcn-surface-root"],[data-projection-prototype="brutalist-surface-root"])';
 const MARKERS = [
