@@ -10,6 +10,8 @@ const marker = 'data-pui-material-carrier';
 const sheets = new WeakMap<Document | ShadowRoot, { node: HTMLStyleElement; users: number }>();
 const owners = new WeakSet<HTMLElement>();
 // Literal CSS keeps the exact owned stylesheet statically auditable by the consumer wall.
+// all: initial retains a medium outline width in Chrome even with style none;
+// the owned paint box explicitly zeros it to satisfy the unchanged admission.
 const rules = `:where([data-pui-material-carrier="contact-v1"])::before {
   all: initial; content: ""; position: absolute; display: block;
   left: var(--pui-material-left); top: var(--pui-material-top);
@@ -18,7 +20,7 @@ const rules = `:where([data-pui-material-carrier="contact-v1"])::before {
   background-repeat: no-repeat; background-position: 0% 0%; background-color: transparent;
   background-origin: border-box; background-clip: border-box; background-attachment: scroll;
   visibility: visible; overflow: visible;
-  border: 0; border-radius: 0; padding: 0; margin: 0;
+  border: 0; border-radius: 0; padding: 0; margin: 0; outline: 0;
   pointer-events: none; z-index: -1; opacity: 1; transform: none;
 }`;
 export function inspectContactCarrier(host: HTMLElement): string | null {

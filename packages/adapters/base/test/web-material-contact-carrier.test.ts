@@ -47,6 +47,20 @@ describe('private expanded paint carrier (computed-style spy, not browser paint)
     expect(document.head.querySelectorAll('style').length).toBe(before);
     expect(host.hasAttribute('data-pui-material-carrier')).toBe(false);
   });
+  it('explicitly resets the owned outline width rather than retaining the initial medium width', () => {
+    const { host } = fixture();
+    const before = document.head.querySelectorAll('style').length;
+    const carrier = createContactCarrier(host);
+    const sheet = document.head.querySelectorAll('style')[before];
+    const rule = sheet.sheet!.cssRules[0] as CSSStyleRule;
+    // Official Chrome 154 evidence had outline-style:none with outline-width:3px
+    // after all:initial. This CSSOM check proves the authored reset, not paint.
+    try {
+      expect(rule.style.outlineWidth).toBe('0px');
+    } finally {
+      carrier.release();
+    }
+  });
   it('verifies actual carrier composition and expanded overlap footprint', () => {
     const { host, computed } = fixture();
     const carrier = createContactCarrier(host);
@@ -78,6 +92,8 @@ describe('private expanded paint carrier (computed-style spy, not browser paint)
       visibility: 'visible',
       overflowX: 'visible',
       overflowY: 'visible',
+      outlineWidth: '0px',
+      outlineStyle: 'none',
     });
     expect(carrier.valid('data:image/png;base64,AA==')).toBe(true);
     // Independent review R1: each change alone must invalidate the receipt.
@@ -96,7 +112,9 @@ describe('private expanded paint carrier (computed-style spy, not browser paint)
       visibility: 'hidden',
       overflowX: 'hidden',
       borderTopLeftRadius: '0px 20px',
-      outlineWidth: '2px',
+      // Even with outline-style:none, preserve the exact admitted zero-width
+      // boundary instead of special-casing the browser's original 3px value.
+      outlineWidth: '3px',
       zoom: '2',
       offsetPath: 'path("M 0 0 L 1 1")',
       animationName: 'move',
