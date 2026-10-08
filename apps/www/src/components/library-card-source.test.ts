@@ -26,10 +26,11 @@ it('prepares individually bound appearance screenshots without treating endpoint
   expect(source).toContain('for (const family of families)');
   expect(source).toContain("'bootstrap-2-3-2'");
   expect(source).toContain("'liquid-glass'");
-  expect(source).toContain("createHash('sha256').update(bytes).digest('hex')");
+  const capture = readFileSync('apps/www/src/content/docs/zh-cn/library-card-capture.ts', 'utf8');
+  expect(capture).toContain("createHash('sha256').update(bytes).digest('hex')");
   expect(source).toContain('expect(sha).toBe(process.env.CANDIDATE_SHA)');
   expect(source).toContain('Endpoints do not replace intermediate-frame observations.');
-  expect(source).toContain('captureBeyondViewport: !!clip');
+  expect(capture).toContain('captureBeyondViewport: !!clip');
 });
 
 it('serializes the same fallback host layout and empty style state before definition', () => {

@@ -12,6 +12,7 @@ on:
       - 'apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx'
       - 'apps/www/src/content/docs/en/ui-libraries/index.mdx'
       - 'apps/www/src/content/docs/zh-cn/library-cards-first-frame*.ts'
+      - 'apps/www/src/content/docs/zh-cn/library-card-capture*.ts'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
       - 'scripts/test/server-readiness.mjs'
       - 'vitest.config.ts'

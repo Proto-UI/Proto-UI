@@ -1,12 +1,12 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
-import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { beforeAll, afterAll, describe, it, expect } from 'vitest';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
+import { captureCurrentViewport, closeEvidenceContext } from './library-card-capture';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
 const route = '/zh-cn/ui-libraries/';
 const directory =
@@ -101,38 +101,6 @@ function readCards(observe = false) {
     frame();
   }
   return read();
-}
-async function captureCurrentViewport(
-  page: Page,
-  file: string,
-  clip?: { x: number; y: number; width: number; height: number; scale: number }
-) {
-  // Do not use Playwright screenshot here: it awaits document.fonts.ready,
-  // which is intentionally blocked by this test's own font request gate.
-  const session = await page.context().newCDPSession(page);
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  try {
-    const screenshot = await Promise.race([
-      session.send('Page.captureScreenshot', {
-        format: 'png',
-        fromSurface: true,
-        captureBeyondViewport: !!clip,
-        ...(clip ? { clip } : {}),
-      }),
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(
-          () => reject(new Error('Current-frame screenshot exceeded 15s')),
-          15_000
-        );
-      }),
-    ]);
-    const bytes = Buffer.from(screenshot.data, 'base64');
-    await writeFile(file, bytes);
-    return { file: path.basename(file), sha256: createHash('sha256').update(bytes).digest('hex') };
-  } finally {
-    if (timer) clearTimeout(timer);
-    await session.detach();
-  }
 }
 const families = [
   'base',
@@ -231,6 +199,7 @@ describe('actual library Cards preserve their first frame', () => {
         const heldScripts: string[] = [];
         let released = false;
         let phase = 'loading SSR';
+        let failed = false;
         let before: ReturnType<typeof readCards> | undefined;
         let after: ReturnType<typeof readCards> | undefined;
         let frames: unknown[] = [];
@@ -333,6 +302,7 @@ describe('actual library Cards preserve their first frame', () => {
           await captureCurrentViewport(page, path.join(directory, `${name}-reload-after.png`));
           phase = 'passed';
         } catch (error) {
+          failed = true;
           await captureCurrentViewport(page, path.join(directory, `${name}-failure.png`)).catch(
             () => {}
           );
@@ -386,7 +356,7 @@ describe('actual library Cards preserve their first frame', () => {
               2
             )
           );
-          await context.close();
+          await closeEvidenceContext(context, failed);
         }
       }, 90_000);
     }
@@ -398,6 +368,7 @@ describe('actual library Cards preserve their first frame', () => {
     const page = await context.newPage();
     const name = 'no-script-320-text-200';
     let phase = 'navigation';
+    let failed = false;
     const recordPhase = async (next: string) => {
       phase = next;
       await writeFile(
@@ -430,6 +401,7 @@ describe('actual library Cards preserve their first frame', () => {
       );
       await recordPhase('passed');
     } catch (error) {
+      failed = true;
       await captureCurrentViewport(page, path.join(directory, `${name}-failure.png`)).catch(
         () => {}
       );
@@ -439,7 +411,7 @@ describe('actual library Cards preserve their first frame', () => {
       );
       throw error;
     } finally {
-      await context.close();
+      await closeEvidenceContext(context, failed);
     }
   }, 90_000);
 });
