@@ -15,6 +15,7 @@ import {
   stopServer,
 } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
+import { collectCollapsibleFocusFailure } from './collapsible-focus-observation';
 
 const FAMILIES = ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const;
 const route = (family: string, language = 'en') =>
@@ -71,9 +72,33 @@ async function expanded(button: Locator, value: boolean): Promise<void> {
 }
 
 async function focused(button: Locator): Promise<void> {
-  await expect
-    .poll(() => button.evaluate((element) => document.activeElement === element))
-    .toBe(true);
+  try {
+    await expect
+      .poll(() => button.evaluate((element) => document.activeElement === element))
+      .toBe(true);
+  } catch (error) {
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    try {
+      const facts = await Promise.race([
+        button.evaluate(collectCollapsibleFocusFailure),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(
+            () => reject(new Error('Read-only focus diagnostic exceeded 1000ms')),
+            1000
+          );
+        }),
+      ]);
+      console.error(
+        '[collapsible-focus-failure]',
+        JSON.stringify({ route: button.page().url(), facts })
+      );
+    } catch (diagnosticError) {
+      console.error('[collapsible-focus-diagnostic-unavailable]', String(diagnosticError));
+    } finally {
+      clearTimeout(timer);
+    }
+    throw error;
+  }
 }
 
 async function controls(root: Locator): Promise<string> {
@@ -96,7 +121,10 @@ type ObservedInput = {
 
 async function trackInput(previewer: Locator): Promise<void> {
   await previewer.evaluate((element) => {
-    const host = element as HTMLElement & { __puiCollapsibleEvidence?: ObservedInput[] };
+    const host = element as HTMLElement & {
+      __puiCollapsibleEvidence?: ObservedInput[];
+      __puiCollapsibleLastPointerTarget?: Element | null;
+    };
     if (host.__puiCollapsibleEvidence) return;
     host.__puiCollapsibleEvidence = [];
     for (const type of [
@@ -112,6 +140,9 @@ async function trackInput(previewer: Locator): Promise<void> {
         type,
         (event) => {
           const target = event.target instanceof Element ? event.target : null;
+          if (type === 'pointerdown')
+            host.__puiCollapsibleLastPointerTarget =
+              target?.closest('[role="button"],button') ?? target;
           host.__puiCollapsibleEvidence!.push({
             type,
             trusted: event.isTrusted,
