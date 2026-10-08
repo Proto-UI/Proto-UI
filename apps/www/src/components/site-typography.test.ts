@@ -5,6 +5,7 @@ beforeAll(() => {
 });
 afterAll(() => observerKeeper.restore());
 import { headerSurfaceParticipant } from './site-header-surface';
+import { quickStartOwnershipReady } from '../content/docs/zh-cn/quick-start-first-frame-ownership';
 import { renderDemo } from './PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
 import { afterAll, beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
@@ -562,4 +563,63 @@ describe('startup typography and independent native selection owners', () => {
       expect(selection.anchorNode).toBe(text);
       expect(selection.anchorOffset).toBe(1);
     });
+});
+
+// Header/Code readiness is injected fixture state; Typography publication is
+// produced by the real React participant and is held behind an explicit gate.
+it('keeps native ownership evidence pending while real React Typography publication is delayed', async () => {
+  document.body.innerHTML = `<header data-docs-site-header data-site-menu-ready></header>
+    <div data-site-code-surface="frame" data-code-surface-view="ready"></div>
+    <main data-doc-flow><p class="doc-stage-notice__title" data-site-typography="notice-title">Retained release text</p></main>`;
+  const root = document.querySelector<HTMLElement>('main')!;
+  const participant = siteTypographyParticipant(root, {
+    docsOnly: true,
+    ownerId: 'documentation-typography',
+  });
+  const candidate = await participant.materialize(request('react', 1));
+  candidates.push(candidate);
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const published = gate.then(() => candidate.activate());
+  try {
+    expect(
+      document.querySelector('[data-docs-site-header]')?.hasAttribute('data-site-menu-ready')
+    ).toBe(true);
+    expect(
+      document
+        .querySelector('[data-site-code-surface="frame"]')
+        ?.getAttribute('data-code-surface-view')
+    ).toBe('ready');
+    expect(
+      root.querySelector('.doc-stage-notice__title')?.hasAttribute('data-typography-runtime')
+    ).toBe(false);
+    expect(
+      quickStartOwnershipReady(),
+      'prepared Typography must not pass the native completion gate'
+    ).toBe(false);
+    release();
+    await published;
+    expect(
+      root.querySelector('.doc-stage-notice__title')?.getAttribute('data-typography-owner')
+    ).toBe('documentation-typography');
+    expect(quickStartOwnershipReady()).toBe(true);
+    const title = root.querySelector('.doc-stage-notice__title')!;
+    title.setAttribute('data-typography-runtime', 'vue');
+    expect(quickStartOwnershipReady(), 'another runtime is not the React owner under test').toBe(
+      false
+    );
+    title.setAttribute('data-typography-runtime', 'react');
+    title.setAttribute('data-typography-owner', 'another-typography-owner');
+    expect(
+      quickStartOwnershipReady(),
+      'another scope cannot certify documentation Typography'
+    ).toBe(false);
+    title.setAttribute('data-typography-owner', 'documentation-typography');
+    expect(quickStartOwnershipReady()).toBe(true);
+  } finally {
+    release();
+    await published;
+  }
 });

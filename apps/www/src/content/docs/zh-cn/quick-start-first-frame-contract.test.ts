@@ -40,6 +40,17 @@ describe('first-frame harness load-gate contract', () => {
       /expect\(\s*initial\.selectionSame/
     );
   });
+  it('waits for the shared real Typography completion predicate before observing final ownership', () => {
+    const ownershipStart = source.indexOf('for (const focusOwner');
+    const wait = source.indexOf(
+      'await page.waitForFunction(quickStartOwnershipReady)',
+      ownershipStart
+    );
+    const finalFacts = source.indexOf('const facts = await page.evaluate', ownershipStart);
+    expect(wait).toBeGreaterThan(ownershipStart);
+    expect(finalFacts).toBeGreaterThan(wait);
+    expect(source).toContain("from './quick-start-first-frame-ownership'");
+  });
   const start = source.indexOf('await page.locator(targets.noteBody)');
   const release = source.indexOf('release();', start);
   const gated = source.slice(start, release);

@@ -22,4 +22,12 @@ An exact-head official rerun must establish whether this repair resolves the two
 
 ## Initial native-state preconditions
 
-A follow-on harness hardening persists `ownership-initial.json` and the original viewport, then strictly asserts actual acquired focus, a nonempty code selection and unchanged selection before releasing any executable script. This separates a failed test-input precondition from a subsequent hydration failure. The post-upgrade strict facts and traces remain unchanged.
+A follow-on harness hardening persists `ownership-initial.json` and the original viewport, then strictly asserts actual acquired focus, a nonempty code selection and unchanged selection before releasing the gated script requests. This separates a failed test-input precondition from a subsequent hydration failure. The post-upgrade strict facts and traces remain unchanged.
+
+## Independent-review P2: wait for the affected owner
+
+Independent review found that the two native ownership journeys waited only for Menu and Code Surface readiness. Those owners can finish while documentation Typography is still preparing, so a passing ownership assertion could precede the very Selection write under investigation. The earlier native test closure was incomplete; its results cannot prove Typography focus preservation.
+
+Both journeys now pass the same self-contained `quickStartOwnershipReady` predicate directly to Playwright. It retains Menu and Code readiness and additionally requires the actual notice title's `data-typography-runtime=react` and `data-typography-owner=documentation-typography` markers. The real participant publishes those markers synchronously inside its content/selection commit. Final diagnostics retain the observed owner/runtime/generation. The initial focus/Selection assertions still execute before releasing the gated script requests, and every final assertion remains strict.
+
+A new executed control stages the real React Typography participant but holds its activation behind an explicit Promise gate. Header and Code readiness are disclosed fixture inputs; Typography markers are produced only by the actual participant. With the original readiness predicate, the prepared-but-uncommitted state incorrectly returns true and fails the new test. The repaired predicate stays false before publication and turns true after actual activation; wrong-runtime and wrong-owner controls remain false. The Typography and harness-contract files pass all 37 tests. This source/renderer control does not replace the pending exact-head native CI result.

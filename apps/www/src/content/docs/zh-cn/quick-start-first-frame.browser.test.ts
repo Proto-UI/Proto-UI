@@ -6,6 +6,7 @@ import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { changedFirstFrameGeometry } from './quick-start-first-frame-geometry';
+import { quickStartOwnershipReady } from './quick-start-first-frame-ownership';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
 
@@ -767,7 +768,7 @@ describe('quick-start first-frame continuity', () => {
           page,
           path.join(directory, `react-${focusOwner}-ownership-before.png`)
         );
-        // Preconditions must succeed before any script runs. A fixture's own
+        // Preconditions must succeed before gated scripts resume. A fixture's own
         // selection/focus setup failure must not be attributed to hydration.
         expect(initial.focused, 'native focus acquired before script release').toBe(true);
         expect(
@@ -776,15 +777,7 @@ describe('quick-start first-frame continuity', () => {
         ).toBe(true);
         expect(initial.selectionSame, 'native selection retained before script release').toBe(true);
         release();
-        await page.waitForFunction(
-          () =>
-            document
-              .querySelector('[data-docs-site-header]')
-              ?.hasAttribute('data-site-menu-ready') &&
-            document
-              .querySelector('[data-site-code-surface="frame"]')
-              ?.getAttribute('data-code-surface-view') === 'ready'
-        );
+        await page.waitForFunction(quickStartOwnershipReady);
         const facts = await page.evaluate((focusOwner) => {
           const saved = (window as any).__startupOwnership;
           const selection = getSelection()!;
@@ -805,7 +798,13 @@ describe('quick-start first-frame continuity', () => {
         const diagnostics = await page.evaluate(() => {
           const saved = (window as any).__startupOwnership;
           saved.observe('after-upgrade');
+          const typography = document.querySelector('.doc-stage-notice__title');
           return {
+            typography: {
+              owner: typography?.getAttribute('data-typography-owner'),
+              runtime: typography?.getAttribute('data-typography-runtime'),
+              generation: typography?.getAttribute('data-typography-generation'),
+            },
             initialFocusCorrect: saved.initialFocusCorrect,
             originalFocus: saved.describe(saved.focus),
             actualFocus: saved.describe(document.activeElement),
