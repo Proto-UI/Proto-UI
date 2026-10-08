@@ -78,12 +78,14 @@ function readCards(observe = false) {
     return [...document.querySelectorAll<HTMLElement>('[data-library]')].map((card) => {
       const surface = card.querySelector<HTMLElement>('.library-card__surface')!;
       const title = card.querySelector<HTMLElement>('h2')!;
+      const titleText = title.querySelector<HTMLElement>('[data-library-part]')!;
       const body = card.querySelector<HTMLElement>('.library-card__content p')!;
       const action = card.querySelector<HTMLElement>('[data-library-action]')!;
       return {
         family: card.dataset.library,
         root: measure(surface),
-        title: measure(title, title.querySelector<HTMLElement>('[data-library-part]')!),
+        title: measure(title, titleText),
+        titleLeaf: measure(titleText),
         body: measure(body, body.querySelector<HTMLElement>('[data-library-part]')!),
         action: measure(action, action.querySelector<HTMLElement>('[data-library-part$="text"]')!),
         actionSurface: measure(action.querySelector<HTMLElement>('.library-card__action')!),
@@ -237,6 +239,7 @@ describe('actual library Cards preserve their first frame', () => {
           Awaited<ReturnType<typeof readLibraryPlatformFonts>>
         > = {};
         let fontFaces: Array<{ family: string; status: string }> = [];
+        let reloadFontFaces: Array<{ family: string; status: string }> = [];
         await page.route('**/*', async (r) => {
           const kind = r.request().resourceType();
           if (!released && ['script', 'font'].includes(kind)) {
@@ -317,6 +320,17 @@ describe('actual library Cards preserve their first frame', () => {
           });
           await page.reload({ waitUntil: 'commit' });
           await page.locator('[data-library="liquid-glass"] h2').waitFor();
+          await page.locator('[data-library="brutalist"] h2').scrollIntoViewIfNeeded();
+          reloadFontFaces = await page.evaluate(() =>
+            [...document.fonts].map((face) => ({ family: face.family, status: face.status }))
+          );
+          expect(
+            reloadFontFaces.some(
+              (face) => face.family.includes('Library DM Sans') && face.status === 'loaded'
+            )
+          ).toBe(true);
+          platformFonts.reloadHeld = await readLibraryPlatformFonts(page);
+          expect(libraryCardFontFailures(platformFonts.reloadHeld)).toEqual([]);
           reloadBefore = await page.evaluate(readCards, true);
           await captureCurrentViewport(page, path.join(directory, `${name}-reload-before.png`));
           released = true;
@@ -330,8 +344,10 @@ describe('actual library Cards preserve their first frame', () => {
           await page.waitForTimeout(250);
           reloadAfter = await page.evaluate(readCards, false);
           reloadFrames = await stopFrames(page);
+          platformFonts.reloadEnhanced = await readLibraryPlatformFonts(page);
           expect(reloadAfter).toEqual(reloadBefore);
           for (const frame of reloadFrames) expect(frame).toEqual(reloadBefore);
+          expect(libraryCardFontFailures(platformFonts.reloadEnhanced)).toEqual([]);
           await captureCurrentViewport(page, path.join(directory, `${name}-reload-after.png`));
           phase = 'passed';
         } catch (error) {
@@ -353,6 +369,7 @@ describe('actual library Cards preserve their first frame', () => {
                 heldFonts,
                 heldScripts,
                 fontFaces,
+                reloadFontFaces,
                 fontTrace,
                 fontTraceErrors,
                 platformFonts,
@@ -382,6 +399,7 @@ describe('actual library Cards preserve their first frame', () => {
                 heldFonts,
                 heldScripts,
                 fontFaces,
+                reloadFontFaces,
                 fontTrace,
                 fontTraceErrors,
                 platformFonts,

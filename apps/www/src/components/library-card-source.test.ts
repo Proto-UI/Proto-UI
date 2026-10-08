@@ -110,3 +110,41 @@ it('inlines the licensed family font without hiding text or altering desktop typ
   const narrow = source.slice(source.indexOf('@container (max-width: 18rem)'));
   expect(narrow).not.toMatch(/font-size:|font-family:|line-height:|overflow: hidden/);
 });
+
+it('measures the actual title Text and verifies real fonts in both reload phases', () => {
+  const source = readFileSync(
+    'apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts',
+    'utf8'
+  );
+  expect(source).toContain('title: measure(title, titleText)');
+  expect(source).toContain('titleLeaf: measure(titleText)');
+  const start = source.indexOf("phase = 'reloading';");
+  const reload = source.slice(start, source.indexOf("phase = 'passed';", start));
+  const release = reload.indexOf('release();');
+  const beforeRelease = reload.slice(0, release);
+  expect(beforeRelease).toContain('reloadFontFaces = await page.evaluate(');
+  expect(beforeRelease).toContain(
+    "face.family.includes('Library DM Sans') && face.status === 'loaded'"
+  );
+  expect(beforeRelease).toContain(
+    'platformFonts.reloadHeld = await readLibraryPlatformFonts(page)'
+  );
+  expect(beforeRelease).toContain(
+    'expect(libraryCardFontFailures(platformFonts.reloadHeld)).toEqual([])'
+  );
+  expect(beforeRelease.indexOf('platformFonts.reloadHeld =')).toBeLessThan(
+    beforeRelease.indexOf('reloadBefore = await page.evaluate(readCards, true)')
+  );
+  expect(beforeRelease).not.toMatch(/fonts\.ready|fonts\.load\(|waitForTimeout|expect\.poll/);
+  expect(reload.slice(release)).toContain(
+    'platformFonts.reloadEnhanced = await readLibraryPlatformFonts(page)'
+  );
+  expect(reload.slice(release)).toContain(
+    'expect(libraryCardFontFailures(platformFonts.reloadEnhanced)).toEqual([])'
+  );
+  expect(reload).toContain('expect(reloadAfter).toEqual(reloadBefore)');
+  expect(reload).toContain('for (const frame of reloadFrames) expect(frame).toEqual(reloadBefore)');
+  const records = source.slice(source.indexOf('} catch (error)', start));
+  expect([...records.matchAll(/^\s+platformFonts,$/gm)]).toHaveLength(2);
+  expect([...records.matchAll(/^\s+reloadFontFaces,$/gm)]).toHaveLength(2);
+});

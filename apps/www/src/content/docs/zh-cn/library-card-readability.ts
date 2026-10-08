@@ -9,6 +9,7 @@ type ReadableCard = {
   family?: string;
   root: MeasuredText;
   title: MeasuredText;
+  titleLeaf: MeasuredText;
   body: MeasuredText;
   action: MeasuredText;
   textLeaves: MeasuredText[];
@@ -23,6 +24,7 @@ export function libraryCardReadabilityFailures(cards: ReadableCard[]): string[] 
     for (const [name, text] of [
       ['root', card.root],
       ['title', card.title],
+      ['titleLeaf', card.titleLeaf],
       ['body', card.body],
       ['action', card.action],
       ...card.textLeaves.map((text, index) => [`text[${index}]`, text] as const),
@@ -34,6 +36,8 @@ export function libraryCardReadabilityFailures(cards: ReadableCard[]): string[] 
     }
     if (!(card.title.width >= Number.parseFloat(card.title.fontSize) * 3))
       failures.push(`${card.family}.title: fewer than three ems of reading width`);
+    if (!(card.titleLeaf.width >= Number.parseFloat(card.titleLeaf.fontSize) * 3))
+      failures.push(`${card.family}.titleLeaf: fewer than three ems of reading width`);
     card.textLeaves.forEach((text, index) => {
       if (!(text.width >= Number.parseFloat(text.fontSize) * 2))
         failures.push(`${card.family}.text[${index}]: fewer than two ems of reading width`);

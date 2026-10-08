@@ -15,9 +15,29 @@ const card = () => ({
   family: 'shadcn',
   root: text(176),
   title: text(158, '48px'),
+  titleLeaf: text(158, '48px'),
   body: text(),
   action: text(),
   textLeaves: [text(), text()],
+});
+
+it('requires three ems in the actual title Text host, independently of its wider h2', () => {
+  const measured = card();
+  measured.title = text(160, '48px');
+  measured.titleLeaf = text(100, '48px');
+  measured.textLeaves = [measured.titleLeaf];
+  expect(libraryCardReadabilityFailures([measured])).toEqual([
+    'shadcn.titleLeaf: fewer than three ems of reading width',
+  ]);
+  measured.titleLeaf.width = 144;
+  expect(libraryCardReadabilityFailures([measured])).toEqual([]);
+  measured.titleLeaf.overflow = 2;
+  expect(libraryCardReadabilityFailures([measured])).toContain(
+    'shadcn.titleLeaf: width=144, overflow=2'
+  );
+  measured.titleLeaf.overflow = 0;
+  measured.titleLeaf.effectiveOpacity = 0;
+  expect(libraryCardReadabilityFailures([measured])).toContain('shadcn.titleLeaf: hidden text');
 });
 
 it('rejects the recorded c49 single-letter columns even when every root fits', () => {
