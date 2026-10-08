@@ -1,5 +1,6 @@
 // Parent-owned review session. No model/reviewer is invoked by this helper.
 import { createHash } from 'node:crypto';
+import { assertModelTraceDisclosure, assertModelTraceFresh } from './modeltrace.mjs';
 import { validateSelfAssessmentResult, isSelfAssessmentFresh } from './assessment-runtime.mjs';
 import {
   authorizeReviewSubmission,
@@ -476,6 +477,12 @@ export class ConnectorReviewSession {
       await this.#ledger.consumePublicationAttempt(intent.id);
       attemptConsumed = true;
       this.#refreshPolicy();
+      // The durable attempt fence can await remote ledger IO. Recheck the same
+      // measured tuple at dispatch; expiry here stays consumed/unknown, no retry.
+      assertModelTraceFresh(measured.modelTrace, measured.modelTraceContext, {
+        repositoryId: intent.analysis.packet.repositoryId,
+      });
+      assertModelTraceDisclosure(intent.body, measured.modelTrace);
       const receipt = await this.#transport.submit(intent.pullRequest, intent);
       confirmedReceipt = receipt;
       // The API acknowledges a review of one commit, never approval of a later head.

@@ -36,7 +36,7 @@ import {
 } from './fixtures/connector-assessment.mjs';
 import { analysis } from './fixtures/cloud-review.mjs';
 import { modelTraceFixture } from './fixtures/modeltrace.mjs';
-import { computeModelTraceReceiptDigest } from '../modeltrace.mjs';
+import { computeModelTraceReceiptDigest, renderModelTraceDisclosure } from '../modeltrace.mjs';
 import { reduceCloudReviewLedger } from '../cloud-review-ledger.mjs';
 import { publishReview, refreshPacket, reviewSnapshot } from './fixtures/review-publication.mjs';
 
@@ -4181,5 +4181,57 @@ for (const kind of [
     );
     assert.equal(f.calls.filter((call) => call.operation === 'add_review_to_pr').length, 0);
     assert.equal(f.reviews.length, 0);
+  });
+}
+
+for (const elapsed of [999, 1000]) {
+  test(`dispatch freshness after consumed attempt at expiry offset ${elapsed}`, async (t) => {
+    const start = Date.now();
+    t.mock.timers.enable({ apis: ['Date'], now: start });
+    const { s, f, store } = await session(t);
+    const packet = await parentPacket(s);
+    const measured = structuredClone(modelTraceFixture());
+    const ttl =
+      Date.parse(measured.modelTrace.expiresAt) - Date.parse(measured.modelTrace.measuredAt);
+    measured.modelTrace.measuredAt = new Date(start + 1000 - ttl).toISOString();
+    measured.modelTrace.expiresAt = new Date(start + 1000).toISOString();
+    measured.modelTrace.id = `sha256:${computeModelTraceReceiptDigest(measured.modelTrace)}`;
+    packet.agentEvidence.source =
+      'AI-executed review by ChatGPT; synthetic expiry boundary\n\n' +
+      renderModelTraceDisclosure(measured.modelTrace);
+    const consume = store.consumePublicationAttempt.bind(store);
+    let consumed = 0;
+    store.consumePublicationAttempt = async (...args) => {
+      const result = await consume(...args);
+      consumed++;
+      // The real remote adapter performs asynchronous ledger work after the
+      // final authorization. Freeze time at each side of exact expiry.
+      t.mock.timers.setTime(start + elapsed);
+      return result;
+    };
+    const outcome = await s.publishParentPacket(
+      packet,
+      createConnectorAssessment(),
+      null,
+      measured
+    );
+    assert.equal(consumed, 1);
+    const posts = f.calls.filter((call) => call.operation === 'add_review_to_pr').length;
+    if (elapsed < 1000) {
+      assert.equal(posts, 1);
+      assert.equal(outcome.status, 'published');
+    } else {
+      assert.equal(posts, 0);
+      assert.equal(outcome.status, 'unknown');
+      assert.match(outcome.reason, /measurement expired/);
+      assert.equal(outcome.retryAllowed, false);
+      assert.equal(outcome.publicationConfirmed, false);
+      assert.equal(store.read().state.slot.intent.status, 'unknown');
+      await assert.rejects(
+        () => s.publishParentPacket(packet, createConnectorAssessment(), null, measured),
+        /one publication attempt/
+      );
+      assert.equal(f.calls.filter((call) => call.operation === 'add_review_to_pr').length, 0);
+    }
   });
 }
