@@ -37,3 +37,7 @@ The browser suite retains generated TypeScript/helpers/CSS/provenance, bundled c
 1. Independent review of the combined source/helper and browser-test candidate.
 2. Publish only through the parent-authorized repository workflow and run the dedicated CI at the exact final source/tree. Keep failures and repair the owning implementation or oracle rather than weakening assertions.
 3. Review native screenshots/AX/frame data and then determine the next bounded SSR capability. Keep public SSR readiness false until its own admission requirements are met.
+
+## Review clarification and subsequent repair
+
+The earlier phrase "one activation per app effect" describes the test's filtered outward `CustomEvent` channel only. Under `A-WEB-COMPONENT-0001-M`, the original native `click` and same-named outward `CustomEvent` remain distinct deliveries; an unfiltered DOM listener can observe both. Disabled suppresses the outward activation, not native event propagation. The review found a separate real fail-open defect for missing/falsy SSR carriers, now recorded with its red/green evidence in [the carrier repair record](2026-10-08-compiler-button-ssr-carrier-repair.md). The original native suite was not run locally, and the original 21/15 counts above describe that earlier candidate, not the repaired candidate.

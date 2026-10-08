@@ -147,6 +147,7 @@ export function emitWebComponentSource(
         'hydrationCssText',
         'checkInitialProps',
         'checkStylesheet',
+        'checkCarrierHost',
         'defaultTagName',
         'HydrationOwner',
         'Carrier',

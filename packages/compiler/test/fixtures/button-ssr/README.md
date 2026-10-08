@@ -16,7 +16,7 @@ The HTTP harness embeds the exact `Component.css` bytes in `style[data-pui-ssr-c
 
 The compatibility binding covers the source graph, IR version, profile, generated owner/client statements, all supporting helper bytes, and CSS bytes. Separate source/helper/CSS versions make mismatches diagnosable. These hashes are compatibility receipts, not signatures or proof of trustworthy HTML. Every render allocates a random UUID instance identity and a default HTML ID. Explicit caller-supplied IDs remain the caller's responsibility. Duplicate live instance identities are refused.
 
-Carrier/source/profile/helper/CSS/initial-props/DOM mismatches report `PUI_WC_HYDRATION_MISMATCH` and preserve the existing first frame. Even a failure after matching the carrier cannot silently clear the server tree. Initial client props must match the raw serialized server snapshot; ordinary updates use `setProps` after successful adoption. Client callbacks, DOM objects, accessors, cyclic values and other capabilities cannot enter the props carrier. Slot HTML is trusted consumer-authored HTML, not an automatic sanitizer.
+Carrier/source/profile/helper/CSS/initial-props/DOM mismatches report `PUI_WC_HYDRATION_MISMATCH` and preserve the existing first frame. Even a failure after matching the carrier cannot silently clear the server tree. A missing or non-object carrier on an SSR-marked host is a mismatch, never permission to reconstruct a client-only Button. Initial client props must match the raw serialized server snapshot; ordinary updates use `setProps` after successful adoption. Client callbacks, DOM objects, accessors, cyclic values and other capabilities cannot enter the props carrier. Slot HTML is trusted consumer-authored HTML, not an automatic sanitizer.
 
 ## Evidence boundaries
 
@@ -40,4 +40,8 @@ COMPILER_EVIDENCE_DIR=/tmp/compiler-button-evidence \
   --maxWorkers=1 --minWorkers=1
 ```
 
-The dedicated `compiler-button-ssr-evidence.yml` workflow runs both groups at the exact PR head, requires all 21 source and 15 browser tests with no skips, and retains generated files, source/lockfile identity, HTTP responses, CSS, carrier mismatch cases, native accessibility observations, frame samples, screenshots and traces. A collected or authored browser suite is not a browser pass. Local synthetic tests and output typechecking do not establish native pixels or AX. Public SSR gates stay closed pending wider capability evidence and independent admission, even if this bounded browser fixture passes.
+The dedicated `compiler-button-ssr-evidence.yml` workflow runs both groups at the exact PR head, requires all 36 source and 18 browser tests with no skips, and retains generated files, source/lockfile identity, HTTP responses, CSS, carrier mismatch cases, native accessibility observations, frame samples, screenshots and traces. A collected or authored browser suite is not a browser pass. Local synthetic tests and output typechecking do not establish native pixels or AX. Public SSR gates stay closed pending wider capability evidence and independent admission, even if this bounded browser fixture passes.
+
+## Input and outward event channels
+
+Under `A-WEB-COMPONENT-0001-M`, `C-EXPOSE-EVENT-0001-D/E` and `HC-EXPOSE-EVENT-SINK-0001-A/B`, a successful activation emits one outward `CustomEvent` named `click`. The original native input event is a distinct channel and is not stopped by this experiment. An unfiltered DOM `click` listener can therefore observe both events. Tests count outward `CustomEvent` signals separately from native clicks; disabled suppresses the outward activation, not native DOM propagation.

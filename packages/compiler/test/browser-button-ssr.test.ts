@@ -36,7 +36,7 @@ declare global {
       roots: ButtonElement[];
       children: Node[][];
       slots: (Element | null)[];
-      effects: number[];
+      outwardSignals: number[];
       trustedClicks: number[];
       focusEvents: { type: string; target: string | null }[];
       selection: {
@@ -133,7 +133,7 @@ async function remember(page: Page) {
       roots,
       children: roots.map((root) => [...root.childNodes]),
       slots: roots.map((root) => root.querySelector('[data-slot-label]')),
-      effects: roots.map(() => 0),
+      outwardSignals: roots.map(() => 0),
       trustedClicks: roots.map(() => 0),
       focusEvents: [],
       selection: null,
@@ -141,9 +141,9 @@ async function remember(page: Page) {
     };
     roots.forEach((root, index) =>
       root.addEventListener('click', (event) => {
-        // Only the generated outward signal is the application effect. The
-        // browser's trusted click remains independently recorded, not double-counted.
-        if (event instanceof CustomEvent) window.buttonSsrProbe.effects[index] += 1;
+        // A-WEB-COMPONENT-0001-M: the outward CustomEvent and native click
+        // intentionally share a name. Unfiltered listeners observe both channels.
+        if (event instanceof CustomEvent) window.buttonSsrProbe.outwardSignals[index] += 1;
         if (event.isTrusted) window.buttonSsrProbe.trustedClicks[index] += 1;
       })
     );
@@ -214,7 +214,7 @@ async function snapshot(page: Page, name: string) {
           focused: document.activeElement === root,
         };
       }),
-      effects: probe?.effects ?? [],
+      outwardSignals: probe?.outwardSignals ?? [],
       trustedClicks: probe?.trustedClicks ?? [],
       focusEvents: probe?.focusEvents ?? [],
       selection: selected
@@ -403,7 +403,7 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
           owner: true,
         });
         expect(after.roots[0].style).toEqual(before.roots[0].style);
-        expect(after.effects).toEqual([0]);
+        expect(after.outwardSignals).toEqual([0]);
         const afterPng = await page.screenshot({
           path: path.join(fixture.evidenceDir, 'delayed-after.png'),
         });
@@ -460,15 +460,15 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         text: initial.text,
       });
       expect(after.focusEvents.filter((event) => event.type === 'focusout')).toEqual([]);
-      expect(after.effects).toEqual([0]);
+      expect(after.outwardSignals).toEqual([0]);
       await page.keyboard.press('Enter');
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1]);
       await page.keyboard.press('Space');
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([2]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([2]);
     });
   }, 60_000);
 
-  it('projects disabled into the first AX tree and blocks native activation before/after adoption', async () => {
+  it('projects disabled into the first AX tree and suppresses outward activation before/after adoption without stopping native click propagation', async () => {
     await withPage('disabled', async (page, context) => {
       await loaded(page, '?disabled=true');
       await remember(page);
@@ -489,28 +489,29 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         serverRect.x + serverRect.width / 2,
         serverRect.y + serverRect.height / 2
       );
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([0]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([0]);
       await adopt(page);
       const rect = await page.locator(compiled.tagName).boundingBox();
       if (!rect) throw new Error('Disabled Button has no native box');
       // Physical mouse input still occurs; force-click would hide the actual input path.
       await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([0]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([0]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.trustedClicks)).toEqual([2]);
       const afterAx = await accessibility(page, context, 'disabled-after');
       expect(
         afterAx?.properties?.find((property) => property.name === 'disabled')?.value.value
       ).toBe(true);
       await page.evaluate(() => window.buttonSsrProbe.roots[0].setProps({ disabled: false }));
       await page.locator(compiled.tagName).click();
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1]);
       await page.evaluate(() => window.buttonSsrProbe.roots[0].setProps({ disabled: true }));
       await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height / 2);
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1]);
       await snapshot(page, 'disabled-final');
     });
   }, 60_000);
 
-  it('isolates two owners, repeated initialization and terminal cleanup with one effect per activation', async () => {
+  it('isolates two owners, repeated initialization and terminal cleanup with one outward CustomEvent per activation', async () => {
     await withPage('owners-cleanup', async (page) => {
       await loaded(page, '?count=2');
       await remember(page);
@@ -530,9 +531,9 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
       expect(ownerFacts).toEqual({ distinct: true, retained: true });
       const roots = page.locator(compiled.tagName);
       await roots.nth(0).click();
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1, 0]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1, 0]);
       await roots.nth(1).click();
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1, 1]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1, 1]);
       await page.evaluate(() => {
         const root = window.buttonSsrProbe.roots[0];
         root.dispose();
@@ -542,14 +543,14 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
       const disposed = await page.evaluate(() => ({
         owner: window.buttonSsrProbe.roots[0].logicalOwner === null,
         exposes: Object.keys(window.buttonSsrProbe.roots[0].getExposes()),
-        effects: window.buttonSsrProbe.effects,
+        outwardSignals: window.buttonSsrProbe.outwardSignals,
       }));
-      expect(disposed).toEqual({ owner: true, exposes: [], effects: [1, 1] });
+      expect(disposed).toEqual({ owner: true, exposes: [], outwardSignals: [1, 1] });
       await roots.nth(1).click();
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1, 2]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1, 2]);
       await roots.nth(1).focus();
       await page.keyboard.press('Enter');
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1, 3]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1, 3]);
       const terminal = await page.evaluate(() => {
         const root = window.buttonSsrProbe.roots[1];
         root.dispose();
@@ -560,17 +561,30 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
       });
       expect(terminal).toBe(true);
       await page.keyboard.press('Enter');
-      expect(await page.evaluate(() => window.buttonSsrProbe.effects)).toEqual([1, 3]);
+      expect(await page.evaluate(() => window.buttonSsrProbe.outwardSignals)).toEqual([1, 3]);
       await snapshot(page, 'owners-cleanup-final');
     });
   }, 60_000);
 
-  for (const mutation of ['source', 'profile', 'props', 'malformed', 'helper', 'css'] as const) {
+  for (const mutation of [
+    'source',
+    'profile',
+    'props',
+    'malformed',
+    'helper',
+    'css',
+    'missing',
+    'null',
+    'false',
+  ] as const) {
     it(`diagnoses ${mutation} carrier mismatch without replacing the server first paint`, async () => {
       await withPage(
         `mismatch-${mutation}`,
         async (page) => {
-          await loaded(page, `?mutation=${mutation}`);
+          await loaded(
+            page,
+            `?mutation=${mutation}${['missing', 'null', 'false'].includes(mutation) ? '&disabled=true' : ''}`
+          );
           await remember(page);
           const before = await snapshot(page, `mismatch-${mutation}-before`);
           const beforePng = await page.screenshot({
@@ -600,7 +614,7 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
           expect(after.roots[0].style).toEqual(before.roots[0].style);
           expect(after.roots[0].disabled).toBe(before.roots[0].disabled);
           expect(after.roots[0].tabIndex).toBe(before.roots[0].tabIndex);
-          expect(after.effects).toEqual([0]);
+          expect(after.outwardSignals).toEqual([0]);
           const afterPng = await page.screenshot({
             path: path.join(fixture.evidenceDir, `mismatch-${mutation}-after.png`),
           });
@@ -739,7 +753,7 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         await page.evaluate(() => window.buttonSsrProbe.roots[0].setProps({ disabled: true }));
         const untouched = await snapshot(other, 'request-isolation-untouched');
         expect(untouched.roots.every((root) => root.disabled !== 'true')).toBe(true);
-        expect(untouched.effects).toEqual([0, 0]);
+        expect(untouched.outwardSignals).toEqual([0, 0]);
       } finally {
         await other.close();
       }

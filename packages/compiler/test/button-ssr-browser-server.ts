@@ -9,7 +9,16 @@ import type { Browser } from '../../../apps/www/node_modules/playwright-core/typ
 import type { buildButtonSsrFixture } from './button-ssr-fixture';
 
 export type ButtonSsrFixture = Awaited<ReturnType<typeof buildButtonSsrFixture>>;
-export type CarrierMutation = 'source' | 'profile' | 'props' | 'malformed' | 'helper' | 'css';
+export type CarrierMutation =
+  | 'source'
+  | 'profile'
+  | 'props'
+  | 'malformed'
+  | 'helper'
+  | 'css'
+  | 'missing'
+  | 'null'
+  | 'false';
 
 export interface ButtonSsrBrowserServer {
   browser: Browser;
@@ -30,6 +39,8 @@ export function mutateButtonCarrier(html: string, mutation: CarrierMutation): st
     /(<script\b[^>]*\bdata-pui-carrier="[^"]*"[^>]*>)([\s\S]*?)(<\/script>)/,
     (_match, start: string, json: string, end: string) => {
       found = true;
+      if (mutation === 'missing') return '';
+      if (mutation === 'null' || mutation === 'false') return start + mutation + end;
       const carrier = JSON.parse(json);
       if (mutation === 'source') carrier.binding = `${carrier.binding}-foreign-source`;
       if (mutation === 'profile') carrier.profile = 'react-dom-ssr-v1';
@@ -86,7 +97,17 @@ export async function startButtonSsrBrowserServer(
       const mutation = url.searchParams.get('mutation') as CarrierMutation | null;
       if (
         mutation &&
-        !['source', 'profile', 'props', 'malformed', 'helper', 'css'].includes(mutation)
+        ![
+          'source',
+          'profile',
+          'props',
+          'malformed',
+          'helper',
+          'css',
+          'missing',
+          'null',
+          'false',
+        ].includes(mutation)
       ) {
         response.writeHead(400).end('Unknown carrier mutation');
         return;

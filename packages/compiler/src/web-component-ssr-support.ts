@@ -26,7 +26,7 @@ export function renderWithScope<T>(props: GeneratedProps & Record<string, unknow
 `;
   const client = `// Browser-only entry. Import Component.ts on the server, never this module.
 import {createHydrationOwner, hydrationBinding, hydrationArtifacts, hydrationCssText, defaultTagName, type GeneratedProps, type GeneratedExposes, type HydrationOwner} from './Component';
-import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
+import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, checkCarrierHost, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
 export {HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
 export class ${className} extends HTMLElement {
   private owner: HydrationOwner | null = null;
@@ -142,7 +142,7 @@ export function register(tagName = defaultTagName, registry: CustomElementRegist
 /** Define first; server carriers auto-adopt on upgrade. This entry also accepts an explicit carrier on a detached element. */
 export function hydrate(element: ${className}, carrier?: Carrier): ${className} {
   if (!(element instanceof ${className})) throw new Error('Register the generated Custom Element before hydrating');
-  if (carrier) checkCarrier(carrier, hydrationBinding, element.localName, hydrationArtifacts);
+  if (carrier !== undefined) { checkCarrier(carrier, hydrationBinding, element.localName, hydrationArtifacts); checkCarrierHost(element, carrier); }
   if (element.hydrationStatus === 'mismatch') throw element.hydrationDiagnostic;
   if (carrier && element.hydrationStatus === 'pending') element.hydrate(carrier);
   else if (!element.logicalOwner && element.isConnected) element.connectedCallback();
@@ -425,9 +425,26 @@ function carrierNode(host: HTMLElement): HTMLScriptElement | null {
 }
 export function readCarrier(host: HTMLElement): Carrier | null {
   const node = carrierNode(host);
-  if (!node) return null;
-  try { return JSON.parse(node.textContent ?? '') as Carrier; }
-  catch (error) { throw new HydrationMismatch('invalid carrier JSON'); }
+  // A marked server frame must never fall through to client-only reconstruction.
+  // Check independent markers too, so removing one attribute cannot erase SSR intent.
+  const marked = ['data-pui-ssr', 'data-pui-instance', 'data-pui-props'].some(name => host.hasAttribute(name)) ||
+    Array.from(host.childNodes).some(node => marker(node, 'pui-root-start') || marker(node, 'pui-root-end'));
+  if (!node) {
+    if (marked) throw new HydrationMismatch('SSR-marked host is missing its carrier');
+    return null;
+  }
+  if (node.getAttribute('type') !== 'application/json') throw new HydrationMismatch('carrier script type differs');
+  let parsed: unknown;
+  try { parsed = JSON.parse(node.textContent ?? ''); }
+  catch { throw new HydrationMismatch('invalid carrier JSON'); }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new HydrationMismatch('carrier must be an object');
+  const carrier = parsed as Carrier;
+  if (node.getAttribute('data-pui-carrier') !== carrier.binding) throw new HydrationMismatch('carrier script binding differs');
+  return carrier;
+}
+export function checkCarrierHost(host: HTMLElement, carrier: Carrier): void {
+  if (host.getAttribute('data-pui-instance') !== carrier.instanceId || host.getAttribute('data-pui-ssr') !== carrier.binding) throw new HydrationMismatch('physical instance/source binding differs');
+  if (host.getAttribute('data-pui-props') !== JSON.stringify(carrier.raw)) throw new HydrationMismatch('physical initial props differ from carrier');
 }
 function logicalParent(host: HTMLElement): ContextScope | null {
   if (!host.isConnected) return null;
@@ -457,8 +474,7 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
   const doc = host.ownerDocument;
   const initialAttributes = Array.from(host.attributes, attribute => [attribute.name, attribute.value] as const);
   if (carrier) {
-    if (host.getAttribute('data-pui-instance') !== carrier.instanceId || host.getAttribute('data-pui-ssr') !== carrier.binding) throw new HydrationMismatch('physical instance/source binding differs');
-    if (host.getAttribute('data-pui-props') !== JSON.stringify(carrier.raw)) throw new HydrationMismatch('physical initial props differ from carrier');
+    checkCarrierHost(host, carrier);
     if (Array.from(doc.querySelectorAll('[data-pui-instance]')).filter(node => node.getAttribute('data-pui-instance') === carrier.instanceId).length > 1) throw new HydrationMismatch('duplicate instance identity');
     for (const [name, value] of Object.entries(carrier.attributes)) if (host.getAttribute(name) !== value) throw new HydrationMismatch('Root attribute differs: ' + name);
   }

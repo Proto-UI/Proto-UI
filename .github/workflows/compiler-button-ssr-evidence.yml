@@ -6,6 +6,9 @@ on:
       - 'packages/**'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
       - 'apps/www/package.json'
+      - 'apps/www/scripts/runtime-retry-urls.mjs'
+      - 'scripts/test/server-readiness.mjs'
+      - '.npmrc'
       - 'spec/**'
       - 'vitest.config.ts'
       - 'tsconfig*.json'
@@ -59,8 +62,8 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 21, 'All source and server controls must run.');
-          assert.equal(report.numPassedTests, 21);
+          assert.equal(report.numTotalTests, 36, 'All source and server controls must run.');
+          assert.equal(report.numPassedTests, 36);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.numPendingTests, 0);
           assert.equal(report.success, true);
@@ -81,8 +84,8 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 15, 'All 15 native browser journeys must run.');
-          assert.equal(report.numPassedTests, 15);
+          assert.equal(report.numTotalTests, 18, 'All 18 native browser journeys must run.');
+          assert.equal(report.numPassedTests, 18);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.numPendingTests, 0);
           assert.equal(report.success, true);

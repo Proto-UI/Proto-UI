@@ -26,7 +26,7 @@ interface GeneratedButton extends HTMLElement {
   dispose(): void;
 }
 let fixture: Awaited<ReturnType<typeof buildButtonSsrFixture>>;
-let client: { register(): void; hydrate(host: GeneratedButton): void };
+let client: { register(): void; hydrate(host: GeneratedButton, carrier?: FixtureCarrier): void };
 const mounted: GeneratedButton[] = [];
 beforeAll(async () => {
   fixture = await buildButtonSsrFixture({ tagName: 'pui-ssr-unit-button' });
@@ -128,7 +128,7 @@ describe('experimental source-generated Button SSR', () => {
     expect(fixture.cssText).toContain('box-sizing: border-box');
   });
 
-  it('adopts original children, focus and selection without duplicate owners or activation', () => {
+  it('adopts original children, focus and selection with one outward CustomEvent per activation', () => {
     const { host } = prepare();
     attachWithoutAutoConnect(host);
     const label = host.querySelector('[data-label]')!;
@@ -151,20 +151,26 @@ describe('experimental source-generated Button SSR', () => {
     client.hydrate(host);
     host.connectedCallback();
     expect(host.logicalOwner).toBe(owner);
-    let effects = 0;
+    let outwardSignals = 0;
+    const listenerChannels: string[] = [];
     host.addEventListener('click', (event) => {
-      if (event instanceof CustomEvent) ++effects;
+      // A-WEB-COMPONENT-0001-M and HC-EXPOSE-EVENT-SINK-0001-A/B:
+      // Native input and the same-named outward CustomEvent are distinct channels.
+      listenerChannels.push(event instanceof CustomEvent ? 'outward' : 'native-input');
+      if (event instanceof CustomEvent) ++outwardSignals;
     });
     host.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(effects).toBe(1);
+    expect(outwardSignals).toBe(1);
+    expect(listenerChannels).toEqual(['outward', 'native-input']);
     host.setProps({ disabled: true });
     expect(host.getExposes().disabled.get()).toBe(true);
     host.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(effects).toBe(1);
+    expect(outwardSignals).toBe(1);
+    expect(listenerChannels).toEqual(['outward', 'native-input', 'native-input']);
     host.dispose();
     host.dispose();
     host.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(effects).toBe(1);
+    expect(outwardSignals).toBe(1);
   });
 
   it.each(['source', 'profile', 'helpers', 'css', 'raw', 'presentation', 'attributes'])(
@@ -189,6 +195,92 @@ describe('experimental source-generated Button SSR', () => {
       expect(host.logicalOwner).toBeNull();
     }
   );
+
+  it.each([
+    'missing',
+    'null',
+    'false',
+    'true',
+    'zero',
+    'string',
+    'array',
+    'empty-object',
+    'duplicate',
+    'version',
+    'script-binding',
+    'script-type',
+    'partial-marker',
+  ])(
+    'refuses %s carrier on a disabled SSR-marked host without client reconstruction',
+    (mutation) => {
+      const { host } = prepare({ disabled: true });
+      const script = host.querySelector('script')!;
+      if (mutation === 'missing' || mutation === 'partial-marker') script.remove();
+      if (mutation === 'partial-marker') host.removeAttribute('data-pui-ssr');
+      const payloads: Record<string, string> = {
+        null: 'null',
+        false: 'false',
+        true: 'true',
+        zero: '0',
+        string: '""',
+        array: '[]',
+        'empty-object': '{}',
+      };
+      if (Object.hasOwn(payloads, mutation)) script.textContent = payloads[mutation];
+      if (mutation === 'duplicate') host.append(script.cloneNode(true));
+      if (mutation === 'version') {
+        const carrier = JSON.parse(script.textContent!);
+        carrier.version = 2;
+        script.textContent = JSON.stringify(carrier);
+      }
+      if (mutation === 'script-binding') script.setAttribute('data-pui-carrier', 'foreign-binding');
+      if (mutation === 'script-type') script.setAttribute('type', 'text/plain');
+      attachWithoutAutoConnect(host);
+      const before = host.outerHTML,
+        nodes = [...host.childNodes];
+      let error: unknown;
+      try {
+        host.connectedCallback();
+      } catch (caught) {
+        error = caught;
+      }
+      expect(error).toMatchObject({ code: 'PUI_WC_HYDRATION_MISMATCH' });
+      expect(host.hydrationStatus).toBe('mismatch');
+      expect(host.logicalOwner).toBeNull();
+      expect(host.getAttribute('aria-disabled')).toBe('true');
+      expect(host.getAttribute('tabindex')).toBe('-1');
+      expect(host.outerHTML).toBe(before);
+      expect([...host.childNodes]).toEqual(nodes);
+    }
+  );
+
+  it('still initializes an ordinary unmarked client element with its supplied props', () => {
+    const host = document.createElement(fixture.tagName) as GeneratedButton;
+    host.textContent = 'Client-only Button';
+    host.setProps({ disabled: true });
+    mounted.push(host);
+    document.body.append(host);
+    expect(host.hydrationStatus).toBe('client');
+    expect(host.getExposes().disabled.get()).toBe(true);
+    expect(host.textContent).toBe('Client-only Button');
+  });
+
+  it('rejects a foreign explicit carrier after adoption while retaining the established owner', () => {
+    const { host, rendered } = prepare({ disabled: true });
+    document.body.append(host);
+    const owner = host.logicalOwner,
+      before = host.outerHTML,
+      nodes = [...host.childNodes];
+    expect(() => client.hydrate(host, fixture.render({ disabled: false }).carrier)).toThrow(
+      /mismatch/i
+    );
+    expect(host.logicalOwner).toBe(owner);
+    expect(host.hydrationStatus).toBe('adopted');
+    expect(host.getExposes().disabled.get()).toBe(true);
+    expect(host.outerHTML).toBe(before);
+    expect([...host.childNodes]).toEqual(nodes);
+    expect(() => client.hydrate(host, rendered.carrier)).not.toThrow();
+  });
 
   it('retains first-frame nodes and attributes when fresh generated presentation disagrees after carrier matching', () => {
     const { host } = prepare();
@@ -316,6 +408,7 @@ describe('experimental source-generated Button SSR', () => {
       'hydrationCssText',
       'checkInitialProps',
       'checkStylesheet',
+      'checkCarrierHost',
     ]) {
       expect(emitWebComponentSource(parsed.value, { ssr: true, className })).toMatchObject({
         ok: false,
