@@ -118,11 +118,17 @@ export function accordionAdapterConformance(
           expect(el(view, f.items[0].trigger.key)?.getAttribute('aria-controls')).toBe(id);
           expect(panel.getAttribute('aria-labelledby')).toBe(el(view, f.items[0].trigger.key)!.id);
           expect(el(view, f.items[2].content.key)).toBeNull();
-          await view.click(el(view, f.items[0].trigger.key)!);
-          await until(view, () => el(view, f.items[0].content.key) === null);
-          expect(el(view, f.items[0].trigger.key)?.hasAttribute('aria-controls')).toBe(false);
-          await view.click(el(view, f.items[0].trigger.key)!);
-          await until(view, () => el(view, f.items[0].content.key)?.id === id);
+          for (let cycle = 0; cycle < 3; cycle++) {
+            await view.click(el(view, f.items[0].trigger.key)!);
+            await until(view, () => el(view, f.items[0].content.key) === null);
+            expect(el(view, f.items[0].trigger.key)?.hasAttribute('aria-controls')).toBe(false);
+            await view.click(el(view, f.items[0].trigger.key)!);
+            await until(view, () => el(view, f.items[0].content.key)?.id === id);
+            expect(el(view, f.items[0].trigger.key)?.getAttribute('aria-controls')).toBe(id);
+            expect(el(view, f.items[0].content.key)?.getAttribute('aria-labelledby')).toBe(
+              el(view, f.items[0].trigger.key)!.id
+            );
+          }
           expect(view.exposes(f.root.key).getOpenItems()).toEqual(['a']);
         } finally {
           await view.unmount();

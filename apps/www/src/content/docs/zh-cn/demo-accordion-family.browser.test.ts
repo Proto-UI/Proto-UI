@@ -24,6 +24,17 @@ const ref = (previewer: Locator, id: string) => previewer.locator(`.host [data-d
 const expanded = async (button: Locator, value: boolean) => {
   await expect.poll(() => button.getAttribute('aria-expanded')).toBe(String(value));
 };
+// Canonical expanded can precede React's Content view commit. Wait only for
+// materialization readiness, then assert IDREFs immediately (never poll the relation).
+const materialized = async (content: Locator) => {
+  await expect
+    .poll(() =>
+      content.evaluateAll(
+        (nodes) => nodes.length === 1 && !nodes[0].hasAttribute('data-pui-view-pending')
+      )
+    )
+    .toBe(true);
+};
 const focused = async (button: Locator) => {
   await expect.poll(() => button.evaluate((el) => document.activeElement === el)).toBe(true);
 };
@@ -233,6 +244,7 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           await expanded(first, false);
           await expanded(second, true);
           await focused(second);
+          await materialized(ref(previewer, 'single-lifetime-content'));
           const id = await second.getAttribute('aria-controls');
           expect(id).toBeTruthy();
           expect(await ref(previewer, 'single-lifetime-content').getAttribute('id')).toBe(id);
@@ -246,7 +258,12 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           expect(await second.getAttribute('aria-controls')).toBeNull();
           await page.keyboard.press('Enter');
           await expanded(second, true);
+          await materialized(ref(previewer, 'single-lifetime-content'));
           expect(await second.getAttribute('aria-controls')).toBe(id);
+          expect(await ref(previewer, 'single-lifetime-content').getAttribute('id')).toBe(id);
+          expect(
+            await ref(previewer, 'single-lifetime-content').getAttribute('aria-labelledby')
+          ).toBe(await second.getAttribute('id'));
           await page.keyboard.press('Tab');
           await focused(long); // disabled header is skipped; no auto focusable Content
           await page.keyboard.press('Home');
