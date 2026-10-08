@@ -1,6 +1,7 @@
 // @vitest-environment node
 
 import { revealHeaderPreferences } from './site-header-browser';
+import { observeLabelDescriptionSelection } from './label-selection-observer';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -1089,6 +1090,18 @@ describe.sequential('Independent Label public documentation', () => {
             { steps: 20 }
           );
           await page.mouse.up();
+          if ((await page.evaluate(() => window.getSelection()?.toString() ?? '')).length <= 5) {
+            console.error(
+              '[label-selection]',
+              JSON.stringify({
+                family,
+                runtime,
+                observation: await description
+                  .evaluate(observeLabelDescriptionSelection, bounds)
+                  .catch((error) => ({ diagnosticError: String(error) })),
+              })
+            );
+          }
           expect(
             (await page.evaluate(() => window.getSelection()?.toString() ?? '')).length
           ).toBeGreaterThan(5);
