@@ -111,3 +111,38 @@ describe('runtime: RuntimeModuleOrchestrator deps ordering (unit)', () => {
     }).toThrow(/dependency cycle/i);
   });
 });
+
+it('checks declared dependencies on every facade/port access, without loading modules', () => {
+  let access!: import('@proto.ui/module-base').ModuleDeps;
+  const facade = { marker: 'existing facade' } as ModuleFacade;
+  const port = { marker: 'existing port' };
+  const declared: ModuleDef = {
+    name: 'declared',
+    resourceOwnership: 'instance',
+    create: () => ({ name: 'declared', scope: 'instance', facade, hooks: {}, port }),
+  };
+  const consumer: ModuleDef = {
+    name: 'consumer',
+    resourceOwnership: 'instance',
+    deps: ['declared'],
+    optionalDeps: ['optional'],
+    create({ deps }) {
+      access = deps;
+      return { name: 'consumer', scope: 'instance', facade: {}, hooks: {} };
+    },
+  };
+  new RuntimeModuleOrchestrator({ prototypeName: 'declared-only', getPhase: () => 'setup' }, [
+    consumer,
+    declared,
+  ]);
+  expect(access.requireFacade('declared')).toBe(facade);
+  expect(access.tryFacade('declared')).toBe(facade);
+  expect(access.requirePort('declared')).toBe(port);
+  expect(access.tryPort('declared')).toBe(port);
+  expect(access.tryFacade('optional')).toBeUndefined();
+  expect(access.tryPort('optional')).toBeUndefined();
+  expect(() => access.requireFacade('optional')).toThrow('missing dep facade');
+  expect(() => access.requirePort('optional')).toThrow('missing dep port');
+  for (const method of ['requireFacade', 'requirePort', 'tryFacade', 'tryPort'] as const)
+    expect(() => access[method]('foreign')).toThrow('tried to access undeclared dep: foreign');
+});

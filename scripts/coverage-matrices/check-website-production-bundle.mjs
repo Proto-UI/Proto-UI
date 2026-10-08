@@ -2,6 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+// Build-time source evaluation must never be shipped as a browser fallback.
+// Runtime modules already owned by real Adapters retain their existing rules;
+// these exact prerender/stylesheet-compiler roots have no browser owner.
+const SERVER_ONLY_PRERENDER_MODULES = new Set([
+  'apps/www/src/components/snapshot-prototype-style.ts',
+  'apps/www/src/components/site-startup-paint.ts',
+  'packages/cli/src/services/proto-style-css.ts',
+]);
 const DEFAULT_GRAPH_PATH = 'apps/www/dist/proto-ui-bundle-graph.json';
 const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/pages/en/test/new-projection-families.astro?astro&type=script&index=0&lang.ts',
@@ -338,6 +346,15 @@ export function collectWebsiteProductionBundleIssues({
           );
         }
       }
+    }
+  }
+
+  for (const chunk of chunks) {
+    for (const moduleId of chunk.moduleIds ?? []) {
+      if (SERVER_ONLY_PRERENDER_MODULES.has(moduleId))
+        issues.push(
+          `server-only prerender module \`${moduleId}\` leaked into client chunk \`${chunk.fileName}\``
+        );
     }
   }
 

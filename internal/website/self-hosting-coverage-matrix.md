@@ -129,6 +129,8 @@ The 2026-10-07 UI checkpoint retains every row state while reviewing the runtime
 
 The 2026-10-07 registration reviewed main `d4861901c2c9a1460b62ff50c7a684cb6cfb483e`. Merged #874 starts independent Pagefind imports together after the successful HEAD probe; Search retains the same five owning rows and current-open/disposal fences. Merged #835's Collapsible demo supplies controlled-request acceptance, status output, Adapter callback wiring and WC listener cleanup under the existing blocked authored-controller row. Its Root, Trigger, Content and acceptance Button remain draft. These source bindings do not establish runtime acceptance, a stable consumer path or resolution of #848's historical delay.
 
+The 2026-10-08 startup prerender review adds a finite source-hashed build-time Runtime dependency closure in `scripts/coverage-matrices/startup-prerender-imports.mjs`: 49 exact source owners and 217 distinct import pairs. The two Website entry owners bind only four public Button/Surface recipes and the existing Runtime feedback/CSS chain. The Runtime session/module orchestrator, feedback style sink, and detached event/trigger lifecycle dependencies remain build infrastructure, not new application command owners. The one transitively scanned event kernel has the exact `www.build.style-generation` binding and hash below; no directory or family-wide module allowance is added. Source, adjacent-import, foreign-owner and dynamic-stylesheet negatives remain mandatory. Menu/Search/code consumers retain their existing blocked row dispositions; this is not Compiler SSR or permission to run arbitrary Prototype lifecycle code at build time.
+
 | Interactive or integration source | Owning matrix row | Source SHA-256 |
 | --- | --- | --- |
 | `apps/www/src/components/PrototypePreviewer/ShadowSplitAcceptance.astro` | `www.demo.authored-controllers` | `3c9c12659926d2a3cc8a531783c1f448b8cbe8e32d3aab44429de11424265684` |
@@ -193,7 +195,7 @@ The 2026-10-07 registration reviewed main `d4861901c2c9a1460b62ff50c7a684cb6cfb4
 | `apps/www/src/components/PrototypePreviewer/runtime-preview-surface.ts` | `www.demo.preview-surface` | `37ddf520355c6ab533383ff914f6744bd74722c2f095ce7a73350b0e462871f9` |
 | `apps/www/src/components/PrototypePreviewer/wc-registry.ts` | `www.demo.raw-adapter-runtimes` | `376b4407e8f93385a57979fc44ea96790a78e7c84b4f3b5a9e71371a30525102` |
 | `apps/www/src/components/SiteContentsCommand.astro` | `www.shell.mobile-menu-toggle` | `066158b499aa59e26f754a7d45ca5bb20c569130b0c66b2b038627be332f2da7` |
-| `apps/www/src/components/SiteCopyBootstrap.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `54eae77fe5bcd8059e0b6c3039b66d8d25db3c24c2487b916e7de4cc074ce1e6` |
+| `apps/www/src/components/SiteCopyBootstrap.astro` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `cebb51c51c665af7b621700465f28026ea3c1068b3977ffdf6ec8dcf745482b1` |
 | `apps/www/src/components/SiteLibraryStyle.astro` | `www.build.style-generation` | `f5c612c3841e7dd9e5441db733f6ac991aac7b9875338c167ffa1caa7667584e` |
 | `apps/www/src/components/SiteTypographyBootstrap.astro` | `www.content.typography-presentation` | `11298b3b53d1deff5656fbea1db03d34c57c19ba10d243534c337e370d759447` |
 | `apps/www/src/components/WikiTerm.astro` | `www.docs.wiki-term` | `8af4d68412ce23bb64052fe76be3e4253525f938d2d681d08cfa36445ac24339` |
@@ -203,11 +205,11 @@ The 2026-10-07 registration reviewed main `d4861901c2c9a1460b62ff50c7a684cb6cfb4
 | `apps/www/src/components/documentation-image-preview.ts` | `www.docs.whitepaper-diagram-viewer` | `e70dd55bf8aa3c18beb24b79172365d5b0351a9495e74d9d49b929228bd1e712` |
 | `apps/www/src/components/hidden-first-activation.ts` | `www.docs.code-panel-copy`, `www.docs.code-surface`, `www.docs.install-copy`, `www.docs.note-surface` | `be46b5e43f8604df479dcf59c4f10fc3d75301efc8fb48674ede91765e59de58` |
 | `apps/www/src/components/override/AdapterSelect.astro` | `www.shell.adapter-select` | `9bae80be9b490ab0f5e5da698d7b5f863fb16b42c3c37697ee42e6f335b7f8c3` |
-| `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `1bd6c4d4f8d81fad1f49ccd89b56c5d39aac5cd6502ee67d8f799a68777b16fc` |
+| `apps/www/src/components/override/Header.astro` | `www.shell.header-separators`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.primary-nav` | `6d175088d5247ae7da4e6fd3480de3bccd75509b6795a7140b5880ba09ff10db` |
 | `apps/www/src/components/override/Hero.astro` | `www.shell.hero-actions`, `www.shell.native-link-presentation` | `70eaca7e24a1c58407b8ca6e72bbd4932f91d3fba77039bb9aa051a5c120b446` |
 | `apps/www/src/components/override/LanguageSelect.astro` | `www.shell.language-select` | `334ec8188645e8ba055a57e75c5f4e2a15fd085995722bf010f8e787c4abc410` |
 | `apps/www/src/components/override/PageFrame.astro` | `www.docs.whitepaper-diagram-viewer`, `www.docs.wiki-term`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle`, `www.shell.page-layout`, `www.shell.sidebar-navigation` | `38adff23ef29d8dcfde1346572bb34848652d1cbeaddb5c47947161384ec5cdc` |
-| `apps/www/src/components/override/Search.astro` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher`, `www.search.loading-failure`, `www.search.pagefind-engine` | `ee008d7e8d0794a1c897a7905e2322dc1afe926340aa29123c7c2c149f7eec2c` |
+| `apps/www/src/components/override/Search.astro` | `www.search.dialog`, `www.search.input-results`, `www.search.launcher`, `www.search.loading-failure`, `www.search.pagefind-engine` | `480f535f437a47a50790bd7698215f10abab875ffa0d29b90955cc6cdeca730c` |
 | `apps/www/src/components/override/Select.astro` | `www.shell.language-select` | `2de370ac250545ea251fcdd6a837c4d793dfa21ae5b659805c30bed6507a5c51` |
 | `apps/www/src/components/override/SocialIcons.astro` | `www.shell.native-link-presentation`, `www.shell.social-links` | `12d59a437c47767ead0edf80c2877b94f071b303bdbeb4542260ab82af8ad401` |
 | `apps/www/src/components/override/TableOfContents/TableOfContents.astro` | `www.shell.table-of-contents` | `9bd30716988a52dc84f35502b252621b2ae37b61d038e17b888e68e62f435cbb` |
@@ -225,7 +227,7 @@ The 2026-10-07 registration reviewed main `d4861901c2c9a1460b62ff50c7a684cb6cfb4
 | `apps/www/src/components/site-link-recipes.ts` | `www.shell.native-link-presentation` | `554aca05225ef6b099d29449979a25fd29b15cd35f6bf2c170e13d25328267fb` |
 | `apps/www/src/components/site-native-controls.ts` | `www.shell.native-link-presentation`, `www.shell.table-of-contents` | `605a9ab995189d4cc2675079b67df28e31d4bbd7068f9fbccef122affb11bbc2` |
 | `apps/www/src/components/site-native-link-facts.ts` | `www.shell.native-link-presentation` | `b1abc0626005f00d0f2298b2fe0d964e733f2df60a1141e158c52331486451cf` |
-| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure` | `29bd6e540f8bfbee400292c6098e0fcc776691311fc9c42b5ad4eca879ba010c` |
+| `apps/www/src/components/site-search-commands.ts` | `www.search.dialog`, `www.search.launcher`, `www.search.loading-failure` | `ee497539db2dc7a8fcc3cf75c08239f15531694aa7a9c508e373ed3ab1b74d8b` |
 | `apps/www/src/components/site-select-dismissal.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-panel`, `www.shell.mobile-menu-toggle` | `3d990e18321eb574957172f2a33252cc0dd157e96c7973252a0cb4adbcef33d0` |
 | `apps/www/src/components/site-shadcn-controls.ts` | `www.demo.runtime-select`, `www.docs.code-panel-expand`, `www.docs.install-manager-tabs`, `www.shell.adapter-select`, `www.shell.language-select`, `www.shell.mobile-menu-toggle`, `www.shell.theme-toggle` | `ce2553dfd82edfc1763107f63709f729fbccdf73e178c7729a59835456e67350` |
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `5d950f495c575e52862356f974cfe35d95b2d627d10a09cc33f3fb3e865b018b` |
@@ -264,6 +266,9 @@ The 2026-10-07 registration reviewed main `d4861901c2c9a1460b62ff50c7a684cb6cfb4
 | `apps/www/src/pages/en/test/style-isolation.astro` | `www.demo.prototype-previewer`, `www.demo.raw-adapter-runtimes` | `8fb1136b0a7c267073ab1f2c52b135ef199e9109c449b0ef3aadd422ab429ca3` |
 | `apps/www/src/pages/index.astro` | `www.route.root-locale-redirect` | `e50e3349709f152a1f53de9e85fecb17dceb443282b147c917d2ff1a8c37c4a8` |
 | `apps/www/src/scripts/proto-concept.ts` | `www.docs.wiki-term` | `ad5f89a44fd1b396221a7161874e634e0eb038b71395e2c5cb54f7911873925a` |
+| `apps/www/src/components/site-startup-paint.ts` | `www.build.style-generation`, `www.docs.code-surface`, `www.search.launcher`, `www.shell.mobile-menu-toggle` | `4bb12512c5c079f9a78dde6003416efde751cdf255dedd47655cd51be228860b` |
+| `apps/www/src/components/snapshot-prototype-style.ts` | `www.build.style-generation` | `ab4528be3bb61287c5d724a9fc7a2eb26bdeee5fdc106a7ab8ba6a37131ff98a` |
+| `packages/modules/event/src/kernel.ts` | `www.build.style-generation` | `aece802470861303b91206fcfdfecc02d337eca8368bf97a4ae2dc7ac622f518` |
 
 ## M0 evidence baseline
 

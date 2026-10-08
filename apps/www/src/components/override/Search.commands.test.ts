@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import ts from 'typescript';
+import { siteSearchShortcutLabel } from '../site-search-shortcut';
 import { PREFERRED_ADAPTER_EVENT } from '../adapter-preference';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 vi.setConfig({ testTimeout: 20_000 });
@@ -990,3 +991,19 @@ describe('module-preparation lifecycle boundaries', () => {
     expect(f.buildUI).not.toHaveBeenCalled();
   });
 });
+
+for (const userAgent of [
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+  'Mozilla/5.0 (X11; Linux x86_64)',
+]) {
+  it(`server and actual command keep the same dual-platform shortcut: ${userAgent}`, async () => {
+    vi.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue(userAgent);
+    const f = await mount('shadcn');
+    expect(f.trigger.querySelector('.site-search-shortcut')!.textContent!.trim()).toBe(
+      siteSearchShortcutLabel('Ctrl')
+    );
+    expect(siteSearchShortcutLabel('Ctrl')).toBe('⌘ / Ctrl K');
+    const source = readFileSync('apps/www/src/components/override/Search.astro', 'utf8');
+    expect(source).toContain("siteSearchShortcutLabel(Astro.locals.t('search.ctrlKey'))");
+  });
+}

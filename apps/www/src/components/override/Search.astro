@@ -2,6 +2,7 @@
 import project from 'virtual:starlight/project-context';
 import { localizedUrl } from '../../utils/localizedUrl';
 import { resolveSiteLibraryFamily } from '../site-library-family';
+import { siteSearchShortcutLabel } from '../site-search-shortcut';
 import StaticLucideIcon from '../StaticLucideIcon.astro';
 import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
 import { snapshotStartupStyle, startupButtonProps } from '../site-startup-paint';
@@ -67,7 +68,7 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
         >{Astro.locals.t('search.label')}</span
       >
       <span aria-hidden="true" class="site-search-shortcut sl-hidden md:sl-flex"
-        >{Astro.locals.t('search.ctrlKey')} K</span
+        >{siteSearchShortcutLabel(Astro.locals.t('search.ctrlKey'))}</span
       >
     </button>
   </div>

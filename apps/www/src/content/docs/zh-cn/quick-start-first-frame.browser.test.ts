@@ -220,6 +220,10 @@ function readPageFrame({
       menu: sample(menu),
       menuGlyph: sample(menu?.querySelector('.site-header-menu-icon') ?? null),
       search: sample(search),
+      searchLabel: sample(search?.querySelector('.site-search-label') ?? null),
+      searchShortcut: sample(search?.querySelector('.site-search-shortcut') ?? null),
+      searchShortcutText: search?.querySelector('.site-search-shortcut')?.textContent?.trim(),
+      searchOverflow: search ? search.scrollWidth - search.clientWidth : null,
       searchGlyph: sample(search?.querySelector('svg') ?? null),
       code: surface(code),
       codeToolbar: surface(toolbar),
@@ -432,6 +436,8 @@ function compare(
     changedFirstFrameGeometry(before.geometry, after.geometry),
     'header and complete page position remain stable in every frame'
   ).toEqual([]);
+  expect(after.chrome.searchShortcutText).toBe(before.chrome.searchShortcutText);
+  expect(after.chrome.searchOverflow).toBeLessThanOrEqual(1);
   expect(
     after.chrome.nativeNodesPreserved,
     'native code and navigation nodes survive every frame'
@@ -441,6 +447,8 @@ function compare(
     'menuGlyph',
     'search',
     'searchGlyph',
+    'searchLabel',
+    'searchShortcut',
     'code',
     'codeToolbar',
     'codeText',
@@ -450,8 +458,14 @@ function compare(
     expect(initial, `${key} SSR owner exists`).not.toBeNull();
     expect(next, `${key} every-frame painted owner exists`).not.toBeNull();
     if (!initial || !next) continue;
-    expect(initial.visible, `${key} SSR paint visible`).toBe(true);
-    expect(next.visible, `${key} remains visible`).toBe(true);
+    // Existing compact layout omits textual labels in both states. Keep its
+    // policy stable; the command and glyph must remain visible.
+    if (key === 'searchLabel' || key === 'searchShortcut')
+      expect(next.visible, `${key} responsive visibility`).toBe(initial.visible);
+    else {
+      expect(initial.visible, `${key} SSR paint visible`).toBe(true);
+      expect(next.visible, `${key} remains visible`).toBe(true);
+    }
     for (const dimension of ['x', 'y', 'width', 'height'] as const)
       expect(
         Math.abs(next[dimension] - initial[dimension]),
@@ -470,7 +484,7 @@ function compare(
       for (const property of ['stroke', 'strokeWidth', 'fill', 'shapes'] as const)
         expect(next[property], `${key}.${property}`).toEqual(initial[property]);
     // Passive planes contain no text. Compare fonts only for actual labels/code.
-    if (key === 'search' || key === 'codeText') {
+    if (['search', 'searchLabel', 'searchShortcut', 'codeText'].includes(key)) {
       for (const property of ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight'] as const)
         expect(next[property], `${key}.${property}`).toEqual(initial[property]);
       expect(initial.fontReady, `${key} initial actual font`).toBe(true);
@@ -494,119 +508,142 @@ const conditions = [
   { width: 390, height: 1000, colorScheme: 'dark' as const },
 ];
 describe('quick-start first-frame continuity', () => {
-  for (const runtime of RUNTIMES)
-    for (const condition of conditions) {
-      it(`${runtime} ${condition.width} ${condition.colorScheme}: readable first paint, cold hydration and refresh`, async () => {
-        const context = await browser.newContext({
-          viewport: condition,
-          colorScheme: condition.colorScheme,
-        });
-        const page = await context.newPage();
-        const errors: string[] = [];
-        page.on('pageerror', (error) => errors.push(error.message));
-        await page.addInitScript(
-          ({ runtime, key }) => {
-            localStorage.setItem(key, runtime);
-          },
-          { runtime, key: PREFERRED_ADAPTER_KEY }
-        );
-        try {
-          for (const navigation of ['cold', 'refresh'] as const) {
-            let release!: () => void;
-            const scripts = new Promise<void>((resolve) => {
-              release = resolve;
-            });
-            // Delay only executable modules, never HTML/CSS/fonts. This exposes
-            // the actual shipped SSR surface rather than a reconstructed fixture.
-            await page.route('**/*', async (request) => {
-              if (request.request().resourceType() === 'script') await scripts;
-              await request.continue();
-            });
-            const loading =
-              navigation === 'cold'
-                ? page.goto(`${baseUrl}${route}`, { waitUntil: 'commit' })
-                : page.reload({ waitUntil: 'commit' });
-            const prefix = `${runtime}-${condition.width}-${condition.colorScheme}-${navigation}`;
-            try {
-              await checkpoint(page, prefix, 'navigation-commit');
-              await loading;
-              await checkpoint(page, prefix, 'native-content');
-              await page.locator(targets.noteBody).waitFor({ state: 'visible' });
-              await checkpoint(page, prefix, 'native-styles');
-              await page.waitForFunction(() => {
-                const title = document.querySelector('h1[data-site-typography="h1"]');
-                return (
-                  title &&
-                  getComputedStyle(title).fontSize === '30px' &&
-                  document.styleSheets.length > 0
-                );
-              });
-              await checkpoint(page, prefix, 'target-font-faces');
-              await waitForCapturedFonts(page);
-              await checkpoint(page, prefix, 'first-frame-capture');
-              const before = await record(page, `${prefix}-first-frame`);
-              expect(before.ready).toBeUndefined();
-              await page.evaluate(readPageFrame, { selectors: targets, observe: true });
-              release();
-              await checkpoint(page, prefix, 'hydration');
-              await page.waitForFunction(
-                (runtime) => {
-                  const note = document.querySelector<HTMLElement>('.starlight-aside--note');
-                  return (
-                    note?.dataset.noteSurfaceView === 'ready' &&
-                    document.querySelector('site-search')?.getAttribute('data-search-view') ===
-                      'ready' &&
-                    [
-                      ...document
-                        .querySelectorAll('[data-site-code-surface="frame"]')[0]!
-                        .querySelectorAll('[data-site-code-surface="toolbar"]'),
-                      document.querySelector('[data-site-code-surface="frame"]')!,
-                    ].every(
-                      (surface) => surface.getAttribute('data-code-surface-view') === 'ready'
-                    ) &&
-                    note.dataset.noteSurfaceRuntime === runtime &&
-                    document
-                      .querySelector('.doc-stage-notice__title')
-                      ?.getAttribute('data-typography-runtime') === runtime
-                  );
-                },
-                runtime,
-                { timeout: 45_000 }
+  const journeys = [
+    ...RUNTIMES.flatMap((runtime) =>
+      conditions.map((condition) => ({
+        runtime,
+        condition,
+        locale: 'zh-cn',
+        platform: 'default',
+        userAgent: undefined as string | undefined,
+      }))
+    ),
+    ...['zh-cn', 'en'].flatMap((locale) =>
+      [320, 390, 1280].map((width) => ({
+        runtime: 'react' as const,
+        condition: { width, height: 1000, colorScheme: 'light' as const },
+        locale,
+        platform: 'apple',
+        userAgent:
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      }))
+    ),
+  ];
+  for (const { runtime, condition, locale, platform, userAgent } of journeys) {
+    it(`${runtime} ${locale} ${platform} ${condition.width} ${condition.colorScheme}: readable first paint, cold hydration and refresh`, async () => {
+      const context = await browser.newContext({
+        viewport: condition,
+        colorScheme: condition.colorScheme,
+        userAgent,
+      });
+      const page = await context.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      await page.addInitScript(
+        ({ runtime, key }) => {
+          localStorage.setItem(key, runtime);
+        },
+        { runtime, key: PREFERRED_ADAPTER_KEY }
+      );
+      try {
+        for (const navigation of ['cold', 'refresh'] as const) {
+          let release!: () => void;
+          const scripts = new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          // Delay only executable modules, never HTML/CSS/fonts. This exposes
+          // the actual shipped SSR surface rather than a reconstructed fixture.
+          await page.route('**/*', async (request) => {
+            if (request.request().resourceType() === 'script') await scripts;
+            await request.continue();
+          });
+          const loading =
+            navigation === 'cold'
+              ? page.goto(`${baseUrl}/${locale}/start-here/quick-start/#_top`, {
+                  waitUntil: 'commit',
+                })
+              : page.reload({ waitUntil: 'commit' });
+          const prefix = `${runtime}-${condition.width}-${condition.colorScheme}-${navigation}${platform === 'apple' ? `-apple-${locale}` : ''}`;
+          try {
+            await checkpoint(page, prefix, 'navigation-commit');
+            await loading;
+            await checkpoint(page, prefix, 'native-content');
+            await page.locator(targets.noteBody).waitFor({ state: 'visible' });
+            await checkpoint(page, prefix, 'native-styles');
+            await page.waitForFunction(() => {
+              const title = document.querySelector('h1[data-site-typography="h1"]');
+              return (
+                title &&
+                getComputedStyle(title).fontSize === '30px' &&
+                document.styleSheets.length > 0
               );
-              await page.evaluate(async () => {
-                await document.fonts.ready;
-                await new Promise<void>((resolve) =>
-                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            });
+            await checkpoint(page, prefix, 'target-font-faces');
+            await waitForCapturedFonts(page);
+            await checkpoint(page, prefix, 'first-frame-capture');
+            const before = await record(page, `${prefix}-first-frame`);
+            expect(before.ready).toBeUndefined();
+            await page.evaluate(readPageFrame, { selectors: targets, observe: true });
+            release();
+            await checkpoint(page, prefix, 'hydration');
+            await page.waitForFunction(
+              (runtime) => {
+                const note = document.querySelector<HTMLElement>('.starlight-aside--note');
+                return (
+                  note?.dataset.noteSurfaceView === 'ready' &&
+                  document.querySelector('site-search')?.getAttribute('data-search-view') ===
+                    'ready' &&
+                  [
+                    ...document
+                      .querySelectorAll('[data-site-code-surface="frame"]')[0]!
+                      .querySelectorAll('[data-site-code-surface="toolbar"]'),
+                    document.querySelector('[data-site-code-surface="frame"]')!,
+                  ].every(
+                    (surface) => surface.getAttribute('data-code-surface-view') === 'ready'
+                  ) &&
+                  note.dataset.noteSurfaceRuntime === runtime &&
+                  document
+                    .querySelector('.doc-stage-notice__title')
+                    ?.getAttribute('data-typography-runtime') === runtime
                 );
-              });
-              const after = await record(page, `${prefix}-hydrated`);
-              const frames = await stopFrameTrace(page, prefix);
-              expect(
-                frames.length,
-                'at least one real pre-release frame was observed'
-              ).toBeGreaterThan(0);
-              compare(before, after);
-              for (const frame of frames) compare(before, frame);
-              expect(errors).toEqual([]);
-              await checkpoint(page, prefix, 'passed');
-            } catch (error) {
-              await captureFailure(page, prefix, error);
-              throw error;
+              },
+              runtime,
+              { timeout: 45_000 }
+            );
+            await page.evaluate(async () => {
+              await document.fonts.ready;
+              await new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              );
+            });
+            const after = await record(page, `${prefix}-hydrated`);
+            const frames = await stopFrameTrace(page, prefix);
+            expect(
+              frames.length,
+              'at least one real pre-release frame was observed'
+            ).toBeGreaterThan(0);
+            compare(before, after);
+            for (const frame of frames) compare(before, frame);
+            expect(errors).toEqual([]);
+            await checkpoint(page, prefix, 'passed');
+          } catch (error) {
+            await captureFailure(page, prefix, error);
+            throw error;
+          } finally {
+            release();
+            // Preserve collected transitions even when readiness or geometry fails.
+            try {
+              await stopFrameTrace(page, prefix);
             } finally {
-              release();
-              // Preserve collected transitions even when readiness or geometry fails.
-              try {
-                await stopFrameTrace(page, prefix);
-              } finally {
-                await page.unrouteAll({ behavior: 'wait' });
-              }
+              await page.unrouteAll({ behavior: 'wait' });
             }
           }
-        } finally {
-          await context.close();
         }
-      }, 150_000);
-    }
+      } finally {
+        await context.close();
+      }
+    }, 150_000);
+  }
   for (const focusOwner of ['menu', 'content-link'] as const)
     it(`React delayed upgrade preserves ${focusOwner} focus and native code selection`, async () => {
       const context = await browser.newContext({ viewport: conditions[0] });

@@ -61,7 +61,7 @@ jobs:
           TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
           printf '%s\n' "$TOOLBAR_SETTING"
           grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
-      - name: Run all 12 first-frame, refresh, ownership and no-JavaScript journeys
+      - name: Run all 18 first-frame, refresh, ownership and no-JavaScript journeys
         timeout-minutes: 20
         env:
           PUI_QUICK_START_EVIDENCE_DIR: ${{ runner.temp }}/quick-start-first-frame/screenshots
@@ -76,8 +76,8 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 12, 'All first-frame and no-script journeys must run.');
-          assert.equal(report.numPassedTests, 12, 'All first-frame and no-script journeys must pass.');
+          assert.equal(report.numTotalTests, 18, 'All first-frame and no-script journeys must run.');
+          assert.equal(report.numPassedTests, 18, 'All first-frame and no-script journeys must pass.');
           assert.equal(report.numFailedTests, 0);
           JS
       - name: Retain exact-source results, screenshots and failures

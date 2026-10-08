@@ -18529,3 +18529,74 @@ for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dyna
     else assert.match(message, /ForeignContact\.ts.*escapes/);
   });
 }
+
+for (const source of ['site-startup-paint.ts', 'snapshot-prototype-style.ts']) {
+  for (const scenario of ['exact', 'foreign', 'changed', 'adjacent-import', 'dynamic-css']) {
+    test(`startup prerender import boundary: ${source} ${scenario}`, () => {
+      const root = createRoot();
+      writeValidMatrices(root);
+      const reviewed = `apps/www/src/components/${source}`;
+      const owner = scenario === 'foreign' ? `apps/www/src/components/Foreign-${source}` : reviewed;
+      const target = path.join(root, owner);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${reviewed}`, import.meta.url), target);
+      if (scenario === 'changed') fs.appendFileSync(target, '\n// unreviewed source change');
+      if (scenario === 'adjacent-import')
+        fs.appendFileSync(target, "\nimport '@proto.ui/prototypes-shadcn/checkbox';");
+      if (scenario === 'dynamic-css')
+        fs.appendFileSync(
+          target,
+          "\nconst link=document.createElement('link');link.rel='stylesheet';link.href=window.location.hash;"
+        );
+      const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+      const escaped = message.includes(
+        `in \`${owner}\` escapes the website consumer-wall allowlist`
+      );
+      assert.equal(escaped, scenario !== 'exact', message);
+      if (scenario === 'adjacent-import')
+        assert.ok(message.includes('prototypes-shadcn/checkbox'), message);
+      if (scenario === 'dynamic-css') assert.match(message, /dynamic stylesheet source/);
+    });
+  }
+}
+for (const scenario of [
+  'exact',
+  'wrong-owner',
+  'changed-bytes',
+  'adjacent-path',
+  'foreign-consumer',
+]) {
+  test(`startup prerender event source binding: ${scenario}`, () => {
+    const root = createRoot();
+    const source =
+      scenario === 'adjacent-path'
+        ? 'packages/modules/event/src/foreign-kernel.ts'
+        : 'packages/modules/event/src/kernel.ts';
+    const target = path.join(root, source);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(
+      new URL('../../../packages/modules/event/src/kernel.ts', import.meta.url),
+      target
+    );
+    const owner = scenario === 'wrong-owner' ? 'www.search.launcher' : 'www.build.style-generation';
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[source, [owner]]] });
+    if (scenario === 'changed-bytes') fs.appendFileSync(target, '\n// changed event semantics');
+    let foreign;
+    if (scenario === 'foreign-consumer') {
+      foreign = 'apps/www/src/components/ForeignStartup.ts';
+      const file = path.join(root, foreign);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, "import '../../../../packages/modules/event/src/kernel';");
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'adjacent-path') assert.match(message, /source binding must name exactly one/);
+    else if (scenario === 'wrong-owner' || scenario === 'changed-bytes')
+      assert.match(message, /exact startup event source, digest and build owner remain unverified/);
+    else if (scenario === 'foreign-consumer')
+      assert.ok(
+        message.includes(`in \`${foreign}\` escapes the website consumer-wall allowlist`),
+        message
+      );
+    else assert.equal(message, '');
+  });
+}

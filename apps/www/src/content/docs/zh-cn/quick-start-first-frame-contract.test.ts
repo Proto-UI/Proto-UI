@@ -7,8 +7,8 @@ const source = readFileSync(
 describe('first-frame harness load-gate contract', () => {
   it('keeps exact coverage including delayed ownership without broad paint exceptions', () => {
     const workflow = readFileSync('.github/workflows/quick-start-first-frame-evidence.yml', 'utf8');
-    expect(workflow).toContain('numTotalTests, 12');
-    expect(workflow).toContain('numPassedTests, 12');
+    expect(workflow).toContain('numTotalTests, 18');
+    expect(workflow).toContain('numPassedTests, 18');
     expect(source).toContain('nativeNodesPreserved');
     expect(source).toContain('selectionSame');
     expect(source).toContain('public disabled-to-ready opacity exception');

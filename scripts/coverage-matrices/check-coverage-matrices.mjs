@@ -1,3 +1,4 @@
+import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
 import { spawnSync } from 'node:child_process';
 import { decodeVideoEvidence } from './decode-video-evidence.mjs';
 import { createHash } from 'node:crypto';
@@ -161,6 +162,7 @@ const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
   'Results:',
 ]);
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
+  ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
   // Exact #652 acceptance compositions. Their App controls remain blocked
   // consumers, not an infrastructure or stable-prototype exemption.
   'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
@@ -12251,6 +12253,9 @@ function validateMainRows(
 // The public optical diagnostic fixture reaches this reviewed host resource
 // owner directly. It remains an exact source+digest+owner binding, never a
 // packages/** exemption or admission of another application's controller.
+const WEBSITE_STARTUP_EVENT_SOURCE = 'packages/modules/event/src/kernel.ts';
+const WEBSITE_STARTUP_EVENT_SHA256 =
+  STARTUP_PRERENDER_IMPORT_ALLOWLIST[WEBSITE_STARTUP_EVENT_SOURCE].sourceSha256;
 const WEBSITE_OPTICAL_HOST_SOURCE = 'packages/adapters/base/src/material/program-pool.ts';
 const WEBSITE_OPTICAL_HOST_SHA256 =
   '9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658';
@@ -12294,10 +12299,13 @@ function parseSourceBindings(lines, afterIndex, relativePath, issues) {
     const isReviewedOpticalHost = sourcePath === WEBSITE_OPTICAL_HOST_SOURCE;
     if (
       sourcePaths.length !== 1 ||
-      (!isWebsiteSource && !isPublicExecutable && !isReviewedOpticalHost)
+      (!isWebsiteSource &&
+        !isPublicExecutable &&
+        !isReviewedOpticalHost &&
+        sourcePath !== WEBSITE_STARTUP_EVENT_SOURCE)
     ) {
       issues.push(
-        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or the exact reviewed optical host source`
+        `${context}: source binding must name exactly one \`apps/www/src/**\` path, executable \`apps/www/public/**/*.{html,js,mjs,cjs,svg}\` path, or an exact reviewed optical/build-time event source`
       );
       continue;
     }
@@ -12333,6 +12341,24 @@ function validateWebsiteSourceBindings(
   const bindings = parseSourceBindings(lines, afterIndex, relativePath, issues);
   for (const [sourcePath, binding] of bindings) {
     const absolutePath = path.resolve(rootDir, sourcePath);
+    if (sourcePath === WEBSITE_STARTUP_EVENT_SOURCE) {
+      try {
+        assertPromotionModulePath(rootDir, absolutePath);
+        if (
+          !fs.lstatSync(absolutePath).isFile() ||
+          sourceScanDigest(absolutePath) !== WEBSITE_STARTUP_EVENT_SHA256 ||
+          binding.digest !== WEBSITE_STARTUP_EVENT_SHA256 ||
+          binding.ownerIds.length !== 1 ||
+          binding.ownerIds[0] !== 'www.build.style-generation'
+        )
+          throw new Error('unexpected build-time event bytes or owner');
+      } catch {
+        issues.push(
+          `${relativePath}:${binding.line}: exact startup event source, digest and build owner remain unverified`
+        );
+        continue;
+      }
+    }
     if (sourcePath === WEBSITE_OPTICAL_HOST_SOURCE) {
       try {
         assertPromotionModulePath(rootDir, absolutePath);
