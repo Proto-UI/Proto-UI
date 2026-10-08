@@ -3,6 +3,7 @@ import { mkdtemp, mkdir, readFile, readdir, rm, symlink, writeFile } from 'node:
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
+import { assertSystemFontEvidence, type SystemFontEvidence } from './button-ssr-first-paint';
 import { writeButtonSsrEvidenceArtifacts } from './button-ssr-evidence';
 import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
@@ -222,5 +223,28 @@ describe('Button SSR generated server artifact', () => {
     } finally {
       await rm(directory, { recursive: true, force: true });
     }
+  });
+});
+
+describe('held-client first-paint font proof', () => {
+  it('requires real system glyphs and rejects web fonts, unavailable or missing font evidence', () => {
+    const valid: SystemFontEvidence = {
+      faceCount: 0,
+      labels: [{ font: '14px Arial, sans-serif', text: 'Compiler Button 1', available: true }],
+      platformFonts: [
+        [{ familyName: 'Arial', postScriptName: 'ArialMT', isCustomFont: false, glyphCount: 17 }],
+      ],
+    };
+    expect(() => assertSystemFontEvidence(valid)).not.toThrow();
+    for (const invalid of [
+      { ...valid, faceCount: 1 },
+      { ...valid, labels: [{ ...valid.labels[0], available: false }] },
+      { ...valid, labels: [] },
+      { ...valid, platformFonts: [] },
+      { ...valid, platformFonts: [[]] },
+      { ...valid, platformFonts: [[{ ...valid.platformFonts[0][0], glyphCount: 0 }]] },
+      { ...valid, platformFonts: [[{ ...valid.platformFonts[0][0], isCustomFont: true }]] },
+    ])
+      expect(() => assertSystemFontEvidence(invalid)).toThrow();
   });
 });

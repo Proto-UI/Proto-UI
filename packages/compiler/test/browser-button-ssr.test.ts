@@ -9,6 +9,7 @@ import type {
 } from '../../../apps/www/node_modules/playwright-core/types/types';
 import { TARGET_PROFILES, resolveTargetProfile } from '../src/targets';
 import { buildButtonSsrFixture } from './button-ssr-fixture';
+import { captureButtonFirstPaint } from './button-ssr-first-paint';
 import {
   sha256,
   startButtonSsrBrowserServer,
@@ -338,9 +339,17 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         const before = await snapshot(page, 'delayed-before');
         expectVisible(before.roots[0]);
         expect(before.roots[0].status).toBe('unregistered');
-        const beforePng = await page.screenshot({
-          path: path.join(fixture.evidenceDir, 'delayed-before.png'),
+        expect(await page.evaluate(() => window.ButtonSsrFixture === undefined)).toBe(true);
+        const beforePaint = await captureButtonFirstPaint(
+          page,
+          context,
+          path.join(fixture.evidenceDir, 'delayed-before.png')
+        );
+        expect(beforePaint.documentState).toEqual({
+          readyState: 'interactive',
+          clientLoaded: false,
         });
+        expect(await page.evaluate(() => window.ButtonSsrFixture === undefined)).toBe(true);
         // Prove a paused bundle is still absent across actual rendering opportunities.
         await page.evaluate(
           () =>
@@ -373,6 +382,7 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
               rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
               opacity: style.opacity,
               visibility: style.visibility,
+              font: style.font,
             });
           }
           return samples;
@@ -387,12 +397,14 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
           rect: unknown;
           opacity: string;
           visibility: string;
+          font: string;
         }[]) {
           expect(frame.sameRoot).toBe(true);
           expect(frame.sameSlot).toBe(true);
           expect(frame.rect).toEqual(before.roots[0].rect);
           expect(frame.opacity).toBe(before.roots[0].style.opacity);
           expect(frame.visibility).toBe('visible');
+          expect(frame.font).toBe(before.roots[0].style.font);
         }
         const after = await snapshot(page, 'delayed-after');
         expect(after.roots[0]).toMatchObject({
@@ -404,11 +416,14 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         });
         expect(after.roots[0].style).toEqual(before.roots[0].style);
         expect(after.outwardSignals).toEqual([0]);
-        const afterPng = await page.screenshot({
-          path: path.join(fixture.evidenceDir, 'delayed-after.png'),
-        });
+        const afterPaint = await captureButtonFirstPaint(
+          page,
+          context,
+          path.join(fixture.evidenceDir, 'delayed-after.png')
+        );
+        expect(afterPaint.fonts).toEqual(beforePaint.fonts);
         // Native pixels, not only DOM/CSS declarations, must be identical here.
-        expect(sha256(afterPng)).toBe(sha256(beforePng));
+        expect(sha256(afterPaint.png)).toBe(sha256(beforePaint.png));
         await accessibility(page, context, 'delayed-adopted');
       } finally {
         release();
