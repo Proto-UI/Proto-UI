@@ -538,7 +538,7 @@ export class AnatomyModuleImpl extends ModuleBase {
     },
     resolveDomainScope: (family: AnatomyFamily): unknown | null =>
       this.caps.has(ANATOMY_INSTANCE_TOKEN_CAP)
-        ? this.resolveCurrentDomain(family, false).rootInstance
+        ? this.findDomainRoot(this.getSelfToken(), family)
         : null,
     descendantsOf: (
       family: AnatomyFamily,
