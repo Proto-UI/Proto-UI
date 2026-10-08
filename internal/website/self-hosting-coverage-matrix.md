@@ -272,7 +272,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/pages/index.astro` | `www.route.root-locale-redirect` | `e50e3349709f152a1f53de9e85fecb17dceb443282b147c917d2ff1a8c37c4a8` |
 | `apps/www/src/scripts/proto-concept.ts` | `www.docs.wiki-term` | `ad5f89a44fd1b396221a7161874e634e0eb038b71395e2c5cb54f7911873925a` |
 | `apps/www/src/components/site-startup-paint.ts` | `www.build.style-generation`, `www.docs.code-surface`, `www.search.launcher`, `www.shell.mobile-menu-toggle` | `4bb12512c5c079f9a78dde6003416efde751cdf255dedd47655cd51be228860b` |
-| `apps/www/src/components/snapshot-prototype-style.ts` | `www.build.style-generation` | `ab4528be3bb61287c5d724a9fc7a2eb26bdeee5fdc106a7ab8ba6a37131ff98a` |
+| `apps/www/src/components/snapshot-prototype-style.ts` | `www.build.style-generation` | `3941b73c46c50a30e9618f6c9288e509ed4738316050bc20c1fa5c28ee1f740e` |
 | `packages/modules/event/src/kernel.ts` | `www.build.style-generation` | `aece802470861303b91206fcfdfecc02d337eca8368bf97a4ae2dc7ac622f518` |
 
 ## M0 evidence baseline
