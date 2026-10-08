@@ -326,9 +326,26 @@ async function renderDemoReact(
 
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = new Map<string, Record<string, unknown>>();
+  // DemoBoxAttrs are native string attributes, not React boolean props. Keep
+  // global presence attributes (including hidden="until-found") byte-exact in
+  // the initial commit, before setup or the first animation-frame boundary.
+  const presenceAttributes = new Set(['hidden', 'inert', 'itemscope']);
+  const boxAttributeRefs = new WeakMap<object, (element: HTMLElement | null) => void>();
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
+    if (node.kind === 'box') {
+      const presence = Object.entries(node.attrs ?? {}).filter(([name]) =>
+        presenceAttributes.has(name.toLowerCase())
+      );
+      if (presence.length) {
+        // A stable ref runs on mount, not on every prototype props update:
+        // setup may subsequently own hidden/inert state, as Copy does.
+        boxAttributeRefs.set(node, (element) => {
+          if (element) for (const [name, value] of presence) element.setAttribute(name, value);
+        });
+      }
+    }
     if (node.kind === 'proto' && node.ref) {
       propsMap.set(node.ref, { ...(node.props ?? {}) });
     }
@@ -343,7 +360,16 @@ async function renderDemoReact(
       const kids = (node.children ?? []).map((child) => renderNode(child));
       return React.createElement(
         node.tag ?? 'div',
-        { ...node.attrs, className: node.className, 'data-demo-ref': node.ref },
+        {
+          ...Object.fromEntries(
+            Object.entries(node.attrs ?? {}).filter(
+              ([name]) => !presenceAttributes.has(name.toLowerCase())
+            )
+          ),
+          className: node.className,
+          'data-demo-ref': node.ref,
+          ref: boxAttributeRefs.get(node),
+        },
         ...kids
       );
     }

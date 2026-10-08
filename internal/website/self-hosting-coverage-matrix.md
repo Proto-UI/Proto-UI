@@ -176,7 +176,7 @@ The 2026-10-07 registration reviewed main `d4861901c2c9a1460b62ff50c7a684cb6cfb4
 | `apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `f3fde9efa38a6cfba71b58c3c11ae133c74501b0465ac8d2615fdce02af3aea8` |
 | `apps/www/src/components/PrototypePreviewer/TransitionDemoStyles.astro` | `www.demo.prototype-previewer` | `bf8f7ef09b0fdfcb0d01f09d90ec093e141e05e884ec3afb949ac2b78c89d383` |
 | `apps/www/src/components/PrototypePreviewer/code-panel-client.ts` | `www.demo.code-panel`, `www.docs.code-panel-expand` | `4ab0dfd77f4974583e6561bebc7e2a99ea1f822239ac36f5ad19d2b146b01c74` |
-| `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` | `www.demo.demo-matrix` | `6c8fead7fe87ebc3e6969cbf9f299e3418f9932e47fcf8252cd1e88d02c94432` |
+| `apps/www/src/components/PrototypePreviewer/demo-renderer.ts` | `www.demo.demo-matrix` | `2e38950b1753e2a77481d0d43b8bbc8bd63b264bd3de741c5cffca0c456800c8` |
 | `apps/www/src/components/PrototypePreviewer/preview-material-scene.ts` | `www.demo.raw-adapter-runtimes` | `d6c67d3aee7d6adb2bdb17dc72f9637f4a9ecf8ebe3e3d40a580d3a0747d5838` |
 | `packages/adapters/base/src/material/program-pool.ts` | `www.demo.raw-adapter-runtimes` | `9fc0918aa83c85f0c5f99d4080dad1f8f247cbf266401c63e65bd8257839c658` |
 | `apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts` | `www.demo.raw-adapter-runtimes` | `32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2` |
