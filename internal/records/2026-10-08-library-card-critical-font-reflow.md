@@ -1,0 +1,34 @@
+# Card first-frame font and narrow readable layout
+
+Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+
+## Request and baseline
+
+Bounded PR #872 follow-up from `c49ae23037d1a38c3594ad43906d669d38eee9ec`, tree `5eec47cd604cffacc553b49be3140e225c00c305`. Repair the actual Card first frame and 320px/200%-text no-JavaScript reflow without changing the established first-four-family desktop visual direction. This does not redesign Bootstrap or Liquid Glass and does not change Prototype semantics, lifecycle, security policy, or repository protections.
+
+The source-bound native baseline recorded eight cold-journey failures: Brutalist title width 125.359375 → 122.234375, action width 139.0625 → 133.515625. CDP reported DejaVu Sans before release and actual custom DM Sans 9pt afterward, with Noto Sans CJK SC for Chinese. The CSS alias declaration stayed the same. The trace retained text/host identity but reported changing FontFace objects (14 → 38 → 40 → 46 in the WC/light journey). Therefore `font-display: optional` on a separately requested alias did not establish first-frame font stability. The broader cause of every face-object replacement is not inferred from these observations.
+
+The no-JavaScript root-overflow check passed while the actual 320 × 20892 PNG was unreadable. Its SHA-256 was `3e9c36cdcc2a2cd9c8b2053904a3cfe3e93a6e09285479d5e730ca04c290fdf2`; the author inspected the original and detail crops. A 176px card minus 48px inline padding on each side, a 32px gap and a non-shrinking 32px logo left Base/Shadcn/Lucide title widths of 16/14/16px. Their title overflow was 19/21/17px despite root overflow zero. The captions, actions and descriptions also had unnecessarily narrow reading lanes.
+
+## Minimal repair and ownership
+
+- Keep the original unmodified DM Sans variable TTF, checksum `8cd08d97e89c24d0aa92edd2f0f4c8ee6195eee9b7c9f154865a58b02f0c1c0d`, existing SIL OFL notice and public license endpoint. Vite's `?inline` query puts the same bytes in the render-blocking gallery CSS under the existing application alias. `font-display: swap` keeps selectable text visible; there is no hidden-title window, fixed-width font compensation, SVG text replacement, new source download, or font-family substitution.
+- The full TTF is 240,164 bytes; its data URL is 320,241 bytes, about 135 kB gzip. This deliberate critical-CSS cost is recorded rather than concealed by a subset or global loading-policy change. The global DM Sans face is unchanged.
+- Add an inline-size container to each Card. Only narrow cards (at most 18rem) stack the decorative logo above the header text and spend at most 5% of card width on inline padding. The observed 324px/16px-root desktop cards are outside this condition. Family font sizes, paint, borders and vertical rhythm stay unchanged. Brutalist retains its real four-part Card; other families retain their actual Surface/Text.
+- Keep the strict endpoint and every-distinct-rAF equality oracle. Before releasing scripts or network fonts, require the critical alias to be loaded and CDP to show real DM Sans glyphs in caption/title/action. No pre-release `fonts.ready` or settling delay supplies this condition. CDP failure or fallback title glyphs are failures, not a typography pass inferred from CSS.
+- The no-JavaScript case still uses a 320px viewport, an effective important 200% root scale and a 90-second deadline. Record all actual Text leaves, require non-overflowing visible leaves, at least three heading ems and two text-leaf ems of available reading width, and a 320px full document width. Retain the full PNG and six per-card images before the new readability verdict, so a red result remains inspectable.
+- The exact Gallery source bindings retain `www.gallery.ui-library-cards` and its blocked composition disposition. There is no broad import exemption or consumer acceptance.
+
+The separate, unpublished Bootstrap visual candidate uses its own outer/caption density. During combination, exclude Bootstrap from the old generic narrow outer/action rules and set that candidate's caption inline padding to `min(.5625rem, 2cqi)`. With its existing outer `.25rem`, the calculated 176px-card heading lane is about 151px, exceeding the 147px three-em requirement for its 49px heading at 200%. This is a source calculation, not native visual evidence. Final combination must be remeasured without weakening the all-family oracle.
+
+## Verification and remaining work
+
+- The new pure predicates reject the actual c49 title metrics and its held DejaVu CDP result; the same font predicate accepts c49's enhanced DM Sans/CJK result. Unit negative controls reject hidden, overflowing, collapsed and missing text leaves and unavailable CDP.
+- The first focused run found missing shared-workspace dependency links in the new worktree, before collecting three suites. Restoring links to the existing installed dependencies allowed all 53 tests in eight selected Card suites to pass. No dependency versions changed. The complete font checksum/public-license test also passed.
+- The first docs build stopped at Astro's unavailable default telemetry config directory. Retrying with telemetry disabled used the same source and completed all 345 pages. Inspection of emitted gallery CSS decoded one inline font with exactly the original 240,164 bytes and checksum; both English and Chinese gallery HTML reference that CSS. The public license bytes remain identical. No CSP meta appears in either output and no app/header policy was changed. The deployed response headers remain a native CI observation.
+- Canonical type check and final source/production checks are recorded in the completion update below.
+- Browser execution remains owned by the integrating parent because local Chromium socket creation is denied. No candidate screenshot, native first-frame pass, reflow pass, or independent acceptance is claimed here. Next: independently review the exact local candidate, run all eight cold/reload journeys plus the no-script case on CI, inspect actual family and full-document PNGs, and rerun against the final Bootstrap combination.
+
+### Local completion update
+
+The final nine-file focused selection passed 54 tests, including original font bytes/public license and strengthened negative predicates. Canonical `check:types` completed with 0 errors, 0 warnings and 9 existing hints across 612 Astro files. `check-coverage-matrices.mjs` passed both matrices; `check-website-production-bundle.mjs` passed against the actual 345-page build. The emitted module graph contains none of `library-card-readability`, `library-card-font-trace`, `library-card-platform-fonts` or `library-card-capture`. `git diff --check` passed. These results do not substitute for the pending exact-candidate CI browser screenshots and independent review.

@@ -15,6 +15,7 @@ on:
       - 'apps/www/src/content/docs/zh-cn/library-card-capture*.ts'
       - 'apps/www/src/content/docs/zh-cn/library-card-font-trace*.ts'
       - 'apps/www/src/content/docs/zh-cn/library-card-platform-fonts*.ts'
+      - 'apps/www/src/content/docs/zh-cn/library-card-readability*.ts'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
       - 'scripts/test/server-readiness.mjs'
       - 'vitest.config.ts'

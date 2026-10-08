@@ -418,10 +418,12 @@ const themeCss = Object.entries(familyThemes)
 <style>
   @font-face {
     font-family: 'Library DM Sans';
-    src: url('../styles/assets/font/dm-sans/DMSans-Variable.ttf') format('truetype');
+    /* Keep the already licensed, checksum-verified bytes in the render-blocking
+       gallery CSS. No network font completion can change this first frame. */
+    src: url('../styles/assets/font/dm-sans/DMSans-Variable.ttf?inline') format('truetype');
     font-style: normal;
     font-weight: 100 1000;
-    font-display: optional;
+    font-display: swap;
   }
   /* Page composition owns only placement. Family Prototype output owns paint,
      radius, border, shadow, type and observed action state, including SSR. */
@@ -438,6 +440,7 @@ const themeCss = Object.entries(familyThemes)
     align-items: start;
   }
   .library-card {
+    container-type: inline-size;
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
@@ -552,6 +555,27 @@ const themeCss = Object.entries(familyThemes)
   .library-card a:focus-visible {
     outline: 2px solid currentColor;
     outline-offset: 4px;
+  }
+  /* A narrow card must spend its width on selectable text, rather than scale
+     desktop gutters alongside enlarged text. This is page-owned placement;
+     family type, borders and paint are unchanged. */
+  @container (max-width: 18rem) {
+    .library-card :global(.library-card__header) {
+      flex-direction: column-reverse;
+      gap: 0.75rem;
+    }
+    .library-card header {
+      width: 100%;
+    }
+    .library-card:not([data-library='brutalist']) :global(.library-card__surface),
+    [data-library='brutalist'] :global(.library-card__header),
+    [data-library='brutalist'] :global(.library-card__content),
+    [data-library='brutalist'] :global(.library-card__footer) {
+      padding-inline: min(1.5rem, 5cqi);
+    }
+    .library-card :global(.library-card__action) {
+      padding-inline: min(1rem, 5cqi);
+    }
   }
   @media (max-width: 50rem) {
     .library-gallery__grid {

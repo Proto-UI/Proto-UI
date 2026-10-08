@@ -69,7 +69,13 @@ it('retains enhanced-family failure evidence before the unchanged strict compari
   expect(source).toContain('for (const frame of frames) expect(frame).toEqual(before)');
   expect(source).toContain("await recordPhase('full-document-capture')");
   expect(source).toContain('document.documentElement.scrollHeight');
-  expect(source).toContain('cards.every((card) => card.root.overflow < 2 && card.root.width > 0)');
+  expect(source).toContain('libraryCardReadabilityFailures(cards)');
+  expect(source).toContain('expect(readabilityFailures).toEqual([])');
+  expect(source).toContain('expect(clip.width).toBe(320)');
+  expect(source).toContain(
+    "it('keeps all destinations available with no JavaScript at 320px and 200% text'"
+  );
+  expect(source).toContain('}, 90_000);');
   expect(source).not.toContain('page.screenshot(');
 });
 
@@ -90,4 +96,17 @@ it('keeps the Bootstrap layout conditional while family prototypes own its paint
   expect(bootstrapRules).toContain('padding: 0.25rem;');
   expect(bootstrapRules).toContain('padding: 0.5625rem;');
   expect(bootstrapRules).not.toMatch(/background|border|shadow|color|font/);
+});
+
+it('inlines the licensed family font without hiding text or altering desktop typography', () => {
+  const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
+  expect(source).toContain('DMSans-Variable.ttf?inline');
+  expect(source).toContain('font-display: swap;');
+  expect(source).not.toMatch(/font-display: (optional|block)|visibility: hidden/);
+  expect(source).toContain('container-type: inline-size;');
+  expect(source).toContain('@container (max-width: 18rem)');
+  expect(source).toContain('flex-direction: column-reverse;');
+  expect(source).toContain('padding-inline: min(1.5rem, 5cqi);');
+  const narrow = source.slice(source.indexOf('@container (max-width: 18rem)'));
+  expect(narrow).not.toMatch(/font-size:|font-family:|line-height:|overflow: hidden/);
 });

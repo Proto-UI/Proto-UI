@@ -14,6 +14,10 @@ import {
 } from './library-card-capture';
 import { recordLibraryFontTrace } from './library-card-font-trace';
 import { readLibraryPlatformFonts } from './library-card-platform-fonts';
+import {
+  libraryCardReadabilityFailures,
+  libraryCardFontFailures,
+} from './library-card-readability';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
 const route = '/zh-cn/ui-libraries/';
 const directory =
@@ -83,6 +87,9 @@ function readCards(observe = false) {
         body: measure(body, body.querySelector<HTMLElement>('[data-library-part]')!),
         action: measure(action, action.querySelector<HTMLElement>('[data-library-part$="text"]')!),
         actionSurface: measure(action.querySelector<HTMLElement>('.library-card__action')!),
+        textLeaves: [...card.querySelectorAll<HTMLElement>('[data-library-part$="-text"]')].map(
+          (leaf) => measure(leaf)
+        ),
         tokens: surface.getAttribute('data-pui-style'),
         anchors: [...card.querySelectorAll('a')].map((a) => ({
           href: a.getAttribute('href'),
@@ -125,7 +132,7 @@ const families = [
 async function captureFamilyCards(
   page: Page,
   name: string,
-  phase: 'held-first-frame' | 'enhanced-endpoint'
+  phase: 'held-first-frame' | 'enhanced-endpoint' | 'no-script-reflow'
 ) {
   const originalScroll = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
   const images = [];
@@ -241,21 +248,18 @@ describe('actual library Cards preserve their first frame', () => {
         try {
           await page.goto(baseUrl + route, { waitUntil: 'commit' });
           await page.locator('[data-library="liquid-glass"] h2').waitFor();
-          // Request the actual card face before asserting that fonts were gated.
+          // Network fonts remain gated. The actual Card face must already be
+          // available from the render-blocking CSS, with no font-ready wait.
           await page.locator('[data-library="brutalist"] h2').scrollIntoViewIfNeeded();
-          await expect.poll(() => heldFonts.length).toBeGreaterThan(0);
           fontFaces = await page.evaluate(() =>
             [...document.fonts].map((face) => ({ family: face.family, status: face.status }))
           );
           expect(
             fontFaces.some(
-              (face) => face.family.includes('Library DM Sans') && face.status === 'loading'
+              (face) => face.family.includes('Library DM Sans') && face.status === 'loaded'
             )
           ).toBe(true);
           expect(heldScripts.length).toBeGreaterThan(0);
-          // Optional faces must settle on their first-frame fallback while the
-          // real font request is still held. No fonts.ready wait before release.
-          await page.waitForTimeout(150);
           // Use a source anchor for upgrade focus retention. A primary action
           // gains a legitimate new observed focus ring only after enhancement;
           // it must not contaminate the resting-state first-frame oracle.
@@ -263,6 +267,7 @@ describe('actual library Cards preserve their first frame', () => {
           await link.focus();
           await traceFonts('held-before');
           platformFonts.held = await readLibraryPlatformFonts(page);
+          expect(libraryCardFontFailures(platformFonts.held)).toEqual([]);
           before = await page.evaluate(readCards, true);
           expect(before).toHaveLength(6);
           expect(
@@ -298,21 +303,20 @@ describe('actual library Cards preserve their first frame', () => {
           await captureCurrentViewport(page, path.join(directory, `${name}-after.png`));
           await captureFamilyCards(page, name, 'enhanced-endpoint');
           expect(after).toEqual(before);
+          expect(libraryCardFontFailures(platformFonts.enhanced)).toEqual([]);
           expect(frames.length).toBeGreaterThan(0);
           for (const frame of frames) expect(frame).toEqual(before);
           await expect.poll(() => link.evaluate((el) => document.activeElement === el)).toBe(true);
           expect(await page.locator('a a').count()).toBe(0);
           phase = 'reloading';
-          // A newly cached optional face may legitimately differ between visits.
-          // Compare the reload's own held first frame with its upgrade, rather
-          // than demand identical font availability across separate visits.
+          // A reload has its own held first-frame baseline. The critical face
+          // remains part of its CSS, independent of network-font availability.
           released = false;
           gate = new Promise<void>((resolve) => {
             release = resolve;
           });
           await page.reload({ waitUntil: 'commit' });
           await page.locator('[data-library="liquid-glass"] h2').waitFor();
-          await page.waitForTimeout(150);
           reloadBefore = await page.evaluate(readCards, true);
           await captureCurrentViewport(page, path.join(directory, `${name}-reload-before.png`));
           released = true;
@@ -424,7 +428,7 @@ describe('actual library Cards preserve their first frame', () => {
       await recordPhase('native-content-assertions');
       expect(await page.locator('[data-library-action]').count()).toBe(6);
       const cards = await page.evaluate(readCards, false);
-      expect(cards.every((card) => card.root.overflow < 2 && card.root.width > 0)).toBe(true);
+      const readabilityFailures = libraryCardReadabilityFailures(cards);
       expect(await page.locator('a a').count()).toBe(0);
       await recordPhase('full-document-capture');
       const clip = await page.evaluate(() => ({
@@ -435,14 +439,27 @@ describe('actual library Cards preserve their first frame', () => {
         scale: 1,
       }));
       const image = await captureCurrentViewport(page, path.join(directory, `${name}.png`), clip);
+      await captureFamilyCards(page, name, 'no-script-reflow');
       await writeFile(
         path.join(directory, `${name}.json`),
         JSON.stringify(
-          { sha, tree, dirty, phase: 'passed', textScale, clip, image, cards },
+          {
+            sha,
+            tree,
+            dirty,
+            phase: 'captured',
+            textScale,
+            clip,
+            image,
+            cards,
+            readabilityFailures,
+          },
           null,
           2
         )
       );
+      expect(clip.width).toBe(320);
+      expect(readabilityFailures).toEqual([]);
       await recordPhase('passed');
     } catch (error) {
       failed = true;
