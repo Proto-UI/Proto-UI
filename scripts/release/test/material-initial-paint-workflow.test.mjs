@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { test } from 'node:test';
 import { parse } from 'yaml';
 
@@ -22,12 +23,21 @@ function verifySourceGate(value) {
   const checkout = job.steps.find((step) => step.uses === 'actions/checkout@v4');
   assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha }}');
   assert.equal(checkout.with['persist-credentials'], false);
+  const verifyHead = job.steps.find((step) => step.name === 'Verify exact pull request head');
+  assert.deepEqual(verifyHead.env, {
+    EXPECTED_SOURCE_SHA: '${{ github.event.pull_request.head.sha }}',
+  });
+  assert.equal(verifyHead.run, 'test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"');
+  assert.ok(job.steps.indexOf(verifyHead) > job.steps.indexOf(checkout));
   const paths = value.on.pull_request.paths;
   for (const path of [
     'experiments/material-initial-paint/**',
     'packages/**',
     'apps/www/src/content/docs/zh-cn/browser-harness.ts',
     'apps/www/src/content/docs/zh-cn/library-card-capture.ts',
+    'scripts/test/server-readiness.mjs',
+    '.npmrc',
+    'pnpm-workspace.yaml',
   ])
     assert.ok(paths.includes(path), `missing input trigger: ${path}`);
   const commands = job.steps.filter((step) => step.run).map((step) => step.run);
@@ -59,7 +69,43 @@ test('official initial-paint gate binds the independent job to actual source and
   verifySourceGate(workflow);
 });
 
+test('actual head-verification command accepts only the checked-out source', () => {
+  const command = workflow.jobs['finite-rest-source'].steps.find(
+    (step) => step.name === 'Verify exact pull request head'
+  ).run;
+  const head = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  const run = (sha) =>
+    spawnSync('bash', ['-c', command], {
+      env: { ...process.env, EXPECTED_SOURCE_SHA: sha },
+      encoding: 'utf8',
+    });
+  assert.equal(run(head).status, 0);
+  assert.equal(run('0'.repeat(40)).status, 1);
+});
+
 for (const [name, mutate] of [
+  ...['scripts/test/server-readiness.mjs', '.npmrc', 'pnpm-workspace.yaml'].map((path) => [
+    `missing declared input ${path}`,
+    (v) => {
+      v.on.pull_request.paths = v.on.pull_request.paths.filter((p) => p !== path);
+    },
+  ]),
+  [
+    'missing exact-head verification',
+    (v) => {
+      v.jobs['finite-rest-source'].steps = v.jobs['finite-rest-source'].steps.filter(
+        (s) => s.name !== 'Verify exact pull request head'
+      );
+    },
+  ],
+  [
+    'merge SHA used as expected source',
+    (v) => {
+      v.jobs['finite-rest-source'].steps.find(
+        (s) => s.name === 'Verify exact pull request head'
+      ).env.EXPECTED_SOURCE_SHA = '${{ github.sha }}';
+    },
+  ],
   [
     'merge-ref checkout',
     (v) => {

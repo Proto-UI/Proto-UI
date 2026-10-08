@@ -7,8 +7,11 @@ on:
       - 'packages/**'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
       - 'apps/www/src/content/docs/zh-cn/library-card-capture.ts'
+      - 'scripts/test/server-readiness.mjs'
       - 'scripts/build/**'
       - 'scripts/release/test/material-initial-paint-workflow.test.mjs'
+      - '.npmrc'
+      - 'pnpm-workspace.yaml'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'tsconfig*.json'
@@ -26,6 +29,10 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
+      - name: Verify exact pull request head
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
