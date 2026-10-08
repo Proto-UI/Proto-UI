@@ -2,7 +2,8 @@ interface SsrOptions {
   className: string;
   tagName: string;
   binding: string;
-  artifacts?: { source: string; helpers: string; css: string };
+  artifacts?: { source: string; helpers: string; css: string; environment: string };
+  environmentCssText?: string;
   cssText?: string;
 }
 
@@ -12,10 +13,11 @@ export function webComponentSsrSupport(options: SsrOptions) {
     className,
     tagName,
     binding,
-    artifacts = { source: '', helpers: '', css: '' },
+    artifacts = { source: '', helpers: '', css: '', environment: '' },
+    environmentCssText = '',
     cssText = '',
   } = options;
-  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\nexport const hydrationArtifacts = ${JSON.stringify(artifacts)};\nexport const hydrationCssText = ${JSON.stringify(cssText)};\n`;
+  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\nexport const hydrationArtifacts = ${JSON.stringify(artifacts)};\nexport const hydrationCssText = ${JSON.stringify(cssText)};\nexport const hydrationEnvironmentCssText = ${JSON.stringify(environmentCssText)};\n`;
   const server = `export function renderToString(props: GeneratedProps & Record<string, unknown> = {}, options: ServerOptions = {}): {html: string; carrier: Carrier} {
   return renderWithScope(props, options, result => result);
 }
@@ -25,7 +27,7 @@ export function renderWithScope<T>(props: GeneratedProps & Record<string, unknow
 }
 `;
   const client = `// Browser-only entry. Import Component.ts on the server, never this module.
-import {createHydrationOwner, hydrationBinding, hydrationArtifacts, hydrationCssText, defaultTagName, type GeneratedProps, type GeneratedExposes, type HydrationOwner} from './Component';
+import {createHydrationOwner, hydrationBinding, hydrationArtifacts, hydrationCssText, hydrationEnvironmentCssText, defaultTagName, type GeneratedProps, type GeneratedExposes, type HydrationOwner} from './Component';
 import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, checkCarrierHost, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
 export {HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
 export class ${className} extends HTMLElement {
@@ -64,6 +66,7 @@ export class ${className} extends HTMLElement {
       if (carrier && !this.recovering) {
         if (this.hasRaw) checkInitialProps(this.raw, carrier);
         checkStylesheet(this, hydrationArtifacts.css, hydrationCssText);
+        checkStylesheet(this, hydrationArtifacts.environment, hydrationEnvironmentCssText, 'consumer environment');
       }
       let mode = carrier?.mode ?? 'light';
       if (this.recovering) mode = carrier?.mode === 'shadow' || this.shadowRoot || this.querySelector(':scope > template[shadowrootmode="open"]') ? 'shadow' : 'light';
@@ -171,7 +174,7 @@ import {ownerScopes, type ContextScope} from '../context/scope-v1';
 export type Presentation = {kind: 'element'; tag: string; style?: string; children: Presentation[]} | {kind: 'text'; text: string} | {kind: 'slot'};
 export type RawData = [string, {kind: 'undefined'} | {kind: 'value'; value: unknown}][];
 export type ControlProjection = {tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; attributes: Record<string, string>};
-export type ArtifactVersions = {source: string; helpers: string; css: string};
+export type ArtifactVersions = {source: string; helpers: string; css: string; environment: string};
 export type Carrier = {instanceId: string; artifacts: ArtifactVersions; version: 1; profile: 'web-component-ssr-v1'; binding: string; tagName: string; mode: 'light' | 'shadow'; raw: RawData; presentation: Presentation[]; control: ControlProjection | null; attributes: Record<string, string>; interactionAttributes: Record<string, string | null>; baselines: Record<string, string>; present: boolean};
 export type InteractionOptions<R> = Parameters<typeof createNativeInteraction<R>>[0];
 export type HostPort = {
@@ -279,7 +282,7 @@ export function checkCarrier(carrier: Carrier, binding: string, tag: string, art
   if (!carrier || typeof carrier !== 'object') throw new HydrationMismatch('invalid carrier');
   if (carrier.version !== 1 || carrier.profile !== 'web-component-ssr-v1' || carrier.binding !== binding || carrier.tagName !== tag)
     throw new HydrationMismatch('source/profile/tag binding differs');
-  if (!carrier.artifacts || artifacts && ['source', 'helpers', 'css'].some(key => carrier.artifacts[key as keyof ArtifactVersions] !== artifacts[key as keyof ArtifactVersions])) throw new HydrationMismatch('source/helper/CSS artifact version differs');
+  if (!carrier.artifacts || artifacts && ['source', 'helpers', 'css', 'environment'].some(key => carrier.artifacts[key as keyof ArtifactVersions] !== artifacts[key as keyof ArtifactVersions])) throw new HydrationMismatch('source/helper/CSS artifact version differs');
   if (typeof carrier.instanceId !== 'string' || !/^[a-z0-9-]+$/i.test(carrier.instanceId)) throw new HydrationMismatch('invalid instance identity');
   if (!['light', 'shadow'].includes(carrier.mode) || typeof carrier.present !== 'boolean' || !Array.isArray(carrier.raw) || !Array.isArray(carrier.presentation)) throw new HydrationMismatch('invalid carrier');
   for (const entry of carrier.raw) {
@@ -306,10 +309,10 @@ export function checkCarrier(carrier: Carrier, binding: string, tag: string, art
 export function checkInitialProps(raw: Record<string, unknown>, carrier: Carrier): void {
   if (JSON.stringify(encodeRaw(raw)) !== JSON.stringify(carrier.raw)) throw new HydrationMismatch('client initial props differ from server props');
 }
-export function checkStylesheet(host: HTMLElement, version: string, cssText: string): void {
+export function checkStylesheet(host: HTMLElement, version: string, cssText: string, subject = 'component'): void {
   if (!cssText) return;
   const styles = Array.from(host.ownerDocument.querySelectorAll('style[data-pui-ssr-css]'));
-  if (!styles.some(style => style.getAttribute('data-pui-ssr-css') === version && style.textContent === cssText)) throw new HydrationMismatch('bound first-frame CSS artifact is absent or differs');
+  if (!styles.some(style => style.getAttribute('data-pui-ssr-css') === version && style.textContent === cssText)) throw new HydrationMismatch('bound first-frame ' + subject + ' CSS artifact is absent or differs');
 }
 function escapeText(value: string): string { return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function escapeAttribute(value: string): string { return escapeText(value).replace(/"/g, '&quot;'); }

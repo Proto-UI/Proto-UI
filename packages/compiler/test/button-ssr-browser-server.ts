@@ -7,6 +7,7 @@ import path from 'node:path';
 import { launchBrowser } from '../../../apps/www/src/content/docs/zh-cn/browser-harness';
 import type { Browser } from '../../../apps/www/node_modules/playwright-core/types/types';
 import type { buildButtonSsrFixture } from './button-ssr-fixture';
+import { writeButtonSsrEvidenceArtifacts } from './button-ssr-evidence';
 
 export type ButtonSsrFixture = Awaited<ReturnType<typeof buildButtonSsrFixture>>;
 export type CarrierMutation =
@@ -123,7 +124,7 @@ export async function startButtonSsrBrowserServer(
         return mutation ? mutateButtonCarrier(result.html, mutation) : result.html;
       });
       // Page geometry is harness input. All Button styling is compiled cssText.
-      const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Compiler Button SSR evidence</title><style data-pui-ssr-css="${compiled.provenance.cssSha256}">${compiled.cssText}</style><style>body{margin:32px;background:#eee;font-family:Arial,sans-serif}main{display:flex;gap:24px;align-items:start}#selection{margin-top:32px}</style></head><body><main>${instances.join('')}</main><p id="selection">Selection outside the server Button must remain intact.</p><script defer src="/client.js"></script></body></html>`;
+      const html = `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><title>Compiler Button SSR evidence</title><style data-pui-ssr-css="${compiled.provenance.artifacts.environment}">${compiled.environmentCssText}</style><style data-pui-ssr-css="${compiled.provenance.cssSha256}">${compiled.cssText}</style><style>body{margin:32px;background:#eee;font-family:Arial,sans-serif}main{display:flex;gap:24px;align-items:start}#selection{margin-top:32px}</style></head><body><main>${instances.join('')}</main><p id="selection">Selection outside the server Button must remain intact.</p><script defer src="/client.js"></script></body></html>`;
       await writeFile(path.join(evidenceDir, `request-${current}.html`), html);
       requests.push({
         path: url.pathname + url.search,
@@ -146,15 +147,16 @@ export async function startButtonSsrBrowserServer(
   };
   try {
     const generatedRoot = path.join(evidenceDir, 'generated');
-    for (const artifact of compiled.generatedFiles) {
-      const destination = path.resolve(generatedRoot, artifact.path);
-      if (!destination.startsWith(generatedRoot + path.sep)) {
-        throw new Error(`Generated artifact path escapes evidence directory: ${artifact.path}`);
-      }
-      await mkdir(path.dirname(destination), { recursive: true });
-      await writeFile(destination, artifact.contents);
-    }
+    const artifactExports = await writeButtonSsrEvidenceArtifacts(compiled, generatedRoot);
+    await writeFile(
+      path.join(evidenceDir, 'generated-artifacts.json'),
+      JSON.stringify({ root: 'generated', artifacts: artifactExports }, null, 2)
+    );
     await writeFile(path.join(evidenceDir, 'generated.css'), compiled.cssText);
+    await writeFile(
+      path.join(evidenceDir, 'generated-environment.css'),
+      compiled.environmentCssText
+    );
     await writeFile(path.join(evidenceDir, 'generated-client.js'), compiled.clientCode);
     await writeFile(
       path.join(evidenceDir, 'build.json'),
@@ -165,6 +167,7 @@ export async function startButtonSsrBrowserServer(
           node: process.version,
           platform: process.platform,
           provenance: compiled.provenance,
+          artifactExports,
           cssSha256: sha256(compiled.cssText),
           clientSha256: sha256(compiled.clientCode),
         },

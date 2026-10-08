@@ -8,6 +8,7 @@ import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './na
 import { nativeInteractionArtifact } from './native-interaction';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
+import { ssrStyleDependencies, type SsrStyleEnvironment } from './web-component-ssr-style';
 import { webComponentSsrSupport } from './web-component-ssr-support';
 import { createHash } from 'node:crypto';
 import { renderProtoStyleTokenCss } from '../../cli/src/services/proto-style-css';
@@ -86,7 +87,13 @@ const SUPPORTED: Record<string, true> = {
 /** Direct native DOM source. The emitted helper kernel owns resources; it never interprets IR. */
 export function emitWebComponentSource(
   input: PrototypeIR,
-  options: { className?: string; tagName?: string; ssr?: boolean; shadow?: boolean } = {}
+  options: {
+    className?: string;
+    tagName?: string;
+    ssr?: boolean;
+    shadow?: boolean;
+    styleEnvironment?: SsrStyleEnvironment;
+  } = {}
 ): CompileResult<GeneratedModule> {
   const checked = validateIR(input);
   if (!checked.ok) return checked;
@@ -145,6 +152,7 @@ export function emitWebComponentSource(
         'hydrationBinding',
         'hydrationArtifacts',
         'hydrationCssText',
+        'hydrationEnvironmentCssText',
         'checkInitialProps',
         'checkStylesheet',
         'checkCarrierHost',
@@ -437,6 +445,29 @@ export function emitWebComponentSource(
       return reject(
         'SSR requires a complete CSS artifact; one or more authored tokens have no CSS lowering.'
       );
+    const environment = options.styleEnvironment;
+    if (
+      environment &&
+      (!/^[a-z][a-z0-9-]*$/.test(environment.id) ||
+        typeof environment.cssText !== 'string' ||
+        /@import\b|url\s*\(|<\/style/i.test(environment.cssText))
+    )
+      return reject(
+        'SSR stylesheet environment requires a named, closed CSS artifact without external imports or URLs.'
+      );
+    const styleDependencies = ssrStyleDependencies(cssText, environment?.cssText);
+    if (styleDependencies.cyclic.length)
+      return reject(
+        'SSR stylesheet environment has cyclic custom property dependencies: ' +
+          styleDependencies.cyclic.join(', ') +
+          '.'
+      );
+    if (styleDependencies.missing.length)
+      return reject(
+        'SSR stylesheet environment must declare: ' +
+          styleDependencies.missing.join(', ') +
+          '. The consumer owns these values.'
+      );
     const hash = (value: string) => createHash('sha256').update(value).digest('hex');
     const helpers = [
       ...context.files,
@@ -464,6 +495,7 @@ export function emitWebComponentSource(
           JSON.stringify(webComponentSsrSupport({ className, tagName, binding: '' }).files)
       ),
       css: hash(cssText),
+      environment: environment ? hash(environment.cssText) : '',
     };
     const imports = `${contextImports}${styled ? `import {createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens, type NativeStyle as ${prefix}Style, type NativeStyleHandle as ${prefix}NativeStyleHandle, type NativeRuleHandle as ${prefix}NativeRuleHandle} from './.proto-ui/style/native-v1';\n` : ''}${
       interacting
@@ -471,7 +503,14 @@ export function emitWebComponentSource(
 \n`
         : ''
     }`;
-    const support = webComponentSsrSupport({ className, tagName, binding, artifacts, cssText });
+    const support = webComponentSsrSupport({
+      className,
+      tagName,
+      binding,
+      artifacts,
+      cssText,
+      environmentCssText: environment?.cssText,
+    });
     const code = `// web-component-ssr-v1: direct semantic statements; no browser globals at module evaluation.
 // Helper cost: guarded owner, presentation serialization/adoption, per-request Context and AX intent.
 ${imports}${support.imports}
@@ -499,10 +538,29 @@ ${support.server}
       ...helpers,
       ...support.files,
       { path: 'Component.css', kind: 'style' as const, contents: cssText },
+      ...(environment
+        ? [
+            {
+              path: 'Component.environment.css',
+              kind: 'style' as const,
+              contents: environment.cssText,
+            },
+          ]
+        : []),
     ];
     // Include source graph, direct generated statements, helper bytes and CSS in one deterministic receipt.
     // The sentinel avoids a circular self-hash. This is compatibility binding, not authentication.
-    const receipt = hash(JSON.stringify({ profile, ir, code, files }));
+    const receipt = hash(
+      JSON.stringify({
+        profile,
+        ir,
+        code,
+        files,
+        styleEnvironment: environment
+          ? { id: environment.id, requiredCustomProperties: styleDependencies.required }
+          : null,
+      })
+    );
     return {
       ok: true,
       value: {
@@ -517,6 +575,16 @@ ${support.server}
           source: ir.source,
           irVersion: ir.schemaVersion,
           backend: 'web-component-ssr-v1',
+          ...(environment
+            ? {
+                styleEnvironment: {
+                  id: environment.id,
+                  artifact: 'Component.environment.css',
+                  sha256: artifacts.environment,
+                  requiredCustomProperties: styleDependencies.required,
+                },
+              }
+            : {}),
         },
       },
     };

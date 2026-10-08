@@ -11,6 +11,7 @@ import {
   baseButtonPath,
   buildButtonSsrFixture,
   compileButtonSsrFixture,
+  buttonSsrStyleEnvironment,
   loadGeneratedModule,
   repositoryRoot,
   type FixtureCarrier,
@@ -61,7 +62,10 @@ function prepare(
   const style = document.createElement('style');
   style.setAttribute('data-pui-ssr-css', fixture.provenance.cssSha256);
   style.textContent = fixture.cssText;
-  document.head.append(style);
+  const environment = document.createElement('style');
+  environment.setAttribute('data-pui-ssr-css', fixture.provenance.artifacts.environment);
+  environment.textContent = fixture.environmentCssText;
+  document.head.append(environment, style);
   mounted.push(host);
   return { host, rendered };
 }
@@ -127,6 +131,87 @@ describe('experimental source-generated Button SSR', () => {
     expect(fixture.cssText).toContain('user-select: text');
     expect(fixture.cssText).toContain('box-sizing: border-box');
   });
+
+  it('binds the explicitly selected canonical consumer theme and all of its required variables', () => {
+    expect(fixture.environmentCssText).toBe(buttonSsrStyleEnvironment.cssText);
+    expect(fixture.provenance.styleEnvironment).toMatchObject({
+      id: 'shadcn-consumer-light',
+      artifact: 'Component.environment.css',
+      sha256: fixture.provenance.artifacts.environment,
+      requiredCustomProperties: ['--pui-foreground', '--pui-radius', '--pui-radius-md'],
+    });
+    expect(fixture.environmentCssText).toContain('--pui-foreground:');
+    expect(fixture.environmentCssText).toContain('--pui-radius-md:');
+    expect(fixture.environmentCssText).toContain('@layer theme, proto-ui;');
+    expect(fixture.provenance.themeActivation).toEqual({ attribute: 'data-theme', value: 'light' });
+  });
+
+  it.each(['absent', 'missing-variable', 'wrong-theme'])(
+    'rejects %s consumer environment during real source lowering',
+    async (kind) => {
+      const compilation = await compileButtonSsrFixture();
+      const styleEnvironment =
+        kind === 'absent'
+          ? undefined
+          : {
+              id: 'negative-environment',
+              cssText:
+                kind === 'missing-variable'
+                  ? buttonSsrStyleEnvironment.cssText.replace(/--pui-radius:\s*[^;]+;/, '')
+                  : ':root { --unrelated: 1; }',
+            };
+      const output = emitWebComponentSource(compilation.ir, { ssr: true, styleEnvironment });
+      expect(output).toMatchObject({
+        ok: false,
+        diagnostics: [
+          {
+            code: 'PUI3301',
+            message: expect.stringContaining('stylesheet environment must declare'),
+          },
+        ],
+      });
+    }
+  );
+
+  it('rejects a declared but cyclic theme dependency instead of treating it as a complete stylesheet', async () => {
+    const compilation = await compileButtonSsrFixture();
+    const output = emitWebComponentSource(compilation.ir, {
+      ssr: true,
+      styleEnvironment: {
+        id: 'cyclic-theme',
+        cssText:
+          ':root {--pui-foreground: #000; --pui-radius-md: var(--cycle); --cycle: var(--pui-radius-md);}',
+      },
+    });
+    expect(output).toMatchObject({
+      ok: false,
+      diagnostics: [{ message: expect.stringContaining('cyclic custom property') }],
+    });
+  });
+
+  it.each(['absent', 'changed-bytes', 'wrong-dependency'])(
+    'refuses %s generated theme delivery and retains the disabled server frame',
+    (kind) => {
+      const { host } = prepare({ disabled: true });
+      const environment = document.querySelector(
+        'style[data-pui-ssr-css="' + fixture.provenance.artifacts.environment + '"]'
+      )!;
+      if (kind === 'absent') environment.remove();
+      if (kind === 'changed-bytes')
+        environment.textContent += '\n/* changed dependency delivery */';
+      if (kind === 'wrong-dependency')
+        environment.setAttribute('data-pui-ssr-css', 'unrelated-theme');
+      attachWithoutAutoConnect(host);
+      const before = host.outerHTML,
+        children = [...host.childNodes];
+      expect(() => host.connectedCallback()).toThrow(/consumer environment CSS artifact/);
+      expect(host.hydrationStatus).toBe('mismatch');
+      expect(host.logicalOwner).toBeNull();
+      expect(host.outerHTML).toBe(before);
+      expect([...host.childNodes]).toEqual(children);
+      expect(host.getAttribute('aria-disabled')).toBe('true');
+    }
+  );
 
   it('adopts original children, focus and selection with one outward CustomEvent per activation', () => {
     const { host } = prepare();
@@ -375,6 +460,7 @@ describe('experimental source-generated Button SSR', () => {
       ssr: true,
       tagName: fixture.tagName,
       className: 'CompiledButton',
+      styleEnvironment: buttonSsrStyleEnvironment,
     });
     expect(emitted.ok).toBe(true);
     if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));

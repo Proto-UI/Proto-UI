@@ -1,4 +1,7 @@
 import path from 'node:path';
+import { readFile } from 'node:fs/promises';
+import { SHADCN_THEME_CSS } from '../../cli/src/legacy/type';
+import { renderPrefixedThemeCss } from '../../cli/src/services/proto-style-css';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath, URL as NodeURL } from 'node:url';
@@ -9,6 +12,12 @@ import { emitWebComponentSource } from '../src/web-component-source';
 import type { Compilation } from '../src/compile';
 
 export const repositoryRoot = fileURLToPath(new NodeURL('../../../', import.meta.url));
+// C-PROTOTYPE-STYLE-CLOSURE-0001-D: this test consumer explicitly chooses its theme.
+export const buttonSsrStyleEnvironment = {
+  id: 'shadcn-consumer-light',
+  cssText:
+    '@layer theme, proto-ui;\n@layer theme {\n' + renderPrefixedThemeCss(SHADCN_THEME_CSS) + '}\n',
+};
 export const baseButtonPath = 'packages/prototypes/base/src/button/button.proto.ts';
 export const fixtureButtonPath = 'packages/compiler/test/fixtures/button-ssr/button.proto.ts';
 
@@ -17,7 +26,7 @@ export type FixtureCarrier = {
   profile: string;
   binding: string;
   instanceId: string;
-  artifacts: { source: string; helpers: string; css: string };
+  artifacts: { source: string; helpers: string; css: string; environment: string };
   raw: unknown[];
   attributes: Record<string, string>;
   [key: string]: unknown;
@@ -87,6 +96,7 @@ export async function compileButtonSsrFixture(
     ssr: true,
     tagName: options.tagName ?? 'pui-ssr-button',
     className: 'CompiledButton',
+    styleEnvironment: buttonSsrStyleEnvironment,
   });
   if (!output.ok) throw new Error(JSON.stringify(output.diagnostics));
   return { ir: source.value.ir, output: output.value };
@@ -97,6 +107,19 @@ export async function buildButtonSsrFixture(options: { tagName?: string; direct?
   const compilation = await compileButtonSsrFixture({ ...options, tagName });
   const generatedFiles = compilationArtifacts(compilation);
   const cssText = generatedFiles.find((file) => file.path === 'Component.css')!.contents;
+  const environmentCssText = generatedFiles.find(
+    (file) => file.path === 'Component.environment.css'
+  )!.contents;
+  const environmentSources = await Promise.all(
+    ['packages/cli/src/legacy/type.ts', 'packages/cli/src/services/proto-style-css.ts'].map(
+      async (file) => ({
+        file,
+        sha256: createHash('sha256')
+          .update(await readFile(path.join(repositoryRoot, file)))
+          .digest('hex'),
+      })
+    )
+  );
   const server = loadGeneratedModule(generatedFiles, 'Component.ts') as unknown as FixtureServer;
   const sources = new Map(generatedFiles.map((file) => [file.path, file.contents]));
   const positioningRequire = createRequire(
@@ -139,6 +162,7 @@ export async function buildButtonSsrFixture(options: { tagName?: string; direct?
   return {
     tagName,
     cssText,
+    environmentCssText,
     clientCode,
     generatedFiles,
     render: server.renderToString,
@@ -148,6 +172,8 @@ export async function buildButtonSsrFixture(options: { tagName?: string; direct?
       sourceFiles: compilation.ir.sourceFiles.map(({ file, sha256 }) => ({ file, sha256 })),
       binding: server.hydrationBinding,
       artifacts: server.hydrationArtifacts,
+      environmentSources,
+      themeActivation: { attribute: 'data-theme', value: 'light' },
       generatedFiles: generatedFiles.map((file) => ({
         path: file.path,
         sha256: createHash('sha256').update(file.contents).digest('hex'),

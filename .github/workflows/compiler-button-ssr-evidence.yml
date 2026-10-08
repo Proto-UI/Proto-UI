@@ -62,8 +62,8 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 36, 'All source and server controls must run.');
-          assert.equal(report.numPassedTests, 36);
+          assert.equal(report.numTotalTests, 47, 'All source and server controls must run.');
+          assert.equal(report.numPassedTests, 47);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.numPendingTests, 0);
           assert.equal(report.success, true);
@@ -84,12 +84,14 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 18, 'All 18 native browser journeys must run.');
-          assert.equal(report.numPassedTests, 18);
+          assert.equal(report.numTotalTests, 21, 'All 21 native browser journeys must run.');
+          assert.equal(report.numPassedTests, 21);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.numPendingTests, 0);
           assert.equal(report.success, true);
           JS
+      # Generated .proto-ui helpers are allowlisted into non-hidden generated/helpers/
+      # with logical-path/SHA mapping; do not enable broad hidden-file uploads.
       - name: Retain exact-source artifacts, screenshots, traces and failures
         if: always()
         uses: actions/upload-artifact@v4

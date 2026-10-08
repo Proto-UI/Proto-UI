@@ -670,6 +670,65 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
     );
   }, 60_000);
 
+  for (const mutation of ['missing', 'changed-bytes', 'wrong-dependency'] as const) {
+    it(`rejects ${mutation} consumer theme delivery and preserves the native pre-adoption frame`, async () => {
+      await withPage(
+        `theme-${mutation}`,
+        async (page) => {
+          await loaded(page, '?disabled=true');
+          await remember(page);
+          const complete = await snapshot(page, `theme-${mutation}-complete`);
+          expectVisible(complete.roots[0]);
+          await page.evaluate(
+            ({ version, mutation }) => {
+              const style = document.querySelector('style[data-pui-ssr-css="' + version + '"]')!;
+              if (mutation === 'missing') style.remove();
+              if (mutation === 'changed-bytes')
+                style.textContent += '\n/* mismatched dependency delivery */';
+              if (mutation === 'wrong-dependency')
+                style.setAttribute('data-pui-ssr-css', 'other-theme');
+            },
+            { version: compiled.provenance.artifacts.environment, mutation }
+          );
+          const before = await snapshot(page, `theme-${mutation}-before`);
+          const beforePng = await page.screenshot({
+            path: path.join(fixture.evidenceDir, `theme-${mutation}-before.png`),
+          });
+          const error = await page.evaluate(() => {
+            window.ButtonSsrFixture!.register();
+            try {
+              window.ButtonSsrFixture!.hydrate(window.buttonSsrProbe.roots[0]);
+              return null;
+            } catch (error) {
+              return { code: (error as { code?: string }).code, message: String(error) };
+            }
+          });
+          expect(error).toMatchObject({
+            code: 'PUI_WC_HYDRATION_MISMATCH',
+            message: expect.stringContaining('consumer environment CSS artifact'),
+          });
+          const after = await snapshot(page, `theme-${mutation}-after`);
+          expect(after.roots[0]).toMatchObject({
+            sameRoot: true,
+            sameChildren: true,
+            sameSlot: true,
+            disabled: 'true',
+            tabIndex: -1,
+            owner: false,
+            status: 'mismatch',
+          });
+          expect(after.roots[0].rect).toEqual(before.roots[0].rect);
+          expect(after.roots[0].style).toEqual(before.roots[0].style);
+          const afterPng = await page.screenshot({
+            path: path.join(fixture.evidenceDir, `theme-${mutation}-after.png`),
+          });
+          expect(sha256(afterPng)).toBe(sha256(beforePng));
+        },
+        { expectedMismatch: true }
+      );
+    }, 60_000);
+  }
+
   it('retains actual-source, profile, generated-helper and CSS provenance', async () => {
     const root = fileURLToPath(new URL('../../../', import.meta.url));
     const provenance = compiled.provenance;
@@ -681,7 +740,7 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         .endsWith('packages/prototypes/base/src/button/button.proto.ts')
     );
     expect(original).toBeDefined();
-    for (const entry of provenance.sourceFiles) {
+    for (const entry of [...provenance.sourceFiles, ...provenance.environmentSources]) {
       const contents = await readFile(path.resolve(root, entry.file), 'utf8');
       expect(entry.sha256).toBe(sha256(contents));
     }
@@ -690,6 +749,7 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
     for (const expected of [
       'Component.ts',
       'Component.client.ts',
+      'Component.environment.css',
       '.proto-ui/web-component/ssr-v1.ts',
     ]) {
       expect(files.some((file) => file.path === expected)).toBe(true);
@@ -702,6 +762,12 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
     expect(provenance.generatedFiles.some((file) => file.path.startsWith('.proto-ui/'))).toBe(true);
     expect(provenance.artifacts.source).toBe(provenance.source.sha256);
     expect(provenance.artifacts.css).toBe(provenance.cssSha256);
+    expect(provenance.artifacts.environment).toBe(sha256(compiled.environmentCssText));
+    expect(provenance.styleEnvironment).toMatchObject({
+      id: 'shadcn-consumer-light',
+      artifact: 'Component.environment.css',
+      sha256: provenance.artifacts.environment,
+    });
     expect(provenance.artifacts.helpers).toMatch(/^[a-f0-9]{64}$/);
     expect(provenance.clientSha256).toBe(sha256(compiled.clientCode));
     const code = files.map((file) => file.contents).join('\n');
