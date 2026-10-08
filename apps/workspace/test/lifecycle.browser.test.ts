@@ -228,7 +228,9 @@ describe.sequential('Workspace lifecycle review projection', () => {
         await expect.poll(() => panel.locator('dd').first().innerText()).toMatch(/^0 \/ \d+$/);
         expect(await panel.innerText()).not.toContain('Remain draft');
         await page.getByRole('combobox', { name: 'To', exact: true }).selectOption(version);
-        await expect.poll(() => panel.locator('dd').first().innerText()).toMatch(/^11 \/ \d+$/);
+        await expect
+          .poll(() => panel.locator('dd').first().innerText())
+          .toBe(expectedRecordedDispositions);
         expect(await panel.innerText()).toContain('Unreviewed drafts');
         expect(await panel.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(
           0
