@@ -1,7 +1,11 @@
 // @vitest-environment node
 
 import { revealHeaderPreferences } from './site-header-browser';
-import { observeLabelDescriptionSelection } from './label-selection-observer';
+import {
+  measureLabelTextDrag,
+  observeLabelDescriptionSelection,
+  recordLabelPointerTrace,
+} from './label-selection-observer';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -1075,36 +1079,84 @@ describe.sequential('Independent Label public documentation', () => {
           await label('passive').click();
           expect(await checked(content.locator('[data-demo-ref="passive"]'))).toBe('false');
 
-          // Drag the actual passive description; no DOM selection API creates
-          // the selection and no page-local CSS changes the product affordance.
-          const description = content.locator('[data-demo-ref="description"]');
-          await description.scrollIntoViewIfNeeded();
-          const bounds = await description.boundingBox();
-          if (!bounds) throw new Error('Description must have physical bounds.');
-          await page.mouse.click(bounds.x + 2, bounds.y + bounds.height / 2);
-          await page.mouse.move(bounds.x + 2, bounds.y + bounds.height / 2);
-          await page.mouse.down();
-          await page.mouse.move(
-            bounds.x + Math.min(bounds.width - 2, 350),
-            bounds.y + bounds.height / 2,
-            { steps: 20 }
-          );
-          await page.mouse.up();
-          if ((await page.evaluate(() => window.getSelection()?.toString() ?? '')).length <= 5) {
-            console.error(
-              '[label-selection]',
-              JSON.stringify({
+          // Exercise both the real naming-only Label and its independent long
+          // description. The driver reads glyph boxes; only native mouse input
+          // creates selection. No page-local CSS or Selection writer is used.
+          for (const ref of ['label-passive', 'description']) {
+            const description = content.locator(`[data-demo-ref="${ref}"]`);
+            await description.scrollIntoViewIfNeeded();
+            const drag = await description.evaluate(measureLabelTextDrag);
+            const geometry = { ...drag.bounds, start: drag.start, end: drag.end };
+            const recorder = await description.evaluateHandle(recordLabelPointerTrace);
+            const stages: unknown[] = [];
+            const snapshot = async (stage: string) =>
+              stages.push({
+                stage,
+                observation: await description.evaluate(observeLabelDescriptionSelection, geometry),
+              });
+            const controlState = () =>
+              content.locator('[aria-checked]').evaluateAll((elements) =>
+                elements.map((element) => ({
+                  ref: element.getAttribute('data-demo-ref'),
+                  checked: element.getAttribute('aria-checked'),
+                }))
+              );
+            const before = await controlState();
+            let complete = false;
+            try {
+              await page.mouse.click(drag.start.x, drag.start.y);
+              await page.mouse.move(drag.start.x, drag.start.y);
+              await page.mouse.down();
+              await snapshot('pointer-down');
+              await page.mouse.move(drag.end.x, drag.end.y, { steps: 20 });
+              await snapshot('drag-before-release');
+              const selectedDuringDrag = await page.evaluate(
+                () => window.getSelection()?.toString() ?? ''
+              );
+              await page.mouse.up();
+              await snapshot('after-release');
+              expect(selectedDuringDrag.length).toBeGreaterThan(5);
+              expect(
+                (await page.evaluate(() => window.getSelection()?.toString() ?? '')).length
+              ).toBeGreaterThan(5);
+              const after = await description.evaluate(observeLabelDescriptionSelection, geometry);
+              expect(after.selected).toBe(selectedDuringDrag);
+              expect(after.anchorWithin && after.focusWithin).toBe(true);
+              expect(await description.textContent()).toContain(after.selected);
+              expect(await controlState()).toEqual(before);
+              await description.screenshot({
+                path: path.join(directory, `label-${family}-${runtime}-${ref}-selection.png`),
+              });
+              complete = true;
+            } finally {
+              const events = await recorder.evaluate((trace) => trace.finish());
+              await recorder.dispose();
+              const evidence = {
                 family,
                 runtime,
-                observation: await description
-                  .evaluate(observeLabelDescriptionSelection, bounds)
-                  .catch((error) => ({ diagnosticError: String(error) })),
-              })
-            );
+                ref,
+                drag,
+                stages,
+                events,
+                before,
+                after: await controlState(),
+              };
+              await writeFile(
+                path.join(directory, `label-${family}-${runtime}-${ref}-selection.json`),
+                JSON.stringify(evidence, null, 2)
+              );
+              if (!complete) console.error('[label-selection]', JSON.stringify(evidence));
+            }
           }
-          expect(
-            (await page.evaluate(() => window.getSelection()?.toString() ?? '')).length
-          ).toBeGreaterThan(5);
+          // A genuine click still uses the existing target owner after a text
+          // drag; duplicate forwarding would toggle twice and fail this check.
+          await label('checkbox').click();
+          await expect.poll(() => checked(checkbox)).toBe('true');
+          await expect
+            .poll(() => checkbox.evaluate((element) => document.activeElement === element))
+            .toBe(true);
+          await page.keyboard.press('Space');
+          await expect.poll(() => checked(checkbox)).toBe('false');
           await preview.screenshot({
             path: path.join(directory, `label-${family}-${runtime}.png`),
           });

@@ -4,7 +4,11 @@ import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
 import { Window } from 'happy-dom';
 import { parse } from 'yaml';
-import { observeLabelDescriptionSelection } from '../src/content/docs/zh-cn/label-selection-observer';
+import {
+  measureLabelTextDrag,
+  observeLabelDescriptionSelection,
+  recordLabelPointerTrace,
+} from '../src/content/docs/zh-cn/label-selection-observer';
 
 test('serialized observer reports controlled hit geometry without changing selection or DOM', () => {
   const window = new Window();
@@ -81,4 +85,116 @@ test('native drag and strict selection assertion remain; focused artifacts share
   ) as any;
   assert.equal(focused.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, `${upload.with.path}/runtime`);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
+});
+
+for (const [family, y] of [
+  ['shadcn', 562.5],
+  ['brutalist', 608.5],
+  ['bootstrap-2-3-2', 608.5],
+  ['liquid-glass', 608.5],
+] as const) {
+  test(`${family}: real failed-run line geometry yields pointer coordinates inside one text line`, () => {
+    const window = new Window();
+    const doc = window.document;
+    doc.body.innerHTML =
+      '<div data-demo-ref="description">Long descriptions are useful copyable content. Selecting this sentence does not activate a control.</div>';
+    const element = doc.querySelector('div')!;
+    const bounds = { x: 352, y, width: 576, height: 52 };
+    const rects = [
+      { x: 352, y: y + 3, width: 566.4375, height: 19 },
+      { x: 352, y: y + 29, width: 219.734375, height: 19 },
+    ];
+    element.getBoundingClientRect = () => bounds as DOMRect;
+    const createRange = doc.createRange.bind(doc);
+    doc.createRange = () => {
+      const range = createRange();
+      range.getClientRects = () => rects as any;
+      return range;
+    };
+    const oldY = bounds.y + bounds.height / 2;
+    assert.equal(
+      rects.some((rect) => oldY > rect.y && oldY < rect.y + rect.height),
+      false
+    );
+    // This replays observed geometry, not browser selection or a native pass.
+    const measure = runInNewContext(`(${measureLabelTextDrag.toString()})`);
+    const before = doc.body.outerHTML;
+    const result = measure(element);
+    for (const point of [result.start, result.end]) {
+      assert.ok(
+        rects.some(
+          (rect) =>
+            point.x > rect.x &&
+            point.x < rect.x + rect.width &&
+            point.y > rect.y &&
+            point.y < rect.y + rect.height
+        ),
+        'drag must land inside rendered text'
+      );
+    }
+    assert.equal(doc.body.outerHTML, before);
+    assert.equal(window.getSelection()!.toString(), '');
+    window.happyDOM.close();
+  });
+}
+
+test('text geometry reads nested text only, retains existing selection/focus and rejects missing layout', () => {
+  const window = new Window();
+  const doc = window.document;
+  doc.body.innerHTML = '<div><span>Copyable text</span></div><button>Outside</button>';
+  const element = doc.querySelector('div')!;
+  const button = doc.querySelector('button')!;
+  button.focus();
+  const selection = window.getSelection()!;
+  const selected = doc.createRange();
+  selected.selectNodeContents(button);
+  selection.addRange(selected);
+  const before = {
+    html: doc.body.outerHTML,
+    selected: selection.toString(),
+    active: doc.activeElement,
+  };
+  const measure = runInNewContext(`(${measureLabelTextDrag.toString()})`);
+  assert.throws(() => measure(element), /visible rendered text line/);
+  const createRange = doc.createRange.bind(doc);
+  doc.createRange = () => {
+    const range = createRange();
+    range.getClientRects = () => {
+      assert.equal(range.startContainer.nodeType, 3, 'do not use wrapper element bounds as text');
+      return [{ x: 12, y: 24, width: 100, height: 16 }] as any;
+    };
+    return range;
+  };
+  const result = measure(element);
+  assert.deepEqual(JSON.parse(JSON.stringify(result.start)), { x: 14, y: 32 });
+  assert.deepEqual(JSON.parse(JSON.stringify(result.end)), { x: 110, y: 32 });
+  assert.equal(selection.toString(), before.selected);
+  assert.equal(doc.body.outerHTML, before.html);
+  assert.equal(doc.activeElement, before.active);
+  window.happyDOM.close();
+});
+
+test('pointer tracing observes native-event facts without cancelling and retires its listeners', () => {
+  const window = new Window();
+  const doc = window.document;
+  doc.body.innerHTML = '<div data-demo-ref="description">Copyable text</div>';
+  const element = doc.querySelector('div')!;
+  const start = runInNewContext(`(${recordLabelPointerTrace.toString()})`);
+  const trace = start(element);
+  const down = new window.MouseEvent('mousedown', {
+    bubbles: true,
+    cancelable: true,
+    clientX: 14,
+    clientY: 32,
+  });
+  assert.equal(element.dispatchEvent(down), true);
+  assert.equal(down.defaultPrevented, false);
+  const events = trace.finish();
+  assert.equal(events.length, 1);
+  assert.equal(events[0].type, 'mousedown');
+  assert.equal(events[0].trusted, down.isTrusted);
+  assert.equal(events[0].target, 'description');
+  element.dispatchEvent(new window.MouseEvent('mouseup', { bubbles: true }));
+  assert.equal(trace.finish().length, 1);
+  window.happyDOM.close();
 });
