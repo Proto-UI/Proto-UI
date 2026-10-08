@@ -192,7 +192,7 @@ for (const pkg of publicPackages) {
 }
 
 const bundleBudgets = JSON.parse(
-  run(process.execPath, ['scripts/analysis/package-budgets.mjs', '--json'])
+  run(process.execPath, ['scripts/analysis/package-budgets.mjs', '--json', '--finf-development'])
 ).results;
 const outputDirectories = [
   ...publicPackages.map((pkg) => `${pkg.path}/dist`),

@@ -85,6 +85,7 @@ jobs:
       - name: Check public manifests and bundle budgets
         run: |
           corepack pnpm@10.32.1 check:package-manifests
+          corepack pnpm@10.32.1 test:package-budget-policy
           corepack pnpm@10.32.1 check:package-budgets
 
   type-check:

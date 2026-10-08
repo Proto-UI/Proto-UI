@@ -282,7 +282,7 @@ function selectChangedPackages(packages, base) {
 
 export function selectAffectedPackages(packages, changedFiles) {
   const globalChange = changedFiles.some((file) =>
-    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|scripts\/analysis\/package-budgets\.mjs$|\.github\/)/.test(
+    /^(package.json|pnpm-lock.yaml|tsconfig[^/]*\.json|scripts\/(build|release)\/|scripts\/analysis\/(package-budgets|package-budget-policy)\.mjs$|scripts\/analysis\/test\/package-budget-policy\.test\.mjs$|internal\/coverage-matrices\/prototype-coverage-matrix\.json$|\.github\/)/.test(
       file
     )
   );

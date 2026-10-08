@@ -15,11 +15,19 @@ const packages = [
   buildDeps: dependencies.map((dependency) => `@proto.ui/${dependency}`),
 }));
 
-test('budget changes select every public package for the blocking measurement', () => {
-  assert.deepEqual(
-    [...selectAffectedPackages(packages, ['scripts/analysis/package-budgets.mjs'])].sort(),
-    packages.map((pkg) => pkg.name).sort()
-  );
+test('budget implementation, phase ledger and policy tests select every public package', () => {
+  for (const path of [
+    'scripts/analysis/package-budgets.mjs',
+    'scripts/analysis/package-budget-policy.mjs',
+    'scripts/analysis/test/package-budget-policy.test.mjs',
+    'internal/coverage-matrices/prototype-coverage-matrix.json',
+  ]) {
+    assert.deepEqual(
+      [...selectAffectedPackages(packages, [path])].sort(),
+      packages.map((pkg) => pkg.name).sort(),
+      path
+    );
+  }
 });
 
 test('records and unrelated analysis do not select public package builds', () => {

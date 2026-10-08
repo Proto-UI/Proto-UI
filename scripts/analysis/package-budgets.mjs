@@ -3,13 +3,18 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createHash } from 'node:crypto';
-import { gzipSync } from 'node:zlib';
 
 import { build, version as esbuildVersion } from 'esbuild';
+import {
+  collectBudgetReport,
+  measureBuildOutput,
+  parseBudgetArguments,
+  resolveBudgetPolicy,
+} from './package-budget-policy.mjs';
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const json = process.argv.includes('--json');
+const { json, finfDevelopment } = parseBudgetArguments(process.argv.slice(2));
+const policy = resolveBudgetPolicy({ finfDevelopment, root: ROOT_DIR });
 // Provenance makes a ceiling change reviewable per the #654 policy: a number
 // is only comparable with the Node/zlib/esbuild/platform environment and the
 // minified artifact hash that produced it.
@@ -20,7 +25,9 @@ const environment = {
   platform: process.platform,
   arch: process.arch,
 };
-// Bounded caps for the exact main 495b338 + reviewed Finf/Shadow joint.
+// Retained strict baselines for the exact main 495b338 + reviewed Finf/Shadow joint.
+// Finf development may report size overruns without blocking, never relabel them:
+// internal/governance/finf-package-budgets.md
 // internal/records/2026-10-07-finf-main-495b-budget.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
@@ -148,44 +155,19 @@ const measure = async (entry) => {
     external,
     logLevel: 'silent',
   });
-  const contents = Buffer.concat(result.outputFiles.map((file) => Buffer.from(file.contents)));
-  return contents;
+  return measureBuildOutput(result);
 };
 
-const results = [];
-for (const [name, entry, budget] of cases) {
-  const contents = await measure(entry);
-  const gzipBytes = gzipSync(contents, { level: 9 }).length;
-  results.push({
-    name,
-    entry,
-    minifiedBytes: contents.length,
-    minifiedSha256: createHash('sha256').update(contents).digest('hex'),
-    gzipBytes,
-    budget,
-    pass: gzipBytes <= budget,
-  });
-}
+const report = await collectBudgetReport({ cases, diagnostics, measure, environment, policy });
+const { results, diagnostics: diagnosticResults } = report;
 
-const diagnosticResults = [];
-for (const [name, entry] of diagnostics) {
-  const contents = await measure(entry);
-  diagnosticResults.push({
-    name,
-    entry,
-    minifiedBytes: contents.length,
-    minifiedSha256: createHash('sha256').update(contents).digest('hex'),
-    gzipBytes: gzipSync(contents, { level: 9 }).length,
-  });
-}
-
-if (json)
-  console.log(JSON.stringify({ environment, results, diagnostics: diagnosticResults }, null, 2));
+if (json) console.log(JSON.stringify(report, null, 2));
 else {
   console.log(`[package-budgets] ${JSON.stringify(environment)}`);
+  console.log(`[package-budgets] policy=${JSON.stringify(policy)}`);
   for (const result of results) {
     console.log(
-      `${result.pass ? 'PASS' : 'FAIL'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes; minified=${result.minifiedBytes} sha256=${result.minifiedSha256}`
+      `${result.pass ? 'PASS' : result.blocking ? 'FAIL' : 'ADVISORY'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes; overBudget=${result.overBudgetBytes}; minified=${result.minifiedBytes} sha256=${result.minifiedSha256}`
     );
   }
   for (const result of diagnosticResults) {
@@ -194,4 +176,4 @@ else {
     );
   }
 }
-if (results.some((result) => !result.pass)) process.exitCode = 1;
+process.exitCode = report.exitCode;

@@ -30,6 +30,8 @@ An Agent defaults to selecting and claiming ready, bounded, unclaimed work with 
 
 For an accepted capability within authorized work, Agents may decide bounded numeric package-budget increases without an additional human gate. Follow [`pui-dev`'s package-budget evidence rules](.agents/skills/pui-dev/SKILL.md#decide-package-budget-ceilings); canonical measurements, separately reviewable transactions, independent review and all other gates remain required.
 
+During the explicitly authorized Finf rapid-development phase only, follow [the scoped advisory size policy](internal/governance/finf-package-budgets.md). It preserves actual failed size comparisons and old baselines, keeps measurement/build/acceptance failures blocking, and restores strict enforcement at the 68-goal completion boundary. Other work retains the ordinary strict numeric-budget policy.
+
 ## Authority and conflicts
 
 `spec/**` is the machine-governed source of truth for the project, but entity lifecycle matters:
