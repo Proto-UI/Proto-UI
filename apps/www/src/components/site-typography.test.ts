@@ -527,3 +527,39 @@ it('discovers native note-title intent before any asynchronous Surface bootstrap
   const collected = collectSiteTypographyTargets(document.body, true);
   expect(collected.map((target) => target.role)).toEqual(['label', 'body']);
 });
+
+// A document-wide typography commit must not rewrite an untouched code
+// selection. Native Selection methods can run focus steps even when all four
+// endpoints remain identical. Happy DOM does not model those browser steps;
+// the controlled side effect below makes that source ownership boundary red.
+describe('startup typography and independent native selection owners', () => {
+  for (const focusOwner of ['button', 'a'] as const)
+    it(`does not reapply a retained code selection while ${focusOwner} owns focus`, async () => {
+      const root = fixture();
+      const command = document.createElement(focusOwner);
+      if (command instanceof HTMLAnchorElement) command.href = '/native';
+      command.textContent = 'Header command';
+      const code = document.createElement('pre');
+      code.tabIndex = 0;
+      code.textContent = 'npm create proto-ui';
+      root.prepend(command, code);
+      const text = code.firstChild!;
+      const selection = document.getSelection()!;
+      selection.setBaseAndExtent(text, 1, text, 1);
+      command.focus();
+      const setBaseAndExtent = selection.setBaseAndExtent.bind(selection);
+      const restore = vi.spyOn(selection, 'setBaseAndExtent').mockImplementation((...args) => {
+        setBaseAndExtent(...args);
+        code.focus(); // Controlled browser focus side effect, not fabricated evidence.
+      });
+      const participant = siteTypographyParticipant(root);
+      const candidate = await participant.materialize(request('react', 1));
+      candidates.push(candidate);
+      candidate.activate();
+      expect(restore).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(command);
+      expect(code.firstChild).toBe(text);
+      expect(selection.anchorNode).toBe(text);
+      expect(selection.anchorOffset).toBe(1);
+    });
+});

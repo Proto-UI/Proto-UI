@@ -15,6 +15,18 @@ describe('first-frame harness load-gate contract', () => {
     expect(source).toContain("'strokeWidth'");
     expect(source).toContain("'shapes'");
   });
+  it('persists real ownership facts and native focus/selection traces before strict assertions', () => {
+    const save = source.indexOf('JSON.stringify({ source, facts, diagnostics }');
+    const assertion = source.indexOf('expect(facts).toEqual(');
+    expect(save).toBeGreaterThan(-1);
+    expect(assertion).toBeGreaterThan(save);
+    expect(source).toContain("'selection-write-before'");
+    expect(source).toContain("'selection-write-after'");
+    expect(source).toContain('initialFocusCorrect: document.activeElement === target');
+    expect(source).toContain('expect(diagnostics.initialFocusCorrect).toBe(true)');
+    expect(source).toContain('focused: true');
+    expect(source).toContain('`${name}-trace.json`');
+  });
   const start = source.indexOf('await page.locator(targets.noteBody)');
   const release = source.indexOf('release();', start);
   const gated = source.slice(start, release);

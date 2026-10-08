@@ -677,7 +677,59 @@ describe('quick-start first-frame continuity', () => {
               ? (document.querySelector('[data-site-header-fallback-summary]') as HTMLElement)
               : (document.querySelector('[data-site-header-desktop-navigation] a') as HTMLElement);
           target.focus({ preventScroll: true });
+          const describe = (node: Node | null) => {
+            const element = node instanceof Element ? node : node?.parentElement;
+            return element
+              ? {
+                  tag: element.localName,
+                  id: element.id,
+                  attributes: Object.fromEntries(
+                    [...element.attributes]
+                      .filter((attribute) =>
+                        /^(?:data-site|data-typography|tabindex|href|hidden|inert)/.test(
+                          attribute.name
+                        )
+                      )
+                      .map((attribute) => [attribute.name, attribute.value])
+                  ),
+                }
+              : null;
+          };
+          const trace: unknown[] = [];
+          const observe = (kind: string, details: Record<string, unknown> = {}) => {
+            if (trace.length < 160)
+              trace.push({
+                kind,
+                at: performance.now(),
+                readyState: document.readyState,
+                active: describe(document.activeElement),
+                ...details,
+              });
+          };
+          for (const kind of ['focusin', 'focusout', 'selectionchange'])
+            document.addEventListener(
+              kind,
+              (event) =>
+                observe(kind, {
+                  target: describe(event.target as Node),
+                }),
+              true
+            );
+          const originalSet = selection.setBaseAndExtent;
+          selection.setBaseAndExtent = function (...args) {
+            observe('selection-write-before', { stack: new Error().stack });
+            try {
+              return Reflect.apply(originalSet, this, args);
+            } finally {
+              observe('selection-write-after');
+            }
+          };
+          observe('before-release');
           (window as any).__startupOwnership = {
+            trace,
+            describe,
+            observe,
+            initialFocusCorrect: document.activeElement === target,
             code,
             text,
             focus: document.activeElement,
@@ -686,6 +738,10 @@ describe('quick-start first-frame continuity', () => {
             selected: selection.toString(),
           };
         }, focusOwner);
+        await captureViewport(
+          page,
+          path.join(directory, `react-${focusOwner}-ownership-before.png`)
+        );
         release();
         await page.waitForFunction(
           () =>
@@ -713,6 +769,27 @@ describe('quick-start first-frame continuity', () => {
                 : document.activeElement === saved.focus,
           };
         }, focusOwner);
+        const diagnostics = await page.evaluate(() => {
+          const saved = (window as any).__startupOwnership;
+          saved.observe('after-upgrade');
+          return {
+            initialFocusCorrect: saved.initialFocusCorrect,
+            originalFocus: saved.describe(saved.focus),
+            actualFocus: saved.describe(document.activeElement),
+            trace: saved.trace,
+          };
+        });
+        // Persist failures before the strict assertion: identity and retained
+        // selection alone cannot establish that no intermediate blur occurred.
+        await writeFile(
+          path.join(directory, `react-${focusOwner}-ownership.json`),
+          JSON.stringify({ source, facts, diagnostics }, null, 2)
+        );
+        await captureViewport(
+          page,
+          path.join(directory, `react-${focusOwner}-ownership-after.png`)
+        );
+        expect(diagnostics.initialFocusCorrect).toBe(true);
         expect(facts).toEqual({
           initialSelectionNonempty: true,
           codeSame: true,
@@ -720,10 +797,19 @@ describe('quick-start first-frame continuity', () => {
           selectionSame: true,
           focused: true,
         });
-        await writeFile(
-          path.join(directory, `react-${focusOwner}-ownership.json`),
-          JSON.stringify({ source, facts }, null, 2)
-        );
+      } catch (error) {
+        const name = `react-${focusOwner}-ownership`;
+        await captureFailure(page, name, error);
+        try {
+          const trace = await page.evaluate(() => (window as any).__startupOwnership?.trace ?? []);
+          await writeFile(
+            path.join(directory, `${name}-trace.json`),
+            JSON.stringify({ source, trace }, null, 2)
+          );
+        } catch {
+          /* Keep the original test failure if diagnostic collection fails. */
+        }
+        throw error;
       } finally {
         release();
         await page.unrouteAll({ behavior: 'wait' });

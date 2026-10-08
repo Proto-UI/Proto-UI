@@ -158,7 +158,19 @@ function preserveSelection(document: Document, move: () => void): void {
   if (focus?.isConnected && document.activeElement !== focus) focus.focus({ preventScroll: true });
   const nextAnchor = resolveBoundary(anchor);
   const nextExtent = resolveBoundary(extent);
-  if (selection && nextAnchor && nextExtent) {
+  // An unchanged selection may belong to code or another independent owner.
+  // Reapplying it is not a no-op in native browsers: Selection can run focus
+  // steps and take focus back from a header command. Restore only changed
+  // endpoints, while preserving directional source-boundary remapping.
+  if (
+    selection &&
+    nextAnchor &&
+    nextExtent &&
+    (selection.anchorNode !== nextAnchor.node ||
+      selection.anchorOffset !== nextAnchor.offset ||
+      selection.focusNode !== nextExtent.node ||
+      selection.focusOffset !== nextExtent.offset)
+  ) {
     try {
       selection.setBaseAndExtent(
         nextAnchor.node,
