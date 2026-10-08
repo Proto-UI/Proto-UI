@@ -133,7 +133,12 @@ const canonicalSubject = (slug, aliases) => {
   return slug;
 };
 const sourceSnapshot = (data) =>
-  data.sourceSnapshot ?? { kind: 'main', revision: data.protoMain, baseMain: data.protoMain };
+  data.sourceSnapshot ?? {
+    kind: 'main',
+    revision: data.protoMain,
+    baseMain: data.protoMain,
+    objectType: 'commit',
+  };
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 export const dataPath = 'internal/coverage-matrices/prototype-coverage-matrix.json';
 export const markdownPath = 'internal/coverage-matrices/prototype-coverage-matrix.md';
@@ -383,7 +388,7 @@ function treeEntries(bytes) {
   return entries;
 }
 const gitProofSnapshots = new Map();
-function captureGitObjectProof(repoRoot, object, paths) {
+export function captureGitObjectProof(repoRoot, object, paths) {
   const key = repoRoot + ':' + object + ':' + sha256(paths.join('\0'));
   if (gitProofSnapshots.has(key)) return structuredClone(gitProofSnapshots.get(key));
   const read = (type, sha) =>
@@ -430,7 +435,7 @@ function captureGitObjectProof(repoRoot, object, paths) {
   gitProofSnapshots.set(key, structuredClone(proof));
   return proof;
 }
-function candidateGitProof(candidate) {
+function gitProofBlob(candidate) {
   const object = candidate.revision ?? candidate.tree;
   const proof = candidate.sourceObjectProof;
   const type = candidate.revision ? 'commit' : 'tree';
@@ -459,7 +464,7 @@ function candidateGitProof(candidate) {
       throw new Error('Git object proof tree hash/identity mismatch');
     trees.set(entry.sha, treeEntries(bytes));
   }
-  return (file, bytes) => {
+  return (file) => {
     let tree = proof.rootTree;
     const parts = file.split('/');
     for (let i = 0; i < parts.length; i++) {
@@ -469,21 +474,69 @@ function candidateGitProof(candidate) {
         if (!['40000', '040000'].includes(entry.mode))
           throw new Error(`Git object proof non-tree: ${file}`);
         tree = entry.sha;
-      } else if (
-        !['100644', '100755'].includes(entry.mode) ||
-        gitObjectSha('blob', bytes) !== entry.sha
-      ) {
-        throw new Error(`Candidate binding differs from advertised Git object: ${file}`);
+      } else {
+        if (!['100644', '100755'].includes(entry.mode))
+          throw new Error(`Candidate binding differs from advertised Git object: ${file}`);
+        return entry.sha;
       }
     }
   };
 }
-function hasGpuiImplementation(row, revision, repoRoot) {
+function candidateGitProof(candidate) {
+  const blobAtPath = gitProofBlob(candidate);
+  return (file, bytes) => {
+    if (gitObjectSha('blob', bytes) !== blobAtPath(file))
+      throw new Error(`Candidate binding differs from advertised Git object: ${file}`);
+  };
+}
+
+function gpuiSourceBound(evidence, snapshot, repoRoot) {
+  try {
+    const blobAtPath = gitProofBlob({
+      [snapshot.objectType === 'tree' ? 'tree' : 'revision']: snapshot.revision,
+      sourceObjectProof: evidence.sourceObjectProof,
+    });
+    return evidence.paths.every((p) => {
+      const blob = blobAtPath(p);
+      // Main is a historical source snapshot, not the current checkout. Its
+      // portable proof binds regular native blobs without requiring old Git objects.
+      if (snapshot.kind === 'main') return Boolean(blob);
+      let absolute = repoRoot;
+      for (const segment of p.split('/')) {
+        absolute = path.join(absolute, segment);
+        if (fs.lstatSync(absolute).isSymbolicLink()) return false;
+      }
+      return (
+        fs.lstatSync(absolute).isFile() && gitObjectSha('blob', fs.readFileSync(absolute)) === blob
+      );
+    });
+  } catch {
+    return false;
+  }
+}
+
+function hasGpuiNativeEvidence(row, revision) {
+  return (
+    Array.isArray(row?.nativeEvidence) &&
+    row.nativeEvidence.some(
+      (e) =>
+        e &&
+        typeof e === 'object' &&
+        e.result === 'passed' &&
+        e.revision === revision &&
+        /^[a-f0-9]{40}$/.test(e.revision ?? '') &&
+        /^https:\/\//.test(e.source ?? '')
+    )
+  );
+}
+
+function hasGpuiImplementation(row, revision, repoRoot, snapshot) {
   return (
     Array.isArray(row?.blockers) &&
     row.blockers.length === 0 &&
     Array.isArray(row.projectionIdentities) &&
     row.projectionIdentities.length > 0 &&
+    Array.isArray(row.implementationEvidence) &&
     row.projectionIdentities.every((identity) =>
       row.implementationEvidence?.some(
         (e) =>
@@ -493,7 +546,7 @@ function hasGpuiImplementation(row, revision, repoRoot) {
           e.baseIdentity === row.baseIdentity &&
           e.projectionIdentity === identity &&
           /^[a-f0-9]{40}$/.test(e.revision ?? '') &&
-          (!revision || e.revision === revision) &&
+          e.revision === revision &&
           /^https:\/\//.test(e.source ?? '') &&
           Array.isArray(e.paths) &&
           e.paths.length > 0 &&
@@ -502,12 +555,9 @@ function hasGpuiImplementation(row, revision, repoRoot) {
               typeof p === 'string' &&
               !path.isAbsolute(p) &&
               !p.split('/').includes('..') &&
-              /^(?:native\/gpui\/crates\/[^/]+\/src\/|packages\/adapters\/gpui-peer\/src\/)/.test(
-                p
-              ) &&
-              fs.existsSync(path.join(repoRoot, p)) &&
-              fs.lstatSync(path.join(repoRoot, p)).isFile()
-          )
+              /^(?:native\/gpui\/crates\/[^/]+\/src\/|packages\/adapters\/gpui-peer\/src\/)/.test(p)
+          ) &&
+          gpuiSourceBound(e, { ...snapshot, revision }, repoRoot)
       )
     )
   );
@@ -527,6 +577,7 @@ function candidateView(data) {
       kind: 'candidate',
       revision: candidate.revision ?? candidate.tree,
       baseMain: candidate.baseMain,
+      objectType: candidate.revision ? 'commit' : 'tree',
     },
     counts: { ...data.counts, ...candidate.counts },
   };
@@ -1093,12 +1144,18 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
       ]?.mappedCurrentIdentities ?? []
     ), `GPUI projection identity drift: ${row.baseIdentity}/${row.projectionLibrary}`);
   for (const row of gpuiRows) {
-    if (row.status === 'verified')
+    if (row.status === 'verified') {
       require(hasGpuiImplementation(
         row,
-        undefined,
-        repoRoot
+        snapshot.revision,
+        repoRoot,
+        snapshot
       ), `Incomplete GPUI implementation: ${row.baseIdentity}/${row.projectionLibrary}`);
+      require(hasGpuiNativeEvidence(
+        row,
+        snapshot.revision
+      ), `Incomplete GPUI acceptance: ${row.baseIdentity}/${row.projectionLibrary}`);
+    }
   }
   require(setEqual(
     Object.keys(data.counts.consumerPrograms),
@@ -1148,6 +1205,7 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
     require(r.action === 'retain-existing-owner; no-close' &&
       Boolean(r.migration && r.url), `Missing migration disposition: ${r.number}`);
   const planSource = data.candidateSource ?? data;
+  const planSnapshot = data.candidateSource ? sourceSnapshot(candidateView(data)) : snapshot;
   const planBaseIds = Object.values(planSource.prototypeInventory.base).flatMap((f) => f.entityIds);
   const planMapping = planSource.atomicProjectionMapping ?? [];
   const planGpuiRows = planSource.gpuiCoverageRows ?? [];
@@ -1249,14 +1307,13 @@ export function validate(data, repoRoot = root, candidatePass = false, sourceRea
             require(hasGpuiImplementation(
               gpui,
               item.acceptedRevision,
-              repoRoot
+              repoRoot,
+              planSnapshot
             ), `Incomplete GPUI implementation: ${item.id} -> ${id}/${lib}`);
             require(gpui?.status === 'verified' &&
-              gpui.nativeEvidence?.some(
-                (e) =>
-                  e.result === 'passed' &&
-                  e.revision === item.acceptedRevision &&
-                  /^https:\/\//.test(e.source ?? '')
+              hasGpuiNativeEvidence(
+                gpui,
+                item.acceptedRevision
               ), `Incomplete GPUI acceptance: ${item.id} -> ${id}/${lib}`);
           }
         const receiptFor = (gate) =>

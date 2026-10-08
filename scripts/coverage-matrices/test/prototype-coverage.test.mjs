@@ -13,8 +13,14 @@ import {
   renderPlan,
   inheritedPrototypeIds,
   refreshCandidateSource,
+  captureGitObjectProof,
 } from '../prototype-coverage.mjs';
 const baseline = JSON.parse(fs.readFileSync(path.join(root, dataPath), 'utf8'));
+// Retain the real pinned-main native proof so receipt tests work in depth-1 CI.
+const mainGpuiSource = JSON.parse(
+  fs.readFileSync(new URL('./fixtures/gpui-main-source-proof.json', import.meta.url), 'utf8')
+);
+assert.equal(mainGpuiSource.revision, baseline.protoMain);
 const fixtureCopies = new WeakSet();
 let fixtureTransforms = {};
 const fixturePaths = new Set(baseline.mainSourceEvidence.sourceBindings.map((entry) => entry.path));
@@ -208,7 +214,7 @@ function acceptedItemShape(data, id) {
   const item = data.deliveryPlan.items.find((x) => x.id === id);
   item.complete = true;
   data.deliveryPlan.checkedCoreTodos = 1;
-  item.acceptedRevision = 'a'.repeat(40);
+  item.acceptedRevision = data.protoMain;
   item.gateResults = Object.fromEntries(item.requirements.map((_, i) => [String(i + 1), 'passed']));
   item.evidence = item.requirements.map((_, i) => ({
     gate: String(i + 1),
@@ -593,6 +599,10 @@ function fillGpuiImplementation(row, revision) {
     result: 'passed',
     source: 'https://example.invalid/shape-only-implementation-receipt',
     paths: ['packages/adapters/gpui-peer/src/session.ts'],
+    sourceObjectProof:
+      revision === mainGpuiSource.revision
+        ? structuredClone(mainGpuiSource.sourceObjectProof)
+        : captureGitObjectProof(root, revision, ['packages/adapters/gpui-peer/src/session.ts']),
   }));
 }
 
@@ -824,6 +834,171 @@ test('GPUI implementation records must identify this projection and real native 
     assert(validate(d).some((x) => /GPUI implementation/.test(x)));
   }
 });
+
+// These are receipt-shape controls using real source-object proofs, not native
+// execution or acceptance claims. No fixture is persisted into the portfolio.
+function verifiedGpuiShape(kind) {
+  const d = structuredClone(baseline);
+  if (kind !== 'main') {
+    const identity = kind === 'candidate-tree' ? 'tree' : 'revision';
+    const object = execFileSync(
+      'git',
+      ['rev-parse', identity === 'tree' ? 'HEAD^{tree}' : 'HEAD'],
+      {
+        cwd: root,
+      }
+    )
+      .toString()
+      .trim();
+    d.candidateSource = refreshCandidateSource(d, root, { [identity]: object });
+  }
+  const source = kind === 'main' ? d : d.candidateSource;
+  const revision = kind === 'main' ? d.protoMain : (source.revision ?? source.tree);
+  const row = source.gpuiCoverageRows.find((r) => r.projectionIdentities.length > 0);
+  row.status = 'verified';
+  fillGpuiImplementation(row, revision);
+  row.nativeEvidence = [
+    { result: 'passed', revision, source: 'https://example.invalid/native-shape-only' },
+  ];
+  return { data: d, row, revision };
+}
+
+for (const kind of ['main', 'candidate-commit', 'candidate-tree']) {
+  test(`review 4217415370: ${kind} verified GPUI accepts matching source-bound receipt shapes`, () => {
+    const { data } = verifiedGpuiShape(kind);
+    assert.deepEqual(validateActual(data), []);
+    assert.equal(data.deliveryPlan.checkedCoreTodos, 0);
+  });
+  for (const [name, mutate, diagnostic] of [
+    [
+      'stale implementation revision',
+      (r) => {
+        r.implementationEvidence[0].revision = 'a'.repeat(40);
+      },
+      /GPUI implementation/,
+    ],
+    [
+      'missing native evidence',
+      (r) => {
+        delete r.nativeEvidence;
+      },
+      /GPUI acceptance/,
+    ],
+    [
+      'empty native evidence',
+      (r) => {
+        r.nativeEvidence = [];
+      },
+      /GPUI acceptance/,
+    ],
+    [
+      'stale native revision',
+      (r) => {
+        r.nativeEvidence[0].revision = 'a'.repeat(40);
+      },
+      /GPUI acceptance/,
+    ],
+    [
+      'failed native result',
+      (r) => {
+        r.nativeEvidence[0].result = 'failed';
+      },
+      /GPUI acceptance/,
+    ],
+    [
+      'missing native source',
+      (r) => {
+        delete r.nativeEvidence[0].source;
+      },
+      /GPUI acceptance/,
+    ],
+    [
+      'malformed native evidence',
+      (r) => {
+        r.nativeEvidence = [null];
+      },
+      /GPUI acceptance/,
+    ],
+    [
+      'wrong source proof object',
+      (r) => {
+        r.implementationEvidence[0].sourceObjectProof.rootTree = 'b'.repeat(40);
+      },
+      /GPUI implementation/,
+    ],
+    [
+      'missing native source proof',
+      (r) => {
+        delete r.implementationEvidence[0].sourceObjectProof;
+      },
+      /GPUI implementation/,
+    ],
+    [
+      'tampered native source proof',
+      (r) => {
+        r.implementationEvidence[0].sourceObjectProof.trees[0].contentBase64 =
+          Buffer.from('forged').toString('base64');
+      },
+      /GPUI implementation/,
+    ],
+    [
+      'unproven native source path',
+      (r) => {
+        r.implementationEvidence[0].paths = ['native/gpui/crates/proto-ui-gpui/src/host.rs'];
+      },
+      /GPUI implementation/,
+    ],
+  ]) {
+    test(`review 4217415370: ${kind} verified GPUI rejects ${name}`, () => {
+      const { data, row } = verifiedGpuiShape(kind);
+      mutate(row);
+      assert(validateActual(data).some((error) => diagnostic.test(error)));
+    });
+  }
+  test(`review 4217415370: ${kind} verified GPUI proof validates offline without Git`, (t) => {
+    const { data } = verifiedGpuiShape(kind);
+    const previous = process.env.PATH;
+    process.env.PATH = '';
+    t.after(() => {
+      process.env.PATH = previous;
+    });
+    assert.deepEqual(validateActual(data, root + '/.'), []);
+  });
+}
+
+test('review 4217415370: candidate verified GPUI rejects changed native worktree bytes', (t) => {
+  const { data } = verifiedGpuiShape('candidate-commit');
+  mockRead(t, {
+    'packages/adapters/gpui-peer/src/session.ts': (text) => text + '\n// changed native source\n',
+  });
+  assert(validateActual(data).some((error) => /GPUI implementation/.test(error)));
+});
+
+test('review 4217415370: historical main proof does not read current native source', (t) => {
+  const { data } = verifiedGpuiShape('main');
+  mockRead(t, {
+    'packages/adapters/gpui-peer/src/session.ts': () => {
+      assert.fail('Historical main receipt must use its own proven source object');
+    },
+  });
+  assert.deepEqual(validateActual(data), []);
+});
+
+for (const kind of ['missing-file', 'symlinked-parent']) {
+  test(`review 4217415370: candidate verified GPUI rejects ${kind}`, (t) => {
+    const { data } = verifiedGpuiShape('candidate-commit');
+    const lstat = fs.lstatSync.bind(fs);
+    t.mock.method(fs, 'lstatSync', (file, ...args) => {
+      const relative = path.relative(root, String(file)).split(path.sep).join('/');
+      if (kind === 'missing-file' && relative === 'packages/adapters/gpui-peer/src/session.ts')
+        throw new Error('Source file unavailable');
+      if (kind === 'symlinked-parent' && relative === 'packages/adapters/gpui-peer/src')
+        return { isSymbolicLink: () => true };
+      return lstat(file, ...args);
+    });
+    assert(validateActual(data).some((error) => /GPUI implementation/.test(error)));
+  });
+}
 
 test('candidate refresh does not erase known unresolved GPUI blockers', () => {
   const d = sameSourceCandidate();
