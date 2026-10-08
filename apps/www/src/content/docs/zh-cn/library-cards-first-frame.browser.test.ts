@@ -11,6 +11,8 @@ import {
   captureCurrentViewport,
   closeEvidenceContext,
 } from './library-card-capture';
+import { recordLibraryFontTrace } from './library-card-font-trace';
+import { readLibraryPlatformFonts } from './library-card-platform-fonts';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
 const route = '/zh-cn/ui-libraries/';
 const directory =
@@ -98,6 +100,11 @@ function readCards(observe = false) {
       const serialized = JSON.stringify(value);
       if (serialized !== previous) {
         state.frames.push(value);
+        (
+          window as typeof window & {
+            __libraryFontTrace?: { record: (label: string) => void };
+          }
+        ).__libraryFontTrace?.record('frame.changed');
         previous = serialized;
       }
       requestAnimationFrame(frame);
@@ -210,6 +217,17 @@ describe('actual library Cards preserve their first frame', () => {
         let reloadBefore: ReturnType<typeof readCards> | undefined;
         let reloadAfter: ReturnType<typeof readCards> | undefined;
         let reloadFrames: unknown[] = [];
+        let fontTrace: unknown;
+        const fontTraceErrors: string[] = [];
+        const traceFonts = async (label: string) =>
+          page.evaluate(recordLibraryFontTrace, label).catch((issue) => {
+            fontTraceErrors.push(`${label}: ${String(issue)}`);
+            return null;
+          });
+        const platformFonts: Record<
+          string,
+          Awaited<ReturnType<typeof readLibraryPlatformFonts>>
+        > = {};
         let fontFaces: Array<{ family: string; status: string }> = [];
         await page.route('**/*', async (r) => {
           const kind = r.request().resourceType();
@@ -242,6 +260,8 @@ describe('actual library Cards preserve their first frame', () => {
           // it must not contaminate the resting-state first-frame oracle.
           const link = page.locator('[data-library="shadcn"] .library-card__credits a').first();
           await link.focus();
+          await traceFonts('held-before');
+          platformFonts.held = await readLibraryPlatformFonts(page);
           before = await page.evaluate(readCards, true);
           expect(before).toHaveLength(6);
           expect(
@@ -257,6 +277,7 @@ describe('actual library Cards preserve their first frame', () => {
           await captureCurrentViewport(page, path.join(directory, `${name}-before.png`));
           await captureFamilyCards(page, name, 'held-first-frame');
           phase = 'upgrading';
+          await traceFonts('release');
           released = true;
           release();
           await page.waitForFunction(() =>
@@ -268,6 +289,9 @@ describe('actual library Cards preserve their first frame', () => {
           await page.waitForTimeout(250);
           after = await page.evaluate(readCards, false);
           frames = await stopFrames(page);
+          await traceFonts('enhanced-after');
+          platformFonts.enhanced = await readLibraryPlatformFonts(page);
+          fontTrace = await traceFonts('stop');
           // Retain real enhanced output before the strict comparison so a red
           // transition still has individually source-bound after images.
           await captureCurrentViewport(page, path.join(directory, `${name}-after.png`));
@@ -307,6 +331,7 @@ describe('actual library Cards preserve their first frame', () => {
           phase = 'passed';
         } catch (error) {
           failed = true;
+          fontTrace ??= await traceFonts('stop');
           await captureCurrentViewport(page, path.join(directory, `${name}-failure.png`)).catch(
             () => {}
           );
@@ -323,6 +348,9 @@ describe('actual library Cards preserve their first frame', () => {
                 heldFonts,
                 heldScripts,
                 fontFaces,
+                fontTrace,
+                fontTraceErrors,
+                platformFonts,
                 before,
                 after,
                 frames,
@@ -349,6 +377,9 @@ describe('actual library Cards preserve their first frame', () => {
                 heldFonts,
                 heldScripts,
                 fontFaces,
+                fontTrace,
+                fontTraceErrors,
+                platformFonts,
                 before,
                 after,
                 frames,
