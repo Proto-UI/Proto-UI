@@ -4,7 +4,9 @@ import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile, readdir } from 'node:fs/promises';
-import { resolve, join, extname, sep } from 'node:path';
+import { resolve, join, extname, sep, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { verifyFixtureBinding, readBoundFixtureFile, sha256 } from './artifact-binding.mjs';
 import { launchBrowser } from '../../apps/www/src/content/docs/zh-cn/browser-harness.ts';
 import {
   captureCurrentViewport,
@@ -21,7 +23,15 @@ assert.deepEqual(
   'Use a fresh output directory so stale images cannot enter this receipt'
 );
 const source = JSON.parse(await readFile(join(root, 'source.json'), 'utf8'));
-assert.equal(source.dirty, false, 'Native evidence requires a committed source tree');
+const repository = fileURLToPath(new URL('../../', import.meta.url));
+const boundFiles = await verifyFixtureBinding(source, repository, root);
+const generatedFiles = [];
+async function writeGeneratedPage(file, html) {
+  await writeFile(join(root, file), html);
+  const digest = sha256(await readFile(join(root, file)));
+  boundFiles.set(file, digest);
+  generatedFiles.push({ file, sha256: digest });
+}
 const observations = [],
   images = [],
   cleanup = [];
@@ -39,7 +49,7 @@ const server = createServer(async (request, response) => {
       { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css' }[extname(file)] ??
         'application/octet-stream'
     );
-    response.end(await readFile(file));
+    response.end(await readBoundFixtureFile(root, relative(root, file), boundFiles));
   } catch {
     response.writeHead(404).end();
   }
@@ -103,8 +113,8 @@ try {
     // rewrite a captured light product and call it a dark artifact.
     if (theme === 'dark') {
       const template = await readFile(join(root, 'index.html'), 'utf8');
-      await writeFile(
-        join(root, 'producer-dark.html'),
+      await writeGeneratedPage(
+        'producer-dark.html',
         template.replace('data-theme="light"', 'data-theme="dark"')
       );
       await page.goto(`${origin}/producer-dark.html?capture`, { waitUntil: 'networkidle' });
@@ -122,8 +132,8 @@ try {
       join(out, `${theme}-artifact.json`),
       JSON.stringify({ ...artifact, source }, null, 2)
     );
-    await writeFile(
-      join(root, `seed-${theme}.html`),
+    await writeGeneratedPage(
+      `seed-${theme}.html`,
       await renderInitialPaintPage(artifact.serialized, artifact.binding)
     );
     await capture(`${theme}-real-producer.png`);
@@ -272,6 +282,7 @@ const result = {
   scope:
     'Finite 1000×800 DPR1 desktop rest Surface; actual family + native link. Unsupported viewport/DPR and accessibility preferences use SSR CSS fallback. No Card/mobile/contact/four-runtime/Compiler acceptance.',
   observations,
+  generatedFiles,
   images,
   cleanup,
 };

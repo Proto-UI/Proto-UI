@@ -3,13 +3,13 @@ import type { OpticalFrame } from './program';
 import type { WebMaterialOptions } from './sink';
 import { inspectCanvasBackdrop } from './source';
 import { resolveWebMaterialPreferences } from './preferences';
-import { observeMaterialGeometry } from './geometry-watch';
 import { rgbaCss, resolvePaletteColor } from './style';
 import {
   digestBytes,
   digestText,
   INITIAL_PAINT_PROFILE,
   materialKey,
+  parseInitialPaintReceipt,
   receiptFromAdmittedPaint,
   verifyInitialPaintArtifact,
   type InitialPaintLayout,
@@ -28,6 +28,31 @@ const preparing = new WeakSet<HTMLElement>();
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const equalBytes = (a: Uint8Array, b: Uint8Array) =>
   a.length === b.length && a.every((byte, index) => byte === b[index]);
+
+// Short-lived preparation observers own their own native resources. They must
+// never occupy/remove the ordinary sink's shared per-host geometry lease.
+function observeInitialPlane(host: HTMLElement, changed: () => void) {
+  const document = host.ownerDocument,
+    win = document.defaultView!;
+  const mutation = new win.MutationObserver(changed);
+  mutation.observe(document.documentElement, {
+    attributes: true,
+    childList: true,
+    subtree: true,
+    characterData: true,
+    attributeFilter: ['style', 'class', 'hidden', 'data-pui-style', 'data-theme', marker],
+  });
+  const resize = win.ResizeObserver ? new win.ResizeObserver(changed) : null;
+  resize?.observe(host);
+  win.addEventListener('resize', changed);
+  win.addEventListener('scroll', changed, true);
+  return () => {
+    mutation.disconnect();
+    resize?.disconnect();
+    win.removeEventListener('resize', changed);
+    win.removeEventListener('scroll', changed, true);
+  };
+}
 export function initialPaintTuple(
   receipt: InitialPaintReceipt
 ): ReadonlyArray<readonly [string, string]> {
@@ -117,8 +142,90 @@ export async function prepareExperimentalInitialPaint(
   preparing.add(host);
   const originalMarker = host.getAttribute(marker);
   const originalStyle = host.getAttribute('style');
+  const ownerDocument = host.ownerDocument;
+  const pendingStops: Array<() => void> = [];
+  let invalidated = false;
+  let pendingActive = true;
   try {
-    return await prepareReservedInitialPaint(host, serialized, binding, options);
+    // Shape parsing establishes no live provenance. It only lets the existing
+    // marked server tuple be withdrawn synchronously while hashes are pending.
+    const expected = parseInitialPaintReceipt(serialized);
+    const source = options.source.current();
+    const withdrawPending = () => {
+      if (!pendingActive) return;
+      invalidated = true;
+      if (
+        host.getAttribute(marker) !== originalMarker ||
+        host.getAttribute('style') !== originalStyle
+      )
+        return;
+      host.removeAttribute(marker);
+      for (const [name, value] of initialPaintTuple(expected)) {
+        const probe = ownerDocument.createElement('span');
+        probe.style.setProperty(name, value);
+        if (
+          host.style.getPropertyValue(name) === probe.style.getPropertyValue(name) &&
+          !host.style.getPropertyPriority(name)
+        )
+          host.style.removeProperty(name);
+      }
+    };
+    const watchPending = (subscribe: (changed: () => void) => () => void) => {
+      let stop: () => void;
+      try {
+        stop = subscribe(withdrawPending);
+      } catch (error) {
+        withdrawPending();
+        throw error;
+      }
+      if (invalidated) {
+        try {
+          stop();
+        } catch {
+          /* keep the rejection primary */
+        }
+      } else pendingStops.push(stop);
+      if (invalidated) throw new Error('seed-verification-inputs-unavailable');
+    };
+    watchPending((changed) => options.source.subscribe(changed));
+    const win = ownerDocument.defaultView;
+    if (!source || !win) {
+      withdrawPending();
+      throw new Error('seed-owned-canvas-unavailable');
+    }
+    watchPending((changed) =>
+      resolveWebMaterialPreferences(options.preferences, win).subscribe(changed)
+    );
+    watchPending((changed) => options.palette.subscribe(changed));
+    const initialBounds = JSON.stringify(host.getBoundingClientRect());
+    const pendingGeometry = () => {
+      if (
+        !host.isConnected ||
+        host.ownerDocument !== ownerDocument ||
+        options.source.current() !== source ||
+        host.getAttribute('style') !== originalStyle ||
+        host.getAttribute(marker) !== originalMarker ||
+        JSON.stringify(host.getBoundingClientRect()) !== initialBounds
+      )
+        withdrawPending();
+    };
+    watchPending(() =>
+      observeInitialPlane(host, () => {
+        try {
+          pendingGeometry();
+        } catch {
+          withdrawPending();
+        }
+      })
+    );
+    return await prepareReservedInitialPaint(
+      host,
+      serialized,
+      binding,
+      options,
+      () =>
+        !invalidated && host.ownerDocument === ownerDocument && options.source.current() === source
+    );
   } catch (error) {
     // Invalid JSON/hash has no trusted tuple to adopt or remove. The server's
     // opaque default still owns every marked plane; select that fallback only
@@ -131,6 +238,14 @@ export async function prepareExperimentalInitialPaint(
       host.setAttribute(marker, 'rejected');
     throw error;
   } finally {
+    pendingActive = false;
+    for (const stop of pendingStops.splice(0)) {
+      try {
+        stop();
+      } catch {
+        /* owned preparation already settled */
+      }
+    }
     preparing.delete(host);
   }
 }
@@ -139,9 +254,11 @@ async function prepareReservedInitialPaint(
   host: HTMLElement,
   serialized: string,
   binding: InitialPaintManifestBinding,
-  options: WebMaterialOptions
+  options: WebMaterialOptions,
+  stillPreparing: () => boolean
 ): Promise<{ receipt: InitialPaintReceipt; dispose(): void }> {
   const receipt = await verifyInitialPaintArtifact(serialized, binding);
+  if (!stillPreparing()) throw new Error('seed-verification-inputs-unavailable');
   const document = host.ownerDocument,
     win = document.defaultView;
   if (!win) throw new Error('seed-document-unavailable');
@@ -214,6 +331,16 @@ async function prepareReservedInitialPaint(
     )
       return false;
     const admission = inspectCanvasBackdrop(host, source);
+    const visible = source.canvas
+      .getContext('2d', { willReadFrequently: true })
+      ?.getImageData(0, 0, source.width, source.height).data;
+    if (
+      !visible ||
+      visible.length !== originalPixels.length ||
+      visible.some((byte, index) => byte !== originalPixels[index]) ||
+      source.canvas.toDataURL('image/png') !== receipt.source.pngDataUrl
+    )
+      return false;
     const rect = host.getBoundingClientRect(),
       css = win.getComputedStyle(host);
     const radii = [
@@ -243,7 +370,16 @@ async function prepareReservedInitialPaint(
     );
   };
   const retire = () => {
-    if (state === 'retired') return;
+    if (state === 'retired') {
+      for (const stop of stops.splice(0)) {
+        try {
+          stop();
+        } catch {
+          /* drain late-installed subscriptions */
+        }
+      }
+      return;
+    }
     const delegated = state === 'claimed';
     state = 'retired';
     unregister();
@@ -266,10 +402,21 @@ async function prepareReservedInitialPaint(
         retire();
       }
     };
-    stops.push(options.source.subscribe(invalidated));
-    stops.push(prefs.subscribe(invalidated));
-    stops.push(options.palette.subscribe(() => retire()));
-    stops.push(observeMaterialGeometry(host, invalidated, () => null));
+    const install = (subscribe: () => () => void) => {
+      const stop = subscribe();
+      if (state === 'retired') {
+        try {
+          stop();
+        } catch {
+          /* remain retired */
+        }
+      } else stops.push(stop);
+      if (state === 'retired') throw new Error('seed-subscription-inputs-unavailable');
+    };
+    install(() => options.source.subscribe(invalidated));
+    install(() => prefs.subscribe(invalidated));
+    install(() => options.palette.subscribe(() => retire()));
+    install(() => observeInitialPlane(host, invalidated));
     if ((await digestBytes(originalPixels)) !== receipt.source.rgbaSha256 || !current())
       throw new Error('seed-source-pixels-mismatch');
     state = 'ready';

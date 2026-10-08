@@ -1,10 +1,10 @@
 // Internal finite-profile experiment. It does not enable a public Adapter or
 // Compiler capability or add a production Library route.
-import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { build } from 'esbuild';
+import { createFixtureBinding } from './artifact-binding.mjs';
 import { renderThemeCss } from '../../packages/prototypes/liquid-glass/src/theme.ts';
 const out = resolve(process.argv[2] ?? '/tmp/pui-initial-paint');
 await mkdir(out, { recursive: true });
@@ -40,12 +40,7 @@ await writeFile(
   resolve(out, 'source.json'),
   JSON.stringify(
     {
-      sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
-      tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim(),
-      dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim().length > 0,
-      assetSha256: createHash('sha256')
-        .update(await readFile(resolve(out, 'app.js')))
-        .digest('hex'),
+      ...(await createFixtureBinding(process.cwd(), out, Object.keys(result.metafile.inputs))),
       inputs: Object.keys(result.metafile.inputs),
       scope:
         'Private source-only finite rest Surface capability. Actual browser rendering pending; no generic Card, mobile, four-runtime, contact, Compiler, or optical-equivalence claim.',

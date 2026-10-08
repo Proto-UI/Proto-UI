@@ -704,3 +704,226 @@ describe('internal server plane adoption (mock GPU, not native first-frame evide
     await expect(capture.artifact()).rejects.toThrow('no-admitted');
   });
 });
+
+// Independent reviewer diagnostics; not candidate implementation changes.
+describe('reviewer source/provenance negative controls', () => {
+  it('rejects an actual canvas that no longer matches the receipt source RGBA', async () => {
+    const f = fixture(),
+      a = await f.show();
+    vi.mocked(f.canvas.getContext).mockReturnValue({
+      getImageData: () => ({ data: new Uint8ClampedArray(f.source.pixels.length).fill(0) }),
+    } as unknown as CanvasRenderingContext2D);
+    await expect(
+      prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options)
+    ).rejects.toThrow();
+  });
+  it('rejects substituted source PNG pixels even after consistent byte-hash recomputation', async () => {
+    const f = fixture(),
+      a = await f.artifact();
+    const forged = JSON.parse(a.serialized);
+    forged.source.pngDataUrl = png(400, 240, 0);
+    const { pngBytes } = await import('../src/material/initial-paint-receipt');
+    forged.source.pngSha256 = await digestBytes(pngBytes(forged.source.pngDataUrl));
+    const serialized = JSON.stringify(forged);
+    const binding = { ...a.binding, artifactSha256: await digestText(serialized) };
+    const presentation = initialPaintPresentation(forged, 'rest-host');
+    for (const [name, value] of Object.entries(presentation.attributes))
+      f.host.setAttribute(name, value);
+    f.host.style.cssText += ';' + presentation.style;
+    await expect(
+      prepareExperimentalInitialPaint(f.host, serialized, binding, f.options)
+    ).rejects.toThrow();
+  });
+  it('withdraws the seed immediately when source is revoked during artifact hash verification', async () => {
+    const f = fixture(),
+      a = await f.show();
+    const original = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+    let unblock: (() => void) | null = null;
+    let first = true;
+    vi.spyOn(globalThis.crypto.subtle, 'digest').mockImplementation(async (algorithm, data) => {
+      if (first) {
+        first = false;
+        await new Promise<void>((resolve) => {
+          unblock = resolve;
+        });
+      }
+      return original(algorithm, data);
+    });
+    const pending = prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options);
+    const rejected = expect(pending).rejects.toThrow('unavailable');
+    await vi.waitFor(() => expect(unblock).not.toBeNull());
+    f.removeSource();
+    const afterRevocation = f.host.style.backgroundImage;
+    unblock!();
+    await rejected;
+    expect(afterRevocation).toBe('');
+  });
+});
+
+describe('reviewer late lifecycle controls', () => {
+  it('does not transfer the same pending preparation into a different owner document', async () => {
+    const f = fixture(),
+      a = await f.show();
+    const original = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+    let unblock: (() => void) | null = null;
+    let first = true;
+    vi.spyOn(globalThis.crypto.subtle, 'digest').mockImplementation(async (algorithm, data) => {
+      if (first) {
+        first = false;
+        await new Promise<void>((resolve) => {
+          unblock = resolve;
+        });
+      }
+      return original(algorithm, data);
+    });
+    const pending = prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options);
+    await vi.waitFor(() => expect(unblock).not.toBeNull());
+    const iframe = document.createElement('iframe');
+    document.body.append(iframe);
+    const other = iframe.contentDocument!,
+      otherWindow = iframe.contentWindow!;
+    Object.defineProperty(otherWindow, 'innerWidth', { configurable: true, value: 1000 });
+    Object.defineProperty(otherWindow, 'innerHeight', { configurable: true, value: 800 });
+    Object.defineProperty(otherWindow, 'devicePixelRatio', { configurable: true, value: 1 });
+    vi.spyOn(otherWindow, 'requestAnimationFrame').mockReturnValue(1);
+    other.body.append(other.adoptNode(f.scope));
+    f.scope.append(other.adoptNode(f.canvas), other.adoptNode(f.host));
+    unblock!();
+    await expect(pending).rejects.toThrow();
+  });
+  it('ignores no revocation when source.subscribe invalidates synchronously and cleans all leases', async () => {
+    const f = fixture(),
+      a = await f.show();
+    const originalSubscribe = f.options.source.subscribe;
+    f.options.source.subscribe = (fn) => {
+      const stop = originalSubscribe(fn);
+      f.removeSource();
+      return stop;
+    };
+    await expect(
+      prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options)
+    ).rejects.toThrow();
+    expect(Object.values(f.listeners).every((set) => set.size === 0)).toBe(true);
+  });
+});
+
+describe('reviewer claimed seed cross-document guard', () => {
+  it.each([false, true])(
+    'retires invalid DPR at actual adoption with seed=%s while old RAF is suspended',
+    async (seeded) => {
+      const f = fixture();
+      let prepared: Awaited<ReturnType<typeof prepareExperimentalInitialPaint>> | undefined;
+      if (seeded) {
+        const a = await f.show();
+        prepared = await prepareExperimentalInitialPaint(
+          f.host,
+          a.serialized,
+          a.binding,
+          f.options
+        );
+      }
+      const sink = f.sink();
+      sink.commit(f.visual);
+      expect(f.host.dataset.materialQuality).toBe('self-optical');
+      const iframe = document.createElement('iframe');
+      document.body.append(iframe);
+      const other = iframe.contentDocument!,
+        otherWindow = iframe.contentWindow!;
+      Object.defineProperty(otherWindow, 'innerWidth', { configurable: true, value: 1000 });
+      Object.defineProperty(otherWindow, 'innerHeight', { configurable: true, value: 800 });
+      Object.defineProperty(otherWindow, 'devicePixelRatio', { configurable: true, value: 2 });
+      vi.spyOn(otherWindow, 'requestAnimationFrame').mockReturnValue(1);
+      other.body.append(other.adoptNode(f.scope));
+      f.scope.append(other.adoptNode(f.canvas), other.adoptNode(f.host));
+      expect(f.host.ownerDocument).toBe(other);
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const quality = f.host.dataset.materialQuality;
+      sink.release(1);
+      prepared?.dispose();
+      expect(quality).not.toBe('self-optical');
+    }
+  );
+});
+
+describe('preparation observer ownership regressions', () => {
+  it('does not let a late callback from a retired verification subscription withdraw the sink', async () => {
+    const f = fixture(),
+      a = await f.show();
+    const subscribe = f.options.source.subscribe;
+    const callbacks: Array<() => void> = [];
+    f.options.source.subscribe = (callback) => {
+      callbacks.push(callback);
+      return subscribe(callback);
+    };
+    const prepared = await prepareExperimentalInitialPaint(
+      f.host,
+      a.serialized,
+      a.binding,
+      f.options
+    );
+    const sink = f.sink();
+    sink.commit(f.visual);
+    const image = f.host.style.backgroundImage;
+    callbacks[0]();
+    expect(f.host.style.backgroundImage).toBe(image);
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+    sink.release(1);
+    prepared.dispose();
+  });
+  it.each([false, true])(
+    'keeps the sink resize subscription after preparation cleanup with seed=%s',
+    async (seeded) => {
+      const observers: Array<{ targets: Set<Element>; callback: () => void }> = [];
+      const frames: FrameRequestCallback[] = [];
+      const Original = window.ResizeObserver;
+      Object.defineProperty(window, 'ResizeObserver', {
+        configurable: true,
+        value: class {
+          targets = new Set<Element>();
+          constructor(public callback: () => void) {
+            observers.push(this);
+          }
+          observe(target: Element) {
+            this.targets.add(target);
+          }
+          unobserve(target: Element) {
+            this.targets.delete(target);
+          }
+          disconnect() {
+            this.targets.clear();
+          }
+        },
+      });
+      vi.mocked(window.requestAnimationFrame).mockImplementation((callback) => {
+        frames.push(callback);
+        return frames.length;
+      });
+      const f = fixture();
+      let prepared: Awaited<ReturnType<typeof prepareExperimentalInitialPaint>> | undefined;
+      try {
+        if (seeded) {
+          const a = await f.show();
+          prepared = await prepareExperimentalInitialPaint(
+            f.host,
+            a.serialized,
+            a.binding,
+            f.options
+          );
+        }
+        const sink = f.sink();
+        sink.commit(f.visual);
+        const active = observers.filter((observer) => observer.targets.has(f.host));
+        expect(active).toHaveLength(1);
+        f.targetRect.mockReturnValue(rect(40, 30, 120, 40));
+        active[0].callback();
+        for (const callback of frames.splice(0)) callback(1);
+        expect((gpu.render.mock.lastCall![0] as OpticalFrame).geometry.width).toBe(120);
+        sink.release(1);
+        prepared?.dispose();
+        expect(observers.every((observer) => !observer.targets.has(f.host))).toBe(true);
+      } finally {
+        Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: Original });
+      }
+    }
+  );
+});
