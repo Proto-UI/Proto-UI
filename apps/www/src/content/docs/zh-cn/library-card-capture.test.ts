@@ -3,6 +3,7 @@ import { writeFileSync } from 'node:fs';
 import type { Page } from 'playwright-core';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
+  applyDoubleRootTextScale,
   captureCurrentViewport,
   closeEvidenceContext,
   type CleanupIssue,
@@ -224,4 +225,98 @@ it('preserves a final publication error after separately logged cleanup failure'
   ).catch((error) => error);
   expect(error).toBe(primary);
   expect(issues).toEqual([{ operation: 'session.detach', error: 'Error: detach failed' }]);
+});
+
+it('applies and verifies 200% text synchronously without a load-event dependency', () => {
+  const properties = new Map([['color', 'red']]);
+  const priorities = new Map<string, string>();
+  const root = {
+    style: {
+      setProperty(name: string, value: string, priority: string) {
+        properties.set(name, value);
+        priorities.set(name, priority);
+      },
+      getPropertyValue(name: string) {
+        return properties.get(name) ?? '';
+      },
+      getPropertyPriority(name: string) {
+        return priorities.get(name) ?? '';
+      },
+    },
+  };
+  const createElement = vi.fn(() => {
+    throw new Error('No style element or load callback permitted');
+  });
+  vi.stubGlobal('document', { documentElement: root, createElement });
+  // Controlled CSSOM values; actual browser scaling remains an official CI assertion.
+  vi.stubGlobal('getComputedStyle', () => ({
+    fontSize: properties.get('font-size') === '200%' ? '32px' : '16px',
+  }));
+  try {
+    expect(applyDoubleRootTextScale()).toEqual({
+      before: 16,
+      after: 32,
+      value: '200%',
+      priority: 'important',
+    });
+    expect(createElement).not.toHaveBeenCalled();
+    expect(properties.get('color')).toBe('red');
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it('rejects unapplied text scaling rather than silently using 100% text', () => {
+  const root = {
+    style: {
+      setProperty: vi.fn(),
+      getPropertyValue: () => '200%',
+      getPropertyPriority: () => 'important',
+    },
+  };
+  vi.stubGlobal('document', { documentElement: root });
+  vi.stubGlobal('getComputedStyle', () => ({ fontSize: '16px' }));
+  try {
+    expect(() => applyDoubleRootTextScale()).toThrow(
+      'Required 200% root text scale was not applied'
+    );
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it('retains the old injector pending when its style load callback is absent', async () => {
+  const { readFileSync } = await vi.importActual<typeof import('node:fs')>('node:fs');
+  const { createRequire } = await import('node:module');
+  const { dirname, join } = await import('node:path');
+  const require = createRequire(import.meta.url);
+  const frames = readFileSync(
+    join(dirname(require.resolve('playwright-core/package.json')), 'lib/server/frames.js'),
+    'utf8'
+  );
+  // Execute the installed, lockfile-pinned injector body in a controlled DOM.
+  // This models a withheld load event; it is not a claim to run Chromium here.
+  const match = frames.match(/async function addStyleContent\(content2\) \{([\s\S]*?)\n    \}/);
+  expect(match).not.toBeNull();
+  const style: { onload?: () => void; appendChild: ReturnType<typeof vi.fn> } = {
+    appendChild: vi.fn(),
+  };
+  const document = {
+    createElement: vi.fn(() => style),
+    createTextNode: vi.fn((value: string) => value),
+    head: { appendChild: vi.fn() },
+  };
+  const inject = new Function('document', `return async function(content2) {${match![1]}}`)(
+    document
+  ) as (content: string) => Promise<unknown>;
+  let settled = false;
+  const pending = inject(':root { font-size: 200% !important; }').then(() => {
+    settled = true;
+  });
+  await vi.advanceTimersByTimeAsync(90_000);
+  expect(document.head.appendChild).toHaveBeenCalledWith(style);
+  expect(settled).toBe(false);
+  style.onload!();
+  await pending;
+  expect(settled).toBe(true);
 });

@@ -6,7 +6,11 @@ import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { beforeAll, afterAll, describe, it, expect } from 'vitest';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
-import { captureCurrentViewport, closeEvidenceContext } from './library-card-capture';
+import {
+  applyDoubleRootTextScale,
+  captureCurrentViewport,
+  closeEvidenceContext,
+} from './library-card-capture';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
 const route = '/zh-cn/ui-libraries/';
 const directory =
@@ -369,6 +373,7 @@ describe('actual library Cards preserve their first frame', () => {
     const name = 'no-script-320-text-200';
     let phase = 'navigation';
     let failed = false;
+    let textScale: ReturnType<typeof applyDoubleRootTextScale> | undefined;
     const recordPhase = async (next: string) => {
       phase = next;
       await writeFile(
@@ -380,7 +385,10 @@ describe('actual library Cards preserve their first frame', () => {
       await recordPhase('navigation');
       await page.goto(baseUrl + route);
       await recordPhase('200-percent-text');
-      await page.addStyleTag({ content: ':root { font-size: 200% !important; }' });
+      textScale = await page.evaluate(applyDoubleRootTextScale);
+      expect(textScale.value).toBe('200%');
+      expect(textScale.priority).toBe('important');
+      expect(textScale.after).toBe(textScale.before * 2);
       await recordPhase('native-content-assertions');
       expect(await page.locator('[data-library-action]').count()).toBe(6);
       const cards = await page.evaluate(readCards, false);
@@ -397,7 +405,11 @@ describe('actual library Cards preserve their first frame', () => {
       const image = await captureCurrentViewport(page, path.join(directory, `${name}.png`), clip);
       await writeFile(
         path.join(directory, `${name}.json`),
-        JSON.stringify({ sha, tree, dirty, phase: 'passed', clip, image, cards }, null, 2)
+        JSON.stringify(
+          { sha, tree, dirty, phase: 'passed', textScale, clip, image, cards },
+          null,
+          2
+        )
       );
       await recordPhase('passed');
     } catch (error) {
@@ -407,7 +419,7 @@ describe('actual library Cards preserve their first frame', () => {
       );
       await writeFile(
         path.join(directory, `${name}-failure.json`),
-        JSON.stringify({ sha, tree, dirty, phase, error: String(error) }, null, 2)
+        JSON.stringify({ sha, tree, dirty, phase, textScale, error: String(error) }, null, 2)
       );
       throw error;
     } finally {

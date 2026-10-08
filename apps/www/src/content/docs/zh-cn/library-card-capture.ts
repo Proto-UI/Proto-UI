@@ -88,3 +88,20 @@ export async function closeEvidenceContext(
     if (!preservePrimaryError) throw error;
   }
 }
+
+/** Serialized into the no-script test page. Inline style mutation is synchronous;
+ * unlike addStyleTag it does not await a style.onload callback in that page. */
+export function applyDoubleRootTextScale() {
+  const root = document.documentElement;
+  const before = Number.parseFloat(getComputedStyle(root).fontSize);
+  root.style.setProperty('font-size', '200%', 'important');
+  const after = Number.parseFloat(getComputedStyle(root).fontSize);
+  if (!Number.isFinite(before) || before <= 0 || after !== before * 2)
+    throw new Error(`Required 200% root text scale was not applied: ${before}px -> ${after}px`);
+  return {
+    before,
+    after,
+    value: root.style.getPropertyValue('font-size'),
+    priority: root.style.getPropertyPriority('font-size'),
+  };
+}
