@@ -195,6 +195,7 @@ function fixture(tag = 'div', attached = true) {
       artifactSha256: await digestText(serialized),
       layoutId: layout.id,
       profile: INITIAL_PAINT_PROFILE,
+      serverPaint: receipt.image,
     };
     return { receipt, serialized, binding };
   };
@@ -277,6 +278,7 @@ describe('internal finite rest seed receipt (synthetic bytes, not optical eviden
       verifyInitialPaintArtifact(serialized, {
         ...a.binding,
         artifactSha256: await digestText(serialized),
+        serverPaint: forged.image,
       })
     ).rejects.toThrow('integrity');
   });
@@ -1049,4 +1051,124 @@ it('never leaves an SSR fallback selector targeting a foreign marker or a claime
   f.host.removeAttribute('data-pui-initial-seed');
   expect(f.host.matches(defaultSelector)).toBe(false);
   expect(p.css).not.toContain('#rest-host{');
+});
+
+describe('reviewer exact owner malformed proof', () => {
+  it.each(['json', 'shape'])(
+    'selects opaque SSR state after own %s proof rejects',
+    async (kind) => {
+      const f = fixture(),
+        a = await f.show();
+      const serialized =
+        kind === 'json'
+          ? a.serialized + 'broken'
+          : JSON.stringify({ ...a.receipt, unexpected: true });
+      await expect(
+        prepareExperimentalInitialPaint(f.host, serialized, a.binding, f.options)
+      ).rejects.toThrow();
+      expect(readInternalInitialPaintLease(f.host)).toBeNull();
+      expect(f.host.getAttribute('data-pui-initial-seed')).not.toBe(a.receipt.image.pngSha256);
+    }
+  );
+});
+
+describe('trusted server owner and fallible proof rejection matrix', () => {
+  const failures = [
+    'no payload',
+    'undefined payload',
+    'null payload',
+    'malformed JSON',
+    'unknown receipt field',
+    'wrong receipt profile',
+    'manifest hash',
+    'missing manifest hash',
+    'layout binding',
+    'manifest profile',
+    'unknown manifest field',
+    'digest rejection',
+  ] as const;
+  for (const owner of ['own', 'foreign', 'author style'] as const)
+    it.each(failures)(
+      `${owner}: %s rejects without stealing paint or leaving listeners`,
+      async (failure) => {
+        const f = fixture(),
+          a = await f.show();
+        if (owner === 'foreign') f.host.setAttribute('data-pui-initial-seed', 'author-plane');
+        if (owner === 'author style') f.host.style.backgroundImage = 'linear-gradient(red, blue)';
+        const originalStyle = f.host.getAttribute('style');
+        let serialized = a.serialized,
+          binding = { ...a.binding };
+        if (failure === 'no payload') serialized = '';
+        if (failure === 'undefined payload') serialized = undefined as unknown as string;
+        if (failure === 'null payload') serialized = null as unknown as string;
+        if (failure === 'malformed JSON') serialized += 'bad';
+        if (failure === 'unknown receipt field')
+          serialized = JSON.stringify({ ...a.receipt, unknown: true });
+        if (failure === 'wrong receipt profile')
+          serialized = JSON.stringify({ ...a.receipt, version: 'unknown' });
+        if (failure === 'manifest hash') binding.artifactSha256 = '0'.repeat(64);
+        if (failure === 'missing manifest hash')
+          binding = { ...binding, artifactSha256: undefined } as unknown as typeof binding;
+        if (failure === 'layout binding') binding.layoutId = 'different-layout';
+        if (failure === 'manifest profile')
+          binding = { ...binding, profile: 'unknown' } as unknown as typeof binding;
+        if (failure === 'unknown manifest field')
+          binding = { ...binding, unknown: true } as typeof binding;
+        if (failure === 'digest rejection')
+          vi.spyOn(globalThis.crypto.subtle, 'digest').mockRejectedValue(
+            new Error('digest rejected')
+          );
+        await expect(
+          prepareExperimentalInitialPaint(f.host, serialized, binding, f.options)
+        ).rejects.toThrow();
+        expect(readInternalInitialPaintLease(f.host)).toBeNull();
+        expect(Object.values(f.listeners).every((set) => set.size === 0)).toBe(true);
+        if (owner === 'own')
+          expect(f.host.getAttribute('data-pui-initial-seed')).toBe(
+            a.receipt.image.pngSha256 + ':rejected'
+          );
+        if (owner === 'foreign') {
+          expect(f.host.getAttribute('data-pui-initial-seed')).toBe('author-plane');
+          expect(f.host.getAttribute('style')).toBe(originalStyle);
+        }
+        if (owner === 'author style') {
+          expect(f.host.hasAttribute('data-pui-initial-seed')).toBe(false);
+          expect(f.host.style.backgroundImage).toBe('linear-gradient(red, blue)');
+        }
+      }
+    );
+  it('uses the synchronously captured manifest and owner across an asynchronous digest', async () => {
+    const f = fixture(),
+      a = await f.show();
+    const original = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+    let first = true,
+      unblock: (() => void) | null = null;
+    vi.spyOn(globalThis.crypto.subtle, 'digest').mockImplementation(async (algorithm, data) => {
+      if (first) {
+        first = false;
+        await new Promise<void>((resolve) => {
+          unblock = resolve;
+        });
+      }
+      return original(algorithm, data);
+    });
+    const pending = prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options);
+    await vi.waitFor(() => expect(unblock).not.toBeNull());
+    a.binding.artifactSha256 = '0'.repeat(64);
+    a.binding.serverPaint = { dataUrl: png(100, 40, 0), pngSha256: '0'.repeat(64) };
+    unblock!();
+    const prepared = await pending;
+    expect(prepared.receipt.image.pngSha256).toBe(a.receipt.image.pngSha256);
+    prepared.dispose();
+  });
+  it('rejects a proof whose output differs from the independent build-side plane', async () => {
+    const f = fixture(),
+      a = await f.artifact();
+    await expect(
+      verifyInitialPaintArtifact(a.serialized, {
+        ...a.binding,
+        serverPaint: { dataUrl: png(100, 40, 0), pngSha256: a.receipt.image.pngSha256 },
+      })
+    ).rejects.toThrow('server-plane-binding');
+  });
 });

@@ -10,6 +10,8 @@ import {
   INITIAL_PAINT_PROFILE,
   materialKey,
   parseInitialPaintReceipt,
+  readInitialPaintServerOwner,
+  snapshotInitialPaintManifest,
   receiptFromAdmittedPaint,
   verifyInitialPaintArtifact,
   type InitialPaintLayout,
@@ -54,7 +56,7 @@ function observeInitialPlane(host: HTMLElement, changed: () => void) {
   };
 }
 export function initialPaintTuple(
-  receipt: InitialPaintReceipt
+  receipt: Pick<InitialPaintReceipt, 'image'>
 ): ReadonlyArray<readonly [string, string]> {
   return [
     ['background-image', `url("${receipt.image.dataUrl}")`],
@@ -114,6 +116,7 @@ export function armExperimentalInitialPaintCapture(host: HTMLElement, layout: In
         artifactSha256: await digestText(serialized),
         layoutId: receipt.layout.id,
         profile: INITIAL_PAINT_PROFILE,
+        serverPaint: receipt.image,
       };
       if (!live) throw new Error('seed-capture-retired');
       return { receipt, serialized, binding };
@@ -146,15 +149,15 @@ export async function prepareExperimentalInitialPaint(
   const pendingStops: Array<() => void> = [];
   let invalidated = false;
   let pendingActive = true;
-  let expected: InitialPaintReceipt | null = null;
+  let serverOwner: InitialPaintReceipt['image'] | null = null;
   let withdrawOwned = () => {};
   try {
-    // Shape parsing establishes no live provenance. It only lets the existing
-    // marked server tuple be withdrawn synchronously while hashes are pending.
-    expected = parseInitialPaintReceipt(serialized);
-    if (originalMarker !== expected.image.pngSha256)
+    // The build-side manifest identifies our server plane even if the receipt
+    // is absent or malformed. Neither candidate JSON nor DOM markers grant it.
+    serverOwner = readInitialPaintServerOwner(binding);
+    if (originalMarker !== serverOwner.pngSha256)
       throw new Error('seed-initial-plane-owner-mismatch');
-    const ownedReceipt = expected;
+    const ownedReceipt = { image: serverOwner };
     const withdrawPending = () => {
       if (!pendingActive) return;
       invalidated = true;
@@ -183,6 +186,8 @@ export async function prepareExperimentalInitialPaint(
       withdrawPending();
       throw new Error('seed-initial-plane-inputs-mismatch');
     }
+    binding = snapshotInitialPaintManifest(binding);
+    parseInitialPaintReceipt(serialized);
     const source = options.source.current();
     const watchPending = (subscribe: (changed: () => void) => () => void) => {
       let stop: () => void;
@@ -245,15 +250,15 @@ export async function prepareExperimentalInitialPaint(
     // paint can select its opaque default; changed paint needs the old selector
     // removed and property-by-property cleanup so an author's value survives.
     if (
-      expected &&
-      originalMarker === expected.image.pngSha256 &&
+      serverOwner &&
+      originalMarker === serverOwner.pngSha256 &&
       host.getAttribute(marker) === originalMarker &&
       host.getAttribute('style') === originalStyle
     )
-      host.setAttribute(marker, `${expected.image.pngSha256}:rejected`);
+      host.setAttribute(marker, `${serverOwner.pngSha256}:rejected`);
     else if (
-      expected &&
-      originalMarker === expected.image.pngSha256 &&
+      serverOwner &&
+      originalMarker === serverOwner.pngSha256 &&
       host.getAttribute(marker) === originalMarker
     )
       withdrawOwned();

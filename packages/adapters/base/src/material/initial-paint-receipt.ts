@@ -34,7 +34,43 @@ export type InitialPaintManifestBinding = Readonly<{
   artifactSha256: string;
   layoutId: string;
   profile: typeof INITIAL_PAINT_PROFILE;
+  /** Trusted build-side plane identity, independent of the fallible receipt. */
+  serverPaint: InitialPaintReceipt['image'];
 }>;
+
+export function readInitialPaintServerOwner(
+  binding: InitialPaintManifestBinding
+): InitialPaintReceipt['image'] {
+  const plane = binding?.serverPaint;
+  if (
+    !keys(plane, ['dataUrl', 'pngSha256']) ||
+    typeof plane.dataUrl !== 'string' ||
+    !hash(plane.pngSha256)
+  )
+    throw new Error('seed-server-owner-binding-invalid');
+  pngBytes(plane.dataUrl);
+  return Object.freeze({ dataUrl: plane.dataUrl, pngSha256: plane.pngSha256 });
+}
+
+export function snapshotInitialPaintManifest(
+  binding: InitialPaintManifestBinding
+): InitialPaintManifestBinding {
+  const serverPaint = readInitialPaintServerOwner(binding);
+  if (
+    !keys(binding, ['artifactSha256', 'layoutId', 'profile', 'serverPaint']) ||
+    !hash(binding.artifactSha256) ||
+    binding.profile !== INITIAL_PAINT_PROFILE ||
+    typeof binding.layoutId !== 'string' ||
+    !/^[a-z][a-z0-9-]{0,63}$/.test(binding.layoutId)
+  )
+    throw new Error('seed-build-manifest-mismatch');
+  return Object.freeze({
+    artifactSha256: binding.artifactSha256,
+    layoutId: binding.layoutId,
+    profile: binding.profile,
+    serverPaint,
+  });
+}
 
 export const materialKey = (frame: VisualFeedbackFrame) =>
   JSON.stringify({
@@ -266,6 +302,7 @@ export async function verifyInitialPaintArtifact(
   serialized: string,
   binding: InitialPaintManifestBinding
 ) {
+  binding = snapshotInitialPaintManifest(binding);
   if (
     binding.profile !== INITIAL_PAINT_PROFILE ||
     !hash(binding.artifactSha256) ||
@@ -274,6 +311,11 @@ export async function verifyInitialPaintArtifact(
     throw new Error('seed-build-manifest-mismatch');
   const receipt = parseInitialPaintReceipt(serialized);
   if (receipt.layout.id !== binding.layoutId) throw new Error('seed-layout-binding-mismatch');
+  if (
+    receipt.image.dataUrl !== binding.serverPaint.dataUrl ||
+    receipt.image.pngSha256 !== binding.serverPaint.pngSha256
+  )
+    throw new Error('seed-server-plane-binding-mismatch');
   const [sourceHash, imageHash] = await Promise.all([
     digestBytes(pngBytes(receipt.source.pngDataUrl)),
     digestBytes(pngBytes(receipt.image.dataUrl)),
