@@ -47,6 +47,7 @@ const GALLERY_PART_COUNTS = {
   'toggle': 4,
   'checkbox-root': 4,
   'checkbox-indicator': 4,
+  'label-root': 4,
   'switch-root': 2,
   'switch-thumb': 2,
   'hover-card-root': 1,
@@ -466,7 +467,7 @@ async function assertTaskPartInventory(
       )
     ),
     ...Array(6).fill(`${family}-surface-root`),
-    ...Array(28).fill(`${family}-text-root`),
+    ...Array(24).fill(`${family}-text-root`),
   ].sort();
   const actualIds = await parts.evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-projection-prototype')).sort()
@@ -474,7 +475,7 @@ async function assertTaskPartInventory(
   expect(actualIds, 'all declared gallery instances, including closed/portaled parts').toEqual(
     expectedIds
   );
-  expect(new Set(actualIds).size, 'complete declared task recipe').toBe(36);
+  expect(new Set(actualIds).size, 'complete declared task recipe').toBe(37);
   await assertSurfacesShareCoordinate(parts, expected, 'every actual task part coordinate');
   const owners = await parts.evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-projection-owner'))
