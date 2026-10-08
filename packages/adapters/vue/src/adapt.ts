@@ -162,6 +162,7 @@ export function createVueAdapter(runtime: VueRuntime) {
     opt: VueAdapterOptions<ProtoAdapterProps<TProto>> = {}
   ): ProtoVueComponent<TProto> {
     type Props = ProtoAdapterProps<TProto>;
+    const createVisualSink = opt.createVisualSink;
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
@@ -458,6 +459,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           });
           bindLogicalEventTarget(instanceToken, router.rootTarget);
           let viewDisposed = false;
+          let ownedVisualStyle: string | null = null;
           let focusRetryGeneration = 0;
           let releaseRequestedTargetReady: (() => void) | undefined;
           const releaseNativeReadiness = registerNativeFocusReadiness(
@@ -482,6 +484,13 @@ export function createVueAdapter(runtime: VueRuntime) {
             if (viewDisposed) return;
             viewDisposed = true;
             const releases = [
+              () => {
+                if (
+                  ownedVisualStyle !== null &&
+                  rootEl.getAttribute('data-pui-style') === ownedVisualStyle
+                )
+                  rootEl.removeAttribute('data-pui-style');
+              },
               () => eventGate.disable(),
               () => eventGate.dispose(),
               () => {
@@ -519,7 +528,16 @@ export function createVueAdapter(runtime: VueRuntime) {
           };
 
           const effectsPort = createVueEffectsPort((tokens) => {
+            if (viewDisposed || rootRef.value !== rootEl) return;
             hostTokens.value = tokens;
+            if (viewDisposed || rootRef.value !== rootEl) return;
+            // One physical owner commits provider style before optical sampling.
+            if (createVisualSink) {
+              ownedVisualStyle = serializeStyleTokens(tokens) ?? null;
+              if (ownedVisualStyle === null) rootEl.removeAttribute('data-pui-style');
+              else if (rootEl.getAttribute('data-pui-style') !== ownedVisualStyle)
+                rootEl.setAttribute('data-pui-style', ownedVisualStyle);
+            }
           });
 
           const modules = createVueModules({
@@ -532,9 +550,9 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             rawPropsSource,
             effectsPort,
-            visualFeedbackSink: opt.createVisualSink
+            visualFeedbackSink: createVisualSink
               ? createDeferredViewVisualSink(
-                  () => opt.createVisualSink!(rootEl, effectsPort),
+                  () => createVisualSink!(rootEl, effectsPort),
                   (frame) => {
                     effectsPort.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
                     effectsPort.requestFlush();
@@ -750,7 +768,9 @@ export function createVueAdapter(runtime: VueRuntime) {
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: viewReady ? undefined : '',
-              'data-pui-style': serializeStyleTokens(hostTokens.value),
+              ...(createVisualSink
+                ? {}
+                : { 'data-pui-style': serializeStyleTokens(hostTokens.value) }),
               'data-demo-ref': ctx.attrs['data-demo-ref'] as string | undefined,
             },
             rendered as any

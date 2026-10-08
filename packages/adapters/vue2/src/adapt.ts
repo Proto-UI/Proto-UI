@@ -199,6 +199,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
     opt: Vue2AdapterOptions<ProtoAdapterProps<TProto>> = {}
   ): ProtoVue2Component<TProto> {
     type Props = ProtoAdapterProps<TProto>;
+    const createVisualSink = opt.createVisualSink;
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
@@ -248,7 +249,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
       const state = {
         proto,
         initOptions: {
-          createVisualSink: opt.createVisualSink,
+          createVisualSink: createVisualSink,
           schedule,
           getMeta,
           colorSchemeSource,
@@ -434,7 +435,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         if (rootEl) installViewVisibilityRule(rootEl.ownerDocument);
         if ((this as any).__puiShouldExist) {
           initSession(runtime, this, proto, {
-            createVisualSink: opt.createVisualSink,
+            createVisualSink: createVisualSink,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -455,7 +456,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           afterVueCommit(runtime, this, () => {
             if (getRootElement(this) === target && (this as any).__puiShouldExist) {
               initSession(runtime, this, proto, {
-                createVisualSink: opt.createVisualSink,
+                createVisualSink: createVisualSink,
                 schedule,
                 getMeta,
                 colorSchemeSource,
@@ -481,7 +482,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         afterVueCommit(runtime, this, () => {
           if (state.terminalDisposed || activationVersion !== state.activationVersion) return;
           initSession(runtime, this, proto, {
-            createVisualSink: opt.createVisualSink,
+            createVisualSink: createVisualSink,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -575,7 +576,9 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: state.viewReady ? undefined : '',
-              'data-pui-style': serializeStyleTokens((this as any).__puiHostTokens ?? []),
+              ...(createVisualSink
+                ? {}
+                : { 'data-pui-style': serializeStyleTokens((this as any).__puiHostTokens ?? []) }),
               'data-demo-ref': attrs['data-demo-ref'] as string | undefined,
             },
           },
@@ -699,6 +702,7 @@ function initSession<Props extends PropsBaseType>(
   bindLogicalEventTarget(state.instanceToken, router.rootTarget);
   state.viewDisposed = false;
   let viewDisposed = false;
+  let ownedVisualStyle: string | null = null;
   let focusRetryGeneration = 0;
   let releaseRequestedTargetReady: (() => void) | undefined;
   const releaseNativeReadiness = registerNativeFocusReadiness(
@@ -727,6 +731,10 @@ function initSession<Props extends PropsBaseType>(
     viewDisposed = true;
     state.viewDisposed = true;
     const releases = [
+      () => {
+        if (ownedVisualStyle !== null && rootEl.getAttribute('data-pui-style') === ownedVisualStyle)
+          rootEl.removeAttribute('data-pui-style');
+      },
       () => eventGate.disable(),
       () => eventGate.dispose(),
       () => {
@@ -764,8 +772,18 @@ function initSession<Props extends PropsBaseType>(
   };
 
   const effectsPort = createVue2EffectsPort((tokens) => {
+    if (viewDisposed || getRootElement(vm) !== rootEl) return;
     setVmField(vm, '__puiHostTokens', tokens);
     forceUpdate(vm);
+    if (viewDisposed || getRootElement(vm) !== rootEl) return;
+    // The VNode omits this owned attribute, including its undefined key: Vue 2
+    // otherwise removes it again on a later unrelated framework update.
+    if (targetOptions.createVisualSink) {
+      ownedVisualStyle = serializeStyleTokens(tokens) ?? null;
+      if (ownedVisualStyle === null) rootEl.removeAttribute('data-pui-style');
+      else if (rootEl.getAttribute('data-pui-style') !== ownedVisualStyle)
+        rootEl.setAttribute('data-pui-style', ownedVisualStyle);
+    }
   });
 
   const modules = createVue2Modules({
