@@ -475,3 +475,96 @@ describe('terminal and publication probes', () => {
     expect(f.requests).toEqual([]);
   });
 });
+
+// P-BASE-ACCORDION-OWNER/KEYS: reject the complete malformed key set,
+// including inherited slots; do not normalize holes into phantom selections.
+const malformedKeySets: Array<[string, () => unknown[]]> = [
+  ['new Array', () => new Array(2)],
+  ['leading hole', () => [, 'b']],
+  ['middle hole', () => ['b', , 'c']],
+  [
+    'trailing hole',
+    () => {
+      const keys = ['b'];
+      keys.length = 2;
+      return keys;
+    },
+  ],
+  ['explicit undefined', () => ['b', undefined]],
+  [
+    'inherited index',
+    () =>
+      Object.setPrototypeOf(
+        new Array(1),
+        Object.assign(Object.create(Array.prototype), { 0: 'b' })
+      ),
+  ],
+  ['empty key', () => ['b', '']],
+];
+describe.each(['single', 'multiple'] as const)('Accordion %s dense key admission', (mode) => {
+  describe.each(['openItems', 'defaultOpenItems'] as const)('%s', (prop) => {
+    it.each(malformedKeySets)(
+      'rejects %s at initialization without a phantom selection',
+      async (_name, makeKeys) => {
+        const f = fixture({ mode, [prop]: makeKeys() });
+        document.body.append(f.root);
+        await flush();
+        const root = f.root.getExposes();
+        expect(root.getOpenItems()).toEqual([]);
+        expect(root.openCount.get()).toBe(0);
+        expect(f.items.map((i) => i.trigger.getAttribute('aria-expanded'))).toEqual([
+          'false',
+          'false',
+          'false',
+        ]);
+        expect(f.requests).toEqual([]);
+        // Rejected input must not prevent a later valid owner update or user request.
+        if (prop === 'openItems') setElementProps(f.root, { mode, openItems: ['c'] });
+        else expect(root.requestOpen('c', true)).toBe(true);
+        await flush();
+        expect(root.getOpenItems()).toEqual(['c']);
+        expect(root.openCount.get()).toBe(1);
+      }
+    );
+
+    it.each(malformedKeySets)(
+      'rejects %s on update without replacing the valid selection',
+      async (_name, makeKeys) => {
+        const f = fixture({ mode, [prop]: ['a'] });
+        document.body.append(f.root);
+        await flush();
+        const root = f.root.getExposes();
+        expect(root.getOpenItems()).toEqual(['a']);
+        setElementProps(f.root, { mode, [prop]: makeKeys() });
+        await flush();
+        expect(root.getOpenItems()).toEqual(['a']);
+        expect(root.openCount.get()).toBe(1);
+        expect(f.items.map((i) => i.trigger.getAttribute('aria-expanded'))).toEqual([
+          'true',
+          'false',
+          'false',
+        ]);
+        expect(f.requests).toEqual([]);
+      }
+    );
+
+    it.each([
+      ['empty set', []],
+      ['duplicates', ['a', 'a', 'b']],
+      ['dormant unknown key', ['unknown', 'a', 'unknown']],
+    ] as Array<[string, string[]]>)('preserves legal %s behavior', async (_name, keys) => {
+      const f = fixture({ mode, [prop]: keys });
+      document.body.append(f.root);
+      await flush();
+      const root = f.root.getExposes();
+      const unique = [...new Set(keys)];
+      const expected = mode === 'single' ? unique.slice(0, 1) : unique;
+      expect(root.getOpenItems()).toEqual(expected);
+      expect(root.openCount.get()).toBe(expected.length);
+      expect(f.items.map((i) => i.trigger.getAttribute('aria-expanded'))).toEqual(
+        ['a', 'b', 'c'].map((key) => String(expected.includes(key)))
+      );
+      expect(f.requests).toEqual([]);
+    });
+  });
+});

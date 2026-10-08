@@ -21,8 +21,18 @@ function setupAccordionRoot(def: DefHandle<AccordionRootProps, AccordionRootExpo
   // P-BASE-ACCORDION-OWNER: protocol-neutral collection, never another Base protocol hook.
   def.anatomy.claim(ACCORDION_FAMILY, { role: 'root' });
   asCollection().configure({ family: ACCORDION_FAMILY, itemRole: 'item' });
-  const stringArray = (value: unknown) =>
-    Array.isArray(value) && value.every((v) => typeof v === 'string' && v.length > 0);
+  const stringArray = (value: unknown) => {
+    if (!Array.isArray(value)) return false;
+    for (let index = 0; index < value.length; index += 1) {
+      if (
+        !Object.hasOwn(value, index) ||
+        typeof value[index] !== 'string' ||
+        value[index].length === 0
+      )
+        return false;
+    }
+    return true;
+  };
   def.props.define({
     mode: { type: 'enum', options: ['single', 'multiple'], empty: 'fallback' },
     openItems: { type: 'object', validator: stringArray, empty: 'fallback' },
