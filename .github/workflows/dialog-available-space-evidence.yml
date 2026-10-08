@@ -12,6 +12,8 @@ on:
       - 'apps/www/src/content/docs/**/ui-libraries/brutalist/components/dialog.mdx'
       - 'scripts/test/server-readiness*'
       - 'scripts/test/check-dialog-baseline-evidence*'
+      - 'scripts/test/dialog-run-integrity*'
+      - 'scripts/test/dialog-baseline-fixture.mjs'
       - 'packages/modules/positioning/**'
       - 'packages/modules/overlay/**'
       - 'packages/prototypes/*/src/dialog/**'
@@ -83,10 +85,12 @@ jobs:
           done
           git -C subject rev-parse HEAD > "$RUNNER_TEMP/dialog-space/subject-sha.txt"
           git -C candidate rev-parse HEAD > "$RUNNER_TEMP/dialog-space/probe-sha.txt"
-          node --test candidate/scripts/test/check-dialog-baseline-evidence.test.mjs candidate/scripts/test/evidence-input-paths.test.mjs
+          node --test candidate/scripts/test/check-dialog-baseline-evidence.test.mjs candidate/scripts/test/dialog-run-integrity.test.mjs candidate/scripts/test/evidence-input-paths.test.mjs
       - name: Run identical native inputs and retain historical failing assertions
         working-directory: subject
         env:
+          PROTO_UI_DIALOG_INTEGRITY_PATH: ${{ runner.temp }}/dialog-space/runner-integrity.json
+          PROTO_UI_DIALOG_JSON_PATH: ${{ runner.temp }}/dialog-space/vitest.json
           PROTO_UI_DIALOG_PROBE_SHA: ${{ env.CANDIDATE_SHA }}
           PROTO_UI_DIALOG_SUBJECT: ${{ matrix.subject }}
           PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/dialog-space
@@ -95,6 +99,7 @@ jobs:
           set +e
           corepack pnpm@10.32.1 exec vitest run --no-file-parallelism \
             apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts \
+            --reporter=../candidate/scripts/test/dialog-run-integrity-reporter.mjs \
             --reporter=default --reporter=json --outputFile="$RUNNER_TEMP/dialog-space/vitest.json" \
             2>&1 | tee "$RUNNER_TEMP/dialog-space/browser.log"
           status=${PIPESTATUS[0]}
@@ -103,7 +108,7 @@ jobs:
           if [[ "$PROTO_UI_DIALOG_SUBJECT" == baseline ]]; then
             node ../candidate/scripts/test/check-dialog-baseline-evidence.mjs \
               "$RUNNER_TEMP/dialog-space/vitest.json" \
-              "$RUNNER_TEMP/dialog-space/dialog-available-space/observations.json" "$status" \
+              "$RUNNER_TEMP/dialog-space/dialog-available-space/observations.json" "$status" "$CANDIDATE_SHA" \
               | tee "$RUNNER_TEMP/dialog-space/expected-failure-classification.json"
           else
             exit "$status"
