@@ -189,7 +189,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts` | `www.demo.raw-adapter-runtimes` | `32011cbe30566785c4e081e32cada2780ef6a6d5349d10331aace4eead0a12f2` |
 | `apps/www/src/components/PrototypePreviewer/home-demo-client.ts` | `www.demo.home-demo-select` | `788d1a4db8a454247bbeda462f3d8087e32158ec0a044bbd8143e4b86023eeba` |
 | `apps/www/src/components/PrototypePreviewer/native-content-lease.ts` | `www.demo.preview-surface`, `www.shell.mobile-menu-panel`, `www.shell.native-link-presentation` | `0cd96b3a1acc210bd6afda937d533f8bd0c4aee1da60fab43e12175b9ae36bb0` |
-| `apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts` | `www.demo.preview-surface`, `www.shell.mobile-menu-panel` | `a041e0bf0d46e06e3995066d0d2ea58ea735625df02595775660228eade84997` |
+| `apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts` | `www.demo.preview-surface`, `www.shell.mobile-menu-panel` | `a8d1901e5ddd675a1a7d516b7c06571e6dcabe3c9ae038fb8dd7e646cd3fbabb` |
 | `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `5ee543910fb2ff91897bb86f07c74c7758cd46463860007a08f1d5603490e04d` |
 | `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `17b855fd7724f12c2305a02f163541c077468034a77237853bd9ed0b09b76053` |
 | `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `0137f3bec891c2090fd6a154120b420b95ef9657b1915e3ca860c77173180ba6` |
@@ -238,7 +238,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/site-sidebar-current-visibility.ts` | `www.shell.sidebar-navigation` | `5d950f495c575e52862356f974cfe35d95b2d627d10a09cc33f3fb3e865b018b` |
 | `apps/www/src/components/site-text-recipes.ts` | `www.content.typography-presentation` | `0a0a29fd6f832c1ffd76ee82e93ec59b6e10f4f1efafab6cfc7204c5f9b46533` |
 | `apps/www/src/components/site-typography-client.ts` | `www.content.typography-presentation` | `bd7d9edb23757db547ffa0cd91ef033bcc5fad7df44d4cbcffe03d5ef083b80a` |
-| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `99a034b3a2e649cdc0db2f1f669a77936a9221f85529593c52372910f6c55edd` |
+| `apps/www/src/components/site-typography.ts` | `www.content.typography-presentation` | `cafbfc8540294745b38aca44036f595ef87c6d947952408d0986b8fcae51070d` |
 | `apps/www/src/content/docs/demo-base-radio-group.demo.ts` | `www.demo.authored-controllers` | `a70429e2c53f24b0bd216aed456446ab91dbcf803c74638f8d06588bc253ebc3` |
 | `apps/www/src/content/docs/demo_components/bootstrap-2-3-2/demo-bootstrap-2-3-2-button.demo.ts` | `www.demo.authored-controllers` | `b0947ee50577daf259f2b7ba5ae7f4c368e890d4c263d3763ee71b7d523a6613` |
 | `apps/www/src/content/docs/demo_components/liquid-glass/demo-liquid-glass-button.demo.ts` | `www.demo.authored-controllers` | `4c4cc768a6b41b05a881bf109752e658a6daa42d6525f3c4d72e55b84d808d14` |
