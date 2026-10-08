@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { writeFile } from 'node:fs/promises';
+import { writeFileSync } from 'node:fs';
 import type { Page } from 'playwright-core';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import {
@@ -7,7 +7,7 @@ import {
   closeEvidenceContext,
   type CleanupIssue,
 } from './library-card-capture';
-vi.mock('node:fs/promises', () => ({ writeFile: vi.fn(async () => {}) }));
+vi.mock('node:fs', () => ({ writeFileSync: vi.fn(() => {}) }));
 beforeEach(() => {
   vi.useFakeTimers();
   vi.clearAllMocks();
@@ -32,7 +32,7 @@ it('returns the primary send deadline even if detach never settles', async () =>
   expect(issues).toEqual([
     { operation: 'session.detach', error: 'Error: CDP detach exceeded 1000ms' },
   ]);
-  expect(writeFile).not.toHaveBeenCalled();
+  expect(writeFileSync).not.toHaveBeenCalled();
 });
 
 it('preserves the original capture rejection and reports a separate detach rejection', async () => {
@@ -76,7 +76,7 @@ it('bounds session acquisition and detaches a late session without capturing or 
   await vi.advanceTimersByTimeAsync(1000);
   expect(session.send).not.toHaveBeenCalled();
   expect(session.detach).toHaveBeenCalledOnce();
-  expect(writeFile).not.toHaveBeenCalled();
+  expect(writeFileSync).not.toHaveBeenCalled();
   expect(issues[0]?.operation).toBe('late-session.detach');
 });
 
@@ -94,7 +94,7 @@ it('does not write an image that arrives after a send deadline', async () => {
   expect((await result).message).toBe('Current-frame screenshot exceeded 15s');
   deliver({ data: Buffer.from('synthetic control bytes, not an image').toString('base64') });
   await vi.advanceTimersByTimeAsync(1);
-  expect(writeFile).not.toHaveBeenCalled();
+  expect(writeFileSync).not.toHaveBeenCalled();
 });
 
 it('retains actual returned bytes and clip while independently reporting cleanup trouble', async () => {
@@ -115,7 +115,7 @@ it('retains actual returned bytes and clip while independently reporting cleanup
     'Page.captureScreenshot',
     expect.objectContaining({ clip, captureBeyondViewport: true })
   );
-  expect(writeFile).toHaveBeenCalledOnce();
+  expect(writeFileSync).toHaveBeenCalledOnce();
   expect(issues[0]?.operation).toBe('session.detach');
 });
 
@@ -179,5 +179,49 @@ it('preserves an acquisition rejection without inventing a session cleanup', asy
   ).catch((error) => error);
   expect(error).toBe(primary);
   expect(issues).toEqual([]);
-  expect(writeFile).not.toHaveBeenCalled();
+  expect(writeFileSync).not.toHaveBeenCalled();
+});
+
+it('completes target publication before resolving, with no pending destination write', async () => {
+  const events: string[] = [];
+  vi.mocked(writeFileSync).mockImplementationOnce(() => {
+    events.push('target-written');
+  });
+  const result = await captureCurrentViewport(
+    pageFor({
+      send: async () => ({
+        data: Buffer.from('synthetic control bytes, not an image').toString('base64'),
+      }),
+      detach: async () => {},
+    }),
+    '/tmp/probe.png'
+  );
+  events.push('capture-returned');
+  expect(result.file).toBe('probe.png');
+  expect(events).toEqual(['target-written', 'capture-returned']);
+  await vi.advanceTimersByTimeAsync(30_000);
+  expect(writeFileSync).toHaveBeenCalledOnce();
+});
+
+it('preserves a final publication error after separately logged cleanup failure', async () => {
+  const primary = new Error('target write failed');
+  const issues: CleanupIssue[] = [];
+  vi.mocked(writeFileSync).mockImplementationOnce(() => {
+    throw primary;
+  });
+  const error = await captureCurrentViewport(
+    pageFor({
+      send: async () => ({
+        data: Buffer.from('synthetic control bytes, not an image').toString('base64'),
+      }),
+      detach: async () => {
+        throw new Error('detach failed');
+      },
+    }),
+    '/tmp/probe.png',
+    undefined,
+    (x) => issues.push(x)
+  ).catch((error) => error);
+  expect(error).toBe(primary);
+  expect(issues).toEqual([{ operation: 'session.detach', error: 'Error: detach failed' }]);
 });

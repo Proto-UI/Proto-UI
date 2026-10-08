@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { writeFile } from 'node:fs/promises';
+import { writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { BrowserContext, CDPSession, Page } from 'playwright-core';
 
@@ -41,8 +41,9 @@ export async function captureCurrentViewport(
 ) {
   let session: CDPSession | undefined;
   let finished = false;
+  let bytes: Buffer;
   try {
-    return await withinDeadline(
+    bytes = await withinDeadline(
       async () => {
         const obtained = await page.context().newCDPSession(page);
         if (finished) {
@@ -59,12 +60,7 @@ export async function captureCurrentViewport(
           ...(clip ? { clip } : {}),
         });
         if (finished) throw new Error('Screenshot arrived after the capture deadline');
-        const bytes = Buffer.from(screenshot.data, 'base64');
-        await writeFile(file, bytes);
-        return {
-          file: path.basename(file),
-          sha256: createHash('sha256').update(bytes).digest('hex'),
-        };
+        return Buffer.from(screenshot.data, 'base64');
       },
       15_000,
       'Current-frame screenshot exceeded 15s'
@@ -73,6 +69,11 @@ export async function captureCurrentViewport(
     finished = true;
     if (session) await detachBounded(session, report, 'session.detach');
   }
+  // Publish only after the bounded capture has returned its bytes. A synchronous
+  // local write cannot outlive a rejected async race and publish a late target.
+  // Filesystem errors remain primary errors; cleanup already finished above.
+  writeFileSync(file, bytes);
+  return { file: path.basename(file), sha256: createHash('sha256').update(bytes).digest('hex') };
 }
 
 export async function closeEvidenceContext(
