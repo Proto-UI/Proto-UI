@@ -291,6 +291,8 @@ function setupSelectContent(
         : null;
     const triggerFocused = triggerFocus?.get?.() === true;
     if (!triggerFocused && !getNavigationEntries(run).some((entry: any) => entry.focused)) return;
+    entryTask?.cancel();
+    entryTask = null;
     requestSelectOpen(run, { open: false, reason: 'tab', focusReason: 'keyboard' });
   });
 
