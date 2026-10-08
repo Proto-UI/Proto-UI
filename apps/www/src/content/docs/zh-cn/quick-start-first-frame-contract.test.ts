@@ -5,6 +5,16 @@ const source = readFileSync(
   'utf8'
 );
 describe('first-frame harness load-gate contract', () => {
+  it('keeps exact coverage including delayed ownership without broad paint exceptions', () => {
+    const workflow = readFileSync('.github/workflows/quick-start-first-frame-evidence.yml', 'utf8');
+    expect(workflow).toContain('numTotalTests, 12');
+    expect(workflow).toContain('numPassedTests, 12');
+    expect(source).toContain('nativeNodesPreserved');
+    expect(source).toContain('selectionSame');
+    expect(source).toContain('public disabled-to-ready opacity exception');
+    expect(source).toContain("'strokeWidth'");
+    expect(source).toContain("'shapes'");
+  });
   const start = source.indexOf('await page.locator(targets.noteBody)');
   const release = source.indexOf('release();', start);
   const gated = source.slice(start, release);

@@ -12,6 +12,7 @@ type ShapeAttrs = Record<string, string | number | boolean | null | undefined>;
 
 interface Props {
   name: PreviewIconName;
+  size?: string;
 }
 
 type PreviewIconName =
@@ -33,7 +34,7 @@ const factories = {
   sun: LUCIDE_SUN_SHAPE_FACTORY,
 } satisfies Record<PreviewIconName, (svg: never) => unknown>;
 
-const { name } = Astro.props as Props;
+const { name, size = '1.65rem' } = Astro.props as Props;
 const shape = (tag: ShapeTag) => (attrs: ShapeAttrs) => ({ tag, attrs });
 const svgFactories = {
   path: shape('path'),
@@ -53,6 +54,7 @@ const nodes = (Array.isArray(generatedNodes) ? generatedNodes : [generatedNodes]
 
 <svg
   class="static-lucide-icon"
+  style={{ '--static-lucide-icon-size': size }}
   viewBox="0 0 24 24"
   fill="none"
   stroke="currentColor"
@@ -72,7 +74,7 @@ const nodes = (Array.isArray(generatedNodes) ? generatedNodes : [generatedNodes]
 <style>
   .static-lucide-icon {
     display: block;
-    width: 1.65rem;
-    height: 1.65rem;
+    width: var(--static-lucide-icon-size, 1.65rem);
+    height: var(--static-lucide-icon-size, 1.65rem);
   }
 </style>

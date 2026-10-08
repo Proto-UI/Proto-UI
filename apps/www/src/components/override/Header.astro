@@ -12,6 +12,8 @@ import AdapterSelect from './AdapterSelect.astro';
 import HomepageRuntime from '../Homepage/HomepageRuntime.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
 import '../../styles/site-header.css';
+import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
+import { snapshotStartupStyle, startupButtonProps } from '../site-startup-paint';
 
 const shouldRenderSearch =
   config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
@@ -22,6 +24,7 @@ const localizedPath = (path: string) =>
   localizedUrl(new URL(path, Astro.url), currentLocale, context.trailingSlash).pathname;
 const family = resolveSiteLibraryFamily(Astro.url.pathname);
 const { Button } = siteControlTags(family);
+const menuTokens = await snapshotStartupStyle(`${family}-button`, startupButtonProps(family));
 const menuLabel = zh ? '导航与设置' : 'Navigation and settings';
 const navigation = [
   { label: zh ? '文档' : 'Docs', href: localizedPath('/start-here/what-you-saw/') },
@@ -38,6 +41,7 @@ const navigation = [
     </HomepageRuntime>
   ) : (
     <div class="site-header" data-site-header data-docs-site-header>
+      <style is:inline set:html={renderSnapshotTokenCss(menuTokens)} />
       <div class="site-header-brand">
         <SiteTitle />
       </div>
@@ -55,6 +59,8 @@ const navigation = [
       <details class="site-header-panel" id="site-header-panel" data-site-header-panel>
         <summary
           data-site-header-fallback-summary
+          data-pui-style={menuTokens.join(' ')}
+          data-site-control-family={family}
           aria-label={zh ? '导航与设置' : 'Navigation and settings'}
         >
           <span class="site-header-menu-icon" aria-hidden="true" />

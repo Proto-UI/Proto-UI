@@ -128,7 +128,112 @@ function readPageFrame({
             ];
           })
         : [];
+    // Read the actually painted owner at each publication boundary, rather
+    // than comparing hidden candidates or the header's outer box alone.
+    const sample = (node: Element | null, pseudo?: string) => {
+      if (!node) return null;
+      const css = getComputedStyle(node, pseudo);
+      const rect = node.getBoundingClientRect();
+      return {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+        background: css.backgroundColor,
+        color: css.color,
+        borders: [
+          css.borderTopWidth,
+          css.borderRightWidth,
+          css.borderBottomWidth,
+          css.borderLeftWidth,
+        ],
+        borderColors: [
+          css.borderTopColor,
+          css.borderRightColor,
+          css.borderBottomColor,
+          css.borderLeftColor,
+        ],
+        radius: css.borderTopLeftRadius,
+        shadow: css.boxShadow,
+        fontFamily: css.fontFamily,
+        fontSize: css.fontSize,
+        fontWeight: css.fontWeight,
+        lineHeight: css.lineHeight,
+        fontReady: document.fonts.check(
+          `${css.fontStyle} ${css.fontWeight} ${css.fontSize} ${css.fontFamily}`,
+          node.textContent ?? ''
+        ),
+        opacity: css.opacity,
+        stroke: css.stroke,
+        strokeWidth: css.strokeWidth,
+        fill: css.fill,
+        shapes:
+          node.localName === 'svg'
+            ? [...node.querySelectorAll('path,circle,line,rect,polyline,ellipse,polygon')].map(
+                (shape) => ({
+                  tag: shape.localName,
+                  attrs: Object.fromEntries(
+                    ['d', 'cx', 'cy', 'r', 'x1', 'x2', 'y1', 'y2', 'points'].flatMap((key) =>
+                      shape.hasAttribute(key) ? [[key, shape.getAttribute(key)]] : []
+                    )
+                  ),
+                })
+              )
+            : null,
+        visible:
+          rect.width > 0 &&
+          rect.height > 0 &&
+          css.visibility === 'visible' &&
+          css.display !== 'none',
+      };
+    };
+    const headerRoot = document.querySelector<HTMLElement>('[data-docs-site-header]')!;
+    const menu = headerRoot.hasAttribute('data-site-menu-ready')
+      ? headerRoot.querySelector('[data-site-menu-button]')
+      : headerRoot.querySelector('[data-site-header-fallback-summary]');
+    const searchRoot = headerRoot.querySelector<HTMLElement>('site-search')!;
+    const searchReady = ['ready', 'retained'].includes(searchRoot.dataset.searchView ?? '');
+    const search = searchReady
+      ? searchRoot.querySelector('[data-projection-generation-state="active"] [data-open-modal]')
+      : searchRoot.querySelector('[data-search-startup-button]');
+    const code = document.querySelector<HTMLElement>('[data-site-code-surface="frame"]')!;
+    const toolbar = code.querySelector<HTMLElement>('[data-site-code-surface="toolbar"]')!;
+    const surface = (owner: HTMLElement) => {
+      const live = ['ready', 'retained'].includes(owner.dataset.codeSurfaceView ?? '');
+      const plane = live
+        ? owner.querySelector(':scope > .site-code-surface-mount .site-code-surface-paint')
+        : owner;
+      return sample(plane, live ? undefined : '::before');
+    };
+    const identityHost = window as typeof window & { __startupNativeNodes?: Element[] };
+    const nativeNodes = [
+      code,
+      code.querySelector('pre')!,
+      code.querySelector('code')!,
+      headerRoot.querySelector('[data-site-header-desktop-navigation] a')!,
+    ];
+    identityHost.__startupNativeNodes ??= nativeNodes;
+    const chrome = {
+      nativeNodesPreserved: nativeNodes.every(
+        (node, index) => node === identityHost.__startupNativeNodes![index] && node.isConnected
+      ),
+      menu: sample(menu),
+      menuGlyph: sample(menu?.querySelector('.site-header-menu-icon') ?? null),
+      search: sample(search),
+      searchGlyph: sample(search?.querySelector('svg') ?? null),
+      code: surface(code),
+      codeToolbar: surface(toolbar),
+      codeText: sample(code.querySelector('pre')),
+      searchReady,
+      searchDisabled:
+        search?.getAttribute('aria-disabled') === 'true' ||
+        search?.hasAttribute('disabled') === true,
+      // Copy and stored Runtime availability are separate command-state
+      // transitions; the passive code frame must never wait for either.
+      copyReady: !!code.querySelector('[data-copy-command]'),
+    };
     return {
+      chrome,
       geometry: {
         header: { x: header.x, y: header.y, width: header.width, height: header.height },
         title: {
@@ -219,7 +324,12 @@ async function waitForCapturedFonts(page: Page) {
   await beforeReleaseDeadline(
     page.evaluate(async (selectors) => {
       await Promise.all(
-        Object.values(selectors).map((selector) => {
+        [
+          ...Object.values(selectors),
+          '[data-search-startup-button]',
+          '[data-site-header-fallback-summary]',
+          '[data-site-code-surface="frame"] pre',
+        ].map((selector) => {
           const owner = document.querySelector<HTMLElement>(selector)!;
           const leaf = owner.querySelector<HTMLElement>('[data-typography-prototype]') ?? owner;
           const css = getComputedStyle(leaf);
@@ -322,6 +432,58 @@ function compare(
     changedFirstFrameGeometry(before.geometry, after.geometry),
     'header and complete page position remain stable in every frame'
   ).toEqual([]);
+  expect(
+    after.chrome.nativeNodesPreserved,
+    'native code and navigation nodes survive every frame'
+  ).toBe(true);
+  for (const key of [
+    'menu',
+    'menuGlyph',
+    'search',
+    'searchGlyph',
+    'code',
+    'codeToolbar',
+    'codeText',
+  ] as const) {
+    const initial = before.chrome[key];
+    const next = after.chrome[key];
+    expect(initial, `${key} SSR owner exists`).not.toBeNull();
+    expect(next, `${key} every-frame painted owner exists`).not.toBeNull();
+    if (!initial || !next) continue;
+    expect(initial.visible, `${key} SSR paint visible`).toBe(true);
+    expect(next.visible, `${key} remains visible`).toBe(true);
+    for (const dimension of ['x', 'y', 'width', 'height'] as const)
+      expect(
+        Math.abs(next[dimension] - initial[dimension]),
+        `${key}.${dimension}`
+      ).toBeLessThanOrEqual(1);
+    for (const property of [
+      'background',
+      'color',
+      'borders',
+      'borderColors',
+      'radius',
+      'shadow',
+    ] as const)
+      expect(next[property], `${key}.${property}`).toEqual(initial[property]);
+    if (key === 'searchGlyph')
+      for (const property of ['stroke', 'strokeWidth', 'fill', 'shapes'] as const)
+        expect(next[property], `${key}.${property}`).toEqual(initial[property]);
+    // Passive planes contain no text. Compare fonts only for actual labels/code.
+    if (key === 'search' || key === 'codeText') {
+      for (const property of ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight'] as const)
+        expect(next[property], `${key}.${property}`).toEqual(initial[property]);
+      expect(initial.fontReady, `${key} initial actual font`).toBe(true);
+      expect(next.fontReady, `${key} every-frame actual font`).toBe(true);
+    }
+    if (key === 'search') {
+      expect(before.chrome.searchDisabled, 'SSR Search honestly unavailable').toBe(true);
+      expect(initial.opacity, 'public disabled Button recipe').toBe('0.5');
+      expect(next.opacity, 'only public disabled-to-ready opacity exception').toBe(
+        after.chrome.searchDisabled ? '0.5' : '1'
+      );
+    } else expect(next.opacity, `${key}.opacity`).toBe(initial.opacity);
+  }
   expect(after.paint).toEqual(before.paint);
   expect(before.pageOverflow).toBeLessThanOrEqual(1);
   expect(after.pageOverflow, JSON.stringify(after.overflowing)).toBeLessThanOrEqual(1);
@@ -392,6 +554,16 @@ describe('quick-start first-frame continuity', () => {
                   const note = document.querySelector<HTMLElement>('.starlight-aside--note');
                   return (
                     note?.dataset.noteSurfaceView === 'ready' &&
+                    document.querySelector('site-search')?.getAttribute('data-search-view') ===
+                      'ready' &&
+                    [
+                      ...document
+                        .querySelectorAll('[data-site-code-surface="frame"]')[0]!
+                        .querySelectorAll('[data-site-code-surface="toolbar"]'),
+                      document.querySelector('[data-site-code-surface="frame"]')!,
+                    ].every(
+                      (surface) => surface.getAttribute('data-code-surface-view') === 'ready'
+                    ) &&
                     note.dataset.noteSurfaceRuntime === runtime &&
                     document
                       .querySelector('.doc-stage-notice__title')
@@ -435,6 +607,92 @@ describe('quick-start first-frame continuity', () => {
         }
       }, 150_000);
     }
+  for (const focusOwner of ['menu', 'content-link'] as const)
+    it(`React delayed upgrade preserves ${focusOwner} focus and native code selection`, async () => {
+      const context = await browser.newContext({ viewport: conditions[0] });
+      const page = await context.newPage();
+      await page.addInitScript((key) => localStorage.setItem(key, 'react'), PREFERRED_ADAPTER_KEY);
+      let release!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      await page.route('**/*', async (request) => {
+        if (request.request().resourceType() === 'script') await gate;
+        await request.continue();
+      });
+      try {
+        await page.goto(`${baseUrl}${route}`, { waitUntil: 'commit' });
+        await page.locator('[data-site-code-surface="frame"] pre').first().waitFor();
+        await page.evaluate((focusOwner) => {
+          const code = document.querySelector(
+            '[data-site-code-surface="frame"] pre'
+          ) as HTMLElement;
+          const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
+          let text = walker.nextNode()!;
+          while (text && !text.textContent?.trim()) text = walker.nextNode()!;
+          const range = document.createRange();
+          range.selectNodeContents(text);
+          const selection = getSelection()!;
+          selection.removeAllRanges();
+          selection.addRange(range);
+          const target =
+            focusOwner === 'menu'
+              ? (document.querySelector('[data-site-header-fallback-summary]') as HTMLElement)
+              : (document.querySelector('[data-site-header-desktop-navigation] a') as HTMLElement);
+          target.focus({ preventScroll: true });
+          (window as any).__startupOwnership = {
+            code,
+            text,
+            focus: document.activeElement,
+            anchor: selection.anchorNode,
+            offset: selection.anchorOffset,
+            selected: selection.toString(),
+          };
+        }, focusOwner);
+        release();
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector('[data-docs-site-header]')
+              ?.hasAttribute('data-site-menu-ready') &&
+            document
+              .querySelector('[data-site-code-surface="frame"]')
+              ?.getAttribute('data-code-surface-view') === 'ready'
+        );
+        const facts = await page.evaluate((focusOwner) => {
+          const saved = (window as any).__startupOwnership;
+          const selection = getSelection()!;
+          return {
+            initialSelectionNonempty: saved.selected.trim().length > 0,
+            codeSame: document.querySelector('[data-site-code-surface="frame"] pre') === saved.code,
+            textRetained: saved.text.isConnected && saved.code.contains(saved.text),
+            selectionSame:
+              selection.anchorNode === saved.anchor &&
+              selection.anchorOffset === saved.offset &&
+              selection.toString() === saved.selected,
+            focused:
+              focusOwner === 'menu'
+                ? document.activeElement?.hasAttribute('data-site-menu-button')
+                : document.activeElement === saved.focus,
+          };
+        }, focusOwner);
+        expect(facts).toEqual({
+          initialSelectionNonempty: true,
+          codeSame: true,
+          textRetained: true,
+          selectionSame: true,
+          focused: true,
+        });
+        await writeFile(
+          path.join(directory, `react-${focusOwner}-ownership.json`),
+          JSON.stringify({ source, facts }, null, 2)
+        );
+      } finally {
+        release();
+        await page.unrouteAll({ behavior: 'wait' });
+        await context.close();
+      }
+    }, 90_000);
   for (const condition of conditions)
     it(`no JavaScript ${condition.width}: full note and text remain readable`, async () => {
       const context = await browser.newContext({
@@ -451,6 +709,19 @@ describe('quick-start first-frame continuity', () => {
         );
         for (const value of Object.values(result.values)) expect(value.visible).toBe(true);
         expect(result.paint.borderWidth).toBe('1px');
+        for (const key of [
+          'menu',
+          'menuGlyph',
+          'search',
+          'searchGlyph',
+          'code',
+          'codeToolbar',
+          'codeText',
+        ] as const)
+          expect(result.chrome[key]?.visible, `${key} no-JS visible`).toBe(true);
+        expect(result.chrome.searchDisabled).toBe(true);
+        expect(result.chrome.code?.background).not.toBe('rgba(0, 0, 0, 0)');
+        expect(await page.locator('[data-search-startup-button]').isDisabled()).toBe(true);
         expect(result.ready).toBeUndefined();
         expect(result.pageOverflow).toBeLessThanOrEqual(1);
         const summary = page.locator('[data-site-header-fallback-summary]');

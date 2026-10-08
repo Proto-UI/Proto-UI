@@ -121,7 +121,7 @@
   height: 2.75rem;
 }
 .site-header :is(.site-header-theme, .site-header-menu) svg,
-.site-header .site-header-search [data-open-modal] svg {
+.site-header .site-header-search :is([data-open-modal], [data-search-startup-button]) svg {
   width: 1.125rem;
   height: 1.125rem;
   flex: none;
@@ -132,10 +132,16 @@
   --site-search-trigger-padding: 0.75rem;
   --site-search-trigger-justify: flex-start;
 }
-.site-header .site-header-search [data-open-modal] .site-search-label {
+.site-header
+  .site-header-search
+  :is([data-open-modal], [data-search-startup-button])
+  .site-search-label {
   display: inline;
 }
-.site-header .site-header-search [data-open-modal] .site-search-shortcut {
+.site-header
+  .site-header-search
+  :is([data-open-modal], [data-search-startup-button])
+  .site-search-shortcut {
   display: inline-flex;
 }
 .site-header-context {
@@ -321,7 +327,7 @@
   }
   .site-header
     .site-header-search
-    [data-open-modal]
+    :is([data-open-modal], [data-search-startup-button])
     :is(.site-search-label, .site-search-shortcut) {
     display: none !important;
   }
@@ -669,7 +675,7 @@
     }
     .site-header[data-docs-site-header]
       .site-header-search
-      [data-open-modal]
+      :is([data-open-modal], [data-search-startup-button])
       :is(.site-search-label, .site-search-shortcut) {
       display: none !important;
     }

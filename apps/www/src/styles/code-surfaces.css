@@ -22,6 +22,20 @@
     min-width: 0;
     max-width: 100%;
   }
+  [data-site-code-surface]::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    pointer-events: none;
+    z-index: 0;
+  }
+  [data-site-code-surface]:is(
+      [data-code-surface-view='ready'],
+      [data-code-surface-view='retained']
+    )::before {
+    content: none;
+  }
   [data-site-code-surface] > :not(.site-code-surface-mount) {
     position: relative;
     z-index: 1;
@@ -72,7 +86,7 @@
   }
 
   /* Remove upstream shell ownership, including terminal faux window controls.
-   * An unavailable/no-script projection leaves readable, unframed native code. */
+   * Build-time Prototype snapshots supply first-frame passive paint. */
   .expressive-code .frame,
   .expressive-code .frame pre {
     border: 0;
@@ -80,9 +94,7 @@
     box-shadow: none;
     background: transparent;
   }
-  .expressive-code .frame::before,
   .expressive-code .frame::after,
-  .expressive-code [data-code-toolbar]::before,
   .expressive-code [data-code-toolbar]::after {
     display: none;
   }

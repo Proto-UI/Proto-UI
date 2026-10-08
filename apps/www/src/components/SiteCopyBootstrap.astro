@@ -1,7 +1,11 @@
 ---
 import '../styles/site-copy-command.css';
 import '../styles/site-note-surface.css';
+import { codeStartupPaintCss } from './site-startup-paint';
+const codePaint = await codeStartupPaintCss();
 ---
+
+<style is:inline set:html={codePaint}></style>
 
 <script>
   import { initSiteCopyCommands } from './site-copy-client';
