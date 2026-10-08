@@ -186,7 +186,9 @@ export async function startMatrixStartupDiagnostic(
                 ? `${url.origin}${url.pathname}`
                 : '[non-http script]';
             } catch {
-              /* Anonymous and browser-internal frames have no URL. */
+              // Relative, protocol-relative and malformed sourceURL values are
+              // not verified public resource URLs. Never retain their raw text.
+              node.callFrame.url = '[unresolved script]';
             }
           }
           profileState = 'captured';
@@ -198,6 +200,8 @@ export async function startMatrixStartupDiagnostic(
       }
       snapshot();
       await detach();
+      // Bound the caller, not the underlying filesystem: an outstanding write
+      // can settle later, with the terminal receipt still last in this queue.
       await bounded(writes, 'Diagnostic writes').catch((error) =>
         console.error('[demo-matrix-startup-diagnostic-write]', String(error))
       );

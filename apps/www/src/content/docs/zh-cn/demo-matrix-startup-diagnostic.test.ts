@@ -19,29 +19,34 @@ afterEach(async () => {
   vi.useRealTimers();
   await rm(directory, { recursive: true, force: true });
 });
-function fixture(failMethod?: string, hangMethod?: string) {
+function fixture(failMethod?: string, hangMethod?: string, frameUrls?: string[]) {
   const session = {
     send: vi.fn(async (method: string) => {
       if (method === failMethod) throw new Error(`injected ${method} failure`);
       if (method === hangMethod) return new Promise<never>(() => {});
       return {
         profile: {
-          nodes: [
-            {
-              id: 1,
-              callFrame: {
-                url: 'http://127.0.0.1:4321/src/previewer.ts?secret=omit#hash',
-                functionName: 'switchTo',
-              },
-            },
-            {
-              id: 2,
-              callFrame: {
-                url: 'data:text/javascript,private-source',
-                functionName: '(anonymous)',
-              },
-            },
-          ],
+          nodes: frameUrls
+            ? frameUrls.map((url, index) => ({
+                id: index + 1,
+                callFrame: { url, functionName: 'publicFixture' },
+              }))
+            : [
+                {
+                  id: 1,
+                  callFrame: {
+                    url: 'http://127.0.0.1:4321/src/previewer.ts?secret=omit#hash',
+                    functionName: 'switchTo',
+                  },
+                },
+                {
+                  id: 2,
+                  callFrame: {
+                    url: 'data:text/javascript,private-source',
+                    functionName: '(anonymous)',
+                  },
+                },
+              ],
           startTime: 10,
           endTime: 20,
           samples: [1],
@@ -144,6 +149,35 @@ describe('explicit opt-in Demo Matrix native startup diagnostics', () => {
     expect(page.route).not.toHaveBeenCalled();
     expect(page.waitForFunction).not.toHaveBeenCalled();
     expect(page.eventNames()).toEqual([]);
+  });
+  it('never persists unresolved relative, protocol-relative or malformed CPU frame URLs', async () => {
+    const inputs = [
+      '/src/public-fixture.ts?token=SYNTHETIC_QUERY#SYNTHETIC_FRAGMENT',
+      '//remote.invalid/public-fixture?token=SYNTHETIC_QUERY#SYNTHETIC_FRAGMENT',
+      'fixture source SYNTHETIC_PAYLOAD',
+      'http://[malformed?token=SYNTHETIC_QUERY#SYNTHETIC_FRAGMENT',
+      '',
+      'http://user:SYNTHETIC_PASSWORD@127.0.0.1:4321/public.ts?token=SYNTHETIC_QUERY#SYNTHETIC_FRAGMENT',
+      'data:text/javascript,SYNTHETIC_SOURCE',
+      'file:///SYNTHETIC_FILE',
+    ];
+    const { page } = fixture(undefined, undefined, inputs);
+    const handle = await startMatrixStartupDiagnostic(page as unknown as Page, options());
+    await handle.finish();
+    const profile = await result('profile.json');
+    expect(
+      profile.profile.nodes.map((node: { callFrame: { url: string } }) => node.callFrame.url)
+    ).toEqual([
+      '[unresolved script]',
+      '[unresolved script]',
+      '[unresolved script]',
+      '[unresolved script]',
+      '[unresolved script]',
+      'http://127.0.0.1:4321/public.ts',
+      '[non-http script]',
+      '[non-http script]',
+    ]);
+    expect(JSON.stringify(profile)).not.toContain('SYNTHETIC_');
   });
   it('limits retained network rows without losing aggregate counts', async () => {
     const { page } = fixture();
