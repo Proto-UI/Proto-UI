@@ -225,10 +225,22 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   }),
   'packages/adapters/base/src/material/program.ts': Object.freeze({
     resolvedPaths: Object.freeze([
+      'packages/adapters/base/src/material/contact-profile',
       'packages/adapters/base/src/material/liquidgl-kernel.generated',
       'packages/adapters/base/src/material/style',
       'packages/adapters/base/src/material/source',
     ]),
+  }),
+  // Continuous contact is still the exact opt-in optical host closure (#420).
+  // These reviewed edges admit neither sibling modules nor foreign consumers.
+  'packages/adapters/base/src/material/contact-profile.ts': Object.freeze({
+    resolvedPaths: Object.freeze(['packages/adapters/base/src/material/liquidgl-kernel.generated']),
+  }),
+  'packages/adapters/base/src/material/source.ts': Object.freeze({
+    resolvedPaths: Object.freeze(['packages/adapters/base/src/material/contact-carrier']),
+  }),
+  'packages/adapters/base/src/material/contact-carrier.ts': Object.freeze({
+    resolvedPaths: Object.freeze(['packages/adapters/base/src/material/paint-mutations']),
   }),
   'packages/adapters/base/src/material/style.ts': Object.freeze({
     specifiers: Object.freeze(['@proto.ui/core']),

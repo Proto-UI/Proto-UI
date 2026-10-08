@@ -34,6 +34,11 @@ describe('private expanded paint carrier (computed-style spy, not browser paint)
     document.body.append(second);
     const b = createContactCarrier(second);
     expect(document.head.querySelectorAll('style').length).toBe(before + 1);
+    // The statically inspected selector must remain identical to the owned marker.
+    const sheet = document.head.querySelectorAll('style')[before];
+    expect(sheet.textContent).toContain(':where([data-pui-material-carrier="contact-v1"])::before');
+    expect(host.getAttribute('data-pui-material-carrier')).toBe('contact-v1');
+    expect(second.getAttribute('data-pui-material-carrier')).toBe('contact-v1');
     expect(host.children.length).toBe(0);
     a.release();
     a.release();

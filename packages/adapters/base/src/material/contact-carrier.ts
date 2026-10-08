@@ -9,7 +9,8 @@ import {
 const marker = 'data-pui-material-carrier';
 const sheets = new WeakMap<Document | ShadowRoot, { node: HTMLStyleElement; users: number }>();
 const owners = new WeakSet<HTMLElement>();
-const rules = `:where([${marker}="contact-v1"])::before {
+// Literal CSS keeps the exact owned stylesheet statically auditable by the consumer wall.
+const rules = `:where([data-pui-material-carrier="contact-v1"])::before {
   all: initial; content: ""; position: absolute; display: block;
   left: var(--pui-material-left); top: var(--pui-material-top);
   width: var(--pui-material-width); height: var(--pui-material-height);
