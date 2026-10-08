@@ -19,7 +19,7 @@ describe('real library card enhancement', () => {
       const element = document.createElement(`wc-library-${part}`);
       element.dataset.libraryPart = part;
       element.dataset.libraryProps = JSON.stringify(props);
-      element.setAttribute('data-pui-style', tokens.join(' '));
+      if (tokens.length) element.setAttribute('data-pui-style', tokens.join(' '));
       const anchor = document.createElement('a');
       anchor.href = '/zh-cn/ui-libraries/';
       anchor.textContent = 'Library';
@@ -31,6 +31,7 @@ describe('real library card enhancement', () => {
       expect(
         (element.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean).sort()
       ).toEqual([...tokens].sort());
+      expect(element.hasAttribute('data-pui-style')).toBe(tokens.length > 0);
       expect(owner.querySelector('a')).toBe(anchor);
       expect(element.tabIndex).toBe(-1);
       expect(element.hasAttribute('role')).toBe(false);

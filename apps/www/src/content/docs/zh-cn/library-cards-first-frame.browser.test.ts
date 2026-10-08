@@ -295,13 +295,15 @@ describe('actual library Cards preserve their first frame', () => {
           await page.waitForTimeout(250);
           after = await page.evaluate(readCards, false);
           frames = await stopFrames(page);
+          // Retain real enhanced output before the strict comparison so a red
+          // transition still has individually source-bound after images.
+          await captureCurrentViewport(page, path.join(directory, `${name}-after.png`));
+          await captureFamilyCards(page, name, 'enhanced-endpoint');
           expect(after).toEqual(before);
           expect(frames.length).toBeGreaterThan(0);
           for (const frame of frames) expect(frame).toEqual(before);
           await expect.poll(() => link.evaluate((el) => document.activeElement === el)).toBe(true);
           expect(await page.locator('a a').count()).toBe(0);
-          await captureCurrentViewport(page, path.join(directory, `${name}-after.png`));
-          await captureFamilyCards(page, name, 'enhanced-endpoint');
           phase = 'reloading';
           // A newly cached optional face may legitimately differ between visits.
           // Compare the reload's own held first frame with its upgrade, rather
@@ -394,16 +396,50 @@ describe('actual library Cards preserve their first frame', () => {
       viewport: { width: 320, height: 900 },
     });
     const page = await context.newPage();
-    await page.goto(baseUrl + route);
-    await page.addStyleTag({ content: ':root { font-size: 200% !important; }' });
-    expect(await page.locator('[data-library-action]').count()).toBe(6);
-    const cards = await page.evaluate(readCards, false);
-    expect(cards.every((card) => card.root.overflow < 2 && card.root.width > 0)).toBe(true);
-    expect(await page.locator('a a').count()).toBe(0);
-    await page.screenshot({
-      path: path.join(directory, 'no-script-320-text-200.png'),
-      fullPage: true,
-    });
-    await context.close();
+    const name = 'no-script-320-text-200';
+    let phase = 'navigation';
+    const recordPhase = async (next: string) => {
+      phase = next;
+      await writeFile(
+        path.join(directory, `${name}-progress.json`),
+        JSON.stringify({ sha, tree, dirty, phase }, null, 2)
+      );
+    };
+    try {
+      await recordPhase('navigation');
+      await page.goto(baseUrl + route);
+      await recordPhase('200-percent-text');
+      await page.addStyleTag({ content: ':root { font-size: 200% !important; }' });
+      await recordPhase('native-content-assertions');
+      expect(await page.locator('[data-library-action]').count()).toBe(6);
+      const cards = await page.evaluate(readCards, false);
+      expect(cards.every((card) => card.root.overflow < 2 && card.root.width > 0)).toBe(true);
+      expect(await page.locator('a a').count()).toBe(0);
+      await recordPhase('full-document-capture');
+      const clip = await page.evaluate(() => ({
+        x: 0,
+        y: 0,
+        width: document.documentElement.scrollWidth,
+        height: document.documentElement.scrollHeight,
+        scale: 1,
+      }));
+      const image = await captureCurrentViewport(page, path.join(directory, `${name}.png`), clip);
+      await writeFile(
+        path.join(directory, `${name}.json`),
+        JSON.stringify({ sha, tree, dirty, phase: 'passed', clip, image, cards }, null, 2)
+      );
+      await recordPhase('passed');
+    } catch (error) {
+      await captureCurrentViewport(page, path.join(directory, `${name}-failure.png`)).catch(
+        () => {}
+      );
+      await writeFile(
+        path.join(directory, `${name}-failure.json`),
+        JSON.stringify({ sha, tree, dirty, phase, error: String(error) }, null, 2)
+      );
+      throw error;
+    } finally {
+      await context.close();
+    }
   }, 90_000);
 });

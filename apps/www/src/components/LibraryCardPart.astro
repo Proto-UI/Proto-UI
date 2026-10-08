@@ -1,4 +1,5 @@
 ---
+import { createHash } from 'node:crypto';
 import { libraryCardPrototypes, type LibraryPart } from './library-card-prototypes';
 import { snapshotLibraryPart } from './library-card-snapshot';
 import { renderSnapshotTokenCss } from './snapshot-prototype-style';
@@ -22,13 +23,22 @@ const stateTokens = part.endsWith('-surface')
     ).flat()
   : [];
 const cssTokens = [...new Set([...tokens, ...stateTokens])];
+// Each distinct recipe/token set owns only its exact hosts. Later Card parts
+// must not re-emit global text-size rules over earlier explicit line heights.
+const snapshotId = createHash('sha256')
+  .update(part)
+  .update('\0')
+  .update(cssTokens.join('\0'))
+  .digest('hex');
+const snapshotScope = `[data-library-snapshot="${snapshotId}"]`;
 ---
 
-<style is:inline set:html={renderSnapshotTokenCss(cssTokens)}></style>
+<style is:inline set:html={renderSnapshotTokenCss(cssTokens, snapshotScope)}></style>
 <Tag
   class={className}
   data-library-part={part}
+  data-library-snapshot={snapshotId}
   data-library-props={JSON.stringify(props)}
   data-library-prototype={libraryCardPrototypes[part].name}
-  data-pui-style={tokens.join(' ')}><slot /></Tag
+  data-pui-style={tokens.length ? tokens.join(' ') : undefined}><slot /></Tag
 >

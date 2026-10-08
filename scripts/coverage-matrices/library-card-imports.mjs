@@ -4,7 +4,7 @@
 // owned by www.build.style-generation through startup-prerender-imports.mjs.
 export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/UiLibraryGallery.astro': Object.freeze({
-    sourceSha256: 'f38518533a89c292296d86f48359c2b6efb334f6022c0e7c3965d1d8686ce6a4',
+    sourceSha256: '43c8ac4e64507793ae4950b9673ac5243cea64f66a3c3f1615ea29540a7194e8',
     specifiers: Object.freeze([
       '../../../../packages/prototypes/brutalist/src/theme',
       '../../../../packages/prototypes/bootstrap-2-3-2/src/theme',

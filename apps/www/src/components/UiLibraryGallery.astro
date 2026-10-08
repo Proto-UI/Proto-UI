@@ -426,6 +426,9 @@ const themeCss = Object.entries(familyThemes)
     overflow-wrap: anywhere;
   }
   .library-card :global([data-library-part]) {
+    /* Match the WC fallback host layout before definition. Named page layout
+       rules below still own flex/grid; Prototype tokens still own paint. */
+    display: block;
     min-width: 0;
   }
   .library-card :global(.library-card__surface) {
