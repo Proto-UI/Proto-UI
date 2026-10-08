@@ -97,7 +97,8 @@ test('a stale theme fixture fails the check', () => {
   assert.match(result.stderr, /theme-tokens\.json is stale/);
 });
 
-// Fourteen shared source variables plus four derived radii; Bootstrap also owns destructive.
+// Liquid declares all eighteen keys, including four radius variants, in its source.
+// Bootstrap declares fifteen keys; the renderer adds four derived radius variants.
 // The explicit contract rejects missing and unknown entries, not just bad colors.
 const sharedDraftVariables = [
   'background',
