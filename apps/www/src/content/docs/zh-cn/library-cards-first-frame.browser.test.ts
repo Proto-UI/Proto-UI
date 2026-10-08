@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import type { Browser } from 'playwright-core';
+import type { Browser, Page } from 'playwright-core';
 import { beforeAll, afterAll, describe, it, expect } from 'vitest';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
@@ -23,30 +23,109 @@ afterAll(async () => {
   await browser?.close();
   await stopServer();
 }, 60_000);
-function readCards() {
-  return [...document.querySelectorAll<HTMLElement>('[data-library]')].map((card) => {
-    const surface = card.querySelector<HTMLElement>('.library-card__surface')!;
-    const title = card.querySelector<HTMLElement>('h2')!;
-    const css = getComputedStyle(surface);
-    const rect = surface.getBoundingClientRect();
-    return {
-      family: card.dataset.library,
-      width: rect.width,
-      height: rect.height,
-      border: css.border,
-      radius: css.borderRadius,
-      shadow: css.boxShadow,
-      fill: css.backgroundColor,
-      title: title.textContent?.trim(),
-      titleHeight: title.getBoundingClientRect().height,
-      tokens: surface.getAttribute('data-pui-style'),
-      visible: css.visibility,
-      overflow: surface.scrollWidth - surface.clientWidth,
-      anchors: [...card.querySelectorAll('a')].map((a) => ({
-        href: a.getAttribute('href'),
-        label: a.textContent?.trim(),
-      })),
+function readCards(observe = false) {
+  const read = () => {
+    const gallery = document
+      .querySelector<HTMLElement>('.library-gallery')!
+      .getBoundingClientRect();
+    const measure = (owner: HTMLElement, leaf: HTMLElement = owner) => {
+      const rect = owner.getBoundingClientRect();
+      const css = getComputedStyle(leaf);
+      let effectiveOpacity = 1;
+      for (let node: HTMLElement | null = leaf; node; node = node.parentElement)
+        effectiveOpacity *= Number(getComputedStyle(node).opacity);
+      return {
+        x: rect.x - gallery.x,
+        y: rect.y - gallery.y,
+        width: rect.width,
+        height: rect.height,
+        fontFamily: css.fontFamily,
+        fontSize: css.fontSize,
+        fontWeight: css.fontWeight,
+        lineHeight: css.lineHeight,
+        letterSpacing: css.letterSpacing,
+        color: css.color,
+        opacity: css.opacity,
+        effectiveOpacity,
+        visibility: css.visibility,
+        display: css.display,
+        border: css.border,
+        radius: css.borderRadius,
+        shadow: css.boxShadow,
+        fill: css.backgroundColor,
+        overflow: owner.scrollWidth - owner.clientWidth,
+      };
     };
+    return [...document.querySelectorAll<HTMLElement>('[data-library]')].map((card) => {
+      const surface = card.querySelector<HTMLElement>('.library-card__surface')!;
+      const title = card.querySelector<HTMLElement>('h2')!;
+      const body = card.querySelector<HTMLElement>('.library-card__content p')!;
+      const action = card.querySelector<HTMLElement>('[data-library-action]')!;
+      return {
+        family: card.dataset.library,
+        root: measure(surface),
+        title: measure(title, title.querySelector<HTMLElement>('[data-library-part]')!),
+        body: measure(body, body.querySelector<HTMLElement>('[data-library-part]')!),
+        action: measure(action, action.querySelector<HTMLElement>('[data-library-part$="text"]')!),
+        actionSurface: measure(action.querySelector<HTMLElement>('.library-card__action')!),
+        tokens: surface.getAttribute('data-pui-style'),
+        anchors: [...card.querySelectorAll('a')].map((a) => ({
+          href: a.getAttribute('href'),
+          label: a.textContent?.trim(),
+        })),
+      };
+    });
+  };
+  if (observe) {
+    const state = { running: true, frames: [] as ReturnType<typeof read>[] };
+    (window as typeof window & { __libraryFrames?: typeof state }).__libraryFrames = state;
+    let previous = '';
+    const frame = () => {
+      if (!state.running) return;
+      const value = read();
+      const serialized = JSON.stringify(value);
+      if (serialized !== previous) {
+        state.frames.push(value);
+        previous = serialized;
+      }
+      requestAnimationFrame(frame);
+    };
+    frame();
+  }
+  return read();
+}
+async function captureCurrentViewport(page: Page, file: string) {
+  // Do not use Playwright screenshot here: it awaits document.fonts.ready,
+  // which is intentionally blocked by this test's own font request gate.
+  const session = await page.context().newCDPSession(page);
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const screenshot = await Promise.race([
+      session.send('Page.captureScreenshot', {
+        format: 'png',
+        fromSurface: true,
+        captureBeyondViewport: false,
+      }),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(
+          () => reject(new Error('Current-frame screenshot exceeded 15s')),
+          15_000
+        );
+      }),
+    ]);
+    await writeFile(file, Buffer.from(screenshot.data, 'base64'));
+  } finally {
+    if (timer) clearTimeout(timer);
+    await session.detach();
+  }
+}
+async function stopFrames(page: Page) {
+  return page.evaluate(() => {
+    const state = (
+      window as typeof window & { __libraryFrames?: { running: boolean; frames: unknown[] } }
+    ).__libraryFrames;
+    if (state) state.running = false;
+    return state?.frames ?? [];
   });
 }
 describe('actual library Cards preserve their first frame', () => {
@@ -66,51 +145,163 @@ describe('actual library Cards preserve their first frame', () => {
         );
         const page = await context.newPage();
         let release!: () => void;
-        const gate = new Promise<void>((resolve) => {
+        let gate = new Promise<void>((resolve) => {
           release = resolve;
         });
+        const name = `${runtime}-${dark}`;
+        const heldFonts: string[] = [];
+        const heldScripts: string[] = [];
+        let released = false;
+        let phase = 'loading SSR';
+        let before: ReturnType<typeof readCards> | undefined;
+        let after: ReturnType<typeof readCards> | undefined;
+        let frames: unknown[] = [];
+        let reloadBefore: ReturnType<typeof readCards> | undefined;
+        let reloadAfter: ReturnType<typeof readCards> | undefined;
+        let reloadFrames: unknown[] = [];
+        let fontFaces: Array<{ family: string; status: string }> = [];
         await page.route('**/*', async (r) => {
-          if (['script', 'font'].includes(r.request().resourceType())) await gate;
+          const kind = r.request().resourceType();
+          if (!released && ['script', 'font'].includes(kind)) {
+            (kind === 'font' ? heldFonts : heldScripts).push(r.request().url());
+            await gate;
+          }
           await r.continue();
         });
-        await page.goto(baseUrl + route, { waitUntil: 'commit' });
-        await page.locator('[data-library="liquid-glass"] h2').waitFor();
-        // Let optional fonts commit their fallback while font requests stay held.
-        await page.waitForTimeout(150);
-        const before = await page.evaluate(readCards);
-        expect(before).toHaveLength(6);
-        expect(
-          before.every((card) => card.width > 0 && card.height > 0 && card.visible === 'visible')
-        ).toBe(true);
-        const link = page.locator('[data-library="shadcn"] [data-library-action]');
-        await link.focus();
-        await page.screenshot({
-          path: path.join(directory, `${runtime}-${dark}-before.png`),
-          fullPage: true,
-        });
-        release();
-        await page.waitForFunction(() =>
-          [...document.querySelectorAll('[data-library-part]')].every((el) =>
-            customElements.get(el.localName)
-          )
-        );
-        await page.evaluate(() => document.fonts.ready);
-        await page.waitForTimeout(250);
-        const after = await page.evaluate(readCards);
-        expect(after).toEqual(before);
-        await expect.poll(() => link.evaluate((el) => document.activeElement === el)).toBe(true);
-        expect(await page.locator('a a').count()).toBe(0);
-        await page.screenshot({
-          path: path.join(directory, `${runtime}-${dark}-after.png`),
-          fullPage: true,
-        });
-        await writeFile(
-          path.join(directory, `${runtime}-${dark}.json`),
-          JSON.stringify({ sha, before, after }, null, 2)
-        );
-        await page.reload({ waitUntil: 'networkidle' });
-        expect(await page.evaluate(readCards)).toEqual(before);
-        await context.close();
+        try {
+          await page.goto(baseUrl + route, { waitUntil: 'commit' });
+          await page.locator('[data-library="liquid-glass"] h2').waitFor();
+          // Request the actual card face before asserting that fonts were gated.
+          await page.locator('[data-library="brutalist"] h2').scrollIntoViewIfNeeded();
+          await expect.poll(() => heldFonts.length).toBeGreaterThan(0);
+          fontFaces = await page.evaluate(() =>
+            [...document.fonts].map((face) => ({ family: face.family, status: face.status }))
+          );
+          expect(
+            fontFaces.some(
+              (face) => face.family.includes('Library DM Sans') && face.status === 'loading'
+            )
+          ).toBe(true);
+          expect(heldScripts.length).toBeGreaterThan(0);
+          // Optional faces must settle on their first-frame fallback while the
+          // real font request is still held. No fonts.ready wait before release.
+          await page.waitForTimeout(150);
+          // Use a source anchor for upgrade focus retention. A primary action
+          // gains a legitimate new observed focus ring only after enhancement;
+          // it must not contaminate the resting-state first-frame oracle.
+          const link = page.locator('[data-library="shadcn"] .library-card__credits a').first();
+          await link.focus();
+          before = await page.evaluate(readCards, true);
+          expect(before).toHaveLength(6);
+          expect(
+            before.every(
+              (card) =>
+                card.root.width > 0 &&
+                card.root.height > 0 &&
+                card.root.visibility === 'visible' &&
+                card.root.opacity === '1'
+            )
+          ).toBe(true);
+          phase = 'capturing held-script/held-font frame';
+          await captureCurrentViewport(page, path.join(directory, `${name}-before.png`));
+          phase = 'upgrading';
+          released = true;
+          release();
+          await page.waitForFunction(() =>
+            [...document.querySelectorAll('[data-library-part]')].every((el) =>
+              customElements.get(el.localName)
+            )
+          );
+          await page.evaluate(() => document.fonts.ready);
+          await page.waitForTimeout(250);
+          after = await page.evaluate(readCards, false);
+          frames = await stopFrames(page);
+          expect(after).toEqual(before);
+          expect(frames.length).toBeGreaterThan(0);
+          for (const frame of frames) expect(frame).toEqual(before);
+          await expect.poll(() => link.evaluate((el) => document.activeElement === el)).toBe(true);
+          expect(await page.locator('a a').count()).toBe(0);
+          await captureCurrentViewport(page, path.join(directory, `${name}-after.png`));
+          phase = 'reloading';
+          // A newly cached optional face may legitimately differ between visits.
+          // Compare the reload's own held first frame with its upgrade, rather
+          // than demand identical font availability across separate visits.
+          released = false;
+          gate = new Promise<void>((resolve) => {
+            release = resolve;
+          });
+          await page.reload({ waitUntil: 'commit' });
+          await page.locator('[data-library="liquid-glass"] h2').waitFor();
+          await page.waitForTimeout(150);
+          reloadBefore = await page.evaluate(readCards, true);
+          await captureCurrentViewport(page, path.join(directory, `${name}-reload-before.png`));
+          released = true;
+          release();
+          await page.waitForFunction(() =>
+            [...document.querySelectorAll('[data-library-part]')].every((el) =>
+              customElements.get(el.localName)
+            )
+          );
+          await page.evaluate(() => document.fonts.ready);
+          await page.waitForTimeout(250);
+          reloadAfter = await page.evaluate(readCards, false);
+          reloadFrames = await stopFrames(page);
+          expect(reloadAfter).toEqual(reloadBefore);
+          for (const frame of reloadFrames) expect(frame).toEqual(reloadBefore);
+          await captureCurrentViewport(page, path.join(directory, `${name}-reload-after.png`));
+          phase = 'passed';
+        } catch (error) {
+          await captureCurrentViewport(page, path.join(directory, `${name}-failure.png`)).catch(
+            () => {}
+          );
+          frames = await stopFrames(page).catch(() => frames);
+          await writeFile(
+            path.join(directory, `${name}-failure.json`),
+            JSON.stringify(
+              {
+                sha,
+                phase,
+                error: String(error),
+                heldFonts,
+                heldScripts,
+                fontFaces,
+                before,
+                after,
+                frames,
+                reloadBefore,
+                reloadAfter,
+                reloadFrames,
+              },
+              null,
+              2
+            )
+          );
+          throw error;
+        } finally {
+          released = true;
+          release();
+          await writeFile(
+            path.join(directory, `${name}.json`),
+            JSON.stringify(
+              {
+                sha,
+                phase,
+                heldFonts,
+                heldScripts,
+                fontFaces,
+                before,
+                after,
+                frames,
+                reloadBefore,
+                reloadAfter,
+                reloadFrames,
+              },
+              null,
+              2
+            )
+          );
+          await context.close();
+        }
       }, 90_000);
     }
   it('keeps all destinations available with no JavaScript at 320px and 200% text', async () => {
@@ -122,8 +313,8 @@ describe('actual library Cards preserve their first frame', () => {
     await page.goto(baseUrl + route);
     await page.addStyleTag({ content: ':root { font-size: 200% !important; }' });
     expect(await page.locator('[data-library-action]').count()).toBe(6);
-    const cards = await page.evaluate(readCards);
-    expect(cards.every((card) => card.overflow < 2 && card.width > 0)).toBe(true);
+    const cards = await page.evaluate(readCards, false);
+    expect(cards.every((card) => card.root.overflow < 2 && card.root.width > 0)).toBe(true);
     expect(await page.locator('a a').count()).toBe(0);
     await page.screenshot({
       path: path.join(directory, 'no-script-320-text-200.png'),
