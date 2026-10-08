@@ -19,3 +19,7 @@ Two source controls place a retained selection in code while a button or native 
 The native suite still requires all 18 cases and every original strict ownership fact, including `focused: true`. It now records initial focus success, bounded real focusin/focusout/selectionchange events, and the real Selection setter's before/after active element and call stack. The wrapper calls the original setter with the original receiver/arguments; it does not synthesize focus or selection. Original code/navigation identity remains independently observed. Raw before/after viewport captures use the existing CDP path, avoiding a whole-document font wait while scripts are paused. Facts and diagnostics are saved before assertions; failure PNG/JSON and trace are retained on errors.
 
 An exact-head official rerun must establish whether this repair resolves the two native failures. If it does not, the recorded trace must drive the next diagnosis; no skip, weakened focus assertion or acceptance change is authorized. Local Chromium was not run or bypassed. Whole-tree types/build, final consumer wall and independent review remain with the combined candidate owner.
+
+## Initial native-state preconditions
+
+A follow-on harness hardening persists `ownership-initial.json` and the original viewport, then strictly asserts actual acquired focus, a nonempty code selection and unchanged selection before releasing any executable script. This separates a failed test-input precondition from a subsequent hydration failure. The post-upgrade strict facts and traces remain unchanged.

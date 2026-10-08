@@ -26,6 +26,19 @@ describe('first-frame harness load-gate contract', () => {
     expect(source).toContain('expect(diagnostics.initialFocusCorrect).toBe(true)');
     expect(source).toContain('focused: true');
     expect(source).toContain('`${name}-trace.json`');
+    const ownershipStart = source.indexOf('for (const focusOwner');
+    const initialSave = source.indexOf('ownership-initial.json', ownershipStart);
+    const initialAssertion = source.indexOf('expect(initial.focused', ownershipStart);
+    const ownershipRelease = source.indexOf('release();', ownershipStart);
+    expect(initialSave).toBeGreaterThan(ownershipStart);
+    expect(initialAssertion).toBeGreaterThan(initialSave);
+    expect(ownershipRelease).toBeGreaterThan(initialAssertion);
+    expect(source.slice(initialAssertion, ownershipRelease)).toMatch(
+      /expect\(\s*initial\.selectionNonempty/
+    );
+    expect(source.slice(initialAssertion, ownershipRelease)).toMatch(
+      /expect\(\s*initial\.selectionSame/
+    );
   });
   const start = source.indexOf('await page.locator(targets.noteBody)');
   const release = source.indexOf('release();', start);

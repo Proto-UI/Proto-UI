@@ -738,10 +738,43 @@ describe('quick-start first-frame continuity', () => {
             selected: selection.toString(),
           };
         }, focusOwner);
+        const initial = await page.evaluate(() => {
+          const saved = (window as any).__startupOwnership;
+          const selection = getSelection()!;
+          return {
+            focused: saved.initialFocusCorrect && document.activeElement === saved.focus,
+            focus: saved.describe(document.activeElement),
+            selectionNonempty: selection.toString().trim().length > 0,
+            selectionSame:
+              selection.anchorNode === saved.anchor &&
+              selection.anchorOffset === saved.offset &&
+              selection.toString() === saved.selected,
+            selection: {
+              text: selection.toString(),
+              rangeCount: selection.rangeCount,
+              anchor: saved.describe(selection.anchorNode),
+              anchorOffset: selection.anchorOffset,
+              extent: saved.describe(selection.focusNode),
+              focusOffset: selection.focusOffset,
+            },
+          };
+        });
+        await writeFile(
+          path.join(directory, `react-${focusOwner}-ownership-initial.json`),
+          JSON.stringify({ source, initial }, null, 2)
+        );
         await captureViewport(
           page,
           path.join(directory, `react-${focusOwner}-ownership-before.png`)
         );
+        // Preconditions must succeed before any script runs. A fixture's own
+        // selection/focus setup failure must not be attributed to hydration.
+        expect(initial.focused, 'native focus acquired before script release').toBe(true);
+        expect(
+          initial.selectionNonempty,
+          'native code selection acquired before script release'
+        ).toBe(true);
+        expect(initial.selectionSame, 'native selection retained before script release').toBe(true);
         release();
         await page.waitForFunction(
           () =>
