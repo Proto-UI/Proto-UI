@@ -102,7 +102,9 @@ describe('Quickstart native fragment causal controls, application modules empty'
           (window as any).__inlinePolicyViolations = [];
           document.addEventListener('securitypolicyviolation', (event) => {
             (window as any).__inlinePolicyViolations.push({
-              directive: event.effectiveDirective,
+              disposition: event.disposition,
+              effectiveDirective: event.effectiveDirective,
+              originalPolicy: event.originalPolicy,
               blockedURI: event.blockedURI,
             });
           });
@@ -155,19 +157,18 @@ describe('Quickstart native fragment causal controls, application modules empty'
               sha256: createHash('sha256').update(body).digest('hex'),
               scriptInventory,
             });
-            return request.fulfill({
-              response,
-              body,
-              headers: {
-                ...response.headers(),
-                'content-security-policy': [
-                  response.headers()['content-security-policy'],
-                  inlineScriptPolicy,
-                ]
-                  .filter(Boolean)
-                  .join(', '),
-              },
-            });
+            // fragment-control-response-headers-start
+            const headers = {
+              ...response.headers(),
+              'content-security-policy': [
+                response.headers()['content-security-policy'],
+                inlineScriptPolicy,
+              ]
+                .filter(Boolean)
+                .join(', '),
+            };
+            // fragment-control-response-headers-end
+            return request.fulfill({ response, body, headers });
           }
           if (request.request().resourceType() !== 'script') return request.continue();
           emptiedScripts.push(request.request().url());
@@ -280,12 +281,23 @@ describe('Quickstart native fragment causal controls, application modules empty'
           expect(before.codeEnhanced).toBe(false);
           expect(before.selectionNonempty).toBe(true);
           expect(before.selectionSame).toBe(true);
-          expect(
-            before.inlinePolicyViolations.some(
-              (event: { blockedURI: string }) => event.blockedURI === 'inline'
-            ),
-            'the browser actually enforced the no-inline policy'
-          ).toBe(true);
+          // enforced-inline-policy-observation-start
+          const enforcedInlineBlock = before.inlinePolicyViolations.some(
+            (event: {
+              disposition: string;
+              effectiveDirective: string;
+              originalPolicy: string;
+              blockedURI: string;
+            }) =>
+              event.disposition === 'enforce' &&
+              ['script-src', 'script-src-elem'].includes(event.effectiveDirective) &&
+              event.originalPolicy === inlineScriptPolicy &&
+              event.blockedURI === 'inline'
+          );
+          // enforced-inline-policy-observation-end
+          expect(enforcedInlineBlock, 'the browser actually enforced the no-inline policy').toBe(
+            true
+          );
           if (input === 'keyboard') expect(before.trustedTabCount).toBeGreaterThan(0);
           expect(
             emptiedScripts.length,

@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { transformSync } from 'esbuild';
 import { describe, expect, it } from 'vitest';
 
 const control = readFileSync(
@@ -75,5 +76,92 @@ describe('native fragment diagnostic evidence boundaries (source controls only)'
     expect(main).toContain('`${name}-document-top`');
     expect(main).toContain('expect(top.geometry.scroll.y).toBe(0)');
     expect(main).toContain('`${name}-menu-open`');
+  });
+});
+
+// Execute the exact snippets used by the native lane, not a test-local
+// approximation of its policy or acceptance predicate. These are deterministic
+// evidence-logic controls and do not claim native CSP/browser execution.
+function snippet(start: string, end: string) {
+  const value = control.split(`// ${start}\n`)[1]?.split(`// ${end}`)[0];
+  if (!value) throw new Error(`Missing native diagnostic snippet: ${start}`);
+  return transformSync(value, { loader: 'ts' }).code;
+}
+const policy = "script-src 'self'; script-src-attr 'none'";
+const headerCode = snippet(
+  'fragment-control-response-headers-start',
+  'fragment-control-response-headers-end'
+);
+const evaluateHeaders = (code = headerCode) =>
+  new Function('response', 'inlineScriptPolicy', `${code}\nreturn headers;`)(
+    {
+      headers: () => ({
+        'content-security-policy': "default-src 'self'",
+        'content-type': 'text/html',
+      }),
+    },
+    policy
+  );
+const observedEnforcement = new Function(
+  'before',
+  'inlineScriptPolicy',
+  `${snippet('enforced-inline-policy-observation-start', 'enforced-inline-policy-observation-end')}\nreturn enforcedInlineBlock;`
+) as (before: { inlinePolicyViolations: Record<string, unknown>[] }, policy: string) => boolean;
+const enforcedEvent = {
+  disposition: 'enforce',
+  effectiveDirective: 'script-src-elem',
+  originalPolicy: policy,
+  blockedURI: 'inline',
+};
+
+describe('actual native diagnostic CSP admission (no browser)', () => {
+  it('sets an enforced response policy while preserving the original policy and other headers', () => {
+    expect(evaluateHeaders()).toEqual({
+      'content-security-policy': `default-src 'self', ${policy}`,
+      'content-type': 'text/html',
+    });
+  });
+  it('rejects moving the actual response policy into a report-only header', () => {
+    const mutated = headerCode.replace(
+      /(["'])content-security-policy\1:/,
+      '"content-security-policy-report-only":'
+    );
+    expect(mutated).not.toBe(headerCode);
+    expect(evaluateHeaders(mutated)['content-security-policy']).not.toBe(
+      `default-src 'self', ${policy}`
+    );
+  });
+  it('records all native CSP admission facts without relabeling their disposition', () => {
+    for (const field of ['disposition', 'effectiveDirective', 'originalPolicy', 'blockedURI'])
+      expect(control).toContain(`${field}: event.${field}`);
+    expect(control).toContain(
+      "expect(enforcedInlineBlock, 'the browser actually enforced the no-inline policy')"
+    );
+  });
+  it.each(['script-src-elem', 'script-src'])(
+    'accepts an enforced matching inline %s violation',
+    (effectiveDirective) => {
+      expect(
+        observedEnforcement(
+          { inlinePolicyViolations: [{ ...enforcedEvent, effectiveDirective }] },
+          policy
+        )
+      ).toBe(true);
+    }
+  );
+  it.each([
+    ['report-only', { disposition: 'report' }],
+    ['missing disposition', { disposition: undefined }],
+    ['event-handler-only directive', { effectiveDirective: 'script-src-attr' }],
+    ['unrelated directive', { effectiveDirective: 'style-src-elem' }],
+    ['unrelated policy', { originalPolicy: "script-src 'none'" }],
+    ['external script', { blockedURI: 'https://example.test/script.js' }],
+  ])('rejects %s evidence even when the other event fields match', (_name, change) => {
+    expect(
+      observedEnforcement({ inlinePolicyViolations: [{ ...enforcedEvent, ...change }] }, policy)
+    ).toBe(false);
+  });
+  it('rejects an empty event set', () => {
+    expect(observedEnforcement({ inlinePolicyViolations: [] }, policy)).toBe(false);
   });
 });
