@@ -5,6 +5,7 @@ import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { resolve, join, extname, sep } from 'node:path';
 import { launchBrowser } from '../../apps/www/src/content/docs/zh-cn/browser-harness.ts';
+import { installCarrierStyleDiagnostics } from './carrier-diagnostics.mjs';
 const root = resolve(process.argv[2] ?? '/tmp/pui-material-v2');
 const output = resolve(process.argv[3] ?? '/tmp/pui-material-v2-evidence');
 await mkdir(output, { recursive: true });
@@ -36,6 +37,7 @@ let failure = null;
 try {
   browser = await launchBrowser();
   context = await browser.newContext({ viewport: { width: 1300, height: 900 } });
+  await context.addInitScript(installCarrierStyleDiagnostics);
   await context.route('**/*', (route) =>
     new URL(route.request().url()).origin === origin ? route.continue() : route.abort()
   );
@@ -136,6 +138,7 @@ try {
               diagnostics: { ...el.dataset },
             })),
             metrics: window.v2Material?.metrics(),
+            carrierStyleReads: window.__carrierStyleDiagnostics,
           }))
           .catch(() => null),
         null,

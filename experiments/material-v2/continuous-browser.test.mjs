@@ -4,6 +4,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import { resolve, join, extname, sep } from 'node:path';
 import { launchBrowser } from '../../apps/www/src/content/docs/zh-cn/browser-harness.ts';
+import { installCarrierStyleDiagnostics } from './carrier-diagnostics.mjs';
 const root = resolve(process.argv[2]),
   out = resolve(process.argv[3]);
 await mkdir(out, { recursive: true });
@@ -43,6 +44,7 @@ let recording = false;
 try {
   browser = await launchBrowser();
   context = await browser.newContext({ viewport: { width: 1300, height: 900 } });
+  await context.addInitScript(installCarrierStyleDiagnostics);
   await context.route('**/*', (r) =>
     new URL(r.request().url()).origin === origin ? r.continue() : r.abort()
   );
@@ -948,6 +950,7 @@ try {
             contacts: window.__contacts,
             native: window.__native,
             metrics: window.v2Material?.metrics(),
+            carrierStyleReads: window.__carrierStyleDiagnostics,
           }))
           .catch(() => null),
         null,
