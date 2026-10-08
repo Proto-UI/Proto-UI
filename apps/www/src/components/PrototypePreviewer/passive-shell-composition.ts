@@ -39,6 +39,31 @@ export function createPassiveShellComposition(options: {
   let requestedTheme = { ...options.theme };
   const slots = new Map<number, HTMLElement>();
   const surfaces = new Map<number, HTMLElement>();
+  const captureDisplay = () => ({
+    value: content.style.getPropertyValue('display'),
+    priority: content.style.getPropertyPriority('display'),
+    hadStyleAttribute: content.hasAttribute('style'),
+  });
+  type DisplayLease = { generation: number; original: ReturnType<typeof captureDisplay> };
+  let displayLease: DisplayLease | null = null;
+  const hasOwnedDisplay = () =>
+    content.style.getPropertyValue('display') === 'contents' &&
+    content.style.getPropertyPriority('display') === '';
+  const restoreDisplay = (original: ReturnType<typeof captureDisplay>) => {
+    if (original.value) content.style.setProperty('display', original.value, original.priority);
+    else content.style.removeProperty('display');
+    if (!original.hadStyleAttribute && content.getAttribute('style') === '')
+      content.removeAttribute('style');
+    else if (original.hadStyleAttribute && !content.hasAttribute('style'))
+      content.setAttribute('style', '');
+  };
+  const releaseDisplay = (generation = displayLease?.generation) => {
+    if (!displayLease || displayLease.generation !== generation) return;
+    const { original } = displayLease;
+    displayLease = null;
+    // Restore only our own declaration; the content owner may have edited it.
+    if (hasOwnedDisplay()) restoreDisplay(original);
+  };
   const move = (parent: Node, before: Node | null = null) =>
     withNativeContentLease(content, () => {
       parent.insertBefore(content, before?.parentNode === parent ? before : null);
@@ -83,7 +108,6 @@ export function createPassiveShellComposition(options: {
             registerNativeContentContainer(slot, [content]);
             registerNativeContentContainer(surface, [content]);
             slot.style.display = 'contents';
-            content.style.display = 'contents';
             surface.dataset.projectionPrototype = prototypeId;
             surface.dataset.projectionRuntime = options.runtime;
             surface.dataset.projectionFamily = request.selection.projectionFamilyId;
@@ -107,6 +131,7 @@ export function createPassiveShellComposition(options: {
           setLocked() {},
           async dispose() {
             const slot = slots.get(request.generation);
+            releaseDisplay(request.generation);
             if (slot?.contains(content)) move(home, nextSibling);
             slots.delete(request.generation);
             surfaces.delete(request.generation);
@@ -127,13 +152,28 @@ export function createPassiveShellComposition(options: {
       if (!slot) throw new Error('Prepared passive shell slot missing');
       const previous = content.parentNode!;
       const before = content.nextSibling;
+      let previousDisplay: ReturnType<typeof captureDisplay> | undefined;
+      let previousLease: DisplayLease | null = null;
       return {
         publish() {
           if (!alive) throw new Error('Passive shell composition disposed');
+          previousDisplay = captureDisplay();
+          previousLease = displayLease;
+          // Hidden, failed and stale candidates never acquire authored styles.
+          // A replacement inherits only a still-owned lease, so the original
+          // value survives shell switches without losing newer external edits.
+          displayLease = {
+            generation: commit.generation,
+            original: previousLease && hasOwnedDisplay() ? previousLease.original : previousDisplay,
+          };
+          content.style.setProperty('display', 'contents');
           move(slot);
         },
         rollback() {
           if (slot.contains(content)) move(previous, before);
+          if (displayLease?.generation !== commit.generation) return;
+          displayLease = previousLease;
+          if (previousDisplay && hasOwnedDisplay()) restoreDisplay(previousDisplay);
         },
       };
     },
@@ -156,6 +196,7 @@ export function createPassiveShellComposition(options: {
     destroy() {
       if (!alive) return Promise.resolve();
       alive = false;
+      releaseDisplay();
       move(home, nextSibling);
       return controller.destroy();
     },

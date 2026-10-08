@@ -1,6 +1,7 @@
 import { afterEach, expect, it, vi } from 'vitest';
 import { createPassiveShellComposition } from './passive-shell-composition';
 import { loadPrototypes } from './prototype-modules';
+import { renderDemo } from './demo-renderer';
 import { panelSurfaceProps, surfacePrototypeId } from '../surface-recipes';
 import type { ProjectionFamilyId } from './projection-families';
 import type { ProjectionThemeSurfaceStyle } from './projection-theme';
@@ -8,6 +9,10 @@ import type { RuntimeId } from './runtimes/registry';
 
 // Keep the real public Prototype loader and adapters. Only control load timing
 // and failures, and replace CDN framework loading with installed dependencies.
+vi.mock('./demo-renderer', async (original) => {
+  const current = await original<typeof import('./demo-renderer')>();
+  return { ...current, renderDemo: vi.fn(current.renderDemo) };
+});
 vi.mock('./prototype-modules', async (original) => {
   const current = await original<typeof import('./prototype-modules')>();
   return { ...current, loadPrototypes: vi.fn(current.loadPrototypes) };
@@ -68,14 +73,17 @@ function delayNextLoad() {
   return gate;
 }
 
-async function mountShell(runtime: RuntimeId = 'wc') {
+function startShell(runtime: RuntimeId = 'wc', style?: string) {
   const home = document.createElement('div');
   const mount = document.createElement('div');
   const content = document.createElement('div');
   const input = document.createElement('input');
   input.value = 'Original uncontrolled content';
   content.append(input);
-  home.append(content);
+  if (style !== undefined) content.setAttribute('style', style);
+  const before = document.createTextNode('before');
+  const after = document.createTextNode('after');
+  home.append(before, content, after);
   document.body.append(mount, home);
   const shell = createPassiveShellComposition({
     runtime,
@@ -89,13 +97,19 @@ async function mountShell(runtime: RuntimeId = 'wc') {
     className: 'transaction-shell',
   });
   compositions.push(shell);
-  await shell.ready;
   const surface = () => content.closest<HTMLElement>('.transaction-shell')!;
+  return { shell, mount, home, content, input, surface, before, after };
+}
+
+async function mountShell(runtime: RuntimeId = 'wc', style?: string) {
+  const fixture = startShell(runtime, style);
+  const { shell, surface, input } = fixture;
+  await shell.ready;
   expect(surface().dataset.projectionPrototype).toBe('shadcn-surface-root');
   expect(surface().hasAttribute('data-pui-root')).toBe(true);
   expect(surface().shadowRoot).toBeNull();
   expect(surface().querySelector('input')).toBe(input);
-  return { shell, mount, home, content, input, surface };
+  return fixture;
 }
 
 function expectTheme(surface: HTMLElement, theme: ProjectionThemeSurfaceStyle) {
@@ -111,6 +125,8 @@ afterEach(async () => {
   for (const gate of pendingLoads.splice(0)) gate.resolve();
   await Promise.all(compositions.splice(0).map((shell) => shell.destroy()));
   vi.mocked(loadPrototypes).mockClear();
+  vi.mocked(renderDemo).mockClear();
+  vi.restoreAllMocks();
   document.body.replaceChildren();
 });
 
@@ -228,4 +244,292 @@ it('destroy returns the original LightDOM content immediately and revokes pendin
   expect(content.parentNode).toBe(home);
   expect(mount.childNodes).toHaveLength(0);
   expectTheme(original, INITIAL);
+});
+
+function interceptNextSetup(afterSetup: (slot: HTMLElement) => void) {
+  vi.mocked(renderDemo).mockImplementationOnce(async (options) => {
+    const original = await vi.importActual<typeof import('./demo-renderer')>('./demo-renderer');
+    const setup = options.demo.setup;
+    return original.renderDemo({
+      ...options,
+      demo: {
+        ...options.demo,
+        setup(context) {
+          const cleanup = setup?.(context);
+          afterSetup(context.refs.slot!);
+          return cleanup;
+        },
+      },
+    });
+  });
+}
+
+function rejectNextPublication(content: HTMLElement, afterMove: () => void = () => {}) {
+  interceptNextSetup((slot) => {
+    const insertBefore = slot.insertBefore;
+    vi.spyOn(slot, 'insertBefore').mockImplementationOnce((node, before) => {
+      insertBefore.call(slot, node, before);
+      expect(node).toBe(content);
+      afterMove();
+      throw new Error('Injected publication failure after content move');
+    });
+  });
+}
+
+function expectReturned(fixture: ReturnType<typeof startShell>) {
+  const { home, content, input, before, after } = fixture;
+  expect(content.parentNode).toBe(home);
+  expect(home.childNodes).toHaveLength(3);
+  for (const [index, node] of [before, content, after].entries())
+    expect(home.childNodes[index]).toBe(node);
+  expect(content.firstChild).toBe(input);
+  expect(input.value).toBe('Original uncontrolled content');
+}
+
+// These are inline-CSS ownership and real renderer/Adapter observations in
+// Happy DOM, not native-browser cascade, layout or paint evidence.
+for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+  for (const [style, value, priority] of [
+    [undefined, '', ''],
+    ['', '', ''],
+    ['display: grid;', 'grid', ''],
+    ['display: inline-flex !important; color: red;', 'inline-flex', 'important'],
+  ] as const) {
+    it(`${runtime}: destroy restores borrowed display and sibling identity (${style ?? 'no style attribute'})`, async () => {
+      const fixture = await mountShell(runtime, style);
+      expect(fixture.content.style.display).toBe('contents');
+      expect(fixture.content.style.getPropertyPriority('display')).toBe('');
+      const destroyed = fixture.shell.destroy();
+      expectReturned(fixture);
+      expect(fixture.content.style.getPropertyValue('display')).toBe(value);
+      expect(fixture.content.style.getPropertyPriority('display')).toBe(priority);
+      expect(fixture.content.hasAttribute('style')).toBe(style !== undefined);
+      expect(fixture.content.style.color).toBe(style?.includes('color') ? 'red' : '');
+      await destroyed;
+      await fixture.shell.destroy();
+      expectReturned(fixture);
+    });
+  }
+
+  it(`${runtime}: first materialization failure after real setup leaves author display untouched`, async () => {
+    interceptNextSetup(() => {
+      throw new Error('Injected setup failure');
+    });
+    const fixture = startShell(runtime, 'display: grid !important');
+    await expect(fixture.shell.ready).rejects.toThrow('Injected setup failure');
+    expectReturned(fixture);
+    expect(fixture.content.style.display).toBe('grid');
+    expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+    expect(fixture.mount.childNodes).toHaveLength(0);
+  });
+
+  it(`${runtime}: first publication rollback restores the original display before cleanup`, async () => {
+    const gate = delayNextLoad();
+    const fixture = startShell(runtime, 'display: grid !important');
+    rejectNextPublication(fixture.content);
+    gate.resolve();
+    await expect(fixture.shell.ready).rejects.toThrow('Injected publication failure');
+    expectReturned(fixture);
+    expect(fixture.content.style.display).toBe('grid');
+    expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+    expect(fixture.mount.childNodes).toHaveLength(0);
+  });
+
+  it(`${runtime}: failed replacement retains the old display lease through the next successful owner`, async () => {
+    const fixture = await mountShell(runtime, 'display: grid !important');
+    const { shell, content, surface } = fixture;
+    const original = surface();
+    rejectNextPublication(content);
+    await expect(shell.update('brutalist', NEXT)).rejects.toThrow('Injected publication failure');
+    expect(surface()).toBe(original);
+    expect(content.style.display).toBe('contents');
+    await shell.update('brutalist', NEXT);
+    expect(surface()).not.toBe(original);
+    expect(content.style.display).toBe('contents');
+    await shell.destroy();
+    expectReturned(fixture);
+    expect(content.style.display).toBe('grid');
+    expect(content.style.getPropertyPriority('display')).toBe('important');
+  });
+}
+
+it('captures author display at publication after a delayed first load', async () => {
+  const gate = delayNextLoad();
+  const fixture = startShell();
+  fixture.content.style.setProperty('display', 'inline-grid', 'important');
+  gate.resolve();
+  await fixture.shell.ready;
+  expect(fixture.content.style.display).toBe('contents');
+  await fixture.shell.destroy();
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('inline-grid');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+});
+
+for (const [value, priority] of [
+  ['flex', ''],
+  ['contents', 'important'],
+  ['', ''],
+] as const) {
+  it(`leaves external display edits in place on destroy (${value}/${priority})`, async () => {
+    const fixture = await mountShell('wc', 'display: grid !important');
+    fixture.content.style.setProperty('display', value, priority);
+    await fixture.shell.destroy();
+    expectReturned(fixture);
+    expect(fixture.content.style.getPropertyValue('display')).toBe(value);
+    expect(fixture.content.style.getPropertyPriority('display')).toBe(priority);
+  });
+}
+
+it('restores only display while retaining unrelated external inline styles', async () => {
+  const fixture = await mountShell();
+  fixture.content.style.color = 'blue';
+  await fixture.shell.destroy();
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('');
+  expect(fixture.content.style.color).toBe('blue');
+});
+
+it('a failed replacement setup cannot overwrite externally updated display', async () => {
+  const fixture = await mountShell('wc', 'display: grid !important');
+  fixture.content.style.setProperty('display', 'flex', 'important');
+  interceptNextSetup(() => {
+    throw new Error('Injected replacement setup failure');
+  });
+  await expect(fixture.shell.update('brutalist', NEXT)).rejects.toThrow(
+    'Injected replacement setup failure'
+  );
+  expect(fixture.surface().dataset.projectionFamily).toBe('shadcn');
+  expect(fixture.content.style.display).toBe('flex');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+  await fixture.shell.destroy();
+  expect(fixture.content.style.display).toBe('flex');
+});
+
+it('a rollback preserves external display changes made during publication', async () => {
+  const fixture = await mountShell('wc', 'display: grid !important');
+  rejectNextPublication(fixture.content, () => {
+    fixture.content.style.setProperty('display', 'inline-block', 'important');
+  });
+  await expect(fixture.shell.update('brutalist', NEXT)).rejects.toThrow(
+    'Injected publication failure'
+  );
+  expect(fixture.content.style.display).toBe('inline-block');
+  await fixture.shell.destroy();
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('inline-block');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+});
+
+it('a replacement reborrows the latest external display rather than restoring an obsolete snapshot', async () => {
+  const fixture = await mountShell('wc', 'display: grid !important');
+  fixture.content.style.setProperty('display', 'flex', 'important');
+  await fixture.shell.update('brutalist', NEXT);
+  expect(fixture.content.style.display).toBe('contents');
+  await fixture.shell.destroy();
+  expect(fixture.content.style.display).toBe('flex');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+});
+
+it('late stale setup and disposal cannot reset the current owner display', async () => {
+  const fixture = await mountShell('wc', 'display: grid !important');
+  const stale = delayNextLoad();
+  const first = fixture.shell.update('brutalist', NEXT);
+  await fixture.shell.update('bootstrap-2-3-2', LATEST);
+  const current = fixture.surface();
+  fixture.content.style.setProperty('display', 'flex', 'important');
+  stale.resolve();
+  await first;
+  expect(fixture.surface()).toBe(current);
+  expect(fixture.content.style.display).toBe('flex');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+  await fixture.shell.destroy();
+  expect(fixture.content.style.display).toBe('flex');
+});
+
+it('destroy restores display synchronously while late candidate cleanup and repeated destroy are harmless', async () => {
+  const fixture = await mountShell('wc', 'display: grid !important');
+  const gate = delayNextLoad();
+  const pending = fixture.shell.update('brutalist', NEXT);
+  const destroyed = fixture.shell.destroy();
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('grid');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+  fixture.content.style.setProperty('display', 'inline-flex', 'important');
+  await fixture.shell.destroy();
+  gate.resolve();
+  await Promise.all([pending, destroyed]);
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('inline-flex');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+  expect(fixture.mount.childNodes).toHaveLength(0);
+});
+
+it('first publication failure before moving content releases the absent display declaration', async () => {
+  interceptNextSetup((slot) => {
+    vi.spyOn(slot, 'insertBefore').mockImplementationOnce(() => {
+      throw new Error('Injected publication failure before content move');
+    });
+  });
+  const fixture = startShell();
+  await expect(fixture.shell.ready).rejects.toThrow('Injected publication failure');
+  expectReturned(fixture);
+  expect(fixture.content.hasAttribute('style')).toBe(false);
+  expect(fixture.mount.childNodes).toHaveLength(0);
+});
+
+it('a render completing after destroy leaves the returned subtree and newer author style alone', async () => {
+  const rendered = defer(),
+    gate = defer();
+  pendingLoads.push(gate);
+  vi.mocked(renderDemo).mockImplementationOnce(async (options) => {
+    const original = await vi.importActual<typeof import('./demo-renderer')>('./demo-renderer');
+    const result = await original.renderDemo(options);
+    rendered.resolve();
+    await gate.promise;
+    return result;
+  });
+  const fixture = startShell('wc', 'display: grid !important');
+  await rendered.promise;
+  // The real setup ran, but this candidate has not published or borrowed styles.
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('grid');
+  const destroyed = fixture.shell.destroy();
+  fixture.content.style.setProperty('display', 'inline-flex', 'important');
+  gate.resolve();
+  await Promise.all([fixture.shell.ready, destroyed]);
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('inline-flex');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
+  expect(fixture.mount.childNodes).toHaveLength(0);
+});
+
+it('late old-shell renderer disposal cannot release the new owner display lease', async () => {
+  const disposing = defer(),
+    gate = defer();
+  pendingLoads.push(gate);
+  vi.mocked(renderDemo).mockImplementationOnce(async (options) => {
+    const original = await vi.importActual<typeof import('./demo-renderer')>('./demo-renderer');
+    const result = await original.renderDemo(options);
+    return {
+      ...result,
+      async destroy() {
+        disposing.resolve();
+        await gate.promise;
+        await result.destroy();
+      },
+    };
+  });
+  const fixture = await mountShell('wc', 'display: grid !important');
+  const replacement = fixture.shell.update('brutalist', NEXT);
+  await disposing.promise;
+  expect(fixture.surface().dataset.projectionFamily).toBe('brutalist');
+  expect(fixture.content.style.display).toBe('contents');
+  gate.resolve();
+  await replacement;
+  expect(fixture.content.style.display).toBe('contents');
+  await fixture.shell.destroy();
+  expectReturned(fixture);
+  expect(fixture.content.style.display).toBe('grid');
+  expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
 });
