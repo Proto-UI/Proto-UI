@@ -99,12 +99,12 @@ for (const [family, y] of [
     doc.body.innerHTML =
       '<div data-demo-ref="description">Long descriptions are useful copyable content. Selecting this sentence does not activate a control.</div>';
     const element = doc.querySelector('div')!;
-    const bounds = { x: 352, y, width: 576, height: 52 };
+    const bounds = new window.DOMRect(352, y, 576, 52);
     const rects = [
       { x: 352, y: y + 3, width: 566.4375, height: 19 },
       { x: 352, y: y + 29, width: 219.734375, height: 19 },
     ];
-    element.getBoundingClientRect = () => bounds as DOMRect;
+    element.getBoundingClientRect = () => bounds;
     const createRange = doc.createRange.bind(doc);
     doc.createRange = () => {
       const range = createRange();
@@ -192,7 +192,9 @@ test('pointer tracing observes native-event facts without cancelling and retires
   const events = trace.finish();
   assert.equal(events.length, 1);
   assert.equal(events[0].type, 'mousedown');
-  assert.equal(events[0].trusted, down.isTrusted);
+  // Happy DOM's type omits this property; retain the exact runtime comparison.
+  const observedTrusted: unknown = Reflect.get(down, 'isTrusted');
+  assert.equal(events[0].trusted, observedTrusted);
   assert.equal(events[0].target, 'description');
   element.dispatchEvent(new window.MouseEvent('mouseup', { bubbles: true }));
   assert.equal(trace.finish().length, 1);
