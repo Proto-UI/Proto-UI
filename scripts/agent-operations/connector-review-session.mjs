@@ -263,7 +263,7 @@ export class ConnectorReviewSession {
         'Parent inspects actual diff and evidence, reconciles prior findings, and supplies its own packet; helper does not judge.',
     };
   }
-  #authorize(packet, live, assessment, permitDuplicate = false) {
+  #authorize(packet, live, assessment, permitDuplicate = false, measured = {}) {
     this.#refreshPolicy();
     validateSelfAssessmentResult(assessment, this.#policy);
     const snapshot = this.#readSnapshot();
@@ -296,6 +296,8 @@ export class ConnectorReviewSession {
     );
     assert(!live.input.isDraft, 'draft pull requests are analysis-only');
     const authorization = authorizeReviewSubmission({
+      modelTrace: measured.modelTrace,
+      modelTraceContext: measured.modelTraceContext,
       packet,
       input: this.#initial.input,
       liveInput: live.input,
@@ -380,7 +382,18 @@ export class ConnectorReviewSession {
     }
     throw new Error('intent-free claim release contention budget exhausted');
   }
-  async publishParentPacket(packet, assessment, analysisReconciliation = null) {
+  async publishParentPacket(
+    packet,
+    assessment,
+    analysisReconciliation = null,
+    measuredInputs = {}
+  ) {
+    // Snapshot caller-owned measured inputs once; both pre-stage and final
+    // authorization validate this same receipt/context, never body text alone.
+    const measured = structuredClone({
+      modelTrace: measuredInputs.modelTrace,
+      modelTraceContext: measuredInputs.modelTraceContext,
+    });
     assert(
       this.#initial && !this.#used,
       'parent-review request required; one publication attempt per session'
@@ -392,7 +405,7 @@ export class ConnectorReviewSession {
     let terminalStarted = false;
     try {
       live = await this.#transport.collect(this.#initial.input.pullRequest);
-      const authorization = this.#authorize(packet, live, assessment, true);
+      const authorization = this.#authorize(packet, live, assessment, true, measured);
       if (authorization.duplicate) {
         terminalStarted = true;
         const finished = await this.#completeParentAnalysis(packet, true);
@@ -459,7 +472,7 @@ export class ConnectorReviewSession {
             current.slot.generation,
         'material generation changed before review request'
       );
-      this.#authorize(intent.analysis.packet, final, assessment);
+      this.#authorize(intent.analysis.packet, final, assessment, false, measured);
       await this.#ledger.consumePublicationAttempt(intent.id);
       attemptConsumed = true;
       this.#refreshPolicy();
