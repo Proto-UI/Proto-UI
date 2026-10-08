@@ -16,6 +16,7 @@ function fixture() {
   const values = new Map<object, unknown>();
   const changes: unknown[] = [];
   const parts: AnatomyPartView[] = [];
+  let orderReads = 0;
   const tokens = new Map<AnatomyPartView, object>();
   const targetNotifications: Array<() => void> = [];
   let rowToken: object;
@@ -36,7 +37,12 @@ function fixture() {
         resolveAncestorInstance: (_family: unknown, part: AnatomyPartView) =>
           part.role === 'headerCell' || part.role === 'cell' ? rowToken : null,
         resolveDomainScope: () => domain,
-        order: { parts: () => parts },
+        order: {
+          parts: () => {
+            orderReads++;
+            return parts;
+          },
+        },
         subscribeOrder: () => () => {},
         subscribeTargets: (_family: unknown, notify: () => void) => {
           targetNotifications.push(notify);
@@ -84,6 +90,7 @@ function fixture() {
     values,
     changes,
     notifyTargets: () => targetNotifications.forEach((notify) => notify()),
+    orderReads: () => orderReads,
   };
 }
 
@@ -114,5 +121,14 @@ describe('Table projection continuity', () => {
     expect(root.handle.getSnapshot()).toMatchObject({ valid: true, columnCount: 3 });
     expect(values.get(cell.handle.states.columnSpan)).toBe(2);
     expect(cell.relations.get('labelledBy')).toEqual([header.ref, cell.ref]);
+  });
+  it('does not recompute stable membership on ordinary updated phases', () => {
+    const current = fixture();
+    const before = current.orderReads();
+    for (const part of [current.root, current.row, current.header, current.cell]) {
+      part.impl.onProtoPhase('updated');
+    }
+    expect(current.orderReads()).toBe(before);
+    expect(current.changes).toEqual([]);
   });
 });

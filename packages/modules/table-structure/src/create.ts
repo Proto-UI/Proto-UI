@@ -74,8 +74,16 @@ export class TableStructureModuleImpl extends ModuleBase {
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
-    if (phase !== 'unmounted') return;
-    this.release();
+    if (
+      phase === 'updated' &&
+      this.role &&
+      !Object.is(this.domainScope, this.anatomy.resolveDomainScope(TABLE_STRUCTURE_FAMILY))
+    ) {
+      // A retained renderer can reparent the logical owner without another
+      // mount epoch. Revoke the old domain before publishing its new facts.
+      this.notifyRoot();
+    }
+    if (phase === 'unmounted') this.release();
   }
 
   dispose(): void {
