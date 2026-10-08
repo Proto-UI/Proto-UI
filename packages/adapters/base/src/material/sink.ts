@@ -33,16 +33,106 @@ export function createWebMaterialSink(
   effects: EffectsPort,
   options: WebMaterialOptions
 ): VisualFeedbackSink {
-  const win = host.ownerDocument.defaultView;
+  let retired = false;
+  let last: VisualFeedbackFrame | null = null;
+  let document = host.ownerDocument;
+  let generation = 0;
+  let rebinding = false;
+  let binding: VisualFeedbackSink | null = null;
+  // Author ownership belongs to the host/view, not its document-bound GPU.
+  const externalPaintOwners = new Set<string>();
+  const motion = createContactMotion();
+  function bindDocument() {
+    // A provider cleanup/subscription may synchronously commit newer intent.
+    // Queue that frame until old cleanup finishes, before acquiring new paint.
+    if (rebinding) return;
+    rebinding = true;
+    const operation = ++generation;
+    try {
+      const previous = binding;
+      binding = null;
+      previous?.release(last?.view ?? 0);
+      if (retired || generation !== operation) return;
+      document = host.ownerDocument;
+      const next = createDocumentMaterialSink(
+        host,
+        effects,
+        options,
+        externalPaintOwners,
+        motion,
+        () => {
+          if (!retired && host.ownerDocument !== document) bindDocument();
+        }
+      );
+      if (retired || generation !== operation) {
+        next.release(last?.view ?? 0);
+        return;
+      }
+      binding = next;
+    } finally {
+      rebinding = false;
+    }
+    if (last) binding?.commit(last);
+  }
+  bindDocument();
+  return {
+    commit(frame) {
+      if (retired) return;
+      assertFrameIdentity(frame, last);
+      last = frame;
+      if (!binding || host.ownerDocument !== document) bindDocument();
+      else binding.commit(frame);
+    },
+    release(view) {
+      if (retired || (last && last.view !== view)) return;
+      retired = true;
+      generation++;
+      const previous = binding;
+      binding = null;
+      previous?.release(view);
+    },
+  };
+}
+
+function assertFrameIdentity(frame: VisualFeedbackFrame, last: VisualFeedbackFrame | null) {
+  if (
+    !Number.isSafeInteger(frame.view) ||
+    frame.view < 0 ||
+    !Number.isSafeInteger(frame.revision) ||
+    frame.revision < 0
+  )
+    throw new Error('Invalid material frame identity');
+  if (last && (frame.view !== last.view || frame.revision <= last.revision))
+    throw new Error('Stale or cross-view material frame');
+}
+
+/** A document change retires this complete physical binding before the current
+ * intent is replayed with destination preferences, GPU, image and observers.
+ * Old asynchronous work can request rebinding but cannot paint the new owner. */
+function createDocumentMaterialSink(
+  host: HTMLElement,
+  effects: EffectsPort,
+  options: WebMaterialOptions,
+  externalPaintOwners: Set<string>,
+  motion: ReturnType<typeof createContactMotion>,
+  adopted: () => void
+): VisualFeedbackSink {
+  const document = host.ownerDocument;
+  const win = document.defaultView;
   if (!win) throw new Error('Material owner document unavailable');
   const preferences = options.preferences ?? createWebMaterialPreferences(win);
-  const program = acquireWebOpticalProgram(host.ownerDocument, () => {
+  const program = acquireWebOpticalProgram(document, () => {
     invalidate('optical-context-invalidated');
   });
   let retired = false,
     painting = false,
     again = false;
-  const motion = createContactMotion();
+  function currentDocument() {
+    if (retired) return false;
+    if (host.ownerDocument === document) return true;
+    adopted();
+    return false;
+  }
   let scheduled: number | null = null;
   let queued = false;
   let paintLease = '';
@@ -53,7 +143,7 @@ export function createWebMaterialSink(
   let paintedImage = '';
   let last: VisualFeedbackFrame | null = null;
   const contact = observeWebPointerContact(host, (sample) => {
-    if (retired) return;
+    if (!currentDocument()) return;
     if (motion.update(sample, win.performance.now())) {
       cancelPending();
       clearImage();
@@ -65,14 +155,14 @@ export function createWebMaterialSink(
     schedule();
   });
   function schedule() {
-    if (retired || scheduled !== null) return;
+    if (!currentDocument() || scheduled !== null) return;
     scheduled = win!.requestAnimationFrame(() => {
       scheduled = null;
       repaint();
     });
   }
   function invalidate(reason: string) {
-    if (retired) return;
+    if (!currentDocument()) return;
     renderFailure = null;
     motion.stop();
     ordinary(reason);
@@ -101,7 +191,6 @@ export function createWebMaterialSink(
   };
   let safeFallback: Parameters<typeof rgbaCss>[0] | null = null;
   const owned = new Map<string, { before: [string, string]; applied: [string, string] }>();
-  const externalPaintOwners = new Set<string>();
   const diagnostics = new Map<
     string,
     { before: string | undefined; applied: string | undefined }
@@ -174,7 +263,7 @@ export function createWebMaterialSink(
     owned.set(name, { before, applied: inline(name) });
   }
   function report(key: string, value: string | undefined) {
-    if (retired) return;
+    if (!currentDocument()) return;
     const current = host.dataset[key],
       old = diagnostics.get(key);
     const before = old && current === old.applied ? old.before : current;
@@ -230,7 +319,7 @@ export function createWebMaterialSink(
     report('materialSource', undefined);
   }
   function repaint() {
-    if (retired || !last) return;
+    if (!currentDocument() || !last) return;
     if (painting) {
       again = true;
       return;
@@ -244,7 +333,7 @@ export function createWebMaterialSink(
         return;
       }
       const palette = options.palette.current();
-      if (retired) return;
+      if (!currentDocument()) return;
       if (
         !Number.isSafeInteger(palette.revision) ||
         palette.revision < 0 ||
@@ -278,7 +367,7 @@ export function createWebMaterialSink(
       // Restoration therefore never waits for an asynchronous framework flush.
       const tokens = frame.style.tokens;
       style(tokens);
-      if (retired) return;
+      if (!currentDocument()) return;
       const applied = (host.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
       const finalStyleRealized =
         applied.length === tokens.length && tokens.every((token) => applied.includes(token));
@@ -325,7 +414,7 @@ export function createWebMaterialSink(
         radii.every((value) => /^\d+(\.\d+)?px$/.test(value)) &&
         radii.every((value) => value === radii[0]);
       const source = options.source.current();
-      if (retired) return;
+      if (!currentDocument()) return;
       const requestedCandidate =
         frame.material.candidates.length === 1 ? frame.material.candidates[0] : null;
       const wantsContact =
@@ -361,7 +450,7 @@ export function createWebMaterialSink(
         sourceRevision = source!.revision;
       } else sourceOwner = null;
       const prefs = preferences.current();
-      if (retired) return;
+      if (!currentDocument()) return;
       const geometry = {
         width: rect.width,
         height: rect.height,
@@ -516,7 +605,7 @@ export function createWebMaterialSink(
       // A same-generation admitted image stays visible until its decoded
       // successor is ready. Revoked source/geometry/preferences never qualify.
       if (paintLease !== lease) fallback(resolved.fill, 'preparing', false);
-      if (retired || program.lost) return;
+      if (!currentDocument() || program.lost) return;
       const image = program.render({
         source,
         geometry: opticalGeometry,
@@ -526,14 +615,14 @@ export function createWebMaterialSink(
         fill: resolved.fill,
         foreground: resolved.foreground,
       });
-      if (retired) return;
+      if (!currentDocument()) return;
       const ticket = { signature, lease, cancel() {} };
       pending = ticket;
       ticket.cancel = prepareOpticalImage(
-        host.ownerDocument,
+        document,
         image,
         () => {
-          if (retired || pending !== ticket) return;
+          if (!currentDocument() || pending !== ticket) return;
           try {
             const currentSource = options.source.current(),
               currentPalette = options.palette.current(),
@@ -550,7 +639,7 @@ export function createWebMaterialSink(
               currentCss.borderBottomRightRadius,
               currentCss.borderBottomLeftRadius,
             ];
-            if (retired || pending !== ticket) return;
+            if (!currentDocument() || pending !== ticket) return;
             if (externalPaintConflict()) {
               ordinary('external-paint-conflict');
               lastOwnedStyle = host.getAttribute('style');
@@ -650,7 +739,7 @@ export function createWebMaterialSink(
               schedule();
             }
           } catch (error) {
-            if (!retired && pending === ticket) {
+            if (currentDocument() && pending === ticket) {
               const reason =
                 error instanceof Error ? error.message : 'material-prepare-input-failed';
               renderFailure = { key: retryKey, reason };
@@ -661,12 +750,12 @@ export function createWebMaterialSink(
           }
         },
         () => {
-          if (retired || pending !== ticket) return;
+          if (!currentDocument() || pending !== ticket) return;
           try {
             const currentSource = options.source.current();
             const currentPalette = options.palette.current();
             const currentPreferences = preferences.current();
-            if (retired || pending !== ticket) return;
+            if (!currentDocument() || pending !== ticket) return;
             if (externalPaintConflict()) ordinary('external-paint-conflict');
             else if (
               !currentMaterialCompatible() ||
@@ -680,14 +769,14 @@ export function createWebMaterialSink(
               fallback(resolved.fill!, 'optical-image-decode-failed');
             }
           } catch {
-            if (!retired && pending === ticket) ordinary('material-prepare-input-failed');
+            if (currentDocument() && pending === ticket) ordinary('material-prepare-input-failed');
           }
           lastOwnedStyle = host.getAttribute('style');
           lastOwnedTokens = host.getAttribute('data-pui-style');
         }
       );
     } catch (error) {
-      if (!retired && last) {
+      if (currentDocument() && last) {
         if (safeFallback && last === frame)
           fallback(safeFallback, error instanceof Error ? error.message : 'material-frame-failed');
         else ordinary('unresolved-owned-opaque-fallback');
@@ -718,6 +807,7 @@ export function createWebMaterialSink(
     );
     disposers.push(
       options.source.subscribe(() => {
+        if (!currentDocument()) return;
         // A new frame from the same admitted canvas lease supersedes an in-flight
         // decode, not its input session. Repaint withdraws null/rebound/invalid
         // sources synchronously, while a valid successor can replace atomically.
@@ -739,16 +829,7 @@ export function createWebMaterialSink(
   }
   return {
     commit(frame) {
-      if (retired) return;
-      if (
-        !Number.isSafeInteger(frame.view) ||
-        frame.view < 0 ||
-        !Number.isSafeInteger(frame.revision) ||
-        frame.revision < 0
-      )
-        throw new Error('Invalid material frame identity');
-      if (last && (frame.view !== last.view || frame.revision <= last.revision))
-        throw new Error('Stale or cross-view material frame');
+      if (!currentDocument()) return;
       // Retire a decode made against the previous style snapshot before it can
       // mistake an ordinary Rule transition (for example pointerleave shadow)
       // for source/session loss. Re-admit geometry below without cancelling the
