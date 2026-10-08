@@ -351,7 +351,7 @@ export function collectWebsiteProductionBundleIssues({
 
   for (const chunk of chunks) {
     for (const moduleId of chunk.moduleIds ?? []) {
-      if (SERVER_ONLY_PRERENDER_MODULES.has(moduleId))
+      if (SERVER_ONLY_PRERENDER_MODULES.has(moduleIdWithoutQuery(moduleId)))
         issues.push(
           `server-only prerender module \`${moduleId}\` leaked into client chunk \`${chunk.fileName}\``
         );

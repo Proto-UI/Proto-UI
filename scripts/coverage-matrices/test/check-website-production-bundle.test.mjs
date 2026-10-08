@@ -1314,26 +1314,33 @@ test('all additionally reviewed WC helpers are statically owned by the actual pu
     assert.ok(seen.has(id), `Missing actual public Adapter ownership: ${id}`);
 });
 
-for (const moduleId of [
+for (const source of [
   'apps/www/src/components/snapshot-prototype-style.ts',
   'apps/www/src/components/site-startup-paint.ts',
   'packages/cli/src/services/proto-style-css.ts',
 ]) {
   for (const dynamic of [false, true]) {
-    test(`startup prerender stays server-only: ${moduleId} dynamic=${dynamic}`, () => {
-      const graph = graphFixture();
-      graph.chunks.push(
-        chunk('_astro/prerender-leak.js', {
-          isEntry: !dynamic,
-          isDynamicEntry: dynamic,
-          moduleIds: [moduleId],
-        })
-      );
-      assert.ok(
-        collectWebsiteProductionBundleIssues({ graph }).some(
-          (issue) => issue.includes('server-only prerender module') && issue.includes(moduleId)
-        )
-      );
-    });
+    for (const [form, moduleId] of [
+      ['plain', source],
+      ['query', `${source}?used`],
+      ['windows', source.replaceAll('/', '\\')],
+      ['windows-query', `${source.replaceAll('/', '\\')}?used`],
+    ]) {
+      test(`startup prerender stays server-only: ${source} dynamic=${dynamic} ${form}`, () => {
+        const graph = graphFixture();
+        graph.chunks.push(
+          chunk('_astro/prerender-leak.js', {
+            isEntry: !dynamic,
+            isDynamicEntry: dynamic,
+            moduleIds: [moduleId],
+          })
+        );
+        assert.ok(
+          collectWebsiteProductionBundleIssues({ graph }).some(
+            (issue) => issue.includes('server-only prerender module') && issue.includes(moduleId)
+          )
+        );
+      });
+    }
   }
 }
