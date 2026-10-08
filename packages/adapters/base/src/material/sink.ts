@@ -150,11 +150,16 @@ function createDocumentMaterialSink(
     if (!currentDocument()) return;
     if (motion.update(sample, win.performance.now())) {
       cancelPending();
-      clearImage();
-      restore();
-      paintLease = '';
-      lastOwnedStyle = host.getAttribute('style');
-      lastOwnedTokens = host.getAttribute('data-pui-style');
+      // A fresh down retires the old session's completion, not an already
+      // admitted image. Keep that paint until the new session decodes, subject
+      // to the same source/style/geometry admission on its next repaint.
+      // Cancellation still withdraws the rejected contact immediately.
+      if (!sample.active) {
+        clearImage();
+        restore();
+        lastOwnedStyle = host.getAttribute('style');
+        lastOwnedTokens = host.getAttribute('data-pui-style');
+      }
     }
     schedule();
   });
@@ -553,7 +558,7 @@ function createDocumentMaterialSink(
           JSON.stringify(last.material.slot) === JSON.stringify(frame.material.slot)
         );
       };
-      const lease = JSON.stringify([
+      const nextPaintLease = JSON.stringify([
         frame.view,
         sourceEpoch,
         palette.revision,
@@ -562,9 +567,11 @@ function createDocumentMaterialSink(
         resolved.fill,
         resolved.foreground,
         tracksContact,
-        motionFrame.session,
         candidate.variant,
       ]);
+      // Session identity gates pending work/retries, while compatible admitted
+      // pixels can bridge a new down without exposing the opaque fallback.
+      const lease = JSON.stringify([nextPaintLease, motionFrame.session]);
       // Carrier/transport refusal is independent of changing source pixels or
       // pointer-move samples. Only a new style/geometry/profile/session can
       // make that failed admission useful to retry; GPU failures remain uncached.
@@ -588,6 +595,7 @@ function createDocumentMaterialSink(
         opticalGeometry,
         policy.effectiveMotion,
         candidate,
+        motionFrame.session,
         tracksContact ? motionFrame.contact : null,
         resolved.fill,
         resolved.foreground,
@@ -606,7 +614,7 @@ function createDocumentMaterialSink(
       cancelPending();
       // A same-generation admitted image stays visible until its decoded
       // successor is ready. Revoked source/geometry/preferences never qualify.
-      if (paintLease !== lease) fallback(resolved.fill, 'preparing', false);
+      if (paintLease !== nextPaintLease) fallback(resolved.fill, 'preparing', false);
       if (!currentDocument() || program.lost) return;
       const image = program.render({
         source,
@@ -702,7 +710,7 @@ function createDocumentMaterialSink(
             own('background-repeat', 'no-repeat');
             renderFailure = null;
             paintSignature = signature;
-            paintLease = lease;
+            paintLease = nextPaintLease;
             paintedImage = image;
             pending = null;
             releaseImage = () => ticket.cancel();

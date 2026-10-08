@@ -502,6 +502,118 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
     expect(cancels[0]).toHaveBeenCalledOnce();
     f.sink.release(1);
   });
+  it.each(['first down', 'repress during release'])(
+    'retains admitted paint through %s while rejecting superseded session completions',
+    (transition) => {
+      let image = 0;
+      optical.render.mockImplementation(() => `data:image/png;base64,${btoa(String(++image))}`);
+      const releaseCarrier = vi.fn();
+      carrierControl.create = () => ({ valid: () => true, release: releaseCarrier });
+      const f = setup();
+      try {
+        if (transition === 'repress during release') {
+          f.send(0.5, 'down');
+          f.flushFrame();
+          f.send(0.8);
+          f.flushFrame();
+          f.send(0.8, 'up');
+          f.flushFrame();
+          expect(f.host.dataset.materialContact).toBe('release');
+        }
+        const safe = f.host.style.getPropertyValue('--pui-material-image');
+        const admittedFrame = f.host.dataset.materialFrame;
+        const callbacks: Array<() => void> = [];
+        const cancellations: Array<ReturnType<typeof vi.fn>> = [];
+        decoding.prepare.mockImplementation((_doc, _source, ready) => {
+          callbacks.push(ready);
+          const cancel = vi.fn();
+          cancellations.push(cancel);
+          return cancel;
+        });
+        // A live source successor is pending before the pointer session changes.
+        f.source(true, 2);
+        expect(callbacks).toHaveLength(1);
+        const releases = releaseCarrier.mock.calls.length;
+        const nextSession = transition === 'first down' ? 1 : 2;
+        f.send(0.2, 'down', nextSession);
+        expect(cancellations[0]).toHaveBeenCalledOnce();
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(safe);
+        expect(f.host.style.backgroundColor).toBe('transparent');
+        expect(releaseCarrier).toHaveBeenCalledTimes(releases);
+        f.flushFrame();
+        expect(callbacks).toHaveLength(2);
+        expect(f.host.dataset.materialQuality).toBe('self-optical');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(safe);
+        expect(f.host.style.backgroundColor).toBe('transparent');
+        callbacks[0]();
+        expect(f.host.dataset.materialFrame).toBe(admittedFrame);
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(safe);
+        callbacks[1]();
+        expect(f.host.style.getPropertyValue('--pui-material-image')).not.toBe(safe);
+        expect(f.host.dataset.materialContact).toBe('held');
+        expect(f.host.dataset.materialContactSession).toBe(String(nextSession));
+        expect(f.host.dataset.materialSourceRevision).toBe('2');
+        expect(releaseCarrier).toHaveBeenCalledTimes(releases);
+      } finally {
+        f.sink.release(1);
+      }
+    }
+  );
+  it('commits a new session even when its contact paint inputs match the previous session', () => {
+    const f = setup();
+    try {
+      f.send(0.5, 'down', 1);
+      f.flushFrame();
+      const rendered = optical.render.mock.calls.length;
+      // The router can replace a still-held session with the same coordinates.
+      f.send(0.5, 'down', 2);
+      f.flushFrame();
+      expect(optical.render).toHaveBeenCalledTimes(rendered + 1);
+      expect(f.host.dataset.materialContactSession).toBe('2');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+  it.each([
+    'source revoked',
+    'reduced transparency',
+    'geometry changed',
+    'material withdrawn',
+    'contact cancelled',
+    'view retired',
+  ])('withdraws retained new-down paint when %s before the replacement decodes', (invalidation) => {
+    const f = setup();
+    try {
+      const callbacks: Array<() => void> = [];
+      decoding.prepare.mockImplementation((_doc, _source, ready) => {
+        callbacks.push(ready);
+        return () => {};
+      });
+      f.send(0.3, 'down');
+      f.flushFrame();
+      expect(f.host.dataset.materialQuality).toBe('self-optical');
+      expect(f.host.style.getPropertyValue('--pui-material-image')).not.toBe('');
+      expect(callbacks).toHaveLength(1);
+      if (invalidation === 'source revoked') f.source(false);
+      else if (invalidation === 'reduced transparency') f.transparency('reduce');
+      else if (invalidation === 'geometry changed') {
+        vi.mocked(f.host.getBoundingClientRect).mockReturnValue(rect(45, 30, 100, 40));
+        f.invalidate();
+      } else if (invalidation === 'material withdrawn')
+        f.sink.commit({
+          ...f.frame,
+          revision: 2,
+          material: { ...f.frame.material, candidates: [] },
+        });
+      else if (invalidation === 'contact cancelled') f.send(0.3, 'cancel');
+      else f.sink.release(1);
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+      callbacks[0]();
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+    } finally {
+      f.sink.release(1);
+    }
+  });
   it('keeps held contact through a Base style/phase transition while retiring its older decode', () => {
     const f = setup();
     f.send(0.5, 'down');
