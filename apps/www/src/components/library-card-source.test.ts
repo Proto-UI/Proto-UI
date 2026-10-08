@@ -14,3 +14,18 @@ it('keeps ownership honest and removes fake previews and delayed placeholders', 
   expect(part).toContain('renderProtoStyleTokenCss(cssTokens)');
   expect(part).not.toContain('visibility');
 });
+
+it('prepares individually bound appearance screenshots without treating endpoints as frame evidence', () => {
+  const source = readFileSync(
+    'apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts',
+    'utf8'
+  );
+  expect(source).toContain("phase: 'held-first-frame' | 'enhanced-endpoint'");
+  expect(source).toContain('for (const family of families)');
+  expect(source).toContain("'bootstrap-2-3-2'");
+  expect(source).toContain("'liquid-glass'");
+  expect(source).toContain("createHash('sha256').update(bytes).digest('hex')");
+  expect(source).toContain('expect(sha).toBe(process.env.CANDIDATE_SHA)');
+  expect(source).toContain('Endpoints do not replace intermediate-frame observations.');
+  expect(source).toContain('captureBeyondViewport: !!clip');
+});

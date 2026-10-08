@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -13,8 +14,15 @@ const directory =
 let browser: Browser;
 let baseUrl: string;
 let sha: string;
+let tree: string;
+let dirty: boolean;
 beforeAll(async () => {
   sha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+  tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim();
+  dirty = !!execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], {
+    encoding: 'utf8',
+  }).trim();
+  if (process.env.CANDIDATE_SHA) expect(sha).toBe(process.env.CANDIDATE_SHA);
   await mkdir(directory, { recursive: true });
   baseUrl = await startServer(route);
   browser = await launchBrowser();
@@ -94,7 +102,11 @@ function readCards(observe = false) {
   }
   return read();
 }
-async function captureCurrentViewport(page: Page, file: string) {
+async function captureCurrentViewport(
+  page: Page,
+  file: string,
+  clip?: { x: number; y: number; width: number; height: number; scale: number }
+) {
   // Do not use Playwright screenshot here: it awaits document.fonts.ready,
   // which is intentionally blocked by this test's own font request gate.
   const session = await page.context().newCDPSession(page);
@@ -104,7 +116,8 @@ async function captureCurrentViewport(page: Page, file: string) {
       session.send('Page.captureScreenshot', {
         format: 'png',
         fromSurface: true,
-        captureBeyondViewport: false,
+        captureBeyondViewport: !!clip,
+        ...(clip ? { clip } : {}),
       }),
       new Promise<never>((_, reject) => {
         timer = setTimeout(
@@ -113,11 +126,76 @@ async function captureCurrentViewport(page: Page, file: string) {
         );
       }),
     ]);
-    await writeFile(file, Buffer.from(screenshot.data, 'base64'));
+    const bytes = Buffer.from(screenshot.data, 'base64');
+    await writeFile(file, bytes);
+    return { file: path.basename(file), sha256: createHash('sha256').update(bytes).digest('hex') };
   } finally {
     if (timer) clearTimeout(timer);
     await session.detach();
   }
+}
+const families = [
+  'base',
+  'shadcn',
+  'lucide',
+  'brutalist',
+  'bootstrap-2-3-2',
+  'liquid-glass',
+] as const;
+async function captureFamilyCards(
+  page: Page,
+  name: string,
+  phase: 'held-first-frame' | 'enhanced-endpoint'
+) {
+  const originalScroll = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+  const images = [];
+  try {
+    for (const family of families) {
+      const card = page.locator(`[data-library="${family}"]`);
+      await card.scrollIntoViewIfNeeded();
+      const clip = await card.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const x = Math.max(0, rect.x + scrollX - 8);
+        const y = Math.max(0, rect.y + scrollY - 8);
+        return {
+          x,
+          y,
+          width: Math.min(rect.width + 16, document.documentElement.scrollWidth - x),
+          height: Math.min(rect.height + 16, document.documentElement.scrollHeight - y),
+          scale: 1,
+        };
+      });
+      expect(clip.width).toBeGreaterThan(0);
+      expect(clip.height).toBeGreaterThan(0);
+      images.push({
+        family,
+        phase,
+        clip,
+        ...(await captureCurrentViewport(
+          page,
+          path.join(directory, `${name}-${phase}-${family}.png`),
+          clip
+        )),
+      });
+    }
+  } finally {
+    await page.evaluate(({ x, y }) => scrollTo(x, y), originalScroll);
+  }
+  await writeFile(
+    path.join(directory, `${name}-${phase}-images.json`),
+    JSON.stringify(
+      {
+        sha,
+        tree,
+        dirty,
+        role: 'Six individual family appearance screenshots. Endpoints do not replace intermediate-frame observations.',
+        images,
+      },
+      null,
+      2
+    )
+  );
+  return images;
 }
 async function stopFrames(page: Page) {
   return page.evaluate(() => {
@@ -204,6 +282,7 @@ describe('actual library Cards preserve their first frame', () => {
           ).toBe(true);
           phase = 'capturing held-script/held-font frame';
           await captureCurrentViewport(page, path.join(directory, `${name}-before.png`));
+          await captureFamilyCards(page, name, 'held-first-frame');
           phase = 'upgrading';
           released = true;
           release();
@@ -222,6 +301,7 @@ describe('actual library Cards preserve their first frame', () => {
           await expect.poll(() => link.evaluate((el) => document.activeElement === el)).toBe(true);
           expect(await page.locator('a a').count()).toBe(0);
           await captureCurrentViewport(page, path.join(directory, `${name}-after.png`));
+          await captureFamilyCards(page, name, 'enhanced-endpoint');
           phase = 'reloading';
           // A newly cached optional face may legitimately differ between visits.
           // Compare the reload's own held first frame with its upgrade, rather
@@ -260,6 +340,8 @@ describe('actual library Cards preserve their first frame', () => {
             JSON.stringify(
               {
                 sha,
+                tree,
+                dirty,
                 phase,
                 error: String(error),
                 heldFonts,
@@ -285,6 +367,8 @@ describe('actual library Cards preserve their first frame', () => {
             JSON.stringify(
               {
                 sha,
+                tree,
+                dirty,
                 phase,
                 heldFonts,
                 heldScripts,
