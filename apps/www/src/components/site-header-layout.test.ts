@@ -237,3 +237,41 @@ it('keeps the compact docs header offset identical before and after enhancement'
   );
   expect(css).toContain('.site-header[data-docs-site-header]:has(.site-header-docs-navigation)');
 });
+
+it('keeps the page-top anchor at the initial reading inset when deferred modules finish loading', () => {
+  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+  // Native fragment navigation runs again at document load. The first title's
+  // clearance must include its actual responsive reading inset, not the 1rem
+  // clearance used by section bookmarks farther down the document.
+  expect(columns).toContain('[--docs-reading-inset:1.5rem]');
+  expect(columns).toContain('lg:[--docs-reading-inset:2rem]');
+  expect(columns).toContain('py-[var(--docs-reading-inset)]');
+  expect(frame).toMatch(
+    /:global\(\.site-page-frame:has\(\[data-docs-site-header\]\) main h1\[data-site-typography='h1'\]\)\s*\{\s*scroll-margin-top: calc\(var\(--header-height\) \+ var\(--docs-reading-inset, 1rem\)\);/
+  );
+  // Ordinary section clearance stays independent of the page-top inset.
+  expect(frame).toContain('scroll-margin-top: calc(var(--header-height) + 1rem)');
+});
+
+it.each(['en', 'zh-cn'])(
+  'preserves the original page-title clearance on the %s nohero splash',
+  (locale) => {
+    const splash = readFileSync(
+      `apps/www/src/content/docs/${locale}/internal/demo-matrix.mdx`,
+      'utf8'
+    );
+    const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+    expect(splash).toContain('template: splash');
+    expect(splash).not.toMatch(/^hero:/m);
+    const splashClass = columns.match(/const mainPaneClass = isSplash\s*\? '([^']+)'/)![1]!;
+    expect(splashClass).not.toContain('--docs-reading-inset');
+    const titleRule = frame.match(
+      /:global\(([^{}]*?h1\[data-site-typography='h1'\])\)\s*\{\s*scroll-margin-top:\s*([^;]+);/
+    )!;
+    document.body.innerHTML = `<div class="site-page-frame"><header data-docs-site-header></header><main><div data-layout="splash" class="${splashClass}"><h1 id="_top" data-site-typography="h1">Matrix</h1></div></main></div>`;
+    expect(document.querySelector(titleRule[1]!)).toBe(document.getElementById('_top'));
+    // A missing variable invalidates the winning declaration; it does not fall
+    // back to the lower-specificity section rule. Preserve that rule's 1rem.
+    expect(titleRule[2]).toBe('calc(var(--header-height) + var(--docs-reading-inset, 1rem))');
+  }
+);
