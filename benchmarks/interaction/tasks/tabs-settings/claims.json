@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "visibility": "coordinator-only; never participant material",
+  "status": "candidate-unreviewed",
+  "taskAuthority": "Current-user bounded standalone HTML requirements; all mapped catalog entities are draft. Source anchors are not full conformance claims.",
+  "sourceRevision": "dc8bf26cd903223f2dd4c8fc5fd37b8eb5227125",
+  "limitations": "Design reference adapted from draft interaction rules, not a stable or complete specification. Only the standalone Web task is covered. No internal ownership, library API, controlled-state, dynamic fallback, signal-count, materialization-default, or cross-adapter guarantee is asserted. Reciprocal retained-panel relationships and cleanup are explicit task requirements; this reference does not establish full accessibility or screen-reader conformance.",
+  "qualifiers": "All claims are task-scoped draft design guidance. Native disabled tabs need not receive focus. Manual activation, retained panels, live UI settings, explicit horizontal orientation, stable identities, and the removal/After flow are fixed by this task rather than promised general defaults.",
+  "claims": [
+    {
+      "id": "C01",
+      "text": "Maintain one selected tab and one visible panel in the four-tab reference; initially Overview is selected. Selection and focused navigation are distinct.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS",
+          "criterionId": "P-BASE-TABS-ROLE-SINGLE-SELECTION",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-CONTENT",
+          "criterionId": "P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "Exactly one selection, the fixed inventory, and the initial value are task requirements; the draft describes at-most-one selection.",
+      "claimTextSha256": "6cd50c23fa80f0169e133cfabbdaf62fade5522c6f8fc729284c877dc3b46091"
+    },
+    {
+      "id": "C02",
+      "text": "Interpret Left/Right in Horizontal and Up/Down in Vertical; the other axis does not navigate tabs. Live Orientation changes update explicit aria-orientation without resetting selection or tab/panel identities.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-ORIENTATION-KEYS",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-A11Y-ORIENTATION",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "Live UI control, explicit horizontal projection, non-axis behavior, and identity preservation are task-owned adaptations.",
+      "claimTextSha256": "8c062f2c17f3111646dbe3dbaa03ac2fb59b299e30f56826ea0635522e97fdd9"
+    },
+    {
+      "id": "C03",
+      "text": "Wrap navigation defaults to false: clamp focus at eligible endpoints. When true, wrap between them. Both modes skip disabled tabs in both directions. Home/End focus the first/last enabled tabs in either orientation and wrap mode; retain one enabled roving tab stop.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-PROP-LOOP",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-SKIP-DISABLED",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-HOME-END",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-FOCUS-ROVING",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "The checkbox, live toggles, explicit endpoint clamping, and DOM tab-stop projection specialize the draft navigation design.",
+      "claimTextSha256": "764a16b42ea20f2aed4e2e97bad2afa1b1c59b6b43d6281f53b8643bfc579dcd"
+    },
+    {
+      "id": "C04",
+      "text": "Keep manual activation: arrow, Home, and End focus movement do not change the selected tab or visible panel; activation is a separate commit.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "criterionId": "P-BASE-TABS-TRIGGER-MANUAL-FOCUS-STABLE",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "Manual mode is fixed by this task, not asserted as the general default.",
+      "claimTextSha256": "181a2af066292e2b8cbde82bed901f5e7dfc2eb767b8781014e7afe344c6e339"
+    },
+    {
+      "id": "C05",
+      "text": "Enabled pointer, Enter, and Space activation select the target tab. Prevent Space keydown default actions such as scrolling. Repeating selection is stable, with no duplicate elements, deselection, visibility drift, or identity changes.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "criterionId": "P-BASE-TABS-TRIGGER-ACTIVATION-REQUESTS-SELECTION",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "criterionId": "P-BASE-TABS-TRIGGER-KEYBOARD-ACTIVATION",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "Concrete Enter/pointer pathways and repeated-selection invariants are task requirements; no event-count or signal guarantee is claimed.",
+      "claimTextSha256": "7c89f77822bbb862cd6f081f5e049a6a9b4561854f05664a188d68c2de96b83c"
+    },
+    {
+      "id": "C06",
+      "text": "Disabled Unavailable suppresses pointer and keyboard selection, stays out of roving navigation and sequential Tab order, and cannot alter the selected panel. If focusable by the host, its activation and arrow keys do not move roving focus.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "criterionId": "P-BASE-TABS-TRIGGER-DISABLED-SUPPRESS-ACTIVATION",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "criterionId": "P-BASE-TABS-TRIGGER-A11Y-DISABLED",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-SKIP-DISABLED",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "Native disabled elements need not accept focus; focused-disabled keyboard suppression is a conditional task requirement.",
+      "claimTextSha256": "8a375e5c44b18c93f73cf5abf5370b95b1fb4ac62cb940998f10c9a98e8c3877"
+    },
+    {
+      "id": "C07",
+      "text": "Preserve the named tablist, tab and tabpanel roles, tab selected states, and disabled semantics. Retain all four panels and their unique stable IDs. Each tab controls its own panel, reciprocally labelled by that tab; only the selected panel is visible.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS",
+          "criterionId": "P-BASE-TABS-A11Y-ROLE-TARGETS",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS",
+          "criterionId": "P-BASE-TABS-A11Y-RELATIONSHIP-TARGET",
+          "path": "spec/prototypes/P-BASE-TABS.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-TRIGGER",
+          "criterionId": "P-BASE-TABS-TRIGGER-A11Y-SELECTED",
+          "path": "spec/prototypes/P-BASE-TABS-TRIGGER.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-CONTENT",
+          "criterionId": "P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "Retained complete panels and concrete Web reciprocity are task-owned requirements, not proof of full draft part-relationship projection or the default materialization policy.",
+      "claimTextSha256": "7452e7a595ed811e4e68098466b02c2cbf1e5449004feb6e13e19ced0830ac2e"
+    },
+    {
+      "id": "C08",
+      "text": "Remove reference removes all reference tabs, panels, and their interaction behavior; surviving settings are inert and do not recreate the reference or throw. After remains keyboard reachable by restored focus or Tab from the surviving removal control. This cleanup requirement is task-owned, not a general teardown guarantee.",
+      "lifecycle": "draft",
+      "sources": [
+        {
+          "entityId": "P-BASE-TABS-LIST",
+          "criterionId": "P-BASE-TABS-LIST-A11Y-ROLE",
+          "path": "spec/prototypes/P-BASE-TABS-LIST.yaml",
+          "lifecycle": "draft"
+        },
+        {
+          "entityId": "P-BASE-TABS-CONTENT",
+          "criterionId": "P-BASE-TABS-CONTENT-HIDDEN-WHEN-INACTIVE",
+          "path": "spec/prototypes/P-BASE-TABS-CONTENT.yaml",
+          "lifecycle": "draft"
+        }
+      ],
+      "adaptation": "Source anchors describe the surfaces being removed only; no source criterion is claimed to specify fixture teardown or After focus restoration.",
+      "claimTextSha256": "937dfff440e5237ed3af6ce413f7d568dbf8ce23106a5fd55baeeb463ae128df"
+    }
+  ],
+  "matchingRule": "ordinary Markdown paragraphs and bounded structured YAML contain exactly the same limitations, qualifiers, neutral criterion IDs, and claim texts. No canonical source metadata in either participant document. Parent owns final prompt/source/claim freezing."
+}

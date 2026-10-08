@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Reference sections</title>
+    <style>
+      body {
+        font:
+          17px system-ui,
+          sans-serif;
+        line-height: 1.5;
+        max-width: 52rem;
+        margin: 3rem auto;
+        padding: 0 1rem;
+      }
+      [role='tablist'] {
+        display: flex;
+        gap: 0.5rem;
+        margin: 1rem 0;
+      }
+      [role='tab'],
+      button,
+      select {
+        font: inherit;
+        padding: 0.55rem 0.8rem;
+      }
+      [role='tab'] {
+        border: 1px solid #52657a;
+        border-radius: 0.3rem;
+        background: #eef3f8;
+        cursor: pointer;
+      }
+      [role='tab'][aria-selected='true'] {
+        background: #163b63;
+        color: white;
+      }
+      [role='tab'][aria-disabled='true'] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      :focus-visible {
+        outline: 3px solid #d36300;
+        outline-offset: 3px;
+      }
+      [role='tabpanel'] {
+        padding: 1rem;
+        border: 1px solid #52657a;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Reference sections</h1>
+    <p>Choose a section. Arrow keys move focus; Enter or Space opens the focused section.</p>
+    <section id="reference-fixture" aria-label="Reference fixture">
+      <div role="tablist" aria-label="Reference sections" aria-orientation="horizontal">
+        <button
+          type="button"
+          role="tab"
+          id="section-overview"
+          aria-controls="view-overview"
+          aria-selected="true"
+          tabindex="0"
+        >
+          Overview
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="section-unavailable"
+          aria-controls="view-unavailable"
+          aria-selected="false"
+          aria-disabled="true"
+          tabindex="-1"
+        >
+          Unavailable
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="section-details"
+          aria-controls="view-details"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          Details
+        </button>
+        <button
+          type="button"
+          role="tab"
+          id="section-history"
+          aria-controls="view-history"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          History
+        </button>
+      </div>
+      <section role="tabpanel" id="view-overview" aria-labelledby="section-overview">
+        <h2>Overview</h2>
+        <p>A short introduction to this reference.</p>
+      </section>
+      <section role="tabpanel" id="view-unavailable" aria-labelledby="section-unavailable" hidden>
+        <h2>Unavailable</h2>
+        <p>This section cannot be selected.</p>
+      </section>
+      <section role="tabpanel" id="view-details" aria-labelledby="section-details" hidden>
+        <h2>Details</h2>
+        <p>The details of this reference.</p>
+      </section>
+      <section role="tabpanel" id="view-history" aria-labelledby="section-history" hidden>
+        <h2>History</h2>
+        <p>A record of earlier changes.</p>
+      </section>
+    </section>
+    <p>
+      <button type="button" id="remove-reference">Remove reference</button>
+      <button type="button">After</button>
+    </p>
+    <script>
+      (() => {
+        const fixture = document.getElementById('reference-fixture');
+        const list = fixture.querySelector('[role="tablist"]');
+        const tabs = [...list.querySelectorAll('[role="tab"]')];
+        const eligible = tabs.filter((tab) => tab.getAttribute('aria-disabled') !== 'true');
+        function rove(tab) {
+          tabs.forEach((item) => {
+            item.tabIndex = item === tab ? 0 : -1;
+          });
+          tab.focus();
+        }
+        function select(tab) {
+          if (tab.getAttribute('aria-disabled') === 'true') return;
+          tabs.forEach((item) => {
+            item.setAttribute('aria-selected', String(item === tab));
+            document.getElementById(item.getAttribute('aria-controls')).hidden = item !== tab;
+          });
+          rove(tab);
+        }
+        function click(event) {
+          const tab = event.target.closest('[role="tab"]');
+          if (tab && eligible.includes(tab)) select(tab);
+        }
+        function keydown(event) {
+          const tab = event.target.closest('[role="tab"]');
+          if (!tab || !eligible.includes(tab)) {
+            if (tab && event.key === ' ') event.preventDefault();
+            return;
+          }
+          const index = eligible.indexOf(tab);
+          let target;
+          if (event.key === 'ArrowRight') target = eligible[(index + 1) % eligible.length];
+          if (event.key === 'ArrowLeft')
+            target = eligible[(index - 1 + eligible.length) % eligible.length];
+          if (event.key === 'Home') target = eligible[0];
+          if (event.key === 'End') target = eligible.at(-1);
+          if (target) {
+            event.preventDefault();
+            rove(target);
+          }
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            select(tab);
+          }
+        }
+        list.addEventListener('click', click);
+        list.addEventListener('keydown', keydown);
+        document.getElementById('remove-reference').addEventListener(
+          'click',
+          () => {
+            list.removeEventListener('click', click);
+            list.removeEventListener('keydown', keydown);
+            fixture.remove();
+          },
+          { once: true }
+        );
+      })();
+    </script>
+  </body>
+</html>

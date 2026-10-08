@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Profile sections example</title>
+  </head>
+  <body>
+    <button id="before">Before profile</button>
+    <section id="profile">
+      <h2 id="heading">Profile sections</h2>
+      <div role="tablist" aria-labelledby="heading">
+        <button id="basic" role="tab" aria-controls="basic-view" aria-selected="true" tabindex="0">
+          Basic
+        </button>
+        <button
+          id="access"
+          role="tab"
+          aria-controls="access-view"
+          aria-selected="false"
+          tabindex="-1"
+          disabled
+        >
+          Access
+        </button>
+        <button
+          id="activity"
+          role="tab"
+          aria-controls="activity-view"
+          aria-selected="false"
+          tabindex="-1"
+        >
+          Activity
+        </button>
+      </div>
+      <section id="basic-view" role="tabpanel" aria-labelledby="basic">
+        Basic profile content
+      </section>
+      <section id="access-view" role="tabpanel" aria-labelledby="access" hidden>
+        Access profile content
+      </section>
+      <section id="activity-view" role="tabpanel" aria-labelledby="activity" hidden>
+        Activity profile content
+      </section>
+    </section>
+    <button id="remove">Remove profile</button>
+    <button id="after">After profile</button>
+    <script>
+      const profile = document.getElementById('profile');
+      const tabs = [...profile.querySelectorAll('[role="tab"]')];
+      function select(tab) {
+        for (const item of tabs) {
+          const selected = item === tab;
+          item.setAttribute('aria-selected', String(selected));
+          item.tabIndex = selected ? 0 : -1;
+          document.getElementById(item.getAttribute('aria-controls')).hidden = !selected;
+        }
+      }
+      for (const tab of tabs) {
+        tab.addEventListener('click', () => {
+          if (!tab.disabled) select(tab);
+        });
+        tab.addEventListener('keydown', (event) => {
+          const active = tabs.filter((item) => !item.disabled);
+          const index = active.indexOf(tab);
+          let next;
+          if (event.key === 'ArrowRight') next = active[(index + 1) % active.length];
+          if (event.key === 'ArrowLeft') next = active[(index + active.length - 1) % active.length];
+          if (event.key === 'Home') next = active[0];
+          if (event.key === 'End') next = active.at(-1);
+          if (next) {
+            event.preventDefault();
+            for (const item of tabs) item.tabIndex = item === next ? 0 : -1;
+            next.focus();
+          }
+        });
+      }
+      document.getElementById('remove').addEventListener('click', () => profile.remove());
+    </script>
+  </body>
+</html>

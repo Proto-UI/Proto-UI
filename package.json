@@ -101,7 +101,7 @@
     "release:lifecycle": "tsx scripts/spec/lifecycle-report.mjs",
     "check:spec-authoring": "tsx scripts/spec/check-lifecycle-authoring.mjs",
     "benchmark:validate": "node scripts/benchmark/benchmark.mjs validate",
-    "benchmark:test": "node --test scripts/benchmark/test/*.test.mjs scripts/benchmark/browser-calibration.test.mjs",
+    "benchmark:test": "node --test scripts/benchmark/test/*.test.mjs scripts/benchmark/browser-calibration.test.mjs scripts/benchmark/semantic/*.test.mjs scripts/benchmark/participant/*.test.mjs",
     "benchmark:dry-run": "node scripts/benchmark/benchmark.mjs dry-run"
   },
   "lint-staged": {
