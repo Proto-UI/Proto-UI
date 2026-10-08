@@ -194,3 +194,87 @@ describe('actual native focus description (DOM-only observations)', () => {
     expect(value.ancestors.some((node: any) => node.id === 'host' && node.inert)).toBe(true);
   });
 });
+
+describe('actual native keyboard observer press counting (injected events, no browser)', () => {
+  const source = readFileSync(
+    'apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts',
+    'utf8'
+  );
+  const raw = source
+    .split('// native-keyboard-observer-start\n')[1]
+    ?.split('// native-keyboard-observer-end')[0];
+  if (!raw) throw new Error('Missing actual native keyboard observer');
+  const install = () => {
+    const state = { trustedTabCount: 0, phase: 'keyboard-acquisition', trace: [] as any[] };
+    const target = document.createElement('button');
+    const observedDocument = {
+      activeElement: target,
+      hasFocus: () => true,
+      readyState: 'interactive',
+      querySelector: () => null,
+    };
+    const observe = new Function(
+      'state',
+      'target',
+      'describe',
+      'activePath',
+      'document',
+      `${transformSync(raw, { loader: 'ts' }).code}\nreturn observe;`
+    )(
+      state,
+      target,
+      (node: Node | null) => node?.nodeName ?? null,
+      () => [target.nodeName],
+      observedDocument
+    ) as (event: Event) => void;
+    return { state, observe };
+  };
+  // Trust is explicitly injected to exercise the real counter branch; this is
+  // not a synthetic dispatch advertised as native browser input.
+  const key = (type: string, key: string, trusted: boolean) => {
+    const event = new KeyboardEvent(type, { key, code: key, shiftKey: false });
+    Object.defineProperty(event, 'isTrusted', { value: trusted });
+    return event;
+  };
+  it('counts one trusted Tab down/up press once while retaining both trace entries', () => {
+    const { state, observe } = install();
+    observe(key('keydown', 'Tab', true));
+    observe(key('keyup', 'Tab', true));
+    expect(state.trustedTabCount).toBe(1);
+    expect(
+      state.trace.map(({ kind, key, trusted, shiftKey }) => ({ kind, key, trusted, shiftKey }))
+    ).toEqual([
+      { kind: 'keydown', key: 'Tab', trusted: true, shiftKey: false },
+      { kind: 'keyup', key: 'Tab', trusted: true, shiftKey: false },
+    ]);
+  });
+  it.each([
+    ['keyup', 'Tab', true],
+    ['keydown', 'Tab', false],
+    ['keydown', 'Enter', true],
+    ['keydown', 'Shift', true],
+  ] as const)('does not increment for %s %s trusted=%s', (type, value, trusted) => {
+    const { state, observe } = install();
+    observe(key(type, value, trusted));
+    expect(state.trustedTabCount).toBe(0);
+    expect(state.trace).toHaveLength(1);
+    expect(state.trace[0]).toMatchObject({ kind: type, key: value, trusted });
+  });
+  it('rejects a trusted non-keyboard event even if named keydown', () => {
+    const { state, observe } = install();
+    const event = new Event('keydown');
+    Object.defineProperty(event, 'isTrusted', { value: true });
+    observe(event);
+    expect(state.trustedTabCount).toBe(0);
+    expect(state.trace[0]).toMatchObject({ kind: 'keydown', key: null, trusted: true });
+  });
+  it('counts two complete presses as two steps, retaining all four event observations', () => {
+    const { state, observe } = install();
+    for (let i = 0; i < 2; i++) {
+      observe(key('keydown', 'Tab', true));
+      observe(key('keyup', 'Tab', true));
+    }
+    expect(state.trustedTabCount).toBe(2);
+    expect(state.trace).toHaveLength(4);
+  });
+});

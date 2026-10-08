@@ -33,7 +33,7 @@ describe('native fragment diagnostic evidence boundaries (source controls only)'
   });
   it('records input attribution and never restores focus after module release', () => {
     expect(control).toContain("for (const input of ['programmatic', 'keyboard']");
-    expect(control).toContain("event.key === 'Tab' && event.isTrusted");
+    expect(control).toMatch(/event\.key === 'Tab'\s*&&\s*event\.isTrusted/);
     expect(control).toContain("() => page.keyboard.press('Tab')");
     expect(control).not.toContain("page.keyboard.press('Shift+Tab')");
     expect(control).toMatch(

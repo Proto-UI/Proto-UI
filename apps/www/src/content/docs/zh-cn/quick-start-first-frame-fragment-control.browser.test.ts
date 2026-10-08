@@ -353,8 +353,14 @@ describe('Quickstart native fragment causal controls, application modules empty'
                 },
               };
               (window as any).__nativeFragmentControl = state;
+              // native-keyboard-observer-start
               const observe = (event: Event) => {
-                if (event instanceof KeyboardEvent && event.key === 'Tab' && event.isTrusted)
+                if (
+                  event.type === 'keydown' &&
+                  event instanceof KeyboardEvent &&
+                  event.key === 'Tab' &&
+                  event.isTrusted
+                )
                   state.trustedTabCount++;
                 if (state.trace.length < 1200)
                   state.trace.push({
@@ -385,6 +391,7 @@ describe('Quickstart native fragment causal controls, application modules empty'
                     targetTag: event.target instanceof Element ? event.target.localName : null,
                   });
               };
+              // native-keyboard-observer-end
               for (const type of [
                 'keydown',
                 'keyup',
