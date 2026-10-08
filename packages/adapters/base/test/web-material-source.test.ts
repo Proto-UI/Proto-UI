@@ -258,11 +258,14 @@ describe('authored pseudo source admission (computed-style inputs)', () => {
       expect(carrier.valid('data:image/png;base64,AA==')).toBe(true);
       expect(inspectCanvasBackdrop(host, lease.current()).valid).toBe(true);
       pseudos['::before'].left = '-220px';
+      sibling.style.setProperty('--pui-material-left', '-220px');
+      expect(carrier.valid('data:image/png;base64,AA==')).toBe(true);
       expect(inspectCanvasBackdrop(host, lease.current())).toMatchObject({
         valid: false,
         reason: 'source-overlapping-content',
       });
       pseudos['::before'].left = '0px';
+      sibling.style.setProperty('--pui-material-left', '0px');
       pseudos['::after'] = { ...authoredPaint };
       expect(inspectCanvasBackdrop(host, lease.current())).toMatchObject({
         valid: false,
