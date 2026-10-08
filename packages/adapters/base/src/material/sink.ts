@@ -127,11 +127,10 @@ export function createWebMaterialSink(
     return entries.sort(([a], [b]) => a.localeCompare(b));
   }
   function externalPaintConflict() {
+    // An optical receipt owns the complete inline paint tuple, including CSS
+    // priority. A surviving image alone cannot certify its size/tiling/clip.
     if (
-      carrier &&
       [...owned].some(([name, prior]) => {
-        if (name !== 'position' && name !== 'isolation' && !name.startsWith('--pui-material-'))
-          return false;
         const current = inline(name);
         return current[0] !== prior.applied[0] || current[1] !== prior.applied[1];
       })

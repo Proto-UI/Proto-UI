@@ -230,6 +230,54 @@ describe('V2 physical-view material ownership (mock GPU, not optical evidence)',
     expect(scheduled).toHaveBeenCalledOnce();
     f.sink.release(1);
   });
+  it.each([
+    ['background-size', '25% 25%'],
+    ['background-repeat', 'repeat'],
+    ['background-origin', 'content-box'],
+    ['background-clip', 'content-box'],
+  ])('revokes the non-contact receipt after author replaces %s', async (property, replacement) => {
+    const f = fixture();
+    try {
+      f.sink.commit(f.frame(1));
+      expect(f.host.dataset.materialQuality).toBe('self-optical');
+      expect(optical.render.mock.calls[0][0]).not.toHaveProperty('contact', expect.anything());
+      const image = f.host.style.backgroundImage;
+      f.invalidate();
+      expect(optical.render).toHaveBeenCalledOnce();
+      f.host.style.setProperty(property, replacement, 'important');
+      expect(f.host.style.backgroundImage).toBe(image);
+      // Actual MutationObserver delivery; manually drain the scheduled RAF so the
+      // mocked clock cannot turn an unobserved mutation into a false pass.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      const callback = vi.mocked(window.requestAnimationFrame).mock.calls.at(-1)?.[0];
+      expect(callback).toBeTypeOf('function');
+      callback!(0);
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      expect(f.host.dataset.materialReason).toBe('external-paint-conflict');
+      expect(f.host.style.getPropertyValue(property)).toBe(replacement);
+      expect(f.host.style.getPropertyPriority(property)).toBe('important');
+      f.sink.release(1);
+      expect(f.host.style.getPropertyValue(property)).toBe(replacement);
+      expect(f.host.style.getPropertyPriority(property)).toBe('important');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+  it('revokes the non-contact receipt when an owned background priority changes alone', () => {
+    const f = fixture();
+    try {
+      f.sink.commit(f.frame(1));
+      const value = f.host.style.backgroundSize;
+      f.host.style.setProperty('background-size', value, 'important');
+      f.invalidate();
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      expect(f.host.style.backgroundSize).toBe(value);
+      expect(f.host.style.getPropertyPriority('background-size')).toBe('important');
+      f.sink.release(1);
+    } finally {
+      f.sink.release(1);
+    }
+  });
   it('keeps opaque paint until image decode and drops superseded, revoked and retired preparations', () => {
     const callbacks: Array<() => void> = [];
     decoding.prepare.mockImplementation((_doc, _source, ready) => {
