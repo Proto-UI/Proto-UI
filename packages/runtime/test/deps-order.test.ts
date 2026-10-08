@@ -143,6 +143,11 @@ it('checks declared dependencies on every facade/port access, without loading mo
   expect(access.tryPort('optional')).toBeUndefined();
   expect(() => access.requireFacade('optional')).toThrow('missing dep facade');
   expect(() => access.requirePort('optional')).toThrow('missing dep port');
-  for (const method of ['requireFacade', 'requirePort', 'tryFacade', 'tryPort'] as const)
-    expect(() => access[method]('foreign')).toThrow('tried to access undeclared dep: foreign');
+  for (const read of [
+    () => access.requireFacade('foreign'),
+    () => access.requirePort('foreign'),
+    () => access.tryFacade('foreign'),
+    () => access.tryPort('foreign'),
+  ])
+    expect(read).toThrow('tried to access undeclared dep: foreign');
 });
