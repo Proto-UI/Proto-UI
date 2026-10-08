@@ -1,3 +1,7 @@
+import { observeWebPointerContact } from '../events/pointer-contact';
+import { createContactMotion } from './contact-motion';
+import { createContactCarrier, inspectContactCarrier } from './contact-carrier';
+import { contactProfile, contactPaintOutset } from './contact-profile';
 import { prepareOpticalImage } from './image-prepare';
 import { observeMaterialGeometry } from './geometry-watch';
 import type { EffectsPort } from '@proto.ui/core';
@@ -20,8 +24,9 @@ export type WebMaterialOptions = {
   preferences?: WebMaterialPreferences;
 };
 /** One physical view owns one V2 consumer. Style continues through the real
- * Adapter EffectsPort. The optical image occupies only CSS background paint,
- * so it creates no content node, slot input, event owner or native control. */
+ * Adapter EffectsPort. Static optics use host background paint; contact optics
+ * use a leased paint-only pseudo-element. Neither creates a content node, slot
+ * input, event owner, transformed hitbox or native control. */
 export function createWebMaterialSink(
   host: HTMLElement,
   effects: EffectsPort,
@@ -31,20 +36,49 @@ export function createWebMaterialSink(
   if (!win) throw new Error('Material owner document unavailable');
   const preferences = options.preferences ?? createWebMaterialPreferences(win);
   const program = acquireWebOpticalProgram(host.ownerDocument, () => {
-    paintSignature = '';
-    repaint();
+    invalidate('optical-context-invalidated');
   });
   let retired = false,
     painting = false,
     again = false;
+  const motion = createContactMotion();
+  let scheduled: number | null = null;
+  let queued = false;
+  let paintLease = '';
+  let geometryLease = '';
+  let carrier: ReturnType<typeof createContactCarrier> | null = null;
+  let paintedImage = '';
   let last: VisualFeedbackFrame | null = null;
+  const contact = observeWebPointerContact(host, (sample) => {
+    if (retired) return;
+    if (motion.update(sample, win.performance.now())) {
+      cancelPending();
+      clearImage();
+      restore();
+      paintLease = '';
+    }
+    schedule();
+  });
+  function schedule() {
+    if (retired || scheduled !== null) return;
+    scheduled = win!.requestAnimationFrame(() => {
+      scheduled = null;
+      repaint();
+    });
+  }
+  function invalidate(reason: string) {
+    if (retired) return;
+    motion.stop();
+    ordinary(reason);
+    repaint();
+  }
   let lastOwnedStyle: string | null = null;
   let sourceRevision = -1,
     paletteRevision = -1,
     renders = 0;
   let desiredTokens: readonly string[] = [],
     paintSignature = '';
-  let pending: { signature: string; cancel(): void } | null = null;
+  let pending: { signature: string; lease: string; cancel(): void } | null = null;
   let releaseImage = () => {};
   const cancelPending = () => {
     const previous = pending;
@@ -77,6 +111,9 @@ export function createWebMaterialSink(
     });
   }
   function restore() {
+    carrier?.release();
+    carrier = null;
+    paintedImage = '';
     for (const [name, value] of owned) {
       const current = inline(name);
       if (current[0] === value.applied[0] && current[1] === value.applied[1]) {
@@ -86,6 +123,7 @@ export function createWebMaterialSink(
     }
     owned.clear();
     paintSignature = '';
+    paintLease = '';
   }
   function own(name: string, value: string) {
     const current = inline(name),
@@ -125,6 +163,7 @@ export function createWebMaterialSink(
     effects.requestFlush();
   }
   function ordinary(reason?: string) {
+    motion.stop();
     cancelPending();
     clearImage();
     program.clear();
@@ -138,6 +177,7 @@ export function createWebMaterialSink(
   }
   function fallback(fill: Parameters<typeof rgbaCss>[0], reason: string, releaseGPU = true) {
     if (releaseGPU) {
+      motion.stop();
       cancelPending();
       program.clear();
     }
@@ -248,7 +288,23 @@ export function createWebMaterialSink(
         radii.every((value) => value === radii[0]);
       const source = options.source.current();
       if (retired) return;
-      const admission = inspectCanvasBackdrop(host, source);
+      const requestedCandidate =
+        frame.material.candidates.length === 1 ? frame.material.candidates[0] : null;
+      const wantsContact =
+        requestedCandidate?.intent === 'liquid-glass' &&
+        requestedCandidate.deformation?.contact === 'pointer';
+      const paintOutset = wantsContact ? contactPaintOutset(rect.width, rect.height) : 0;
+      const admission = inspectCanvasBackdrop(host, source, paintOutset);
+      const carrierConflict =
+        carrier && !carrier.valid(paintedImage)
+          ? 'contact-carrier-style-conflict'
+          : wantsContact
+            ? inspectContactCarrier(host)
+            : null;
+      if (carrierConflict) {
+        fallback(resolved.fill, carrierConflict);
+        return;
+      }
       const currentSource =
         !!source &&
         Number.isSafeInteger(source.revision) &&
@@ -282,7 +338,7 @@ export function createWebMaterialSink(
           : null,
         provider: {
           backend: 'self-optical',
-          profile: 'liquidgl-v2-app-canvas-1',
+          profile: wantsContact ? contactProfile : 'liquidgl-v2-app-canvas-1',
           ready: !program.lost,
           sourceKind: 'in-app-backdrop',
           staticSupported: true,
@@ -309,7 +365,66 @@ export function createWebMaterialSink(
         fallback(resolved.fill, 'intent-backend-mismatch');
         return;
       }
-      const opticalGeometry: OpticalGeometry = { ...geometry, bounds: admission.bounds };
+      const nextGeometryLease = JSON.stringify([
+        rect.x,
+        rect.y,
+        rect.width,
+        rect.height,
+        geometry.radius,
+        geometry.dpr,
+      ]);
+      if (geometryLease && nextGeometryLease !== geometryLease) motion.stop();
+      geometryLease = nextGeometryLease;
+      const tracksContact = candidate.deformation?.contact === 'pointer';
+      if (policy.effectiveMotion !== 'press' || !tracksContact) motion.stop();
+      const motionFrame = motion.frame(
+        win!.performance.now(),
+        policy.effectiveMotion === 'press' && tracksContact
+      );
+      // Keyboard press retains the established centred finite response; it
+      // does not manufacture a pointer contact or revive a rejected session.
+      if (
+        tracksContact &&
+        policy.effectiveMotion === 'press' &&
+        candidate.deformation?.phase === 'pressed' &&
+        !contact.current()?.active &&
+        motionFrame.contact?.strength === 0
+      )
+        motionFrame.contact = { x: 0.5, y: 0.5, deltaX: 0, deltaY: 0, strength: 1 };
+      const opticalGeometry: OpticalGeometry = {
+        ...geometry,
+        paintOutset,
+        bounds: admission.bounds,
+      };
+      const currentMaterialCompatible = () => {
+        if (last === frame) return true;
+        if (
+          !tracksContact ||
+          !last ||
+          last.view !== frame.view ||
+          last.material.candidates.length !== 1
+        )
+          return false;
+        const current = last.material.candidates[0];
+        return (
+          current.intent === 'liquid-glass' &&
+          current.deformation?.contact === 'pointer' &&
+          current.variant === candidate.variant &&
+          JSON.stringify(last.material.slot) === JSON.stringify(frame.material.slot)
+        );
+      };
+      const lease = JSON.stringify([
+        frame.view,
+        source.revision,
+        palette.revision,
+        opticalGeometry,
+        policy.effectiveMotion,
+        resolved.fill,
+        resolved.foreground,
+        tracksContact,
+        motionFrame.session,
+        candidate.variant,
+      ]);
       const signature = JSON.stringify([
         frame.view,
         frame.revision,
@@ -318,30 +433,37 @@ export function createWebMaterialSink(
         opticalGeometry,
         policy.effectiveMotion,
         candidate,
+        tracksContact ? motionFrame.contact : null,
         resolved.fill,
         resolved.foreground,
       ]);
       if (
         paintSignature === signature &&
-        owned.get('background-image')?.applied[0] === host.style.backgroundImage
+        owned.get('background-image')?.applied[0] === host.style.backgroundImage &&
+        (!carrier || carrier.valid(paintedImage))
       )
         return;
       if (pending?.signature === signature) return;
+      if (pending?.lease === lease) {
+        queued = true;
+        return;
+      }
       cancelPending();
-      // Withdraw the previous frame before GPU work; no transparent gap can
-      // expose a revoked/stale source when this render fails.
-      fallback(resolved.fill, 'preparing', false);
+      // A same-generation admitted image stays visible until its decoded
+      // successor is ready. Revoked source/geometry/preferences never qualify.
+      if (paintLease !== lease) fallback(resolved.fill, 'preparing', false);
       if (retired || program.lost) return;
       const image = program.render({
         source,
         geometry: opticalGeometry,
         pressed: policy.effectiveMotion === 'press' && candidate.deformation?.phase === 'pressed',
+        contact: tracksContact ? motionFrame.contact : undefined,
         variant: candidate.variant ?? 'regular',
         fill: resolved.fill,
         foreground: resolved.foreground,
       });
       if (retired) return;
-      const ticket = { signature, cancel() {} };
+      const ticket = { signature, lease, cancel() {} };
       pending = ticket;
       ticket.cancel = prepareOpticalImage(
         host.ownerDocument,
@@ -352,7 +474,7 @@ export function createWebMaterialSink(
             const currentSource = options.source.current(),
               currentPalette = options.palette.current(),
               currentPreferences = preferences.current();
-            const currentAdmission = inspectCanvasBackdrop(host, currentSource),
+            const currentAdmission = inspectCanvasBackdrop(host, currentSource, paintOutset),
               currentRect = host.getBoundingClientRect(),
               currentCss = win!.getComputedStyle(host);
             const currentTokens = (host.getAttribute('data-pui-style') ?? '')
@@ -372,7 +494,7 @@ export function createWebMaterialSink(
             }
             if (
               program.lost ||
-              last !== frame ||
+              !currentMaterialCompatible() ||
               currentSource !== source ||
               currentPalette.revision !== palette.revision ||
               JSON.stringify(currentPreferences) !== JSON.stringify(prefs) ||
@@ -398,22 +520,56 @@ export function createWebMaterialSink(
               repaint();
               return;
             }
-            pending = null;
-            releaseImage = () => ticket.cancel();
-            own('background-image', `url("${image}")`);
+            const previousImage = releaseImage;
+            if (tracksContact) {
+              carrier ??= createContactCarrier(host);
+              if (!currentCss.position || currentCss.position === 'static')
+                own('position', 'relative');
+              own('isolation', 'isolate');
+              const borderLeft = parseFloat(currentCss.borderLeftWidth || '0');
+              const borderTop = parseFloat(currentCss.borderTopWidth || '0');
+              if (![borderLeft, borderTop].every(Number.isFinite))
+                throw new Error('contact-carrier-border-unavailable');
+              own('--pui-material-left', `${-paintOutset - borderLeft}px`);
+              own('--pui-material-top', `${-paintOutset - borderTop}px`);
+              own('--pui-material-width', `${rect.width + 2 * paintOutset}px`);
+              own('--pui-material-height', `${rect.height + 2 * paintOutset}px`);
+              own('--pui-material-image', `url("${image}")`);
+              own('background-image', 'none');
+              if (!carrier.valid(image)) throw new Error('contact-carrier-style-unavailable');
+            } else own('background-image', `url("${image}")`);
             own('background-color', 'transparent');
             own('background-origin', 'border-box');
             own('background-clip', 'border-box');
             own('background-size', '100% 100%');
             own('background-repeat', 'no-repeat');
             paintSignature = signature;
+            paintLease = lease;
+            paintedImage = image;
+            pending = null;
+            releaseImage = () => ticket.cancel();
+            previousImage();
             report('materialQuality', 'self-optical');
             report('materialReason', 'rendered');
             report('materialBackend', 'self-optical');
-            report('materialProfile', 'liquidgl-v2-app-canvas-1');
+            report('materialProfile', tracksContact ? contactProfile : 'liquidgl-v2-app-canvas-1');
             report('materialSource', 'visible-app-canvas');
             report('materialFrame', String(++renders));
             report('materialSourceRevision', String(source.revision));
+            report(
+              'materialContact',
+              tracksContact
+                ? motionFrame.animating
+                  ? 'release'
+                  : motionFrame.contact?.strength
+                    ? 'held'
+                    : 'rest'
+                : undefined
+            );
+            report(
+              'materialContactSession',
+              tracksContact ? String(motionFrame.session) : undefined
+            );
             report(
               'materialPhase',
               policy.effectiveMotion === 'press' && candidate.deformation?.phase === 'pressed'
@@ -421,6 +577,10 @@ export function createWebMaterialSink(
                 : 'rest'
             );
             lastOwnedStyle = host.getAttribute('style');
+            if (queued || motionFrame.animating) {
+              queued = false;
+              schedule();
+            }
           } catch {
             if (!retired && pending === ticket) {
               ordinary('material-prepare-input-failed');
@@ -437,7 +597,7 @@ export function createWebMaterialSink(
             if (retired || pending !== ticket) return;
             if (externalPaintConflict()) ordinary('external-paint-conflict');
             else if (
-              last !== frame ||
+              !currentMaterialCompatible() ||
               currentSource !== source ||
               currentPalette.revision !== palette.revision ||
               JSON.stringify(currentPreferences) !== JSON.stringify(prefs)
@@ -467,10 +627,11 @@ export function createWebMaterialSink(
   }
   const disposers: Array<() => void> = [];
   try {
+    disposers.push(contact.dispose);
     disposers.push(observeMaterialGeometry(host, repaint, () => lastOwnedStyle));
-    disposers.push(options.source.subscribe(repaint));
-    disposers.push(options.palette.subscribe(repaint));
-    disposers.push(preferences.subscribe(repaint));
+    disposers.push(options.source.subscribe(() => invalidate('material-source-invalidated')));
+    disposers.push(options.palette.subscribe(() => invalidate('material-palette-invalidated')));
+    disposers.push(preferences.subscribe(() => invalidate('material-preferences-invalidated')));
   } catch (error) {
     retired = true;
     for (const dispose of disposers) {
@@ -499,6 +660,9 @@ export function createWebMaterialSink(
     release(view) {
       if (retired || (last && view !== last.view)) return;
       retired = true;
+      if (scheduled !== null) win!.cancelAnimationFrame(scheduled);
+      scheduled = null;
+      motion.stop();
       last = null;
       let error: unknown;
       for (const dispose of [

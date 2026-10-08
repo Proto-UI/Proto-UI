@@ -1,0 +1,23 @@
+# Continuous contact optics and expanded paint carrier
+
+Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+
+## Scope and authority
+
+User-directed #872 continuation from `c0f83b30`, composed with the router-owned contact slice `3e0485fc`. Draft `C-FEEDBACK-MATERIAL-0001` geometry, ownership, safety, semantics and quality remain the boundaries. No Apple-private parameters, cross-engine equivalence, GPUI execution, native material admission, general DOM backdrop capture or full compiler guarantee is asserted.
+
+## Implementation
+
+- The unchanged generated, MIT-attributed upstream shader literal remains the historical profile. `contact-profile.ts` explicitly derives the first-party `liquidgl-v2-contact-canvas-1` shader. It replaces reversed-edge light smoothsteps with defined, touch-local lighting, enables bounded chromatic sampling and derives outward mask/refraction normals from the same field. Static and non-contact consumers retain the original profile.
+- Contact geometry comes from the one style-resolved box/radius. The finite field dilates that shape by up to 4.5% and applies up to 5.5% axis-relative local drag displacement. A symmetric `ceil(max(width,height)*0.08+1)` CSS-pixel output margin accommodates displacement, dilation and edge AA. Original source UV mapping and original `u_boxSize` are retained; expanded output uses matching `u_subpixel`. This is an actual expanded silhouette, not a host transform or background-size illusion.
+- A document-leased `::before` is a paint-only carrier, with no content child, slot contribution, accessible node, activation or hitbox change. Existing author pseudo content, reserved marker collisions, fragmented inline boxes and static positioning with active inset values are refused. Position/isolation/custom-property ownership is restored exactly on withdrawal. Computed carrier image, geometry and composition must be confirmed before a receipt; CSP or competing CSS chooses fallback.
+- Source admission covers the entire expanded paint footprint, rejects source-edge escape, overlapping siblings or registered optical output, ancestor overflow/paint containment, transforms, clip/mask and unsupported compositing. Restrictive admission is explicit; arbitrary page glass is not claimed. Border, foreground, shadow and layout remain owned by family/style inputs rather than silently suppressed by the renderer.
+- Pointer moves are RAF-coalesced with latest sample selected before render. Each physical view retains at most one pending decode and one admitted decoded image. A newer sample waits behind that decode instead of starting another GPU/PNG/decode chain. A same-generation image is atomically replaced only after its successor decodes; source/geometry/preferences/session loss clears unsafe output. The existing document WebGL pool remains shared. Redundant `gl.finish` is removed; contrast readback and PNG encoding remain synchronous and measured, so 60 Hz performance is not asserted.
+- Release uses a bounded 240 ms decay with one small directional reversal. Cancel, blur, lost capture, disabled/zero candidate, source loss, geometry change, context loss and retirement stop old-session motion; re-enabling cannot resume that session. Reduced/unknown motion retains a static optical profile without a spring. No perpetual idle RAF is introduced.
+- Internal `zero-refraction`, `zero-deformation` and `zero-aberration` program controls retain the selected shader profile for matched evidence. They are not new public material author options.
+
+## Evidence and remaining acceptance
+
+The new and existing `web-material*.test.ts` suites exercise optical uniform input, resource/sink ownership, coalescing, delayed decoding, old completion rejection, bounded motion, expanded source admission and pseudo carrier ownership using explicit spies. They are not GPU or browser-pixel evidence. Existing shader literals are checked through their generator. Complete workspace types are checked after generating required existing style projections.
+
+Exact-commit real Chromium WebGL, native held-pointer frame sequence, outward contour pixels, matched controls, foreground/outline behavior, four-framework lifetime, interruption/re-press/resize/source/context-loss behavior, performance and independent review remain required. A passed source test or an encoded image alone does not complete any of those outcomes. This checkpoint is implementation in progress, not completion of the user's Apple-reference matching request. Expanded clipping refusal and synchronous encode/readback are concrete residual constraints.

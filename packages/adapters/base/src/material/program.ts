@@ -1,3 +1,4 @@
+import { contactFragment } from './contact-profile';
 import { vertex, fragment, uniformNames } from './liquidgl-kernel.generated';
 import { colorContrast, type OpaqueRgba } from './style';
 import type { CanvasBackdropFrame } from './source';
@@ -6,6 +7,7 @@ export type OpticalGeometry = {
   width: number;
   height: number;
   radius: number;
+  paintOutset?: number;
   dpr: number;
   bounds: [number, number, number, number];
 };
@@ -13,6 +15,8 @@ export type OpticalFrame = {
   source: CanvasBackdropFrame;
   geometry: OpticalGeometry;
   pressed: boolean;
+  /** Adapter-private, finite contact profile. No author shader uniforms. */
+  contact?: { x: number; y: number; deltaX: number; deltaY: number; strength: number };
   variant: 'regular' | 'clear';
   fill: OpaqueRgba;
   foreground: OpaqueRgba;
@@ -21,11 +25,12 @@ export type OpticalFrame = {
  * source acquisition, or reinterpretation of the historical v1 compiler. */
 export function createWebOpticalProgram(
   canvas: HTMLCanvasElement,
-  diagnostic: 'zero-refraction' | null = null
+  diagnostic: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null
 ) {
   let gl: WebGLRenderingContext | null = null,
     pipeline: WebGLProgram | null = null,
     buffer: WebGLBuffer | null = null;
+  let contactPipeline = false;
   let textures: WebGLTexture[] = [],
     locations: Record<string, WebGLUniformLocation | null> = {};
   const metrics = {
@@ -52,8 +57,10 @@ export function createWebOpticalProgram(
     pipeline = null;
     locations = {};
   }
-  function initialize() {
+  function initialize(contact: boolean) {
+    if (pipeline && contactPipeline !== contact) clear();
     if (pipeline) return;
+    contactPipeline = contact;
     metrics.programBuilds++;
     gl ??= canvas.getContext('webgl', {
       alpha: true,
@@ -67,7 +74,7 @@ export function createWebOpticalProgram(
     try {
       for (const [kind, code] of [
         [g.VERTEX_SHADER, vertex],
-        [g.FRAGMENT_SHADER, fragment],
+        [g.FRAGMENT_SHADER, contact ? contactFragment : fragment],
       ] as const) {
         const shader = g.createShader(kind);
         if (!shader) throw new Error('shader-allocation');
@@ -83,7 +90,10 @@ export function createWebOpticalProgram(
       if (!g.getProgramParameter(pipeline, g.LINK_STATUS)) throw new Error('program-link');
       g.useProgram(pipeline);
       locations = Object.fromEntries(
-        uniformNames.map((name) => [name, g.getUniformLocation(pipeline!, name)])
+        [...uniformNames, 'u_contactShape'].map((name) => [
+          name,
+          g.getUniformLocation(pipeline!, name),
+        ])
       );
       buffer = g.createBuffer();
       if (!buffer) throw new Error('buffer-allocation');
@@ -124,12 +134,15 @@ export function createWebOpticalProgram(
     render(frame: OpticalFrame): string {
       const started = performance.now();
       const { source, geometry, pressed, variant } = frame;
-      const width = Math.ceil(geometry.width * geometry.dpr),
-        height = Math.ceil(geometry.height * geometry.dpr);
+      const outset = geometry.paintOutset ?? 0;
+      const width = Math.ceil((geometry.width + 2 * outset) * geometry.dpr),
+        height = Math.ceil((geometry.height + 2 * outset) * geometry.dpr);
       if (
-        ![width, height, geometry.radius, geometry.dpr, ...geometry.bounds].every(
+        ![width, height, outset, geometry.radius, geometry.dpr, ...geometry.bounds].every(
           Number.isFinite
         ) ||
+        outset < 0 ||
+        outset > 165 ||
         width < 1 ||
         height < 1 ||
         width > 2048 ||
@@ -162,7 +175,19 @@ export function createWebOpticalProgram(
         throw new Error('invalid-optical-source');
       for (let i = 3; i < source.pixels.length; i += 4)
         if (source.pixels[i] !== 255) throw new Error('nonopaque-optical-source');
-      initialize();
+      const contact = frame.contact;
+      if (
+        contact &&
+        ![contact.x, contact.y, contact.deltaX, contact.deltaY, contact.strength].every(
+          Number.isFinite
+        )
+      )
+        throw new Error('invalid-optical-contact');
+      const clamp = (n: number, low: number, high: number) => Math.max(low, Math.min(high, n));
+      const strength = contact ? clamp(contact.strength, 0, 1) : pressed ? 1 : 0;
+      const blend = (rest: number, held: number) =>
+        strength === 1 ? held : rest + (held - rest) * strength;
+      initialize(!!contact);
       const g = gl!;
       if (canvas.width !== width) canvas.width = width;
       if (canvas.height !== height) canvas.height = height;
@@ -198,9 +223,14 @@ export function createWebOpticalProgram(
       v2('u_resolution', [width, height]);
       v2('u_textureResolution', [source.width, source.height]);
       v4('u_bounds', geometry.bounds);
-      f('u_refraction', diagnostic === 'zero-refraction' ? 0 : pressed ? 0.018 : 0.008);
-      f('u_aberration', 0);
-      f('u_bevelDepth', diagnostic === 'zero-refraction' ? 0 : pressed ? 0.12 : 0.06);
+      f('u_refraction', diagnostic === 'zero-refraction' ? 0 : blend(0.008, 0.018));
+      f(
+        'u_aberration',
+        contact && diagnostic !== 'zero-refraction' && diagnostic !== 'zero-aberration'
+          ? 0.12 + 0.18 * strength
+          : 0
+      );
+      f('u_bevelDepth', diagnostic === 'zero-refraction' ? 0 : blend(0.06, 0.12));
       f('u_bevelWidth', 0.22);
       f('u_frost', 0);
       f('u_radius', Math.min(geometry.radius * geometry.dpr, width / 2, height / 2));
@@ -213,8 +243,8 @@ export function createWebOpticalProgram(
       i('u_revealType', 0);
       f('u_tiltX', 0);
       f('u_tiltY', 0);
-      f('u_magnify', diagnostic === 'zero-refraction' ? 1 : pressed ? 1.08 : 1.025);
-      v2('u_subpixel', [0, 0]);
+      f('u_magnify', diagnostic === 'zero-refraction' ? 1 : blend(1.025, 1.08));
+      v2('u_subpixel', [outset * geometry.dpr, outset * geometry.dpr]);
       v2('u_boxSize', [geometry.width * geometry.dpr, geometry.height * geometry.dpr]);
       const dark = frame.foreground[0] + frame.foreground[1] + frame.foreground[2] > 1.5;
       v4(
@@ -226,15 +256,31 @@ export function createWebOpticalProgram(
       i('u_stack', 1);
       v4('u_stackMapping', [0, 0, 0, 0]);
       v4('u_stackRegion', [0, 0, 0, 0]);
-      v4('u_interaction', [0.5, 0.5, 0, 0]);
-      f('u_interactionRadius', 0);
+      f('u_contactShape', contact && diagnostic !== 'zero-deformation' ? strength : 0);
+      v4(
+        'u_interaction',
+        contact
+          ? [
+              clamp(contact.x, 0, 1),
+              clamp(contact.y, 0, 1),
+              clamp(contact.deltaX, -1, 1) *
+                0.055 *
+                (diagnostic === 'zero-deformation' ? 0 : strength),
+              clamp(contact.deltaY, -1, 1) *
+                0.055 *
+                (diagnostic === 'zero-deformation' ? 0 : strength),
+            ]
+          : [0.5, 0.5, 0, 0]
+      );
+      f('u_interactionRadius', contact ? 0.8 * strength : 0);
       i('u_shadow', 2);
       v4('u_shadowMapping', [0, 0, 0, 0]);
       g.clearColor(0, 0, 0, 0);
       g.clear(g.COLOR_BUFFER_BIT);
       g.disable(g.BLEND);
       g.drawArrays(g.TRIANGLE_STRIP, 0, 4);
-      g.finish();
+      // readPixels is the required synchronization point; a preceding finish
+      // needlessly blocks the main thread a second time.
       if (g.getError() !== g.NO_ERROR || g.isContextLost()) throw new Error('gpu-frame-failed');
       const pixels = new Uint8Array(width * height * 4);
       g.readPixels(0, 0, width, height, g.RGBA, g.UNSIGNED_BYTE, pixels);

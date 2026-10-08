@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createWebOpticalProgram } from '../src/material/program';
 import { vertex, fragment } from '../src/material/liquidgl-kernel.generated';
-function fixture(control: 'zero-refraction' | null = null) {
+function fixture(
+  control: 'zero-refraction' | 'zero-deformation' | 'zero-aberration' | null = null
+) {
   const shaderSources: string[] = [],
     writes = new Map<string, unknown>();
   const gl: any = {
@@ -132,5 +134,69 @@ describe('fixed V2 optical ABI (spy, no GPU execution claim)', () => {
       f.program.render({ ...f.frame, geometry: { ...f.frame.geometry, width: NaN } })
     ).toThrow('optical-geometry-budget');
     f.program.dispose();
+  });
+});
+
+describe('finite first-party contact optical ABI (spy, not GPU evidence)', () => {
+  it('retains upstream literals and selects a separately identified local-light derivative', async () => {
+    const { contactFragment } = await import('../src/material/contact-profile');
+    const f = fixture();
+    f.program.render({
+      ...f.frame,
+      contact: { x: 0.2, y: 0.7, deltaX: 0.6, deltaY: -0.4, strength: 1 },
+    });
+    expect(f.shaderSources).toEqual([vertex, contactFragment]);
+    expect(contactFragment).not.toBe(fragment);
+    expect(contactFragment).toContain('float localLight');
+    expect(fragment).not.toContain('float localLight');
+    expect(contactFragment).not.toContain('smoothstep(0.4,0.0');
+    expect(f.writes.get('u_interaction')).toEqual([0.2, 0.7, 0.033, -0.022000000000000002]);
+    expect(f.writes.get('u_interactionRadius')).toBe(0.8);
+    expect(f.writes.get('u_aberration')).toBeCloseTo(0.3);
+    expect(f.gl.finish).not.toHaveBeenCalled();
+    f.program.dispose();
+  });
+  it('bounds contact input and rejects nonfinite input before GPU allocation', () => {
+    const f = fixture();
+    expect(() =>
+      f.program.render({ ...f.frame, contact: { x: NaN, y: 0, deltaX: 0, deltaY: 0, strength: 1 } })
+    ).toThrow('invalid-optical-contact');
+    expect(f.shaderSources).toHaveLength(0);
+    f.program.render({
+      ...f.frame,
+      contact: { x: -5, y: 5, deltaX: 99, deltaY: -99, strength: 10 },
+    });
+    expect(f.writes.get('u_interaction')).toEqual([0, 1, 0.055, -0.055]);
+    f.program.dispose();
+  });
+});
+
+describe('expanded contact bounds and matched diagnostic controls (spy)', () => {
+  it('preserves source mapping and original box while adding symmetric output margins', () => {
+    const f = fixture();
+    f.program.render({
+      ...f.frame,
+      geometry: { ...f.frame.geometry, paintOutset: 2 },
+      contact: { x: 0.5, y: 0.5, deltaX: 1, deltaY: 0, strength: 1 },
+    });
+    expect(f.writes.get('u_resolution')).toEqual([6, 6]);
+    expect(f.writes.get('u_boxSize')).toEqual([2, 2]);
+    expect(f.writes.get('u_subpixel')).toEqual([2, 2]);
+    expect(f.writes.get('u_bounds')).toEqual(f.frame.geometry.bounds);
+    expect(f.writes.get('u_contactShape')).toBe(1);
+    f.program.dispose();
+  });
+  it('isolates zero-deformation and zero-aberration without replacing the shader profile', () => {
+    for (const control of ['zero-deformation', 'zero-aberration'] as const) {
+      const f = fixture(control);
+      f.program.render({
+        ...f.frame,
+        contact: { x: 0.5, y: 0.5, deltaX: 1, deltaY: 1, strength: 1 },
+      });
+      expect(f.writes.get('u_contactShape')).toBe(control === 'zero-deformation' ? 0 : 1);
+      expect(f.writes.get('u_aberration')).toBeCloseTo(control === 'zero-aberration' ? 0 : 0.3);
+      expect(f.writes.get('u_interactionRadius')).toBe(0.8);
+      f.program.dispose();
+    }
   });
 });

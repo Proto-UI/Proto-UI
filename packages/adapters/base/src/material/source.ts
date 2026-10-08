@@ -1,3 +1,4 @@
+import { contactCarrierBounds } from './contact-carrier';
 /** A bounded source is the visible application canvas itself. No DOM capture,
  * screenshot API, external image fetch, or self-output sampling is performed. */
 export type CanvasBackdropFrame = Readonly<{
@@ -116,7 +117,11 @@ const neutral = (css: CSSStyleDeclaration) =>
   );
 /** Conservative scene admission. Overlapping siblings and painted ancestors
  * are unavailable rather than silently omitted from an alleged DOM backdrop. */
-export function inspectCanvasBackdrop(host: HTMLElement, frame: CanvasBackdropFrame | null) {
+export function inspectCanvasBackdrop(
+  host: HTMLElement,
+  frame: CanvasBackdropFrame | null,
+  paintOutset = 0
+) {
   const fail = (reason: string) => ({ valid: false as const, reason });
   if (
     !frame ||
@@ -134,15 +139,23 @@ export function inspectCanvasBackdrop(host: HTMLElement, frame: CanvasBackdropFr
   if (!win) return fail('source-document-unavailable');
   const source = frame.canvas.getBoundingClientRect(),
     target = host.getBoundingClientRect();
+  if (!Number.isFinite(paintOutset) || paintOutset < 0 || paintOutset > 165)
+    return fail('source-paint-outset-unavailable');
+  const paint = {
+    left: target.left - paintOutset,
+    top: target.top - paintOutset,
+    right: target.right + paintOutset,
+    bottom: target.bottom + paintOutset,
+  } as DOMRect;
   if (
     source.width <= 0 ||
     source.height <= 0 ||
     target.width <= 0 ||
     target.height <= 0 ||
-    target.left < source.left ||
-    target.top < source.top ||
-    target.right > source.right ||
-    target.bottom > source.bottom
+    paint.left < source.left ||
+    paint.top < source.top ||
+    paint.right > source.right ||
+    paint.bottom > source.bottom
   )
     return fail('source-bounds-unavailable');
   const dpr = win.devicePixelRatio;
@@ -174,6 +187,12 @@ export function inspectCanvasBackdrop(host: HTMLElement, frame: CanvasBackdropFr
     const css = win.getComputedStyle(current);
     if (!neutral(css)) return fail('source-compositing-unavailable');
     if (
+      paintOutset > 0 &&
+      ([css.overflow, css.overflowX, css.overflowY].some((v) => v && v !== 'visible') ||
+        /(?:paint|strict|content)/.test(css.contain))
+    )
+      return fail('source-expanded-paint-clipped');
+    if (
       current !== host &&
       current !== frame.scope &&
       (!transparent(css.backgroundColor) || (css.backgroundImage && css.backgroundImage !== 'none'))
@@ -187,9 +206,16 @@ export function inspectCanvasBackdrop(host: HTMLElement, frame: CanvasBackdropFr
     let ancestor: Element | null = frame.scope.parentElement;
     ancestor;
     ancestor = ancestor.parentElement
-  )
-    if (!neutral(win.getComputedStyle(ancestor)))
-      return fail('source-ancestor-compositing-unavailable');
+  ) {
+    const css = win.getComputedStyle(ancestor);
+    if (!neutral(css)) return fail('source-ancestor-compositing-unavailable');
+    if (
+      paintOutset > 0 &&
+      ([css.overflow, css.overflowX, css.overflowY].some((v) => v && v !== 'visible') ||
+        /(?:paint|strict|content)/.test(css.contain))
+    )
+      return fail('source-expanded-paint-clipped');
+  }
   for (const element of frame.scope.querySelectorAll('*')) {
     if (
       element === frame.canvas ||
@@ -201,8 +227,7 @@ export function inspectCanvasBackdrop(host: HTMLElement, frame: CanvasBackdropFr
     const css = win.getComputedStyle(element);
     if (css.display === 'none' || css.visibility === 'hidden' || Number(css.opacity || '1') === 0)
       continue;
-    if (overlaps(target, element.getBoundingClientRect()))
-      return fail('source-overlapping-content');
+    if (overlaps(paint, contactCarrierBounds(element))) return fail('source-overlapping-content');
   }
   return {
     valid: true as const,

@@ -88,3 +88,39 @@ describe('visible in-app canvas backdrop lease', () => {
     });
   });
 });
+
+describe('expanded contact paint source admission', () => {
+  it('checks the full paint box without changing source mapping or hitbox', () => {
+    const { host, lease } = fixture();
+    expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
+      valid: true,
+      bounds: [0.1, 0.125, 0.25, 1 / 6],
+    });
+    expect(inspectCanvasBackdrop(host, lease.current(), 31)).toMatchObject({
+      valid: false,
+      reason: 'source-bounds-unavailable',
+    });
+  });
+  it('rejects content overlapping only the expansion', () => {
+    const { host, lease, scope } = fixture();
+    const other = document.createElement('div');
+    scope.append(other);
+    vi.spyOn(other, 'getBoundingClientRect').mockReturnValue(rect(143, 30, 20, 20));
+    expect(inspectCanvasBackdrop(host, lease.current()).valid).toBe(true);
+    expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
+      reason: 'source-overlapping-content',
+    });
+  });
+  it('rejects clipping and paint containment instead of presenting a truncated contour', () => {
+    const { host, lease, scope } = fixture();
+    scope.style.overflow = 'hidden';
+    expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
+      reason: 'source-expanded-paint-clipped',
+    });
+    scope.style.overflow = 'visible';
+    host.style.contain = 'paint';
+    expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
+      reason: 'source-expanded-paint-clipped',
+    });
+  });
+});

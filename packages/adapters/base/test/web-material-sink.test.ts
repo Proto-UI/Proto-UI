@@ -1,3 +1,4 @@
+import { createWebPointerContactWriter } from '../src/events/pointer-contact';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import { createWebMaterialSink } from '../src/material/sink';
@@ -17,6 +18,11 @@ vi.mock('../src/material/image-prepare', () => ({
   inspectOpticalImageResources: () => ({}),
 }));
 vi.mock('../src/material/program', () => ({ createWebOpticalProgram: () => optical }));
+vi.mock('../src/material/contact-carrier', () => ({
+  inspectContactCarrier: () => null,
+  contactCarrierBounds: (element: Element) => element.getBoundingClientRect(),
+  createContactCarrier: () => ({ valid: () => true, release() {} }),
+}));
 const rect = (x: number, y: number, width: number, height: number) =>
   ({
     x,
@@ -353,5 +359,116 @@ describe('V2 physical-view material ownership (mock GPU, not optical evidence)',
     expect(g.host.dataset.materialQuality).toBe('unavailable');
     expect(g.host.getAttribute('data-pui-style')).toContain('bg-background/80');
     g.sink.release(1);
+  });
+});
+
+describe('continuous contact scheduler (mock GPU/decode, not optical evidence)', () => {
+  function setup() {
+    const f = fixture();
+    let callbacks: FrameRequestCallback[] = [];
+    vi.mocked(window.requestAnimationFrame).mockImplementation((fn) => {
+      callbacks.push(fn);
+      return callbacks.length;
+    });
+    const flushFrame = () => {
+      const batch = callbacks;
+      callbacks = [];
+      batch.forEach((fn) => fn(performance.now()));
+    };
+    const baseFrame = f.frame(1);
+    const frame: VisualFeedbackFrame = {
+      ...baseFrame,
+      material: {
+        ...baseFrame.material,
+        candidates: [
+          {
+            intent: 'liquid-glass',
+            deformation: { kind: 'press', phase: 'pressed', contact: 'pointer' },
+          },
+        ],
+      },
+    };
+    f.sink.commit(frame);
+    const writer = createWebPointerContactWriter(f.host);
+    const send = (x: number, reason: 'down' | 'move' | 'up' | 'cancel' = 'move', session = 1) =>
+      writer.publish({
+        active: reason === 'move' || reason === 'down',
+        session,
+        x,
+        y: 0.4,
+        deltaX: x - 0.5,
+        deltaY: 0,
+        reason,
+      });
+    return { ...f, frame, send, flushFrame };
+  }
+  it('coalesces many moves to the newest sample in one RAF', () => {
+    const f = setup();
+    f.send(0.5, 'down');
+    f.flushFrame();
+    optical.render.mockClear();
+    for (let i = 0; i < 50; i++) f.send(0.5 + i / 100);
+    expect(optical.render).not.toHaveBeenCalled();
+    f.flushFrame();
+    expect(optical.render).toHaveBeenCalledOnce();
+    expect(optical.render.mock.calls[0][0]).toMatchObject({ contact: { x: 0.99 } });
+    expect(f.host.dataset.materialProfile).toBe('liquidgl-v2-contact-canvas-1');
+    f.sink.release(1);
+  });
+  it('keeps one decode in flight and atomically replaces the admitted safe image', () => {
+    const f = setup();
+    f.send(0.5, 'down');
+    f.flushFrame();
+    const safe = f.host.style.getPropertyValue('--pui-material-image');
+    const callbacks: Array<() => void> = [];
+    const cancels: Array<ReturnType<typeof vi.fn>> = [];
+    decoding.prepare.mockImplementation((_doc, _source, ready) => {
+      callbacks.push(ready);
+      const cancel = vi.fn();
+      cancels.push(cancel);
+      return cancel;
+    });
+    optical.render.mockClear();
+    f.send(0.7);
+    f.flushFrame();
+    expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(safe);
+    f.send(0.8);
+    f.flushFrame();
+    f.send(0.9);
+    f.flushFrame();
+    expect(callbacks).toHaveLength(1);
+    expect(optical.render).toHaveBeenCalledOnce();
+    callbacks[0]();
+    f.flushFrame();
+    expect(callbacks).toHaveLength(2);
+    expect(optical.render.mock.calls[1][0]).toMatchObject({ contact: { x: 0.9 } });
+    expect(cancels[0]).not.toHaveBeenCalled();
+    callbacks[1]();
+    expect(cancels[0]).toHaveBeenCalledOnce();
+    f.sink.release(1);
+  });
+  it('revocation and a new session cannot revive a late decoded image', () => {
+    const f = setup();
+    f.send(0.5, 'down');
+    f.flushFrame();
+    const callbacks: Array<() => void> = [];
+    decoding.prepare.mockImplementation((_doc, _source, ready) => {
+      callbacks.push(ready);
+      return () => {};
+    });
+    f.send(0.8);
+    f.flushFrame();
+    f.source(false);
+    expect(f.host.style.backgroundImage).toBe('none');
+    callbacks[0]();
+    expect(f.host.style.backgroundImage).toBe('none');
+    f.source(true);
+    f.flushFrame();
+    f.send(0.2, 'down', 2);
+    f.flushFrame();
+    const count = optical.render.mock.calls.length;
+    callbacks[1]?.();
+    expect(optical.render.mock.calls.length).toBe(count);
+    f.sink.release(1);
   });
 });
