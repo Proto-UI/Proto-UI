@@ -50,6 +50,13 @@ async function capture(previewer: Locator, name: string, subject: Record<string,
         ...subject,
         checkedAt: new Date().toISOString(),
         viewport: previewer.page().viewportSize(),
+        asyncStatuses: await ref(previewer, 'asyncStatus').allTextContents(),
+        cancelButtons: await ref(previewer, 'cancel').evaluateAll((nodes) =>
+          nodes.map((el) => ({
+            rect: el.getBoundingClientRect().toJSON(),
+            focused: el === document.activeElement,
+          }))
+        ),
         editors: await previewer.locator('input').evaluateAll((nodes) =>
           nodes.map((n) => ({
             value: (n as HTMLInputElement).value,
@@ -105,16 +112,48 @@ describe('Field real browser journeys', () => {
           }
           await page.evaluate(() => {
             (window as any).__fieldInputEvidence = [];
-            for (const type of ['pointerdown', 'keydown', 'input', 'focusin'])
+            for (const type of [
+              'pointerdown',
+              'pointerup',
+              'pointercancel',
+              'click',
+              'keydown',
+              'input',
+              'change',
+              'focusin',
+              'focusout',
+              'validationRequest',
+              'validityChange',
+            ])
               document.addEventListener(
                 type,
                 (event) => {
-                  if ((event.target as Element)?.closest('[data-previewer-id]'))
-                    (window as any).__fieldInputEvidence.push({
-                      type: event.type,
-                      trusted: event.isTrusted,
-                      key: (event as KeyboardEvent).key ?? null,
-                    });
+                  const path = event
+                    .composedPath()
+                    .filter((node): node is Element => node instanceof Element);
+                  const previewer = path.find((node) => node.hasAttribute('data-previewer-id'));
+                  if (!previewer) return;
+                  const asyncOwner = previewer.querySelector('[data-demo-ref="asyncControl"]');
+                  const input = asyncOwner?.matches('input')
+                    ? asyncOwner
+                    : asyncOwner?.querySelector('input');
+                  (window as any).__fieldInputEvidence.push({
+                    type: event.type,
+                    at: performance.now(),
+                    trusted: event.isTrusted,
+                    custom: event instanceof CustomEvent,
+                    key: (event as KeyboardEvent).key ?? null,
+                    refs: path.map((node) => node.getAttribute('data-demo-ref')).filter(Boolean),
+                    requestId:
+                      event.type === 'validationRequest'
+                        ? (event as CustomEvent).detail?.requestId
+                        : null,
+                    asyncStatus: previewer.querySelector('[data-demo-ref="asyncStatus"]')
+                      ?.textContent,
+                    asyncValue: (input as HTMLInputElement | null)?.value,
+                    asyncInvalid: input?.getAttribute('aria-invalid'),
+                    asyncBusy: input?.getAttribute('aria-busy'),
+                  });
                 },
                 { capture: true }
               );
@@ -157,6 +196,11 @@ describe('Field real browser journeys', () => {
           expect(await editor(previewer, 'async').getAttribute('aria-invalid')).toBe('false');
           await editor(previewer, 'async').fill('taken');
           await ref(previewer, 'cancel').click();
+          // Distinguish a command that never arrived from a canceled lease that
+          // later changed. The original post-reply assertions remain below.
+          await expect
+            .poll(() => ref(previewer!, 'asyncStatus').textContent())
+            .toContain('Canceled');
           await page.waitForTimeout(650);
           expect(await ref(previewer, 'asyncStatus').textContent()).toContain('Canceled');
           expect(await editor(previewer, 'async').getAttribute('aria-invalid')).toBe('false');
@@ -189,7 +233,9 @@ describe('Field real browser journeys', () => {
               runtime,
               state: 'failure',
               error: String(error),
-            }).catch(() => {});
+            }).catch((captureError) => {
+              console.error('[Field evidence] failure capture also failed:', captureError);
+            });
           throw error;
         } finally {
           await context.close();
