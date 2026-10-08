@@ -1,0 +1,72 @@
+name: Demo Matrix startup diagnostic
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/demo-matrix-startup-diagnostic.yml'
+      - 'apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic*.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-matrix-observation*.ts'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: demo-matrix-startup-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  representative-profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and record the exact diagnostic subject
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/demo-matrix-startup"
+          git rev-parse HEAD > "$RUNNER_TEMP/demo-matrix-startup/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/demo-matrix-startup/source-tree.txt"
+          node --version > "$RUNNER_TEMP/demo-matrix-startup/node-environment.txt"
+          "$CHROME" --version > "$RUNNER_TEMP/demo-matrix-startup/browser-environment.txt"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Verify diagnostic fail-closed controls
+        run: |
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic.test.ts \
+            apps/www/src/content/docs/zh-cn/demo-matrix-observation.test.ts \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism
+      - name: Profile one original Matrix case without changing its assertions or waits
+        timeout-minutes: 10
+        env:
+          PROTO_UI_MATRIX_STARTUP_PROFILE: '1'
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/demo-matrix-startup
+        run: |
+          set -euo pipefail
+          # Diagnostic-only subset, including profiler overhead. The other three
+          # cases still run in standard CI; neither this subset nor its profile
+          # establishes native performance acceptance or full Matrix success.
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts \
+            --testNamePattern='mounts every demo in every official Web adapter$' \
+            --maxWorkers=1 --minWorkers=1 --no-file-parallelism \
+            --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/demo-matrix-startup/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/demo-matrix-startup/browser.log"
+      - name: Retain exact-source phase, network and bounded CPU diagnostics including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-matrix-startup-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/demo-matrix-startup
+          if-no-files-found: error
+          retention-days: 14

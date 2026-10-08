@@ -13,6 +13,8 @@ import {
   type InteractiveFact,
 } from './demo-matrix-observation';
 
+import { startMatrixStartupDiagnostic } from './demo-matrix-startup-diagnostic';
+
 const MATRIX_ROUTE = '/zh-cn/internal/demo-matrix/';
 
 type MatrixFacts = {
@@ -57,6 +59,7 @@ type MatrixDiagnosticState = {
   phase: string;
   sequence: number;
   pageErrors: Array<{ name: string; message: string; stack: string | null; at: string }>;
+  startupDiagnostic?: Awaited<ReturnType<typeof startMatrixStartupDiagnostic>>;
 };
 const matrixDiagnostics = new WeakMap<Page, MatrixDiagnosticState>();
 const diagnosticSourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
@@ -187,6 +190,22 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
       `[demo-matrix-pageerror] ${JSON.stringify({ sourceSha: diagnosticSourceSha, caseName: state.caseName, phase: state.phase, ...entry })}`
     );
   });
+  const evidenceDirectory =
+    process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? process.env.PROTO_UI_BROWSER_EVIDENCE_DIR;
+  if (
+    process.env.PROTO_UI_MATRIX_STARTUP_PROFILE === '1' &&
+    evidenceDirectory &&
+    state.caseName.endsWith('mounts every demo in every official Web adapter')
+  ) {
+    state.startupDiagnostic = await startMatrixStartupDiagnostic(page, {
+      enabled: true,
+      directory: evidenceDirectory,
+      sourceSha: diagnosticSourceSha,
+      caseName: state.caseName,
+      origin: new URL(baseUrl).origin,
+      phase: () => state.phase,
+    });
+  }
   await persistReadinessDiagnostic(page, 'route-open', 'started');
   try {
     // Preserve openRoute's exact navigation and first-visible-preview boundary.
@@ -194,6 +213,7 @@ async function openMatrixRoute(viewport: { width: number; height: number }) {
     await page.locator('[data-previewer-id]').first().waitFor({ state: 'visible' });
   } catch (error) {
     await persistReadinessDiagnostic(page, 'route-open', 'failed', error);
+    await state.startupDiagnostic?.finish();
     await context.close();
     throw error;
   }
@@ -452,6 +472,7 @@ describe.sequential('Website Demo Matrix browser smoke', () => {
       await reactBroadcast;
     } finally {
       await persistReadinessDiagnostic(page, 'case-finally', 'observed');
+      await matrixDiagnostics.get(page)?.startupDiagnostic?.finish();
       await context.close();
     }
   }, 180_000);
