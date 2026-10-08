@@ -10,7 +10,9 @@ import { inspectWebOpticalResources } from 'material-v2-diagnostics';
 const scenes: ReturnType<typeof createPreviewMaterialScene>[] = [];
 const views: MaterialView[] = [];
 const counts = new Map<string, number>();
+const activations: { runtime: string; time: number }[] = [];
 (window as any).v2Material = {
+  activations: () => activations.slice(),
   metrics: () => inspectWebOpticalResources(document),
   scenes: () => scenes,
   controls() {
@@ -76,6 +78,7 @@ async function mount() {
     scenes.push(scene);
     views.push(
       await mountMaterialConsumer(runtime, scene.mount, () => {
+        activations.push({ runtime, time: performance.now() });
         counts.set(runtime, (counts.get(runtime) ?? 0) + 1);
         document.querySelector(`[data-count="${runtime}"]`)!.textContent = String(
           counts.get(runtime)

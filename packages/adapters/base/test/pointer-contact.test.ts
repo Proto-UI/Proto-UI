@@ -78,6 +78,25 @@ describe('bounded router-owned visual contact; not activation or GPU evidence', 
     f.pointer(event);
     expect(f.contact.current()).toMatchObject({ active: false, reason });
   });
+  it('keeps visual capture cancellation separate from a later native click activation', () => {
+    const f = fixture();
+    const commit = vi.fn();
+    f.router.rootTarget.addEventListener('press.commit', commit);
+    f.pointer('pointerdown');
+    f.pointer('gotpointercapture');
+    f.pointer('lostpointercapture');
+    const cancelled = f.contact.current();
+    expect(cancelled).toMatchObject({ active: false, reason: 'lostcapture' });
+    expect(commit).not.toHaveBeenCalled();
+    f.pointer('pointerup');
+    expect(commit).not.toHaveBeenCalled();
+    // Injected host-unit evidence: native browser trust is verified separately.
+    f.host.dispatchEvent(new PointerEvent('click', { bubbles: true, pointerId: 1, detail: 1 }));
+    expect(commit).toHaveBeenCalledOnce();
+    f.host.dispatchEvent(new CustomEvent('click', { bubbles: true }));
+    expect(commit).toHaveBeenCalledOnce();
+    expect(f.contact.current()).toBe(cancelled);
+  });
   it('does not translate implicit capture release after pointerup into cancellation', () => {
     const f = fixture();
     const cancel = vi.fn();

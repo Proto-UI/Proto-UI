@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { explicitCaptureEvidenceIssues } from './capture-evidence';
+import { explicitCaptureEvidenceIssues, captureActivationEvidenceIssues } from './capture-evidence';
 
 const held = { active: true, session: 5, reason: 'move' };
 const ended = { active: false, session: 5, reason: 'lostcapture' };
@@ -77,6 +77,55 @@ describe('explicit native capture evidence controls (synthetic data, not browser
     expect(capture).not.toContain('waitForTimeout');
     expect(capture).not.toContain('dispatchEvent');
     expect(capture).toContain('explicitCaptureEvidenceIssues(');
-    expect(capture).toMatch(/assert\.equal\([\s\S]*?cancelCount/);
+    expect(capture).toContain("for (const release of ['inside', 'outside'])");
+    expect(capture).toContain("release === 'inside' ? captureCount + 1 : captureCount");
+    expect(capture).toContain('captureActivationEvidenceIssues(');
+  });
+});
+
+describe('capture loss distinguishes native activation from visual cancellation', () => {
+  const clicks = () => [
+    ...trace(),
+    { ...trace()[0], type: 'click', time: 6, custom: false, detail: 1 },
+    { ...trace()[0], type: 'click', time: 7, trust: false, custom: true },
+  ];
+  const activations = () => [{ runtime: 'wc', time: 8 }];
+  it('accepts one same-pointer native click, one WC outward signal and one consumer callback', () => {
+    expect(captureActivationEvidenceIssues(clicks(), activations(), 'wc', 1, 'inside')).toEqual([]);
+  });
+  it.each([
+    'no click',
+    'untrusted',
+    'wrong pointer',
+    'zero detail',
+    'duplicate native',
+    'duplicate outward',
+    'duplicate callback',
+    'callback before click',
+  ])('rejects %s', (mutation) => {
+    const events = clicks();
+    const calls = activations();
+    if (mutation === 'no click') events.splice(6, 1);
+    else if (mutation === 'untrusted') events[6].trust = false;
+    else if (mutation === 'wrong pointer') events[6].pointerId = 2;
+    else if (mutation === 'zero detail') Object.assign(events[6], { detail: 0 });
+    else if (mutation === 'duplicate native') events.push(events[6]);
+    else if (mutation === 'duplicate outward') events.push(events[7]);
+    else if (mutation === 'duplicate callback') calls.push(calls[0]);
+    else calls[0].time = 0;
+    expect(
+      captureActivationEvidenceIssues(events, calls, 'wc', 1, 'inside').length
+    ).toBeGreaterThan(0);
+  });
+  it('requires an outside up and no control activation for the outside negative control', () => {
+    const events = trace();
+    Object.assign(events[5], { runtime: undefined, control: undefined });
+    expect(explicitCaptureEvidenceIssues(events, 'wc', 1, held, ended, 'outside')).toEqual([]);
+    expect(explicitCaptureEvidenceIssues(trace(), 'wc', 1, held, ended, 'outside')).not.toEqual([]);
+    expect(captureActivationEvidenceIssues(events, [], 'wc', 1, 'outside')).toEqual([]);
+    expect(captureActivationEvidenceIssues(clicks(), [], 'wc', 1, 'outside')).not.toEqual([]);
+    expect(captureActivationEvidenceIssues(events, activations(), 'wc', 1, 'outside')).not.toEqual(
+      []
+    );
   });
 });

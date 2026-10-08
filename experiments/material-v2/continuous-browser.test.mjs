@@ -5,7 +5,10 @@ import { spawnSync } from 'node:child_process';
 import { resolve, join, extname, sep } from 'node:path';
 import { launchBrowser } from '../../apps/www/src/content/docs/zh-cn/browser-harness.ts';
 import { installCarrierStyleDiagnostics } from './carrier-diagnostics.mjs';
-import { explicitCaptureEvidenceIssues } from './capture-evidence.ts';
+import {
+  explicitCaptureEvidenceIssues,
+  captureActivationEvidenceIssues,
+} from './capture-evidence.ts';
 const root = resolve(process.argv[2]),
   out = resolve(process.argv[3]);
 await mkdir(out, { recursive: true });
@@ -91,6 +94,7 @@ try {
       'gotpointercapture',
       'lostpointercapture',
       'blur',
+      'click',
     ])
       addEventListener(
         type,
@@ -98,6 +102,8 @@ try {
           window.__native.push({
             type,
             trust: e.isTrusted,
+            custom: e instanceof CustomEvent,
+            detail: typeof e.detail === 'number' ? e.detail : undefined,
             windowTarget: e.target === window,
             pointerId: e.pointerId,
             pointerType: e.pointerType,
@@ -431,144 +437,190 @@ try {
       endedContact,
     });
     // Capture is explicitly requested by this fixture only to exercise genuine lostcapture.
-    const captureStart = await page.evaluate(() => window.__native.length);
-    const captureContactStart = await page.evaluate(() => window.__contacts.length);
-    await wc.evaluate((e) =>
-      e.addEventListener(
-        'pointerdown',
-        function capture(ev) {
-          e.setPointerCapture(ev.pointerId);
-        },
-        { once: true }
-      )
-    );
-    await page.mouse.move(p.x, p.y);
-    await page.mouse.down();
-    const captureDown = await page.evaluate(
-      ({ start, runtime }) =>
-        window.__native
-          .slice(start)
-          .find(
-            (e) =>
-              e.type === 'pointerdown' &&
-              e.trust &&
-              e.pointerType === 'mouse' &&
-              e.runtime === runtime &&
-              e.control === 'regular'
-          ),
-      { start: captureStart, runtime }
-    );
-    assert.ok(
-      captureDown,
-      'the capture fixture must begin with a trusted mouse down on its control'
-    );
-    // setPointerCapture only sets the pending override. A real pointer event
-    // processes it; a timeout or hasPointerCapture cannot prove gotcapture.
-    await page.mouse.move(p.x + 1, p.y);
-    await page.waitForFunction(
-      ({ start, runtime, id }) =>
-        window.__native
-          .slice(start)
-          .some(
-            (e) =>
-              e.type === 'gotpointercapture' &&
-              e.trust &&
-              e.pointerId === id &&
-              e.pointerType === 'mouse' &&
-              e.runtime === runtime &&
-              e.control === 'regular'
-          ),
-      { start: captureStart, runtime, id: captureDown.pointerId }
-    );
-    await page.waitForFunction(
-      (r) =>
-        document.querySelector(`[data-runtime="${r}"] [data-demo-ref="regular"]`).dataset
-          .materialContact === 'held',
-      runtime
-    );
-    const captureHeld = await page.evaluate(
-      ({ start, runtime }) =>
-        window.__contacts
-          .slice(start)
-          .filter((c) => c.runtime === runtime)
-          .at(-1),
-      { start: captureContactStart, runtime }
-    );
-    assert.equal(captureHeld?.active, true, 'actual capture must retain the current held contact');
-    await page.screenshot({ path: join(out, `${runtime}-capture-held.png`) });
-    const releaseStart = await page.evaluate(() => window.__native.length);
-    await wc.evaluate((e, id) => e.releasePointerCapture(id), captureDown.pointerId);
-    // Process the pending release before up, so up cannot supply an implicit
-    // loss after activation and be mislabeled as the cancellation under test.
-    await page.mouse.move(p.x + 2, p.y);
-    await page.waitForFunction(
-      ({ start, runtime, id }) =>
-        window.__native
-          .slice(start)
-          .some(
-            (e) =>
-              e.type === 'lostpointercapture' &&
-              e.trust &&
-              e.pointerId === id &&
-              e.pointerType === 'mouse' &&
-              e.runtime === runtime &&
-              e.control === 'regular'
-          ),
-      { start: releaseStart, runtime, id: captureDown.pointerId }
-    );
-    const captureEnded = await page.evaluate(
-      ({ start, runtime }) =>
-        window.__contacts
-          .slice(start)
-          .filter((c) => c.runtime === runtime)
-          .at(-1),
-      { start: captureContactStart, runtime }
-    );
-    assert.equal(captureEnded?.active, false);
-    assert.equal(captureEnded?.session, captureHeld.session);
-    assert.equal(captureEnded?.reason, 'lostcapture');
-    await page.mouse.up();
-    await page.waitForFunction(
-      ({ runtime, session }) => {
-        const e = document.querySelector(`[data-runtime="${runtime}"] [data-demo-ref="regular"]`);
-        return (
-          e.dataset.materialContact === 'rest' &&
-          e.dataset.materialContactSession === String(session) &&
-          e.dataset.materialQuality === 'self-optical'
+    // Losing visual tracking does not veto a later valid native click.
+    for (const release of ['inside', 'outside']) {
+      const captureCount = Number(await page.locator(`[data-count="${runtime}"]`).textContent());
+      const activationStart = await page.evaluate(() => window.v2Material.activations().length);
+      const captureStart = await page.evaluate(() => window.__native.length);
+      const captureContactStart = await page.evaluate(() => window.__contacts.length);
+      await wc.evaluate((e) =>
+        e.addEventListener(
+          'pointerdown',
+          function capture(ev) {
+            e.setPointerCapture(ev.pointerId);
+          },
+          { once: true }
+        )
+      );
+      await page.mouse.move(p.x, p.y);
+      await page.mouse.down();
+      const captureDown = await page.evaluate(
+        ({ start, runtime }) =>
+          window.__native
+            .slice(start)
+            .find(
+              (e) =>
+                e.type === 'pointerdown' &&
+                e.trust &&
+                e.pointerType === 'mouse' &&
+                e.runtime === runtime &&
+                e.control === 'regular'
+            ),
+        { start: captureStart, runtime }
+      );
+      assert.ok(
+        captureDown,
+        'the capture fixture must begin with a trusted mouse down on its control'
+      );
+      // setPointerCapture only sets the pending override. A real pointer event
+      // processes it; a timeout or hasPointerCapture cannot prove gotcapture.
+      await page.mouse.move(p.x + 1, p.y);
+      await page.waitForFunction(
+        ({ start, runtime, id }) =>
+          window.__native
+            .slice(start)
+            .some(
+              (e) =>
+                e.type === 'gotpointercapture' &&
+                e.trust &&
+                e.pointerId === id &&
+                e.pointerType === 'mouse' &&
+                e.runtime === runtime &&
+                e.control === 'regular'
+            ),
+        { start: captureStart, runtime, id: captureDown.pointerId }
+      );
+      await page.waitForFunction(
+        (r) =>
+          document.querySelector(`[data-runtime="${r}"] [data-demo-ref="regular"]`).dataset
+            .materialContact === 'held',
+        runtime
+      );
+      const captureHeld = await page.evaluate(
+        ({ start, runtime }) =>
+          window.__contacts
+            .slice(start)
+            .filter((c) => c.runtime === runtime)
+            .at(-1),
+        { start: captureContactStart, runtime }
+      );
+      assert.equal(
+        captureHeld?.active,
+        true,
+        'actual capture must retain the current held contact'
+      );
+      await page.screenshot({ path: join(out, `${runtime}-capture-${release}-held.png`) });
+      const releaseStart = await page.evaluate(() => window.__native.length);
+      await wc.evaluate((e, id) => e.releasePointerCapture(id), captureDown.pointerId);
+      // Process the pending release before up, so up cannot supply an implicit
+      // loss after activation and be mislabeled as the cancellation under test.
+      await page.mouse.move(p.x + 2, p.y);
+      await page.waitForFunction(
+        ({ start, runtime, id }) =>
+          window.__native
+            .slice(start)
+            .some(
+              (e) =>
+                e.type === 'lostpointercapture' &&
+                e.trust &&
+                e.pointerId === id &&
+                e.pointerType === 'mouse' &&
+                e.runtime === runtime &&
+                e.control === 'regular'
+            ),
+        { start: releaseStart, runtime, id: captureDown.pointerId }
+      );
+      const captureEnded = await page.evaluate(
+        ({ start, runtime }) =>
+          window.__contacts
+            .slice(start)
+            .filter((c) => c.runtime === runtime)
+            .at(-1),
+        { start: captureContactStart, runtime }
+      );
+      assert.equal(captureEnded?.active, false);
+      assert.equal(captureEnded?.session, captureHeld.session);
+      assert.equal(captureEnded?.reason, 'lostcapture');
+      if (release === 'outside') {
+        assert.equal(
+          await page.evaluate(() => !!document.elementFromPoint(5, 5)?.closest('[data-demo-ref]')),
+          false,
+          'outside negative control must release away from every demo control'
         );
-      },
-      { runtime, session: captureHeld.session }
-    );
-    const captureNative = await page.evaluate(
-      (start) => window.__native.slice(start),
-      captureStart
-    );
-    assert.deepEqual(
-      explicitCaptureEvidenceIssues(
-        captureNative,
+        await page.mouse.move(5, 5);
+      }
+      await page.mouse.up();
+      await page.waitForFunction(
+        ({ runtime, session }) => {
+          const e = document.querySelector(`[data-runtime="${runtime}"] [data-demo-ref="regular"]`);
+          return (
+            e.dataset.materialContact === 'rest' &&
+            e.dataset.materialContactSession === String(session) &&
+            e.dataset.materialQuality === 'self-optical'
+          );
+        },
+        { runtime, session: captureHeld.session }
+      );
+      const captureNative = await page.evaluate(
+        (start) => window.__native.slice(start),
+        captureStart
+      );
+      assert.deepEqual(
+        explicitCaptureEvidenceIssues(
+          captureNative,
+          runtime,
+          captureDown.pointerId,
+          captureHeld,
+          captureEnded,
+          release
+        ),
+        [],
+        'explicit release must exercise a matching trusted down/got/lost/up and cancelled router session'
+      );
+      const captureActivations = await page.evaluate(
+        (start) => window.v2Material.activations().slice(start),
+        activationStart
+      );
+      assert.deepEqual(
+        captureActivationEvidenceIssues(
+          captureNative,
+          captureActivations,
+          runtime,
+          captureDown.pointerId,
+          release
+        ),
+        []
+      );
+      assert.equal(
+        Number(await page.locator(`[data-count="${runtime}"]`).textContent()),
+        release === 'inside' ? captureCount + 1 : captureCount,
+        'inside release commits one native activation; outside release commits none'
+      );
+      const finalContact = await page.evaluate(
+        (r) => window.__contacts.filter((c) => c.runtime === r).at(-1),
+        runtime
+      );
+      assert.equal(finalContact.session, captureHeld.session);
+      assert.equal(finalContact.active, false);
+      assert.equal(
+        finalContact.reason,
+        'lostcapture',
+        'native activation must not revive cancelled visual tracking'
+      );
+      assert.equal(await wc.getAttribute('data-material-contact'), 'rest');
+      await page.screenshot({ path: join(out, `${runtime}-capture-${release}-cancelled.png`) });
+      results.push({
         runtime,
-        captureDown.pointerId,
-        captureHeld,
-        captureEnded
-      ),
-      [],
-      'explicit release must exercise a matching trusted down/got/lost/up and cancelled router session'
-    );
-    assert.equal(
-      Number(await page.locator(`[data-count="${runtime}"]`).textContent()),
-      cancelCount
-    );
-    assert.equal(await wc.getAttribute('data-material-contact'), 'rest');
-    await page.screenshot({ path: join(out, `${runtime}-capture-cancelled.png`) });
-    results.push({
-      runtime,
-      flow: 'native explicit fixture releasePointerCapture',
-      note: 'fixture, not product, requested capture',
-      trustedPointerId: captureDown.pointerId,
-      heldContact: captureHeld,
-      endedContact: captureEnded,
-      native: captureNative,
-    });
+        flow: 'native explicit fixture releasePointerCapture',
+        release,
+        activations: captureActivations,
+        note: 'fixture, not product, requested capture',
+        trustedPointerId: captureDown.pointerId,
+        heldContact: captureHeld,
+        endedContact: captureEnded,
+        native: captureNative,
+      });
+    }
     // Blur observation is a real page focus change, asserted by native trace.
     const nativeBeforeBlur = await page.evaluate(() => window.__native.length);
     const beforeBlur = Number(await page.locator(`[data-count="${runtime}"]`).textContent());
