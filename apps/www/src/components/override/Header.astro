@@ -41,7 +41,10 @@ const navigation = [
     </HomepageRuntime>
   ) : (
     <div class="site-header" data-site-header data-docs-site-header>
-      <style is:inline set:html={renderSnapshotTokenCss(menuTokens)} />
+      <style
+        is:inline
+        set:html={renderSnapshotTokenCss(menuTokens, '[data-site-header-fallback-summary]')}
+      />
       <div class="site-header-brand">
         <SiteTitle />
       </div>

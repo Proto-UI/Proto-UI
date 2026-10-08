@@ -63,10 +63,16 @@ describe('startup paint comes from actual prototype style output', () => {
   it('retains SSR semantics and never treats static search as operational', () => {
     const search = readFileSync('apps/www/src/components/override/Search.astro', 'utf8');
     expect(search).toMatch(/disabled\s+aria-disabled="true"/);
+    expect(search).toContain(
+      "renderSnapshotTokenCss(startupTokens, '[data-search-startup-button]')"
+    );
     expect(search).toContain('aria-label={loadingLabel}');
     expect(search).toContain('<StaticLucideIcon name="search" size="16px" />');
     const header = readFileSync('apps/www/src/components/override/Header.astro', 'utf8');
     expect(header).toContain("data-pui-style={menuTokens.join(' ')}");
+    expect(header).toContain(
+      "renderSnapshotTokenCss(menuTokens, '[data-site-header-fallback-summary]')"
+    );
     const startup = readFileSync('apps/www/src/styles/site-startup.css', 'utf8');
     const shell = startup.slice(0, startup.indexOf('background: var(--color-background)'));
     expect(shell).not.toContain('[data-site-header-fallback-summary]');

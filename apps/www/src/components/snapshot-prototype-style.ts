@@ -91,14 +91,24 @@ async function snapshotPrototypeStyle(
  * figure's decorative pseudo plane) still use the canonical token compiler.
  * Only its zero-specificity host selector is rebound; declarations, ordering,
  * variants, theme selectors and media queries remain compiler-owned. */
-export function renderSnapshotTokenCss(tokens: string[]): string {
+export function renderSnapshotTokenCss(tokens: string[], scope?: string): string {
   // The site already loads the canonical document reset. Do not emit it again:
   // a later snapshot must not reset earlier controls in the same CSS layer.
   const reset = renderProtoStyleTokenCss([]);
   const prefix = reset.slice(0, reset.lastIndexOf('}'));
   const compiled = renderProtoStyleTokenCss(tokens);
   if (!compiled.startsWith(prefix)) throw new Error('Snapshot compiler prelude changed');
-  return '@layer proto-ui {' + compiled.slice(prefix.length);
+  const css = '@layer proto-ui {' + compiled.slice(prefix.length);
+  // A late inline snapshot must not re-declare composite utilities globally:
+  // e.g. a Button's text-sm would override another Text's explicit leading.
+  // Keep the compiler's token membership and variants on the same host, at
+  // zero specificity. Unscoped output is for declaration extraction/rebinding.
+  return scope
+    ? css.replace(
+        /:where\((\[data-pui-style~="(?:\\.|[^"\\])*"\])\)/g,
+        (_match, token: string) => `:where(${scope}${token})`
+      )
+    : css;
 }
 
 export function renderSnapshotSelectorCss(tokens: string[], selector: string): string {

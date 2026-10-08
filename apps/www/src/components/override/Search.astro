@@ -50,7 +50,8 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
   data-retry-label={retryLabel}
   data-ctrl-label={Astro.locals.t('search.ctrlKey')}
 >
-  <style is:inline set:html={renderSnapshotTokenCss(startupTokens)}></style>
+  <style is:inline set:html={renderSnapshotTokenCss(startupTokens, '[data-search-startup-button]')}
+  ></style>
   <div data-search-startup>
     <button
       type="button"

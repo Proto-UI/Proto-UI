@@ -14,7 +14,7 @@ export const STARTUP_PRERENDER_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/snapshot-prototype-style.ts': Object.freeze({
-    sourceSha256: 'ab4528be3bb61287c5d724a9fc7a2eb26bdeee5fdc106a7ab8ba6a37131ff98a',
+    sourceSha256: '3941b73c46c50a30e9618f6c9288e509ed4738316050bc20c1fa5c28ee1f740e',
     specifiers: Object.freeze([
       '../../../../packages/modules/as-trigger/src',
       '../../../../packages/modules/event/src',
