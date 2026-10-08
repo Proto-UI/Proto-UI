@@ -9,7 +9,7 @@ import type { EffectsPort } from '@proto.ui/core';
 import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-feedback';
 import { resolveMaterialPolicy } from '@proto.ui/module-feedback/internal/shared-policy';
 import { inspectCanvasBackdrop, type CanvasBackdropLease } from './source';
-import { createWebMaterialPreferences, type WebMaterialPreferences } from './preferences';
+import { resolveWebMaterialPreferences, type WebMaterialPreferences } from './preferences';
 import type { OpticalGeometry } from './program';
 import { acquireWebOpticalProgram } from './program-pool';
 import {
@@ -124,7 +124,7 @@ function createDocumentMaterialSink(
   const document = host.ownerDocument;
   const win = document.defaultView;
   if (!win) throw new Error('Material owner document unavailable');
-  const preferences = options.preferences ?? createWebMaterialPreferences(win);
+  const preferences = resolveWebMaterialPreferences(options.preferences, win);
   const program = acquireWebOpticalProgram(document, () => {
     invalidate('optical-context-invalidated');
   });

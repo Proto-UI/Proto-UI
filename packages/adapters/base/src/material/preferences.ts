@@ -3,6 +3,20 @@ export type WebMaterialPreferences = {
   current(): MaterialPolicyInput['preferences'];
   subscribe(invalidate: () => void): () => void;
 };
+const windows = new WeakMap<WebMaterialPreferences, Window>();
+
+/** Rebind only our known window-backed source. An arbitrary custom provider
+ * retains its own policy and subscription contract across host adoption. */
+export function resolveWebMaterialPreferences(
+  preferences: WebMaterialPreferences | undefined,
+  window: Window
+): WebMaterialPreferences {
+  const owner = preferences && windows.get(preferences);
+  return !preferences || (owner && owner !== window)
+    ? createWebMaterialPreferences(window)
+    : preferences;
+}
+
 /** Unsupported preference queries remain unknown, independently of motion. */
 export function createWebMaterialPreferences(window: Window): WebMaterialPreferences {
   const query = (text: string) => {
@@ -34,7 +48,7 @@ export function createWebMaterialPreferences(window: Window): WebMaterialPrefere
     const matches = queries.flatMap((q, i) => (q?.matches ? [values[i]] : []));
     return matches.length === 1 ? matches[0] : 'unknown';
   };
-  return {
+  const preferences: WebMaterialPreferences = {
     current: () => ({
       reducedMotion: select(motion, ['no-preference', 'reduce']),
       reducedTransparency: select(transparency, ['no-preference', 'reduce']),
@@ -49,4 +63,6 @@ export function createWebMaterialPreferences(window: Window): WebMaterialPrefere
       };
     },
   };
+  windows.set(preferences, window);
+  return preferences;
 }

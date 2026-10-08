@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { VisualFeedbackFrame } from '@proto.ui/module-feedback';
 import type { CanvasBackdropFrame, CanvasBackdropLease } from '../src/material/source';
 import { createWebMaterialSink } from '../src/material/sink';
+import { createWebMaterialPreferences } from '../src/material/preferences';
 import { createWebPointerContactWriter } from '../src/events/pointer-contact';
 import { inspectWebOpticalResources } from '../src/material/program-pool';
 
@@ -85,7 +86,7 @@ function environment(win: Window) {
   };
 }
 
-function fixture() {
+function fixture(preferences?: 'builtin' | 'custom') {
   const old = environment(window);
   const iframe = document.createElement('iframe');
   document.body.append(iframe);
@@ -129,6 +130,7 @@ function fixture() {
     return vi.fn();
   });
   const sourceListeners = new Set<() => void>();
+  const customPreferenceListeners = new Set<() => void>();
   let onSubscribe = () => {};
   let onUnsubscribe = () => {};
   let tokens: string[] = [];
@@ -143,6 +145,25 @@ function fixture() {
       },
     },
     {
+      preferences:
+        preferences === 'builtin'
+          ? createWebMaterialPreferences(window)
+          : preferences === 'custom'
+            ? {
+                current: () => ({
+                  reducedMotion: 'no-preference',
+                  reducedTransparency: 'reduce',
+                  contrast: 'no-preference',
+                  forcedColors: 'none',
+                }),
+                subscribe(fn) {
+                  customPreferenceListeners.add(fn);
+                  return () => {
+                    customPreferenceListeners.delete(fn);
+                  };
+                },
+              }
+            : undefined,
       source: {
         current: () => source,
         subscribe(fn) {
@@ -191,6 +212,7 @@ function fixture() {
     next,
     destination,
     sourceListeners,
+    customPreferenceListeners,
     source: () => source,
     setSource(value: CanvasBackdropFrame) {
       source = value;
@@ -494,5 +516,37 @@ describe('material resources follow actual owner-document adoption (mock GPU, no
     f.paletteRevision(10);
     f.invalidate();
     expect(f.host.dataset.materialQuality).toBe('self-optical');
+  });
+  it('rebinds an explicitly supplied built-in window preference provider', () => {
+    // Matches the real preview-material-scene consumer's explicit provider.
+    const f = fixture('builtin');
+    f.sink.commit(f.frame(1));
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+    f.next.transparency(true);
+    f.adopt();
+    f.sink.commit(f.frame(2));
+    expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+    expect(gpu.create.mock.results[1].value.render).not.toHaveBeenCalled();
+    expect(f.old.listeners.size).toBe(0);
+    expect(f.next.listeners.size).toBe(1);
+    f.old.transparency(false);
+    expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+    f.next.transparency(false);
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+  });
+
+  it('preserves an arbitrary custom preference provider across document rebinding', () => {
+    const f = fixture('custom');
+    f.sink.commit(f.frame(1));
+    expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+    f.adopt();
+    f.sink.commit(f.frame(2));
+    expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+    expect(gpu.create.mock.results[1].value.render).not.toHaveBeenCalled();
+    expect(f.customPreferenceListeners.size).toBe(1);
+    expect(f.old.listeners.size).toBe(0);
+    expect(f.next.listeners.size).toBe(0);
+    f.sink.release(1);
+    expect(f.customPreferenceListeners.size).toBe(0);
   });
 });
