@@ -840,7 +840,7 @@ class FocusModuleImpl extends ModuleBase {
         const request = this.caps.get(FOCUS_REQUEST_FOCUS_CAP);
         for (let attempts = targets.length; attempts > 0; attempts -= 1) {
           const target = targets[next]!;
-          if (request(target, { reason: 'keyboard' }) !== false) {
+          if (request(target, { reason: 'keyboard' }, 'native') !== false) {
             this.lastScopeTarget = target;
             return;
           }
