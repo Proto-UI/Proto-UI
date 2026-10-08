@@ -37,6 +37,23 @@ function chunk(
   };
 }
 
+test('pointer contact is an actual router-owned leaf with no optical dependency', async () => {
+  const { readFileSync } = await import('node:fs');
+  const router = readFileSync(
+    new URL('../../../packages/adapters/base/src/events/web-event-router.ts', import.meta.url),
+    'utf8'
+  );
+  const contact = readFileSync(
+    new URL('../../../packages/adapters/base/src/events/pointer-contact.ts', import.meta.url),
+    'utf8'
+  );
+  assert.match(
+    router,
+    /import \{ createWebPointerContactWriter, type WebPointerContact \} from '\.\/pointer-contact'/
+  );
+  assert.doesNotMatch(contact, /^\s*import\b|\bimport\s*\(|\bfrom\s*['"]/m);
+});
+
 function graphFixture() {
   return {
     version: 1,
@@ -757,6 +774,25 @@ for (const [entry, owner] of siteOwners) {
       .imports.push(target);
     return bridge;
   }
+  test(`bridge origin: ${entry} admits router-owned pointer contact transitively`, () => {
+    const { graph } = siteGraph();
+    const router = 'packages/adapters/base/src/events/web-event-router.ts';
+    const contact = 'packages/adapters/base/src/events/pointer-contact.ts';
+    const bridge = addReviewedBridgeTarget(graph, router);
+    bridge.moduleIds.push(contact);
+    graph.modules.push({ id: contact, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === router).imports.push(contact);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    const unknown = 'packages/adapters/base/src/events/pointer-contact-unreviewed.ts';
+    bridge.moduleIds.push(unknown);
+    graph.modules.push({ id: unknown, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === router).imports.push(unknown);
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(unknown)
+      )
+    );
+  });
   test(`bridge origin: ${entry} admits the exact WC-owned color scheme provider transitively`, () => {
     const { graph } = siteGraph();
     const adapter = 'packages/adapters/web-component/src/adapt.ts';
@@ -778,6 +814,7 @@ for (const [entry, owner] of siteOwners) {
     );
   });
   for (const target of [
+    'packages/adapters/base/src/events/pointer-contact.ts',
     'packages/adapters/web-component/src/color-scheme-source.ts',
     'packages/adapters/web-component/src/adapt.ts',
     'packages/adapters/web-component/src/material/owned-texture-sink.ts',

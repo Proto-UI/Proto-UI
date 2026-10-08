@@ -78,6 +78,8 @@ const REVIEWED_WEBSITE_CONTROL_APIS = new Set([
 const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/events/web-default-action.ts',
   'packages/adapters/base/src/events/web-event-router.ts',
+  // The existing router owns this finite sample cell; it imports no optical renderer.
+  'packages/adapters/base/src/events/pointer-contact.ts',
   'packages/adapters/base/src/gate/event-gate.ts',
   'packages/adapters/base/src/gestures/web-move-gesture-host.ts',
   'packages/adapters/base/src/host/adapter-host.ts',
