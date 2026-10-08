@@ -1050,3 +1050,138 @@ it.each(['compositionstart', 'input'] as const)(
     }
   }
 );
+
+// C-TEXT-CONTROL-0001-D/E/F/G/CHANGE-COMMIT: change-only edits are proposals,
+// including when the owner responds only at the deferred callback boundary.
+describe.each(['single', 'multiline'] as const)('Web %s change-only restoration', (lineMode) => {
+  it.each(['reject', 'accept', 'replace'] as const)(
+    'reconciles a change-only candidate after owner response=%s',
+    async (response) => {
+      let pendingOwner: string | undefined;
+      const h = createHarness(false, lineMode);
+      const target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+      document.body.append(target);
+      const control = h.module.facade.declare();
+      h.vault.attach([
+        [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(() => target)],
+        [
+          TEXT_CONTROL_RUN_IN_CALLBACK_CAP,
+          (callback: () => void) => {
+            if (pendingOwner !== undefined) {
+              const value = pendingOwner;
+              pendingOwner = undefined;
+              control.sync({ value });
+            }
+            callback();
+          },
+        ],
+      ]);
+      const seen: TextControlEvent[] = [];
+      control.on('change', (_run, next) => {
+        seen.push(next);
+        if (response !== 'reject')
+          pendingOwner = response === 'accept' ? next.value : 'replacement';
+      });
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'owner' });
+      target.focus();
+      try {
+        target.value = 'native candidate';
+        target.setSelectionRange(3, 3);
+        target.dispatchEvent(new Event('change'));
+        expect(seen).toEqual([event('change', 'native candidate')]);
+        expect(target.value).toBe('native candidate');
+        await Promise.resolve();
+        const expected =
+          response === 'reject'
+            ? 'owner'
+            : response === 'accept'
+              ? 'native candidate'
+              : 'replacement';
+        expect(target.value).toBe(expected);
+        expect(control.snapshot()).toEqual({ value: expected, composing: false });
+        if (response === 'accept') {
+          expect(target.selectionStart).toBe(3);
+          expect(target.selectionEnd).toBe(3);
+        }
+      } finally {
+        h.module.hooks.dispose?.();
+        target.remove();
+      }
+    }
+  );
+
+  it('preserves a change-only candidate and caret during active composition', async () => {
+    const h = createHarness(false, lineMode);
+    const target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+    document.body.append(target);
+    const control = h.module.facade.declare();
+    h.vault.attach([[TEXT_CONTROL_HOST_CAP, createWebTextControlHost(() => target)]]);
+    const seen: TextControlEvent[] = [];
+    control.on('change', (_run, next) => seen.push(next));
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'controlled', value: 'owner' });
+    target.focus();
+    try {
+      target.dispatchEvent(new CompositionEvent('compositionstart'));
+      target.value = 'composing candidate';
+      target.setSelectionRange(3, 3);
+      target.dispatchEvent(new Event('change'));
+      control.sync({ value: 'next owner' });
+      await Promise.resolve();
+      expect(seen).toEqual([event('change', 'composing candidate', true)]);
+      expect(target.value).toBe('composing candidate');
+      expect(target.selectionStart).toBe(3);
+      expect(target.selectionEnd).toBe(3);
+      expect(control.snapshot()).toEqual({ value: 'next owner', composing: true });
+      target.dispatchEvent(new CompositionEvent('compositionend'));
+      await Promise.resolve();
+      expect(target.value).toBe('next owner');
+      expect(control.snapshot()?.composing).toBe(false);
+    } finally {
+      h.module.hooks.dispose?.();
+      target.remove();
+    }
+  });
+
+  it.each(['detach', 'dispose', 'new-composition'] as const)(
+    'does not let pending change restoration overwrite %s',
+    async (transition) => {
+      const h = createHarness(false, lineMode);
+      let target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+      const oldTarget = target;
+      const control = h.module.facade.declare();
+      h.vault.attach([[TEXT_CONTROL_HOST_CAP, createWebTextControlHost(() => target)]]);
+      h.module.hooks.onMountPhase?.('mounted', 1);
+      h.sys.phase = 'callback';
+      control.sync({ valueMode: 'controlled', value: 'owner' });
+      try {
+        target.value = 'old candidate';
+        target.dispatchEvent(new Event('change'));
+        if (transition === 'dispose') h.module.hooks.dispose?.();
+        else {
+          if (transition === 'detach') {
+            h.module.hooks.onMountPhase?.('detached', 1);
+            target = document.createElement(lineMode === 'single' ? 'input' : 'textarea');
+            h.module.hooks.onMountPhase?.('mounted', 2);
+          }
+          target.dispatchEvent(new CompositionEvent('compositionstart'));
+          target.value = 'new composition';
+        }
+        await Promise.resolve();
+        expect(target.value).toBe(transition === 'dispose' ? 'old candidate' : 'new composition');
+        if (transition === 'detach') expect(oldTarget.value).toBe('old candidate');
+        if (transition !== 'dispose') {
+          expect(control.snapshot()?.composing).toBe(true);
+          target.dispatchEvent(new CompositionEvent('compositionend'));
+          await Promise.resolve();
+          expect(target.value).toBe('owner');
+        }
+      } finally {
+        h.module.hooks.dispose?.();
+      }
+    }
+  );
+});

@@ -278,3 +278,38 @@ describe('Field payload normalization precedes any retained mutation', () => {
     expect(root.getValidity().errors).toEqual([]);
   });
 });
+
+describe('Field change-only controlled editor ownership', () => {
+  it.each(['reject', 'accept', 'replace'] as const)(
+    'keeps physical editor and Field canonical value aligned when the owner chooses to %s',
+    async (response) => {
+      const f = await mount(fixture({ externalValidation: true }, { value: 'owner' }));
+      const seen: string[] = [];
+      f.control.addEventListener('change', (e: CustomEvent<{ value: string }>) => {
+        seen.push(e.detail.value);
+        if (response !== 'reject')
+          setElementProps(f.control, {
+            value: response === 'accept' ? e.detail.value : 'replacement',
+          });
+      });
+      const target = editor(f);
+      target.focus();
+      target.value = 'candidate';
+      target.setSelectionRange(3, 3);
+      target.dispatchEvent(new Event('change', { bubbles: true, composed: true }));
+      await flush();
+      const expected =
+        response === 'reject' ? 'owner' : response === 'accept' ? 'candidate' : 'replacement';
+      expect(seen).toEqual(['candidate']);
+      expect(target.value).toBe(expected);
+      expect(f.control.getExposes().value.get()).toBe(expected);
+      f.root.getExposes().validate();
+      await flush();
+      expect(f.requests.at(-1).value).toBe(expected);
+      if (response === 'accept') {
+        expect(target.selectionStart).toBe(3);
+        expect(target.selectionEnd).toBe(3);
+      }
+    }
+  );
+});

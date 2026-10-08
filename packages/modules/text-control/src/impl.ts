@@ -221,8 +221,9 @@ export class TextControlModuleImpl extends ModuleBase {
       const inCurrentCallback = (callback: () => void) => {
         const previousPrelude = this.callbackPrelude;
         const prelude = { epoch };
-        // Change has no deferred native-candidate restoration. Let queued owner
-        // patches project normally; active composition remains protected separately.
+        // Change lets queued owner patches project immediately; unlike input and
+        // composition boundaries, it needs no native-candidate prelude guard.
+        // Unaccepted changes still restore below; active composition stays protected.
         if (canonicalEvent.type !== 'change') this.callbackPrelude = prelude;
         const releasePrelude = () => {
           if (this.callbackPrelude === prelude) this.callbackPrelude = previousPrelude;
@@ -266,7 +267,8 @@ export class TextControlModuleImpl extends ModuleBase {
 
       const mustRestoreControlledValue =
         this.valueMode === 'controlled' &&
-        ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
+        (((event.type === 'input' || event.type === 'change') && !event.composing) ||
+          event.type === 'compositionend');
       if (!mustRestoreControlledValue) return;
       queueMicrotask(() => {
         // Re-enter the current callback boundary so pending accepted owner props
