@@ -660,6 +660,7 @@ for (const [observed, canonical, canApprove] of [
     // with a genuine fixture publication receipt and all other facts held fixed.
     published.input.reviewerPermissions = live.input.reviewerPermissions;
     const decision = authorizePullRequestMerge({
+      ...modelTraceFixture(),
       ...published,
       packet: refreshPacket(published.publishedPacket, published.input),
       liveInput: structuredClone(published.input),
@@ -3973,7 +3974,9 @@ test('review instructions distinguish the governed CLI and exact owner-plugin wr
     new URL('../../../.agents/skills/pui-review/SKILL.md', import.meta.url),
     'utf8'
   );
-  assert(skill.includes('only supported local CLI review mutation path'));
+  assert(skill.includes('pnpm agent:review -- submit-review'));
+  assert(skill.includes('only supported review mutation path'));
+  assert(skill.includes('re-collects the whole canonical review input live from GitHub with `gh`'));
   assert(skill.includes('governed tokenless owner-plugin writer'));
   assert(skill.includes('proto-ui-cloud-owner-review-v1'));
   assert(skill.includes('not an independent alternate writer'));
@@ -4162,12 +4165,11 @@ for (const kind of [
     if (kind === 'missing') delete measured.modelTrace;
     if (kind === 'missing-context') delete measured.modelTraceContext;
     if (kind === 'expired') {
-      measured.modelTrace.measuredAt = new Date(
-        Date.parse(measured.modelTrace.measuredAt) - 120 * 60_000
-      ).toISOString();
-      measured.modelTrace.expiresAt = new Date(
-        Date.parse(measured.modelTrace.expiresAt) - 120 * 60_000
-      ).toISOString();
+      const ttl =
+        Date.parse(measured.modelTrace.expiresAt) - Date.parse(measured.modelTrace.measuredAt);
+      const fixedPast = Date.parse('2000-01-01T00:00:00.000Z');
+      measured.modelTrace.measuredAt = new Date(fixedPast).toISOString();
+      measured.modelTrace.expiresAt = new Date(fixedPast + ttl).toISOString();
       measured.modelTrace.id = `sha256:${computeModelTraceReceiptDigest(measured.modelTrace)}`;
     }
     if (kind === 'mismatched-context') measured.modelTraceContext.contextDigest = 'd'.repeat(64);
