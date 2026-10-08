@@ -567,14 +567,18 @@ const themeCss = Object.entries(familyThemes)
     .library-card header {
       width: 100%;
     }
-    .library-card:not([data-library='brutalist']) :global(.library-card__surface),
+    .library-card:not([data-library='brutalist']):not([data-library='bootstrap-2-3-2'])
+      :global(.library-card__surface),
     [data-library='brutalist'] :global(.library-card__header),
     [data-library='brutalist'] :global(.library-card__content),
     [data-library='brutalist'] :global(.library-card__footer) {
       padding-inline: min(1.5rem, 5cqi);
     }
-    .library-card :global(.library-card__action) {
+    .library-card:not([data-library='bootstrap-2-3-2']) :global(.library-card__action) {
       padding-inline: min(1rem, 5cqi);
+    }
+    [data-library='bootstrap-2-3-2'] :global(.library-card__thumbnail-caption) {
+      padding-inline: min(0.5625rem, 2cqi);
     }
   }
   @media (max-width: 50rem) {

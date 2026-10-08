@@ -134,7 +134,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | Interactive or integration source | Owning matrix row | Source SHA-256 |
 | --- | --- | --- |
 | `apps/www/src/components/PrototypePreviewer/ShadowSplitAcceptance.astro` | `www.demo.authored-controllers` | `3c9c12659926d2a3cc8a531783c1f448b8cbe8e32d3aab44429de11424265684` |
-| `apps/www/src/components/UiLibraryGallery.astro` | `www.gallery.ui-library-cards` | `df876b9b8b6fc99c6baab29926123e0fa31720f6d203bdfd048cf262a91b2517` |
+| `apps/www/src/components/UiLibraryGallery.astro` | `www.gallery.ui-library-cards` | `89685fbeab258ff0565abc7fbc38aed4fa00d92bb41c106cd25fd0954bcbb14e` |
 | `apps/www/src/components/LibraryCardFrame.astro` | `www.gallery.ui-library-cards` | `f583b5140d82d64d1620ec8b0e62cf309e5ebec27fce5459e3c4926ca34b6665` |
 | `apps/www/src/components/LibraryCardPart.astro` | `www.gallery.ui-library-cards` | `2068554829bf946160e7086e362334ce2721894d4affa321669f5193a01013a1` |
 | `apps/www/src/components/library-card-client.ts` | `www.gallery.ui-library-cards` | `6f7c427be2a9e7a0802d5eacdaa3f95bb5c57a06ee1c6d7191d2d7a5b1f43f03` |

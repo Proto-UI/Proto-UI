@@ -111,6 +111,26 @@ it('inlines the licensed family font without hiding text or altering desktop typ
   expect(narrow).not.toMatch(/font-size:|font-family:|line-height:|overflow: hidden/);
 });
 
+it('keeps Bootstrap narrow padding on its caption instead of its outer shell and action', () => {
+  const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
+  const narrow = source
+    .slice(
+      source.indexOf('@container (max-width: 18rem)'),
+      source.indexOf('@media (max-width: 50rem)')
+    )
+    .replace(/\s+/g, ' ');
+  expect(narrow).toContain(
+    ".library-card:not([data-library='brutalist']):not([data-library='bootstrap-2-3-2']) :global(.library-card__surface)"
+  );
+  expect(narrow).toContain(
+    ".library-card:not([data-library='bootstrap-2-3-2']) :global(.library-card__action) { padding-inline: min(1rem, 5cqi); }"
+  );
+  expect(narrow).toContain(
+    "[data-library='bootstrap-2-3-2'] :global(.library-card__thumbnail-caption) { padding-inline: min(0.5625rem, 2cqi); }"
+  );
+  expect(narrow).not.toMatch(/font-size:|font-family:|line-height:|overflow: hidden/);
+});
+
 it('measures the actual title Text and verifies real fonts in both reload phases', () => {
   const source = readFileSync(
     'apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts',
