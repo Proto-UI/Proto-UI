@@ -34,9 +34,10 @@ describe('native fragment diagnostic evidence boundaries (source controls only)'
   it('records input attribution and never restores focus after module release', () => {
     expect(control).toContain("for (const input of ['programmatic', 'keyboard']");
     expect(control).toContain("event.key === 'Tab' && event.isTrusted");
-    expect(control).toContain("await page.keyboard.press('Shift+Tab')");
-    expect(control).toContain(
-      "if (input === 'programmatic') target.focus({ preventScroll: true })"
+    expect(control).toContain("() => page.keyboard.press('Tab')");
+    expect(control).not.toContain("page.keyboard.press('Shift+Tab')");
+    expect(control).toMatch(
+      /if \(input === 'programmatic'\) \{\s*state\.selectCode\(\);\s*target\.focus\(\{ preventScroll: true \}\);/
     );
     const release = control.indexOf('release();');
     const final = control.indexOf('} catch (error)', release);

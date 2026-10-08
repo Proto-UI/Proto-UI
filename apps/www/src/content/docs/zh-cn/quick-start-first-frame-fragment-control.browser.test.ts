@@ -8,6 +8,7 @@ import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
+import { acquireHeaderKeyboardFocus } from './quick-start-first-frame-keyboard';
 
 // This is a causal control, not a replacement for the real 18-case suite.
 // Keep the same initial fragment and document bytes. External JavaScript is
@@ -61,6 +62,18 @@ function readControl() {
   const selection = getSelection()!;
   return {
     readyState: document.readyState,
+    phase: state.phase,
+    documentHasFocus: document.hasFocus(),
+    visibilityState: document.visibilityState,
+    selectionRangeCount: selection.rangeCount,
+    selectionAnchor: state.describe(selection.anchorNode),
+    selectionExtent: state.describe(selection.focusNode),
+    active: state.describe(document.activeElement),
+    activePath: state.activePath(),
+    target: state.describe(state.target),
+    keyboardSteps: state.keyboardSteps,
+    rangeSetup: state.rangeSetup,
+    headerCandidates: state.headerCandidates,
     actualTheme: document.documentElement.dataset.theme,
     inlinePolicyViolations: (window as any).__inlinePolicyViolations ?? [],
     hash: location.hash,
@@ -119,6 +132,10 @@ describe('Quickstart native fragment causal controls, application modules empty'
           externalScripts: 'every requested script held until release, then empty 200 JavaScript',
           policy: inlineScriptPolicy,
           emptyModuleSHA256: createHash('sha256').update(emptyModule).digest('hex'),
+          keyboardSetup:
+            'fresh document and empty Selection, native forward Tab to Header, then script-created code Range; no focus correction',
+          shadowObservation:
+            'open shadow active paths and composed event paths only; closed shadow internals are not inferred',
         };
         page.on('pageerror', (error) => errors.push(error.message));
         let release!: () => void;
@@ -188,27 +205,152 @@ describe('Quickstart native fragment causal controls, application modules empty'
               const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
               let text = walker.nextNode()!;
               while (text && !text.textContent?.trim()) text = walker.nextNode()!;
-              const range = document.createRange();
-              range.selectNodeContents(text);
               const selection = getSelection()!;
-              selection.removeAllRanges();
-              selection.addRange(range);
               const target = document.querySelector<HTMLElement>(
                 focusOwner === 'menu'
                   ? '[data-site-header-fallback-summary]'
                   : '[data-site-header-desktop-navigation] a'
               )!;
+              // native-focus-description-start
+              const nodeIds = new WeakMap<Node, number>();
+              let nextNodeId = 1;
+              const describe = (node: Node | null): any => {
+                if (!node) return null;
+                if (!nodeIds.has(node)) nodeIds.set(node, nextNodeId++);
+                const element = node instanceof Element ? node : node.parentElement;
+                if (!element) return { nodeId: nodeIds.get(node), nodeType: node.nodeType };
+                const header = document.querySelector('[data-docs-site-header]');
+                const css = getComputedStyle(element);
+                const rect = element.getBoundingClientRect();
+                const ancestors = [];
+                let blockedByClosedDetails = false;
+                let hiddenOrInert = false;
+                for (let owner: Element | null = element; owner; ) {
+                  const style = getComputedStyle(owner);
+                  const summary: Element | null =
+                    owner.localName === 'details'
+                      ? ([...owner.children].find((child) => child.localName === 'summary') ?? null)
+                      : null;
+                  const closed = owner.localName === 'details' && !owner.hasAttribute('open');
+                  const inFirstSummary =
+                    !!summary && (summary === element || summary.contains(element));
+                  if (closed && !inFirstSummary) blockedByClosedDetails = true;
+                  if (owner.hasAttribute('hidden') || owner.hasAttribute('inert'))
+                    hiddenOrInert = true;
+                  if (
+                    owner === element ||
+                    closed ||
+                    owner.hasAttribute('hidden') ||
+                    owner.hasAttribute('inert') ||
+                    style.display === 'none' ||
+                    style.visibility !== 'visible' ||
+                    style.contentVisibility === 'hidden'
+                  )
+                    ancestors.push({
+                      tag: owner.localName,
+                      id: owner.id,
+                      closedDetails: closed,
+                      inFirstSummary,
+                      hidden: owner.hasAttribute('hidden'),
+                      inert: owner.hasAttribute('inert'),
+                      display: style.display,
+                      visibility: style.visibility,
+                      contentVisibility: style.contentVisibility,
+                    });
+                  const root = owner.getRootNode();
+                  owner = owner.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+                }
+                const root = element.getRootNode();
+                return {
+                  nodeId: nodeIds.get(node),
+                  nodeType: node.nodeType,
+                  tag: element.localName,
+                  id: element.id,
+                  text: (node.textContent ?? '').trim().slice(0, 80),
+                  href: element.getAttribute('href'),
+                  tabIndex: (element as HTMLElement).tabIndex,
+                  tabindexAttribute: element.getAttribute('tabindex'),
+                  connected: node.isConnected,
+                  disabled: element.matches(':disabled'),
+                  hiddenOrInert,
+                  blockedByClosedDetails,
+                  ancestors,
+                  inHeader: !!header?.contains(element),
+                  precedesHeader:
+                    !!header &&
+                    !header.contains(element) &&
+                    !!(element.compareDocumentPosition(header) & Node.DOCUMENT_POSITION_FOLLOWING),
+                  root:
+                    root instanceof ShadowRoot
+                      ? { type: 'shadow', mode: root.mode, host: root.host.localName }
+                      : { type: 'document' },
+                  exposedShadowRoot: element.shadowRoot?.mode ?? null,
+                  checkVisibility:
+                    element.checkVisibility?.({ checkOpacity: true, checkVisibilityCSS: true }) ??
+                    null,
+                  rect: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+                  css: {
+                    display: css.display,
+                    visibility: css.visibility,
+                    opacity: css.opacity,
+                    contentVisibility: css.contentVisibility,
+                  },
+                };
+              };
+              const activePath = () => {
+                const result = [];
+                for (
+                  let owner = document.activeElement;
+                  owner;
+                  owner = owner.shadowRoot?.activeElement ?? null
+                )
+                  result.push(describe(owner));
+                return result;
+              };
+              // native-focus-description-end
               const state = {
                 code,
                 text,
                 target,
-                anchor: selection.anchorNode,
-                anchorOffset: selection.anchorOffset,
-                extent: selection.focusNode,
-                extentOffset: selection.focusOffset,
-                selected: selection.toString(),
+                describe,
+                activePath,
+                phase: 'initial' as string,
+                anchor: null as Node | null,
+                anchorOffset: 0,
+                extent: null as Node | null,
+                extentOffset: 0,
+                selected: '',
                 trustedTabCount: 0,
+                keyboardSteps: 0,
+                rangeSetup: null as Record<string, unknown> | null,
+                headerCandidates: {
+                  kind: 'DOM-order hints only; actual Tab order is recorded by trusted focus events',
+                  nodes: [
+                    ...document.querySelectorAll(
+                      '[data-docs-site-header] a[href], [data-docs-site-header] summary, [data-docs-site-header] button, [data-docs-site-header] [tabindex]'
+                    ),
+                  ].map(describe),
+                },
                 trace: [] as Record<string, unknown>[],
+                selectCode: () => {
+                  const focusedBefore = document.activeElement;
+                  state.phase = 'code-range-setup';
+                  const range = document.createRange();
+                  range.selectNodeContents(text);
+                  selection.removeAllRanges();
+                  selection.addRange(range);
+                  state.anchor = selection.anchorNode;
+                  state.anchorOffset = selection.anchorOffset;
+                  state.extent = selection.focusNode;
+                  state.extentOffset = selection.focusOffset;
+                  state.selected = selection.toString();
+                  state.rangeSetup = {
+                    focusRetained: document.activeElement === focusedBefore,
+                    before: describe(focusedBefore),
+                    after: describe(document.activeElement),
+                  };
+                  return state.rangeSetup;
+                },
               };
               (window as any).__nativeFragmentControl = state;
               const observe = (event: Event) => {
@@ -217,6 +359,23 @@ describe('Quickstart native fragment causal controls, application modules empty'
                 if (state.trace.length < 1200)
                   state.trace.push({
                     kind: event.type,
+                    phase: state.phase,
+                    key: event instanceof KeyboardEvent ? event.key : null,
+                    code: event instanceof KeyboardEvent ? event.code : null,
+                    shiftKey: event instanceof KeyboardEvent ? event.shiftKey : null,
+                    documentHasFocus: document.hasFocus(),
+                    active: describe(document.activeElement),
+                    activePath: activePath(),
+                    eventTarget: event.target instanceof Node ? describe(event.target) : null,
+                    relatedTarget:
+                      event instanceof FocusEvent && event.relatedTarget instanceof Node
+                        ? describe(event.relatedTarget)
+                        : null,
+                    composedPath: event
+                      .composedPath()
+                      .filter((node): node is Node => node instanceof Node)
+                      .map(describe),
+                    intendedTarget: describe(target),
                     trusted: event.isTrusted,
                     at: performance.now(),
                     readyState: document.readyState,
@@ -228,6 +387,7 @@ describe('Quickstart native fragment causal controls, application modules empty'
               };
               for (const type of [
                 'keydown',
+                'keyup',
                 'focusin',
                 'focusout',
                 'selectionchange',
@@ -239,18 +399,48 @@ describe('Quickstart native fragment causal controls, application modules empty'
               // The first arm reproduces the original injected setup. The second
               // acquires focus only with browser keyboard input below. Neither arm
               // restores focus after releasing the pending initial navigation.
-              if (input === 'programmatic') target.focus({ preventScroll: true });
+              if (input === 'programmatic') {
+                state.selectCode();
+                target.focus({ preventScroll: true });
+              } else state.phase = 'keyboard-acquisition';
             },
             { focusOwner, input }
           );
           if (input === 'keyboard') {
-            // A code Range can move the sequential navigation starting point.
-            // Walk backwards through the real tab order, never call focus().
-            for (let tabs = 0; tabs < 160; tabs++) {
-              if ((await page.evaluate(readControl)).focused) break;
-              await page.keyboard.press('Shift+Tab');
-            }
+            // Range setup can move the sequential starting point even with body
+            // active. Acquire the Header through its short fresh-document prefix
+            // first; don't reverse through the sidebar or repair focus with JS.
+            await writeFile(
+              path.join(directory, `${name}-keyboard-start.json`),
+              JSON.stringify(
+                {
+                  source,
+                  browser: browser.version(),
+                  loader,
+                  start: await page.evaluate(readControl),
+                },
+                null,
+                2
+              )
+            );
+            const steps = await acquireHeaderKeyboardFocus(
+              () => page.evaluate(readControl),
+              () => page.keyboard.press('Tab')
+            );
+            await page.evaluate((steps) => {
+              (window as any).__nativeFragmentControl.keyboardSteps = steps;
+            }, steps);
+            const rangeSetup = await page.evaluate(() =>
+              (window as any).__nativeFragmentControl.selectCode()
+            );
+            expect(
+              rangeSetup.focusRetained,
+              'the code Range must not change the keyboard-acquired owner'
+            ).toBe(true);
           }
+          await page.evaluate(() => {
+            (window as any).__nativeFragmentControl.phase = 'before-release';
+          });
           const before = await page.evaluate(readControl);
           await writeFile(
             path.join(directory, `${name}-before.json`),
@@ -298,11 +488,22 @@ describe('Quickstart native fragment causal controls, application modules empty'
           expect(enforcedInlineBlock, 'the browser actually enforced the no-inline policy').toBe(
             true
           );
-          if (input === 'keyboard') expect(before.trustedTabCount).toBeGreaterThan(0);
+          if (input === 'keyboard') {
+            expect(before.trustedTabCount).toBeGreaterThan(0);
+            expect(before.trustedTabCount).toBe(before.keyboardSteps);
+            expect(
+              before.trace
+                .filter((event: any) => event.kind === 'keydown' && event.key === 'Tab')
+                .every((event: any) => event.trusted && event.shiftKey === false)
+            ).toBe(true);
+          }
           expect(
             emptiedScripts.length,
             'the native document is held by real module requests'
           ).toBeGreaterThan(0);
+          await page.evaluate(() => {
+            (window as any).__nativeFragmentControl.phase = 'document-completion';
+          });
           release();
           await page.waitForLoadState('load');
           await page.evaluate(
