@@ -7,6 +7,7 @@ export const FIXTURE_GENERATORS = [
   'experiments/material-initial-paint/artifact-binding.mjs',
   'experiments/material-initial-paint/browser-entry.ts',
   'experiments/material-initial-paint/browser.test.mjs',
+  'experiments/material-initial-paint/media-session.ts',
   'experiments/material-initial-paint/build-browser.mjs',
   'experiments/material-initial-paint/render-page.mjs',
   'packages/adapters/base/src/material/initial-paint-experiment.ts',

@@ -23,6 +23,7 @@ try {
         resolve(root, 'experiments/material-initial-paint/browser-entry.ts'),
         resolve(root, 'packages/adapters/base/test/web-material-initial-paint.test.ts'),
         resolve(root, 'packages/adapters/base/test/web-material-initial-binding.test.ts'),
+        resolve(root, 'packages/adapters/base/test/initial-paint-media-session.test.ts'),
       ],
       include: [],
     })

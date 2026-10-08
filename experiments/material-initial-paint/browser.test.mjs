@@ -14,6 +14,11 @@ import {
   writeFailureRecord,
 } from '../../apps/www/src/content/docs/zh-cn/library-card-capture.ts';
 import { renderInitialPaintPage } from './render-page.mjs';
+import {
+  holdMediaEmulation,
+  readMediaObservation,
+  assertMediaObservation,
+} from './media-session.ts';
 const root = resolve(process.argv[2] ?? '/tmp/pui-initial-paint'),
   out = resolve(process.argv[3] ?? '/tmp/pui-initial-paint-evidence');
 await mkdir(out, { recursive: true });
@@ -60,6 +65,9 @@ let browser,
   context,
   page,
   failure = null,
+  mediaSession,
+  requestedMedia,
+  activeCase = null,
   releaseHeld = () => {};
 const safe = {
   'prefers-reduced-motion': 'no-preference',
@@ -77,29 +85,36 @@ async function open(theme, { script = true, width = 1000, dpr = 1, preferences =
     new URL(route.request().url()).origin === origin ? route.continue() : route.abort()
   );
   page = await context.newPage();
-  const cdp = await context.newCDPSession(page);
-  await cdp.send('Emulation.setEmulatedMedia', {
-    features: Object.entries({ ...safe, 'prefers-color-scheme': theme, ...preferences }).map(
-      ([name, value]) => ({ name, value })
-    ),
-  });
-  await cdp.detach();
+  requestedMedia = { ...safe, 'prefers-color-scheme': theme, ...preferences };
+  mediaSession = await holdMediaEmulation(context, page, requestedMedia, report);
+}
+async function recordMedia() {
+  const media = await readMediaObservation(page, requestedMedia);
+  observations.push({ ...activeCase, phase: 'media-observation', media });
+  assertMediaObservation(media);
+  return media;
 }
 async function snapshot() {
-  return page.locator('#seed-control').evaluate((el) => ({
-    image: getComputedStyle(el).backgroundImage,
-    color: getComputedStyle(el).backgroundColor,
-    rect: el.getBoundingClientRect().toJSON(),
-    quality: el.dataset.materialQuality ?? null,
-    reason: el.dataset.materialReason ?? null,
-    blur: getComputedStyle(el).backdropFilter,
-    source: getComputedStyle(document.querySelector('canvas')).backgroundImage,
-  }));
+  return page.locator('#seed-control').evaluate(
+    (el) => ({
+      image: getComputedStyle(el).backgroundImage,
+      color: getComputedStyle(el).backgroundColor,
+      rect: el.getBoundingClientRect().toJSON(),
+      quality: el.dataset.materialQuality ?? null,
+      reason: el.dataset.materialReason ?? null,
+      blur: getComputedStyle(el).backdropFilter,
+      source: getComputedStyle(document.querySelector('canvas')).backgroundImage,
+    }),
+    undefined,
+    { timeout: 5000 }
+  );
 }
 async function capture(name) {
   images.push(await captureCurrentViewport(page, join(out, name), undefined, report));
 }
 async function close() {
+  await mediaSession?.close();
+  mediaSession = null;
   await closeEvidenceContext(context, false, report);
   context = null;
   page = null;
@@ -107,6 +122,7 @@ async function close() {
 try {
   browser = await launchBrowser();
   for (const theme of ['light', 'dark']) {
+    activeCase = { theme, case: 'producer' };
     await open(theme);
     await page.goto(`${origin}/?capture`, { waitUntil: 'networkidle' });
     // Theme is set before a second navigation because the fixture does not
@@ -119,6 +135,7 @@ try {
       );
       await page.goto(`${origin}/producer-dark.html?capture`, { waitUntil: 'networkidle' });
     }
+    await recordMedia();
     await page.waitForFunction(
       () =>
         document.querySelector('#seed-control')?.dataset.materialQuality === 'self-optical' ||
@@ -147,9 +164,12 @@ try {
       ['unsupported-width', { width: 800 }, false],
       ['unsupported-dpr', { dpr: 2 }, false],
     ]) {
+      activeCase = { theme, case: name };
       await open(theme, { script: false, ...config });
       await page.goto(`${origin}/seed-${theme}.html`, { waitUntil: 'load' });
+      const media = await recordMedia();
       const state = await snapshot();
+      observations.push({ theme, case: name, eligible, media, state });
       assert.equal(state.image, eligible ? expected : 'none');
       assert.equal(state.quality, null);
       assert.equal(state.blur, 'none');
@@ -161,9 +181,9 @@ try {
         await page.keyboard.press('Enter');
         assert.equal(new URL(page.url()).hash, '#destination');
       }
-      observations.push({ theme, case: name, eligible, state });
       await close();
     }
+    activeCase = { theme, case: 'server-to-live' };
     await open(theme);
     let release;
     const held = new Promise((resolve) => {
@@ -180,6 +200,7 @@ try {
         document.querySelector('#seed-control') &&
         getComputedStyle(document.querySelector('#seed-control')).backgroundImage.startsWith('url(')
     );
+    await recordMedia();
     const before = await snapshot();
     assert.equal(before.image, expected);
     assert.equal(before.quality, null);
@@ -235,6 +256,7 @@ try {
       assert.equal(frame.visibility, 'visible');
       assert.equal(frame.opacity, '1');
     }
+    await recordMedia();
     const after = await snapshot();
     assert.equal(after.image, expected);
     assert.equal(after.quality, 'self-optical');
@@ -251,6 +273,18 @@ try {
   }
 } catch (error) {
   failure = String(error?.stack ?? error);
+  if (page) {
+    try {
+      observations.push({
+        ...activeCase,
+        phase: 'failure-media',
+        media: await readMediaObservation(page, requestedMedia),
+        state: await snapshot(),
+      });
+    } catch (issue) {
+      report({ operation: 'failure.media-observation', error: String(issue) });
+    }
+  }
   if (page)
     await capture('failure.png').catch((issue) =>
       report({ operation: 'failure.capture', error: String(issue) })
@@ -262,6 +296,8 @@ try {
   );
 } finally {
   releaseHeld();
+  await mediaSession?.close();
+  mediaSession = null;
   if (context)
     await closeEvidenceContext(context, !!failure, report).catch((error) => {
       failure ??= String(error);

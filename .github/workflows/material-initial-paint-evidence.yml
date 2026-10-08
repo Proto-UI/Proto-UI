@@ -46,7 +46,7 @@ jobs:
         run: |
           node --test scripts/release/test/material-initial-paint-workflow.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
-          node node_modules/vitest/vitest.mjs run packages/adapters/base/test/web-material-initial-paint.test.ts packages/adapters/base/test/web-material-initial-binding.test.ts --minWorkers=1 --maxWorkers=1
+          node node_modules/vitest/vitest.mjs run packages/adapters/base/test/web-material-initial-paint.test.ts packages/adapters/base/test/web-material-initial-binding.test.ts packages/adapters/base/test/initial-paint-media-session.test.ts --minWorkers=1 --maxWorkers=1
           node experiments/material-initial-paint/typecheck.mjs
       - name: Build the finite source fixture
         run: |

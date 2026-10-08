@@ -41,6 +41,10 @@ function verifySourceGate(value) {
   ])
     assert.ok(paths.includes(path), `missing input trigger: ${path}`);
   const commands = job.steps.filter((step) => step.run).map((step) => step.run);
+  assert.ok(
+    commands.some((run) => run.includes('initial-paint-media-session.test.ts')),
+    'missing media lifecycle controls'
+  );
   const build = commands.findIndex((run) =>
     run.includes('material-initial-paint/build-browser.mjs')
   );
@@ -90,6 +94,18 @@ for (const [name, mutate] of [
       v.on.pull_request.paths = v.on.pull_request.paths.filter((p) => p !== path);
     },
   ]),
+  [
+    'missing media lifecycle controls',
+    (v) => {
+      const step = v.jobs['finite-rest-source'].steps.find(
+        (s) => s.name === 'Check the private source contract'
+      );
+      step.run = step.run.replace(
+        ' packages/adapters/base/test/initial-paint-media-session.test.ts',
+        ''
+      );
+    },
+  ],
   [
     'missing exact-head verification',
     (v) => {
