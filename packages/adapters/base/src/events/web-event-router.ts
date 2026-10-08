@@ -446,7 +446,9 @@ export function createWebProtoEventRouter(opt: {
   unsubs.push(
     listen(rootEl, 'lostpointercapture', (e: PointerEvent) => {
       if (!isEnabled() || !shouldRouteToCurrentRoot(e, { includeActiveFallback: false })) return;
-      if (contact && contact.pointerId !== e.pointerId) return;
+      // Normal pointerup already ended this contact. Its implicit capture
+      // release must not cancel surviving hover or a later keyboard gesture.
+      if (!contact || contact.pointerId !== e.pointerId) return;
       endContact('lostcapture');
       emit(protoRootBus, 'pointer.cancel', e);
     })
