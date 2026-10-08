@@ -2,9 +2,14 @@ name: Dialog available-space matched evidence
 on:
   pull_request:
     paths:
+      - 'scripts/test/evidence-input-paths.test.mjs'
       - '.github/workflows/dialog-available-space-evidence.yml'
       - 'apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.demo.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-brutalist-dialog.demo.ts'
+      - 'apps/www/src/content/docs/**/ui-libraries/shadcn/dialog.mdx'
+      - 'apps/www/src/content/docs/**/ui-libraries/brutalist/components/dialog.mdx'
       - 'scripts/test/server-readiness*'
       - 'scripts/test/check-dialog-baseline-evidence*'
       - 'packages/modules/positioning/**'
@@ -75,7 +80,7 @@ jobs:
           done
           git -C subject rev-parse HEAD > "$RUNNER_TEMP/dialog-space/subject-sha.txt"
           git -C candidate rev-parse HEAD > "$RUNNER_TEMP/dialog-space/probe-sha.txt"
-          node --test candidate/scripts/test/check-dialog-baseline-evidence.test.mjs
+          node --test candidate/scripts/test/check-dialog-baseline-evidence.test.mjs candidate/scripts/test/evidence-input-paths.test.mjs
       - name: Run identical native inputs and retain historical failing assertions
         working-directory: subject
         env:
