@@ -730,3 +730,10 @@
 .site-header:not([data-site-menu-ready]) > .site-header-menu {
   visibility: hidden;
 }
+
+/* The native summary owns Docs startup. Keep the future Button unrendered
+   inside its reserved 44px cell: an already-rendered transition-all Button
+   would animate inherited visibility when this Header publishes readiness. */
+.site-header[data-docs-site-header]:not([data-site-menu-ready]) [data-site-menu-button] {
+  display: none !important;
+}

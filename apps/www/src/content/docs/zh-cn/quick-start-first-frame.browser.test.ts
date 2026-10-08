@@ -219,6 +219,49 @@ function readPageFrame({
         (node, index) => node === identityHost.__startupNativeNodes![index] && node.isConnected
       ),
       menu: sample(menu),
+      // Diagnostics only: the visible-owner and every-frame assertions below
+      // remain authoritative, including the original fragment route.
+      menuPublication: menu
+        ? {
+            tag: menu.localName,
+            ready: headerRoot.hasAttribute('data-site-menu-ready'),
+            display: getComputedStyle(menu).display,
+            visibility: getComputedStyle(menu).visibility,
+            transitionProperty: getComputedStyle(menu).transitionProperty,
+            transitionDuration: getComputedStyle(menu).transitionDuration,
+            ancestors: (() => {
+              const facts = [];
+              for (let node: Element | null = menu; node; node = node.parentElement) {
+                const css = getComputedStyle(node);
+                if (
+                  node === menu ||
+                  node.hasAttribute('hidden') ||
+                  node.hasAttribute('inert') ||
+                  node.hasAttribute('data-pui-view-pending') ||
+                  css.visibility !== 'visible' ||
+                  css.display === 'none'
+                )
+                  facts.push({
+                    tag: node.localName,
+                    hidden: node.hasAttribute('hidden'),
+                    inert: node.hasAttribute('inert'),
+                    pending: node.hasAttribute('data-pui-view-pending'),
+                    generation: node.getAttribute('data-projection-generation-state'),
+                    display: css.display,
+                    visibility: css.visibility,
+                  });
+              }
+              return facts;
+            })(),
+            transitions: menu
+              .getAnimations()
+              .flatMap((animation) =>
+                animation instanceof CSSTransition
+                  ? [{ property: animation.transitionProperty, currentTime: animation.currentTime }]
+                  : []
+              ),
+          }
+        : null,
       menuGlyph: sample(menu?.querySelector('.site-header-menu-icon') ?? null),
       search: sample(search),
       searchLabel: sample(search?.querySelector('.site-search-label') ?? null),
@@ -678,12 +721,39 @@ describe('quick-start first-frame continuity', () => {
               ? (document.querySelector('[data-site-header-fallback-summary]') as HTMLElement)
               : (document.querySelector('[data-site-header-desktop-navigation] a') as HTMLElement);
           target.focus({ preventScroll: true });
-          const describe = (node: Node | null) => {
+          const describe = (node: Node | null, includePaint = true) => {
             const element = node instanceof Element ? node : node?.parentElement;
             return element
               ? {
                   tag: element.localName,
                   id: element.id,
+                  connected: element.isConnected,
+                  ancestors: !includePaint
+                    ? undefined
+                    : (() => {
+                        const facts = [];
+                        for (let node: Element | null = element; node; node = node.parentElement) {
+                          const css = getComputedStyle(node);
+                          if (
+                            node === element ||
+                            node.hasAttribute('hidden') ||
+                            node.hasAttribute('inert') ||
+                            node.hasAttribute('data-pui-view-pending') ||
+                            css.visibility !== 'visible' ||
+                            css.display === 'none'
+                          )
+                            facts.push({
+                              tag: node.localName,
+                              hidden: node.hasAttribute('hidden'),
+                              inert: node.hasAttribute('inert'),
+                              pending: node.hasAttribute('data-pui-view-pending'),
+                              generation: node.getAttribute('data-projection-generation-state'),
+                              display: css.display,
+                              visibility: css.visibility,
+                            });
+                        }
+                        return facts;
+                      })(),
                   attributes: Object.fromEntries(
                     [...element.attributes]
                       .filter((attribute) =>
@@ -703,7 +773,12 @@ describe('quick-start first-frame continuity', () => {
                 kind,
                 at: performance.now(),
                 readyState: document.readyState,
-                active: describe(document.activeElement),
+                hash: location.hash,
+                fragmentTarget: document.querySelector(':target')?.id ?? null,
+                menuReady: document
+                  .querySelector('[data-docs-site-header]')
+                  ?.hasAttribute('data-site-menu-ready'),
+                active: describe(document.activeElement, !kind.endsWith('-call')),
                 ...details,
               });
           };
@@ -713,9 +788,33 @@ describe('quick-start first-frame continuity', () => {
               (event) =>
                 observe(kind, {
                   target: describe(event.target as Node),
+                  relatedTarget: describe((event as FocusEvent).relatedTarget as Node | null),
+                  stack: event.type === 'selectionchange' ? undefined : new Error().stack,
                 }),
               true
             );
+          // focus-method-observation-start
+          for (const method of ['focus', 'blur'] as const) {
+            const original = HTMLElement.prototype[method];
+            HTMLElement.prototype[method] = function (this: HTMLElement, ...args: any[]) {
+              // Observing must never turn a native return/throw into another
+              // outcome, including a borrowed method with an invalid receiver.
+              try {
+                observe(`${method}-call`, {
+                  target: this instanceof HTMLElement ? { tag: this.localName, id: this.id } : null,
+                  stack: new Error().stack,
+                });
+              } catch {
+                /* Diagnostic failure cannot interfere with native behavior. */
+              }
+              return Reflect.apply(original, this, args);
+            };
+          }
+          // focus-method-observation-end
+          for (const kind of ['DOMContentLoaded', 'astro:page-load'])
+            document.addEventListener(kind, () => observe(kind), { once: true });
+          for (const kind of ['load', 'pageshow', 'hashchange'])
+            window.addEventListener(kind, () => observe(kind));
           const originalSet = selection.setBaseAndExtent;
           selection.setBaseAndExtent = function (...args) {
             observe('selection-write-before', { stack: new Error().stack });
