@@ -966,6 +966,40 @@ for (const kind of ['main', 'candidate-commit', 'candidate-tree']) {
   });
 }
 
+for (const kind of ['main', 'candidate-commit', 'candidate-tree']) {
+  test(`GPUI-RECEIPT-URL-001: ${kind} rejects malformed native receipt links`, () => {
+    for (const source of [
+      'https://',
+      'https://[not-an-ip]/native',
+      'https://example.invalid:invalid/native',
+      'https:/example.invalid/native',
+      'https://@example.invalid/native',
+      'http://example.invalid/native',
+      'https://user:password@example.invalid/native',
+      'https://example.invalid/na\ttive',
+      ['https://example.invalid/native'],
+    ]) {
+      const { data, row } = verifiedGpuiShape(kind);
+      row.nativeEvidence[0].source = source;
+      assert(
+        validateActual(data).some((error) => /GPUI acceptance/.test(error)),
+        JSON.stringify(source)
+      );
+    }
+  });
+  test(`GPUI-RECEIPT-URL-001: ${kind} rejects malformed implementation receipt links`, () => {
+    const { data, row } = verifiedGpuiShape(kind);
+    row.implementationEvidence[0].source = 'https://';
+    assert(validateActual(data).some((error) => /GPUI implementation/.test(error)));
+  });
+  test(`GPUI-RECEIPT-URL-001: ${kind} accepts well-formed receipt links`, () => {
+    const { data, row } = verifiedGpuiShape(kind);
+    row.nativeEvidence[0].source =
+      'https://artifacts.example.invalid:8443/runs/123?view=native#layout';
+    assert.deepEqual(validateActual(data), []);
+  });
+}
+
 test('review 4217415370: candidate verified GPUI rejects changed native worktree bytes', (t) => {
   const { data } = verifiedGpuiShape('candidate-commit');
   mockRead(t, {

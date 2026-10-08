@@ -43,3 +43,11 @@ Validation completed before the final freeze:
 Node was `v24.19.0`. The first Corepack invocation failed because its default cache parent was absent; no dependencies or toolchains were installed. The repository's Node entry points and existing shared dependencies were used instead. Browser, native GPUI execution, full repository builds/types, trusted CI and independent acceptance were not claimed by this local validator repair.
 
 This local packet does not publish a commit, update a remote ref, resolve the review thread or grant independent approval. Integrated aggregate checks, trusted exact-head CI/DCO and independent review remain later gates. No browser screenshots are applicable to this validator-only change; the evidence is the executed rejection/acceptance controls and source-bound walkthrough above.
+
+## Independent review follow-up: receipt URL syntax
+
+The independent review of `c735a0fbb7b01daa9e0de57e8de7af2bd46798f9` identified `GPUI-RECEIPT-URL-001`: the bare string `https://` passed the native receipt's prefix-only check. Three new main/candidate-commit/candidate-tree rejection assertions reproduced that defect before the fix; the three matching valid-URL controls passed.
+
+Native and implementation receipt sources now share a real URL-parser predicate: a string, explicit HTTPS authority, nonempty parsed host and no credentials. It rejects malformed authorities/ports, protocol substitutions, whitespace/control characters and backslash normalization. Valid HTTPS paths, explicit ports, query strings and fragment references remain accepted. The same native predicate still governs both row verification and completion. A syntactically valid URL is not proof of native execution or receipt authenticity; no evidence URL was fetched by this repair.
+
+The targeted URL/offline run passed 12/12 tests, covering nine invalid native source forms for each of the three snapshots, invalid implementation sources, valid sources, and offline source-proof validation. Three retained completion/implementation controls also passed. The source/generated-view check and whitespace diff check passed. No heavyweight build, complete repository suite, native run or new production proof was performed for this small follow-up; the independent review's prior 104-test and depth-1 results remain separately attributed historical evidence.

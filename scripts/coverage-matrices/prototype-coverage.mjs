@@ -515,6 +515,23 @@ function gpuiSourceBound(evidence, snapshot, repoRoot) {
   }
 }
 
+function isHttpsReceiptSource(source) {
+  if (
+    typeof source !== 'string' ||
+    source !== source.trim() ||
+    /[\u0000-\u0020\u007f\\]/.test(source)
+  )
+    return false;
+  const authority = /^https:\/\/([^/?#]+)/i.exec(source)?.[1];
+  if (!authority || authority.includes('@')) return false;
+  try {
+    const url = new URL(source);
+    return url.protocol === 'https:' && Boolean(url.hostname) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
 function hasGpuiNativeEvidence(row, revision) {
   return (
     Array.isArray(row?.nativeEvidence) &&
@@ -525,7 +542,7 @@ function hasGpuiNativeEvidence(row, revision) {
         e.result === 'passed' &&
         e.revision === revision &&
         /^[a-f0-9]{40}$/.test(e.revision ?? '') &&
-        /^https:\/\//.test(e.source ?? '')
+        isHttpsReceiptSource(e.source)
     )
   );
 }
@@ -547,7 +564,7 @@ function hasGpuiImplementation(row, revision, repoRoot, snapshot) {
           e.projectionIdentity === identity &&
           /^[a-f0-9]{40}$/.test(e.revision ?? '') &&
           e.revision === revision &&
-          /^https:\/\//.test(e.source ?? '') &&
+          isHttpsReceiptSource(e.source) &&
           Array.isArray(e.paths) &&
           e.paths.length > 0 &&
           e.paths.every(
