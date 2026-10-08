@@ -95,3 +95,68 @@ it('notifies adoption at mutation delivery while retaining ordinary old-document
   expect(frames.size).toBe(0);
   expect(migrated).toHaveBeenCalledOnce();
 });
+
+it.each([false, true])(
+  'isolates failed adoption cleanup from other consumers (stationary=%s)',
+  async (stationary) => {
+    const first = document.createElement('button');
+    const second = document.createElement('button');
+    const sibling = document.createElement('button');
+    const iframe = document.createElement('iframe');
+    document.body.append(first, second, sibling, iframe);
+    const destination = iframe.contentDocument!;
+    const frames = new Map<number, FrameRequestCallback>();
+    let sequence = 0;
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.set(++sequence, callback);
+      return sequence;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+      frames.delete(id);
+    });
+    // Use actual MutationObserver delivery, recording the propagated exception
+    // outside its callback instead of causing an uncaught runner error.
+    const errors: unknown[] = [];
+    const NativeObserver = window.MutationObserver;
+    vi.spyOn(window, 'MutationObserver').mockImplementation(function (callback) {
+      return new NativeObserver((records, observer) => {
+        try {
+          callback(records, observer);
+        } catch (error) {
+          errors.push(error);
+        }
+      });
+    });
+    let offFirst = () => {},
+      offSecond = () => {};
+    const failure = new Error('one-consumer-release-failed');
+    const firstChanged = vi.fn(() => {
+      offFirst();
+      throw failure;
+    });
+    const secondChanged = vi.fn(() => offSecond());
+    const siblingChanged = vi.fn();
+    offFirst = observeMaterialGeometry(first, firstChanged, () => null);
+    offSecond = observeMaterialGeometry(second, secondChanged, () => null);
+    const offSibling = stationary
+      ? observeMaterialGeometry(sibling, siblingChanged, () => null)
+      : () => {};
+    try {
+      destination.body.append(destination.adoptNode(first), destination.adoptNode(second));
+      await deliverMutations();
+      expect(errors).toEqual([failure]);
+      expect(firstChanged).toHaveBeenCalledOnce();
+      expect(secondChanged).toHaveBeenCalledOnce();
+      expect(frames.size).toBe(stationary ? 1 : 0);
+      expect(siblingChanged).not.toHaveBeenCalled();
+      [...frames.values()].forEach((fn) => fn(1));
+      frames.clear();
+      expect(siblingChanged).toHaveBeenCalledTimes(stationary ? 1 : 0);
+    } finally {
+      offFirst();
+      offSecond();
+      offSibling();
+    }
+    expect(frames.size).toBe(0);
+  }
+);

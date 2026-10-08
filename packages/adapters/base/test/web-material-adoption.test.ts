@@ -549,4 +549,36 @@ describe('material resources follow actual owner-document adoption (mock GPU, no
     f.sink.release(1);
     expect(f.customPreferenceListeners.size).toBe(0);
   });
+  it('isolates a real provider cleanup failure and allows the failed sink to recover', async () => {
+    const errors: unknown[] = [];
+    const NativeObserver = window.MutationObserver;
+    vi.spyOn(window, 'MutationObserver').mockImplementation(function (callback) {
+      return new NativeObserver((records, observer) => {
+        try {
+          callback(records, observer);
+        } catch (error) {
+          errors.push(error);
+        }
+      });
+    });
+    const first = fixture(),
+      second = fixture();
+    first.sink.commit(first.frame(1));
+    second.sink.commit(second.frame(1));
+    const failure = new Error('first-provider-cleanup-failed');
+    first.onUnsubscribe(() => {
+      throw failure;
+    });
+    first.adopt();
+    second.adopt();
+    await deliverMutations();
+    expect(errors).toEqual([failure]);
+    expect(inspectWebOpticalResources(document).consumers).toBe(0);
+    expect(second.next.listeners.size).toBe(1);
+    expect(second.host.dataset.materialQuality).toBe('self-optical');
+    expect(images.prepare.mock.lastCall?.[0]).toBe(second.destination.document);
+    first.sink.commit(first.frame(2));
+    expect(first.next.listeners.size).toBe(1);
+    expect(first.host.dataset.materialQuality).toBe('self-optical');
+  });
 });

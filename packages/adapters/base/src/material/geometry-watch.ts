@@ -40,11 +40,21 @@ export function observeMaterialGeometry(
       });
     };
     const onMutation = (records: MutationRecord[]) => {
+      let failed = false;
+      let failure: unknown;
       // Adoption invalidates a document resource lease at mutation delivery.
       // The old window may never get another animation frame. Notify only
       // migrated hosts now; ordinary geometry still coalesces below.
       if (records.some((record) => record.type === 'childList' && record.removedNodes.length))
-        for (const [host, notify] of [...documentChanges]) if (host.ownerDocument !== doc) notify();
+        for (const [host, notify] of [...documentChanges]) {
+          if (host.ownerDocument === doc) continue;
+          try {
+            notify();
+          } catch (error) {
+            if (!failed) failure = error;
+            failed = true;
+          }
+        }
       if (
         records.some(
           (record) =>
@@ -66,6 +76,9 @@ export function observeMaterialGeometry(
         revision++;
         schedule();
       }
+      // One provider's cleanup failure cannot strand other migrated hosts or
+      // suppress still-live geometry work. Preserve the original error after.
+      if (failed) throw failure;
     };
     const mutationOptions: MutationObserverInit = {
       attributes: true,
