@@ -167,14 +167,30 @@ try {
         window.__frames.push({
           t,
           metrics: window.v2Material.metrics(),
-          controls: [...document.querySelectorAll('[data-demo-ref="regular"]')].map((e) => ({
-            runtime: e.closest('[data-runtime]').dataset.runtime,
-            data: { ...e.dataset },
-            rect: e.getBoundingClientRect().toJSON(),
-            background: paintId(getComputedStyle(e).backgroundImage),
-            carrier: paintId(getComputedStyle(e, '::before').backgroundImage),
-            outset: getComputedStyle(e, '::before').inset,
-          })),
+          controls: [...document.querySelectorAll('[data-demo-ref="regular"]')].map((e) => {
+            const hostCss = getComputedStyle(e),
+              carrierCss = getComputedStyle(e, '::before');
+            return {
+              runtime: e.closest('[data-runtime]').dataset.runtime,
+              data: { ...e.dataset },
+              rect: e.getBoundingClientRect().toJSON(),
+              background: paintId(hostCss.backgroundImage),
+              hostBackground: hostCss.backgroundImage,
+              hostBackgroundColor: hostCss.backgroundColor,
+              hostVisibility: hostCss.visibility,
+              carrier: paintId(carrierCss.backgroundImage),
+              carrierHasImage: /^url\(["']?data:image\/png;base64,/.test(
+                carrierCss.backgroundImage
+              ),
+              carrierContent: carrierCss.content,
+              carrierDisplay: carrierCss.display,
+              carrierVisibility: carrierCss.visibility,
+              carrierOpacity: Number(carrierCss.opacity),
+              carrierWidth: parseFloat(carrierCss.width),
+              carrierHeight: parseFloat(carrierCss.height),
+              outset: carrierCss.inset,
+            };
+          }),
         });
         requestAnimationFrame(tick);
       }
@@ -270,6 +286,25 @@ try {
     assert.ok(
       sample.every((f) => f.controls[0]?.data.materialQuality === 'self-optical'),
       'valid live source updates must not flash opaque fallback'
+    );
+    const missingActualPaint = sample.filter((f) => {
+      const c = f.controls[0];
+      return (
+        !c?.carrierHasImage ||
+        c.carrierContent !== '""' ||
+        c.carrierDisplay !== 'block' ||
+        c.carrierVisibility !== 'visible' ||
+        c.carrierOpacity !== 1 ||
+        !(c.carrierWidth > 0 && c.carrierHeight > 0) ||
+        c.hostVisibility !== 'visible' ||
+        c.hostBackground !== 'none' ||
+        c.hostBackgroundColor !== 'rgba(0, 0, 0, 0)'
+      );
+    });
+    assert.deepEqual(
+      missingActualPaint,
+      [],
+      'every sampled frame, including new down, must retain actual visible carrier paint and a transparent host; a stale self-optical receipt is insufficient'
     );
 
     assert.ok(paints.size >= 5, 'continuous movement/release commits more than two paint states');
