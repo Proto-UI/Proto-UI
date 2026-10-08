@@ -28,6 +28,7 @@ Run source, synthetic-DOM and generated-output checks:
 corepack pnpm@10.32.1 exec vitest run \
   packages/compiler/test/button-ssr.test.ts \
   packages/compiler/test/button-ssr-server.test.ts \
+  packages/compiler/src/web-component-ssr-style.test.ts \
   --maxWorkers=1 --minWorkers=1
 ```
 
@@ -40,7 +41,7 @@ COMPILER_EVIDENCE_DIR=/tmp/compiler-button-evidence \
   --maxWorkers=1 --minWorkers=1
 ```
 
-The dedicated `compiler-button-ssr-evidence.yml` workflow runs both groups at the exact PR head, requires all 47 source and 21 browser tests with no skips, and retains generated files, source/lockfile identity, HTTP responses, CSS, carrier mismatch cases, native accessibility observations, frame samples, screenshots and traces. A collected or authored browser suite is not a browser pass. Local synthetic tests and output typechecking do not establish native pixels or AX. Public SSR gates stay closed pending wider capability evidence and independent admission, even if this bounded browser fixture passes.
+The dedicated `compiler-button-ssr-evidence.yml` workflow runs both groups at the exact PR head, requires all 67 source and 21 browser tests with no skips, and retains generated files, source/lockfile identity, HTTP responses, CSS, carrier mismatch cases, native accessibility observations, frame samples, screenshots and traces. A collected or authored browser suite is not a browser pass. Local synthetic tests and output typechecking do not establish native pixels or AX. Public SSR gates stay closed pending wider capability evidence and independent admission, even if this bounded browser fixture passes.
 
 ## Input and outward event channels
 
@@ -57,3 +58,7 @@ Native run [37801216661](https://github.com/Proto-UI/Proto-UI/actions/runs/37801
 ## Archive-safe generated closure
 
 `button-ssr-evidence.ts` accepts only the finite generated Button artifact paths and verifies every byte against the compiler fixture's SHA inventory before writing. Hidden logical `.proto-ui/...` helpers are exported as non-hidden `generated/helpers/...`; `generated-artifacts.json` and `build.json` retain the original logical path, exported relative path and SHA. Tests read all ten exported artifacts, verify each hash and reconstruct the generated server under its logical paths. Traversal, unrelated files, duplicate paths and foreign bytes are rejected before any write. The workflow retains its normal hidden-file exclusion and never uploads another hidden directory.
+
+The dependency checker preserves CSS `var()` fallback behavior: a valid primary does not require an unused fallback, and a complete fallback can close an absent/invalid primary. It tokenizes nested functions and commas rather than treating every referenced name as mandatory. The declaration cycle graph includes fallback references; a fallback inside a cyclic declaration does not resolve that cycle. A consuming declaration can still supply a fallback for a guaranteed-invalid variable. These rules follow [CSS Custom Properties](https://www.w3.org/TR/css-variables-1/#cycles).
+
+Closed consumer environments are deliberately limited to unescaped ASCII CSS identifiers, custom-property declarations, `@layer`/`@media`, and the admitted pure math/color/`var()` and canonical selector functions. CSS escapes, external-resource functions (including `image-set`), ordinary property declarations and other at-rules/functions are unsupported and rejected. Quoted font names and comma-separated fallback lists remain supported. This is a finite canonical theme grammar, not a universal CSS sanitizer or selector/cascade proof.

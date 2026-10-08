@@ -55,6 +55,7 @@ jobs:
           corepack pnpm@10.32.1 exec vitest run \
             packages/compiler/test/button-ssr.test.ts \
             packages/compiler/test/button-ssr-server.test.ts \
+            packages/compiler/src/web-component-ssr-style.test.ts \
             --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
             --outputFile="$RUNNER_TEMP/compiler-button-ssr/source-vitest.json" \
             2>&1 | tee "$RUNNER_TEMP/compiler-button-ssr/source.log"
@@ -62,8 +63,8 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 47, 'All source and server controls must run.');
-          assert.equal(report.numPassedTests, 47);
+          assert.equal(report.numTotalTests, 67, 'All source and server controls must run.');
+          assert.equal(report.numPassedTests, 67);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.numPendingTests, 0);
           assert.equal(report.success, true);

@@ -8,7 +8,11 @@ import { emitNativeStyleHandle, emitNativeRule, nativeStyleArtifact } from './na
 import { nativeInteractionArtifact } from './native-interaction';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
-import { ssrStyleDependencies, type SsrStyleEnvironment } from './web-component-ssr-style';
+import {
+  ssrStyleDependencies,
+  ssrStyleEnvironmentError,
+  type SsrStyleEnvironment,
+} from './web-component-ssr-style';
 import { webComponentSsrSupport } from './web-component-ssr-support';
 import { createHash } from 'node:crypto';
 import { renderProtoStyleTokenCss } from '../../cli/src/services/proto-style-css';
@@ -448,14 +452,19 @@ export function emitWebComponentSource(
     const environment = options.styleEnvironment;
     if (
       environment &&
-      (!/^[a-z][a-z0-9-]*$/.test(environment.id) ||
-        typeof environment.cssText !== 'string' ||
-        /@import\b|url\s*\(|<\/style/i.test(environment.cssText))
+      (!/^[a-z][a-z0-9-]*$/.test(environment.id) || typeof environment.cssText !== 'string')
     )
-      return reject(
-        'SSR stylesheet environment requires a named, closed CSS artifact without external imports or URLs.'
-      );
+      return reject('SSR stylesheet environment requires a named canonical CSS artifact.');
+    const environmentError = environment ? ssrStyleEnvironmentError(environment.cssText) : null;
+    if (environmentError)
+      return reject('Unsupported closed SSR stylesheet environment: ' + environmentError + '.');
     const styleDependencies = ssrStyleDependencies(cssText, environment?.cssText);
+    if (styleDependencies.invalid.length)
+      return reject(
+        'Unsupported SSR stylesheet dependency syntax: ' +
+          styleDependencies.invalid.join(', ') +
+          '.'
+      );
     if (styleDependencies.cyclic.length)
       return reject(
         'SSR stylesheet environment has cyclic custom property dependencies: ' +
