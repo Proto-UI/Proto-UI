@@ -1,0 +1,47 @@
+{
+  "purpose": "Evidence only. Do not merge this branch into any product branch.",
+  "source": "b0392134d488103faad977ff586bb86caf996556",
+  "sourceTree": "81a81c5e4158257c510fcf1962c33b16015cfc1f",
+  "dirty": false,
+  "run": 37726400887,
+  "artifact": 11527932488,
+  "artifactZipSha256": "b811ba7ad45831fc5ed2217df061ecd0c5f2672b74aaeb3f88ae0fff5584c5d8",
+  "browser": "Google Chrome 154.0.8037.57",
+  "results": {
+    "total": 10,
+    "passed": 10,
+    "failed": 0,
+    "coldAndRefreshJourneys": 16,
+    "noJavaScriptCases": 2,
+    "maximumDocumentOverflow": 0
+  },
+  "images": [
+    {
+      "path": "internal/evidence/quick-start-first-frame/b0392134/react-390-dark-cold-first-frame.png",
+      "size": 111017,
+      "sha256": "a67974d05b30e797fbb02dd4a0767e6b96ed8e2c0dd49c525a09495b11f0e12f"
+    },
+    {
+      "path": "internal/evidence/quick-start-first-frame/b0392134/react-390-dark-cold-hydrated.png",
+      "size": 111351,
+      "sha256": "622e011e1f6533238af983e499e6234233c6f650ab7fb5c912afada5907dec97"
+    },
+    {
+      "path": "internal/evidence/quick-start-first-frame/b0392134/wc-1280-light-cold-first-frame.png",
+      "size": 176663,
+      "sha256": "86973f9514f93e361dd313399025bbf367aa5579fb77ae83678d6490ad42b267"
+    },
+    {
+      "path": "internal/evidence/quick-start-first-frame/b0392134/wc-1280-light-cold-hydrated.png",
+      "size": 184741,
+      "sha256": "14003b7bc815ad1fe69819132158a1822bb624e343a5dbc2bf1148cfd81a41a5"
+    }
+  ],
+  "limitations": [
+    "The oracle measures quick-start content fonts, paint, absolute geometry, scroll and page overflow.",
+    "Header-control enhancement paint and other page surfaces are not all covered.",
+    "Whole Finf acceptance and main CI are not established by these images."
+  ],
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}
