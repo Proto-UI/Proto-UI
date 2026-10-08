@@ -5,6 +5,8 @@ on:
       - '.github/workflows/liquid-material-evidence.yml'
       - 'packages/prototypes/liquid-glass/**'
       - 'packages/modules/rule-meta/**'
+      - 'packages/modules/feedback/**'
+      - 'scripts/test/liquid-material-evidence-inputs.test.mjs'
       - 'packages/adapters/**'
       - 'apps/www/src/components/**'
       - 'apps/www/src/content/docs/**/ui-libraries/liquid-glass/**'
@@ -42,6 +44,7 @@ jobs:
         env:
           PROTO_UI_MATERIAL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-material-evidence
         run: |
+          node --test scripts/test/liquid-material-evidence-inputs.test.mjs
           node scripts/build/generate-web-material-kernel.mjs --check
           corepack pnpm@10.32.1 check:styles:preset
           corepack pnpm@10.32.1 exec vitest run \
