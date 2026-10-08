@@ -549,6 +549,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           : slotNodes;
         const rootChildren = normalizeVue2Children(rendered);
         const attrs = this.$attrs ?? {};
+        const hostDirection = attrs.dir ?? (this as any).dir;
 
         return h(
           rootTag,
@@ -569,7 +570,8 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               attrs.style,
             ]),
             attrs: {
-              dir: attrs.dir ?? (this as any).dir,
+              // An absent VNode attr must not claim consumer-owned native direction.
+              ...(hostDirection === undefined ? {} : { dir: hostDirection }),
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: state.viewReady ? undefined : '',
