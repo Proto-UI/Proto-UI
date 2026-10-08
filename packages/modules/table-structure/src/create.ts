@@ -217,7 +217,6 @@ export class TableStructureModuleImpl extends ModuleBase {
       });
     }
 
-    for (const { impl } of domainRecords) impl.clearProjection();
     const next = projectTableStructure({
       root: this.a11y.getObjectRef(),
       captions: captions.map(({ impl }) => impl.a11y.getObjectRef()),
@@ -225,6 +224,10 @@ export class TableStructureModuleImpl extends ModuleBase {
       unmatchedCells,
       roleMismatches: roleMismatches.map(({ impl }) => impl.a11y.getObjectRef()),
     });
+    // Valid topology updates its current facts directly. Withdrawing every
+    // part first emits false invalid states on ordinary target notifications.
+    // Invalid topology still clears the whole previous semantic projection.
+    if (!next.valid) for (const { impl } of domainRecords) impl.clearProjection();
     this.snapshot = next;
     this.applyTable(next);
     if (!next.valid) return;
