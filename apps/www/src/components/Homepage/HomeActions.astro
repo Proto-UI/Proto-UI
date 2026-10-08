@@ -76,14 +76,16 @@ const menuLabel = locale === 'zh-cn' ? '导航与设置' : 'Navigation and setti
                 height="18"
                 aria-hidden="true"
               >
-                <path
-                  fill={HOME_ACTION_ICONS[homeActionIcon(configuredIcon)!].fill}
-                  stroke={HOME_ACTION_ICONS[homeActionIcon(configuredIcon)!].stroke}
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d={HOME_ACTION_ICONS[homeActionIcon(configuredIcon)!].path}
-                />
+                {HOME_ACTION_ICONS[homeActionIcon(configuredIcon)!].paths.map((d) => (
+                  <path
+                    fill={HOME_ACTION_ICONS[homeActionIcon(configuredIcon)!].fill}
+                    stroke={HOME_ACTION_ICONS[homeActionIcon(configuredIcon)!].stroke}
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d={d}
+                  />
+                ))}
               </svg>
             )}
           </a>

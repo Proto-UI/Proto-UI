@@ -27,3 +27,11 @@ Measured isolated `home-action-icons.ts` browser ESM with installed esbuild, bun
 ## Evidence debt and handoff
 
 No screenshot is attached to this local-only commit. Fresh source-bound desktop/mobile, no-JS and family-card visuals must be captured against the integrated exact head, including Hero, gallery, overview, Lucide loading/error and Base Select. Do not reuse prior screenshots. Full production build, official CI and independent review remain required. No remote push or PR comment was performed here.
+
+## Independent review correction: separate SVG path origins
+
+Independent review of `6ce678901d8025e5c31ef1ced249f3d0174a1ce7` found a real geometry defect: joining the two Lucide arrow-right path strings made the second relative `m` begin at the first path's terminal point. Its first arrowhead point became `(31, 17)`, outside the 24-unit viewBox. The prior path-string equality assertion preserved the defect rather than detecting it. That candidate was not accepted or published.
+
+The correction retains a `paths` array and creates separate path elements in both Astro SSR and runtime rendering. A bounded line-path interpreter now verifies the actual independent shaft/arrowhead vertices and includes the malformed joined-path negative control. Base Select's consumer glyph also gains an `aria-hidden` wrapper, all four snippets preserve that decorative boundary, and the gallery's dynamic SVG explicitly disables focus.
+
+48 focused tests pass (geometry/negative control, Astro compilation/source controls and actual four-runtime native-host renderer cases). Astro check passes again with zero errors. Updated isolated entry cost is 5705 raw / 2136 gzip bytes (+4849 raw / +1618 gzip versus base). Native-browser screenshots and independent acceptance remain outstanding; this correction does not claim those checks ran.

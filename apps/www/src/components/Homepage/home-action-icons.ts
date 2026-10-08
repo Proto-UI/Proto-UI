@@ -4,11 +4,9 @@ import { LUCIDE_ARROW_RIGHT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/ic
 export const HOME_ACTION_ICONS = {
   'arrow-right': {
     viewBox: '0 0 24 24',
-    path: (
-      LUCIDE_ARROW_RIGHT_SHAPE_FACTORY({
-        path: ({ d }: { d: string }) => d,
-      } as never) as unknown as string[]
-    ).join(' '),
+    paths: LUCIDE_ARROW_RIGHT_SHAPE_FACTORY({
+      path: ({ d }: { d: string }) => d,
+    } as never) as unknown as string[],
     fill: 'none',
     stroke: 'currentColor',
   },
@@ -16,7 +14,9 @@ export const HOME_ACTION_ICONS = {
     fill: 'currentColor',
     stroke: 'none',
     viewBox: '0 0 24 24',
-    path: 'M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z',
+    paths: [
+      'M14 3h7v7h-2V6.414l-9.293 9.293-1.414-1.414L17.586 5H14V3ZM5 5h6v2H5v12h12v-6h2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z',
+    ],
   },
 } as const;
 export type HomeActionIcon = keyof typeof HOME_ACTION_ICONS;
@@ -39,13 +39,16 @@ export function appendHomeActionGlyph(slot: HTMLElement, icon: HomeActionIcon): 
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
   svg.style.marginInlineStart = '0.5rem';
-  const path = slot.ownerDocument.createElementNS(svg.namespaceURI, 'path');
-  path.setAttribute('fill', source.fill);
-  path.setAttribute('stroke', source.stroke);
-  path.setAttribute('stroke-width', '2');
-  path.setAttribute('stroke-linecap', 'round');
-  path.setAttribute('stroke-linejoin', 'round');
-  path.setAttribute('d', source.path);
-  svg.append(path);
+  // Keep each factory node separate: a leading relative move starts at its own origin.
+  for (const d of source.paths) {
+    const path = slot.ownerDocument.createElementNS(svg.namespaceURI, 'path');
+    path.setAttribute('fill', source.fill);
+    path.setAttribute('stroke', source.stroke);
+    path.setAttribute('stroke-width', '2');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    path.setAttribute('d', d);
+    svg.append(path);
+  }
   slot.append(svg);
 }

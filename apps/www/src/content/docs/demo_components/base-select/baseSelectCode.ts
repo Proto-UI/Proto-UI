@@ -7,7 +7,7 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
 <wc-base-select-root class="relative inline-flex flex-col gap-2">
   <wc-base-select-trigger class="inline-flex min-w-56 items-center justify-between gap-3 rounded-md border bg-white px-3 py-2 text-sm shadow-sm cursor-pointer select-none">
     <wc-base-select-value placeholder="Pick a framework"></wc-base-select-value>
-    <wc-lucide-chevron-down-icon class="text-slate-400" size="16"></wc-lucide-chevron-down-icon>
+    <wc-lucide-chevron-down-icon aria-hidden="true" class="text-slate-400" size="16"></wc-lucide-chevron-down-icon>
   </wc-base-select-trigger>
 
   <wc-base-select-content class="w-56 rounded-md border bg-white p-1 shadow-lg">
@@ -29,7 +29,7 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
 <BaseSelectRoot className="relative inline-flex flex-col gap-2">
   <BaseSelectTrigger className="inline-flex min-w-56 items-center justify-between gap-3 rounded-md border bg-white px-3 py-2 text-sm shadow-sm cursor-pointer select-none">
     <BaseSelectValue placeholder="Pick a framework" />
-    <LucideChevronDownIcon className="text-slate-400" size={16} />
+    <LucideChevronDownIcon aria-hidden="true" className="text-slate-400" size={16} />
   </BaseSelectTrigger>
 
   <BaseSelectContent className="w-56 rounded-md border bg-white p-1 shadow-lg">
@@ -51,7 +51,7 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
 <BaseSelectRoot class="relative inline-flex flex-col gap-2">
   <BaseSelectTrigger class="inline-flex min-w-56 items-center justify-between gap-3 rounded-md border bg-white px-3 py-2 text-sm shadow-sm cursor-pointer select-none">
     <BaseSelectValue placeholder="Pick a framework" />
-    <LucideChevronDownIcon class="text-slate-400" :size="16" />
+    <LucideChevronDownIcon aria-hidden="true" class="text-slate-400" :size="16" />
   </BaseSelectTrigger>
 
   <BaseSelectContent class="w-56 rounded-md border bg-white p-1 shadow-lg">
@@ -74,7 +74,7 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
   <BaseSelectRoot class="relative inline-flex flex-col gap-2">
     <BaseSelectTrigger class="inline-flex min-w-56 items-center justify-between gap-3 rounded-md border bg-white px-3 py-2 text-sm shadow-sm cursor-pointer select-none">
       <BaseSelectValue placeholder="Pick a framework" />
-      <LucideChevronDownIcon class="text-slate-400" :size="16" />
+      <LucideChevronDownIcon aria-hidden="true" class="text-slate-400" :size="16" />
     </BaseSelectTrigger>
 
     <BaseSelectContent class="w-56 rounded-md border bg-white p-1 shadow-lg">

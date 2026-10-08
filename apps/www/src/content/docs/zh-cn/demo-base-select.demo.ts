@@ -38,10 +38,13 @@ export default {
             props: { placeholder: 'Pick a framework' },
           },
           {
-            kind: 'proto',
-            prototypeId: 'lucide-chevron-down-icon',
-            props: { size: 16 },
-            className: 'text-slate-400',
+            kind: 'box',
+            tag: 'span',
+            attrs: { 'aria-hidden': 'true' },
+            className: 'inline-flex text-slate-400',
+            children: [
+              { kind: 'proto', prototypeId: 'lucide-chevron-down-icon', props: { size: 16 } },
+            ],
           },
         ],
       },

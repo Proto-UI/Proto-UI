@@ -42,6 +42,15 @@ describe('family-aware decorative icons', () => {
     expect(source('LucideIconGallery.astro')).toContain('aria-label={copy.close}');
     expect(source('LucideIconGallery.astro')).toContain('<StaticLucideIcon name="x"');
   });
+  it('hides the Base Select consumer glyph from the accessibility tree', () => {
+    const demo = readFileSync('apps/www/src/content/docs/zh-cn/demo-base-select.demo.ts', 'utf8');
+    expect(demo).toContain("attrs: { 'aria-hidden': 'true' }");
+    const snippets = readFileSync(
+      'apps/www/src/content/docs/demo_components/base-select/baseSelectCode.ts',
+      'utf8'
+    );
+    expect(snippets.match(/aria-hidden="true"/g)).toHaveLength(4);
+  });
   it('preserves readable lazy-load, error and no-script fallback instead of fake icons', () => {
     const gallery = source('LucideIconGallery.astro');
     expect(gallery).toContain('{icon.name}');
