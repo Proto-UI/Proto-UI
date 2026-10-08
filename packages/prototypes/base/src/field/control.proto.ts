@@ -217,7 +217,8 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     emitComposition(run, 'compositionEnd', event);
     binding.report({
       value: value.get(),
-      composing: false,
+      // A synchronous owner callback may already have started a newer composition.
+      composing: composing.get(),
       focused: focused.get(),
       reason: 'compositionend',
     });

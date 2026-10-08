@@ -103,8 +103,16 @@ function setup(def: DefHandle<FieldControlBindingProps>) {
     if (
       (fieldDisabled.get() || fieldReadOnly.get()) &&
       (reason === 'input' || reason === 'change' || reason === 'compositionend')
-    )
+    ) {
+      // Editing policy does not extend a composition that has already ended.
+      // Retire only that lifecycle fact; keep the canonical value/baseline and
+      // do not turn a rejected edit into automatic onChange validation.
+      if (reason === 'compositionend' && normalized.composing === false && report.composing) {
+        report = { ...report, composing: false };
+        notify('sync');
+      }
       return false;
+    }
     report = {
       value: copyFieldValue(normalized.value),
       initialValue: hasInitial

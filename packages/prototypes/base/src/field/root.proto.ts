@@ -344,7 +344,10 @@ function setupFieldRoot(def: DefHandle<FieldRootProps, FieldRootExposes>) {
       flags = [];
       status = 'unvalidated';
     }
-    invalidate();
+    // Defaults initialize uncontrolled validity once; later defaults are not
+    // a revision of the current validation policy or its pending request.
+    if (info.changedKeysAll.some((key) => key !== 'defaultInvalid' && key !== 'defaultErrors'))
+      invalidate();
     publish();
   });
   for (const role of ['control', 'label', 'description', 'error'])
