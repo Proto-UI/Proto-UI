@@ -68,6 +68,9 @@ jobs:
           "$CHROME" --version > "$RUNNER_TEMP/dialog-space/browser-environment.txt"
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
           corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Install candidate-owned probe dependencies
+        working-directory: candidate
+        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
       - name: Bind one complete candidate probe closure to both source subjects
         run: |
           set -euo pipefail
