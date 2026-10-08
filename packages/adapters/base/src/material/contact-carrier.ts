@@ -165,6 +165,22 @@ export function createContactCarrier(host: HTMLElement) {
   };
 }
 
+/** Author pseudos have no DOMRect and may paint outside their originating box.
+ * Only the private before carrier has a separately inspected bounded footprint. */
+export function hasAuthoredPseudoPaint(element: Element): boolean {
+  return ['::before', '::after'].some((pseudo) => {
+    if (pseudo === '::before' && owners.has(element as HTMLElement)) return false;
+    const css = element.ownerDocument.defaultView!.getComputedStyle(element, pseudo);
+    return (
+      !!css.content &&
+      !['none', 'normal'].includes(css.content) &&
+      css.display !== 'none' &&
+      !['hidden', 'collapse'].includes(css.visibility) &&
+      Number(css.opacity || '1') !== 0
+    );
+  });
+}
+
 /** Registered private paint footprints are excluded from neither visibility nor
  * overlap admission. Another surface must not sample through this output. */
 export function contactCarrierBounds(element: Element): DOMRect {

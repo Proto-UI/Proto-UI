@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createCanvasBackdropLease, inspectCanvasBackdrop } from '../src/material/source';
+import { createContactCarrier } from '../src/material/contact-carrier';
 const rect = (x: number, y: number, width: number, height: number) =>
   ({
     x,
@@ -143,5 +144,134 @@ describe('expanded contact paint source admission', () => {
     expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
       reason: 'source-expanded-paint-clipped',
     });
+  });
+});
+
+// These explicit computed-style and rectangle inputs exercise admission, not
+// browser layout or rendered pixels. A pseudo's fixed/absolute painted box can
+// reach the material even when its originating element's border box cannot.
+describe('authored pseudo source admission (computed-style inputs)', () => {
+  function pseudoFixture() {
+    const f = fixture(),
+      sibling = document.createElement('div');
+    sibling.style.position = 'relative';
+    f.scope.append(sibling);
+    vi.spyOn(sibling, 'getBoundingClientRect').mockReturnValue(rect(260, 30, 20, 20));
+    const pseudos: Record<string, Record<string, string>> = {
+      '::before': { content: 'none' },
+      '::after': { content: 'none' },
+    };
+    const nativeStyle = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) =>
+      element === sibling && pseudo
+        ? (pseudos[pseudo] as unknown as CSSStyleDeclaration)
+        : nativeStyle(element, pseudo)
+    );
+    return { ...f, sibling, pseudos };
+  }
+  const authoredPaint = {
+    content: '\"\"',
+    display: 'block',
+    visibility: 'visible',
+    opacity: '1',
+    position: 'fixed',
+    left: '40px',
+    top: '30px',
+    width: '100px',
+    height: '40px',
+    backgroundColor: 'rgb(255, 0, 0)',
+  };
+  it.each(['::before', '::after'])(
+    'rejects out-of-box authored %s and recovers when removed',
+    (pseudo) => {
+      const { host, lease, pseudos } = pseudoFixture();
+      expect(inspectCanvasBackdrop(host, lease.current()).valid).toBe(true);
+      pseudos[pseudo] = { ...authoredPaint };
+      expect(inspectCanvasBackdrop(host, lease.current())).toMatchObject({
+        valid: false,
+        reason: 'source-authored-pseudo-unavailable',
+      });
+      pseudos[pseudo].content = 'none';
+      expect(inspectCanvasBackdrop(host, lease.current()).valid).toBe(true);
+    }
+  );
+  it('does not hide a visible pseudo behind its hidden originating element', () => {
+    const { host, lease, sibling, pseudos } = pseudoFixture();
+    sibling.style.visibility = 'hidden';
+    pseudos['::after'] = { ...authoredPaint };
+    expect(inspectCanvasBackdrop(host, lease.current())).toMatchObject({
+      valid: false,
+      reason: 'source-authored-pseudo-unavailable',
+    });
+  });
+  it.each([
+    { content: 'none' },
+    { content: 'normal' },
+    { display: 'none' },
+    { visibility: 'hidden' },
+    { visibility: 'collapse' },
+    { opacity: '0' },
+  ])('retains ordinary enhancement for nonpainted pseudo %j', (override) => {
+    const { host, lease, pseudos } = pseudoFixture();
+    pseudos['::before'] = { ...authoredPaint, ...override };
+    expect(inspectCanvasBackdrop(host, lease.current()).valid).toBe(true);
+  });
+  it('does not treat an author-supplied carrier marker as private ownership', () => {
+    const { host, lease, sibling, pseudos } = pseudoFixture();
+    sibling.setAttribute('data-pui-material-carrier', 'contact-v1');
+    pseudos['::before'] = { ...authoredPaint };
+    expect(inspectCanvasBackdrop(host, lease.current())).toMatchObject({
+      valid: false,
+      reason: 'source-authored-pseudo-unavailable',
+    });
+  });
+  it('retains bounded owned before paint, rejects its overlap and never exempts author after paint', () => {
+    const { host, lease, sibling, pseudos } = pseudoFixture();
+    sibling.style.isolation = 'isolate';
+    const carrier = createContactCarrier(sibling);
+    try {
+      pseudos['::before'] = {
+        ...authoredPaint,
+        position: 'absolute',
+        left: '0px',
+        top: '0px',
+        width: '20px',
+        height: '20px',
+        pointerEvents: 'none',
+        zIndex: '-1',
+        backgroundImage: 'url("data:image/png;base64,AA==")',
+        backgroundSize: '100% 100%',
+        backgroundPosition: '0% 0%',
+        backgroundRepeat: 'no-repeat',
+        backgroundAttachment: 'scroll',
+        backgroundOrigin: 'border-box',
+        backgroundClip: 'border-box',
+        backgroundColor: 'rgba(0, 0, 0, 0)',
+        overflowX: 'visible',
+        overflowY: 'visible',
+        outlineWidth: '0px',
+        outlineStyle: 'none',
+        transform: 'none',
+      };
+      for (const key of ['left', 'top', 'width', 'height'])
+        sibling.style.setProperty(`--pui-material-${key}`, pseudos['::before'][key]);
+      expect(carrier.valid('data:image/png;base64,AA==')).toBe(true);
+      expect(inspectCanvasBackdrop(host, lease.current()).valid).toBe(true);
+      pseudos['::before'].left = '-220px';
+      expect(inspectCanvasBackdrop(host, lease.current())).toMatchObject({
+        valid: false,
+        reason: 'source-overlapping-content',
+      });
+      pseudos['::before'].left = '0px';
+      pseudos['::after'] = { ...authoredPaint };
+      expect(inspectCanvasBackdrop(host, lease.current())).toMatchObject({
+        valid: false,
+        reason: 'source-authored-pseudo-unavailable',
+      });
+      pseudos['::after'].content = 'none';
+      expect(inspectCanvasBackdrop(host, lease.current()).valid).toBe(true);
+    } finally {
+      carrier.release();
+    }
   });
 });

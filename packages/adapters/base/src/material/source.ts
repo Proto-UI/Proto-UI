@@ -1,4 +1,4 @@
-import { contactCarrierBounds } from './contact-carrier';
+import { contactCarrierBounds, hasAuthoredPseudoPaint } from './contact-carrier';
 /** A bounded source is the visible application canvas itself. No DOM capture,
  * screenshot API, external image fetch, or self-output sampling is performed. */
 export type CanvasBackdropFrame = Readonly<{
@@ -235,8 +235,9 @@ export function inspectCanvasBackdrop(
     )
       continue;
     const css = win.getComputedStyle(element);
-    if (css.display === 'none' || css.visibility === 'hidden' || Number(css.opacity || '1') === 0)
-      continue;
+    if (css.display === 'none' || Number(css.opacity || '1') === 0) continue;
+    if (hasAuthoredPseudoPaint(element)) return fail('source-authored-pseudo-unavailable');
+    if (css.visibility === 'hidden') continue;
     if (overlaps(paint, contactCarrierBounds(element))) return fail('source-overlapping-content');
   }
   return {

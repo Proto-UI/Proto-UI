@@ -23,7 +23,8 @@ vi.mock('../src/material/image-prepare', () => ({
   inspectOpticalImageResources: () => ({}),
 }));
 vi.mock('../src/material/program', () => ({ createWebOpticalProgram: () => optical }));
-vi.mock('../src/material/contact-carrier', () => ({
+vi.mock('../src/material/contact-carrier', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../src/material/contact-carrier')>()),
   inspectContactCarrier: () => null,
   contactCarrierBounds: (element: Element) => element.getBoundingClientRect(),
   createContactCarrier: (host: HTMLElement) =>
@@ -200,6 +201,52 @@ describe('V2 physical-view material ownership (mock GPU, not optical evidence)',
     expect(f.sourceListeners.size).toBe(0);
     expect(f.preferenceListeners.size).toBe(0);
   });
+  it.each(['::before', '::after'])(
+    'withdraws an existing receipt on authored sibling %s and recovers after removal',
+    (pseudo) => {
+      const f = fixture(),
+        sibling = document.createElement('div');
+      f.host.parentElement!.append(sibling);
+      vi.spyOn(sibling, 'getBoundingClientRect').mockReturnValue(rect(260, 30, 20, 20));
+      let content = 'none';
+      const nativeStyle = window.getComputedStyle.bind(window);
+      vi.spyOn(window, 'getComputedStyle').mockImplementation((element, selected) =>
+        element === sibling && selected === pseudo
+          ? ({
+              content,
+              display: 'block',
+              visibility: 'visible',
+              opacity: '1',
+              position: 'fixed',
+              left: '40px',
+              top: '30px',
+              width: '100px',
+              height: '40px',
+              backgroundColor: 'rgb(255, 0, 0)',
+            } as CSSStyleDeclaration)
+          : nativeStyle(element, selected)
+      );
+      try {
+        f.sink.commit(f.frame(1));
+        expect(f.host.dataset.materialQuality).toBe('self-optical');
+        expect(optical.render).toHaveBeenCalledOnce();
+        content = '\"\"';
+        // Explicit source invalidation, with computed CSS injected above. This
+        // tests receipt withdrawal, not native paint or CSS mutation delivery.
+        f.invalidate();
+        expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+        expect(f.host.dataset.materialReason).toBe('source-authored-pseudo-unavailable');
+        expect(f.host.style.backgroundImage).toBe('none');
+        expect(optical.render).toHaveBeenCalledOnce();
+        content = 'none';
+        f.invalidate();
+        expect(f.host.dataset.materialQuality).toBe('self-optical');
+        expect(optical.render).toHaveBeenCalledTimes(2);
+      } finally {
+        f.sink.release(1);
+      }
+    }
+  );
   it('waits for exact asynchronous framework style delivery and discards a superseded frame', () => {
     const f = fixture(true);
     f.sink.commit(f.frame(1));
