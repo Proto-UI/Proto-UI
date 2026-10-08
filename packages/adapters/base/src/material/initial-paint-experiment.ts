@@ -72,8 +72,8 @@ export function initialPaintTuple(
 export function initialPaintPresentation(receipt: InitialPaintReceipt, hostId: string) {
   if (!/^[a-z][a-z0-9-]{0,63}$/.test(hostId)) throw new Error('seed-host-id-invalid');
   const host = `#${hostId}`,
-    pending = `${host}[${marker}]`,
-    selected = `${host}[${marker}="${receipt.image.pngSha256}"]`;
+    selected = `${host}[${marker}="${receipt.image.pngSha256}"]`,
+    pending = `${selected},${host}[${marker}="${receipt.image.pngSha256}:rejected"]`;
   const { viewportWidth: width, viewportHeight: height, dpr, theme } = receipt.layout;
   const fallback = `background-image:none!important;background-color:${rgbaCss(receipt.fill)}!important;`;
   const paint = `background-image:url("${receipt.image.dataUrl}")!important;background-color:transparent!important;`;
@@ -89,7 +89,7 @@ export function initialPaintPresentation(receipt: InitialPaintReceipt, hostId: s
     style: initialPaintTuple(receipt)
       .map(([name, value]) => `${name}:${value}`)
       .join(';'),
-    css: `${pending}{${fallback}}\n@media ${eligibility}{${explicitTheme}{${paint}}}\n@media ${eligibility} and (prefers-color-scheme:${theme}){${automaticTheme}{${paint}}}\n@media (prefers-reduced-transparency:reduce),(prefers-contrast:more),(prefers-contrast:less),(prefers-contrast:custom){${host}{${fallback}}}\n@media (forced-colors:active){${host}{background-image:none!important;background-color:Canvas!important;color:CanvasText!important;forced-color-adjust:auto;}}`,
+    css: `${pending}{${fallback}}\n@media ${eligibility}{${explicitTheme}{${paint}}}\n@media ${eligibility} and (prefers-color-scheme:${theme}){${automaticTheme}{${paint}}}\n@media (prefers-reduced-transparency:reduce),(prefers-contrast:more),(prefers-contrast:less),(prefers-contrast:custom){${pending}{${fallback}}}\n@media (forced-colors:active){${pending}{background-image:none!important;background-color:Canvas!important;color:CanvasText!important;forced-color-adjust:auto;}}`,
     layoutLimit:
       'Only the declared viewport/DPR and build-owned layout profile may show initial optical paint; other profiles start opaque. Font-scale/layout variants require separate pre-render evidence.',
   };
@@ -146,21 +146,21 @@ export async function prepareExperimentalInitialPaint(
   const pendingStops: Array<() => void> = [];
   let invalidated = false;
   let pendingActive = true;
+  let expected: InitialPaintReceipt | null = null;
+  let withdrawOwned = () => {};
   try {
     // Shape parsing establishes no live provenance. It only lets the existing
     // marked server tuple be withdrawn synchronously while hashes are pending.
-    const expected = parseInitialPaintReceipt(serialized);
-    const source = options.source.current();
+    expected = parseInitialPaintReceipt(serialized);
+    if (originalMarker !== expected.image.pngSha256)
+      throw new Error('seed-initial-plane-owner-mismatch');
+    const ownedReceipt = expected;
     const withdrawPending = () => {
       if (!pendingActive) return;
       invalidated = true;
-      if (
-        host.getAttribute(marker) !== originalMarker ||
-        host.getAttribute('style') !== originalStyle
-      )
-        return;
+      if (host.getAttribute(marker) !== ownedReceipt.image.pngSha256) return;
       host.removeAttribute(marker);
-      for (const [name, value] of initialPaintTuple(expected)) {
+      for (const [name, value] of initialPaintTuple(ownedReceipt)) {
         const probe = ownerDocument.createElement('span');
         probe.style.setProperty(name, value);
         if (
@@ -170,6 +170,20 @@ export async function prepareExperimentalInitialPaint(
           host.style.removeProperty(name);
       }
     };
+    withdrawOwned = withdrawPending;
+    const initialTupleIntact = initialPaintTuple(ownedReceipt).every(([name, value]) => {
+      const probe = ownerDocument.createElement('span');
+      probe.style.setProperty(name, value);
+      return (
+        host.style.getPropertyValue(name) === probe.style.getPropertyValue(name) &&
+        host.style.getPropertyPriority(name) === ''
+      );
+    });
+    if (!initialTupleIntact) {
+      withdrawPending();
+      throw new Error('seed-initial-plane-inputs-mismatch');
+    }
+    const source = options.source.current();
     const watchPending = (subscribe: (changed: () => void) => () => void) => {
       let stop: () => void;
       try {
@@ -227,15 +241,22 @@ export async function prepareExperimentalInitialPaint(
         !invalidated && host.ownerDocument === ownerDocument && options.source.current() === source
     );
   } catch (error) {
-    // Invalid JSON/hash has no trusted tuple to adopt or remove. The server's
-    // opaque default still owns every marked plane; select that fallback only
-    // if neither its identity nor inline paint was replaced during validation.
+    // Only the receipt's marker identifies this server plane. Unchanged own
+    // paint can select its opaque default; changed paint needs the old selector
+    // removed and property-by-property cleanup so an author's value survives.
     if (
-      originalMarker &&
+      expected &&
+      originalMarker === expected.image.pngSha256 &&
       host.getAttribute(marker) === originalMarker &&
       host.getAttribute('style') === originalStyle
     )
-      host.setAttribute(marker, 'rejected');
+      host.setAttribute(marker, `${expected.image.pngSha256}:rejected`);
+    else if (
+      expected &&
+      originalMarker === expected.image.pngSha256 &&
+      host.getAttribute(marker) === originalMarker
+    )
+      withdrawOwned();
     throw error;
   } finally {
     pendingActive = false;

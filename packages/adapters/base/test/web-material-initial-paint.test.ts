@@ -407,7 +407,7 @@ describe('internal finite rest seed receipt (synthetic bytes, not optical eviden
       expect(p.css).toContain(guard);
     expect(p.css).toContain('(prefers-reduced-transparency:reduce)');
     expect(p.css).toContain(
-      '(forced-colors:active){#rest-host{background-image:none!important;background-color:Canvas!important;color:CanvasText!important'
+      `(forced-colors:active){#rest-host[data-pui-initial-seed="${a.receipt.image.pngSha256}"],#rest-host[data-pui-initial-seed="${a.receipt.image.pngSha256}:rejected"]{background-image:none!important;background-color:Canvas!important;color:CanvasText!important`
     );
     expect(p.style).not.toMatch(/(?:^|;)(width|height|padding|display|visibility|opacity):/);
     expect(() => initialPaintPresentation(a.receipt, 'host;bad')).toThrow('host-id');
@@ -497,10 +497,12 @@ describe('internal server plane adoption (mock GPU, not native first-frame evide
         f.options
       )
     ).rejects.toThrow('manifest');
-    expect(f.host.getAttribute('data-pui-initial-seed')).toBe('rejected');
+    expect(f.host.getAttribute('data-pui-initial-seed')).toBe(
+      `${a.receipt.image.pngSha256}:rejected`
+    );
     expect(readInternalInitialPaintLease(f.host)).toBeNull();
     expect(initialPaintPresentation(a.receipt, 'rest-host').css).toMatch(
-      /^#rest-host\[data-pui-initial-seed\]\{background-image:none!important/
+      /^#rest-host\[data-pui-initial-seed="[a-f0-9]{64}"\],#rest-host\[data-pui-initial-seed="[a-f0-9]{64}:rejected"\]\{background-image:none!important/
     );
   });
   it('does not let an unregistered arbitrary image bypass the ordinary authored paint guard', async () => {
@@ -926,4 +928,125 @@ describe('preparation observer ownership regressions', () => {
       }
     }
   );
+});
+
+describe('reviewer repair pending external owner guard', () => {
+  it('withdraws its SSR selector when an author replaces paint during artifact hashing', async () => {
+    const f = fixture(),
+      a = await f.show();
+    const original = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+    let unblock: (() => void) | null = null;
+    let first = true;
+    vi.spyOn(globalThis.crypto.subtle, 'digest').mockImplementation(async (algorithm, data) => {
+      if (first) {
+        first = false;
+        await new Promise<void>((resolve) => {
+          unblock = resolve;
+        });
+      }
+      return original(algorithm, data);
+    });
+    const pending = prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options);
+    const rejected = expect(pending).rejects.toThrow('unavailable');
+    await vi.waitFor(() => expect(unblock).not.toBeNull());
+    f.host.style.backgroundImage = 'linear-gradient(red,blue)';
+    f.invalidate('source');
+    unblock!();
+    await rejected;
+    expect(f.host.style.backgroundImage).toBe('linear-gradient(red, blue)');
+    expect(readInternalInitialPaintLease(f.host)).toBeNull();
+    expect(f.host.hasAttribute('data-pui-initial-seed')).toBe(false);
+  });
+});
+
+describe('reviewer repair existing replacement marker', () => {
+  it('does not remove an already replaced marker on early missing-source rejection', async () => {
+    const f = fixture(),
+      a = await f.show();
+    f.host.setAttribute('data-pui-initial-seed', 'author-plane');
+    f.host.style.backgroundImage = 'linear-gradient(red,blue)';
+    f.removeSource();
+    await expect(
+      prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options)
+    ).rejects.toThrow();
+    expect(f.host.getAttribute('data-pui-initial-seed')).toBe('author-plane');
+    expect(f.host.style.backgroundImage).toBe('linear-gradient(red, blue)');
+  });
+});
+
+describe('pending server tuple replacement coverage', () => {
+  const replacements = [
+    ['background-image', 'linear-gradient(red, blue)'],
+    ['background-color', 'rgb(1, 2, 3)'],
+    ['background-origin', 'content-box'],
+    ['background-clip', 'padding-box'],
+    ['background-size', '25% 25%'],
+    ['background-repeat', 'repeat'],
+  ] as const;
+  for (const phase of ['before', 'during'] as const)
+    it.each(replacements)(
+      `preserves %s replaced ${phase} verification and clears only its selector`,
+      async (name, value) => {
+        const f = fixture(),
+          a = await f.show();
+        let unblock: (() => void) | null = null;
+        if (phase === 'before') f.host.style.setProperty(name, value);
+        else {
+          const digest = globalThis.crypto.subtle.digest.bind(globalThis.crypto.subtle);
+          let first = true;
+          vi.spyOn(globalThis.crypto.subtle, 'digest').mockImplementation(
+            async (algorithm, data) => {
+              if (first) {
+                first = false;
+                await new Promise<void>((resolve) => {
+                  unblock = resolve;
+                });
+              }
+              return digest(algorithm, data);
+            }
+          );
+        }
+        const pending = prepareExperimentalInitialPaint(f.host, a.serialized, a.binding, f.options);
+        const rejected = expect(pending).rejects.toThrow();
+        if (phase === 'during') {
+          await vi.waitFor(() => expect(unblock).not.toBeNull());
+          f.host.style.setProperty(name, value);
+          f.invalidate('source');
+          unblock!();
+        }
+        await rejected;
+        expect(f.host.style.getPropertyValue(name)).toBe(value);
+        expect(f.host.hasAttribute('data-pui-initial-seed')).toBe(false);
+        expect(readInternalInitialPaintLease(f.host)).toBeNull();
+      }
+    );
+  it('keeps a replacement marker when verification itself rejects', async () => {
+    const f = fixture(),
+      a = await f.show();
+    f.host.setAttribute('data-pui-initial-seed', 'author-plane');
+    await expect(
+      prepareExperimentalInitialPaint(
+        f.host,
+        a.serialized,
+        { ...a.binding, artifactSha256: '0'.repeat(64) },
+        f.options
+      )
+    ).rejects.toThrow();
+    expect(f.host.getAttribute('data-pui-initial-seed')).toBe('author-plane');
+  });
+});
+
+it('never leaves an SSR fallback selector targeting a foreign marker or a claimed live plane', async () => {
+  const f = fixture(),
+    a = await f.show(),
+    p = initialPaintPresentation(a.receipt, 'rest-host');
+  const defaultSelector = p.css.slice(0, p.css.indexOf('{'));
+  expect(f.host.matches(defaultSelector)).toBe(true);
+  f.host.setAttribute('data-pui-initial-seed', a.receipt.image.pngSha256 + ':rejected');
+  expect(f.host.matches(defaultSelector)).toBe(true);
+  f.host.setAttribute('data-pui-initial-seed', 'author-plane');
+  expect(f.host.matches(defaultSelector)).toBe(false);
+  f.host.removeAttribute('data-pui-initial-seed');
+  expect(f.host.matches(defaultSelector)).toBe(false);
+  expect(p.css).not.toContain('#rest-host{');
 });
