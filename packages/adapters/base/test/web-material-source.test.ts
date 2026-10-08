@@ -111,6 +111,16 @@ describe('expanded contact paint source admission', () => {
       reason: 'source-overlapping-content',
     });
   });
+  it('checks clipping above a shadow-root boundary as well as ordinary ancestors', () => {
+    const { host, lease, scope } = fixture();
+    const outer = document.createElement('div');
+    document.body.append(outer);
+    outer.attachShadow({ mode: 'open' }).append(scope);
+    outer.style.overflow = 'hidden';
+    expect(inspectCanvasBackdrop(host, lease.current(), 9)).toMatchObject({
+      reason: 'source-expanded-paint-clipped',
+    });
+  });
   it('rejects clipping and paint containment instead of presenting a truncated contour', () => {
     const { host, lease, scope } = fixture();
     scope.style.overflow = 'hidden';

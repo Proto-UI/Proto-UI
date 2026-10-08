@@ -73,6 +73,8 @@ export function createWebMaterialSink(
     repaint();
   }
   let lastOwnedStyle: string | null = null;
+  let sourceEpoch = 0;
+  let sourceOwner: { canvas: HTMLCanvasElement; scope: HTMLElement } | null = null;
   let sourceRevision = -1,
     paletteRevision = -1,
     renders = 0;
@@ -101,6 +103,16 @@ export function createWebMaterialSink(
     host.style.getPropertyPriority(name),
   ];
   function externalPaintConflict() {
+    if (
+      carrier &&
+      [...owned].some(([name, prior]) => {
+        if (name !== 'position' && name !== 'isolation' && !name.startsWith('--pui-material-'))
+          return false;
+        const current = inline(name);
+        return current[0] !== prior.applied[0] || current[1] !== prior.applied[1];
+      })
+    )
+      return true;
     return ['background-color', 'background-image', 'backdrop-filter'].some((name) => {
       const value = inline(name),
         previous = owned.get(name);
@@ -310,7 +322,18 @@ export function createWebMaterialSink(
         Number.isSafeInteger(source.revision) &&
         source.revision >= 0 &&
         source.revision >= sourceRevision;
-      if (currentSource) sourceRevision = source!.revision;
+      if (currentSource) {
+        if (
+          !sourceOwner ||
+          sourceOwner.canvas !== source!.canvas ||
+          sourceOwner.scope !== source!.scope
+        ) {
+          if (sourceOwner) motion.stop();
+          sourceEpoch++;
+          sourceOwner = { canvas: source!.canvas, scope: source!.scope };
+        }
+        sourceRevision = source!.revision;
+      } else sourceOwner = null;
       const prefs = preferences.current();
       if (retired) return;
       const geometry = {
@@ -415,7 +438,7 @@ export function createWebMaterialSink(
       };
       const lease = JSON.stringify([
         frame.view,
-        source.revision,
+        sourceEpoch,
         palette.revision,
         opticalGeometry,
         policy.effectiveMotion,
@@ -629,7 +652,15 @@ export function createWebMaterialSink(
   try {
     disposers.push(contact.dispose);
     disposers.push(observeMaterialGeometry(host, repaint, () => lastOwnedStyle));
-    disposers.push(options.source.subscribe(() => invalidate('material-source-invalidated')));
+    disposers.push(
+      options.source.subscribe(() => {
+        // A new frame from the same admitted canvas lease supersedes an in-flight
+        // decode, not its input session. Repaint withdraws null/rebound/invalid
+        // sources synchronously, while a valid successor can replace atomically.
+        cancelPending();
+        repaint();
+      })
+    );
     disposers.push(options.palette.subscribe(() => invalidate('material-palette-invalidated')));
     disposers.push(preferences.subscribe(() => invalidate('material-preferences-invalidated')));
   } catch (error) {
@@ -654,6 +685,16 @@ export function createWebMaterialSink(
         throw new Error('Invalid material frame identity');
       if (last && (frame.view !== last.view || frame.revision <= last.revision))
         throw new Error('Stale or cross-view material frame');
+      // Retire a decode made against the previous style snapshot before it can
+      // mistake an ordinary Rule transition (for example pointerleave shadow)
+      // for source/session loss. Re-admit geometry below without cancelling the
+      // router-owned contact. Zero candidates still stop it through fallback.
+      if (
+        last &&
+        (last.style.tokens.length !== frame.style.tokens.length ||
+          last.style.tokens.some((token, index) => token !== frame.style.tokens[index]))
+      )
+        cancelPending();
       last = frame;
       repaint();
     },

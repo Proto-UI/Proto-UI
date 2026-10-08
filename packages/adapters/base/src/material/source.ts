@@ -100,6 +100,12 @@ export function createCanvasBackdropLease(
     },
   };
 }
+const composedParent = (element: Element): Element | null => {
+  if (element.assignedSlot) return element.assignedSlot;
+  if (element.parentElement) return element.parentElement;
+  const root = element.getRootNode();
+  return root instanceof element.ownerDocument.defaultView!.ShadowRoot ? root.host : null;
+};
 const transparent = (value: string) =>
   !value || value === 'transparent' || /^rgba\([^)]*,\s*0\)$/.test(value);
 const overlaps = (a: DOMRect, b: DOMRect) =>
@@ -199,13 +205,13 @@ export function inspectCanvasBackdrop(
     )
       return fail('source-painted-ancestor');
     if (current === frame.scope) break;
-    current = current.parentElement;
+    current = composedParent(current);
   }
   if (current !== frame.scope) return fail('source-cross-scope');
   for (
-    let ancestor: Element | null = frame.scope.parentElement;
+    let ancestor: Element | null = composedParent(frame.scope);
     ancestor;
-    ancestor = ancestor.parentElement
+    ancestor = composedParent(ancestor)
   ) {
     const css = win.getComputedStyle(ancestor);
     if (!neutral(css)) return fail('source-ancestor-compositing-unavailable');

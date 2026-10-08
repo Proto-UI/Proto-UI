@@ -65,6 +65,9 @@ export function createContactCarrier(host: HTMLElement) {
         css.zIndex === '-1' &&
         css.backgroundImage.includes(image) &&
         css.transform === 'none' &&
+        ['rotate', 'scale', 'translate', 'maskImage', 'webkitMaskImage', 'backdropFilter'].every(
+          (key) => !(css as any)[key] || (css as any)[key] === 'none'
+        ) &&
         Number(css.opacity) === 1 &&
         css.content === '""' &&
         css.display === 'block' &&
@@ -90,7 +93,10 @@ export function createContactCarrier(host: HTMLElement) {
             ) <=
             1 / 64
         ) &&
-        doc.defaultView!.getComputedStyle(host).isolation === 'isolate'
+        doc.defaultView!.getComputedStyle(host).isolation === 'isolate' &&
+        ['relative', 'absolute', 'fixed', 'sticky'].includes(
+          doc.defaultView!.getComputedStyle(host).position
+        )
       );
     },
     release() {
@@ -112,15 +118,28 @@ export function contactCarrierBounds(element: Element): DOMRect {
   const rect = element.getBoundingClientRect();
   if (!(element instanceof element.ownerDocument.defaultView!.HTMLElement) || !owners.has(element))
     return rect;
-  const width = parseFloat(element.style.getPropertyValue('--pui-material-width'));
-  const height = parseFloat(element.style.getPropertyValue('--pui-material-height'));
-  const x = Math.max(0, (width - rect.width) / 2),
-    y = Math.max(0, (height - rect.height) / 2);
+  const win = element.ownerDocument.defaultView!;
+  const css = win.getComputedStyle(element, '::before');
+  const hostCss = win.getComputedStyle(element);
+  const left = parseFloat(css.left),
+    top = parseFloat(css.top),
+    width = parseFloat(css.width),
+    height = parseFloat(css.height),
+    borderLeft = parseFloat(hostCss.borderLeftWidth || '0'),
+    borderTop = parseFloat(hostCss.borderTopWidth || '0');
+  if (
+    ![left, top, width, height, borderLeft, borderTop].every(Number.isFinite) ||
+    css.position !== 'absolute' ||
+    !['relative', 'absolute', 'fixed', 'sticky'].includes(hostCss.position) ||
+    ['transform', 'rotate', 'scale', 'translate', 'filter', 'boxShadow'].some(
+      (key) => (css as any)[key] && (css as any)[key] !== 'none'
+    )
+  )
+    return { left: -Infinity, top: -Infinity, right: Infinity, bottom: Infinity } as DOMRect;
   return {
-    ...rect,
-    left: rect.left - x,
-    top: rect.top - y,
-    right: rect.right + x,
-    bottom: rect.bottom + y,
+    left: rect.left + borderLeft + left,
+    top: rect.top + borderTop + top,
+    right: rect.left + borderLeft + left + width,
+    bottom: rect.top + borderTop + top + height,
   } as DOMRect;
 }

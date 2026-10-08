@@ -447,6 +447,70 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
     expect(cancels[0]).toHaveBeenCalledOnce();
     f.sink.release(1);
   });
+  it('keeps held contact through a Base style/phase transition while retiring its older decode', () => {
+    const f = setup();
+    f.send(0.5, 'down');
+    f.flushFrame();
+    const callbacks: Array<() => void> = [];
+    const cancellations: Array<ReturnType<typeof vi.fn>> = [];
+    decoding.prepare.mockImplementation((_doc, _source, ready) => {
+      callbacks.push(ready);
+      const cancel = vi.fn();
+      cancellations.push(cancel);
+      return cancel;
+    });
+    f.send(0.8);
+    f.flushFrame();
+    const prior = f.frame;
+    const next: VisualFeedbackFrame = {
+      ...prior,
+      revision: 2,
+      style: { kind: 'tw', tokens: [...prior.style.tokens, 'shadow-sm'] },
+      material: {
+        ...prior.material,
+        candidates: [
+          {
+            intent: 'liquid-glass',
+            deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+          },
+        ],
+      },
+    };
+    f.sink.commit(next);
+    expect(cancellations[0]).toHaveBeenCalledOnce();
+    expect(callbacks).toHaveLength(2);
+    callbacks[0]();
+    callbacks[1]();
+    expect(f.host.dataset.materialContact).toBe('held');
+    expect(f.host.dataset.materialPhase).toBe('rest');
+    expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+      contact: { x: 0.8, strength: 1 },
+    });
+    f.sink.release(1);
+  });
+  it('atomically refreshes a live source frame without ending its held contact', () => {
+    const f = setup();
+    f.send(0.5, 'down');
+    f.flushFrame();
+    f.send(0.8);
+    f.flushFrame();
+    const previous = f.host.style.getPropertyValue('--pui-material-image');
+    const callbacks: Array<() => void> = [];
+    decoding.prepare.mockImplementation((_doc, _source, ready) => {
+      callbacks.push(ready);
+      return () => {};
+    });
+    f.source(true);
+    expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(previous);
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+    expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+      source: { revision: 3 },
+      contact: { x: 0.8, strength: 1 },
+    });
+    callbacks[0]();
+    expect(f.host.dataset.materialSourceRevision).toBe('3');
+    f.sink.release(1);
+  });
   it('revocation and a new session cannot revive a late decoded image', () => {
     const f = setup();
     f.send(0.5, 'down');

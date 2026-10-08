@@ -14,7 +14,7 @@ describe('private expanded paint carrier (computed-style spy, not browser paint)
     document.body.append(host);
     const computed: Record<string, string> = { content: 'none' };
     vi.spyOn(window, 'getComputedStyle').mockImplementation(
-      (_el, pseudo) => (pseudo ? computed : { isolation: 'isolate' }) as any
+      (_el, pseudo) => (pseudo ? computed : { isolation: 'isolate', position: 'relative' }) as any
     );
     return { host, computed };
   }
