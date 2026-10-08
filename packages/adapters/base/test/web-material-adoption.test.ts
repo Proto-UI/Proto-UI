@@ -104,6 +104,7 @@ function fixture() {
   vi.spyOn(host, 'getBoundingClientRect').mockImplementation(() => new DOMRect(40, 30, width, 40));
   vi.spyOn(canvas, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 400, 240));
   let source: CanvasBackdropFrame;
+  let paletteRevision = 1;
   function sourceFrame() {
     const dpr = host.ownerDocument.defaultView!.devicePixelRatio;
     canvas.width = 400 * dpr;
@@ -158,7 +159,10 @@ function fixture() {
         },
       } as CanvasBackdropLease,
       palette: {
-        current: () => ({ revision: 1, colors: { background: '#fff', foreground: '#171717' } }),
+        current: () => ({
+          revision: paletteRevision,
+          colors: { background: '#fff', foreground: '#171717' },
+        }),
         subscribe: () => () => {},
       },
     }
@@ -187,6 +191,13 @@ function fixture() {
     next,
     destination,
     sourceListeners,
+    source: () => source,
+    setSource(value: CanvasBackdropFrame) {
+      source = value;
+    },
+    paletteRevision(value: number) {
+      paletteRevision = value;
+    },
     onSubscribe(fn: () => void) {
       onSubscribe = fn;
     },
@@ -451,5 +462,37 @@ describe('material resources follow actual owner-document adoption (mock GPU, no
     expect(inspectWebOpticalResources(document).contexts).toBe(0);
     expect(inspectWebOpticalResources(f.destination.document).contexts).toBe(0);
     expect(f.host.dataset.materialQuality).toBeUndefined();
+  });
+  it('does not reaccept an exact older source frame when its provider and nodes are adopted', () => {
+    const f = fixture();
+    Object.defineProperty(f.destination, 'devicePixelRatio', { configurable: true, value: 1 });
+    const obsolete = f.source();
+    f.setSource({ ...obsolete, revision: 9 });
+    f.sink.commit(f.frame(1));
+    expect(f.host.dataset.materialSourceRevision).toBe('9');
+    f.adopt();
+    f.setSource(obsolete);
+    f.sink.commit(f.frame(2));
+    expect(gpu.create.mock.results[1].value.render).not.toHaveBeenCalled();
+    expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+    f.setSource({ ...obsolete, revision: 10 });
+    f.invalidate();
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+    expect(f.host.dataset.materialSourceRevision).toBe('10');
+  });
+
+  it('keeps the same palette provider revision high-water mark across adoption', () => {
+    const f = fixture();
+    f.paletteRevision(9);
+    f.sink.commit(f.frame(1));
+    f.adopt();
+    f.paletteRevision(1);
+    f.sink.commit(f.frame(2));
+    expect(gpu.create.mock.results[1].value.render).not.toHaveBeenCalled();
+    expect(f.host.dataset.materialQuality).toBe('unavailable');
+    expect(f.host.dataset.materialReason).toBe('palette-revision-stale');
+    f.paletteRevision(10);
+    f.invalidate();
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
   });
 });

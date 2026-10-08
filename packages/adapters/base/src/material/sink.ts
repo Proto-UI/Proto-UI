@@ -42,6 +42,8 @@ export function createWebMaterialSink(
   // Author ownership belongs to the host/view, not its document-bound GPU.
   const externalPaintOwners = new Set<string>();
   const motion = createContactMotion();
+  // Providers and view survive adoption; physical rebinding grants no rewind.
+  const revisions = { source: -1, palette: -1 };
   function bindDocument() {
     // A provider cleanup/subscription may synchronously commit newer intent.
     // Queue that frame until old cleanup finishes, before acquiring new paint.
@@ -60,6 +62,7 @@ export function createWebMaterialSink(
         options,
         externalPaintOwners,
         motion,
+        revisions,
         () => {
           if (!retired && host.ownerDocument !== document) bindDocument();
         }
@@ -115,6 +118,7 @@ function createDocumentMaterialSink(
   options: WebMaterialOptions,
   externalPaintOwners: Set<string>,
   motion: ReturnType<typeof createContactMotion>,
+  revisions: { source: number; palette: number },
   adopted: () => void
 ): VisualFeedbackSink {
   const document = host.ownerDocument;
@@ -172,9 +176,7 @@ function createDocumentMaterialSink(
   let lastOwnedTokens: string | null = null;
   let sourceEpoch = 0;
   let sourceOwner: { canvas: HTMLCanvasElement; scope: HTMLElement } | null = null;
-  let sourceRevision = -1,
-    paletteRevision = -1,
-    renders = 0;
+  let renders = 0;
   let desiredTokens: readonly string[] = [],
     paintSignature = '';
   let pending: { signature: string; lease: string; cancel(): void } | null = null;
@@ -337,12 +339,12 @@ function createDocumentMaterialSink(
       if (
         !Number.isSafeInteger(palette.revision) ||
         palette.revision < 0 ||
-        palette.revision < paletteRevision
+        palette.revision < revisions.palette
       ) {
         ordinary('palette-revision-stale');
         return;
       }
-      paletteRevision = palette.revision;
+      revisions.palette = palette.revision;
       if (externalPaintConflict()) {
         ordinary('external-paint-conflict');
         return;
@@ -436,7 +438,7 @@ function createDocumentMaterialSink(
         !!source &&
         Number.isSafeInteger(source.revision) &&
         source.revision >= 0 &&
-        source.revision >= sourceRevision;
+        source.revision >= revisions.source;
       if (currentSource) {
         if (
           !sourceOwner ||
@@ -447,7 +449,7 @@ function createDocumentMaterialSink(
           sourceEpoch++;
           sourceOwner = { canvas: source!.canvas, scope: source!.scope };
         }
-        sourceRevision = source!.revision;
+        revisions.source = source!.revision;
       } else sourceOwner = null;
       const prefs = preferences.current();
       if (!currentDocument()) return;
