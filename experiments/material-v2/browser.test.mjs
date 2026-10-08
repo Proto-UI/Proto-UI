@@ -74,7 +74,11 @@ try {
     await page.screenshot({ path: join(output, `${theme}-four-web.png`), fullPage: true });
     for (const runtime of ['wc', 'react', 'vue', 'vue2']) {
       const button = page.locator(`[data-runtime="${runtime}"] [data-demo-ref="regular"]`);
-      const before = await button.evaluate((el) => el.style.backgroundImage);
+      const before = await button.evaluate((el) =>
+        getComputedStyle(el, '::before').backgroundImage !== 'none'
+          ? getComputedStyle(el, '::before').backgroundImage
+          : getComputedStyle(el).backgroundImage
+      );
       assert.match(before, /^url\("data:image\/png;base64,/);
       await button.hover();
       await page.mouse.down();
@@ -84,7 +88,11 @@ try {
             .materialPhase === 'pressed',
         runtime
       );
-      const pressed = await button.evaluate((el) => el.style.backgroundImage);
+      const pressed = await button.evaluate((el) =>
+        getComputedStyle(el, '::before').backgroundImage !== 'none'
+          ? getComputedStyle(el, '::before').backgroundImage
+          : getComputedStyle(el).backgroundImage
+      );
       assert.notEqual(pressed, before);
       await page.screenshot({
         path: join(output, `${theme}-${runtime}-pressed.png`),

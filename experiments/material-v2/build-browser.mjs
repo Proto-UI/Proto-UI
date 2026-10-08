@@ -28,6 +28,16 @@ paths['material-v2-diagnostics'] = [
     `packages/adapters/base/${packed ? 'dist/material/program-pool.js' : 'src/material/program-pool.ts'}`
   ),
 ];
+paths['material-v2-contact-diagnostics'] = [
+  resolve(
+    `packages/adapters/base/${packed ? 'dist/events/pointer-contact.js' : 'src/events/pointer-contact.ts'}`
+  ),
+];
+paths['material-v2-program-diagnostics'] = [
+  resolve(
+    `packages/adapters/base/${packed ? 'dist/material/program.js' : 'src/material/program.ts'}`
+  ),
+];
 const result = await build({
   entryPoints: ['experiments/material-v2/browser-entry.ts'],
   outfile: resolve(out, 'app.js'),
@@ -52,7 +62,7 @@ execFileSync(
 );
 await writeFile(
   resolve(out, 'index.html'),
-  `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:,"><title>V2 four-Web optical artifact consumer</title><link rel="stylesheet" href="tokens.css"><style>${renderThemeCss()}body{font:16px system-ui;color:var(--pui-foreground);background:var(--pui-background);margin:24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px}.controls{display:flex;gap:16px;padding:28px;align-items:center}.scene{min-width:0}h2{font-size:18px}</style></head><body><h1>V2 optical material: four real Web runtimes</h1><p>Visible application canvas, one fixed audited GPU kernel. No arbitrary DOM or native-equivalence claim.</p><div class="grid">${['wc', 'react', 'vue', 'vue2'].map((runtime) => `<section><h2>${runtime}</h2><div class="scene" data-runtime="${runtime}"></div><p>Activations: <output data-count="${runtime}">0</output></p></section>`).join('')}</div><script type="module" src="app.js"></script></body></html>`
+  `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><link rel="icon" href="data:,"><title>V2 four-Web optical artifact consumer</title><link rel="stylesheet" href="tokens.css"><style>${renderThemeCss()}body{font:16px system-ui;color:var(--pui-foreground);background:var(--pui-background);margin:24px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px}.controls{display:flex;gap:32px;padding:28px;align-items:center}.scene{min-width:0}h2{font-size:18px}</style></head><body><h1>V2 optical material: four real Web runtimes</h1><p>Visible application canvas, one fixed audited GPU kernel. No arbitrary DOM or native-equivalence claim.</p><div class="grid">${['wc', 'react', 'vue', 'vue2'].map((runtime) => `<section><h2>${runtime}</h2><div class="scene" data-runtime="${runtime}"></div><p>Activations: <output data-count="${runtime}">0</output></p></section>`).join('')}</div><script type="module" src="app.js"></script></body></html>`
 );
 await writeFile(
   resolve(out, 'source.json'),

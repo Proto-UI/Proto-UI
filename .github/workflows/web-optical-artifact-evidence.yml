@@ -45,10 +45,17 @@ jobs:
         run: |
           node --import tsx experiments/material-v2/build-browser.mjs /tmp/pui-material-v2-source
           node --import tsx experiments/material-v2/browser.test.mjs /tmp/pui-material-v2-source /tmp/pui-material-v2-source-evidence
+      - name: Exercise continuous source contact and optical lifetime
+        if: ${{ !cancelled() }}
+        run: node --import tsx experiments/material-v2/continuous-browser.test.mjs /tmp/pui-material-v2-source /tmp/pui-material-v2-source-continuous
       - name: Exercise emitted public package consumer
+        if: ${{ !cancelled() }}
         run: |
           node --import tsx experiments/material-v2/build-browser.mjs /tmp/pui-material-v2-packed --packed
           node --import tsx experiments/material-v2/browser.test.mjs /tmp/pui-material-v2-packed /tmp/pui-material-v2-packed-evidence
+      - name: Exercise continuous emitted package contact and optical lifetime
+        if: ${{ !cancelled() }}
+        run: node --import tsx experiments/material-v2/continuous-browser.test.mjs /tmp/pui-material-v2-packed /tmp/pui-material-v2-packed-continuous
       - name: Retain exact-head real output and consumer graph
         if: always()
         uses: actions/upload-artifact@v4
@@ -57,7 +64,9 @@ jobs:
           path: |
             /tmp/pui-material-v2-source/source.json
             /tmp/pui-material-v2-source-evidence/
+            /tmp/pui-material-v2-source-continuous/
             /tmp/pui-material-v2-packed/source.json
             /tmp/pui-material-v2-packed-evidence/
+            /tmp/pui-material-v2-packed-continuous/
           if-no-files-found: warn
           retention-days: 30
