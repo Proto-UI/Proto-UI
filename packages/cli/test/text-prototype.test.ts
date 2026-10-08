@@ -45,7 +45,15 @@ describe('Text public compiler consumption', () => {
       )) as string[];
       const css = renderProtoStyleTokenCss(tokens);
       expect(css).not.toContain('Unsupported Proto UI style tokens');
-      for (const [token, declaration] of Object.entries(required)) {
+      const familyRequired = { ...required } as Record<string, string>;
+      if (family === 'bootstrap-2-3-2') {
+        delete familyRequired['text-2xl'];
+        delete familyRequired['leading-normal'];
+        familyRequired['text-[1.53125rem]'] = 'font-size: 1.53125rem;';
+        familyRequired['leading-[1.4285714285714286]'] = 'line-height: 1.4285714285714286;';
+        familyRequired['leading-[2.5rem]'] = 'line-height: 2.5rem;';
+      }
+      for (const [token, declaration] of Object.entries(familyRequired)) {
         expect(tokens).toContain(token);
         expect(css).toContain(`:where([data-pui-style~="${token}"]) {\n    ${declaration}`);
       }
@@ -60,9 +68,13 @@ describe('Text public compiler consumption', () => {
       );
       expect(css).toContain('var(--pui-font-heading');
       // Composite text-size line-height must yield to the explicit leading input.
-      expect(css.indexOf('data-pui-style~="leading-normal"')).toBeGreaterThan(
-        css.indexOf('data-pui-style~="text-5xl"')
-      );
+      expect(
+        css.indexOf(
+          family === 'bootstrap-2-3-2'
+            ? 'data-pui-style~="leading-[1.4285714285714286]"'
+            : 'data-pui-style~="leading-normal"'
+        )
+      ).toBeGreaterThan(css.indexOf('data-pui-style~="text-5xl"'));
       expect(css).not.toMatch(/(?:^|\n)\s*(?:body|h1|h2|p|label|a)\s*\{/);
     }
   );

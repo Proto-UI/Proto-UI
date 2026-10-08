@@ -27,3 +27,9 @@ Select Root/Trigger/Value/Content/Item and Text now have independent direct Base
 The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
 
 This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
+
+## Text-capable Thumbnail composition
+
+The Library entry composes the existing passive Surface (`outline`, `raised`) and Text, following the archived 2.3.2 Thumbnail instead of a modern Card. Default Surface (`outline`, no elevation) remains neutral. The explicit raised recipe uses the #ddd frame and 0/1/3px shadow; native-link `solid` Surface shares Button's classic primary gradient and pressed paint without inheriting Button interaction. Its native anchor remains the navigation/focus owner.
+
+Text's `sm` + `normal` supplies 14/20 typography at a 16px root; `2xl` + `relaxed` supplies 24.5/40. Rem dimensions scale with text settings. The website supplies only composition spacing, while these family prototypes own paint/type and real Runtime server snapshots. This introduces no new component kind, public CLI entry, homepage eligibility or exact-browser acceptance claim.

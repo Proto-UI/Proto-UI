@@ -14,7 +14,7 @@ criteria:
       en: Directly consume Base Text without importing another projection or taking over native heading/paragraph/link/label/button ownership.
   - id: P-BOOTSTRAP-2-3-2-TEXT-PROJECTION
     text:
-      en: Map every size, tone, weight, font, leading, tracking, emphasis and decoration value to one corresponding standard style token; explicit leading overrides size line-height and omitted props restore defaults on the same canonical subject.
+      en: Map every size, tone, weight, font, leading, tracking, emphasis and decoration value to one corresponding standard style token; Bootstrap 2xl selects the archived 24.5px heading scale at a 16px root; normal leading uses the 20/14 body ratio and 2xl plus relaxed leading selects 40px. These values scale in rem; explicit leading overrides size line-height and omitted props restore defaults on the same canonical subject.
   - id: P-BOOTSTRAP-2-3-2-TEXT-SELECTION
     text:
       en: Do not set user-select or introduce interaction. Document text preserves normal selection while content inside controls inherits their actual owner selection policy. No forced select-text or select-none patch belongs to the passive atom.
@@ -32,6 +32,7 @@ dependsOn:
 verifies:
   tests:
     - T-TEXT-DRAFT-PROJECTIONS-0001
+    - T-BOOTSTRAP-2-3-2-THUMBNAIL-RECIPE-0001
 openQuestions:
   - id: P-BOOTSTRAP-2-3-2-TEXT-Q-ADMISSION
     question:

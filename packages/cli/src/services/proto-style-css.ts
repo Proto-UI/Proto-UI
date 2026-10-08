@@ -334,6 +334,15 @@ const staticUtilities: Record<string, string[]> = {
   'ring-offset-0': ['--pui-ring-offset-width: 0px;'],
   'ring-offset-2': ['--pui-ring-offset-width: 2px;'],
   'ring-offset-background': ['--pui-ring-offset-color: var(--pui-background);'],
+  // Bootstrap 2.3.2 text-capable thumbnail and type scale.
+  'border-[#ddd]': ['border-color: #ddd;'],
+  'shadow-[0_1px_3px_rgb(0_0_0/5.5%)]': [
+    '--pui-shadow: 0 1px 3px rgb(0 0 0 / 0.055);',
+    ...composedShadow(),
+  ],
+  'text-[1.53125rem]': ['font-size: 1.53125rem;'],
+  'leading-[1.4285714285714286]': ['line-height: 1.4285714285714286;'],
+  'leading-[2.5rem]': ['line-height: 2.5rem;'],
   // Controlled v2.3.2 paint vocabulary: one bg token owns both fallback and image.
   'bg-[#e6e6e6]': ['background-color: #e6e6e6;', 'background-image: none;'],
   'bg-[#04c]': ['background-color: #04c;', 'background-image: none;'],

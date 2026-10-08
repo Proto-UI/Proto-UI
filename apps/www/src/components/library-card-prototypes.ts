@@ -55,3 +55,12 @@ export const libraryActionProps = {
   border: 'all',
   elevation: 'raised',
 } as const;
+
+export const bootstrapLibraryHeadingProps = { ...libraryHeadingProps, leading: 'relaxed' } as const;
+export const bootstrapLibraryBodyProps = { size: 'sm', leading: 'normal' } as const;
+export const bootstrapLibraryActionTextProps = {
+  size: 'sm',
+  weight: 'normal',
+  leading: 'normal',
+  tone: 'inherit',
+} as const;

@@ -34,7 +34,7 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     });
     def.rule({
       when: (w) => w.prop('size').eq('2xl'),
-      intent: (i) => i.feedback.style.use(tw('text-2xl')),
+      intent: (i) => i.feedback.style.use(tw('text-[1.53125rem]')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('3xl'),
@@ -98,11 +98,15 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     });
     def.rule({
       when: (w) => w.prop('leading').eq('normal'),
-      intent: (i) => i.feedback.style.use(tw('leading-normal')),
+      intent: (i) => i.feedback.style.use(tw('leading-[1.4285714285714286]')),
     });
     def.rule({
-      when: (w) => w.prop('leading').eq('relaxed'),
+      when: (w) => w.all(w.prop('leading').eq('relaxed'), w.not(w.prop('size').eq('2xl'))),
       intent: (i) => i.feedback.style.use(tw('leading-relaxed')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('leading').eq('relaxed'), w.prop('size').eq('2xl')),
+      intent: (i) => i.feedback.style.use(tw('leading-[2.5rem]')),
     });
     def.rule({
       when: (w) => w.prop('tracking').eq('normal'),

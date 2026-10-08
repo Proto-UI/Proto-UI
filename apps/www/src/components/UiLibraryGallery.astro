@@ -1,5 +1,6 @@
 ---
 import StaticLucideIcon from './StaticLucideIcon.astro';
+import LibraryCardFrame from './LibraryCardFrame.astro';
 import LibraryCardPart from './LibraryCardPart.astro';
 import {
   librarySurfaceProps,
@@ -7,6 +8,9 @@ import {
   libraryBodyProps,
   libraryCaptionProps,
   libraryActionProps,
+  bootstrapLibraryHeadingProps,
+  bootstrapLibraryBodyProps,
+  bootstrapLibraryActionTextProps,
   type LibraryFamily,
 } from './library-card-prototypes';
 import { BRUTALIST_THEME } from '../../../../packages/prototypes/brutalist/src/theme';
@@ -268,6 +272,7 @@ const themeCss = Object.entries(familyThemes)
       cards.map((library) => {
         const family: LibraryFamily = library.id === 'lucide' ? 'base' : library.id;
         const brutalist = family === 'brutalist';
+        const bootstrap = family === 'bootstrap-2-3-2';
         return (
           <article
             class="library-card"
@@ -279,110 +284,122 @@ const themeCss = Object.entries(familyThemes)
               props={brutalist ? {} : librarySurfaceProps}
               class="library-card__surface"
             >
-              <LibraryCardPart
-                part={brutalist ? 'brutalist-header' : 'base-surface'}
-                class="library-card__header"
-              >
-                <header>
-                  <LibraryCardPart
-                    part={`${family}-text`}
-                    props={libraryCaptionProps}
-                    class="library-card__kind"
-                  >
-                    {library.type}
-                    {library.status && ` · ${library.status}`}
-                  </LibraryCardPart>
-                  <h2 id={`library-${library.id}`}>
-                    <LibraryCardPart part={`${family}-text`} props={libraryHeadingProps}>
-                      {library.name}
-                    </LibraryCardPart>
-                  </h2>
-                </header>
-                {library.logoSrc && (
-                  <img
-                    class="library-card__logo"
-                    src={library.logoSrc}
-                    alt=""
-                    width="32"
-                    height="32"
-                    loading="eager"
-                  />
-                )}
-              </LibraryCardPart>
-              <LibraryCardPart
-                part={brutalist ? 'brutalist-content' : 'base-surface'}
-                class="library-card__content"
-              >
-                {library.id === 'lucide' && (
-                  <div class="library-card__icons" aria-hidden="true">
-                    <StaticLucideIcon name="sun" />
-                    <StaticLucideIcon name="heart" />
-                    <StaticLucideIcon name="search" />
-                    <StaticLucideIcon name="circle-check" />
-                    <StaticLucideIcon name="panels-top-left" />
-                  </div>
-                )}
-                <p>
-                  <LibraryCardPart part={`${family}-text`} props={libraryBodyProps}>
-                    {library.description}
-                  </LibraryCardPart>
-                </p>
-                <p>
-                  <LibraryCardPart part={`${family}-text`} props={libraryCaptionProps}>
-                    {copy.bestFor} · {library.bestFor}
-                  </LibraryCardPart>
-                </p>
+              <LibraryCardFrame bootstrap={bootstrap}>
                 <LibraryCardPart
-                  part={`${family}-text`}
-                  props={{ ...libraryCaptionProps, tone: 'inherit' }}
+                  part={brutalist ? 'brutalist-header' : 'base-surface'}
+                  class="library-card__header"
                 >
-                  <dl class="library-card__credits">
-                    <div>
-                      <>
-                        <dt>{library.sourceLabel}</dt>
-                        <dd>
-                          {library.sourceHref ? (
-                            <a href={library.sourceHref} target="_blank" rel="noreferrer">
-                              {library.source} ↗
-                            </a>
-                          ) : (
-                            library.source
-                          )}
-                        </dd>
-                      </>
-                    </div>
-                    <div>
-                      <>
-                        <dt>{copy.prototypeAuthor}</dt>
-                        <dd>
-                          <a href={library.authorHref} target="_blank" rel="noreferrer">
-                            {library.author} ↗
-                          </a>
-                        </dd>
-                      </>
-                    </div>
-                  </dl>
-                </LibraryCardPart>
-              </LibraryCardPart>
-              <LibraryCardPart
-                part={brutalist ? 'brutalist-footer' : 'base-surface'}
-                class="library-card__footer"
-              >
-                <a href={library.href} data-library-action>
-                  <LibraryCardPart
-                    part={`${family}-surface`}
-                    props={libraryActionProps}
-                    class="library-card__action"
-                  >
+                  <header>
                     <LibraryCardPart
                       part={`${family}-text`}
-                      props={{ size: 'sm', weight: 'medium', tone: 'inherit' }}
+                      props={libraryCaptionProps}
+                      class="library-card__kind"
                     >
-                      {library.cta} <span aria-hidden="true">→</span>
+                      {library.type}
+                      {library.status && ` · ${library.status}`}
                     </LibraryCardPart>
+                    <h2 id={`library-${library.id}`}>
+                      <LibraryCardPart
+                        part={`${family}-text`}
+                        props={bootstrap ? bootstrapLibraryHeadingProps : libraryHeadingProps}
+                      >
+                        {library.name}
+                      </LibraryCardPart>
+                    </h2>
+                  </header>
+                  {library.logoSrc && (
+                    <img
+                      class="library-card__logo"
+                      src={library.logoSrc}
+                      alt=""
+                      width="32"
+                      height="32"
+                      loading="eager"
+                    />
+                  )}
+                </LibraryCardPart>
+                <LibraryCardPart
+                  part={brutalist ? 'brutalist-content' : 'base-surface'}
+                  class="library-card__content"
+                >
+                  {library.id === 'lucide' && (
+                    <div class="library-card__icons" aria-hidden="true">
+                      <StaticLucideIcon name="sun" />
+                      <StaticLucideIcon name="heart" />
+                      <StaticLucideIcon name="search" />
+                      <StaticLucideIcon name="circle-check" />
+                      <StaticLucideIcon name="panels-top-left" />
+                    </div>
+                  )}
+                  <p>
+                    <LibraryCardPart
+                      part={`${family}-text`}
+                      props={bootstrap ? bootstrapLibraryBodyProps : libraryBodyProps}
+                    >
+                      {library.description}
+                    </LibraryCardPart>
+                  </p>
+                  <p>
+                    <LibraryCardPart part={`${family}-text`} props={libraryCaptionProps}>
+                      {copy.bestFor} · {library.bestFor}
+                    </LibraryCardPart>
+                  </p>
+                  <LibraryCardPart
+                    part={`${family}-text`}
+                    props={{ ...libraryCaptionProps, tone: 'inherit' }}
+                  >
+                    <dl class="library-card__credits">
+                      <div>
+                        <>
+                          <dt>{library.sourceLabel}</dt>
+                          <dd>
+                            {library.sourceHref ? (
+                              <a href={library.sourceHref} target="_blank" rel="noreferrer">
+                                {library.source} ↗
+                              </a>
+                            ) : (
+                              library.source
+                            )}
+                          </dd>
+                        </>
+                      </div>
+                      <div>
+                        <>
+                          <dt>{copy.prototypeAuthor}</dt>
+                          <dd>
+                            <a href={library.authorHref} target="_blank" rel="noreferrer">
+                              {library.author} ↗
+                            </a>
+                          </dd>
+                        </>
+                      </div>
+                    </dl>
                   </LibraryCardPart>
-                </a>
-              </LibraryCardPart>
+                </LibraryCardPart>
+                <LibraryCardPart
+                  part={brutalist ? 'brutalist-footer' : 'base-surface'}
+                  class="library-card__footer"
+                >
+                  <a href={library.href} data-library-action>
+                    <LibraryCardPart
+                      part={`${family}-surface`}
+                      props={libraryActionProps}
+                      class="library-card__action"
+                    >
+                      <LibraryCardPart
+                        part={`${family}-text`}
+                        props={
+                          bootstrap
+                            ? bootstrapLibraryActionTextProps
+                            : { size: 'sm', weight: 'medium', tone: 'inherit' }
+                        }
+                      >
+                        {library.cta} <span aria-hidden="true">→</span>
+                      </LibraryCardPart>
+                    </LibraryCardPart>
+                  </a>
+                </LibraryCardPart>
+              </LibraryCardFrame>
             </LibraryCardPart>
           </article>
         );
@@ -431,12 +448,13 @@ const themeCss = Object.entries(familyThemes)
     display: block;
     min-width: 0;
   }
-  .library-card :global(.library-card__surface) {
+  .library-card:not([data-library='bootstrap-2-3-2']) :global(.library-card__surface) {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
   }
-  .library-card:not([data-library='brutalist']) :global(.library-card__surface) {
+  .library-card:not([data-library='brutalist']):not([data-library='bootstrap-2-3-2'])
+    :global(.library-card__surface) {
     padding: 1.5rem;
   }
   .library-card :global(.library-card__header) {
@@ -465,7 +483,7 @@ const themeCss = Object.entries(familyThemes)
   :global(:root:is(.dark, [data-theme='dark'])) [data-library='shadcn'] .library-card__logo {
     filter: invert(1);
   }
-  .library-card :global(.library-card__content) {
+  .library-card:not([data-library='bootstrap-2-3-2']) :global(.library-card__content) {
     display: grid;
     gap: 1rem;
   }
@@ -479,6 +497,8 @@ const themeCss = Object.entries(familyThemes)
     display: grid;
     gap: 0.5rem;
     margin: 0;
+  }
+  .library-card:not([data-library='bootstrap-2-3-2']) .library-card__credits {
     font-size: 0.875rem;
     line-height: 1.5;
   }
@@ -503,10 +523,27 @@ const themeCss = Object.entries(familyThemes)
     max-width: 100%;
     text-decoration: none;
   }
-  .library-card :global(.library-card__action) {
+  .library-card:not([data-library='bootstrap-2-3-2']) :global(.library-card__action) {
     display: block;
     padding: 0.75rem 1rem;
     min-height: 2.75rem;
+  }
+  /* Layout only: Bootstrap's own atoms supply component paint and spacing. */
+  [data-library='bootstrap-2-3-2'] :global(.library-card__surface) {
+    padding: 0.25rem;
+  }
+  [data-library='bootstrap-2-3-2'] :global(.library-card__thumbnail-caption) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    padding: 0.5625rem;
+  }
+  [data-library='bootstrap-2-3-2'] :global(.library-card__content) {
+    display: grid;
+    gap: 0.625rem;
+  }
+  [data-library='bootstrap-2-3-2'] :global(.library-card__action) {
+    padding: 0.25rem 0.75rem;
   }
   [data-library='base'] [data-library-action],
   [data-library='lucide'] [data-library-action] {

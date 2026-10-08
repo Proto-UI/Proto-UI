@@ -127,6 +127,12 @@ const options = {
   emphasis: { normal: 'not-italic', italic: 'italic' },
   decoration: { none: 'no-underline', underline: 'underline', 'line-through': 'line-through' },
 };
+const bootstrapFamilyTokens: Record<string, string> = {
+  'text-2xl': 'text-[1.53125rem]',
+  'leading-normal': 'leading-[1.4285714285714286]',
+};
+const familyToken = (family: string, token: string) =>
+  family === 'bootstrap-2-3-2' ? (bootstrapFamilyTokens[token] ?? token) : token;
 const defaults = [
   'text-base',
   'text-foreground',
@@ -174,17 +180,21 @@ describe.each(runtimes)('real %s Adapter Text', (runtime) => {
               const tokens = (element.getAttribute('data-pui-style') ?? '').split(/\s+/);
               if (family === 'base') expect(tokens.filter(Boolean)).toEqual([]);
               else {
-                expect(tokens).toContain(token);
+                expect(tokens).toContain(familyToken(family, token));
                 expect(
-                  tokens.filter((candidate) => Object.values(values).includes(candidate))
-                ).toEqual([token]);
+                  tokens.filter((candidate) =>
+                    Object.values(values)
+                      .map((value) => familyToken(family, value))
+                      .includes(candidate)
+                  )
+                ).toEqual([familyToken(family, token)]);
               }
             }
           }
           await mounted.update({});
           if (family !== 'base')
             expect((element.getAttribute('data-pui-style') ?? '').split(/\s+/).sort()).toEqual(
-              [...defaults].sort()
+              defaults.map((token) => familyToken(family, token)).sort()
             );
           expect(owner.textContent).toBe(TEXT);
         } finally {

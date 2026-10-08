@@ -48,7 +48,9 @@ it('serializes the same fallback host layout and empty style state before defini
     ['footer', 'flex'],
   ]) {
     const rule = source.match(
-      new RegExp(`\\.library-card :global\\(\\.library-card__${part}\\)\\s*\\{([^}]+)\\}`)
+      new RegExp(
+        `\\.library-card(?:\\:not\\(\\[data-library='bootstrap-2-3-2'\\]\\))? :global\\(\\.library-card__${part}\\)\\s*\\{([^}]+)\\}`
+      )
     )?.[1];
     expect(rule).toContain(`display: ${display};`);
   }
@@ -69,4 +71,23 @@ it('retains enhanced-family failure evidence before the unchanged strict compari
   expect(source).toContain('document.documentElement.scrollHeight');
   expect(source).toContain('cards.every((card) => card.root.overflow < 2 && card.root.width > 0)');
   expect(source).not.toContain('page.screenshot(');
+});
+
+it('keeps the Bootstrap layout conditional while family prototypes own its paint', () => {
+  const frame = readFileSync('apps/www/src/components/LibraryCardFrame.astro', 'utf8');
+  expect(frame).toContain('bootstrap ?');
+  expect(frame).toMatch(/\)\s*:\s*\(\s*<slot\s*\/>\s*\)/);
+  expect(frame).not.toMatch(/role=|tabindex=|onclick=|<button/);
+  const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
+  expect(source).toContain('bootstrap ? bootstrapLibraryHeadingProps : libraryHeadingProps');
+  expect(source).toContain('bootstrap ? bootstrapLibraryBodyProps : libraryBodyProps');
+  expect(source).toContain('<a href={library.href} data-library-action>');
+  const bootstrapRules = [
+    ...source.matchAll(/\[data-library='bootstrap-2-3-2'\] :global\([^}]+\{([^}]+)\}/g),
+  ]
+    .map((match) => match[1])
+    .join('\n');
+  expect(bootstrapRules).toContain('padding: 0.25rem;');
+  expect(bootstrapRules).toContain('padding: 0.5625rem;');
+  expect(bootstrapRules).not.toMatch(/background|border|shadow|color|font/);
 });

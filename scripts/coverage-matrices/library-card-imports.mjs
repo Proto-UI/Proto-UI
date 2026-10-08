@@ -4,7 +4,7 @@
 // owned by www.build.style-generation through startup-prerender-imports.mjs.
 export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/UiLibraryGallery.astro': Object.freeze({
-    sourceSha256: '43c8ac4e64507793ae4950b9673ac5243cea64f66a3c3f1615ea29540a7194e8',
+    sourceSha256: '88ae0724b4af99498eec807fd6cf3c80e3cc8e80b5584a71012faa0eb141bc09',
     specifiers: Object.freeze([
       '../../../../packages/prototypes/brutalist/src/theme',
       '../../../../packages/prototypes/bootstrap-2-3-2/src/theme',
@@ -16,7 +16,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/library-card-prototypes.ts': Object.freeze({
-    sourceSha256: 'ba4ca0bc1fcb094f99307679d193d52bc17e77491bbd23f6710874ddf09a77a5',
+    sourceSha256: '1ebc076d75f1ce6e00d1cb4b47160b18418d8e767f90dafd1d819ec2b611aeab',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
