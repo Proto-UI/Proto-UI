@@ -48,13 +48,20 @@ try {
   );
   await context.addInitScript(() => {
     const originalDecode = HTMLImageElement.prototype.decode;
-    window.__decode = { calls: 0, timings: [], delay: 0, fail: 0 };
+    window.__decode = { calls: 0, timings: [], delay: 0, fail: 0, hold: false, held: [] };
     HTMLImageElement.prototype.decode = function () {
       let t = performance.now();
+      const delay = window.__decode.delay,
+        hold = window.__decode.hold,
+        source = this.src;
       window.__decode.calls++;
       return originalDecode.call(this).then(async (v) => {
         window.__decode.timings.push(performance.now() - t);
-        if (window.__decode.delay) await new Promise((r) => setTimeout(r, window.__decode.delay));
+        if (hold)
+          await new Promise((resolve) =>
+            window.__decode.held.push({ source, resolve, nativeDecodedAt: performance.now() })
+          );
+        if (delay) await new Promise((r) => setTimeout(r, delay));
         return v;
       });
     };
@@ -90,6 +97,7 @@ try {
             trust: e.isTrusted,
             windowTarget: e.target === window,
             pointerId: e.pointerId,
+            pointerType: e.pointerType,
             x: e.clientX,
             y: e.clientY,
             time: performance.now(),
@@ -134,7 +142,6 @@ try {
     )
   );
   await page.evaluate(() => {
-    window.v2Material.pause();
     window.__frames = [];
     window.__contacts = [];
     window.__record = true;
@@ -253,6 +260,18 @@ try {
       { runtime, start: before.frames }
     );
     const paints = new Set(sample.flatMap((f) => f.controls.map((c) => c.carrier)));
+    const liveRevisions = new Set(
+      sample.map((f) => f.controls[0]?.data.materialSourceRevision).filter(Boolean)
+    );
+    assert.ok(
+      liveRevisions.size >= 3,
+      'the actual 120ms live backdrop must advance during mounted drag/release'
+    );
+    assert.ok(
+      sample.every((f) => f.controls[0]?.data.materialQuality === 'self-optical'),
+      'valid live source updates must not flash opaque fallback'
+    );
+
     assert.ok(paints.size >= 5, 'continuous movement/release commits more than two paint states');
     assert.ok(
       sample.some((f) => f.controls[0]?.data.materialContact === 'release'),
@@ -265,7 +284,13 @@ try {
       'paint must not change host hitbox'
     );
     const after = await state();
-    results.push({ runtime, flow: 'trusted native down/move/out/in/up', before, after });
+    results.push({
+      runtime,
+      flow: 'trusted native down/move/out/in/up with live source',
+      liveSourceRevisions: [...liveRevisions],
+      before,
+      after,
+    });
     await page.mouse.down();
     await page.waitForTimeout(60);
     await page.mouse.up();
@@ -295,18 +320,70 @@ try {
       b = await wc.boundingBox(),
       p = { x: b.x + b.width / 2, y: b.y + b.height / 2 };
     const cancelCount = Number(await page.locator(`[data-count="${runtime}"]`).textContent());
+    const nativeStart = await page.evaluate(() => window.__native.length);
     await cdp.send('Input.dispatchTouchEvent', {
       type: 'touchStart',
       touchPoints: [{ ...p, radiusX: 1, radiusY: 1, force: 1, id: 0 }],
     });
-    await page.waitForTimeout(80);
+    await page.waitForFunction(
+      (r) =>
+        document.querySelector(`[data-runtime="${r}"] [data-demo-ref="regular"]`).dataset
+          .materialContact === 'held',
+      runtime
+    );
+    const heldContact = await page.evaluate(
+      (r) => window.__contacts.filter((c) => c.runtime === r).at(-1),
+      runtime
+    );
+    assert.equal(
+      heldContact.active,
+      true,
+      'touch must establish a live router session before cancellation'
+    );
+    const touchDown = await page.evaluate(
+      (start) => window.__native.slice(start).find((e) => e.type === 'pointerdown' && e.trust),
+      nativeStart
+    );
+    assert.ok(touchDown, 'a trusted native pointerdown must exist');
+    assert.equal(touchDown.pointerType, 'touch');
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
-    await page.waitForTimeout(400);
+    await page.waitForFunction(
+      ({ start, id }) =>
+        window.__native
+          .slice(start)
+          .some((e) => e.type === 'pointercancel' && e.trust && e.pointerId === id),
+      { start: nativeStart, id: touchDown.pointerId }
+    );
+    await page.waitForFunction(
+      (r) =>
+        document.querySelector(`[data-runtime="${r}"] [data-demo-ref="regular"]`).dataset
+          .materialContact === 'rest',
+      runtime
+    );
+    const endedContact = await page.evaluate(
+      (r) => window.__contacts.filter((c) => c.runtime === r).at(-1),
+      runtime
+    );
+    assert.equal(endedContact.active, false);
+    assert.equal(endedContact.session, heldContact.session);
+    assert.ok(
+      ['cancel', 'lostcapture'].includes(endedContact.reason),
+      'the same contact is terminally cancelled'
+    );
+    assert.equal(await wc.getAttribute('data-material-quality'), 'self-optical');
+
     assert.equal(
       Number(await page.locator(`[data-count="${runtime}"]`).textContent()),
       cancelCount
     );
-    results.push({ runtime, flow: 'native CDP touchCancel', activation: false });
+    results.push({
+      runtime,
+      flow: 'native CDP touchCancel',
+      activation: false,
+      trustedPointerId: touchDown.pointerId,
+      heldContact,
+      endedContact,
+    });
     // Capture is explicitly requested by this fixture only to exercise genuine lostcapture.
     await wc.evaluate((e) =>
       e.addEventListener(
@@ -393,6 +470,18 @@ try {
     });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
   }
+  // The principal four-runtime drag/release above intentionally keeps the real
+  // 120ms source running. Pause only for isolated invalidation/idle controls.
+  await page.evaluate(() => window.v2Material.pause());
+  await page.waitForFunction(() => window.v2Material.metrics().pendingImages === 0);
+  assert.ok(
+    recordingFrames.length >= 5,
+    'continuous evidence requires at least five actual screencast frames'
+  );
+  assert.ok(
+    new Set(recordingFrames.map((f) => f.timestamp)).size >= 5,
+    'captured frames need distinct native timestamps'
+  );
   // Slow real decode settlement, then revoke; old completion must never republish.
   await page.evaluate(() => {
     window.__decode.delay = 500;
@@ -435,9 +524,134 @@ try {
       (e) => e.dataset.materialQuality === 'self-optical'
     )
   );
-  await page.setViewportSize({ width: 1180, height: 840 });
-  await page.waitForTimeout(300);
-  results.push({ flow: 'resize', state: await state() });
+  // Hold already decoded old-size images at the Promise delivery boundary,
+  // then change real viewport/source geometry. GPU and image decode stay real.
+  const beforeResize = await page.evaluate(() => ({
+    counts: [...document.querySelectorAll('[data-count]')].map((e) => Number(e.textContent)),
+    sources: window.v2Material.scenes().map((s) => ({
+      revision: s.lease.current().revision,
+      width: s.lease.current().width,
+      height: s.lease.current().height,
+    })),
+  }));
+  await page.evaluate(() => {
+    window.__decode.hold = true;
+    for (const s of window.v2Material.scenes()) s.redraw();
+  });
+  await page.waitForFunction(() => window.__decode.held.length === 4);
+  await page.evaluate(() => {
+    window.__resizeOldImages = window.__decode.held.map((h) => h.source);
+    window.__decode.hold = false;
+    window.__decode.delay = 250;
+  });
+  await page.setViewportSize({ width: 1000, height: 840 });
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('[data-demo-ref="regular"]')].every(
+      (e) =>
+        e.dataset.materialQuality === 'opaque-fallback' &&
+        !getComputedStyle(e, '::before').backgroundImage.includes('data:image') &&
+        !getComputedStyle(e).backgroundImage.includes('data:image')
+    )
+  );
+  const resizeBoundary = await page.evaluate(() => ({
+    index: window.__frames.length,
+    sources: window.v2Material.scenes().map((s) => ({
+      revision: s.lease.current().revision,
+      width: s.lease.current().width,
+      height: s.lease.current().height,
+    })),
+  }));
+  assert.ok(
+    resizeBoundary.sources.every((s, i) => s.width !== beforeResize.sources[i].width),
+    'the viewport change must actually resize every source canvas'
+  );
+  await page.evaluate(() => {
+    window.__decode.delay = 0;
+  });
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('[data-demo-ref="regular"]')].every(
+      (e, i) =>
+        e.dataset.materialQuality === 'self-optical' &&
+        Number(e.dataset.materialSourceRevision) ===
+          window.v2Material.scenes()[i].lease.current().revision
+    )
+  );
+  const releasedOldImages = await page.evaluate(() => {
+    const held = window.__decode.held.splice(0);
+    held.forEach((h) => h.resolve());
+    return held.length;
+  });
+  assert.equal(releasedOldImages, 4, 'four real old-size decodes must actually complete late');
+  await page.evaluate(
+    () =>
+      new Promise((resolve) => {
+        let n = 0;
+        function tick() {
+          if (++n === 4) resolve();
+          else requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      })
+  );
+  const resizeResult = await page.evaluate(
+    (start) => ({
+      counts: [...document.querySelectorAll('[data-count]')].map((e) => Number(e.textContent)),
+      frames: window.__frames.slice(start),
+      staleOldImage: window.__frames
+        .slice(start)
+        .some((f) =>
+          f.controls.some(
+            (c) =>
+              c.data.materialQuality === 'self-optical' &&
+              window.__resizeOldImages.some((source) =>
+                window.__paints[c.carrier]?.includes(source)
+              )
+          )
+        ),
+      surfaces: [...document.querySelectorAll('[data-demo-ref="regular"]')].map((e) => {
+        const r = e.getBoundingClientRect(),
+          p = getComputedStyle(e, '::before');
+        return {
+          runtime: e.closest('[data-runtime]').dataset.runtime,
+          width: r.width,
+          height: r.height,
+          paintWidth: parseFloat(p.width),
+          paintHeight: parseFloat(p.height),
+          quality: e.dataset.materialQuality,
+          sourceRevision: Number(e.dataset.materialSourceRevision),
+        };
+      }),
+    }),
+    resizeBoundary.index
+  );
+  assert.deepEqual(resizeResult.counts, beforeResize.counts, 'resize never activates controls');
+  assert.equal(
+    resizeResult.staleOldImage,
+    false,
+    'old decoded PNG bytes must not replace the resized optical paint'
+  );
+  for (const [i, surface] of resizeResult.surfaces.entries()) {
+    assert.equal(surface.quality, 'self-optical');
+    assert.equal(surface.sourceRevision, resizeBoundary.sources[i].revision);
+    const outset = Math.ceil(Math.max(surface.width, surface.height) * 0.08 + 1);
+    assert.equal(surface.paintWidth, surface.width + 2 * outset);
+    assert.equal(surface.paintHeight, surface.height + 2 * outset);
+    assert.ok(
+      resizeResult.frames.every(
+        (f) =>
+          f.controls[i].data.materialQuality !== 'self-optical' ||
+          Number(f.controls[i].data.materialSourceRevision) === resizeBoundary.sources[i].revision
+      ),
+      'late old-size decode cannot publish the old source revision'
+    );
+  }
+  await page.screenshot({ path: join(out, 'resized-recovered.png') });
+  results.push({
+    flow: 'resize invalidates pending old decode and recovers new geometry',
+    before: beforeResize,
+    after: resizeResult.surfaces,
+    observedFrames: resizeResult.frames.length,
+  });
   await page.evaluate(() => {
     window.__lostExtension = window.__gpu[0].getExtension('WEBGL_lose_context');
     if (!window.__lostExtension) throw Error('WEBGL_lose_context unavailable');
@@ -463,6 +677,74 @@ try {
     )
   );
   results.push({ flow: 'WebGL actual context loss/recovery', state: await state() });
+  // Real competing author CSS must fail closed and then become idle, rather
+  // than continually retrying its own carrier marker/stylesheet mutations.
+  const cssTarget = page.locator('[data-runtime="wc"] [data-demo-ref="regular"]');
+  const cssCases = [
+    'background-size:1px 1px !important',
+    'background-position:3px 4px !important',
+    'background-repeat:repeat !important',
+    'margin-left:3px !important',
+    'visibility:hidden !important',
+    'background-image:linear-gradient(red,red),var(--pui-material-image) !important',
+  ];
+  for (const [index, rule] of cssCases.entries()) {
+    await page.evaluate((rule) => {
+      const s = document.createElement('style');
+      s.id = 'material-competing-css';
+      s.textContent = `[data-runtime="wc"] [data-demo-ref="regular"]::before{${rule}}`;
+      document.head.append(s);
+    }, rule);
+    await page.waitForFunction(
+      () =>
+        document.querySelector('[data-runtime="wc"] [data-demo-ref="regular"]').dataset
+          .materialQuality === 'opaque-fallback'
+    );
+    await page.waitForFunction(() => window.v2Material.metrics().pendingImages === 0);
+    const idleBefore = await page.evaluate(() => window.v2Material.metrics());
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          let n = 0;
+          function tick() {
+            if (++n === 12) resolve();
+            else requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        })
+    );
+    const idleAfter = await page.evaluate(() => window.v2Material.metrics());
+    assert.equal(
+      idleAfter.renders,
+      idleBefore.renders,
+      `unchanged failed carrier must not render again: ${rule}`
+    );
+    assert.equal(
+      idleAfter.imagePreparations,
+      idleBefore.imagePreparations,
+      `unchanged failed carrier must not decode again: ${rule}`
+    );
+    assert.equal(await cssTarget.getAttribute('data-material-quality'), 'opaque-fallback');
+    if (index === 0) await page.screenshot({ path: join(out, 'competing-css-fallback.png') });
+    await page.evaluate(() => document.querySelector('#material-competing-css').remove());
+    await page.waitForFunction(
+      () =>
+        document.querySelector('[data-runtime="wc"] [data-demo-ref="regular"]').dataset
+          .materialQuality === 'self-optical'
+    );
+    assert.equal(
+      await cssTarget.evaluate((e) => getComputedStyle(e, '::before').backgroundSize),
+      '100% 100%'
+    );
+    results.push({
+      flow: 'actual CSS rejection, idle and external-change recovery',
+      rule,
+      idleBefore,
+      idleAfter,
+    });
+  }
+  await page.screenshot({ path: join(out, 'competing-css-recovered.png') });
+
   await page.evaluate(() => (window.__record = false));
   const performance = await page.evaluate(() => {
     const frames = window.__frames,
