@@ -54,6 +54,17 @@ describe('bounded hero decorative icon mapping', () => {
     ])
       expect(homeActionIcon(value)).toBeUndefined();
   });
+  it('uses Lucide arrow geometry with matching SSR and runtime paint', () => {
+    expect(homeActionIcon('arrow-right')).toBe('arrow-right');
+    expect(homeActionIcon({ type: 'icon', name: 'arrow-right' })).toBe('arrow-right');
+    const slot = document.createElement('span');
+    appendHomeActionGlyph(slot, 'arrow-right');
+    const path = slot.querySelector('path')!;
+    expect(path.getAttribute('d')).toBe('M5 12h14 m12 5 7 7-7 7');
+    expect(path.getAttribute('fill')).toBe('none');
+    expect(path.getAttribute('stroke')).toBe('currentColor');
+    expect(slot.querySelector('svg')!.getAttribute('aria-hidden')).toBe('true');
+  });
   it('creates passive artwork with no name or focus owner', () => {
     const slot = document.createElement('span');
     appendHomeActionGlyph(slot, 'external');

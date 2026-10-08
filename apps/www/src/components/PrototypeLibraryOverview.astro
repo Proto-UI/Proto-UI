@@ -1,4 +1,5 @@
 ---
+import StaticFamilyIcon from './StaticFamilyIcon.astro';
 import PrototypePreviewer from './PrototypePreviewer/PrototypePreviewer.astro';
 
 type Locale = 'en' | 'zh-cn';
@@ -625,7 +626,7 @@ const copy = isZh
             {entry.href && (
               <a href={entry.href} aria-label={`${copy.details}: ${entry.name}`}>
                 {copy.details}
-                <span aria-hidden="true">→</span>
+                <StaticFamilyIcon family={library} name="arrow-right" />
               </a>
             )}
           </header>

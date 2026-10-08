@@ -258,7 +258,9 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
   it(`${runtime}: gallery compositions have real independent task results and revoke stale work`, async () => {
     const gallery = mount(runtime);
     gallery.event('gallery-primary', 'click');
-    expect(gallery.refs['gallery-controls-feedback']!.textContent).toBe('Primary button ✓');
+    expect(gallery.refs['gallery-controls-feedback']!.textContent).toBe(
+      'Primary button: Activated'
+    );
     gallery.event('editor-text', 'valueChange', { value: 'Editable result' });
     gallery.event('editor-bold', 'activeChange', { active: true });
     await Promise.resolve();

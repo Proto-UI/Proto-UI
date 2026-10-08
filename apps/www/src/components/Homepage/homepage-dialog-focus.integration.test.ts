@@ -40,7 +40,9 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
         rendered = await renderDemo({ runtime, demo: content.demo, host });
         const ref = (name: string) => host.querySelector<HTMLElement>(`[data-demo-ref="${name}"]`)!;
         ref('gallery-primary').click();
-        await expect.poll(() => ref('gallery-controls-feedback').textContent).toContain('✓');
+        await expect
+          .poll(() => ref('gallery-controls-feedback').textContent)
+          .toContain('Activated');
         const editorRoot = ref('editor-text');
         const editor = (
           editorRoot.matches('textarea') ? editorRoot : editorRoot.querySelector('textarea')

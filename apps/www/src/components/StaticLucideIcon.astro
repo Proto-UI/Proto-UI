@@ -1,4 +1,6 @@
 ---
+import { LUCIDE_ARROW_RIGHT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/arrow-right';
+import { LUCIDE_X_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/x';
 import { LUCIDE_ARROW_UP_RIGHT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/arrow-up-right';
 import { LUCIDE_CIRCLE_CHECK_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/circle-check';
 import { LUCIDE_HEART_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/heart';
@@ -13,9 +15,12 @@ type ShapeAttrs = Record<string, string | number | boolean | null | undefined>;
 interface Props {
   name: PreviewIconName;
   size?: string;
+  inline?: boolean;
 }
 
 type PreviewIconName =
+  | 'arrow-right'
+  | 'x'
   | 'arrow-up-right'
   | 'circle-check'
   | 'heart'
@@ -25,6 +30,8 @@ type PreviewIconName =
   | 'sun';
 
 const factories = {
+  'arrow-right': LUCIDE_ARROW_RIGHT_SHAPE_FACTORY,
+  x: LUCIDE_X_SHAPE_FACTORY,
   'arrow-up-right': LUCIDE_ARROW_UP_RIGHT_SHAPE_FACTORY,
   'circle-check': LUCIDE_CIRCLE_CHECK_SHAPE_FACTORY,
   heart: LUCIDE_HEART_SHAPE_FACTORY,
@@ -34,7 +41,7 @@ const factories = {
   sun: LUCIDE_SUN_SHAPE_FACTORY,
 } satisfies Record<PreviewIconName, (svg: never) => unknown>;
 
-const { name, size = '1.65rem' } = Astro.props as Props;
+const { name, size = '1.65rem', inline = false } = Astro.props as Props;
 const shape = (tag: ShapeTag) => (attrs: ShapeAttrs) => ({ tag, attrs });
 const svgFactories = {
   path: shape('path'),
@@ -53,7 +60,7 @@ const nodes = (Array.isArray(generatedNodes) ? generatedNodes : [generatedNodes]
 ---
 
 <svg
-  class="static-lucide-icon"
+  class:list={['static-lucide-icon', { 'static-lucide-icon--inline': inline }]}
   style={{ '--static-lucide-icon-size': size }}
   viewBox="0 0 24 24"
   fill="none"
@@ -62,6 +69,7 @@ const nodes = (Array.isArray(generatedNodes) ? generatedNodes : [generatedNodes]
   stroke-linecap="round"
   stroke-linejoin="round"
   aria-hidden="true"
+  focusable="false"
 >
   {
     nodes.map((node) => {
@@ -74,7 +82,12 @@ const nodes = (Array.isArray(generatedNodes) ? generatedNodes : [generatedNodes]
 <style>
   .static-lucide-icon {
     display: block;
+    flex: none;
     width: var(--static-lucide-icon-size, 1.65rem);
     height: var(--static-lucide-icon-size, 1.65rem);
+  }
+  .static-lucide-icon--inline {
+    display: inline-block;
+    vertical-align: -0.125em;
   }
 </style>

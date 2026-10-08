@@ -1,4 +1,5 @@
 ---
+import StaticFamilyIcon from './StaticFamilyIcon.astro';
 import StaticLucideIcon from './StaticLucideIcon.astro';
 import LibraryCardFrame from './LibraryCardFrame.astro';
 import LibraryCardPart from './LibraryCardPart.astro';
@@ -355,7 +356,8 @@ const themeCss = Object.entries(familyThemes)
                           <dd>
                             {library.sourceHref ? (
                               <a href={library.sourceHref} target="_blank" rel="noreferrer">
-                                {library.source} ↗
+                                {library.source}{' '}
+                                <StaticFamilyIcon family={library.id} name="arrow-up-right" />
                               </a>
                             ) : (
                               library.source
@@ -368,7 +370,8 @@ const themeCss = Object.entries(familyThemes)
                           <dt>{copy.prototypeAuthor}</dt>
                           <dd>
                             <a href={library.authorHref} target="_blank" rel="noreferrer">
-                              {library.author} ↗
+                              {library.author}{' '}
+                              <StaticFamilyIcon family={library.id} name="arrow-up-right" />
                             </a>
                           </dd>
                         </>
@@ -394,7 +397,7 @@ const themeCss = Object.entries(familyThemes)
                             : { size: 'sm', weight: 'medium', tone: 'inherit' }
                         }
                       >
-                        {library.cta} <span aria-hidden="true">→</span>
+                        {library.cta} <StaticFamilyIcon family={library.id} name="arrow-right" />
                       </LibraryCardPart>
                     </LibraryCardPart>
                   </a>

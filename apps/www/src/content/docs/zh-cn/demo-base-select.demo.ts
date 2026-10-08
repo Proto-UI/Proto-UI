@@ -38,9 +38,10 @@ export default {
             props: { placeholder: 'Pick a framework' },
           },
           {
-            kind: 'box',
+            kind: 'proto',
+            prototypeId: 'lucide-chevron-down-icon',
+            props: { size: 16 },
             className: 'text-slate-400',
-            children: ['▾'],
           },
         ],
       },
