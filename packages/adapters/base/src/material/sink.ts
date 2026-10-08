@@ -101,6 +101,7 @@ export function createWebMaterialSink(
   };
   let safeFallback: Parameters<typeof rgbaCss>[0] | null = null;
   const owned = new Map<string, { before: [string, string]; applied: [string, string] }>();
+  const externalPaintOwners = new Set<string>();
   const diagnostics = new Map<
     string,
     { before: string | undefined; applied: string | undefined }
@@ -129,13 +130,15 @@ export function createWebMaterialSink(
   function externalPaintConflict() {
     // An optical receipt owns the complete inline paint tuple, including CSS
     // priority. A surviving image alone cannot certify its size/tiling/clip.
-    if (
-      [...owned].some(([name, prior]) => {
-        const current = inline(name);
-        return current[0] !== prior.applied[0] || current[1] !== prior.applied[1];
-      })
-    )
-      return true;
+    // restore() retires our lease, not a replacement author's ownership. Keep
+    // every takeover across source/semantic repaints until explicitly removed.
+    for (const name of externalPaintOwners) if (!inline(name)[0]) externalPaintOwners.delete(name);
+    for (const [name, prior] of owned) {
+      const current = inline(name);
+      if (current[0] !== prior.applied[0] || current[1] !== prior.applied[1])
+        externalPaintOwners.add(name);
+    }
+    if (externalPaintOwners.size) return true;
     return ['background-color', 'background-image', 'backdrop-filter'].some((name) => {
       const value = inline(name),
         previous = owned.get(name);
@@ -154,7 +157,7 @@ export function createWebMaterialSink(
       if (current[0] === value.applied[0] && current[1] === value.applied[1]) {
         if (value.before[0]) host.style.setProperty(name, ...value.before);
         else host.style.removeProperty(name);
-      }
+      } else externalPaintOwners.add(name);
     }
     owned.clear();
     paintSignature = '';

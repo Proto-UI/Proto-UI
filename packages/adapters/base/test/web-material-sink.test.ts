@@ -714,3 +714,162 @@ it('holds an image-transport failure across source revisions and retries changed
   expect(optical.render).toHaveBeenCalledTimes(2);
   f.sink.release(1);
 });
+
+// Retained verbatim from the independent-review counterexample.
+it.each([
+  ['background-size', '25% 25%'],
+  ['background-repeat', 'repeat'],
+  ['background-origin', 'content-box'],
+  ['background-clip', 'content-box'],
+])(
+  'independent: preserves external %s through subsequent source and semantic repaints',
+  (property, replacement) => {
+    const f = fixture();
+    try {
+      f.sink.commit(f.frame(1));
+      f.host.style.setProperty(property, replacement, 'important');
+      f.invalidate();
+      expect(f.host.dataset.materialReason).toBe('external-paint-conflict');
+      expect(f.host.style.getPropertyValue(property)).toBe(replacement);
+      f.invalidate();
+      console.log(
+        'REPAINT_OVERRIDE',
+        property,
+        JSON.stringify({
+          quality: f.host.dataset.materialQuality,
+          value: f.host.style.getPropertyValue(property),
+          priority: f.host.style.getPropertyPriority(property),
+        })
+      );
+      expect(f.host.style.getPropertyValue(property)).toBe(replacement);
+      expect(f.host.style.getPropertyPriority(property)).toBe('important');
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      f.sink.commit(f.frame(2));
+      expect(f.host.style.getPropertyValue(property)).toBe(replacement);
+      expect(f.host.style.getPropertyPriority(property)).toBe('important');
+    } finally {
+      f.sink.release(1);
+    }
+  }
+);
+
+it.each([
+  ['background-size', '25% 25%'],
+  ['background-repeat', 'repeat'],
+  ['background-origin', 'content-box'],
+  ['background-clip', 'content-box'],
+])(
+  're-admits optics only after the author relinquishes the %s override',
+  (property, replacement) => {
+    const f = fixture();
+    try {
+      f.sink.commit(f.frame(1));
+      const applied = f.host.style.getPropertyValue(property);
+      f.host.style.setProperty(property, replacement, 'important');
+      for (let revision = 2; revision <= 5; revision++) {
+        f.source(true, revision);
+        f.sink.commit(f.frame(revision));
+        f.motion(revision % 2 === 0 ? 'reduce' : 'no-preference');
+        expect(f.host.style.getPropertyValue(property)).toBe(replacement);
+        expect(f.host.style.getPropertyPriority(property)).toBe('important');
+        expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+        expect(f.host.dataset.materialReason).toBe('external-paint-conflict');
+      }
+      expect(optical.render).toHaveBeenCalledOnce();
+      const changedReplacement =
+        property === 'background-size'
+          ? '50% 50%'
+          : property === 'background-repeat'
+            ? 'repeat-x'
+            : 'padding-box';
+      f.host.style.setProperty(property, changedReplacement, 'important');
+      expect(f.host.style.getPropertyValue(property)).toBe(changedReplacement);
+      f.source(true, 6);
+      expect(f.host.style.getPropertyValue(property)).toBe(changedReplacement);
+      expect(f.host.style.getPropertyPriority(property)).toBe('important');
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      expect(optical.render).toHaveBeenCalledOnce();
+      // Dropping priority is another author edit, not a release of its value.
+      f.host.style.setProperty(property, changedReplacement);
+      f.source(true, 7);
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      expect(f.host.style.getPropertyValue(property)).toBe(changedReplacement);
+      expect(f.host.style.getPropertyPriority(property)).toBe('');
+      f.host.style.removeProperty(property);
+      f.invalidate();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      expect(f.host.dataset.materialQuality).toBe('self-optical');
+      expect(f.host.style.getPropertyValue(property)).toBe(applied);
+      expect(f.host.style.getPropertyPriority(property)).toBe('');
+      f.invalidate();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      f.sink.release(1);
+      expect(f.host.style.getPropertyValue(property)).toBe('');
+    } finally {
+      f.sink.release(1);
+    }
+  }
+);
+
+it('keeps priority-only ownership replacement across repaint but can recover after removal', () => {
+  const f = fixture();
+  try {
+    f.sink.commit(f.frame(1));
+    const applied = f.host.style.backgroundSize;
+    f.host.style.setProperty('background-size', applied, 'important');
+    for (let revision = 2; revision <= 4; revision++) {
+      f.source(true, revision);
+      expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+      expect(f.host.style.backgroundSize).toBe(applied);
+      expect(f.host.style.getPropertyPriority('background-size')).toBe('important');
+    }
+    expect(optical.render).toHaveBeenCalledOnce();
+    f.host.style.removeProperty('background-size');
+    f.invalidate();
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+    expect(optical.render).toHaveBeenCalledTimes(2);
+  } finally {
+    f.sink.release(1);
+  }
+});
+
+it('retains simultaneous author takeovers until each declaration is removed', () => {
+  const f = fixture();
+  try {
+    f.sink.commit(f.frame(1));
+    f.host.style.setProperty('background-size', '25% 25%', 'important');
+    f.host.style.setProperty('background-repeat', 'repeat', 'important');
+    f.invalidate();
+    f.host.style.removeProperty('background-size');
+    f.invalidate();
+    expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+    expect(f.host.style.backgroundRepeat).toBe('repeat');
+    expect(f.host.style.getPropertyPriority('background-repeat')).toBe('important');
+    expect(optical.render).toHaveBeenCalledOnce();
+    f.host.style.removeProperty('background-repeat');
+    f.invalidate();
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+    expect(optical.render).toHaveBeenCalledTimes(2);
+  } finally {
+    f.sink.release(1);
+  }
+});
+
+it('retains author ownership when preferences revoke paint before the style observer runs', () => {
+  const f = fixture();
+  try {
+    f.sink.commit(f.frame(1));
+    f.host.style.setProperty('background-size', '25% 25%', 'important');
+    f.motion('reduce');
+    f.invalidate();
+    expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+    expect(f.host.style.backgroundSize).toBe('25% 25%');
+    expect(f.host.style.getPropertyPriority('background-size')).toBe('important');
+    f.sink.release(1);
+    f.source(true, 2);
+    expect(f.host.style.backgroundSize).toBe('25% 25%');
+    expect(f.host.dataset.materialQuality).toBeUndefined();
+  } finally {
+    f.sink.release(1);
+  }
+});
