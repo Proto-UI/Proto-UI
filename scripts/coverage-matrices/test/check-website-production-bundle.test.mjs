@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import ts from 'typescript';
+import { fileURLToPath } from 'node:url';
 import {
   collectWebsiteProductionBundleIssues,
   validateWebsiteProductionBundle,
@@ -718,6 +723,24 @@ for (const family of ['react', 'vue', 'vue2', 'wc'])
       else assert.deepEqual(issues, []);
     });
 
+const reviewedWcHelpers = [
+  'packages/adapters/base/src/platform/portal-direction.ts',
+  'packages/adapters/web-component/src/focus-scope-targets.ts',
+  'packages/adapters/web-component/src/keyed-meta-sources.ts',
+  'packages/adapters/web-component/src/portal-conceal.ts',
+  'packages/adapters/web-component/src/portal-mount.ts',
+  'packages/adapters/web-component/src/shadow-color-scheme-environment.ts',
+  'packages/adapters/web-component/src/shadow-inner-surface.ts',
+  'packages/adapters/web-component/src/shadow-owner-shell.ts',
+  'packages/adapters/web-component/src/shadow-profile.ts',
+  'packages/adapters/web-component/src/shadow-split-effects.ts',
+  'packages/adapters/web-component/src/shadow-split-meta.ts',
+  'packages/adapters/web-component/src/shadow-split-resources.ts',
+  'packages/adapters/web-component/src/shadow-style-artifact.ts',
+  'packages/adapters/web-component/src/shadow-stylesheet-owner.ts',
+  'packages/adapters/web-component/src/shadow-text-control-surface.ts',
+];
+
 const siteOwners = [
   ['Homepage/HomepageRuntime.astro', 'Homepage/homepage-runtime-client.ts'],
   ['override/Header.astro', 'site-header-surface.ts'],
@@ -815,6 +838,7 @@ for (const [entry, owner] of siteOwners) {
   });
   for (const target of [
     'packages/adapters/base/src/events/pointer-contact.ts',
+    ...reviewedWcHelpers,
     'packages/adapters/web-component/src/color-scheme-source.ts',
     'packages/adapters/web-component/src/adapt.ts',
     'packages/adapters/web-component/src/material/owned-texture-sink.ts',
@@ -1125,6 +1149,7 @@ test('rejects a runtime facade paired with another runtime source identity', () 
 });
 
 for (const moduleId of [
+  ...reviewedWcHelpers,
   'packages/adapters/web-component/src/material/owned-texture-sink.ts',
   'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
   'packages/adapters/web-component/src/visual-surface.ts',
@@ -1179,4 +1204,112 @@ test('Bootstrap state-controls admission is exact and keeps frameworks lazy', ()
       issue.includes('Website shell entry')
     )
   );
+});
+
+const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
+const configSource = ts.createSourceFile(
+  'astro.config.mjs',
+  fs.readFileSync(path.join(repositoryRoot, 'apps/www/astro.config.mjs'), 'utf8'),
+  ts.ScriptTarget.Latest,
+  true,
+  ts.ScriptKind.JS
+);
+const chunkFunction = configSource.statements.find(
+  (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'websiteManualChunk'
+);
+assert.ok(chunkFunction);
+const classifyChunk = vm.runInNewContext(`(${chunkFunction.getText(configSource)})`, {
+  normalizedBundleModuleId: (id) => id,
+});
+const materialBoundary = chunkFunction.body.statements.find(
+  (node) =>
+    ts.isIfStatement(node) &&
+    node.getText(configSource).includes('packages/adapters/base/src/material/')
+);
+assert.ok(materialBoundary);
+const regroupMaterial = vm.runInNewContext(
+  `(${chunkFunction.getText(configSource).replace(materialBoundary.getText(configSource), '')})`,
+  { normalizedBundleModuleId: (id) => id }
+);
+const optionalMaterialSources = fs
+  .readdirSync(path.join(repositoryRoot, 'packages/adapters/base/src/material'))
+  .filter((name) => name.endsWith('.ts'))
+  .map((name) => `packages/adapters/base/src/material/${name}`);
+for (const moduleId of optionalMaterialSources) {
+  test(`manual chunk preserves existing lazy material boundary: ${moduleId}`, () => {
+    assert.equal(classifyChunk(moduleId), undefined);
+    assert.equal(
+      regroupMaterial(moduleId),
+      'site-shadcn-controls',
+      'Removing the precise exclusion must reproduce eager regrouping.'
+    );
+  });
+  for (const via of ['same bridge chunk', 'static dependency chunk']) {
+    test(`material remains forbidden in ordinary shells through ${via}: ${moduleId}`, () => {
+      const graph = graphFixture();
+      const bridge = graph.chunks.find(
+        (item) => item.fileName === '_astro/site-shadcn-controls.js'
+      );
+      if (via === 'same bridge chunk') bridge.moduleIds.push(moduleId);
+      else {
+        graph.chunks.push(chunk('_astro/forbidden-material.js', { moduleIds: [moduleId] }));
+        bridge.imports.push('_astro/forbidden-material.js');
+      }
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('statically reaches forbidden') && issue.includes(moduleId)
+        )
+      );
+    });
+  }
+}
+test('manual chunk keeps reviewed WC controls grouped and framework-only associations outside', () => {
+  for (const id of [
+    'apps/www/src/components/site-shadcn-controls.ts',
+    'packages/adapters/web-component/src/adapt.ts',
+    ...reviewedWcHelpers,
+  ])
+    assert.equal(classifyChunk(id), 'site-shadcn-controls');
+  assert.equal(
+    classifyChunk('packages/adapters/base/src/host/instance-associations.ts'),
+    undefined
+  );
+});
+test('all additionally reviewed WC helpers are statically owned by the actual public entry', () => {
+  const seen = new Set();
+  const queue = ['packages/adapters/web-component/src/index.ts'];
+  while (queue.length) {
+    const id = queue.shift();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const file = path.join(repositoryRoot, id);
+    const source = ts.createSourceFile(
+      id,
+      fs.readFileSync(file, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    for (const node of source.statements) {
+      if (
+        !(ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) ||
+        !node.moduleSpecifier ||
+        !ts.isStringLiteral(node.moduleSpecifier)
+      )
+        continue;
+      if (node.isTypeOnly || (ts.isImportDeclaration(node) && node.importClause?.isTypeOnly))
+        continue;
+      const specifier = node.moduleSpecifier.text;
+      let target;
+      if (specifier.startsWith('.')) target = path.resolve(path.dirname(file), specifier);
+      else if (specifier === '@proto.ui/adapter-base')
+        target = path.join(repositoryRoot, 'packages/adapters/base/src/index');
+      else continue;
+      const resolved = [`${target}.ts`, path.join(target, 'index.ts')].find((candidate) =>
+        fs.existsSync(candidate)
+      );
+      if (resolved) queue.push(path.relative(repositoryRoot, resolved));
+    }
+  }
+  for (const id of reviewedWcHelpers)
+    assert.ok(seen.has(id), `Missing actual public Adapter ownership: ${id}`);
 });

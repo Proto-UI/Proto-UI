@@ -88,6 +88,9 @@ function websiteManualChunk(id) {
   // Only the lazy React/Vue/Vue2 adapters use this reserved-input helper.
   // Do not pull it into every WC site shell through the broad Base grouping.
   if (modulePath === 'packages/adapters/base/src/host/instance-associations.ts') return;
+  // Optional material providers already enter through the renderer's lazy scene.
+  // Preserve that boundary instead of folding shader/source code into every shell.
+  if (modulePath?.startsWith('packages/adapters/base/src/material/')) return;
   if (
     modulePath === 'apps/www/src/components/site-shadcn-controls.ts' ||
     /^packages\/adapters\/(?:base|web-component)\//u.test(modulePath ?? '')

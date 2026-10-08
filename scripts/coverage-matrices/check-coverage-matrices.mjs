@@ -9250,7 +9250,7 @@ const PROMOTION_AUDIT_PLUGIN_SHA256 =
 // modules and delegates the fixed eleven acquisition entries to the same resolver.
 // Its exact helper bytes are evidence metadata; arbitrary plugins stay rejected.
 const PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256 =
-  'a7947553aeba5d5efb4b5806326b833e8c31dd924d3555411099feb0b8c898e8';
+  '428f9cbe0c5fe19f4d24a74afeebddcfcad0f00c929144df205a94c45e87f8ac';
 const PROMOTION_RETRY_PLUGIN_PATH = 'apps/www/scripts/runtime-retry-urls.mjs';
 const PROMOTION_RETRY_PLUGIN_SHA256 =
   '510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224';

@@ -123,6 +123,22 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/slot-projector.ts',
   'packages/adapters/web-component/src/style.ts',
   'packages/adapters/web-component/src/types.ts',
+  // Current public WC entry's exact portal, Meta and Shadow profile helpers.
+  'packages/adapters/base/src/platform/portal-direction.ts',
+  'packages/adapters/web-component/src/focus-scope-targets.ts',
+  'packages/adapters/web-component/src/keyed-meta-sources.ts',
+  'packages/adapters/web-component/src/portal-conceal.ts',
+  'packages/adapters/web-component/src/portal-mount.ts',
+  'packages/adapters/web-component/src/shadow-color-scheme-environment.ts',
+  'packages/adapters/web-component/src/shadow-inner-surface.ts',
+  'packages/adapters/web-component/src/shadow-owner-shell.ts',
+  'packages/adapters/web-component/src/shadow-profile.ts',
+  'packages/adapters/web-component/src/shadow-split-effects.ts',
+  'packages/adapters/web-component/src/shadow-split-meta.ts',
+  'packages/adapters/web-component/src/shadow-split-resources.ts',
+  'packages/adapters/web-component/src/shadow-style-artifact.ts',
+  'packages/adapters/web-component/src/shadow-stylesheet-owner.ts',
+  'packages/adapters/web-component/src/shadow-text-control-surface.ts',
 ]);
 
 export class WebsiteProductionBundleValidationError extends Error {
