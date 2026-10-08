@@ -7,6 +7,11 @@ const optical = vi.hoisted(() => ({
   render: vi.fn((_frame: unknown) => 'data:image/png;base64,AA=='),
   clear: vi.fn(),
 }));
+const carrierControl = vi.hoisted(() => ({
+  create: null as
+    | null
+    | ((host: HTMLElement) => { valid(image: string): boolean; release(): void }),
+}));
 const decoding = vi.hoisted(() => ({
   prepare: vi.fn((_doc: Document, _source: string, ready: () => void, _failed: () => void) => {
     ready();
@@ -21,7 +26,8 @@ vi.mock('../src/material/program', () => ({ createWebOpticalProgram: () => optic
 vi.mock('../src/material/contact-carrier', () => ({
   inspectContactCarrier: () => null,
   contactCarrierBounds: (element: Element) => element.getBoundingClientRect(),
-  createContactCarrier: () => ({ valid: () => true, release() {} }),
+  createContactCarrier: (host: HTMLElement) =>
+    carrierControl.create?.(host) ?? { valid: () => true, release() {} },
 }));
 const rect = (x: number, y: number, width: number, height: number) =>
   ({
@@ -143,10 +149,10 @@ function fixture(delayed = false) {
     invalidate: () => {
       for (const fn of sourceListeners) fn();
     },
-    source(value: boolean) {
+    source(value: boolean, revision = 3) {
       source = value
         ? {
-            revision: 3,
+            revision,
             width: 400,
             height: 240,
             canvas,
@@ -167,6 +173,7 @@ function fixture(delayed = false) {
   };
 }
 beforeEach(() => {
+  carrierControl.create = null;
   optical.render.mockReset().mockReturnValue('data:image/png;base64,AA==');
   optical.clear.mockClear();
   decoding.prepare.mockReset().mockImplementation((_doc, _source, ready) => {
@@ -535,4 +542,127 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
     expect(optical.render.mock.calls.length).toBe(count);
     f.sink.release(1);
   });
+});
+
+describe('independent-review R2: failed carrier must become idle', () => {
+  it.each(['marker-only negative control', 'real stylesheet refused by computed-style admission'])(
+    '%s does not retry without external changes and recovers after a real edit',
+    async (mode) => {
+      const actual = await vi.importActual<typeof import('../src/material/contact-carrier')>(
+        '../src/material/contact-carrier'
+      );
+      let refused = true;
+      if (mode === 'marker-only negative control') {
+        carrierControl.create = (host) => {
+          host.setAttribute('data-pui-material-carrier', 'contact-v1');
+          return {
+            valid: () => !refused,
+            release() {
+              host.removeAttribute('data-pui-material-carrier');
+            },
+          };
+        };
+      } else {
+        const nativeStyle = window.getComputedStyle.bind(window);
+        vi.spyOn(window, 'getComputedStyle').mockImplementation((host, pseudo) => {
+          if (!pseudo) return nativeStyle(host);
+          // Models CSP/higher-priority CSS refusing the actual leased stylesheet.
+          return { content: 'none', position: 'static' } as CSSStyleDeclaration;
+        });
+        carrierControl.create = actual.createContactCarrier;
+      }
+      const f = fixture();
+      let frames: FrameRequestCallback[] = [];
+      vi.mocked(window.requestAnimationFrame).mockImplementation((fn) => {
+        frames.push(fn);
+        return frames.length;
+      });
+      const base = f.frame(1);
+      const frame: VisualFeedbackFrame = {
+        ...base,
+        material: {
+          ...base.material,
+          candidates: [
+            {
+              intent: 'liquid-glass',
+              deformation: { kind: 'press', phase: 'rest', contact: 'pointer' },
+            },
+          ],
+        },
+      };
+      f.sink.commit(frame);
+      const counts = [optical.render.mock.calls.length];
+      const turn = async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+        const pending = frames;
+        frames = [];
+        pending.forEach((fn) => fn(performance.now()));
+      };
+      for (let i = 0; i < 5; i++) {
+        await turn();
+        counts.push(optical.render.mock.calls.length);
+      }
+      expect(counts).toEqual([1, 1, 1, 1, 1, 1]);
+      expect(f.host.hasAttribute('data-pui-material-carrier')).toBe(false);
+      // Source pixels cannot repair a stylesheet/CSP refusal. A live canvas
+      // must not restart GPU readback, encode and decode for each new revision.
+      for (let revision = 2; revision < 7; revision++) {
+        f.source(true, revision);
+        await turn();
+      }
+      expect(optical.render).toHaveBeenCalledTimes(1);
+      const writer = createWebPointerContactWriter(f.host);
+      writer.publish({
+        active: true,
+        session: 1,
+        x: 0.5,
+        y: 0.5,
+        deltaX: 0,
+        deltaY: 0,
+        reason: 'down',
+      });
+      await turn();
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      for (let i = 0; i < 5; i++) {
+        writer.publish({
+          active: true,
+          session: 1,
+          x: 0.6,
+          y: 0.5,
+          deltaX: 0.1,
+          deltaY: 0,
+          reason: 'move',
+        });
+        await turn();
+      }
+      expect(optical.render).toHaveBeenCalledTimes(2);
+      // Genuine author change retries. The real-sheet case keeps refusing, but
+      // still gets exactly one attempt instead of starting another retry loop.
+      refused = false;
+      f.host.className = 'author-fixed-carrier-style';
+      await turn();
+      expect(optical.render).toHaveBeenCalledTimes(3);
+      if (mode === 'marker-only negative control')
+        expect(f.host.dataset.materialQuality).toBe('self-optical');
+      for (let i = 0; i < 5; i++) await turn();
+      expect(optical.render).toHaveBeenCalledTimes(3);
+      f.sink.release(1);
+    }
+  );
+});
+
+it('holds an image-transport failure across source revisions and retries changed preferences', () => {
+  const f = fixture();
+  decoding.prepare.mockImplementation((_doc, _source, _ready, failed) => {
+    failed();
+    return () => {};
+  });
+  f.sink.commit(f.frame(1));
+  expect(optical.render).toHaveBeenCalledTimes(1);
+  for (let revision = 2; revision < 7; revision++) f.source(true, revision);
+  expect(optical.render).toHaveBeenCalledTimes(1);
+  expect(f.host.dataset.materialReason).toBe('optical-image-decode-failed');
+  f.motion('reduce');
+  expect(optical.render).toHaveBeenCalledTimes(2);
+  f.sink.release(1);
 });

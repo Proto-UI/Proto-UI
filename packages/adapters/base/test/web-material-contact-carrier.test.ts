@@ -63,10 +63,49 @@ describe('private expanded paint carrier (computed-style spy, not browser paint)
       backgroundImage: 'url("data:image/png;base64,AA==")',
       transform: 'none',
       opacity: '1',
+      backgroundSize: '100% 100%',
+      backgroundPosition: '0% 0%',
+      backgroundRepeat: 'no-repeat',
+      backgroundAttachment: 'scroll',
+      backgroundOrigin: 'border-box',
+      backgroundClip: 'border-box',
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+      visibility: 'visible',
+      overflowX: 'visible',
+      overflowY: 'visible',
     });
     expect(carrier.valid('data:image/png;base64,AA==')).toBe(true);
-    computed.pointerEvents = 'auto';
-    expect(carrier.valid('data:image/png;base64,AA==')).toBe(false);
+    // Independent review R1: each change alone must invalidate the receipt.
+    for (const [key, value] of Object.entries({
+      backgroundSize: '1px 1px',
+      backgroundPosition: '20px 0px',
+      backgroundRepeat: 'repeat',
+      backgroundAttachment: 'fixed',
+      backgroundOrigin: 'content-box',
+      backgroundClip: 'text',
+      backgroundColor: 'rgb(255, 0, 0)',
+      backgroundBlendMode: 'multiply',
+      backgroundImage: 'url("data:image/png;base64,AA=="), linear-gradient(red, blue)',
+      marginLeft: '20px',
+      marginTop: '-10px',
+      visibility: 'hidden',
+      overflowX: 'hidden',
+      borderTopLeftRadius: '0px 20px',
+      outlineWidth: '2px',
+      zoom: '2',
+      offsetPath: 'path("M 0 0 L 1 1")',
+      animationName: 'move',
+      transitionDuration: '0.5s',
+      contentVisibility: 'hidden',
+      pointerEvents: 'auto',
+    })) {
+      const before = computed[key];
+      computed[key] = value;
+      expect(carrier.valid('data:image/png;base64,AA=='), key).toBe(false);
+      if (before === undefined) delete computed[key];
+      else computed[key] = before;
+      expect(carrier.valid('data:image/png;base64,AA=='), `${key} recovery`).toBe(true);
+    }
     vi.spyOn(host, 'getBoundingClientRect').mockReturnValue({
       left: 40,
       top: 30,

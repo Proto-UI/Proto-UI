@@ -1,3 +1,4 @@
+import { withOwnedCarrierMarker } from './paint-mutations';
 import { observeWebPointerContact } from '../events/pointer-contact';
 import { createContactMotion } from './contact-motion';
 import { createContactCarrier, inspectContactCarrier } from './contact-carrier';
@@ -46,6 +47,8 @@ export function createWebMaterialSink(
   let queued = false;
   let paintLease = '';
   let geometryLease = '';
+  let externalStyleRevision = 0;
+  let renderFailure: { key: string; reason: string } | null = null;
   let carrier: ReturnType<typeof createContactCarrier> | null = null;
   let paintedImage = '';
   let last: VisualFeedbackFrame | null = null;
@@ -56,6 +59,8 @@ export function createWebMaterialSink(
       clearImage();
       restore();
       paintLease = '';
+      lastOwnedStyle = host.getAttribute('style');
+      lastOwnedTokens = host.getAttribute('data-pui-style');
     }
     schedule();
   });
@@ -68,11 +73,13 @@ export function createWebMaterialSink(
   }
   function invalidate(reason: string) {
     if (retired) return;
+    renderFailure = null;
     motion.stop();
     ordinary(reason);
     repaint();
   }
   let lastOwnedStyle: string | null = null;
+  let lastOwnedTokens: string | null = null;
   let sourceEpoch = 0;
   let sourceOwner: { canvas: HTMLCanvasElement; scope: HTMLElement } | null = null;
   let sourceRevision = -1,
@@ -102,6 +109,23 @@ export function createWebMaterialSink(
     host.style.getPropertyValue(name),
     host.style.getPropertyPriority(name),
   ];
+  function authoredInlineStyle() {
+    const entries: Array<[string, string, string]> = [];
+    const names = new Set([
+      ...Array.from({ length: host.style.length }, (_, index) => host.style[index]),
+      ...owned.keys(),
+    ]);
+    for (const name of names) {
+      const current = inline(name),
+        prior = owned.get(name);
+      const value =
+        prior && current[0] === prior.applied[0] && current[1] === prior.applied[1]
+          ? prior.before
+          : current;
+      if (value[0]) entries.push([name, ...value]);
+    }
+    return entries.sort(([a], [b]) => a.localeCompare(b));
+  }
   function externalPaintConflict() {
     if (
       carrier &&
@@ -123,7 +147,7 @@ export function createWebMaterialSink(
     });
   }
   function restore() {
-    carrier?.release();
+    withOwnedCarrierMarker(host, () => carrier?.release());
     carrier = null;
     paintedImage = '';
     for (const [name, value] of owned) {
@@ -448,6 +472,21 @@ export function createWebMaterialSink(
         motionFrame.session,
         candidate.variant,
       ]);
+      // Carrier/transport refusal is independent of changing source pixels or
+      // pointer-move samples. Only a new style/geometry/profile/session can
+      // make that failed admission useful to retry; GPU failures remain uncached.
+      const retryKey = JSON.stringify([
+        lease,
+        externalStyleRevision,
+        tokens,
+        candidate.deformation?.phase,
+        host.getAttribute('class'),
+        authoredInlineStyle(),
+      ]);
+      if (renderFailure?.key === retryKey) {
+        fallback(resolved.fill, renderFailure.reason);
+        return;
+      }
       const signature = JSON.stringify([
         frame.view,
         frame.revision,
@@ -513,6 +552,7 @@ export function createWebMaterialSink(
             if (externalPaintConflict()) {
               ordinary('external-paint-conflict');
               lastOwnedStyle = host.getAttribute('style');
+              lastOwnedTokens = host.getAttribute('data-pui-style');
               return;
             }
             if (
@@ -540,12 +580,13 @@ export function createWebMaterialSink(
             ) {
               ordinary('lease-replaced-during-image-prepare');
               lastOwnedStyle = host.getAttribute('style');
+              lastOwnedTokens = host.getAttribute('data-pui-style');
               repaint();
               return;
             }
             const previousImage = releaseImage;
             if (tracksContact) {
-              carrier ??= createContactCarrier(host);
+              carrier ??= withOwnedCarrierMarker(host, () => createContactCarrier(host));
               if (!currentCss.position || currentCss.position === 'static')
                 own('position', 'relative');
               own('isolation', 'isolate');
@@ -566,6 +607,7 @@ export function createWebMaterialSink(
             own('background-clip', 'border-box');
             own('background-size', '100% 100%');
             own('background-repeat', 'no-repeat');
+            renderFailure = null;
             paintSignature = signature;
             paintLease = lease;
             paintedImage = image;
@@ -600,14 +642,19 @@ export function createWebMaterialSink(
                 : 'rest'
             );
             lastOwnedStyle = host.getAttribute('style');
+            lastOwnedTokens = host.getAttribute('data-pui-style');
             if (queued || motionFrame.animating) {
               queued = false;
               schedule();
             }
-          } catch {
+          } catch (error) {
             if (!retired && pending === ticket) {
-              ordinary('material-prepare-input-failed');
+              const reason =
+                error instanceof Error ? error.message : 'material-prepare-input-failed';
+              renderFailure = { key: retryKey, reason };
+              ordinary(reason);
               lastOwnedStyle = host.getAttribute('style');
+              lastOwnedTokens = host.getAttribute('data-pui-style');
             }
           }
         },
@@ -626,11 +673,15 @@ export function createWebMaterialSink(
               JSON.stringify(currentPreferences) !== JSON.stringify(prefs)
             )
               ordinary('lease-replaced-during-image-prepare');
-            else fallback(resolved.fill!, 'optical-image-decode-failed');
+            else {
+              renderFailure = { key: retryKey, reason: 'optical-image-decode-failed' };
+              fallback(resolved.fill!, 'optical-image-decode-failed');
+            }
           } catch {
             if (!retired && pending === ticket) ordinary('material-prepare-input-failed');
           }
           lastOwnedStyle = host.getAttribute('style');
+          lastOwnedTokens = host.getAttribute('data-pui-style');
         }
       );
     } catch (error) {
@@ -646,12 +697,23 @@ export function createWebMaterialSink(
         repaint();
       }
       lastOwnedStyle = host.getAttribute('style');
+      lastOwnedTokens = host.getAttribute('data-pui-style');
     }
   }
   const disposers: Array<() => void> = [];
   try {
     disposers.push(contact.dispose);
-    disposers.push(observeMaterialGeometry(host, repaint, () => lastOwnedStyle));
+    disposers.push(
+      observeMaterialGeometry(
+        host,
+        (revision) => {
+          externalStyleRevision = revision;
+          repaint();
+        },
+        () => lastOwnedStyle,
+        () => lastOwnedTokens
+      )
+    );
     disposers.push(
       options.source.subscribe(() => {
         // A new frame from the same admitted canvas lease supersedes an in-flight

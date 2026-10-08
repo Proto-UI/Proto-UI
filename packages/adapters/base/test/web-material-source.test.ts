@@ -121,6 +121,17 @@ describe('expanded contact paint source admission', () => {
       reason: 'source-expanded-paint-clipped',
     });
   });
+  it('rejects zoom and hidden source geometry before an expanded carrier can override visibility', () => {
+    const { host, lease, scope } = fixture();
+    host.style.visibility = 'hidden';
+    expect(inspectCanvasBackdrop(host, lease.current(), 9).valid).toBe(false);
+    host.style.visibility = 'visible';
+    (scope.style as any).zoom = '2';
+    expect(inspectCanvasBackdrop(host, lease.current(), 9).valid).toBe(false);
+    (scope.style as any).zoom = '1';
+    (scope.style as any).contentVisibility = 'hidden';
+    expect(inspectCanvasBackdrop(host, lease.current(), 9).valid).toBe(false);
+  });
   it('rejects clipping and paint containment instead of presenting a truncated contour', () => {
     const { host, lease, scope } = fixture();
     scope.style.overflow = 'hidden';

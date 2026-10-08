@@ -1,3 +1,8 @@
+import {
+  appendOwnedCarrierSheet,
+  removeOwnedCarrierSheet,
+  withOwnedCarrierMarker,
+} from './paint-mutations';
 /** A paint-only pseudo-element has no DOM child, slot input, accessibility node,
  * pointer target or independent semantic owner. Styles are leased per document.
  * Existing author ::before content is never commandeered. */
@@ -9,7 +14,9 @@ const rules = `:where([${marker}="contact-v1"])::before {
   left: var(--pui-material-left); top: var(--pui-material-top);
   width: var(--pui-material-width); height: var(--pui-material-height);
   background-image: var(--pui-material-image); background-size: 100% 100%;
-  background-repeat: no-repeat; background-color: transparent;
+  background-repeat: no-repeat; background-position: 0% 0%; background-color: transparent;
+  background-origin: border-box; background-clip: border-box; background-attachment: scroll;
+  visibility: visible; overflow: visible;
   border: 0; border-radius: 0; padding: 0; margin: 0;
   pointer-events: none; z-index: -1; opacity: 1; transform: none;
 }`;
@@ -18,6 +25,8 @@ export function inspectContactCarrier(host: HTMLElement): string | null {
   if (host.hasAttribute(marker)) return 'contact-carrier-marker-conflict';
   const win = host.ownerDocument.defaultView!;
   const hostCss = win.getComputedStyle(host);
+  if (hostCss.visibility && hostCss.visibility !== 'visible')
+    return 'contact-carrier-host-not-visible';
   if (
     (!hostCss.position || hostCss.position === 'static') &&
     [hostCss.top, hostCss.right, hostCss.bottom, hostCss.left].some((v) => v && v !== 'auto')
@@ -40,14 +49,14 @@ export function createContactCarrier(host: HTMLElement) {
   if (!sheet) {
     const node = doc.createElement('style');
     node.textContent = rules;
-    (root === doc ? (doc.head ?? doc.documentElement) : root).append(node);
+    appendOwnedCarrierSheet(node, root === doc ? (doc.head ?? doc.documentElement) : root);
     sheet = { node, users: 0 };
     sheets.set(root, sheet);
   }
   const lease = sheet;
   lease.users++;
   owners.add(host);
-  host.setAttribute(marker, 'contact-v1');
+  withOwnedCarrierMarker(host, () => host.setAttribute(marker, 'contact-v1'));
   let retired = false;
   return {
     valid(image: string) {
@@ -63,7 +72,32 @@ export function createContactCarrier(host: HTMLElement) {
         css.position === 'absolute' &&
         css.pointerEvents === 'none' &&
         css.zIndex === '-1' &&
-        css.backgroundImage.includes(image) &&
+        [`url("${image}")`, `url('${image}')`, `url(${image})`].includes(css.backgroundImage) &&
+        css.backgroundSize === '100% 100%' &&
+        css.backgroundPosition === '0% 0%' &&
+        css.backgroundRepeat === 'no-repeat' &&
+        css.backgroundAttachment === 'scroll' &&
+        css.backgroundOrigin === 'border-box' &&
+        css.backgroundClip === 'border-box' &&
+        (css.backgroundColor === 'transparent' || css.backgroundColor === 'rgba(0, 0, 0, 0)') &&
+        (!css.backgroundBlendMode || css.backgroundBlendMode === 'normal') &&
+        css.visibility === 'visible' &&
+        css.overflowX === 'visible' &&
+        css.overflowY === 'visible' &&
+        (!css.clip || css.clip === 'auto') &&
+        (!(css as any).contentVisibility || (css as any).contentVisibility === 'visible') &&
+        (!(css as any).zoom || ['1', 'normal'].includes((css as any).zoom)) &&
+        (!css.animationName || css.animationName === 'none') &&
+        [css.transitionDuration, css.transitionDelay].every(
+          (value) => !value || value.split(',').every((time) => /^0(?:s|ms)$/.test(time.trim()))
+        ) &&
+        [
+          'borderImageSource',
+          'maskBorderSource',
+          'webkitMaskBoxImageSource',
+          'webkitBoxReflect',
+          'offsetPath',
+        ].every((key) => !(css as any)[key] || (css as any)[key] === 'none') &&
         css.transform === 'none' &&
         ['rotate', 'scale', 'translate', 'maskImage', 'webkitMaskImage', 'backdropFilter'].every(
           (key) => !(css as any)[key] || (css as any)[key] === 'none'
@@ -84,7 +118,21 @@ export function createContactCarrier(host: HTMLElement) {
           'paddingRight',
           'paddingBottom',
           'paddingLeft',
-        ].every((key) => parseFloat((css as any)[key] || '0') === 0) &&
+          'marginTop',
+          'marginRight',
+          'marginBottom',
+          'marginLeft',
+          'borderTopLeftRadius',
+          'borderTopRightRadius',
+          'borderBottomRightRadius',
+          'borderBottomLeftRadius',
+          'outlineWidth',
+        ].every((key) =>
+          String((css as any)[key] || '0')
+            .trim()
+            .split(/\s+/)
+            .every((value) => /^[+-]?0(?:\.0+)?(?:px|%)?$/.test(value))
+        ) &&
         ['left', 'top', 'width', 'height'].every(
           (key) =>
             Math.abs(
@@ -103,9 +151,11 @@ export function createContactCarrier(host: HTMLElement) {
       if (retired) return;
       retired = true;
       owners.delete(host);
-      if (host.getAttribute(marker) === 'contact-v1') host.removeAttribute(marker);
+      withOwnedCarrierMarker(host, () => {
+        if (host.getAttribute(marker) === 'contact-v1') host.removeAttribute(marker);
+      });
       if (--lease.users === 0) {
-        lease.node.remove();
+        removeOwnedCarrierSheet(lease.node);
         sheets.delete(root);
       }
     },

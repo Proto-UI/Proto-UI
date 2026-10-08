@@ -111,6 +111,8 @@ const transparent = (value: string) =>
 const overlaps = (a: DOMRect, b: DOMRect) =>
   a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
 const neutral = (css: CSSStyleDeclaration) =>
+  (!(css as any).zoom || ['normal', '1'].includes((css as any).zoom)) &&
+  (!(css as any).contentVisibility || (css as any).contentVisibility === 'visible') &&
   (!css.opacity || Number(css.opacity) === 1) &&
   (!css.filter || css.filter === 'none') &&
   (!css.mixBlendMode || css.mixBlendMode === 'normal') &&
@@ -192,6 +194,8 @@ export function inspectCanvasBackdrop(
   while (current) {
     const css = win.getComputedStyle(current);
     if (!neutral(css)) return fail('source-compositing-unavailable');
+    if (css.visibility && css.visibility !== 'visible')
+      return fail('source-not-visible-or-composited');
     if (
       paintOutset > 0 &&
       ([css.overflow, css.overflowX, css.overflowY].some((v) => v && v !== 'visible') ||

@@ -1,3 +1,4 @@
+import { isOwnedCarrierMutation } from './paint-mutations';
 /** Event-driven, one scheduled frame per document and one shared observer per
  * participating document/shadow tree. A static material
  * does not retain a perpetual per-surface RAF. External CSS animation outside
@@ -7,23 +8,28 @@ const observers = new WeakMap<
   {
     listeners: Set<() => void>;
     ownStyles: Map<HTMLElement, () => string | null>;
+    ownTokens: Map<HTMLElement, () => string | null>;
     resize: ResizeObserver | null;
+    readonly revision: number;
     watchRoot(root: ShadowRoot): () => void;
     stop(): void;
   }
 >();
 export function observeMaterialGeometry(
   host: HTMLElement,
-  changed: () => void,
-  ownStyle: () => string | null
+  changed: (externalRevision: number) => void,
+  ownStyle: () => string | null,
+  ownTokenSnapshot?: () => string | null
 ) {
   const doc = host.ownerDocument,
     win = doc.defaultView!;
   let shared = observers.get(doc);
   if (!shared) {
     const listeners = new Set<() => void>(),
-      ownStyles = new Map<HTMLElement, () => string | null>();
+      ownStyles = new Map<HTMLElement, () => string | null>(),
+      ownTokens = new Map<HTMLElement, () => string | null>();
     let frame: number | null = null;
+    let revision = 0;
     const schedule = () => {
       if (frame !== null) return;
       frame = win.requestAnimationFrame(() => {
@@ -35,14 +41,24 @@ export function observeMaterialGeometry(
       if (
         records.some(
           (record) =>
-            record.type !== 'attributes' ||
-            record.attributeName !== 'style' ||
-            !ownStyles.has(record.target as HTMLElement) ||
-            (record.target as HTMLElement).getAttribute('style') !==
-              ownStyles.get(record.target as HTMLElement)!()
+            !isOwnedCarrierMutation(record) &&
+            !(
+              record.type === 'attributes' &&
+              record.attributeName === 'data-pui-style' &&
+              ownTokens.has(record.target as HTMLElement) &&
+              (record.target as HTMLElement).getAttribute('data-pui-style') ===
+                ownTokens.get(record.target as HTMLElement)!()
+            ) &&
+            (record.type !== 'attributes' ||
+              record.attributeName !== 'style' ||
+              !ownStyles.has(record.target as HTMLElement) ||
+              (record.target as HTMLElement).getAttribute('style') !==
+                ownStyles.get(record.target as HTMLElement)!())
         )
-      )
+      ) {
+        revision++;
         schedule();
+      }
     };
     const mutationOptions: MutationObserverInit = {
       attributes: true,
@@ -55,8 +71,14 @@ export function observeMaterialGeometry(
         'hidden',
         'slot',
         'name',
+        'media',
+        'disabled',
+        'href',
+        'rel',
+        'type',
       ],
       childList: true,
+      characterData: true,
       subtree: true,
     };
     const mutation = new win.MutationObserver(onMutation);
@@ -70,7 +92,11 @@ export function observeMaterialGeometry(
     shared = {
       listeners,
       ownStyles,
+      ownTokens,
       resize,
+      get revision() {
+        return revision;
+      },
       watchRoot(root) {
         let record = roots.get(root);
         if (!record) {
@@ -134,11 +160,12 @@ export function observeMaterialGeometry(
   const notify = () => {
     if (retired) return;
     refreshRoots();
-    changed();
+    changed(entry.revision);
   };
   refreshRoots();
   entry.listeners.add(notify);
   entry.ownStyles.set(host, ownStyle);
+  if (ownTokenSnapshot) entry.ownTokens.set(host, ownTokenSnapshot);
   entry.resize?.observe(host);
   return () => {
     if (retired) return;
@@ -147,6 +174,7 @@ export function observeMaterialGeometry(
     for (const release of rootLeases.values()) release();
     rootLeases.clear();
     entry.ownStyles.delete(host);
+    entry.ownTokens.delete(host);
     entry.resize?.unobserve(host);
     if (!entry.listeners.size) {
       entry.stop();
