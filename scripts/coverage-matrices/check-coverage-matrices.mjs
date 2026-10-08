@@ -1,4 +1,5 @@
 import { STARTUP_PRERENDER_IMPORT_ALLOWLIST } from './startup-prerender-imports.mjs';
+import { LIBRARY_CARD_IMPORT_ALLOWLIST } from './library-card-imports.mjs';
 import { spawnSync } from 'node:child_process';
 import { decodeVideoEvidence } from './decode-video-evidence.mjs';
 import { createHash } from 'node:crypto';
@@ -163,6 +164,7 @@ const SELF_HOSTED_WEBSITE_RECORD_LABELS = Object.freeze([
 ]);
 const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   ...STARTUP_PRERENDER_IMPORT_ALLOWLIST,
+  ...LIBRARY_CARD_IMPORT_ALLOWLIST,
   // Exact #652 acceptance compositions. Their App controls remain blocked
   // consumers, not an infrastructure or stable-prototype exemption.
   'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
@@ -501,12 +503,15 @@ const WEBSITE_NON_INTERACTIVE_EXPECTATIONS = Object.freeze({
       'www.docs.stage-notice',
       'www.docs.entity-links',
       'www.gallery.lucide-card-grid',
-      'www.gallery.ui-library-cards',
       'www.gallery.prototype-library-cards',
       'www.content.document-semantics',
       'www.content.draft-notice',
     ].map((id) => [id, Object.freeze({ targetClass: 'native/static', state: 'native/static' })])
   ),
+  'www.gallery.ui-library-cards': Object.freeze({
+    targetClass: 'site-composition',
+    state: 'blocked',
+  }),
   'www.shell.primary-nav': Object.freeze({
     targetClass: 'site-composition',
     state: 'research',

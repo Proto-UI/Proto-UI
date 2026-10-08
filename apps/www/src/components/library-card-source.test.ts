@@ -11,7 +11,7 @@ it('keeps ownership honest and removes fake previews and delayed placeholders', 
   expect(source).toContain('不透明 Surface 回退');
   const part = readFileSync('apps/www/src/components/LibraryCardPart.astro', 'utf8');
   expect(part).toContain('snapshotLibraryPart(part, props)');
-  expect(part).toContain('renderProtoStyleTokenCss(cssTokens)');
+  expect(part).toContain('renderSnapshotTokenCss(cssTokens)');
   expect(part).not.toContain('visibility');
 });
 

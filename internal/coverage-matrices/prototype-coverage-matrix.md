@@ -198,7 +198,7 @@ These matrices count user-facing jobs, not prototype families. Their exact row I
 
 | Program | Rows | Recorded states | Dedicated ledger |
 | --- | --- | --- | --- |
-| website | 78 | native/static: 15; research: 7; blocked: 39; infrastructure-exempt: 17 | [Website](../website/self-hosting-coverage-matrix.md) |
+| website | 78 | native/static: 14; research: 7; blocked: 40; infrastructure-exempt: 17 | [Website](../website/self-hosting-coverage-matrix.md) |
 | harness | 63 | ready: 22; native/static: 2; research: 13; blocked: 11; app-local-proto: 7; infrastructure-exempt: 8 | [Harness](../agent-harness/dogfood-coverage-matrix.md) |
 
 - Tree (#523)

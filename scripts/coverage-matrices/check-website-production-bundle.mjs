@@ -30,6 +30,10 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
 // by a directory, filename prefix, or arbitrary reachability to shared chunks.
 const REVIEWED_SITE_RUNTIME_OWNERS = new Map([
   [
+    'apps/www/src/components/UiLibraryGallery.astro?astro&type=script&index=0&lang.ts',
+    'apps/www/src/components/library-card-client.ts',
+  ],
+  [
     'apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts',
     'apps/www/src/components/Homepage/homepage-runtime-client.ts',
   ],
@@ -76,6 +80,7 @@ const REVIEWED_WEBSITE_CONTROL_MODULE = 'apps/www/src/components/site-shadcn-con
 // Existing exact source owners in WEBSITE_RAW_IMPORT_ALLOWLIST. Native links
 // have their own Surface/Text WC bridge; neither boundary admits React/Vue.
 const REVIEWED_WEBSITE_CONTROL_APIS = new Set([
+  'apps/www/src/components/library-card-client.ts',
   REVIEWED_WEBSITE_CONTROL_MODULE,
   'apps/www/src/components/site-native-controls.ts',
 ]);

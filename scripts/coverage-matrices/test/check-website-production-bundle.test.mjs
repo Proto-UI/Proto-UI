@@ -742,6 +742,7 @@ const reviewedWcHelpers = [
 ];
 
 const siteOwners = [
+  ['UiLibraryGallery.astro', 'library-card-client.ts'],
   ['Homepage/HomepageRuntime.astro', 'Homepage/homepage-runtime-client.ts'],
   ['override/Header.astro', 'site-header-surface.ts'],
   ['override/Search.astro', 'site-search-commands.ts'],
@@ -872,7 +873,11 @@ for (const [entry, owner] of siteOwners) {
       }
     }
   }
-  for (const api of ['site-shadcn-controls.ts', 'site-native-controls.ts']) {
+  for (const api of [
+    'site-shadcn-controls.ts',
+    'site-native-controls.ts',
+    'library-card-client.ts',
+  ]) {
     test(`bridge origin: ${entry} accepts exact ${api} and its helper but rejects helper bypass`, () => {
       const { graph, root } = siteGraph();
       const target = 'packages/adapters/web-component/src/adapt.ts';

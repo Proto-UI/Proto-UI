@@ -20,14 +20,19 @@ describe('library entry real Prototype first-frame projection', () => {
   });
 });
 
-it('negative control: replacing the public source removes its projected paint', async () => {
+it('negative control: a source registry without Shadcn cannot retain its paint', async () => {
   const { libraryCardPrototypes } = await import('./library-card-prototypes');
-  const source = libraryCardPrototypes['shadcn-surface'];
-  try {
-    libraryCardPrototypes['shadcn-surface'] = libraryCardPrototypes['base-surface'];
-    expect(await snapshotLibraryPart('shadcn-surface', librarySurfaceProps)).toEqual([]);
-  } finally {
-    libraryCardPrototypes['shadcn-surface'] = source;
-  }
+  const { createStyleSnapshotter, renderSnapshotTokenCss } =
+    await import('./snapshot-prototype-style');
+  const altered = createStyleSnapshotter({
+    ...libraryCardPrototypes,
+    'shadcn-surface': libraryCardPrototypes['base-surface'],
+  });
+  expect(await altered('shadcn-surface', librarySurfaceProps)).toEqual([]);
   expect(await snapshotLibraryPart('shadcn-surface', librarySurfaceProps)).toContain('rounded-xl');
+  // A later part must not reset earlier Surface shadow/transform/ring state.
+  const css = renderSnapshotTokenCss(await snapshotLibraryPart('brutalist-card', {}));
+  expect(css).not.toContain('--pui-shadow: initial');
+  expect(css).not.toContain('--pui-translate-x: initial');
+  expect(css).toContain('4px');
 });

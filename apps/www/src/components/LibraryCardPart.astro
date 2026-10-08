@@ -1,7 +1,7 @@
 ---
 import { libraryCardPrototypes, type LibraryPart } from './library-card-prototypes';
 import { snapshotLibraryPart } from './library-card-snapshot';
-import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
+import { renderSnapshotTokenCss } from './snapshot-prototype-style';
 interface Props {
   part: LibraryPart;
   props?: Record<string, unknown>;
@@ -24,7 +24,7 @@ const stateTokens = part.endsWith('-surface')
 const cssTokens = [...new Set([...tokens, ...stateTokens])];
 ---
 
-<style is:inline set:html={renderProtoStyleTokenCss(cssTokens)}></style>
+<style is:inline set:html={renderSnapshotTokenCss(cssTokens)}></style>
 <Tag
   class={className}
   data-library-part={part}

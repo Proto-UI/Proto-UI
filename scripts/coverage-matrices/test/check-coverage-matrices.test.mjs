@@ -18471,65 +18471,6 @@ for (const name of ['acceptance', 's2', 's3', 's4', 's5']) {
   });
 }
 
-for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dynamic-css']) {
-  test(`Finf continuous optical closure: ${scenario}`, () => {
-    const root = createRoot();
-    const material = 'packages/adapters/base/src/material/';
-    const write = (name, source) => {
-      const target = path.join(root, material, name);
-      fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.writeFileSync(target, source);
-    };
-    for (const name of ['program-pool.ts', 'contact-carrier.ts'])
-      write(name, fs.readFileSync(new URL(`../../../${material}${name}`, import.meta.url), 'utf8'));
-    write('program.ts', "import './contact-profile'; import './source'; export {};");
-    write('contact-profile.ts', "import './liquidgl-kernel.generated'; export {};");
-    write('source.ts', "import './contact-carrier'; export {};");
-    for (const name of ['image-prepare.ts', 'liquidgl-kernel.generated.ts', 'paint-mutations.ts'])
-      write(name, 'export {};');
-    const entryPath = 'apps/www/src/pages/en/test/liquid-glass-material.astro';
-    const entry = path.join(root, entryPath);
-    fs.mkdirSync(path.dirname(entry), { recursive: true });
-    const entryImport = path
-      .relative(path.dirname(entry), path.join(root, material, 'program-pool'))
-      .replaceAll('\\', '/');
-    fs.writeFileSync(entry, `<script>import '${entryImport}';</script>`);
-    writeValidMatrices(
-      root,
-      { Path: entryPath, Evidence: entryPath },
-      {},
-      {
-        websiteBindings: [
-          [material + 'program-pool.ts', ['www.demo.raw-adapter-runtimes']],
-          [entryPath, ['www.shell.search']],
-        ],
-      }
-    );
-    if (scenario === 'unreviewed-sibling') {
-      fs.appendFileSync(path.join(root, material, 'source.ts'), "import './unreviewed';");
-      write('unreviewed.ts', 'export {};');
-    }
-    if (scenario === 'foreign-consumer') {
-      const foreign = path.join(root, 'apps/www/src/components/ForeignContact.ts');
-      fs.mkdirSync(path.dirname(foreign), { recursive: true });
-      fs.writeFileSync(foreign, `import '../../../../${material}contact-carrier';`);
-    }
-    if (scenario === 'dynamic-css')
-      write(
-        'contact-carrier.ts',
-        `export function install(document: Document, css: string) {
-        const node = document.createElement('style'); node.textContent = css;
-      }`
-      );
-    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
-    if (scenario === 'exact') assert.equal(message, '');
-    else if (scenario === 'dynamic-css') assert.match(message, /DOM style body.*unverified/);
-    else if (scenario === 'unreviewed-sibling')
-      assert.match(message, /raw Proto UI import `\.\/unreviewed`.*escapes/);
-    else assert.match(message, /ForeignContact\.ts.*escapes/);
-  });
-}
-
 for (const source of ['site-startup-paint.ts', 'snapshot-prototype-style.ts']) {
   for (const scenario of ['exact', 'foreign', 'changed', 'adjacent-import', 'dynamic-css']) {
     test(`startup prerender import boundary: ${source} ${scenario}`, () => {
@@ -18598,5 +18539,104 @@ for (const scenario of [
         message
       );
     else assert.equal(message, '');
+  });
+}
+
+for (const [source, allowed] of [
+  ['UiLibraryGallery.astro', '../../../../packages/prototypes/brutalist/src/theme'],
+  ['library-card-client.ts', '@proto.ui/adapter-web-component'],
+  ['library-card-prototypes.ts', '@proto.ui/prototypes-brutalist/card'],
+]) {
+  test(`library card import boundary remains exact and content-bound: ${source}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const relative = `apps/www/src/components/${source}`;
+    const file = path.join(root, relative);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    fs.writeFileSync(file, reviewed);
+    const rawIssue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+    assert.ok(
+      !collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(rawIssue),
+      'exact reviewed import is admitted'
+    );
+    const foreign = `apps/www/src/components/copied-${source}`;
+    fs.writeFileSync(path.join(root, foreign), reviewed);
+    assert.ok(
+      validationMessage(root).includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+    );
+    fs.writeFileSync(file, reviewed + '\n// Changed source bytes require review.\n');
+    assert.ok(
+      validationMessage(root).includes(rawIssue),
+      'same path with altered bytes is rejected'
+    );
+    const extra = source.endsWith('.astro')
+      ? "\n<script>import '@proto.ui/adapter-react';</script>"
+      : "\nimport '@proto.ui/adapter-react';";
+    fs.writeFileSync(file, reviewed + extra);
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/adapter-react\` in \`${relative}\``
+      )
+    );
+  });
+}
+
+for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dynamic-css']) {
+  test(`Finf continuous optical closure: ${scenario}`, () => {
+    const root = createRoot();
+    const material = 'packages/adapters/base/src/material/';
+    const write = (name, source) => {
+      const target = path.join(root, material, name);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.writeFileSync(target, source);
+    };
+    for (const name of ['program-pool.ts', 'contact-carrier.ts'])
+      write(name, fs.readFileSync(new URL(`../../../${material}${name}`, import.meta.url), 'utf8'));
+    write('program.ts', "import './contact-profile'; import './source'; export {};");
+    write('contact-profile.ts', "import './liquidgl-kernel.generated'; export {};");
+    write('source.ts', "import './contact-carrier'; export {};");
+    for (const name of ['image-prepare.ts', 'liquidgl-kernel.generated.ts', 'paint-mutations.ts'])
+      write(name, 'export {};');
+    const entryPath = 'apps/www/src/pages/en/test/liquid-glass-material.astro';
+    const entry = path.join(root, entryPath);
+    fs.mkdirSync(path.dirname(entry), { recursive: true });
+    const entryImport = path
+      .relative(path.dirname(entry), path.join(root, material, 'program-pool'))
+      .replaceAll('\\', '/');
+    fs.writeFileSync(entry, `<script>import '${entryImport}';</script>`);
+    writeValidMatrices(
+      root,
+      { Path: entryPath, Evidence: entryPath },
+      {},
+      {
+        websiteBindings: [
+          [material + 'program-pool.ts', ['www.demo.raw-adapter-runtimes']],
+          [entryPath, ['www.shell.search']],
+        ],
+      }
+    );
+    if (scenario === 'unreviewed-sibling') {
+      fs.appendFileSync(path.join(root, material, 'source.ts'), "import './unreviewed';");
+      write('unreviewed.ts', 'export {};');
+    }
+    if (scenario === 'foreign-consumer') {
+      const foreign = path.join(root, 'apps/www/src/components/ForeignContact.ts');
+      fs.mkdirSync(path.dirname(foreign), { recursive: true });
+      fs.writeFileSync(foreign, `import '../../../../${material}contact-carrier';`);
+    }
+    if (scenario === 'dynamic-css')
+      write(
+        'contact-carrier.ts',
+        `export function install(document: Document, css: string) {
+        const node = document.createElement('style'); node.textContent = css;
+      }`
+      );
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'exact') assert.equal(message, '');
+    else if (scenario === 'dynamic-css') assert.match(message, /DOM style body.*unverified/);
+    else if (scenario === 'unreviewed-sibling')
+      assert.match(message, /raw Proto UI import `\.\/unreviewed`.*escapes/);
+    else assert.match(message, /ForeignContact\.ts.*escapes/);
   });
 }
