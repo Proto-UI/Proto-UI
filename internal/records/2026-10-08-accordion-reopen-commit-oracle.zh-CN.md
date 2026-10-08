@@ -30,3 +30,9 @@ browser 测试现在只等待当前 Content 存在且不再 pending，然后立�
 ## 未完成边界
 
 本地 browser socket/file-scheme 限制不绕过。当前候选 native browser、真实 pixels、官方 exact-head CI 和独立审查仍由父任务后续收集。局部 DOM 证据不等于浏览器通过，也不等于 draft 稳定准入。
+
+## 独审后收紧 oracle
+
+- readiness 还必须排除 `data-pui-view-detached`，避免把保留的关闭 shell 当作当前 materialized view。
+- 事件内采样不固定 React 必须异步 commit：未就绪分支检查无悬空 IDREF，已就绪分支检查精确双向关系；`act` 结束后无条件严格检查旧 ID、双向关系及非 pending/非 detached。
+- 前述同步 `expanded=true / controls=null / Content不存在` 是本次观测和负控依据，不是要求未来 React 实现保留这个调度间隙的规范。

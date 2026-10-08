@@ -59,16 +59,27 @@ it('restores reciprocal Accordion relationships at the rematerialized React comm
       expect(trigger.getAttribute('aria-controls')).toBeNull();
       expect(content()).toBeUndefined();
       await press('Enter', () => {
-        // A canonical state update is synchronous; React has not committed the new
-        // Content view yet. This is the old browser oracle's false-ready boundary.
+        // Either React scheduling is legal: a not-yet-committed Content must
+        // not leave a dangling IDREF, while a ready view must already restore it.
         expect(trigger.getAttribute('aria-expanded')).toBe('true');
-        expect(trigger.getAttribute('aria-controls')).toBeNull();
-        expect(content()).toBeUndefined();
+        const panel = content();
+        if (
+          !panel ||
+          panel.hasAttribute('data-pui-view-pending') ||
+          panel.hasAttribute('data-pui-view-detached')
+        ) {
+          expect(trigger.getAttribute('aria-controls')).toBeNull();
+        } else {
+          expect(panel.id).toBe(id);
+          expect(trigger.getAttribute('aria-controls')).toBe(id);
+          expect(panel.getAttribute('aria-labelledby')).toBe(trigger.id);
+        }
       });
       expect(content()!.id).toBe(id);
       expect(trigger.getAttribute('aria-controls')).toBe(id);
       expect(content()!.getAttribute('aria-labelledby')).toBe(trigger.id);
       expect(content()!.hasAttribute('data-pui-view-pending')).toBe(false);
+      expect(content()!.hasAttribute('data-pui-view-detached')).toBe(false);
     }
   } finally {
     await act(async () => root.unmount());

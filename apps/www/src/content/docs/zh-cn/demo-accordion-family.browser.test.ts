@@ -30,7 +30,10 @@ const materialized = async (content: Locator) => {
   await expect
     .poll(() =>
       content.evaluateAll(
-        (nodes) => nodes.length === 1 && !nodes[0].hasAttribute('data-pui-view-pending')
+        (nodes) =>
+          nodes.length === 1 &&
+          !nodes[0].hasAttribute('data-pui-view-pending') &&
+          !nodes[0].hasAttribute('data-pui-view-detached')
       )
     )
     .toBe(true);
