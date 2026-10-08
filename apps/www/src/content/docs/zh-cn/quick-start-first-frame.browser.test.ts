@@ -410,7 +410,7 @@ async function captureFailure(page: Page, name: string, failure: unknown) {
   }
   await writeFile(path.join(directory, `${name}-failure.json`), JSON.stringify(detail, null, 2));
 }
-async function record(page: Page, name: string) {
+async function record(page: Page, name: string, context: Record<string, unknown> = {}) {
   const result = await measure(page);
   // The whole document viewport stays visible, including content outside the
   // note; a hidden-page/skeleton workaround cannot satisfy these artifacts.
@@ -424,6 +424,7 @@ async function record(page: Page, name: string) {
         url: page.url(),
         viewport: page.viewportSize(),
         kind: 'same-source stylesheet-ready pre-module versus hydrated',
+        ...context,
         result,
       },
       null,
@@ -948,7 +949,7 @@ describe('quick-start first-frame continuity', () => {
       }
     }, 90_000);
   for (const condition of conditions)
-    it(`no JavaScript ${condition.width}: full note and text remain readable`, async () => {
+    it(`no JavaScript ${condition.width}, system ${condition.colorScheme}: SSR dark note and text remain readable`, async () => {
       const context = await browser.newContext({
         javaScriptEnabled: false,
         viewport: condition,
@@ -957,10 +958,44 @@ describe('quick-start first-frame continuity', () => {
       const page = await context.newPage();
       try {
         await page.goto(`${baseUrl}${route}`);
-        const result = await record(
-          page,
-          `no-javascript-${condition.width}-${condition.colorScheme}`
+        // Starlight's shipped HTML is data-theme=dark. The system preference
+        // only changes it through the inline provider, which is disabled here.
+        // Keep the historical filename, but label it as a requested preference,
+        // never as proof of rendered light coverage.
+        const name = `no-javascript-${condition.width}-${condition.colorScheme}`;
+        const reading = await page.evaluate(() => {
+          const rect = (selector: string) => {
+            const value = document.querySelector(selector)!.getBoundingClientRect();
+            return { x: value.x, y: value.y, right: value.right, bottom: value.bottom };
+          };
+          return {
+            fragmentTarget: document.querySelector(':target')?.id ?? null,
+            title: rect('h1[data-site-typography="h1"]'),
+            note: rect('.starlight-aside--note'),
+            viewport: { width: innerWidth, height: innerHeight },
+          };
+        });
+        const actualTheme = await page.locator('html').getAttribute('data-theme');
+        const context = {
+          kind: 'shipped no-JavaScript SSR, initial fragment reading viewport',
+          requestedColorScheme: condition.colorScheme,
+          actualTheme,
+          themeCoverage: { dark: actualTheme === 'dark', light: actualTheme === 'light' },
+          themeLimitation:
+            'The shipped SSR is fixed dark; a light system preference cannot run the theme provider without JavaScript.',
+          initialFragmentReading: reading,
+        };
+        const result = await record(page, name, context);
+        expect(result.theme, 'actual no-JS theme, independent of requested system preference').toBe(
+          'dark'
         );
+        expect(reading.fragmentTarget).toBe('_top');
+        for (const key of ['title', 'note'] as const) {
+          expect(reading[key].x, `${key} inside the reading viewport`).toBeGreaterThanOrEqual(0);
+          expect(reading[key].y, `${key} inside the reading viewport`).toBeGreaterThanOrEqual(0);
+          expect(reading[key].right).toBeLessThanOrEqual(reading.viewport.width);
+          expect(reading[key].bottom).toBeLessThanOrEqual(reading.viewport.height);
+        }
         for (const value of Object.values(result.values)) expect(value.visible).toBe(true);
         expect(result.paint.borderWidth).toBe('1px');
         for (const key of [
@@ -978,6 +1013,21 @@ describe('quick-start first-frame continuity', () => {
         expect(await page.locator('[data-search-startup-button]').isDisabled()).toBe(true);
         expect(result.ready).toBeUndefined();
         expect(result.pageOverflow).toBeLessThanOrEqual(1);
+        // Fragment navigation legitimately leaves the long no-JS directory
+        // above the article. Capture the real document start separately rather
+        // than claiming off-screen header controls were in the reading image.
+        await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: 'instant' }));
+        const top = await record(page, `${name}-document-top`, {
+          ...context,
+          kind: 'shipped no-JavaScript SSR, explicit document-start viewport',
+        });
+        expect(top.geometry.scroll.y).toBe(0);
+        for (const key of ['menu', 'search'] as const) {
+          expect(top.chrome[key]!.y).toBeGreaterThanOrEqual(0);
+          expect(top.chrome[key]!.y + top.chrome[key]!.height).toBeLessThanOrEqual(
+            condition.height
+          );
+        }
         const summary = page.locator('[data-site-header-fallback-summary]');
         expect(await summary.isVisible()).toBe(true);
         expect(
@@ -985,6 +1035,10 @@ describe('quick-start first-frame continuity', () => {
         ).toBe(1);
         await summary.click();
         expect(await page.locator('[data-site-header-preferences]').isVisible()).toBe(true);
+        await record(page, `${name}-menu-open`, {
+          ...context,
+          kind: 'shipped no-JavaScript SSR, native details menu opened',
+        });
       } finally {
         await context.close();
       }

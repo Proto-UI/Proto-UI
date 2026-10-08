@@ -1,0 +1,31 @@
+# Quickstart native fragment focus controls
+
+Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+
+## Scope and preserved failure
+
+This diagnostic continuation starts at `c49ae23037d1a38c3594ad43906d669d38eee9ec`, tree `5eec47cd604cffacc553b49be3140e225c00c305`, for [PR #872](https://github.com/Proto-UI/Proto-UI/pull/872). The [official Quickstart run](https://github.com/Proto-UI/Proto-UI/actions/runs/37782062760) passed 16 of its 18 cases. Both React ownership cases retained code, source Text and selection but lost focus. The Menu focus transfer to the actual WC Button succeeded. The final focusout occurred just after DOMContentLoaded while `:target` changed from null to `_top`, with no observed application focus/blur call responsible for that final transition.
+
+The original two ownership tests, including their route, all-script request gate, programmatic setup, preconditions, real Typography completion wait and `focused: true` final expectation, remain byte-identical. Their failure has not been fixed or reclassified as a pass. No production Menu, Typography, Adapter, hash, or focus-restoration behavior changes here.
+
+## Hypothesis and control
+
+The [HTML scroll-to-fragment algorithm](https://html.spec.whatwg.org/multipage/browsing-the-web.html#scroll-to-the-fragment) performs focusing steps with the viewport as fallback for its target. [Chromium's element-fragment implementation](https://chromium.googlesource.com/chromium/src/+/f8eb32985e2b245d9fe22c458c464ae6b37ae48c/third_party/blink/renderer/core/page/scrolling/element_fragment_anchor.cc) clears current focus when the target is not focusable. This supports an initial-fragment hypothesis; it does not prove that exact path in the official browser build.
+
+`quick-start-first-frame-fragment-control.browser.test.ts` adds four separate native controls: Menu and navigation-link ownership, each with the original programmatic focus input or actual Playwright Shift+Tab input. They request the same Quickstart document at `#_top` and retain its HTML bytes and stylesheet requests. A restrictive response CSP disables every inline script and event handler, including inline modules; requested external scripts remain pending until release and then receive the same empty JavaScript body. The original CSP, if present, remains an additional restriction. These are deliberately controlled pages, not production-renderer success evidence.
+
+Evidence includes the source SHA/tree/dirty state, browser version, original HTML digest, script source/body-digest inventory, empty-module digest, loader/CSP strategy, actual CSP rejection events, actual theme, trusted Tab count, native lifecycle/focus/selection trace, native-node and both directional Selection endpoint checks, and before/after screenshots. Code selection remains a script-created native Range in both input arms and is labeled as such. No focus is restored after releasing the document. Preconditions require real acquired focus, nonempty unchanged selection, pending fragment navigation and no enhanced owner. The postcondition predicts focus loss even with no application enhancement. A failing control rejects or leaves this explanation unproven; it does not license weakening the original assertion.
+
+The four controls run as a separate `always()` step after the unchanged 18-case acceptance command, with separate reports. The original 18/18 gate still must pass. The job budget grows by exactly the separate control step's ten-minute budget; existing test deadlines are unchanged. The suite is also registered in the shared sequential runtime browser phase.
+
+## No-JavaScript evidence correction
+
+The shipped Starlight HTML is fixed `data-theme="dark"`; its inline theme provider cannot respond to a light system preference when JavaScript is disabled. The existing historical filename suffix remains the requested system preference, while new metadata records the actual observed theme and actual coverage. The tests explicitly require current dark SSR. Actual no-JavaScript light coverage remains absent; no theme attribute or response HTML is rewritten to manufacture it.
+
+The initial `#_top` capture now requires the title and complete Note to be inside the reading viewport. A separate explicitly scrolled document-start capture requires Header Menu and Search to be in the viewport. A third capture shows the real native details menu after opening. This distinguishes an article reading image, which can contain the fallback directory's tail, from evidence that the Header controls are visible and usable. Existing overflow, content, native fallback and disabled Search assertions remain.
+
+## Validation and remaining work
+
+On Node `v24.19.0` with pnpm `10.32.1`, seven focused source/Happy DOM suites pass 123 tests, including the original ownership/readiness and Menu/selection regressions. The runtime test-plan and native-evidence source controls pass 121 Node tests. A focused TypeScript check of both browser suites and the new contract suite passes. An initial diagnostic source guard failed only because it expected formatter-specific indentation; its corrected whitespace-independent check and the full focused rerun pass. These are source checks, not native browser evidence.
+
+Native controls and the strengthened no-JavaScript captures are **not run** in this worktree because the current executor's known Chrome socket `EPERM` restriction has not been bypassed. No new image, browser pass, production fix or full-build pass is claimed. The original official artifacts remain the failure evidence. The next authorized exact-source native run must retain all four controls and the original 18-case report; independently inspect the controls' CSP enforcement, loader strategy, preconditions, focus timeline and screenshots before choosing a repair boundary. If the browser clears both script and trusted-keyboard focus without enhancement, a new independently reviewed ownership fixture must isolate completed native navigation from still-pending enhancement while retaining strict focus/selection ownership. Do not introduce production focus stealing to satisfy a fixture's earlier competing navigation.

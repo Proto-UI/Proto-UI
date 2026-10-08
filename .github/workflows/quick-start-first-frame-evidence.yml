@@ -27,7 +27,7 @@ env:
 jobs:
   browser-evidence:
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,6 +79,27 @@ jobs:
           assert.equal(report.numTotalTests, 18, 'All first-frame and no-script journeys must run.');
           assert.equal(report.numPassedTests, 18, 'All first-frame and no-script journeys must pass.');
           assert.equal(report.numFailedTests, 0);
+          JS
+      - name: Isolate native fragment focus with four empty-module controls
+        if: always()
+        timeout-minutes: 10
+        env:
+          PUI_QUICK_START_EVIDENCE_DIR: ${{ runner.temp }}/quick-start-first-frame/screenshots
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/quick-start-first-frame/fragment-controls-vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/quick-start-first-frame/fragment-controls-browser.log"
+          node --input-type=module - "$RUNNER_TEMP/quick-start-first-frame/fragment-controls-vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numTotalTests, 4, 'Both focus owners and both input strategies must run.');
+          assert.equal(report.numPassedTests, 4, 'The causal prediction must be observed natively.');
+          assert.equal(report.numFailedTests, 0);
+          // These controls never replace the original 18-case acceptance result.
           JS
       - name: Retain exact-source results, screenshots and failures
         if: always()

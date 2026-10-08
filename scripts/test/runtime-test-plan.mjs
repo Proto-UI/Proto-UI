@@ -137,6 +137,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts',
