@@ -1,0 +1,90 @@
+name: Library Card first-frame evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/library-card-evidence.yml'
+      - 'packages/**'
+      - 'apps/www/astro.config.mjs'
+      - 'apps/www/package.json'
+      - 'package.json'
+      - 'apps/www/src/components/**'
+      - 'apps/www/src/styles/**'
+      - 'apps/www/src/content/docs/zh-cn/ui-libraries/index.mdx'
+      - 'apps/www/src/content/docs/zh-cn/library-cards-first-frame*.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/server-readiness.mjs'
+      - 'vitest.config.ts'
+      - 'scripts/test/runtime-test-plan.mjs'
+      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: library-card-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and identify Chromium
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/library-card"
+          "$CHROME" --version > "$RUNNER_TEMP/library-card/browser-environment.txt"
+          node --version > "$RUNNER_TEMP/library-card/node-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/library-card/source-sha.txt"
+      - name: Install the matching public CJK font fallback
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$RUNNER_TEMP/library-card/font-environment.txt"
+      - name: Disable the development toolbar on the real evidence surface
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
+          printf '%s\n' "$TOOLBAR_SETTING"
+          grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
+      - name: Run all 9 first-frame, refresh and no-JavaScript journeys
+        timeout-minutes: 20
+        env:
+          PUI_LIBRARY_CARD_EVIDENCE_DIR: ${{ runner.temp }}/library-card/screenshots
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/library-card/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/library-card/browser.log"
+          node --input-type=module - "$RUNNER_TEMP/library-card/vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numTotalTests, 9, 'All first-frame and no-script journeys must run.');
+          assert.equal(report.numPassedTests, 9, 'All first-frame and no-script journeys must pass.');
+          assert.equal(report.numFailedTests, 0);
+          JS
+      - name: Retain exact-source results, screenshots and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-card-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/library-card
+          if-no-files-found: error
+          retention-days: 30

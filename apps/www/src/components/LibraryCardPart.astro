@@ -1,0 +1,34 @@
+---
+import { libraryCardPrototypes, type LibraryPart } from './library-card-prototypes';
+import { snapshotLibraryPart } from './library-card-snapshot';
+import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
+interface Props {
+  part: LibraryPart;
+  props?: Record<string, unknown>;
+  class?: string;
+}
+const { part, props = {}, class: className } = Astro.props;
+// Astro's intrinsic typing has no dynamic custom-element union; the host
+// accepts ordinary HTML attributes while keeping its actual runtime tag.
+const Tag = `wc-library-${part}` as 'div';
+const tokens = await snapshotLibraryPart(part, props);
+const stateTokens = part.endsWith('-surface')
+  ? (
+      await Promise.all(
+        [{ hovered: true }, { focusVisible: true }, { pressed: true }].map((facts) =>
+          snapshotLibraryPart(part, { ...props, ...facts })
+        )
+      )
+    ).flat()
+  : [];
+const cssTokens = [...new Set([...tokens, ...stateTokens])];
+---
+
+<style is:inline set:html={renderProtoStyleTokenCss(cssTokens)}></style>
+<Tag
+  class={className}
+  data-library-part={part}
+  data-library-props={JSON.stringify(props)}
+  data-library-prototype={libraryCardPrototypes[part].name}
+  data-pui-style={tokens.join(' ')}><slot /></Tag
+>

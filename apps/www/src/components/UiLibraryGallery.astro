@@ -1,7 +1,17 @@
 ---
 import StaticLucideIcon from './StaticLucideIcon.astro';
-import PrototypePreviewer from './PrototypePreviewer/PrototypePreviewer.astro';
-import DraftProjectionStyle from './DraftProjectionStyle.astro';
+import LibraryCardPart from './LibraryCardPart.astro';
+import {
+  librarySurfaceProps,
+  libraryHeadingProps,
+  libraryBodyProps,
+  libraryCaptionProps,
+  libraryActionProps,
+  type LibraryFamily,
+} from './library-card-prototypes';
+import { BRUTALIST_THEME } from '../../../../packages/prototypes/brutalist/src/theme';
+import { THEME as BOOTSTRAP_THEME } from '../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
+import { THEME as LIQUID_THEME } from '../../../../packages/prototypes/liquid-glass/src/theme';
 
 type Locale = 'en' | 'zh-cn';
 type LibraryId = 'base' | 'shadcn' | 'lucide' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
@@ -193,7 +203,7 @@ const cards: LibraryCard[] = [
     name: 'Bootstrap 2.3.2',
     mark: '2.3',
     type: isZh ? '风格组件库' : 'Styled components',
-    status: isZh ? '七类组件 · 部分覆盖' : 'Seven kinds · partial coverage',
+    status: isZh ? '孵化中' : 'Incubating',
     description: isZh
       ? '经典渐变、输入框与分隔线，交互由 Base 拥有；Switch / Toggle 为设计语言扩展。'
       : 'Classic gradients, fields, and dividers over Base; Switch / Toggle are design-language extensions.',
@@ -211,10 +221,10 @@ const cards: LibraryCard[] = [
     name: 'Liquid Glass',
     mark: 'LG',
     type: isZh ? '风格组件库' : 'Styled components',
-    status: isZh ? 'Button 已登记 · 扩展中' : 'Button available · expanding',
+    status: isZh ? '孵化中' : 'Incubating',
     description: isZh
-      ? '初阶段半透明与模糊回退；Apple Liquid Glass 的折射与自适应光学仍在实现。'
-      : 'Stage-0 translucency and blur fallback; Liquid Glass lensing and adaptive optics are still pending.',
+      ? '功能层的材质与层次探索。此入口使用不透明 Surface 回退；光学材质仍在验证。'
+      : 'An exploration of materials and functional layers. This entry uses the opaque Surface fallback; optical rendering remains under verification.',
     bestFor: isZh
       ? '重视层次和可读性的功能层'
       : 'Layered functional controls with readable content',
@@ -227,874 +237,285 @@ const cards: LibraryCard[] = [
     href: './liquid-glass/',
   },
 ];
+const familyThemes = {
+  brutalist: BRUTALIST_THEME,
+  'bootstrap-2-3-2': BOOTSTRAP_THEME,
+  'liquid-glass': LIQUID_THEME,
+};
+const themeCss = Object.entries(familyThemes)
+  .flatMap(([family, modes]) =>
+    ['light', 'dark'].map((mode) => {
+      const selector =
+        mode === 'light'
+          ? `[data-library="${family}"]`
+          : `:root:is(.dark,[data-theme='dark']) [data-library="${family}"]`;
+      return `${selector}{${Object.entries(modes[mode as 'light' | 'dark'])
+        .map(
+          ([key, value]) =>
+            `--pui-${key}:${String(value).replaceAll('"DM Sans"', '"Library DM Sans"')};`
+        )
+        .join('')}}`;
+    })
+  )
+  .join('\n');
 ---
 
-<DraftProjectionStyle />
+<style is:inline set:html={themeCss}></style>
 <section class="library-gallery" aria-label={copy.aria}>
-  <div class="library-gallery__summary" aria-label={copy.count}>
-    <span>{copy.count}</span>
-    <span>{copy.componentCount}</span>
-    <span>{copy.iconCount}</span>
-  </div>
-
+  <p class="library-gallery__summary">{copy.componentCount} · {copy.iconCount}</p>
   <div class="library-gallery__grid">
     {
-      cards.map((library) => (
-        <article class:list={['library-card', `library-card--${library.id}`]}>
-          <header class="library-card__header">
-            <span class="library-card__logo" aria-hidden="true">
-              {library.logoSrc ? <img src={library.logoSrc} alt="" /> : library.mark}
-            </span>
-            <span class="library-card__identity">
-              <strong>{library.name}</strong>
-              <span>{library.type}</span>
-            </span>
-            {library.status && <span class="library-card__status">{library.status}</span>}
-          </header>
-
-          <div
-            class="library-card__preview"
-            aria-hidden={
-              library.id === 'bootstrap-2-3-2' || library.id === 'liquid-glass' ? undefined : 'true'
-            }
+      cards.map((library) => {
+        const family: LibraryFamily = library.id === 'lucide' ? 'base' : library.id;
+        const brutalist = family === 'brutalist';
+        return (
+          <article
+            class="library-card"
+            data-library={library.id}
+            aria-labelledby={`library-${library.id}`}
           >
-            {(library.id === 'bootstrap-2-3-2' || library.id === 'liquid-glass') && (
-              <PrototypePreviewer
-                demoId={`demo-${library.id}-button`}
-                initialRuntime="wc"
-                toolbar={false}
-                codePanel={false}
-                lazy
-              />
-            )}
-            {library.id === 'base' && (
-              <div class="base-preview">
-                <span class="base-preview__watermark">{copy.unstyledMark}</span>
-                <div class="base-preview__toolbar">
-                  <i />
-                  <i />
-                  <i />
-                </div>
-                <div class="base-preview__body">
-                  <div class="base-preview__title" />
-                  <div class="base-preview__copy" />
-                  <div class="base-preview__row">
-                    <span class="base-preview__field" />
-                    <span class="base-preview__switch">
-                      <i />
-                    </span>
-                  </div>
-                  <div class="base-preview__actions">
-                    <span />
-                    <span />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {library.id === 'shadcn' && (
-              <div class="shadcn-preview">
-                <div class="shadcn-preview__nav">
-                  <i />
-                  <span />
-                  <span />
-                  <b />
-                </div>
-                <div class="shadcn-preview__panel">
-                  <div class="shadcn-preview__title" />
-                  <div class="shadcn-preview__copy" />
-                  <div class="shadcn-preview__fields">
-                    <span />
-                    <span />
-                  </div>
-                  <div class="shadcn-preview__button" />
-                </div>
-              </div>
-            )}
-
-            {library.id === 'lucide' && (
-              <div class="lucide-preview">
-                <div class="lucide-preview__search">
-                  <StaticLucideIcon name="search" />
-                  <i />
-                </div>
-                <div class="lucide-preview__icons">
-                  <span class="line-icon">
+            <LibraryCardPart
+              part={brutalist ? 'brutalist-card' : `${family}-surface`}
+              props={brutalist ? {} : librarySurfaceProps}
+              class="library-card__surface"
+            >
+              <LibraryCardPart
+                part={brutalist ? 'brutalist-header' : 'base-surface'}
+                class="library-card__header"
+              >
+                <header>
+                  <LibraryCardPart
+                    part={`${family}-text`}
+                    props={libraryCaptionProps}
+                    class="library-card__kind"
+                  >
+                    {library.type}
+                    {library.status && ` · ${library.status}`}
+                  </LibraryCardPart>
+                  <h2 id={`library-${library.id}`}>
+                    <LibraryCardPart part={`${family}-text`} props={libraryHeadingProps}>
+                      {library.name}
+                    </LibraryCardPart>
+                  </h2>
+                </header>
+                {library.logoSrc && (
+                  <img
+                    class="library-card__logo"
+                    src={library.logoSrc}
+                    alt=""
+                    width="32"
+                    height="32"
+                    loading="eager"
+                  />
+                )}
+              </LibraryCardPart>
+              <LibraryCardPart
+                part={brutalist ? 'brutalist-content' : 'base-surface'}
+                class="library-card__content"
+              >
+                {library.id === 'lucide' && (
+                  <div class="library-card__icons" aria-hidden="true">
                     <StaticLucideIcon name="sun" />
-                  </span>
-                  <span class="line-icon">
-                    <StaticLucideIcon name="circle-check" />
-                  </span>
-                  <span class="line-icon">
                     <StaticLucideIcon name="heart" />
-                  </span>
-                  <span class="line-icon">
-                    <StaticLucideIcon name="sparkles" />
-                  </span>
-                  <span class="line-icon">
-                    <StaticLucideIcon name="arrow-up-right" />
-                  </span>
-                  <span class="line-icon">
+                    <StaticLucideIcon name="search" />
+                    <StaticLucideIcon name="circle-check" />
                     <StaticLucideIcon name="panels-top-left" />
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {library.id === 'brutalist' && (
-              <div class="brutalist-preview">
-                <div class="brutalist-preview__poster">
-                  <span class="brutalist-preview__sticker">NEW</span>
-                  <strong>
-                    BUILD
-                    <br />
-                    LOUD.
-                  </strong>
-                  <div class="brutalist-preview__controls">
-                    <span>SELECT</span>
-                    <i />
                   </div>
-                </div>
-                <div class="brutalist-preview__dot" />
-              </div>
-            )}
-          </div>
-
-          <div class="library-card__body">
-            <p class="library-card__description">{library.description}</p>
-            <p class="library-card__best-for">
-              <span>{copy.bestFor}</span>
-              {library.bestFor}
-            </p>
-            <dl class="library-card__credits">
-              <div>
-                <dt>{library.sourceLabel}</dt>
-                <dd>
-                  {library.sourceHref ? (
-                    <a href={library.sourceHref} target="_blank" rel="noreferrer">
-                      {library.source}
-                      <span aria-hidden="true">↗</span>
-                    </a>
-                  ) : (
-                    library.source
-                  )}
-                </dd>
-              </div>
-              <div>
-                <dt>{copy.prototypeAuthor}</dt>
-                <dd>
-                  <a href={library.authorHref} target="_blank" rel="noreferrer">
-                    {library.author}
-                    <span aria-hidden="true">↗</span>
-                  </a>
-                </dd>
-              </div>
-            </dl>
-          </div>
-
-          <footer class="library-card__footer">
-            <a class="library-card__primary-link" href={library.href} aria-label={library.cta}>
-              <span>{library.cta}</span>
-              <span aria-hidden="true">↗</span>
-            </a>
-          </footer>
-        </article>
-      ))
+                )}
+                <p>
+                  <LibraryCardPart part={`${family}-text`} props={libraryBodyProps}>
+                    {library.description}
+                  </LibraryCardPart>
+                </p>
+                <p>
+                  <LibraryCardPart part={`${family}-text`} props={libraryCaptionProps}>
+                    {copy.bestFor} · {library.bestFor}
+                  </LibraryCardPart>
+                </p>
+                <LibraryCardPart
+                  part={`${family}-text`}
+                  props={{ ...libraryCaptionProps, tone: 'inherit' }}
+                >
+                  <dl class="library-card__credits">
+                    <div>
+                      <>
+                        <dt>{library.sourceLabel}</dt>
+                        <dd>
+                          {library.sourceHref ? (
+                            <a href={library.sourceHref} target="_blank" rel="noreferrer">
+                              {library.source} ↗
+                            </a>
+                          ) : (
+                            library.source
+                          )}
+                        </dd>
+                      </>
+                    </div>
+                    <div>
+                      <>
+                        <dt>{copy.prototypeAuthor}</dt>
+                        <dd>
+                          <a href={library.authorHref} target="_blank" rel="noreferrer">
+                            {library.author} ↗
+                          </a>
+                        </dd>
+                      </>
+                    </div>
+                  </dl>
+                </LibraryCardPart>
+              </LibraryCardPart>
+              <LibraryCardPart
+                part={brutalist ? 'brutalist-footer' : 'base-surface'}
+                class="library-card__footer"
+              >
+                <a href={library.href} data-library-action>
+                  <LibraryCardPart
+                    part={`${family}-surface`}
+                    props={libraryActionProps}
+                    class="library-card__action"
+                  >
+                    <LibraryCardPart
+                      part={`${family}-text`}
+                      props={{ size: 'sm', weight: 'medium', tone: 'inherit' }}
+                    >
+                      {library.cta} <span aria-hidden="true">→</span>
+                    </LibraryCardPart>
+                  </LibraryCardPart>
+                </a>
+              </LibraryCardPart>
+            </LibraryCardPart>
+          </article>
+        );
+      })
     }
   </div>
 </section>
-
+<script>
+  import { initLibraryCards } from './library-card-client';
+  let release = initLibraryCards();
+  document.addEventListener('astro:before-swap', () => release());
+  document.addEventListener('astro:page-load', () => {
+    release = initLibraryCards();
+  });
+</script>
 <style>
+  @font-face {
+    font-family: 'Library DM Sans';
+    src: url('../styles/assets/font/dm-sans/DMSans-Variable.ttf') format('truetype');
+    font-style: normal;
+    font-weight: 100 1000;
+    font-display: optional;
+  }
+  /* Page composition owns only placement. Family Prototype output owns paint,
+     radius, border, shadow, type and observed action state, including SSR. */
   .library-gallery {
-    margin-block: 1.75rem 3rem;
+    margin-block: 1.5rem 3rem;
   }
-
   .library-gallery__summary {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-block: 0 1rem;
   }
-
-  .library-gallery__summary span {
-    border: 1px solid color-mix(in oklab, var(--color-border) 88%, transparent);
-    border-radius: 999px;
-    color: var(--color-muted-foreground);
-    font-size: 0.72rem;
-    font-weight: 650;
-    letter-spacing: 0.02em;
-    line-height: 1;
-    padding: 0.4rem 0.65rem;
-  }
-
-  .library-gallery__summary span:first-child {
-    background: var(--color-foreground);
-    border-color: var(--color-foreground);
-    color: var(--color-background);
-  }
-
   .library-gallery__grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+  }
+  .library-card {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .library-card :global([data-library-part]) {
+    min-width: 0;
+  }
+  .library-card :global(.library-card__surface) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .library-card:not([data-library='brutalist']) :global(.library-card__surface) {
+    padding: 1.5rem;
+  }
+  .library-card :global(.library-card__header) {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
     gap: 1rem;
   }
-
-  .library-card {
-    position: relative;
-    display: grid;
-    grid-template-rows: auto auto 1fr auto;
-    min-width: 0;
-    margin: 0;
-    border: 1px solid color-mix(in oklab, var(--color-border) 88%, transparent);
-    border-radius: 0.85rem;
-    background: color-mix(in oklab, var(--color-background) 97%, var(--color-muted) 3%);
-    box-shadow: 0 1px 0 color-mix(in oklab, var(--color-foreground) 5%, transparent);
-    overflow: hidden;
-    transition:
-      border-color 180ms ease,
-      box-shadow 180ms ease,
-      transform 180ms ease;
-  }
-
-  .library-card:hover,
-  .library-card:focus-within {
-    border-color: color-mix(in oklab, var(--color-foreground) 35%, var(--color-border));
-    box-shadow:
-      0 14px 32px color-mix(in oklab, var(--color-foreground) 8%, transparent),
-      0 1px 0 color-mix(in oklab, var(--color-foreground) 8%, transparent);
-    transform: translateY(-2px);
-  }
-
-  .library-card__header {
-    display: flex;
-    align-items: center;
-    gap: 0.7rem;
-    min-width: 0;
-    padding: 0.9rem 0.9rem 0.8rem;
-  }
-
-  .library-card__logo {
-    display: grid;
-    width: 2.35rem;
-    height: 2.35rem;
-    flex: 0 0 auto;
-    place-items: center;
-    border: 1px solid color-mix(in oklab, var(--color-border) 88%, transparent);
-    border-radius: 0.62rem;
-    background: var(--color-foreground);
-    color: var(--color-background);
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    font-weight: 800;
-    letter-spacing: -0.04em;
-    overflow: hidden;
-  }
-
-  .library-card__logo img {
+  .library-card :global(.library-card__kind) {
     display: block;
-    width: 1.5rem;
-    height: 1.5rem;
+    margin-bottom: 0.5rem;
   }
-
-  .library-card--shadcn .library-card__logo {
-    background: #18181b;
-    color: #fafafa;
-    text-transform: lowercase;
+  .library-card header {
+    min-width: 0;
   }
-
-  .library-card--shadcn .library-card__logo img {
+  .library-card h2,
+  .library-card p {
+    margin: 0;
+  }
+  .library-card__logo {
+    flex-shrink: 0;
+  }
+  [data-library='shadcn'] .library-card__logo {
+    filter: var(--library-logo-filter, none);
+  }
+  :global(:root:is(.dark, [data-theme='dark'])) [data-library='shadcn'] .library-card__logo {
     filter: invert(1);
   }
-
-  .library-card--base .library-card__logo img {
-    width: 100%;
-    height: 100%;
-  }
-
-  .library-card--lucide .library-card__logo {
-    background: #fff;
-    border-color: #f1cfcc;
-  }
-
-  .library-card--brutalist .library-card__logo {
-    border: 2px solid #111;
-    border-radius: 0;
-    background: #ffd23f;
-    box-shadow: 2px 2px 0 #111;
-    color: #111;
-  }
-
-  .library-card__identity {
+  .library-card :global(.library-card__content) {
     display: grid;
-    min-width: 0;
-    gap: 0.08rem;
+    gap: 1rem;
   }
-
-  .library-card__identity strong {
-    color: var(--color-foreground);
-    font-size: 0.98rem;
-    letter-spacing: -0.015em;
-    line-height: 1.2;
+  .library-card__icons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    padding-block: 0.5rem;
   }
-
-  .library-card__identity > span {
-    color: var(--color-muted-foreground);
-    font-size: 0.7rem;
-    line-height: 1.25;
-  }
-
-  .library-card__status {
-    margin-left: auto;
-    border: 1px solid color-mix(in oklab, #f59e0b 60%, var(--color-border));
-    border-radius: 999px;
-    background: color-mix(in oklab, #f59e0b 12%, var(--color-background));
-    color: color-mix(in oklab, #b45309 82%, var(--color-foreground));
-    font-size: 0.63rem;
-    font-weight: 750;
-    letter-spacing: 0.025em;
-    line-height: 1;
-    padding: 0.34rem 0.48rem;
-    white-space: nowrap;
-  }
-
-  .library-card__preview {
-    position: relative;
-    min-height: 13.5rem;
-    margin-inline: 0.75rem;
-    overflow: hidden;
-    border-radius: 0.62rem;
-  }
-
-  /* Live controls must receive native input above the stretched navigation link. */
-  .library-card__preview:not([aria-hidden='true']) {
-    z-index: 2;
-  }
-
-  .library-card__body {
-    display: grid;
-    align-content: start;
-    gap: 0.85rem;
-    padding: 1rem 0.95rem 0.9rem;
-  }
-
-  .library-card__description,
-  .library-card__best-for {
-    margin: 0;
-  }
-
-  .library-card__description {
-    color: var(--color-foreground);
-    font-size: 0.82rem;
-    line-height: 1.55;
-  }
-
-  .library-card__best-for {
-    color: var(--color-muted-foreground);
-    font-size: 0.72rem;
-    line-height: 1.5;
-  }
-
-  .library-card__best-for span {
-    margin-right: 0.4rem;
-    color: var(--color-foreground);
-    font-weight: 700;
-  }
-
   .library-card__credits {
     display: grid;
-    gap: 0.45rem;
+    gap: 0.5rem;
     margin: 0;
-    padding-top: 0.15rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
   }
-
   .library-card__credits div {
-    display: grid;
-    grid-template-columns: minmax(5.6rem, 0.9fr) minmax(0, 1.2fr);
-    gap: 0.6rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
   }
-
-  .library-card__credits dt,
   .library-card__credits dd {
     margin: 0;
-    font-size: 0.68rem;
-    line-height: 1.4;
   }
-
-  .library-card__credits dt {
-    color: var(--color-muted-foreground);
+  .library-card a {
+    color: inherit;
+    text-underline-offset: 0.2em;
   }
-
-  .library-card__credits dd {
-    overflow: hidden;
-    color: var(--color-foreground);
-    font-weight: 650;
-    text-align: right;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+  .library-card :global(.library-card__footer) {
+    display: flex;
+    align-items: start;
   }
-
-  .library-card__credits a {
-    position: relative;
-    z-index: 2;
-    display: inline-flex;
+  .library-card [data-library-action] {
+    display: inline-block;
     max-width: 100%;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 0.25rem;
-    color: inherit;
     text-decoration: none;
-    text-underline-offset: 0.18em;
   }
-
-  .library-card__credits a:hover,
-  .library-card__credits a:focus-visible {
+  .library-card :global(.library-card__action) {
+    display: block;
+    padding: 0.75rem 1rem;
+    min-height: 2.75rem;
+  }
+  [data-library='base'] [data-library-action],
+  [data-library='lucide'] [data-library-action] {
     text-decoration: underline;
-    text-decoration-color: currentColor;
   }
-
-  .library-card__credits a span {
-    color: var(--color-muted-foreground);
-    font-size: 0.62rem;
+  .library-card a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
   }
-
-  .library-card__footer {
-    border-top: 1px solid color-mix(in oklab, var(--color-border) 78%, transparent);
-    color: var(--color-foreground);
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 0.72rem 0.95rem;
-  }
-
-  .library-card__primary-link {
-    display: flex;
-    justify-content: space-between;
-    color: inherit;
-    text-decoration: none;
-  }
-
-  .library-card__primary-link::after {
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    border-radius: 0.85rem;
-    content: '';
-  }
-
-  .library-card__primary-link:focus-visible {
-    outline: none;
-  }
-
-  .library-card__primary-link:focus-visible::after {
-    outline: 2px solid var(--color-primary);
-    outline-offset: -3px;
-  }
-
-  .library-card__primary-link span:last-child {
-    transition: transform 180ms ease;
-  }
-
-  .library-card:hover .library-card__primary-link span:last-child {
-    transform: translate(2px, -2px);
-  }
-
-  /* Base preview */
-  .library-card--base .library-card__preview {
-    display: grid;
-    place-items: center;
-    background:
-      linear-gradient(color-mix(in oklab, #e5e7eb 62%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in oklab, #e5e7eb 62%, transparent) 1px, transparent 1px),
-      #f8fafc;
-    background-size: 18px 18px;
-  }
-
-  .base-preview {
-    position: relative;
-    width: 78%;
-    overflow: hidden;
-    border: 1px dashed #64748b;
-    border-radius: 0.2rem;
-    background: rgba(255, 255, 255, 0.82);
-    color: #0f172a;
-    transform: rotate(-1deg);
-  }
-
-  .base-preview__watermark {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    color: rgba(15, 23, 42, 0.08);
-    font-family: var(--font-mono);
-    font-size: clamp(1.35rem, 4.5vw, 2.3rem);
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    line-height: 1;
-    transform: translate(-50%, -50%) rotate(-8deg);
-    white-space: nowrap;
-  }
-
-  .base-preview__toolbar {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    gap: 0.3rem;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 0.52rem 0.62rem;
-  }
-
-  .base-preview__toolbar i {
-    width: 0.36rem;
-    height: 0.36rem;
-    border-radius: 50%;
-    background: #cbd5e1;
-  }
-
-  .base-preview__body {
-    position: relative;
-    z-index: 1;
-    display: grid;
-    gap: 0.72rem;
-    padding: 1rem;
-  }
-
-  .base-preview__title,
-  .base-preview__copy,
-  .base-preview__field,
-  .base-preview__actions span {
-    display: block;
-    border-radius: 0;
-    background: #64748b;
-  }
-
-  .base-preview__title {
-    width: 42%;
-    height: 0.48rem;
-  }
-
-  .base-preview__copy {
-    width: 76%;
-    height: 0.25rem;
-    background: #cbd5e1;
-  }
-
-  .base-preview__row,
-  .base-preview__actions {
-    display: flex;
-    align-items: center;
-  }
-
-  .base-preview__row {
-    justify-content: space-between;
-    border-top: 1px dashed #94a3b8;
-    border-bottom: 1px dashed #94a3b8;
-    padding-block: 0.7rem;
-  }
-
-  .base-preview__field {
-    width: 36%;
-    height: 0.26rem;
-    background: #94a3b8;
-  }
-
-  .base-preview__switch {
-    display: flex;
-    width: 1.75rem;
-    height: 0.95rem;
-    justify-content: flex-end;
-    align-items: center;
-    border: 1px solid #64748b;
-    border-radius: 0;
-    background: transparent;
-    padding: 0.12rem;
-  }
-
-  .base-preview__switch i {
-    width: 0.7rem;
-    height: 0.7rem;
-    border: 1px solid #64748b;
-    border-radius: 0;
-    background: #e2e8f0;
-  }
-
-  .base-preview__actions {
-    justify-content: flex-end;
-    gap: 0.4rem;
-  }
-
-  .base-preview__actions span {
-    width: 2.7rem;
-    height: 1.1rem;
-    border: 1px solid #cbd5e1;
-    background: transparent;
-  }
-
-  .base-preview__actions span:last-child {
-    border-style: dashed;
-    border-color: #64748b;
-    background: transparent;
-  }
-
-  /* Shadcn preview */
-  .library-card--shadcn .library-card__preview {
-    background: #e4e4e7;
-    color: #18181b;
-  }
-
-  .shadcn-preview {
-    position: absolute;
-    inset: 0;
-    background: #e4e4e7;
-    padding: 1rem;
-  }
-
-  .shadcn-preview__nav {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .shadcn-preview__nav i {
-    width: 1.2rem;
-    height: 1.2rem;
-    border-radius: 0.25rem;
-    background: #18181b;
-  }
-
-  .shadcn-preview__nav span {
-    width: 2.4rem;
-    height: 0.23rem;
-    border-radius: 999px;
-    background: #a1a1aa;
-  }
-
-  .shadcn-preview__nav b {
-    width: 2.7rem;
-    height: 1.05rem;
-    margin-left: auto;
-    border-radius: 0.3rem;
-    background: #18181b;
-  }
-
-  .shadcn-preview__panel {
-    display: grid;
-    width: 72%;
-    gap: 0.65rem;
-    margin: 1.3rem auto 0;
-    border: 1px solid #d4d4d8;
-    border-radius: 0.58rem;
-    background: #fff;
-    box-shadow: 0 16px 36px rgba(24, 24, 27, 0.18);
-    padding: 1rem;
-  }
-
-  .shadcn-preview__title,
-  .shadcn-preview__copy,
-  .shadcn-preview__fields span,
-  .shadcn-preview__button {
-    display: block;
-    border-radius: 0.18rem;
-  }
-
-  .shadcn-preview__title {
-    width: 52%;
-    height: 0.46rem;
-    background: #18181b;
-  }
-
-  .shadcn-preview__copy {
-    width: 86%;
-    height: 0.24rem;
-    background: #d4d4d8;
-  }
-
-  .shadcn-preview__fields {
-    display: grid;
-    gap: 0.45rem;
-    margin-top: 0.15rem;
-  }
-
-  .shadcn-preview__fields span {
-    height: 1.25rem;
-    border: 1px solid #d4d4d8;
-    background: #fafafa;
-  }
-
-  .shadcn-preview__button {
-    width: 3.2rem;
-    height: 1.15rem;
-    margin-left: auto;
-    background: #18181b;
-  }
-
-  /* Lucide preview */
-  .library-card--lucide .library-card__preview {
-    background: #fff4f3;
-    color: #2e2a2a;
-  }
-
-  .lucide-preview {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    grid-template-rows: auto 1fr;
-    gap: 0.9rem;
-    padding: 1rem;
-  }
-
-  .lucide-preview__search {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    height: 1.7rem;
-    border: 1px solid #f1c2bf;
-    border-radius: 0.45rem;
-    background: rgba(255, 255, 255, 0.75);
-    padding-inline: 0.55rem;
-  }
-
-  .lucide-preview__search i {
-    width: 38%;
-    height: 0.23rem;
-    border-radius: 999px;
-    background: #e8b1ad;
-  }
-
-  .lucide-preview__search :global(.static-lucide-icon) {
-    width: 0.85rem;
-    height: 0.85rem;
-    color: #8f5d5a;
-  }
-
-  .lucide-preview__icons {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.55rem;
-  }
-
-  .line-icon {
-    display: grid;
-    place-items: center;
-    min-width: 0;
-    border: 1px solid #f1cfcc;
-    border-radius: 0.5rem;
-    background: rgba(255, 255, 255, 0.72);
-    color: #70413e;
-  }
-
-  .line-icon :global(.static-lucide-icon) {
-    width: 1.7rem;
-    height: 1.7rem;
-  }
-
-  /* Brutalist preview */
-  .library-card--brutalist .library-card__preview {
-    background: #a7f3d0;
-    color: #111;
-  }
-
-  .brutalist-preview {
-    position: absolute;
-    inset: 0;
-    overflow: hidden;
-    background: linear-gradient(135deg, transparent 72%, #fca5a5 72%), #a7f3d0;
-    padding: 1rem;
-  }
-
-  .brutalist-preview__poster {
-    position: relative;
-    display: grid;
-    width: 72%;
-    min-height: 10.7rem;
-    align-content: space-between;
-    border: 2px solid #111;
-    background: #ffd23f;
-    box-shadow: 6px 6px 0 #111;
-    padding: 0.9rem;
-    transform: rotate(-2deg);
-  }
-
-  .brutalist-preview__poster strong {
-    font-family:
-      Arial Black,
-      Impact,
-      sans-serif;
-    font-size: clamp(1.5rem, 4vw, 2.15rem);
-    letter-spacing: -0.07em;
-    line-height: 0.82;
-  }
-
-  .brutalist-preview__sticker {
-    position: absolute;
-    right: -2.15rem;
-    top: 0.8rem;
-    display: grid;
-    width: 3.65rem;
-    height: 3.65rem;
-    place-items: center;
-    border: 2px solid #111;
-    border-radius: 50%;
-    background: #c4b5fd;
-    box-shadow: 3px 3px 0 #111;
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 900;
-    transform: rotate(9deg);
-  }
-
-  .brutalist-preview__controls {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border: 2px solid #111;
-    background: #fff;
-    box-shadow: 3px 3px 0 #111;
-    font-family: var(--font-mono);
-    font-size: 0.63rem;
-    font-weight: 800;
-    padding: 0.38rem 0.45rem;
-  }
-
-  .brutalist-preview__controls i {
-    width: 0.7rem;
-    height: 0.7rem;
-    border: 2px solid #111;
-    background: #fca5a5;
-  }
-
-  .brutalist-preview__dot {
-    position: absolute;
-    right: -1.7rem;
-    bottom: -1.7rem;
-    width: 5.2rem;
-    height: 5.2rem;
-    border: 2px solid #111;
-    border-radius: 50%;
-    background: #60a5fa;
-  }
-
-  @media (max-width: 44rem) {
+  @media (max-width: 50rem) {
     .library-gallery__grid {
       grid-template-columns: minmax(0, 1fr);
-    }
-
-    .library-card__preview {
-      min-height: 15rem;
-    }
-
-    .base-preview,
-    .shadcn-preview__panel {
-      max-width: 18rem;
-    }
-
-    .brutalist-preview__poster {
-      max-width: 15rem;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .library-card,
-    .library-card__footer span:last-child {
-      transition: none;
     }
   }
 </style>
