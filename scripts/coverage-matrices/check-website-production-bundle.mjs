@@ -100,6 +100,8 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/wiring/caps-builder.ts',
   'packages/adapters/base/src/wiring/host-wiring.ts',
   'packages/adapters/web-component/src/adapt.ts',
+  // Rebindable provider imported only by the reviewed public WC adapt entry.
+  'packages/adapters/web-component/src/color-scheme-source.ts',
   'packages/adapters/web-component/src/commit.ts',
   'packages/adapters/web-component/src/debug/hooks.ts',
   'packages/adapters/web-component/src/feedback-style.ts',

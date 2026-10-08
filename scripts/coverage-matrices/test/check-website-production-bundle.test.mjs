@@ -757,7 +757,28 @@ for (const [entry, owner] of siteOwners) {
       .imports.push(target);
     return bridge;
   }
+  test(`bridge origin: ${entry} admits the exact WC-owned color scheme provider transitively`, () => {
+    const { graph } = siteGraph();
+    const adapter = 'packages/adapters/web-component/src/adapt.ts';
+    const source = 'packages/adapters/web-component/src/color-scheme-source.ts';
+    const bridge = addReviewedBridgeTarget(graph, adapter);
+    bridge.moduleIds.push(source);
+    graph.modules.push({ id: source, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === adapter).imports.push(source);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    // Reviewing this exact provider never admits adjacent or similarly named helpers.
+    const unknown = 'packages/adapters/web-component/src/color-scheme-source-unreviewed.ts';
+    bridge.moduleIds.push(unknown);
+    graph.modules.push({ id: unknown, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === adapter).imports.push(unknown);
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(unknown)
+      )
+    );
+  });
   for (const target of [
+    'packages/adapters/web-component/src/color-scheme-source.ts',
     'packages/adapters/web-component/src/adapt.ts',
     'packages/adapters/web-component/src/material/owned-texture-sink.ts',
     'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
