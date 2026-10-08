@@ -1,3 +1,4 @@
+import { readInternalInitialPaintLease, recordInternalInitialPaint } from './initial-paint-bridge';
 import { withOwnedCarrierMarker } from './paint-mutations';
 import { observeWebPointerContact } from '../events/pointer-contact';
 import { createContactMotion } from './contact-motion';
@@ -10,7 +11,7 @@ import type { VisualFeedbackFrame, VisualFeedbackSink } from '@proto.ui/module-f
 import { resolveMaterialPolicy } from '@proto.ui/module-feedback/internal/shared-policy';
 import { inspectCanvasBackdrop, type CanvasBackdropLease } from './source';
 import { resolveWebMaterialPreferences, type WebMaterialPreferences } from './preferences';
-import type { OpticalGeometry } from './program';
+import type { OpticalGeometry, OpticalFrame } from './program';
 import { acquireWebOpticalProgram } from './program-pool';
 import {
   resolveMaterialStyle,
@@ -122,6 +123,7 @@ function createDocumentMaterialSink(
   adopted: () => void
 ): VisualFeedbackSink {
   const document = host.ownerDocument;
+  const initialPaint = readInternalInitialPaintLease(host);
   const win = document.defaultView;
   if (!win) throw new Error('Material owner document unavailable');
   const preferences = resolveWebMaterialPreferences(options.preferences, win);
@@ -240,7 +242,8 @@ function createDocumentMaterialSink(
         previous = owned.get(name);
       return (
         value[0] !== '' &&
-        !(previous && value[0] === previous.applied[0] && value[1] === previous.applied[1])
+        !(previous && value[0] === previous.applied[0] && value[1] === previous.applied[1]) &&
+        !initialPaint?.permitsInline(name, value)
       );
     });
   }
@@ -297,6 +300,7 @@ function createDocumentMaterialSink(
     effects.requestFlush();
   }
   function ordinary(reason?: string) {
+    initialPaint?.retire();
     motion.stop();
     cancelPending();
     clearImage();
@@ -310,6 +314,7 @@ function createDocumentMaterialSink(
     }
   }
   function fallback(fill: Parameters<typeof rgbaCss>[0], reason: string, releaseGPU = true) {
+    initialPaint?.retire();
     if (releaseGPU) {
       motion.stop();
       cancelPending();
@@ -381,6 +386,7 @@ function createDocumentMaterialSink(
       // React/Vue may deliver style after their EffectsPort call. Do not sample
       // stale geometry or announce an optical frame while that delivery waits.
       if (!finalStyleRealized || last !== frame) {
+        initialPaint?.retire();
         cancelPending();
         clearImage();
         program.clear();
@@ -612,11 +618,7 @@ function createDocumentMaterialSink(
         return;
       }
       cancelPending();
-      // A same-generation admitted image stays visible until its decoded
-      // successor is ready. Revoked source/geometry/preferences never qualify.
-      if (paintLease !== nextPaintLease) fallback(resolved.fill, 'preparing', false);
-      if (!currentDocument() || program.lost) return;
-      const image = program.render({
+      const renderFrame: OpticalFrame = {
         source,
         geometry: opticalGeometry,
         pressed: policy.effectiveMotion === 'press' && candidate.deformation?.phase === 'pressed',
@@ -624,8 +626,36 @@ function createDocumentMaterialSink(
         variant: candidate.variant ?? 'regular',
         fill: resolved.fill,
         foreground: resolved.foreground,
-      });
+      };
+      // Only an explicitly registered internal server-plane lease can defer the
+      // preparing fallback. All ordinary source/policy/style guards ran above.
+      const initialCandidate = initialPaint?.matches(frame, renderFrame) ?? false;
+      // A same-generation admitted image stays visible until its decoded
+      // successor is ready. Revoked source/geometry/preferences never qualify.
+      if (paintLease !== nextPaintLease && !initialCandidate)
+        fallback(resolved.fill, 'preparing', false);
+      if (!currentDocument() || program.lost) return;
+      const image = program.render(renderFrame);
       if (!currentDocument()) return;
+      if (initialCandidate) {
+        // Replaying this very renderer is required in addition to manifest/hash
+        // checks. An arbitrary or differently rendered background never adopts.
+        const seedTuple =
+          last === frame &&
+          initialPaint!.matches(frame, renderFrame) &&
+          initialPaint!.matchesOutput(image)
+            ? initialPaint!.claim()
+            : null;
+        if (seedTuple) {
+          for (const [name, value] of seedTuple)
+            owned.set(name, { before: ['', ''], applied: [value, ''] });
+          paintedImage = image;
+          paintLease = nextPaintLease;
+          // Drop the SSR-only CSS selector after adopting the identical tuple.
+          // Decode below still owns live-resource and diagnostic publication.
+          initialPaint!.finishClaim();
+        } else fallback(resolved.fill, 'initial-paint-replay-mismatch', false);
+      }
       const ticket = { signature, lease, cancel() {} };
       pending = ticket;
       ticket.cancel = prepareOpticalImage(
@@ -715,6 +745,7 @@ function createDocumentMaterialSink(
             pending = null;
             releaseImage = () => ticket.cancel();
             previousImage();
+            recordInternalInitialPaint(host, frame, renderFrame, image);
             report('materialQuality', 'self-optical');
             report('materialReason', 'rendered');
             report('materialBackend', 'self-optical');
@@ -866,6 +897,7 @@ function createDocumentMaterialSink(
         clearImage,
         ...disposers,
         program.release,
+        () => initialPaint?.retire(),
         restore,
         clearDiagnostics,
       ]) {
