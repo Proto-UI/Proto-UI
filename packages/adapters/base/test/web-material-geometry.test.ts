@@ -52,3 +52,46 @@ describe('shared material geometry observation across composed trees', () => {
     expect(frames).toHaveLength(0);
   });
 });
+
+it('notifies adoption at mutation delivery while retaining ordinary old-document observers', async () => {
+  const host = document.createElement('button');
+  const sibling = document.createElement('button');
+  const iframe = document.createElement('iframe');
+  document.body.append(host, sibling, iframe);
+  const destination = iframe.contentDocument!;
+  const frames = new Map<number, FrameRequestCallback>();
+  let sequence = 0;
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    frames.set(++sequence, callback);
+    return sequence;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+    frames.delete(id);
+  });
+  const migrated = vi.fn();
+  const stationary = vi.fn();
+  const releaseHost = observeMaterialGeometry(
+    host,
+    () => {
+      migrated();
+      releaseHost();
+    },
+    () => null
+  );
+  const releaseSibling = observeMaterialGeometry(sibling, stationary, () => null);
+  destination.body.append(destination.adoptNode(host));
+  await deliverMutations();
+  expect(migrated).toHaveBeenCalledOnce();
+  expect(stationary).not.toHaveBeenCalled();
+  expect(frames.size).toBe(1);
+  [...frames.values()].forEach((fn) => fn(1));
+  frames.clear();
+  expect(stationary).toHaveBeenCalledOnce();
+  sibling.className = 'ordinary-change';
+  await deliverMutations();
+  expect(stationary).toHaveBeenCalledOnce();
+  expect(frames.size).toBe(1);
+  releaseSibling();
+  expect(frames.size).toBe(0);
+  expect(migrated).toHaveBeenCalledOnce();
+});

@@ -7,6 +7,7 @@ const observers = new WeakMap<
   Document,
   {
     listeners: Set<() => void>;
+    documentChanges: Map<HTMLElement, () => void>;
     ownStyles: Map<HTMLElement, () => string | null>;
     ownTokens: Map<HTMLElement, () => string | null>;
     resize: ResizeObserver | null;
@@ -26,18 +27,24 @@ export function observeMaterialGeometry(
   let shared = observers.get(doc);
   if (!shared) {
     const listeners = new Set<() => void>(),
+      documentChanges = new Map<HTMLElement, () => void>(),
       ownStyles = new Map<HTMLElement, () => string | null>(),
       ownTokens = new Map<HTMLElement, () => string | null>();
     let frame: number | null = null;
     let revision = 0;
     const schedule = () => {
-      if (frame !== null) return;
+      if (!listeners.size || frame !== null) return;
       frame = win.requestAnimationFrame(() => {
         frame = null;
         for (const fn of [...listeners]) fn();
       });
     };
     const onMutation = (records: MutationRecord[]) => {
+      // Adoption invalidates a document resource lease at mutation delivery.
+      // The old window may never get another animation frame. Notify only
+      // migrated hosts now; ordinary geometry still coalesces below.
+      if (records.some((record) => record.type === 'childList' && record.removedNodes.length))
+        for (const [host, notify] of [...documentChanges]) if (host.ownerDocument !== doc) notify();
       if (
         records.some(
           (record) =>
@@ -91,6 +98,7 @@ export function observeMaterialGeometry(
     doc.addEventListener('animationend', schedule, true);
     shared = {
       listeners,
+      documentChanges,
       ownStyles,
       ownTokens,
       resize,
@@ -159,11 +167,12 @@ export function observeMaterialGeometry(
   }
   const notify = () => {
     if (retired) return;
-    refreshRoots();
+    if (host.ownerDocument === doc) refreshRoots();
     changed(entry.revision);
   };
   refreshRoots();
   entry.listeners.add(notify);
+  entry.documentChanges.set(host, notify);
   entry.ownStyles.set(host, ownStyle);
   if (ownTokenSnapshot) entry.ownTokens.set(host, ownTokenSnapshot);
   entry.resize?.observe(host);
@@ -171,6 +180,7 @@ export function observeMaterialGeometry(
     if (retired) return;
     retired = true;
     entry.listeners.delete(notify);
+    entry.documentChanges.delete(host);
     for (const release of rootLeases.values()) release();
     rootLeases.clear();
     entry.ownStyles.delete(host);

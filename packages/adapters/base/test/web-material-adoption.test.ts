@@ -268,6 +268,27 @@ describe('material resources follow actual owner-document adoption (mock GPU, no
     expect(inspectWebOpticalResources(f.destination.document).contexts).toBe(0);
   });
 
+  it('honors destination safety before any old-window animation frame can run', async () => {
+    const f = fixture();
+    f.sink.commit(f.frame(1));
+    await deliverMutations();
+    f.old.flush();
+    f.adopt();
+    await deliverMutations();
+    // Adoption is a lifetime boundary, not old-window geometry work. Only
+    // the destination gets rendering opportunities from this point onward.
+    f.next.transparency(true);
+    f.destination.dispatchEvent(new Event('resize'));
+    f.width(120);
+    await deliverMutations();
+    f.next.flush();
+    expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
+    expect(inspectWebOpticalResources(document).consumers).toBe(0);
+    expect(f.old.listeners.size).toBe(0);
+    expect(f.old.frames.size).toBe(0);
+    expect(f.next.listeners.size).toBe(1);
+  });
+
   it('rebinds before an old image completion can publish in the destination', () => {
     const f = fixture();
     const pending: { doc: Document; ready(): void; cancel: ReturnType<typeof vi.fn> }[] = [];
