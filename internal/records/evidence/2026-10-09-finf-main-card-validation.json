@@ -1,0 +1,509 @@
+{
+  "schemaVersion": 1,
+  "agent": "dot",
+  "sourceRevision": "854a8cf7b1953c6dc5130ba468c2027c32a6f2d9",
+  "sourceTree": "a0646e284582841467cbbc0ed22ef07615672ac1",
+  "verificationCheckout": "d10fa55ee963371a8de39f51cfd4fd891aca5ab6",
+  "verificationTree": "7bbccf108ea0eabeb6a141261dd867b6522089f9",
+  "branch": "integrate/finf-main-20261009",
+  "remoteTarget": "codex/finf-prototype-coverage-20261006",
+  "lastObservedRemoteHead": "8e8c4ca21801378c11ea055f8f39796f86eeeda6",
+  "externalWritesPerformed": false,
+  "retainedAncestors": [
+    "7e28d06f26150513d6096f0c24e59b871ae8ae62",
+    "e0e47d1e5becd270254de8eedd4c63f6efc66223",
+    "80b0bdae0588df4d29dc64b332a5c48820e6296b",
+    "7de2b08e2a9879dad869733a49b63ca045f327f2",
+    "1a0f8d82732db619d29a39802ac8e8d6bddd8132",
+    "8e8c4ca21801378c11ea055f8f39796f86eeeda6"
+  ],
+  "environment": {
+    "node": "v24.19.0",
+    "pnpm": "10.32.1",
+    "NODE_OPTIONS": "--max-old-space-size=3072",
+    "COREPACK_HOME": "/workspace/shared/cache/corepack",
+    "ASTRO_TELEMETRY_DISABLED": "1",
+    "platform": "linux x64"
+  },
+  "results": {
+    "canonicalTypes": {
+      "files": 632,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 10
+    },
+    "nonbrowser": {
+      "passedFiles": 915,
+      "todoFiles": 3,
+      "passedTests": 8471,
+      "todoTests": 34,
+      "totalInventoryFiles": 918,
+      "inventory": "internal/records/evidence/2026-10-09-finf-main-card-nonbrowser-inventory.json"
+    },
+    "coverageControls": {
+      "passed": 3730,
+      "skipped": 1,
+      "skipReason": "Portable suite does not run separate Linux media integration"
+    },
+    "connectorReview": 353,
+    "runtimePlan": 123,
+    "releaseControls": 97,
+    "publicPackageBuild": {
+      "packageCount": 45,
+      "selectedCount": 45,
+      "results": [
+        {
+          "name": "@proto.ui/types",
+          "durationMs": 721,
+          "files": 12,
+          "bytes": 8375
+        },
+        {
+          "name": "@proto.ui/core",
+          "durationMs": 1297,
+          "files": 82,
+          "bytes": 131524
+        },
+        {
+          "name": "@proto.ui/module-base",
+          "durationMs": 821,
+          "files": 14,
+          "bytes": 11525
+        },
+        {
+          "name": "@proto.ui/module-expose",
+          "durationMs": 896,
+          "files": 12,
+          "bytes": 9383
+        },
+        {
+          "name": "@proto.ui/module-state",
+          "durationMs": 872,
+          "files": 10,
+          "bytes": 21872
+        },
+        {
+          "name": "@proto.ui/module-expose-state",
+          "durationMs": 866,
+          "files": 10,
+          "bytes": 10561
+        },
+        {
+          "name": "@proto.ui/module-feedback",
+          "durationMs": 1275,
+          "files": 22,
+          "bytes": 50537
+        },
+        {
+          "name": "@proto.ui/module-anatomy",
+          "durationMs": 1023,
+          "files": 14,
+          "bytes": 60807
+        },
+        {
+          "name": "@proto.ui/module-collection",
+          "durationMs": 774,
+          "files": 6,
+          "bytes": 7263
+        },
+        {
+          "name": "@proto.ui/module-a11y",
+          "durationMs": 1164,
+          "files": 12,
+          "bytes": 82120
+        },
+        {
+          "name": "@proto.ui/module-table-structure",
+          "durationMs": 945,
+          "files": 10,
+          "bytes": 33556
+        },
+        {
+          "name": "@proto.ui/hooks",
+          "durationMs": 861,
+          "files": 40,
+          "bytes": 26096
+        },
+        {
+          "name": "@proto.ui/module-expose-event",
+          "durationMs": 774,
+          "files": 12,
+          "bytes": 5996
+        },
+        {
+          "name": "@proto.ui/module-event",
+          "durationMs": 904,
+          "files": 14,
+          "bytes": 31375
+        },
+        {
+          "name": "@proto.ui/module-as-trigger",
+          "durationMs": 779,
+          "files": 10,
+          "bytes": 8989
+        },
+        {
+          "name": "@proto.ui/module-boundary",
+          "durationMs": 832,
+          "files": 12,
+          "bytes": 16495
+        },
+        {
+          "name": "@proto.ui/module-context",
+          "durationMs": 868,
+          "files": 12,
+          "bytes": 28070
+        },
+        {
+          "name": "@proto.ui/module-control-label",
+          "durationMs": 911,
+          "files": 12,
+          "bytes": 38188
+        },
+        {
+          "name": "@proto.ui/module-expose-state-web",
+          "durationMs": 834,
+          "files": 12,
+          "bytes": 14916
+        },
+        {
+          "name": "@proto.ui/module-focus",
+          "durationMs": 1087,
+          "files": 12,
+          "bytes": 89672
+        },
+        {
+          "name": "@proto.ui/module-hit-participation",
+          "durationMs": 783,
+          "files": 12,
+          "bytes": 14287
+        },
+        {
+          "name": "@proto.ui/module-image-view",
+          "durationMs": 942,
+          "files": 12,
+          "bytes": 20166
+        },
+        {
+          "name": "@proto.ui/module-positioning",
+          "durationMs": 970,
+          "files": 16,
+          "bytes": 29262
+        },
+        {
+          "name": "@proto.ui/module-overlay",
+          "durationMs": 954,
+          "files": 16,
+          "bytes": 43628
+        },
+        {
+          "name": "@proto.ui/module-presence",
+          "durationMs": 829,
+          "files": 10,
+          "bytes": 15595
+        },
+        {
+          "name": "@proto.ui/module-props",
+          "durationMs": 911,
+          "files": 18,
+          "bytes": 48619
+        },
+        {
+          "name": "@proto.ui/module-rule",
+          "durationMs": 869,
+          "files": 16,
+          "bytes": 24400
+        },
+        {
+          "name": "@proto.ui/module-rule-expose-state-web",
+          "durationMs": 911,
+          "files": 10,
+          "bytes": 13516
+        },
+        {
+          "name": "@proto.ui/module-rule-meta",
+          "durationMs": 875,
+          "files": 10,
+          "bytes": 13123
+        },
+        {
+          "name": "@proto.ui/module-scroll",
+          "durationMs": 1127,
+          "files": 16,
+          "bytes": 81632
+        },
+        {
+          "name": "@proto.ui/module-state-accessibility",
+          "durationMs": 729,
+          "files": 6,
+          "bytes": 2598
+        },
+        {
+          "name": "@proto.ui/module-state-interaction",
+          "durationMs": 797,
+          "files": 6,
+          "bytes": 5166
+        },
+        {
+          "name": "@proto.ui/module-test-sys",
+          "durationMs": 718,
+          "files": 8,
+          "bytes": 3404
+        },
+        {
+          "name": "@proto.ui/module-text-control",
+          "durationMs": 877,
+          "files": 14,
+          "bytes": 23616
+        },
+        {
+          "name": "@proto.ui/runtime",
+          "durationMs": 1326,
+          "files": 58,
+          "bytes": 110827
+        },
+        {
+          "name": "@proto.ui/adapter-base",
+          "durationMs": 1861,
+          "files": 82,
+          "bytes": 258700
+        },
+        {
+          "name": "@proto.ui/adapter-react",
+          "durationMs": 1405,
+          "files": 18,
+          "bytes": 81178
+        },
+        {
+          "name": "@proto.ui/adapter-vue",
+          "durationMs": 1501,
+          "files": 18,
+          "bytes": 78915
+        },
+        {
+          "name": "@proto.ui/adapter-vue2",
+          "durationMs": 1406,
+          "files": 18,
+          "bytes": 83068
+        },
+        {
+          "name": "@proto.ui/adapter-web-component",
+          "durationMs": 2305,
+          "files": 66,
+          "bytes": 329668
+        },
+        {
+          "name": "@proto.ui/cli",
+          "durationMs": 1812,
+          "files": 54,
+          "bytes": 316861
+        },
+        {
+          "name": "@proto.ui/prototypes-base",
+          "durationMs": 4882,
+          "files": 294,
+          "bytes": 488741
+        },
+        {
+          "name": "@proto.ui/prototypes-brutalist",
+          "durationMs": 3388,
+          "files": 220,
+          "bytes": 161957
+        },
+        {
+          "name": "@proto.ui/prototypes-lucide",
+          "durationMs": 12472,
+          "files": 6812,
+          "bytes": 8773654
+        },
+        {
+          "name": "@proto.ui/prototypes-shadcn",
+          "durationMs": 3433,
+          "files": 224,
+          "bytes": 174718
+        }
+      ]
+    },
+    "publicManifests": 45,
+    "docsPages": 349,
+    "productionBundle": "pass: native/static shell, WC primary, three isolated demonstration runtimes",
+    "sourceProofPaths": 4206,
+    "catalogDraftEntities": 258,
+    "completeDeliveryItems": "0/68",
+    "strictOveragesGzipBytes": {
+      "react": 445,
+      "vue": 280,
+      "web-component": 30
+    }
+  },
+  "checks": [
+    {
+      "name": "types-telemetry-disabled",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/types-telemetry-disabled.log",
+      "logSha256": "5d4d41bc349df5e9822a31ba855d28deea11de2ad797273d09ed039dab4d458a"
+    },
+    {
+      "name": "nonbrowser",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/nonbrowser.log",
+      "logSha256": "6c02066bcf71851dabeb0951c17afb149933f860b809b72f5096f96b001d35ee"
+    },
+    {
+      "name": "source-wall",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/source-wall.log",
+      "logSha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    {
+      "name": "source-proof",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/source-proof.log",
+      "logSha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+    },
+    {
+      "name": "coverage-controls",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/coverage-controls.log",
+      "logSha256": "e6fc63310d60e395169b87a950273394ab068fdbe0818bd3b3c9e86fd4b52655"
+    },
+    {
+      "name": "connector-review",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/connector-review.log",
+      "logSha256": "f327f05d9220e6500811022d5413b631cf481f01d38fd2b30bd4613f4560a599"
+    },
+    {
+      "name": "runtime-plan",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/runtime-plan.log",
+      "logSha256": "1cf026333fc736920ec334e8939d4129bbcd2105780f7d5ade99cb9e51833d7f"
+    },
+    {
+      "name": "release-tests",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/release-tests.log",
+      "logSha256": "05156b81064ca9daee3a5ec9df38026f5387017331c8e48c66c2e0e650efd268"
+    },
+    {
+      "name": "catalog",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/catalog.log",
+      "logSha256": "1c834698769be7aa643a1f51aadc74cd80f1ba6903b0d49262b5e7a902266047"
+    },
+    {
+      "name": "gpui-style",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/gpui-style.log",
+      "logSha256": "20bb80162f54bc442ce4352dd3b41506506ca0070976bcfa20fd66ee5bde1ae3"
+    },
+    {
+      "name": "types-contract",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/types-contract.log",
+      "logSha256": "145c566dde0ce567be5c555845964f2cd2a943d87f5f3734cee6902df2bef936"
+    },
+    {
+      "name": "build-packages",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/build-packages.log",
+      "logSha256": "156bd8b83de5b84c6a66c28171b755838bb795c7ab8217bb647361c23ec4d3b9"
+    },
+    {
+      "name": "package-manifests",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/package-manifests.log",
+      "logSha256": "8798785acad8fbc732ac9c6dfadafe3b07f56d7af770a560993d71653741a3ec"
+    },
+    {
+      "name": "docs-build",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/docs-build.log",
+      "logSha256": "34bf8476257daac964176fa158d54fd8e29a04ef41c19606ebde071064604fb2"
+    },
+    {
+      "name": "production-bundle",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/production-bundle.log",
+      "logSha256": "ccf37f16b0641edb78217985447c7acbc121b122941efdf3e419dc7a2c889294"
+    },
+    {
+      "name": "budgets-finf",
+      "exitCode": 0,
+      "log": "/workspace/shared/finf-main-final-evidence/budgets-finf.log",
+      "logSha256": "4126728964c8a1f394b6725caada103026cf36b52d4dd4198ea620f29c8acf33"
+    },
+    {
+      "name": "budgets-strict",
+      "exitCode": 1,
+      "log": "/workspace/shared/finf-main-final-evidence/budgets-strict.log",
+      "logSha256": "7aa1a7215fa790358cea30c1e40812541ddcd68a8c0112048c6a7857a6a7699d"
+    }
+  ],
+  "initialFailures": [
+    {
+      "name": "canonical-types-first-attempt",
+      "cause": "Astro telemetry tried unavailable /home/agent/.config/astro; disable optional telemetry and rerun unchanged source",
+      "log": "/workspace/shared/finf-main-final-evidence/types.log",
+      "exitCode": 1
+    },
+    {
+      "name": "post-Card-GPUI-fixture",
+      "cause": "Four new Card compiler tokens absent in old fixture; regenerated canonically and committed separately before source/proof binding",
+      "sourceRepair": "854a8cf7b1953c6dc5130ba468c2027c32a6f2d9"
+    }
+  ],
+  "independentReview": {
+    "mainConflictSourceTree": "d15a601fa27ded5ef1ec921b858129b5ace8569d",
+    "mainDisposition": "bounded local conflict acceptance after four reproduced failures and repairs, not GitHub approval",
+    "cardSource": "e0e47d1e5becd270254de8eedd4c63f6efc66223",
+    "cardProof": "80b0bdae0588df4d29dc64b332a5c48820e6296b",
+    "cardDisposition": "bounded draft source acceptance; native evidence not executed"
+  },
+  "debts": [
+    "Final parent/independent receipt readback before publication",
+    "Actual remote Git object readback and proof rebind if commit/tree IDs remap",
+    "Single nonforce expected-head CAS only after live remote reconciliation",
+    "Exact published-head CI/DCO remains unrun",
+    "Native browser, native Compiler and GPUI visual evidence unrun for this final source",
+    "Per-development-commit PR comments and new-source screenshots remain publication-stage work",
+    "Strict budget comparisons fail for three entries; Finf advisory exit zero is not within-budget success",
+    "PR872 remains WIP and must not be merged"
+  ],
+  "generatedOutputPolicy": "All final package/dist and apps/www/dist output was generated in the integration worktree. Prior Card-owner generated output cleanup receipt is retained separately; old builds/screenshots were not reused as proof.",
+  "remoteRefReadback": {
+    "observedAt": "2026-10-09T01:36:41Z",
+    "main": {
+      "ref": "refs/heads/main",
+      "node_id": "REF_kwDOMhQZja9yZWZzL2hlYWRzL21haW4",
+      "url": "https://api.github.com/repos/Proto-UI/Proto-UI/git/refs/heads/main",
+      "object": {
+        "sha": "7e28d06f26150513d6096f0c24e59b871ae8ae62",
+        "type": "commit",
+        "url": "https://api.github.com/repos/Proto-UI/Proto-UI/git/commits/7e28d06f26150513d6096f0c24e59b871ae8ae62"
+      }
+    },
+    "finf": {
+      "ref": "refs/heads/codex/finf-prototype-coverage-20261006",
+      "node_id": "REF_kwDOMhQZjdoAMXJlZnMvaGVhZHMvY29kZXgvZmluZi1wcm90b3R5cGUtY292ZXJhZ2UtMjAyNjEwMDY",
+      "url": "https://api.github.com/repos/Proto-UI/Proto-UI/git/refs/heads/codex/finf-prototype-coverage-20261006",
+      "object": {
+        "sha": "8e8c4ca21801378c11ea055f8f39796f86eeeda6",
+        "type": "commit",
+        "url": "https://api.github.com/repos/Proto-UI/Proto-UI/git/commits/8e8c4ca21801378c11ea055f8f39796f86eeeda6"
+      }
+    }
+  },
+  "commands": {
+    "canonicalTypes": "corepack pnpm@10.32.1 check:types",
+    "nonbrowser": "node node_modules/vitest/vitest.mjs run with createRuntimeTestPlan([], {phase: general}) exclusions plus the six exact native Compiler paths in the saved inventory; minWorkers=1 maxWorkers=2",
+    "coverageControls": "node --test --test-concurrency=1 scripts/coverage-matrices/test/*.test.mjs",
+    "connectorReview": "node --test --test-concurrency=1 scripts/agent-operations/test/connector-review.test.mjs scripts/agent-operations/test/connector-assessment-fixture.test.mjs",
+    "runtimePlan": "node --test --test-concurrency=1 scripts/test/run-runtime-tests.test.mjs scripts/test/happy-dom-mutation-keepalive.test.mjs",
+    "releaseControls": "node --test --test-concurrency=1 scripts/release/test/*.test.mjs",
+    "buildPackages": "node scripts/build/public-packages.mjs --json",
+    "docs": "corepack pnpm@10.32.1 docs:build",
+    "finfBudget": "node scripts/analysis/package-budgets.mjs --finf-development --json",
+    "strictBudget": "node scripts/analysis/package-budgets.mjs --json"
+  }
+}
