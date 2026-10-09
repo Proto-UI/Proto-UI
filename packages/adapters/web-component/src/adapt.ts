@@ -5,7 +5,11 @@ import {
   type RootStyleEntry,
 } from '@proto.ui/core/internal';
 import type { FinalStyleSink } from '@proto.ui/module-feedback/internal/final-style-sink';
-import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
+import {
+  createDeferredViewVisualSink,
+  type VisualFeedbackFrame,
+  type VisualFeedbackSink,
+} from '@proto.ui/module-feedback';
 // packages/adapters/web-component/src/adapt.ts
 import {
   getModuleDeclaration,
@@ -843,7 +847,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 flushNow: () => project(() => splitEffects.flushNow?.()),
               }
             : createWebEffectsPort(applier);
-          const visualFeedbackSink = opt.createVisualSink
+          const deferredVisualSink = opt.createVisualSink
             ? createDeferredViewVisualSink(
                 () => opt.createVisualSink!(thisEl, effectsPort),
                 (frame) => {
@@ -851,6 +855,22 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                   effectsPort.requestFlush();
                 }
               )
+            : undefined;
+          // View acquisition installs capabilities and evaluates initial Rules in
+          // one synchronous transaction. Intermediate snapshots are not a
+          // committed host frame and must not retire a valid server paint lease.
+          let pendingVisualFrame: VisualFeedbackFrame | null = null;
+          const visualFeedbackSink: VisualFeedbackSink | undefined = deferredVisualSink
+            ? {
+                commit(frame) {
+                  if (acquiringProjection) pendingVisualFrame = frame;
+                  else deferredVisualSink.commit(frame);
+                },
+                release(view) {
+                  if (pendingVisualFrame?.view === view) pendingVisualFrame = null;
+                  deferredVisualSink.release(view);
+                },
+              }
             : undefined;
           const visualTarget = thisEl;
           const rawFinalStyleSink = visualFeedbackSink
@@ -974,6 +994,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           });
           acquiringProjection = false;
           if (acquisitionFailed) throw acquisitionError;
+          if (pendingVisualFrame) {
+            const frame = pendingVisualFrame;
+            pendingVisualFrame = null;
+            deferredVisualSink!.commit(frame);
+          }
         } catch (error) {
           // Initial failure is retired by the guarded connection transaction,
           // so callback reentry cannot race a partly cleaned logical owner.

@@ -188,8 +188,8 @@ function fixture(tag = 'div', attached = true) {
   };
   const image = png(100, 40, 238);
   gpu.render.mockReturnValue(image);
-  const artifact = async () => {
-    const receipt = await receiptFromAdmittedPaint(layout, visual, optical, image);
+  const artifact = async (frame: VisualFeedbackFrame = visual) => {
+    const receipt = await receiptFromAdmittedPaint(layout, frame, optical, image);
     const serialized = JSON.stringify(receipt);
     const binding = {
       artifactSha256: await digestText(serialized),
@@ -199,8 +199,8 @@ function fixture(tag = 'div', attached = true) {
     };
     return { receipt, serialized, binding };
   };
-  const show = async () => {
-    const artifactValue = await artifact(),
+  const show = async (frame: VisualFeedbackFrame = visual) => {
+    const artifactValue = await artifact(frame),
       presentation = initialPaintPresentation(artifactValue.receipt, 'rest-host');
     for (const [name, value] of Object.entries(presentation.attributes))
       host.setAttribute(name, value);
@@ -1170,5 +1170,113 @@ describe('trusted server owner and fallible proof rejection matrix', () => {
         serverPaint: { dataUrl: png(100, 40, 0), pngSha256: a.receipt.image.pngSha256 },
       })
     ).rejects.toThrow('server-plane-binding');
+  });
+});
+
+describe('real WC seed handoff investigation', () => {
+  it('records a real Surface first frame before subsequent seeded admission', async () => {
+    const { AdaptToWebComponent, setElementProps } =
+      await import('@proto.ui/adapter-web-component');
+    const { default: surface } = await import('@proto.ui/prototypes-liquid-glass/surface');
+    const { THEME } = await import('../../../prototypes/liquid-glass/src/theme');
+    let f: ReturnType<typeof fixture>;
+    const frames: VisualFeedbackFrame[] = [];
+    AdaptToWebComponent(surface, {
+      registerAs: 'seed-probe-defined',
+      createVisualSink: (host, effects) => {
+        const sink = createWebMaterialSink(host, effects, f.options);
+        return {
+          commit(frame) {
+            frames.push(frame);
+            sink.commit(frame);
+          },
+          release(view) {
+            sink.release(view);
+          },
+        };
+      },
+    });
+    f = fixture('seed-probe-defined', false);
+    f.options.palette.current = () => ({ revision: 1, colors: THEME.light });
+    f.host.style.color = 'rgb(29, 29, 31)';
+    setElementProps(f.host, {
+      variant: 'outline',
+      radius: 'full',
+      border: 'none',
+      elevation: 'none',
+    });
+    document.body.append(f.scope);
+
+    for (let i = 0; i < 8; i++) await Promise.resolve();
+    expect(frames).toHaveLength(1);
+    expect(frames[0].style.tokens).toEqual([
+      'rounded-full',
+      'border-0',
+      'bg-background',
+      'text-foreground',
+    ]);
+    f.scope.remove();
+  });
+});
+
+describe('WC acquisition preserves the registered initial plane (synthetic layout/GPU)', () => {
+  it('keeps an admitted seed through the real Surface mount transaction and delayed decode', async () => {
+    const { AdaptToWebComponent, setElementProps } =
+      await import('@proto.ui/adapter-web-component');
+    const { default: surface } = await import('@proto.ui/prototypes-liquid-glass/surface');
+    let f: ReturnType<typeof fixture>;
+    const Constructor = AdaptToWebComponent(surface, {
+      registerAs: 'seed-transaction-control',
+      createVisualSink: (host, effects) => createWebMaterialSink(host, effects, f.options),
+    });
+    f = fixture('seed-transaction-control', false);
+    setElementProps(f.host, {
+      variant: 'outline',
+      radius: 'full',
+      border: 'none',
+      elevation: 'none',
+    });
+    const a = await f.show({
+      ...f.visual,
+      style: {
+        kind: 'tw',
+        tokens: ['rounded-full', 'border-0', 'bg-background', 'text-foreground'],
+      },
+      material: {
+        ...f.visual.material,
+        candidates: [{ intent: 'liquid-glass', variant: 'regular' }],
+      },
+    });
+    // Hold only the custom-element connection callback to model the native
+    // unknown-element SSR phase on happy-dom without its upgrade replacement.
+    // Preparation observes a genuinely connected host; no guard is stubbed.
+    const prototype = Constructor.prototype as unknown as HTMLElement & {
+      connectedCallback(): void;
+    };
+    const connect = prototype.connectedCallback;
+    const held = vi.spyOn(prototype, 'connectedCallback').mockImplementation(() => {});
+    document.body.append(f.scope);
+    const prepared = await prepareExperimentalInitialPaint(
+      f.host,
+      a.serialized,
+      a.binding,
+      f.options
+    );
+    held.mockRestore();
+    const lease = readInternalInitialPaintLease(f.host)!;
+    const retire = vi.spyOn(lease, 'retire');
+    decode.delayed = true;
+    connect.call(f.host);
+    expect(retire).not.toHaveBeenCalled();
+    expect(f.host.style.backgroundImage).toContain(a.receipt.image.dataUrl);
+    expect(f.host.dataset.materialReason).not.toBe('preparing');
+    expect(f.host.dataset.materialQuality).not.toBe('self-optical');
+    decode.ready!();
+    expect(f.host.dataset.materialQuality).toBe('self-optical');
+    // A real later source revocation must still synchronously withdraw paint.
+    f.removeSource();
+    expect(f.host.style.backgroundImage).toBe('none');
+    f.scope.remove();
+    prepared.dispose();
   });
 });
