@@ -98,3 +98,26 @@ it('never continues a late protocol response or publishes late records', async (
   expect(result.nodes).toEqual([]);
   expect(result.error).toContain('exceeded 3s');
 });
+
+it('keeps the default targets and permits the explicit Liquid family diagnostic', async () => {
+  for (const family of ['brutalist', 'liquid-glass'] as const) {
+    const selectors: string[] = [];
+    const send = vi.fn(async (method: string, params?: { selector?: string }) => {
+      if (method === 'DOM.getDocument') return { root: { nodeId: 1 } };
+      if (method === 'DOM.querySelector') {
+        selectors.push(params!.selector!);
+        return { nodeId: 2 };
+      }
+      if (method === 'CSS.getPlatformFontsForNode') return { fonts: [] };
+      return {};
+    });
+    const page = pageFor(async () => ({ send, detach: async () => {} }));
+    await (family === 'brutalist'
+      ? readLibraryPlatformFonts(page)
+      : readLibraryPlatformFonts(page, family));
+    expect(selectors).toHaveLength(3);
+    expect(selectors.every((selector) => selector.startsWith(`[data-library="${family}"] `))).toBe(
+      true
+    );
+  }
+});

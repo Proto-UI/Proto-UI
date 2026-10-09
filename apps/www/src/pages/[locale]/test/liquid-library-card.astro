@@ -1,0 +1,50 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import UiLibraryGallery from '../../../components/UiLibraryGallery.astro';
+
+export function getStaticPaths() {
+  return ['en', 'zh-cn'].map((locale) => ({ params: { locale }, props: { locale } }));
+}
+
+interface Props {
+  locale: 'en' | 'zh-cn';
+}
+const { locale } = Astro.props;
+const isZh = locale === 'zh-cn';
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'UI Libraries',
+    description: isZh
+      ? '按视觉风格、适用场景与来源选择组件库或图标库。'
+      : 'Choose a component or icon library by visual language, use case, and provenance.',
+    head: [
+      { tag: 'meta', attrs: { name: 'robots', content: 'noindex, nofollow' } },
+      // The shared Gallery retains its original relative destination strings.
+      { tag: 'base', attrs: { href: `/${locale}/ui-libraries/` } },
+    ],
+  }}
+>
+  <UiLibraryGallery locale={locale} liquidMaterialCandidate={true} />
+</StarlightPage>
+
+<script>
+  import { initLibraryLiquidCardCandidate } from '../../../components/library-liquid-card-client';
+  import { installLibraryLiquidCandidateHarness } from '../../../components/library-liquid-scene';
+  const start = () => {
+    if (!document.querySelector('[data-library-liquid-candidate]')) return () => {};
+    const release = initLibraryLiquidCardCandidate(document);
+    const removeHarness = installLibraryLiquidCandidateHarness(document);
+    return () => {
+      removeHarness();
+      release();
+    };
+  };
+  let release = start();
+  document.addEventListener('astro:before-swap', () => release());
+  document.addEventListener('astro:page-load', () => {
+    release();
+    release = start();
+  });
+</script>

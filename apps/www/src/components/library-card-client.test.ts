@@ -1,3 +1,4 @@
+import { initLibraryLiquidCardCandidate } from './library-liquid-card-client';
 import { describe, it, expect } from 'vitest';
 import { initLibraryCards } from './library-card-client';
 import { snapshotLibraryPart } from './library-card-snapshot';
@@ -75,4 +76,39 @@ it('observes native focus and pointer state without owning navigation, and relea
   await flush();
   expect(surface.getAttribute('data-pui-style')).not.toContain('bg-primary/80');
   owner.remove();
+});
+
+it('keeps the candidate native action recipe when projecting native facts', async () => {
+  const owner = document.createElement('article'),
+    link = document.createElement('a');
+  link.href = '/liquid-glass/';
+  link.dataset.libraryAction = '';
+  const surface = document.createElement('wc-library-liquid-optical-surface');
+  surface.dataset.libraryPart = 'liquid-glass-surface';
+  surface.dataset.libraryProps = JSON.stringify({
+    variant: 'outline',
+    radius: 'full',
+    border: 'none',
+    elevation: 'none',
+  });
+  surface.textContent = 'Explore Liquid Glass';
+  link.append(surface);
+  owner.append(link);
+  document.body.append(owner);
+  const release = initLibraryLiquidCardCandidate(owner);
+  await flush();
+  const rendered = link.querySelector<HTMLElement>('wc-library-liquid-optical-surface')!;
+  expect(rendered.getAttribute('data-pui-style')).toContain('rounded-full');
+  link.dispatchEvent(new Event('pointerenter'));
+  await flush();
+  expect(rendered.getAttribute('data-pui-style')).toContain('bg-muted');
+  expect(rendered.getAttribute('data-pui-style')).not.toContain('bg-primary');
+  expect(link.hasAttribute('tabindex')).toBe(false);
+  expect(link.localName).toBe('a');
+  expect(rendered.tabIndex).toBe(-1);
+  expect(rendered.hasAttribute('role')).toBe(false);
+  expect(link.getAttribute('href')).toBe('/liquid-glass/');
+  release();
+  owner.remove();
+  await flush();
 });

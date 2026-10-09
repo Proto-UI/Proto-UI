@@ -1,0 +1,32 @@
+---
+// The runtime owns painting and leasing this exact visible Canvas. A static
+// Canvas alone is not material evidence and supplies no verified optical seed.
+---
+
+<div class="library-liquid-scene" data-library-liquid-scene>
+  <canvas class="library-liquid-scene__canvas" data-library-liquid-canvas aria-hidden="true"
+  ></canvas>
+  <slot />
+</div>
+
+<style>
+  .library-liquid-scene {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    padding-block: 3rem;
+    padding-inline: min(1rem, 5cqi);
+  }
+  .library-liquid-scene__canvas {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+</style>

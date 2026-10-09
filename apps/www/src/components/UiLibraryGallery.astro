@@ -3,6 +3,7 @@ import StaticFamilyIcon from './StaticFamilyIcon.astro';
 import StaticLucideIcon from './StaticLucideIcon.astro';
 import LibraryCardFrame from './LibraryCardFrame.astro';
 import LibraryCardPart from './LibraryCardPart.astro';
+import LibraryLiquidCard from './LibraryLiquidCard.astro';
 import {
   librarySurfaceProps,
   libraryHeadingProps,
@@ -23,6 +24,8 @@ type LibraryId = 'base' | 'shadcn' | 'lucide' | 'brutalist' | 'bootstrap-2-3-2' 
 
 interface Props {
   locale?: Locale;
+  /** Internal evidence route only until the real Card material is verified. */
+  liquidMaterialCandidate?: boolean;
 }
 
 type LibraryCard = {
@@ -43,7 +46,7 @@ type LibraryCard = {
   href: string;
 };
 
-const { locale = 'en' } = Astro.props as Props;
+const { locale = 'en', liquidMaterialCandidate = false } = Astro.props as Props;
 
 const copy =
   locale === 'zh-cn'
@@ -271,6 +274,15 @@ const themeCss = Object.entries(familyThemes)
   <div class="library-gallery__grid">
     {
       cards.map((library) => {
+        if (liquidMaterialCandidate && library.id === 'liquid-glass') {
+          return (
+            <LibraryLiquidCard
+              library={library}
+              bestForLabel={copy.bestFor}
+              prototypeAuthorLabel={copy.prototypeAuthor}
+            />
+          );
+        }
         const family: LibraryFamily = library.id === 'lucide' ? 'base' : library.id;
         const brutalist = family === 'brutalist';
         const bootstrap = family === 'bootstrap-2-3-2';

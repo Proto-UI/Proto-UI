@@ -118,6 +118,16 @@ function graphFixture() {
         dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
         moduleIds: ['apps/www/src/pages/en/test/bootstrap-state-controls.astro'],
       }),
+      chunk('_astro/liquid-library-card.js', {
+        isEntry: true,
+        facadeModuleId:
+          'apps/www/src/pages/[locale]/test/liquid-library-card.astro?astro&type=script&index=0&lang.ts',
+        imports: ['_astro/wc-host.js'],
+        moduleIds: [
+          'apps/www/src/components/library-liquid-card-client.ts',
+          'apps/www/src/components/library-liquid-scene.ts',
+        ],
+      }),
       chunk('_astro/liquid-glass-material.js', {
         isEntry: true,
         facadeModuleId:
@@ -1349,3 +1359,42 @@ for (const source of [
     }
   }
 }
+
+// A new private route is an exact entry, never a directory-wide shell exemption.
+test('Liquid Card producer requires its exact route facade and stays outside ordinary shells', () => {
+  const good = graphFixture();
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: good }), []);
+  const missing = structuredClone(good);
+  missing.chunks = missing.chunks.filter(
+    (chunk) => chunk.fileName !== '_astro/liquid-library-card.js'
+  );
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: missing }).some((issue) =>
+      issue.includes('liquid-library-card.astro')
+    )
+  );
+  const renamed = structuredClone(good);
+  renamed.chunks.find(
+    (chunk) => chunk.fileName === '_astro/liquid-library-card.js'
+  ).facadeModuleId =
+    'apps/www/src/pages/[locale]/test/foreign-card.astro?astro&type=script&index=0&lang.ts';
+  assert.ok(collectWebsiteProductionBundleIssues({ graph: renamed }).length > 0);
+  const missingOwner = structuredClone(good);
+  missingOwner.chunks.find(
+    (chunk) => chunk.fileName === '_astro/liquid-library-card.js'
+  ).moduleIds = [];
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: missingOwner }).some((issue) =>
+      issue.includes('exact client')
+    )
+  );
+  const foreignRuntime = structuredClone(good);
+  foreignRuntime.chunks.find(
+    (chunk) => chunk.fileName === '_astro/liquid-library-card.js'
+  ).dynamicImports = ['_astro/react.js'];
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: foreignRuntime }).some((issue) =>
+      issue.includes('only WC')
+    )
+  );
+});

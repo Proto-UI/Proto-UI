@@ -3,8 +3,30 @@
 // Owner: www.gallery.ui-library-cards. Shared server closure is separately
 // owned by www.build.style-generation through startup-prerender-imports.mjs.
 export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
+  'packages/adapters/base/src/material/initial-paint-experiment.ts': Object.freeze({
+    sourceSha256: '4a5526992ba29b83df17917deb7560af47ea7ab7e53a04379535bb354f534451',
+    specifiers: Object.freeze([
+      './source',
+      './preferences',
+      './style',
+      './initial-paint-receipt',
+      './initial-paint-bridge',
+    ]),
+  }),
+  'apps/www/src/components/library-liquid-scene.ts': Object.freeze({
+    sourceSha256: 'd8ccbb061715254ca258abef8e686561aa87cafd9327d84d7a789e8759740a0b',
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-base/web-material',
+      '../../../../packages/adapters/base/src/material/initial-paint-experiment',
+      '../../../../packages/prototypes/liquid-glass/src/theme',
+    ]),
+  }),
+  'apps/www/src/components/library-liquid-card-client.ts': Object.freeze({
+    sourceSha256: 'a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0',
+    specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
+  }),
   'apps/www/src/components/UiLibraryGallery.astro': Object.freeze({
-    sourceSha256: '6918d2b9b67e9a05c76a96c98ab4749c79213632834cef8407e744fe07ccf25d',
+    sourceSha256: '4ae7937ed88f53188639abd8507217c5933145851e28cd3498fefcefe77e7fdf',
     specifiers: Object.freeze([
       '../../../../packages/prototypes/brutalist/src/theme',
       '../../../../packages/prototypes/bootstrap-2-3-2/src/theme',
@@ -12,7 +34,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     ]),
   }),
   'apps/www/src/components/library-card-client.ts': Object.freeze({
-    sourceSha256: '6f7c427be2a9e7a0802d5eacdaa3f95bb5c57a06ee1c6d7191d2d7a5b1f43f03',
+    sourceSha256: '782f2ff171266ecf7c7d412fdb50f00261f511f1aa769c402dd5b5fe7de14294',
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/library-card-prototypes.ts': Object.freeze({

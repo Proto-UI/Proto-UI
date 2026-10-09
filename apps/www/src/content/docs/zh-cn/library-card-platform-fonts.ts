@@ -2,7 +2,10 @@ import type { CDPSession, Page } from 'playwright-core';
 
 /** Diagnostic only. Actual font selection comes from Chromium, not the CSS
  * family string. A failed read is retained separately from the original gate. */
-export async function readLibraryPlatformFonts(page: Page) {
+export async function readLibraryPlatformFonts(
+  page: Page,
+  family: 'brutalist' | 'liquid-glass' = 'brutalist'
+) {
   let session: CDPSession | undefined;
   let active = true;
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -52,7 +55,7 @@ export async function readLibraryPlatformFonts(page: Page) {
         ]) {
           const { nodeId } = await session.send('DOM.querySelector', {
             nodeId: root.nodeId,
-            selector: `[data-library="brutalist"] ${target}`,
+            selector: `[data-library="${family}"] ${target}`,
           });
           check();
           if (!nodeId) nodes.push({ name, missing: true });

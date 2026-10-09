@@ -34,10 +34,12 @@ export function initLibraryCards(scope: ParentNode = document) {
     if (bound.has(link)) continue;
     bound.add(link);
     const surface = link.querySelector<HTMLElement>('[data-library-part]')!;
+    const actionProps =
+      surface.localName === 'wc-library-liquid-optical-surface'
+        ? JSON.parse(surface.dataset.libraryProps ?? '{}')
+        : libraryActionProps;
     cleanup.push(
-      bindNativeLinkFacts(link, (facts) =>
-        setElementProps(surface, { ...libraryActionProps, ...facts })
-      )
+      bindNativeLinkFacts(link, (facts) => setElementProps(surface, { ...actionProps, ...facts }))
     );
     cleanup.push(() => bound.delete(link));
   }

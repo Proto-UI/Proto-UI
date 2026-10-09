@@ -7,11 +7,15 @@ interface Props {
   part: LibraryPart;
   props?: Record<string, unknown>;
   class?: string;
+  /** Private Card experiment alias; it adds no Prototype or public entry. */
+  candidateTag?: boolean;
 }
-const { part, props = {}, class: className } = Astro.props;
+const { part, props = {}, class: className, candidateTag = false } = Astro.props;
+if (candidateTag && part !== 'liquid-glass-surface')
+  throw new Error('The private optical tag only consumes the actual Liquid Surface');
 // Astro's intrinsic typing has no dynamic custom-element union; the host
 // accepts ordinary HTML attributes while keeping its actual runtime tag.
-const Tag = `wc-library-${part}` as 'div';
+const Tag = (candidateTag ? 'wc-library-liquid-optical-surface' : `wc-library-${part}`) as 'div';
 const tokens = await snapshotLibraryPart(part, props);
 const stateTokens = part.endsWith('-surface')
   ? (

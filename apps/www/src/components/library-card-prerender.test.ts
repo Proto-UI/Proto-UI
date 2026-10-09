@@ -59,3 +59,23 @@ it('retains interactive Surface token membership without sharing other recipe sc
   expect(css).toContain('[data-pui-style~=');
   expect(css).not.toContain('--pui-shadow: initial');
 });
+
+it('uses the private optical tag only for the actual Liquid Surface recipe', async () => {
+  const props = { variant: 'outline', radius: 'full', border: 'none', elevation: 'none' };
+  const candidate = await evaluateSnapshot(
+    { props: { part: 'liquid-glass-surface', props, candidateTag: true } },
+    snapshotLibraryPart,
+    createHash
+  );
+  const ordinary = await snapshot('liquid-glass-surface', props);
+  expect(candidate.Tag).toBe('wc-library-liquid-optical-surface');
+  expect(candidate.tokens).toEqual(ordinary.tokens);
+  expect(candidate.snapshotId).toBe(ordinary.snapshotId);
+  await expect(
+    evaluateSnapshot(
+      { props: { part: 'base-surface', candidateTag: true } },
+      snapshotLibraryPart,
+      createHash
+    )
+  ).rejects.toThrow('actual Liquid Surface');
+});
