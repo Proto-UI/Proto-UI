@@ -1778,7 +1778,9 @@ it('calibrates translucent paint and zero-area straight SVG stroke witnesses wit
           root('stroke-hidden', path('M5 12h14', 'opacity:0')),
           root('stroke-dashed', path('M5 12h14', 'stroke-dasharray:2 2')),
           root('stroke-css-none', path('M5 12h14', 'd:none')),
-          root('stroke-outside', path('M5 12h14', 'transform:translateX(900px)')),
+          // Path transforms use SVG user units: 1800 * (14 / 24) = 1050 CSS px.
+          // The old 900 offset painted at x≈552 inside this 800px viewport.
+          root('stroke-outside', path('M5 12h14', 'transform:translateX(1800px)')),
           root('stroke-clipped', `<div style="height:0;overflow:hidden">${path('M5 12h14')}</div>`),
           root('stroke-rotated', path('M5 12h14', 'transform:rotate(30deg)')),
         ].join('')
@@ -1796,6 +1798,11 @@ it('calibrates translucent paint and zero-area straight SVG stroke witnesses wit
         id: element.id,
         observation: window.puiContrastProbe.readContrastTargetObservation(element),
         centerline: element.querySelector('path')?.getBoundingClientRect().toJSON(),
+        ownerRect: element.getBoundingClientRect().toJSON(),
+        screenCTM: element.querySelector('path')?.getScreenCTM()?.toJSON(),
+        strokeWidth: Number.parseFloat(
+          getComputedStyle(element.querySelector('path') ?? element).strokeWidth
+        ),
       }))
     );
     const png = await page.screenshot({ type: 'png', caret: 'initial' });
@@ -1805,6 +1812,7 @@ it('calibrates translucent paint and zero-area straight SVG stroke witnesses wit
       png.toString('base64')
     );
     await recordCalibrationFile('translucent-and-straight-stroke.png', png);
+    const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
     await recordCalibrationFile(
       'translucent-and-straight-stroke.json',
       JSON.stringify(
@@ -1812,12 +1820,25 @@ it('calibrates translucent paint and zero-area straight SVG stroke witnesses wit
           probeBundleSha256: createHash('sha256').update(bundle).digest('hex'),
           pngSha256: createHash('sha256').update(png).digest('hex'),
           observations,
+          viewport,
           frame,
         },
         null,
         2
       )
     );
+    const outside = observations.find((row) => row.id === 'stroke-outside')!;
+    // Check the negative fixture itself before blaming the visibility probe.
+    // Its owner stays on screen; even an extended cap of its child stroke does not.
+    expect(outside.ownerRect.left).toBeGreaterThanOrEqual(0);
+    expect(outside.ownerRect.right).toBeLessThanOrEqual(viewport.width);
+    expect(outside.ownerRect.top).toBeGreaterThanOrEqual(0);
+    expect(outside.ownerRect.bottom).toBeLessThanOrEqual(viewport.height);
+    expect(outside.screenCTM!.a).toBeCloseTo(14 / 24);
+    expect(outside.strokeWidth).toBeGreaterThan(0);
+    const halfStrokeX =
+      (Math.hypot(outside.screenCTM!.a, outside.screenCTM!.c) * outside.strokeWidth) / 2;
+    expect(outside.centerline!.left - halfStrokeX).toBeGreaterThan(viewport.width);
     for (const row of observations)
       expect(row.observation.achieved, row.id).toBe(
         ['translucent', 'horizontal', 'vertical'].includes(row.id)
