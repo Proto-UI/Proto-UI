@@ -8314,7 +8314,7 @@
     },
     {
       "ID": "www.gallery.ui-library-cards",
-      "Path": "apps/www/src/components/UiLibraryGallery.astro`, `apps/www/src/components/LibraryCardPart.astro`, `apps/www/src/components/LibraryCardFrame.astro`, `apps/www/src/components/library-card-client.ts`, `apps/www/src/components/library-card-prototypes.ts`, `apps/www/src/components/library-card-snapshot.ts",
+      "Path": "apps/www/src/components/UiLibraryGallery.astro`, `apps/www/src/components/LibraryCardPart.astro`, `apps/www/src/components/LibraryCardFrame.astro`, `apps/www/src/components/library-card-client.ts`, `apps/www/src/components/library-card-prototypes.ts`, `apps/www/src/components/library-card-snapshot.ts`, `apps/www/src/components/StaticFamilyIcon.astro",
       "User job": "Browse supported UI-library integrations",
       "Current owner": "Website native navigation and family presentation composition",
       "Target class": "site-composition",
@@ -8334,7 +8334,7 @@
     },
     {
       "ID": "www.gallery.prototype-library-cards",
-      "Path": "apps/www/src/components/PrototypeLibraryOverview.astro",
+      "Path": "apps/www/src/components/PrototypeLibraryOverview.astro`, `apps/www/src/components/StaticFamilyIcon.astro",
       "User job": "Browse official prototype libraries",
       "Current owner": "Website prototype documentation",
       "Target class": "native/static",
