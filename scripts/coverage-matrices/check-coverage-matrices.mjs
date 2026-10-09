@@ -9241,6 +9241,11 @@ function isTestNamedSource(absolutePath) {
 // fail-closed behavior for every other configuration change.
 const PROMOTION_RESOLVER_CONFIG_SHA256 =
   '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377';
+// Main #877 keeps a distinct exact configuration; historical #875 remains valid.
+const PROMOTION_MAIN_877_CONFIG_SHA256 =
+  '0625e633927c6cbbc24d62347e6407aff9a535f13a499cad17c336ad25534005';
+const PROMOTION_MAIN_877_AUDIT_CONFIG_SHA256 =
+  '82110490011548595d5bc9c91bdf5edc4d8ff77e84ff0e8652c268aeb5fb51d4';
 // Exact opt-in, serve-only contrast audit profile. Its imported plugin bytes
 // are part of the reviewed resolver boundary, not an unrestricted plugin hook.
 const PROMOTION_AUDIT_CONFIG_SHA256 =
@@ -9287,11 +9292,13 @@ export function promotionBarePackageTargets(root, specifier, metadata) {
   const retryProfile = configSha === PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256;
   const auditProfile =
     configSha === PROMOTION_AUDIT_CONFIG_SHA256 ||
+    configSha === PROMOTION_MAIN_877_AUDIT_CONFIG_SHA256 ||
     configSha === PROMOTION_HISTORICAL_AUDIT_CONFIG_SHA256 ||
     configSha === PROMOTION_FINF_AUDIT_CONFIG_SHA256 ||
     retryProfile;
   if (
     configSha !== PROMOTION_RESOLVER_CONFIG_SHA256 &&
+    configSha !== PROMOTION_MAIN_877_CONFIG_SHA256 &&
     configSha !== PROMOTION_HISTORICAL_CONFIG_SHA256 &&
     configSha !== PROMOTION_FINF_CONFIG_SHA256 &&
     !auditProfile

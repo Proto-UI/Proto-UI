@@ -61,6 +61,7 @@ const OPTIONAL_DEMONSTRATION_ENTRY_FACADES = new Set([
   // Kept for retained callers; current homepage is owned by HomepageRuntime.
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/site-typography.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
 ]);
 for (const facade of OPTIONAL_DEMONSTRATION_ENTRY_FACADES)
   APPROVED_DEMONSTRATION_ENTRY_FACADES.add(facade);

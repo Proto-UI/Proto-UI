@@ -18394,25 +18394,36 @@ for (const scenario of [
   });
 }
 
-for (const audit of [true, false]) {
-  test(`main #875 profile remains exact and independently admitted (audit=${audit})`, () => {
-    const { root, config, plugin, target } = auditResolverFixture();
-    let source = fs.readFileSync(
-      new URL('./fixtures/promotion-resolver-main-f64-audit.txt', import.meta.url),
-      'utf8'
-    );
-    assert.equal(
-      createHash('sha256').update(source).digest('hex'),
-      'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee'
-    );
-    if (!audit) {
-      source = source
-        .replace(
-          "import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n",
-          ''
-        )
-        .replace(
-          `    plugins: [
+for (const profile of [
+  {
+    name: '#875',
+    fixture: 'promotion-resolver-main-f64-audit.txt',
+    auditHash: 'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee',
+    plainHash: '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377',
+  },
+  {
+    name: '#877',
+    fixture: 'promotion-resolver-main-877-audit.txt',
+    auditHash: '82110490011548595d5bc9c91bdf5edc4d8ff77e84ff0e8652c268aeb5fb51d4',
+    plainHash: '0625e633927c6cbbc24d62347e6407aff9a535f13a499cad17c336ad25534005',
+  },
+]) {
+  for (const audit of [true, false]) {
+    test(`main ${profile.name} profile remains exact and independently admitted (audit=${audit})`, () => {
+      const { root, config, plugin, target } = auditResolverFixture();
+      let source = fs.readFileSync(
+        new URL(`./fixtures/${profile.fixture}`, import.meta.url),
+        'utf8'
+      );
+      assert.equal(createHash('sha256').update(source).digest('hex'), profile.auditHash);
+      if (!audit) {
+        source = source
+          .replace(
+            "import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n",
+            ''
+          )
+          .replace(
+            `    plugins: [
       ...(process.env.PROTO_UI_CONTRAST_AUDIT === '1'
         ? [contrastProvenancePlugin(repositoryRoot)]
         : []),
@@ -18420,32 +18431,30 @@ for (const audit of [true, false]) {
       websiteBundleGraphPlugin(),
       tailwindcss(),
     ],`,
-          '    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],'
+            '    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],'
+          );
+        assert.equal(createHash('sha256').update(source).digest('hex'), profile.plainHash);
+        fs.unlinkSync(plugin);
+      }
+      fs.writeFileSync(config, source);
+      const metadata = new Set();
+      assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+      assert.equal(metadata.has(plugin), audit);
+      if (audit) {
+        fs.appendFileSync(plugin, '\n// unreviewed helper');
+        assert.throws(
+          () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+          /audit resolver plugin.*unrecognized/
         );
-      assert.equal(
-        createHash('sha256').update(source).digest('hex'),
-        '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377'
-      );
-      fs.unlinkSync(plugin);
-    }
-    fs.writeFileSync(config, source);
-    const metadata = new Set();
-    assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
-    assert.equal(metadata.has(plugin), audit);
-    if (audit) {
-      fs.appendFileSync(plugin, '\n// unreviewed helper');
-      assert.throws(
-        () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
-        /audit resolver plugin.*unrecognized/
-      );
-    } else {
-      fs.appendFileSync(config, '\n// unreviewed config');
-      assert.throws(
-        () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
-        /configuration is unrecognized/
-      );
-    }
-  });
+      } else {
+        fs.appendFileSync(config, '\n// unreviewed config');
+        assert.throws(
+          () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+          /configuration is unrecognized/
+        );
+      }
+    });
+  }
 }
 
 for (const name of ['acceptance', 's2', 's3', 's4', 's5']) {

@@ -4,7 +4,7 @@ Portfolio navigation: [active prototype and four-family matrix](../coverage-matr
 
 This document is the non-normative M0 operational ledger for issue #420. It inventories the website surfaces that must either consume Proto UI through the approved website boundary or carry an explicit native/infrastructure disposition. `spec/**` remains authoritative; this ledger does not promote an entity or create a semantic guarantee.
 
-Snapshot basis: the original M0 ledger used repository commit `3b29193950327ed0ee24d86b61f10d9dedf016aa`. Source inventory was reconciled on 2026-10-06 against integrated commit `d1555c8a31bd836e02231c11d6e52f2ecdb57a01` and this repair's reviewed source bytes under `apps/www/src/**`, `apps/www/astro.config.mjs`, and `apps/www/package.json`. Source fingerprints below bind those bytes; the original M0 runtime, screenshot, and multi-frame gaps remain historical baseline gaps, not evidence of current runtime acceptance.
+Snapshot basis: the original M0 ledger used repository commit `3b29193950327ed0ee24d86b61f10d9dedf016aa`. Source inventory was reconciled on 2026-10-06 against integrated commit `d1555c8a31bd836e02231c11d6e52f2ecdb57a01` and this repair's reviewed source bytes under `apps/www/src/**`, `apps/www/astro.config.mjs`, and `apps/www/package.json`. Source fingerprints below bind those bytes; the original M0 runtime, screenshot, and multi-frame gaps remain historical baseline gaps, not evidence of current runtime acceptance. The 2026-10-08 follow-up binds the merged #652 Shadow S1–S5 and #808 Bootstrap control fixtures at main `169407b2d463d5da5d6694e2d1f8644578046b40`; it records source ownership, not new runtime acceptance.
 
 ## Lifecycle stop condition
 

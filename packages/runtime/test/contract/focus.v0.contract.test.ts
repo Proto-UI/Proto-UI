@@ -4,6 +4,7 @@ import {
   createFocusRovingKey,
   definePrototype,
   tw,
+  type FocusRequestOptions,
   type FocusScopeHandle,
   type FocusableHandle,
 } from '@proto.ui/core';
@@ -17,8 +18,10 @@ import {
   FOCUS_REQUEST_FOCUS_CAP,
   FOCUS_ROOT_TARGET_CAP,
   FOCUS_SET_FOCUSABLE_CAP,
+  FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
   FOCUS_TARGET_READY_CAP,
   type FocusPort,
+  type FocusRequestKind,
 } from '@proto.ui/module-focus';
 import type { PropsBaseType } from '@proto.ui/types';
 
@@ -1083,6 +1086,68 @@ describe('runtime contract: focus (v0)', () => {
       focusVisible: true,
     });
     scope.deactivate();
+  });
+
+  it('delegates entry request ownership when trapping Tab through the host sample', async () => {
+    let scope!: FocusScopeHandle<PropsBaseType>;
+    const root = document.createElement('div');
+    const target = document.createElement('button');
+    root.append(target);
+    document.body.append(root);
+    const globalTarget = new EventTarget();
+    const kinds: unknown[] = [];
+    const proto = definePrototype({
+      name: 'x-focus-sampled-entry-kind',
+      setup() {
+        scope = asFocusScope<PropsBaseType>();
+        scope.configure({ trap: true, loop: true, entry: 'manual' });
+        return (r) => r.el('div');
+      },
+    });
+    const session = createRuntimeSession(proto, {
+      prototypeName: proto.name,
+      getRawProps: () => ({}),
+      schedule: (task) => task(),
+      commit: (_children, signal) => signal?.done(),
+      onRuntimeReady(wiring) {
+        wiring.attach('event', [
+          [EVENT_ROOT_TARGET_CAP, () => root],
+          [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
+        ]);
+        wiring.attach('focus', [
+          [FOCUS_INSTANCE_TOKEN_CAP, root],
+          [FOCUS_PARENT_CAP, () => null],
+          [FOCUS_ROOT_TARGET_CAP, () => root],
+          [FOCUS_SAMPLE_SCOPE_TARGETS_CAP, () => ({ targets: [target], activeTarget: null })],
+          [
+            FOCUS_REQUEST_FOCUS_CAP,
+            (
+              node: HTMLElement,
+              _options: FocusRequestOptions | undefined,
+              kind: FocusRequestKind
+            ) => {
+              kinds.push(kind);
+              if (kind !== 'entry') return false;
+              node.focus();
+              return document.activeElement === node;
+            },
+          ],
+        ]);
+      },
+    });
+    try {
+      await session.mount();
+      scope.activate();
+      globalTarget.dispatchEvent(new CustomEvent('key.down', { detail: { key: 'Tab' } }));
+      // HC-FOCUS-TARGET-0001-D: sampled descendants use entry acquisition,
+      // without native Trigger root-only admission or ownership of target facts.
+      expect(kinds).toEqual(['entry']);
+      expect(document.activeElement).toBe(target);
+    } finally {
+      scope.deactivate();
+      await session.dispose();
+      root.remove();
+    }
   });
 
   it('FOCUS-0810: deactivating a scope restores focus to the previous owner', () => {

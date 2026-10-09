@@ -1,7 +1,14 @@
 import { declareTextControl } from '@proto.ui/module-text-control';
 import { describe, it, expect, vi } from 'vitest';
-import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
+import {
+  declareModule,
+  moduleDeclaration,
+  definePrototype,
+  tw,
+  type RunHandle,
+} from '@proto.ui/core';
 import { asButton } from '@proto.ui/prototypes-base/button';
+import { asFocusable } from '@proto.ui/hooks';
 import { AdaptToWebComponent, setElementProps } from '../src';
 import { installExperimentalVisualConsumer } from '../src/runtime/experimental-visual-consumer';
 import type { FinalStyleFrame } from '../../../modules/feedback/src/material/final-style-sink';
@@ -343,6 +350,161 @@ describe('private material through real WC and Feedback', () => {
         }
       });
 
+  it('retires actual sink subscriptions once per healthy connection and reconnect', async () => {
+    let leases = 0;
+    const unsubscribe = vi.fn(() => {
+      leases--;
+    });
+    const releases: ReturnType<typeof vi.fn>[] = [];
+    const prototype = definePrototype({
+      name: `material-healthy-lease-${++id}`,
+      setup(def) {
+        def.feedback.style.use(tw('rounded-full'));
+        return () => null;
+      },
+    });
+    const off = installExperimentalVisualConsumer(prototype, (host, style, surface) => {
+      const sink = createOwnedTextureVisualSink(
+        host,
+        style,
+        null,
+        {
+          current: () => null,
+          subscribe: () => {
+            leases++;
+            return unsubscribe;
+          },
+        },
+        {
+          current: () => ({
+            reducedMotion: 'no-preference',
+            reducedTransparency: 'no-preference',
+            contrast: 'no-preference',
+            forcedColors: 'none',
+          }),
+          subscribe: () => {
+            leases++;
+            return unsubscribe;
+          },
+        },
+        surface
+      );
+      const release = vi.fn((view: number) => sink.release(view));
+      releases.push(release);
+      return { commit: (frame) => sink.commit(frame), release };
+    });
+    const Constructor = AdaptToWebComponent(prototype);
+    const host = new Constructor();
+    try {
+      for (let cycle = 0; cycle < 2; cycle++) {
+        document.body.append(host);
+        await settle();
+        expect(leases).toBe(2);
+        host.remove();
+        await settle();
+        expect(leases).toBe(0);
+        expect(releases[cycle]).toHaveBeenCalledOnce();
+      }
+      expect(unsubscribe).toHaveBeenCalledTimes(4);
+    } finally {
+      off();
+      host.remove();
+    }
+  });
+
+  for (const [throwOnRelease, releaseFailure] of [
+    [false, undefined],
+    [true, new Error('secondary retirement failure')],
+    [true, null],
+    [true, undefined],
+    [true, 0],
+  ] as const)
+    it(`retires a successfully acquired sink before rejected material attachment (throwing cleanup: ${throwOnRelease}, value: ${String(releaseFailure)})`, async () => {
+      let sourceLeases = 0;
+      let preferenceLeases = 0;
+      const sourceOff = vi.fn(() => {
+        sourceLeases--;
+      });
+      const preferenceOff = vi.fn(() => {
+        preferenceLeases--;
+      });
+      const release = vi.fn();
+      const commit = vi.fn();
+      const beforeDispose = vi.fn();
+      const states: Array<{ get(): boolean }> = [];
+      const prototype = definePrototype({
+        name: `material-preframe-failure-${++id}`,
+        modules: [
+          declareModule(moduleDeclaration('experimental/feedback-material-v1'), { version: 0 }),
+        ],
+        setup(def) {
+          states.push(def.state.bool('alive', true));
+          def.lifecycle.onBeforeDispose(beforeDispose);
+          return () => null;
+        },
+      });
+      const off = installExperimentalVisualConsumer(prototype, (host, style, surface) => {
+        const sink = createOwnedTextureVisualSink(
+          host,
+          style,
+          null,
+          {
+            current: () => null,
+            subscribe: () => {
+              sourceLeases++;
+              return sourceOff;
+            },
+          },
+          {
+            current: () => ({
+              reducedMotion: 'no-preference',
+              reducedTransparency: 'no-preference',
+              contrast: 'no-preference',
+              forcedColors: 'none',
+            }),
+            subscribe: () => {
+              preferenceLeases++;
+              return preferenceOff;
+            },
+          },
+          surface
+        );
+        return {
+          commit(frame) {
+            commit(frame);
+            sink.commit(frame);
+          },
+          release(view) {
+            release(view);
+            sink.release(view);
+            if (throwOnRelease) throw releaseFailure;
+          },
+        };
+      });
+      const Constructor = AdaptToWebComponent(prototype);
+      const host = new Constructor();
+      try {
+        expect(() => document.body.append(host)).toThrow(
+          'Invalid finite owned-material declaration'
+        );
+        await settle();
+        expect(commit).not.toHaveBeenCalled();
+        expect(release).toHaveBeenCalledOnce();
+        expect(sourceLeases).toBe(0);
+        expect(preferenceLeases).toBe(0);
+        expect(sourceOff).toHaveBeenCalledOnce();
+        expect(preferenceOff).toHaveBeenCalledOnce();
+        expect(beforeDispose).toHaveBeenCalledOnce();
+        expect(() => states[0].get()).toThrow(/disposed/);
+        host.remove();
+        await settle();
+        expect(release).toHaveBeenCalledOnce();
+      } finally {
+        off();
+        host.remove();
+      }
+    });
+
   it('retires adapter and owner resources when the visual consumer fails before attachment', async () => {
     const beforeDispose = vi.fn();
     const states: Array<{ get(): boolean }> = [];
@@ -350,6 +512,7 @@ describe('private material through real WC and Feedback', () => {
       name: `material-construction-failure-${++id}`,
       modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
       setup(def) {
+        asFocusable().configure({ disabled: false });
         states.push(def.state.bool('alive', true));
         def.lifecycle.onBeforeDispose(beforeDispose);
         return () => null;
@@ -370,20 +533,23 @@ describe('private material through real WC and Feedback', () => {
       expect(beforeDispose).toHaveBeenCalledOnce();
       expect(() => states[0].get()).toThrow(/disposed/);
       expect(host.querySelector('[data-pui-style]')).toBeNull();
-      const focusAdds = add.mock.calls
+      // Finf binds physical ingress before provider construction. A failed
+      // provider must retire those exact eager listeners before returning.
+      const failedFocusAdds = add.mock.calls
         .map((args, i) => ({ args, target: add.mock.contexts[i] }))
         .filter(
           ({ args, target }) =>
             ['focus', 'blur'].includes(String(args[0])) && target instanceof HTMLInputElement
         );
-      expect(focusAdds).toHaveLength(2);
-      for (const { args, target } of focusAdds)
+      expect(failedFocusAdds).toHaveLength(2);
+      for (const { args, target } of failedFocusAdds)
         expect(
           remove.mock.calls.some(
             (call, i) =>
               remove.mock.contexts[i] === target && call[0] === args[0] && call[1] === args[1]
           )
         ).toBe(true);
+      const failedAddCount = add.mock.calls.length;
       host.remove();
       await settle();
       expect(beforeDispose).toHaveBeenCalledOnce();
@@ -392,6 +558,24 @@ describe('private material through real WC and Feedback', () => {
       await settle();
       expect(states).toHaveLength(2);
       expect(states[1].get()).toBe(true);
+      const focusAdds = add.mock.calls
+        .map((args, i) => ({ args, target: add.mock.contexts[i] }))
+        .slice(failedAddCount)
+        .filter(
+          ({ args, target }) =>
+            ['focus', 'blur'].includes(String(args[0])) && target instanceof HTMLInputElement
+        );
+      expect(focusAdds).toHaveLength(2);
+      host.remove();
+      await settle();
+      for (const { args, target } of focusAdds)
+        expect(
+          remove.mock.calls.some(
+            (call, i) =>
+              remove.mock.contexts[i] === target && call[0] === args[0] && call[1] === args[1]
+          )
+        ).toBe(true);
+      expect(beforeDispose).toHaveBeenCalledTimes(2);
     } finally {
       off();
       host.remove();

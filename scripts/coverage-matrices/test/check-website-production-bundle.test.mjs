@@ -181,6 +181,21 @@ test('accepts module-proven demo runtimes isolated from shell static closures', 
   });
 });
 
+test('Bootstrap state-control fixture keeps framework runtimes lazy in its exact demonstration entry', () => {
+  const graph = graphFixture();
+  const facade =
+    'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts';
+  const entry = graph.chunks.find((candidate) => candidate.facadeModuleId === facade);
+  assert.ok(entry, 'the canonical graph already includes the approved Bootstrap fixture');
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  entry.imports.push('_astro/react.js');
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some(
+      (issue) => issue.includes(facade) && issue.includes('statically includes the react Adapter')
+    )
+  );
+});
+
 test('requires every approved demonstration facade in the production graph', () => {
   for (const facadeModuleId of [
     PREVIEWER_FACADE,
@@ -429,6 +444,27 @@ test('rejects unreviewed Adapter modules inside the reviewed bridge chunk', () =
     assert.ok(
       issues.some((issue) => issue.includes(moduleId)),
       `unreviewed bridge module should be rejected: ${moduleId}`
+    );
+  }
+});
+
+test('accepted Shadow resources stay limited to the exact WC bridge chunk', () => {
+  for (const moduleId of [
+    'packages/adapters/web-component/src/shadow-profile.ts',
+    'packages/adapters/web-component/src/shadow-split-effects.ts',
+    'packages/adapters/web-component/src/color-scheme-source.ts',
+  ]) {
+    const graph = graphFixture();
+    const bridge = graph.chunks.find(
+      (candidate) => candidate.fileName === '_astro/site-shadcn-controls.js'
+    );
+    bridge.moduleIds.push(moduleId);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    bridge.moduleIds.pop();
+    graph.chunks[0].imports.push('_astro/misplaced-shadow.js');
+    graph.chunks.push(chunk('_astro/misplaced-shadow.js', { moduleIds: [moduleId] }));
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some((issue) => issue.includes(moduleId))
     );
   }
 });

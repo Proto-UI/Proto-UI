@@ -4176,7 +4176,7 @@ for (const kind of [
     if (kind === 'missing-disclosure')
       packet.agentEvidence.source = 'AI-executed review by ChatGPT';
     await assert.rejects(
-      () => s.publishParentPacket(packet, assessment, null, measured),
+      () => s.publishParentPacket(packet, createConnectorAssessment(), null, measured),
       kind === 'expired' ? /measurement expired/ : /ModelTrace:/
     );
     assert.equal(f.calls.filter((call) => call.operation === 'add_review_to_pr').length, 0);

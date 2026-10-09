@@ -638,6 +638,17 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           return;
         }
 
+        // Share the acquired final-style lease between Feedback and rollback.
+        // Acquisition may succeed before any frame or capability attachment;
+        // retire before invoking user cleanup so throwing cleanup is once-only.
+        let acquiredFinalStyleSink: FinalStyleSink | undefined;
+        let finalStyleSinkReleased = false;
+        let finalStyleSinkView = 0;
+        const releaseFinalStyleSink = (view = finalStyleSinkView) => {
+          if (finalStyleSinkReleased || !acquiredFinalStyleSink) return;
+          finalStyleSinkReleased = true;
+          acquiredFinalStyleSink.release(view);
+        };
         let disposed = false;
         let focusRetryGeneration = 0;
         let disposeFocusBridge: (() => void) | null = null;
@@ -653,6 +664,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           if (disposed) return;
           disposed = true;
           const releases = [
+            releaseFinalStyleSink,
             () => resources.eventGate?.disable(),
             () => resources.eventGate?.dispose(),
             () => {
@@ -851,21 +863,25 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               (proto.modules?.some((declaration) => declaration.id === OWNED_MATERIAL_ID)
                 ? createOpaqueMaterialVisualSink(visualTarget, applier)
                 : undefined));
-          const finalStyleSink: FinalStyleSink | undefined =
-            rawFinalStyleSink && splitEffects
-              ? {
-                  commit(frame) {
+          acquiredFinalStyleSink = rawFinalStyleSink;
+          const finalStyleSink: FinalStyleSink | undefined = rawFinalStyleSink
+            ? {
+                commit(frame) {
+                  if (finalStyleSinkReleased) throw new Error('Retired material visual sink');
+                  finalStyleSinkView = frame.view;
+                  if (splitEffects) {
                     if (!('entries' in frame.style))
                       throw new Error('shadow-split:root-provenance');
                     finalStyleEntries = readRootStyleEntries(
                       { ...frame.style, tokens: [...frame.style.tokens] },
                       'setup'
                     );
-                    rawFinalStyleSink.commit(frame);
-                  },
-                  release: (view) => rawFinalStyleSink.release(view),
-                }
-              : rawFinalStyleSink;
+                  }
+                  rawFinalStyleSink.commit(frame);
+                },
+                release: releaseFinalStyleSink,
+              }
+            : undefined;
           owner.attachView({
             modules: createWebComponentModules({
               el: thisEl,
