@@ -1794,16 +1794,22 @@ it('calibrates translucent paint and zero-area straight SVG stroke witnesses wit
     });
     await page.addScriptTag({ content: bundle });
     const observations = await page.locator('[data-pui-root]').evaluateAll((elements) =>
-      elements.map((element) => ({
-        id: element.id,
-        observation: window.puiContrastProbe.readContrastTargetObservation(element),
-        centerline: element.querySelector('path')?.getBoundingClientRect().toJSON(),
-        ownerRect: element.getBoundingClientRect().toJSON(),
-        screenCTM: element.querySelector('path')?.getScreenCTM()?.toJSON(),
-        strokeWidth: Number.parseFloat(
-          getComputedStyle(element.querySelector('path') ?? element).strokeWidth
-        ),
-      }))
+      elements.map((element) => {
+        const matrix = element.querySelector('path')?.getScreenCTM();
+        return {
+          id: element.id,
+          observation: window.puiContrastProbe.readContrastTargetObservation(element),
+          centerline: element.querySelector('path')?.getBoundingClientRect().toJSON(),
+          ownerRect: element.getBoundingClientRect().toJSON(),
+          // Native SVG matrices expose these fields without necessarily providing toJSON.
+          screenCTM: matrix
+            ? { a: matrix.a, b: matrix.b, c: matrix.c, d: matrix.d, e: matrix.e, f: matrix.f }
+            : undefined,
+          strokeWidth: Number.parseFloat(
+            getComputedStyle(element.querySelector('path') ?? element).strokeWidth
+          ),
+        };
+      })
     );
     const png = await page.screenshot({ type: 'png', caret: 'initial' });
     const frame = await page.evaluate(
