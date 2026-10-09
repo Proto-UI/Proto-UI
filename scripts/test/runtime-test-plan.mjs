@@ -158,6 +158,7 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
@@ -165,6 +166,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts':
+    '.github/workflows/liquid-elevation-control-evidence.yml',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts':
     '.github/workflows/liquid-card-candidate-evidence.yml',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts':
