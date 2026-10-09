@@ -52,7 +52,7 @@ export function noScriptInput(page: Page, link: Locator): NoScriptInput {
 }
 
 const hostSleep = (milliseconds: number) =>
-  new Promise<void>((resolve) => setTimeout(resolve, milliseconds));
+  new Promise<void>((resolve) => setTimeout(() => resolve(), milliseconds));
 const stableKey = (s: NoScriptLinkSample) =>
   JSON.stringify([
     s.rect,

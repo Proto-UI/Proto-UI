@@ -206,18 +206,18 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 radius: style.borderRadius,
               };
             });
-            expect(geometry.direction).toBe('rtl');
-            expect(geometry.left).toBeGreaterThanOrEqual(0);
-            expect(geometry.right).toBeLessThanOrEqual(321);
-            expect(geometry.width).toBeGreaterThan(40);
-            expect(geometry.height).toBeGreaterThan(30);
-            expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
-            expect(geometry.indicatorRight).toBeLessThanOrEqual(geometry.labelLeft + 1);
-            expect(geometry.selectedText).toContain('VeryLongUnbrokenOptionLabels');
-            expect(geometry.background).not.toBe('rgba(0, 0, 0, 0)');
-            expect(Number.parseFloat(geometry.radius)).toBeGreaterThan(0);
             await withLiquidCardFailureObservation(
               async () => {
+                expect(geometry.direction).toBe('rtl');
+                expect(geometry.left).toBeGreaterThanOrEqual(0);
+                expect(geometry.right).toBeLessThanOrEqual(321);
+                expect(geometry.width).toBeGreaterThan(40);
+                expect(geometry.height).toBeGreaterThan(30);
+                expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.clientWidth + 1);
+                expect(geometry.indicatorRight).toBeLessThanOrEqual(geometry.labelLeft + 1);
+                expect(geometry.selectedText).toContain('VeryLongUnbrokenOptionLabels');
+                expect(geometry.background).not.toBe('rgba(0, 0, 0, 0)');
+                expect(Number.parseFloat(geometry.radius)).toBeGreaterThan(0);
                 expect(
                   await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
                 ).toBe(true);

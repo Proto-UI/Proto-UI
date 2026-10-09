@@ -62,7 +62,7 @@ export default {
   root: {
     kind: 'box',
     ref: 'selectLayout',
-    className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-2 wrap-anywhere',
+    className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-0 sm:p-2 wrap-anywhere',
     children: [
       { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm' },
       select('uncontrolled', { defaultValue: 'alpha' }),

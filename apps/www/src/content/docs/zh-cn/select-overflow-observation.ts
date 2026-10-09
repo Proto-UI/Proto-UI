@@ -35,6 +35,9 @@ export function collectSelectOverflowObservation() {
       overflowWrap: style.overflowWrap,
       wordBreak: style.wordBreak,
       flexWrap: style.flexWrap,
+      fontSize: style.fontSize,
+      columnGap: style.columnGap,
+      boxSizing: style.boxSizing,
       gridTemplateColumns: style.gridTemplateColumns,
       paddingLeft: style.paddingLeft,
       paddingRight: style.paddingRight,
@@ -59,6 +62,10 @@ export function collectSelectOverflowObservation() {
     'disabledTrigger',
     'controlledTrigger',
     'rtlTrigger',
+    'uncontrolledContent',
+    'disabledContent',
+    'controlledContent',
+    'rtlContent',
   ]);
   const layoutBoxes = [];
   let layoutMatched = 0;
@@ -73,7 +80,27 @@ export function collectSelectOverflowObservation() {
       layoutMatched++;
       if (layoutBoxes.length < 24) {
         const children = Array.from(node.children).slice(0, 16).map(describe);
-        layoutBoxes.push({ ...facts, children, childrenTruncated: node.children.length > 16 });
+        const selectedOptions = [];
+        let selectedOptionsTruncated = false;
+        if (facts.role === 'listbox') {
+          const options = node.querySelectorAll('[role="option"][aria-selected="true"]');
+          selectedOptionsTruncated = options.length > 4;
+          for (let index = 0; index < Math.min(options.length, 4); index++) {
+            const option = options[index];
+            selectedOptions.push({
+              ...describe(option),
+              label: option.firstElementChild ? describe(option.firstElementChild) : null,
+              indicator: option.lastElementChild ? describe(option.lastElementChild) : null,
+            });
+          }
+        }
+        layoutBoxes.push({
+          ...facts,
+          children,
+          childrenTruncated: node.children.length > 16,
+          selectedOptions,
+          selectedOptionsTruncated,
+        });
       }
     }
     if (

@@ -286,3 +286,45 @@ describe('bounded Select demo intrinsic layout samples', () => {
     expect(result.layoutBoxes[0].childrenTruncated).toBe(true);
   });
 });
+
+it('records the selected popup label and indicator before any popup assertion can abort the journey', async () => {
+  viewport();
+  const popup = document.createElement('div');
+  popup.setAttribute('data-demo-ref', 'rtlContent');
+  popup.setAttribute('role', 'listbox');
+  popup.style.cssText = 'direction:rtl; width:78px; padding:16px';
+  for (let i = 0; i < 5; i++) {
+    const option = document.createElement('div');
+    option.setAttribute('role', 'option');
+    option.setAttribute('aria-selected', 'true');
+    const label = document.createElement('span'),
+      indicator = document.createElement('span');
+    label.textContent = 'PRIVATE_SELECTED_LABEL';
+    indicator.textContent = 'PRIVATE_INDICATOR';
+    option.append(label, indicator);
+    popup.append(option);
+    vi.spyOn(label, 'getBoundingClientRect').mockReturnValue(rect(76, 0));
+    vi.spyOn(indicator, 'getBoundingClientRect').mockReturnValue(rect(56, 32));
+  }
+  document.body.append(popup);
+  const before = document.body.outerHTML;
+  const result = collectSelectOverflowObservation();
+  const box = result.layoutBoxes.find((item) => item.demoRef === 'rtlContent')!;
+  expect(box.direction).toBe('rtl');
+  expect(box.selectedOptions).toHaveLength(4);
+  expect(box.selectedOptionsTruncated).toBe(true);
+  expect(box.selectedOptions[0].label?.rect.left).toBe(76);
+  expect(box.selectedOptions[0].indicator?.rect.right).toBe(88);
+  expect(JSON.stringify(result)).not.toMatch(/PRIVATE_SELECTED_LABEL|PRIVATE_INDICATOR/);
+  expect(document.body.outerHTML).toBe(before);
+  const source = await readFile(
+    path.resolve('apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts'),
+    'utf8'
+  );
+  const guard = source.indexOf('await withLiquidCardFailureObservation(');
+  expect(guard).toBeGreaterThan(0);
+  expect(guard).toBeLessThan(source.indexOf("expect(geometry.direction).toBe('rtl')"));
+  expect(source).toContain(
+    'expect(geometry.indicatorRight).toBeLessThanOrEqual(geometry.labelLeft + 1)'
+  );
+});

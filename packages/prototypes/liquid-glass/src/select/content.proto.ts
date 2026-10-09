@@ -20,9 +20,11 @@ export default definePrototype<LiquidGlassSelectContentProps, LiquidGlassSelectC
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
     });
 
+    // Prefer room for text and the indicator even when the anchor is narrow.
+    // The available-width maximum still wins; no hard minimum escapes the viewport.
     def.feedback.style.use(
       tw(
-        'z-50 min-w-0 w-[var(--proto-ui-anchor-width)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-x-hidden overflow-y-auto outline-none rounded-2xl border border-border bg-secondary text-secondary-foreground p-2 shadow-md'
+        'z-50 min-w-0 w-[max(var(--proto-ui-anchor-width),12rem)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-x-hidden overflow-y-auto outline-none rounded-2xl border border-border bg-secondary text-secondary-foreground p-2 shadow-md'
       )
     );
   },

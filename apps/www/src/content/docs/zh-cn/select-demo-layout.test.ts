@@ -87,3 +87,23 @@ for (const [family, demo] of [
     });
   });
 }
+
+// This controls the authored 320px/200% inset allocation, not native layout.
+it('uses only an opt-in Select preview inset and removes duplicate narrow demo padding', () => {
+  for (const locale of ['en', 'zh-cn'])
+    for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
+      const page = readFileSync(
+        `apps/www/src/content/docs/${locale}/ui-libraries/${family}/select.mdx`,
+        'utf8'
+      );
+      expect(page).toContain('class="select-content-preview"');
+    }
+  const css = readFileSync('apps/www/src/styles/runtime-box.css', 'utf8');
+  expect(css).toContain('.pui-runtime-box.select-content-preview');
+  expect(css).toContain('--runtime-box-content-padding: 1.25rem 0;');
+  for (const demo of [bootstrap, liquid]) {
+    expect(tokens(demo.root)).toContain('p-0');
+    expect(tokens(demo.root)).toContain('sm:p-2');
+    expect(tokens(demo.root)).not.toContain('p-2');
+  }
+});
