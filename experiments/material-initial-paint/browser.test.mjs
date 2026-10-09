@@ -221,6 +221,9 @@ try {
           visibility: css.visibility,
           opacity: css.opacity,
           quality: el.dataset.materialQuality ?? null,
+          reason: el.dataset.materialReason ?? null,
+          seedOwner: el.getAttribute('data-pui-initial-seed'),
+          backgroundColor: css.backgroundColor,
         });
         requestAnimationFrame(tick);
       };
@@ -249,9 +252,23 @@ try {
     });
     await writeFile(join(out, `${theme}-frames.json`), JSON.stringify(frames, null, 2));
     assert.ok(frames.length >= 8);
-    for (const frame of frames) {
+    for (const [index, frame] of frames.entries()) {
       assert.equal(frame.sameOwner, true);
-      assert.equal(frame.image, expected);
+      assert.equal(
+        frame.image,
+        expected,
+        `server-to-live paint mismatch: ${JSON.stringify({
+          theme,
+          index,
+          at: frame.t,
+          quality: frame.quality,
+          reason: frame.reason,
+          seedOwner: frame.seedOwner,
+          backgroundColor: frame.backgroundColor,
+          sameOwner: frame.sameOwner,
+          rect: frame.rect,
+        })}`
+      );
       assert.deepEqual(frame.rect, before.rect);
       assert.equal(frame.visibility, 'visible');
       assert.equal(frame.opacity, '1');
