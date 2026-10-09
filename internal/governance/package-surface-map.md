@@ -281,7 +281,9 @@ A Shadcn family should express inheritance through its corresponding Base family
 
 ### 8.3 `@proto.ui/prototypes-brutalist`
 
-`@proto.ui/prototypes-brutalist` is the contributor-authored Neo-Brutalist styled library promoted to the public `v0.2.0-rc.7` release train.
+`@proto.ui/prototypes-brutalist` is the Proto UI-maintained Neo-Brutalist styled library promoted to the public `v0.2.0-rc.7` release train.
+
+The current workspace adapts visual recipes from [neobrutalism-components at `3306a802`](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4), retaining the MIT attribution in the package’s `THIRD_PARTY_NOTICES.md`. Proto UI maintains its own semantic implementation and documented extensions; it does not claim to have originated the design language or upstream recipes.
 
 Its families reuse Base only when Base owns an independently testable cross-host protocol. Styled-only visual carriers remain direct prototypes rather than creating empty Base abstractions. The complete package is the release unit; family subpaths and the Brutalist CLI preset are the consumer-facing integration boundary.
 

@@ -280,7 +280,9 @@ Shadcn family 应通过对应的 Base family subpath 表达继承边界，默认
 
 ### 8.3 `@proto.ui/prototypes-brutalist`
 
-`@proto.ui/prototypes-brutalist` 是进入公开 `v0.2.0-rc.7` release train 的贡献者原创 Neo-Brutalist styled library。
+`@proto.ui/prototypes-brutalist` 是由 Proto UI 维护、已进入公开 `v0.2.0-rc.7` release train 的 Neo-Brutalist styled library。
+
+当前 workspace 的视觉 recipe 改编自 [neobrutalism-components `3306a802`](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4)，package 的 `THIRD_PARTY_NOTICES.md` 保留 MIT 署名。Proto UI 维护自己的语义实现与已说明扩展，不声称原创该设计语言或上游 recipe。
 
 只有当 Base 拥有可独立测试的跨宿主协议时，Brutalist family 才复用 Base；仅承载视觉语法的 styled-only 项直接定义为 prototype，不以空 Base 抽象占位。完整 package 是发布单位，family subpath 与 Brutalist CLI preset 是消费侧集成边界。
 

@@ -1,14 +1,14 @@
 # @proto.ui/prototypes-brutalist
 
-Contributor-authored Neo-Brutalist Proto UI style library.
+Proto UI-maintained Neo-Brutalist design-language projection.
 
 > **Release status:** public `0.2.0-rc.7` package published on npm under `next`. The stable `0.2.0` release train is under review and is not installable until publication completes.
 
 ## Purpose
 
-Provides a Proto UI design-language foundation: square geometry, strong structural borders, hard offset shadows, flat paired colors, and explicit light/dark theme variables. Families project Base only when they share a transferable Base protocol; styled-only visual prototypes are defined directly.
+Provides a Neo-Brutalist design-language projection: component-specific geometry, strong structural borders, role-specific hard shadows, flat paired colors, and explicit light/dark theme variables. Families project Base only when they share a transferable Base protocol; styled-only visual prototypes are defined directly.
 
-This package is not owned by or claimed to be compatible with a named third-party component system. It uses only general Neo-Brutalist visual references.
+The current workspace adapts visual recipes from [neobrutalism.dev / neobrutalism-components at `3306a802`](https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4), with MIT attribution preserved in [third-party notices](THIRD_PARTY_NOTICES.md). Neo-Brutalist design language and the upstream visual recipes are not Proto UI originals. Proto UI maintains its own semantic implementation and documented extensions; this does not imply upstream endorsement or component API compatibility.
 
 ## Published rc.7 scope
 
