@@ -13,7 +13,7 @@ const SERVER_ONLY_PRERENDER_MODULES = new Set([
 const DEFAULT_GRAPH_PATH = 'apps/www/dist/proto-ui-bundle-graph.json';
 const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   // Private full-Card producer; normal Library roots must not reach its material entry.
-  'apps/www/src/pages/[locale]/test/liquid-library-card.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/new-projection-families.astro?astro&type=script&index=0&lang.ts',
   // The #808 route renders its actual eight Base-derived parts through the
   // reviewed demo-renderer and keeps React/Vue/Vue2 in dynamic runtime edges.
@@ -521,7 +521,7 @@ export function collectWebsiteProductionBundleIssues({
     ]);
     if (
       demoRoot.facadeModuleId ===
-      'apps/www/src/pages/[locale]/test/liquid-library-card.astro?astro&type=script&index=0&lang.ts'
+      'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts'
     ) {
       const modules = [...completeClosure]
         .flatMap((fileName) => chunksByFileName.get(fileName)?.moduleIds ?? [])

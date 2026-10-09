@@ -1,10 +1,6 @@
 ---
 import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
-import UiLibraryGallery from '../../../components/UiLibraryGallery.astro';
-
-export function getStaticPaths() {
-  return ['en', 'zh-cn'].map((locale) => ({ params: { locale }, props: { locale } }));
-}
+import UiLibraryGallery from './UiLibraryGallery.astro';
 
 interface Props {
   locale: 'en' | 'zh-cn';
@@ -30,8 +26,8 @@ const isZh = locale === 'zh-cn';
 </StarlightPage>
 
 <script>
-  import { initLibraryLiquidCardCandidate } from '../../../components/library-liquid-card-client';
-  import { installLibraryLiquidCandidateHarness } from '../../../components/library-liquid-scene';
+  import { initLibraryLiquidCardCandidate } from './library-liquid-card-client';
+  import { installLibraryLiquidCandidateHarness } from './library-liquid-scene';
   const start = () => {
     if (!document.querySelector('[data-library-liquid-candidate]')) return () => {};
     const release = initLibraryLiquidCardCandidate(document);

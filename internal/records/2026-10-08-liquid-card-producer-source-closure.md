@@ -1,0 +1,11 @@
+# Liquid Card producer: explicit source closure
+
+Independent review of `d87c4961c8bc0e260390282b42d353a2c20c373a` found 48 source-wall issues. Some were the already-reviewed family icon binding follow-up; the Card-specific failures exposed the complete private capture type and runtime import closure, three interactive material resources, and the inventory parser's inability to read a bracketed dynamic route as a literal source path. No native browser result was established by that candidate.
+
+The accepted icon binding commit `883bef98ed07d9fcbc86e4e3b42a44175f47a02e` is replayed as a prerequisite. Its two conflicts keep all Card paths and the actual combined Gallery fingerprint while retaining the icon owners and exact icon import admission. It is not a new icon implementation.
+
+The Card now has two explicit static locale routes that render one shared `LibraryLiquidCandidatePage.astro`. Their URLs and full Card content are the same. The source parser is unchanged; no bracket, glob or directory allowance is added. The production graph names only the shared component's exact script facade and continues to require its actual Card client, scene and WC Adapter. Foreign facades, missing owners and added framework runtimes fail its controls.
+
+The capture closure is bound by exact file SHA-256 and a finite list of actual import specifiers, including type imports. The newly reached interactive `geometry-watch.ts`, `initial-paint-experiment.ts` and `preferences.ts` resources also require their exact hashes and the single existing blocked Card owner. The checker admits no sibling path, alternate owner, modified source or general material directory. Fifteen focused import/owner/hash/adjacent-path controls passed. This is inventory admission for an isolated producer, not a lifecycle promotion, a default material consumer or optical acceptance.
+
+The old full-wall red remains evidence. A new full wall, final canonical checks, actual production graph and both updated route HTTP requests must be recorded on the corrected source before integration. Full GPU output, preferences and prerender continuity remain official-native work. This follow-up changes no renderer, shader, material guard, family recipe or original Card oracle.

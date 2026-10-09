@@ -18666,3 +18666,68 @@ test('Hero fixed-icon import remains exact, content-bound and owner-bound', () =
     )
   );
 });
+
+for (const source of [
+  'packages/adapters/base/src/material/geometry-watch.ts',
+  'packages/adapters/base/src/material/initial-paint-experiment.ts',
+  'packages/adapters/base/src/material/preferences.ts',
+])
+  for (const scenario of ['exact', 'wrong-owner', 'changed-bytes', 'adjacent-path']) {
+    test(`private Liquid Card interactive source binding: ${path.basename(source)} ${scenario}`, () => {
+      const root = createRoot();
+      const relative = scenario === 'adjacent-path' ? source.replace('.ts', '-foreign.ts') : source;
+      const target = path.join(root, relative);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${source}`, import.meta.url), target);
+      const owner =
+        scenario === 'wrong-owner'
+          ? 'www.demo.raw-adapter-runtimes'
+          : 'www.gallery.ui-library-cards';
+      writeValidMatrices(root, {}, {}, { websiteBindings: [[relative, [owner]]] });
+      if (scenario === 'changed-bytes')
+        fs.appendFileSync(target, '\n// Unreviewed private material bytes\n');
+      const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+      if (scenario === 'adjacent-path')
+        assert.match(message, /source binding must name exactly one/);
+      else if (scenario === 'wrong-owner' || scenario === 'changed-bytes')
+        assert.match(
+          message,
+          /exact private Card material source, digest and blocked Card owner remain unverified/
+        );
+      else assert.equal(message, '');
+    });
+  }
+for (const [relative, allowed] of [
+  ['apps/www/src/components/library-liquid-scene.ts', '@proto.ui/adapter-base/web-material'],
+  ['packages/adapters/base/src/material/initial-paint-experiment.ts', './sink'],
+  ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
+])
+  test(`private Liquid Card import stays source-bound: ${relative}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const bytes = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const importer = path.join(root, 'apps/www/src/components/CardImportProbe.ts');
+    fs.mkdirSync(path.dirname(importer), { recursive: true });
+    fs.writeFileSync(
+      importer,
+      `import '${path.relative(path.dirname(importer), target).replaceAll('\\', '/')}';`
+    );
+    fs.writeFileSync(target, bytes);
+    const issue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+    assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    fs.writeFileSync(target, bytes + '\n// unreviewed bytes\n');
+    assert.ok(collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    const foreign = relative.replace('.ts', '-foreign.ts');
+    fs.writeFileSync(path.join(root, foreign), bytes);
+    fs.writeFileSync(
+      importer,
+      `import '${path.relative(path.dirname(importer), path.join(root, foreign)).replaceAll('\\', '/')}';`
+    );
+    assert.ok(
+      collectCoverageMatrixIssues({ rootDir: root })
+        .join('\n')
+        .includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+    );
+  });

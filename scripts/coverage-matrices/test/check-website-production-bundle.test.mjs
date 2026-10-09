@@ -121,7 +121,7 @@ function graphFixture() {
       chunk('_astro/liquid-library-card.js', {
         isEntry: true,
         facadeModuleId:
-          'apps/www/src/pages/[locale]/test/liquid-library-card.astro?astro&type=script&index=0&lang.ts',
+          'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts',
         imports: ['_astro/wc-host.js'],
         moduleIds: [
           'apps/www/src/components/library-liquid-card-client.ts',
@@ -1370,7 +1370,7 @@ test('Liquid Card producer requires its exact route facade and stays outside ord
   );
   assert.ok(
     collectWebsiteProductionBundleIssues({ graph: missing }).some((issue) =>
-      issue.includes('liquid-library-card.astro')
+      issue.includes('LibraryLiquidCandidatePage.astro')
     )
   );
   const renamed = structuredClone(good);
