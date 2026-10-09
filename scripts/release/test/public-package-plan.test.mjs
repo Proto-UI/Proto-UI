@@ -1,7 +1,15 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { test } from 'node:test';
 
-import { selectAffectedPackages } from '../../build/public-packages.mjs';
+import {
+  buildPublicPackage,
+  ROOT_DIR,
+  selectAffectedPackages,
+} from '../../build/public-packages.mjs';
 
 const packages = [
   ['core', []],
@@ -49,33 +57,76 @@ test('package changes retain their consumers and required dependencies', () => {
   );
 });
 
-test('builds an explicit private subpath without re-exporting it from the root', async (t) => {
-  const { mkdtempSync, mkdirSync, writeFileSync, rmSync } = await import('node:fs');
-  const { tmpdir } = await import('node:os');
-  const { join } = await import('node:path');
-  const { pathToFileURL } = await import('node:url');
-  const { buildPublicPackage } = await import('../../build/public-packages.mjs');
-  const dir = mkdtempSync(join(tmpdir(), 'public-subpath-'));
-  t.after(() => rmSync(dir, { recursive: true, force: true }));
+test('declared subpaths build independently of the barrel for JavaScript and type consumers', (t) => {
+  const packageDir = mkdtempSync(join(tmpdir(), 'proto-ui-detached-exports-'));
+  t.after(() => rmSync(packageDir, { recursive: true, force: true }));
+  mkdirSync(join(packageDir, 'src', 'internal'), { recursive: true });
   const manifest = {
-    name: '@proto.ui/private-subpath-fixture',
+    name: '@proto.ui/build-fixture',
     type: 'module',
     exports: {
-      '.': { import: './dist/index.js', types: './dist/index.d.ts' },
-      './internal/value': {
-        import: './dist/internal/value.js',
-        types: './dist/internal/value.d.ts',
+      '.': { types: './dist/index.d.ts', import: './dist/index.js' },
+      './internal/double': {
+        types: './dist/internal/double.d.ts',
+        import: './dist/internal/double.js',
       },
+      './internal/input': { types: './dist/internal/input.d.ts' },
     },
   };
-  writeFileSync(join(dir, 'package.json'), JSON.stringify(manifest));
-  mkdirSync(join(dir, 'src/internal'), { recursive: true });
-  writeFileSync(join(dir, 'src/index.ts'), 'export const publicValue = 1;');
-  writeFileSync(join(dir, 'src/internal/value.ts'), 'export const privateValue = 2;');
-  buildPublicPackage({ name: manifest.name, dir, manifest });
-  const root = await import(pathToFileURL(join(dir, 'dist/index.js')).href);
-  const subpath = await import(pathToFileURL(join(dir, 'dist/internal/value.js')).href);
-  assert.equal(root.publicValue, 1);
-  assert.equal(root.privateValue, undefined);
-  assert.equal(subpath.privateValue, 2);
+  writeFileSync(join(packageDir, 'package.json'), JSON.stringify(manifest));
+  writeFileSync(join(packageDir, 'src', 'index.ts'), 'export const root = true;\n');
+  writeFileSync(
+    join(packageDir, 'src', 'internal', 'double.ts'),
+    'export function double(value: number) { return value * 2; }\n'
+  );
+  writeFileSync(
+    join(packageDir, 'src', 'internal', 'input.ts'),
+    'export type Input = { value: number };\n'
+  );
+  const pkg = { name: manifest.name, dir: packageDir, manifest };
+  buildPublicPackage(pkg);
+
+  const runtime = spawnSync(
+    process.execPath,
+    [
+      '--input-type=module',
+      '--eval',
+      `import { double } from '@proto.ui/build-fixture/internal/double';
+       import * as root from '@proto.ui/build-fixture';
+       console.log(JSON.stringify({ doubled: double(7), leaked: 'double' in root }));`,
+    ],
+    { cwd: packageDir, encoding: 'utf8' }
+  );
+  assert.equal(runtime.status, 0, runtime.stderr);
+  assert.deepEqual(JSON.parse(runtime.stdout), { doubled: 14, leaked: false });
+
+  const consumer = join(packageDir, 'consumer.ts');
+  writeFileSync(
+    consumer,
+    `import { double } from '@proto.ui/build-fixture/internal/double';
+     import type { Input } from '@proto.ui/build-fixture/internal/input';
+     const input: Input = { value: 7 };
+     double(input.value);\n`
+  );
+  const types = spawnSync(
+    process.execPath,
+    [
+      join(ROOT_DIR, 'node_modules', 'typescript', 'bin', 'tsc'),
+      '--noEmit',
+      '--strict',
+      '--module',
+      'ES2022',
+      '--moduleResolution',
+      'Bundler',
+      consumer,
+    ],
+    { cwd: packageDir, encoding: 'utf8' }
+  );
+  assert.equal(types.status, 0, types.stdout + types.stderr);
+
+  manifest.exports['./absent'] = { import: './dist/absent.js' };
+  assert.throws(
+    () => buildPublicPackage(pkg),
+    (error) => error instanceof Error && error.message.includes('./dist/absent.js')
+  );
 });

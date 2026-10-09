@@ -72,3 +72,18 @@ test('refuses source traversal and does not treat wildcard exports as literal ro
     pkg.dispose();
   }
 });
+
+test('declaration-only roots retain missing-source, wildcard and traversal boundaries', () => {
+  const pkg = fixture();
+  try {
+    pkg.manifest.exports['./wild-types/*'] = { types: './dist/wild/*.d.ts' };
+    assert.equal(publicPackageSourceEntries(pkg).length, 2);
+    pkg.manifest.exports['./missing-types'] = { types: './dist/missing.d.ts' };
+    assert.throws(() => publicPackageSourceEntries(pkg), /missing source for explicit export/);
+    delete pkg.manifest.exports['./missing-types'];
+    pkg.manifest.exports['./escape-types'] = { types: './dist/../outside.d.ts' };
+    assert.throws(() => publicPackageSourceEntries(pkg), /escapes its source/);
+  } finally {
+    pkg.dispose();
+  }
+});

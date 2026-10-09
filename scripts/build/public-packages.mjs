@@ -174,14 +174,15 @@ function validateBuiltPackage(pkg, distDir) {
   }
 }
 
-/** Every explicit JS export is a compiler root, even when intentionally kept
+/** Every explicit JS or declaration export is a compiler root, even when intentionally kept
  * out of the runtime barrel to preserve a lazy/import ownership boundary. */
 export function publicPackageSourceEntries(pkg) {
   const sourceRoot = join(pkg.dir, 'src');
   const entries = new Set([join(sourceRoot, 'index.ts')]);
   for (const target of flattenExportTargets(pkg.manifest.exports)) {
-    if (!target.startsWith('./dist/') || !target.endsWith('.js') || target.includes('*')) continue;
-    const stem = resolve(sourceRoot, target.slice('./dist/'.length, -3));
+    if (!target.startsWith('./dist/') || !/\.(?:d\.ts|js)$/.test(target) || target.includes('*'))
+      continue;
+    const stem = resolve(sourceRoot, target.slice('./dist/'.length).replace(/\.(?:d\.ts|js)$/, ''));
     if (relative(sourceRoot, stem).startsWith('..'))
       throw new Error(`${pkg.name}: export escapes its source directory: ${target}`);
     const entry = ['.ts', '.tsx', '.js'].map((extension) => stem + extension).find(existsSync);
