@@ -122,17 +122,17 @@ function rewriteRelativeRuntimeSpecifiers(distDir) {
   )) {
     const original = readFileSync(file, 'utf8');
     let next = original.replace(
-      /(\bfrom\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
+      /(\bfrom\s*)(['"])(\.{1,2}(?:\/[^'"]*)?)\2/g,
       (_match, prefix, quote, specifier) =>
         `${prefix}${quote}${resolveRelativeRuntimeSpecifier(file, specifier)}${quote}`
     );
     next = next.replace(
-      /(\bimport\s*\(\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
+      /(\bimport\s*\(\s*)(['"])(\.{1,2}(?:\/[^'"]*)?)\2/g,
       (_match, prefix, quote, specifier) =>
         `${prefix}${quote}${resolveRelativeRuntimeSpecifier(file, specifier)}${quote}`
     );
     next = next.replace(
-      /(\bimport\s*)(['"])(\.{1,2}\/[^'"]+)\2/g,
+      /(\bimport\s*)(['"])(\.{1,2}(?:\/[^'"]*)?)\2/g,
       (_match, prefix, quote, specifier) =>
         `${prefix}${quote}${resolveRelativeRuntimeSpecifier(file, specifier)}${quote}`
     );
