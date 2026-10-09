@@ -2,6 +2,11 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { withLiquidCardFailureObservation } from './library-liquid-card-observation';
+import {
+  collectAccordionPendingObservation,
+  readAccordionSourceBinding,
+} from './accordion-pending-observation';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -302,7 +307,41 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           await expanded(controlled, true);
           await first.click();
           await expanded(first, true);
-          await ref(previewer, 'nested-overview-trigger').click();
+          await withLiquidCardFailureObservation(
+            () => ref(previewer, 'nested-overview-trigger').click(),
+            () =>
+              ref(previewer, 'nested-overview-trigger').evaluate(
+                collectAccordionPendingObservation
+              ),
+            async (facts) => {
+              const directory =
+                process.env.PROTO_UI_ACCORDION_SCREENSHOT_DIR ??
+                (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
+                  ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'accordion')
+                  : null);
+              if (!directory) return;
+              await mkdir(directory, { recursive: true });
+              const { sourceSha, sourceTree, sourceDirty } = readAccordionSourceBinding((args) =>
+                execFileSync('git', args, { encoding: 'utf8' })
+              );
+              // At most one retained observation per exact source/family/runtime.
+              // EEXIST is secondary and never replaces the original native failure.
+              await writeFile(
+                path.join(
+                  directory,
+                  `${sourceSha.slice(0, 12)}-${family}-${runtime}-nested-click-failure.json`
+                ),
+                JSON.stringify(
+                  { sourceSha, sourceTree, sourceDirty, family, runtime, facts },
+                  null,
+                  2
+                ),
+                { flag: 'wx' }
+              );
+            },
+            (error) => console.error('[accordion failure observation]', String(error)),
+            1000
+          );
           await expanded(ref(previewer, 'nested-overview-trigger'), true);
           await expanded(first, true);
           await capture(previewer, `${family}-${runtime}-controlled-nested`, {
