@@ -59,6 +59,19 @@ test('the Spinner single border-color intent retains the existing native declara
   });
 });
 
+test('Card row sizing retains exact declarations despite the native grid gaps', () => {
+  const fixture = JSON.parse(readFileSync(FIXTURE, 'utf8'));
+  const cases = [
+    ['auto-rows-min', { 'grid-auto-rows': 'min-content' }],
+    ['grid-rows-[auto_auto]', { 'grid-template-rows': 'auto auto' }],
+  ];
+  for (const [token, declarations] of cases) {
+    assert.deepEqual(fixture.tokens[token], declarations);
+    assert.ok(fixture.order.includes(token));
+    assert.ok(!fixture.noDeclarations.includes(token));
+  }
+});
+
 test('a stale fixture fails the check', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'proto-ui-style-fixture-'));
   const copy = path.join(dir, 'style-tokens.json');
