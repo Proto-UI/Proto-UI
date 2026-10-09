@@ -7,6 +7,7 @@ import {
 import { asControlLabel } from '@proto.ui/hooks';
 import { A11Y_PROJECT_CAP, type A11yPort } from '@proto.ui/module-a11y';
 import { createRuntimeSession } from '@proto.ui/runtime';
+import type { ControlLabelPort } from '../src/create';
 import { CONTROL_LABEL_HOST_CAP, type ControlLabelHost } from '../src/caps';
 
 const cleanups: Array<() => Promise<void>> = [];
@@ -203,5 +204,60 @@ describe('Control Label failed association acquisition', () => {
     target.projectWith();
     target.associate(ref);
     expect(target.a11y.getSnapshot().relations.labelledBy?.[0]).toBe(label.a11y.getObjectRef());
+  });
+});
+
+describe('withdrawn diagnostic negative controls', () => {
+  it('preserves a successor association installed reentrantly during withdrawal', async () => {
+    const scope = {},
+      label = participant('label', scope),
+      target = participant('target', scope);
+    await label.session.mount();
+    await target.session.mount();
+    const ref = createControlLabelRef();
+    label.associate(ref);
+    target.associate(ref);
+    const port = label.session.caps.getPort<ControlLabelPort>('control-label')!;
+    label.disposeWith(() => {
+      label.disposeWith();
+      port.prepareViewPresence(true);
+    });
+    port.prepareViewPresence(false);
+    expect(port.getDiagnostic()).toBeNull();
+    expect(target.a11y.getSnapshot().relations.labelledBy?.[0]).toBe(label.a11y.getObjectRef());
+    expect(label.leases).toHaveLength(2);
+    expect(label.leases[1]!.dispose).not.toHaveBeenCalled();
+  });
+
+  it('diagnoses a previously healthy participant withdrawn by view presence', async () => {
+    const scope = {},
+      label = participant('label', scope),
+      target = participant('target', scope);
+    await label.session.mount();
+    await target.session.mount();
+    const ref = createControlLabelRef();
+    label.associate(ref);
+    target.associate(ref);
+    const port = label.session.caps.getPort<ControlLabelPort>('control-label')!;
+    expect(port.getDiagnostic()).toBeNull();
+    port.prepareViewPresence(false);
+    expect(target.a11y.getSnapshot().relations.labelledBy).toBeUndefined();
+    expect(port.getDiagnostic()).toBe('missing-binding');
+    port.prepareViewPresence(true);
+    expect(port.getDiagnostic()).toBeNull();
+    expect(target.a11y.getSnapshot().relations.labelledBy?.[0]).toBe(label.a11y.getObjectRef());
+  });
+  it('clears a stale foreign scope error when association intent is removed', async () => {
+    const label = participant('label', {}),
+      target = participant('target', {});
+    await label.session.mount();
+    await target.session.mount();
+    const ref = createControlLabelRef();
+    label.associate(ref);
+    target.associate(ref);
+    const port = label.session.caps.getPort<ControlLabelPort>('control-label')!;
+    expect(port.getDiagnostic()).toBe('foreign-tree-scope');
+    label.associate(null);
+    expect(port.getDiagnostic()).toBeNull();
   });
 });

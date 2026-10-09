@@ -200,6 +200,12 @@ class ControlLabelModuleImpl extends ModuleBase {
       this.mountPhase === 'detached' ||
       this.mountPhase === 'unmounting'
     ) {
+      // Retire this participant's own diagnostic before releasing its lease:
+      // registry refresh only diagnoses participants which remain registered.
+      // Cleanup can reenter and install a successor, whose diagnostic must win.
+      if (this.disposed || !this.kind || (!this.ref && !this.anatomyPair)) this.setDiagnostic(null);
+      else if (this.ref) this.setDiagnostic('missing-binding');
+      // An unresolved anatomy association retains its specific domain diagnostic.
       if (this.binding || this.host) this.release();
       return;
     }
