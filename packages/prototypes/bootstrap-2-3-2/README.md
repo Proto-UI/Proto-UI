@@ -33,3 +33,13 @@ This is not Fieldset/Form or form submission. Native TextControl transport, OS a
 The Library entry composes the existing passive Surface (`outline`, `raised`) and Text, following the archived 2.3.2 Thumbnail instead of a modern Card. Default Surface (`outline`, no elevation) remains neutral. The explicit raised recipe uses the #ddd frame and 0/1/3px shadow; native-link `solid` Surface shares Button's classic primary gradient and pressed paint without inheriting Button interaction. Its native anchor remains the navigation/focus owner.
 
 Text's `sm` + `normal` supplies 14/20 typography at a 16px root; `2xl` + `relaxed` supplies 24.5/40. Rem dimensions scale with text settings. The website supplies only composition spacing, while these family prototypes own paint/type and real Runtime server snapshots. This introduces no new component kind, public CLI entry, homepage eligibility or exact-browser acceptance claim.
+
+## Local draft artifacts
+
+`pnpm run build:draft` refreshes the public prerequisite `dist` trees in the workspace through the normal package compiler, then builds and stages the existing draft entries and dependency closure in a fresh temporary directory. `pnpm run pack:draft` additionally produces local tarballs. The JSON receipt identifies every artifact and its draft-only status. Both commands run from this package directory.
+
+These are private, release-excluded development artifacts, not public package admission or a registry publication. The checked-in source exports and public CLI rejection remain unchanged. The temporary manifests use `0.0.0-draft`, retain `private: true`, omit lifecycle scripts and bind workspace dependencies to the same local draft version. Install the complete returned tarball closure together with scripts disabled and offline resolution; no artifact should be uploaded to npm. Build/pack success alone does not establish consumer, host, visual, native, or full Finf G4 acceptance.
+
+Run `pnpm test:draft-packages` from the repository root for the complete offline tarball install, JavaScript ESM and strict NodeNext declaration smoke. Run this build-bearing suite separately from other package builds.
+
+The draft builder admits only the two named prototype families and their current dependency shape. It is not a general private-package build API; adding workspace dependencies that occur only in peer or optional fields requires extending and testing its closure planning first.

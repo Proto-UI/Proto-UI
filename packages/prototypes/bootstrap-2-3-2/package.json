@@ -78,5 +78,9 @@
   "dependencies": {
     "@proto.ui/core": "workspace:*",
     "@proto.ui/prototypes-base": "workspace:*"
+  },
+  "scripts": {
+    "build:draft": "node ../../../scripts/build/draft-prototype-packages.mjs --package @proto.ui/prototypes-bootstrap-2-3-2",
+    "pack:draft": "node ../../../scripts/build/draft-prototype-packages.mjs --package @proto.ui/prototypes-bootstrap-2-3-2 --pack"
   }
 }
