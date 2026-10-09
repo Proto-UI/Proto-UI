@@ -164,9 +164,9 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts` | `www.demo.authored-controllers` | `4492f622a7d0cd411f60ea7e3906205219cb9b4bc2d1062c0eed5703e1bfd514` |
 | `apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts` | `www.demo.authored-controllers` | `fa92aa85ff8afb7a0f0233155e485dc3363ee886068015ceb979162e2ae66cbf` |
 | `apps/www/src/content/docs/accordion-demo.shared.ts` | `www.demo.authored-controllers` | `e84850cd3dd0dcf0fd1b1afdbdc7989bfb3bf253f7db760ad4b9b26d8f426d94` |
-| `apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts` | `www.demo.authored-controllers` | `00275623d399292a5c57e1eceb1ebc3be8bd49a56398ab95bab7c24b8e456b41` |
-| `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` | `www.demo.authored-controllers` | `55eb24acce9b08d2d682c32253d50fffb96524368b9b852e5b41094914c34262` |
-| `apps/www/src/content/docs/field-demo.shared.ts` | `www.demo.authored-controllers` | `34f875b743d60441737fe0cd6b476e4d888d5f5cb11a16a9ad9ff36c0ab65cb9` |
+| `apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts` | `www.demo.authored-controllers` | `a3a8e4a3cdec9f6beba3cd30c146813f0db0bf377e3c4936eb3badc03e981dbb` |
+| `apps/www/src/content/docs/demo-liquid-glass-select.demo.ts` | `www.demo.authored-controllers` | `5514f686af74e6d971633b2649b5314724544603d17e8c7ac0aeba672c42455f` |
+| `apps/www/src/content/docs/field-demo.shared.ts` | `www.demo.authored-controllers` | `cea7363876a91fd4548dd5e41738ff200f2dc5ca3bcd2c6e819617be57be9798` |
 | `apps/www/src/content/docs/demo-bootstrap-2-3-2-collapsible.demo.ts` | `www.demo.authored-controllers` | `9c4fc0147e888f965014696d2f8284d6c11710805cdc04847172de987e6de64a` |
 | `apps/www/src/content/docs/demo-brutalist-collapsible.demo.ts` | `www.demo.authored-controllers` | `4f8499ac68ae99f27330d8a771756f2fab9ff70eaddfd023b681adba2a004ac6` |
 | `apps/www/src/content/docs/demo-liquid-glass-collapsible.demo.ts` | `www.demo.authored-controllers` | `9deade9f6939aef8ebb67dbc8e2024a8bb0e3dc06c63c41b54064aabf95652ca` |
