@@ -63,8 +63,8 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 68, 'All source and server controls must run.');
-          assert.equal(report.numPassedTests, 68);
+          assert.equal(report.numTotalTests, 91, 'All source and server controls must run.');
+          assert.equal(report.numPassedTests, 91);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.numPendingTests, 0);
           assert.equal(report.success, true);

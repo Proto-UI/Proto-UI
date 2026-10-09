@@ -29,3 +29,21 @@ The resolver now analyzes local declaration choices only when a consumed union S
 Additional candidate analysis has a shared limit of 256 choices and 100,000 traversal-input work units (definition names, declarations and reference nodes counted from the original graph). Both resources are reserved before enumeration. Exceeding either produces an explicit unsupported/invalid result that an outer fallback cannot swallow. The same SCC's candidate resolvers are cached across repeated references and references to its other members. Unconsumed SCCs are never enumerated. These are algorithm-resource bounds, not package-size exemptions or wall-clock performance claims.
 
 Final focused evidence: 43 CSS-boundary cases and eight generated-server cases pass, 51/51. Coverage includes alias and selected fallback negatives, known-primary/unused-fallback positives, independent and cross-linked SCCs, repeated related references, the exact 256-choice boundary and 512-choice rejection, cumulative choices across SCCs, below/above the traversal bound, a large unconsumed SCC, and local declaration overrides. A focused strict TypeScript program for the analyzer returns zero diagnostics. This is still source/server evidence; fresh independent source review and later combined checks remain required.
+
+## Dedicated workflow count synchronization
+
+After the finite resolver review was accepted, the dedicated workflow still required the old source-report total of 68. Its exact existing command was run against `e94c612a45b624edd2562cf95fe39379025ef264`, using Node 24 and pnpm 10.32.1, and its JSON reported 91 total / 91 passed / 0 failed / 0 pending / success true: Button lowering 40, generated server 8, CSS boundary 43. The total was measured, not inferred from source text. The command remains:
+
+```sh
+corepack pnpm@10.32.1 exec vitest run \
+  packages/compiler/test/button-ssr.test.ts \
+  packages/compiler/test/button-ssr-server.test.ts \
+  packages/compiler/src/web-component-ssr-style.test.ts \
+  --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+  --outputFile="$RUNNER_TEMP/compiler-button-ssr/source-vitest.json" \
+  2>&1 | tee "$RUNNER_TEMP/compiler-button-ssr/source.log"
+```
+
+Only the two strict source total/passed assertions change from 68 to 91. Failed/pending/success checks, all three source inputs and their options, and the exact 21-case native browser gate are unchanged. An independent workflow-gate test reads the actual YAML step and executes its exact Node assertion body. Before synchronization it failed two controls (rejecting the measured 91 and accepting the obsolete 68); afterward all eight controls pass, including rejection of 68, 90, 92, reduced passed count, nonzero failure/pending, and false success. This extra test is intentionally outside the dedicated three-file invocation, so it does not recursively change the measured total.
+
+After editing the workflow, its unchanged complete source command was rerun: 91/91 passed and the updated exact gate accepted the real JSON. The standalone gate controls passed 8/8. These are local source/server and validator results; no native browser, full workspace, hosted CI or release acceptance is claimed.
