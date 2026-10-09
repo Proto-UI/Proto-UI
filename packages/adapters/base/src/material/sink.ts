@@ -148,12 +148,12 @@ function createDocumentMaterialSink(
   let carrier: ReturnType<typeof createContactCarrier> | null = null;
   let paintedImage = '';
   let cancellationSession: number | null = null;
+  let cancelledPointerPhase = false;
   let contactEpoch = 0;
   let neutralPaint: {
     lease: string;
     image: string;
     sourceRevision: number;
-    styles: [string, string][];
     retain(): () => void;
     release(): void;
   } | null = null;
@@ -162,7 +162,10 @@ function createDocumentMaterialSink(
     if (!currentDocument()) return;
     if (motion.update(sample, win.performance.now())) {
       contactEpoch++;
-      if (sample.active) cancellationSession = null;
+      if (sample.active) {
+        cancellationSession = null;
+        cancelledPointerPhase = false;
+      }
       cancelPending();
       // A fresh down retires the old session's completion, not an already
       // admitted image. Keep that paint until the new session decodes, subject
@@ -174,6 +177,7 @@ function createDocumentMaterialSink(
         // Re-admit a decoded neutral image through the ordinary source, style,
         // geometry and preference guards in this same event turn.
         cancellationSession = sample.session;
+        cancelledPointerPhase = true;
         repaint();
         lastOwnedStyle = host.getAttribute('style');
         lastOwnedTokens = host.getAttribute('data-pui-style');
@@ -549,6 +553,11 @@ function createDocumentMaterialSink(
       if (geometryLease && nextGeometryLease !== geometryLease) motion.stop();
       geometryLease = nextGeometryLease;
       const tracksContact = candidate.deformation?.contact === 'pointer';
+      // A stale pressed contribution is not a new keyboard gesture. Require
+      // its neutral phase (or a fresh pointer session) before centered press
+      // may re-arm; source ticks alone cannot revive cancelled contact.
+      if (candidate.deformation?.phase !== 'pressed') cancelledPointerPhase = false;
+      const suppressCancelledPress = cancellingContact || cancelledPointerPhase;
       if (policy.effectiveMotion !== 'press' || !tracksContact) motion.stop();
       const motionFrame = motion.frame(
         win!.performance.now(),
@@ -560,7 +569,7 @@ function createDocumentMaterialSink(
         tracksContact &&
         policy.effectiveMotion === 'press' &&
         candidate.deformation?.phase === 'pressed' &&
-        !cancellingContact &&
+        !suppressCancelledPress &&
         !contact.current()?.active &&
         motionFrame.contact?.strength === 0
       )
@@ -598,13 +607,38 @@ function createDocumentMaterialSink(
         tracksContact,
         candidate.variant,
       ]);
+      const installPaint = (image: string, currentCss: CSSStyleDeclaration) => {
+        if (tracksContact) {
+          carrier ??= withOwnedCarrierMarker(host, () => createContactCarrier(host));
+          if (!currentCss.position || currentCss.position === 'static') own('position', 'relative');
+          own('isolation', 'isolate');
+          // The absolute carrier origin is the current padding box, not the
+          // border box sampled by the renderer. Rebuild this translation for
+          // both decoded publication and neutral restoration; never replay a
+          // former border-relative offset just because the outer rect matches.
+          const borderLeft = parseFloat(currentCss.borderLeftWidth || '0');
+          const borderTop = parseFloat(currentCss.borderTopWidth || '0');
+          if (![borderLeft, borderTop].every((value) => Number.isFinite(value) && value >= 0))
+            throw new Error('contact-carrier-border-unavailable');
+          own('--pui-material-left', `${-paintOutset - borderLeft}px`);
+          own('--pui-material-top', `${-paintOutset - borderTop}px`);
+          own('--pui-material-width', `${rect.width + 2 * paintOutset}px`);
+          own('--pui-material-height', `${rect.height + 2 * paintOutset}px`);
+          own('--pui-material-image', `url("${image}")`);
+          own('background-image', 'none');
+          if (!carrier.valid(image)) throw new Error('contact-carrier-style-unavailable');
+        } else own('background-image', `url("${image}")`);
+        own('background-color', 'transparent');
+        own('background-origin', 'border-box');
+        own('background-clip', 'border-box');
+        own('background-size', '100% 100%');
+        own('background-repeat', 'no-repeat');
+      };
       // A cancelled held image is never a bridge. Only an already decoded rest
       // image from the exact admitted generation can cover its neutral successor.
       if (cancellingContact && neutralPaint?.lease === nextPaintLease) {
         const neutral = neutralPaint;
-        carrier ??= withOwnedCarrierMarker(host, () => createContactCarrier(host));
-        for (const [name, value] of neutral.styles) own(name, value);
-        if (!carrier.valid(neutral.image)) throw new Error('contact-carrier-style-unavailable');
+        installPaint(neutral.image, css);
         paintedImage = neutral.image;
         paintLease = nextPaintLease;
         releaseImage = neutral.retain();
@@ -666,7 +700,7 @@ function createDocumentMaterialSink(
         source,
         geometry: opticalGeometry,
         pressed:
-          !cancellingContact &&
+          !suppressCancelledPress &&
           policy.effectiveMotion === 'press' &&
           candidate.deformation?.phase === 'pressed',
         contact: tracksContact ? motionFrame.contact : undefined,
@@ -768,28 +802,7 @@ function createDocumentMaterialSink(
               return;
             }
             const previousImage = releaseImage;
-            if (tracksContact) {
-              carrier ??= withOwnedCarrierMarker(host, () => createContactCarrier(host));
-              if (!currentCss.position || currentCss.position === 'static')
-                own('position', 'relative');
-              own('isolation', 'isolate');
-              const borderLeft = parseFloat(currentCss.borderLeftWidth || '0');
-              const borderTop = parseFloat(currentCss.borderTopWidth || '0');
-              if (![borderLeft, borderTop].every(Number.isFinite))
-                throw new Error('contact-carrier-border-unavailable');
-              own('--pui-material-left', `${-paintOutset - borderLeft}px`);
-              own('--pui-material-top', `${-paintOutset - borderTop}px`);
-              own('--pui-material-width', `${rect.width + 2 * paintOutset}px`);
-              own('--pui-material-height', `${rect.height + 2 * paintOutset}px`);
-              own('--pui-material-image', `url("${image}")`);
-              own('background-image', 'none');
-              if (!carrier.valid(image)) throw new Error('contact-carrier-style-unavailable');
-            } else own('background-image', `url("${image}")`);
-            own('background-color', 'transparent');
-            own('background-origin', 'border-box');
-            own('background-clip', 'border-box');
-            own('background-size', '100% 100%');
-            own('background-repeat', 'no-repeat');
+            installPaint(image, currentCss);
             renderFailure = null;
             paintSignature = signature;
             paintLease = nextPaintLease;
@@ -812,7 +825,6 @@ function createDocumentMaterialSink(
                 lease: nextPaintLease,
                 image,
                 sourceRevision: source.revision,
-                styles: [...owned].map(([name, value]) => [name, value.applied[0]]),
                 retain,
                 release: retain(),
               };

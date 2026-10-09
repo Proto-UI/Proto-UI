@@ -756,6 +756,70 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
       }
     }
   );
+  it.each([
+    [5, 7],
+    [2.5, 3.25],
+    [0, 8],
+  ])(
+    'rebuilds neutral carrier origin for current left/top borders %s/%s without changing outer bounds',
+    (left, top) => {
+      const f = neutralFixture();
+      try {
+        const outset = -parseFloat(f.host.style.getPropertyValue('--pui-material-left'));
+        f.host.style.borderLeft = `${left}px solid red`;
+        f.host.style.borderTop = `${top}px solid red`;
+        f.invalidate();
+        f.send(0.5, 'cancel');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(f.neutral);
+        expect(parseFloat(f.host.style.getPropertyValue('--pui-material-left'))).toBe(
+          -outset - left
+        );
+        expect(parseFloat(f.host.style.getPropertyValue('--pui-material-top'))).toBe(-outset - top);
+        f.host.style.borderLeft = `${left + 1}px solid red`;
+        f.host.style.borderTop = `${top + 2}px solid red`;
+        f.callbacks.at(-1)?.();
+        expect(parseFloat(f.host.style.getPropertyValue('--pui-material-left'))).toBe(
+          -outset - left - 1
+        );
+        expect(parseFloat(f.host.style.getPropertyValue('--pui-material-top'))).toBe(
+          -outset - top - 2
+        );
+      } finally {
+        f.sink.release(1);
+      }
+    }
+  );
+  it('keeps cancellation latched across source ticks but re-arms a fresh semantic keyboard press', () => {
+    const f = neutralFixture();
+    try {
+      f.sink.commit({ ...f.frame, revision: 3 });
+      f.callbacks.at(-1)?.();
+      f.send(0.5, 'cancel');
+      f.callbacks.at(-1)?.();
+      for (let revision = 2; revision <= 4; revision++) {
+        f.source(true, revision);
+        f.callbacks.at(-1)?.();
+        expect(f.host.dataset.materialContact).toBe('rest');
+        expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+          pressed: false,
+          contact: { strength: 0 },
+        });
+      }
+      // A real neutral semantic phase followed by pressed is distinct input;
+      // source revision alone is not. No keyboard event is invented by the sink.
+      f.sink.commit({ ...f.rest, revision: 4 });
+      f.callbacks.at(-1)?.();
+      f.sink.commit({ ...f.frame, revision: 5 });
+      f.callbacks.at(-1)?.();
+      expect(optical.render.mock.calls.at(-1)?.[0]).toMatchObject({
+        pressed: true,
+        contact: { strength: 1 },
+      });
+      expect(f.host.dataset.materialPhase).toBe('pressed');
+    } finally {
+      f.sink.release(1);
+    }
+  });
   it('rejects neutral bridge completion after a new pointer session replaces cancellation', () => {
     const f = neutralFixture();
     try {
