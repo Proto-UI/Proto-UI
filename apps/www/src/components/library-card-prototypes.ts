@@ -64,3 +64,15 @@ export const bootstrapLibraryActionTextProps = {
   leading: 'normal',
   tone: 'inherit',
 } as const;
+
+// Consumer recipes preserve each family's existing typography rather than
+// changing Text defaults shared by unrelated consumers.
+export function libraryBodyPropsForFamily(family: LibraryFamily) {
+  if (family === 'brutalist') return { ...libraryBodyProps, weight: 'medium' } as const;
+  return family === 'bootstrap-2-3-2' ? bootstrapLibraryBodyProps : libraryBodyProps;
+}
+export function libraryCaptionPropsForFamily(family: LibraryFamily) {
+  return family === 'brutalist'
+    ? ({ ...libraryCaptionProps, weight: 'medium' } as const)
+    : libraryCaptionProps;
+}

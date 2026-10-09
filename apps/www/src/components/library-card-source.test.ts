@@ -86,7 +86,11 @@ it('keeps the Bootstrap layout conditional while family prototypes own its paint
   expect(frame).not.toMatch(/role=|tabindex=|onclick=|<button/);
   const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
   expect(source).toContain('bootstrap ? bootstrapLibraryHeadingProps : libraryHeadingProps');
-  expect(source).toContain('bootstrap ? bootstrapLibraryBodyProps : libraryBodyProps');
+  expect(source).toContain('const bodyProps = libraryBodyPropsForFamily(family)');
+  expect(source).toContain('props={bodyProps}');
+  expect(source).toContain('const captionProps = libraryCaptionPropsForFamily(family)');
+  expect(source).toContain('props={captionProps}');
+  expect(source).toContain("props={{ ...captionProps, tone: 'inherit' }}");
   expect(source).toContain('<a href={library.href} data-library-action>');
   const bootstrapRules = [
     ...source.matchAll(/\[data-library='bootstrap-2-3-2'\] :global\([^}]+\{([^}]+)\}/g),

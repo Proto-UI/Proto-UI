@@ -5,6 +5,8 @@ import { snapshotLibraryPart } from './library-card-snapshot';
 import {
   libraryCardPrototypes,
   librarySurfaceProps,
+  libraryBodyPropsForFamily,
+  libraryCaptionPropsForFamily,
   type LibraryPart,
 } from './library-card-prototypes';
 const flush = async () => {
@@ -112,3 +114,31 @@ it('keeps the candidate native action recipe when projecting native facts', asyn
   owner.remove();
   await flush();
 });
+
+it.each(['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const)(
+  'preserves the %s body/caption weight recipe through real WC enhancement',
+  async (family) => {
+    const owner = document.createElement('article');
+    for (const props of [libraryBodyPropsForFamily(family), libraryCaptionPropsForFamily(family)]) {
+      const element = document.createElement(`wc-library-${family}-text`);
+      element.dataset.libraryPart = `${family}-text`;
+      element.dataset.libraryProps = JSON.stringify(props);
+      element.textContent = 'Family text';
+      const tokens = await snapshotLibraryPart(`${family}-text`, props);
+      element.setAttribute('data-pui-style', tokens.join(' '));
+      owner.append(element);
+    }
+    document.body.append(owner);
+    const release = initLibraryCards(owner);
+    await flush();
+    for (const element of owner.children) {
+      const tokens = element.getAttribute('data-pui-style')!.split(/\s+/);
+      expect(tokens.filter((token) => /^font-(normal|medium|semibold|bold)$/.test(token))).toEqual([
+        family === 'brutalist' ? 'font-medium' : 'font-normal',
+      ]);
+    }
+    release();
+    owner.remove();
+    await flush();
+  }
+);

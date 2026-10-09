@@ -7,11 +7,10 @@ import LibraryLiquidCard from './LibraryLiquidCard.astro';
 import {
   librarySurfaceProps,
   libraryHeadingProps,
-  libraryBodyProps,
-  libraryCaptionProps,
+  libraryBodyPropsForFamily,
+  libraryCaptionPropsForFamily,
   libraryActionProps,
   bootstrapLibraryHeadingProps,
-  bootstrapLibraryBodyProps,
   bootstrapLibraryActionTextProps,
   type LibraryFamily,
 } from './library-card-prototypes';
@@ -286,6 +285,8 @@ const themeCss = Object.entries(familyThemes)
         const family: LibraryFamily = library.id === 'lucide' ? 'base' : library.id;
         const brutalist = family === 'brutalist';
         const bootstrap = family === 'bootstrap-2-3-2';
+        const bodyProps = libraryBodyPropsForFamily(family);
+        const captionProps = libraryCaptionPropsForFamily(family);
         return (
           <article
             class="library-card"
@@ -305,7 +306,7 @@ const themeCss = Object.entries(familyThemes)
                   <header>
                     <LibraryCardPart
                       part={`${family}-text`}
-                      props={libraryCaptionProps}
+                      props={captionProps}
                       class="library-card__kind"
                     >
                       {library.type}
@@ -345,21 +346,18 @@ const themeCss = Object.entries(familyThemes)
                     </div>
                   )}
                   <p>
-                    <LibraryCardPart
-                      part={`${family}-text`}
-                      props={bootstrap ? bootstrapLibraryBodyProps : libraryBodyProps}
-                    >
+                    <LibraryCardPart part={`${family}-text`} props={bodyProps}>
                       {library.description}
                     </LibraryCardPart>
                   </p>
                   <p>
-                    <LibraryCardPart part={`${family}-text`} props={libraryCaptionProps}>
+                    <LibraryCardPart part={`${family}-text`} props={captionProps}>
                       {copy.bestFor} · {library.bestFor}
                     </LibraryCardPart>
                   </p>
                   <LibraryCardPart
                     part={`${family}-text`}
-                    props={{ ...libraryCaptionProps, tone: 'inherit' }}
+                    props={{ ...captionProps, tone: 'inherit' }}
                   >
                     <dl class="library-card__credits">
                       <div>

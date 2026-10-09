@@ -36,3 +36,20 @@ it('negative control: a source registry without Shadcn cannot retain its paint',
   expect(css).not.toContain('--pui-translate-x: initial');
   expect(css).toContain('4px');
 });
+
+// P-BRUTALIST-CARD-ROOT-VISUAL (draft), neobrutalism-components 3306a802:
+// nested Text must preserve the selected Card's medium body weight.
+it('keeps body and caption weights family-specific without normalizing typography', async () => {
+  const { libraryBodyPropsForFamily, libraryCaptionPropsForFamily } =
+    await import('./library-card-prototypes');
+  for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const) {
+    for (const props of [libraryBodyPropsForFamily(family), libraryCaptionPropsForFamily(family)]) {
+      const tokens = await snapshotLibraryPart(`${family}-text`, props);
+      expect(tokens.filter((token) => /^font-(normal|medium|semibold|bold)$/.test(token))).toEqual([
+        family === 'brutalist' ? 'font-medium' : 'font-normal',
+      ]);
+    }
+  }
+  expect(libraryBodyPropsForFamily('base')).toEqual({ size: 'base', leading: 'relaxed' });
+  expect(libraryBodyPropsForFamily('bootstrap-2-3-2')).toEqual({ size: 'sm', leading: 'normal' });
+});

@@ -147,11 +147,11 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/LibraryLiquidScene.astro` | `www.gallery.ui-library-cards` | `4db6d52ad50e06a57ba01bba6e57d4f04b9baadc3920c5882ff9526640eb5661` |
 | `apps/www/src/components/library-liquid-card-client.ts` | `www.gallery.ui-library-cards` | `a2b9d2019202dea0d1a7f7c6157afef3897a71acadb5a00ca64951570d8fc2e0` |
 | `apps/www/src/components/library-liquid-scene.ts` | `www.gallery.ui-library-cards` | `d8ccbb061715254ca258abef8e686561aa87cafd9327d84d7a789e8759740a0b` |
-| `apps/www/src/components/UiLibraryGallery.astro` | `www.gallery.ui-library-cards` | `4ae7937ed88f53188639abd8507217c5933145851e28cd3498fefcefe77e7fdf` |
+| `apps/www/src/components/UiLibraryGallery.astro` | `www.gallery.ui-library-cards` | `c6a0398390efe5396d9aaaba881f58df1534d860564eb4c466f6c4983aba1461` |
 | `apps/www/src/components/LibraryCardFrame.astro` | `www.gallery.ui-library-cards` | `f583b5140d82d64d1620ec8b0e62cf309e5ebec27fce5459e3c4926ca34b6665` |
 | `apps/www/src/components/LibraryCardPart.astro` | `www.gallery.ui-library-cards` | `f1b860036fbd42429da7a70d6b65b1d7992b5c788194b3b5ead88d5a417cce07` |
 | `apps/www/src/components/library-card-client.ts` | `www.gallery.ui-library-cards` | `782f2ff171266ecf7c7d412fdb50f00261f511f1aa769c402dd5b5fe7de14294` |
-| `apps/www/src/components/library-card-prototypes.ts` | `www.gallery.ui-library-cards` | `1ebc076d75f1ce6e00d1cb4b47160b18418d8e767f90dafd1d819ec2b611aeab` |
+| `apps/www/src/components/library-card-prototypes.ts` | `www.gallery.ui-library-cards` | `858af78866c351330256474cd576ce6c9090a518d006d76ba40cfc4ab4c00eb7` |
 | `apps/www/src/components/library-card-snapshot.ts` | `www.gallery.ui-library-cards` | `054f688a4e6b5063f865d87b07967fd8b22bfe6124ee1cd5f730624ed193a2eb` |
 | `apps/www/src/content/docs/zh-cn/library-card-font-trace.ts` | `www.gallery.ui-library-cards` | `1259f2df0ec7e0262207a7a88b0a4aeedb5874ac7db023f9f6647d231b78c68a` |
 | `apps/www/src/components/PrototypePreviewer/ShadowSplitS2.astro` | `www.demo.authored-controllers` | `13d6104a02fdfe3868a0120b06ee0e98ee7465f5f394af8d3d1fdb87beb7a8fa` |
