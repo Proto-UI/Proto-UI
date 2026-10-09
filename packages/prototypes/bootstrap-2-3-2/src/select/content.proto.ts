@@ -10,9 +10,11 @@ export default definePrototype<Bootstrap232SelectContentProps, Bootstrap232Selec
     // Space inside the scrollport keeps item outlines from being clipped.
     select.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
 
+    // Prefer room for text and the indicator even when the anchor is narrow.
+    // The available-width maximum still wins; no hard minimum escapes the viewport.
     def.feedback.style.use(
       tw(
-        'z-50 min-w-0 w-[var(--proto-ui-anchor-width)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-x-hidden overflow-y-auto outline-none rounded-[6px] border border-border bg-background text-foreground py-[0.3125rem] shadow-[0_5px_10px_rgb(0_0_0/20%)]'
+        'z-50 min-w-0 w-[max(var(--proto-ui-anchor-width),12rem)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-x-hidden overflow-y-auto outline-none rounded-[6px] border border-border bg-background text-foreground py-[0.3125rem] shadow-[0_5px_10px_rgb(0_0_0/20%)]'
       )
     );
   },
