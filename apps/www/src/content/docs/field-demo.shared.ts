@@ -28,12 +28,16 @@ export function createFieldDemo(family: string): DemoSpec {
     label: string,
     props: Record<string, unknown> = {},
     controlProps: Record<string, unknown> = {},
-    help = 'Visible name, help and current errors are linked to one editor. 标签、帮助及当前错误关联唯一编辑器。'
+    help = 'Visible name, help and current errors are linked to one editor. 标签、帮助及当前错误关联唯一编辑器。',
+    actions: DemoChild[] = []
   ) =>
     atom('root', `${id}Root`, props, [
       atom('label', `${id}Label`, {}, [label]),
       atom('control', `${id}Control`, controlProps),
       atom('description', `${id}Description`, {}, [help]),
+      // Keep commands before feedback that can detach or wrap during a native
+      // change on blur, so that feedback does not move a pressed command.
+      ...actions,
       atom('error', `${id}Error`),
       atom('validity', `${id}Validity`),
     ]);
@@ -69,7 +73,8 @@ export function createFieldDemo(family: string): DemoSpec {
           'Availability check · 可用性检查',
           { externalValidation: true, validationMode: 'onChange' },
           { defaultValue: 'available' },
-          'Try “taken”, then replace it before the reply. 试填 taken，再于返回前修改。'
+          'Try “taken”, then replace it before the reply. 试填 taken，再于返回前修改。',
+          [button('cancel', 'Cancel pending check · 取消待返回检查')]
         ),
         {
           kind: 'box',
@@ -77,7 +82,6 @@ export function createFieldDemo(family: string): DemoSpec {
           attrs: { 'aria-live': 'polite' },
           children: ['No request yet · 暂无请求'],
         },
-        button('cancel', 'Cancel pending check · 取消待返回检查'),
         field(
           'controlled',
           'Owner-rejected validity · 所有者拒绝的校验状态',

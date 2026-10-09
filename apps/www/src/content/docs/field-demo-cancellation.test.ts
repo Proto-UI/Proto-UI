@@ -1,8 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as base from '@proto.ui/prototypes-base/field';
 import * as liquid from '@proto.ui/prototypes-liquid-glass/field';
+import * as shadcn from '@proto.ui/prototypes-shadcn/field';
+import * as brutalist from '@proto.ui/prototypes-brutalist/field';
+import * as bootstrap from '@proto.ui/prototypes-bootstrap-2-3-2/field';
 import baseButton from '@proto.ui/prototypes-base/button';
 import liquidButton from '@proto.ui/prototypes-liquid-glass/button';
+import shadcnButton from '@proto.ui/prototypes-shadcn/button';
+import brutalistButton from '@proto.ui/prototypes-brutalist/button';
+import bootstrapButton from '@proto.ui/prototypes-bootstrap-2-3-2/button';
 import { createFieldDemo } from './field-demo.shared';
 import { renderDemo } from '../../components/PrototypePreviewer/demo-renderer';
 
@@ -10,7 +16,18 @@ vi.mock('../../components/PrototypePreviewer/registry', () => ({
   getPrototype(id: string) {
     if (id === 'base-button') return baseButton;
     if (id === 'liquid-glass-button') return liquidButton;
-    const family = id.startsWith('liquid-glass-') ? liquid : base;
+    if (id === 'shadcn-button') return shadcnButton;
+    if (id === 'brutalist-button') return brutalistButton;
+    if (id === 'bootstrap-2-3-2-button') return bootstrapButton;
+    const family = id.startsWith('liquid-glass-')
+      ? liquid
+      : id.startsWith('shadcn-')
+        ? shadcn
+        : id.startsWith('brutalist-')
+          ? brutalist
+          : id.startsWith('bootstrap-2-3-2-')
+            ? bootstrap
+            : base;
     const role = id.split('-').at(-1)!;
     return family[`field${role[0].toUpperCase()}${role.slice(1)}` as keyof typeof family];
   },
@@ -59,7 +76,7 @@ async function mount(family: string) {
   };
   return { ref, root, requests, edit, cancel };
 }
-describe.each(['base', 'liquid-glass'])(
+describe.each(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])(
   'Field %s demo cancellation consumer (synthetic WC)',
   (family) => {
     it('retires a pending reply after delivered pointer activation and permits a fresh request', async () => {
@@ -116,6 +133,29 @@ describe.each(['base', 'liquid-glass'])(
       await f.cancel();
       expect(f.ref('asyncStatus').textContent).toContain('Canceled');
       expect(f.root.invalid.get()).toBe(true);
+    });
+    it('keeps the actual command before mounted error feedback and preserves editor associations', async () => {
+      const f = await mount(family);
+      await f.edit('taken');
+      await vi.advanceTimersByTimeAsync(500);
+      const cancel = f.ref('cancel');
+      const error = f.ref('asyncError');
+      const input = f.ref('asyncControl').querySelector('input')!;
+      expect(cancel.closest('[data-demo-ref="asyncRoot"]')).toBe(f.ref('asyncRoot'));
+      expect(cancel.compareDocumentPosition(error) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+      expect(input.getAttribute('aria-labelledby')).toBe(f.ref('asyncLabel').id);
+      expect(input.getAttribute('aria-describedby')).toBe(f.ref('asyncDescription').id);
+      expect(input.getAttribute('aria-errormessage')).toBe(error.id);
+      expect(error.getAttribute('role')).not.toBe('alert');
+      expect(error.getAttribute('aria-live')).toBeNull();
+      await f.edit('taken', 'change');
+      expect(f.root.pending.get()).toBe(true);
+      expect(input.getAttribute('aria-errormessage')).toBeNull();
+      expect(f.ref('cancel')).toBe(cancel);
+      await f.cancel();
+      await vi.advanceTimersByTimeAsync(650);
+      expect(f.ref('asyncStatus').textContent).toContain('Canceled');
+      expect(f.root.invalid.get()).toBe(false);
     });
   }
 );
