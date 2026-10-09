@@ -650,7 +650,10 @@ describe('@proto.ui/cli', () => {
     expect(addHelp.status).toBe(0);
     expect(addHelp.stdout).toContain('proto-ui add <host> <component>');
     expect(addHelp.stdout).toContain('proto-ui add vue2 shadcn-button');
-    expect(addHelp.stdout).toContain('generates proto-ui/components/<host>/index.ts');
+    expect(addHelp.stdout).toContain('generates .ts facade files for TypeScript projects');
+    expect(addHelp.stdout).toContain(
+      'use --language js or --language ts to override detection explicitly'
+    );
   });
 
   it('initializes proto-ui workspace and default style files', async () => {
@@ -813,10 +816,10 @@ describe('@proto.ui/cli', () => {
     expect(result.stdout).toContain(`@proto.ui/prototypes-shadcn@${cliVersion}`);
 
     const reactIndex = await fs.readFile(
-      path.join(cwd, 'proto-ui/components/react/index.ts'),
+      path.join(cwd, 'proto-ui/components/react/index.js'),
       'utf8'
     );
-    const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.ts'), 'utf8');
+    const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.js'), 'utf8');
     const config = JSON.parse(await fs.readFile(path.join(cwd, 'proto-ui/config.json'), 'utf8'));
 
     expect(reactIndex).toContain(`createReactAdapter`);
@@ -826,38 +829,136 @@ describe('@proto.ui/cli', () => {
     );
     expect(reactIndex).not.toContain(`from '@proto.ui/prototypes-shadcn';`);
     expect(reactIndex).toContain(`export const ShadcnButton = adapt(shadcnButton);`);
-    expect(rootIndex).toContain(`export { ShadcnButton as ReactShadcnButton } from './react';`);
+    expect(rootIndex).toContain(
+      `export { ShadcnButton as ReactShadcnButton } from './react/index.js';`
+    );
     expect(config.components.react).toEqual(['shadcn-button']);
   });
 
-  it('adds a Vue 2 facade without installing packages when --no-install is used', async () => {
+  it('generates JavaScript Vue 2 facades without TypeScript syntax when the project has no TypeScript capability', async () => {
     const cwd = await createTempProject('pui-cli-add-vue2', {
       name: 'pui-cli-add-vue2',
       private: true,
       dependencies: {
-        vue: '~2.6.14',
+        vue: '2.6.14',
       },
     });
 
     expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
     const result = runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']);
+    const switchResult = runCli(cwd, ['add', 'vue2', 'shadcn-switch', '--no-install']);
 
     expect(result.status).toBe(0);
+    expect(switchResult.status).toBe(0);
     expect(result.stdout).toContain(`@proto.ui/adapter-vue2@${cliVersion}`);
     expect(result.stdout).toContain(`@proto.ui/prototypes-shadcn@${cliVersion}`);
+    expect(result.stdout).toContain('no tsconfig.json or project TypeScript dependency was found');
+
+    const vue2Index = await fs.readFile(
+      path.join(cwd, 'proto-ui/components/vue2/index.js'),
+      'utf8'
+    );
+    const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.js'), 'utf8');
+    const config = JSON.parse(await fs.readFile(path.join(cwd, 'proto-ui/config.json'), 'utf8'));
+
+    expect(vue2Index).toContain(`import { createVue2Adapter } from '@proto.ui/adapter-vue2';`);
+    expect(vue2Index).toContain(`extend: Vue.extend.bind(Vue)`);
+    expect(vue2Index).toContain(`export const ShadcnButton = adapt(shadcnButton);`);
+    expect(vue2Index).toContain(`export const ShadcnSwitch = {`);
+    expect(vue2Index).not.toMatch(/this: any|fn: \(\) => void|\(child: any\)/);
+    expect(rootIndex).toContain(
+      `export { ShadcnButton as Vue2ShadcnButton } from './vue2/index.js';`
+    );
+    expect(rootIndex).toContain(
+      `export { ShadcnSwitch as Vue2ShadcnSwitch } from './vue2/index.js';`
+    );
+    expect(
+      spawnSync('node', ['--check', path.join(cwd, 'proto-ui/components/vue2/index.js')], {
+        encoding: 'utf8',
+      }).status
+    ).toBe(0);
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/index.ts'))).rejects.toThrow();
+    expect(config.components.vue2).toEqual(['shadcn-button', 'shadcn-switch']);
+  });
+
+  it('generates TypeScript facades for TypeScript projects and removes stale JavaScript indexes', async () => {
+    const cwd = await createTempProject('pui-cli-add-vue2-typescript', {
+      name: 'pui-cli-add-vue2-typescript',
+      private: true,
+      devDependencies: {
+        typescript: '^5.0.0',
+      },
+      dependencies: {
+        vue: '2.6.14',
+      },
+    });
+    await fs.writeFile(path.join(cwd, 'tsconfig.json'), '{\n  "compilerOptions": {}\n}\n', 'utf8');
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+    expect(runCli(cwd, ['add', 'vue2', 'shadcn-button', '--no-install']).status).toBe(0);
+
+    await fs.writeFile(path.join(cwd, 'proto-ui/components/vue2/index.js'), '// stale\n', 'utf8');
+    await fs.writeFile(path.join(cwd, 'proto-ui/components/index.js'), '// stale\n', 'utf8');
+    expect(runCli(cwd, ['add', 'vue2', 'shadcn-switch', '--no-install']).status).toBe(0);
 
     const vue2Index = await fs.readFile(
       path.join(cwd, 'proto-ui/components/vue2/index.ts'),
       'utf8'
     );
     const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.ts'), 'utf8');
-    const config = JSON.parse(await fs.readFile(path.join(cwd, 'proto-ui/config.json'), 'utf8'));
 
-    expect(vue2Index).toContain(`import { createVue2Adapter } from '@proto.ui/adapter-vue2';`);
-    expect(vue2Index).toContain(`extend: Vue.extend.bind(Vue)`);
-    expect(vue2Index).toContain(`export const ShadcnButton = adapt(shadcnButton);`);
-    expect(rootIndex).toContain(`export { ShadcnButton as Vue2ShadcnButton } from './vue2';`);
-    expect(config.components.vue2).toEqual(['shadcn-button']);
+    expect(vue2Index).toContain('this: any');
+    expect(vue2Index).toContain('fn: () => void');
+    expect(vue2Index).toContain('(child: any)');
+    expect(rootIndex).toContain(`export { ShadcnSwitch as Vue2ShadcnSwitch } from './vue2';`);
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.js'))).rejects.toThrow();
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/index.js'))).rejects.toThrow();
+  });
+
+  it('allows --language to override automatic facade language detection', async () => {
+    const cwd = await createTempProject('pui-cli-add-vue2-language-override', {
+      name: 'pui-cli-add-vue2-language-override',
+      private: true,
+      dependencies: {
+        vue: '2.6.14',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+    expect(
+      runCli(cwd, ['add', 'vue2', 'shadcn-button', '--language', 'ts', '--no-install']).status
+    ).toBe(0);
+
+    await expect(
+      fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))
+    ).resolves.toBeTruthy();
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/index.ts'))).resolves.toBeTruthy();
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.js'))).rejects.toThrow();
+  });
+
+  it('does not treat a TypeScript peer dependency as project TypeScript capability', async () => {
+    const cwd = await createTempProject('pui-cli-add-vue2-typescript-peer', {
+      name: 'pui-cli-add-vue2-typescript-peer',
+      private: true,
+      dependencies: {
+        vue: '2.6.14',
+      },
+      peerDependencies: {
+        typescript: '^5.0.0',
+      },
+    });
+
+    expect(runCli(cwd, ['init', '--no-interactive', '--no-styles']).status).toBe(0);
+    const result = runCli(cwd, ['add', 'vue2', 'shadcn-switch', '--no-install']);
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('no tsconfig.json or project TypeScript dependency was found');
+    await expect(
+      fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.js'))
+    ).resolves.toBeTruthy();
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/index.js'))).resolves.toBeTruthy();
+    await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
   });
 
   it('rejects a Vue 3 dependency before generating a Vue 2 facade', async () => {
@@ -896,7 +997,7 @@ describe('@proto.ui/cli', () => {
 
       expect(result.status).not.toBe(0);
       expect(result.stderr).toContain('Vue 2 runtime must satisfy >=2.6.0 <2.7');
-      await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.ts'))).rejects.toThrow();
+      await expect(fs.stat(path.join(cwd, 'proto-ui/components/vue2/index.js'))).rejects.toThrow();
     }
   );
 
@@ -915,7 +1016,7 @@ describe('@proto.ui/cli', () => {
 
     expect(result.status).toBe(0);
     const reactIndex = await fs.readFile(
-      path.join(cwd, 'proto-ui/components/react/index.ts'),
+      path.join(cwd, 'proto-ui/components/react/index.js'),
       'utf8'
     );
     const config = JSON.parse(await fs.readFile(path.join(cwd, 'proto-ui/config.json'), 'utf8'));
@@ -942,8 +1043,8 @@ describe('@proto.ui/cli', () => {
     expect(result.stdout).toContain('@proto.ui/adapter-web-component');
     expect(result.stdout).toContain('@proto.ui/prototypes-base');
 
-    const wcIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/wc/index.ts'), 'utf8');
-    const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.ts'), 'utf8');
+    const wcIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/wc/index.js'), 'utf8');
+    const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.js'), 'utf8');
     const config = JSON.parse(await fs.readFile(path.join(cwd, 'proto-ui/config.json'), 'utf8'));
 
     expect(wcIndex).toContain(`AdaptToWebComponent`);
@@ -951,7 +1052,7 @@ describe('@proto.ui/cli', () => {
     expect(wcIndex).toContain(`from '@proto.ui/prototypes-base/dialog';`);
     expect(wcIndex).toContain(`export const BaseDialogRootElement = AdaptToWebComponent`);
     expect(wcIndex).toContain(`registerAs: 'proto-ui-base-dialog-root'`);
-    expect(rootIndex).toContain(`export { BaseDialogRootElement } from './wc';`);
+    expect(rootIndex).toContain(`export { BaseDialogRootElement } from './wc/index.js';`);
     expect(config.components.wc).toEqual(['base-dialog']);
   });
 
@@ -968,12 +1069,12 @@ describe('@proto.ui/cli', () => {
     expect(result.stdout).toContain('@proto.ui/adapter-web-component');
     expect(result.stdout).toContain('@proto.ui/prototypes-shadcn');
 
-    const wcIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/wc/index.ts'), 'utf8');
-    const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.ts'), 'utf8');
+    const wcIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/wc/index.js'), 'utf8');
+    const rootIndex = await fs.readFile(path.join(cwd, 'proto-ui/components/index.js'), 'utf8');
 
     expect(wcIndex).toContain(`from '@proto.ui/prototypes-shadcn/button';`);
     expect(wcIndex).toContain(`export const ShadcnButtonElement = AdaptToWebComponent`);
-    expect(rootIndex).toContain(`export { ShadcnButtonElement } from './wc';`);
+    expect(rootIndex).toContain(`export { ShadcnButtonElement } from './wc/index.js';`);
   });
 
   it('initializes with the Brutalist prototype and style preset when requested', async () => {
@@ -1033,7 +1134,7 @@ describe('@proto.ui/cli', () => {
     await expect(fs.readFile(configPath, 'utf8')).resolves.not.toBe(configBefore);
     await expect(fs.readFile(packagePath, 'utf8')).resolves.toBe(packageBefore);
     await expect(
-      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.ts'), 'utf8')
+      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.js'), 'utf8')
     ).resolves.toContain('brutalistButton');
   });
 
@@ -1062,7 +1163,7 @@ describe('@proto.ui/cli', () => {
     await expect(fs.readFile(configPath, 'utf8')).resolves.toBe(configBefore);
     await expect(fs.readFile(packagePath, 'utf8')).resolves.toBe(packageBefore);
     await expect(
-      fs.stat(path.join(cwd, 'proto-ui/components/react/index.ts'))
+      fs.stat(path.join(cwd, 'proto-ui/components/react/index.js'))
     ).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
@@ -1083,7 +1184,7 @@ describe('@proto.ui/cli', () => {
 
     expect(result.status).toBe(0);
     await expect(
-      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.ts'), 'utf8')
+      fs.readFile(path.join(cwd, 'proto-ui/components/react/index.js'), 'utf8')
     ).resolves.toContain('brutalistButton');
   });
 
@@ -1111,7 +1212,7 @@ describe('@proto.ui/cli', () => {
     expect(result.stderr).toContain('enables no preset');
     await expect(fs.readFile(configPath, 'utf8')).resolves.toBe(configBefore);
     await expect(
-      fs.stat(path.join(cwd, 'proto-ui/components/react/index.ts'))
+      fs.stat(path.join(cwd, 'proto-ui/components/react/index.js'))
     ).rejects.toMatchObject({ code: 'ENOENT' });
   });
 
