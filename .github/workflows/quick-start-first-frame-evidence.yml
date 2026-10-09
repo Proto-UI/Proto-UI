@@ -61,7 +61,7 @@ jobs:
           TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
           printf '%s\n' "$TOOLBAR_SETTING"
           grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
-      - name: Run all 18 first-frame, refresh, ownership and no-JavaScript journeys
+      - name: Run 20 paint, split ownership and no-JavaScript journeys
         timeout-minutes: 20
         env:
           PUI_QUICK_START_EVIDENCE_DIR: ${{ runner.temp }}/quick-start-first-frame/screenshots
@@ -76,8 +76,14 @@ jobs:
           import fs from 'node:fs';
           import assert from 'node:assert/strict';
           const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
-          assert.equal(report.numTotalTests, 18, 'All first-frame and no-script journeys must run.');
-          assert.equal(report.numPassedTests, 18, 'All first-frame and no-script journeys must pass.');
+          assert.equal(report.numTotalTests, 20, 'All paint, ownership-boundary, settled-runtime and no-script journeys must run.');
+          assert.equal(report.numPassedTests, 20, 'All split-boundary assertions must pass; native early-input focus debt is retained separately.');
+          for (const owner of ['menu', 'content-link']) {
+            const evidence = JSON.parse(fs.readFileSync(`${process.env.PUI_QUICK_START_EVIDENCE_DIR}/react-${owner}-early-native-ownership.json`, 'utf8'));
+            assert.equal(evidence.endToEndEarlyInputDebt.passed, false, 'Native early-input experience debt must remain visible.');
+            assert.equal(evidence.endToEndEarlyInputDebt.productFixClaimed, false);
+          }
+          console.log('Acceptance split: early native fragment focus loss remains an explicit experience debt, not a product fix. See early-native-ownership JSON plus unchanged zero-application controls.');
           assert.equal(report.numFailedTests, 0);
           JS
       - name: Isolate native fragment focus with four empty-module controls

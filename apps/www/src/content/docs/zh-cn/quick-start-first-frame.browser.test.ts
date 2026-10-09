@@ -6,6 +6,10 @@ import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { changedFirstFrameGeometry } from './quick-start-first-frame-geometry';
+import {
+  earlyOwnershipBoundaryIsNative,
+  isQuickStartReactRuntime,
+} from './quick-start-runtime-gate';
 import { quickStartOwnershipReady } from './quick-start-first-frame-ownership';
 import { PREFERRED_ADAPTER_KEY } from '../../../components/adapter-preference-key';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
@@ -16,10 +20,11 @@ const directory =
   path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'quick-start-first-frame');
 let browser: Browser;
 let baseUrl: string;
-let source: { sha: string; dirty: boolean };
+let source: { sha: string; tree: string; dirty: boolean };
 beforeAll(async () => {
   source = {
     sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+    tree: execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim(),
     dirty: !!execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], {
       encoding: 'utf8',
     }).trim(),
@@ -690,264 +695,429 @@ describe('quick-start first-frame continuity', () => {
     }, 150_000);
   }
   for (const focusOwner of ['menu', 'content-link'] as const)
-    it(`React delayed upgrade preserves ${focusOwner} focus and native code selection`, async () => {
-      const context = await browser.newContext({ viewport: conditions[0] });
-      const page = await context.newPage();
-      await page.addInitScript((key) => localStorage.setItem(key, 'react'), PREFERRED_ADAPTER_KEY);
-      let release!: () => void;
-      const gate = new Promise<void>((resolve) => {
-        release = resolve;
-      });
-      await page.route('**/*', async (request) => {
-        if (request.request().resourceType() === 'script') await gate;
-        await request.continue();
-      });
-      try {
-        await page.goto(`${baseUrl}${route}`, { waitUntil: 'commit' });
-        await page.locator('[data-site-code-surface="frame"] pre').first().waitFor();
-        await page.evaluate((focusOwner) => {
-          const code = document.querySelector(
-            '[data-site-code-surface="frame"] pre'
-          ) as HTMLElement;
-          const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
-          let text = walker.nextNode()!;
-          while (text && !text.textContent?.trim()) text = walker.nextNode()!;
-          const range = document.createRange();
-          range.selectNodeContents(text);
-          const selection = getSelection()!;
-          selection.removeAllRanges();
-          selection.addRange(range);
-          const target =
-            focusOwner === 'menu'
-              ? (document.querySelector('[data-site-header-fallback-summary]') as HTMLElement)
-              : (document.querySelector('[data-site-header-desktop-navigation] a') as HTMLElement);
-          target.focus({ preventScroll: true });
-          const describe = (node: Node | null, includePaint = true) => {
-            const element = node instanceof Element ? node : node?.parentElement;
-            return element
-              ? {
-                  tag: element.localName,
-                  id: element.id,
-                  connected: element.isConnected,
-                  ancestors: !includePaint
-                    ? undefined
-                    : (() => {
-                        const facts = [];
-                        for (let node: Element | null = element; node; node = node.parentElement) {
-                          const css = getComputedStyle(node);
-                          if (
-                            node === element ||
-                            node.hasAttribute('hidden') ||
-                            node.hasAttribute('inert') ||
-                            node.hasAttribute('data-pui-view-pending') ||
-                            css.visibility !== 'visible' ||
-                            css.display === 'none'
-                          )
-                            facts.push({
-                              tag: node.localName,
-                              hidden: node.hasAttribute('hidden'),
-                              inert: node.hasAttribute('inert'),
-                              pending: node.hasAttribute('data-pui-view-pending'),
-                              generation: node.getAttribute('data-projection-generation-state'),
-                              display: css.display,
-                              visibility: css.visibility,
-                            });
-                        }
-                        return facts;
-                      })(),
-                  attributes: Object.fromEntries(
-                    [...element.attributes]
-                      .filter((attribute) =>
-                        /^(?:data-site|data-typography|tabindex|href|hidden|inert)/.test(
-                          attribute.name
-                        )
-                      )
-                      .map((attribute) => [attribute.name, attribute.value])
-                  ),
-                }
-              : null;
-          };
-          const trace: unknown[] = [];
-          const observe = (kind: string, details: Record<string, unknown> = {}) => {
-            if (trace.length < 160)
-              trace.push({
-                kind,
-                at: performance.now(),
-                readyState: document.readyState,
-                hash: location.hash,
-                fragmentTarget: document.querySelector(':target')?.id ?? null,
-                menuReady: document
-                  .querySelector('[data-docs-site-header]')
-                  ?.hasAttribute('data-site-menu-ready'),
-                active: describe(document.activeElement, !kind.endsWith('-call')),
-                ...details,
-              });
-          };
-          for (const kind of ['focusin', 'focusout', 'selectionchange'])
+    for (const phase of ['early-native', 'settled-runtime'] as const)
+      it(`React ${phase}: ${focusOwner} ownership at the actual navigation/upgrade boundary`, async () => {
+        const context = await browser.newContext({ viewport: conditions[0] });
+        const page = await context.newPage();
+        await page.addInitScript(
+          (key) => localStorage.setItem(key, 'react'),
+          PREFERRED_ADAPTER_KEY
+        );
+        const heldRuntimeRequests: string[] = [];
+        await page.addInitScript(() => {
+          (window as any).__ownershipInput = [];
+          for (const type of ['keydown', 'pointerdown'])
             document.addEventListener(
-              kind,
-              (event) =>
-                observe(kind, {
-                  target: describe(event.target as Node),
-                  relatedTarget: describe((event as FocusEvent).relatedTarget as Node | null),
-                  stack: event.type === 'selectionchange' ? undefined : new Error().stack,
-                }),
+              type,
+              (event) => {
+                (window as any).__ownershipInput.push({
+                  type: event.type,
+                  trusted: event.isTrusted,
+                  key: event instanceof KeyboardEvent ? event.key : null,
+                  shift: event instanceof KeyboardEvent ? event.shiftKey : null,
+                });
+              },
               true
             );
-          // focus-method-observation-start
-          for (const method of ['focus', 'blur'] as const) {
-            const original = HTMLElement.prototype[method];
-            HTMLElement.prototype[method] = function (this: HTMLElement, ...args: any[]) {
-              // Observing must never turn a native return/throw into another
-              // outcome, including a borrowed method with an invalid receiver.
-              try {
-                observe(`${method}-call`, {
-                  target: this instanceof HTMLElement ? { tag: this.localName, id: this.id } : null,
-                  stack: new Error().stack,
-                });
-              } catch {
-                /* Diagnostic failure cannot interfere with native behavior. */
-              }
-              return Reflect.apply(original, this, args);
-            };
+        });
+        let release!: () => void;
+        const gate = new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        await page.route('**/*', async (request) => {
+          if (
+            request.request().resourceType() === 'script' &&
+            (phase === 'early-native' || isQuickStartReactRuntime(request.request().url()))
+          ) {
+            heldRuntimeRequests.push(request.request().url());
+            await gate;
           }
-          // focus-method-observation-end
-          for (const kind of ['DOMContentLoaded', 'astro:page-load'])
-            document.addEventListener(kind, () => observe(kind), { once: true });
-          for (const kind of ['load', 'pageshow', 'hashchange'])
-            window.addEventListener(kind, () => observe(kind));
-          const originalSet = selection.setBaseAndExtent;
-          selection.setBaseAndExtent = function (...args) {
-            observe('selection-write-before', { stack: new Error().stack });
-            try {
-              return Reflect.apply(originalSet, this, args);
-            } finally {
-              observe('selection-write-after');
-            }
-          };
-          observe('before-release');
-          (window as any).__startupOwnership = {
-            trace,
-            describe,
-            observe,
-            initialFocusCorrect: document.activeElement === target,
-            code,
-            text,
-            focus: document.activeElement,
-            anchor: selection.anchorNode,
-            offset: selection.anchorOffset,
-            selected: selection.toString(),
-          };
-        }, focusOwner);
-        const initial = await page.evaluate(() => {
-          const saved = (window as any).__startupOwnership;
-          const selection = getSelection()!;
-          return {
-            focused: saved.initialFocusCorrect && document.activeElement === saved.focus,
-            focus: saved.describe(document.activeElement),
-            selectionNonempty: selection.toString().trim().length > 0,
-            selectionSame:
-              selection.anchorNode === saved.anchor &&
-              selection.anchorOffset === saved.offset &&
-              selection.toString() === saved.selected,
-            selection: {
-              text: selection.toString(),
-              rangeCount: selection.rangeCount,
-              anchor: saved.describe(selection.anchorNode),
-              anchorOffset: selection.anchorOffset,
-              extent: saved.describe(selection.focusNode),
-              focusOffset: selection.focusOffset,
-            },
-          };
+          await request.continue();
         });
-        await writeFile(
-          path.join(directory, `react-${focusOwner}-ownership-initial.json`),
-          JSON.stringify({ source, initial }, null, 2)
-        );
-        await captureViewport(
-          page,
-          path.join(directory, `react-${focusOwner}-ownership-before.png`)
-        );
-        // Preconditions must succeed before gated scripts resume. A fixture's own
-        // selection/focus setup failure must not be attributed to hydration.
-        expect(initial.focused, 'native focus acquired before script release').toBe(true);
-        expect(
-          initial.selectionNonempty,
-          'native code selection acquired before script release'
-        ).toBe(true);
-        expect(initial.selectionSame, 'native selection retained before script release').toBe(true);
-        release();
-        await page.waitForFunction(quickStartOwnershipReady);
-        const facts = await page.evaluate((focusOwner) => {
-          const saved = (window as any).__startupOwnership;
-          const selection = getSelection()!;
-          return {
-            initialSelectionNonempty: saved.selected.trim().length > 0,
-            codeSame: document.querySelector('[data-site-code-surface="frame"] pre') === saved.code,
-            textRetained: saved.text.isConnected && saved.code.contains(saved.text),
-            selectionSame:
-              selection.anchorNode === saved.anchor &&
-              selection.anchorOffset === saved.offset &&
-              selection.toString() === saved.selected,
-            focused:
-              focusOwner === 'menu'
-                ? document.activeElement?.hasAttribute('data-site-menu-button')
-                : document.activeElement === saved.focus,
-          };
-        }, focusOwner);
-        const diagnostics = await page.evaluate(() => {
-          const saved = (window as any).__startupOwnership;
-          saved.observe('after-upgrade');
-          const typography = document.querySelector('.doc-stage-notice__title');
-          return {
-            typography: {
-              owner: typography?.getAttribute('data-typography-owner'),
-              runtime: typography?.getAttribute('data-typography-runtime'),
-              generation: typography?.getAttribute('data-typography-generation'),
-            },
-            initialFocusCorrect: saved.initialFocusCorrect,
-            originalFocus: saved.describe(saved.focus),
-            actualFocus: saved.describe(document.activeElement),
-            trace: saved.trace,
-          };
-        });
-        // Persist failures before the strict assertion: identity and retained
-        // selection alone cannot establish that no intermediate blur occurred.
-        await writeFile(
-          path.join(directory, `react-${focusOwner}-ownership.json`),
-          JSON.stringify({ source, facts, diagnostics }, null, 2)
-        );
-        await captureViewport(
-          page,
-          path.join(directory, `react-${focusOwner}-ownership-after.png`)
-        );
-        expect(diagnostics.initialFocusCorrect).toBe(true);
-        expect(facts).toEqual({
-          initialSelectionNonempty: true,
-          codeSame: true,
-          textRetained: true,
-          selectionSame: true,
-          focused: true,
-        });
-      } catch (error) {
-        const name = `react-${focusOwner}-ownership`;
-        await captureFailure(page, name, error);
         try {
-          const trace = await page.evaluate(() => (window as any).__startupOwnership?.trace ?? []);
-          await writeFile(
-            path.join(directory, `${name}-trace.json`),
-            JSON.stringify({ source, trace }, null, 2)
+          await page.goto(`${baseUrl}${route}`, { waitUntil: 'commit' });
+          if (phase === 'settled-runtime') {
+            await page.waitForLoadState('domcontentloaded');
+            await page.waitForFunction(
+              () => location.hash === '#_top' && document.querySelector(':target')?.id === '_top'
+            );
+            // Native fragment navigation places the sequential starting point at
+            // the heading. A real pointer click on empty Header padding places it
+            // back in the Header, then only trusted forward Tab acquires the owner.
+            // This is explicitly mixed pointer/keyboard input, not keyboard-only.
+            const header = page.locator('[data-docs-site-header]');
+            const point = await header.evaluate((element) => {
+              const r = element.getBoundingClientRect();
+              return { x: r.left + 1, y: r.top + 1 };
+            });
+            await page.evaluate(({ x, y }) => {
+              const hit = document.elementFromPoint(x, y);
+              if (
+                !hit?.closest('[data-docs-site-header]') ||
+                hit.closest('a,button,summary,input,select,[tabindex]')
+              )
+                throw new Error('Header pointer starting point must be non-interactive padding');
+            }, point);
+            await page.mouse.click(point.x, point.y);
+            const target =
+              focusOwner === 'menu'
+                ? '[data-site-menu-button]'
+                : '[data-site-header-desktop-navigation] a';
+            let acquired = false;
+            for (let step = 0; step < 8; step++) {
+              await page.keyboard.press('Tab');
+              acquired = await page.evaluate(
+                (selector) => document.activeElement === document.querySelector(selector),
+                target
+              );
+              if (acquired) break;
+            }
+            expect(acquired, 'trusted forward Tab reaches the actual Header owner').toBe(true);
+          }
+          await page.locator('[data-site-code-surface="frame"] pre').first().waitFor();
+          await page.evaluate(
+            ({ focusOwner, phase }) => {
+              const code = document.querySelector(
+                '[data-site-code-surface="frame"] pre'
+              ) as HTMLElement;
+              const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
+              let text = walker.nextNode()!;
+              while (text && !text.textContent?.trim()) text = walker.nextNode()!;
+              const range = document.createRange();
+              range.selectNodeContents(text);
+              const selection = getSelection()!;
+              selection.removeAllRanges();
+              selection.addRange(range);
+              const target =
+                focusOwner === 'menu'
+                  ? (document.querySelector(
+                      phase === 'early-native'
+                        ? '[data-site-header-fallback-summary]'
+                        : '[data-site-menu-button]'
+                    ) as HTMLElement)
+                  : (document.querySelector(
+                      '[data-site-header-desktop-navigation] a'
+                    ) as HTMLElement);
+              if (phase === 'early-native') target.focus({ preventScroll: true });
+              else if (document.activeElement !== target)
+                throw new Error('Range setup displaced keyboard focus');
+              const describe = (node: Node | null, includePaint = true) => {
+                const element = node instanceof Element ? node : node?.parentElement;
+                return element
+                  ? {
+                      tag: element.localName,
+                      id: element.id,
+                      connected: element.isConnected,
+                      ancestors: !includePaint
+                        ? undefined
+                        : (() => {
+                            const facts = [];
+                            for (
+                              let node: Element | null = element;
+                              node;
+                              node = node.parentElement
+                            ) {
+                              const css = getComputedStyle(node);
+                              if (
+                                node === element ||
+                                node.hasAttribute('hidden') ||
+                                node.hasAttribute('inert') ||
+                                node.hasAttribute('data-pui-view-pending') ||
+                                css.visibility !== 'visible' ||
+                                css.display === 'none'
+                              )
+                                facts.push({
+                                  tag: node.localName,
+                                  hidden: node.hasAttribute('hidden'),
+                                  inert: node.hasAttribute('inert'),
+                                  pending: node.hasAttribute('data-pui-view-pending'),
+                                  generation: node.getAttribute('data-projection-generation-state'),
+                                  display: css.display,
+                                  visibility: css.visibility,
+                                });
+                            }
+                            return facts;
+                          })(),
+                      attributes: Object.fromEntries(
+                        [...element.attributes]
+                          .filter((attribute) =>
+                            /^(?:data-site|data-typography|tabindex|href|hidden|inert)/.test(
+                              attribute.name
+                            )
+                          )
+                          .map((attribute) => [attribute.name, attribute.value])
+                      ),
+                    }
+                  : null;
+              };
+              const trace: unknown[] = [];
+              const observe = (kind: string, details: Record<string, unknown> = {}) => {
+                if (trace.length < 160)
+                  trace.push({
+                    kind,
+                    at: performance.now(),
+                    readyState: document.readyState,
+                    hash: location.hash,
+                    fragmentTarget: document.querySelector(':target')?.id ?? null,
+                    applicationOwnership: {
+                      focused:
+                        focusOwner === 'menu'
+                          ? document.activeElement?.hasAttribute('data-site-menu-button')
+                          : document.activeElement === target,
+                      codeSame:
+                        document.querySelector('[data-site-code-surface="frame"] pre') === code,
+                      textRetained: text.isConnected && code.contains(text),
+                      selectionSame:
+                        selection.anchorNode === text &&
+                        selection.anchorOffset === 0 &&
+                        selection.focusNode === text &&
+                        selection.focusOffset === text.textContent?.length &&
+                        selection.toString() === text.textContent,
+                    },
+                    menuReady: document
+                      .querySelector('[data-docs-site-header]')
+                      ?.hasAttribute('data-site-menu-ready'),
+                    active: describe(document.activeElement, !kind.endsWith('-call')),
+                    ...details,
+                  });
+              };
+              for (const kind of ['focusin', 'focusout', 'selectionchange'])
+                document.addEventListener(
+                  kind,
+                  (event) =>
+                    observe(kind, {
+                      target: describe(event.target as Node),
+                      relatedTarget: describe((event as FocusEvent).relatedTarget as Node | null),
+                      stack: event.type === 'selectionchange' ? undefined : new Error().stack,
+                    }),
+                  true
+                );
+              // focus-method-observation-start
+              for (const method of ['focus', 'blur'] as const) {
+                const original = HTMLElement.prototype[method];
+                HTMLElement.prototype[method] = function (this: HTMLElement, ...args: any[]) {
+                  // Observing must never turn a native return/throw into another
+                  // outcome, including a borrowed method with an invalid receiver.
+                  try {
+                    observe(`${method}-call`, {
+                      target:
+                        this instanceof HTMLElement ? { tag: this.localName, id: this.id } : null,
+                      stack: new Error().stack,
+                    });
+                  } catch {
+                    /* Diagnostic failure cannot interfere with native behavior. */
+                  }
+                  return Reflect.apply(original, this, args);
+                };
+              }
+              // focus-method-observation-end
+              for (const kind of ['DOMContentLoaded', 'astro:page-load'])
+                document.addEventListener(kind, () => observe(kind), { once: true });
+              for (const kind of ['load', 'pageshow', 'hashchange'])
+                window.addEventListener(kind, () => observe(kind));
+              const originalSet = selection.setBaseAndExtent;
+              selection.setBaseAndExtent = function (...args) {
+                observe('selection-write-before', { stack: new Error().stack });
+                try {
+                  return Reflect.apply(originalSet, this, args);
+                } finally {
+                  observe('selection-write-after');
+                }
+              };
+              observe('before-release');
+              (window as any).__startupOwnership = {
+                trace,
+                describe,
+                observe,
+                initialFocusCorrect: document.activeElement === target,
+                code,
+                text,
+                focus: document.activeElement,
+                anchor: selection.anchorNode,
+                offset: selection.anchorOffset,
+                extent: selection.focusNode,
+                extentOffset: selection.focusOffset,
+                selected: selection.toString(),
+              };
+            },
+            { focusOwner, phase }
           );
-        } catch {
-          /* Keep the original test failure if diagnostic collection fails. */
+          const initial = await page.evaluate((phase) => {
+            const saved = (window as any).__startupOwnership;
+            const selection = getSelection()!;
+            return {
+              phase,
+              hash: location.hash,
+              fragmentTarget: document.querySelector(':target')?.id ?? null,
+              menuEnhanced: document
+                .querySelector('[data-docs-site-header]')
+                ?.hasAttribute('data-site-menu-ready'),
+              codeEnhanced: !!document.querySelector('[data-code-surface-view="ready"]'),
+              typographyEnhanced: !!document.querySelector('[data-typography-runtime]'),
+              input: (window as any).__ownershipInput,
+              focused: saved.initialFocusCorrect && document.activeElement === saved.focus,
+              focus: saved.describe(document.activeElement),
+              selectionNonempty: selection.toString().trim().length > 0,
+              selectionSame:
+                selection.anchorNode === saved.anchor &&
+                selection.anchorOffset === saved.offset &&
+                selection.focusNode === saved.extent &&
+                selection.focusOffset === saved.extentOffset &&
+                selection.toString() === saved.selected,
+              selection: {
+                text: selection.toString(),
+                rangeCount: selection.rangeCount,
+                anchor: saved.describe(selection.anchorNode),
+                anchorOffset: selection.anchorOffset,
+                extent: saved.describe(selection.focusNode),
+                focusOffset: selection.focusOffset,
+              },
+            };
+          }, phase);
+          await writeFile(
+            path.join(directory, `react-${focusOwner}-${phase}-ownership-initial.json`),
+            JSON.stringify({ source, initial, heldRuntimeRequests }, null, 2)
+          );
+          await captureViewport(
+            page,
+            path.join(directory, `react-${focusOwner}-${phase}-ownership-before.png`)
+          );
+          // Preconditions must succeed before gated scripts resume. A fixture's own
+          // selection/focus setup failure must not be attributed to hydration.
+          expect(initial.focused, 'native focus acquired before script release').toBe(true);
+          expect(
+            initial.selectionNonempty,
+            'native code selection acquired before script release'
+          ).toBe(true);
+          expect(initial.selectionSame, 'native selection retained before script release').toBe(
+            true
+          );
+          expect(initial.hash).toBe('#_top');
+          expect(
+            heldRuntimeRequests.length,
+            'the declared gate really holds a request'
+          ).toBeGreaterThan(0);
+          if (phase === 'settled-runtime') {
+            expect(initial.fragmentTarget).toBe('_top');
+            expect(initial.menuEnhanced).toBe(true); // eager Header is covered by early-native
+            expect(initial.codeEnhanced).toBe(false);
+            expect(initial.typographyEnhanced).toBe(false);
+            expect(
+              initial.input.some(
+                (event: any) =>
+                  event.type === 'keydown' && event.key === 'Tab' && event.trusted && !event.shift
+              )
+            ).toBe(true);
+            expect(heldRuntimeRequests.every(isQuickStartReactRuntime)).toBe(true);
+          } else expect(initial.fragmentTarget).toBeNull();
+          release();
+          await page.waitForFunction(quickStartOwnershipReady);
+          await page.waitForLoadState('load');
+          const facts = await page.evaluate((focusOwner) => {
+            const saved = (window as any).__startupOwnership;
+            const selection = getSelection()!;
+            return {
+              initialSelectionNonempty: saved.selected.trim().length > 0,
+              codeSame:
+                document.querySelector('[data-site-code-surface="frame"] pre') === saved.code,
+              textRetained: saved.text.isConnected && saved.code.contains(saved.text),
+              selectionSame:
+                selection.anchorNode === saved.anchor &&
+                selection.anchorOffset === saved.offset &&
+                selection.focusNode === saved.extent &&
+                selection.focusOffset === saved.extentOffset &&
+                selection.toString() === saved.selected,
+              focused:
+                focusOwner === 'menu'
+                  ? document.activeElement?.hasAttribute('data-site-menu-button')
+                  : document.activeElement === saved.focus,
+            };
+          }, focusOwner);
+          const diagnostics = await page.evaluate(() => {
+            const saved = (window as any).__startupOwnership;
+            saved.observe('after-upgrade');
+            const typography = document.querySelector('.doc-stage-notice__title');
+            return {
+              typography: {
+                owner: typography?.getAttribute('data-typography-owner'),
+                runtime: typography?.getAttribute('data-typography-runtime'),
+                generation: typography?.getAttribute('data-typography-generation'),
+              },
+              initialFocusCorrect: saved.initialFocusCorrect,
+              originalFocus: saved.describe(saved.focus),
+              actualFocus: saved.describe(document.activeElement),
+              trace: saved.trace,
+            };
+          });
+          // Persist failures before the strict assertion: identity and retained
+          // selection alone cannot establish that no intermediate blur occurred.
+          await writeFile(
+            path.join(directory, `react-${focusOwner}-${phase}-ownership.json`),
+            JSON.stringify(
+              {
+                source,
+                phase,
+                facts,
+                diagnostics,
+                endToEndEarlyInputDebt:
+                  phase === 'early-native'
+                    ? {
+                        passed: facts.focused,
+                        boundary: 'pending initial native fragment navigation',
+                        productFixClaimed: false,
+                      }
+                    : null,
+              },
+              null,
+              2
+            )
+          );
+          await captureViewport(
+            page,
+            path.join(directory, `react-${focusOwner}-${phase}-ownership-after.png`)
+          );
+          expect(diagnostics.initialFocusCorrect).toBe(true);
+          if (phase === 'early-native') {
+            expect(
+              earlyOwnershipBoundaryIsNative(diagnostics.trace, focusOwner),
+              'only the observed native fragment boundary may explain early focus loss'
+            ).toBe(true);
+            // Retain the original red endpoint as explicit native experience debt.
+            // This arm proves application handoff at DCL, not end-to-end focus retention.
+            expect(facts.focused, 'pending native fragment still takes focus').toBe(false);
+          }
+          if (phase === 'settled-runtime') {
+            expect(facts.focused).toBe(true);
+            expect(diagnostics.trace.filter((event: any) => event.kind === 'focusout')).toEqual([]);
+          }
+          expect(facts).toEqual({
+            initialSelectionNonempty: true,
+            codeSame: true,
+            textRetained: true,
+            selectionSame: true,
+            ...(phase === 'settled-runtime' ? { focused: true } : { focused: false }),
+          });
+        } catch (error) {
+          const name = `react-${focusOwner}-${phase}-ownership`;
+          await captureFailure(page, name, error);
+          try {
+            const trace = await page.evaluate(
+              () => (window as any).__startupOwnership?.trace ?? []
+            );
+            await writeFile(
+              path.join(directory, `${name}-trace.json`),
+              JSON.stringify({ source, trace }, null, 2)
+            );
+          } catch {
+            /* Keep the original test failure if diagnostic collection fails. */
+          }
+          throw error;
+        } finally {
+          release();
+          await page.unrouteAll({ behavior: 'wait' });
+          await context.close();
         }
-        throw error;
-      } finally {
-        release();
-        await page.unrouteAll({ behavior: 'wait' });
-        await context.close();
-      }
-    }, 90_000);
+      }, 90_000);
   for (const condition of conditions)
     it(`no JavaScript ${condition.width}, system ${condition.colorScheme}: SSR dark note and text remain readable`, async () => {
       const context = await browser.newContext({

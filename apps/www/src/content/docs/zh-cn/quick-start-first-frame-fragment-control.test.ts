@@ -48,8 +48,8 @@ describe('native fragment diagnostic evidence boundaries (source controls only)'
     expect(control).toContain('selection.focusNode === state.extent');
     expect(control).toContain('selection.focusOffset === state.extentOffset');
   });
-  it('runs after a failed original suite and cannot replace its 18 strict passing results', () => {
-    const original = workflow.indexOf('report.numPassedTests, 18');
+  it('runs after a failed original suite and cannot replace the split boundary and strict settled-runtime results', () => {
+    const original = workflow.indexOf('report.numPassedTests, 20');
     const diagnostic = workflow.indexOf('name: Isolate native fragment focus');
     const retain = workflow.indexOf('name: Retain exact-source');
     expect(diagnostic).toBeGreaterThan(original);
