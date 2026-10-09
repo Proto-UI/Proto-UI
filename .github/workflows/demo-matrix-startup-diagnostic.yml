@@ -5,6 +5,8 @@ on:
       - '.github/workflows/demo-matrix-startup-diagnostic.yml'
       - 'apps/www/src/content/docs/zh-cn/demo-matrix-startup-diagnostic*.ts'
       - 'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/server-readiness.mjs'
       - 'apps/www/src/content/docs/zh-cn/demo-matrix-observation*.ts'
   workflow_dispatch:
 permissions:

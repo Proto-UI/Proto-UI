@@ -326,3 +326,33 @@ it.each([
     ]);
   }
 );
+
+describe('Matrix startup workflow dependency triggers', () => {
+  const workflow = readFileSync('.github/workflows/demo-matrix-startup-diagnostic.yml', 'utf8');
+  const dependencies = [
+    {
+      importer: 'apps/www/src/content/docs/zh-cn/demo-matrix.browser.test.ts',
+      specifier: './browser-harness',
+      dependency: 'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+    },
+    {
+      importer: 'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+      specifier: '../../../../../../scripts/test/server-readiness.mjs',
+      dependency: 'scripts/test/server-readiness.mjs',
+    },
+  ];
+  const triggeredPaths = (text: string) =>
+    [...text.split('  workflow_dispatch:')[0].matchAll(/^\s+- '([^']+)'$/gm)].map(
+      (match) => match[1]
+    );
+  it.each(dependencies)(
+    'profiles changes to the actual imported $dependency',
+    ({ importer, specifier, dependency }) => {
+      expect(readFileSync(importer, 'utf8')).toContain(`from '${specifier}'`);
+      expect(triggeredPaths(workflow)).toContain(dependency);
+      expect(triggeredPaths(workflow.replace(`      - '${dependency}'\n`, ''))).not.toContain(
+        dependency
+      );
+    }
+  );
+});
