@@ -79,6 +79,55 @@ describe('bounded SSR CSS variable fallback and closed environment syntax', () =
     ).toMatchObject({ required: [], missing: [], cyclic: [] });
   });
 
+  it.each(['unset', 'inherit', 'revert', 'revert-layer'])(
+    'refuses context-dependent %s definitions even when a consuming fallback exists',
+    (keyword) => {
+      for (const value of [keyword, '  ' + keyword.toUpperCase() + ' /* cascade */ !important ']) {
+        for (const consumer of ['var(--radius)', 'var(--radius,0.5rem)']) {
+          for (const [component, environment] of [
+            [`x{border-radius:${consumer}}`, `:root{--radius:${value}}`],
+            [`x{--radius:${value};border-radius:${consumer}}`, ''],
+          ]) {
+            expect(ssrStyleDependencies(component, environment).invalid).toEqual([
+              `Custom property --radius uses context-dependent CSS-wide keyword ${keyword}`,
+            ]);
+          }
+        }
+        expect(compileFont(`:root{--pui-font-sans:${value}}`).output).toMatchObject({
+          ok: false,
+          diagnostics: [{ message: expect.stringContaining('context-dependent CSS-wide keyword') }],
+        });
+      }
+      expect(
+        ssrStyleDependencies('x{font-family:var(--font)}', `:root{--font:"${keyword}"}`)
+      ).toMatchObject({ required: ['--font'], missing: [], invalid: [] });
+      expect(
+        ssrStyleDependencies('x{font-family:var(--font)}', `:root{--font:${keyword},sans-serif}`)
+      ).toMatchObject({ missing: [], invalid: [] });
+      // Keyword tokens used as ordinary var() fallback values are not declarations
+      // of a context-dependent custom property. Property grammar is outside this checker.
+      expect(ssrStyleDependencies(`x{color:var(--absent,${keyword})}`)).toMatchObject({
+        missing: [],
+        invalid: [],
+      });
+      expect(
+        ssrStyleDependencies(
+          'x{color:var(--good,var(--unused))}',
+          `:root{--good:red;--unused:${keyword}}`
+        )
+      ).toMatchObject({ required: ['--good'], missing: [], invalid: [] });
+    }
+  );
+
+  it('keeps initial guaranteed-invalid fallback distinct from context-dependent keywords', () => {
+    expect(
+      ssrStyleDependencies('x{color:var(--x)}', ':root{--x: INITIAL !important}')
+    ).toMatchObject({ missing: ['--x'], invalid: [] });
+    expect(
+      ssrStyleDependencies('x{color:var(--x,red)}', ':root{--x: INITIAL !important}')
+    ).toMatchObject({ required: [], missing: [], invalid: [] });
+  });
+
   it('does not parse quoted text or comments as references and supports empty fallback', () => {
     expect(
       ssrStyleDependencies(

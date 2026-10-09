@@ -264,12 +264,18 @@ export function ssrStyleDependencies(componentCss: string, environmentCss = '') 
         if (!values) result.missing.add(name);
         else
           for (const value of values) {
-            if (
-              value.value.length === 1 &&
-              value.value[0].kind === 'word' &&
-              value.value[0].value.toLowerCase() === 'initial'
-            )
-              result.missing.add(name);
+            const keyword =
+              value.value.length === 1 && value.value[0].kind === 'word'
+                ? value.value[0].value.toLowerCase()
+                : null;
+            // Unlike initial, these can resolve through an unknown ancestor or
+            // cascade origin/layer. A consuming var() fallback cannot close that
+            // uncertainty; this bounded analyzer does not model the cascade.
+            if (keyword && ['inherit', 'unset', 'revert', 'revert-layer'].includes(keyword))
+              throw new Error(
+                `Custom property ${name} uses context-dependent CSS-wide keyword ${keyword}`
+              );
+            if (keyword === 'initial') result.missing.add(name);
             else merge(result, resolveReferences(value.references));
           }
       }
