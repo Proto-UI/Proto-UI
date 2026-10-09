@@ -6,6 +6,7 @@ on:
       - 'apps/www/src/components/**'
       - 'apps/www/src/pages/**/test/liquid-library-card.astro'
       - 'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/library-liquid-card-observation.ts'
       - 'apps/www/src/content/docs/zh-cn/library-card*.ts'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
       - 'apps/www/src/styles/**'
@@ -13,6 +14,7 @@ on:
       - 'apps/www/package.json'
       - 'experiments/material-initial-paint/media-session.ts'
       - 'scripts/release/test/liquid-card-candidate-workflow.test.mjs'
+      - 'scripts/test/liquid-card-observation.test.mjs'
       - 'scripts/test/server-readiness.mjs'
       - '.npmrc'
       - 'pnpm-workspace.yaml'
@@ -54,7 +56,7 @@ jobs:
           git rev-parse HEAD > "$RUNNER_TEMP/liquid-card/source-sha.txt"
           git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/liquid-card/source-tree.txt"
       - name: Check producer source and workflow controls
-        run: node --test scripts/release/test/liquid-card-candidate-workflow.test.mjs
+        run: node --test scripts/release/test/liquid-card-candidate-workflow.test.mjs scripts/test/liquid-card-observation.test.mjs
       - name: Install the same public CJK fallback as the Card gate
         timeout-minutes: 3
         run: |

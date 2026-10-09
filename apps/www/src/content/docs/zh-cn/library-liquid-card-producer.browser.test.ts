@@ -6,7 +6,7 @@ import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import ts from 'typescript';
-import type { Browser, Response } from 'playwright-core';
+import type { Browser, Page, Response } from 'playwright-core';
 import { beforeAll, afterAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 import {
@@ -19,6 +19,11 @@ import type { LibraryLiquidCandidateHarness } from '../../../components/library-
 import { readLibraryPlatformFonts } from './library-card-platform-fonts';
 type CandidateWindow = Window & { libraryLiquidCardCandidate?: LibraryLiquidCandidateHarness };
 import { libraryCardReadabilityFailures } from './library-card-readability';
+import {
+  collectLiquidCardObservation,
+  boundedLiquidCardObservation,
+  withLiquidCardFailureObservation,
+} from './library-liquid-card-observation';
 import {
   holdMediaEmulation,
   readMediaObservation,
@@ -44,6 +49,28 @@ const safeMedia = {
   'prefers-contrast': 'no-preference',
   'forced-colors': 'none',
 };
+async function observeScrollFailure(page: Page) {
+  const before = await page.evaluate(collectLiquidCardObservation);
+  // This probes the frame scheduler without changing layout or awaiting fonts.
+  // The host-side bound also works when a no-script page does not deliver rAF.
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let raf: unknown;
+  try {
+    raf = await Promise.race([
+      page.evaluate(() => new Promise<number>((resolve) => requestAnimationFrame(resolve))),
+      new Promise((resolve) => {
+        timer = setTimeout(
+          () =>
+            resolve({ observed: false, reason: 'No rAF within 250ms; not proof of layout motion' }),
+          250
+        );
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+  return { before, raf, after: await page.evaluate(collectLiquidCardObservation) };
+}
 async function boundedBody(read: () => Promise<Buffer>): Promise<Buffer> {
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {
@@ -303,6 +330,15 @@ describe('actual complete Liquid Card optical producer', () => {
                 path.join(directory, 'actual-liquid-card.png'),
                 clip
               );
+              // Keep the unmodified viewport beside the tall card crop. A fixed
+              // site header can intersect a beyond-viewport crop; never hide it.
+              const viewportImage = await captureCurrentViewport(
+                page,
+                path.join(directory, 'actual-viewport.png')
+              );
+              const viewportObservation = await boundedLiquidCardObservation(() =>
+                page.evaluate(collectLiquidCardObservation)
+              );
               page.off('response', collectResponse);
               await Promise.all(pendingAssets);
               expect(
@@ -325,6 +361,8 @@ describe('actual complete Liquid Card optical producer', () => {
                     fonts,
                     media,
                     image,
+                    viewportImage,
+                    viewportObservation,
                     assets,
                     readCardsSha,
                   },
@@ -408,7 +446,19 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
         expect(await page.locator('[data-library-action]').count()).toBe(6);
         expect(await page.locator('a a').count()).toBe(0);
         const card = page.locator('[data-library-liquid-candidate]');
-        await card.scrollIntoViewIfNeeded();
+        await withLiquidCardFailureObservation(
+          () => card.scrollIntoViewIfNeeded(),
+          () => observeScrollFailure(page),
+          (facts) =>
+            writeFailureRecord(path.join(directory, 'scroll-failure-observation.json'), {
+              sha,
+              tree,
+              name,
+              role: 'Read-only diagnosis; the original scroll failure remains blocking',
+              facts,
+            }),
+          (error) => console.warn('[liquid-card-scroll-observation-unavailable]', String(error))
+        );
         const clip = await card.evaluate((element) => {
           const r = element.getBoundingClientRect();
           return {
