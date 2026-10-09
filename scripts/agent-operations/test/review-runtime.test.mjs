@@ -2416,6 +2416,7 @@ test('legacy schema v1 packets remain readable but cannot authorize current writ
 test('cloud event provenance cannot borrow local scheduled or current-user review authority', () => {
   const input = reviewInput();
   const base = {
+    ...modelTraceFixture(input.repositoryId),
     packet: packet({ limitations: [], humanGates: [], recommendedAction: 'APPROVE' }, input),
     input,
     liveInput: structuredClone(input),

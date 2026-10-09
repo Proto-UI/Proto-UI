@@ -202,7 +202,7 @@ function loadAssessment(path, policy) {
   return { ...result, validated: true, fresh: isSelfAssessmentFresh(result, snapshot) };
 }
 
-function loadInvocationContext(args) {
+function loadInvocationContext(args, command) {
   const executionMode = args.get('--mode');
   const executionModeSource = args.get('--mode-source');
   if (!executionMode)
@@ -210,6 +210,13 @@ function loadInvocationContext(args) {
   if (!executionModeSource)
     throw new Error('--mode-source is required for submit-review and merge-pull-request');
   establishExecutionMode(executionMode, executionModeSource);
+  if (command === 'submit-review' || command === 'merge-pull-request') {
+    assertModelTraceInputsOutsideCheckout({
+      recordPath: args.get('--record'),
+      contextPath: args.get('--context'),
+      checkoutRoot: skillRegistryRoot,
+    });
+  }
   // Retain the launcher/operator declaration independently of task-authored
   // artifacts. Matching declarations do not authenticate the caller.
   return Object.freeze({
@@ -374,11 +381,6 @@ function readExternalEvidence(args) {
 }
 
 function loadModelTraceInvocation(args, packet, handoff) {
-  assertModelTraceInputsOutsideCheckout({
-    recordPath: args.get('--record'),
-    contextPath: args.get('--context'),
-    checkoutRoot: skillRegistryRoot,
-  });
   const modelTrace = loadModelTraceRecord({
     recordPath: args.get('--record'),
     contextPath: args.get('--context'),
@@ -501,7 +503,7 @@ try {
       scopeId: handoff.binding?.scopeId,
     });
   } else if (command === 'submit-review') {
-    const invocationContext = loadInvocationContext(args);
+    const invocationContext = loadInvocationContext(args, command);
     const { handoff } = loadHandoff(
       args.get('--handoff'),
       'pui-review',
@@ -579,7 +581,7 @@ try {
       };
     }
   } else {
-    const invocationContext = loadInvocationContext(args);
+    const invocationContext = loadInvocationContext(args, command);
     const routed = loadHandoff(args.get('--handoff'), 'pui-integrate', invocationContext);
     const input = readInput(args.get('--input'));
     const packet = readPacket(args.get('--packet'), input);

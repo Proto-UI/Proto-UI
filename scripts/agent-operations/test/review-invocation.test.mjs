@@ -150,9 +150,16 @@ function fixture(t, command) {
 
 // Spawn review-packet with overridden --record/--context paths and observe
 // whether either raw input was opened before the process exited. Mirrors the
-// existing preload boundary observer but intercepts fs.openSync, since the
-// no-follow reader opens files directly rather than through readFileSync.
-function observeInputs(t, command, f, recordPath, contextPath) {
+// existing preload boundary observer and watches both the no-follow reader's
+// opens and task-artifact reads that could alias either private input.
+function observeInputs(
+  t,
+  command,
+  f,
+  recordPath,
+  contextPath,
+  { handoffPath = f.files.handoff, ownerArgs = [] } = {}
+) {
   const directory = mkdtempSync(path.join(tmpdir(), 'pui-review-observe-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const readsPath = path.join(directory, 'reads.jsonl');
@@ -168,11 +175,18 @@ function observeInputs(t, command, f, recordPath, contextPath) {
     import { syncBuiltinESMExports } from 'node:module';
     const watched = new Set(JSON.parse(process.env.PUI_INVOCATION_FILES));
     const openSync = fs.openSync;
+    const readFileSync = fs.readFileSync;
     fs.openSync = (file, ...args) => {
       if (watched.has(String(file))) {
         fs.appendFileSync(process.env.PUI_INVOCATION_READS, JSON.stringify(String(file)) + '\\n');
       }
       return openSync(file, ...args);
+    };
+    fs.readFileSync = (file, ...args) => {
+      if (watched.has(String(file))) {
+        fs.appendFileSync(process.env.PUI_INVOCATION_READS, JSON.stringify(String(file)) + '\\n');
+      }
+      return readFileSync(file, ...args);
     };
     cp.execFileSync = (command, args) => {
       fs.appendFileSync(process.env.PUI_INVOCATION_CALLS, JSON.stringify({ command, args }) + '\\n');
@@ -196,7 +210,7 @@ function observeInputs(t, command, f, recordPath, contextPath) {
       '--packet',
       f.files.packet,
       '--handoff',
-      f.files.handoff,
+      handoffPath,
       '--authorization',
       'explicit-current-user',
       '--record',
@@ -204,6 +218,7 @@ function observeInputs(t, command, f, recordPath, contextPath) {
       '--context',
       contextPath,
       ...(merge ? ['--published-review-packet', f.files.published] : []),
+      ...ownerArgs,
     ],
     {
       cwd: root,
@@ -309,6 +324,31 @@ for (const command of ['submit-review', 'merge-pull-request']) {
     assert.deepEqual(aliased.reads, []);
     assert.equal(aliased.calls, '');
     assert.match(aliased.stderr, /outside the checkout/);
+
+    // Equal paths in another argument role must not open raw inputs before
+    // admission, including owner proof loading before the handoff itself.
+    const handoffAlias = observeInputs(t, command, f, insideRecord, f.files.context, {
+      handoffPath: insideRecord,
+    });
+    assert.equal(handoffAlias.status, 1);
+    assert.deepEqual(handoffAlias.reads, []);
+    assert.equal(handoffAlias.calls, '');
+    assert.match(handoffAlias.stderr, /outside the checkout/);
+
+    const ownerAlias = observeInputs(t, command, f, f.files.record, insideContext, {
+      ownerArgs: [
+        '--owner-authorization',
+        f.files.record,
+        '--owner-key',
+        insideContext,
+        '--owner-grant',
+        'synthetic-invocation-control',
+      ],
+    });
+    assert.equal(ownerAlias.status, 1);
+    assert.deepEqual(ownerAlias.reads, []);
+    assert.equal(ownerAlias.calls, '');
+    assert.match(ownerAlias.stderr, /outside the checkout/);
   });
 
   test(`${command} accepts outside-checkout ModelTrace record/context as control`, (t) => {

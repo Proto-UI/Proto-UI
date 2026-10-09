@@ -140,12 +140,19 @@ function loadAssessment(path, policy, request) {
   return { ...result, validated: true, fresh: isSelfAssessmentFresh(result, snapshot) };
 }
 
-function loadInvocationContext(args) {
+function loadInvocationContext(args, command) {
   const executionMode = args.get('--mode');
   const executionModeSource = args.get('--mode-source');
   if (!executionMode) throw new Error('--mode is required for validate and apply');
   if (!executionModeSource) throw new Error('--mode-source is required for validate and apply');
   establishExecutionMode(executionMode, executionModeSource);
+  if (command === 'apply') {
+    assertModelTraceInputsOutsideCheckout({
+      recordPath: args.get('--record'),
+      contextPath: args.get('--context'),
+      checkoutRoot: skillRegistryRoot,
+    });
+  }
   // Preserve the independent operator declaration before reading task-authored
   // artifacts. This binding cannot authenticate a caller that controls both.
   return Object.freeze({
@@ -240,7 +247,7 @@ export function runCollaborationCli(argv, dependencies = {}) {
     return { valid: true, requestDigest: request.requestDigest };
   }
 
-  const invocationContext = loadInvocationContext(args);
+  const invocationContext = loadInvocationContext(args, command);
   // Reject missing, invalid, or conflicting declarations before assessment
   // collection, live GitHub reads, or any other external dependency is called.
   const routed = loadCollaborationHandoff(args.get('--handoff'), invocationContext);
@@ -257,11 +264,6 @@ export function runCollaborationCli(argv, dependencies = {}) {
     };
   }
 
-  assertModelTraceInputsOutsideCheckout({
-    recordPath: args.get('--record'),
-    contextPath: args.get('--context'),
-    checkoutRoot: skillRegistryRoot,
-  });
   const modelTrace = loadModelTraceRecord({
     recordPath: args.get('--record'),
     contextPath: args.get('--context'),

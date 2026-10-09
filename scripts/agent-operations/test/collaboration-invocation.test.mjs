@@ -350,7 +350,13 @@ for (const scenario of [
   });
 }
 
-for (const scenario of ['in-checkout record', 'in-checkout context', 'in-checkout alias']) {
+for (const scenario of [
+  'in-checkout record',
+  'in-checkout context',
+  'in-checkout alias',
+  'raw record reused as handoff',
+  'raw context reused as owner key',
+]) {
   test(`apply rejects ${scenario} before raw JSON reading or external dependencies`, (t) => {
     const f = fixture(t);
     const root = fileURLToPath(new URL('../../..', import.meta.url));
@@ -367,6 +373,19 @@ for (const scenario of ['in-checkout record', 'in-checkout context', 'in-checkou
     } else if (scenario === 'in-checkout context') {
       const idx = args.indexOf('--context');
       args[idx + 1] = insideContext;
+    } else if (scenario === 'raw record reused as handoff') {
+      args[args.indexOf('--record') + 1] = insideRecord;
+      args[args.indexOf('--handoff') + 1] = insideRecord;
+    } else if (scenario === 'raw context reused as owner key') {
+      args[args.indexOf('--context') + 1] = insideContext;
+      args.push(
+        '--owner-authorization',
+        f.recordPath,
+        '--owner-key',
+        insideContext,
+        '--owner-grant',
+        'synthetic-invocation-control'
+      );
     } else {
       // A directory alias outside checkout still reaches stageable raw inputs.
       const aliasDir = mkdtempSync(join(tmpdir(), 'collab-alias-'));
@@ -390,24 +409,32 @@ for (const scenario of ['in-checkout record', 'in-checkout context', 'in-checkou
     ]);
     const opened = [];
     const openSync = fs.openSync;
+    const readFileSync = fs.readFileSync;
     fs.openSync = (file, ...options) => {
       if (rawPaths.has(String(file))) opened.push(String(file));
       return openSync(file, ...options);
     };
+    fs.readFileSync = (file, ...options) => {
+      if (rawPaths.has(String(file))) opened.push(String(file));
+      return readFileSync(file, ...options);
+    };
     t.after(() => {
       fs.openSync = openSync;
+      fs.readFileSync = readFileSync;
     });
     const { calls, dependencies } = untouchedDependencies();
-    assert.throws(
-      () =>
-        runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...args], {
-          ...dependencies,
-          loadPolicy: () => ({}),
-        }),
-      /outside the checkout/
-    );
+    let failure;
+    try {
+      runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...args], {
+        ...dependencies,
+        loadPolicy: () => ({}),
+      });
+    } catch (error) {
+      failure = error;
+    }
     assert.deepEqual(calls, []);
     assert.deepEqual(opened, []);
+    assert.match(failure?.message ?? '', /outside the checkout/);
   });
 }
 

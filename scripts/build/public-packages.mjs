@@ -178,6 +178,20 @@ export function buildPublicPackage(pkg, options = {}) {
   const distDir = options.outDir ?? join(pkg.dir, 'dist');
   const sourceEntry = join(pkg.dir, 'src', 'index.ts');
   if (!existsSync(sourceEntry)) throw new Error(`${pkg.name}: missing src/index.ts`);
+  const sourceEntries = [
+    ...new Set([
+      sourceEntry,
+      ...flattenExportTargets(pkg.manifest.exports)
+        .filter(
+          (target) =>
+            target.startsWith('./dist/') && target.endsWith('.js') && !target.includes('*')
+        )
+        .map((target) =>
+          join(pkg.dir, 'src', target.slice('./dist/'.length).replace(/\.js$/, '.ts'))
+        )
+        .filter((target) => existsSync(target)),
+    ]),
+  ];
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
 
@@ -209,7 +223,7 @@ export function buildPublicPackage(pkg, options = {}) {
     'react-jsx',
     '--strict',
     '--skipLibCheck',
-    sourceEntry,
+    ...sourceEntries,
   ];
   const started = performance.now();
   const result = spawnSync(process.execPath, args, {
