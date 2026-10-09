@@ -21,3 +21,9 @@ Both source-wall matrices and 113 canonical proof negative controls pass. Canoni
 The previous exact-head CI `37876012675` finished failure: eight browser shards and macOS GPUI failed; general was cancelled. Successful individual checks and DCO are retained separately. Library Card has source-bound screenshots and 9/9 native journeys; Liquid Card remains 8/10 and Accordion 24/25. Initial-paint fallback and search readiness failures remain open. New workflow/diagnostics are not product repairs. GPUI pinned upstream still cannot represent the recorded row-sizing cases.
 
 This successor has no new full-workspace or native browser/GPUI result yet. Strict gzip overages remain React +445 B, Vue +280 B and Web Component +30 B under the existing Finf advisory policy; no ceilings changed or measurements relabelled. Four public SSR completion flags remain false and private Liquid Card remains default-off. Source-bound official CI and screenshots must be regenerated after actual publication.
+
+## Evidence commit follow-up
+
+The first proof commit's formatter succeeded, but lint-staged could not re-add sparse-excluded matrix/evidence paths and nevertheless returned zero. Its original object and full failure log are retained. The exact 72-path matrix/evidence directories were materialized before the normal follow-up commit; all four evidence files receive an explicit format check. This was an evidence-staging problem, not a source or validation change.
+
+Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
