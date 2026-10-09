@@ -119,6 +119,34 @@ describe('bounded SSR CSS variable fallback and closed environment syntax', () =
     }
   );
 
+  it.each(['unset', 'inherit', 'revert', 'revert-layer'])(
+    'does not let a candidate cycle conceal a context-dependent %s alternative',
+    (keyword) => {
+      for (const environment of [
+        `:root{--pui-font-sans:var(--pui-font-sans);--pui-font-sans:${keyword}}`,
+        `:root{--pui-font-sans:var(--pui-font-sans)}@media (min-width:1px){:root{--pui-font-sans:${keyword}}}`,
+        `:root{--pui-font-sans:var(--alias);--alias:var(--pui-font-sans);--alias:${keyword}}`,
+      ]) {
+        expect(compileFont(environment).output).toMatchObject({
+          ok: false,
+          diagnostics: [{ message: expect.stringContaining('context-dependent CSS-wide keyword') }],
+        });
+      }
+      expect(
+        ssrStyleDependencies(
+          'x{color:var(--good,var(--unused))}',
+          `:root{--good:red;--unused:var(--unused);--unused:${keyword}}`
+        )
+      ).toMatchObject({ required: ['--good'], missing: [], cyclic: [], invalid: [] });
+    }
+  );
+
+  it('does not inspect a context-dependent fallback outside a guaranteed-invalid SCC', () => {
+    expect(
+      ssrStyleDependencies('x{color:var(--x,red)}', ':root{--x:var(--x,var(--bad));--bad:inherit}')
+    ).toMatchObject({ required: [], missing: [], cyclic: [], invalid: [] });
+  });
+
   it('keeps initial guaranteed-invalid fallback distinct from context-dependent keywords', () => {
     expect(
       ssrStyleDependencies('x{color:var(--x)}', ':root{--x: INITIAL !important}')

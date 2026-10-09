@@ -221,7 +221,7 @@ export function ssrStyleDependencies(componentCss: string, environmentCss = '') 
     for (const [name, values] of definitions)
       graph.set(name, allRefs(values.flatMap((value) => value.references)));
     // CSS cycle edges include references inside fallbacks, even when a primary could resolve.
-    const cyclicNames = new Set<string>(),
+    const cyclicMembers = new Map<string, string[]>(),
       indices = new Map<string, number>(),
       low = new Map<string, number>();
     const stack: string[] = [],
@@ -249,7 +249,7 @@ export function ssrStyleDependencies(componentCss: string, environmentCss = '') 
         component.push(entry);
       } while (entry !== name);
       if (component.length > 1 || graph.get(name)?.has(name))
-        for (const member of component) cyclicNames.add(member);
+        for (const member of component) cyclicMembers.set(member, component);
     }
     for (const name of definitions.keys()) if (!indices.has(name)) cycle(name);
     const cache = new Map<string, Resolution>();
@@ -258,23 +258,29 @@ export function ssrStyleDependencies(componentCss: string, environmentCss = '') 
       if (previous) return previous;
       const result = empty();
       if (!localNames.has(name)) result.required.add(name);
-      if (cyclicNames.has(name)) result.cyclic.add(name);
+      // A union graph over conditional/multiple declarations cannot certify a
+      // guaranteed-invalid cycle when one of its members also has an unknown
+      // inherited/cascade candidate. Check only this consumed name and its SCC;
+      // unrelated definitions and outgoing unused fallback branches stay ignored.
+      const keywordOf = (value: Declaration) =>
+        value.value.length === 1 && value.value[0].kind === 'word'
+          ? value.value[0].value.toLowerCase()
+          : null;
+      for (const member of cyclicMembers.get(name) ?? [name])
+        for (const value of definitions.get(member) ?? []) {
+          const keyword = keywordOf(value);
+          if (keyword && ['inherit', 'unset', 'revert', 'revert-layer'].includes(keyword))
+            throw new Error(
+              `Custom property ${member} uses context-dependent CSS-wide keyword ${keyword}`
+            );
+        }
+      if (cyclicMembers.has(name)) result.cyclic.add(name);
       else {
         const values = definitions.get(name);
         if (!values) result.missing.add(name);
         else
           for (const value of values) {
-            const keyword =
-              value.value.length === 1 && value.value[0].kind === 'word'
-                ? value.value[0].value.toLowerCase()
-                : null;
-            // Unlike initial, these can resolve through an unknown ancestor or
-            // cascade origin/layer. A consuming var() fallback cannot close that
-            // uncertainty; this bounded analyzer does not model the cascade.
-            if (keyword && ['inherit', 'unset', 'revert', 'revert-layer'].includes(keyword))
-              throw new Error(
-                `Custom property ${name} uses context-dependent CSS-wide keyword ${keyword}`
-              );
+            const keyword = keywordOf(value);
             if (keyword === 'initial') result.missing.add(name);
             else merge(result, resolveReferences(value.references));
           }

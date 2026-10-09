@@ -13,3 +13,9 @@ The new source controls failed four cases and passed twenty-one before repair. T
 No browser, full build, remote write, public SSR admission or integration is included. Independent source review and final combined checks remain required.
 
 Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+
+## Independent review: conditional cycle candidates
+
+The first repair `0d232643749a52b75c0852a02649c8e6c1c8176a` still accepted a consumed name with both a cycle-producing declaration and a context-dependent alternative, including an `@media` alternative. The union graph marked the name cyclic before the new keyword check, so an outer fallback concealed the unknown cascade branch. Four additional actual-compiler negative controls failed while the prior twenty-five cases passed. The same issue can occur through another member of a multi-name strongly connected component.
+
+The follow-up retains SCC membership and validates context-dependent candidates of the consumed name and its SCC before treating the cycle as guaranteed-invalid. It does not walk outgoing unused fallback branches or globally reject unconsumed definitions. A guaranteed-invalid self-cycle with an outgoing unused context-dependent fallback remains accepted via its outer fallback. After this correction the CSS-boundary suite passes 30/30 and the generated server suite 8/8, total 38/38. The first candidate's false-green boundary is retained here; fresh independent re-review remains required.
