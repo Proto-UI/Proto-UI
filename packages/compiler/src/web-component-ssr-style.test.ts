@@ -141,6 +141,111 @@ describe('bounded SSR CSS variable fallback and closed environment syntax', () =
     }
   );
 
+  it.each([
+    '--pui-font-sans:var(--pui-font-sans);--pui-font-sans:var(--bad);--bad:inherit',
+    '--pui-font-sans:var(--pui-font-sans);--pui-font-sans:var(--missing,var(--bad));--bad:inherit',
+    '--pui-font-sans:var(--alias) var(--bad);--alias:var(--pui-font-sans);--alias:Arial;--bad:inherit',
+  ])('rejects an actually consumed context dependency in a noncyclic candidate: %s', (css) => {
+    expect(compileFont(`:root{${css}}`).output).toMatchObject({
+      ok: false,
+      diagnostics: [{ message: expect.stringContaining('context-dependent CSS-wide keyword') }],
+    });
+  });
+
+  it.each([
+    '--x:var(--x);--x:var(--good,var(--bad));--good:red;--bad:inherit',
+    '--x:var(--x,var(--bad));--bad:inherit',
+    '--x:var(--x) var(--other);--other:var(--x);--other:inherit',
+  ])('ignores context values never consumed by a viable candidate: %s', (css) => {
+    expect(ssrStyleDependencies('x{color:var(--x,red)}', `:root{${css}}`)).toMatchObject({
+      missing: [],
+      cyclic: [],
+      invalid: [],
+    });
+  });
+
+  const candidateRing = (prefix: string, size: number) =>
+    Array.from(
+      { length: size },
+      (_, index) =>
+        `--${prefix}${index}:var(--${prefix}${(index + 1) % size});--${prefix}${index}:red;`
+    ).join('');
+
+  it('admits exactly 256 candidate choices and caches repeated consumption', () => {
+    const css = `:root{${candidateRing('a', 8)}}`;
+    expect(
+      ssrStyleDependencies(
+        'x{color:var(--a0,red);background:var(--a0,blue);outline-color:var(--a1,green)}',
+        css
+      )
+    ).toMatchObject({ missing: [], cyclic: [], invalid: [] });
+  });
+
+  it('rejects over-budget choices before enumeration even with a closed outer fallback', () => {
+    expect(
+      ssrStyleDependencies('x{color:var(--a0,red)}', `:root{${candidateRing('a', 9)}}`).invalid
+    ).toEqual(['Unsupported SSR custom-property cycle: candidate budget exceeded']);
+  });
+
+  it('keeps local custom-property ownership ahead of environment candidates', () => {
+    expect(
+      ssrStyleDependencies(
+        'x{--a:red;color:var(--a)}',
+        ':root{--a:var(--a);--a:var(--bad);--bad:inherit}'
+      )
+    ).toMatchObject({ required: [], missing: [], cyclic: [], invalid: [] });
+  });
+
+  it('shares the candidate budget across separately consumed SCCs', () => {
+    for (const size of [7, 8]) {
+      const result = ssrStyleDependencies(
+        'x{color:var(--a0,red);background:var(--b0,blue)}',
+        `:root{${candidateRing('a', 7)}${candidateRing('b', size)}}`
+      );
+      expect(result.invalid).toEqual(
+        size === 7 ? [] : ['Unsupported SSR custom-property cycle: candidate budget exceeded']
+      );
+    }
+  });
+
+  it('checks cross-SCC aliases and preserves their selected fallback paths', () => {
+    expect(
+      ssrStyleDependencies(
+        'x{color:var(--a,red)}',
+        ':root{--a:var(--a);--a:var(--b);--b:var(--b);--b:var(--bad);--bad:inherit}'
+      ).invalid
+    ).toEqual(['Custom property --bad uses context-dependent CSS-wide keyword inherit']);
+    expect(
+      ssrStyleDependencies(
+        'x{color:var(--a,red)}',
+        ':root{--a:var(--a);--a:var(--b);--b:var(--b);--b:var(--good,var(--bad));--good:red;--bad:inherit}'
+      )
+    ).toMatchObject({ missing: [], cyclic: [], invalid: [] });
+  });
+
+  it('does not enumerate a large unconsumed SCC or an unused fallback subtree', () => {
+    expect(
+      ssrStyleDependencies(
+        'x{color:var(--good,var(--unused0))}',
+        `:root{--good:red;${candidateRing('unused', 20)}}`
+      )
+    ).toMatchObject({ required: ['--good'], missing: [], cyclic: [], invalid: [] });
+  });
+
+  it('bounds candidate graph traversal independently of the combination count', () => {
+    // 8 nodes + 16 declarations + 8 references = 32 work units; 179 unused
+    // literal definitions add 358. One extra reference crosses 100,000 / 256.
+    const padding = Array.from({ length: 179 }, (_, index) => `--padding${index}:red;`).join('');
+    const css = `:root{${candidateRing('a', 8)}${padding}}`;
+    expect(ssrStyleDependencies('x{color:var(--a0,red)}', css).invalid).toEqual([]);
+    expect(
+      ssrStyleDependencies(
+        'x{color:var(--a0,red)}',
+        css.replace('--padding0:red', '--padding0:var(--padding1)')
+      ).invalid
+    ).toEqual(['Unsupported SSR custom-property cycle: traversal budget exceeded']);
+  });
+
   it('does not inspect a context-dependent fallback outside a guaranteed-invalid SCC', () => {
     expect(
       ssrStyleDependencies('x{color:var(--x,red)}', ':root{--x:var(--x,var(--bad));--bad:inherit}')

@@ -210,99 +210,146 @@ export function ssrStyleDependencies(componentCss: string, environmentCss = '') 
         values.push(declaration);
         definitions.set(declaration.name, values);
       }
-    const graph = new Map<string, Set<string>>();
-    function allRefs(refs: Reference[], result = new Set<string>()) {
+    // These limits bound additional candidate analysis, not CSS parsing. Budget
+    // is shared by all consumed SCCs and reserved before candidate enumeration.
+    let candidateBudget = 256;
+    let traversalBudget = 100_000;
+    let graphWork = definitions.size;
+    const countReferences = (refs: Reference[]) => {
       for (const reference of refs) {
-        result.add(reference.name);
-        if (reference.fallback) allRefs(reference.fallback, result);
+        graphWork++;
+        if (reference.fallback) countReferences(reference.fallback);
       }
-      return result;
-    }
-    for (const [name, values] of definitions)
-      graph.set(name, allRefs(values.flatMap((value) => value.references)));
-    // CSS cycle edges include references inside fallbacks, even when a primary could resolve.
-    const cyclicMembers = new Map<string, string[]>(),
-      indices = new Map<string, number>(),
-      low = new Map<string, number>();
-    const stack: string[] = [],
-      onStack = new Set<string>();
-    let sequence = 0;
-    function cycle(name: string) {
-      indices.set(name, sequence);
-      low.set(name, sequence++);
-      stack.push(name);
-      onStack.add(name);
-      for (const dependency of graph.get(name) ?? [])
-        if (definitions.has(dependency)) {
-          if (!indices.has(dependency)) {
-            cycle(dependency);
-            low.set(name, Math.min(low.get(name)!, low.get(dependency)!));
-          } else if (onStack.has(dependency))
-            low.set(name, Math.min(low.get(name)!, indices.get(dependency)!));
+    };
+    for (const values of definitions.values())
+      for (const value of values) {
+        graphWork++;
+        countReferences(value.references);
+      }
+    function resolver(definitions: Map<string, Declaration[]>) {
+      const graph = new Map<string, Set<string>>();
+      function allRefs(refs: Reference[], result = new Set<string>()) {
+        for (const reference of refs) {
+          result.add(reference.name);
+          if (reference.fallback) allRefs(reference.fallback, result);
         }
-      if (low.get(name) !== indices.get(name)) return;
-      const component: string[] = [];
-      let entry: string;
-      do {
-        entry = stack.pop()!;
-        onStack.delete(entry);
-        component.push(entry);
-      } while (entry !== name);
-      if (component.length > 1 || graph.get(name)?.has(name))
-        for (const member of component) cyclicMembers.set(member, component);
-    }
-    for (const name of definitions.keys()) if (!indices.has(name)) cycle(name);
-    const cache = new Map<string, Resolution>();
-    function resolveName(name: string): Resolution {
-      const previous = cache.get(name);
-      if (previous) return previous;
-      const result = empty();
-      if (!localNames.has(name)) result.required.add(name);
-      // A union graph over conditional/multiple declarations cannot certify a
-      // guaranteed-invalid cycle when one of its members also has an unknown
-      // inherited/cascade candidate. Check only this consumed name and its SCC;
-      // unrelated definitions and outgoing unused fallback branches stay ignored.
-      const keywordOf = (value: Declaration) =>
-        value.value.length === 1 && value.value[0].kind === 'word'
-          ? value.value[0].value.toLowerCase()
-          : null;
-      for (const member of cyclicMembers.get(name) ?? [name])
-        for (const value of definitions.get(member) ?? []) {
-          const keyword = keywordOf(value);
-          if (keyword && ['inherit', 'unset', 'revert', 'revert-layer'].includes(keyword))
-            throw new Error(
-              `Custom property ${member} uses context-dependent CSS-wide keyword ${keyword}`
-            );
-        }
-      if (cyclicMembers.has(name)) result.cyclic.add(name);
-      else {
-        const values = definitions.get(name);
-        if (!values) result.missing.add(name);
-        else
-          for (const value of values) {
-            const keyword = keywordOf(value);
-            if (keyword === 'initial') result.missing.add(name);
-            else merge(result, resolveReferences(value.references));
+        return result;
+      }
+      for (const [name, values] of definitions)
+        graph.set(name, allRefs(values.flatMap((value) => value.references)));
+      // CSS cycle edges include references inside fallbacks, even when a primary could resolve.
+      const cyclicMembers = new Map<string, string[]>(),
+        indices = new Map<string, number>(),
+        low = new Map<string, number>();
+      const stack: string[] = [],
+        onStack = new Set<string>();
+      let sequence = 0;
+      function cycle(name: string) {
+        indices.set(name, sequence);
+        low.set(name, sequence++);
+        stack.push(name);
+        onStack.add(name);
+        for (const dependency of graph.get(name) ?? [])
+          if (definitions.has(dependency)) {
+            if (!indices.has(dependency)) {
+              cycle(dependency);
+              low.set(name, Math.min(low.get(name)!, low.get(dependency)!));
+            } else if (onStack.has(dependency))
+              low.set(name, Math.min(low.get(name)!, indices.get(dependency)!));
           }
+        if (low.get(name) !== indices.get(name)) return;
+        const component: string[] = [];
+        let entry: string;
+        do {
+          entry = stack.pop()!;
+          onStack.delete(entry);
+          component.push(entry);
+        } while (entry !== name);
+        if (component.length > 1 || graph.get(name)?.has(name))
+          for (const member of component) cyclicMembers.set(member, component);
       }
-      cache.set(name, result);
-      return result;
-    }
-    function resolveReferences(refs: Reference[]): Resolution {
-      const result = empty();
-      for (const reference of refs) {
-        const primary = resolveName(reference.name);
-        merge(
-          result,
-          valid(primary) || reference.fallback === undefined
-            ? primary
-            : resolveReferences(reference.fallback)
-        );
+      for (const name of definitions.keys()) if (!indices.has(name)) cycle(name);
+      const cache = new Map<string, Resolution>();
+      const candidateResolvers = new Map<string[], Array<(name: string) => Resolution>>();
+      function resolveName(name: string): Resolution {
+        const previous = cache.get(name);
+        if (previous) return previous;
+        const result = empty();
+        if (!localNames.has(name)) result.required.add(name);
+        const members = cyclicMembers.get(name);
+        if (members?.some((member) => definitions.get(member)!.length > 1)) {
+          // The union graph may combine declarations that never form one actual
+          // cycle. Conservatively inspect every bounded local candidate choice;
+          // this does not select or prove reachability of a selector/cascade branch.
+          let candidates = candidateResolvers.get(members);
+          if (!candidates) {
+            let combinations = 1;
+            for (const member of members) {
+              const count = definitions.get(member)!.length;
+              if (combinations > Math.floor(candidateBudget / count))
+                throw new Error('Unsupported SSR custom-property cycle: candidate budget exceeded');
+              combinations *= count;
+            }
+            const work = combinations * graphWork;
+            if (work > traversalBudget)
+              throw new Error('Unsupported SSR custom-property cycle: traversal budget exceeded');
+            candidateBudget -= combinations;
+            traversalBudget -= work;
+            candidates = [];
+            const chosen = new Map(definitions);
+            const visit = (index: number) => {
+              if (index === members.length) {
+                candidates!.push(resolver(new Map(chosen)).resolveName);
+                return;
+              }
+              const member = members[index];
+              for (const value of definitions.get(member)!) {
+                chosen.set(member, [value]);
+                visit(index + 1);
+              }
+            };
+            visit(0);
+            candidateResolvers.set(members, candidates);
+          }
+          for (const candidate of candidates) merge(result, candidate(name));
+        } else if (members) result.cyclic.add(name);
+        else {
+          const values = definitions.get(name);
+          if (!values) result.missing.add(name);
+          else
+            for (const value of values) {
+              const keyword =
+                value.value.length === 1 && value.value[0].kind === 'word'
+                  ? value.value[0].value.toLowerCase()
+                  : null;
+              if (keyword && ['inherit', 'unset', 'revert', 'revert-layer'].includes(keyword))
+                throw new Error(
+                  `Custom property ${name} uses context-dependent CSS-wide keyword ${keyword}`
+                );
+              if (keyword === 'initial') result.missing.add(name);
+              else merge(result, resolveReferences(value.references));
+            }
+        }
+        cache.set(name, result);
+        return result;
       }
-      return result;
+      function resolveReferences(refs: Reference[]): Resolution {
+        const result = empty();
+        for (const reference of refs) {
+          const primary = resolveName(reference.name);
+          merge(
+            result,
+            valid(primary) || reference.fallback === undefined
+              ? primary
+              : resolveReferences(reference.fallback)
+          );
+        }
+        return result;
+      }
+      return { resolveName, resolveReferences };
     }
     // Resolve ordinary declarations; custom properties are traversed only when consumed.
-    const result = resolveReferences(
+    const result = resolver(definitions).resolveReferences(
       component.filter((value) => !value.name.startsWith('--')).flatMap((value) => value.references)
     );
     return {
