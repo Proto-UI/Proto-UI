@@ -1,0 +1,243 @@
+{
+  "base": "24b54c735dbcfb83d5369e84a9a3f84ba1d638ab",
+  "source": "4777e1b62b0f83d71f254f13e165316ec4f9d100",
+  "tree": "6e40c763178f9b06e3d1647e2a7511f53391734a",
+  "replayedSources": {
+    "8d7f2f37080c868e40fb65550ca9cae8c2c6c339": "02d544c6ee0cdc9394c59f2e39157ab69ade4cfe",
+    "a146790ff7c97f40fb235a33544ba152f33750a3": "2a6f567656f8c235ac477715602f8274b80ad934",
+    "dce15fd7ccd440b6e261e0d5afccf3a4d454ff03": "2e7811a94445c21f992f44fa53d9d740312cf6a0",
+    "60147851c1492679e84f22a74655f58a7495cc46": "b0d4c111bbea7f20ab1e938bfc8e8837d2e805db",
+    "b06a2e8c690db2b8a1e09f93bd8ee910b50218aa": "45a2243490bb0c2dcfb110dec5f779f1154c8fe7",
+    "bc4add044042a0cb13225d20374de8b3e3307368": "7752db27001ca629b865cc6285eee63cf751633a"
+  },
+  "replayedFilesByteIdentical": true,
+  "originalAuthorsIdentical": true,
+  "preservedOriginalMergeParents": [
+    "4ff904c6331dbd143a0c8f98372ceb6c4f66db54",
+    "54fbe93cef4da5ea5d1a3ce3b20bccbcae587989",
+    "4058219c3deac8273ccfbe68fecf295fa8adb170"
+  ],
+  "commits": [
+    {
+      "sha": "02d544c6ee0cdc9394c59f2e39157ab69ade4cfe",
+      "tree": "9f783161d0c763fc1601f15513c8b6cd84355253",
+      "parents": [
+        "24b54c735dbcfb83d5369e84a9a3f84ba1d638ab"
+      ]
+    },
+    {
+      "sha": "2a6f567656f8c235ac477715602f8274b80ad934",
+      "tree": "517bdc36dee2a5fb94f0a93f6497fbc35940a948",
+      "parents": [
+        "24b54c735dbcfb83d5369e84a9a3f84ba1d638ab"
+      ]
+    },
+    {
+      "sha": "b1e5db33f691680c263b44c16d9852eb2e010b85",
+      "tree": "ad32bb3748095908ca0d5a99909c4c4b8f5fa567",
+      "parents": [
+        "02d544c6ee0cdc9394c59f2e39157ab69ade4cfe",
+        "2a6f567656f8c235ac477715602f8274b80ad934"
+      ]
+    },
+    {
+      "sha": "4ff904c6331dbd143a0c8f98372ceb6c4f66db54",
+      "tree": "2fc14a135c02eefaa622389f4f39b681fe756596",
+      "parents": [
+        "24b54c735dbcfb83d5369e84a9a3f84ba1d638ab"
+      ]
+    },
+    {
+      "sha": "1d041288063675beaac7346863ab51312276457b",
+      "tree": "1c4c01f5a3de5d79daf036305e51e08a4c5d8877",
+      "parents": [
+        "b1e5db33f691680c263b44c16d9852eb2e010b85",
+        "4ff904c6331dbd143a0c8f98372ceb6c4f66db54"
+      ]
+    },
+    {
+      "sha": "2e7811a94445c21f992f44fa53d9d740312cf6a0",
+      "tree": "b8df221b768f417cfba4e346042ba19ba473e690",
+      "parents": [
+        "1d041288063675beaac7346863ab51312276457b"
+      ]
+    },
+    {
+      "sha": "b0d4c111bbea7f20ab1e938bfc8e8837d2e805db",
+      "tree": "382dd4fc6f0ff09ed71554381739f038faa82402",
+      "parents": [
+        "2e7811a94445c21f992f44fa53d9d740312cf6a0"
+      ]
+    },
+    {
+      "sha": "45a2243490bb0c2dcfb110dec5f779f1154c8fe7",
+      "tree": "cd43bde4ac67c07d8235fe19a3e69fbccd36e5d2",
+      "parents": [
+        "b0d4c111bbea7f20ab1e938bfc8e8837d2e805db"
+      ]
+    },
+    {
+      "sha": "7752db27001ca629b865cc6285eee63cf751633a",
+      "tree": "4ce326da06948ae606555986a30b485366418558",
+      "parents": [
+        "45a2243490bb0c2dcfb110dec5f779f1154c8fe7"
+      ]
+    },
+    {
+      "sha": "54fbe93cef4da5ea5d1a3ce3b20bccbcae587989",
+      "tree": "847346aa8824de21c2ead241e2cc61781a8778cd",
+      "parents": [
+        "24b54c735dbcfb83d5369e84a9a3f84ba1d638ab"
+      ]
+    },
+    {
+      "sha": "c749c0558a5b0fe5166913ee1c93aa0ded74abc1",
+      "tree": "2c2314086c2775b021e90fde1c70ec046e798edf",
+      "parents": [
+        "7752db27001ca629b865cc6285eee63cf751633a",
+        "54fbe93cef4da5ea5d1a3ce3b20bccbcae587989"
+      ]
+    },
+    {
+      "sha": "4058219c3deac8273ccfbe68fecf295fa8adb170",
+      "tree": "3909cad27b10a9ceb646acafa7a0341f9335a946",
+      "parents": [
+        "24b54c735dbcfb83d5369e84a9a3f84ba1d638ab"
+      ]
+    },
+    {
+      "sha": "4777e1b62b0f83d71f254f13e165316ec4f9d100",
+      "tree": "6e40c763178f9b06e3d1647e2a7511f53391734a",
+      "parents": [
+        "c749c0558a5b0fe5166913ee1c93aa0ded74abc1",
+        "4058219c3deac8273ccfbe68fecf295fa8adb170"
+      ]
+    }
+  ],
+  "observedAt": "2026-10-09T09:19:00Z",
+  "executionTree": "/tmp/proto-ui-finf-combined-packaging-proof",
+  "checks": {
+    "nodeCombination": 80,
+    "selectionAndAccordion": 19,
+    "gpuiNegative": 1,
+    "initialPaintSynthetic": 129,
+    "externalAssertionBlockProbes": 13,
+    "draftConsumer": {
+      "packages": 15,
+      "esmEntries": 18,
+      "strictNodeNext": true,
+      "strictBundler": true,
+      "workspaceLinks": false,
+      "report": "/tmp/proto-ui-local-draft-kE1DEs/consumer-report.json",
+      "bundlerCommand": "node /tmp/proto-ui-finf-combined-packaging-proof/node_modules/typescript/bin/tsc -p /tmp/proto-ui-draft-consumer-oZoEfW/tsconfig.json --module ESNext --moduleResolution Bundler --pretty false"
+    },
+    "publicConsumer": {
+      "packages": 15,
+      "esmEntries": 27,
+      "strictNodeNext": true,
+      "strictBundler": true,
+      "workspaceLinks": false,
+      "artifacts": "/tmp/finf-next-public-consumer/public-artifacts.json"
+    },
+    "sourceWallMatrices": 2,
+    "canonicalSourcePaths": 4206,
+    "canonicalNegativeControls": 113
+  },
+  "unchanged": {
+    "draftCatalog": 258,
+    "completedItems": 0,
+    "deliveryItems": 68,
+    "privateLiquidCardDefault": false,
+    "publicSSRCompletionFlags": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "strictBudgetOverages": {
+      "react": 445,
+      "vue": 280,
+      "webComponent": 30
+    }
+  },
+  "previousPublishedCI": {
+    "head": "24b54c735dbcfb83d5369e84a9a3f84ba1d638ab",
+    "run": 37876012675,
+    "conclusion": "failure",
+    "browserShards": "8 failed",
+    "general": "cancelled",
+    "dco": "success",
+    "libraryCard": "9/9",
+    "liquidCard": "8/10",
+    "accordion": "24/25"
+  },
+  "boundaries": [
+    "No full workspace or native rerun for this successor yet",
+    "Packaging and failure diagnostics do not repair existing native product failures",
+    "GPUI pinned row-sizing limitations remain unsupported",
+    "Original reviewers accepted bounded local slices, not PR merge readiness",
+    "No thresholds, native assertions or action timeouts relaxed"
+  ],
+  "logs": {
+    "final-draft-bundler.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "final-draft-consumer.log": {
+      "sha256": "d0a3f2addf18f57b78fad02f088f8062b7a55969ebea9c113a30cbed4c80ff0e",
+      "bytes": 319
+    },
+    "final-frame-probes.log": {
+      "sha256": "d275de7376f6930ecc21b7143ce89adec9f62b3e35d7f6c901618b0535e593f7",
+      "bytes": 115
+    },
+    "final-gpui.log": {
+      "sha256": "3568224858a32f738c5d6bc13bb2bc5981d91df240c3afcbd9f8f5c7678e4f9b",
+      "bytes": 173
+    },
+    "final-initial-synthetic.log": {
+      "sha256": "ee34bb0c12e92586c2417da815ce2999ab9544e5fcee476b3657c9ca0188cc0c",
+      "bytes": 897
+    },
+    "final-light.log": {
+      "sha256": "068d9d2830365c6438a5113f58e6585100753bdb716944da97c5cae2d62c66cf",
+      "bytes": 7307
+    },
+    "final-public-build.log": {
+      "sha256": "abe38480ca85a93b5aae652d6d38119db487af203ae78ccaa27b6c409a89e7d3",
+      "bytes": 1284
+    },
+    "final-public-bundler.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "final-public-import.log": {
+      "sha256": "9d73477065a346ccea04723dd62ac2312914f77329ef23103782c6882fcd2a7a",
+      "bytes": 658
+    },
+    "final-public-install.log": {
+      "sha256": "b5444b31cce80340243414dd798d51eb5785b9f16d45542375ee64720f7a9323",
+      "bytes": 127
+    },
+    "final-public-nodenext.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "final-public-pack.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    "final-source-wall.log": {
+      "sha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4",
+      "bytes": 36
+    },
+    "final-vitest.log": {
+      "sha256": "3f9d32b8d9ba97ec6ac1088b947839b60c99116cf3d8fe9d3a24e66ba852e0d1",
+      "bytes": 673
+    },
+    "final-proof-negative.log": {
+      "sha256": "a69a3be543e6b3e2a9070cebffc0957ade1aef31932041fffbfa2f6891841ab5",
+      "bytes": 10714
+    }
+  }
+}
