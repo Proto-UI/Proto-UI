@@ -196,7 +196,8 @@ describe('F1 public CLI companion delivery', () => {
     expect(run(dir, ['add', 'wc', 'shadcn-button', '--no-install']).status).toBe(0);
     const before = await snapshot(dir);
     expect(Object.keys(before).filter((file) => file.startsWith('src/styles/'))).toHaveLength(3);
-    expect(before['proto-ui/components/wc/index.ts']).not.toContain('shadow:');
+    expect(before['proto-ui/components/wc/index.js']).not.toContain('shadow:');
+    expect(before).not.toHaveProperty('proto-ui/components/wc/index.ts');
     for (const command of ['init', 'add', 'theme', 'style']) {
       const result = run(dir, [command, '--shadow-out', 'shadow.js', '--no-interactive']);
       expect(result.status).toBe(1);

@@ -6,7 +6,7 @@ import { GlobalRegistrator } from '@happy-dom/global-registrator';
 GlobalRegistrator.register();
 
 const { default: Vue } = await import('vue');
-const { BaseImageRoot, ShadcnButton } = await import('./proto-ui/components/vue2/index.ts');
+const { BaseImageRoot, ShadcnButton } = await import('./proto-ui/components/vue2/index.js');
 
 const flush = () => new Promise((resolve) => Vue.nextTick(resolve));
 
