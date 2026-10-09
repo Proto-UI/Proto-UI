@@ -1,0 +1,123 @@
+id: T-SHADCN-CARD-0001
+type: test
+title: Shadcn Card passive source and harness evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Owning-layer and synthetic Web harness coverage only; native browser visual and first-frame evidence remain pending, with no stable or complete Finf credit.
+summary: Four-part exports, passive composition, theme-token projection and gallery inheritance.
+cases:
+  - id: T-SHADCN-CARD-0001-CASE-1
+    title: Four public parts and facade aliases
+    covers:
+      - P-SHADCN-CARD-ANATOMY
+    expectation: exact-four-part-exports
+  - id: T-SHADCN-CARD-0001-CASE-2
+    title: Passive slots retain native semantic children
+    covers:
+      - P-SHADCN-CARD-PASSIVE
+      - P-SHADCN-CARD-CONTENT-VISUAL
+    expectation: roleless-nonfocusable-native-anchor-composition
+  - id: T-SHADCN-CARD-0001-CASE-3
+    title: Source-bound token recipes and distinct card colors
+    covers:
+      - P-SHADCN-CARD-VISUAL
+      - P-SHADCN-CARD-HEADER-VISUAL
+      - P-SHADCN-CARD-CONTENT-VISUAL
+      - P-SHADCN-CARD-FOOTER-VISUAL
+    expectation: card-specific-token-projection
+  - id: T-SHADCN-CARD-0001-CASE-4
+    title: Gallery SSR uses actual Card with inherited title/body and explicit muted caption
+    covers:
+      - P-SHADCN-CARD-CONTENT
+    expectation: nested-text-does-not-reset-card-foreground
+  - id: T-SHADCN-CARD-0001-CASE-NATIVE
+    title: Native alternate-theme paint and semantic composition
+    covers:
+      - P-SHADCN-CARD-VISUAL
+      - P-SHADCN-CARD-PASSIVE
+      - P-SHADCN-CARD-CONTENT
+      - P-SHADCN-CARD-HEADER-VISUAL
+    expectation: native-card-paint-distinct-from-page-and-inherited-text
+implementations:
+  - id: shadcn-card-harness
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/card.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-CARD-0001-CASE-1
+      - T-SHADCN-CARD-0001-CASE-2
+      - T-SHADCN-CARD-0001-CASE-3
+    exercises:
+      - P-SHADCN-CARD
+      - P-SHADCN-CARD-HEADER
+      - P-SHADCN-CARD-CONTENT
+      - P-SHADCN-CARD-FOOTER
+  - id: shadcn-card-gallery
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/library-card-snapshot.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-CARD-0001-CASE-4
+    exercises:
+      - P-SHADCN-CARD
+  - id: shadcn-card-four-adapters
+    kind: adapter-test
+    status: passing
+    path: packages/web-conformance/test/shadcn-card.journey.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-CARD-0001-CASE-2
+      - T-SHADCN-CARD-0001-CASE-3
+    exercises:
+      - P-SHADCN-CARD
+      - P-SHADCN-CARD-HEADER
+      - P-SHADCN-CARD-CONTENT
+      - P-SHADCN-CARD-FOOTER
+  - id: shadcn-card-public-cli
+    kind: module-test
+    status: passing
+    path: packages/cli/test/shadcn-card.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-CARD-0001-CASE-1
+      - T-SHADCN-CARD-0001-CASE-3
+    exercises:
+      - P-SHADCN-CARD
+      - P-SHADCN-CARD-HEADER
+      - P-SHADCN-CARD-CONTENT
+      - P-SHADCN-CARD-FOOTER
+  - id: shadcn-card-native
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-CARD-0001-CASE-NATIVE
+    exercises:
+      - P-SHADCN-CARD
+      - P-SHADCN-CARD-HEADER
+      - P-SHADCN-CARD-CONTENT
+      - P-SHADCN-CARD-FOOTER
+verifies:
+  prototypes:
+    - P-SHADCN-CARD
+    - P-SHADCN-CARD-HEADER
+    - P-SHADCN-CARD-CONTENT
+    - P-SHADCN-CARD-FOOTER
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bound Card draft criteria to explicit owning-layer and SSR checks.
+tags:
+  - test
+  - shadcn
+  - card
+exercises:
+  prototypes:
+    - P-SHADCN-CARD
+    - P-SHADCN-CARD-HEADER
+    - P-SHADCN-CARD-CONTENT
+    - P-SHADCN-CARD-FOOTER

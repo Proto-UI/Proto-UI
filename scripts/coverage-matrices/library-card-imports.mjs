@@ -72,7 +72,7 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/UiLibraryGallery.astro': Object.freeze({
-    sourceSha256: 'c6a0398390efe5396d9aaaba881f58df1534d860564eb4c466f6c4983aba1461',
+    sourceSha256: '10b46c6a95217cc6756b50393de8c6d7a542dbd8cf148524a3ae56fc643fa4a2',
     specifiers: Object.freeze([
       '../../../../packages/prototypes/brutalist/src/theme',
       '../../../../packages/prototypes/bootstrap-2-3-2/src/theme',
@@ -84,11 +84,12 @@ export const LIBRARY_CARD_IMPORT_ALLOWLIST = Object.freeze({
     specifiers: Object.freeze(['@proto.ui/adapter-web-component']),
   }),
   'apps/www/src/components/library-card-prototypes.ts': Object.freeze({
-    sourceSha256: '858af78866c351330256474cd576ce6c9090a518d006d76ba40cfc4ab4c00eb7',
+    sourceSha256: '7f13431804ae16891b05c8d75394a1c7be45b1bdc95eaf1bc8817b3ddcf48eb4',
     specifiers: Object.freeze([
       '@proto.ui/prototypes-base/surface',
       '@proto.ui/prototypes-base/text',
       '@proto.ui/prototypes-shadcn/surface',
+      '@proto.ui/prototypes-shadcn/card',
       '@proto.ui/prototypes-shadcn/text',
       '@proto.ui/prototypes-brutalist/surface',
       '@proto.ui/prototypes-brutalist/text',

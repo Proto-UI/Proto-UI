@@ -28,6 +28,7 @@ const EXPECTED_SHARED_BASE_FAMILY_IDS = [
 const EXPECTED_COMPONENT_IDS = {
   shadcn: [
     ...EXPECTED_SHARED_BASE_FAMILY_IDS,
+    'card',
     'accordion',
     'field',
     'collapsible',
@@ -99,6 +100,25 @@ const EXPECTED_THEME_REFERENCES = {
 
 const EXPECTED_LANE_ONLY_FAMILIES = {
   shadcn: {
+    card: {
+      baseFamilyId: null,
+      recipeId: 'demo-shadcn-card',
+      recipePrototypeIds: [
+        'shadcn-card-root',
+        'shadcn-card-header',
+        'shadcn-card-content',
+        'shadcn-card-footer',
+        'shadcn-text-root',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-TEXT', prototypeId: 'shadcn-text-root' }],
+      parts: {
+        root: { basePrototypeId: null, prototypeId: 'shadcn-card-root' },
+        header: { basePrototypeId: null, prototypeId: 'shadcn-card-header' },
+        content: { basePrototypeId: null, prototypeId: 'shadcn-card-content' },
+        footer: { basePrototypeId: null, prototypeId: 'shadcn-card-footer' },
+      },
+    },
+
     checkbox: {
       baseFamilyId: 'P-BASE-CHECKBOX',
       recipeId: 'demo-shadcn-checkbox',
@@ -566,7 +586,10 @@ describe('Website projection-family manifests', () => {
     }
 
     expect(tryResolveProjectionRecipe('demo-brutalist-radio-group')).toBeNull();
-    expect(tryResolveProjectionRecipe('demo-shadcn-card')).toBeNull();
+    expect(tryResolveProjectionRecipe('demo-shadcn-card')).toEqual({
+      projectionFamilyId: 'shadcn',
+      familyId: 'card',
+    });
   });
 
   it('resolves the admitted Checkbox recipe and rejects unadmitted anatomy', () => {
@@ -700,6 +723,7 @@ describe('Website projection-family manifests', () => {
 
   it('classifies every recipe Prototype with explicit part or auxiliary lineage', () => {
     const expectedAuxiliaries = {
+      'shadcn/card': [{ basePrototypeId: 'P-BASE-TEXT', prototypeId: 'shadcn-text-root' }],
       'bootstrap-2-3-2/select': [
         { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
       ],

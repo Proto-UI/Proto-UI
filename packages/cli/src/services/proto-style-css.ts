@@ -143,6 +143,8 @@ const staticUtilities: Record<string, string[]> = {
   'inline-flex': ['display: inline-flex;'],
   'inline-block': ['display: inline-block;'],
   grid: ['display: grid;'],
+  'auto-rows-min': ['grid-auto-rows: min-content;'],
+  'grid-rows-[auto_auto]': ['grid-template-rows: auto auto;'],
   hidden: ['display: none;'],
   'flex-1': ['flex: 1 1 0%;'],
   'flex-col': ['flex-direction: column;'],

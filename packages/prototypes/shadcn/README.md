@@ -93,3 +93,9 @@ Dialog Footer uses intrinsic reverse wrapping, rather than reproducing the upstr
 The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
 
 This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
+
+## Card (draft)
+
+`./card` exports ShadcnCardRoot/Header/Content/Footer and their `shadcnCard*` aliases. These direct styled-only parts have no Base Card dependency, role, focus or action protocol. The source comparison is `f31ed81983653919dd4fe77aee4b4859f610f1dc`, `apps/v4/registry/new-york-v4/ui/card.tsx`, covered by the MIT third-party notice above. Root uses card-specific fill/foreground, rounded-xl, border plus explicit border-border ink (the upstream global reset made self-contained), shadow-sm and vertical spacing; the other parts own local spacing. Surface outline retains its neutral meaning.
+
+Titles and descriptions remain ordinary content. Use native headings/paragraphs where appropriate, Shadcn Text `tone: 'inherit'` for nested title/body and explicit muted tone for captions. Upstream CardTitle/Description/Action, action-dependent header columns, header container-query markers, border-presence selectors and `asChild` are outside this bounded subset. Source/CLI/preview availability is not stable admission or a completed Finf goal; current native visual and first-frame evidence remains pending.

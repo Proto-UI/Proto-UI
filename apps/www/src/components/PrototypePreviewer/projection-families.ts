@@ -99,6 +99,24 @@ const SHADCN_MANIFEST = {
   themeArtifactId: 'website-shadcn-theme',
   themeInputId: 'website-root-computed-pui-theme',
   families: {
+    card: {
+      baseFamilyId: null,
+      recipeId: 'demo-shadcn-card',
+      recipePrototypeIds: [
+        'shadcn-card-root',
+        'shadcn-card-header',
+        'shadcn-card-content',
+        'shadcn-card-footer',
+        'shadcn-text-root',
+      ],
+      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-TEXT', prototypeId: 'shadcn-text-root' }],
+      parts: {
+        root: { basePrototypeId: null, prototypeId: 'shadcn-card-root' },
+        header: { basePrototypeId: null, prototypeId: 'shadcn-card-header' },
+        content: { basePrototypeId: null, prototypeId: 'shadcn-card-content' },
+        footer: { basePrototypeId: null, prototypeId: 'shadcn-card-footer' },
+      },
+    },
     field: {
       baseFamilyId: 'P-BASE-FIELD',
       recipeId: 'demo-shadcn-field',

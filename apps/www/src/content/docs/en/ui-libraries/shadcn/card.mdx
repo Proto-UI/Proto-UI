@@ -1,0 +1,20 @@
+---
+title: Card
+description: Draft passive Shadcn Card on Proto UI.
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+Shadcn Card is a draft, passive four-part styled surface. It has no Base Card counterpart.
+
+<h2 id="card-contract">Card contract</h2>
+
+- Import `ShadcnCardRoot`, `ShadcnCardHeader`, `ShadcnCardContent`, and `ShadcnCardFooter` from `@proto.ui/prototypes-shadcn/card`; lowercase facade aliases are also exported.
+- Root owns `bg-card`, `text-card-foreground`, `rounded-xl`, border, small shadow and vertical spacing. Header, Content and Footer own their part spacing.
+- Title and description remain ordinary content. Compose native headings and paragraphs where appropriate; nested Shadcn Text title/body must use `tone: 'inherit'`. Muted descriptions intentionally use `tone: 'muted'`.
+- All four parts remain roleless and non-focusable. Anchors and controls retain their own navigation and activation; Card adds no events or state.
+- This subset intentionally omits upstream CardTitle, CardDescription, CardAction, action-dependent columns, header container-query markers, border-presence selectors and `asChild`. It does not claim full upstream compatibility.
+
+The comparison source is [shadcn/ui Card at f31ed819](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/card.tsx), under its [MIT notice](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/LICENSE.md). Proto UI is an independent implementation. Native screenshot, first-frame and cross-host acceptance remain separate gates; this draft is not stable or a completed Finf goal.
+
+<PrototypePreviewer demoId="demo-shadcn-card" initialRuntime="wc" />

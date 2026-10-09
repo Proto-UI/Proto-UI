@@ -53,3 +53,35 @@ it('keeps body and caption weights family-specific without normalizing typograph
   expect(libraryBodyPropsForFamily('base')).toEqual({ size: 'base', leading: 'relaxed' });
   expect(libraryBodyPropsForFamily('bootstrap-2-3-2')).toEqual({ size: 'sm', leading: 'normal' });
 });
+
+// T-SHADCN-CARD-0001-CASE-4
+it('dogfoods Card-specific SSR tokens and retains inherited title/body ink', async () => {
+  const { libraryBodyPropsForFamily, libraryCaptionPropsForFamily, shadcnLibraryHeadingProps } =
+    await import('./library-card-prototypes');
+  const { renderSnapshotTokenCss, createStyleSnapshotter } =
+    await import('./snapshot-prototype-style');
+  const { libraryCardPrototypes } = await import('./library-card-prototypes');
+  const tokens = await snapshotLibraryPart('shadcn-card', {});
+  expect(tokens).toContain('bg-card');
+  expect(tokens).toContain('text-card-foreground');
+  expect(tokens).not.toContain('bg-background');
+  expect(tokens).not.toContain('text-foreground');
+  const css = renderSnapshotTokenCss(tokens);
+  expect(css).toContain('background-color: var(--pui-card)');
+  expect(css).toContain('color: var(--pui-card-foreground)');
+  for (const props of [shadcnLibraryHeadingProps, libraryBodyPropsForFamily('shadcn')]) {
+    const text = await snapshotLibraryPart('shadcn-text', props);
+    expect(text).toContain('text-inherit');
+    expect(text).not.toContain('text-foreground');
+  }
+  expect(
+    await snapshotLibraryPart('shadcn-text', libraryCaptionPropsForFamily('shadcn'))
+  ).toContain('text-muted-foreground');
+  const removed = createStyleSnapshotter({
+    ...libraryCardPrototypes,
+    'shadcn-card': libraryCardPrototypes['base-surface'],
+  });
+  expect(await removed('shadcn-card', {})).toEqual([]);
+  // Neutral Surface remains distinct from the Card contract.
+  expect(await snapshotLibraryPart('shadcn-surface', librarySurfaceProps)).not.toContain('bg-card');
+});
