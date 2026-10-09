@@ -121,6 +121,42 @@ async function close() {
 }
 try {
   browser = await launchBrowser();
+  // The original bright dark source is genuinely unsafe under the fixed
+  // renderer. Preserve that refusal instead of demanding an optical receipt.
+  activeCase = { theme: 'dark', case: 'unsafe-source-rejection' };
+  await open('dark');
+  const darkTemplate = await readFile(join(root, 'index.html'), 'utf8');
+  await writeGeneratedPage(
+    'producer-dark.html',
+    darkTemplate.replace('data-theme="light"', 'data-theme="dark"')
+  );
+  await page.goto(`${origin}/producer-dark.html?capture&unsafe-dark-control`, {
+    waitUntil: 'networkidle',
+  });
+  await recordMedia();
+  await page.waitForFunction(
+    () =>
+      document.querySelector('#seed-control')?.dataset.materialReason ===
+      'rendered-contrast-unsafe',
+    undefined,
+    { timeout: 30000 }
+  );
+  const rejected = await snapshot();
+  assert.equal(rejected.quality, 'opaque-fallback');
+  assert.equal(rejected.image, 'none');
+  assert.equal(await page.locator('html').getAttribute('data-seed-error'), null);
+  const rejection = await page.evaluate(async () => {
+    try {
+      await window.initialPaintExperiment.artifact();
+      return null;
+    } catch (error) {
+      return String(error);
+    }
+  });
+  assert.match(rejection ?? '', /no-admitted-static-paint-captured/);
+  observations.push({ ...activeCase, state: rejected, captureRejection: rejection });
+  await capture('dark-unsafe-source-rejected.png');
+  await close();
   for (const theme of ['light', 'dark']) {
     activeCase = { theme, case: 'producer' };
     await open(theme);

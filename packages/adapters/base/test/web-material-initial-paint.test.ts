@@ -1,3 +1,5 @@
+import { initialPaintSceneColors } from '../../../../experiments/material-initial-paint/scene';
+import { colorContrast, resolvePaletteColor } from '../src/material/style';
 import { webcrypto } from 'node:crypto';
 import { deflateSync } from 'node:zlib';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -1278,5 +1280,49 @@ describe('WC acquisition preserves the registered initial plane (synthetic layou
     expect(f.host.style.backgroundImage).toBe('none');
     f.scope.remove();
     prepared.dispose();
+  });
+});
+
+describe('finite initial-paint scene contrast inputs', () => {
+  const foreground = resolvePaletteColor('#f5f5f7', {})!;
+  const factors = [0.6425, 0.6425, 0.662];
+  const modeledPixel = (hex: string, highlight: number) => {
+    const source = resolvePaletteColor(hex, {})!;
+    return [
+      source[0] * factors[0] + highlight,
+      source[1] * factors[1] + highlight,
+      source[2] * factors[2] + highlight,
+      1,
+    ] as const;
+  };
+
+  it('retains the exact bright dark source as an unsafe native control', () => {
+    const scene = initialPaintSceneColors('dark', true);
+    expect(scene).toEqual({
+      bands: ['#132138', '#235968', '#4b3b73', '#ae626b'],
+      centre: '#7bafae',
+    });
+    expect(colorContrast(modeledPixel(scene.centre, 0), foreground)).toBeGreaterThan(4.5);
+    // An ordinary highlight is enough to invalidate the old positive fixture.
+    expect(colorContrast(modeledPixel(scene.centre, 0.08), foreground)).toBeLessThan(4.5);
+  });
+
+  it('gives the dark continuity source modeled headroom without asserting native admission', () => {
+    const scene = initialPaintSceneColors('dark');
+    for (const hex of [...scene.bands, scene.centre]) {
+      // The fixed shader's two highlights sum to at most .18 in the modeled
+      // engine; add three bytes of filtering/readback headroom. Native readPixels still
+      // decides admission, including the inherited reversed-edge smoothstep.
+      expect(colorContrast(modeledPixel(hex, 0.18 + 3 / 255), foreground)).toBeGreaterThan(4.5);
+    }
+  });
+
+  it('preserves light pixels even when the negative-control query is present', () => {
+    const expected = {
+      bands: ['#d1e6fa', '#82c5c7', '#b6ace3', '#f1b5bf'],
+      centre: '#e8e3ac',
+    };
+    expect(initialPaintSceneColors('light')).toEqual(expected);
+    expect(initialPaintSceneColors('light', true)).toEqual(expected);
   });
 });
