@@ -214,8 +214,17 @@ function runVue2Consumer({ consumerDir, expectedPackages, packageByName, release
 
   const config = readFileSync(join(consumerDir, 'proto-ui', 'config.json'), 'utf8');
   const facade = readFileSync(
-    join(consumerDir, 'proto-ui', 'components', 'vue2', 'index.ts'),
+    join(consumerDir, 'proto-ui', 'components', 'vue2', 'index.js'),
     'utf8'
+  );
+  assert(
+    !existsSync(join(consumerDir, 'proto-ui', 'components', 'vue2', 'index.ts')),
+    'JavaScript Vue 2 consumer must not retain a TypeScript facade'
+  );
+  const rootFacade = readFileSync(join(consumerDir, 'proto-ui', 'components', 'index.js'), 'utf8');
+  assert(
+    rootFacade.includes("from './vue2/index.js'"),
+    'JavaScript root facade must reference the generated JavaScript entry'
   );
   assert(config.includes('@proto.ui/adapter-vue2'), 'Vue 2 config is missing its adapter');
   for (const expected of [

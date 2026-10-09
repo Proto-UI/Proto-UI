@@ -4,6 +4,10 @@ import { getComponentEntry } from '../registry/components.js';
 import { writeGeneratedIndexes } from '../services/codegen.js';
 import { promptForComponent, promptForHost } from '../services/interactive.js';
 import {
+  describeGeneratedSourceLanguage,
+  resolveGeneratedSourceLanguage,
+} from '../services/project-language.js';
+import {
   detectPackageManager,
   formatInstallCommand,
   hasPackage,
@@ -63,6 +67,11 @@ export async function runAddCommand(argv: string[]): Promise<void> {
       'missing package.json in current project root. "proto-ui add" must run inside a project.'
     );
   }
+  const generatedLanguage = await resolveGeneratedSourceLanguage({
+    cwd,
+    projectPkg,
+    requestedLanguage: options.language,
+  });
 
   const packageManager = await detectPackageManager(cwd);
   ensureRuntimePackages({ adapter, projectPkg, packageManager });
@@ -88,11 +97,12 @@ export async function runAddCommand(argv: string[]): Promise<void> {
 
   const nextConfig = addComponentToConfig(config, host, componentEntry.id, adapter.packageName);
   await saveCliConfig(cwd, nextConfig);
-  await writeGeneratedIndexes(paths, nextConfig);
+  await writeGeneratedIndexes(paths, nextConfig, generatedLanguage.language);
 
   console.log(
     `[proto-ui] add: generated ${relativeToCwd(paths.componentsDir, cwd)} for ${host}/${componentEntry.id}`
   );
+  console.log(`[proto-ui] add: ${describeGeneratedSourceLanguage(generatedLanguage)}`);
   if (componentEntry.stylePreset && nextConfig.styles?.enabled === false) {
     console.log(
       `[proto-ui] add: styles are disabled; provide the complete ${componentEntry.stylePreset} --pui-* token set for ${componentEntry.id}`
