@@ -117,7 +117,8 @@ lines.on('line', async (line) => {
         result = await session.publishParentPacket(
           message.packet,
           message.assessment,
-          message.analysisReconciliation
+          message.analysisReconciliation,
+          { modelTrace: message.modelTrace, modelTraceContext: message.modelTraceContext }
         );
       if (message.kind === 'finish') result = await session.finishParentAnalysis(message.packet);
       if (message.kind === 'abandon') result = await session.abandonBeforeIntent();

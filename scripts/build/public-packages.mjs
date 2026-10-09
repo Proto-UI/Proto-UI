@@ -178,6 +178,19 @@ export function buildPublicPackage(pkg, options = {}) {
   const distDir = options.outDir ?? join(pkg.dir, 'dist');
   const sourceEntry = join(pkg.dir, 'src', 'index.ts');
   if (!existsSync(sourceEntry)) throw new Error(`${pkg.name}: missing src/index.ts`);
+  const sourceEntries = new Set([sourceEntry]);
+  // Explicit subpaths need not be reachable from the root barrel.
+  for (const target of flattenExportTargets(pkg.manifest.exports)) {
+    if (!target.startsWith('./dist/') || target.includes('*') || !/\.(?:d\.ts|js)$/.test(target))
+      continue;
+    const exportedSource = join(
+      pkg.dir,
+      'src',
+      target.slice('./dist/'.length).replace(/\.(?:d\.ts|js)$/, '.ts')
+    );
+    if (!sourceEntries.has(exportedSource) && existsSync(exportedSource))
+      sourceEntries.add(exportedSource);
+  }
   rmSync(distDir, { recursive: true, force: true });
   mkdirSync(distDir, { recursive: true });
 
@@ -209,7 +222,7 @@ export function buildPublicPackage(pkg, options = {}) {
     'react-jsx',
     '--strict',
     '--skipLibCheck',
-    sourceEntry,
+    ...sourceEntries,
   ];
   const started = performance.now();
   const result = spawnSync(process.execPath, args, {

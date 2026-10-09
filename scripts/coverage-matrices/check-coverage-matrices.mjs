@@ -201,6 +201,52 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
     resolvedPaths: Object.freeze(['packages/prototypes/brutalist/src/theme']),
   }),
 
+  'apps/www/src/components/PrototypePreviewer/shadow-split-acceptance.ts': Object.freeze({
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-brutalist/badge',
+      '@proto.ui/prototypes-shadcn/checkbox',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s2.ts': Object.freeze({
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/button',
+      '@proto.ui/prototypes-shadcn/switch',
+      '@proto.ui/prototypes-shadcn/checkbox',
+      '@proto.ui/prototypes-brutalist/badge',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s3.ts': Object.freeze({
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/tabs',
+      '@proto.ui/prototypes-shadcn/button',
+      '@proto.ui/prototypes-shadcn/switch',
+      '@proto.ui/prototypes-shadcn/checkbox',
+      '@proto.ui/prototypes-brutalist/badge',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s4.ts': Object.freeze({
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-shadcn/dialog',
+    ]),
+  }),
+  'apps/www/src/components/PrototypePreviewer/shadow-split-s5.ts': Object.freeze({
+    specifiers: Object.freeze([
+      '@proto.ui/adapter-web-component',
+      '@proto.ui/prototypes-base/input',
+      '@proto.ui/prototypes-base/textarea',
+      '@proto.ui/prototypes-shadcn/textarea',
+      '@proto.ui/prototypes-shadcn/tabs',
+    ]),
+  }),
+  'apps/www/src/pages/en/test/bootstrap-state-controls.astro': Object.freeze({
+    specifiers: Object.freeze(['@proto.ui/prototypes-bootstrap-2-3-2']),
+    resolvedPaths: Object.freeze(['packages/prototypes/bootstrap-2-3-2/src/theme']),
+  }),
+
   'apps/www/src/components/PrototypePreviewer/demo-renderer.ts': Object.freeze({
     specifiers: Object.freeze([
       '@proto.ui/core',
@@ -9068,11 +9114,11 @@ function isTestNamedSource(absolutePath) {
 // sidebar entries and source-reviewed Copy render plugin; resolver functions stay intact. Parity/mutation tests retain
 // fail-closed behavior for every other configuration change.
 const PROMOTION_RESOLVER_CONFIG_SHA256 =
-  '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377';
+  '0625e633927c6cbbc24d62347e6407aff9a535f13a499cad17c336ad25534005';
 // Exact opt-in, serve-only contrast audit profile. Its imported plugin bytes
 // are part of the reviewed resolver boundary, not an unrestricted plugin hook.
 const PROMOTION_AUDIT_CONFIG_SHA256 =
-  'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee';
+  '82110490011548595d5bc9c91bdf5edc4d8ff77e84ff0e8652c268aeb5fb51d4';
 const PROMOTION_AUDIT_PLUGIN_PATH = 'apps/www/scripts/contrast-provenance.mjs';
 const PROMOTION_AUDIT_PLUGIN_SHA256 =
   'a1e7103b44b29063a9bc47d6e7d0881122b9184ff29c239275e00cba8315462a';

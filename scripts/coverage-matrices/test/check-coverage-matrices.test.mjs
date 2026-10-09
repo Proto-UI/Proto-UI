@@ -18063,7 +18063,7 @@ test('audit resolver profile: reviewed standard profile remains independently ad
     );
   assert.equal(
     createHash('sha256').update(original).digest('hex'),
-    '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377'
+    '0625e633927c6cbbc24d62347e6407aff9a535f13a499cad17c336ad25534005'
   );
   fs.writeFileSync(config, original);
   fs.unlinkSync(plugin);

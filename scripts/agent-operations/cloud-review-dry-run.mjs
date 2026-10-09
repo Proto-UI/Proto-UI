@@ -198,6 +198,8 @@ export class CloudReviewDryRun {
       'candidate requires a disposition'
     );
     const parameters = {
+      modelTrace: this.#options.modelTrace,
+      modelTraceContext: this.#options.modelTraceContext,
       packet,
       input: initial.input,
       liveInput: live.input,
