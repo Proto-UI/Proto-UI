@@ -591,6 +591,12 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/dropdown-menu',
                 },
                 {
+                  label: 'Card',
+                  translations: { en: 'Card', 'zh-CN': 'Card' },
+                  slug: 'ui-libraries/shadcn/card',
+                  badge: inProgressBadge,
+                },
+                {
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/shadcn/hover-card',

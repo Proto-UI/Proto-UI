@@ -203,6 +203,34 @@ it('registers every discovered browser suite exactly once in its explicit browse
   }
 });
 
+it('keeps the existing Liquid candidate producer in its dedicated workflow, never shared dev', () => {
+  const suite = 'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts';
+  assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
+  assert.ok(!BROWSER_SUITES.includes(suite));
+  const owner = '.github/workflows/liquid-card-candidate-evidence.yml';
+  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
+  const workflow = readFileSync(owner, 'utf8');
+  assert.ok(workflow.includes(suite));
+  assert.ok(workflow.includes('workflow_dispatch:'));
+  assert.ok(workflow.includes('pull_request:'));
+  assert.ok(workflow.includes('corepack pnpm@10.32.1 exec vitest run'));
+  assert.ok(!workflow.includes('docs:build'));
+  const plan = createRuntimeTestPlan([]);
+  assert.ok(plan[0].args.includes(suite));
+  assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
+  assert.ok(!plan[1].args.includes(suite));
+  // An accidental registration in both buckets fails closed rather than running it twice.
+  assert.throws(
+    () =>
+      assertBrowserInventory(
+        [...BROWSER_SUITES, ...PRODUCTION_BROWSER_SUITES],
+        [...BROWSER_SUITES, suite],
+        PRODUCTION_BROWSER_SUITES
+      ),
+    /Duplicate browser suite registration/
+  );
+});
+
 describe('runtime test plan', () => {
   it('warms both Table locales before shared-server browser navigation', () => {
     for (const route of ['/en/ui-libraries/base/table/', '/zh-cn/ui-libraries/base/table/']) {

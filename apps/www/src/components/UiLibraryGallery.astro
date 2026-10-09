@@ -7,6 +7,7 @@ import LibraryLiquidCard from './LibraryLiquidCard.astro';
 import {
   librarySurfaceProps,
   libraryHeadingProps,
+  shadcnLibraryHeadingProps,
   libraryBodyPropsForFamily,
   libraryCaptionPropsForFamily,
   libraryActionProps,
@@ -284,6 +285,8 @@ const themeCss = Object.entries(familyThemes)
         }
         const family: LibraryFamily = library.id === 'lucide' ? 'base' : library.id;
         const brutalist = family === 'brutalist';
+        const shadcn = family === 'shadcn';
+        const hasCard = brutalist || shadcn;
         const bootstrap = family === 'bootstrap-2-3-2';
         const bodyProps = libraryBodyPropsForFamily(family);
         const captionProps = libraryCaptionPropsForFamily(family);
@@ -294,13 +297,13 @@ const themeCss = Object.entries(familyThemes)
             aria-labelledby={`library-${library.id}`}
           >
             <LibraryCardPart
-              part={brutalist ? 'brutalist-card' : `${family}-surface`}
-              props={brutalist ? {} : librarySurfaceProps}
+              part={brutalist ? 'brutalist-card' : shadcn ? 'shadcn-card' : `${family}-surface`}
+              props={hasCard ? {} : librarySurfaceProps}
               class="library-card__surface"
             >
               <LibraryCardFrame bootstrap={bootstrap}>
                 <LibraryCardPart
-                  part={brutalist ? 'brutalist-header' : 'base-surface'}
+                  part={brutalist ? 'brutalist-header' : shadcn ? 'shadcn-header' : 'base-surface'}
                   class="library-card__header"
                 >
                   <header>
@@ -315,7 +318,13 @@ const themeCss = Object.entries(familyThemes)
                     <h2 id={`library-${library.id}`}>
                       <LibraryCardPart
                         part={`${family}-text`}
-                        props={bootstrap ? bootstrapLibraryHeadingProps : libraryHeadingProps}
+                        props={
+                          shadcn
+                            ? shadcnLibraryHeadingProps
+                            : bootstrap
+                              ? bootstrapLibraryHeadingProps
+                              : libraryHeadingProps
+                        }
                       >
                         {library.name}
                       </LibraryCardPart>
@@ -333,7 +342,9 @@ const themeCss = Object.entries(familyThemes)
                   )}
                 </LibraryCardPart>
                 <LibraryCardPart
-                  part={brutalist ? 'brutalist-content' : 'base-surface'}
+                  part={
+                    brutalist ? 'brutalist-content' : shadcn ? 'shadcn-content' : 'base-surface'
+                  }
                   class="library-card__content"
                 >
                   {library.id === 'lucide' && (
@@ -390,7 +401,7 @@ const themeCss = Object.entries(familyThemes)
                   </LibraryCardPart>
                 </LibraryCardPart>
                 <LibraryCardPart
-                  part={brutalist ? 'brutalist-footer' : 'base-surface'}
+                  part={brutalist ? 'brutalist-footer' : shadcn ? 'shadcn-footer' : 'base-surface'}
                   class="library-card__footer"
                 >
                   <a href={library.href} data-library-action>
@@ -469,7 +480,9 @@ const themeCss = Object.entries(familyThemes)
     flex-direction: column;
     gap: 1.5rem;
   }
-  .library-card:not([data-library='brutalist']):not([data-library='bootstrap-2-3-2'])
+  .library-card:not([data-library='brutalist']):not([data-library='shadcn']):not(
+      [data-library='bootstrap-2-3-2']
+    )
     :global(.library-card__surface) {
     padding: 1.5rem;
   }
@@ -580,8 +593,13 @@ const themeCss = Object.entries(familyThemes)
     .library-card header {
       width: 100%;
     }
-    .library-card:not([data-library='brutalist']):not([data-library='bootstrap-2-3-2'])
+    .library-card:not([data-library='brutalist']):not([data-library='shadcn']):not(
+        [data-library='bootstrap-2-3-2']
+      )
       :global(.library-card__surface),
+    [data-library='shadcn'] :global(.library-card__header),
+    [data-library='shadcn'] :global(.library-card__content),
+    [data-library='shadcn'] :global(.library-card__footer),
     [data-library='brutalist'] :global(.library-card__header),
     [data-library='brutalist'] :global(.library-card__content),
     [data-library='brutalist'] :global(.library-card__footer) {

@@ -18555,6 +18555,7 @@ for (const [source, allowed] of [
   ['UiLibraryGallery.astro', '../../../../packages/prototypes/brutalist/src/theme'],
   ['library-card-client.ts', '@proto.ui/adapter-web-component'],
   ['library-card-prototypes.ts', '@proto.ui/prototypes-brutalist/card'],
+  ['library-card-prototypes.ts', '@proto.ui/prototypes-shadcn/card'],
 ]) {
   test(`library card import boundary remains exact and content-bound: ${source}`, () => {
     const root = createRoot();
@@ -18740,3 +18741,26 @@ for (const [relative, allowed] of [
         .includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
     );
   });
+
+test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed resolver bytes', () => {
+  const source = fs.readFileSync(
+    new URL('../../../apps/www/astro.config.mjs', import.meta.url),
+    'utf8'
+  );
+  const entry = `                {
+                  label: 'Card',
+                  translations: { en: 'Card', 'zh-CN': 'Card' },
+                  slug: 'ui-libraries/shadcn/card',
+                  badge: inProgressBadge,
+                },
+`;
+  assert.equal(source.split(entry).length, 2, 'one bounded sidebar addition');
+  assert.equal(
+    createHash('sha256').update(source.replace(entry, '')).digest('hex'),
+    '428f9cbe0c5fe19f4d24a74afeebddcfcad0f00c929144df205a94c45e87f8ac'
+  );
+  assert.ok(
+    source.indexOf("slug: 'ui-libraries/shadcn/card'") >
+      source.indexOf("slug: 'ui-libraries/shadcn/button'")
+  );
+});

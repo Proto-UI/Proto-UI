@@ -1,6 +1,12 @@
 import BaseSurface from '@proto.ui/prototypes-base/surface';
 import BaseText from '@proto.ui/prototypes-base/text';
 import ShadcnSurface from '@proto.ui/prototypes-shadcn/surface';
+import {
+  ShadcnCardRoot,
+  ShadcnCardHeader,
+  ShadcnCardContent,
+  ShadcnCardFooter,
+} from '@proto.ui/prototypes-shadcn/card';
 import ShadcnText from '@proto.ui/prototypes-shadcn/text';
 import BrutalistSurface from '@proto.ui/prototypes-brutalist/surface';
 import BrutalistText from '@proto.ui/prototypes-brutalist/text';
@@ -20,6 +26,10 @@ import LiquidText from '@proto.ui/prototypes-liquid-glass/text';
 export const libraryCardPrototypes = {
   'base-surface': BaseSurface,
   'base-text': BaseText,
+  'shadcn-card': ShadcnCardRoot,
+  'shadcn-header': ShadcnCardHeader,
+  'shadcn-content': ShadcnCardContent,
+  'shadcn-footer': ShadcnCardFooter,
   'shadcn-surface': ShadcnSurface,
   'shadcn-text': ShadcnText,
   'brutalist-surface': BrutalistSurface,
@@ -68,6 +78,7 @@ export const bootstrapLibraryActionTextProps = {
 // Consumer recipes preserve each family's existing typography rather than
 // changing Text defaults shared by unrelated consumers.
 export function libraryBodyPropsForFamily(family: LibraryFamily) {
+  if (family === 'shadcn') return { ...libraryBodyProps, tone: 'inherit' } as const;
   if (family === 'brutalist') return { ...libraryBodyProps, weight: 'medium' } as const;
   return family === 'bootstrap-2-3-2' ? bootstrapLibraryBodyProps : libraryBodyProps;
 }
@@ -76,3 +87,6 @@ export function libraryCaptionPropsForFamily(family: LibraryFamily) {
     ? ({ ...libraryCaptionProps, weight: 'medium' } as const)
     : libraryCaptionProps;
 }
+
+// Native h2 owns heading semantics; card ink must survive the nested Text.
+export const shadcnLibraryHeadingProps = { ...libraryHeadingProps, tone: 'inherit' } as const;

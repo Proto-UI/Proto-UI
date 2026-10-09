@@ -7,7 +7,8 @@ it('keeps ownership honest and removes fake previews and delayed placeholders', 
     /base-preview|shadcn-preview|brutalist-preview|background:\s*(?:#|linear-gradient)|box-shadow:/
   );
   expect(source).toContain("library.id === 'lucide' ? 'base'");
-  expect(source).toContain("'brutalist-card'");
+  expect(source).toMatch(/shadcn\s*\?\s*'shadcn-card'/);
+  expect(source).toContain('const hasCard = brutalist || shadcn');
   expect(source).toContain('不透明 Surface 回退');
   const part = readFileSync('apps/www/src/components/LibraryCardPart.astro', 'utf8');
   expect(part).toContain('snapshotLibraryPart(part, props)');
@@ -85,7 +86,7 @@ it('keeps the Bootstrap layout conditional while family prototypes own its paint
   expect(frame).toMatch(/\)\s*:\s*\(\s*<slot\s*\/>\s*\)/);
   expect(frame).not.toMatch(/role=|tabindex=|onclick=|<button/);
   const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
-  expect(source).toContain('bootstrap ? bootstrapLibraryHeadingProps : libraryHeadingProps');
+  expect(source).toMatch(/bootstrap\s*\?\s*bootstrapLibraryHeadingProps\s*:\s*libraryHeadingProps/);
   expect(source).toContain('const bodyProps = libraryBodyPropsForFamily(family)');
   expect(source).toContain('props={bodyProps}');
   expect(source).toContain('const captionProps = libraryCaptionPropsForFamily(family)');
@@ -123,8 +124,8 @@ it('keeps Bootstrap narrow padding on its caption instead of its outer shell and
       source.indexOf('@media (max-width: 50rem)')
     )
     .replace(/\s+/g, ' ');
-  expect(narrow).toContain(
-    ".library-card:not([data-library='brutalist']):not([data-library='bootstrap-2-3-2']) :global(.library-card__surface)"
+  expect(narrow.replace(/\s/g, '')).toContain(
+    ".library-card:not([data-library='brutalist']):not([data-library='shadcn']):not([data-library='bootstrap-2-3-2']):global(.library-card__surface)"
   );
   expect(narrow).toContain(
     ".library-card:not([data-library='bootstrap-2-3-2']) :global(.library-card__action) { padding-inline: min(1rem, 5cqi); }"

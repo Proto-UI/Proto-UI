@@ -141,6 +141,11 @@
       "types": "./dist/field/index.d.ts",
       "import": "./dist/field/index.js",
       "default": "./dist/field/index.js"
+    },
+    "./card": {
+      "types": "./dist/card/index.d.ts",
+      "import": "./dist/card/index.js",
+      "default": "./dist/card/index.js"
     }
   },
   "description": "shadcn-style Proto UI prototype library for adapter-driven components.",

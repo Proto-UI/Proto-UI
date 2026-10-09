@@ -42,6 +42,7 @@ export const READY_ROUTES = Object.freeze([
   '/en/ui-libraries/base/table/',
   '/zh-cn/ui-libraries/base/table/',
   '/en/start-here/quick-start/',
+  '/en/ui-libraries/shadcn/card/',
   '/en/ui-libraries/shadcn/input/',
   '/en/ui-libraries/shadcn/select/',
   '/en/ui-libraries/base/scroll-area/',
@@ -96,6 +97,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
@@ -152,14 +154,19 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
 ]);
 
-// Production-specific evidence uses dedicated built-site owners, never the dev server.
+// Dedicated evidence uses its existing owner, never the ordinary shared-dev phase.
+// The historical PRODUCTION_* names include built-site checks and the private
+// Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
 ]);
 
-// Each production-only suite has an executable owner; exclusion is never a skip.
+// Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts':
+    '.github/workflows/liquid-card-candidate-evidence.yml',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts':
     'apps/www/scripts/run-search-production-evidence.mjs',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':

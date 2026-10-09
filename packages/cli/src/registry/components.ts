@@ -452,6 +452,28 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
   },
 
   'base-surface': base('base-surface', 'Base Surface', 'surfaceRoot', 'BaseSurfaceRoot'),
+  'shadcn-card': shadcnCompound('shadcn-card', 'Shadcn Card', [
+    {
+      prototypeImport: 'shadcnCardRoot',
+      exportBaseName: 'ShadcnCardRoot',
+      elementName: 'proto-ui-shadcn-card-root',
+    },
+    {
+      prototypeImport: 'shadcnCardHeader',
+      exportBaseName: 'ShadcnCardHeader',
+      elementName: 'proto-ui-shadcn-card-header',
+    },
+    {
+      prototypeImport: 'shadcnCardContent',
+      exportBaseName: 'ShadcnCardContent',
+      elementName: 'proto-ui-shadcn-card-content',
+    },
+    {
+      prototypeImport: 'shadcnCardFooter',
+      exportBaseName: 'ShadcnCardFooter',
+      elementName: 'proto-ui-shadcn-card-footer',
+    },
+  ]),
   'shadcn-surface': shadcn('shadcn-surface', 'Shadcn Surface', 'surfaceRoot', 'ShadcnSurfaceRoot'),
   'brutalist-surface': brutalist(
     'brutalist-surface',

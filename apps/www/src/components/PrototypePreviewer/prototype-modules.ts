@@ -492,6 +492,22 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-brutalist/badge');
     registerPrototype('brutalist-badge-root', mod.BrutalistBadgeRoot);
   },
+  'shadcn-card-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-root', mod.ShadcnCardRoot);
+  },
+  'shadcn-card-header': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-header', mod.ShadcnCardHeader);
+  },
+  'shadcn-card-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-content', mod.ShadcnCardContent);
+  },
+  'shadcn-card-footer': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-footer', mod.ShadcnCardFooter);
+  },
   'brutalist-card-root': async () => {
     const mod = await import('@proto.ui/prototypes-brutalist/card');
     registerPrototype('brutalist-card-root', mod.BrutalistCardRoot);

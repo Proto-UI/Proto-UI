@@ -8447,7 +8447,10 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
     ]);
     if (!owners.has(sourcePath) || !rootDir) return false;
     const inputs = [
-      ['apps/www/astro.config.mjs', PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256],
+      [
+        'apps/www/astro.config.mjs',
+        [PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256, PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256],
+      ],
       [PROMOTION_RETRY_PLUGIN_PATH, PROMOTION_RETRY_PLUGIN_SHA256],
       [PROMOTION_AUDIT_PLUGIN_PATH, PROMOTION_AUDIT_PLUGIN_SHA256],
     ];
@@ -8457,7 +8460,9 @@ function isReviewedBuildTimeModuleSpecifier(sourcePath, specifier, rootDir, meta
         assertPromotionModulePath(rootDir, target);
         if (
           !fs.lstatSync(target).isFile() ||
-          createHash('sha256').update(fs.readFileSync(target)).digest('hex') !== sha
+          !(Array.isArray(sha) ? sha : [sha]).includes(
+            createHash('sha256').update(fs.readFileSync(target)).digest('hex')
+          )
         )
           return false;
       }
@@ -9271,6 +9276,10 @@ const PROMOTION_AUDIT_PLUGIN_SHA256 =
 // Its exact helper bytes are evidence metadata; arbitrary plugins stay rejected.
 const PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256 =
   '428f9cbe0c5fe19f4d24a74afeebddcfcad0f00c929144df205a94c45e87f8ac';
+// The draft Shadcn Card adds one sidebar entry only; plugin and resolver bytes
+// are unchanged. Preserve the preceding exact profile for historical fixtures.
+const PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256 =
+  '4ac9f16ef4933248e1707ab179e5ea8aa94469033001dc945837e82156d3225a';
 const PROMOTION_RETRY_PLUGIN_PATH = 'apps/www/scripts/runtime-retry-urls.mjs';
 const PROMOTION_RETRY_PLUGIN_SHA256 =
   '510d0fd3bbd96804c6ea989e2da47531188890721f260822521a11c69000c224';
@@ -9289,7 +9298,10 @@ export function promotionBarePackageTargets(root, specifier, metadata) {
   )
     throw unrecognizedConfig();
   const configSha = createHash('sha256').update(fs.readFileSync(configPath)).digest('hex');
-  const retryProfile = configSha === PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256;
+  const retryProfile = [
+    PROMOTION_FINF_RETRY_AUDIT_CONFIG_SHA256,
+    PROMOTION_SHADCN_CARD_RETRY_AUDIT_CONFIG_SHA256,
+  ].includes(configSha);
   const auditProfile =
     configSha === PROMOTION_AUDIT_CONFIG_SHA256 ||
     configSha === PROMOTION_MAIN_877_AUDIT_CONFIG_SHA256 ||
