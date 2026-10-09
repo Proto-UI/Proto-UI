@@ -61,7 +61,8 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'grid min-w-0 w-full max-w-lg gap-5 p-2',
+    ref: 'selectLayout',
+    className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-2 wrap-anywhere',
     children: [
       { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm' },
       select('uncontrolled', { defaultValue: 'alpha' }),
@@ -84,12 +85,22 @@ export default {
         kind: 'proto',
         prototypeId: 'liquid-glass-button',
         ref: 'accept',
-        children: ['Accept selection'],
+        className: 'min-w-0 max-w-full',
+        children: [
+          {
+            kind: 'box',
+            tag: 'span',
+            ref: 'acceptLabel',
+            className: 'min-w-0 whitespace-normal wrap-anywhere',
+            children: ['Accept selection'],
+          },
+        ],
       },
       {
         kind: 'box',
         attrs: { dir: 'rtl' },
-        className: 'grid min-w-0 gap-2',
+        ref: 'selectRtlLayout',
+        className: 'grid grid-cols-1 min-w-0 gap-2',
         children: [
           { kind: 'box', children: ['RTL · long selected label'], className: 'text-sm' },
           select('rtl', { defaultValue: 'long' }),

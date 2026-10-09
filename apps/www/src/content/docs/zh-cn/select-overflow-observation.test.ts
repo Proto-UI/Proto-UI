@@ -233,3 +233,56 @@ describe('Select document overflow failure observation', () => {
       expect(git).toHaveBeenCalledWith(['status', '--porcelain']);
     });
 });
+
+describe('bounded Select demo intrinsic layout samples', () => {
+  it('retains in-viewport known owners and their child sizing without exposing text or mutating DOM', () => {
+    viewport();
+    const layout = document.createElement('div');
+    layout.setAttribute('data-demo-ref', 'selectLayout');
+    layout.style.cssText = 'display:grid;grid-template-columns:minmax(0,1fr);padding:16px';
+    const button = document.createElement('button');
+    button.setAttribute('data-demo-ref', 'accept');
+    button.style.cssText =
+      'white-space:nowrap;padding-left:40px;padding-right:40px;border:1px solid';
+    const label = document.createElement('span');
+    label.setAttribute('data-demo-ref', 'acceptLabel');
+    label.textContent = 'PRIVATE_DEMO_LABEL';
+    button.append(label);
+    layout.append(button);
+    document.body.append(layout);
+    for (const node of [layout, button, label])
+      vi.spyOn(node, 'getBoundingClientRect').mockReturnValue(rect(0, 100));
+    const before = document.body.outerHTML;
+    const result = collectSelectOverflowObservation();
+    expect(result.candidates).toEqual([]);
+    expect(result.layoutBoxes.map((box) => box.demoRef)).toEqual([
+      'selectLayout',
+      'accept',
+      'acceptLabel',
+    ]);
+    const owner = result.layoutBoxes.find((box) => box.demoRef === 'accept')!;
+    expect(owner).toMatchObject({
+      whiteSpace: 'nowrap',
+      paddingLeft: '40px',
+      paddingRight: '40px',
+    });
+    expect(owner.children[0].demoRef).toBe('acceptLabel');
+    expect(JSON.stringify(result)).not.toContain('PRIVATE_DEMO_LABEL');
+    expect(document.body.outerHTML).toBe(before);
+    expect(scrollX).toBe(27);
+  });
+  it('bounds repeated owner samples and direct children independently of the general offender cap', () => {
+    viewport();
+    for (let i = 0; i < 26; i++) {
+      const layout = document.createElement('div');
+      layout.setAttribute('data-demo-ref', 'selectLayout');
+      for (let child = 0; child < 18; child++) layout.append(document.createElement('span'));
+      document.body.append(layout);
+    }
+    const result = collectSelectOverflowObservation();
+    expect(result.layoutBoxes).toHaveLength(24);
+    expect(result.layoutBoxesTruncated).toBe(true);
+    expect(result.layoutBoxes[0].children).toHaveLength(16);
+    expect(result.layoutBoxes[0].childrenTruncated).toBe(true);
+  });
+});
