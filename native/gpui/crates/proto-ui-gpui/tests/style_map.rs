@@ -393,13 +393,20 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 31] = [
+const EXPECTED_UNMAPPED: [&str; 33] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
     // Bootstrap's recorded gradient has a flat fallback, but no image lowering.
     "background-image",
     "border-top-color",
+    // Shadcn Card Header's implicit min-content rows have no Style field at
+    // GPUI 62e5991. Explicit `auto auto` rows cannot be represented by its
+    // GridTemplate either: it only lowers repeat/minmax tracks, not auto.
+    // Keep both runtime diagnostics; see the Card row regression below and
+    // internal/records/2026-10-09-gpui-card-grid-row-gaps.md for pinned evidence.
+    "grid-auto-rows",
+    "grid-template-rows",
     "outline",
     "outline-color",
     "outline-offset",
@@ -432,6 +439,43 @@ const EXPECTED_UNMAPPED: [&str; 31] = [
     "white-space",
     "overflow-wrap",
 ];
+
+#[test]
+fn card_grid_rows_remain_diagnostic_instead_of_becoming_fractional_tracks() {
+    for (token, property, value) in [
+        ("auto-rows-min", "grid-auto-rows", "min-content"),
+        ("grid-rows-[auto_auto]", "grid-template-rows", "auto auto"),
+    ] {
+        let resolved = resolve(&["relative", "grid", "grid-cols-1", token], "shadcn");
+        assert!(resolved.unknown.is_empty());
+        assert_eq!(
+            resolved.declarations.get(property).map(String::as_str),
+            Some(value)
+        );
+        let mapped = map(&resolved, LengthContext::default());
+        assert_eq!(mapped.refinement.display, Some(Display::Grid));
+        assert!(mapped.refinement.grid_cols.is_some());
+        assert_eq!(mapped.refinement.grid_rows, None);
+        assert_eq!(
+            mapped.unmapped,
+            vec![(property.into(), value.into(), Unmapped::UnknownProperty)]
+        );
+        assert!(!mapped.is_complete());
+
+        // The host-facing path must preserve the same gap, not silently
+        // treat the token as a declaration-free marker or accept a fallback.
+        let feedback = style_for_feedback_tokens([token], None, LengthContext::default());
+        assert_eq!(feedback.refinement.grid_rows, None);
+        assert_eq!(
+            feedback.issues,
+            [StyleIssue::Unmapped {
+                property: property.into(),
+                value: value.into(),
+                reason: Unmapped::UnknownProperty,
+            }]
+        );
+    }
+}
 
 #[test]
 fn selectable_text_affordances_remain_explicitly_unmapped() {
