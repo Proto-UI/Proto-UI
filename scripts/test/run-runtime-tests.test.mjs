@@ -1712,3 +1712,20 @@ it('the executable runtime runner parses before any test phase starts', () => {
   );
   assert.equal(result.status, 0, result.stderr);
 });
+
+it('assigns Liquid elevation control to its dedicated source-bound experiment workflow', () => {
+  const suite = 'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts';
+  const owner = '.github/workflows/liquid-elevation-control-evidence.yml';
+  assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
+  assert.ok(!BROWSER_SUITES.includes(suite));
+  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
+  const workflow = readFileSync(owner, 'utf8');
+  assert.ok(workflow.includes(suite));
+  assert.ok(workflow.includes('workflow_dispatch:'));
+  assert.ok(workflow.includes('pull_request:'));
+  assert.ok(workflow.includes('assert.equal(report.numTotalTests, 6)'));
+  assert.ok(workflow.includes('assert.equal(report.numPassedTests, 6)'));
+  const plan = createRuntimeTestPlan([]);
+  assert.ok(!plan[1].args.includes(suite));
+  assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
+});

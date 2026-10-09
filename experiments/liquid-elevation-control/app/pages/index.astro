@@ -1,0 +1,141 @@
+---
+// Isolated CI experiment; not a public docs route or a new product default.
+import LibraryCardPart from '../../../../apps/www/src/components/LibraryCardPart.astro';
+import LibraryLiquidScene from '../../../../apps/www/src/components/LibraryLiquidScene.astro';
+import { renderThemeCss } from '../../../../packages/prototypes/liquid-glass/src/theme';
+const profiles = [45, 64].flatMap((height) =>
+  ['none', 'raised'].map((elevation) => ({
+    id: `${height}-${elevation}`,
+    title: `${height}px: Surface elevation ${elevation}`,
+    elevation: elevation as 'none' | 'raised',
+    height,
+    width: height === 45 ? 156.046875 : 222,
+  }))
+);
+---
+
+<html lang="en">
+  <head
+    ><meta charset="utf-8" /><meta name="robots" content="noindex,nofollow" /><title>
+      Private prototype elevation control
+    </title><style is:inline set:html={renderThemeCss()}></style></head
+  >
+  <body>
+    <h1>Liquid Surface elevation control</h1>
+    <p>
+      Default: optical off. Add ?optical=1 only for the explicit candidate run. Both rows use the
+      same existing owned scene, shape, content, and genuine Liquid Surface prototype.
+    </p>
+    <p>
+      Candidate A changes only the prototype elevation prop. It is not an optical-shadow,
+      refraction, or bright-rim fix.
+    </p>
+    {
+      profiles.map((profile) => (
+        <section
+          style={`--control-width:${profile.width}px;--control-height:${profile.height}px`}
+          data-control-profile={profile.id}
+          data-library="liquid-glass"
+          data-library-liquid-candidate
+        >
+          <h2>{profile.title}</h2>
+          <LibraryLiquidScene>
+            <a href="#comparison" data-library-action aria-label="Local diagnostic action">
+              <span data-library-liquid-optical>
+                <LibraryCardPart
+                  part="liquid-glass-surface"
+                  candidateTag={true}
+                  props={{
+                    variant: 'outline',
+                    radius: 'full',
+                    border: 'none',
+                    elevation: profile.elevation,
+                  }}
+                  class="control-surface"
+                >
+                  <LibraryCardPart
+                    part="liquid-glass-text"
+                    props={{ size: 'sm', weight: 'medium', tone: 'inherit' }}
+                  >
+                    Material control
+                  </LibraryCardPart>
+                </LibraryCardPart>
+              </span>
+            </a>
+          </LibraryLiquidScene>
+        </section>
+      ))
+    }
+    <p id="comparison">Local target; no external action.</p>
+    <script>
+      import { initLibraryLiquidCardCandidate } from '../../../../apps/www/src/components/library-liquid-card-client';
+      import {
+        installLibraryLiquidCandidateHarness,
+        type LibraryLiquidCandidateHarness,
+      } from '../../../../apps/www/src/components/library-liquid-scene';
+      // Default/no-JS renders genuine SSR Surface snapshots. The actual sink checks
+      // reduced transparency, forced colors, source validity, and rendered contrast.
+      if (new URLSearchParams(location.search).get('optical') === '1') {
+        const profiles: Record<string, LibraryLiquidCandidateHarness> = {};
+        const releases = Array.from(
+          document.querySelectorAll<HTMLElement>('[data-control-profile]'),
+          (scope) => {
+            const release = initLibraryLiquidCardCandidate(scope);
+            const remove = installLibraryLiquidCandidateHarness(scope);
+            profiles[scope.dataset.controlProfile!] = (
+              window as Window & { libraryLiquidCardCandidate: LibraryLiquidCandidateHarness }
+            ).libraryLiquidCardCandidate;
+            remove();
+            return release;
+          }
+        );
+        (window as Window & { liquidElevationControl?: typeof profiles }).liquidElevationControl =
+          profiles;
+        addEventListener('pagehide', () => releases.forEach((release) => release()), {
+          once: true,
+        });
+      }
+    </script>
+    <style>
+      body {
+        font: 14px system-ui;
+        margin: 24px;
+      }
+      section {
+        width: 536px;
+        max-width: 100%;
+        margin-block: 16px;
+      }
+      h2 {
+        font-size: 16px;
+      }
+      [data-library-action] {
+        position: relative;
+        z-index: 1;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+      }
+      [data-library-liquid-optical] {
+        display: block;
+      }
+      :global(.control-surface) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        width: var(--control-width);
+        height: var(--control-height);
+      }
+      :global(.library-liquid-scene) {
+        height: 160px;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      a:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 4px;
+      }
+    </style>
+  </body>
+</html>

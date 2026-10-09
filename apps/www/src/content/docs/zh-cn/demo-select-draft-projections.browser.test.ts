@@ -4,6 +4,11 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { withLiquidCardFailureObservation } from './library-liquid-card-observation';
+import {
+  collectSelectOverflowObservation,
+  readSelectSourceBinding,
+} from './select-overflow-observation';
 import {
   RUNTIMES,
   choosePreviewRuntime,
@@ -211,9 +216,27 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             expect(geometry.selectedText).toContain('VeryLongUnbrokenOptionLabels');
             expect(geometry.background).not.toBe('rgba(0, 0, 0, 0)');
             expect(Number.parseFloat(geometry.radius)).toBeGreaterThan(0);
-            expect(
-              await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
-            ).toBe(true);
+            await withLiquidCardFailureObservation(
+              async () => {
+                expect(
+                  await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)
+                ).toBe(true);
+              },
+              () => page.evaluate(collectSelectOverflowObservation),
+              async (observation) => {
+                if (!captureDir) return;
+                const binding = readSelectSourceBinding((args) =>
+                  execFileSync('git', args, { encoding: 'utf8' })
+                );
+                await writeFile(
+                  path.join(captureDir, `${prefix}-overflow.json`),
+                  JSON.stringify({ ...binding, family, runtime, theme, observation }, null, 2),
+                  { flag: 'wx' }
+                );
+              },
+              (error) => console.warn('Select overflow observation unavailable', error),
+              1000
+            );
             if (captureDir) {
               await page.screenshot({
                 path: path.join(captureDir, `${prefix}-320-text200-rtl-open.png`),
