@@ -252,6 +252,7 @@ test('rejects a graph without route-owned Web Component host provenance', () => 
     '_astro/new-projection-families.js',
     '_astro/liquid-glass-material.js',
     '_astro/bootstrap-state-controls.js',
+    '_astro/liquid-library-card.js',
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
@@ -271,6 +272,7 @@ test('does not mistake an orphaned WC runtime for primary host provenance', () =
     '_astro/new-projection-families.js',
     '_astro/liquid-glass-material.js',
     '_astro/bootstrap-state-controls.js',
+    '_astro/liquid-library-card.js',
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
