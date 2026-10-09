@@ -44,6 +44,7 @@ const OPTIONAL_DEMONSTRATION_ENTRY_FACADES = new Set([
   // Kept for retained callers; current homepage is owned by HomepageRuntime.
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/site-typography.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
 ]);
 for (const facade of OPTIONAL_DEMONSTRATION_ENTRY_FACADES)
   APPROVED_DEMONSTRATION_ENTRY_FACADES.add(facade);
@@ -116,6 +117,22 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/slot-projector.ts',
   'packages/adapters/web-component/src/style.ts',
   'packages/adapters/web-component/src/types.ts',
+  // Merged #652 host resources; exact WC closure only, not shell import APIs.
+  'packages/adapters/web-component/src/color-scheme-source.ts',
+  'packages/adapters/web-component/src/focus-scope-targets.ts',
+  'packages/adapters/web-component/src/keyed-meta-sources.ts',
+  'packages/adapters/web-component/src/portal-conceal.ts',
+  'packages/adapters/web-component/src/portal-mount.ts',
+  'packages/adapters/web-component/src/shadow-color-scheme-environment.ts',
+  'packages/adapters/web-component/src/shadow-inner-surface.ts',
+  'packages/adapters/web-component/src/shadow-owner-shell.ts',
+  'packages/adapters/web-component/src/shadow-profile.ts',
+  'packages/adapters/web-component/src/shadow-split-effects.ts',
+  'packages/adapters/web-component/src/shadow-split-meta.ts',
+  'packages/adapters/web-component/src/shadow-split-resources.ts',
+  'packages/adapters/web-component/src/shadow-style-artifact.ts',
+  'packages/adapters/web-component/src/shadow-stylesheet-owner.ts',
+  'packages/adapters/web-component/src/shadow-text-control-surface.ts',
 ]);
 
 export class WebsiteProductionBundleValidationError extends Error {

@@ -13,6 +13,8 @@ import {
 import { LocalCloudReviewLedger } from '../local-cloud-review-ledger.mjs';
 import { renderReviewBody } from '../review-runtime.mjs';
 import { analysis } from './fixtures/cloud-review.mjs';
+import { withReviewTransportMetadata } from './fixtures/review-pagination.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 
 const policy = parse(
   readFileSync(
@@ -46,7 +48,7 @@ function transport() {
       completedAt: '2026-10-03T00:00:00Z',
       detailsUrl: 'https://github.com/Proto-UI/Proto-UI/actions/runs/1',
       checkSuite: {
-        app: { slug: 'github-actions' },
+        app: { id: 'APP_github_actions', slug: 'github-actions' },
         repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
         workflowRun: { file: { path: '.github/workflows/ci.yml' }, workflow: { name: 'CI' } },
       },
@@ -66,6 +68,7 @@ function transport() {
     checkSuite: {
       app: { slug: 'dco', id: 'MDM6QXBwMTg2MQ==' },
       repository: { nameWithOwner: 'Proto-UI/Proto-UI' },
+      workflowRun: null,
     },
   });
   const graph = {
@@ -110,7 +113,7 @@ function transport() {
   const fixture = {
     pr,
     commit,
-    graph,
+    graph: withReviewTransportMetadata(graph),
     viewer: actor,
     permission: { user: actor, permission: 'write' },
     files: [[{ filename: 'packages/core/src/index.ts', status: 'modified' }]],
@@ -126,7 +129,10 @@ function transport() {
     const endpoint = args.at(-1);
     if (args[1] === 'graphql') return JSON.stringify(fixture.graph);
     if (endpoint === 'user') return JSON.stringify(fixture.viewer);
-    if (endpoint.endsWith('/files?per_page=100')) return JSON.stringify(fixture.files);
+    if (/\/files\?per_page=100&page=\d+$/.test(endpoint)) {
+      const page = Number(new URL(endpoint, 'https://fixture.invalid/').searchParams.get('page'));
+      return JSON.stringify(fixture.files[page - 1] ?? []);
+    }
     if (endpoint.endsWith('/commits?per_page=100')) return JSON.stringify([[fixture.commit]]);
     if (endpoint.endsWith('/permission')) return JSON.stringify(fixture.permission);
     if (endpoint.endsWith('/reviews/42')) return JSON.stringify(fixture.receipt);
@@ -150,7 +156,10 @@ function setup(t, mutate = () => {}) {
   });
   const fixture = transport();
   mutate(fixture);
-  const dry = new CloudReviewDryRun(ledger, policy, { runner: fixture.runner });
+  const dry = new CloudReviewDryRun(ledger, policy, {
+    runner: fixture.runner,
+    ...modelTraceFixture(),
+  });
   const { input } = dry.begin(487);
   const { packet } = analysis(input);
   packet.agentEvidence.disposition = 'complete';
@@ -387,6 +396,8 @@ test('a governed historical disposition requires reconciliation before any new i
       submittedAt: '2026-10-03T00:01:00Z',
       body: renderReviewBody(packet),
     });
+    f.graph.data.repository.pullRequest.reviews.totalCount = 1;
+    f.graph.data.repository.pullRequest.reviews.pageInfo.endCursor = '1';
   });
   assert.throws(
     () => dry.prepare(packet, assessment),
@@ -497,14 +508,12 @@ test('ordinary unknown intent cannot be finalized as a simulation by matching co
 
 test('final read after durable intent catches revocation before the fake submit', (t) => {
   const { dry, packet, fixture, ledger } = setup(t);
-  // begin has already collected once. Revoke only at the third collection,
-  // after prepare persisted the intent but before the exchange could submit.
+  // Revoke on durable intent publication, not a guessed collector read count.
+  // Pagination now binds both opening and closing snapshots of each collection.
   const original = fixture.graph.data.repository.viewerPermission;
-  let reads = 0;
   Object.defineProperty(fixture.graph.data.repository, 'viewerPermission', {
     get() {
-      reads++;
-      return reads >= 2 ? 'READ' : original;
+      return ledger.read().state.slot?.intent ? 'READ' : original;
     },
   });
   let submits = 0;
@@ -518,3 +527,32 @@ test('final read after durable intent catches revocation before the fake submit'
   assert.equal(submits, 0);
   assert.equal(ledger.read().state.slot.intent.status, 'unknown');
 });
+
+for (const field of [
+  'repository-id',
+  'repository-name',
+  'pr-id',
+  'pr-number',
+  'updated-at',
+  'connection-count',
+  'check-app-id',
+]) {
+  test(`cloud dry-run retains rejection of missing ${field} pagination evidence`, (t) => {
+    assert.throws(
+      () =>
+        setup(t, (f) => {
+          const repo = f.graph.data.repository;
+          const pr = repo.pullRequest;
+          if (field === 'repository-id') delete repo.id;
+          if (field === 'repository-name') delete repo.nameWithOwner;
+          if (field === 'pr-id') delete pr.id;
+          if (field === 'pr-number') delete pr.number;
+          if (field === 'updated-at') delete pr.updatedAt;
+          if (field === 'connection-count') delete pr.commits.totalCount;
+          if (field === 'check-app-id')
+            delete pr.commits.nodes[0].commit.statusCheckRollup.contexts.nodes[0].checkSuite.app.id;
+        }),
+      /malformed|incomplete|totalCount/
+    );
+  });
+}

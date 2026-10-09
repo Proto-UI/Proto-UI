@@ -35,6 +35,8 @@ import {
   createConnectorAssessment,
 } from './fixtures/connector-assessment.mjs';
 import { analysis } from './fixtures/cloud-review.mjs';
+import { modelTraceFixture } from './fixtures/modeltrace.mjs';
+import { computeModelTraceReceiptDigest, renderModelTraceDisclosure } from '../modeltrace.mjs';
 import { reduceCloudReviewLedger } from '../cloud-review-ledger.mjs';
 import { publishReview, refreshPacket, reviewSnapshot } from './fixtures/review-publication.mjs';
 
@@ -49,6 +51,9 @@ const rootPolicy = parse(
 );
 // Readers are trusted constructor seams, never parent command fields.
 class ConnectorReviewSession extends NativeConnectorReviewSession {
+  publishParentPacket(packet, assessment, reconciliation = null, measured = modelTraceFixture()) {
+    return super.publishParentPacket(packet, assessment, reconciliation, measured);
+  }
   constructor({ policy, ...options }) {
     super({
       readPolicy: () => structuredClone(policy),
@@ -204,7 +209,10 @@ async function session(t, { active = true, enabled = true, modify = () => {} } =
 async function parentPacket(s) {
   const request = await s.begin(487, { kind: 'synchronize', deliveryId: 'event-1' });
   const { packet } = analysis(request.input);
-  packet.agentEvidence.source = 'AI-executed review by ChatGPT; parent-owned test judgment';
+  packet.agentEvidence.source =
+    'AI-executed review by ChatGPT; parent-owned test judgment' +
+    '\n\n' +
+    modelTraceFixture().disclosure;
   packet.agentEvidence.disposition = 'complete';
   packet.agentEvidence.debt = [];
   return packet;
@@ -652,6 +660,7 @@ for (const [observed, canonical, canApprove] of [
     // with a genuine fixture publication receipt and all other facts held fixed.
     published.input.reviewerPermissions = live.input.reviewerPermissions;
     const decision = authorizePullRequestMerge({
+      ...modelTraceFixture(),
       ...published,
       packet: refreshPacket(published.publishedPacket, published.input),
       liveInput: structuredClone(published.input),
@@ -733,7 +742,8 @@ test('REST validity does not invent a GitHub platform identity for an unknown co
   const request = await s.begin(487, { kind: 'synchronize', deliveryId: 'unknown-platform' });
   assert.equal(request.input.commits[0].committer.platform, null);
   const { packet } = analysis(request.input);
-  packet.agentEvidence.source = 'AI-executed review by ChatGPT';
+  packet.agentEvidence.source =
+    'AI-executed review by ChatGPT' + '\n\n' + modelTraceFixture().disclosure;
   packet.agentEvidence.disposition = 'complete';
   packet.agentEvidence.debt = [];
   await assert.rejects(
@@ -749,7 +759,8 @@ test('initial sweep and later event cumulatively reconcile findings with exact c
   const request0 = await s.beginInitialSweep(487);
   assert.equal(request0.executionModeSource, 'delegated-owner-initial-sweep');
   const { packet: first } = analysis(request0.input);
-  first.agentEvidence.source = 'AI-executed review by ChatGPT';
+  first.agentEvidence.source =
+    'AI-executed review by ChatGPT' + '\n\n' + modelTraceFixture().disclosure;
   first.agentEvidence.disposition = 'complete';
   first.agentEvidence.debt = [];
   first.recommendedAction = 'REQUEST_CHANGES';
@@ -792,7 +803,8 @@ test('initial sweep and later event cumulatively reconcile findings with exact c
   });
   const request = await next.begin(487, { kind: 'human-comment', deliveryId: 'event-2' });
   const { packet } = analysis(request.input);
-  packet.agentEvidence.source = 'AI-executed review by ChatGPT';
+  packet.agentEvidence.source =
+    'AI-executed review by ChatGPT' + '\n\n' + modelTraceFixture().disclosure;
   packet.agentEvidence.disposition = 'complete';
   packet.agentEvidence.debt = [];
   packet.reconciliation.priorReviewedHeadSha = first.headSha;
@@ -842,7 +854,8 @@ test('fresh run rejects a cleared prior pointer or omitted prior finding before 
       });
       const request = await next.begin(487, { kind: 'human-comment', deliveryId: 'event-2' });
       const { packet } = analysis(request.input);
-      packet.agentEvidence.source = 'AI-executed review by ChatGPT';
+      packet.agentEvidence.source =
+        'AI-executed review by ChatGPT' + '\n\n' + modelTraceFixture().disclosure;
       packet.agentEvidence.disposition = 'complete';
       packet.agentEvidence.debt = [];
       packet.reconciliation.priorReviewedHeadSha = first.headSha;
@@ -943,7 +956,8 @@ test('initial sweep includes draft analysis and rejects closed inventory races',
         await s.captureInitialSweep();
         const request = await s.beginInitialSweep(487);
         const { packet } = analysis(request.input);
-        packet.agentEvidence.source = 'AI-executed review by ChatGPT';
+        packet.agentEvidence.source =
+          'AI-executed review by ChatGPT' + '\n\n' + modelTraceFixture().disclosure;
         packet.agentEvidence.disposition = 'complete';
         packet.agentEvidence.debt = [];
         packet.recommendedAction = 'COMMENT';
@@ -1065,7 +1079,8 @@ test('each intake command enforces only its own scope across all active/paused c
               if (command === 'sweep') await s.captureInitialSweep();
               const request = await begin();
               const { packet } = analysis(request.input);
-              packet.agentEvidence.source = 'AI-executed review by ChatGPT';
+              packet.agentEvidence.source =
+                'AI-executed review by ChatGPT' + '\n\n' + modelTraceFixture().disclosure;
               packet.agentEvidence.disposition = 'complete';
               packet.agentEvidence.debt = [];
               assert.equal(
@@ -1483,7 +1498,8 @@ test('post-publication observation or paused event scope cannot cause dismissal,
       await s.captureInitialSweep();
       const request = await s.beginInitialSweep(487);
       const { packet } = analysis(request.input);
-      packet.agentEvidence.source = 'AI-executed review by ChatGPT';
+      packet.agentEvidence.source =
+        'AI-executed review by ChatGPT' + '\n\n' + modelTraceFixture().disclosure;
       packet.agentEvidence.disposition = 'complete';
       packet.agentEvidence.debt = [];
       transport.observeHead = async () => {
@@ -1915,7 +1931,10 @@ test('confirmed review receipt survives a real remote stale-lease race without r
 
 function completePacket(input, prior = null, ids = []) {
   const { packet } = analysis(input);
-  packet.agentEvidence.source = 'AI-executed review by ChatGPT; parent-owned test judgment';
+  packet.agentEvidence.source =
+    'AI-executed review by ChatGPT; parent-owned test judgment' +
+    '\n\n' +
+    modelTraceFixture().disclosure;
   packet.agentEvidence.disposition = 'complete';
   packet.agentEvidence.debt = [];
   packet.findings = ids.map((id) => ({
@@ -3955,7 +3974,9 @@ test('review instructions distinguish the governed CLI and exact owner-plugin wr
     new URL('../../../.agents/skills/pui-review/SKILL.md', import.meta.url),
     'utf8'
   );
-  assert(skill.includes('only supported local CLI review mutation path'));
+  assert(skill.includes('pnpm agent:review -- submit-review'));
+  assert(skill.includes('only supported review mutation path'));
+  assert(skill.includes('re-collects the whole canonical review input live from GitHub with `gh`'));
   assert(skill.includes('governed tokenless owner-plugin writer'));
   assert(skill.includes('proto-ui-cloud-owner-review-v1'));
   assert(skill.includes('not an independent alternate writer'));
@@ -4129,3 +4150,88 @@ test('unknown duplicate-completion acknowledgement never releases or transfers i
   assert.equal(store.read().state.publicationReceipts.length, 0);
   assert.equal(f.calls.filter((c) => c.operation === 'add_review_to_pr').length, 0);
 });
+
+for (const kind of [
+  'missing',
+  'missing-context',
+  'expired',
+  'mismatched-context',
+  'missing-disclosure',
+]) {
+  test(`connector publication rejects ${kind} measured input before transport write`, async (t) => {
+    const { s, f } = await session(t);
+    const packet = await parentPacket(s);
+    const measured = structuredClone(modelTraceFixture());
+    if (kind === 'missing') delete measured.modelTrace;
+    if (kind === 'missing-context') delete measured.modelTraceContext;
+    if (kind === 'expired') {
+      const ttl =
+        Date.parse(measured.modelTrace.expiresAt) - Date.parse(measured.modelTrace.measuredAt);
+      const fixedPast = Date.parse('2000-01-01T00:00:00.000Z');
+      measured.modelTrace.measuredAt = new Date(fixedPast).toISOString();
+      measured.modelTrace.expiresAt = new Date(fixedPast + ttl).toISOString();
+      measured.modelTrace.id = `sha256:${computeModelTraceReceiptDigest(measured.modelTrace)}`;
+    }
+    if (kind === 'mismatched-context') measured.modelTraceContext.contextDigest = 'd'.repeat(64);
+    if (kind === 'missing-disclosure')
+      packet.agentEvidence.source = 'AI-executed review by ChatGPT';
+    await assert.rejects(
+      () => s.publishParentPacket(packet, createConnectorAssessment(), null, measured),
+      kind === 'expired' ? /measurement expired/ : /ModelTrace:/
+    );
+    assert.equal(f.calls.filter((call) => call.operation === 'add_review_to_pr').length, 0);
+    assert.equal(f.reviews.length, 0);
+  });
+}
+
+for (const elapsed of [999, 1000]) {
+  test(`dispatch freshness after consumed attempt at expiry offset ${elapsed}`, async (t) => {
+    const start = Date.now();
+    t.mock.timers.enable({ apis: ['Date'], now: start });
+    const { s, f, store } = await session(t);
+    const packet = await parentPacket(s);
+    const measured = structuredClone(modelTraceFixture());
+    const ttl =
+      Date.parse(measured.modelTrace.expiresAt) - Date.parse(measured.modelTrace.measuredAt);
+    measured.modelTrace.measuredAt = new Date(start + 1000 - ttl).toISOString();
+    measured.modelTrace.expiresAt = new Date(start + 1000).toISOString();
+    measured.modelTrace.id = `sha256:${computeModelTraceReceiptDigest(measured.modelTrace)}`;
+    packet.agentEvidence.source =
+      'AI-executed review by ChatGPT; synthetic expiry boundary\n\n' +
+      renderModelTraceDisclosure(measured.modelTrace);
+    const consume = store.consumePublicationAttempt.bind(store);
+    let consumed = 0;
+    store.consumePublicationAttempt = async (...args) => {
+      const result = await consume(...args);
+      consumed++;
+      // The real remote adapter performs asynchronous ledger work after the
+      // final authorization. Freeze time at each side of exact expiry.
+      t.mock.timers.setTime(start + elapsed);
+      return result;
+    };
+    const outcome = await s.publishParentPacket(
+      packet,
+      createConnectorAssessment(),
+      null,
+      measured
+    );
+    assert.equal(consumed, 1);
+    const posts = f.calls.filter((call) => call.operation === 'add_review_to_pr').length;
+    if (elapsed < 1000) {
+      assert.equal(posts, 1);
+      assert.equal(outcome.status, 'published');
+    } else {
+      assert.equal(posts, 0);
+      assert.equal(outcome.status, 'unknown');
+      assert.match(outcome.reason, /measurement expired/);
+      assert.equal(outcome.retryAllowed, false);
+      assert.equal(outcome.publicationConfirmed, false);
+      assert.equal(store.read().state.slot.intent.status, 'unknown');
+      await assert.rejects(
+        () => s.publishParentPacket(packet, createConnectorAssessment(), null, measured),
+        /one publication attempt/
+      );
+      assert.equal(f.calls.filter((call) => call.operation === 'add_review_to_pr').length, 0);
+    }
+  });
+}

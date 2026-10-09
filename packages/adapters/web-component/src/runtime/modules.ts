@@ -34,6 +34,14 @@ import { createWebBoundaryHostBridge, BOUNDARY_HOST_BRIDGE_CAP } from '@proto.ui
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import { EFFECTS_CAP } from '@proto.ui/module-feedback';
 import {
+  MATERIAL_BINDING_FACTORY_CAP,
+  type MaterialBindingFactory,
+} from '@proto.ui/module-feedback/internal/runtime-cap';
+import {
+  FINAL_STYLE_SINK_CAP,
+  type FinalStyleSink,
+} from '@proto.ui/module-feedback/internal/final-style-sink';
+import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   EVENT_GLOBAL_TARGET_CAP,
   EVENT_GLOBAL_INPUT_SCOPE_CAP,
@@ -1098,6 +1106,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   };
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
+  finalStyleSink?: FinalStyleSink;
+  materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
   imageViewTarget: HTMLImageElement | null;
   getMeta: (key: string) => unknown;
@@ -1226,7 +1236,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
-    .use('feedback', [[EFFECTS_CAP, effectsPort]])
+    .use('feedback', [
+      [EFFECTS_CAP, effectsPort],
+      ...(args.materialBindingFactory
+        ? [[MATERIAL_BINDING_FACTORY_CAP, args.materialBindingFactory] as const]
+        : []),
+      ...(args.finalStyleSink ? [[FINAL_STYLE_SINK_CAP, args.finalStyleSink] as const] : []),
+    ])
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,

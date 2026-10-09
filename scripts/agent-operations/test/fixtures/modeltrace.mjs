@@ -11,7 +11,13 @@ import {
 // never claim a fingerprint measurement of Main, a backend, or a real model.
 const fixtures = new Map();
 export function modelTraceFixture(repositoryId = 'github.com:Proto-UI/Proto-UI') {
-  if (!fixtures.has(repositoryId)) {
+  const existing = fixtures.get(repositoryId);
+  const nowMs = Date.now();
+  if (
+    !existing ||
+    nowMs < Date.parse(existing.modelTrace.measuredAt) ||
+    nowMs >= Date.parse(existing.modelTrace.expiresAt)
+  ) {
     const modelTraceContext = {
       schemaVersion: 1,
       kind: 'proto-ui.modeltrace-context',
@@ -21,7 +27,7 @@ export function modelTraceFixture(repositoryId = 'github.com:Proto-UI/Proto-UI')
       routeDigest: 'b'.repeat(64),
       declared: { systemModel: null, harnessModel: null },
     };
-    const now = new Date();
+    const now = new Date(nowMs);
     const challenge = createModelTraceChallenge(modelTraceContext, { now });
     const response = {
       schemaVersion: 1,
