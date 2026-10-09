@@ -1,0 +1,108 @@
+name: Field family native evidence
+on:
+  pull_request:
+    paths:
+      - 'scripts/test/evidence-input-paths.test.mjs'
+      - 'scripts/test/field-evidence.mjs'
+      - 'scripts/test/field-evidence.test.mjs'
+      - '.github/workflows/field-family-evidence.yml'
+      - 'packages/prototypes/**/src/field/**'
+      - 'packages/prototypes/**/src/button/**'
+      - 'packages/prototypes/bootstrap-2-3-2/src/theme.ts'
+      - 'packages/prototypes/liquid-glass/src/theme.ts'
+      - 'packages/prototypes/brutalist/src/theme.ts'
+      - 'packages/adapters/**'
+      - 'packages/core/**'
+      - 'packages/hooks/**'
+      - 'packages/modules/**'
+      - 'packages/runtime/**'
+      - 'packages/cli/src/**'
+      - 'apps/www/src/content/docs/**/field.mdx'
+      - 'apps/www/src/content/docs/field-demo.shared.ts'
+      - 'apps/www/src/content/docs/demo-*-field.demo.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/field-browser-oracle.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+      - 'scripts/test/server-readiness*'
+      - 'pnpm-lock.yaml'
+      - 'vitest.config.ts'
+      - 'apps/www/astro.config.mjs'
+      - 'apps/www/package.json'
+      - 'package.json'
+      - 'apps/www/src/styles/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: field-family-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and identify Chromium
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/field-family"
+          "$CHROME" --version > "$RUNNER_TEMP/field-family/browser-environment.txt"
+          node --version > "$RUNNER_TEMP/field-family/node-environment.txt"
+          node scripts/test/field-evidence.mjs source "$RUNNER_TEMP/field-family/source-before.json" "$CANDIDATE_SHA"
+      - name: Install the matching public CJK font fallback
+        timeout-minutes: 3
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$RUNNER_TEMP/field-family/font-environment.txt"
+      - name: Verify evidence input-surface contract
+        run: node --test scripts/test/brutalist-design-toolbar.test.mjs scripts/test/evidence-input-paths.test.mjs scripts/test/field-evidence.test.mjs
+      - name: Disable the development toolbar on the real evidence surface
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
+          printf '%s\n' "$TOOLBAR_SETTING"
+          grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
+      - name: Run all 25 native Field journeys and capture same-source comparisons
+        timeout-minutes: 20
+        env:
+          PROTO_UI_FIELD_SCREENSHOT_DIR: ${{ runner.temp }}/field-family/screenshots
+        run: |
+          set -euo pipefail
+          # Supplementary direct evidence only. The standard required CI inventory
+          # and its historical failures remain intact; this does not replace them.
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/field-family/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/field-family/browser.log"
+          node scripts/test/field-evidence.mjs check "$RUNNER_TEMP/field-family/vitest.json"
+      - name: Record actual final head, tree and dirty state even on failure
+        if: always()
+        env:
+          FIELD_RUN_OUTCOME: ${{ job.status }}
+        run: |
+          node scripts/test/field-evidence.mjs source "$RUNNER_TEMP/field-family/source-after.json" "$CANDIDATE_SHA"
+      - name: Retain exact-source results, screenshots and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: field-family-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/field-family
+          if-no-files-found: error
+          retention-days: 30
