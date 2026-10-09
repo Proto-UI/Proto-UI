@@ -36,6 +36,10 @@ export function collectSelectOverflowObservation() {
       wordBreak: style.wordBreak,
       flexWrap: style.flexWrap,
       gridTemplateColumns: style.gridTemplateColumns,
+      paddingLeft: style.paddingLeft,
+      paddingRight: style.paddingRight,
+      borderLeftWidth: style.borderLeftWidth,
+      borderRightWidth: style.borderRightWidth,
       transform: style.transform,
     };
   };
@@ -43,6 +47,21 @@ export function collectSelectOverflowObservation() {
     node.parentElement ??
     (node.getRootNode() instanceof ShadowRoot ? (node.getRootNode() as ShadowRoot).host : null);
   const candidates = [];
+  // Horizontal scroll can move a wide child back inside the viewport. Keep a
+  // separate bounded sample of these known demo owners even when they do not
+  // match the generic out-of-viewport predicate; never collect their text.
+  const layoutRefs = new Set([
+    'selectLayout',
+    'selectRtlLayout',
+    'accept',
+    'acceptLabel',
+    'uncontrolledTrigger',
+    'disabledTrigger',
+    'controlledTrigger',
+    'rtlTrigger',
+  ]);
+  const layoutBoxes = [];
+  let layoutMatched = 0;
   let visited = 0,
     matched = 0;
   const pending: Element[] = [root];
@@ -50,6 +69,13 @@ export function collectSelectOverflowObservation() {
     const node = pending.pop()!;
     visited++;
     const facts = describe(node);
+    if (facts.demoRef && layoutRefs.has(facts.demoRef)) {
+      layoutMatched++;
+      if (layoutBoxes.length < 24) {
+        const children = Array.from(node.children).slice(0, 16).map(describe);
+        layoutBoxes.push({ ...facts, children, childrenTruncated: node.children.length > 16 });
+      }
+    }
     if (
       facts.rect.width > 0 &&
       facts.rect.height > 0 &&
@@ -96,6 +122,8 @@ export function collectSelectOverflowObservation() {
     traversalTruncated: pending.length > 0,
     candidatesTruncated: matched > candidates.length,
     candidates,
+    layoutBoxes,
+    layoutBoxesTruncated: layoutMatched > layoutBoxes.length,
   };
 }
 
