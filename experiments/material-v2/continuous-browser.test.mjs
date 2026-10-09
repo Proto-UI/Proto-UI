@@ -183,6 +183,7 @@ try {
       if (window.__record) {
         window.__frames.push({
           t,
+          sampledAt: performance.now(),
           metrics: window.v2Material.metrics(),
           controls: [...document.querySelectorAll('[data-demo-ref="regular"]')].map((e) => {
             const hostCss = getComputedStyle(e),

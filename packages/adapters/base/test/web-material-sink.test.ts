@@ -68,6 +68,8 @@ function fixture(delayed = false) {
   let reducedMotion: 'no-preference' | 'reduce' = 'no-preference',
     reducedTransparency: 'no-preference' | 'reduce' = 'no-preference';
   let paletteThrows = false;
+  let paletteRevision = 1;
+  const paletteListeners = new Set<() => void>();
   let contrast: 'no-preference' | 'more' = 'no-preference';
   let tokens: string[] = [];
   const flush = () => host.setAttribute('data-pui-style', tokens.join(' '));
@@ -94,9 +96,17 @@ function fixture(delayed = false) {
       palette: {
         current: () => {
           if (paletteThrows) throw new Error('palette-failed');
-          return { revision: 1, colors: { background: '#fff', foreground: '#171717' } };
+          return {
+            revision: paletteRevision,
+            colors: { background: '#fff', foreground: '#171717' },
+          };
         },
-        subscribe: () => () => {},
+        subscribe(fn) {
+          paletteListeners.add(fn);
+          return () => {
+            paletteListeners.delete(fn);
+          };
+        },
       },
       preferences: {
         current: () => ({
@@ -138,6 +148,19 @@ function fixture(delayed = false) {
     flush,
     sourceListeners,
     preferenceListeners,
+    palette() {
+      paletteRevision++;
+      for (const fn of paletteListeners) fn();
+    },
+    rebindSource() {
+      const nextCanvas = document.createElement('canvas');
+      nextCanvas.width = canvas.width;
+      nextCanvas.height = canvas.height;
+      scope.prepend(nextCanvas);
+      vi.spyOn(nextCanvas, 'getBoundingClientRect').mockReturnValue(rect(0, 0, 400, 240));
+      source = { ...source!, canvas: nextCanvas };
+      for (const fn of sourceListeners) fn();
+    },
     failPalette() {
       paletteThrows = true;
     },
@@ -492,7 +515,11 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
     };
     f.sink.commit(frame);
     const writer = createWebPointerContactWriter(f.host);
-    const send = (x: number, reason: 'down' | 'move' | 'up' | 'cancel' = 'move', session = 1) =>
+    const send = (
+      x: number,
+      reason: 'down' | 'move' | 'up' | 'cancel' | 'lostcapture' | 'blur' = 'move',
+      session = 1
+    ) =>
       writer.publish({
         active: reason === 'move' || reason === 'down',
         session,
@@ -606,6 +633,204 @@ describe('continuous contact scheduler (mock GPU/decode, not optical evidence)',
       }
     }
   );
+  function neutralFixture() {
+    let image = 0;
+    optical.render.mockImplementation(() => `data:image/png;base64,${btoa(String(++image))}`);
+    const f = setup();
+    const rest: VisualFeedbackFrame = {
+      ...f.frame,
+      revision: 2,
+      material: {
+        ...f.frame.material,
+        candidates: [
+          {
+            intent: 'liquid-glass',
+            deformation: {
+              kind: 'press',
+              phase: 'rest',
+              contact: 'pointer',
+            },
+          },
+        ],
+      },
+    };
+    f.sink.commit(rest);
+    const neutral = f.host.style.getPropertyValue('--pui-material-image');
+    f.send(0.5, 'down');
+    f.flushFrame();
+    const held = f.host.style.getPropertyValue('--pui-material-image');
+    expect(held).not.toBe(neutral);
+    const callbacks: Array<() => void> = [];
+    const retirements: ReturnType<typeof vi.fn>[] = [];
+    decoding.prepare.mockImplementation((_doc, _source, ready) => {
+      callbacks.push(ready);
+      const retire = vi.fn();
+      retirements.push(retire);
+      return retire;
+    });
+    return { ...f, rest, neutral, held, callbacks, retirements };
+  }
+  it.each(['cancel', 'lostcapture', 'blur'] as const)(
+    'atomically replaces %s held paint with admitted neutral while its successor decodes',
+    (reason) => {
+      const f = neutralFixture();
+      try {
+        f.source(true, 2); // Old held decode may settle even after cancellation.
+        f.send(0.5, reason);
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(f.neutral);
+        expect(f.host.style.getPropertyValue('--pui-material-image')).not.toBe(f.held);
+        expect(f.host.style.backgroundColor).toBe('transparent');
+        expect(f.host.dataset.materialContact).toBe('rest');
+        expect(f.host.dataset.materialContactSession).toBe('1');
+        expect(f.host.dataset.materialSourceRevision).toBe('1');
+        f.sink.commit({ ...f.rest, revision: 3 });
+        f.flushFrame();
+        expect(f.host.dataset.materialQuality).toBe('self-optical');
+        f.callbacks[0](); // Rejected held completion cannot replace neutral.
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(f.neutral);
+        f.callbacks.at(-1)?.();
+        expect(f.host.style.getPropertyValue('--pui-material-image')).not.toBe(f.neutral);
+        expect(f.host.dataset.materialContact).toBe('rest');
+        expect(f.host.dataset.materialSourceRevision).toBe('2');
+      } finally {
+        f.sink.release(1);
+      }
+    }
+  );
+  it.each([
+    'source',
+    'source owner',
+    'palette',
+    'geometry',
+    'preference',
+    'author',
+    'material',
+    'view',
+  ])('does not bridge neutral after %s admission is revoked', (invalidation) => {
+    const f = neutralFixture();
+    try {
+      if (invalidation === 'source') f.source(false);
+      else if (invalidation === 'source owner') f.rebindSource();
+      else if (invalidation === 'palette') f.palette();
+      else if (invalidation === 'geometry') {
+        vi.mocked(f.host.getBoundingClientRect).mockReturnValue(rect(45, 30, 100, 40));
+        f.invalidate();
+      } else if (invalidation === 'preference') f.silentTransparency();
+      else if (invalidation === 'author')
+        f.host.style.setProperty('background-image', 'none', 'important');
+      else if (invalidation === 'material')
+        f.sink.commit({ ...f.rest, revision: 3, material: { ...f.rest.material, candidates: [] } });
+      else f.sink.release(1);
+      f.send(0.5, 'cancel');
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+      f.callbacks.forEach((done) => done());
+      expect(f.host.style.getPropertyValue('--pui-material-image')).not.toBe(f.neutral);
+      if (invalidation === 'author')
+        expect(f.host.style.getPropertyPriority('background-image')).toBe('important');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+  it.each(['source', 'palette', 'geometry', 'preference', 'author'])(
+    'withdraws an already restored neutral bridge on later %s revocation',
+    (invalidation) => {
+      const f = neutralFixture();
+      try {
+        f.send(0.5, 'cancel');
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(f.neutral);
+        if (invalidation === 'source') f.source(false);
+        else if (invalidation === 'palette') f.palette();
+        else if (invalidation === 'geometry') {
+          vi.mocked(f.host.getBoundingClientRect).mockReturnValue(rect(45, 30, 100, 40));
+          f.invalidate();
+        } else if (invalidation === 'preference') f.transparency('reduce');
+        else {
+          f.host.style.setProperty('background-image', 'none', 'important');
+          f.invalidate();
+        }
+        expect(f.host.style.getPropertyValue('--pui-material-image')).toBe('');
+        f.callbacks.forEach((done) => done());
+        expect(f.host.style.getPropertyValue('--pui-material-image')).not.toBe(f.neutral);
+      } finally {
+        f.sink.release(1);
+      }
+    }
+  );
+  it('rejects neutral bridge completion after a new pointer session replaces cancellation', () => {
+    const f = neutralFixture();
+    try {
+      f.send(0.5, 'cancel');
+      const cancelledDone = f.callbacks[0];
+      f.send(0.8, 'down', 2);
+      f.flushFrame();
+      cancelledDone();
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(f.neutral);
+      f.callbacks.at(-1)?.();
+      expect(f.host.dataset.materialContact).toBe('held');
+      expect(f.host.dataset.materialContactSession).toBe('2');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+  it('re-admits neutral after cancellation reenters a held render without installing stale work', () => {
+    const f = neutralFixture();
+    try {
+      optical.render.mockImplementationOnce(() => {
+        f.send(0.5, 'cancel');
+        return 'data:image/png;base64,cmVqZWN0ZWQ=';
+      });
+      f.source(true, 2);
+      expect(f.host.style.getPropertyValue('--pui-material-image')).toBe(f.neutral);
+      expect(f.callbacks).toHaveLength(1); // neutral only, never rejected held render
+      f.callbacks[0]();
+      expect(f.host.dataset.materialContact).toBe('rest');
+      expect(f.host.style.getPropertyValue('--pui-material-image')).not.toContain('cmVqZWN0ZWQ=');
+    } finally {
+      f.sink.release(1);
+    }
+  });
+  it('bounds retained decoded ownership to current plus one neutral and releases each exactly once', () => {
+    const retirements: ReturnType<typeof vi.fn>[] = [];
+    decoding.prepare.mockImplementation((_doc, _source, ready) => {
+      const retire = vi.fn();
+      retirements.push(retire);
+      ready();
+      return retire;
+    });
+    const f = setup();
+    const live = () => retirements.filter((retire) => retire.mock.calls.length === 0).length;
+    const rest: VisualFeedbackFrame = {
+      ...f.frame,
+      revision: 2,
+      material: {
+        ...f.frame.material,
+        candidates: [
+          {
+            intent: 'liquid-glass',
+            deformation: {
+              kind: 'press',
+              phase: 'rest',
+              contact: 'pointer',
+            },
+          },
+        ],
+      },
+    };
+    f.sink.commit(rest);
+    expect(live()).toBe(1);
+    f.send(0.5, 'down');
+    f.flushFrame();
+    expect(live()).toBe(2);
+    for (let i = 2; i < 6; i++) {
+      f.source(true, i);
+      expect(live()).toBe(2);
+    }
+    f.send(0.5, 'cancel');
+    expect(live()).toBe(1);
+    f.sink.release(1);
+    expect(live()).toBe(0);
+    expect(retirements.every((retire) => retire.mock.calls.length === 1)).toBe(true);
+  });
   it('commits a new session even when its contact paint inputs match the previous session', () => {
     const f = setup();
     try {

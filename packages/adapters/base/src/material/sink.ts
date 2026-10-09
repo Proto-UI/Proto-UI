@@ -147,18 +147,34 @@ function createDocumentMaterialSink(
   let renderFailure: { key: string; reason: string } | null = null;
   let carrier: ReturnType<typeof createContactCarrier> | null = null;
   let paintedImage = '';
+  let cancellationSession: number | null = null;
+  let contactEpoch = 0;
+  let neutralPaint: {
+    lease: string;
+    image: string;
+    sourceRevision: number;
+    styles: [string, string][];
+    retain(): () => void;
+    release(): void;
+  } | null = null;
   let last: VisualFeedbackFrame | null = null;
   const contact = observeWebPointerContact(host, (sample) => {
     if (!currentDocument()) return;
     if (motion.update(sample, win.performance.now())) {
+      contactEpoch++;
+      if (sample.active) cancellationSession = null;
       cancelPending();
       // A fresh down retires the old session's completion, not an already
       // admitted image. Keep that paint until the new session decodes, subject
       // to the same source/style/geometry admission on its next repaint.
       // Cancellation still withdraws the rejected contact immediately.
       if (!sample.active) {
-        clearImage();
+        clearImage(true);
         restore();
+        // Re-admit a decoded neutral image through the ordinary source, style,
+        // geometry and preference guards in this same event turn.
+        cancellationSession = sample.session;
+        repaint();
         lastOwnedStyle = host.getAttribute('style');
         lastOwnedTokens = host.getAttribute('data-pui-style');
       }
@@ -193,7 +209,11 @@ function createDocumentMaterialSink(
     pending = null;
     previous?.cancel();
   };
-  const clearImage = () => {
+  const clearImage = (keepNeutral = false) => {
+    if (!keepNeutral) {
+      neutralPaint?.release();
+      neutralPaint = null;
+    }
     const previous = releaseImage;
     releaseImage = () => {};
     previous();
@@ -338,6 +358,8 @@ function createDocumentMaterialSink(
     }
     painting = true;
     const frame = last;
+    const frameContactEpoch = contactEpoch;
+    const cancellingContact = cancellationSession !== null;
     safeFallback = null;
     try {
       if (!frame.material.slot) {
@@ -538,6 +560,7 @@ function createDocumentMaterialSink(
         tracksContact &&
         policy.effectiveMotion === 'press' &&
         candidate.deformation?.phase === 'pressed' &&
+        !cancellingContact &&
         !contact.current()?.active &&
         motionFrame.contact?.strength === 0
       )
@@ -575,6 +598,27 @@ function createDocumentMaterialSink(
         tracksContact,
         candidate.variant,
       ]);
+      // A cancelled held image is never a bridge. Only an already decoded rest
+      // image from the exact admitted generation can cover its neutral successor.
+      if (cancellingContact && neutralPaint?.lease === nextPaintLease) {
+        const neutral = neutralPaint;
+        carrier ??= withOwnedCarrierMarker(host, () => createContactCarrier(host));
+        for (const [name, value] of neutral.styles) own(name, value);
+        if (!carrier.valid(neutral.image)) throw new Error('contact-carrier-style-unavailable');
+        paintedImage = neutral.image;
+        paintLease = nextPaintLease;
+        releaseImage = neutral.retain();
+        report('materialQuality', 'self-optical');
+        report('materialReason', 'rendered');
+        report('materialBackend', 'self-optical');
+        report('materialProfile', contactProfile);
+        report('materialSource', 'visible-app-canvas');
+        report('materialFrame', String(++renders));
+        report('materialSourceRevision', String(neutral.sourceRevision));
+        report('materialContact', 'rest');
+        report('materialContactSession', String(motionFrame.session));
+        report('materialPhase', 'rest');
+      }
       // Session identity gates pending work/retries, while compatible admitted
       // pixels can bridge a new down without exposing the opaque fallback.
       const lease = JSON.stringify([nextPaintLease, motionFrame.session]);
@@ -621,7 +665,10 @@ function createDocumentMaterialSink(
       const renderFrame: OpticalFrame = {
         source,
         geometry: opticalGeometry,
-        pressed: policy.effectiveMotion === 'press' && candidate.deformation?.phase === 'pressed',
+        pressed:
+          !cancellingContact &&
+          policy.effectiveMotion === 'press' &&
+          candidate.deformation?.phase === 'pressed',
         contact: tracksContact ? motionFrame.contact : undefined,
         variant: candidate.variant ?? 'regular',
         fill: resolved.fill,
@@ -635,8 +682,11 @@ function createDocumentMaterialSink(
       if (paintLease !== nextPaintLease && !initialCandidate)
         fallback(resolved.fill, 'preparing', false);
       if (!currentDocument() || program.lost) return;
+      cancellationSession = null;
       const image = program.render(renderFrame);
-      if (!currentDocument()) return;
+      // Host callbacks may cancel/replace input reentrantly while rendering.
+      // Never install a ticket for that already rejected lifetime.
+      if (!currentDocument() || frameContactEpoch !== contactEpoch) return;
       if (initialCandidate) {
         // Replaying this very renderer is required in addition to manifest/hash
         // checks. An arbitrary or differently rendered background never adopts.
@@ -662,7 +712,8 @@ function createDocumentMaterialSink(
         document,
         image,
         () => {
-          if (!currentDocument() || pending !== ticket) return;
+          if (!currentDocument() || pending !== ticket || frameContactEpoch !== contactEpoch)
+            return;
           try {
             const currentSource = options.source.current(),
               currentPalette = options.palette.current(),
@@ -679,7 +730,8 @@ function createDocumentMaterialSink(
               currentCss.borderBottomRightRadius,
               currentCss.borderBottomLeftRadius,
             ];
-            if (!currentDocument() || pending !== ticket) return;
+            if (!currentDocument() || pending !== ticket || frameContactEpoch !== contactEpoch)
+              return;
             if (externalPaintConflict()) {
               ordinary('external-paint-conflict');
               lastOwnedStyle = host.getAttribute('style');
@@ -743,7 +795,29 @@ function createDocumentMaterialSink(
             paintLease = nextPaintLease;
             paintedImage = image;
             pending = null;
-            releaseImage = () => ticket.cancel();
+            let imageUsers = 0;
+            const retain = () => {
+              imageUsers++;
+              let live = true;
+              return () => {
+                if (!live) return;
+                live = false;
+                if (--imageUsers === 0) ticket.cancel();
+              };
+            };
+            releaseImage = retain();
+            if (tracksContact && !renderFrame.pressed && !motionFrame.contact?.strength) {
+              const previousNeutral = neutralPaint;
+              neutralPaint = {
+                lease: nextPaintLease,
+                image,
+                sourceRevision: source.revision,
+                styles: [...owned].map(([name, value]) => [name, value.applied[0]]),
+                retain,
+                release: retain(),
+              };
+              previousNeutral?.release();
+            }
             previousImage();
             recordInternalInitialPaint(host, frame, renderFrame, image);
             report('materialQuality', 'self-optical');
@@ -767,12 +841,7 @@ function createDocumentMaterialSink(
               'materialContactSession',
               tracksContact ? String(motionFrame.session) : undefined
             );
-            report(
-              'materialPhase',
-              policy.effectiveMotion === 'press' && candidate.deformation?.phase === 'pressed'
-                ? 'pressed'
-                : 'rest'
-            );
+            report('materialPhase', renderFrame.pressed ? 'pressed' : 'rest');
             lastOwnedStyle = host.getAttribute('style');
             lastOwnedTokens = host.getAttribute('data-pui-style');
             if (queued || motionFrame.animating) {
@@ -791,12 +860,14 @@ function createDocumentMaterialSink(
           }
         },
         () => {
-          if (!currentDocument() || pending !== ticket) return;
+          if (!currentDocument() || pending !== ticket || frameContactEpoch !== contactEpoch)
+            return;
           try {
             const currentSource = options.source.current();
             const currentPalette = options.palette.current();
             const currentPreferences = preferences.current();
-            if (!currentDocument() || pending !== ticket) return;
+            if (!currentDocument() || pending !== ticket || frameContactEpoch !== contactEpoch)
+              return;
             if (externalPaintConflict()) ordinary('external-paint-conflict');
             else if (
               !currentMaterialCompatible() ||
