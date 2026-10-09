@@ -18640,3 +18640,29 @@ for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dyna
     else assert.match(message, /ForeignContact\.ts.*escapes/);
   });
 }
+
+test('Hero fixed-icon import remains exact, content-bound and owner-bound', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/src/components/Homepage/home-action-icons.ts';
+  const file = path.join(root, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+  const allowed = '@proto.ui/prototypes-lucide/icons/arrow-right';
+  const rawIssue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+  fs.writeFileSync(file, reviewed);
+  assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(rawIssue));
+  const foreign = 'apps/www/src/components/copied-home-action-icons.ts';
+  fs.writeFileSync(path.join(root, foreign), reviewed);
+  assert.ok(
+    validationMessage(root).includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+  );
+  fs.writeFileSync(file, reviewed + '\n// unreviewed bytes\n');
+  assert.ok(validationMessage(root).includes(rawIssue));
+  fs.writeFileSync(file, reviewed.replace(allowed, '@proto.ui/prototypes-lucide/icons/arrow-left'));
+  assert.ok(
+    validationMessage(root).includes(
+      'raw Proto UI import `@proto.ui/prototypes-lucide/icons/arrow-left`'
+    )
+  );
+});

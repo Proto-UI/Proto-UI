@@ -352,6 +352,11 @@ const WEBSITE_RAW_IMPORT_ALLOWLIST = Object.freeze({
   'apps/www/src/components/LucideIconGallery.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
+  // Exact reviewed Hero glyph source and fixed icon; no general icon allowance.
+  'apps/www/src/components/Homepage/home-action-icons.ts': Object.freeze({
+    sourceSha256: 'f06c052c540bab9e1b8e4b2b9cb14320241bb5bfbe2dee15cc2435a5f2ee1c0c',
+    specifiers: Object.freeze(['@proto.ui/prototypes-lucide/icons/arrow-right']),
+  }),
   'apps/www/src/components/StaticLucideIcon.astro': Object.freeze({
     specifierPrefixes: Object.freeze(['@proto.ui/prototypes-lucide']),
   }),
