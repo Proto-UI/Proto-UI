@@ -257,7 +257,10 @@ class ControlLabelModuleImpl extends ModuleBase {
             this.activate(run, { isCurrent, source });
           });
         },
-        diagnostic: (code) => this.setDiagnostic(code),
+        diagnostic: (code) => {
+          // A retired registry refresh may resume after cleanup installed a successor.
+          if (generation === this.generation && !this.disposed) this.setDiagnostic(code);
+        },
       });
       if (generation !== this.generation || this.disposed) binding.dispose();
       else this.binding = binding;

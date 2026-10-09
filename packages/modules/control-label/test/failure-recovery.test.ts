@@ -261,3 +261,29 @@ describe('withdrawn diagnostic negative controls', () => {
     expect(port.getDiagnostic()).toBeNull();
   });
 });
+
+describe('stale registry diagnostic callback', () => {
+  it('a successor installed by naming cleanup keeps its own diagnostic', async () => {
+    const scope = {},
+      label = participant('label', scope),
+      target = participant('target', scope),
+      next = participant('label', scope);
+    for (const f of [label, target, next]) await f.session.mount();
+    const ref = createControlLabelRef(),
+      nextRef = createControlLabelRef();
+    label.associate(ref);
+    target.associate(ref);
+    next.associate(nextRef);
+    target.projectWith((snapshot) => {
+      if (!snapshot.relations.labelledBy?.length) {
+        target.projectWith();
+        target.associate(nextRef);
+      }
+    });
+    label.session.caps.getPort<ControlLabelPort>('control-label')!.prepareViewPresence(false);
+    expect(target.a11y.getSnapshot().relations.labelledBy?.[0]).toBe(next.a11y.getObjectRef());
+    expect(
+      target.session.caps.getPort<ControlLabelPort>('control-label')!.getDiagnostic()
+    ).toBeNull();
+  });
+});
