@@ -104,12 +104,12 @@ test('a timed-out read cannot publish a late diagnostic or swallow native failur
   assert.equal(reports, 1);
 });
 
-test('producer keeps original native scroll, blocking checks, public surfaces and failure retention', () => {
+test('producer keeps verified native wheel, blocking checks, public surfaces and failure retention', () => {
   const producer = readFileSync(
     'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
     'utf8'
   );
-  assert.match(producer, /\(\) => card\.scrollIntoViewIfNeeded\(\)/);
+  assert.match(producer, /\(\) => revealNoScriptLink\(input, destination\)/);
   assert.match(producer, /scroll-failure-observation\.json/);
   assert.match(producer, /actual-viewport\.png/);
   assert.match(producer, /throw error;/);

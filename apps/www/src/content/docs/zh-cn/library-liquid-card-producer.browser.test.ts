@@ -20,6 +20,11 @@ import { readLibraryPlatformFonts } from './library-card-platform-fonts';
 type CandidateWindow = Window & { libraryLiquidCardCandidate?: LibraryLiquidCandidateHarness };
 import { libraryCardReadabilityFailures } from './library-card-readability';
 import {
+  noScriptInput,
+  revealNoScriptLink,
+  activateNoScriptLink,
+} from './library-no-script-interaction';
+import {
   collectLiquidCardObservation,
   boundedLiquidCardObservation,
   withLiquidCardFailureObservation,
@@ -411,6 +416,92 @@ describe('actual complete Liquid Card optical producer', () => {
       }
 });
 
+describe('no-script native input controls', () => {
+  it('scrolls a long no-script document and follows a real same-origin link', async () => {
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      viewport: { width: 320, height: 900 },
+    });
+    await context.route('**/*', (route) =>
+      new URL(route.request().url()).origin === new URL(baseUrl).origin
+        ? route.continue()
+        : route.abort()
+    );
+    const page = await context.newPage();
+    let failed = false;
+    try {
+      const destination = `${baseUrl}/en/ui-libraries/liquid-glass/`;
+      await page.setContent(
+        `<style>body{margin:0}header{position:fixed;top:0;left:0;width:100%;height:96px;background:#ddd;z-index:2}a{display:block;width:180px;height:80px;margin:0 auto}</style><header>Visible fixed header</header><div style="height:14000px"></div><a href="${destination}">Native destination</a><div style="height:1000px"></div><script>globalThis.__puiNoScriptControlRan=true</script>`
+      );
+      expect(
+        await page.evaluate(
+          () =>
+            (globalThis as typeof globalThis & { __puiNoScriptControlRan?: boolean })
+              .__puiNoScriptControlRan
+        )
+      ).toBeUndefined();
+      const input = noScriptInput(page, page.locator('a'));
+      const observation = await revealNoScriptLink(input, destination);
+      expect(observation.wheels).toBeGreaterThan(0);
+      expect(observation.sample.viewport.scrollY).toBeGreaterThan(0);
+      expect(observation.sample.receivesEvents).toBe(true);
+      const image = await captureCurrentViewport(
+        page,
+        path.join(output, 'no-script-wheel-control.png')
+      );
+      await activateNoScriptLink(input, destination);
+      await page.waitForURL(destination);
+      results.push({
+        name: 'no-script-native-wheel-control',
+        passed: true,
+        observation,
+        image,
+        destination: page.url(),
+      });
+    } catch (error) {
+      failed = true;
+      throw error;
+    } finally {
+      await closeEvidenceContext(context, failed);
+    }
+  }, 90_000);
+
+  it('refuses a stable action hidden beneath a real fixed header', async () => {
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      viewport: { width: 320, height: 900 },
+    });
+    const page = await context.newPage();
+    let failed = false;
+    try {
+      const destination = `${baseUrl}/en/ui-libraries/liquid-glass/`;
+      await page.setContent(
+        `<style>body{margin:0}header{position:fixed;top:0;left:0;width:100%;height:180px;background:#ddd;z-index:2}a{position:absolute;top:40px;left:40px;width:180px;height:80px}</style><header>Blocking fixed header</header><a href="${destination}">Obstructed destination</a>`
+      );
+      await expect(
+        revealNoScriptLink(noScriptInput(page, page.locator('a')), destination)
+      ).rejects.toThrow('obstructed');
+      expect(page.url()).toBe('about:blank');
+      const image = await captureCurrentViewport(
+        page,
+        path.join(output, 'no-script-header-negative.png')
+      );
+      results.push({
+        name: 'no-script-fixed-header-negative',
+        passed: true,
+        image,
+        navigationPrevented: true,
+      });
+    } catch (error) {
+      failed = true;
+      throw error;
+    } finally {
+      await closeEvidenceContext(context, failed);
+    }
+  }, 30_000);
+});
+
 describe('candidate Card keeps its complete opaque no-JS fallback', () => {
   for (const locale of ['en', 'zh-cn'])
     it(`${locale} 320px with 200% text`, async () => {
@@ -446,40 +537,36 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
         expect(await page.locator('[data-library-action]').count()).toBe(6);
         expect(await page.locator('a a').count()).toBe(0);
         const card = page.locator('[data-library-liquid-candidate]');
-        await withLiquidCardFailureObservation(
-          () => card.scrollIntoViewIfNeeded(),
+        const link = card.locator('a[data-library-action]');
+        const destination = `${baseUrl}/${locale}/ui-libraries/liquid-glass/`;
+        expect(new URL(destination).origin).toBe(new URL(page.url()).origin);
+        const input = noScriptInput(page, link);
+        const scroll = await withLiquidCardFailureObservation(
+          () => revealNoScriptLink(input, destination),
           () => observeScrollFailure(page),
           (facts) =>
             writeFailureRecord(path.join(directory, 'scroll-failure-observation.json'), {
               sha,
               tree,
               name,
-              role: 'Read-only diagnosis; the original scroll failure remains blocking',
+              role: 'Read-only diagnosis; failed native wheel or geometry checks remain blocking',
               facts,
             }),
           (error) => console.warn('[liquid-card-scroll-observation-unavailable]', String(error))
         );
-        const clip = await card.evaluate((element) => {
-          const r = element.getBoundingClientRect();
-          return {
-            x: Math.max(0, r.x + scrollX - 8),
-            y: Math.max(0, r.y + scrollY - 8),
-            width: r.width + 16,
-            height: r.height + 16,
-            scale: 1,
-          };
-        });
+        // Capture the actual viewport, including the unmodified header. A tall
+        // Card is not required to fit; no beyond-viewport crop substitutes for
+        // the native action link being visible and receiving pointer events.
         const image = await captureCurrentViewport(
           page,
-          path.join(directory, 'opaque-fallback-only.png'),
-          clip
+          path.join(directory, 'opaque-fallback-only.png')
         );
         expect(
           await card
             .locator('wc-library-liquid-optical-surface')
             .getAttribute('data-material-quality')
         ).toBeNull();
-        await card.locator('a[data-library-action]').click();
+        const activation = await activateNoScriptLink(input, destination);
         await page.waitForURL(`${baseUrl}/${locale}/ui-libraries/liquid-glass/`);
         await writeFile(
           path.join(directory, 'fallback.json'),
@@ -488,6 +575,9 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
               sha,
               tree,
               role: 'Opaque accessible fallback only; not a Liquid optical appearance result',
+              capture: 'Actual uncropped viewport with the header unchanged',
+              scroll,
+              activation,
               scale,
               media,
               cards,

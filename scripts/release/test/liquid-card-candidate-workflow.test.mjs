@@ -22,14 +22,15 @@ function verify(value) {
   assert.equal(checkout.with['persist-credentials'], false);
   const run = job.steps.find(
     (step) =>
-      step.name === 'Produce eight real Card profiles and check two opaque no-script fallbacks'
+      step.name ===
+      'Produce eight Card profiles, two no-script fallbacks and two native input controls'
   );
   assert.equal(run['continue-on-error'], undefined);
   assert.equal(run.if, undefined);
   assert.match(run.run, /set -euo pipefail/);
   assert.match(run.run, /library-liquid-card-producer\.browser\.test\.ts/);
-  assert.match(run.run, /assert\.equal\(report.numTotalTests, 10/);
-  assert.match(run.run, /assert\.equal\(report.numPassedTests, 10\)/);
+  assert.match(run.run, /assert\.equal\(report.numTotalTests, 12/);
+  assert.match(run.run, /assert\.equal\(report.numPassedTests, 12\)/);
   const upload = job.steps.find((step) => step.uses === 'actions/upload-artifact@v4');
   assert.equal(upload.if, 'always()');
   assert.equal(upload.with.path, '${{ runner.temp }}/liquid-card');
