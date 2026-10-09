@@ -123,7 +123,8 @@
     },
     "sourceWallMatrices": 2,
     "canonicalSourcePaths": 4206,
-    "canonicalNegativeControls": 113
+    "canonicalNegativeControls": 113,
+    "gpuiNegativeEvidence": "final-gpui-exact.log"
   },
   "unchanged": {
     "draftCatalog": 258,
@@ -182,7 +183,8 @@
       "bytes": 173,
       "command": "node --test --test-name-pattern='Card grid' scripts/gpui/test/style-fixture.test.mjs",
       "exitCode": 0,
-      "cwd": "/tmp/proto-ui-finf-combined-packaging-proof"
+      "cwd": "/tmp/proto-ui-finf-combined-packaging-proof",
+      "evidenceStatus": "wrong filter matched no target case; file-level pass is not capability-gap evidence"
     },
     "final-initial-synthetic.log": {
       "sha256": "ee34bb0c12e92586c2417da815ce2999ab9544e5fcee476b3657c9ca0188cc0c",
@@ -260,6 +262,16 @@
       "command": "node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs",
       "exitCode": 0,
       "cwd": "/tmp/proto-ui-finf-combined-packaging-proof"
+    },
+    "final-gpui-exact.log": {
+      "sha256": "94463e5ae5be8372f7c090aebd13314cb72517a2a35530fa2fe6bdb34ccfdd0c",
+      "bytes": 203,
+      "command": "node --test --test-name-pattern='Card row sizing' scripts/gpui/test/style-fixture.test.mjs",
+      "exitCode": 0,
+      "cwd": "/tmp/proto-ui-finf-combined-packaging-proof",
+      "sourceCommit": "4777e1b62b0f83d71f254f13e165316ec4f9d100",
+      "evidenceCommit": "08b5bdd745eaa7518f1767aac0138792d2a39c1f",
+      "case": "Card row sizing retains exact declarations despite the native grid gaps"
     }
   },
   "proofCommitHookObservation": {

@@ -16,6 +16,10 @@ Fresh private artifacts compile and pack 15 packages; 18 off-repository ESM entr
 
 Both source-wall matrices and 113 canonical proof negative controls pass. Canonical proof is regenerated from the immutable source commit and retains 4,206 paths and 258 draft identities. Main comparison evidence, consumer states, delivery counts and all acceptance flags remain unchanged.
 
+## GPUI filter correction
+
+Independent review caught that the original `Card grid` name filter matched no target case; its file-level pass is not a capability-gap test. The original log is preserved as invalid evidence. The exact `Card row sizing` filter was rerun against unchanged source and passed the named declaration-gap case; `final-gpui-exact.log` is the valid one-case evidence. No production source or native acceptance changed.
+
 ## Remaining failures and limits
 
 The previous exact-head CI `37876012675` finished failure: eight browser shards and macOS GPUI failed; general was cancelled. Successful individual checks and DCO are retained separately. Library Card has source-bound screenshots and 9/9 native journeys; Liquid Card remains 8/10 and Accordion 24/25. Initial-paint fallback and search readiness failures remain open. New workflow/diagnostics are not product repairs. GPUI pinned upstream still cannot represent the recorded row-sizing cases.
