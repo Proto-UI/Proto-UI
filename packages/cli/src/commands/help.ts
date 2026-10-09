@@ -3,7 +3,7 @@ const HELP_TEXT = `proto-ui
 Usage:
   proto-ui [--help|-h|help]
   proto-ui init [--prototypes <shadcn|brutalist>] [--root-dir <dir>] [--styles-dir <dir>] [--no-styles] [--no-interactive] [--yes|-y]
-  proto-ui add <host> <component> [--root-dir <dir>] [--no-install] [--no-interactive]
+  proto-ui add <host> <component> [--root-dir <dir>] [--language <js|ts>] [--no-install] [--no-interactive]
 
 Core commands:
   init              Create ./proto-ui, write config, and optionally generate style preset files
@@ -55,7 +55,7 @@ Options:
   add: `proto-ui add
 
 Usage:
-  proto-ui add <host> <component> [--root-dir <dir>] [--no-install] [--no-interactive]
+  proto-ui add <host> <component> [--root-dir <dir>] [--language <js|ts>] [--no-install] [--no-interactive]
 
 Examples:
   proto-ui add react shadcn-button
@@ -67,8 +67,10 @@ Behavior:
   - reads proto-ui/config.json
   - checks host runtime requirements
   - installs Proto UI adapter/prototype packages unless --no-install is used
-  - generates proto-ui/components/<host>/index.ts
-  - updates proto-ui/components/index.ts
+  - detects TypeScript from a tsconfig*.json file or project-level typescript dependency
+  - generates proto-ui/components/<host>/index.js and proto-ui/components/index.js for JavaScript projects
+  - generates .ts facade files for TypeScript projects
+  - use --language js or --language ts to override detection explicitly
   - when styles are enabled, rejects components that require a different project-wide preset
   - with --no-styles, reports that the application owns the required semantic tokens
   - never replaces the configured style preset automatically
