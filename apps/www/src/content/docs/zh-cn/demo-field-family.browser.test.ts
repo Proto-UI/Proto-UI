@@ -137,6 +137,18 @@ describe('Field real browser journeys', () => {
                   const input = asyncOwner?.matches('input')
                     ? asyncOwner
                     : asyncOwner?.querySelector('input');
+                  const cancel = previewer.querySelector('[data-demo-ref="cancel"]');
+                  const inspectGeometry = [
+                    'pointerdown',
+                    'pointerup',
+                    'click',
+                    'change',
+                    'validationRequest',
+                  ].includes(event.type);
+                  const pointer = event instanceof MouseEvent ? event : null;
+                  const hit = pointer
+                    ? document.elementFromPoint(pointer.clientX, pointer.clientY)
+                    : null;
                   (window as any).__fieldInputEvidence.push({
                     type: event.type,
                     at: performance.now(),
@@ -153,6 +165,15 @@ describe('Field real browser journeys', () => {
                     asyncValue: (input as HTMLInputElement | null)?.value,
                     asyncInvalid: input?.getAttribute('aria-invalid'),
                     asyncBusy: input?.getAttribute('aria-busy'),
+                    // Instantaneous geometry distinguishes a moving target
+                    // from an activated command whose validation lease failed.
+                    cancelRect: inspectGeometry
+                      ? (cancel?.getBoundingClientRect().toJSON() ?? null)
+                      : null,
+                    pointer: pointer ? { x: pointer.clientX, y: pointer.clientY } : null,
+                    hitRef: hit?.closest('[data-demo-ref]')?.getAttribute('data-demo-ref') ?? null,
+                    hitInsideCancel: hit && cancel ? cancel.contains(hit) : null,
+                    cancelInPath: !!cancel && path.includes(cancel),
                   });
                 },
                 { capture: true }
