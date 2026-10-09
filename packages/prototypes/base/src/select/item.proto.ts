@@ -16,7 +16,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
   const accessible = asAccessible();
   const command = setupSelectCommand(def, 'select item');
   const active = def.state.bool('active', false);
-  const selected = def.state.fromAccessibility('selected');
+  const selected = def.state.bool('selected', false);
   const collectionItem = asCollectionItem();
   collectionItem.configure({
     family: SELECT_FAMILY,

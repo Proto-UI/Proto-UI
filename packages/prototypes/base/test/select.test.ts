@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { definePrototype } from '@proto.ui/core';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { selectContent, selectItem, selectRoot, selectTrigger, selectValue } from '../src/select';
+import {
+  asSelectItem,
+  selectContent,
+  selectItem,
+  selectRoot,
+  selectTrigger,
+  selectValue,
+} from '../src/select';
 
 AdaptToWebComponent(selectRoot as any);
 AdaptToWebComponent(selectTrigger as any);
@@ -25,6 +33,7 @@ function createSelect(options?: {
   value?: Record<string, unknown>;
   content?: Record<string, unknown>;
   items?: Array<Record<string, unknown>>;
+  itemTag?: string;
 }) {
   const root = document.createElement('base-select-root') as any;
   const trigger = document.createElement('base-select-trigger') as any;
@@ -37,7 +46,7 @@ function createSelect(options?: {
       { value: 'gamma', textValue: 'Gamma' },
     ]
   ).map((props) => {
-    const item = document.createElement('base-select-item') as any;
+    const item = document.createElement(options?.itemTag ?? 'base-select-item') as any;
     setElementProps(item, props);
     item.textContent = String(props.textValue ?? props.value ?? 'Option');
     content.appendChild(item);
@@ -60,6 +69,46 @@ afterEach(async () => {
 });
 
 describe('prototypes/base: select', () => {
+  it('keeps deprecated A11y borrowed views separate from committed selection', async () => {
+    // D-STATE-SEMANTIC-ACCESSORS-DEPRECATION-0001-C; P-BASE-SELECT-ITEM-CONTROLLED.
+    // Exercise coexistence while the deprecated accessor is still supported.
+    AdaptToWebComponent(
+      definePrototype({
+        name: 'select-item-compatibility-probe',
+        setup(def) {
+          asSelectItem();
+          const borrowed = def.state.fromAccessibility('selected');
+          def.expose.method('writeBorrowedSelected', (value: boolean) => borrowed.set(value));
+        },
+      })
+    );
+    vi.useFakeTimers();
+    const {
+      root,
+      items: [item],
+    } = createSelect({
+      root: { value: 'alpha', open: true },
+      itemTag: 'select-item-compatibility-probe',
+      items: [{ value: 'beta', textValue: 'Beta' }],
+    });
+    await settle();
+    const selected = () => ({
+      value: root.getExposes().value.get(),
+      exposed: item.getExposes().selected.get(),
+      aria: item.getAttribute('aria-selected'),
+    });
+    expect(selected()).toEqual({ value: 'alpha', exposed: false, aria: 'false' });
+    item.getExposes().writeBorrowedSelected(true);
+    await settle();
+    expect(selected()).toEqual({ value: 'alpha', exposed: false, aria: 'false' });
+    setElementProps(root, { value: 'beta', open: true });
+    await settle();
+    expect(selected()).toEqual({ value: 'beta', exposed: true, aria: 'true' });
+    item.getExposes().writeBorrowedSelected(false);
+    await settle();
+    expect(selected()).toEqual({ value: 'beta', exposed: true, aria: 'true' });
+  });
+
   it('owns single-selection facts, collection, anatomy, and live selected text', async () => {
     // T-BASE-SELECT-0001-CASE-ROOT-OWNERSHIP
     // T-BASE-SELECT-0001-CASE-SELECTION-TEXT
