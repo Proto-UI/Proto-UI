@@ -1,4 +1,6 @@
 import { readFileSync } from 'node:fs';
+import { matchesGlob } from 'node:path';
+import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import {
   earlyOwnershipBoundaryIsNative,
@@ -109,5 +111,56 @@ describe('Quickstart actual navigation/runtime boundary (source and classifier, 
     const failed = trace(true);
     failed[2].applicationOwnership = { ...retained, focused: false };
     expect(earlyOwnershipBoundaryIsNative(failed, 'menu')).toBe(false);
+  });
+});
+
+describe('Quickstart native workflow actual path filters', () => {
+  const workflow = parse(
+    readFileSync('.github/workflows/quick-start-first-frame-evidence.yml', 'utf8')
+  );
+  const paths: string[] = workflow.on.pull_request.paths;
+  const gatePattern = 'apps/www/src/content/docs/zh-cn/quick-start-runtime-gate*.ts';
+  const covered = (file: string, filters = paths) =>
+    filters.some((pattern) => matchesGlob(file, pattern));
+  it.each(['quick-start-runtime-gate.ts', 'quick-start-runtime-gate.test.ts'])(
+    'schedules native evidence when only %s changes, and rejects the old missing trigger',
+    (name) => {
+      const file = `apps/www/src/content/docs/zh-cn/${name}`;
+      expect(readFileSync(file, 'utf8').length).toBeGreaterThan(0);
+      expect(paths).toContain(gatePattern);
+      expect(covered(file)).toBe(true);
+      expect(
+        covered(
+          file,
+          paths.filter((pattern) => pattern !== gatePattern)
+        )
+      ).toBe(false);
+    }
+  );
+  it('preserves every prior filter and manual dispatch without broadening unrelated changes', () => {
+    for (const pattern of [
+      '.github/workflows/quick-start-first-frame-evidence.yml',
+      'packages/**',
+      'apps/www/astro.config.mjs',
+      'apps/www/package.json',
+      'package.json',
+      'apps/www/src/components/**',
+      'apps/www/src/styles/**',
+      'apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx',
+      'apps/www/src/content/docs/zh-cn/quick-start-first-frame*.ts',
+      'apps/www/src/content/docs/zh-cn/browser-harness.ts',
+      'scripts/test/server-readiness.mjs',
+      'vitest.config.ts',
+      'scripts/test/runtime-test-plan.mjs',
+      'pnpm-lock.yaml',
+    ])
+      expect(paths).toContain(pattern);
+    expect(covered('apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts')).toBe(
+      true
+    );
+    expect(covered('README.md')).toBe(false);
+    expect(covered('apps/www/src/content/docs/zh-cn/unrelated.ts')).toBe(false);
+    expect(workflow.on).toHaveProperty('workflow_dispatch');
+    expect(workflow.permissions).toEqual({ contents: 'read' });
   });
 });

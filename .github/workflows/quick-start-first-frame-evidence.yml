@@ -11,6 +11,7 @@ on:
       - 'apps/www/src/styles/**'
       - 'apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx'
       - 'apps/www/src/content/docs/zh-cn/quick-start-first-frame*.ts'
+      - 'apps/www/src/content/docs/zh-cn/quick-start-runtime-gate*.ts'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
       - 'scripts/test/server-readiness.mjs'
       - 'vitest.config.ts'
