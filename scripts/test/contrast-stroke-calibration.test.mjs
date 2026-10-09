@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import { runInNewContext } from 'node:vm';
 
 const source = readFileSync(
   'apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts',
@@ -18,6 +19,44 @@ const offset = Number(
   )?.[1]
 );
 const scale = svgWidth / viewBoxWidth;
+
+const observationCallback = fixture
+  .slice(fixture.indexOf('const observations ='))
+  .match(/evaluateAll\(([\s\S]*?)\n    \);/)?.[1];
+assert.ok(observationCallback, 'The actual native observation callback must be found.');
+
+function observeMatrix(matrix, hasPath = true) {
+  const rect = () => ({ toJSON: () => ({ left: 1050, top: 12, width: 14, height: 0 }) });
+  const path = { getScreenCTM: () => matrix, getBoundingClientRect: rect };
+  const element = {
+    id: 'stroke-outside',
+    querySelector: () => (hasPath ? path : null),
+    getBoundingClientRect: rect,
+  };
+  const observe = runInNewContext(`(${observationCallback})`, {
+    window: { puiContrastProbe: { readContrastTargetObservation: () => ({ achieved: false }) } },
+    getComputedStyle: () => ({ strokeWidth: '3px' }),
+  });
+  return observe([element])[0];
+}
+
+test('actual observation preserves all six inherited matrix fields without a toJSON method', () => {
+  const fields = { a: 0.5, b: 0.125, c: -0.25, d: 0.75, e: 1050.75, f: -16.25 };
+  const matrix = Object.create(fields);
+  assert.equal(matrix.toJSON, undefined);
+  assert.deepEqual(Object.keys(matrix), []);
+  assert.deepEqual(JSON.parse(JSON.stringify(observeMatrix(matrix).screenCTM)), fields);
+});
+
+test('the historical toJSON assumption fails on the native-compatible matrix shape', () => {
+  const matrix = Object.create({ a: 1, b: 0, c: 0, d: 1, e: 1050, f: 0 });
+  assert.throws(() => matrix?.toJSON(), /toJSON is not a function/);
+});
+
+test('actual observation preserves missing-path and null-CTM absence without inventing geometry', () => {
+  assert.equal(observeMatrix(null).screenCTM, undefined);
+  assert.equal(observeMatrix(undefined, false).screenCTM, undefined);
+});
 
 // Arithmetic controls for the authored fixture, not a substitute for native
 // CTM, viewport, stroke envelope and owner-visibility assertions in the suite.
@@ -40,7 +79,8 @@ test('the historical 900-user-unit negative control fails the actual screen-spac
 });
 
 test('native evidence records CTM and rejects malformed offscreen fixtures before visibility expectations', () => {
-  assert.match(fixture, /getScreenCTM\(\)\?\.toJSON\(\)/);
+  assert.match(fixture, /getScreenCTM\(\)/);
+  assert.doesNotMatch(observationCallback, /getScreenCTM\(\)\?\.toJSON\(\)/);
   assert.match(fixture, /width: innerWidth, height: innerHeight/);
   assert.match(fixture, /outside\.ownerRect\.right\)\.toBeLessThanOrEqual\(viewport\.width\)/);
   assert.match(fixture, /outside\.ownerRect\.bottom\)\.toBeLessThanOrEqual\(viewport\.height\)/);
