@@ -377,7 +377,8 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               setVmField(vm, '__puiRenderChildren', children);
               setVmField(vm, '__puiCommitVersion', ((vm as any).__puiCommitVersion ?? 0) + 1);
               forceUpdate(vm);
-              afterVueCommit(runtime, vm, () => finishPendingCommit(vm));
+              const commitVersion = (vm as any).__puiCommitVersion;
+              afterVueCommit(runtime, vm, () => finishPendingCommit(vm, commitVersion));
             },
             onAfterUnmount: () => {
               state.scopedExposesReader.invalidate();
@@ -909,7 +910,8 @@ function initSession<Props extends PropsBaseType>(
           setVmField(vm, '__puiRenderChildren', children);
           setVmField(vm, '__puiCommitVersion', (vm.__puiCommitVersion ?? 0) + 1);
           forceUpdate(vm);
-          afterVueCommit(runtime, vm, () => finishPendingCommit(vm));
+          const commitVersion = vm.__puiCommitVersion;
+          afterVueCommit(runtime, vm, () => finishPendingCommit(vm, commitVersion));
         },
         onLifecycleCheckpoint: targetOptions.onLifecycleCheckpoint,
         onLifecycleEvent: (event) => {
@@ -979,15 +981,33 @@ function trackFocusIngress(vm: any, event: RuntimeLifecycleEvent) {
   if (state.focusIngressReady) notifyFocusTargetReady(vm);
 }
 
-function finishPendingCommit(vm: any) {
+function finishPendingCommit(vm: any, commitVersion: number) {
   const state = getState(vm);
-  if (!state.pendingCommit) return;
+  const root = getRootElement(vm);
+  const gate = state.eventGate;
+  const isCurrentView = () =>
+    commitVersion === vm.__puiCommitVersion &&
+    root !== null &&
+    getRootElement(vm) === root &&
+    state.boundRoot === root &&
+    state.eventGate === gate &&
+    !state.terminalDisposed &&
+    !state.viewDisposed &&
+    state.hostActive &&
+    vm.__puiShouldExist &&
+    state.owner.hasView;
+  if (!state.pendingCommit || !isCurrentView()) return;
   state.pendingCommit = false;
   const signal = state.pendingSignal;
   state.pendingSignal = null;
   state.viewReady = true;
   state.eventGate?.enable();
   signal?.done?.();
+  // Ready is intentionally non-reactive. A visual sink can consume the final
+  // style frame without another Vue render, so finish this owned DOM attribute
+  // explicitly. A lifecycle callback may replace, hide, or recommit the view.
+  if (!isCurrentView() || state.pendingCommit || !state.viewReady) return;
+  root!.removeAttribute(PUI_VIEW_PENDING_ATTR);
   // Remount event listeners and Runtime callback scope are live only after
   // acknowledgement. onUpdated retains Vue2's existing enabled-gate timing.
   notifyFocusTargetReady(vm);
