@@ -242,7 +242,7 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'min-h-9',
   'min-w-0',
   'min-w-10',
-  'min-w-12',
+  'min-w-11',
   'min-w-32',
   'min-w-40',
   'min-w-9',

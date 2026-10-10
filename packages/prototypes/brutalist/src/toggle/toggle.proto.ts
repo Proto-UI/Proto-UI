@@ -22,8 +22,8 @@ const TOGGLE_BASE_TOKENS = [
 
 const SIZE_TOKENS: Record<BrutalistToggleSize, string> = {
   default: `${TOGGLE_BASE_TOKENS} h-10 min-w-10 px-3 text-sm`,
-  sm: `${TOGGLE_BASE_TOKENS} h-9 min-w-9 px-2.5 text-xs`,
-  lg: `${TOGGLE_BASE_TOKENS} h-12 min-w-12 px-4 text-base`,
+  sm: `${TOGGLE_BASE_TOKENS} h-9 min-w-9 px-2.5 text-[0.8rem]`,
+  lg: `${TOGGLE_BASE_TOKENS} h-11 min-w-11 px-4 text-sm`,
 };
 
 const ACTIVE_FRAME_TOKENS = 'shadow-[inset_0_0_0_2px_#000]';

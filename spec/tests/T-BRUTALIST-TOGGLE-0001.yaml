@@ -62,7 +62,7 @@ cases:
 implementations:
   - id: prototypes-brutalist-toggle-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/brutalist/test/toggle.test.ts
     required: true
     consumesCases:
@@ -78,7 +78,7 @@ implementations:
       - P-BASE-TOGGLE
       - P-BRUTALIST-TOGGLE
     notes:
-      - Historical passing evidence predates the source-pinned size migration. Successor size assertions, legacy-size negative controls and current browser evidence must be verified before the corresponding implementation is marked passing again.
+      - 'Eleven successor module cases passed: exact source-pinned sizes, legacy-size negative assertions, prop-removal defaults, actual CSS generation and unchanged persistent active/pressed/focus/disabled semantics. Browser evidence remains planned.'
   - id: website-brutalist-remaining-browser-toggle
     kind: adapter-test
     status: planned
