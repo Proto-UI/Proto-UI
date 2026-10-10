@@ -180,6 +180,8 @@ export interface RunHandle<Props extends PropsBaseType> {
   context: {
     read<T extends JsonObject>(key: ContextKey<T>): T;
     tryRead<T extends JsonObject>(key: ContextKey<T>): T | null;
+    /** Optional strict-ancestor read; requires prior trySubscribeAncestor. */
+    tryReadAncestor<T extends JsonObject>(key: ContextKey<T>): T | null;
     update<T extends JsonObject>(key: ContextKey<T>, next: T | ((prev: T) => T)): void;
     tryUpdate<T extends JsonObject>(key: ContextKey<T>, next: T | ((prev: T) => T)): boolean;
   };
@@ -281,6 +283,11 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
       onChange?: ContextOnChange<Props, T>
     ): Unsubscribe;
     trySubscribe<T extends JsonObject>(
+      key: ContextKey<T>,
+      onChange?: ContextOnChangeOptional<Props, T>
+    ): Unsubscribe;
+    /** Observe the nearest ancestor provider, excluding this instance's provider. */
+    trySubscribeAncestor<T extends JsonObject>(
       key: ContextKey<T>,
       onChange?: ContextOnChangeOptional<Props, T>
     ): Unsubscribe;

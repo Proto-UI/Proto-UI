@@ -57,7 +57,8 @@ Core MUST provide a ContextKey factory, e.g.:
 ## 3. Provider resolution
 
 - Provider resolution MUST be based on the logical tree.
-- For a given (consumer instance, key), the bound provider is the **nearest self-inclusive provider** of that key.
+- For ordinary API calls on a given (consumer instance, key), the bound provider is the **nearest self-inclusive provider** of that key.
+- The explicit `trySubscribeAncestor` / `tryReadAncestor` extension starts at the logical parent instead. It excludes self and selects the nearest current strict ancestor.
 - Different component instances may provide the same key simultaneously; binding is per consumer and depends on tree position.
 
 ---
@@ -107,6 +108,14 @@ Read APIs are runtime-only:
 - If the subscription is disconnected or provider is absent, `tryRead` MUST return `null`.
 
 ---
+
+### 5.3 Explicit optional strict ancestors (draft Runtime extension)
+
+- Declare `def.context.trySubscribeAncestor(key, onChange?)` in setup, then use `run.context.tryReadAncestor(key)` in a Runtime callback. Missing ancestors return `null`.
+- Its subscription intent is independent of ordinary `subscribe` / `trySubscribe`, even for the same key. It grants no ordinary read or consumer write authority and adds no renderer read or ancestor write API.
+- Current supplied logical ancestry controls reads and notification eligibility. Reparenting or provider removal alone does not emit a value notification. A later read or update observes the new binding.
+- Unsubscribe removes that callback while retaining intent; terminal disposal removes the instance's intent. Reentrant or deferred callbacks must recheck current binding, subscription and provider lifetime before delivery.
+- The four Web Runtime Adapters share this extension. Compiler source profiles, GPUI, Qt and Flutter do not yet implement it and must diagnose unsupported operations. Native browser/GUI evidence is separate.
 
 ## 6. Provide & update
 

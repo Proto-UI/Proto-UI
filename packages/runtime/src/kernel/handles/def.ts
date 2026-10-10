@@ -379,6 +379,19 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         recordCaptured(def, 'context', { op: 'trySubscribe', key, hasCallback: true, off });
         return off;
       },
+      trySubscribeAncestor(key, cb) {
+        ensureSetup('def.context.trySubscribeAncestor');
+        if (!cb) {
+          const off = context.trySubscribeAncestor(key);
+          recordCaptured(def, 'context', { op: 'trySubscribeAncestor', key, off });
+          return off;
+        }
+        const off = context.trySubscribeAncestor(key, (ctx, next, prev) =>
+          cb(ctx as RunHandle<P>, next, prev)
+        );
+        recordCaptured(def, 'context', { op: 'trySubscribeAncestor', key, hasCallback: true, off });
+        return off;
+      },
     },
 
     anatomy: {

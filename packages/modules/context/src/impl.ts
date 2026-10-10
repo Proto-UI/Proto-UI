@@ -171,6 +171,29 @@ export class ContextModuleImpl extends ModuleBase {
     };
   }
 
+  trySubscribeAncestor<T extends JsonObject>(
+    key: ContextKey<T>,
+    onChange?: ContextChangeCbOptional<T>
+  ): () => void {
+    this.guardSetupOnly('def.context.trySubscribeAncestor');
+    const self = this.getSelfToken();
+    let active = true;
+    const wrapped = onChange
+      ? (ctx: unknown, next: T | null, prev: T | null, isCurrent?: () => boolean) => {
+          const deliver = (callbackCtx: unknown) => {
+            if (active && isCurrent?.()) onChange(callbackCtx, next, prev);
+          };
+          if (this.callbackDispatcher) this.callbackDispatcher(deliver);
+          else deliver(ctx);
+        }
+      : undefined;
+    const off = CONTEXT_CENTER.subscribe(self, key, 'optional', wrapped, 'ancestor');
+    return () => {
+      active = false;
+      off();
+    };
+  }
+
   // -------------------------
   // runtime-only API
   // -------------------------
@@ -212,6 +235,19 @@ export class ContextModuleImpl extends ModuleBase {
     if (provider === null) return null;
 
     return (CONTEXT_CENTER.getProviderValue(provider, key) as T) ?? null;
+  }
+
+  tryReadAncestor<T extends JsonObject>(key: ContextKey<T>): T | null {
+    this.guardRuntimeOnly('run.context.tryReadAncestor');
+    const self = this.getSelfToken();
+    if (!CONTEXT_CENTER.hasSubscription(self, key, 'optional', 'ancestor')) {
+      throw contextError(
+        ERR.SUB_REQUIRED,
+        `[Context] tryReadAncestor requires optional ancestor subscription: ${key?.debugName ?? '(unknown)'}`
+      );
+    }
+    const provider = CONTEXT_CENTER.resolveProvider(self, key, this.getParentGetter(), 'ancestor');
+    return provider === null ? null : (CONTEXT_CENTER.getProviderValue(provider, key) as T);
   }
 
   update<T extends JsonObject>(key: ContextKey<T>, next: T | ((prev: T) => T)): void {

@@ -22,9 +22,11 @@ export function createContextModule(ctx: ModuleFactoryArgs): ContextModule {
           provide: (key, value) => impl.provide(key as any, value as any),
           subscribe: (key, cb) => impl.subscribe(key as any, cb as any),
           trySubscribe: (key, cb) => impl.trySubscribe(key as any, cb as any),
+          trySubscribeAncestor: (key, cb) => impl.trySubscribeAncestor(key, cb),
 
           read: (key) => impl.read(key as any),
           tryRead: (key) => impl.tryRead(key as any),
+          tryReadAncestor: (key) => impl.tryReadAncestor(key),
           update: (key, next) => impl.update(key as any, next as any),
           tryUpdate: (key, next) => impl.tryUpdate(key as any, next as any),
         },
