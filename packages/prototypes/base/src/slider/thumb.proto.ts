@@ -16,6 +16,8 @@ export const asSliderThumb = defineAsHook<
       orientation: State<string>;
       direction: State<string>;
       focusVisible: State<boolean>;
+      hovered: State<boolean>;
+      pressed: State<boolean>;
     };
   }
 >({ name: 'as-slider-thumb', setup });

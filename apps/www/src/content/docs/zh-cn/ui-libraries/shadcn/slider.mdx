@@ -19,3 +19,7 @@ Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Tra
 部件: root, label, track, indicator, thumb, field-thumb, value. 四个视觉家族继承同一 Base 行为。
 
 当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
+
+当前皮肤按已核对的 Base/Nova 源码，用被动 Proto Template 绘制：默认 16px rem 下轨道 4px、白色 Thumb 12px、ring 色边框 1px，Thumb 命中区单独保留 28px。hover、已接受的指针按压和 focus-visible 使用 3px ring。原 Track 仍是唯一输入及几何主体，Thumb/FieldThumb 仍各只有一个焦点目标。disabled 降低整个控件透明度；readOnly 保留焦点和 hover，同时禁止编辑。
+
+这还不是完整 shadcn 等价。当前数值区间仍将 Thumb 中心放在轨道端点，上游 thumbAlignment="edge" 需要先统一绘制与输入的通用几何契约，不能只挪视觉位置。范围/多 Thumb、所有原生捕获路径上的上游 active 精确行为、跨主题同态像素比较及原生宿主效果仍待完成。示例保留这些真实边界。

@@ -7,12 +7,18 @@ export default definePrototype<SliderPartProps, SliderPartExposes>({
   setup(def) {
     const inherited = asSliderIndicator();
     def.feedback.style.use(
-      tw('absolute left-0 top-0 h-full w-[calc(var(--pui-percentage)*1%)] rounded-full bg-primary')
+      tw(
+        'pointer-events-none absolute left-0 top-1/2 h-1 -translate-y-1/2 w-[calc(var(--pui-percentage)*1%)] rounded-full bg-primary'
+      )
     );
     def.rule({
       when: (w) => w.state(inherited.stateHandles!.orientation).eq('vertical'),
       intent: (i) =>
-        i.feedback.style.use(tw('top-auto bottom-0 h-[calc(var(--pui-percentage)*1%)] w-full')),
+        i.feedback.style.use(
+          tw(
+            'left-1/2 top-auto bottom-0 h-[calc(var(--pui-percentage)*1%)] w-1 -translate-x-1/2 translate-y-0'
+          )
+        ),
     });
     def.rule({
       when: (w) =>

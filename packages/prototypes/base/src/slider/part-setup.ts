@@ -28,6 +28,35 @@ export function setupSliderPart(def: DefHandle<SliderPartProps>, role: string, f
     def.expose.state(key, s);
   const a = asAccessible();
   const focus = role === 'thumb' ? asFocusable<SliderPartProps>() : null;
+  const hovered = focus ? def.state.bool('hovered', false) : null;
+  const pressed = focus ? def.state.bool('pressed', false) : null;
+  let pointerOrigin = false;
+  let interactionPhase = 'idle';
+  const clearPointer = (reason: string, clearHover = true) => {
+    pointerOrigin = false;
+    pressed?.set(false, reason);
+    if (clearHover) hovered?.set(false, reason);
+  };
+  if (hovered && pressed) {
+    def.expose.state('hovered', hovered);
+    def.expose.state('pressed', pressed);
+    def.event.on('pointer.enter', () => {
+      if (!disabled.get()) hovered.set(true, 'reason: slider pointer hover');
+    });
+    def.event.on('pointer.leave', () => {
+      hovered.set(false, 'reason: slider pointer leave');
+      // The Track still owns a captured gesture outside the Thumb's hit box.
+      if (interactionPhase !== 'active') clearPointer('reason: slider pointer left');
+    });
+    def.event.on('pointer.down', () => {
+      // No host payload or independent gesture recognizer. Pressed begins only
+      // when the existing Root/AxisInput session accepts this pointer origin.
+      pointerOrigin = !disabled.get() && !readOnly.get();
+    });
+    def.event.on('pointer.up', () => clearPointer('reason: slider pointer up', false));
+    def.event.on('pointer.cancel', () => clearPointer('reason: slider pointer canceled'));
+    def.event.on('press.cancel', () => clearPointer('reason: slider input canceled'));
+  }
   if (focus) {
     focus.configure({ disabled: false });
     def.expose.state('focusVisible', focus.focusVisible);
@@ -56,6 +85,13 @@ export function setupSliderPart(def: DefHandle<SliderPartProps>, role: string, f
     percentage.set(c.percentage, 'reason: slider part');
     disabled.set(c.disabled, 'reason: slider policy');
     readOnly.set(c.readOnly, 'reason: slider policy');
+    if (c.disabled || c.readOnly) clearPointer('reason: slider input policy', c.disabled);
+    if (interactionPhase !== c.interactionPhase) {
+      interactionPhase = c.interactionPhase;
+      if (interactionPhase === 'active')
+        pressed?.set(pointerOrigin, 'reason: slider accepted pointer session');
+      else clearPointer('reason: slider session ended', interactionPhase === 'cancel');
+    }
     orientation.set(c.orientation, 'reason: slider part');
     direction.set(c.direction, 'reason: slider direction');
     min.set(c.min, 'reason: slider bound');
@@ -71,6 +107,7 @@ export function setupSliderPart(def: DefHandle<SliderPartProps>, role: string, f
     currentRun = run;
   });
   def.lifecycle.onUnmounted(() => {
+    clearPointer('reason: slider view unmounted');
     currentRun = null;
   });
   if (focus) {

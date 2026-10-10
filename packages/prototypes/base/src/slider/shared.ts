@@ -16,6 +16,7 @@ export const SLIDER_FAMILY = createAnatomyFamily('base-slider', {
 });
 export type SliderContext = {
   value: number;
+  interactionPhase: 'idle' | 'active' | 'commit' | 'cancel';
   min: number;
   max: number;
   step: number;

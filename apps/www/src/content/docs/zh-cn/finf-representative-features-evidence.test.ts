@@ -142,7 +142,7 @@ function mockedCase(
 }
 
 describe('Finf representative evidence harness, no native browser', () => {
-  it('registers the existing suite with one official owner and exactly five bounded matrix groups', () => {
+  it('registers the existing suite with one official owner and five existing groups plus the separately owned Slider suite', () => {
     expect(PRODUCTION_BROWSER_OWNERS[filename]).toBe(workflowFile);
     expect(manifest.cases).toHaveLength(34);
     expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(34);
@@ -158,6 +158,7 @@ describe('Finf representative evidence harness, no native browser', () => {
       'disclosure-overlays': 8,
       'modal-overlays': 5,
       'runtime-tabs': 4,
+      slider: 0, // Four runtime cases live in finf-slider-upstream.browser.test.ts.
     });
     expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);

@@ -49,6 +49,8 @@ export type SliderPartExposes = {
 };
 export type SliderThumbExposes = SliderPartExposes & {
   focusVisible: ExposeState<boolean>;
+  hovered: ExposeState<boolean>;
+  pressed: ExposeState<boolean>;
   focusSelf: ExposeMethod<() => void>;
   resetValue: ExposeMethod<() => boolean>;
   __fieldInput: ExposeMethod<() => void>;

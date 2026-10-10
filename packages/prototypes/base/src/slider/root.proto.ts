@@ -53,6 +53,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
   a.role('group');
   def.context.provide(SLIDER_CONTEXT, {
     value: 0,
+    interactionPhase: 'idle',
     min: 0,
     max: 100,
     step: 1,
@@ -68,6 +69,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
   });
   let run: RunHandle<SliderRootProps> | null = null,
     initial = 0;
+  let interactionPhase: 'idle' | 'active' | 'commit' | 'cancel' = 'idle';
   const bounds = () => range(run?.props.get().min, run?.props.get().max);
   const normalize = (v: number) => {
     const b = bounds();
@@ -89,6 +91,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     percentageState.set(percentage(value.get(), b.min, b.max), 'reason: slider ratio');
     run.context.update(SLIDER_CONTEXT, {
       value: value.get(),
+      interactionPhase,
       ...b,
       step: finite(p.step, 1),
       percentage: percentageState.get(),
@@ -105,16 +108,30 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
   const cancel = () => {
     if (!dragging.get()) return;
     dragging.set(false, 'reason: slider interaction canceled');
+    interactionPhase = 'cancel';
     if (run && !run.props.isProvided('value')) {
       value.set(normalize(initial), 'reason: slider cancel restores start');
       publish();
       run.expose.emit('valueChange', { value: value.get() });
-    }
+    } else publish();
   };
+  // A removed input part cannot finish its own session after its anatomy lease
+  // ends. The existing Root owns cancellation when either required part leaves.
+  for (const role of ['track', 'thumb'])
+    def.anatomy.subscribeParts(SLIDER_FAMILY, role, (_run, parts) => {
+      if (parts.length === 0) cancel();
+    });
   def.expose.method('beginInteraction', () => {
-    if (!run || disabled.get() || readOnly.get()) return false;
+    if (!run || dragging.get() || disabled.get() || readOnly.get()) return false;
+    if (
+      run.anatomy.partsOf(SLIDER_FAMILY, 'track').length !== 1 ||
+      run.anatomy.partsOf(SLIDER_FAMILY, 'thumb').length !== 1
+    )
+      return false;
     initial = value.get();
     dragging.set(true, 'reason: slider interaction start');
+    interactionPhase = 'active';
+    publish();
     return true;
   });
   def.expose.method('requestValue', (next) => {
@@ -131,6 +148,8 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
   def.expose.method('commitValue', () => {
     if (!run || disabled.get() || readOnly.get()) return;
     dragging.set(false, 'reason: slider commit');
+    interactionPhase = 'commit';
+    publish();
     run.expose.emit('valueCommit', { value: value.get() });
   });
   def.expose.method('cancelInteraction', cancel);
@@ -143,6 +162,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     const next = normalize(initialValue);
     if (!run.props.isProvided('value')) value.set(next, 'reason: slider value reset');
     dragging.set(false, 'reason: slider reset cancels gesture');
+    interactionPhase = 'cancel';
     publish();
     if (run.props.isProvided('value')) run.expose.emit('valueChange', { value: next });
     return true;

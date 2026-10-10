@@ -56,6 +56,8 @@ function f0sliderThumb(x: ProtoAdapterExposes<typeof f0slider.sliderThumb>) {
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
 }
@@ -70,6 +72,8 @@ function f0sliderFieldThumb(x: ProtoAdapterExposes<typeof f0slider.sliderFieldTh
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
   const invalid: boolean = x.invalid.get();
@@ -216,6 +220,8 @@ function f1sliderThumb(x: ProtoAdapterExposes<typeof f1slider.sliderThumb>) {
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
 }
@@ -230,6 +236,8 @@ function f1sliderFieldThumb(x: ProtoAdapterExposes<typeof f1slider.sliderFieldTh
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
   const invalid: boolean = x.invalid.get();
@@ -376,6 +384,8 @@ function f2sliderThumb(x: ProtoAdapterExposes<typeof f2slider.sliderThumb>) {
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
 }
@@ -390,6 +400,8 @@ function f2sliderFieldThumb(x: ProtoAdapterExposes<typeof f2slider.sliderFieldTh
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
   const invalid: boolean = x.invalid.get();
@@ -536,6 +548,8 @@ function f3sliderThumb(x: ProtoAdapterExposes<typeof f3slider.sliderThumb>) {
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
 }
@@ -550,6 +564,8 @@ function f3sliderFieldThumb(x: ProtoAdapterExposes<typeof f3slider.sliderFieldTh
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
   const invalid: boolean = x.invalid.get();
@@ -696,6 +712,8 @@ function f4sliderThumb(x: ProtoAdapterExposes<typeof f4slider.sliderThumb>) {
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
 }
@@ -710,6 +728,8 @@ function f4sliderFieldThumb(x: ProtoAdapterExposes<typeof f4slider.sliderFieldTh
   x.focusSelf();
   const reset: boolean = x.resetValue();
   const focused: boolean = x.focusVisible.get();
+  const hovered: boolean = x.hovered.get();
+  const pressed: boolean = x.pressed.get();
   // @ts-expect-error no invented focus parameters
   x.focusSelf('bad');
   const invalid: boolean = x.invalid.get();

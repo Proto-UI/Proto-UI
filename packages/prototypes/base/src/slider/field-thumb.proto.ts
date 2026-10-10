@@ -16,6 +16,8 @@ export const asSliderFieldThumb = defineAsHook<
       orientation: State<string>;
       direction: State<string>;
       focusVisible: State<boolean>;
+      hovered: State<boolean>;
+      pressed: State<boolean>;
     };
     asHooks: { 'as-field-control': import('../field').FieldControlBindingHandles };
   }

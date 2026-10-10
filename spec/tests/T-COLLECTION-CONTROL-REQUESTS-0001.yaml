@@ -7,8 +7,10 @@ lifecycleRationale:
   en: >-
     This is a bounded regression ledger, not family-level acceptance. Resizable, Carousel and Tree do not yet have family-specific Prototype definitions. Button and the relevant focus/capture contracts are draft. Resizable proposal expectations are recorded explicitly without claiming nonexistent normative criterion coverage; other Adapters, native input and rendered paint remain unverified.
 
+
 summary: >-
   Exercises controlled Resizable proposal history and existing nested Button disabled semantics in Carousel navigation and TreeToggle. It leaves Carousel initial collection convergence and leaf/missing TreeToggle focus policy unresolved.
+
 
 cases:
   - id: T-COLLECTION-CONTROL-REQUESTS-0001-CASE-PROPOSALS

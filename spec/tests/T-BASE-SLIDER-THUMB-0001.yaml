@@ -1,0 +1,45 @@
+id: T-BASE-SLIDER-THUMB-0001
+type: test
+title: Slider Thumb session and passive paint tests
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Synthetic pointer/DOM tests and source-level style assertions are bounded evidence. Real browser screenshots and host-native conformance remain separate requirements.
+summary: Covers transient facts across all five families and Thumb/FieldThumb plus Shadcn source-bound passive paint.
+cases:
+  - id: T-BASE-SLIDER-THUMB-0001-CASE-FACTS
+    title: Five families and both entries share accepted session facts and cleanup
+    covers:
+      [P-BASE-SLIDER-THUMB-FACTS, P-BASE-SLIDER-THUMB-LIFETIME, P-BASE-SLIDER-FIELD-THUMB-FACTS]
+    expectation: pointer-origin-and-root-session-control-pressed-without-keyboard-or-policy-false-positive
+  - id: T-BASE-SLIDER-THUMB-0001-CASE-PAINT
+    title: Shadcn passive paint preserves existing owners and coordinate intervals
+    covers: [P-BASE-SLIDER-THUMB-BOUNDARY]
+    expectation: four-unit-track-twelve-unit-thumb-separate-from-hit-boxes-and-borrowed-states
+implementations:
+  - id: slider-thumb-session
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/slider-thumb-interaction.test.ts
+    required: true
+    consumesCases: [T-BASE-SLIDER-THUMB-0001-CASE-FACTS]
+    exercises: [P-BASE-SLIDER-THUMB, P-BASE-SLIDER-FIELD-THUMB]
+    notes: [Synthetic Web events and fixture geometry; not native input or rendered pixel evidence.]
+  - id: shadcn-slider-passive-paint
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/shadcn/test/slider-upstream-paint.test.ts
+    required: true
+    consumesCases: [T-BASE-SLIDER-THUMB-0001-CASE-PAINT]
+    exercises: [P-BASE-SLIDER-THUMB]
+    notes:
+      [Token and structure assertions do not establish computed CSS geometry or native fidelity.]
+exercises:
+  prototypes: [P-BASE-SLIDER-THUMB, P-BASE-SLIDER-FIELD-THUMB]
+sources:
+  - path: packages/prototypes/base/test/slider-thumb-interaction.test.ts
+  - path: packages/prototypes/shadcn/test/slider-upstream-paint.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded same-owner session and source-derived Shadcn paint coverage.
+tags: [slider, test, draft]
