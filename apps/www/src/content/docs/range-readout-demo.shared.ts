@@ -4,6 +4,19 @@ export function createRangeReadoutDemo(family: string, component: 'progress' | '
     kind: 'proto',
     prototypeId: `${family}-${component}-${part}`,
     children,
+    ...(family === 'base'
+      ? {
+          className: (
+            {
+              root: 'grid w-full min-w-0 gap-2',
+              label: 'block',
+              track: 'block h-3 w-full overflow-hidden rounded bg-slate-200',
+              indicator: 'block h-full w-[calc(var(--pui-percentage)*1%)] bg-slate-700',
+              value: 'block tabular-nums',
+            } as Record<string, string>
+          )[part],
+        }
+      : {}),
   });
   return {
     type: 'demo',

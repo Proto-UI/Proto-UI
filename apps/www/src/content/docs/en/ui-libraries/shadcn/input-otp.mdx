@@ -1,0 +1,19 @@
+---
+title: shadcn Input Otp
+description: Draft portable input atoms.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root owns value/defaultValue, length (1–32, default 6), numeric/alphanumeric filtering, disabled/readOnly, name and ariaLabel. One real Input preserves selection, paste, deletion and composition through TextControl; it requests one-time-code autocomplete. Input commits after composition, strips disallowed characters and bounds length. Slots are passive indexed, aria-hidden readouts; they never create additional editors or tab stops. The active slot is an end-insertion hint, not a claim about the native selection caret. valueChange is a request; completed emits once for each accepted complete code, not an authentication action. Server verification, SMS retrieval and per-cell focus are outside this implementation.
+
+Parts: root, input, slot, separator. All four styled families inherit Base behavior.
+
+Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.

@@ -1,0 +1,19 @@
+---
+title: brutalist Slider
+description: 可移植输入原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-brutalist-slider"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 管理 value/defaultValue、min/max/step、disabled/readOnly、方向。Track 通过共享 AxisInput 接入真实指针/触摸拖动；Thumb 支持箭头、Shift 十倍、PageUp/PageDown、Home/End，水平 RTL 反向。数值从 min 对齐步长并限制边界；受控请求不覆盖作者值，valueCommit 标记完成，取消恢复非受控拖动起点。当前实现单 thumb，多 thumb 约束待补。
+
+部件: root, label, track, indicator, thumb, value. 四个视觉家族继承同一 Base 行为。
+
+当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。

@@ -1,0 +1,19 @@
+---
+title: shadcn Input Otp
+description: 可移植输入原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-shadcn-input-otp"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 管理 value/defaultValue、length（1–32，默认6）、numeric/alphanumeric 过滤、disabled/readOnly、name、ariaLabel。唯一真实 Input 由 TextControl 处理选择、粘贴、删除与组合输入，并声明 one-time-code 自动填充；组合结束后过滤和限长。Slot 是按索引被动显示且对辅助技术隐藏，不制造额外编辑器或 Tab 停靠点；active 只表示尾部插入提示，不声称等于原生选区位置。valueChange 为提案；每个接受的完整代码发一次 completed，不执行验证或获取短信。
+
+部件: root, input, slot, separator. 四个视觉家族继承同一 Base 行为。
+
+当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。

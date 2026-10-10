@@ -1,0 +1,19 @@
+---
+title: base Slider
+description: Draft portable input atoms.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-base-slider"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root owns value/defaultValue, min/max/step, disabled/readOnly, orientation and direction. Track uses shared normalized AxisInput for real pointer/touch drag. Thumb is one focusable slider: arrows, Shift×10, PageUp/PageDown, Home/End; horizontal RTL reverses lateral arrows. Values clamp and snap from min. Controlled requests emit valueChange while retaining owner values; valueCommit marks completion, cancel restores an uncontrolled drag start. Label names Thumb; Value and Indicator are passive. Single-thumb behavior is implemented; multi-thumb constraints remain open.
+
+Parts: root, label, track, indicator, thumb, value. All four styled families inherit Base behavior.
+
+Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.

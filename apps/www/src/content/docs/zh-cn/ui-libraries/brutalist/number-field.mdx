@@ -1,0 +1,19 @@
+---
+title: brutalist Number Field
+description: 可移植输入原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-brutalist-number-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 管理有限数值 value/defaultValue、min/max（0/100）、正 step（1）、disabled/readOnly、name、ariaLabel。Input 使用现有 TextControl 唯一编辑器与 spinbutton 语义。编辑允许未完成草稿，失焦/Enter 提交合法数值或恢复规范值；加减按钮与上下箭头共享步进，Shift 十倍，Home/End 达边界。受控提案不覆盖作者值；本地化格式、空/null、拖擦与滚轮尚未实现。
+
+部件: root, label, input, increment, decrement. 四个视觉家族继承同一 Base 行为。
+
+当前为 Draft 源码工作。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍待完成，不宣称 Finf 验收通过。
