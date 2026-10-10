@@ -1729,3 +1729,22 @@ it('assigns Liquid elevation control to its dedicated source-bound experiment wo
   assert.ok(!plan[1].args.includes(suite));
   assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
 });
+
+it('owns representative Finf image journeys in their explicit sandboxed evidence workflow', () => {
+  const suite = 'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts';
+  const owner = '.github/workflows/finf-representative-features-evidence.yml';
+  assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
+  assert.ok(!BROWSER_SUITES.includes(suite));
+  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
+  const workflow = readFileSync(owner, 'utf8');
+  assert.ok(workflow.includes(suite));
+  assert.ok(workflow.includes('check:styles:preset'));
+  assert.ok(workflow.includes('fonts-noto-cjk'));
+  assert.ok(workflow.includes('font-environment.txt'));
+  const source = readFileSync(suite, 'utf8');
+  assert.ok(source.includes('chromiumSandbox: true'));
+  assert.ok(source.includes("name: 'Close', exact: true"));
+  const plan = createRuntimeTestPlan([]);
+  assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
+  assert.ok(!plan[1].args.includes(suite));
+});
