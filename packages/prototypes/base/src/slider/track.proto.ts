@@ -1,3 +1,4 @@
+import type { SliderPartExposes } from './types';
 import type { State } from '@proto.ui/core';
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
 import { asAxisInput } from '@proto.ui/hooks';
@@ -38,7 +39,7 @@ function setup(def: DefHandle<SliderPartProps>) {
 }
 export const asSliderTrack = defineAsHook<
   SliderPartProps,
-  Record<string, unknown>,
+  SliderPartExposes,
   {
     state: {
       value: State<number>;
@@ -50,4 +51,7 @@ export const asSliderTrack = defineAsHook<
     };
   }
 >({ name: 'as-slider-track', setup });
-export default definePrototype({ name: 'base-slider-track', setup });
+export default definePrototype<SliderPartProps, SliderPartExposes>({
+  name: 'base-slider-track',
+  setup,
+});

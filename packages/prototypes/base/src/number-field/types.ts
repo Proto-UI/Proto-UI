@@ -32,3 +32,23 @@ export type NumberFieldRootAsHookContract = {
   };
 };
 export interface NumberFieldPartProps {}
+
+export type NumberFieldInputExposes = {
+  value: ExposeState<number>;
+  disabled: ExposeState<boolean>;
+  readOnly: ExposeState<boolean>;
+  focused: ExposeState<boolean>;
+  focusVisible: ExposeState<boolean>;
+  focusSelf: ExposeMethod<() => void>;
+  resetValue: ExposeMethod<() => boolean>;
+  __fieldInput: ExposeMethod<() => void>;
+  __implicitSubmitEligible: ExposeMethod<() => boolean>;
+};
+export type NumberFieldControlExposes = NumberFieldInputExposes & {
+  [K in keyof import('../field').FieldControlBindingStates]: ExposeState<boolean>;
+};
+export type NumberFieldStepExposes = {
+  disabled: ExposeState<boolean>;
+  focusVisible: ExposeState<boolean>;
+};
+export type NumberFieldLabelExposes = {};

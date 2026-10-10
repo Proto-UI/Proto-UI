@@ -1,7 +1,8 @@
+import type { InputOtpSlotExposes } from '@proto.ui/prototypes-base/input-otp';
 import type { InputOtpSlotProps } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpSlot } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype<InputOtpSlotProps, Record<string, unknown>>({
+export default definePrototype<InputOtpSlotProps, InputOtpSlotExposes>({
   name: 'liquid-glass-input-otp-slot',
   setup(def) {
     const inherited = asInputOtpSlot();

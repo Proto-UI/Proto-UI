@@ -1,7 +1,8 @@
+import type { NumberFieldLabelExposes } from '@proto.ui/prototypes-base/number-field';
 import type { NumberFieldPartProps } from '@proto.ui/prototypes-base/number-field';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldLabel } from '@proto.ui/prototypes-base/number-field';
-export default definePrototype<NumberFieldPartProps, Record<string, unknown>>({
+export default definePrototype<NumberFieldPartProps, NumberFieldLabelExposes>({
   name: 'liquid-glass-number-field-label',
   setup(def) {
     const inherited = asNumberFieldLabel();

@@ -1,7 +1,8 @@
+import type { SliderThumbExposes } from '@proto.ui/prototypes-base/slider';
 import type { SliderPartProps } from '@proto.ui/prototypes-base/slider';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSliderThumb } from '@proto.ui/prototypes-base/slider';
-export default definePrototype<SliderPartProps, Record<string, unknown>>({
+export default definePrototype<SliderPartProps, SliderThumbExposes>({
   name: 'liquid-glass-slider-thumb',
   setup(def) {
     const inherited = asSliderThumb();

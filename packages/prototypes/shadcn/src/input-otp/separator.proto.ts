@@ -1,6 +1,7 @@
+import type { InputOtpSeparatorExposes } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpSeparator } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype<{}, Record<string, unknown>>({
+export default definePrototype<{}, InputOtpSeparatorExposes>({
   name: 'shadcn-input-otp-separator',
   setup(def) {
     const inherited = asInputOtpSeparator();

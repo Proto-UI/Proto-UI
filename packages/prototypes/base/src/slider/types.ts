@@ -37,3 +37,22 @@ export type SliderRootExposes = {
 };
 export type SliderRootAsHookContract = { state: SliderStates };
 export interface SliderPartProps {}
+
+/** Read-only facts registered by every Slider part; editing requests remain on Root. */
+export type SliderPartExposes = {
+  value: ExposeState<number>;
+  percentage: ExposeState<number>;
+  disabled: ExposeState<boolean>;
+  readOnly: ExposeState<boolean>;
+  orientation: ExposeState<string>;
+  direction: ExposeState<string>;
+};
+export type SliderThumbExposes = SliderPartExposes & {
+  focusVisible: ExposeState<boolean>;
+  focusSelf: ExposeMethod<() => void>;
+  resetValue: ExposeMethod<() => boolean>;
+  __fieldInput: ExposeMethod<() => void>;
+};
+export type SliderFieldThumbExposes = SliderThumbExposes & {
+  [K in keyof import('../field').FieldControlBindingStates]: ExposeState<boolean>;
+};

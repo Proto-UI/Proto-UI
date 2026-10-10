@@ -1,3 +1,4 @@
+import type { InputOtpSlotExposes } from './types';
 import type { State } from '@proto.ui/core';
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
 import { asAccessible } from '@proto.ui/hooks';
@@ -38,7 +39,10 @@ function setup(def: DefHandle<InputOtpSlotProps>) {
 }
 export const asInputOtpSlot = defineAsHook<
   InputOtpSlotProps,
-  Record<string, unknown>,
+  InputOtpSlotExposes,
   { state: { character: State<string>; active: State<boolean>; filled: State<boolean> } }
 >({ name: 'as-input-otp-slot', setup });
-export default definePrototype({ name: 'base-input-otp-slot', setup });
+export default definePrototype<InputOtpSlotProps, InputOtpSlotExposes>({
+  name: 'base-input-otp-slot',
+  setup,
+});

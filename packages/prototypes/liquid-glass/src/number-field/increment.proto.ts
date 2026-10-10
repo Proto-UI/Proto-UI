@@ -1,7 +1,8 @@
+import type { NumberFieldStepExposes } from '@proto.ui/prototypes-base/number-field';
 import type { NumberFieldPartProps } from '@proto.ui/prototypes-base/number-field';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldIncrement } from '@proto.ui/prototypes-base/number-field';
-export default definePrototype<NumberFieldPartProps, Record<string, unknown>>({
+export default definePrototype<NumberFieldPartProps, NumberFieldStepExposes>({
   name: 'liquid-glass-number-field-increment',
   setup(def) {
     const inherited = asNumberFieldIncrement();

@@ -1,3 +1,4 @@
+import type { InputOtpInputExposes } from './types';
 import { FIELD_LABEL_PAIR } from '../field/shared';
 import { asFieldControl } from '../field/control-binding.proto';
 import type { State } from '@proto.ui/core';
@@ -121,14 +122,14 @@ export function setupInputOtpInput(def: DefHandle<InputOtpInputProps>, field = f
 }
 export const asInputOtpInput = defineAsHook<
   InputOtpInputProps,
-  Record<string, unknown>,
+  InputOtpInputExposes,
   { state: { disabled: State<boolean>; focusVisible: State<boolean> } }
 >({
   name: 'as-input-otp-input',
   modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
   setup: setupInputOtpInput,
 });
-export default definePrototype({
+export default definePrototype<InputOtpInputProps, InputOtpInputExposes>({
   name: 'base-input-otp-input',
   modules: asInputOtpInput.modules,
   setup: setupInputOtpInput,

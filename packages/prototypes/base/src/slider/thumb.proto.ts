@@ -1,3 +1,4 @@
+import type { SliderThumbExposes } from './types';
 import type { State } from '@proto.ui/core';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { setupSliderPart } from './part-setup';
@@ -5,7 +6,7 @@ import type { SliderPartProps } from './types';
 const setup = (def: DefHandle<SliderPartProps>) => setupSliderPart(def, 'thumb');
 export const asSliderThumb = defineAsHook<
   SliderPartProps,
-  Record<string, unknown>,
+  SliderThumbExposes,
   {
     state: {
       value: State<number>;
@@ -18,4 +19,7 @@ export const asSliderThumb = defineAsHook<
     };
   }
 >({ name: 'as-slider-thumb', setup });
-export default definePrototype({ name: 'base-slider-thumb', setup });
+export default definePrototype<SliderPartProps, SliderThumbExposes>({
+  name: 'base-slider-thumb',
+  setup,
+});

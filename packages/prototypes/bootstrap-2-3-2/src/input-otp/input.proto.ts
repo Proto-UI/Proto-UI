@@ -1,7 +1,8 @@
+import type { InputOtpInputExposes } from '@proto.ui/prototypes-base/input-otp';
 import type { InputOtpInputProps } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpInput } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype<InputOtpInputProps, Record<string, unknown>>({
+export default definePrototype<InputOtpInputProps, InputOtpInputExposes>({
   name: 'bootstrap-2-3-2-input-otp-input',
   modules: asInputOtpInput.modules,
   setup(def) {

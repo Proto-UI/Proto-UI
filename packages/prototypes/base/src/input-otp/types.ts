@@ -38,3 +38,20 @@ export type InputOtpRootAsHookContract = {
     focused: State<boolean>;
   };
 };
+
+export type InputOtpInputExposes = {
+  disabled: ExposeState<boolean>;
+  focusVisible: ExposeState<boolean>;
+  focusSelf: ExposeMethod<() => void>;
+  resetValue: ExposeMethod<() => boolean>;
+  __implicitSubmitEligible: ExposeMethod<() => boolean>;
+};
+export type InputOtpControlExposes = InputOtpInputExposes & {
+  [K in keyof import('../field').FieldControlBindingStates]: ExposeState<boolean>;
+};
+export type InputOtpSlotExposes = {
+  character: ExposeState<string>;
+  active: ExposeState<boolean>;
+  filled: ExposeState<boolean>;
+};
+export type InputOtpSeparatorExposes = {};

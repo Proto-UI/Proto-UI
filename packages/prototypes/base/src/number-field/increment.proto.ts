@@ -1,3 +1,4 @@
+import type { NumberFieldStepExposes } from './types';
 import type { State } from '@proto.ui/core';
 import {
   defineAsHook,
@@ -35,7 +36,10 @@ function setup(def: DefHandle<NumberFieldPartProps>) {
 }
 export const asNumberFieldIncrement = defineAsHook<
   NumberFieldPartProps,
-  Record<string, unknown>,
+  NumberFieldStepExposes,
   { state: { disabled: State<boolean>; focusVisible: State<boolean> } }
 >({ name: 'as-number-field-increment', setup });
-export default definePrototype({ name: 'base-number-field-increment', setup });
+export default definePrototype<NumberFieldPartProps, NumberFieldStepExposes>({
+  name: 'base-number-field-increment',
+  setup,
+});

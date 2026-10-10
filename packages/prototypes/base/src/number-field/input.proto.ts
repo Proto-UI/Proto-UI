@@ -1,3 +1,4 @@
+import type { NumberFieldInputExposes } from './types';
 import { FIELD_LABEL_PAIR } from '../field/shared';
 import { asFieldControl } from '../field/control-binding.proto';
 import type { State } from '@proto.ui/core';
@@ -168,7 +169,7 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
 }
 export const asNumberFieldInput = defineAsHook<
   NumberFieldPartProps,
-  Record<string, unknown>,
+  NumberFieldInputExposes,
   {
     state: {
       disabled: State<boolean>;
@@ -183,7 +184,7 @@ export const asNumberFieldInput = defineAsHook<
   modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
   setup: setupNumberFieldInput,
 });
-export default definePrototype({
+export default definePrototype<NumberFieldPartProps, NumberFieldInputExposes>({
   name: 'base-number-field-input',
   modules: asNumberFieldInput.modules,
   setup: setupNumberFieldInput,

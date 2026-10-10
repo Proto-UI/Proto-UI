@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.workspace.json",
+  "include": ["numeric-parts-public.types.ts"],
+  "exclude": []
+}

@@ -1,7 +1,8 @@
+import type { NumberFieldControlExposes } from '@proto.ui/prototypes-base/number-field';
 import type { NumberFieldPartProps } from '@proto.ui/prototypes-base/number-field';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldControl } from '@proto.ui/prototypes-base/number-field';
-export default definePrototype<NumberFieldPartProps, Record<string, unknown>>({
+export default definePrototype<NumberFieldPartProps, NumberFieldControlExposes>({
   name: 'brutalist-number-field-control',
   modules: asNumberFieldControl.modules,
   setup(def) {
