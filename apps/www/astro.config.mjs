@@ -514,6 +514,36 @@ export default defineConfig({
                   slug: 'ui-libraries/base/field',
                 },
                 {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/base/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/base/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/base/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/base/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/base/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/base/checkbox-group',
+                },
+                {
                   label: 'Progress (Draft)',
                   translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
                   slug: 'ui-libraries/base/progress',
@@ -673,6 +703,36 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/field',
                 },
                 {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/shadcn/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/shadcn/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/shadcn/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/shadcn/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/shadcn/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/shadcn/checkbox-group',
+                },
+                {
                   label: 'Progress (Draft)',
                   translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
                   slug: 'ui-libraries/shadcn/progress',
@@ -790,6 +850,36 @@ export default defineConfig({
                   slug: 'ui-libraries/bootstrap-2-3-2/field',
                 },
                 {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/checkbox-group',
+                },
+                {
                   label: 'Progress (Draft)',
                   translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
                   slug: 'ui-libraries/bootstrap-2-3-2/progress',
@@ -854,6 +944,36 @@ export default defineConfig({
                   label: 'Field (Draft)',
                   translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
                   slug: 'ui-libraries/liquid-glass/field',
+                },
+                {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/liquid-glass/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/liquid-glass/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/liquid-glass/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/liquid-glass/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/liquid-glass/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/liquid-glass/checkbox-group',
                 },
                 {
                   label: 'Progress (Draft)',
@@ -945,6 +1065,36 @@ export default defineConfig({
                   label: 'Field (Draft)',
                   translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
                   slug: 'ui-libraries/brutalist/field',
+                },
+                {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/brutalist/components/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/brutalist/components/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/brutalist/components/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/brutalist/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/brutalist/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/brutalist/checkbox-group',
                 },
                 {
                   label: 'Progress (Draft)',

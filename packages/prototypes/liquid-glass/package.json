@@ -73,6 +73,30 @@
     "./calendar": {
       "types": "./src/calendar/index.ts",
       "default": "./src/calendar/index.ts"
+    },
+    "./toggle-group": {
+      "types": "./src/toggle-group/index.ts",
+      "default": "./src/toggle-group/index.ts"
+    },
+    "./toolbar": {
+      "types": "./src/toolbar/index.ts",
+      "default": "./src/toolbar/index.ts"
+    },
+    "./toast": {
+      "types": "./src/toast/index.ts",
+      "default": "./src/toast/index.ts"
+    },
+    "./fieldset": {
+      "types": "./src/fieldset/index.ts",
+      "default": "./src/fieldset/index.ts"
+    },
+    "./form": {
+      "types": "./src/form/index.ts",
+      "default": "./src/form/index.ts"
+    },
+    "./checkbox-group": {
+      "types": "./src/checkbox-group/index.ts",
+      "default": "./src/checkbox-group/index.ts"
     }
   },
   "dependencies": {

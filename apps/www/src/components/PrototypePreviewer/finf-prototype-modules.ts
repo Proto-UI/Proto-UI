@@ -426,6 +426,226 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-liquid-glass/popover');
     registerExactPrototype('liquid-glass-popover-close', module.popoverClose);
   },
+  'base-toggle-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-base/toggle-group');
+    registerExactPrototype('base-toggle-group-root', module.toggleGroupRoot);
+  },
+  'base-toggle-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-base/toggle-group');
+    registerExactPrototype('base-toggle-group-item', module.toggleGroupItem);
+  },
+  'shadcn-toggle-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toggle-group');
+    registerExactPrototype('shadcn-toggle-group-root', module.toggleGroupRoot);
+  },
+  'shadcn-toggle-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toggle-group');
+    registerExactPrototype('shadcn-toggle-group-item', module.toggleGroupItem);
+  },
+  'brutalist-toggle-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toggle-group');
+    registerExactPrototype('brutalist-toggle-group-root', module.toggleGroupRoot);
+  },
+  'brutalist-toggle-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toggle-group');
+    registerExactPrototype('brutalist-toggle-group-item', module.toggleGroupItem);
+  },
+  'bootstrap-2-3-2-toggle-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toggle-group');
+    registerExactPrototype('bootstrap-2-3-2-toggle-group-root', module.toggleGroupRoot);
+  },
+  'bootstrap-2-3-2-toggle-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toggle-group');
+    registerExactPrototype('bootstrap-2-3-2-toggle-group-item', module.toggleGroupItem);
+  },
+  'liquid-glass-toggle-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toggle-group');
+    registerExactPrototype('liquid-glass-toggle-group-root', module.toggleGroupRoot);
+  },
+  'liquid-glass-toggle-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toggle-group');
+    registerExactPrototype('liquid-glass-toggle-group-item', module.toggleGroupItem);
+  },
+  'base-toolbar-root': async () => {
+    const module = await import('@proto.ui/prototypes-base/toolbar');
+    registerExactPrototype('base-toolbar-root', module.toolbarRoot);
+  },
+  'base-toolbar-button': async () => {
+    const module = await import('@proto.ui/prototypes-base/toolbar');
+    registerExactPrototype('base-toolbar-button', module.toolbarButton);
+  },
+  'base-toolbar-separator': async () => {
+    const module = await import('@proto.ui/prototypes-base/toolbar');
+    registerExactPrototype('base-toolbar-separator', module.toolbarSeparator);
+  },
+  'shadcn-toolbar-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toolbar');
+    registerExactPrototype('shadcn-toolbar-root', module.toolbarRoot);
+  },
+  'shadcn-toolbar-button': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toolbar');
+    registerExactPrototype('shadcn-toolbar-button', module.toolbarButton);
+  },
+  'shadcn-toolbar-separator': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toolbar');
+    registerExactPrototype('shadcn-toolbar-separator', module.toolbarSeparator);
+  },
+  'brutalist-toolbar-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toolbar');
+    registerExactPrototype('brutalist-toolbar-root', module.toolbarRoot);
+  },
+  'brutalist-toolbar-button': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toolbar');
+    registerExactPrototype('brutalist-toolbar-button', module.toolbarButton);
+  },
+  'brutalist-toolbar-separator': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toolbar');
+    registerExactPrototype('brutalist-toolbar-separator', module.toolbarSeparator);
+  },
+  'bootstrap-2-3-2-toolbar-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toolbar');
+    registerExactPrototype('bootstrap-2-3-2-toolbar-root', module.toolbarRoot);
+  },
+  'bootstrap-2-3-2-toolbar-button': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toolbar');
+    registerExactPrototype('bootstrap-2-3-2-toolbar-button', module.toolbarButton);
+  },
+  'bootstrap-2-3-2-toolbar-separator': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toolbar');
+    registerExactPrototype('bootstrap-2-3-2-toolbar-separator', module.toolbarSeparator);
+  },
+  'liquid-glass-toolbar-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toolbar');
+    registerExactPrototype('liquid-glass-toolbar-root', module.toolbarRoot);
+  },
+  'liquid-glass-toolbar-button': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toolbar');
+    registerExactPrototype('liquid-glass-toolbar-button', module.toolbarButton);
+  },
+  'liquid-glass-toolbar-separator': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toolbar');
+    registerExactPrototype('liquid-glass-toolbar-separator', module.toolbarSeparator);
+  },
+  'base-toast-root': async () => {
+    const module = await import('@proto.ui/prototypes-base/toast');
+    registerExactPrototype('base-toast-root', module.toastRoot);
+  },
+  'base-toast-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-base/toast');
+    registerExactPrototype('base-toast-viewport', module.toastViewport);
+  },
+  'base-toast-title': async () => {
+    const module = await import('@proto.ui/prototypes-base/toast');
+    registerExactPrototype('base-toast-title', module.toastTitle);
+  },
+  'base-toast-description': async () => {
+    const module = await import('@proto.ui/prototypes-base/toast');
+    registerExactPrototype('base-toast-description', module.toastDescription);
+  },
+  'base-toast-action': async () => {
+    const module = await import('@proto.ui/prototypes-base/toast');
+    registerExactPrototype('base-toast-action', module.toastAction);
+  },
+  'base-toast-close': async () => {
+    const module = await import('@proto.ui/prototypes-base/toast');
+    registerExactPrototype('base-toast-close', module.toastClose);
+  },
+  'shadcn-toast-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toast');
+    registerExactPrototype('shadcn-toast-root', module.toastRoot);
+  },
+  'shadcn-toast-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toast');
+    registerExactPrototype('shadcn-toast-viewport', module.toastViewport);
+  },
+  'shadcn-toast-title': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toast');
+    registerExactPrototype('shadcn-toast-title', module.toastTitle);
+  },
+  'shadcn-toast-description': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toast');
+    registerExactPrototype('shadcn-toast-description', module.toastDescription);
+  },
+  'shadcn-toast-action': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toast');
+    registerExactPrototype('shadcn-toast-action', module.toastAction);
+  },
+  'shadcn-toast-close': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/toast');
+    registerExactPrototype('shadcn-toast-close', module.toastClose);
+  },
+  'brutalist-toast-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toast');
+    registerExactPrototype('brutalist-toast-root', module.toastRoot);
+  },
+  'brutalist-toast-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toast');
+    registerExactPrototype('brutalist-toast-viewport', module.toastViewport);
+  },
+  'brutalist-toast-title': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toast');
+    registerExactPrototype('brutalist-toast-title', module.toastTitle);
+  },
+  'brutalist-toast-description': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toast');
+    registerExactPrototype('brutalist-toast-description', module.toastDescription);
+  },
+  'brutalist-toast-action': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toast');
+    registerExactPrototype('brutalist-toast-action', module.toastAction);
+  },
+  'brutalist-toast-close': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/toast');
+    registerExactPrototype('brutalist-toast-close', module.toastClose);
+  },
+  'bootstrap-2-3-2-toast-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toast');
+    registerExactPrototype('bootstrap-2-3-2-toast-root', module.toastRoot);
+  },
+  'bootstrap-2-3-2-toast-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toast');
+    registerExactPrototype('bootstrap-2-3-2-toast-viewport', module.toastViewport);
+  },
+  'bootstrap-2-3-2-toast-title': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toast');
+    registerExactPrototype('bootstrap-2-3-2-toast-title', module.toastTitle);
+  },
+  'bootstrap-2-3-2-toast-description': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toast');
+    registerExactPrototype('bootstrap-2-3-2-toast-description', module.toastDescription);
+  },
+  'bootstrap-2-3-2-toast-action': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toast');
+    registerExactPrototype('bootstrap-2-3-2-toast-action', module.toastAction);
+  },
+  'bootstrap-2-3-2-toast-close': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/toast');
+    registerExactPrototype('bootstrap-2-3-2-toast-close', module.toastClose);
+  },
+  'liquid-glass-toast-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toast');
+    registerExactPrototype('liquid-glass-toast-root', module.toastRoot);
+  },
+  'liquid-glass-toast-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toast');
+    registerExactPrototype('liquid-glass-toast-viewport', module.toastViewport);
+  },
+  'liquid-glass-toast-title': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toast');
+    registerExactPrototype('liquid-glass-toast-title', module.toastTitle);
+  },
+  'liquid-glass-toast-description': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toast');
+    registerExactPrototype('liquid-glass-toast-description', module.toastDescription);
+  },
+  'liquid-glass-toast-action': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toast');
+    registerExactPrototype('liquid-glass-toast-action', module.toastAction);
+  },
+  'liquid-glass-toast-close': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/toast');
+    registerExactPrototype('liquid-glass-toast-close', module.toastClose);
+  },
   'base-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-base/progress');
     registerExactPrototype('base-progress-root', module.progressRoot);
@@ -465,6 +685,42 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'base-meter-value': async () => {
     const module = await import('@proto.ui/prototypes-base/meter');
     registerExactPrototype('base-meter-value', module.meterValue);
+  },
+  'base-fieldset-root': async () => {
+    const module = await import('@proto.ui/prototypes-base/fieldset');
+    registerExactPrototype('base-fieldset-root', module.fieldsetRoot);
+  },
+  'base-fieldset-legend': async () => {
+    const module = await import('@proto.ui/prototypes-base/fieldset');
+    registerExactPrototype('base-fieldset-legend', module.fieldsetLegend);
+  },
+  'base-fieldset-description': async () => {
+    const module = await import('@proto.ui/prototypes-base/fieldset');
+    registerExactPrototype('base-fieldset-description', module.fieldsetDescription);
+  },
+  'base-form-root': async () => {
+    const module = await import('@proto.ui/prototypes-base/form');
+    registerExactPrototype('base-form-root', module.formRoot);
+  },
+  'base-form-field': async () => {
+    const module = await import('@proto.ui/prototypes-base/form');
+    registerExactPrototype('base-form-field', module.formField);
+  },
+  'base-form-submit': async () => {
+    const module = await import('@proto.ui/prototypes-base/form');
+    registerExactPrototype('base-form-submit', module.formSubmit);
+  },
+  'base-checkbox-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-base/checkbox-group');
+    registerExactPrototype('base-checkbox-group-root', module.checkboxGroupRoot);
+  },
+  'base-checkbox-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-base/checkbox-group');
+    registerExactPrototype('base-checkbox-group-item', module.checkboxGroupItem);
+  },
+  'base-checkbox-group-all': async () => {
+    const module = await import('@proto.ui/prototypes-base/checkbox-group');
+    registerExactPrototype('base-checkbox-group-all', module.checkboxGroupAll);
   },
   'shadcn-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/progress');
@@ -506,6 +762,42 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/meter');
     registerExactPrototype('shadcn-meter-value', module.meterValue);
   },
+  'shadcn-fieldset-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/fieldset');
+    registerExactPrototype('shadcn-fieldset-root', module.fieldsetRoot);
+  },
+  'shadcn-fieldset-legend': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/fieldset');
+    registerExactPrototype('shadcn-fieldset-legend', module.fieldsetLegend);
+  },
+  'shadcn-fieldset-description': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/fieldset');
+    registerExactPrototype('shadcn-fieldset-description', module.fieldsetDescription);
+  },
+  'shadcn-form-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/form');
+    registerExactPrototype('shadcn-form-root', module.formRoot);
+  },
+  'shadcn-form-field': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/form');
+    registerExactPrototype('shadcn-form-field', module.formField);
+  },
+  'shadcn-form-submit': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/form');
+    registerExactPrototype('shadcn-form-submit', module.formSubmit);
+  },
+  'shadcn-checkbox-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/checkbox-group');
+    registerExactPrototype('shadcn-checkbox-group-root', module.checkboxGroupRoot);
+  },
+  'shadcn-checkbox-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/checkbox-group');
+    registerExactPrototype('shadcn-checkbox-group-item', module.checkboxGroupItem);
+  },
+  'shadcn-checkbox-group-all': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/checkbox-group');
+    registerExactPrototype('shadcn-checkbox-group-all', module.checkboxGroupAll);
+  },
   'brutalist-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/progress');
     registerExactPrototype('brutalist-progress-root', module.progressRoot);
@@ -545,6 +837,42 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'brutalist-meter-value': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/meter');
     registerExactPrototype('brutalist-meter-value', module.meterValue);
+  },
+  'brutalist-fieldset-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/fieldset');
+    registerExactPrototype('brutalist-fieldset-root', module.fieldsetRoot);
+  },
+  'brutalist-fieldset-legend': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/fieldset');
+    registerExactPrototype('brutalist-fieldset-legend', module.fieldsetLegend);
+  },
+  'brutalist-fieldset-description': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/fieldset');
+    registerExactPrototype('brutalist-fieldset-description', module.fieldsetDescription);
+  },
+  'brutalist-form-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/form');
+    registerExactPrototype('brutalist-form-root', module.formRoot);
+  },
+  'brutalist-form-field': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/form');
+    registerExactPrototype('brutalist-form-field', module.formField);
+  },
+  'brutalist-form-submit': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/form');
+    registerExactPrototype('brutalist-form-submit', module.formSubmit);
+  },
+  'brutalist-checkbox-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/checkbox-group');
+    registerExactPrototype('brutalist-checkbox-group-root', module.checkboxGroupRoot);
+  },
+  'brutalist-checkbox-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/checkbox-group');
+    registerExactPrototype('brutalist-checkbox-group-item', module.checkboxGroupItem);
+  },
+  'brutalist-checkbox-group-all': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/checkbox-group');
+    registerExactPrototype('brutalist-checkbox-group-all', module.checkboxGroupAll);
   },
   'bootstrap-2-3-2-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/progress');
@@ -586,6 +914,42 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/meter');
     registerExactPrototype('bootstrap-2-3-2-meter-value', module.meterValue);
   },
+  'bootstrap-2-3-2-fieldset-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/fieldset');
+    registerExactPrototype('bootstrap-2-3-2-fieldset-root', module.fieldsetRoot);
+  },
+  'bootstrap-2-3-2-fieldset-legend': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/fieldset');
+    registerExactPrototype('bootstrap-2-3-2-fieldset-legend', module.fieldsetLegend);
+  },
+  'bootstrap-2-3-2-fieldset-description': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/fieldset');
+    registerExactPrototype('bootstrap-2-3-2-fieldset-description', module.fieldsetDescription);
+  },
+  'bootstrap-2-3-2-form-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/form');
+    registerExactPrototype('bootstrap-2-3-2-form-root', module.formRoot);
+  },
+  'bootstrap-2-3-2-form-field': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/form');
+    registerExactPrototype('bootstrap-2-3-2-form-field', module.formField);
+  },
+  'bootstrap-2-3-2-form-submit': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/form');
+    registerExactPrototype('bootstrap-2-3-2-form-submit', module.formSubmit);
+  },
+  'bootstrap-2-3-2-checkbox-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/checkbox-group');
+    registerExactPrototype('bootstrap-2-3-2-checkbox-group-root', module.checkboxGroupRoot);
+  },
+  'bootstrap-2-3-2-checkbox-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/checkbox-group');
+    registerExactPrototype('bootstrap-2-3-2-checkbox-group-item', module.checkboxGroupItem);
+  },
+  'bootstrap-2-3-2-checkbox-group-all': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/checkbox-group');
+    registerExactPrototype('bootstrap-2-3-2-checkbox-group-all', module.checkboxGroupAll);
+  },
   'liquid-glass-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/progress');
     registerExactPrototype('liquid-glass-progress-root', module.progressRoot);
@@ -625,6 +989,42 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'liquid-glass-meter-value': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/meter');
     registerExactPrototype('liquid-glass-meter-value', module.meterValue);
+  },
+  'liquid-glass-fieldset-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/fieldset');
+    registerExactPrototype('liquid-glass-fieldset-root', module.fieldsetRoot);
+  },
+  'liquid-glass-fieldset-legend': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/fieldset');
+    registerExactPrototype('liquid-glass-fieldset-legend', module.fieldsetLegend);
+  },
+  'liquid-glass-fieldset-description': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/fieldset');
+    registerExactPrototype('liquid-glass-fieldset-description', module.fieldsetDescription);
+  },
+  'liquid-glass-form-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/form');
+    registerExactPrototype('liquid-glass-form-root', module.formRoot);
+  },
+  'liquid-glass-form-field': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/form');
+    registerExactPrototype('liquid-glass-form-field', module.formField);
+  },
+  'liquid-glass-form-submit': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/form');
+    registerExactPrototype('liquid-glass-form-submit', module.formSubmit);
+  },
+  'liquid-glass-checkbox-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/checkbox-group');
+    registerExactPrototype('liquid-glass-checkbox-group-root', module.checkboxGroupRoot);
+  },
+  'liquid-glass-checkbox-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/checkbox-group');
+    registerExactPrototype('liquid-glass-checkbox-group-item', module.checkboxGroupItem);
+  },
+  'liquid-glass-checkbox-group-all': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/checkbox-group');
+    registerExactPrototype('liquid-glass-checkbox-group-all', module.checkboxGroupAll);
   },
   'base-calendar-root': async () => {
     const module = await import('@proto.ui/prototypes-base/calendar');
