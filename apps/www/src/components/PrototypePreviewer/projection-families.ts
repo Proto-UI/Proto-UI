@@ -67,7 +67,16 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   switch: ['root', 'thumb'],
   tabs: ['root', 'list', 'trigger', 'content'],
   'hover-card': ['root', 'trigger', 'content'],
-  'dropdown-menu': ['root', 'trigger', 'content', 'item'],
+  'dropdown-menu': [
+    'root',
+    'trigger',
+    'content',
+    'item',
+    'group',
+    'label',
+    'separator',
+    'shortcut',
+  ],
   select: ['root', 'trigger', 'value', 'content', 'item'],
   dialog: [
     'root',
@@ -300,6 +309,10 @@ const SHADCN_MANIFEST = {
         'shadcn-dropdown-trigger',
         'shadcn-dropdown-content',
         'shadcn-dropdown-item',
+        'shadcn-dropdown-group',
+        'shadcn-dropdown-label',
+        'shadcn-dropdown-separator',
+        'shadcn-dropdown-shortcut',
       ],
       parts: {
         root: {
@@ -317,6 +330,22 @@ const SHADCN_MANIFEST = {
         item: {
           basePrototypeId: 'P-BASE-DROPDOWN-MENU-ITEM',
           prototypeId: 'shadcn-dropdown-item',
+        },
+        group: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-GROUP',
+          prototypeId: 'shadcn-dropdown-group',
+        },
+        label: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-LABEL',
+          prototypeId: 'shadcn-dropdown-label',
+        },
+        separator: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-SEPARATOR',
+          prototypeId: 'shadcn-dropdown-separator',
+        },
+        shortcut: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-SHORTCUT',
+          prototypeId: 'shadcn-dropdown-shortcut',
         },
       },
     },
@@ -665,6 +694,10 @@ const BRUTALIST_MANIFEST = {
         'brutalist-dropdown-trigger',
         'brutalist-dropdown-content',
         'brutalist-dropdown-item',
+        'brutalist-dropdown-group',
+        'brutalist-dropdown-label',
+        'brutalist-dropdown-separator',
+        'brutalist-dropdown-shortcut',
       ],
       parts: {
         root: {
@@ -682,6 +715,22 @@ const BRUTALIST_MANIFEST = {
         item: {
           basePrototypeId: 'P-BASE-DROPDOWN-MENU-ITEM',
           prototypeId: 'brutalist-dropdown-item',
+        },
+        group: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-GROUP',
+          prototypeId: 'brutalist-dropdown-group',
+        },
+        label: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-LABEL',
+          prototypeId: 'brutalist-dropdown-label',
+        },
+        separator: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-SEPARATOR',
+          prototypeId: 'brutalist-dropdown-separator',
+        },
+        shortcut: {
+          basePrototypeId: 'P-BASE-DROPDOWN-MENU-SHORTCUT',
+          prototypeId: 'brutalist-dropdown-shortcut',
         },
       },
     },

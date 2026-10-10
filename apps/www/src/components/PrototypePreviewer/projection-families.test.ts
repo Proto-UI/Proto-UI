@@ -61,7 +61,16 @@ const EXPECTED_REQUIRED_PART_IDS = {
   switch: ['root', 'thumb'],
   tabs: ['root', 'list', 'trigger', 'content'],
   'hover-card': ['root', 'trigger', 'content'],
-  'dropdown-menu': ['root', 'trigger', 'content', 'item'],
+  'dropdown-menu': [
+    'root',
+    'trigger',
+    'content',
+    'item',
+    'group',
+    'label',
+    'separator',
+    'shortcut',
+  ],
   select: ['root', 'trigger', 'value', 'content', 'item'],
   dialog: [
     'root',
@@ -268,6 +277,10 @@ const EXPECTED_RECIPE_PROTOTYPE_IDS = {
       'shadcn-dropdown-trigger',
       'shadcn-dropdown-content',
       'shadcn-dropdown-item',
+      'shadcn-dropdown-group',
+      'shadcn-dropdown-label',
+      'shadcn-dropdown-separator',
+      'shadcn-dropdown-shortcut',
     ],
     select: [
       'shadcn-select-root',
@@ -313,6 +326,10 @@ const EXPECTED_RECIPE_PROTOTYPE_IDS = {
       'brutalist-dropdown-trigger',
       'brutalist-dropdown-content',
       'brutalist-dropdown-item',
+      'brutalist-dropdown-group',
+      'brutalist-dropdown-label',
+      'brutalist-dropdown-separator',
+      'brutalist-dropdown-shortcut',
     ],
     select: [
       'brutalist-select-root',
@@ -958,5 +975,29 @@ describe('Accordion exact family projection admission', () => {
         { basePrototypeId: 'P-BASE-BUTTON', prototypeId: `${family}-button` },
       ]);
     });
+  }
+});
+
+describe('Grouped Dropdown recipe admission', () => {
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    for (const part of ['group', 'label', 'separator', 'shortcut'] as const) {
+      it(`${family} declares the actual ${part} lineage and rejects its removal`, () => {
+        const manifest = PROJECTION_FAMILY_MANIFESTS[family];
+        const dropdown = manifest.families['dropdown-menu'];
+        expect(resolveProjectionPart(family, 'dropdown-menu', part)).toEqual({
+          basePrototypeId: `P-BASE-DROPDOWN-MENU-${part.toUpperCase()}`,
+          prototypeId: `${family}-dropdown-${part}`,
+        });
+        expect(dropdown.recipePrototypeIds).toContain(`${family}-dropdown-${part}`);
+        const { [part]: removed, ...parts } = dropdown.parts;
+        expect(removed).toBeDefined();
+        expect(() =>
+          validateProjectionFamilyManifest({
+            ...manifest,
+            families: { ...manifest.families, 'dropdown-menu': { ...dropdown, parts } },
+          })
+        ).toThrow(new RegExp(part));
+      });
+    }
   }
 });
