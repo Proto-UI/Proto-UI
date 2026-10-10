@@ -96,12 +96,13 @@ it('advances real slides and disables at the last boundary', async () => {
   root.remove();
 });
 it('Date Picker composes Calendar selection with Popover close', async () => {
-  const root = node('date-picker-root', { defaultMonth: '2026-10', defaultOpen: true }),
+  const root = node('date-picker-root', { defaultValue: '2026-10-01', defaultOpen: true }),
     day = node('date-picker-day', { date: '2026-10-12' }),
     value = node('date-picker-value');
   root.append(day, value);
   document.body.append(root);
   await flush();
+  expect(root.getExposes().month.get()).toBe('2026-10');
   day.click();
   await flush();
   expect(root.getExposes().value.get()).toBe('2026-10-12');

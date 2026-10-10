@@ -70,11 +70,12 @@ for (const family of [shadcn, brutalist, bootstrap, liquid]) {
       AdaptToWebComponent(p, { registerAs: `test-${p.name}` });
     const root = document.createElement(`test-${family.calendarRoot.name}`) as any;
     const day = document.createElement(`test-${family.calendarDay.name}`) as any;
-    setElementProps(root, { defaultMonth: '2026-10' });
+    setElementProps(root, { defaultValue: '2026-10-09' });
     setElementProps(day, { offset: 13 });
     root.append(day);
     document.body.append(root);
     await flush();
+    expect(root.getExposes().month.get()).toBe('2026-10');
     day.click();
     await flush();
     expect(root.getExposes().value.get()).toBe('2026-10-10');
@@ -82,3 +83,62 @@ for (const family of [shadcn, brutalist, bootstrap, liquid]) {
     root.remove();
   });
 }
+
+it.each([{ defaultValue: '2026-10-10' }, { value: '2024-02-29' }])(
+  'derives the initial displayed month from the selected date when no month is supplied: %o',
+  async (props) => {
+    const root = document.createElement('test-base-calendar-root') as any;
+    setElementProps(root, props);
+    document.body.append(root);
+    try {
+      await flush();
+      expect(root.getExposes().month.get()).toBe((props.defaultValue ?? props.value)!.slice(0, 7));
+    } finally {
+      root.remove();
+    }
+  }
+);
+
+it.each([
+  [{ defaultValue: '2026-10-10', defaultMonth: '1970-01' }, '1970-01'],
+  [{ defaultValue: '2026-10-10', defaultMonth: '2020-03', month: '2030-05' }, '2030-05'],
+  [{}, '1970-01'],
+] as const)(
+  'preserves explicit month precedence and deterministic empty fallback: %o',
+  async (props, month) => {
+    const root = document.createElement('test-base-calendar-root') as any;
+    setElementProps(root, props);
+    document.body.append(root);
+    try {
+      await flush();
+      expect(root.getExposes().month.get()).toBe(month);
+    } finally {
+      root.remove();
+    }
+  }
+);
+
+it.each([
+  { unavailable: {} },
+  { unavailable: { 0: '2026-10-10', length: 1 } },
+  { unavailable: ['2026-10-10', {}] },
+])(
+  'rejects malformed unavailable input without spreading a non-array: %o',
+  async ({ unavailable }) => {
+    const root = document.createElement('test-base-calendar-root') as any;
+    setElementProps(root, { defaultMonth: '2026-10', unavailable });
+    try {
+      expect(() => document.body.append(root)).not.toThrow();
+      await flush();
+      expect(root.getExposes().requestValue('2026-10-10')).toBe(true);
+      setElementProps(root, { unavailable: ['2026-10-11'] });
+      await flush();
+      expect(root.getExposes().requestValue('2026-10-11')).toBe(false);
+      setElementProps(root, { unavailable: {} });
+      await flush();
+      expect(root.getExposes().requestValue('2026-10-11')).toBe(false);
+    } finally {
+      root.remove();
+    }
+  }
+);

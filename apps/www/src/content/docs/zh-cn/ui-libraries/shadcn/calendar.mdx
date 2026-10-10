@@ -9,6 +9,8 @@ Calendar 使用公历日期字符串。选中值与显示月份可分别受控�
 
 当前为功能代码 WIP。原生 GPUI、完整 Adapter/Compiler 一致性、视觉证据与生命周期验收仍待补齐。
 
+未传 month 或 defaultMonth 时，初始显示月份取自 value 或 defaultValue；无选中日期时回退到 1970-01。显式 month 优先于 defaultMonth。unavailable 接受日期字符串数组；非法形状由 Props 边界拒绝，保留上一个有效值或默认空数组。
+
 <PrototypePreviewer
   demoId="demo-shadcn-calendar"
   initialRuntime="wc"

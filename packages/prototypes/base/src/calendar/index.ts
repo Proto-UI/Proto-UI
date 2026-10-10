@@ -74,7 +74,10 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     defaultMonth: { type: 'string' },
     min: { type: 'string' },
     max: { type: 'string' },
-    unavailable: { type: 'object' },
+    unavailable: {
+      type: 'object',
+      validator: (value) => Array.isArray(value) && value.every((date) => typeof date === 'string'),
+    },
     disabled: { type: 'boolean' },
     readOnly: { type: 'boolean' },
     weekStartsOn: { type: 'number' },
@@ -82,7 +85,6 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   });
   def.props.setDefaults({
     defaultValue: '',
-    defaultMonth: '1970-01',
     min: '',
     max: '',
     unavailable: [],
