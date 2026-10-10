@@ -1,0 +1,66 @@
+id: C-SLIDER-VALUE-0001
+type: contract
+title: Slider ordered-value ownership and interaction proposal
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Only the pure transition model is implemented. Root cannot yet express a dynamic vector in a governed State slot. General collection State, typed public compatibility, runtime integration, native interaction and Compiler translation remain activation blockers.
+summary: Defines the proposed scalar/vector Slider value domain and the boundary between a candidate, owner acceptance, a session and a projection.
+statement:
+  en: One Root owns the accepted ordered values. Props select controlled input; Track and Thumb submit requests; Context distributes JSON snapshots; scalar State projections never become independent value owners. The pure model is a deterministic test oracle only, not a second state system or runtime implementation. Existing scalar runtime and public API remain unchanged by this draft.
+criteria:
+  - id: C-SLIDER-VALUE-0001-VALUES
+    text: The proposed input domain is a finite number or a nonempty dense finite-number array. Scalar and array shape remain distinct, including a one-item array. Normalize without mutating caller input, clamp and project onto the min-relative step grid while retaining exact finite endpoints as allowed values, then order ascending with an explicit stable source-index permutation and reordered flag. Caller input remains unchanged. Runtime adoption must diagnose changed slot correspondence and cancel an active session before adoption; sorting cannot implicitly transfer focus or reassign Thumb identities. Empty, sparse or nonfinite vectors, invalid policies, impossible minimum spacing and owner values violating spacing receive explicit diagnostics. An invalid new vector configuration rejects the complete transaction, cancels input and retains the last valid values and policy together until corrected; invalid initial input does not manufacture a scalar fallback. The public diagnostic carrier remains an implementation prerequisite. These proposed vector diagnostics do not silently replace the existing scalar Props fallback behavior.
+  - id: C-SLIDER-VALUE-0001-COLLISION
+    text: Pointer collision policy defaults to push. Push propagates the minimum step gap through affected neighbors and preserves their pushed positions when returning. None constrains the selected slot. Swap crosses one adjacent sorted slot per sample and returns the destination index as a proposal; no DOM identity changes. Keyboard input constrains the same slot regardless of pointer policy. The reference model compares shortest-decimal input values using bounded integer arithmetic and projects grid points with standard finite Number rounding. Bounds, projected-grid membership and minimum distance are simultaneous hard constraints; a gap boundary is not an extra grid exception. Endpoints are exempt only from grid membership, never from spacing. Select the nearest feasible member, with higher-value ties; infeasibility produces a diagnostic rather than relaxed spacing or an off-grid candidate. This is a draft oracle precision choice, not upstream bit equivalence or a generic Runtime/Compiler numeric guarantee.
+  - id: C-SLIDER-VALUE-0001-NUMERIC-CLOSURE
+    text: Every accepted model proposal must remain unchanged when supplied as a new owner input to normalization; normalization itself is idempotent. No-op endpoint requests and edits to an unrelated slot must retain exact endpoint values. The oracle uses finite Number inputs, shortest-decimal arithmetic, a maximum decimal power of 1024 and a maximum signed coefficient text length of 2048. Each bound search is limited to 4096 binary-search iterations over the monotone actual Number projections, including repeated projections. Every accepted value lies inside its own inclusive keyboard/accessibility interval; a same-value request preserves all slots. Its BigInt operations are private computation only; outputs remain JSON-compatible. Rejected or unsupported proposals carry an explicit diagnostic, not an indistinguishable no-op. A separate generic precision/representation contract is required before Runtime or Compiler admission.
+  - id: C-SLIDER-VALUE-0001-GRAB-ORIGIN
+    text: The center-aligned pure pointer reference distinguishes Track and Thumb origins. Track-origin press seeks its logical position. Thumb-origin press retains the exact accepted start value, including an off-center grab; later samples add already-direction-adjusted AxisInput totalDelta to the accepted start percentage. No movement produces no seek. Values remain ordered rather than reversed for RTL/vertical. Real capture, geometry-change cancellation, owner acknowledgement and host focus remain separate missing integration evidence.
+  - id: C-SLIDER-VALUE-0001-PROJECTION
+    text: Nearest-thumb selection uses the center-aligned normalized interval, ignores disabled indices, prefers a live explicit origin, and resolves equal distances to the later slot; stacked maximum origins choose the first enabled maximum slot. A default Indicator spans minimum-to-value for one value and first-to-last for multiple values. Explicit ordered start/end indices describe optional additional segments. Per-Thumb accessible and keyboard limits are the nearest legal projected-grid-or-endpoint values inward from neighboring accepted values plus or minus the minimum gap, clipped to Root bounds. These are proposed data projections, not host geometry evidence.
+  - id: C-SLIDER-VALUE-0001-KEYBOARD
+    text: Numeric keyboard intent is a pure projection of the accepted slot. Up increases and Down decreases; RTL reverses only Left/Right. Home/End use the slot's neighbor-constrained interval. Page and Shift+Arrow use the absolute largeStep. Alt/Ctrl/Meta modified input and unrelated keys produce no request. Tab reachability and focus transfer belong to the separately missing part integration.
+  - id: C-SLIDER-VALUE-0001-OWNER
+    text: Root must use a governed collection State slot with stable identity for current accepted values. Props, Context, JSON event payloads, a mutable closure, encoded string, setup-time maximum allocation or child-owned values cannot substitute for that slot. Historical session snapshots and pending proposals are separately named Root-owned facts, never displayed as accepted values. Core or Compiler component-specific exceptions are forbidden.
+  - id: C-SLIDER-VALUE-0001-CONTROLLED
+    text: Controlled proposals cannot mutate accepted values. Only a valid owner Props receipt advances accepted values. An acknowledged proposal can advance active slot and focus; a rejected or obsolete proposal cannot. Default input is captured once. Later defaultValue changes do not reset an uncontrolled instance. Shape, length, bounds, step, spacing, direction or orientation changes invalidate an active session before adopting normalized new input. A controlled-to-uncontrolled transition retains the last accepted value; uncontrolled-to-controlled adopts the supplied valid value. Receipt attribution must be explicit; equal array contents alone cannot identify an asynchronous acknowledgement. Runtime reconciliation, the receipt mechanism and source-compatible typed event shapes remain unimplemented.
+  - id: C-SLIDER-VALUE-0001-SESSION
+    text: Capture one immutable start snapshot after accepting a fresh session. A commit is eligible only for a material owner-accepted change from that snapshot and never after cancellation, stale samples, rejected controlled requests, or a shape/length change. A no-change round trip produces no commit. Uncontrolled cancellation restores the start snapshot; controlled cancellation may request restoration but cannot overwrite the owner. Reset restores the creation snapshot through the same ownership rules. Cancellation must revoke the real Track capture lease, not merely clear a local accepted flag.
+  - id: C-SLIDER-VALUE-0001-BOUNDARY
+    text: JSON-compatible Props and Context, Expose method classification and payload json hints establish channel shape only. They do not establish array State, atomicity, a serialized transition language or cross-host Compiler execution. Pure model success cannot mark mounted Slider, a family, a host profile or a Finf goal complete.
+openQuestions:
+  - id: C-SLIDER-VALUE-0001-Q-STATE
+    question: Which minimal generic collection State definition supplies stable vector identity, atomic replacement, observation and serialization without a component-specific escape hatch?
+    blocks: [activation:C-SLIDER-VALUE-0001]
+  - id: C-SLIDER-VALUE-0001-Q-COMPATIBILITY
+    question: How will scalar event callback source compatibility and array-specialized typed entries be proven before widening the public value prop and event domain?
+    blocks: [activation:C-SLIDER-VALUE-0001]
+  - id: C-SLIDER-VALUE-0001-Q-NUMERIC
+    question: Which separately reviewed generic precision and representable-value contract should replace the bounded decimal test oracle for Runtime and Compiler consumers, including extreme spans and decimal spacing?
+    blocks: [activation:C-SLIDER-VALUE-0001]
+  - id: C-SLIDER-VALUE-0001-Q-REALIZATION
+    question: What exact-source Runtime, native-host, assistive-technology and generic Compiler evidence admits the proposed owner, session and focus transitions?
+    blocks: [activation:C-SLIDER-VALUE-0001]
+dependsOn:
+  contracts:
+    [
+      C-STATE-0001,
+      C-STATE-0002,
+      C-PROPS-0003,
+      C-CONTEXT-0001,
+      C-CONTEXT-0009,
+      C-EXPOSE-0007,
+      C-EXPOSE-EVENT-0001,
+      C-EXPOSE-EVENT-0002,
+      C-EXPOSE-STATE-0001,
+    ]
+verifies:
+  tests: [T-SLIDER-VALUE-MODEL-0001]
+sources:
+  - path: internal/models/slider-value-model.ts
+  - path: internal/records/2026-10-10-base-slider-value-definition.md
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Proposed the complete value/ownership boundary while recording the architecture blocker and limiting evidence to a pure model.
+tags: [slider, values, ownership, draft, architecture-blocked]
