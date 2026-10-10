@@ -6,6 +6,7 @@ import {
   tw,
   type DefHandle,
   type RunHandle,
+  type NativeLinkNavigate,
 } from '@proto.ui/core';
 import {
   asAccessible,
@@ -15,9 +16,11 @@ import {
   asFocusable,
   asFocusRoving,
   asOverlay,
+  asNativeLink,
   asTrigger,
 } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
+import { declareNativeLink } from '@proto.ui/module-native-link';
 import { useTypeaheadNavigation } from '../behaviors';
 import type * as T from './types';
 type Context = { id: string; value: string; current: string; disabled: boolean };
@@ -406,7 +409,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
   }
   function itemSetup(def: DefHandle<T.MenuItemProps, T.MenuItemExposes>, link = false) {
     def.anatomy.claim(family, { role: 'item' });
-    asTrigger();
+    if (!link) asTrigger();
     def.props.define({
       value: { type: 'string', empty: 'fallback' },
       textValue: { type: 'string', empty: 'fallback' },
@@ -445,6 +448,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     };
     def.context.subscribe(context, (run) => sync(run));
     def.context.subscribe(contentContext, (run) => sync(run));
+    def.lifecycle.onCreated(sync);
     def.lifecycle.onMounted(sync);
     def.lifecycle.onUnmounted(() => {
       currentRun = null;
@@ -457,39 +461,52 @@ export function createMenuFamily(slug: string, navigation: boolean) {
           source: 'base-' + slug + '-item',
         });
     });
-    def.event.on('press.commit', (run, event) => {
-      if (disabled.get() || !run.context.read(contentContext).open || (link && event.key === ' '))
-        return;
+    const commit = (run: RunHandle<T.MenuItemProps>, native?: NativeLinkNavigate) => {
+      if (disabled.get() || !run.context.read(contentContext).open || (link && !native)) return;
       run.expose.emit('select', {
         value: run.props.get().value ?? '',
         menuValue: run.context.read(contentContext).value,
       });
-      if (link) {
-        const p = run.props.get() as T.MenuLinkProps;
-        run.expose.emit('navigate', {
-          href: p.href,
-          target: p.target ?? '_self',
-          modified: !!(event.ctrlKey || event.metaKey || event.shiftKey || event.altKey),
-        });
-      }
-      if (run.props.get().closeOnSelect !== false) invoke(run, 'close');
-    });
+      if (native) run.expose.emit('navigate', native);
+      // New-tab/window intent must keep the current page's navigation panel intact.
+      if (
+        run.props.get().closeOnSelect !== false &&
+        (!native || (!native.modified && native.target !== '_blank'))
+      )
+        invoke(run, 'close');
+    };
+    if (!link) def.event.on('press.commit', (run) => commit(run));
+    return { disabled, commit };
   }
+
   function linkSetup(def: DefHandle<T.MenuLinkProps, T.MenuLinkExposes>) {
-    itemSetup(def as any, true);
+    const item = itemSetup(def as any, true);
+    const nativeLink = asNativeLink<T.MenuLinkProps>();
     def.props.define({
       href: { type: 'string', empty: 'fallback' },
+      rel: { type: 'string', empty: 'fallback' },
       current: { type: 'boolean', empty: 'fallback' },
       target: { type: 'enum', empty: 'fallback', options: ['_self', '_blank'] },
     });
-    def.props.setDefaults({ href: '', current: false, target: '_self' });
+    def.props.setDefaults({ href: '', rel: '', current: false, target: '_self' });
     const current = def.state.string('current', '');
     asAccessible().state('current', current);
-    const sync = (run: RunHandle<T.MenuLinkProps>) =>
-      current.set(run.props.get().current ? 'page' : '', 'reason: navigation current page');
+    const sync = (run: RunHandle<T.MenuLinkProps>) => {
+      const props = run.props.get();
+      current.set(props.current ? 'page' : '', 'reason: navigation current page');
+      nativeLink.sync({
+        href: props.href,
+        target: props.target,
+        rel: props.rel,
+        disabled: item.disabled.get(),
+      });
+    };
     def.lifecycle.onCreated(sync);
-    def.props.watch(['current'], sync);
+    def.lifecycle.onMounted(sync);
+    def.props.watchAll(sync);
+    def.context.subscribe(context, sync);
     def.expose.event('navigate', { payload: 'json' });
+    nativeLink.on('navigate', (run, event) => item.commit(run, event));
   }
   const rootHook = defineAsHook<T.MenuRootProps, T.MenuRootExposes, T.MenuRootAsHookContract>({
     name: `as-${slug}-root`,
@@ -507,10 +524,13 @@ export function createMenuFamily(slug: string, navigation: boolean) {
   >({ name: `as-${slug}-content`, setup: contentSetup });
   const itemHook = defineAsHook<T.MenuItemProps, T.MenuItemExposes, T.MenuItemAsHookContract>({
     name: `as-${slug}-item`,
-    setup: (def) => itemSetup(def),
+    setup: (def) => {
+      itemSetup(def);
+    },
   });
   const linkHook = defineAsHook<T.MenuLinkProps, T.MenuLinkExposes, T.MenuLinkAsHookContract>({
     name: `as-${slug}-link`,
+    modules: [declareNativeLink()],
     setup: linkSetup,
   });
   return {
@@ -526,8 +546,14 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     content: definePrototype({ name: `base-${slug}-content`, setup: contentSetup }),
     item: definePrototype({
       name: `base-${slug}-item`,
-      setup: (def: DefHandle<T.MenuItemProps, T.MenuItemExposes>) => itemSetup(def),
+      setup: (def: DefHandle<T.MenuItemProps, T.MenuItemExposes>) => {
+        itemSetup(def);
+      },
     }),
-    link: definePrototype({ name: `base-${slug}-link`, setup: linkSetup }),
+    link: definePrototype({
+      name: `base-${slug}-link`,
+      modules: linkHook.modules,
+      setup: linkSetup,
+    }),
   };
 }

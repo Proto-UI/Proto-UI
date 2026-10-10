@@ -44,9 +44,9 @@ export default {
               {
                 'kind': 'proto',
                 'prototypeId': 'base-navigation-menu-link',
-                'children': ['Documentation'],
+                'children': ['Jump to demo destination'],
                 'props': {
-                  'href': '/en/ui-libraries/base/',
+                  'href': '#base-navigation-demo-destination',
                   'current': true,
                 },
                 'ref': 'docs',
@@ -109,6 +109,11 @@ export default {
         },
         'children': ['Select a command.'],
       },
+      {
+        'kind': 'box',
+        'attrs': { 'id': 'base-navigation-demo-destination' },
+        'children': ['Native link destination within this demo.'],
+      },
     ],
   },
   setup({ refs, api }) {
@@ -120,7 +125,7 @@ export default {
       });
     api.setProps('docs', {
       onNavigate: (detail: { href: string }) => {
-        refs.status.textContent = 'Navigation requested: ' + detail.href;
+        refs.status.textContent = 'Native navigation observed: ' + detail.href;
       },
     });
   },

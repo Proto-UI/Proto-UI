@@ -1,3 +1,4 @@
+import { activationTurn } from '../../../../modules/native-link/test/no-network';
 import { afterEach, describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as menubar from '../../src/menubar';
@@ -95,16 +96,17 @@ it('menubar arrows move among menu commands then across top-level menus', async 
 });
 it('navigation Link emits destination intent and current-page semantics', async () => {
   const p = bar('navigation-menu', { defaultValue: 'file' });
-  const link = el('base-navigation-menu-link', { href: '/docs', current: true });
+  const link = el('base-navigation-menu-link', { href: '#docs', current: true });
   link.textContent = 'Docs';
   p.panels[0].append(link);
   await flush();
   const events: unknown[] = [];
   link.addEventListener('navigate', (e: any) => events.push(e.detail));
-  link.click();
+  link.querySelector('a')!.click();
+  await activationTurn();
   await flush();
-  expect(events).toEqual([{ href: '/docs', target: '_self', modified: false }]);
-  expect(link.getAttribute('role')).toBe('link');
+  expect(events).toEqual([{ href: '#docs', target: '_self', rel: '', modified: false }]);
+  expect(link.querySelector('a')!.getAttribute('role')).toBe('link');
 });
 it('context menu opens on context intent, not ordinary click', async () => {
   const root = el(contextMenu.contextMenuRoot.name),

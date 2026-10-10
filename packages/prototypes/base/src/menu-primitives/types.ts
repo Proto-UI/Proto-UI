@@ -71,10 +71,11 @@ export type MenuItemAsHookContract = {
 };
 export interface MenuLinkProps extends MenuItemProps {
   href: string;
+  rel?: string;
   current?: boolean;
   target?: '_self' | '_blank';
 }
 export type MenuLinkExposes = MenuItemExposes & {
-  navigate: ExposeEvent<{ href: string; target: '_self' | '_blank'; modified: boolean }>;
+  navigate: ExposeEvent<{ href: string; target: string; rel: string; modified: boolean }>;
 };
 export type MenuLinkAsHookContract = MenuItemAsHookContract;

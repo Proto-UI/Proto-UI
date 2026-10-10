@@ -6,6 +6,7 @@ import {
 } from '@proto.ui/prototypes-base/navigation-menu';
 export default definePrototype<NavigationMenuLinkProps, NavigationMenuLinkExposes>({
   name: 'liquid-glass-navigation-menu-link',
+  modules: asNavigationMenuLink.modules,
   setup(def) {
     const behavior = asNavigationMenuLink();
     def.feedback.style.use(
