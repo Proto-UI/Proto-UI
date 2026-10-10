@@ -1,0 +1,19 @@
+---
+title: shadcn Form
+description: 可移植 form 原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-shadcn-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 汇总显式 FormField 注册，通过现有 Field 校验后才发出包含命名值快照的 submit；禁用项被排除，重复名称拒绝序列化。异步校验等待当前结果，值变更、移除、取消、卸载撤销旧提交。FormSubmit 支持键盘及指针激活。resetValidation 清理校验并发出 reset，不伪称已复位控件值，也不导航或联网；完整值复位及隐式 Enter 提交待补。Form disabled 当前阻止提交；控件继承禁用由 Fieldset 管理。
+
+四家族继承同一 Base 行为。部件： root, field, submit.
+
+当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。

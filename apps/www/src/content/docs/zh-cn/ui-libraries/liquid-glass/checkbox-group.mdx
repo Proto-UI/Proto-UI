@@ -1,0 +1,19 @@
+---
+title: liquid-glass Checkbox Group
+description: 可移植 checkbox-group 原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 通过 value/defaultValue 管理字符串数组，支持 disabled/readOnly/ariaLabel；Item 支持 value/disabled；All 汇总可用项并切换全部选择，保留已禁用项的选择。每项独立 Tab，空格切换，Enter 不切换。受控请求仅发 valueChange，不覆盖作者值；getValue 返回副本，重复值不含糊切换。原生隐藏表单项及 Field 控件桥接仍待补齐。
+
+四家族继承同一 Base 行为。部件： root, item, all.
+
+当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。

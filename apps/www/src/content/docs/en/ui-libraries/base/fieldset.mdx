@@ -1,0 +1,19 @@
+---
+title: base Fieldset
+description: Draft portable fieldset atoms.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-base-fieldset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root semantically groups Fields under one Legend and Description. disabled is inherited by contained Field roots, combines with their local disabled policy and invalidates pending validation. Re-enabling the group preserves explicitly disabled Fields. The nearest Fieldset owns each Field policy scope; nested Fieldset inheritance and first-Legend exceptions remain open. This is a portable group, not a native fieldset DOM escape.
+
+All four visual families inherit Base behavior. Parts: root, legend, description.
+
+Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.

@@ -1,0 +1,19 @@
+---
+title: liquid-glass Fieldset
+description: 可移植 fieldset 原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-fieldset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 将 Field 聚合到一个 Legend 和 Description 下。disabled 与 Field 自身禁用状态取 OR，变化撤销过期校验；重新启用不会清除作者自身的 disabled。当前最近 Fieldset 拥有策略范围；嵌套禁用继承与首 Legend 例外仍待补齐。
+
+四家族继承同一 Base 行为。部件： root, legend, description.
+
+当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。
