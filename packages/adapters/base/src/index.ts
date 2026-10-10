@@ -25,3 +25,4 @@ export * from './platform/web-preference-source';
 export * from './platform/web-style-support-source';
 
 export * from './platform/portal-direction';
+export { createWebAxisInputHost } from './gestures/web-axis-input-host';

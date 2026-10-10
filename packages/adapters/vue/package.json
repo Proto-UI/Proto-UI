@@ -29,7 +29,8 @@
     "@proto.ui/module-props": "workspace:*",
     "@proto.ui/module-rule-expose-state-web": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
-    "@proto.ui/module-control-label": "workspace:*"
+    "@proto.ui/module-control-label": "workspace:*",
+    "@proto.ui/module-axis-input": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/prototypes-base": "workspace:*",

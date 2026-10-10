@@ -28,6 +28,7 @@ import { BoundaryModuleDef } from '@proto.ui/module-boundary';
 import { HitParticipationModuleDef } from '@proto.ui/module-hit-participation';
 import { OverlayModuleDef } from '@proto.ui/module-overlay';
 import { PositioningModuleDef } from '@proto.ui/module-positioning';
+import { AxisInputModuleDef } from '@proto.ui/module-axis-input';
 import { ScrollModuleDef } from '@proto.ui/module-scroll';
 import { PresenceModuleDef } from '@proto.ui/module-presence';
 import { __RUN_TEST_SYS, TestSysModuleDef, type TestSysPort } from '@proto.ui/module-test-sys';
@@ -102,6 +103,7 @@ export function createRuntimeInstance<P extends PropsBaseType>(
       HitParticipationModuleDef,
       PositioningModuleDef,
       ScrollModuleDef,
+      AxisInputModuleDef,
       OverlayModuleDef,
       PresenceModuleDef,
       TestSysModuleDef,

@@ -1,3 +1,5 @@
+import { AXIS_INPUT_HOST_CAP, AXIS_INPUT_RUN_IN_CALLBACK_CAP } from '@proto.ui/module-axis-input';
+import { createWebAxisInputHost } from '@proto.ui/adapter-base';
 import {
   CONTROL_LABEL_HOST_CAP,
   CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
@@ -504,6 +506,10 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     .use('positioning', [
       [ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()],
       [AVAILABLE_SPACE_HOST_CAP, createWebAvailableSpaceHost()],
+    ])
+    .use('axis-input', [
+      [AXIS_INPUT_HOST_CAP, createWebAxisInputHost()],
+      [AXIS_INPUT_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('scroll', [
       [

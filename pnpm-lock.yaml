@@ -326,6 +326,9 @@ importers:
 
   packages/adapters/react:
     dependencies:
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -423,6 +426,9 @@ importers:
 
   packages/adapters/vue:
     dependencies:
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -511,6 +517,9 @@ importers:
 
   packages/adapters/vue2:
     dependencies:
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -599,6 +608,9 @@ importers:
 
   packages/adapters/web-component:
     dependencies:
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -811,6 +823,21 @@ importers:
       '@proto.ui/module-event':
         specifier: workspace:*
         version: link:../event
+
+  packages/modules/axis-input:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-anatomy':
+        specifier: workspace:*
+        version: link:../anatomy
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
 
   packages/modules/base:
     dependencies:
@@ -1370,6 +1397,9 @@ importers:
 
   packages/runtime:
     dependencies:
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../modules/axis-input
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../core
