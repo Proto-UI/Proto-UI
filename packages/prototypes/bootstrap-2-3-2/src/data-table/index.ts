@@ -1,3 +1,4 @@
+import { bootstrapButtonPressed } from '../button/paint';
 import type {
   DataTableRootProps,
   DataTableRootExposes,
@@ -151,18 +152,23 @@ export const dataTablePrevious = definePrototype<DataTablePreviousProps, DataTab
         'min-w-0 max-w-full text-foreground inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm cursor-pointer'
       )
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    const states = behavior.getAsHookHandle?.('as-button')?.stateHandles;
+    if (!states)
+      throw new Error('[bootstrap-2-3-2-data-table] Required inherited state is unavailable.');
+    def.rule({
+      when: (w) => w.state(states.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.state(states.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+    });
+    // Presentation consumes the existing owner; no second interaction hook.
+    def.rule({
+      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressed)),
+    });
     return behavior.render;
   },
 });
@@ -176,18 +182,23 @@ export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextEx
         'min-w-0 max-w-full text-foreground inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm cursor-pointer'
       )
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    const states = behavior.getAsHookHandle?.('as-button')?.stateHandles;
+    if (!states)
+      throw new Error('[bootstrap-2-3-2-data-table] Required inherited state is unavailable.');
+    def.rule({
+      when: (w) => w.state(states.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.state(states.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+    });
+    // Presentation consumes the existing owner; no second interaction hook.
+    def.rule({
+      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressed)),
+    });
     return behavior.render;
   },
 });
