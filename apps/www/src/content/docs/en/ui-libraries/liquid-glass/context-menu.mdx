@@ -1,0 +1,21 @@
+---
+title: 'ContextMenu'
+description: 'A context-triggered command menu with keyboard access.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+A context-triggered command menu with keyboard access.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-context-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root supports open/defaultOpen, disabled and closeOnItemCommit. Trigger opens on context.menu or ContextMenu/Shift+F10 and suppresses the native context menu for that handled request; ordinary left click does not open it. Content inherits real Overlay/Focus/Transition navigation, typeahead and controlled dismissal. This source anchors to the trigger region. Pointer-location virtual anchoring and touch long-press await portable host support; no raw DOM-coordinate escape is used.
+
+Parts: Root, Trigger, Content, Item.
+
+Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.

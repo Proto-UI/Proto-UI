@@ -1,0 +1,21 @@
+---
+title: 'ContextMenu'
+description: '支持键盘访问的上下文命令菜单。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+支持键盘访问的上下文命令菜单。
+
+<PrototypePreviewer
+  demoId="demo-base-context-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 提供 open/defaultOpen、disabled、closeOnItemCommit。Trigger 在 context.menu 或 ContextMenu/Shift+F10 时打开，并阻止已处理请求的原生菜单；普通左键不打开。Content 使用真实 Overlay/Focus/Transition 导航、文字跳转与受控关闭。本源码锚定触发区域；指针位置虚拟锚点及触摸长按仍待可移植宿主能力，没有采用原始DOM坐标绕过。
+
+组成: Root, Trigger, Content, Item.
+
+草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。

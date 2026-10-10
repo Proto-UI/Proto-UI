@@ -1,0 +1,21 @@
+---
+title: 'NavigationMenu'
+description: '具有目的地意图的命名导航展开面板。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+具有目的地意图的命名导航展开面板。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-navigation-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 为导航地标，Trigger 为展开按钮，Content 为命名区域。Root.value 标识打开的面板。Item 发出命令；Link 发出含 href、target 和修饰键意图的 navigate，由应用路由处理。声明当前页面语义；原生锚点 href、URL 预览、修饰键浏览及历史仍待宿主导航投影，不在此宣称完成。
+
+组成: Root, Trigger, Content, Item, Link.
+
+草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。

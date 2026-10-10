@@ -1,0 +1,21 @@
+---
+title: 'NavigationMenu'
+description: 'Named navigation disclosures with destination intents.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Named navigation disclosures with destination intents.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-navigation-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root is a navigation landmark, Trigger is a disclosure button and Content is a labelled region. Root.value identifies one open panel. Item emits a command; Link emits navigate with href, target and modifier intent. The application routes that intent. Current-page semantics are declared; native anchor href, URL preview, modifier browsing and browser history are pending a host navigation projection and are not claimed here.
+
+Parts: Root, Trigger, Content, Item, Link.
+
+Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.

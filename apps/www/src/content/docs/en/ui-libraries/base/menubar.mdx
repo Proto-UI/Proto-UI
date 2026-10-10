@@ -1,0 +1,21 @@
+---
+title: 'Menubar'
+description: 'A keyboard-coordinated bar of independent command panels.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+A keyboard-coordinated bar of independent command panels.
+
+<PrototypePreviewer
+  demoId="demo-base-menubar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root.value identifies one open panel. Trigger.value and Content.value pair a panel. The bar uses one roving tab stop, left/right movement, ArrowDown/Up entry, vertical command navigation and typeahead. Escape restores the matching trigger; outside press and command selection dismiss. Controlled value emits requests without changing the owner.
+
+Parts: Root, Trigger, Content, Item.
+
+Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
