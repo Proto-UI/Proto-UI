@@ -11,7 +11,7 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
     const behavior = asDrawerContent();
     def.feedback.style.use(
       tw(
-        'rounded-none border-2 border-foreground bg-background text-foreground shadow-[4px_4px_0_0_var(--color-foreground)] p-4 grid gap-4'
+        'rounded-none border-2 border-foreground bg-background text-foreground shadow-[4px_4px_0_0_var(--pui-foreground)] p-4 grid gap-4'
       )
     );
     behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });

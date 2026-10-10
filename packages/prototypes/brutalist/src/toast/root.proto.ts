@@ -11,7 +11,7 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
     const behavior = asToastRoot();
     def.feedback.style.use(
       tw(
-        'rounded-none border-2 border-foreground bg-background text-foreground shadow-[3px_3px_0_0_var(--color-foreground)] p-2 grid gap-2 min-w-0 w-full p-4'
+        'rounded-none border-2 border-foreground bg-background text-foreground shadow-[3px_3px_0_0_var(--pui-foreground)] p-2 grid gap-2 min-w-0 w-full p-4'
       )
     );
   },
