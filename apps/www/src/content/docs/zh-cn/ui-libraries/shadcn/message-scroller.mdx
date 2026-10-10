@@ -1,0 +1,16 @@
+---
+title: 'Message-Scroller (WIP)'
+description: 'message-scroller functional composition and current verification limits.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Message Scroller 复用 Scroll Surface 的 end-follow。读者位于末端时跟随追加；离开末端后可以通过 Jump to latest 显式恢复。newContentCount 由应用提供，不推断未读业务事实。跳转不会主动请求焦点。
+
+当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-message-scroller"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

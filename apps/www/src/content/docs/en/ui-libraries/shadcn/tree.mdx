@@ -1,0 +1,16 @@
+---
+title: 'Tree (WIP)'
+description: 'tree functional composition and current verification limits.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Tree owns single selection and expansion of a complete authored hierarchy. nodeKey is unique, parentKey identifies its parent, and invalid cycles or missing parents fail closed. Arrow keys, Home/End and first-letter navigation move focus; Left/Right collapse, expand or navigate to parent/child. Controlled value and expandedKeys are request-only.
+
+This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-tree"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

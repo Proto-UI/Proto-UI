@@ -1,0 +1,147 @@
+{
+  "status": "WIP functional source, not acceptance",
+  "families": [
+    {
+      "family": "base",
+      "subpath": "tree",
+      "exports": {
+        "treeRoot": "base-tree-root",
+        "treeItem": "base-tree-item",
+        "treeGroup": "base-tree-group",
+        "treeToggle": "base-tree-toggle"
+      },
+      "demoId": "demo-base-tree",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-tree.demo.ts",
+      "docSlug": "ui-libraries/base/tree"
+    },
+    {
+      "family": "base",
+      "subpath": "message-scroller",
+      "exports": {
+        "messageScrollerRoot": "base-message-scroller-root",
+        "messageScrollerViewport": "base-message-scroller-viewport",
+        "messageScrollerJump": "base-message-scroller-jump"
+      },
+      "demoId": "demo-base-message-scroller",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-message-scroller.demo.ts",
+      "docSlug": "ui-libraries/base/message-scroller"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "tree",
+      "exports": {
+        "treeRoot": "shadcn-tree-root",
+        "treeItem": "shadcn-tree-item",
+        "treeGroup": "shadcn-tree-group",
+        "treeToggle": "shadcn-tree-toggle"
+      },
+      "demoId": "demo-shadcn-tree",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-tree.demo.ts",
+      "docSlug": "ui-libraries/shadcn/tree"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "message-scroller",
+      "exports": {
+        "messageScrollerRoot": "shadcn-message-scroller-root",
+        "messageScrollerViewport": "shadcn-message-scroller-viewport",
+        "messageScrollerJump": "shadcn-message-scroller-jump"
+      },
+      "demoId": "demo-shadcn-message-scroller",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-message-scroller.demo.ts",
+      "docSlug": "ui-libraries/shadcn/message-scroller"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "tree",
+      "exports": {
+        "treeRoot": "brutalist-tree-root",
+        "treeItem": "brutalist-tree-item",
+        "treeGroup": "brutalist-tree-group",
+        "treeToggle": "brutalist-tree-toggle"
+      },
+      "demoId": "demo-brutalist-tree",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-tree.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/tree"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "message-scroller",
+      "exports": {
+        "messageScrollerRoot": "brutalist-message-scroller-root",
+        "messageScrollerViewport": "brutalist-message-scroller-viewport",
+        "messageScrollerJump": "brutalist-message-scroller-jump"
+      },
+      "demoId": "demo-brutalist-message-scroller",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-message-scroller.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/message-scroller"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "tree",
+      "exports": {
+        "treeRoot": "bootstrap-2-3-2-tree-root",
+        "treeItem": "bootstrap-2-3-2-tree-item",
+        "treeGroup": "bootstrap-2-3-2-tree-group",
+        "treeToggle": "bootstrap-2-3-2-tree-toggle"
+      },
+      "demoId": "demo-bootstrap-2-3-2-tree",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-tree.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/tree"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "message-scroller",
+      "exports": {
+        "messageScrollerRoot": "bootstrap-2-3-2-message-scroller-root",
+        "messageScrollerViewport": "bootstrap-2-3-2-message-scroller-viewport",
+        "messageScrollerJump": "bootstrap-2-3-2-message-scroller-jump"
+      },
+      "demoId": "demo-bootstrap-2-3-2-message-scroller",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-message-scroller.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/message-scroller"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "tree",
+      "exports": {
+        "treeRoot": "liquid-glass-tree-root",
+        "treeItem": "liquid-glass-tree-item",
+        "treeGroup": "liquid-glass-tree-group",
+        "treeToggle": "liquid-glass-tree-toggle"
+      },
+      "demoId": "demo-liquid-glass-tree",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-tree.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/tree"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "message-scroller",
+      "exports": {
+        "messageScrollerRoot": "liquid-glass-message-scroller-root",
+        "messageScrollerViewport": "liquid-glass-message-scroller-viewport",
+        "messageScrollerJump": "liquid-glass-message-scroller-jump"
+      },
+      "demoId": "demo-liquid-glass-message-scroller",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-message-scroller.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/message-scroller"
+    }
+  ],
+  "dependencies": [
+    "Calendar/shared utility commit 9d306b27594e5e7503476fb6ec3ea90e682ba7a9",
+    "Tree generic A11y mapping 8fc72616"
+  ],
+  "tests": [
+    "packages/prototypes/base/test/tree.test.ts",
+    "packages/prototypes/base/test/message-scroller.test.ts"
+  ],
+  "testResult": "4 tests passed after Tree A11y mapping; initial missing aria-level and disconnected end-follow callback failures retained in work report",
+  "remaining": [
+    "Full keyboard/pointer real browser and interruption matrix",
+    "Native GPUI and Compiler/runtime conformance",
+    "Package/CLI/catalog integration and consumer builds",
+    "Commit-bound visual evidence, independent review and lifecycle admission"
+  ],
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}

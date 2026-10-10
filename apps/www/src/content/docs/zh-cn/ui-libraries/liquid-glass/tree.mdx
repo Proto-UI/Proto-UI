@@ -1,0 +1,16 @@
+---
+title: 'Tree (WIP)'
+description: 'tree functional composition and current verification limits.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，parentKey 指向父项；重复标识、缺失父项和环路均拒绝。方向键、Home/End 与首字母移动焦点；左右键展开、折叠或定位父子项。value 与 expandedKeys 支持受控请求。
+
+当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tree"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
