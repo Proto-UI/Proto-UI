@@ -6,7 +6,7 @@ const radioGroupRoot = definePrototype<ShadcnRadioGroupRootProps, ShadcnRadioGro
   name: 'shadcn-radio-group-root',
   setup(def) {
     asRadioGroupRoot();
-    def.feedback.style.use(tw('grid gap-3'));
+    def.feedback.style.use(tw('grid w-full gap-2'));
   },
 });
 
