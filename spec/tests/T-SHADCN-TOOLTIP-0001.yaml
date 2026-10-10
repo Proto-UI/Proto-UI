@@ -36,15 +36,15 @@ cases:
       - P-SHADCN-TOOLTIP-TRIGGER-NO-ACTIVATION-OWNER
     expectation: shadcn-tooltip-trigger-paints-hover-focus-and-press-without-command-semantics
   - id: T-SHADCN-TOOLTIP-0001-CASE-CONTENT
-    title: Content remains supplementary and renderer-portaled with its complete visual surface
+    title: Content remains supplementary and renderer-portaled with the foreground/background static surface and physical CSS
     covers:
       - P-SHADCN-TOOLTIP-OWNERSHIP-BOUNDARY
       - P-SHADCN-TOOLTIP-CONTENT-BASE-INHERITANCE
       - P-SHADCN-TOOLTIP-CONTENT-CURRENT-VISUAL-SURFACE
       - P-SHADCN-TOOLTIP-CONTENT-SUPPLEMENTARY-BOUNDARY
-    expectation: shadcn-tooltip-content-keeps-base-overlay-ownership-and-compact-presentation
+    expectation: shadcn-tooltip-content-keeps-base-overlay-ownership-and-base-nova-static-surface-without-old-popover-additions
   - id: T-SHADCN-TOOLTIP-0001-CASE-BROWSER
-    title: Real package exports render focus description Portal Escape and paint across Web Components React Vue and Vue 2
+    title: Real package exports render focus description Portal Escape and same-instance Light/Dark paint across Web Components React Vue and Vue 2
     covers:
       - P-SHADCN-TOOLTIP-OWNERSHIP-BOUNDARY
       - P-SHADCN-TOOLTIP-ARROW-OMISSION
@@ -106,4 +106,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced draft shadcn Tooltip package, compatibility, behavior, and cross-runtime coverage.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Updated draft Content token, physical CSS, and browser paint expectations for the base-nova static surface migration.
 tags: [test, shadcn, tooltip, compatibility, visual, interaction, accessibility]

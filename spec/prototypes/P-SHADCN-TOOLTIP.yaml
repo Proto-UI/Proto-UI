@@ -82,15 +82,18 @@ openQuestions:
       zh-CN: 当前差异中哪些是 Proto UI 的有意边界，哪些属于未来 parity work？
     context:
       en: >-
-        The pinned TooltipProvider defaults delayDuration to 0ms, while P-BASE-TOOLTIP-GROUP-DELAYS keeps 700/100/300ms Group defaults and explicit Root override semantics. The projection keeps the Base defaults and documents this upstream divergence. Pinned TooltipContent defaults sideOffset to 0, while Base Content defaults to 4; this projection inherits 4. Upstream wraps Content in Portal and renders Arrow unconditionally; Proto UI keeps Portal renderer-owned and omits Arrow under D-TOOLTIP-PROTOTYPE-BOUNDARY-0001. Group inline-flex, Trigger feedback, and the local Content border/popover/shadow/overflow additions are Proto UI presentation deltas.
+        The pinned TooltipProvider defaults delayDuration to 0ms, while P-BASE-TOOLTIP-GROUP-DELAYS keeps 700/100/300ms Group defaults and explicit Root override semantics. The projection keeps the Base defaults and documents this upstream divergence. Pinned TooltipContent defaults sideOffset to 0, while Base Content defaults to 4; this projection inherits 4. Upstream wraps Content in Portal and renders Arrow unconditionally; Proto UI keeps Portal renderer-owned and omits Arrow under D-TOOLTIP-PROTOTYPE-BOUNDARY-0001. Group inline-flex and Trigger feedback remain Proto UI presentation deltas. Content static presentation now follows the separate 2026-10-10 base-nova registry snapshot (JSON SHA256 2f55867faecee2d3616cfd8c6a80b538909a21e62fdfa2788b1ead56093e5395), not a replacement API baseline. That snapshot uses sideOffset 4. The existing max-w-80 expresses its default max-w-xs 20rem limit. Arrow, transform-origin, directional enter/exit motion, and kbd descendant recipes remain unaligned; this is not full upstream parity.
 
 
       zh-CN: >-
-        固定 TooltipProvider 的 delayDuration 默认为 0ms，而 P-BASE-TOOLTIP-GROUP-DELAYS 保留 700/100/300ms Group defaults 与显式 Root override semantics；本投射保留 Base defaults 并记录该差异。 固定 TooltipContent 的 sideOffset 默认为 0，Base Content 默认为 4，本投射继承 4。upstream 显式 Portal 包裹 Content 且无条件渲染 Arrow；Proto UI 依 D-TOOLTIP-PROTOTYPE-BOUNDARY-0001 保持 Portal 为 renderer-owned 并省略 Arrow。Group inline-flex、Trigger feedback 与本地 Content 的 border/popover/shadow/overflow 是 Proto UI presentation deltas。
+        固定 TooltipProvider 的 delayDuration 默认为 0ms，而 P-BASE-TOOLTIP-GROUP-DELAYS 保留 700/100/300ms Group defaults 与显式 Root override semantics；本投射保留 Base defaults 并记录该差异。 固定 TooltipContent 的 sideOffset 默认为 0，Base Content 默认为 4，本投射继承 4。upstream 显式 Portal 包裹 Content 且无条件渲染 Arrow；Proto UI 依 D-TOOLTIP-PROTOTYPE-BOUNDARY-0001 保持 Portal 为 renderer-owned 并省略 Arrow。Group inline-flex 与 Trigger feedback 仍是 Proto UI presentation deltas。Content 静态呈现另参考 2026-10-10 base-nova registry snapshot（JSON SHA256 2f55867faecee2d3616cfd8c6a80b538909a21e62fdfa2788b1ead56093e5395），并未替换 API baseline。该 snapshot 的 sideOffset 为 4。既有 max-w-80 表达其默认 max-w-xs 的 20rem 上限。Arrow、transform-origin、方向 enter/exit motion 与 kbd descendant recipes 仍未对齐，不构成完整 upstream parity。
 
 
     blocks: [shadcn tooltip parity roadmap]
 sources:
+  - path: internal/records/2026-10-10-finf-tooltip-surface-migration.md
+  - path: https://ui.shadcn.com/r/styles/base-nova/tooltip.json
+    label: Separate 2026-10-10 content-hash-pinned visual snapshot, not an API baseline
   - path: internal/records/2026-09-05-shadcn-tooltip-provenance.zh-CN.md
   - path: packages/prototypes/shadcn/src/tooltip/root.proto.ts
   - path: packages/prototypes/shadcn/src/tooltip/types.ts
@@ -110,4 +113,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft shadcn Tooltip family boundary and centralized compatibility differences.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added the separate dated base-nova static Content reference while retaining the pinned API baseline and explicit remaining differences.
 tags: [prototype, shadcn, tooltip, upstream-derived, compatibility, visual, delta]

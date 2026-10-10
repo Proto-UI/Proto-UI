@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  renderProtoStyleTokenCss,
+  renderProtoShadowStyleTokenCss,
+} from '../../../cli/src/services/proto-style-css';
 import { styleContains } from '../../test-utils/style';
 import * as ShadcnPackage from '../src';
 import * as tooltipFamily from '../src/tooltip';
@@ -110,19 +114,54 @@ describe('prototypes/shadcn: tooltip', () => {
     for (const token of ['inline-flex', 'cursor-pointer', 'outline-none']) {
       expect(styleContains(trigger, token), token).toBe(true);
     }
-    for (const token of [
+    const surface = [
       'z-50',
-      'overflow-hidden',
+      'inline-flex',
+      'w-fit',
+      'max-w-80',
+      'items-center',
+      'gap-1.5',
       'rounded-md',
-      'border',
-      'bg-popover',
+      'bg-foreground',
       'px-3',
       'py-1.5',
       'text-xs',
+      'text-background',
+    ];
+    for (const token of surface) expect(styleContains(content, token), token).toBe(true);
+    for (const token of [
+      'overflow-hidden',
+      'border',
+      'bg-popover',
       'text-popover-foreground',
       'shadow-md',
+      'max-w-xs',
     ]) {
-      expect(styleContains(content, token), token).toBe(true);
+      expect(styleContains(content, token), token).toBe(false);
+    }
+    // Feed actual opened renderer output through both existing physical CSS paths.
+    const emitted = (content.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(emitted);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const declaration of [
+        'z-index: 50;',
+        'display: inline-flex;',
+        'width: fit-content;',
+        'max-width: 20rem;',
+        'align-items: center;',
+        'gap: 0.375rem;',
+        'background-color: var(--pui-foreground);',
+        'color: var(--pui-background);',
+        'padding-inline: 0.75rem;',
+        'padding-block: 0.375rem;',
+        'font-size: 0.75rem;',
+      ])
+        expect(css, declaration).toContain(declaration);
+      expect(css).not.toContain('overflow: hidden;');
+      expect(css).not.toContain('border-width: 1px;');
+      expect(css).not.toContain('background-color: var(--pui-popover);');
+      expect(css).not.toContain('box-shadow:');
     }
     expect(content.getAttribute('role')).toBe('tooltip');
     expect(content.hasAttribute('tabindex')).toBe(false);
