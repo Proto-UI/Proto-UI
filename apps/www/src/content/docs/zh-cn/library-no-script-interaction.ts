@@ -10,6 +10,9 @@ export interface NoScriptLinkSample {
   viewport: { width: number; height: number; scrollX: number; scrollY: number };
   point: { x: number; y: number };
   receivesEvents: boolean;
+  wheelPoint: { x: number; y: number } | null;
+  visibleBounds: { left: number; top: number; right: number; bottom: number } | null;
+  wheelRoute?: unknown;
   wheelContext?: unknown;
 }
 
@@ -20,6 +23,121 @@ export function readNoScriptLink(element: Element, diagnostics = false): NoScrip
   const style = getComputedStyle(element);
   const point = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const hit = document.elementFromPoint(point.x, point.y);
+  let wheelPoint: { x: number; y: number } | null = null;
+  let wheelRoute: unknown;
+  let visibleBounds: NoScriptLinkSample['visibleBounds'] = null;
+  // The native wheel must reach the same scroll owner as the destination.
+  // A fixed viewport coordinate can instead scroll an unrelated no-JS sidebar
+  // whose overscroll containment correctly prevents document scroll chaining.
+  try {
+    const styles = new Map<Element, CSSStyleDeclaration>();
+    const css = (node: Element) => {
+      let value = styles.get(node);
+      if (!value) {
+        value = getComputedStyle(node);
+        styles.set(node, value);
+      }
+      return value;
+    };
+    const chain = (start: Element | null) => {
+      const nodes: Element[] = [];
+      for (let node = start; node; ) {
+        if (nodes.length >= 128) return null;
+        nodes.push(node);
+        const root = node.getRootNode();
+        node = node.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+      }
+      return nodes;
+    };
+    const isScrollBoundary = (node: Element) => {
+      if (node === document.scrollingElement) return true;
+      const style = css(node);
+      return (
+        /^(auto|scroll|overlay|hidden)$/.test(style.overflowY) &&
+        (node.scrollHeight > node.clientHeight ||
+          /^(contain|none)$/.test(style.overscrollBehaviorY))
+      );
+    };
+    const targetChain = chain(element);
+    if (!targetChain) throw new Error('Target clipping ancestry exceeds 128 elements');
+    const bounds = { left: 0, top: 0, right: innerWidth, bottom: innerHeight };
+    for (const node of targetChain.slice(1)) {
+      const style = css(node);
+      // Rectangular clipping is the supported observation. Do not claim
+      // full-link visibility from an axis-aligned box after transforms/masks.
+      if (
+        (style.transform && style.transform !== 'none') ||
+        (style.zoom && !['1', 'normal'].includes(style.zoom)) ||
+        (style.clipPath && style.clipPath !== 'none')
+      )
+        throw new Error('Transformed or masked clipping ancestry is unsupported');
+      if (node === document.scrollingElement) continue;
+      const clipX = /^(auto|scroll|overlay|hidden|clip)$/.test(style.overflowX);
+      const clipY = /^(auto|scroll|overlay|hidden|clip)$/.test(style.overflowY);
+      if (!clipX && !clipY) continue;
+      const box = node.getBoundingClientRect();
+      if (clipX) {
+        bounds.left = Math.max(bounds.left, box.left + node.clientLeft);
+        bounds.right = Math.min(bounds.right, box.left + node.clientLeft + node.clientWidth);
+      }
+      if (clipY) {
+        bounds.top = Math.max(bounds.top, box.top + node.clientTop);
+        bounds.bottom = Math.min(bounds.bottom, box.top + node.clientTop + node.clientHeight);
+      }
+    }
+    if (!Object.values(bounds).every(Number.isFinite)) throw new Error('Invalid clipping geometry');
+    visibleBounds = bounds;
+    const fullyWithin =
+      rect.x >= bounds.left &&
+      rect.y >= bounds.top &&
+      rect.x + rect.width <= bounds.right &&
+      rect.y + rect.height <= bounds.bottom;
+    const owner = targetChain.find(isScrollBoundary);
+    const candidates: { point: { x: number; y: number }; reason: string }[] = [];
+    if (
+      !fullyWithin &&
+      owner &&
+      (owner === document.scrollingElement || css(owner).overflowY !== 'hidden')
+    ) {
+      if (bounds.right > bounds.left && bounds.bottom > bounds.top) {
+        outer: for (const fy of [0.75, 0.5, 0.9])
+          for (const fx of [0.5, 0.05, 0.95, 0.25, 0.75]) {
+            const point = {
+              x: bounds.left + (bounds.right - bounds.left) * fx,
+              y: bounds.top + (bounds.bottom - bounds.top) * fy,
+            };
+            const hitChain = chain(document.elementFromPoint(point.x, point.y));
+            const hitOwner = hitChain?.find(isScrollBoundary);
+            const overlay = hitChain?.some(
+              (node) => /^(fixed|sticky)$/.test(css(node).position) && !targetChain!.includes(node)
+            );
+            const reason = !hitChain
+              ? 'ancestry-limit'
+              : overlay
+                ? 'unrelated-overlay'
+                : hitOwner !== owner
+                  ? 'different-scroll-owner'
+                  : 'same-scroll-owner';
+            candidates.push({ point, reason });
+            if (reason === 'same-scroll-owner') {
+              wheelPoint = point;
+              break outer;
+            }
+          }
+      }
+    }
+    wheelRoute = {
+      owner: owner
+        ? { tag: owner.tagName, id: owner.id, className: owner.getAttribute('class') }
+        : null,
+      candidates,
+      bounded: 'at most 15 native hit tests; each ancestry at most 128 elements',
+    };
+  } catch (error) {
+    // Missing native routing evidence is fail-closed, never a guessed point.
+    visibleBounds = null;
+    wheelRoute = { unavailable: String(error) };
+  }
   let wheelContext: unknown;
   if (diagnostics) {
     try {
@@ -51,8 +169,8 @@ export function readNoScriptLink(element: Element, diagnostics = false): NoScrip
           transform: css.transform,
         };
       };
-      const wheelPoint = { x: innerWidth / 2, y: innerHeight * 0.75 };
-      let node = document.elementFromPoint(wheelPoint.x, wheelPoint.y);
+      const inspectedPoint = wheelPoint ?? { x: innerWidth / 2, y: innerHeight * 0.75 };
+      let node = document.elementFromPoint(inspectedPoint.x, inspectedPoint.y);
       const hitChain = [];
       for (let depth = 0; node && depth < 32; depth++) {
         hitChain.push(inspect(node));
@@ -60,7 +178,7 @@ export function readNoScriptLink(element: Element, diagnostics = false): NoScrip
         node = node.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
       }
       wheelContext = {
-        wheelPoint,
+        wheelPoint: inspectedPoint,
         hitChain,
         chainTruncated: node !== null,
         scrollingElement: inspect(document.scrollingElement),
@@ -84,7 +202,9 @@ export function readNoScriptLink(element: Element, diagnostics = false): NoScrip
     }
   }
   return {
-    ...(diagnostics ? { wheelContext } : {}),
+    wheelPoint,
+    visibleBounds,
+    ...(diagnostics ? { wheelContext, wheelRoute } : {}),
     connected: element.isConnected,
     visible:
       style.display !== 'none' && style.visibility === 'visible' && Number(style.opacity) > 0,
@@ -182,6 +302,7 @@ const stableKey = (s: NoScriptLinkSample) =>
   JSON.stringify([
     s.rect,
     s.viewport,
+    s.visibleBounds,
     s.point,
     s.href,
     s.visible,
@@ -204,6 +325,7 @@ export function assertNoScriptDestination(sample: NoScriptLinkSample, expected: 
     ...Object.values(sample.rect),
     ...Object.values(sample.viewport),
     ...Object.values(sample.point),
+    ...Object.values(sample.visibleBounds ?? {}),
   ];
   if (
     !values.every(Number.isFinite) ||
@@ -215,16 +337,21 @@ export function assertNoScriptDestination(sample: NoScriptLinkSample, expected: 
     !sample.visible
   )
     throw new Error('No-script link is detached, hidden or has invalid geometry');
+  if (!sample.visibleBounds)
+    throw new Error('No-script link visible clipping bounds are unavailable');
 }
 
 export function linkWithinViewport(sample: NoScriptLinkSample) {
-  const { rect, viewport } = sample;
+  const { rect, viewport, visibleBounds } = sample;
   // Require the actual action link, not the taller containing Card, to fit.
   return (
-    rect.x >= 0 &&
-    rect.y >= 0 &&
+    !!visibleBounds &&
+    rect.x >= Math.max(0, visibleBounds.left) &&
+    rect.y >= Math.max(0, visibleBounds.top) &&
     rect.x + rect.width <= viewport.width &&
-    rect.y + rect.height <= viewport.height
+    rect.y + rect.height <= viewport.height &&
+    rect.x + rect.width <= visibleBounds.right &&
+    rect.y + rect.height <= visibleBounds.bottom
   );
 }
 
@@ -287,17 +414,42 @@ export async function revealNoScriptLink(
           stability: 'three host-clock samples, at least 50ms apart; not rAF frames',
         };
       }
-      if (sample.rect.width > sample.viewport.width || sample.rect.height > sample.viewport.height)
-        throw new Error('No-script action link cannot fit in the viewport');
+      const bounds = sample.visibleBounds!;
+      if (
+        sample.rect.width > bounds.right - bounds.left ||
+        sample.rect.height > bounds.bottom - bounds.top
+      )
+        throw new Error('No-script action link cannot fit in its visible scrollport');
       if (wheels >= maxWheels)
         throw new Error('No-script link remained unreachable after bounded wheel input');
       const delta = Math.max(
         -sample.viewport.height * 0.8,
-        Math.min(sample.viewport.height * 0.8, sample.point.y - sample.viewport.height / 2)
+        Math.min(sample.viewport.height * 0.8, sample.point.y - (bounds.top + bounds.bottom) / 2)
       );
       if (Math.abs(delta) < 1)
         throw new Error('No-script link is horizontally outside the viewport');
-      await bounded(() => input.move(sample.viewport.width / 2, sample.viewport.height * 0.75));
+      const wheelPoint = sample.wheelPoint;
+      if (
+        !wheelPoint ||
+        !Number.isFinite(wheelPoint.x) ||
+        !Number.isFinite(wheelPoint.y) ||
+        wheelPoint.x <= 0 ||
+        wheelPoint.y <= 0 ||
+        wheelPoint.x >= sample.viewport.width ||
+        wheelPoint.y >= sample.viewport.height
+      )
+        throw new Error(
+          'No-script destination has no unobstructed wheel surface for its scroll owner'
+        );
+      await bounded(() => input.move(wheelPoint.x, wheelPoint.y));
+      const positioned = await bounded(input.sample);
+      assertNoScriptDestination(positioned, expected);
+      if (
+        stableKey(positioned) !== stableKey(sample) ||
+        positioned.wheelPoint?.x !== wheelPoint.x ||
+        positioned.wheelPoint?.y !== wheelPoint.y
+      )
+        throw new Error('No-script wheel route changed after pointer positioning');
       await bounded(() => input.wheel(delta));
       wheels++;
       stable = 0;

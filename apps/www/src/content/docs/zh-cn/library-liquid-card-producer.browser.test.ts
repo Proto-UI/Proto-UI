@@ -433,7 +433,7 @@ describe('no-script native input controls', () => {
     try {
       const destination = `${baseUrl}/en/ui-libraries/liquid-glass/`;
       await page.setContent(
-        `<style>body{margin:0}header{position:fixed;top:0;left:0;width:100%;height:96px;background:#ddd;z-index:2}a{display:block;width:180px;height:80px;margin:0 auto}</style><header>Visible fixed header</header><div style="height:14000px"></div><a href="${destination}">Native destination</a><div style="height:1000px"></div><script>globalThis.__puiNoScriptControlRan=true</script>`
+        `<style>body{margin:0}header{position:fixed;top:0;left:0;width:100%;height:96px;background:#ddd;z-index:2}a{display:block;width:180px;height:80px;margin:0 auto}</style><header>Visible fixed header</header><aside id="wheel-trap" style="position:absolute;left:10%;top:264px;width:80%;height:540px;overflow:auto;overscroll-behavior:contain"><div style="height:22533px">Independent sidebar wheel owner</div></aside><div style="height:14000px"></div><a href="${destination}">Native destination</a><div style="height:1000px"></div><script>globalThis.__puiNoScriptControlRan=true</script>`
       );
       expect(
         await page.evaluate(
@@ -442,8 +442,33 @@ describe('no-script native input controls', () => {
               .__puiNoScriptControlRan
         )
       ).toBeUndefined();
+      // Reproduce the official failed route with real input: the old fixed
+      // point belongs to the sidebar, not the document containing the link.
+      await page.mouse.move(160, 675);
+      await page.mouse.wheel(0, 720);
+      let trapped = { root: 0, sidebar: 0 };
+      const trapDeadline = performance.now() + 3000;
+      let trapStable = 0;
+      while (trapStable < 3 && performance.now() < trapDeadline) {
+        const next = await page.evaluate(() => ({
+          root: scrollY,
+          sidebar: document.querySelector('#wheel-trap')!.scrollTop,
+        }));
+        trapStable =
+          next.sidebar > 0 && next.sidebar === trapped.sidebar && next.root === trapped.root
+            ? trapStable + 1
+            : 0;
+        trapped = next;
+        if (trapStable < 3) await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+      expect(trapStable).toBe(3);
+      expect(trapped.sidebar).toBeGreaterThan(0);
+      expect(trapped.root).toBe(0);
       const input = noScriptInput(page, page.locator('a'));
       const observation = await revealNoScriptLink(input, destination);
+      expect(await page.locator('#wheel-trap').evaluate((node) => node.scrollTop)).toBe(
+        trapped.sidebar
+      );
       expect(observation.wheels).toBeGreaterThan(0);
       expect(observation.sample.viewport.scrollY).toBeGreaterThan(0);
       expect(observation.sample.receivesEvents).toBe(true);
@@ -455,6 +480,7 @@ describe('no-script native input controls', () => {
       await page.waitForURL(destination);
       results.push({
         name: 'no-script-native-wheel-control',
+        trapped,
         passed: true,
         observation,
         image,

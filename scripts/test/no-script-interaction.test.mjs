@@ -22,6 +22,8 @@ function harness(overrides = {}) {
   const input = {
     async sample() {
       return {
+        wheelPoint: { x: 160, y: 675 },
+        visibleBounds: { left: 0, top: 0, right: 320, bottom: 900 },
         connected: true,
         visible: true,
         href: expected,
@@ -517,10 +519,8 @@ test('read-only diagnostic identifies wheel hit chain, scroll owner and actual v
   });
   try {
     const sample = read(anchor, true);
-    assert.deepEqual(points, [
-      [160, 11040],
-      [160, 675],
-    ]);
+    assert.deepEqual(points[0], [160, 11040]);
+    assert.deepEqual(points.at(-1), [160, 675]);
     assert.deepEqual(
       sample.wheelContext.hitChain.map((node) => node.tag),
       ['DIV', 'BODY', 'HTML']
@@ -545,4 +545,302 @@ test('read-only diagnostic identifies wheel hit chain, scroll owner and actual v
       else delete globalThis[key];
     }
   }
+});
+
+async function withWheelRouteFixture(options, work) {
+  const names = [
+    'HTMLAnchorElement',
+    'ShadowRoot',
+    'innerWidth',
+    'innerHeight',
+    'scrollX',
+    'scrollY',
+    'getComputedStyle',
+    'document',
+  ];
+  const saved = Object.fromEntries(
+    names.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
+  );
+  const width = options.width ?? 320,
+    height = 900;
+  let rootOffset = options.backwards ? 5000 : 0,
+    nestedOffset = 0,
+    sidebarOffset = 0,
+    pointer,
+    time = 0;
+  const calls = [];
+  const box = (x, y, width, height) => ({
+    x,
+    y,
+    width,
+    height,
+    left: x,
+    top: y,
+    right: x + width,
+    bottom: y + height,
+  });
+  class Node {
+    constructor(tag, parent, rect, style = {}) {
+      this.tagName = tag;
+      this.parentElement = parent;
+      this.rect = rect;
+      this.style = style;
+      this.id = tag;
+    }
+    isConnected = true;
+    clientLeft = 0;
+    clientTop = 0;
+    scrollLeft = 0;
+    get scrollTop() {
+      return this === root
+        ? rootOffset
+        : this === nested
+          ? nestedOffset
+          : this === sidebar
+            ? sidebarOffset
+            : 0;
+    }
+    get scrollHeight() {
+      return [root, nested, sidebar].includes(this) ? 23000 : this.getBoundingClientRect().height;
+    }
+    get clientHeight() {
+      return this === root ? height : this.getBoundingClientRect().height;
+    }
+    get clientWidth() {
+      return this.getBoundingClientRect().width;
+    }
+    getBoundingClientRect() {
+      return this.rect();
+    }
+    getAttribute() {
+      return null;
+    }
+    hasAttribute() {
+      return false;
+    }
+    getRootNode() {
+      return document;
+    }
+    contains(node) {
+      return node === this;
+    }
+  }
+  class Anchor extends Node {
+    href = expected;
+  }
+  const root = new Node('HTML', null, () => box(0, 0, width, 23000));
+  const body = new Node('BODY', root, () => box(0, -rootOffset, width, 23000));
+  const outer = new Node(
+    'OUTER',
+    body,
+    () => box(options.outerNarrow ? width / 2 - 20 : 0, 100, options.outerNarrow ? 40 : width, 550),
+    { overflowX: 'hidden', overflowY: 'hidden', transform: options.outerTransform ?? 'none' }
+  );
+  const nested = new Node(
+    'NESTED',
+    options.outerClip ? outer : body,
+    () => box(4, 150, width - 8, 600),
+    { overflowY: 'auto' }
+  );
+  const sidebar = new Node(
+    'SIDEBAR',
+    body,
+    () =>
+      options.fullSidebar ? box(0, 0, width, height) : box(width * 0.1, 264, width * 0.8, 540),
+    { overflowY: 'auto', overscrollBehaviorY: 'contain' }
+  );
+  const overlay = new Node('OVERLAY', body, () => box(0, 0, width, height), {
+    position: options.overlay ?? 'fixed',
+  });
+  const targetY = options.targetY ?? (options.backwards ? 1000 : 14000);
+  const anchor = new Anchor('A', options.nested ? nested : body, () =>
+    box(width * 0.2, targetY - (options.nested ? nestedOffset : rootOffset), width * 0.6, 80)
+  );
+  const inside = (node, x, y) => {
+    const r = node.getBoundingClientRect();
+    return x >= r.x && x < r.right && y >= r.y && y < r.bottom;
+  };
+  const hit = (x, y) => {
+    if (x < 0 || x >= width || y < 0 || y >= height || options.noHit) return null;
+    if (options.overlay) return overlay;
+    if (options.nested) {
+      if (!inside(nested, x, y) || (options.outerClip && !inside(outer, x, y))) return body;
+      return inside(anchor, x, y) ? anchor : nested;
+    }
+    if (inside(anchor, x, y)) return anchor;
+    return inside(sidebar, x, y) ? sidebar : body;
+  };
+  Object.assign(globalThis, {
+    HTMLAnchorElement: Anchor,
+    ShadowRoot: class {},
+    innerWidth: width,
+    innerHeight: height,
+    scrollX: 0,
+    scrollY: rootOffset,
+    getComputedStyle: (node) => ({
+      display: 'block',
+      visibility: 'visible',
+      opacity: '1',
+      overflowY: 'visible',
+      position: 'static',
+      overscrollBehaviorY: 'auto',
+      ...node.style,
+    }),
+    document: { documentElement: root, body, scrollingElement: root, elementFromPoint: hit },
+  });
+  const input = {
+    async sample() {
+      globalThis.scrollY = rootOffset;
+      return read(anchor);
+    },
+    async move(x, y) {
+      pointer = { x, y };
+      calls.push(['move', x, y]);
+    },
+    async wheel(delta) {
+      calls.push(['wheel', delta]);
+      const node = hit(pointer.x, pointer.y);
+      if (node === sidebar)
+        sidebarOffset = Math.max(0, Math.min(23000 - sidebar.clientHeight, sidebarOffset + delta));
+      else if (options.nested && (node === nested || node === anchor))
+        nestedOffset = Math.max(0, nestedOffset + delta);
+      else rootOffset = Math.max(0, rootOffset + delta);
+    },
+    async down() {
+      calls.push(['down']);
+    },
+    async up() {
+      calls.push(['up']);
+    },
+  };
+  try {
+    return await work({
+      input,
+      calls,
+      options: {
+        now: () => time,
+        sleep: async (ms) => {
+          time += ms;
+        },
+      },
+      state: () => ({ rootOffset, nestedOffset, sidebarOffset }),
+    });
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value) Object.defineProperty(globalThis, key, value);
+      else delete globalThis[key];
+    }
+  }
+}
+
+test('official sidebar trap reproduces old fixed-point source failure and routes the candidate to its actual document owner', async () => {
+  await withWheelRouteFixture({}, async (h) => {
+    // Original 5dab fixed point consumes every wheel in the independent sidebar.
+    await h.input.move(160, 675);
+    for (let i = 0; i < 40; i++) await h.input.wheel(720);
+    assert.equal(h.state().rootOffset, 0);
+    assert.equal(h.state().sidebarOffset, 22460);
+    const r = await reveal(h.input, expected, h.options);
+    assert.ok(r.sample.viewport.scrollY > 0);
+    assert.equal(h.state().sidebarOffset, 22460);
+    assert.ok(h.calls.some((call) => call[0] === 'move' && call[1] === 16));
+    assert.equal(r.sample.receivesEvents, true);
+  });
+});
+for (const options of [{ nested: true }, { backwards: true }, { width: 80 }])
+  test(`strict target-owner route supports ${JSON.stringify(options)}`, async () => {
+    await withWheelRouteFixture(options, async (h) => {
+      const r = await reveal(h.input, expected, h.options);
+      assert.equal(r.sample.receivesEvents, true);
+      assert.ok(r.wheels > 0 && r.wheels <= 40);
+      if (options.nested) {
+        assert.equal(h.state().rootOffset, 0);
+        assert.ok(h.state().nestedOffset > 0);
+      }
+      if (options.backwards)
+        assert.ok(h.calls.filter((c) => c[0] === 'wheel').every((c) => c[1] < 0));
+      assert.equal(h.state().sidebarOffset, 0);
+    });
+  });
+for (const options of [
+  { fullSidebar: true },
+  { overlay: 'fixed' },
+  { overlay: 'sticky' },
+  { noHit: true },
+])
+  test(`no matching unobstructed owner fails before input ${JSON.stringify(options)}`, async () => {
+    await withWheelRouteFixture(options, async (h) => {
+      await assert.rejects(reveal(h.input, expected, h.options), /no unobstructed wheel surface/);
+      assert.equal(h.calls.length, 0);
+    });
+  });
+test('wheel hover rechecks current native routing and fails before sending a misrouted wheel', async () => {
+  const h = harness();
+  const base = h.input.sample;
+  let moved = false;
+  h.input.move = async () => {
+    moved = true;
+  };
+  h.input.sample = async () => ({
+    ...(await base()),
+    wheelPoint: moved ? null : { x: 16, y: 675 },
+  });
+  await assert.rejects(reveal(h.input, expected, h.options), /wheel route changed/);
+  assert.equal(h.calls.length, 0);
+});
+
+for (const targetY of [690, 760])
+  test(`nested action at y=${targetY} must scroll until its entire rectangle fits the clipped scrollport`, async () => {
+    await withWheelRouteFixture({ nested: true, targetY }, async (h) => {
+      const before = await h.input.sample();
+      assert.equal(before.rect.y + before.rect.height < before.viewport.height, true);
+      assert.equal(before.receivesEvents, targetY === 690);
+      const result = await reveal(h.input, expected, h.options);
+      assert.ok(result.wheels > 0);
+      assert.equal(before.visibleBounds.bottom, 750);
+      assert.ok(result.sample.rect.y >= 150);
+      assert.ok(result.sample.rect.y + result.sample.rect.height <= 750);
+      assert.equal(h.state().rootOffset, 0);
+      assert.ok(h.state().nestedOffset > 0);
+    });
+  });
+
+test('partial clipped rectangle cannot be accepted from center hit alone', async () => {
+  const h = harness();
+  h.setTop(690);
+  const base = h.input.sample;
+  h.input.sample = async () => ({
+    ...(await base()),
+    visibleBounds: { left: 0, top: 150, right: 320, bottom: 750 },
+    wheelPoint: null,
+  });
+  await assert.rejects(reveal(h.input, expected, h.options), /no unobstructed wheel surface/);
+  assert.equal(h.calls.length, 0);
+});
+
+test('every clipping ancestor contributes to the supported rectangular visibility intersection', async () => {
+  await withWheelRouteFixture({ nested: true, outerClip: true, targetY: 600 }, async (h) => {
+    const before = await h.input.sample();
+    assert.equal(before.receivesEvents, true);
+    const result = await reveal(h.input, expected, h.options);
+    assert.ok(result.wheels > 0);
+    assert.equal(result.sample.visibleBounds.bottom, 650);
+    assert.ok(result.sample.rect.y + result.sample.rect.height <= 650);
+    assert.ok(result.sample.rect.y >= 150);
+  });
+});
+test('an action too wide for an outer clip fails without input', async () => {
+  await withWheelRouteFixture({ nested: true, outerClip: true, outerNarrow: true }, async (h) => {
+    await assert.rejects(reveal(h.input, expected, h.options), /cannot fit/);
+    assert.equal(h.calls.length, 0);
+  });
+});
+test('unsupported transformed clipping ancestry is fail-closed', async () => {
+  await withWheelRouteFixture(
+    { nested: true, outerClip: true, outerTransform: 'matrix(1,0,0,1,0,10)' },
+    async (h) => {
+      await assert.rejects(reveal(h.input, expected, h.options), /clipping bounds are unavailable/);
+      assert.equal(h.calls.length, 0);
+    }
+  );
 });
