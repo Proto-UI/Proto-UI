@@ -51,6 +51,16 @@ Apply these rules when sources disagree:
 
 If a task exposes a real contradiction, do not silently choose the most convenient source. Identify the applicable entity and version, describe the mismatch, and either reconcile the affected artifacts within scope or record the unresolved gap.
 
+## Definition-first implementation
+
+The highest engineering principle for prototype work is independent implementation from a shared public definition. A prototype and a compiler must each implement the applicable Proto definitions; their composition checks whether those implementations agree. Neither implementation is the authority for the other. This principle operates within the authority, lifecycle, safety, and permission rules above.
+
+- Before implementing or changing a prototype, identify its applicable core syntax, prototype, module, host capability, Adapter profile, and test definitions and their lifecycle status. When a behavioral definition is missing or contradictory, make the intended responsibilities, inputs, outputs, ownership, lifecycle, and acceptance criteria reviewable through the existing definition process first. Do not transcribe current code into a document and call that independent conformance. An uncataloged prototype may have real behavior; missing catalog coverage is a definition gap to resolve, not proof that no implementation exists.
+- Implement Base portable semantics independently of a particular host or compiler subset. Keep family-specific appearance in the relevant family projection and physical input, geometry, rendering, and native affordances at their defined host or Adapter boundary. Do not introduce a Web-only public bypass to make a demo work. Follow applicable composition and independence decisions with their actual lifecycle status; do not turn a draft direction into an unstated stable ban on all hook composition.
+- A compiler must interpret the shared definitions without embedded component business logic, component-name or source-path dispatch, or exceptions added merely to make an acceptance test pass. Do not change otherwise valid prototype semantics, ban legal setup functions or closures, or erase behavior merely to fit the current parser subset. Any new shared syntax or operation requires its own definition and review, rather than an ad hoc agreement between a prototype author and a compiler author.
+- Validate prototype conformance, compiler coverage, and host realization separately, then exercise their real composition. A rejected input identifies a coverage or conformance question to investigate; an explicit unsupported diagnostic is not an implemented capability. Source presence, a passing isolated test, or a declared backend mapping does not establish the remaining acceptance conditions.
+- Attribute a composition failure to the relevant definition or implementation with a reproducible case and send it to that owner. For the current Finf prototype workstream, Compiler and IR implementation belong to their existing owner: do not modify them to accommodate these prototypes. Continue prototype-side definition review, implementation, and applicable evidence without taking over that workstream.
+
 ## Repository map
 
 - `spec/**`: cataloged contracts, prototypes, modules, Adapter profiles, decisions, host capabilities, tests, versions, and knowledge.
