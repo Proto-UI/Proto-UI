@@ -5,11 +5,7 @@ export default definePrototype<FieldsetRootProps, FieldsetRootExposes>({
   name: 'bootstrap-2-3-2-fieldset-root',
   setup(def) {
     const inherited = asFieldsetRoot();
-    def.feedback.style.use(
-      tw(
-        'flex w-full min-w-0 flex-col gap-2 text-foreground rounded-[4px] border border-border p-4'
-      )
-    );
+    def.feedback.style.use(tw('block w-full min-w-0 m-0 p-0 border-0 text-foreground'));
     return inherited.render;
   },
 });

@@ -9,6 +9,11 @@ export default definePrototype<FieldRootProps, FieldRootExposes>({
   setup(def) {
     const inherited = asFieldRoot();
     def.feedback.style.use(tw('flex w-full min-w-0 flex-col gap-2 text-foreground'));
+    // Existing Base validity remains the sole owner; Labels inherit this ink.
+    def.rule({
+      when: (w) => w.state(inherited.stateHandles!.invalid).eq(true),
+      intent: (i) => i.feedback.style.use(tw('text-destructive')),
+    });
     return inherited.render;
   },
 });

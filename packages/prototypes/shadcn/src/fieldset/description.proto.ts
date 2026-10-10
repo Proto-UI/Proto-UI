@@ -5,7 +5,9 @@ export default definePrototype<FieldsetPartProps, FieldsetRootExposes>({
   name: 'shadcn-fieldset-description',
   setup(def) {
     const inherited = asFieldsetDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    def.feedback.style.use(
+      tw('text-left text-sm font-normal leading-normal text-muted-foreground break-words')
+    );
     return inherited.render;
   },
 });

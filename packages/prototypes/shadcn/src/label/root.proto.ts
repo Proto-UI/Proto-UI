@@ -8,6 +8,8 @@ export default definePrototype<LabelRootProps, LabelRootExposes>({
   name: 'shadcn-label-root',
   setup(def) {
     asLabelRoot();
-    def.feedback.style.use(tw('text-sm font-medium leading-none text-foreground'));
+    def.feedback.style.use(
+      tw('flex items-center gap-2 text-sm font-medium leading-none text-foreground')
+    );
   },
 });

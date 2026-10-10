@@ -8,6 +8,6 @@ export default definePrototype<LabelRootProps, LabelRootExposes>({
   name: 'brutalist-label-root',
   setup(def) {
     asLabelRoot();
-    def.feedback.style.use(tw('text-sm font-medium leading-none text-foreground'));
+    def.feedback.style.use(tw('font-sans text-sm font-bold leading-none text-foreground'));
   },
 });

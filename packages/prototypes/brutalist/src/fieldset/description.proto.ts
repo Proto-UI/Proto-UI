@@ -5,7 +5,9 @@ export default definePrototype<FieldsetPartProps, FieldsetRootExposes>({
   name: 'brutalist-fieldset-description',
   setup(def) {
     const inherited = asFieldsetDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    def.feedback.style.use(
+      tw('text-left font-sans text-sm font-medium leading-normal text-foreground break-words')
+    );
     return inherited.render;
   },
 });

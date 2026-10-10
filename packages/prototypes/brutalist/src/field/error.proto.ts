@@ -9,7 +9,7 @@ export default definePrototype<FieldErrorProps, FieldErrorExposes>({
   setup(def) {
     const inherited = asFieldError();
     def.feedback.style.use(
-      tw('block border-l-2 border-foreground pl-2 text-sm font-bold text-foreground break-words')
+      tw('block font-sans text-sm font-medium leading-normal text-destructive-ink break-words')
     );
     return inherited.render;
   },

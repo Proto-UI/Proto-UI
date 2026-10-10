@@ -6,9 +6,7 @@ export default definePrototype<FieldsetRootProps, FieldsetRootExposes>({
   setup(def) {
     const inherited = asFieldsetRoot();
     def.feedback.style.use(
-      tw(
-        'flex w-full min-w-0 flex-col gap-3 text-foreground rounded-none border-2 border border-border p-4'
-      )
+      tw('flex w-full min-w-0 flex-col gap-4 font-sans font-medium text-foreground')
     );
     return inherited.render;
   },

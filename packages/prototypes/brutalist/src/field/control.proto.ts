@@ -11,7 +11,7 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
     const inherited = asFieldTextControl();
     def.feedback.style.use(
       tw(
-        'h-11 w-full min-w-0 rounded-none border-2 border-foreground bg-background px-3 py-2 text-base font-medium text-foreground shadow-[3px_3px_0_0_var(--pui-foreground)] outline-none'
+        'h-10 w-full min-w-0 rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-sans text-sm font-medium text-foreground outline-none'
       )
     );
     const state = inherited.stateHandles!;
