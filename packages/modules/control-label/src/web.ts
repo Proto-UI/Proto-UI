@@ -174,7 +174,7 @@ export function createWebControlLabelHost(
       let lastConnected: HTMLElement | null = null;
       let detachedOff: (() => void) | null = null;
       let cleanListeners = () => {};
-      let pending: {
+      type PointerReceipt = {
         id: number;
         x: number;
         y: number;
@@ -182,7 +182,23 @@ export function createWebControlLabelHost(
         down: PointerEvent;
         up: PointerEvent | null;
         released: boolean;
+      };
+      let pending: PointerReceipt | null = null;
+      let releaseExpiry: (() => void) | null = null;
+      let capturedClick: {
+        event: MouseEvent;
+        gesture: PointerReceipt | null;
+        cancel(): void;
       } | null = null;
+      const clearCapturedClick = () => {
+        capturedClick?.cancel();
+        capturedClick = null;
+      };
+      const clearPending = () => {
+        pending = null;
+        releaseExpiry?.();
+        releaseExpiry = null;
+      };
       const view = () => {
         const current = getTarget();
         return !disposed && current?.isConnected
@@ -229,7 +245,8 @@ export function createWebControlLabelHost(
           return;
         }
         cleanListeners();
-        pending = null;
+        clearPending();
+        clearCapturedClick();
         // Observe before replacing target so same-scope physical replacements
         // do not accidentally retain the previous anchor subscription.
         observeCurrentScopes(next);
@@ -246,7 +263,8 @@ export function createWebControlLabelHost(
             return false;
           };
           const down = (event: PointerEvent) => {
-            pending = null;
+            clearPending();
+            clearCapturedClick();
             if (
               !actionable ||
               event.defaultPrevented ||
@@ -274,10 +292,11 @@ export function createWebControlLabelHost(
               event.pointerId === pending.id &&
               Math.hypot(event.clientX - pending.x, event.clientY - pending.y) > 6
             )
-              pending = null;
+              clearPending();
           };
           const cancel = () => {
-            pending = null;
+            clearPending();
+            clearCapturedClick();
           };
           const up = (event: PointerEvent) => {
             if (!pending || pending.id !== event.pointerId) return;
@@ -285,11 +304,34 @@ export function createWebControlLabelHost(
             if (pending) {
               pending.up = event;
               pending.released = eligible(event);
+              // Native click follows this release in its activation turn. If an
+              // earlier listener swallows it, no later task may borrow the receipt.
+              releaseExpiry?.();
+              const released = pending;
+              const timer = setTimeout(() => {
+                if (pending === released) pending = null;
+                if (releaseExpiry === cancelExpiry) releaseExpiry = null;
+              }, 0);
+              const cancelExpiry = () => clearTimeout(timer);
+              releaseExpiry = cancelExpiry;
             }
           };
+          const captureClick = (event: MouseEvent) => {
+            clearCapturedClick();
+            const receipt = { event, gesture: pending, cancel: () => {} };
+            clearPending();
+            capturedClick = receipt;
+            // Use a task checkpoint: native listener boundaries may drain
+            // microtasks before this event reaches its bubble listener.
+            const timer = setTimeout(() => {
+              if (capturedClick === receipt) capturedClick = null;
+            }, 0);
+            receipt.cancel = () => clearTimeout(timer);
+          };
           const click = (event: MouseEvent) => {
-            const gesture = pending;
-            pending = null;
+            const receipt = capturedClick?.event === event ? capturedClick : null;
+            const gesture = receipt?.gesture;
+            if (receipt) clearCapturedClick();
             if (
               !actionable ||
               event.button !== 0 ||
@@ -310,7 +352,11 @@ export function createWebControlLabelHost(
                   }
                 : {}),
             });
-            if (!gesture?.released && !nonPointer) return;
+            const pointer =
+              gesture?.released &&
+              event.isTrusted === gesture.down.isTrusted &&
+              event.isTrusted === gesture.up?.isTrusted;
+            if (!pointer && !nonPointer) return;
             const root = next.getRootNode();
             // Preserve the originating user-activation turn for native editor
             // focus. This custom host intent is committed synchronously; only
@@ -325,7 +371,7 @@ export function createWebControlLabelHost(
             )
               return;
             if (gesture && gesture.root !== root) return;
-            onActivate(gesture?.released ? 'pointer' : 'accessibility');
+            onActivate(pointer ? 'pointer' : 'accessibility');
           };
           if (kind === 'label') {
             next.addEventListener('pointerdown', down);
@@ -333,6 +379,7 @@ export function createWebControlLabelHost(
             document.addEventListener('pointermove', move, true);
             document.addEventListener('pointerup', up, true);
             document.addEventListener('pointercancel', cancel, true);
+            next.addEventListener('click', captureClick, true);
             next.addEventListener('click', click);
             cleanListeners = () => {
               next.removeEventListener('pointerdown', down);
@@ -340,6 +387,7 @@ export function createWebControlLabelHost(
               document.removeEventListener('pointermove', move, true);
               document.removeEventListener('pointerup', up, true);
               document.removeEventListener('pointercancel', cancel, true);
+              next.removeEventListener('click', captureClick, true);
               next.removeEventListener('click', click);
             };
           }
@@ -353,12 +401,16 @@ export function createWebControlLabelHost(
         setActivation(enabled) {
           if (disposed) return;
           actionable = kind === 'label' && enabled;
-          if (!actionable) pending = null;
+          if (!actionable) {
+            clearPending();
+            clearCapturedClick();
+          }
         },
         dispose() {
           if (disposed) return;
           disposed = true;
-          pending = null;
+          clearPending();
+          clearCapturedClick();
           off?.();
           cleanListeners();
           const stopDetached = detachedOff;

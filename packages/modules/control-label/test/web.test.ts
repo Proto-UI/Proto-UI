@@ -153,6 +153,38 @@ describe('Control Label Web intent bridge', () => {
     await gesture((child.firstElementChild ?? child) as HTMLElement);
     expect(f.activate).toHaveBeenCalledOnce();
   });
+  it('cannot lend a released gesture to a later synthetic click after an intercepted click', async () => {
+    const f = fixture();
+    const intercept = (event: Event) => event.stopImmediatePropagation();
+    document.addEventListener('click', intercept, { capture: true, once: true });
+    await gesture(f.el);
+    expect(f.activate).not.toHaveBeenCalled();
+    f.el.click();
+    f.el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1, button: 0 }));
+    expect(f.activate).not.toHaveBeenCalled();
+    await gesture(f.el);
+    expect(f.activate).toHaveBeenCalledOnce();
+  });
+  it('consumes the exact click receipt even when a later capture listener stops bubbling', () => {
+    const f = fixture();
+    f.el.addEventListener('click', (event) => event.stopImmediatePropagation(), {
+      capture: true,
+      once: true,
+    });
+    for (const type of ['pointerdown', 'pointerup'])
+      f.el.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          pointerId: 2,
+          button: 0,
+          clientX: 10,
+          clientY: 10,
+        })
+      );
+    f.el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1, button: 0 }));
+    f.el.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1, button: 0 }));
+    expect(f.activate).not.toHaveBeenCalled();
+  });
   it('does not invent keyboard or untrusted click-only activation', async () => {
     const f = fixture();
     f.el.click();
