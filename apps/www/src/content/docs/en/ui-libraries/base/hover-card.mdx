@@ -6,7 +6,11 @@ description: 'Hover Card base prototype'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
-Base Hover Card composes Root, Trigger, and Content. Root supports controlled or uncontrolled open state, `openDelay`, `closeDelay`, and `openChange`; Content uses `asOverlay` plus `asTransition` and detaches only after leave completes. Positioning currently guarantees `side` and `align`; portal, collision handling, Arrow, forceMount, and numeric offsets remain deferred.
+Base Hover Card composes Root, Trigger, and Content. Root supports controlled or uncontrolled open state, `openDelay`, `closeDelay`, and `openChange`; Content uses `asOverlay` plus `asTransition` and detaches only after leave completes. Content uses a logical-owner-preserving Portal, fixed positioning, `side`/`align`, numeric offsets, and collision handling. Arrow, forceMount, custom collision boundaries, sticky positioning, and detached-anchor hiding remain extensions.
+
+Interaction contributions are view-scoped: removing Trigger or Content withdraws only that part's current hover/focus contribution. Retained view remounts start without old hover. The Root still applies `closeDelay` and emits `openChange`; a controlled owner may decline that request.
+
+The draft Root exposes the typed cooperation method `releaseInteraction(part, contributionId): boolean`, where `part` is `'trigger' | 'content'` and the ID is a positive safe integer unique across publishers and view generations. Trigger/Content borrow it from their same-domain Root before removal. Matching current IDs retire once; invalid, stale, or repeated IDs return `false` without changing Context or restarting a timer. Normal application visibility control continues through `open`, `openHoverCard`, `close`, and `toggle`. This additive cooperation surface does not imply stable lifecycle admission or complete host/native coverage.
 
 <div>
   <PrototypePreviewer

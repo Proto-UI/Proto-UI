@@ -127,7 +127,7 @@ implementations:
       - P-BASE-HOVER-CARD-CONTENT
   - id: prototypes-base-hover-card-root-lifecycle-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/base/test/hover-card-lifecycle.test.ts
     required: true
     consumesCases:
@@ -137,6 +137,15 @@ implementations:
       - T-BASE-HOVER-CARD-0001-CASE-FALSE-RETIREMENT
       - T-BASE-HOVER-CARD-0001-CASE-IDENTITY-EXHAUSTION
     exercises: [P-BASE-HOVER-CARD]
+  - id: prototypes-base-hover-card-release-public-types
+    kind: workspace-check
+    status: passing
+    path: packages/prototypes/base/test/hover-card-lifecycle-public.types.ts
+    required: true
+    consumesCases: [T-BASE-HOVER-CARD-0001-CASE-LIFECYCLE-OWNERSHIP]
+    exercises: [P-BASE-HOVER-CARD]
+    notes:
+      - Source TypeScript fixture checks Base, Shadcn and Brutalist releaseInteraction signatures and rejects unknown roles or callback identities; not packed-consumer or native evidence.
 verifies:
   prototypes:
     - id: P-BASE-HOVER-CARD
@@ -153,4 +162,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: extended
     summary: Added planned view-generation interaction cleanup, stale-owner, and controlled-request lifecycle evidence.
+  - version: 0.3.0-alpha.1
+    change: implemented
+    summary: Added executed source-bound lifecycle regressions and negative controls; prototype and test lifecycle remain draft.
 tags: [prototype, base, hover-card, test]

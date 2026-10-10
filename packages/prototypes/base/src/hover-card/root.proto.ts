@@ -37,6 +37,8 @@ function sameContext(a: HoverCardContextValue, b: HoverCardContextValue): boolea
     a.triggerHovered === b.triggerHovered &&
     a.triggerFocused === b.triggerFocused &&
     a.contentHovered === b.contentHovered &&
+    a.triggerInteractionOwner === b.triggerInteractionOwner &&
+    a.contentInteractionOwner === b.contentInteractionOwner &&
     a.interactionReason === b.interactionReason &&
     a.interactionVersion === b.interactionVersion &&
     a.requestedOpen === b.requestedOpen &&
@@ -73,6 +75,8 @@ function setupHoverCardRoot(def: DefHandle<HoverCardRootProps, HoverCardRootExpo
     triggerHovered: false,
     triggerFocused: false,
     contentHovered: false,
+    triggerInteractionOwner: null,
+    contentInteractionOwner: null,
     interactionReason: null,
     interactionVersion: 0,
     requestedOpen: false,
@@ -94,6 +98,37 @@ function setupHoverCardRoot(def: DefHandle<HoverCardRootProps, HoverCardRootExpo
   const open = openState.getState?.('open');
   // P-BASE-HOVER-CARD-OPEN-CHANGE
   def.expose.event('openChange', { payload: 'json' });
+
+  let cleanupRun: import('@proto.ui/core').RunHandle<HoverCardRootProps> | null = null;
+  // C-ANATOMY-0009-E: borrowers invoke this operation in this Root's callback
+  // scope. They never retain our run handle or rediscover a provider at release.
+  def.expose.method('releaseInteraction', (part, contributionId) => {
+    if (
+      !cleanupRun ||
+      (part !== 'trigger' && part !== 'content') ||
+      !Number.isSafeInteger(contributionId) ||
+      contributionId <= 0
+    )
+      return false;
+    const current = cleanupRun.context.read(HOVER_CARD_CONTEXT);
+    const ownerKey = part === 'trigger' ? 'triggerInteractionOwner' : 'contentInteractionOwner';
+    if (current[ownerKey] !== contributionId) return false;
+    const wasActive =
+      part === 'trigger'
+        ? current.triggerHovered || current.triggerFocused
+        : current.contentHovered;
+    cleanupRun.context.update(HOVER_CARD_CONTEXT, {
+      ...current,
+      ...(part === 'trigger'
+        ? { triggerHovered: false, triggerFocused: false }
+        : { contentHovered: false }),
+      [ownerKey]: null,
+      // Retiring an already-false source must preserve a pending close deadline.
+      interactionReason: wasActive ? `${part}.pointerleave` : current.interactionReason,
+      interactionVersion: current.interactionVersion + (wasActive ? 1 : 0),
+    });
+    return true;
+  });
 
   let snapshot = initialContext;
   let published = initialContext;
@@ -162,6 +197,7 @@ function setupHoverCardRoot(def: DefHandle<HoverCardRootProps, HoverCardRootExpo
   });
 
   def.lifecycle.onCreated((run) => {
+    cleanupRun = run;
     // P-BASE-HOVER-CARD-ROOT-OWNER, P-BASE-HOVER-CARD-PROPS
     const props = run.props.get();
     snapshot = {
@@ -192,7 +228,10 @@ function setupHoverCardRoot(def: DefHandle<HoverCardRootProps, HoverCardRootExpo
     syncContext(run);
   });
 
-  def.lifecycle.onBeforeDispose(cancelPending);
+  def.lifecycle.onBeforeDispose(() => {
+    cleanupRun = null;
+    cancelPending();
+  });
 }
 
 /*

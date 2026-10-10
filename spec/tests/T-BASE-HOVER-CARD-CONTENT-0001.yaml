@@ -54,7 +54,7 @@ implementations:
     exercises: [P-BASE-HOVER-CARD-CONTENT]
   - id: prototypes-base-hover-card-content-lifecycle-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/base/test/hover-card-lifecycle.test.ts
     required: true
     consumesCases: [T-BASE-HOVER-CARD-CONTENT-0001-CASE-LIFECYCLE]
@@ -81,4 +81,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: extended
     summary: Added planned view-generation interaction cleanup, stale-owner, and controlled-request lifecycle evidence.
+  - version: 0.3.0-alpha.1
+    change: implemented
+    summary: Added executed source-bound lifecycle regressions and negative controls; prototype and test lifecycle remain draft.
 tags: [prototype, base, hover-card, content, positioning, portal, test]

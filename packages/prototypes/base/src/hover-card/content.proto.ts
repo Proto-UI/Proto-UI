@@ -1,7 +1,7 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
 import { asOverlay } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
-import { HOVER_CARD_CONTEXT, HOVER_CARD_FAMILY, updateHoverCardInteraction } from './shared';
+import { HOVER_CARD_CONTEXT, HOVER_CARD_FAMILY, createHoverCardInteraction } from './shared';
 import type {
   HoverCardContentAsHookContract,
   HoverCardContentExposes,
@@ -86,6 +86,7 @@ function setupHoverCardContent(
 
   const open = def.state.bool('open', false);
   const hovered = def.state.bool('hovered', false);
+  const interaction = createHoverCardInteraction('content');
   def.expose.state('open', open);
 
   const updateOpen = (nextOpen: boolean, reason: string) => {
@@ -123,6 +124,7 @@ function setupHoverCardContent(
     updateOpen(ctx.open, 'reason: lifecycle.onCreated => hover-card content open sync');
   });
   def.lifecycle.onMounted((run) => {
+    interaction.mount(run);
     // P-BASE-HOVER-CARD-CONTENT-ANCHOR, P-BASE-HOVER-CARD-CONTENT-PORTAL
     const trigger = run.anatomy.partsOf(HOVER_CARD_FAMILY, 'trigger')[0] ?? null;
     if (trigger) overlay.registerAnchorPart(trigger);
@@ -132,16 +134,19 @@ function setupHoverCardContent(
   });
   def.lifecycle.onUnmounted(() => {
     hovered.set(false, 'reason: hover-card content unmounted => hovered false');
+    interaction.release();
   });
+
+  def.lifecycle.onBeforeDispose(() => interaction.release());
 
   // P-BASE-HOVER-CARD-CONTENT-HOVER-BRIDGE
   def.event.on('pointer.enter', (run) => {
     hovered.set(true, 'reason: hover-card content pointer.enter');
-    updateHoverCardInteraction(run, { contentHovered: true }, 'content.pointerenter');
+    interaction.update(run, { contentHovered: true }, 'content.pointerenter');
   });
   def.event.on('pointer.leave', (run) => {
     hovered.set(false, 'reason: hover-card content pointer.leave');
-    updateHoverCardInteraction(run, { contentHovered: false }, 'content.pointerleave');
+    interaction.update(run, { contentHovered: false }, 'content.pointerleave');
   });
 
   def.rule({

@@ -6,7 +6,11 @@ description: 'Hover Card 基础原型'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
-Base Hover Card 由 Root、Trigger 与 Content 组成。Root 支持受控/非受控 open、`openDelay`、`closeDelay` 与 `openChange`；Content 使用 `asOverlay` 和 `asTransition`，离场完成后才 detach。当前定位 API 覆盖 `side` 与 `align`，portal、碰撞检测、Arrow、forceMount 和数值 offset 暂不属于 Base 保证。
+Base Hover Card 由 Root、Trigger 与 Content 组成。Root 支持受控/非受控 open、`openDelay`、`closeDelay` 与 `openChange`；Content 使用 `asOverlay` 和 `asTransition`，离场完成后才 detach。Content 使用保留 logical owner 的 Portal、fixed positioning、`side`/`align`、数值 offset 与碰撞处理。Arrow、forceMount、自定义碰撞边界、sticky 与 detached-anchor hiding 仍属于扩展。
+
+交互贡献属于当前 view：移除 Trigger 或 Content 时只撤销该 part 当前的 hover/focus 贡献；保留实例的 view 重挂不会重放旧 hover。Root 仍应用 `closeDelay` 并发出 `openChange`，受控 owner 可以拒绝请求。
+
+Draft Root 显式公开 typed 协作方法 `releaseInteraction(part, contributionId): boolean`。`part` 为 `'trigger' | 'content'`，ID 为跨 publisher/view generation 唯一的正 safe integer。Trigger/Content 在移除前从同域 Root 借用该方法；匹配的当前 ID 只能退休一次，非法、过期或重复 ID 返回 `false`，不更新 Context 或重启计时。应用的普通可见性控制仍使用 `open`、`openHoverCard`、`close` 与 `toggle`。这一兼容增量不代表稳定生命周期准入或全部 host/native 验收完成。
 
 <div>
   <PrototypePreviewer
