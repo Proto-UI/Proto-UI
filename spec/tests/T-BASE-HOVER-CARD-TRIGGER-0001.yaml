@@ -23,6 +23,10 @@ cases:
     title: View-generation withdrawal preserves owner, replacement, and request boundaries
     covers: [P-BASE-HOVER-CARD-TRIGGER-INTERACTION-LIFETIME]
     expectation: With openDelay=0 and closeDelay=20, hover or focus Trigger to open then remove it without leave or blur. With no Content hover, exactly one close occurs at 20ms; with Content still hovered Root stays open. Removing a pending-open Trigger cancels its old deadline and a replacement waits its full own openDelay.
+  - id: T-BASE-HOVER-CARD-TRIGGER-0001-CASE-FOCUS-READINESS
+    title: New pending focus facts survive author mounted-callback ordering
+    covers: [P-BASE-HOVER-CARD-TRIGGER-FOCUS-READINESS]
+    expectation: Start focused=false, actually unmount retained Trigger, call focusSelf(keyboard) without a host target, then restore target and mount. Focus applies host focus and emits false-to-true before author onMounted; after openDelay Root records triggerFocused=true with a new owner and exactly one open request. Retained same-true facts without a new watch next event do not reopen. Latest true-to-false or false-to-true observations win; after Focus has emitted false-to-true but author onMounted is still queued, actual unmount cancels that epoch and a later remount without new input must not replay it; disabled or terminal teardown also clears the buffer; invalid old-target events never create a new contribution.
 implementations:
   - id: prototypes-base-hover-card-trigger-contract
     kind: module-test
@@ -39,6 +43,13 @@ implementations:
     path: packages/prototypes/base/test/hover-card-lifecycle.test.ts
     required: true
     consumesCases: [T-BASE-HOVER-CARD-TRIGGER-0001-CASE-LIFECYCLE]
+    exercises: [P-BASE-HOVER-CARD-TRIGGER]
+  - id: prototypes-base-hover-card-focus-readiness-contract
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/hover-card-focus-readiness.test.ts
+    required: true
+    consumesCases: [T-BASE-HOVER-CARD-TRIGGER-0001-CASE-FOCUS-READINESS]
     exercises: [P-BASE-HOVER-CARD-TRIGGER]
 verifies:
   prototypes:
@@ -59,4 +70,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: implemented
     summary: Added executed source-bound lifecycle regressions and negative controls; prototype and test lifecycle remain draft.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added executed source-runtime focus-readiness ordering, controlled-owner and buffer invalidation controls; draft retained.
 tags: [prototype, base, hover-card, trigger, test]

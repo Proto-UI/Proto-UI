@@ -36,6 +36,14 @@ criteria:
     text:
       zh-CN: Trigger 必须遵循 Root 的 view-generation contribution identity、owner-bound release 与 remount 规则，在实际 unmount/terminal teardown 撤销自身 transient intent；不得清除其他当前贡献、替代 Root open owner 或修改共享 Focus/Runtime lifetime。
       en: Trigger must follow Root view-generation contribution identity, owner-bound release, and remount rules, withdrawing its own transient intent on actual unmount or terminal teardown without clearing another current contribution, replacing Root open ownership, or changing shared Focus/Runtime lifetime.
+  - id: P-BASE-HOVER-CARD-TRIGGER-FOCUS-READINESS
+    text:
+      zh-CN: 合法 pending focus 在新 view readiness 兑现时，实际 focused.watch next 转换可早于 Trigger 作者的 onMounted 与 contribution owner 就绪。Trigger 必须仅暂存此类已观察转换的最新值，在同次 mounted 借用/分配 owner 后最多发布一次；实际 unmount、terminal teardown 或 disabled 必须清除未发布观察。不得通过 mount 时采样旧 focused=true、伪造 blur/focus 或改写 Focus state 来补发；旧 host generation 已失效的事件仍须由现有宿主/Focus 边界拒绝，不能以缓存重放。
+      en: Fulfillment of a valid pending focus at new-view readiness may emit an actual focused.watch next transition before the Trigger author's onMounted and contribution owner are ready. Trigger must retain only the latest such observed transition and publish it at most once after borrowing/allocating the owner in that mounted callback; actual unmount, terminal teardown, or disabled state clears unpublished observations. It must not replay by sampling an old focused=true at mount, fabricating blur/focus, or rewriting Focus state. Invalidated old-host-generation events remain rejected by existing host/Focus boundaries and cannot be replayed through the buffer.
+    dependsOn:
+      contracts:
+        - id: C-AS-FOCUSABLE-0001
+          anchors: [C-AS-FOCUSABLE-0001-G]
 sources:
   - path: packages/prototypes/base/src/hover-card/trigger.proto.ts
   - path: packages/prototypes/base/test/hover-card.test.ts
@@ -53,4 +61,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: refined
     summary: Defined owner-bound withdrawal of this part's view-generation interaction contribution; draft retained.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Clarified consumption of newly observed focus transitions before the authored mounted callback without replaying retained facts or changing Focus ownership.
 tags: [prototype, base, hover-card, trigger, link-preview]

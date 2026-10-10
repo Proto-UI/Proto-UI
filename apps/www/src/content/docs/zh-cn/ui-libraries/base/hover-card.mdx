@@ -10,6 +10,8 @@ Base Hover Card 由 Root、Trigger 与 Content 组成。Root 支持受控/非受
 
 交互贡献属于当前 view：移除 Trigger 或 Content 时只撤销该 part 当前的 hover/focus 贡献；保留实例的 view 重挂不会重放旧 hover。Root 仍应用 `closeDelay` 并发出 `openChange`，受控 owner 可以拒绝请求。
 
+重挂就绪期间实际观察到的新 Focus 转换会在 Trigger owner 就绪后发布。未变化的 retained `focused=true` 不会重放；取消挂载、disabled 或 terminal teardown 会丢弃未发布观察。
+
 Draft Root 显式公开 typed 协作方法 `releaseInteraction(part, contributionId): boolean`。`part` 为 `'trigger' | 'content'`，ID 为跨 publisher/view generation 唯一的正 safe integer。Trigger/Content 在移除前从同域 Root 借用该方法；匹配的当前 ID 只能退休一次，非法、过期或重复 ID 返回 `false`，不更新 Context 或重启计时。应用的普通可见性控制仍使用 `open`、`openHoverCard`、`close` 与 `toggle`。这一兼容增量不代表稳定生命周期准入或全部 host/native 验收完成。
 
 <div>
