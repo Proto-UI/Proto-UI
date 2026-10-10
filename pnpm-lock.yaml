@@ -380,6 +380,9 @@ importers:
       '@proto.ui/module-image-view':
         specifier: workspace:*
         version: link:../../modules/image-view
+      '@proto.ui/module-native-link':
+        specifier: workspace:*
+        version: link:../../modules/native-link
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
@@ -480,6 +483,9 @@ importers:
       '@proto.ui/module-image-view':
         specifier: workspace:*
         version: link:../../modules/image-view
+      '@proto.ui/module-native-link':
+        specifier: workspace:*
+        version: link:../../modules/native-link
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
@@ -571,6 +577,9 @@ importers:
       '@proto.ui/module-image-view':
         specifier: workspace:*
         version: link:../../modules/image-view
+      '@proto.ui/module-native-link':
+        specifier: workspace:*
+        version: link:../../modules/native-link
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
@@ -662,6 +671,9 @@ importers:
       '@proto.ui/module-image-view':
         specifier: workspace:*
         version: link:../../modules/image-view
+      '@proto.ui/module-native-link':
+        specifier: workspace:*
+        version: link:../../modules/native-link
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../../modules/overlay
@@ -1017,6 +1029,18 @@ importers:
         version: link:../../types
 
   packages/modules/image-view:
+    dependencies:
+      '@proto.ui/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@proto.ui/module-base':
+        specifier: workspace:*
+        version: link:../base
+      '@proto.ui/types':
+        specifier: workspace:*
+        version: link:../../types
+
+  packages/modules/native-link:
     dependencies:
       '@proto.ui/core':
         specifier: workspace:*
@@ -1460,6 +1484,9 @@ importers:
       '@proto.ui/module-image-view':
         specifier: workspace:*
         version: link:../modules/image-view
+      '@proto.ui/module-native-link':
+        specifier: workspace:*
+        version: link:../modules/native-link
       '@proto.ui/module-overlay':
         specifier: workspace:*
         version: link:../modules/overlay

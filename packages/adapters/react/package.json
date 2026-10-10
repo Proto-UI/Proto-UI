@@ -30,7 +30,8 @@
     "@proto.ui/module-rule-expose-state-web": "workspace:*",
     "@proto.ui/module-rule-meta": "workspace:*",
     "@proto.ui/module-control-label": "workspace:*",
-    "@proto.ui/module-axis-input": "workspace:*"
+    "@proto.ui/module-axis-input": "workspace:*",
+    "@proto.ui/module-native-link": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

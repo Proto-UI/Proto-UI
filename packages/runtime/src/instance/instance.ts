@@ -34,6 +34,7 @@ import { PresenceModuleDef } from '@proto.ui/module-presence';
 import { __RUN_TEST_SYS, TestSysModuleDef, type TestSysPort } from '@proto.ui/module-test-sys';
 import { ControlLabelModuleDef } from '@proto.ui/module-control-label';
 import { TextControlModuleDef } from '@proto.ui/module-text-control';
+import { NativeLinkModuleDef } from '@proto.ui/module-native-link';
 import { ImageViewModuleDef } from '@proto.ui/module-image-view';
 import { TableStructureModuleDef } from '@proto.ui/module-table-structure';
 
@@ -98,6 +99,7 @@ export function createRuntimeInstance<P extends PropsBaseType>(
       FocusModuleDef,
       TextControlModuleDef,
       ImageViewModuleDef,
+      NativeLinkModuleDef,
       TableStructureModuleDef,
       BoundaryModuleDef,
       HitParticipationModuleDef,

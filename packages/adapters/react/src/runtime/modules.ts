@@ -1,3 +1,8 @@
+import {
+  NATIVE_LINK_HOST_CAP,
+  NATIVE_LINK_RUN_IN_CALLBACK_CAP,
+  createWebNativeLinkHost,
+} from '@proto.ui/module-native-link';
 import { AXIS_INPUT_HOST_CAP, AXIS_INPUT_RUN_IN_CALLBACK_CAP } from '@proto.ui/module-axis-input';
 import { createWebAxisInputHost } from '@proto.ui/adapter-base';
 import {
@@ -349,6 +354,13 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     .use('text-control', [
       [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('native-link', [
+      [
+        NATIVE_LINK_HOST_CAP,
+        createWebNativeLinkHost(() => args.getCurrentElement() as HTMLAnchorElement | null),
+      ],
+      [NATIVE_LINK_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('image-view', [
       [IMAGE_VIEW_HOST_CAP, createWebImageViewHost(physicalImage)],

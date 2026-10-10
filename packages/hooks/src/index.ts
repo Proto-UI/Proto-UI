@@ -20,3 +20,5 @@ export { asControlLabel } from './as-control-label';
 export * from './as-axis-input';
 
 export * from './as-context-menu-input';
+
+export * from './as-native-link';

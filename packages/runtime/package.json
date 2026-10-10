@@ -38,7 +38,8 @@
     "@proto.ui/module-image-view": "workspace:*",
     "@proto.ui/module-table-structure": "workspace:*",
     "@proto.ui/module-control-label": "workspace:*",
-    "@proto.ui/module-axis-input": "workspace:*"
+    "@proto.ui/module-axis-input": "workspace:*",
+    "@proto.ui/module-native-link": "workspace:*"
   },
   "exports": {
     ".": {

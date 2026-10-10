@@ -1,3 +1,8 @@
+import {
+  NATIVE_LINK_HOST_CAP,
+  NATIVE_LINK_RUN_IN_CALLBACK_CAP,
+  createWebNativeLinkHost,
+} from '@proto.ui/module-native-link';
 import { AXIS_INPUT_HOST_CAP, AXIS_INPUT_RUN_IN_CALLBACK_CAP } from '@proto.ui/module-axis-input';
 import { createWebAxisInputHost } from '@proto.ui/adapter-base';
 import { isWebFocusTargetActive, orderFocusTargetsByDocument } from '@proto.ui/adapter-base';
@@ -963,6 +968,7 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   rawPropsSource: RawPropsSource<Props>;
   textControlTarget: WebTextControl | null;
   imageViewTarget: HTMLImageElement | null;
+  nativeLinkTarget?: HTMLAnchorElement | null;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -993,6 +999,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   const getControlLabelSurface = () => {
     if (args.textControlTarget) return args.textControlTarget;
     if (args.imageViewTarget) return args.imageViewTarget;
+    if (args.nativeLinkTarget) return args.nativeLinkTarget;
     return resolveWebComponentTriggerSurface(el, getLogicalTriggerSurfaceRoot(instanceToken));
   };
   const getTriggerSurface = () => {
@@ -1021,6 +1028,10 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
         createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
       ],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('native-link', [
+      [NATIVE_LINK_HOST_CAP, createWebNativeLinkHost(() => args.nativeLinkTarget ?? null)],
+      [NATIVE_LINK_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('image-view', [
       [
@@ -1143,6 +1154,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
   imageViewTarget: HTMLImageElement | null;
+  nativeLinkTarget?: HTMLAnchorElement | null;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -1181,6 +1193,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   } = args;
 
   const getPhysicalTriggerSurface = () =>
+    args.nativeLinkTarget ??
     resolveWebComponentTriggerSurface(el, getLogicalTriggerSurfaceRoot(instanceToken));
   const getConnectedTriggerSurface = () => {
     const surface = getPhysicalTriggerSurface();
@@ -1275,7 +1288,8 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   // Keep canonical instance-facing state markers on the custom-element
   // boundary while mirroring only the generated selector context needed by
   // translated feedback.style tokens on a split presentation surface.
-  const presentationSurface = args.textControlTarget ?? args.imageViewTarget ?? el;
+  const presentationSurface =
+    args.textControlTarget ?? args.imageViewTarget ?? args.nativeLinkTarget ?? el;
   const portalMount = createWebComponentPortalMount();
   let releasePortalDirection: (() => void) | null = null;
 
@@ -1293,6 +1307,10 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
       ],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('native-link', [
+      [NATIVE_LINK_HOST_CAP, createWebNativeLinkHost(() => args.nativeLinkTarget ?? null)],
+      [NATIVE_LINK_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('image-view', [
       [

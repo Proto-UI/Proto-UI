@@ -1,3 +1,7 @@
+import {
+  NATIVE_LINK_DECLARATION,
+  resolveWebNativeLinkLocalName,
+} from '@proto.ui/module-native-link';
 import type { EffectsPort } from '@proto.ui/core';
 import {
   createRootStyleEffect,
@@ -54,7 +58,7 @@ import {
   setElementProps,
   unbindController,
 } from './props';
-import { createOwnedVisualSurface } from './visual-surface';
+import { createOwnedVisualSurface, isOwnedVisualNode } from './visual-surface';
 import { SlotProjector } from './slot-projector';
 import { createOwnedTwTokenApplier } from './feedback-style';
 import { installDebugHooks, removeDebugHooks } from './debug/hooks';
@@ -169,10 +173,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
   assertKebabCase(tagName);
   const textControl = getModuleDeclaration(proto, TEXT_CONTROL_DECLARATION)?.config;
   const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
+  const nativeLink = getModuleDeclaration(proto, NATIVE_LINK_DECLARATION)?.config;
 
   const profile = normalizeShadowProfile(opt.shadow);
   const split = typeof profile === 'object' ? profile : null;
   const shadow = profile !== false;
+  if (split && nativeLink) throw new Error('shadow-split:native-link unsupported');
   if (split && imageView) {
     throw new Error('shadow-split:image-view');
   }
@@ -243,6 +249,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _hostDisplay: HostDisplayController | null = null;
     private _textControlTarget: WebTextControl | null = null;
     private _imageViewTarget: HTMLImageElement | null = null;
+    private _nativeLinkTarget: HTMLAnchorElement | null = null;
     private _surfaceProjection: HostSurfaceProjection<HTMLElement>;
     private readonly _a11yProjection: HostSurfaceProjection<HTMLElement>;
 
@@ -254,8 +261,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       this._overlayModal = createRebindableWebOverlayModal(this.ownerDocument);
       this._root = shadow ? (this.attachShadow({ mode: 'open' }) as ShadowRoot) : this;
-      if (textControl && imageView) {
-        throw new Error('WC:text/image conflict');
+      if ([textControl, imageView, nativeLink].filter(Boolean).length > 1) {
+        throw new Error('WC:text/image/native-link conflict');
       }
       if (textControl) {
         this._textControlTarget = this.ownerDocument.createElement(
@@ -267,15 +274,21 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         this._imageViewTarget = this.ownerDocument.createElement(resolveWebImageLocalName());
         this._imageViewTarget.setAttribute('part', 'image');
       }
+      if (nativeLink) {
+        this._nativeLinkTarget = this.ownerDocument.createElement(resolveWebNativeLinkLocalName());
+        this._nativeLinkTarget.setAttribute('part', 'link');
+      }
       this._surfaceProjection = createHostSurfaceProjection<HTMLElement>(
         this,
-        split ? null : (this._textControlTarget ?? this._imageViewTarget ?? this)
+        split
+          ? null
+          : (this._textControlTarget ?? this._imageViewTarget ?? this._nativeLinkTarget ?? this)
       );
       // C-HOST-SURFACE-PROJECTION-0001-D: an ordinary split surface only
       // paints. Native controls retain Main's live physical a11y projection;
       // other controls retain their logical trigger/boundary target.
       this._a11yProjection =
-        split && !textControl && !imageView
+        split && !textControl && !imageView && !nativeLink
           ? createHostSurfaceProjection<HTMLElement>(this)
           : this._surfaceProjection;
       bindElementSurfaceProjection(this, this._surfaceProjection);
@@ -284,6 +297,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     override focus(options?: FocusOptions): void {
+      if (this._nativeLinkTarget) {
+        this._nativeLinkTarget.focus(options);
+        return;
+      }
       if (this._textControlTarget) {
         this._textControlTarget.focus(options);
         return;
@@ -292,6 +309,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     override blur(): void {
+      if (this._nativeLinkTarget) {
+        this._nativeLinkTarget.blur();
+        return;
+      }
       if (this._textControlTarget) {
         this._textControlTarget.blur();
         return;
@@ -408,6 +429,25 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
       const thisEl = this;
       const thisRoot = this._root;
+      const nativeLinkTarget = this._nativeLinkTarget;
+      let nativeLinkProjectionObserver: MutationObserver | null = null;
+      const transferNativeLinkChildren = () => {
+        if (!nativeLinkTarget || shadow) return;
+        for (const node of Array.from(thisEl.childNodes)) {
+          if (node !== nativeLinkTarget && !isOwnedVisualNode(thisEl, node))
+            nativeLinkTarget.appendChild(node);
+        }
+      };
+      const mountNativeLink = () => {
+        if (!nativeLinkTarget || nativeLinkTarget.parentNode === thisRoot) return;
+        transferNativeLinkChildren();
+        thisRoot.appendChild(nativeLinkTarget);
+        if (!shadow) {
+          nativeLinkProjectionObserver = new MutationObserver(transferNativeLinkChildren);
+          nativeLinkProjectionObserver.observe(thisEl, { childList: true });
+        }
+      };
+      mountNativeLink();
       thisEl.setAttribute('data-pui-root', '');
       if (split) {
         this._splitResources = createShadowSplitResources({
@@ -536,6 +576,24 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       };
 
       const releaseRenderedChildren = () => {
+        if (nativeLinkTarget) {
+          nativeLinkProjectionObserver?.disconnect();
+          nativeLinkProjectionObserver = null;
+          if (!shadow) {
+            const external =
+              this._slotProjector?.collectSlotPoolBeforeCommit() ??
+              Array.from(nativeLinkTarget.childNodes);
+            clearSlotProjector();
+            nativeLinkTarget.replaceChildren();
+            nativeLinkTarget.remove();
+            thisEl.append(...external);
+          } else {
+            nativeLinkTarget.replaceChildren();
+            nativeLinkTarget.remove();
+            clearSlotProjector();
+          }
+          return;
+        }
         if (shadow) {
           if (splitResources) splitResources.surface.clearRenderedChildren();
           else thisRoot.replaceChildren();
@@ -561,7 +619,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           tagName,
           shadow,
           host: thisEl,
-          root: thisRoot,
+          root: nativeLinkTarget ?? thisRoot,
           shadowViewTarget: splitResources?.surface,
           schedule,
           rawPropsSource,
@@ -571,6 +629,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           wiring,
           eventGate: {
             enable: () => {
+              mountNativeLink();
               if (!thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR)) currentEventGate?.enable();
             },
             disable: () => currentEventGate?.disable(),
@@ -589,7 +648,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           },
           getSlotProjector: () => this._slotProjector,
           ensureSlotProjector: () => {
-            if (!this._slotProjector) this._slotProjector = new SlotProjector(thisEl);
+            if (!this._slotProjector)
+              this._slotProjector = new SlotProjector(nativeLinkTarget ?? thisEl);
             return this._slotProjector;
           },
           clearSlotProjector,
@@ -734,7 +794,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             // The eager native bridge owns focus/blur before provider construction.
             // Router subscriptions stay on a private target, avoiding a second
             // Shadow-retargeted host observation of the same physical event.
-            focusEventTarget: this._textControlTarget ? new EventTarget() : undefined,
+            focusEventTarget:
+              this._textControlTarget || nativeLinkTarget ? new EventTarget() : undefined,
             isSemanticEventRouteCandidate: isLogicalEventRouteCandidate,
             instanceToken: instanceToken,
             resolveSemanticEventRoute: resolveLogicalTriggerEventRouteForTarget,
@@ -769,7 +830,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 getOwned: () => splitOwnedTokens,
               }
             : createOwnedTwTokenApplier(
-                this._textControlTarget ?? this._imageViewTarget ?? thisEl,
+                this._textControlTarget ??
+                  this._imageViewTarget ??
+                  this._nativeLinkTarget ??
+                  thisEl,
                 {
                   onChange: () => this._hostDisplay?.sync(),
                 }
@@ -778,12 +842,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           currentRouter = router;
           // Split owns its role-aware styles across synchronous DOM moves.
           this._applier = splitEffects ? null : applier;
-          if (this._textControlTarget) {
+          if (this._textControlTarget || nativeLinkTarget) {
             // Native focus/blur do not bubble from the physical text control.
             // Route the trusted physical event through the adapter-private host
             // ingress: Proto focus facts update without emitting a second public
             // native-looking event from the custom-element boundary.
-            const control: HTMLElement = this._textControlTarget;
+            const control: HTMLElement = (this._textControlTarget ?? nativeLinkTarget)!;
             // Bind native focus/blur directly on the known control so the
             // callback receives the real DOM event object with target/currentTarget
             // intact. The private transport preserves both the declared type and
@@ -814,7 +878,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
               // Text controls use a physical control target while logical ownership
               // stays on the custom element. Both are roots of this same view.
-              getNativeTarget: () => this._textControlTarget ?? thisEl,
+              getNativeTarget: () => this._textControlTarget ?? nativeLinkTarget ?? thisEl,
               subscribe: (listener) => {
                 this._focusTargetReadyListeners.add(listener);
                 return () => this._focusTargetReadyListeners.delete(listener);
@@ -923,6 +987,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               styleSupportSource,
               textControlTarget: this._textControlTarget,
               imageViewTarget: this._imageViewTarget,
+              nativeLinkTarget,
               overlayModal: this._overlayModal,
               exposeStateWebMode,
               scrollProjection,
@@ -1079,6 +1144,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         styleSupportSource,
         textControlTarget: this._textControlTarget,
         imageViewTarget: this._imageViewTarget,
+        nativeLinkTarget,
         exposeStateWebMode,
         setExposes,
         runInCallbackScope,

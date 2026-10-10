@@ -1,3 +1,7 @@
+import {
+  NATIVE_LINK_DECLARATION,
+  resolveWebNativeLinkLocalName,
+} from '@proto.ui/module-native-link';
 import type { EffectsPort } from '@proto.ui/core';
 import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
@@ -180,14 +184,20 @@ export function createVueAdapter(runtime: VueRuntime) {
       : undefined;
     const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
     const imageViewRootTag = imageView ? resolveWebImageLocalName() : undefined;
-    if (textControlRootTag && imageViewRootTag) {
+    const nativeLink = getModuleDeclaration(proto, NATIVE_LINK_DECLARATION)?.config;
+    const nativeLinkRootTag = nativeLink ? resolveWebNativeLinkLocalName() : undefined;
+    if ([textControlRootTag, imageViewRootTag, nativeLinkRootTag].filter(Boolean).length > 1) {
       throw new Error(
-        '[Vue Adapter] text-control and image-view declarations cannot share a root.'
+        '[Vue Adapter] text-control, image-view and native-link declarations cannot share a root.'
       );
     }
-    const declaredRootTag = textControlRootTag ?? imageViewRootTag;
+    const declaredRootTag = textControlRootTag ?? imageViewRootTag ?? nativeLinkRootTag;
     if (declaredRootTag && opt.rootTag && opt.rootTag !== declaredRootTag) {
-      const declarationName = textControlRootTag ? 'text-control' : 'image-view';
+      const declarationName = textControlRootTag
+        ? 'text-control'
+        : imageViewRootTag
+          ? 'image-view'
+          : 'native-link';
       throw new Error(
         `[Vue Adapter] ${declarationName} declaration conflicts with rootTag: ${opt.rootTag}`
       );
