@@ -16290,9 +16290,9 @@
       {
         "id": "prior-pr.857",
         "pr": 857,
-        "complete": false,
-        "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "complete": true,
+        "disposition": "Accepted bounded prior-work closeout at 5dab3a9e; source, applicable official evidence and independent technical review are retained",
+        "publication": "[Closeout review](https://github.com/Proto-UI/Proto-UI/blob/9395d2deb012934976ab155b9461aa0356583247/internal/records/2026-10-10-finf-three-prior-closeouts.md). No full Finf, prototype lifecycle or merge approval is implied",
         "observed": null,
         "currentPrSnapshot": {
           "number": 857,
@@ -16305,6 +16305,19 @@
           "mergeableState": "blocked",
           "url": "https://github.com/Proto-UI/Proto-UI/pull/857",
           "observedAt": "2026-10-06T19:05:00Z"
+        },
+        "closeout": {
+          "mode": "merged-main",
+          "sourcePullRequest": 857,
+          "sourceHead": "83327215fc617e23e012c083ace8765d35e9aa20",
+          "integrationRevision": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+          "evidence": "https://github.com/Proto-UI/Proto-UI/actions/runs/38026839816/job/114140208245",
+          "ci": "passed",
+          "independentReview": {
+            "verdict": "approved",
+            "revision": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+            "source": "https://github.com/Proto-UI/Proto-UI/blob/9395d2deb012934976ab155b9461aa0356583247/internal/records/2026-10-10-finf-three-prior-closeouts.md"
+          }
         }
       },
       {
@@ -16370,9 +16383,9 @@
       {
         "id": "prior-pr.867",
         "pr": 867,
-        "complete": false,
-        "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "complete": true,
+        "disposition": "Accepted bounded prior-work closeout at 5dab3a9e; source, applicable official evidence and independent technical review are retained",
+        "publication": "[Closeout review](https://github.com/Proto-UI/Proto-UI/blob/9395d2deb012934976ab155b9461aa0356583247/internal/records/2026-10-10-finf-three-prior-closeouts.md). No full Finf, prototype lifecycle or merge approval is implied",
         "observed": null,
         "currentPrSnapshot": {
           "number": 867,
@@ -16385,6 +16398,19 @@
           "mergeableState": "blocked",
           "url": "https://github.com/Proto-UI/Proto-UI/pull/867",
           "observedAt": "2026-10-06T19:05:00Z"
+        },
+        "closeout": {
+          "mode": "merged-main",
+          "sourcePullRequest": 867,
+          "sourceHead": "8cf74b43ae19c2f5f14c18cc587a8eafaed5f24a",
+          "integrationRevision": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+          "evidence": "https://github.com/Proto-UI/Proto-UI/actions/runs/38026839816/job/114140208245",
+          "ci": "passed",
+          "independentReview": {
+            "verdict": "approved",
+            "revision": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+            "source": "https://github.com/Proto-UI/Proto-UI/blob/9395d2deb012934976ab155b9461aa0356583247/internal/records/2026-10-10-finf-three-prior-closeouts.md"
+          }
         }
       },
       {
@@ -16510,9 +16536,9 @@
       {
         "id": "prior-pr.871",
         "pr": 871,
-        "complete": false,
-        "disposition": "Continue original shared benchmark bootstrap repair; retain frozen code, failures and review/CI evidence as equal-priority Finf follow-up if not quickly integrated.",
-        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "complete": true,
+        "disposition": "Accepted bounded prior-work closeout at 5dab3a9e; source, applicable official evidence and independent technical review are retained",
+        "publication": "[Closeout review](https://github.com/Proto-UI/Proto-UI/blob/9395d2deb012934976ab155b9461aa0356583247/internal/records/2026-10-10-finf-three-prior-closeouts.md). No full Finf, prototype lifecycle or merge approval is implied",
         "observed": {
           "head": "dbdd969",
           "source": "https://github.com/Proto-UI/Proto-UI/pull/871",
@@ -16529,6 +16555,19 @@
           "mergeableState": "blocked",
           "url": "https://github.com/Proto-UI/Proto-UI/pull/871",
           "observedAt": "2026-10-06T19:05:00Z"
+        },
+        "closeout": {
+          "mode": "merged-main",
+          "sourcePullRequest": 871,
+          "sourceHead": "0ed119b52cd2c498d90121e681d2c47953c4f345",
+          "integrationRevision": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+          "evidence": "https://github.com/Proto-UI/Proto-UI/actions/runs/38029962495/job/114148633123",
+          "ci": "passed",
+          "independentReview": {
+            "verdict": "approved",
+            "revision": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+            "source": "https://github.com/Proto-UI/Proto-UI/blob/9395d2deb012934976ab155b9461aa0356583247/internal/records/2026-10-10-finf-three-prior-closeouts.md"
+          }
         }
       }
     ],
