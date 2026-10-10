@@ -21,6 +21,7 @@ type CandidateWindow = Window & { libraryLiquidCardCandidate?: LibraryLiquidCand
 import { libraryCardReadabilityFailures } from './library-card-readability';
 import {
   noScriptInput,
+  type NoScriptInputTrace,
   revealNoScriptLink,
   activateNoScriptLink,
 } from './library-no-script-interaction';
@@ -518,6 +519,7 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
           : route.abort()
       );
       const page = await context.newPage();
+      const inputTrace: NoScriptInputTrace = { entries: [], dropped: 0 };
       let failed = false,
         mediaSession: Awaited<ReturnType<typeof holdMediaEmulation>> | undefined;
       let media: Awaited<ReturnType<typeof readMediaObservation>> | undefined;
@@ -540,7 +542,7 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
         const link = card.locator('a[data-library-action]');
         const destination = `${baseUrl}/${locale}/ui-libraries/liquid-glass/`;
         expect(new URL(destination).origin).toBe(new URL(page.url()).origin);
-        const input = noScriptInput(page, link);
+        const input = noScriptInput(page, link, inputTrace);
         const scroll = await withLiquidCardFailureObservation(
           () => revealNoScriptLink(input, destination),
           () => observeScrollFailure(page),
@@ -551,6 +553,9 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
               name,
               role: 'Read-only diagnosis; failed native wheel or geometry checks remain blocking',
               facts,
+              inputTrace,
+              inputTraceMeaning:
+                'fulfilled mouse calls are protocol responses, not proof of DOM event delivery or scrolling; pending calls had no response at capture; samples record observed offsets',
             }),
           (error) => console.warn('[liquid-card-scroll-observation-unavailable]', String(error))
         );
@@ -577,6 +582,7 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
               role: 'Opaque accessible fallback only; not a Liquid optical appearance result',
               capture: 'Actual uncropped viewport with the header unchanged',
               scroll,
+              inputTrace,
               activation,
               scale,
               media,
@@ -591,6 +597,17 @@ describe('candidate Card keeps its complete opaque no-JS fallback', () => {
         results.push({ name, passed: true, role: 'opaque-no-JS', image });
       } catch (error) {
         failed = true;
+        // Persist the input journal independently of the optional failure
+        // observer and screenshot. Neither may erase the native error.
+        await writeFailureRecord(path.join(directory, 'input-trace.json'), {
+          sha,
+          tree,
+          name,
+          error: String(error),
+          inputTrace,
+          meaning:
+            'Mouse fulfillment means protocol response only. Pending means no response at capture; offset samples, not sends, establish scrolling. No DOM listeners were installed.',
+        });
         const image = await captureCurrentViewport(page, path.join(directory, 'failure.png')).catch(
           (issue) => ({ error: String(issue) })
         );

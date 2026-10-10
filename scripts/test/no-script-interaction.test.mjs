@@ -11,6 +11,7 @@ const {
   revealNoScriptLink: reveal,
   activateNoScriptLink: activate,
   readNoScriptLink: read,
+  traceNoScriptInput: traceInput,
 } = await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
 const expected = 'https://fixture.test/en/ui-libraries/liquid-glass/';
 function harness(overrides = {}) {
@@ -345,3 +346,203 @@ for (const lateFailure of [false, true])
     assert.equal(pressed, false);
     assert.equal(releases, 2);
   });
+
+test('input trace separates acknowledged wheel delivery from observed scrolling', async () => {
+  const h = harness({ wheel: async () => {} });
+  const trace = { entries: [], dropped: 0 };
+  const input = traceInput(h.input, trace);
+  await assert.rejects(reveal(input, expected, { ...h.options, maxWheels: 2 }), /bounded wheel/);
+  const wheels = trace.entries.filter((entry) => entry.operation === 'wheel');
+  const samples = trace.entries.filter((entry) => entry.operation === 'sample');
+  assert.equal(wheels.length, 2);
+  assert.ok(wheels.every((entry) => entry.status === 'fulfilled' && entry.args[0] === 720));
+  assert.ok(samples.every((entry) => entry.sample.viewport.scrollY === 0));
+  assert.ok(trace.entries.every((entry) => entry.settledAt >= entry.startedAt));
+  assert.equal(trace.dropped, 0);
+});
+
+for (const primary of [undefined, null, false, 0, '', new Error('transport rejected')])
+  test(`input trace preserves exact transport rejection ${String(primary)}`, async () => {
+    const h = harness({
+      wheel: async () => {
+        throw primary;
+      },
+    });
+    const trace = { entries: [], dropped: 0 };
+    let caught = false;
+    try {
+      await reveal(traceInput(h.input, trace), expected, h.options);
+    } catch (error) {
+      caught = true;
+      assert.equal(error, primary);
+    }
+    assert.equal(caught, true);
+    assert.equal(trace.entries.at(-1).operation, 'wheel');
+    assert.equal(trace.entries.at(-1).status, 'rejected');
+  });
+
+test('input trace retains pending response at deadline and separates later settlement', async () => {
+  let finish;
+  const h = harness({
+    wheel: () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      }),
+  });
+  const trace = { entries: [], dropped: 0 };
+  await assert.rejects(
+    reveal(traceInput(h.input, trace), expected, { ...h.options, timeoutMs: 120 }),
+    /deadline/
+  );
+  const snapshot = JSON.parse(JSON.stringify(trace));
+  assert.equal(snapshot.entries.at(-1).status, 'pending');
+  assert.equal(snapshot.entries.at(-1).settledAt, undefined);
+  finish();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(trace.entries.at(-1).status, 'fulfilled');
+  assert.equal(snapshot.entries.at(-1).status, 'pending');
+});
+
+test('input trace caps retained operations without suppressing actual input', async () => {
+  const h = harness();
+  const trace = { entries: [], dropped: 0 };
+  const input = traceInput(h.input, trace);
+  for (let i = 0; i < 2050; i++) await input.move(160, 675);
+  assert.equal(trace.entries.length, 2048);
+  assert.equal(trace.dropped, 2);
+  assert.equal(h.calls.length, 2050);
+});
+
+test('failure journal persists separately before screenshot and keeps original verdict', () => {
+  const producer = readFileSync(
+    'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
+    'utf8'
+  );
+  const nojs = producer.slice(producer.indexOf("describe('candidate Card keeps"));
+  assert.match(nojs, /noScriptInput\(page, link, inputTrace\)/);
+  const failure = nojs.slice(nojs.indexOf('} catch (error)'));
+  assert.ok(failure.indexOf("'input-trace.json'") < failure.indexOf('captureCurrentViewport'));
+  assert.match(failure, /throw error/);
+});
+
+test('read-only diagnostic identifies wheel hit chain, scroll owner and actual viewport scale', () => {
+  const names = [
+    'HTMLAnchorElement',
+    'ShadowRoot',
+    'innerWidth',
+    'innerHeight',
+    'scrollX',
+    'scrollY',
+    'visualViewport',
+    'devicePixelRatio',
+    'getComputedStyle',
+    'document',
+  ];
+  const saved = Object.fromEntries(
+    names.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)])
+  );
+  const css = {
+    display: 'block',
+    visibility: 'visible',
+    opacity: '1',
+    overflowX: 'visible',
+    overflowY: 'auto',
+    overscrollBehaviorY: 'contain',
+    fontSize: '32px',
+  };
+  class Node {
+    constructor(tag, parent = null) {
+      this.tagName = tag;
+      this.parentElement = parent;
+      this.id = tag;
+    }
+    isConnected = true;
+    scrollTop = 25;
+    scrollLeft = 0;
+    scrollHeight = 22000;
+    scrollWidth = 320;
+    clientHeight = 900;
+    clientWidth = 320;
+    getBoundingClientRect() {
+      return { x: 72, y: 11000, width: 176, height: 80 };
+    }
+    getAttribute(name) {
+      return name === 'class' ? 'fixture-owner' : null;
+    }
+    hasAttribute() {
+      return false;
+    }
+    getRootNode() {
+      return document;
+    }
+    contains(node) {
+      return node === this;
+    }
+  }
+  class Anchor extends Node {
+    href = expected;
+  }
+  const root = new Node('HTML'),
+    body = new Node('BODY', root),
+    nested = new Node('DIV', body),
+    anchor = new Anchor('A', body);
+  const points = [];
+  Object.assign(globalThis, {
+    HTMLAnchorElement: Anchor,
+    ShadowRoot: class {},
+    innerWidth: 320,
+    innerHeight: 900,
+    scrollX: 0,
+    scrollY: 25,
+    devicePixelRatio: 1,
+    visualViewport: {
+      width: 320,
+      height: 900,
+      scale: 1,
+      offsetLeft: 0,
+      offsetTop: 0,
+      pageLeft: 0,
+      pageTop: 25,
+    },
+    getComputedStyle: () => css,
+    document: {
+      documentElement: root,
+      body,
+      scrollingElement: root,
+      elementFromPoint(x, y) {
+        points.push([x, y]);
+        return y === 675 ? nested : null;
+      },
+    },
+  });
+  try {
+    const sample = read(anchor, true);
+    assert.deepEqual(points, [
+      [160, 11040],
+      [160, 675],
+    ]);
+    assert.deepEqual(
+      sample.wheelContext.hitChain.map((node) => node.tag),
+      ['DIV', 'BODY', 'HTML']
+    );
+    assert.equal(sample.wheelContext.scrollingElement.scrollHeight, 22000);
+    assert.equal(sample.wheelContext.scrollingElement.clientHeight, 900);
+    assert.equal(sample.wheelContext.hitChain[0].overscrollBehaviorY, 'contain');
+    assert.equal(sample.wheelContext.rootFontSize, '32px');
+    assert.equal(sample.wheelContext.visualViewport.scale, 1);
+    assert.equal(sample.wheelContext.chainTruncated, false);
+    assert.equal(sample.viewport.scrollY, 25);
+    assert.equal(root.scrollTop, 25);
+    document.elementFromPoint = (x, y) => {
+      if (y === 675) throw new Error('diagnostic unavailable');
+      return null;
+    };
+    assert.match(read(anchor, true).wheelContext.unavailable, /diagnostic unavailable/);
+    assert.equal(read(anchor, true).rect.y, 11000);
+  } finally {
+    for (const [key, descriptor] of Object.entries(saved)) {
+      if (descriptor) Object.defineProperty(globalThis, key, descriptor);
+      else delete globalThis[key];
+    }
+  }
+});

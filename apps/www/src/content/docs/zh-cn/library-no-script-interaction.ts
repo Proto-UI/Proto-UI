@@ -10,16 +10,81 @@ export interface NoScriptLinkSample {
   viewport: { width: number; height: number; scrollX: number; scrollY: number };
   point: { x: number; y: number };
   receivesEvents: boolean;
+  wheelContext?: unknown;
 }
 
 /** Read-only geometry and native hit testing. It never invokes page rAF or
  * mutates scrolling, styles, focus, event handlers or the no-script setting. */
-export function readNoScriptLink(element: Element): NoScriptLinkSample {
+export function readNoScriptLink(element: Element, diagnostics = false): NoScriptLinkSample {
   const rect = element.getBoundingClientRect();
   const style = getComputedStyle(element);
   const point = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
   const hit = document.elementFromPoint(point.x, point.y);
+  let wheelContext: unknown;
+  if (diagnostics) {
+    try {
+      const inspect = (node: Element | null) => {
+        if (!node) return null;
+        const box = node.getBoundingClientRect(),
+          css = getComputedStyle(node);
+        return {
+          tag: node.tagName,
+          id: node.id,
+          className: node.getAttribute('class'),
+          rect: { x: box.x, y: box.y, width: box.width, height: box.height },
+          scrollTop: node.scrollTop,
+          scrollLeft: node.scrollLeft,
+          scrollHeight: node.scrollHeight,
+          scrollWidth: node.scrollWidth,
+          clientHeight: node.clientHeight,
+          clientWidth: node.clientWidth,
+          overflowX: css.overflowX,
+          overflowY: css.overflowY,
+          overscrollBehaviorX: css.overscrollBehaviorX,
+          overscrollBehaviorY: css.overscrollBehaviorY,
+          scrollBehavior: css.scrollBehavior,
+          position: css.position,
+          pointerEvents: css.pointerEvents,
+          touchAction: css.touchAction,
+          fontSize: css.fontSize,
+          zoom: css.zoom,
+          transform: css.transform,
+        };
+      };
+      const wheelPoint = { x: innerWidth / 2, y: innerHeight * 0.75 };
+      let node = document.elementFromPoint(wheelPoint.x, wheelPoint.y);
+      const hitChain = [];
+      for (let depth = 0; node && depth < 32; depth++) {
+        hitChain.push(inspect(node));
+        const root = node.getRootNode();
+        node = node.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+      }
+      wheelContext = {
+        wheelPoint,
+        hitChain,
+        chainTruncated: node !== null,
+        scrollingElement: inspect(document.scrollingElement),
+        root: inspect(document.documentElement),
+        body: inspect(document.body),
+        visualViewport: visualViewport && {
+          width: visualViewport.width,
+          height: visualViewport.height,
+          scale: visualViewport.scale,
+          offsetLeft: visualViewport.offsetLeft,
+          offsetTop: visualViewport.offsetTop,
+          pageLeft: visualViewport.pageLeft,
+          pageTop: visualViewport.pageTop,
+        },
+        devicePixelRatio,
+        rootFontSize: getComputedStyle(document.documentElement).fontSize,
+      };
+    } catch (error) {
+      // Read-only diagnostic failure must not replace the interaction verdict.
+      wheelContext = { unavailable: String(error) };
+    }
+  }
   return {
+    ...(diagnostics ? { wheelContext } : {}),
     connected: element.isConnected,
     visible:
       style.display !== 'none' && style.visibility === 'visible' && Number(style.opacity) > 0,
@@ -41,14 +106,74 @@ export interface NoScriptInput {
   up(): Promise<void>;
 }
 
-export function noScriptInput(page: Page, link: Locator): NoScriptInput {
+export interface NoScriptInputTrace {
+  entries: {
+    operation: keyof NoScriptInput;
+    args: number[];
+    startedAt: number;
+    settledAt?: number;
+    status: 'pending' | 'fulfilled' | 'rejected';
+    sample?: NoScriptLinkSample;
+    error?: string;
+  }[];
+  dropped: number;
+}
+
+/** Protocol completion is not evidence of DOM event delivery or scrolling.
+ * Subsequent sample geometry records actual observed movement separately. */
+export function traceNoScriptInput(input: NoScriptInput, trace: NoScriptInputTrace): NoScriptInput {
+  const record = async <T>(
+    operation: keyof NoScriptInput,
+    args: number[],
+    work: () => Promise<T>
+  ) => {
+    const entry: NoScriptInputTrace['entries'][number] = {
+      operation,
+      args,
+      startedAt: performance.now(),
+      status: 'pending',
+    };
+    if (trace.entries.length < 2048) trace.entries.push(entry);
+    else trace.dropped++;
+    try {
+      const result = await work();
+      entry.status = 'fulfilled';
+      if (operation === 'sample') entry.sample = result as NoScriptLinkSample;
+      return result;
+    } catch (error) {
+      entry.status = 'rejected';
+      try {
+        entry.error = String(error);
+      } catch {
+        entry.error = 'Unprintable rejection';
+      }
+      throw error;
+    } finally {
+      entry.settledAt = performance.now();
+    }
+  };
   return {
-    sample: () => link.evaluate(readNoScriptLink),
+    sample: () => record('sample', [], input.sample),
+    move: (x, y) => record('move', [x, y], () => input.move(x, y)),
+    wheel: (delta) => record('wheel', [delta], () => input.wheel(delta)),
+    down: () => record('down', [], input.down),
+    up: () => record('up', [], input.up),
+  };
+}
+
+export function noScriptInput(
+  page: Page,
+  link: Locator,
+  trace?: NoScriptInputTrace
+): NoScriptInput {
+  const input: NoScriptInput = {
+    sample: () => link.evaluate(readNoScriptLink, !!trace),
     move: (x, y) => page.mouse.move(x, y),
     wheel: (deltaY) => page.mouse.wheel(0, deltaY),
     down: () => page.mouse.down(),
     up: () => page.mouse.up(),
   };
+  return trace ? traceNoScriptInput(input, trace) : input;
 }
 
 const hostSleep = (milliseconds: number) =>
