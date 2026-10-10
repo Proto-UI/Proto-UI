@@ -5,6 +5,7 @@ import {
   type ScrollProjectionPreference,
 } from '@proto.ui/core';
 import { PropsBaseType } from '@proto.ui/types';
+import type { AnatomyPort } from '@proto.ui/module-anatomy';
 
 import { type RawPropsSource } from '@proto.ui/module-props';
 
@@ -52,6 +53,9 @@ import { createDefaultMetaGetter } from './platform/meta';
 import {
   createLogicalInstance,
   bindLogicalParent,
+  getLogicalParent,
+  getLogicalRoot,
+  setProtoParent,
   bindLogicalEventTarget,
   resolveLogicalTriggerEventRouteForTarget,
   isLogicalEventRouteCandidate,
@@ -190,6 +194,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _disconnectVersion = 0;
     private _pendingOwnedTokens: string[] | null = null;
     private _controller: RuntimeController | null = null;
+    private _anatomyPort: AnatomyPort | null = null;
     private _focusTargetReadyListeners = new Set<() => void>();
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
@@ -338,15 +343,26 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       this._focusTargetRetryCount = 0;
 
       if (this._mountedOnce) {
-        // Refresh the logical parent link after a synchronous DOM move.
-        // Portal ownership is retained in Adapter metadata while parentNode
-        // continues to report the physical DOM tree.
-        markProtoInstance(
-          this,
-          proto as Prototype<any>,
-          this._instanceToken,
-          !isWebComponentPortaled(this)
-        );
+        const previousParent = getLogicalParent(this._instanceToken);
+        const previousRoot = previousParent ? getLogicalRoot(previousParent) : null;
+        try {
+          if (!isWebComponentPortaled(this)) setProtoParent(this, null);
+          markProtoInstance(
+            this,
+            proto as Prototype<any>,
+            this._instanceToken,
+            !isWebComponentPortaled(this)
+          );
+          this._anatomyPort?.syncStructure();
+        } catch (error) {
+          try {
+            setProtoParent(this, previousRoot);
+            this._anatomyPort?.syncStructure();
+          } catch (rollbackError) {
+            throw new AggregateError([error, rollbackError]);
+          }
+          throw error;
+        }
         if (this._pendingOwnedTokens?.length) {
           this._applier?.apply(this._pendingOwnedTokens);
         }
@@ -535,6 +551,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           onAfterUnmount: () => {
             scopedExposesReader.invalidate();
             runFocusCallbackScope = null;
+            this._anatomyPort = null;
             this._exposes = {};
             this._applier?.clear();
             this._applier = null;
@@ -781,6 +798,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       });
       initializingOwner = false;
       runFocusCallbackScope = hostSession.invokeInCallbackScope;
+      this._anatomyPort = hostSession.caps.getPort<AnatomyPort>('anatomy') ?? null;
 
       try {
         if (initialPresent) attachView();

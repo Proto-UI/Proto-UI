@@ -1,0 +1,299 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-10",
+  "stage": "Bounded numeric proposal after actual integrated source cost; final canonical numeric-head check remains a separate PR receipt",
+  "issue": "https://github.com/Proto-UI/Proto-UI/issues/883",
+  "pullRequest": "https://github.com/Proto-UI/Proto-UI/pull/884",
+  "scope": "C Anatomy/Runtime existing lifecycle and rejected-adoption repair; no new capability, public API, lifecycle promotion or wider callback-error policy",
+  "sourceCandidate": {
+    "sha": "02a653dc0907e262102b2dd6709f2d95fd4d5413",
+    "tree": "91081ecde318bf45a1e8883e1244155700d3c2c7",
+    "baseline": "ea19727838d85c05af5e4bca8d5fc235cb44e288"
+  },
+  "canonical": {
+    "environment": {
+      "node": "v24.21.0",
+      "zlib": "1.3.2.1-motley-8002e91",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "measurement": {
+      "gzipLevel": 9,
+      "minify": true,
+      "bundle": true,
+      "treeShaking": true,
+      "target": ["es2020"],
+      "format": "esm",
+      "platform": "browser",
+      "workspaceExternalBoundary": "unchanged script/manifest-derived third-party boundary"
+    },
+    "baselineRun": 37953108222,
+    "baselineJob": 113896790334,
+    "baselineRows": [
+      {
+        "result": "PASS",
+        "name": "lucide/icons/x",
+        "gzip": 1737,
+        "cap": 3000,
+        "minified": 4670,
+        "sha256": "48d7f79983beca000fd0cbbfa4e84101cb4bce326f3440bbb37db2d401d51e5d"
+      },
+      {
+        "result": "PASS",
+        "name": "lucide root",
+        "gzip": 635866,
+        "cap": 700000,
+        "minified": 4082945,
+        "sha256": "b4f53a871d51032bcb0b8937e51863888eedc167fa92d51d9652efc197820baa"
+      },
+      {
+        "result": "PASS",
+        "name": "core root",
+        "gzip": 6373,
+        "cap": 6600,
+        "minified": 19647,
+        "sha256": "5e266465eb5e23c69989f43ae2c440d1f17f9c2f1cf921d5165708a50491f6e5"
+      },
+      {
+        "result": "PASS",
+        "name": "runtime root",
+        "gzip": 71377,
+        "cap": 71500,
+        "minified": 276844,
+        "sha256": "067a7fbcde838ed31edb22882313be7de5abb872e0810f22ee7078cf204f950e"
+      },
+      {
+        "result": "PASS",
+        "name": "adapter-react root",
+        "gzip": 94422,
+        "cap": 94550,
+        "minified": 348168,
+        "sha256": "8a8dc5ae4642f555f6557e74e5906fb29fb60c573435b0fe23ca3fd1c5c0798d"
+      },
+      {
+        "result": "PASS",
+        "name": "adapter-vue root",
+        "gzip": 94206,
+        "cap": 94350,
+        "minified": 347008,
+        "sha256": "fdf9172ade2259877b8141fabaf6228793e85f9ba9008a7978e6588b1c805f52"
+      },
+      {
+        "result": "PASS",
+        "name": "adapter-web-component root",
+        "gzip": 117706,
+        "cap": 117850,
+        "minified": 418847,
+        "sha256": "6c0bc106413987ae9b8d2722b1189656532f05cfb45ccaebfcfacf31ac25639f"
+      },
+      {
+        "result": "PASS",
+        "name": "prototypes-base/button",
+        "gzip": 3783,
+        "cap": 6000,
+        "minified": 12788,
+        "sha256": "8f9e45fe51a5dcfe61e1ea39ecbcaa07cce6c0cfcb2269108f8d8c2a7cf462d6"
+      },
+      {
+        "result": "PASS",
+        "name": "prototypes-shadcn/button",
+        "gzip": 4625,
+        "cap": 7000,
+        "minified": 16420,
+        "sha256": "ec7e426e45df705075a9af31627181a05c2b01584b508f1f90fa23c7787ade1f"
+      }
+    ],
+    "sourceRun": 38020376990,
+    "sourceJob": 114120182365,
+    "sourceCheckout": {
+      "parents": [
+        "ea19727838d85c05af5e4bca8d5fc235cb44e288",
+        "02a653dc0907e262102b2dd6709f2d95fd4d5413"
+      ],
+      "sha": "2a30ecb66181e5dffaea408363a6bace4e7364d7",
+      "tree": "91081ecde318bf45a1e8883e1244155700d3c2c7"
+    },
+    "sourceRows": [
+      {
+        "result": "PASS",
+        "name": "lucide/icons/x",
+        "gzip": 1737,
+        "cap": 3000,
+        "minified": 4670,
+        "sha256": "48d7f79983beca000fd0cbbfa4e84101cb4bce326f3440bbb37db2d401d51e5d"
+      },
+      {
+        "result": "PASS",
+        "name": "lucide root",
+        "gzip": 635866,
+        "cap": 700000,
+        "minified": 4082945,
+        "sha256": "b4f53a871d51032bcb0b8937e51863888eedc167fa92d51d9652efc197820baa"
+      },
+      {
+        "result": "PASS",
+        "name": "core root",
+        "gzip": 6373,
+        "cap": 6600,
+        "minified": 19647,
+        "sha256": "5e266465eb5e23c69989f43ae2c440d1f17f9c2f1cf921d5165708a50491f6e5"
+      },
+      {
+        "result": "PASS",
+        "name": "runtime root",
+        "gzip": 71457,
+        "cap": 71500,
+        "minified": 277111,
+        "sha256": "18e05c98b57d91c077d620ae1340a2c048a9c6020cdc60e28fe7ce64bf873d3e"
+      },
+      {
+        "result": "PASS",
+        "name": "adapter-react root",
+        "gzip": 94516,
+        "cap": 94550,
+        "minified": 348449,
+        "sha256": "84c67b560cc3877fb8876957e81b202d663c195a9d5eb1ca4206750cf2b56c41"
+      },
+      {
+        "result": "PASS",
+        "name": "adapter-vue root",
+        "gzip": 94298,
+        "cap": 94350,
+        "minified": 347289,
+        "sha256": "5b78e3975d08f1b21048ac17357201d5fec41144bb6ff5bba66ed8e8ae745bdf"
+      },
+      {
+        "result": "FAIL",
+        "name": "adapter-web-component root",
+        "gzip": 117874,
+        "cap": 117850,
+        "minified": 419438,
+        "sha256": "02ecb49c75c9ade97a88bc7dd21a688a1f60661bd4a66c47291f60b6b3c35e67"
+      },
+      {
+        "result": "PASS",
+        "name": "prototypes-base/button",
+        "gzip": 3783,
+        "cap": 6000,
+        "minified": 12788,
+        "sha256": "8f9e45fe51a5dcfe61e1ea39ecbcaa07cce6c0cfcb2269108f8d8c2a7cf462d6"
+      },
+      {
+        "result": "PASS",
+        "name": "prototypes-shadcn/button",
+        "gzip": 4625,
+        "cap": 7000,
+        "minified": 16420,
+        "sha256": "ec7e426e45df705075a9af31627181a05c2b01584b508f1f90fa23c7787ade1f"
+      }
+    ],
+    "sourceConclusion": "Failed, with actual WC24-byte overage; preserve this historical result",
+    "buildSelection": {
+      "baseline": "44/44 packages actually rebuilt",
+      "sourceCandidate": "39/44 affected packages actually rebuilt; remaining5 not claimed as rebuilds",
+      "manifests": "44 checked in both jobs",
+      "budgets": "All9 whole-entry blocking measurements actually executed in both jobs"
+    }
+  },
+  "transaction": {
+    "entry": "adapter-web-component root",
+    "path": "packages/adapters/web-component/src/index.ts",
+    "oldCap": 117850,
+    "proposedCap": 118000,
+    "increase": 150,
+    "baselineGzip": 117706,
+    "sourceGzip": 117874,
+    "sourceGrowth": 168,
+    "oldHeadroom": 144,
+    "proposedHeadroom": 126,
+    "rationale": "Existing bounded lifetime and logical-parent correctness adds168 gzip bytes. A150 ceiling adjustment retains126 bytes of margin, slightly below the previous144; no unrelated future growth is budgeted."
+  },
+  "attribution": {
+    "method": "Supplemental local esbuild metafiles reproduce all4 canonical before/after minified hashes and gzip values; environment differs only platform/architecture, with exact equal artifact hashes/costs, not claimed as another canonical execution",
+    "environment": {
+      "node": "v24.21.0",
+      "zlib": "1.3.2.1-motley-8002e91",
+      "esbuild": "0.25.12",
+      "platform": "darwin",
+      "arch": "arm64"
+    },
+    "entries": [
+      {
+        "name": "runtime root",
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeEntryCopies": 1,
+        "outputDeltas": [
+          {
+            "path": "packages/runtime/src/instance/session.ts",
+            "delta": 260
+          },
+          {
+            "path": "packages/runtime/src/kernel/kernel.ts",
+            "delta": 10
+          },
+          {
+            "path": "packages/modules/a11y/src/web.ts",
+            "delta": -6
+          },
+          {
+            "path": "packages/runtime/src/kernel/as-hook.ts",
+            "delta": 3
+          }
+        ]
+      },
+      {
+        "name": "adapter-react root",
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeEntryCopies": 1,
+        "outputDeltas": [
+          {
+            "path": "packages/runtime/src/instance/session.ts",
+            "delta": 281
+          }
+        ]
+      },
+      {
+        "name": "adapter-vue root",
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeEntryCopies": 1,
+        "outputDeltas": [
+          {
+            "path": "packages/runtime/src/instance/session.ts",
+            "delta": 281
+          }
+        ]
+      },
+      {
+        "name": "adapter-web-component root",
+        "addedInputs": [],
+        "removedInputs": [],
+        "runtimeEntryCopies": 1,
+        "outputDeltas": [
+          {
+            "path": "packages/adapters/web-component/src/adapt.ts",
+            "delta": 321
+          },
+          {
+            "path": "packages/runtime/src/instance/session.ts",
+            "delta": 270
+          }
+        ]
+      }
+    ],
+    "conclusion": "No added or removed source inputs and one Runtime entry copy in each closure. WC minified growth591 consists of321 adapt and270 session bytes; other5 blocking entries retain identical minified hashes. No new dependency, accidental duplicate Runtime or eager feature closure was found."
+  },
+  "unchanged": [
+    "All other8 numeric ceilings",
+    "entry points and external dependency boundary",
+    "gzip level9, bundle/minify/tree-shaking/target/format",
+    "blocking whole-entry comparison",
+    "diagnostic-only consumer profiles",
+    "source implementation from02a653dc"
+  ],
+  "rollback": "Revert this one numeric literal and this proposal record; retain the separately committed source repair and red CI history",
+  "validationBoundary": "Re-run all9 blocking budgets on final numeric head in repository CI, preserve trusted DCO/independent review and Issue coordinator whole-main validation. This record is not an approval or CI waiver."
+}
