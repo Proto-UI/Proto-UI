@@ -18,6 +18,11 @@ import {
   fieldEditorOwnerRef,
   fieldEditorSelector,
 } from './field-browser-oracle';
+import {
+  createFieldFocusObservation,
+  recordFieldFocusSample,
+  type FieldFocusSnapshot,
+} from './field-focus-observation';
 const families = ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'];
 let browser: Browser,
   baseUrl = '';
@@ -25,7 +30,13 @@ const ref = (previewer: Locator, id: string) => previewer.locator(`.host [data-d
 const editor = (previewer: Locator, id: string) =>
   previewer.locator('.host').locator(fieldEditorSelector(id));
 const route = (family: string, locale = 'en') => `/${locale}/ui-libraries/${family}/field/`;
-async function capture(previewer: Locator, name: string, subject: Record<string, unknown>) {
+async function capture(
+  previewer: Locator,
+  name: string,
+  subject: Record<string, unknown>,
+  focusObservation?: ReturnType<typeof createFieldFocusObservation>,
+  focusAtFailure?: FieldFocusSnapshot
+) {
   const directory =
     process.env.PROTO_UI_FIELD_SCREENSHOT_DIR ??
     (process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR
@@ -40,6 +51,11 @@ async function capture(previewer: Locator, name: string, subject: Record<string,
     path: path.join(directory, basename + '.png'),
     style: 'astro-dev-toolbar { visibility: hidden; }',
   });
+  const focusSamples = await previewer
+    .page()
+    .evaluate(() => (window as any).__fieldFocusEvidence ?? [])
+    .catch(() => [{ diagnosticError: true }]);
+  const focusAtCapture = focusObservation?.snapshot();
   await writeFile(
     path.join(directory, basename + '.json'),
     JSON.stringify(
@@ -48,6 +64,9 @@ async function capture(previewer: Locator, name: string, subject: Record<string,
         dirtyWorktree: !!dirty.trim(),
         fixture: 'demo-field-family.browser.test.ts',
         ...subject,
+        focusObservation: focusObservation
+          ? { atFailure: focusAtFailure, atCapture: focusAtCapture, browserSamples: focusSamples }
+          : undefined,
         checkedAt: new Date().toISOString(),
         viewport: previewer.page().viewportSize(),
         asyncStatuses: await ref(previewer, 'asyncStatus').allTextContents(),
@@ -100,6 +119,7 @@ describe('Field real browser journeys', () => {
           previewer: mountedPreviewer,
         } = await openRoute(browser, baseUrl, route(family), { width: 1100, height: 1000 });
         let previewer: Locator | undefined;
+        const focusObservation = createFieldFocusObservation();
         try {
           previewer = mountedPreviewer;
           await selectRuntime(page, previewer, runtime, 'input', 6);
@@ -112,6 +132,11 @@ describe('Field real browser journeys', () => {
           }
           await page.evaluate(() => {
             (window as any).__fieldInputEvidence = [];
+            try {
+              (window as any).__fieldFocusEvidence = [];
+            } catch {
+              // A diagnostic sidecar cannot prevent the original event recorder.
+            }
             for (const type of [
               'pointerdown',
               'pointerup',
@@ -187,7 +212,11 @@ describe('Field real browser journeys', () => {
             await ref(previewer, 'requiredDescription').getAttribute('id')
           );
           await ref(previewer, 'requiredLabel').click();
-          await expect.poll(() => input.evaluate((el) => el === document.activeElement)).toBe(true);
+          await expect
+            .poll(() =>
+              focusObservation.observe((attempt) => input.evaluate(recordFieldFocusSample, attempt))
+            )
+            .toBe(true);
           await page.keyboard.press('Tab');
           await expect.poll(() => input.getAttribute('aria-invalid')).toBe('true');
           expect(await input.getAttribute('aria-errormessage')).toBe(
@@ -225,11 +254,12 @@ describe('Field real browser journeys', () => {
           await page.waitForTimeout(650);
           expect(await ref(previewer, 'asyncStatus').textContent()).toContain('Canceled');
           expect(await editor(previewer, 'async').getAttribute('aria-invalid')).toBe('false');
-          await capture(previewer, `${family}-${runtime}-light`, {
-            family,
-            runtime,
-            state: 'light-valid-and-owner-invalid',
-          });
+          await capture(
+            previewer,
+            `${family}-${runtime}-light`,
+            { family, runtime, state: 'light-valid-and-owner-invalid' },
+            focusObservation
+          );
           await applyColorScheme(page, 'dark');
           await page.setViewportSize({ width: 390, height: 1000 });
           await page.evaluate(() => (document.documentElement.style.fontSize = '32px'));
@@ -239,22 +269,36 @@ describe('Field real browser journeys', () => {
             client: el.clientWidth,
           }));
           expect(geometry.scroll).toBeLessThanOrEqual(geometry.client + 2);
-          await capture(previewer, `${family}-${runtime}-dark-narrow-200`, {
-            family,
-            runtime,
-            state: 'dark-narrow-200-percent',
-          });
+          await capture(
+            previewer,
+            `${family}-${runtime}-dark-narrow-200`,
+            { family, runtime, state: 'dark-narrow-200-percent' },
+            focusObservation
+          );
           const evidence = await page.evaluate(() => (window as any).__fieldInputEvidence);
           expect(evidence.some((e: any) => e.type === 'keydown' && e.trusted)).toBe(true);
           expect(evidence.some((e: any) => e.type === 'input' && e.trusted)).toBe(true);
         } catch (error) {
+          let focusAtFailure: FieldFocusSnapshot | undefined;
+          // Retain the Node-side deadline boundary even if the browser cannot
+          // complete the existing screenshot/evidence capture.
+          try {
+            focusAtFailure = focusObservation.snapshot();
+            console.info(
+              '[Field focus diagnostic]',
+              JSON.stringify({ family, runtime, atFailure: focusAtFailure })
+            );
+          } catch {
+            // A diagnostic logger cannot replace the original journey error.
+          }
           if (previewer)
-            await capture(previewer, `${family}-${runtime}-failure`, {
-              family,
-              runtime,
-              state: 'failure',
-              error: String(error),
-            }).catch((captureError) => {
+            await capture(
+              previewer,
+              `${family}-${runtime}-failure`,
+              { family, runtime, state: 'failure', error: String(error) },
+              focusObservation,
+              focusAtFailure
+            ).catch((captureError) => {
               console.error('[Field evidence] failure capture also failed:', captureError);
             });
           throw error;
