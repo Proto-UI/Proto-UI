@@ -7,7 +7,7 @@ import {
 } from '@proto.ui/core';
 import { asAccessible } from '@proto.ui/hooks';
 import { METER_FAMILY, METER_CONTEXT } from './shared';
-import { range, finite, clamp, percentage } from '../progress/range';
+import { range, finite, clamp, percentage, midpoint } from '../progress/range';
 import type { MeterRootProps, MeterRootExposes, MeterRootAsHookContract } from './types';
 function setup(def: DefHandle<MeterRootProps, MeterRootExposes>) {
   def.anatomy.claim(METER_FAMILY, { role: 'root' });
@@ -59,7 +59,11 @@ function setup(def: DefHandle<MeterRootProps, MeterRootExposes>) {
     const indeterminate = false;
     const low = clamp(finite(p.low, bounds.min), bounds.min, bounds.max);
     const high = clamp(finite(p.high, bounds.max), low, bounds.max);
-    const optimum = clamp(finite(p.optimum, (bounds.min + bounds.max) / 2), bounds.min, bounds.max);
+    const optimum = clamp(
+      finite(p.optimum, midpoint(bounds.min, bounds.max)),
+      bounds.min,
+      bounds.max
+    );
     const zone = value < low ? 0 : value > high ? 2 : 1;
     const ideal = optimum < low ? 0 : optimum > high ? 2 : 1;
     const status =

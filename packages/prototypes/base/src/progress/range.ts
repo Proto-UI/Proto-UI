@@ -23,5 +23,27 @@ export function percentage(value: number, min: number, max: number) {
 export function quantize(value: number, min: number, max: number, step: number) {
   const bounded = clamp(value, min, max);
   if (!(step > 0) || !Number.isFinite(step)) return bounded;
-  return clamp(Number((min + Math.round((bounded - min) / step) * step).toPrecision(14)), min, max);
+  const snapped = min + Math.round((bounded - min) / step) * step;
+  if (Number.isFinite(snapped)) {
+    // Preserve the existing ordinary/subnormal decimal-noise normalization.
+    return clamp(Number(snapped.toPrecision(14)), min, max);
+  }
+  // Finite endpoints can overflow either the offset, step count, or product.
+  // Compare grid phases instead: each positive remainder is within one step,
+  // so their difference is finite even when the total grid index is not.
+  const minRemainder = min % step;
+  const valueRemainder = bounded % step;
+  const minPhase = minRemainder < 0 ? minRemainder + step : minRemainder;
+  const valuePhase = valueRemainder < 0 ? valueRemainder + step : valueRemainder;
+  const phaseDifference = valuePhase - minPhase;
+  const remainder = phaseDifference < 0 ? phaseDifference + step : phaseDifference;
+  if (remainder === 0) return bounded;
+  // Like Math.round on the nonnegative grid index, midpoint ties go upward.
+  const nearest = remainder < step / 2 ? bounded - remainder : bounded + (step - remainder);
+  return clamp(nearest, min, max);
+}
+/** Finite endpoint midpoint without losing the ordinary/subnormal sum path. */
+export function midpoint(min: number, max: number) {
+  const sum = min + max;
+  return Number.isFinite(sum) ? sum / 2 : min / 2 + max / 2;
 }
