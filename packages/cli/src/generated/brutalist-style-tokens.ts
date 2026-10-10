@@ -154,6 +154,7 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'flex-none',
   'flex-nowrap',
   'flex-wrap',
+  'flex-wrap-reverse',
   'font-black',
   'font-bold',
   'font-heading',

@@ -79,6 +79,14 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/alert-dialog');
     registerExactPrototype('brutalist-alert-dialog-content', module.alertDialogContent);
   },
+  'brutalist-alert-dialog-header': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/alert-dialog');
+    registerExactPrototype('brutalist-alert-dialog-header', module.alertDialogHeader);
+  },
+  'brutalist-alert-dialog-footer': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/alert-dialog');
+    registerExactPrototype('brutalist-alert-dialog-footer', module.alertDialogFooter);
+  },
   'brutalist-alert-dialog-title': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/alert-dialog');
     registerExactPrototype('brutalist-alert-dialog-title', module.alertDialogTitle);

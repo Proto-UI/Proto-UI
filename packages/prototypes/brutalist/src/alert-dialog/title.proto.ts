@@ -9,6 +9,7 @@ export default definePrototype<AlertDialogTitleProps, AlertDialogTitleExposes>({
   name: 'brutalist-alert-dialog-title',
   setup(def) {
     const behavior = asAlertDialogTitle();
-    def.feedback.style.use(tw('text-xl font-black'));
+    // AlertDialog's upstream heading is 18px/28px; ordinary Dialog uses another recipe.
+    def.feedback.style.use(tw('font-heading font-bold text-lg text-foreground'));
   },
 });

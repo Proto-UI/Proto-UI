@@ -9,6 +9,6 @@ export default definePrototype<AlertDialogDescriptionProps, AlertDialogDescripti
   name: 'brutalist-alert-dialog-description',
   setup(def) {
     const behavior = asAlertDialogDescription();
-    def.feedback.style.use(tw('text-sm text-foreground'));
+    def.feedback.style.use(tw('font-sans font-medium text-sm text-foreground'));
   },
 });

@@ -18,6 +18,8 @@ Root fixes alert semantics. Mask owns modality; Content traps focus, blocks outs
 
 Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
 
-Parts: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+Parts: Root, Trigger, Content, Header, Title, Description, Footer, Cancel, Action, Mask. Header and Footer are optional, passive layout parts with empty Props/Exposes. They preserve authored children without adding commands or state.
+
+The desktop composition follows the [pinned Neo-Brutalist source](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/alert-dialog.tsx): a 5px-radius panel with 24px padding, 8px-spaced heading and description, and intrinsic-width actions aligned right with a 12px gap. Footer uses natural reverse wrapping when its contents no longer fit. This is not the upstream 640px switch to full-width reverse columns; narrow-screen text centering and the 545–639px panel width remain different. The existing zero-duration transitions, theme-relative focus offset and dark palette remain Proto UI behavior/extensions. Upstream small-size and Media parts are not exposed.
 
 Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.

@@ -29,26 +29,38 @@ export default {
             'children': [
               {
                 'kind': 'proto',
-                'prototypeId': 'brutalist-alert-dialog-title',
-                'children': ['AlertDialog settings'],
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-alert-dialog-description',
+                'prototypeId': 'brutalist-alert-dialog-header',
                 'children': [
-                  'Changes remain in this demonstration. Close and reopen to exercise focus restoration.',
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'brutalist-alert-dialog-title',
+                    'children': ['AlertDialog settings'],
+                  },
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'brutalist-alert-dialog-description',
+                    'children': [
+                      'Changes remain in this demonstration. Close and reopen to exercise focus restoration.',
+                    ],
+                  },
                 ],
               },
               {
                 'kind': 'proto',
-                'prototypeId': 'brutalist-alert-dialog-cancel',
-                'children': ['Cancel'],
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'brutalist-alert-dialog-action',
-                'children': ['Confirm'],
-                'ref': 'action',
+                'prototypeId': 'brutalist-alert-dialog-footer',
+                'children': [
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'brutalist-alert-dialog-cancel',
+                    'children': ['Cancel'],
+                  },
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'brutalist-alert-dialog-action',
+                    'children': ['Confirm'],
+                    'ref': 'action',
+                  },
+                ],
               },
             ],
             'props': {

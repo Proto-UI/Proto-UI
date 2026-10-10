@@ -1,0 +1,60 @@
+id: T-BRUTALIST-ALERT-DIALOG-0001
+type: test
+title: Neo-Brutalist AlertDialog passive grouping source and host-unit coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Source and Web Component host-unit checks cover the bounded grouping contract. They do not prove real layout, native input, upstream mobile breakpoint parity or complete cross-Adapter acceptance.
+  zh-CN: 源码与 Web Component host-unit 检查覆盖有界分组契约；不证明真实布局、原生输入、上游移动断点一致性或完整跨 Adapter 验收。
+summary: Covers passive Header/Footer ownership, authored child preservation, intrinsic layout tokens and unchanged command composition.
+cases:
+  - id: T-BRUTALIST-ALERT-DIALOG-0001-CASE-1
+    title: Optional groups have empty public behavior and preserve authored descendants
+    covers: [P-BRUTALIST-ALERT-DIALOG-HEADER-PASSIVE, P-BRUTALIST-ALERT-DIALOG-FOOTER-PASSIVE]
+    expectation: passive-alert-dialog-group-exports-and-slots
+  - id: T-BRUTALIST-ALERT-DIALOG-0001-CASE-2
+    title: Group styles preserve spacing and bounded intrinsic reverse wrapping without host variants
+    covers: [P-BRUTALIST-ALERT-DIALOG-HEADER-LAYOUT, P-BRUTALIST-ALERT-DIALOG-FOOTER-LAYOUT]
+    expectation: bounded-alert-dialog-group-style-intents
+  - id: T-BRUTALIST-ALERT-DIALOG-0001-CASE-3
+    title: Nested commands retain Cancel focus and single-owner controlled requests
+    covers:
+      [P-BRUTALIST-ALERT-DIALOG-HEADER-COMPOSITION, P-BRUTALIST-ALERT-DIALOG-FOOTER-COMPOSITION]
+    expectation: grouped-alert-dialog-command-and-accessibility-composition
+  - id: T-BRUTALIST-ALERT-DIALOG-0001-CASE-4
+    title: The public demo consumes both reusable grouping prototypes
+    covers:
+      [P-BRUTALIST-ALERT-DIALOG-HEADER-COMPOSITION, P-BRUTALIST-ALERT-DIALOG-FOOTER-COMPOSITION]
+    expectation: grouped-alert-dialog-demo-source
+implementations:
+  - id: brutalist-alert-dialog-source-and-host-unit
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/alert-dialog.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BRUTALIST-ALERT-DIALOG-0001-CASE-1,
+        T-BRUTALIST-ALERT-DIALOG-0001-CASE-2,
+        T-BRUTALIST-ALERT-DIALOG-0001-CASE-3,
+      ]
+    exercises: [P-BRUTALIST-ALERT-DIALOG-HEADER, P-BRUTALIST-ALERT-DIALOG-FOOTER]
+  - id: brutalist-alert-dialog-demo-grouping
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/brutalist-alert-dialog-layout.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-ALERT-DIALOG-0001-CASE-4]
+    exercises: [P-BRUTALIST-ALERT-DIALOG-HEADER, P-BRUTALIST-ALERT-DIALOG-FOOTER]
+verifies:
+  prototypes: [P-BRUTALIST-ALERT-DIALOG-HEADER, P-BRUTALIST-ALERT-DIALOG-FOOTER]
+exercises:
+  prototypes: [P-BRUTALIST-ALERT-DIALOG-HEADER, P-BRUTALIST-ALERT-DIALOG-FOOTER]
+sources:
+  - path: packages/prototypes/brutalist/test/alert-dialog.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/brutalist-alert-dialog-layout.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded passive grouping coverage without claiming native or upstream mobile visual acceptance.
+tags: [test, brutalist, alert-dialog, source, host-unit]
