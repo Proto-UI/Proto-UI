@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asMeterValue } from '@proto.ui/prototypes-base/meter';
-export default definePrototype({
+import {
+  type MeterPartProps,
+  type MeterPartExposes,
+  asMeterValue,
+} from '@proto.ui/prototypes-base/meter';
+export default definePrototype<MeterPartProps, MeterPartExposes>({
   name: 'bootstrap-2-3-2-meter-value',
   setup(def) {
     const inherited = asMeterValue();

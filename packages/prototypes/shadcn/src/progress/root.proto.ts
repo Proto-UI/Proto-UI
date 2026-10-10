@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asProgressRoot } from '@proto.ui/prototypes-base/progress';
-export default definePrototype({
+import {
+  type ProgressRootProps,
+  type ProgressRootExposes,
+  asProgressRoot,
+} from '@proto.ui/prototypes-base/progress';
+export default definePrototype<ProgressRootProps, ProgressRootExposes>({
   name: 'shadcn-progress-root',
   setup(def) {
     const inherited = asProgressRoot();

@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asMeterLabel } from '@proto.ui/prototypes-base/meter';
-export default definePrototype({
+import {
+  type MeterPartProps,
+  type MeterPartExposes,
+  asMeterLabel,
+} from '@proto.ui/prototypes-base/meter';
+export default definePrototype<MeterPartProps, MeterPartExposes>({
   name: 'brutalist-meter-label',
   setup(def) {
     const inherited = asMeterLabel();

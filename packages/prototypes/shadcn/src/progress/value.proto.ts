@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asProgressValue } from '@proto.ui/prototypes-base/progress';
-export default definePrototype({
+import {
+  type ProgressPartProps,
+  type ProgressPartExposes,
+  asProgressValue,
+} from '@proto.ui/prototypes-base/progress';
+export default definePrototype<ProgressPartProps, ProgressPartExposes>({
   name: 'shadcn-progress-value',
   setup(def) {
     const inherited = asProgressValue();

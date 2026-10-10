@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asProgressLabel } from '@proto.ui/prototypes-base/progress';
-export default definePrototype({
+import {
+  type ProgressPartProps,
+  type ProgressPartExposes,
+  asProgressLabel,
+} from '@proto.ui/prototypes-base/progress';
+export default definePrototype<ProgressPartProps, ProgressPartExposes>({
   name: 'liquid-glass-progress-label',
   setup(def) {
     const inherited = asProgressLabel();

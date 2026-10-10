@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asMeterRoot } from '@proto.ui/prototypes-base/meter';
-export default definePrototype({
+import {
+  type MeterRootProps,
+  type MeterRootExposes,
+  asMeterRoot,
+} from '@proto.ui/prototypes-base/meter';
+export default definePrototype<MeterRootProps, MeterRootExposes>({
   name: 'shadcn-meter-root',
   setup(def) {
     const inherited = asMeterRoot();

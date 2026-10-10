@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asProgressTrack } from '@proto.ui/prototypes-base/progress';
-export default definePrototype({
+import {
+  type ProgressPartProps,
+  type ProgressPartExposes,
+  asProgressTrack,
+} from '@proto.ui/prototypes-base/progress';
+export default definePrototype<ProgressPartProps, ProgressPartExposes>({
   name: 'brutalist-progress-track',
   setup(def) {
     const inherited = asProgressTrack();

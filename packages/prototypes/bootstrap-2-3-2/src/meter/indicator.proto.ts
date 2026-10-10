@@ -1,6 +1,10 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import { asMeterIndicator } from '@proto.ui/prototypes-base/meter';
-export default definePrototype({
+import {
+  type MeterPartProps,
+  type MeterPartExposes,
+  asMeterIndicator,
+} from '@proto.ui/prototypes-base/meter';
+export default definePrototype<MeterPartProps, MeterPartExposes>({
   name: 'bootstrap-2-3-2-meter-indicator',
   setup(def) {
     const inherited = asMeterIndicator();
