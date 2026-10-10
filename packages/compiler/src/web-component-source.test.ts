@@ -424,3 +424,26 @@ describe('generated nullable current range value', () => {
     expect(element.hasAttribute('aria-valuenow')).toBe(false);
   });
 });
+
+describe('generated tree positional accessibility', () => {
+  it('projects positive logical depth and set membership from emitted source', async () => {
+    const element = create(`import { definePrototype } from '@proto.ui/core';
+      import { asAccessible } from '@proto.ui/hooks';
+      export default definePrototype({ name: 'tree-facts', setup(def) {
+        const level = def.state.numberDiscrete('tree.level', 2);
+        const position = def.state.numberDiscrete('tree.position', 3);
+        const size = def.state.numberDiscrete('tree.size', -1);
+        const accessible = asAccessible();
+        accessible.role('treeitem');
+        accessible.state('level', level);
+        accessible.state('posInSet', position);
+        accessible.state('setSize', size);
+        return (renderer) => renderer.el('span', 'Node');
+      }});`);
+    document.body.append(element);
+    await Promise.resolve();
+    expect(element.getAttribute('aria-level')).toBe('2');
+    expect(element.getAttribute('aria-posinset')).toBe('3');
+    expect(element.getAttribute('aria-setsize')).toBe('-1');
+  });
+});

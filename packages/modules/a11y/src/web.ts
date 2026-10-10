@@ -32,10 +32,20 @@ const ARIA_STATE_ATTRS: Record<string, string> = {
   valueMax: 'aria-valuemax',
   valueNow: 'aria-valuenow',
   valueText: 'aria-valuetext',
+  level: 'aria-level',
+  posInSet: 'aria-posinset',
+  setSize: 'aria-setsize',
 };
 
-const TABLE_COUNT_STATE_KEYS = new Set(['rowCount', 'columnCount']);
-const POSITIVE_INTEGER_STATE_KEYS = new Set(['rowIndex', 'columnIndex', 'rowSpan', 'columnSpan']);
+const TABLE_COUNT_STATE_KEYS = new Set(['rowCount', 'columnCount', 'setSize']);
+const POSITIVE_INTEGER_STATE_KEYS = new Set([
+  'rowIndex',
+  'columnIndex',
+  'rowSpan',
+  'columnSpan',
+  'level',
+  'posInSet',
+]);
 
 const ARIA_RELATION_ATTRS: Record<string, string> = {
   controls: 'aria-controls',
@@ -981,6 +991,8 @@ function projectedScalarAttributes(
   }
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {
     if (!Object.prototype.hasOwnProperty.call(snapshot.states, key)) continue;
+    // The existing explicit heading-level declaration wins when supplied.
+    if (key === 'level' && snapshot.level !== undefined) continue;
     attrs.set(attr, projectedStateAttributeValue(key, snapshot.states[key]));
   }
   if (Object.prototype.hasOwnProperty.call(snapshot.states, 'hidden')) {

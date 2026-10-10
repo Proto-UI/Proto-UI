@@ -99,3 +99,26 @@ describe('nullable range readout string representation', () => {
     project.dispose?.();
   });
 });
+
+describe('collection position accessibility facts', () => {
+  it('projects tree depth and set position while retaining explicit heading-level ownership', () => {
+    const target = document.createElement('div');
+    const project = createWebA11yProjector(target);
+    const state = snapshot({ level: 2, posInSet: 3, setSize: -1 });
+    project({ ...state, role: 'treeitem' });
+    expect(target.getAttribute('aria-level')).toBe('2');
+    expect(target.getAttribute('aria-posinset')).toBe('3');
+    expect(target.getAttribute('aria-setsize')).toBe('-1');
+    project({ ...state, role: 'heading', level: 4 });
+    expect(target.getAttribute('aria-level')).toBe('4');
+    project.dispose?.();
+  });
+  it.each([0, -2, 1.5, Infinity, '2'])('rejects invalid positive set/depth fact %j', (value) => {
+    const target = document.createElement('div');
+    const project = createWebA11yProjector(target);
+    project({ ...snapshot({ level: value, posInSet: value, setSize: value }), role: 'treeitem' });
+    for (const attribute of ['aria-level', 'aria-posinset', 'aria-setsize'])
+      expect(target.hasAttribute(attribute)).toBe(false);
+    project.dispose?.();
+  });
+});

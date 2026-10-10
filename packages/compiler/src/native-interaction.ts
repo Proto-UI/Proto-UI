@@ -56,6 +56,9 @@ const stateAttributes: Record<string, string> = {
   valueMax: 'aria-valuemax',
   valueNow: 'aria-valuenow',
   valueText: 'aria-valuetext',
+  level: 'aria-level',
+  posInSet: 'aria-posinset',
+  setSize: 'aria-setsize',
 };
 export const nativeAccessibleStateKeys: readonly string[] = Object.freeze(
   Object.keys(stateAttributes)
@@ -366,8 +369,8 @@ export function createNativeInteraction<Run>(options: {
     if (key === 'valueNow' && typeof value === 'string' && /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) && Number.isFinite(Number(value))) return value;
     if (['valueMin', 'valueMax', 'valueNow'].includes(key)) return typeof value === 'number' && Number.isFinite(value) ? String(value) : null;
     if (key === 'valueText') return typeof value === 'string' ? value : null;
-    if (key === 'rowCount' || key === 'columnCount') return typeof value === 'number' && Number.isSafeInteger(value) && (value === -1 || value > 0) ? String(value) : null;
-    if (['rowIndex', 'columnIndex', 'rowSpan', 'columnSpan'].includes(key)) return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? String(value) : null;
+    if (key === 'rowCount' || key === 'columnCount' || key === 'setSize') return typeof value === 'number' && Number.isSafeInteger(value) && (value === -1 || value > 0) ? String(value) : null;
+    if (['rowIndex', 'columnIndex', 'rowSpan', 'columnSpan', 'level', 'posInSet'].includes(key)) return typeof value === 'number' && Number.isSafeInteger(value) && value > 0 ? String(value) : null;
     return String(value);
   }
   function visitProjection(write: (name: string, value: string | null) => void): void {
