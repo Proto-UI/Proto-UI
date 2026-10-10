@@ -18,11 +18,15 @@ export interface BrutalistTabsRootProps extends TabsRootProps {}
 export type BrutalistTabsRootExposes = TabsRootExposes;
 export type BrutalistTabsRootAsHookContract = TabsRootAsHookContract;
 
-export interface BrutalistTabsListProps extends TabsListProps {}
+export interface BrutalistTabsListProps extends TabsListProps {
+  appearance?: 'default' | 'underline';
+}
 export type BrutalistTabsListExposes = TabsListExposes;
 export type BrutalistTabsListAsHookContract = TabsListAsHookContract;
 
-export interface BrutalistTabsTriggerProps extends TabsTriggerProps {}
+export interface BrutalistTabsTriggerProps extends TabsTriggerProps {
+  appearance?: 'default' | 'underline';
+}
 export type BrutalistTabsTriggerExposes = TabsTriggerExposes;
 export type BrutalistTabsTriggerStateHandles = TabsTriggerStateHandles;
 export type BrutalistTabsTriggerAsHookContract = TabsTriggerAsHookContract;

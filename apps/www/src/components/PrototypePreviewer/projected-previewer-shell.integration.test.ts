@@ -115,3 +115,117 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
     await (root as any).__previewer__.destroy();
     expect(root.querySelector('.host')!.childNodes).toHaveLength(0);
   });
+
+for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const)
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
+    it(`${family}/${runtime}: Runtime Tabs activate the next real generation exactly once`, async () => {
+      const root = document.createElement('section');
+      root.dataset.previewerId = `tabs-${family}-${runtime}`;
+      root.innerHTML = '<div class="host"></div>';
+      for (const match of renderPrefixedThemeCss(SHADCN_THEME_CSS)
+        .split('}')[0]!
+        .matchAll(/(--pui-[\w-]+):\s*([^;]+);/g)) {
+        root.style.setProperty(match[1]!, match[2]!);
+        root.querySelector<HTMLElement>('.host')!.style.setProperty(match[1]!, match[2]!);
+      }
+      document.body.append(root);
+      roots.push(root);
+      const publications: string[] = [];
+      root.addEventListener('runtime:changed', () =>
+        publications.push(root.dataset.projectionRuntime!)
+      );
+      initProjectedPreviewer({
+        root,
+        initialRuntime: runtime,
+        runtimeList: ['wc', 'react', 'vue', 'vue2'],
+        projectionFamilyId: family,
+        componentId: 'button',
+        toolbar: true,
+      });
+      await vi.waitFor(() =>
+        expect(root.dataset.projectionState, root.textContent ?? '').toBe('ready')
+      );
+      const tabs = [...root.querySelectorAll<HTMLElement>('[role="tab"]')];
+      expect(tabs.map((tab) => tab.textContent)).toEqual([
+        'Web Components',
+        'React',
+        'Vue',
+        'Vue 2',
+      ]);
+      expect(root.querySelector('[role=combobox]')).toBeNull();
+      expect(
+        tabs
+          .filter((tab) => tab.getAttribute('aria-selected') === 'true')
+          .map((tab) => tab.textContent)
+      ).toEqual([{ wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' }[runtime]]);
+      for (const tab of tabs)
+        expect(
+          document
+            .getElementById(tab.getAttribute('aria-controls')!)
+            ?.getAttribute('aria-labelledby')
+        ).toBe(tab.id);
+      const next = runtime === 'react' ? 'vue' : 'react';
+      const nextTab = tabs.find((tab) => tab.textContent === (next === 'vue' ? 'Vue' : 'React'))!;
+      nextTab.click();
+      await vi.waitFor(() => expect(root.dataset.projectionRuntime).toBe(next));
+      await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+      expect(publications).toEqual([runtime, next]);
+      expect(root.querySelectorAll('[data-projection-scope]')).toHaveLength(1);
+      expect(root.querySelectorAll('[role=tab][aria-selected=true]')).toHaveLength(1);
+      expect(root.querySelector('[role=tab][aria-selected=true]')?.textContent).toBe(
+        next === 'vue' ? 'Vue' : 'React'
+      );
+      expect(
+        root.querySelector('.pui-runtime-preview-surface')?.getAttribute('data-projection-runtime')
+      ).toBe(next);
+      // An old control cannot request another mount after its generation disposed.
+      tabs.find((tab) => tab.textContent === 'Vue 2')!.click();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      expect(publications).toEqual([runtime, next]);
+      await (root as any).__previewer__.destroy();
+      expect(root.querySelectorAll('[role=tab]')).toHaveLength(0);
+    });
+
+for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
+  it(`${runtime}: legacy Runtime Tabs keep a single real demo host across teardown and switch`, async () => {
+    const { initPreviewer } = await import('./previewer-client');
+    const root = document.createElement('section');
+    root.dataset.previewerId = `generic-tabs-${runtime}`;
+    root.innerHTML =
+      '<div data-runtime-tabs-mount></div><div data-panel="preview"><div class="host"></div></div>';
+    for (const match of renderPrefixedThemeCss(SHADCN_THEME_CSS)
+      .split('}')[0]!
+      .matchAll(/(--pui-[\w-]+):\s*([^;]+);/g)) {
+      root.style.setProperty(match[1]!, match[2]!);
+      root.querySelector<HTMLElement>('.host')!.style.setProperty(match[1]!, match[2]!);
+    }
+    document.body.append(root);
+    roots.push(root);
+    const publications: string[] = [];
+    root.addEventListener('runtime:changed', (event) =>
+      publications.push((event as CustomEvent<{ runtime: string }>).detail.runtime)
+    );
+    initPreviewer({
+      root,
+      prototypeId: 'shadcn-button',
+      initialRuntime: runtime,
+      runtimeList: ['wc', 'react', 'vue', 'vue2'],
+      demoProps: {},
+    });
+    await vi.waitFor(() => expect((root as any).__previewer__.getCurrentRuntime()).toBe(runtime));
+    const next = runtime === 'react' ? 'vue' : 'react';
+    const tab = [...root.querySelectorAll<HTMLElement>('[role=tab]')].find(
+      (tab) => tab.textContent === (next === 'vue' ? 'Vue' : 'React')
+    )!;
+    tab.click();
+    await vi.waitFor(() => expect((root as any).__previewer__.getCurrentRuntime()).toBe(next));
+    expect(root.querySelectorAll('.host')).toHaveLength(1);
+    expect(root.querySelectorAll('.pui-runtime-preview-surface')).toHaveLength(1);
+    expect(root.querySelector('[role=tab][aria-selected=true]')).toBe(tab);
+    expect(
+      root.querySelector('.host')!.closest('[role=tabpanel]')?.getAttribute('aria-labelledby')
+    ).toBe(tab.id);
+    await (root as any).__previewer__.destroy();
+    expect(root.querySelector('[role=tab]')).toBeNull();
+    expect(root.querySelector('.host')!.childNodes).toHaveLength(0);
+  });

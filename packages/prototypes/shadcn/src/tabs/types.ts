@@ -18,11 +18,15 @@ export interface ShadcnTabsRootProps extends TabsRootProps {}
 export type ShadcnTabsRootExposes = TabsRootExposes;
 export type ShadcnTabsRootAsHookContract = TabsRootAsHookContract;
 
-export interface ShadcnTabsListProps extends TabsListProps {}
+export interface ShadcnTabsListProps extends TabsListProps {
+  appearance?: 'default' | 'underline';
+}
 export type ShadcnTabsListExposes = TabsListExposes;
 export type ShadcnTabsListAsHookContract = TabsListAsHookContract;
 
-export interface ShadcnTabsTriggerProps extends TabsTriggerProps {}
+export interface ShadcnTabsTriggerProps extends TabsTriggerProps {
+  appearance?: 'default' | 'underline';
+}
 export type ShadcnTabsTriggerExposes = TabsTriggerExposes;
 export type ShadcnTabsTriggerStateHandles = TabsTriggerStateHandles;
 export type ShadcnTabsTriggerAsHookContract = TabsTriggerAsHookContract;

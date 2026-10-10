@@ -1,3 +1,4 @@
+import { createRuntimeTabs } from './runtime-tabs';
 // src/next-www/src/components/PrototypePreviewer/previewer-client.ts
 import { loadPrototype, loadPrototypes } from './prototype-modules';
 import { loadDemo } from './demo-modules';
@@ -94,6 +95,7 @@ export function initPreviewer(options: PreviewerOptions) {
     else if (nativeSelect) nativeSelect.value = value;
   };
   const setPreviewerSelectDisabled = (disabled: boolean) => {
+    runtimeTabs?.setDisabled(disabled);
     if (selectRoot) setSiteSelectDisabled(selectRoot, disabled);
     else if (nativeSelect) nativeSelect.disabled = disabled;
   };
@@ -109,6 +111,28 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   const selectedInitialRuntime = preferredRuntime();
+  const tabsMount = root.querySelector<HTMLElement>('[data-runtime-tabs-mount]');
+  const previewPanel = root.querySelector<HTMLElement>('[data-panel="preview"]');
+  const runtimeTabs =
+    tabsMount && previewPanel
+      ? createRuntimeTabs({
+          mount: tabsMount,
+          panel: previewPanel,
+          family: runtimePreviewFamily(root),
+          runtimes: runtimeList,
+          value: selectedInitialRuntime,
+          onValueChange(value) {
+            try {
+              localStorage.setItem(PREFERRED_ADAPTER_KEY, value);
+            } catch {
+              /* optional storage */
+            }
+            document.dispatchEvent(
+              new CustomEvent('proto-adapter:change', { detail: { adapter: value } })
+            );
+          },
+        })
+      : null;
   const nativeSelectUsesPagePreference = Boolean(nativeSelect?.closest('[data-adapter-select]'));
 
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
@@ -231,6 +255,7 @@ export function initPreviewer(options: PreviewerOptions) {
       if (previous) await previous.destroy();
       else host.replaceChildren();
       if (destroyed || myVersion !== version) return;
+      runtimeTabs?.select(runtime);
 
       let demo: DemoSpec;
       if (demoId) {
@@ -406,6 +431,7 @@ export function initPreviewer(options: PreviewerOptions) {
         } finally {
           host.replaceChildren();
           finishStartup();
+          runtimeTabs?.dispose();
         }
       })();
       return destroyPromise;
