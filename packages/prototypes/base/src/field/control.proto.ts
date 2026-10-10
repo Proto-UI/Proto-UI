@@ -82,6 +82,38 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
   accessible.state('readOnly', readOnly);
   // Field owns exact anatomy relationships. External ID strings are not a fallback escape hatch.
 
+  let initialValue = '',
+    resetRun: RunHandle<FieldControlProps> | null = null;
+  def.expose.method(
+    '__implicitSubmitEligible',
+    () => focused.get() && !composing.get() && !control.snapshot()?.composing
+  );
+  def.expose.method('resetValue', () => {
+    if (!resetRun) return false;
+    const changed = control.resetValue(initialValue);
+    if (!changed && typeof resetRun.props.get().value === 'string')
+      resetRun.expose.emit('valueChange', {
+        value: initialValue,
+        composing: false,
+        data: null,
+        inputType: null,
+      });
+    value.set(control.snapshot()?.value ?? value.get(), 'reason: field reset canonical value');
+    composing.set(false, 'reason: field reset composition');
+    binding.report({
+      value: value.get(),
+      focused: focused.get(),
+      composing: false,
+      reason: 'sync',
+    });
+    return changed;
+  });
+  def.lifecycle.onMounted((run) => {
+    resetRun = run;
+  });
+  def.lifecycle.onUnmounted(() => {
+    resetRun = null;
+  });
   let minLength = -1,
     maxLength = -1;
   const sync = (props: Readonly<FieldControlProps>) => {
@@ -142,6 +174,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     minLength = ctx.minLength;
     maxLength = ctx.maxLength;
     sync(run.props.get());
+    initialValue = value.get();
   });
   def.props.watch(
     [

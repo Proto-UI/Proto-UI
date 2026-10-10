@@ -10,6 +10,14 @@ function setup(def: DefHandle<FormFieldProps, FormFieldExposes>) {
   def.props.define({ name: { type: 'string', empty: 'fallback' } });
   def.props.setDefaults({ name: '' });
   let run: RunHandle<FormFieldProps> | null = null;
+  def.expose.method('__formReset', () => {
+    const control = run?.anatomy.partsOf(FIELD_FAMILY, 'control')[0];
+    const reset = control?.getExpose('resetValue');
+    if (typeof reset !== 'function') return false;
+    reset();
+    (inherited.getMethod!('resetValidation') as () => void)();
+    return true;
+  });
   def.expose.method('__formField', () => {
     const get = run?.anatomy.partsOf(FIELD_FAMILY, 'control')[0]?.getExpose('__fieldSnapshot');
     const snapshot: FieldControlSnapshot | null = typeof get === 'function' ? get() : null;
@@ -18,6 +26,12 @@ function setup(def: DefHandle<FormFieldProps, FormFieldExposes>) {
       value: copyFieldValue(snapshot?.value ?? null),
       disabled: inherited.stateHandles!.disabled.get(),
       available: !!snapshot?.active,
+      implicitSubmit: (() => {
+        const eligible = run?.anatomy
+          .partsOf(FIELD_FAMILY, 'control')[0]
+          ?.getExpose('__implicitSubmitEligible');
+        return typeof eligible === 'function' && eligible() === true;
+      })(),
       validity: (
         inherited.getMethod!('getValidity') as () => import('../field/types').FieldValiditySnapshot
       )(),
@@ -31,7 +45,7 @@ function setup(def: DefHandle<FormFieldProps, FormFieldExposes>) {
     state.watch((current, event) => {
       if (event.type === 'next') notify(current);
     });
-  def.context.subscribe(FORM_CONTEXT, () => {});
+  def.context.trySubscribe(FORM_CONTEXT, () => {});
   def.lifecycle.onMounted(notify);
   def.lifecycle.onUpdated(notify);
   def.props.watchAll(notify);

@@ -23,9 +23,17 @@ export type FormFieldSnapshot = {
   value: FieldValue;
   disabled: boolean;
   available: boolean;
+  implicitSubmit: boolean;
   validity: FieldValiditySnapshot;
 };
 export function formMethod(run: RunHandle<any>, name: string, ...args: unknown[]) {
-  const method = run.anatomy.partsOf(FORM_FAMILY, 'root')[0]?.getExpose(name);
+  let parts: ReturnType<typeof run.anatomy.partsOf>;
+  try {
+    parts = run.anatomy.partsOf(FORM_FAMILY, 'root');
+  } catch (error) {
+    if ((error as { code?: string }).code === 'ANATOMY_CLAIM_INVALID') return false;
+    throw error;
+  }
+  const method = parts[0]?.getExpose(name);
   return typeof method === 'function' ? method(...args) : false;
 }

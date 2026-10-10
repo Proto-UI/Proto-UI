@@ -1,3 +1,4 @@
+import { FIELD_CONTEXT } from '../field/shared';
 import {
   defineAsHook,
   definePrototype,
@@ -49,6 +50,8 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
     length: 6,
     disabled: false,
     readOnly: false,
+    controlDisabled: false,
+    controlReadOnly: false,
     complete: false,
     pattern: 'numeric',
     name: '',
@@ -62,8 +65,14 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
   const publish = () => {
     if (!run) return;
     const p = run.props.get();
-    disabled.set(!!p.disabled, 'reason: OTP policy');
-    readOnly.set(!!p.readOnly, 'reason: OTP policy');
+    disabled.set(
+      !!p.disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
+      'reason: OTP policy'
+    );
+    readOnly.set(
+      !!p.readOnly || !!run.context.tryRead(FIELD_CONTEXT)?.readOnly,
+      'reason: OTP policy'
+    );
     complete.set(value.get().length === (p.length ?? 6), 'reason: OTP completion');
     if (!complete.get()) lastComplete = '';
     run.context.update(INPUT_OTP_CONTEXT, {
@@ -71,6 +80,8 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
       length: p.length ?? 6,
       disabled: disabled.get(),
       readOnly: readOnly.get(),
+      controlDisabled: !!p.disabled,
+      controlReadOnly: !!p.readOnly,
       complete: complete.get(),
       pattern: p.pattern ?? 'numeric',
       name: p.name ?? '',
@@ -107,6 +118,16 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
     fn();
     return true;
   });
+  def.context.trySubscribe(FIELD_CONTEXT, () => publish());
+  let initialValue: string = '';
+  def.expose.method('resetValue', () => {
+    if (!run) return false;
+    const next = normalize(initialValue);
+    if (!run.props.isProvided('value')) value.set(next, 'reason: input-otp value reset');
+    publish();
+    if (run.props.isProvided('value')) run.expose.emit('valueChange', { value: next });
+    return true;
+  });
   def.lifecycle.onCreated((current) => {
     run = current;
     value.set(
@@ -117,6 +138,7 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
       ),
       'reason: OTP initialize'
     );
+    initialValue = value.get();
     publish();
   });
   def.lifecycle.onMounted((current) => {

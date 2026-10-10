@@ -27,6 +27,9 @@ export type CheckboxGroupRootExposes = {
   indeterminate: ExposeState<boolean>;
   disabled: ExposeState<boolean>;
   readOnly: ExposeState<boolean>;
+  resetValue: ExposeMethod<() => boolean>;
+  focusSelf: ExposeMethod<() => void>;
+  __focus: ExposeMethod<() => void>;
   getValue: ExposeMethod<() => string[]>;
   requestToggle: ExposeMethod<(value: string) => boolean>;
   requestAll: ExposeMethod<() => boolean>;

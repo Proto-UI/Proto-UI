@@ -1,3 +1,4 @@
+import { FIELD_CONTEXT } from '../field/shared';
 import {
   defineAsHook,
   definePrototype,
@@ -58,6 +59,8 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     percentage: 0,
     disabled: false,
     readOnly: false,
+    controlDisabled: false,
+    controlReadOnly: false,
     orientation: 'horizontal',
     direction: 'ltr',
     valueText: '',
@@ -74,8 +77,14 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     if (!run) return;
     const p = run.props.get(),
       b = bounds();
-    disabled.set(!!p.disabled, 'reason: slider policy');
-    readOnly.set(!!p.readOnly, 'reason: slider policy');
+    disabled.set(
+      !!p.disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
+      'reason: slider policy'
+    );
+    readOnly.set(
+      !!p.readOnly || !!run.context.tryRead(FIELD_CONTEXT)?.readOnly,
+      'reason: slider policy'
+    );
     orientation.set(p.orientation ?? 'horizontal', 'reason: slider orientation');
     percentageState.set(percentage(value.get(), b.min, b.max), 'reason: slider ratio');
     run.context.update(SLIDER_CONTEXT, {
@@ -85,6 +94,8 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
       percentage: percentageState.get(),
       disabled: disabled.get(),
       readOnly: readOnly.get(),
+      controlDisabled: !!p.disabled,
+      controlReadOnly: !!p.readOnly,
       orientation: p.orientation ?? 'horizontal',
       direction: p.direction ?? 'ltr',
       valueText: p.valueText || String(value.get()),
@@ -113,6 +124,8 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     if (!run.props.isProvided('value')) value.set(next, 'reason: slider accepted value');
     publish();
     run.expose.emit('valueChange', { value: next });
+    const report = run?.anatomy.partsOf(SLIDER_FAMILY, 'thumb')[0]?.getExpose('__fieldInput');
+    if (typeof report === 'function') report();
     return true;
   });
   def.expose.method('commitValue', () => {
@@ -123,6 +136,17 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
   def.expose.method('cancelInteraction', cancel);
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.event('valueCommit', { payload: 'json' });
+  def.context.trySubscribe(FIELD_CONTEXT, () => publish());
+  let initialValue: number = 0;
+  def.expose.method('resetValue', () => {
+    if (!run) return false;
+    const next = normalize(initialValue);
+    if (!run.props.isProvided('value')) value.set(next, 'reason: slider value reset');
+    dragging.set(false, 'reason: slider reset cancels gesture');
+    publish();
+    if (run.props.isProvided('value')) run.expose.emit('valueChange', { value: next });
+    return true;
+  });
   def.lifecycle.onCreated((current) => {
     run = current;
     value.set(
@@ -133,6 +157,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
       ),
       'reason: slider initial value'
     );
+    initialValue = value.get();
     publish();
   });
   def.lifecycle.onMounted((current) => {

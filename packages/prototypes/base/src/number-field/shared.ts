@@ -20,6 +20,8 @@ export type NumberFieldContext = {
   max: number;
   step: number;
   disabled: boolean;
+  controlDisabled: boolean;
+  controlReadOnly: boolean;
   readOnly: boolean;
   label: string;
   name: string;

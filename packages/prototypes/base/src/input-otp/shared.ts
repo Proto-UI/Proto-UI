@@ -16,6 +16,8 @@ export type InputOtpContext = {
   value: string;
   length: number;
   disabled: boolean;
+  controlDisabled: boolean;
+  controlReadOnly: boolean;
   readOnly: boolean;
   complete: boolean;
   pattern: 'numeric' | 'alphanumeric';

@@ -1,6 +1,6 @@
 export * from './types';
 export { FIELD_FAMILY, FIELD_CONTEXT, FIELD_LABEL_PAIR } from './shared';
-export { asFieldControl } from './control-binding.proto';
+export { asFieldControl, asOptionalFieldControl } from './control-binding.proto';
 export { default as fieldRoot, asFieldRoot } from './root.proto';
 export { default as fieldControl, asFieldTextControl } from './control.proto';
 export { default as fieldLabel, asFieldLabel } from './label.proto';

@@ -102,7 +102,7 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
   def.expose.method('__fieldChanged', finish);
   def.expose.method('getValues', values);
   def.expose.method('cancelSubmit', cancel);
-  def.expose.method('requestSubmit', () => {
+  const requestSubmit = () => {
     if (!run || disabled.get()) return false;
     cancel();
     submitted.set(false, 'reason: form new submission');
@@ -122,6 +122,25 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
     }
     finish();
     return true;
+  };
+  def.expose.method('requestSubmit', requestSubmit);
+  def.event.onGlobal('key.down', (_run, event) => {
+    if (
+      event.key !== 'Enter' ||
+      event.repeat ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      disabled.get()
+    )
+      return;
+    if (!entries().some(({ snapshot }) => snapshot.available && snapshot.implicitSubmit)) return;
+    event.control.requestDefaultActionPrevention({
+      reason: 'form.implicit-submit',
+      source: 'base-form-root',
+    });
+    requestSubmit();
   });
   def.expose.method('resetValidation', () => {
     cancel();
@@ -131,7 +150,24 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
     }
     submitted.set(false, 'reason: form reset validation');
     publish();
+  });
+  def.expose.method('requestReset', () => {
+    if (!run) return false;
+    cancel();
+    validating = true;
+    let complete = true;
+    try {
+      for (const part of parts()) {
+        const reset = part.getExpose('__formReset');
+        if (typeof reset !== 'function' || reset() !== true) complete = false;
+      }
+    } finally {
+      validating = false;
+    }
+    submitted.set(false, 'reason: form reset');
+    publish();
     run?.expose.emit('reset', {});
+    return complete;
   });
   const sync = (current: RunHandle<FormRootProps>) => {
     run = current;

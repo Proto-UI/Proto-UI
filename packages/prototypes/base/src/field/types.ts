@@ -101,6 +101,7 @@ export type FieldControlBindingHandles = {
     [K in keyof FieldControlBindingStates]: BorrowedStateHandle<boolean, FieldControlBindingProps>;
   };
   report: (report: FieldControlReport) => boolean;
+  setPolicy: (policy: { disabled?: boolean; readOnly?: boolean; required?: boolean }) => boolean;
 };
 export interface FieldControlProps {
   value?: string;
@@ -146,6 +147,8 @@ export type FieldControlExposes = {
   required: ExposeState<boolean>;
   focusSelf: ExposeMethod<(options?: FocusRequestOptions) => void>;
   blurSelf: ExposeMethod<() => void>;
+  resetValue: ExposeMethod<() => boolean>;
+  __implicitSubmitEligible: ExposeMethod<() => boolean>;
   valueChange: ExposeEvent<FieldControlValueChangeDetail>;
   change: ExposeEvent<FieldControlChangeDetail>;
   compositionStart: ExposeEvent<FieldControlCompositionDetail>;

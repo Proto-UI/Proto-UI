@@ -16,7 +16,7 @@ import type {
   FieldControlReport,
 } from './types';
 let controlSequence = 0;
-function setup(def: DefHandle<FieldControlBindingProps>) {
+function setup(def: DefHandle<FieldControlBindingProps>, optional = false) {
   def.anatomy.claim(FIELD_FAMILY, { role: 'control' });
   def.expose.value('__fieldLease', ++controlSequence);
   def.props.define({
@@ -64,20 +64,53 @@ function setup(def: DefHandle<FieldControlBindingProps>) {
     focused: false,
     composing: false,
   };
+  let controlPolicy = { disabled: false, readOnly: false, required: false };
+  const readContext = (current: RunHandle<FieldControlBindingProps>) =>
+    optional ? current.context.tryRead(FIELD_CONTEXT) : current.context.read(FIELD_CONTEXT);
   const sync = (current: RunHandle<FieldControlBindingProps>) => {
     run = current;
-    rejectFieldDuplicates(current, 'control');
-    const ctx = current.context.read(FIELD_CONTEXT),
+    const parentContext = readContext(current);
+    if (parentContext) rejectFieldDuplicates(current, 'control');
+    const ctx = parentContext ?? {
+        disabled: false,
+        readOnly: false,
+        required: false,
+        invalid: false,
+        pending: false,
+      },
       p = current.props.get();
-    fieldDisabled.set(ctx.disabled || !!p.disabled, 'reason: field control disabled');
-    fieldReadOnly.set(ctx.readOnly || !!p.readOnly, 'reason: field control readonly');
-    fieldRequired.set(ctx.required || !!p.required, 'reason: field control required');
+    fieldDisabled.set(
+      ctx.disabled || !!p.disabled || controlPolicy.disabled,
+      'reason: field control disabled'
+    );
+    fieldReadOnly.set(
+      ctx.readOnly || !!p.readOnly || controlPolicy.readOnly,
+      'reason: field control readonly'
+    );
+    fieldRequired.set(
+      ctx.required || !!p.required || controlPolicy.required,
+      'reason: field control required'
+    );
     invalid.set(ctx.invalid, 'reason: field control invalid');
     pending.set(ctx.pending, 'reason: field control pending');
     errorKey.set(ctx.invalid ? 'error' : '', 'reason: field current error relation');
   };
   const notify = (reason: string) => {
-    if (run) fieldRootMethod(run, '__fieldNotify')?.(reason);
+    if (!run) return;
+    if (optional) {
+      try {
+        if (!run.context.tryRead(FIELD_CONTEXT)) return;
+      } catch (error) {
+        if (
+          ['CONTEXT_DISCONNECTED', 'CONTEXT_SUBSCRIPTION_REQUIRED'].includes(
+            (error as { code?: string }).code ?? ''
+          )
+        )
+          return;
+        throw error;
+      }
+    }
+    fieldRootMethod(run, '__fieldNotify')?.(reason);
   };
   def.expose.method(
     '__fieldSnapshot',
@@ -86,9 +119,9 @@ function setup(def: DefHandle<FieldControlBindingProps>) {
       initialValue: copyFieldValue(report.initialValue ?? null),
       focused: !!report.focused,
       composing: !!report.composing,
-      disabled: !!run?.props.get().disabled,
-      readOnly: !!run?.props.get().readOnly,
-      required: !!run?.props.get().required,
+      disabled: !!run?.props.get().disabled || controlPolicy.disabled,
+      readOnly: !!run?.props.get().readOnly || controlPolicy.readOnly,
+      required: !!run?.props.get().required || controlPolicy.required,
       active,
     })
   );
@@ -127,7 +160,33 @@ function setup(def: DefHandle<FieldControlBindingProps>) {
     notify(reason);
     return true;
   });
-  def.context.subscribe(FIELD_CONTEXT, sync);
+  def.expose.method(
+    '__fieldSetPolicy',
+    (next: { disabled?: boolean; readOnly?: boolean; required?: boolean }) => {
+      if (!run || !next || typeof next !== 'object') return false;
+      const disabled = next.disabled ?? false,
+        readOnly = next.readOnly ?? false,
+        required = next.required ?? false;
+      if (
+        typeof disabled !== 'boolean' ||
+        typeof readOnly !== 'boolean' ||
+        typeof required !== 'boolean'
+      )
+        return false;
+      if (
+        controlPolicy.disabled === disabled &&
+        controlPolicy.readOnly === readOnly &&
+        controlPolicy.required === required
+      )
+        return true;
+      controlPolicy = { disabled, readOnly, required };
+      sync(run);
+      notify('sync');
+      return true;
+    }
+  );
+  if (optional) def.context.trySubscribe(FIELD_CONTEXT, sync);
+  else def.context.subscribe(FIELD_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   def.lifecycle.onMounted((current) => {
     active = true;
@@ -166,6 +225,25 @@ export const asFieldControl = defineAsHook<
     return {
       state: result.stateHandles!,
       report: result.getMethod!('reportField') as FieldControlBindingHandles['report'],
+      setPolicy: result.getMethod!('__fieldSetPolicy') as FieldControlBindingHandles['setPolicy'],
+    };
+  },
+});
+
+/** The same canonical bridge with an optional parent Field; standalone controls retain their own policy. */
+export const asOptionalFieldControl = defineAsHook<
+  FieldControlBindingProps,
+  Record<string, unknown>,
+  { state: FieldControlBindingStates },
+  FieldControlBindingHandles
+>({
+  name: 'as-optional-field-control',
+  setup: (def) => setup(def, true),
+  projectHandle(result) {
+    return {
+      state: result.stateHandles!,
+      report: result.getMethod!('reportField') as FieldControlBindingHandles['report'],
+      setPolicy: result.getMethod!('__fieldSetPolicy') as FieldControlBindingHandles['setPolicy'],
     };
   },
 });

@@ -1,8 +1,11 @@
+import { asFieldControl } from '../field/control-binding.proto';
+import { FIELD_LABEL_PAIR } from '../field/shared';
 import { type DefHandle, type RendererHandle, type RunHandle } from '@proto.ui/core';
-import { asAccessible, asFocusable } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asControlLabel } from '@proto.ui/hooks';
 import { SLIDER_FAMILY, SLIDER_CONTEXT, sliderMethod } from './shared';
 import type { SliderPartProps } from './types';
-export function setupSliderPart(def: DefHandle<SliderPartProps>, role: string) {
+export function setupSliderPart(def: DefHandle<SliderPartProps>, role: string, field = false) {
+  const binding = field ? asFieldControl() : null;
   def.anatomy.claim(SLIDER_FAMILY, { role });
   const value = def.state.numberDiscrete('value', 0),
     percentage = def.state.numberRange('percentage', 0, { min: 0, max: 100 }),
@@ -40,13 +43,15 @@ export function setupSliderPart(def: DefHandle<SliderPartProps>, role: string) {
     a.state('orientation', orientation);
     a.state('disabled', disabled);
     a.state('readOnly', readOnly);
-    a.relation('labelledBy', {
-      target: { kind: 'part', family: SLIDER_FAMILY, role: 'label', key: 'label' },
-    });
+    if (!field)
+      a.relation('labelledBy', {
+        target: { kind: 'part', family: SLIDER_FAMILY, role: 'label', key: 'label' },
+      });
   } else if (role === 'label') a.part(SLIDER_FAMILY, { key: 'label' });
   else if (role === 'indicator' || role === 'value') a.tree({ hidden: true });
   const sync = (run: RunHandle<SliderPartProps>) => {
     const c = run.context.read(SLIDER_CONTEXT);
+    binding?.setPolicy({ disabled: c.controlDisabled, readOnly: c.controlReadOnly });
     value.set(c.value, 'reason: slider part');
     percentage.set(c.percentage, 'reason: slider part');
     disabled.set(c.disabled, 'reason: slider policy');
@@ -58,8 +63,42 @@ export function setupSliderPart(def: DefHandle<SliderPartProps>, role: string) {
     label.set(c.label, 'reason: slider label');
     text.set(c.valueText, 'reason: slider text');
     focus?.setDisabled(c.disabled);
+    binding?.report({ value: c.value, focused: focus?.focused.get() ?? false, reason: 'sync' });
     if (role === 'value') run.update();
   };
+  let currentRun: RunHandle<SliderPartProps> | null = null;
+  def.lifecycle.onMounted((run) => {
+    currentRun = run;
+  });
+  def.lifecycle.onUnmounted(() => {
+    currentRun = null;
+  });
+  if (focus) {
+    def.expose.method('resetValue', () =>
+      currentRun ? sliderMethod(currentRun, 'resetValue') : false
+    );
+    def.expose.method('__fieldInput', () => {
+      if (currentRun)
+        binding?.report({
+          value: currentRun.context.read(SLIDER_CONTEXT).value,
+          focused: focus.focused.get(),
+          reason: 'change',
+        });
+    });
+    focus.focused.watch((run, event) => {
+      if (event.type === 'next')
+        binding?.report({
+          value: run.context.read(SLIDER_CONTEXT).value,
+          focused: event.next,
+          reason: event.next ? 'sync' : 'blur',
+        });
+    });
+    if (binding)
+      asControlLabel().target((_run, request) => {
+        if (!disabled.get() && request.isCurrent())
+          focus.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+      }, FIELD_LABEL_PAIR);
+  }
   def.context.subscribe(SLIDER_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   if (focus)

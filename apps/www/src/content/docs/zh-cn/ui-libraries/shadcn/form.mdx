@@ -12,8 +12,8 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root 汇总显式 FormField 注册，通过现有 Field 校验后才发出包含命名值快照的 submit；禁用项被排除，重复名称拒绝序列化。异步校验等待当前结果，值变更、移除、取消、卸载撤销旧提交。FormSubmit 支持键盘及指针激活。resetValidation 清理校验并发出 reset，不伪称已复位控件值，也不导航或联网；完整值复位及隐式 Enter 提交待补。Form disabled 当前阻止提交；控件继承禁用由 Fieldset 管理。
+Root 汇总显式 FormField，通过规范 Field 控件校验后才发出命名值快照 submit。禁用项被排除，重复名称拒绝序列化；异步校验等待当前结果，值变化、移除、取消及卸载撤销旧提交。Form disabled 同时传递到内部 Field。FormSubmit 与 FormReset 支持键盘/指针激活。聚焦的单行 Field、Number Field 和 OTP 编辑器支持隐式 Enter，排除组合输入、修饰键及重复 keydown。requestReset 恢复挂载初值，受控值仅向作者发提议，同时取消编辑和过期校验并发出 reset；resetValidation 只清理校验。不自动联网、原生导航或创建隐藏 HTML 表单项。
 
-四家族继承同一 Base 行为。部件： root, field, submit.
+四家族继承同一 Base 行为。部件： root, field, submit, reset.
 
 当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。

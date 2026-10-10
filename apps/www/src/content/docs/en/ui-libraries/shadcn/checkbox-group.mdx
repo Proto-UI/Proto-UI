@@ -12,7 +12,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root owns a string-array selection through value/defaultValue, disabled, readOnly and ariaLabel. Item has value/disabled; All toggles enabled registered items and derives checked/mixed, preserving disabled selections. Every item has its own Tab stop and Space activation; Enter does not toggle. Controlled requests emit valueChange without overwriting owner state. getValue returns a copy. Duplicate item values cannot be toggled ambiguously. This group is a selection protocol; native hidden form entries and Field control bridge remain open.
+Root owns string-array value/defaultValue, disabled/readOnly and ariaLabel. Item has value/disabled; All toggles enabled registered items and derives checked/mixed while preserving disabled selections. Each item has a Tab stop and Space activation; Enter does not toggle. Controlled requests emit valueChange without overwriting owner state. getValue returns a copy; duplicate item values reject ambiguous toggles. Inside Field/FormField, Root reports the canonical array, group focus and local policy, supports label activation, required validation, Form serialization and reset. Native hidden HTML entries are not created.
 
 All four visual families inherit Base behavior. Parts: root, item, all.
 

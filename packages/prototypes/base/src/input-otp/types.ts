@@ -21,6 +21,7 @@ export type InputOtpRootExposes = {
   disabled: ExposeState<boolean>;
   readOnly: ExposeState<boolean>;
   focused: ExposeState<boolean>;
+  resetValue: ExposeMethod<() => boolean>;
   requestValue: ExposeMethod<(value: string) => boolean>;
   clear: ExposeMethod<() => boolean>;
   focusInput: ExposeMethod<() => boolean>;

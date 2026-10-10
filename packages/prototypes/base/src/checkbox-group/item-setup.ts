@@ -60,6 +60,9 @@ export function setupCheckboxGroupItem(
     if (!disabled.get() && !readOnly.get())
       groupRequest(run, all ? 'requestAll' : 'requestToggle', run.props.get().value ?? '');
   };
+  focus.focused.watch((run, event) => {
+    if (event.type === 'next') groupRequest(run, '__focus');
+  });
   def.context.subscribe(CHECKBOX_GROUP_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   def.lifecycle.onMounted((run) => {

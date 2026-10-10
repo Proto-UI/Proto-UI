@@ -1,3 +1,4 @@
+import { FORM_CONTEXT } from '../form/shared';
 import { FIELDSET_CONTEXT } from '../fieldset/shared';
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
 import {
@@ -146,7 +147,10 @@ function setupFieldRoot(def: DefHandle<FieldRootProps, FieldRootExposes>) {
     }
     previousRequired = required;
     const disabled =
-      !!p.disabled || !!snapshot?.disabled || !!run.context.tryRead(FIELDSET_CONTEXT)?.disabled;
+      !!p.disabled ||
+      !!snapshot?.disabled ||
+      !!run.context.tryRead(FIELDSET_CONTEXT)?.disabled ||
+      !!run.context.tryRead(FORM_CONTEXT)?.disabled;
     const readOnly = !!p.readOnly || !!snapshot?.readOnly;
     if (previousDisabled !== disabled || previousReadOnly !== readOnly) invalidate();
     if (!previousComposing && snapshot?.composing) invalidate();
@@ -303,6 +307,10 @@ function setupFieldRoot(def: DefHandle<FieldRootProps, FieldRootExposes>) {
         mode === 'onChange')
     )
       validate(reason === 'blur' ? 'blur' : 'change');
+  });
+  def.context.trySubscribe(FORM_CONTEXT, (current) => {
+    run = current;
+    publish();
   });
   def.context.trySubscribe(FIELDSET_CONTEXT, (current) => {
     run = current;

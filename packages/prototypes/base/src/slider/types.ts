@@ -27,6 +27,7 @@ export type SliderRootExposes = {
   readOnly: ExposeState<boolean>;
   dragging: ExposeState<boolean>;
   orientation: ExposeState<string>;
+  resetValue: ExposeMethod<() => boolean>;
   requestValue: ExposeMethod<(value: number) => boolean>;
   beginInteraction: ExposeMethod<() => boolean>;
   commitValue: ExposeMethod<() => void>;

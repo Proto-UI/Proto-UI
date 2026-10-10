@@ -13,6 +13,7 @@ export type FormRootExposes = {
   getValues: ExposeMethod<() => FormValues>;
   requestSubmit: ExposeMethod<() => boolean>;
   resetValidation: ExposeMethod<() => void>;
+  requestReset: ExposeMethod<() => boolean>;
   cancelSubmit: ExposeMethod<() => void>;
   __fieldChanged: ExposeMethod<() => void>;
   submit: ExposeEvent<{ values: FormValues; submissionId: number }>;
@@ -27,6 +28,7 @@ export interface FormFieldProps extends FieldRootProps {
 }
 export type FormFieldExposes = FieldRootExposes & {
   __formField: ExposeMethod<() => FormFieldSnapshot>;
+  __formReset: ExposeMethod<() => boolean>;
 };
 export interface FormActionProps {
   disabled?: boolean;

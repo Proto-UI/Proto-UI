@@ -1,3 +1,4 @@
+import { FIELD_CONTEXT } from '../field/shared';
 import {
   defineAsHook,
   definePrototype,
@@ -53,6 +54,8 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     step: 1,
     disabled: false,
     readOnly: false,
+    controlDisabled: false,
+    controlReadOnly: false,
     label: '',
     name: '',
   });
@@ -65,8 +68,14 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   const publish = () => {
     if (!run) return;
     const p = run.props.get();
-    disabled.set(!!p.disabled, 'reason: number policy');
-    readOnly.set(!!p.readOnly, 'reason: number policy');
+    disabled.set(
+      !!p.disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
+      'reason: number policy'
+    );
+    readOnly.set(
+      !!p.readOnly || !!run.context.tryRead(FIELD_CONTEXT)?.readOnly,
+      'reason: number policy'
+    );
     run.context.update(NUMBER_FIELD_CONTEXT, {
       value: value.get(),
       draft: draft.get(),
@@ -74,17 +83,22 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
       step: finite(p.step, 1),
       disabled: disabled.get(),
       readOnly: readOnly.get(),
+      controlDisabled: !!p.disabled,
+      controlReadOnly: !!p.readOnly,
       label: p.ariaLabel ?? '',
       name: p.name ?? '',
     });
   };
-  const request = (next: number) => {
+  const request = (next: number, notify = true) => {
     if (!run || disabled.get() || readOnly.get() || !Number.isFinite(next)) return false;
     next = normalize(next);
     if (next === value.get()) return false;
     if (!run.props.isProvided('value')) value.set(next, 'reason: number accepted value');
     publish();
     run.expose.emit('valueChange', { value: next });
+    const report =
+      notify && run?.anatomy.partsOf(NUMBER_FIELD_FAMILY, 'input')[0]?.getExpose('__fieldInput');
+    if (typeof report === 'function') report();
     return true;
   };
   def.expose.method('requestValue', (next) => {
@@ -105,7 +119,8 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     if (!run || disabled.get() || readOnly.get() || typeof text !== 'string') return false;
     draft.set(text, 'reason: number draft input');
     publish();
-    if (!composing && text.trim() !== '' && Number.isFinite(Number(text))) request(Number(text));
+    if (!composing && text.trim() !== '' && Number.isFinite(Number(text)))
+      request(Number(text), false);
     return true;
   });
   def.expose.method('commitValue', commit);
@@ -116,6 +131,17 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     publish();
     if (changed) run?.expose.emit('valueCommit', { value: value.get() });
     return changed;
+  });
+  def.context.trySubscribe(FIELD_CONTEXT, () => publish());
+  let initialValue: number = 0;
+  def.expose.method('resetValue', () => {
+    if (!run) return false;
+    const next = normalize(initialValue);
+    if (!run.props.isProvided('value')) value.set(next, 'reason: number-field value reset');
+    draft.set(String(value.get()), 'reason: number reset text');
+    publish();
+    if (run.props.isProvided('value')) run.expose.emit('valueChange', { value: next });
+    return true;
   });
   def.lifecycle.onCreated((current) => {
     run = current;
@@ -131,6 +157,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
       'reason: number initialize'
     );
     draft.set(String(value.get()), 'reason: number initialize text');
+    initialValue = value.get();
     publish();
   });
   def.lifecycle.onMounted((current) => {

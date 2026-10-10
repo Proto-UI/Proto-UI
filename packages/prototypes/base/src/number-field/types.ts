@@ -15,6 +15,7 @@ export type NumberFieldRootExposes = {
   draft: ExposeState<string>;
   disabled: ExposeState<boolean>;
   readOnly: ExposeState<boolean>;
+  resetValue: ExposeMethod<() => boolean>;
   requestValue: ExposeMethod<(value: number) => boolean>;
   requestInput: ExposeMethod<(text: string, composing?: boolean) => boolean>;
   commitValue: ExposeMethod<() => void>;

@@ -24,11 +24,17 @@ function setup(def: DefHandle<FieldsetRootProps, FieldsetRootExposes>) {
   });
   def.context.provide(FIELDSET_CONTEXT, { disabled: false });
   const sync = (run: import('@proto.ui/core').RunHandle<FieldsetRootProps>) => {
-    disabled.set(!!run.props.get().disabled, 'reason: fieldset disabled');
+    disabled.set(
+      !!run.props.get().disabled || !!run.context.tryReadAncestor(FIELDSET_CONTEXT)?.disabled,
+      'reason: fieldset local or ancestor disabled'
+    );
     label.set(run.props.get().ariaLabel ?? '', 'reason: fieldset name');
     run.context.update(FIELDSET_CONTEXT, { disabled: disabled.get() });
   };
+  def.context.trySubscribeAncestor(FIELDSET_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted(sync);
+  def.lifecycle.onUpdated(sync);
   def.props.watchAll(sync);
   return (r: RendererHandle<any>) => r.slot();
 }
