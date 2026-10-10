@@ -185,6 +185,10 @@
     "./data-table": {
       "types": "./src/data-table/index.ts",
       "default": "./src/data-table/index.ts"
+    },
+    "./dropdown": {
+      "types": "./src/dropdown/index.ts",
+      "default": "./src/dropdown/index.ts"
     }
   },
   "dependencies": {

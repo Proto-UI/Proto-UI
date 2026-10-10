@@ -76,3 +76,5 @@ export * from './virtual-list';
 export * from './date-picker';
 
 export * from './data-table';
+
+export * from './dropdown';

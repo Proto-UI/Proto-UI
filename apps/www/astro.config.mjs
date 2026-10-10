@@ -1148,6 +1148,11 @@ export default defineConfig({
                   slug: 'ui-libraries/bootstrap-2-3-2/meter',
                 },
                 {
+                  label: 'Dropdown Menu (Draft)',
+                  translations: { en: 'Dropdown Menu (Draft)', 'zh-CN': '下拉菜单（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/dropdown-menu',
+                },
+                {
                   label: 'Calendar (Draft)',
                   translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
                   slug: 'ui-libraries/bootstrap-2-3-2/calendar',
@@ -1328,6 +1333,11 @@ export default defineConfig({
                   label: 'Meter (Draft)',
                   translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
                   slug: 'ui-libraries/liquid-glass/meter',
+                },
+                {
+                  label: 'Dropdown Menu (Draft)',
+                  translations: { en: 'Dropdown Menu (Draft)', 'zh-CN': '下拉菜单（草案）' },
+                  slug: 'ui-libraries/liquid-glass/dropdown-menu',
                 },
                 {
                   label: 'Calendar (Draft)',

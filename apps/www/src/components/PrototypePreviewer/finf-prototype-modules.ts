@@ -2772,6 +2772,178 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-liquid-glass/data-table');
     registerExactPrototype('liquid-glass-data-table-next', module.dataTableNext);
   },
+  'base-dropdown-group': async () => {
+    const module = await import('@proto.ui/prototypes-base/dropdown');
+    registerExactPrototype('base-dropdown-group', module.dropdownGroup);
+  },
+  'base-dropdown-label': async () => {
+    const module = await import('@proto.ui/prototypes-base/dropdown');
+    registerExactPrototype('base-dropdown-label', module.dropdownLabel);
+  },
+  'base-dropdown-separator': async () => {
+    const module = await import('@proto.ui/prototypes-base/dropdown');
+    registerExactPrototype('base-dropdown-separator', module.dropdownSeparator);
+  },
+  'base-dropdown-shortcut': async () => {
+    const module = await import('@proto.ui/prototypes-base/dropdown');
+    registerExactPrototype('base-dropdown-shortcut', module.dropdownShortcut);
+  },
+  'shadcn-dropdown-group': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/dropdown');
+    registerExactPrototype('shadcn-dropdown-group', module.dropdownGroup);
+  },
+  'shadcn-dropdown-label': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/dropdown');
+    registerExactPrototype('shadcn-dropdown-label', module.dropdownLabel);
+  },
+  'shadcn-dropdown-separator': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/dropdown');
+    registerExactPrototype('shadcn-dropdown-separator', module.dropdownSeparator);
+  },
+  'shadcn-dropdown-shortcut': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/dropdown');
+    registerExactPrototype('shadcn-dropdown-shortcut', module.dropdownShortcut);
+  },
+  'brutalist-dropdown-group': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/dropdown');
+    registerExactPrototype('brutalist-dropdown-group', module.dropdownGroup);
+  },
+  'brutalist-dropdown-label': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/dropdown');
+    registerExactPrototype('brutalist-dropdown-label', module.dropdownLabel);
+  },
+  'brutalist-dropdown-separator': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/dropdown');
+    registerExactPrototype('brutalist-dropdown-separator', module.dropdownSeparator);
+  },
+  'brutalist-dropdown-shortcut': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/dropdown');
+    registerExactPrototype('brutalist-dropdown-shortcut', module.dropdownShortcut);
+  },
+  'bootstrap-2-3-2-dropdown-group': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-group', module.dropdownGroup);
+  },
+  'bootstrap-2-3-2-dropdown-label': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-label', module.dropdownLabel);
+  },
+  'bootstrap-2-3-2-dropdown-separator': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-separator', module.dropdownSeparator);
+  },
+  'bootstrap-2-3-2-dropdown-shortcut': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-shortcut', module.dropdownShortcut);
+  },
+  'bootstrap-2-3-2-dropdown-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-root', module.dropdownRoot);
+  },
+  'bootstrap-2-3-2-dropdown-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-trigger', module.dropdownTrigger);
+  },
+  'bootstrap-2-3-2-dropdown-content': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-content', module.dropdownContent);
+  },
+  'bootstrap-2-3-2-dropdown-item': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dropdown');
+    registerExactPrototype('bootstrap-2-3-2-dropdown-item', module.dropdownItem);
+  },
+  'liquid-glass-dropdown-group': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-group', module.dropdownGroup);
+  },
+  'liquid-glass-dropdown-label': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-label', module.dropdownLabel);
+  },
+  'liquid-glass-dropdown-separator': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-separator', module.dropdownSeparator);
+  },
+  'liquid-glass-dropdown-shortcut': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-shortcut', module.dropdownShortcut);
+  },
+  'liquid-glass-dropdown-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-root', module.dropdownRoot);
+  },
+  'liquid-glass-dropdown-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-trigger', module.dropdownTrigger);
+  },
+  'liquid-glass-dropdown-content': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-content', module.dropdownContent);
+  },
+  'liquid-glass-dropdown-item': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dropdown');
+    registerExactPrototype('liquid-glass-dropdown-item', module.dropdownItem);
+  },
+  'base-calendar-caption': async () => {
+    const module = await import('@proto.ui/prototypes-base/calendar');
+    registerExactPrototype('base-calendar-caption', module.calendarCaption);
+  },
+  'base-calendar-weekdays': async () => {
+    const module = await import('@proto.ui/prototypes-base/calendar');
+    registerExactPrototype('base-calendar-weekdays', module.calendarWeekdays);
+  },
+  'base-calendar-weekday': async () => {
+    const module = await import('@proto.ui/prototypes-base/calendar');
+    registerExactPrototype('base-calendar-weekday', module.calendarWeekday);
+  },
+  'shadcn-calendar-caption': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/calendar');
+    registerExactPrototype('shadcn-calendar-caption', module.calendarCaption);
+  },
+  'shadcn-calendar-weekdays': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/calendar');
+    registerExactPrototype('shadcn-calendar-weekdays', module.calendarWeekdays);
+  },
+  'shadcn-calendar-weekday': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/calendar');
+    registerExactPrototype('shadcn-calendar-weekday', module.calendarWeekday);
+  },
+  'brutalist-calendar-caption': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/calendar');
+    registerExactPrototype('brutalist-calendar-caption', module.calendarCaption);
+  },
+  'brutalist-calendar-weekdays': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/calendar');
+    registerExactPrototype('brutalist-calendar-weekdays', module.calendarWeekdays);
+  },
+  'brutalist-calendar-weekday': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/calendar');
+    registerExactPrototype('brutalist-calendar-weekday', module.calendarWeekday);
+  },
+  'bootstrap-2-3-2-calendar-caption': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/calendar');
+    registerExactPrototype('bootstrap-2-3-2-calendar-caption', module.calendarCaption);
+  },
+  'bootstrap-2-3-2-calendar-weekdays': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/calendar');
+    registerExactPrototype('bootstrap-2-3-2-calendar-weekdays', module.calendarWeekdays);
+  },
+  'bootstrap-2-3-2-calendar-weekday': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/calendar');
+    registerExactPrototype('bootstrap-2-3-2-calendar-weekday', module.calendarWeekday);
+  },
+  'liquid-glass-calendar-caption': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/calendar');
+    registerExactPrototype('liquid-glass-calendar-caption', module.calendarCaption);
+  },
+  'liquid-glass-calendar-weekdays': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/calendar');
+    registerExactPrototype('liquid-glass-calendar-weekdays', module.calendarWeekdays);
+  },
+  'liquid-glass-calendar-weekday': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/calendar');
+    registerExactPrototype('liquid-glass-calendar-weekday', module.calendarWeekday);
+  },
 };
 
 function registerExactPrototype(id: string, prototype: Prototype<any, any>): void {

@@ -90,8 +90,13 @@ async function journey(
   const context = await browser.newContext({
     viewport: { width: 1365, height: 1000 },
     colorScheme: 'light',
+    timezoneId: 'UTC',
   });
   const page = await context.newPage();
+  if (component === 'calendar') {
+    // Control the demo owner's clock, without putting a fixed today into the prototype.
+    await page.clock.setFixedTime('2026-10-10T12:00:00Z');
+  }
   const pageErrors: string[] = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
   await context.route('**/*', (route) => {
@@ -145,7 +150,11 @@ describe('Finf source-bound representative feature screenshots', () => {
   it('captures the real Calendar after native date selection', async () => {
     await journey('calendar', async (page, previewer) => {
       await selectRuntime(page, previewer, 'react', '[role="gridcell"]', 42);
-      const day = previewer.getByRole('gridcell', { name: '2026-10-15', exact: true });
+      expect(await previewer.getByRole('columnheader').count()).toBe(7);
+      const day = previewer.getByRole('gridcell', {
+        name: 'Thursday, October 15, 2026',
+        exact: true,
+      });
       await day.click();
       await expect.poll(() => day.getAttribute('aria-selected')).toBe('true');
       const box = await day.boundingBox();
@@ -156,6 +165,9 @@ describe('Finf source-bound representative feature screenshots', () => {
         'calendar',
         {
           selectedDate: '2026-10-15',
+          hostClock: '2026-10-10T12:00:00Z',
+          accessibleName: await day.getAttribute('aria-label'),
+          weekdayCount: await previewer.getByRole('columnheader').count(),
           ariaSelected: await day.getAttribute('aria-selected'),
           selectedCell: box,
         },
