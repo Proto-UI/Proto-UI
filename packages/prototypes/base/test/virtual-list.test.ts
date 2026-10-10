@@ -54,3 +54,10 @@ it('rejects forged logical contents and invalidates in-flight work on policy cha
   expect(collection.commit(request, request.keys)).toBe(false);
   expect(collection.propose(0, 2)).toBe(null);
 });
+
+import virtualDemo from '../../../../apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo';
+it('authors the full thousand-key DemoSpec without expanding physical views', () => {
+  expect(virtualDemo.root.props.itemKeys).toHaveLength(1000);
+  expect(new Set(virtualDemo.root.props.itemKeys).size).toBe(1000);
+  expect(virtualDemo.root.props.itemKeys.at(-1)).toBe('row-1000');
+});

@@ -16,8 +16,13 @@ it('composes one scroll surface and application-owned new content facts', async 
   document.body.append(root);
   for (let n = 0; n < 20; n++) await Promise.resolve();
   expect(viewport.getExposes().following).toBeDefined();
+  expect(viewport.getAttribute('aria-label')).toBe('Messages');
   expect(viewport.getExposes().scrollYPosition).toBeDefined();
   expect(jump.getExposes().newContentCount.get()).toBe(4);
+  setElementProps(root, { a11yLabel: 'Team conversation', newContentCount: -3.5 });
+  for (let n = 0; n < 20; n++) await Promise.resolve();
+  expect(viewport.getAttribute('aria-label')).toBe('Team conversation');
+  expect(jump.getExposes().newContentCount.get()).toBe(0);
   expect(() => jump.click()).not.toThrow();
   root.remove();
 });

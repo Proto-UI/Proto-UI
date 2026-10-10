@@ -48,6 +48,16 @@ it('resizes actual panels with constrained ratio and honors readOnly requests', 
   expect(left.getExposes().size.get()).toBe(80);
   expect(right.getExposes().size.get()).toBe(20);
   expect(handle.getAttribute('aria-valuenow')).toBe('80');
+  expect(left.style.getPropertyValue('--pui-size')).toBe('80');
+  expect(left.getAttribute('data-pui-style')).toContain('basis-[calc(var(--pui-size)*1%)]');
+  left.remove();
+  await flush();
+  root.getExposes().requestValue(40);
+  await flush();
+  expect(left.style.getPropertyValue('--pui-size')).toBe('80');
+  root.prepend(left);
+  await flush();
+  expect(left.style.getPropertyValue('--pui-size')).toBe('40');
   setElementProps(root, { readOnly: true });
   await flush();
   expect(root.getExposes().requestValue(25)).toBe(false);
@@ -124,10 +134,30 @@ it('updates actual passive Table cells when a sort control is activated', async 
   header.click();
   await flush();
   expect(cell0.getExposes().displayValue.get()).toBe('Alpha');
+  expect(header.getAttribute('aria-sort')).toBe('ascending');
   expect(row0.getExposes().rowKey.get()).toBe('b');
   row0.click();
   await flush();
   expect(row0.getExposes().selected.get()).toBe(true);
   expect(root.getExposes().getStructure()?.valid).toBe(true);
   root.remove();
+});
+
+import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
+import {
+  renderProtoStyleTokenCss,
+  renderProtoShadowStyleTokenCss,
+} from '../../../cli/src/services/proto-style-css';
+import path from 'node:path';
+it('collects and compiles one continuous panel ratio recipe', async () => {
+  const tokens = await collectProtoStyleTokens(
+    path.resolve(process.cwd(), 'packages/prototypes/base/src/resizable')
+  );
+  expect(tokens).toContain('basis-[calc(var(--pui-size)*1%)]');
+  const recipe = ['basis-[calc(var(--pui-size)*1%)]', 'basis-2'];
+  for (const css of [renderProtoStyleTokenCss(recipe), renderProtoShadowStyleTokenCss(recipe)]) {
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('flex-basis: calc(var(--pui-size)*1%);');
+    expect(css).toContain('flex-basis: 0.5rem;');
+  }
 });

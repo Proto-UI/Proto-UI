@@ -105,6 +105,8 @@ for (const f of families) {
     root.getExposes().requestValue(65);
     await flush();
     expect(panel.getExposes().size.get()).toBe(35);
+    expect(panel.style.getPropertyValue('--pui-size')).toBe('35');
+    expect(panel.getAttribute('data-pui-style')).toContain('basis-[calc(var(--pui-size)*1%)]');
     root.remove();
   });
   it(`${f.name} Carousel changes actual slide visibility`, async () => {

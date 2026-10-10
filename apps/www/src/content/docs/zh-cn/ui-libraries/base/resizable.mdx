@@ -9,6 +9,8 @@ Resizable 将两个比例面板与一个可聚焦分隔柄组合。value 表示�
 
 当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
 
+Panel 通过既有 exposed-state 投影导出无量纲 size；Web CSS 使用读取 --pui-size 的静态 flex-basis 规则，不再依赖运行时动态百分比 token。
+
 <PrototypePreviewer
   demoId="demo-base-resizable"
   initialRuntime="wc"

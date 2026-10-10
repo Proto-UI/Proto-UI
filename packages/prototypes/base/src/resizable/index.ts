@@ -153,12 +153,13 @@ function setupPanel(def: DefHandle<ResizablePanelProps, any>) {
   def.props.setDefaults({ index: 0 });
   const size = def.state.numberRange('size', 50, { min: 0, max: 100 });
   def.expose.state('size', size);
-  def.feedback.style.use(tw('min-w-0 min-h-0 overflow-auto shrink grow-0'));
+  def.feedback.style.use(
+    tw('min-w-0 min-h-0 overflow-auto shrink grow-0 basis-[calc(var(--pui-size)*1%)]')
+  );
   const sync = (run: RunHandle<ResizablePanelProps>) => {
     const c = run.context.read(RESIZABLE_CONTEXT);
     const next = run.props.get().index === 1 ? 100 - c.value : c.value;
     size.set(next, 'resize panel ratio');
-    run.feedback.style.patch(tw(`basis-[${next}%]`));
   };
   def.context.subscribe(RESIZABLE_CONTEXT, sync);
   def.lifecycle.onCreated(sync);

@@ -9,6 +9,8 @@ Resizable composes two ratio-sized panels with one focusable separator. value is
 
 This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
 
+Panel exposes its dimensionless size through the existing exposed-state projection. Web CSS uses a static flex-basis recipe consuming --pui-size, so arbitrary ratios do not depend on runtime-generated CSS tokens.
+
 <PrototypePreviewer
   demoId="demo-liquid-glass-resizable"
   initialRuntime="wc"

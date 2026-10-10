@@ -11,6 +11,7 @@ import { asScrollAreaRoot, asScrollAreaViewport } from '../scroll-area';
 import { asButton } from '../button';
 export interface MessageScrollerRootProps {
   newContentCount?: number;
+  a11yLabel?: string;
 }
 export const MESSAGE_SCROLLER_FAMILY = createAnatomyFamily('base-message-scroller', {
   roles: {
@@ -23,23 +24,30 @@ export const MESSAGE_SCROLLER_CONTEXT = createContextKey<{
   atEnd: boolean;
   following: string;
   newContentCount: number;
+  a11yLabel: string;
 }>('base-message-scroller');
 function setupRoot(def: DefHandle<MessageScrollerRootProps, any>) {
   asScrollAreaRoot();
   def.anatomy.claim(MESSAGE_SCROLLER_FAMILY, { role: 'root' });
-  def.props.define({ newContentCount: { type: 'number' } });
-  def.props.setDefaults({ newContentCount: 0 });
+  def.props.define({ newContentCount: { type: 'number' }, a11yLabel: { type: 'string' } });
+  def.props.setDefaults({ newContentCount: 0, a11yLabel: 'Messages' });
   def.context.provide(MESSAGE_SCROLLER_CONTEXT, {
     atEnd: true,
     following: 'pending',
     newContentCount: 0,
+    a11yLabel: 'Messages',
   });
   def.context.subscribe(MESSAGE_SCROLLER_CONTEXT);
   const sync = (run: RunHandle<MessageScrollerRootProps>) => {
     const c = run.context.read(MESSAGE_SCROLLER_CONTEXT);
+    const p = run.props.get();
     run.context.update(MESSAGE_SCROLLER_CONTEXT, {
       ...c,
-      newContentCount: Math.max(0, Math.trunc(run.props.get().newContentCount ?? 0)),
+      newContentCount: Math.max(
+        0,
+        Math.trunc(Number.isFinite(p.newContentCount) ? p.newContentCount! : 0)
+      ),
+      a11yLabel: p.a11yLabel ?? 'Messages',
     });
   };
   def.lifecycle.onCreated(sync);
@@ -56,7 +64,11 @@ export const messageScrollerRoot = definePrototype({
 function setupViewport(def: DefHandle<Record<string, never>, any>) {
   asScrollAreaViewport();
   def.anatomy.claim(MESSAGE_SCROLLER_FAMILY, { role: 'viewport' });
-  def.context.trySubscribe(MESSAGE_SCROLLER_CONTEXT);
+  const label = def.state.string('a11yLabel', 'Messages');
+  def.context.trySubscribe(MESSAGE_SCROLLER_CONTEXT, (run) => {
+    const next = run.context.tryRead(MESSAGE_SCROLLER_CONTEXT);
+    if (next) label.set(next.a11yLabel, 'message scroller name');
+  });
   const scroll = asScrollSurface();
   scroll.configure({ axes: 'vertical', endFollow: { mode: 'while-at-end', axis: 'vertical' } });
   def.expose.state('atEnd', scroll.vertical.atEnd);
@@ -66,6 +78,7 @@ function setupViewport(def: DefHandle<Record<string, never>, any>) {
   const publish = (run: RunHandle<any>) => {
     const c = run.context.tryRead(MESSAGE_SCROLLER_CONTEXT);
     if (!c) return;
+    label.set(c.a11yLabel, 'message scroller name');
     const next = {
       ...c,
       atEnd: scroll.vertical.atEnd.get(),
@@ -81,7 +94,9 @@ function setupViewport(def: DefHandle<Record<string, never>, any>) {
     if (e.type === 'next') publish(run);
   });
   def.lifecycle.onMounted(publish);
-  asAccessible().role('region');
+  const a11y = asAccessible();
+  a11y.role('region');
+  a11y.name(label);
 }
 export const asMessageScrollerViewport = defineAsHook({
   name: 'as-message-scroller-viewport',
