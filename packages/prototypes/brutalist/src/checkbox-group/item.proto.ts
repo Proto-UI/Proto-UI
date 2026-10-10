@@ -9,9 +9,10 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
   name: 'brutalist-checkbox-group-item',
   setup(def) {
     const inherited = asCheckboxGroupItem();
+    // Ordinary checkbox row; card-label presentation is not an implicit variant.
     def.feedback.style.use(
       tw(
-        'inline-flex min-h-10 items-center gap-2 rounded-none border-2 border-black bg-main px-3 py-2 text-main-foreground font-sans font-medium outline-none'
+        'inline-flex min-h-6 min-w-0 items-center gap-2 font-sans text-sm font-bold leading-5 text-foreground outline-none'
       )
     );
     const state = inherited.stateHandles!;
@@ -20,18 +21,18 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
       intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
     });
     def.rule({
-      when: (w) => w.state(state.checked).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-foreground text-background border-background')),
-    });
-    def.rule({
-      when: (w) => w.state(state.indeterminate).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
-    });
-    def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
+      intent: (i) =>
+        i.feedback.style.use(tw('forced-colors-focus-outline ring-2 ring-ring ring-offset-2')),
     });
     const glyph = checkboxGroupGlyph(def, state);
-    return (renderer) => [glyph(renderer), renderer.r.slot()];
+    return (renderer) => [
+      glyph(renderer),
+      renderer.el(
+        'span',
+        { style: tw('min-w-0 whitespace-normal break-words') },
+        renderer.r.slot()
+      ),
+    ];
   },
 });
