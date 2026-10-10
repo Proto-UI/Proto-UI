@@ -241,6 +241,10 @@ it.each(['close', 'external-remove', 'close-to-detached-parent'] as const)(
   async (mode) => {
     let setups = 0,
       disposed = 0;
+    let completeUnmount!: () => void;
+    const unmounted = new Promise<void>((resolve) => {
+      completeUnmount = resolve;
+    });
     const proto = definePrototype({
       name: `wc-terminal-portal-${mode}`,
       setup(def) {
@@ -254,7 +258,13 @@ it.each(['close', 'external-remove', 'close-to-detached-parent'] as const)(
         return () => 'Portal content';
       },
     });
-    AdaptToWebComponent(proto);
+    AdaptToWebComponent(proto, {
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (event.type === 'unmount.done') completeUnmount();
+        },
+      },
+    });
     const host = document.createElement('div'),
       next = document.createElement('span'),
       content: any = document.createElement(proto.name);
@@ -271,6 +281,9 @@ it.each(['close', 'external-remove', 'close-to-detached-parent'] as const)(
         if (mode === 'close-to-detached-parent') host.remove();
         content.getExposes().actions.close();
       }
+      // Revocation follows actual view completion, including conceal frames and
+      // origin-observer delivery. Promise-only flushing is not that boundary.
+      await unmounted;
       await flush();
       if (mode === 'external-remove') {
         expect(content.isConnected).toBe(false);

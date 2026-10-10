@@ -2,7 +2,7 @@ import type { ShadowOwnerShell } from './shadow-owner-shell';
 
 export type ShadowInnerSurface = {
   readonly element: HTMLElement;
-  replaceRenderedChildren(nodes: readonly Node[]): void;
+  replaceRenderedChildren(nodes: Readonly<ArrayLike<Node>>): void;
   clearRenderedChildren(): void;
   hasOnlyRenderedNode(node: Node): boolean;
   dispose(): void;
@@ -25,7 +25,8 @@ export function createShadowInnerSurface(shell: ShadowOwnerShell): ShadowInnerSu
   }
 
   const element = shell.root.ownerDocument.createElement('div');
-  let renderedNodes: Node[] = [];
+  // Only singleton identity participates in continuity and native-editor checks.
+  let renderedNode: Node | null = null;
   let disposed = false;
   shell.attachOwnerNode(element);
 
@@ -37,7 +38,7 @@ export function createShadowInnerSurface(shell: ShadowOwnerShell): ShadowInnerSu
 
   const clearRenderedChildren = () => {
     element.replaceChildren();
-    renderedNodes = [];
+    renderedNode = null;
   };
 
   const surface: ShadowInnerSurface = {
@@ -49,11 +50,10 @@ export function createShadowInnerSurface(shell: ShadowOwnerShell): ShadowInnerSu
       // flattened tree and cancels its CSS transitions, even if consumer Node
       // identities never change. Preserve the validated slot-only view within
       // an epoch. This is split-local; detach/remount still clears the view.
-      const previous = renderedNodes[0];
+      const previous = renderedNode;
       const nextSlot = nodes[0];
       if (
         nodes.length === 1 &&
-        renderedNodes.length === 1 &&
         element.childNodes.length === 1 &&
         previous?.parentNode === element &&
         previous.nodeType === 1 &&
@@ -64,7 +64,7 @@ export function createShadowInnerSurface(shell: ShadowOwnerShell): ShadowInnerSu
       clearRenderedChildren();
       const next = Array.from(nodes);
       element.replaceChildren(...next);
-      renderedNodes = next;
+      renderedNode = next.length === 1 ? next[0]! : null;
     },
     clearRenderedChildren() {
       assertActive();
@@ -72,7 +72,7 @@ export function createShadowInnerSurface(shell: ShadowOwnerShell): ShadowInnerSu
     },
     hasOnlyRenderedNode(node) {
       assertActive();
-      return renderedNodes.length === 1 && renderedNodes[0] === node && node.parentNode === element;
+      return renderedNode === node && node.parentNode === element;
     },
     dispose() {
       if (disposed) return;

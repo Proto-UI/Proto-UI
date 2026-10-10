@@ -22,6 +22,7 @@ import {
 } from '../../src/runtime/modules';
 import {
   createLogicalInstance,
+  isFocusTargetOwnerReady,
   markProtoInstance,
   unbindProtoInstance,
   bindLogicalEventTarget,
@@ -156,6 +157,7 @@ export function createSplitRuntimePilot(args: {
                   effectsPort: effects,
                   router: router!,
                   isViewReady: () => true,
+                  isEntryAcquisitionReady: isFocusTargetOwnerReady,
                   subscribeTargetReady: () => () => {},
                   retryTargetReady() {},
                 })

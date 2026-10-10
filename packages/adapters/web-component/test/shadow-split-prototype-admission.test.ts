@@ -16,6 +16,7 @@ describe('composed Shadow prototype admission', () => {
     const artifact = renderProtoShadowSplitStyleArtifact([
       'fixed',
       'inset-0',
+      'bg-background',
       'bg-black/50',
       'backdrop-blur-xs',
       'hidden',
@@ -30,21 +31,67 @@ describe('composed Shadow prototype admission', () => {
         declarations.replace('--pui-split-participation-coordinate-recipe: i1;', '')
       ),
     };
+    const environmentListeners = new Set<() => void>();
+    const lifecycleEvents: string[] = [];
+    let finishDisposal!: () => void;
+    const disposed = new Promise<void>((resolve) => {
+      finishDisposal = resolve;
+    });
     const Mask = AdaptToWebComponent(dialogMask, {
       registerAs: 'x-split-mask-admission',
-      shadow: { mode: 'open', presentation: 'split', styleArtifact: oldArtifact },
+      shadow: {
+        mode: 'open',
+        presentation: 'split',
+        styleArtifact: oldArtifact,
+        colorSchemeSource: {
+          get: () => 'light',
+          subscribe(listener) {
+            environmentListeners.add(listener);
+            return () => {
+              environmentListeners.delete(listener);
+            };
+          },
+        },
+      },
+      diagnostics: {
+        onLifecycleEvent(event) {
+          lifecycleEvents.push(event.type);
+          if (event.type === 'instance.dispose.done') finishDisposal();
+        },
+      },
       schedule: (task) => task(),
     });
     const host = new Mask();
+    const errors: unknown[] = [];
+    const capture = (event: ErrorEvent) => {
+      errors.push(event.error);
+      event.preventDefault();
+    };
+    window.addEventListener('error', capture);
     try {
-      expect(() => parent.append(host)).toThrow(
-        /shadcn-dialog-mask.*rule token "hidden".*I1 recipe/
-      );
+      expect(parent.getExposes().open.get()).toBe(true);
+      // Capture native CE reports and the harness's synchronous transport;
+      // neither changes the real connected Dialog provider association.
+      try {
+        parent.append(host);
+      } catch (error) {
+        errors.push(error);
+      }
+      expect(errors).toHaveLength(1);
+      expect(errors[0]).toBeInstanceOf(Error);
+      await disposed;
+      expect(lifecycleEvents).toContain('mount.commit.done');
+      expect(lifecycleEvents).not.toContain('mount.mounted');
+      expect(environmentListeners.size).toBe(0);
+      expect(host.getExposes?.() ?? {}).toEqual({});
+      expect(host.hasAttribute('data-pui-color-scheme')).toBe(false);
       expect(host.hasAttribute('data-pui-split-root-style')).toBe(false);
       expect(host.shadowRoot?.childNodes.length).toBe(0);
+      expect(errors).toHaveLength(1);
     } finally {
       parent.remove();
       await Promise.resolve();
+      window.removeEventListener('error', capture);
     }
   });
 });

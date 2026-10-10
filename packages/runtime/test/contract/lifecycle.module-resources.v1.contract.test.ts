@@ -13,6 +13,7 @@ import { asAccessible, asOverlay } from '@proto.ui/hooks';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import { EFFECTS_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
+import { RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import {
   HIT_PARTICIPATION_HOST_BRIDGE_CAP,
   type HitParticipationPort,
@@ -76,29 +77,73 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
     expect(() => retainedRun.expose.emit('change')).toThrow();
   });
 
-  it('preserves both created and terminal cleanup failures in the synchronous caller', () => {
-    const createdFailure = new Error('created failure');
-    const cleanupFailure = new Error('cleanup failure');
-    const proto = definePrototype({
-      name: 'lifecycle-failed-created-and-cleanup-owner',
-      setup(def) {
-        def.lifecycle.onCreated(() => {
-          throw createdFailure;
-        });
-        def.lifecycle.onBeforeDispose(() => {
-          throw cleanupFailure;
-        });
-      },
-    });
-    let thrown: unknown;
-    try {
-      createRuntimeSession(proto, createImmediateHost());
-    } catch (error) {
-      thrown = error;
+  it.each(['source', 'watcher'] as const)(
+    'preserves the created failure through Props %s and terminal callback failures',
+    (preparationFailure) => {
+      const createdFailure = new Error('created failure');
+      const propsFailure = new Error('Props source failed during terminal preparation');
+      const cleanupFailure = new Error('cleanup failure');
+      let open!: OwnedStateHandle<boolean>;
+      let invalidateRawProps!: () => void;
+      let failPropsRead = false;
+      let rawSubscriptionReleased = false;
+      let disposed = 0;
+      const proto = definePrototype({
+        name: 'lifecycle-failed-created-and-cleanup-owner',
+        setup(def) {
+          def.props.define({ step: { type: 'number' } });
+          def.props.setDefaults({ step: 0 });
+          open = def.state.bool('open', false);
+          def.props.watch(['step'], () => {
+            if (failPropsRead && preparationFailure === 'watcher') throw propsFailure;
+          });
+          def.lifecycle.onCreated(() => {
+            failPropsRead = true;
+            invalidateRawProps();
+            throw createdFailure;
+          });
+          def.lifecycle.onBeforeDispose(() => {
+            disposed += 1;
+            throw cleanupFailure;
+          });
+          def.lifecycle.onBeforeDispose(() => {
+            disposed += 1;
+          });
+        },
+      });
+      let thrown: unknown;
+      try {
+        createRuntimeSession(
+          proto,
+          createImmediateHost((wiring) => {
+            wiring.attach('props', [
+              [
+                RAW_PROPS_SOURCE_CAP,
+                {
+                  get() {
+                    if (failPropsRead && preparationFailure === 'source') throw propsFailure;
+                    return { step: failPropsRead ? 1 : 0 };
+                  },
+                  subscribe(listener: () => void) {
+                    invalidateRawProps = listener;
+                    return () => {
+                      rawSubscriptionReleased = true;
+                    };
+                  },
+                },
+              ],
+            ]);
+          })
+        );
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBe(createdFailure);
+      expect(disposed).toBe(2);
+      expect(rawSubscriptionReleased).toBe(true);
+      expect(() => open.get()).toThrow();
     }
-    expect(thrown).toBeInstanceOf(AggregateError);
-    expect((thrown as AggregateError).errors).toEqual([createdFailure, cleanupFailure]);
-  });
+  );
 
   it('keeps Expose Event declarations across view epochs and invalidates emit at disposal', async () => {
     const emitted: string[] = [];

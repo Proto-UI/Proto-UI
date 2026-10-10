@@ -10,7 +10,7 @@ import {
  * No open-state writes or Runtime disposal here: restore the DOM projection
  * and let normal Custom Element disconnection settle the owner lifetime.
  */
-const activeProjections = new WeakSet<HTMLElement>();
+const activeProjections = new WeakMap<HTMLElement, (restoreToOrigin?: boolean) => void>();
 const adoptedProjections = new WeakMap<HTMLElement, Set<(document: Document) => void>>();
 const projectionByOriginMarker = new WeakMap<Node, HTMLElement>();
 const originMarkerByProjection = new WeakMap<HTMLElement, Node>();
@@ -21,6 +21,11 @@ function isShadowRootNode(node: Node): node is ShadowRoot {
 
 export function isWebComponentPortaled(el: HTMLElement): boolean {
   return activeProjections.has(el);
+}
+
+/** Confirmed owner disconnection withdraws projection without reconnecting it. */
+export function abandonWebComponentPortalProjection(el: HTMLElement): void {
+  activeProjections.get(el)?.(false);
 }
 
 /** Resolves only a currently active projection at its logical origin point. */
@@ -137,7 +142,7 @@ export function createWebComponentPortalMount() {
         for (const tree of trees) observer!.observe(tree, { childList: true, subtree: true });
         observedTrees = trees;
       }
-      const restore = () => {
+      const restore = (restoreToOrigin = true) => {
         if (revoke !== restore) return;
         revoke = null;
         unbindAdoption?.();
@@ -147,6 +152,11 @@ export function createWebComponentPortalMount() {
         originMarkerByProjection.delete(el);
         activeProjections.delete(el);
         observer?.disconnect();
+        if (!restoreToOrigin) {
+          marker.remove();
+          setProtoParent(el, null);
+          return;
+        }
         setProtoParent(el, null);
         if (marker.parentNode === parent) {
           parent.insertBefore(el, marker);
@@ -162,7 +172,7 @@ export function createWebComponentPortalMount() {
         observeOriginTrees();
         parent.insertBefore(marker, el);
         projected = true;
-        activeProjections.add(el);
+        activeProjections.set(el, restore);
         projectionByOriginMarker.set(marker, el);
         originMarkerByProjection.set(el, marker);
         el.ownerDocument.body.appendChild(el);

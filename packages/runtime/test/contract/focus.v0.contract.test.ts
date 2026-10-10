@@ -1088,17 +1088,18 @@ describe('runtime contract: focus (v0)', () => {
     scope.deactivate();
   });
 
-  it('passes native request ownership when trapping Tab through the host sample', async () => {
+  it('traps Tab on a sampled descendant without claiming requester focus', async () => {
     let scope!: FocusScopeHandle<PropsBaseType>;
+    let requester!: FocusableHandle<PropsBaseType>;
     const root = document.createElement('div');
     const target = document.createElement('button');
     root.append(target);
     document.body.append(root);
     const globalTarget = new EventTarget();
-    const kinds: unknown[] = [];
     const proto = definePrototype({
-      name: 'x-focus-sampled-native-kind',
+      name: 'x-focus-sampled-descendant-ownership',
       setup() {
+        requester = asFocusable<PropsBaseType>();
         scope = asFocusScope<PropsBaseType>();
         scope.configure({ trap: true, loop: true, entry: 'manual' });
         return (r) => r.el('div');
@@ -1126,8 +1127,9 @@ describe('runtime contract: focus (v0)', () => {
               _options: FocusRequestOptions | undefined,
               kind: FocusRequestKind
             ) => {
-              kinds.push(kind);
-              if (kind !== 'native') return false;
+              // Native Root effects cannot borrow this ordinary descendant; entry
+              // admission may focus it without owning requester focus facts.
+              if (kind === 'native' && node !== root) return false;
               node.focus();
               return document.activeElement === node;
             },
@@ -1139,8 +1141,8 @@ describe('runtime contract: focus (v0)', () => {
       await session.mount();
       scope.activate();
       globalTarget.dispatchEvent(new CustomEvent('key.down', { detail: { key: 'Tab' } }));
-      expect(kinds).toEqual(['native']);
       expect(document.activeElement).toBe(target);
+      expect(requester.focused.get()).toBe(false);
     } finally {
       scope.deactivate();
       await session.dispose();

@@ -17,6 +17,11 @@ it.each(
   async ({ mode, property }) => {
     let setups = 0;
     let disposed = 0;
+    let completeUnmount: (() => void) | undefined;
+    const waitForUnmount = () =>
+      new Promise<void>((resolve) => {
+        completeUnmount = resolve;
+      });
     const parentProto = definePrototype({
       name: `wc-portal-parent-release-host-${mode}-${property}`,
       setup() {
@@ -40,7 +45,16 @@ it.each(
       },
     });
     const Parent = AdaptToWebComponent(parentProto);
-    const Content = AdaptToWebComponent(contentProto);
+    const Content = AdaptToWebComponent(contentProto, {
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (event.type !== 'unmount.done') return;
+          const complete = completeUnmount;
+          completeUnmount = undefined;
+          complete?.();
+        },
+      },
+    });
     const originalParent: any = new Parent();
     const newParent: any = new Parent();
     const content: any = new Content();
@@ -49,7 +63,7 @@ it.each(
     await flush();
     const oldToken = content._instanceToken;
     // Supplemental property-ownership controls delegate to the native getter.
-    // They must survive either acquisition or replacement of the Adapter shim.
+    // Neither acquisition nor release may replace caller-owned DOM behavior.
     const nativeParentGetter = Object.getOwnPropertyDescriptor(Node.prototype, 'parentNode')!.get!;
     const hostDescriptor = {
       get(this: Node) {
@@ -64,15 +78,16 @@ it.each(
       content.getExposes().actions.open();
       await flush();
       expect(Array.from(document.body.children)).toContain(content);
-      expect(content.parentNode).toBe(originalParent);
       expect(tree.getLogicalParent(oldToken)).toBe(originalParent._instanceToken);
       if (property === 'replacement') {
         Object.defineProperty(content, 'parentNode', hostDescriptor);
         expectedDescriptor = Object.getOwnPropertyDescriptor(content, 'parentNode');
       }
 
+      const firstUnmount = waitForUnmount();
       if (mode === 'external-remove') content.remove();
       else content.getExposes().actions.close();
+      await firstUnmount;
       await flush();
       const releasedDescriptor = Object.getOwnPropertyDescriptor(content, 'parentNode');
       const releasedParent = content.parentNode;
@@ -104,11 +119,13 @@ it.each(
 
       content.getExposes().actions.open();
       await flush();
-      expect(content.parentNode).toBe(newParent);
       expect(Array.from(document.body.children)).toContain(content);
+      expect(tree.getLogicalParent(content._instanceToken)).toBe(newParent._instanceToken);
       content.getExposes().actions.focus();
       expect(document.activeElement).toBe(content);
+      const secondUnmount = waitForUnmount();
       content.getExposes().actions.close();
+      await secondUnmount;
       await flush();
       expect(content.parentNode).toBe(newParent);
       expect(Array.from(newParent.children)).toContain(content);
