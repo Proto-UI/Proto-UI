@@ -66,6 +66,10 @@ const spacing: Record<string, string> = {
   '11': '2.75rem',
   '12': '3rem',
   '16': '4rem',
+  '24': '6rem',
+  '40': '10rem',
+  '48': '12rem',
+  '96': '24rem',
   '32': '8rem',
   '64': '16rem',
   '28': '7rem',
@@ -109,6 +113,25 @@ const colorVars = new Set([
 ]);
 
 const staticUtilities: Record<string, string[]> = {
+  // Bounded vocabulary authored by the source-first Finf component families.
+  'border-dashed': ['border-style: dashed;'],
+  'cursor-move': ['cursor: move;'],
+  'grid-cols-7': ['grid-template-columns: repeat(7, minmax(0, 1fr));'],
+  grow: ['flex-grow: 1;'],
+  'grow-0': ['flex-grow: 0;'],
+  shrink: ['flex-shrink: 1;'],
+  'inline-grid': ['display: inline-grid;'],
+  'items-stretch': ['align-items: stretch;'],
+  'self-stretch': ['align-self: stretch;'],
+  'max-w-md': ['max-width: 28rem;'],
+  'w-auto': ['width: auto;'],
+  rounded: ['border-radius: 0.25rem;'],
+  'tabular-nums': ['font-variant-numeric: tabular-nums;'],
+  'text-center': ['text-align: center;'],
+  'shadow-[2px_2px_0_0_var(--pui-border)]': [
+    '--pui-shadow: 2px 2px 0 0 var(--pui-border);',
+    ...composedShadow(),
+  ],
   // Bounded layout-safety vocabulary used by Accordion and other authored controls.
   'text-start': ['text-align: start;'],
   'whitespace-normal': ['white-space: normal;'],
@@ -1062,7 +1085,7 @@ function renderUtility(utility: string): string[] | null {
 
 function renderSpacingUtility(utility: string): string[] | null {
   const spacingMatch = utility.match(
-    /^(gap|basis|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|pt|pb|mt|mb|ml|mr|top|bottom|left|right)-(.+)$/
+    /^(gap|basis|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|pt|pb|mx|my|mt|mb|ml|mr|top|bottom|left|right)-(.+)$/
   );
   if (!spacingMatch) return null;
   const [, kind, rawValue] = spacingMatch;
@@ -1085,6 +1108,8 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (kind === 'pr') return [`padding-right: ${value};`];
   if (kind === 'pt') return [`padding-top: ${value};`];
   if (kind === 'pb') return [`padding-bottom: ${value};`];
+  if (kind === 'mx') return [`margin-inline: ${value};`];
+  if (kind === 'my') return [`margin-block: ${value};`];
   if (kind === 'mt') return [`margin-top: ${value};`];
   if (kind === 'mb') return [`margin-bottom: ${value};`];
   if (kind === 'ml') return [`margin-left: ${value};`];
@@ -1283,6 +1308,7 @@ function spacingValue(raw: string): string | null {
   if (raw === 'fit') return 'fit-content';
   if (raw === 'full') return '100%';
   if (raw === '1/2') return '50%';
+  if (raw === '1/3') return '33.333333333333%';
   if (raw.startsWith('[') && raw.endsWith(']')) return raw.slice(1, -1).replaceAll('_', ' ');
   return spacing[raw] ?? null;
 }

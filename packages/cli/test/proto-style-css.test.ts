@@ -597,3 +597,44 @@ describe('normalized continuous layout projection', () => {
     }
   });
 });
+
+describe('Finf authored layout utility closure', () => {
+  it('realizes the collected component vocabulary in document and Shadow CSS', () => {
+    const tokens = [
+      'border-dashed',
+      'cursor-move',
+      'grid-cols-7',
+      'grow',
+      'grow-0',
+      'h-48',
+      'inline-grid',
+      'items-stretch',
+      'max-w-md',
+      'min-h-24',
+      'min-w-40',
+      'mx-0',
+      'mx-1',
+      'my-1',
+      'rounded',
+      'self-stretch',
+      'shadow-[2px_2px_0_0_var(--pui-border)]',
+      'shrink',
+      'tabular-nums',
+      'text-center',
+      'w-1/3',
+      'w-96',
+      'w-auto',
+    ];
+    for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('grid-template-columns: repeat(7, minmax(0, 1fr));');
+      expect(css).toContain('flex-grow: 0;');
+      expect(css).toContain('flex-shrink: 1;');
+      expect(css).toContain('margin-inline: 0.25rem;');
+      expect(css).toContain('margin-block: 0.25rem;');
+      expect(css).toContain('--pui-shadow: 2px 2px 0 0 var(--pui-border);');
+      expect(css).toContain('font-variant-numeric: tabular-nums;');
+      expect(css).toContain('width: 24rem;');
+    }
+  });
+});
