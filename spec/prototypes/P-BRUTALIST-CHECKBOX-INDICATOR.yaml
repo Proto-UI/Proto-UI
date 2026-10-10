@@ -4,17 +4,12 @@ title: Brutalist Checkbox Indicator inherits Base Checkbox Indicator and project
 status: draft
 since: 0.3.0-alpha.0
 summary: >-
-  Brutalist Checkbox Indicator inherits the same-domain Base context projection and paints an accessibility-hidden hard-stroke tick or dash without owning value, interaction, focus, event, form, or accessibility semantics.
+  Brutalist Checkbox Indicator derives Base context and paints one aria-hidden 16px check or mixed dash; it owns no interaction or accessibility semantics.
 
 
 statement:
-  en: >-
-    The draft Indicator is a presentation-only anatomy part over P-BASE-CHECKBOX-INDICATOR. It derives checked and indeterminate from the nearest Root, gives indeterminate precedence, and adds only the current glyph box, hard-stroke SVG, and visibility styling.
-
-
-  zh-CN: >-
-    draft Indicator 是 P-BASE-CHECKBOX-INDICATOR 之上的纯呈现 anatomy part。它从最近 Root 派生 checked 与 indeterminate，并让 indeterminate 优先；本层只增加当前 glyph box、硬线 SVG 与可见性样式。
-
+  en: This presentation-only part derives checked and indeterminate from the nearest Base domain. Its 16px rounded 2px-stroke glyph follows the pinned Neo Lucide Check treatment. The distinguishable mixed dash is retained as an explicit Proto UI accessibility extension instead of silently replacing it with the upstream Check.
+  zh-CN: 此纯呈现 part 从最近 Base domain 派生 checked 与 indeterminate；16px、圆端点/圆连接、2px stroke glyph 对应固定 Neo 的 Lucide Check 处理。可区分的 mixed dash 保留为明确 Proto UI 无障碍扩展，不静默替换为上游 Check。
 
 criteria:
   - id: P-BRUTALIST-CHECKBOX-INDICATOR-BASE-INHERITANCE
@@ -43,28 +38,20 @@ criteria:
 
   - id: P-BRUTALIST-CHECKBOX-INDICATOR-GLYPH-SELECTION
     text:
-      en: >-
-        checked paints exactly one hard-stroke tick, indeterminate paints exactly one hard dash, and neither state paints no glyph. Indeterminate wins when both are true, and repeated updates must never stack a second SVG.
-
-
-      zh-CN: >-
-        checked 必须恰好绘制一个硬线 tick，indeterminate 必须恰好绘制一个硬横杠，两者均不成立时 不绘制 glyph；两者同真时 indeterminate 优先，重复更新不得叠加第二个 SVG。
-
+      en: Checked paints exactly one 2px round-cap round-join check, indeterminate exactly one matching dash, and neither state no glyph. Indeterminate wins when both are true; repeated updates must not stack SVGs. The distinct dash is a retained Proto UI accessibility extension.
+      zh-CN: checked 绘制恰好一个 2px round-cap/round-join check，indeterminate 绘制恰好一个同笔画 dash，两者均不成立时不绘制；两者同真时 indeterminate 优先，重复更新不得叠加 SVG。可区分 dash 是保留的 Proto UI 无障碍扩展。
 
   - id: P-BRUTALIST-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
     text:
-      en: >-
-        Indicator must project inline-flex size-3.5 items-center justify-center text-current transition-none, use opacity-100 for checked or indeterminate, and use opacity-0 only when both are false.
-
-
-      zh-CN: >-
-        Indicator 必须投射 inline-flex size-3.5 items-center justify-center text-current transition-none； checked 或 indeterminate 时使用 opacity-100，仅两者均为 false 时使用 opacity-0。
-
+      en: Indicator projects flex size-4 items-center justify-center text-main-foreground transition-none, with opacity-100 for checked or indeterminate and opacity-0 only when both are false. The glyph remains aria-hidden.
+      zh-CN: Indicator 投射 flex size-4 items-center justify-center text-main-foreground transition-none；checked 或 indeterminate 为 opacity-100，仅两者均false时为 opacity-0；glyph 继续 aria-hidden。
 
 sources:
   - path: packages/prototypes/brutalist/src/checkbox/indicator.proto.ts
   - path: packages/prototypes/brutalist/src/checkbox/types.ts
   - path: packages/prototypes/brutalist/test/checkbox.test.ts
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/checkbox.tsx
+    label: Pinned Neo source; SHA256 2b864431334ef4bcc47742deb03d5b8d0b8710d3c8d17cf5174ea73ad9cc0259
 relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
@@ -80,4 +67,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft context-derived Brutalist Checkbox Indicator projection.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Reconciled this draft presentation with exact pinned Neo source; retained Base semantics and explicitly bounded remaining parity and accessibility extensions.
 tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox, indicator]

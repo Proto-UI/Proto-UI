@@ -4,7 +4,7 @@ title: Brutalist Checkbox projection and public-boundary tests
 status: draft
 since: 0.3.0-alpha.0
 summary: >-
-  Covers exact exports and CLI absence, Base-owned behavior, surface-paired Root frames, the Indicator visual surface, mixed precedence, the no-second-owner boundary, and rendered cross-runtime evidence.
+  Covers exact Checkbox and separate CheckboxGroup package boundaries, Base ownership, the source-pinned 16px outline geometry, checked/mixed main fill, a 16px passive glyph, negative legacy-recipe controls and separately pending browser evidence.
 
 
 cases:
@@ -16,15 +16,15 @@ cases:
       - P-BRUTALIST-CHECKBOX-INDICATOR-DIRECT-ENTRY
     expectation: brutalist-checkbox-package-and-subpath-export-the-family-without-a-cli-entry
   - id: T-BRUTALIST-CHECKBOX-0001-CASE-SURFACE
-    title: Resting, checked, and mixed states atomically paint governed fill, content, and frame pairs
+    title: 16px outlined resting, checked and mixed surfaces retain paired ink and distinct glyphs
     covers:
       - P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
       - P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
       - P-BRUTALIST-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
       - P-BRUTALIST-CHECKBOX-INDICATOR-GLYPH-SELECTION
-    expectation: brutalist-checkbox-paints-square-surface-paired-frames-and-mixed-precedence
+    expectation: brutalist-checkbox-source-pinned-outline-main-fill-and-mixed-glyph-precedence
   - id: T-BRUTALIST-CHECKBOX-0001-CASE-INTERACTION
-    title: Press, focus-visible, and disabled presentation consumes inherited Base facts
+    title: Inherited press changes no geometry while focus-visible and disabled presentation remain derived
     covers:
       - P-BRUTALIST-CHECKBOX-BASE-INHERITANCE
       - P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
@@ -38,14 +38,14 @@ cases:
       - P-BRUTALIST-CHECKBOX-INDICATOR-CONTEXT-DERIVED
     expectation: brutalist-checkbox-republishes-only-base-owned-facts-and-derived-indicator-state
   - id: T-BRUTALIST-CHECKBOX-0001-CASE-CSS
-    title: The style renderer and generated Brutalist closure support Checkbox frame and Indicator tokens
+    title: Actual runtime-collected outline, main-fill and glyph tokens have supported generated CSS
     covers:
       - P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
       - P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
       - P-BRUTALIST-CHECKBOX-INDICATOR-CURRENT-VISUAL-SURFACE
-    expectation: brutalist-checkbox-surface-pair-and-indicator-tokens-produce-supported-css
+    expectation: brutalist-checkbox-source-pinned-outline-and-glyph-tokens-produce-supported-css
   - id: T-BRUTALIST-CHECKBOX-0001-CASE-BROWSER
-    title: Real package exports render computed surface-paired frames, state, focus, and one accessible control across Web Components, React, Vue, and Vue 2
+    title: Package exports render the source-pinned outline and main-fill recipe with one accessible control across four Web Adapters
     covers:
       - P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
       - P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
@@ -57,7 +57,7 @@ cases:
 implementations:
   - id: prototypes-brutalist-checkbox-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/brutalist/test/checkbox.test.ts
     required: true
     consumesCases:
@@ -70,6 +70,8 @@ implementations:
       - P-BASE-CHECKBOX-INDICATOR
       - P-BRUTALIST-CHECKBOX
       - P-BRUTALIST-CHECKBOX-INDICATOR
+    notes:
+      - Historical passing evidence predates this source-pinned presentation migration; current runtime/CSS/browser evidence must be verified separately.
   - id: cli-brutalist-checkbox-absence
     kind: workspace-check
     status: passing
@@ -86,20 +88,24 @@ implementations:
     exercises: *checkbox-prototypes
   - id: cli-brutalist-checkbox-css
     kind: workspace-check
-    status: passing
+    status: planned
     path: packages/cli/test/proto-style-css.test.ts
     required: true
     consumesCases: [T-BRUTALIST-CHECKBOX-0001-CASE-CSS]
     exercises:
       - P-BRUTALIST-CHECKBOX
       - P-BRUTALIST-CHECKBOX-INDICATOR
+    notes:
+      - Historical passing evidence predates this source-pinned presentation migration; current runtime/CSS/browser evidence must be verified separately.
   - id: www-brutalist-checkbox-browser
     kind: runtime-test
-    status: passing
+    status: planned
     path: apps/www/src/content/docs/zh-cn/demo-brutalist-checkbox.browser.test.ts
     required: true
     consumesCases: [T-BRUTALIST-CHECKBOX-0001-CASE-BROWSER]
     exercises: *checkbox-prototypes
+    notes:
+      - Historical passing evidence predates this source-pinned presentation migration; current runtime/CSS/browser evidence must be verified separately.
 verifies:
   prototypes:
     - id: P-BRUTALIST-CHECKBOX
@@ -110,4 +116,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced draft Brutalist Checkbox package, surface-paired frames, behavior, CSS, and cross-runtime coverage.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Require source-pinned geometry and negative legacy-recipe controls; presentation evidence is planned until current execution.
 tags: [test, brutalist, neo-brutalist, visual, checkbox]
