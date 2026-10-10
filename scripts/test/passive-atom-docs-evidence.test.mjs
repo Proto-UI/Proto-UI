@@ -92,15 +92,44 @@ function probe(markup) {
   return { ...suite, state: window.__passiveAtomEvidence };
 }
 
-test('collects all 64 bounded bilingual runtime cases without executing hooks', () => {
+test('collects the original 64 cases plus exactly 16 Bootstrap and Liquid Glass Text cases', () => {
   const { cases, hooks } = collect(new Window());
-  assert.equal(cases.length, 64);
+  assert.equal(cases.length, 80);
   assert.equal(hooks.length, 2);
   assert.equal(
     new Set(
       cases.map(({ value }) => `${value.locale}/${value.family}/${value.atom}/${value.runtime}`)
     ).size,
-    64
+    80
+  );
+  // Retain every existing family/atom/runtime/locale identity. Only the two
+  // already-public Text pages add cases; no prior case may be traded away.
+  const originalSubjects = [
+    ...['base', 'shadcn', 'brutalist'].map((family) => ({ family, atom: 'text' })),
+    ...['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'].map((family) => ({
+      family,
+      atom: 'surface',
+    })),
+  ];
+  const addedSubjects = ['bootstrap-2-3-2', 'liquid-glass'].map((family) => ({
+    family,
+    atom: 'text',
+  }));
+  const identities = (subjects) =>
+    subjects.flatMap(({ family, atom }) =>
+      ['en', 'zh-cn'].flatMap((locale) =>
+        ['wc', 'react', 'vue', 'vue2'].map((runtime) => `${locale}/${family}/${atom}/${runtime}`)
+      )
+    );
+  const original = identities(originalSubjects);
+  const added = identities(addedSubjects);
+  assert.equal(original.length, 64);
+  assert.equal(added.length, 16);
+  assert.deepEqual(
+    cases
+      .map(({ value }) => `${value.locale}/${value.family}/${value.atom}/${value.runtime}`)
+      .sort(),
+    [...original, ...added].sort()
   );
   assert.ok(cases.every(({ timeout }) => timeout === 90_000));
 });
