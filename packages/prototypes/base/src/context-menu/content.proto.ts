@@ -50,8 +50,8 @@ function setupContextMenuContent(
   });
   def.props.setDefaults({
     side: 'bottom',
-    align: 'center',
-    sideOffset: 4,
+    align: 'start',
+    sideOffset: 0,
     alignOffset: 0,
     avoidCollisions: true,
     collisionPadding: 0,
@@ -83,8 +83,8 @@ function setupContextMenuContent(
     restore: 'none',
     entry: 'manual',
     placement: 'bottom',
-    align: 'center',
-    sideOffset: 4,
+    align: 'start',
+    sideOffset: 0,
     alignOffset: 0,
     anchored: true,
     strategy: 'fixed',
@@ -223,7 +223,14 @@ function setupContextMenuContent(
     const wasOpen = open.get();
     const menuStillOwnsFocus =
       wasOpen && getNavigationEntries(run).some((entry: any) => entry.focused);
+    const inputAnchorChanged = currentContext?.inputAnchorVersion !== ctx.inputAnchorVersion;
     currentContext = ctx;
+    const readInputAnchor = run.anatomy
+      .partsOf(CONTEXT_MENU_FAMILY, 'root')[0]
+      ?.getExpose('__getInputAnchor');
+    overlay.registerInputAnchor(
+      ctx.open && !ctx.disabled && typeof readInputAnchor === 'function' ? readInputAnchor() : null
+    );
     contentId.set(
       createContextMenuContentId(ctx.rootId),
       'reason: contextMenu content identity sync'
@@ -231,7 +238,7 @@ function setupContextMenuContent(
     open.set(ctx.open, reason);
     if (ctx.open) {
       overlay.openOverlay(reason);
-      if (!wasOpen) {
+      if (!ctx.disabled && (!wasOpen || inputAnchorChanged)) {
         focusScope.activate({ reason: ctx.requestFocusReason ?? 'programmatic' });
         resolveOpenFocusAction(run, ctx);
       }
@@ -282,7 +289,7 @@ function setupContextMenuContent(
     const ctx = currentContext;
     if (!run || !ctx?.open) return;
     requestContextMenuOpen(run, false, 'escape', 'keyboard');
-    if (ctx.controlled) overlay.openOverlay('controlled.sync');
+    if (currentContext?.open) overlay.openOverlay('owner.sync');
   });
 
   def.event.onGlobal('key.down', (run, ev) => {
@@ -307,6 +314,7 @@ function setupContextMenuContent(
   def.lifecycle.onUnmounted(() => {
     store.run = null;
     currentContext = null;
+    overlay.registerInputAnchor(null);
   });
 
   def.rule({

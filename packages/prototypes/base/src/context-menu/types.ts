@@ -1,5 +1,6 @@
 import type {
   BorrowedStateHandle,
+  InputOriginAnchor,
   ExposeEvent,
   ExposeMethod,
   ExposeState,
@@ -24,6 +25,7 @@ export interface ContextMenuRootProps {
 }
 
 export type ContextMenuRootExposes = {
+  __getInputAnchor: ExposeMethod<() => InputOriginAnchor | null>;
   open: ExposeState<boolean>;
   openContextMenu: ExposeMethod<(reason?: string) => void>;
   close: ExposeMethod<(reason?: string) => void>;

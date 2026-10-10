@@ -1,4 +1,4 @@
-import { asAccessible } from '@proto.ui/hooks';
+import { asAccessible, asContextMenuInput } from '@proto.ui/hooks';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { setupContextMenuCommand } from './command';
 import {
@@ -32,10 +32,13 @@ function setupContextMenuTrigger(
   accessible.state('expanded', expanded);
   accessible.state('hasPopup', hasPopup);
   accessible.relation('controls', { target: controls });
-  accessible.action('activate', { event: 'click' });
+  const input = asContextMenuInput<ContextMenuTriggerProps>();
+  input.configure({ anatomy: CONTEXT_MENU_FAMILY, inputRole: 'trigger' });
 
   const sync = (run: any, ctx: ContextMenuContextValue) => {
-    command.syncDisabled(!!run.props.get().disabled || ctx.disabled);
+    const disabled = !!run.props.get().disabled || ctx.disabled;
+    command.syncDisabled(disabled);
+    input.sync({ disabled });
     expanded.set(ctx.open, 'reason: contextMenu trigger expanded sync');
     controls.set(
       createContextMenuContentId(ctx.rootId),
@@ -44,6 +47,7 @@ function setupContextMenuTrigger(
   };
   def.context.subscribe(CONTEXT_MENU_CONTEXT, (run, next) => sync(run, next));
   def.lifecycle.onCreated((run) => sync(run, run.context.read(CONTEXT_MENU_CONTEXT)));
+  def.lifecycle.onMounted((run) => sync(run, run.context.read(CONTEXT_MENU_CONTEXT)));
   def.props.watch(['disabled'], (run) => sync(run, run.context.read(CONTEXT_MENU_CONTEXT)));
 
   command.focused.watch((run, event) => {
@@ -53,19 +57,16 @@ function setupContextMenuTrigger(
     run.context.update(CONTEXT_MENU_CONTEXT, (prev) => ({ ...prev, activeValue: '' }));
   });
 
-  const openAtTarget = (run: any, event: any, reason: 'pointer' | 'keyboard') => {
-    if (command.disabled.get()) return;
-    event.control.requestDefaultActionPrevention({
-      reason: 'context-menu.open',
-      source: 'base-context-menu-trigger',
-    });
-    requestContextMenuOpen(run, true, 'context.menu', reason, 'first');
-  };
-  def.event.on('context.menu', (run, event) => openAtTarget(run, event, 'pointer'));
-  def.event.on('key.down', (run, event) => {
-    if (!command.focused.get()) return;
-    if (event.key === 'ContextMenu' || (event.key === 'F10' && event.shiftKey))
-      openAtTarget(run, event, 'keyboard');
+  input.on((run, intent) => {
+    if (command.disabled.get()) return false;
+    return requestContextMenuOpen(
+      run,
+      true,
+      intent.origin === 'long-press' ? 'long.press' : 'context.menu',
+      intent.origin === 'keyboard' ? 'keyboard' : 'pointer',
+      'first',
+      intent.anchor
+    );
   });
 }
 

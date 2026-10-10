@@ -1,4 +1,4 @@
-import { createAnatomyFamily, createContextKey } from '@proto.ui/core';
+import { createAnatomyFamily, createContextKey, type InputOriginAnchor } from '@proto.ui/core';
 import type { ContextMenuOpenEntry } from './types';
 
 export type ContextMenuFocusReason = 'programmatic' | 'keyboard' | 'pointer';
@@ -8,10 +8,12 @@ export type ContextMenuOpenRequest = Readonly<{
   reason: string;
   focusReason: ContextMenuFocusReason | null;
   entry?: 'first' | 'last' | null;
+  inputAnchor?: InputOriginAnchor | null;
 }>;
 
 export type ContextMenuContextValue = {
   rootId: string;
+  inputAnchorVersion: number;
   open: boolean;
   controlled: boolean;
   disabled: boolean;
@@ -40,7 +42,8 @@ export function requestContextMenuOpen(
   nextOpen: boolean,
   reason: string,
   focusReason: ContextMenuFocusReason | null,
-  entry: 'first' | 'last' | null = null
+  entry: 'first' | 'last' | null = null,
+  inputAnchor: InputOriginAnchor | null = null
 ): boolean {
   try {
     const root = run.anatomy.partsOf(CONTEXT_MENU_FAMILY, 'root')[0] ?? null;
@@ -53,6 +56,7 @@ export function requestContextMenuOpen(
         reason,
         focusReason,
         entry: nextOpen ? entry : null,
+        inputAnchor: nextOpen ? inputAnchor : null,
       }) ?? false
     );
   } catch (error) {

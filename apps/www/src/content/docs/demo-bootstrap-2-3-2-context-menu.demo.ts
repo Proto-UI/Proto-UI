@@ -12,7 +12,7 @@ export default {
           {
             'kind': 'proto',
             'prototypeId': 'bootstrap-2-3-2-context-menu-trigger',
-            'children': ['Right-click here, or focus and press Shift+F10.'],
+            'children': ['Right-click, hold with touch/pen, or focus and press Shift+F10.'],
           },
           {
             'kind': 'proto',
@@ -63,6 +63,11 @@ export default {
     ],
   },
   setup({ refs, api }) {
+    api.setProps('root', {
+      onOpenChange: (detail: { open: boolean; reason: string }) => {
+        if (detail.open) refs.status.textContent = `Context menu opened: ${detail.reason}`;
+      },
+    });
     for (const ref of ['copy', 'paste'])
       api.setProps(ref, {
         onSelect: (detail: { value: string }) => {

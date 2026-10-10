@@ -1,4 +1,9 @@
-import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
+import {
+  defineAsHook,
+  definePrototype,
+  type DefHandle,
+  type InputOriginAnchor,
+} from '@proto.ui/core';
 import { asCollection } from '@proto.ui/hooks';
 import { useOpenState } from '../tools';
 import {
@@ -43,6 +48,7 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
 
   const initialContext: ContextMenuContextValue = {
     rootId: '',
+    inputAnchorVersion: 0,
     open: false,
     controlled: false,
     disabled: false,
@@ -59,6 +65,7 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
 
   let submitRequest = (_run: any, _request: ContextMenuOpenRequest): boolean => false;
   const openState = useOpenState({
+    exposeOpenMethodKey: 'openContextMenu',
     requestOpen(run, nextOpen, reason) {
       submitRequest(run, {
         open: nextOpen,
@@ -73,6 +80,14 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
   let snapshot = initialContext;
   let published = initialContext;
   let currentRun: any = null;
+  let inputAnchor: InputOriginAnchor | null = null;
+  const replaceInputAnchor = (next: InputOriginAnchor | null) => {
+    if (inputAnchor === next) return;
+    inputAnchor = next;
+    snapshot = { ...snapshot, inputAnchorVersion: snapshot.inputAnchorVersion + 1 };
+  };
+  // Host-owned associations are not JSON context facts. Only their version is published.
+  def.expose.method('__getInputAnchor', () => inputAnchor);
 
   const syncContext = (run: any) => {
     const next = { ...snapshot, open: open?.get() ?? false };
@@ -89,6 +104,8 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
 
   submitRequest = (run, request) => {
     if (snapshot.disabled) return false;
+    if (request.open) replaceInputAnchor(request.inputAnchor ?? null);
+    else if (!snapshot.controlled) replaceInputAnchor(null);
     snapshot = {
       ...snapshot,
       activeValue: request.open || snapshot.controlled ? snapshot.activeValue : '',
@@ -134,11 +151,13 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
 
   def.lifecycle.onUnmounted(() => {
     currentRun = null;
+    inputAnchor = null;
   });
 
   def.props.watch(
     ['open', 'disabled', 'closeOnItemCommit', 'openEntry', 'openEntryValue'],
     (run, next) => {
+      if (next.disabled) replaceInputAnchor(null);
       snapshot = {
         ...snapshot,
         controlled: run.props.isProvided('open'),
@@ -153,7 +172,10 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
 
   open?.watch((run, event) => {
     if (event.type !== 'next') return;
-    if (!event.next) snapshot = { ...snapshot, activeValue: '', requestEntry: null };
+    if (!event.next) {
+      replaceInputAnchor(null);
+      snapshot = { ...snapshot, activeValue: '', requestEntry: null };
+    }
     syncContext(run);
   });
 }
