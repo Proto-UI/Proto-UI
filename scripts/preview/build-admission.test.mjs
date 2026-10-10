@@ -28,7 +28,7 @@ function build(id = 100, overrides = {}) {
 function artifact(run, binding = false, pr = 596, head = sha) {
   return {
     id: run.id * 10 + (binding ? 1 : 2),
-    name: `poppy-preview-${binding ? 'binding-' : ''}${pr}-${head}-${run.run_attempt}`,
+    name: `intranet-preview-${binding ? 'binding-' : ''}${pr}-${head}-${run.run_attempt}`,
     expired: false,
     size_in_bytes: binding ? 60 : 2048,
     workflow_run: {
@@ -67,7 +67,7 @@ function fixture(run = build()) {
       actions: {
         getWorkflowRun: async ({ run_id }) => response('run', state.runs.get(run_id)),
         getWorkflow: async () =>
-          response('workflow', { path: '.github/workflows/poppy-preview-build.yml' }),
+          response('workflow', { path: '.github/workflows/intranet-preview-build.yml' }),
         listWorkflowRunArtifacts: async ({ run_id, page, per_page }) => {
           const values = state.artifacts.get(run_id) || [];
           return response('artifacts', {
@@ -323,7 +323,7 @@ test('nonempty associations must identify this PR and its actual head repository
   assert.deepEqual(f.state.published, []);
 });
 
-test('failed GitHub lookups never authorize lifecycle or sticky-card mutations', async () => {
+test('failed GitHub lookups never authorize preview publication', async () => {
   for (const endpoint of ['pull', 'run', 'workflow', 'repository', 'artifacts', 'recency']) {
     const f = fixture();
     const expected = await f.resolve();

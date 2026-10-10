@@ -2158,8 +2158,8 @@ test('external success cannot substitute for trusted repository CI evidence', ()
     ...neutralRepositoryTest,
     name: 'Build docs preview',
     conclusion: 'SUCCESS',
-    workflowName: 'Poppy preview build',
-    workflowPath: '.github/workflows/poppy-preview-build.yml',
+    workflowName: 'Intranet preview build',
+    workflowPath: '.github/workflows/intranet-preview-build.yml',
   };
   assert.equal(
     summarizeLiveChecks([neutralRepositoryTest, unrelatedRepositorySuccess], options),

@@ -13,6 +13,8 @@
 | Release Cadence | `.github/workflows/release-cadence.yml` | 定期检查距最近 `v*` release 的时间并提醒维护者 |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR intake/reconciliation lane |
 | RepoSteward Portfolio Shadow Trial | `.github/workflows/reposteward-portfolio-shadow.yml` | 手动触发的只读外部 portfolio 实验 |
+| Intranet preview build | `.github/workflows/intranet-preview-build.yml` | 无部署 secret 的 exact-PR-head 文档 artifact 构建 |
+| Intranet preview checks | `.github/workflows/intranet-preview-checks.yml` | artifact 准入、发布与静态服务的 focused checks |
 
 ## CI 工作流（`ci.yml`）
 
@@ -39,19 +41,15 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 
 普通 Contributor Agent 使用 `internal/agent-operations/skills.yaml` 下的懒加载 skill registry，不属于定时 shadow workflow。`$pui-dev` 负责普通开发，`$pui-maintain` 负责独立的自治维护协议。三个 scheduled scope 都是 `pending-runtime-identity`，在绑定 Poppy broker-verified workload identity 前只能进行只读观察与 reconciliation，不能提交 review 或集成 PR；有人协作时的 review 或 integration 需要 current-user 的明确授权，未来 standing scope 激活后仍必须匹配授权、可信证据、fresh canonical input、实时 credential 权限，并与 review state 和仓库规则一致。人类决策只保留给未决产品方向和特权或不可逆操作；扩大本工作流自身 token、变更访问或 secrets、publication 与 release 均属于这一边界。
 
-## 私有贡献者预览工作流（`poppy-preview-*.yml`）
+## 内网贡献者预览工作流
 
-五条 workflow 共同实现 Poppy/Cloudflare 私有预览边界：
+`intranet-preview-build.yml` 在 PR 变化或 exact-head 手动构建时运行。它仅有 `contents: read`，使用一次性的 hosted builder，不接收部署 secrets。执行贡献者 checkout 前先上传 Actions identity marker，随后上传 canonical 文档 ZIP；两份 artifact 都保留三天。
 
-| Workflow | 触发 | 权限 / 外部边界 |
-| --- | --- | --- |
-| `poppy-preview-build.yml` | `pull_request` 与受信 bootstrap 的 `workflow_dispatch` | `contents: read`，无仓库或外部部署 secrets；构建 exact PR head，上传不受信 artifact 与 Actions 控制的 head binding。 |
-| `poppy-preview-bootstrap.yml` | trusted default-branch 安装/更新（仅 `push`） | `actions: write`、`contents: write`、`pull-requests: read`；枚举 live PR、调度 secret-free exact-head build，再发出 `poppy_preview_build_completed` repository-dispatch。 |
-| `poppy-preview-deploy.yml` | build 完成的 `workflow_run` 或 `poppy_preview_build_completed` `repository_dispatch` | 由平台选择 default-branch code，`actions: read`、`contents: read`、`pull-requests: write`；无 manual dispatch entry；复核 live PR/head/workflow/artifact，随后进入独立开关控制的 Cloudflare 路径，或向已配置的 dcbot fallback 发送有界 regular-file archive。两条路径都保留 exact lifecycle 与 sticky-comment 失败处理，且不执行贡献者代码。 |
-| `poppy-preview-close.yml` | `pull_request_target: closed` | trusted default-branch cleanup，`contents: read`、`pull-requests: write`；仅在 mutation 开启时删除每 PR Cloudflare project，并始终要求向所选 Poppy/dcbot control plane 的 Closed 撤销成功。 |
-| `poppy-preview-security.yml` | preview workflow/integration 在 PR（`pull_request` 加 trusted `pull_request_target`）或 `main` 变化 | secret-free 的 `pull_request` lane 运行 sanitizer/Worker/lifecycle/browser focused tests、固定 checksum 的 actionlint 与 installed/template workflow byte-for-byte lockstep，且不接触私有 handler 仓库；trusted `pull_request_target` lane 从不可变的 default-branch workflow 定义运行，要求 `DCBOT_CONTRACT_TOKEN`，只 checkout 固定的 `Proto-UI/dcbot@3f60a2b41832a0b02e64a0f4b8bf237355b59806` revision 及作为惰性数据的 exact-head contract JSON，用 trusted inline code 核对固定源码 digest，运行真实 preview handler 测试，并将其 check 绑定到 exact PR head；同样的 fail-closed 固定核对也在 `main` push 上运行。无法拉取或测试固定 revision 在两条 trusted lane 中都是 blocking。它是仓库 CI 证据，但**当前不是平台 required status check**。 |
+`intranet-preview-checks.yml` 在 PR 或 `main` 的 preview 文件变化时运行 native Node 准入、解压、sanitation、发布与静态服务 focused suite。两条 workflow 都不部署 Poppy、不调用 Cloudflare、不写 PR 评论，也不在持久 publisher 上执行贡献者代码。
 
-贡献者 artifact 永不获得 Cloudflare/Poppy secrets。Deploy/cleanup 只执行 trusted repository code，并调用私有外部 control-plane API；exact endpoint、tuple binding、fallback receiver limits、failure convergence、access policy 与 post-merge E2E 要求记录在 `integrations/proto-ui-preview/README.md`。仓库内的 fallback 实现与 contract 测试不会设置 repository variable、部署 dcbot，也不构成 production rollout 证据。合并前绿色检查不能端到端证明 default-branch `workflow_run`、bootstrap、live OAuth identities、外部 revision/configuration、failure convergence 或 close cleanup；这些仍是 post-merge production acceptance gates。
+唯一 publisher 是单独配置的受信内网进程。它下载 hostile artifact，复核 live PR/head/run/attempt 及 supersession，再将普通、不可执行文件发布到独立 generation origin。静态 server 没有 credential 或 control API。内网受众替代已经退役的 per-author/reviewer OAuth 策略；polling 与五分钟 catalog lease 提供有界收敛，不承诺即时撤销。配置、安全上限与运行验收见 `scripts/preview/README.md`。
+
+旧 Poppy workflows、Pages provider、dcbot fallback 和重复 integration templates 已从源码移除。平台 workflow 注册、preview-only credentials、Pages resources 与已部署 bot/edge callbacks 的退役仍需 live 证据；删除源码和绿色测试不能证明外部清理或新的 hosted-build 到内网链路已经完成。
 
 ## 发布工作流（`release-packages.yml`）
 

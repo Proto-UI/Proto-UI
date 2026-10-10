@@ -1,23 +1,18 @@
-#!/usr/bin/env node
-
 // Bounded download and extraction for one verified GitHub Actions artifact.
 //
 // The artifact bytes are always treated as hostile. The compressed stream is
 // capped while it is downloaded, and every ZIP entry is validated from the
 // central directory - before a single uncompressed byte is materialized -
-// against the pinned dcbot fallback envelope. Only after this bounded
-// extraction does the fallback sanitizer re-check the resulting tree.
+// against the preview byte/file envelope. Only after this bounded
+// extraction does the regular-file sanitizer re-check the resulting tree.
 
 import { chmod, mkdir, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import process from 'node:process';
-import { fileURLToPath } from 'node:url';
 import { inflateRawSync } from 'node:zlib';
 
-import { FALLBACK_LIMITS } from './prepare-fallback-artifact.mjs';
+import { PREVIEW_LIMITS } from './sanitize-tree.mjs';
 
-// Local filesystem-materialization budgets supplement the receiver's byte/file
-// envelope. They do not change the pinned wire contract.
+// Local filesystem-materialization budgets supplement the preview byte/file envelope.
 export const ZIP_PATH_LIMITS = Object.freeze({
   maxPathDepth: 64,
   maxPathBytes: 1024,
@@ -59,7 +54,7 @@ export async function downloadVerifiedArtifact({
   artifactId,
   runId,
   fetchImpl = fetch,
-  maxCompressedBytes = FALLBACK_LIMITS.maxCompressedBytes,
+  maxCompressedBytes = PREVIEW_LIMITS.maxCompressedBytes,
 }) {
   if (!token) fail('GitHub workflow identity is unavailable');
   const [owner, repo] = (repository || '').split('/');
@@ -138,8 +133,8 @@ function findEndOfCentralDirectory(bytes) {
   fail('artifact archive has no end of central directory');
 }
 
-export function listBoundedEntries(bytes, limits = FALLBACK_LIMITS) {
-  limits = { ...FALLBACK_LIMITS, ...ZIP_PATH_LIMITS, ...limits };
+export function listBoundedEntries(bytes, limits = PREVIEW_LIMITS) {
+  limits = { ...PREVIEW_LIMITS, ...ZIP_PATH_LIMITS, ...limits };
   for (const [name, value] of Object.entries(limits)) {
     if (!Number.isSafeInteger(value) || value < 1) fail(`invalid extraction limit ${name}`);
   }
@@ -220,7 +215,7 @@ export function listBoundedEntries(bytes, limits = FALLBACK_LIMITS) {
   return entries;
 }
 
-export function extractBoundedZip(bytes, limits = FALLBACK_LIMITS) {
+export function extractBoundedZip(bytes, limits = PREVIEW_LIMITS) {
   const entries = listBoundedEntries(bytes, limits);
   const files = new Map();
   for (const entry of entries) {
@@ -253,7 +248,7 @@ export function extractBoundedZip(bytes, limits = FALLBACK_LIMITS) {
   return files;
 }
 
-export async function materializeBoundedZip(bytes, targetDirectory, limits = FALLBACK_LIMITS) {
+export async function materializeBoundedZip(bytes, targetDirectory, limits = PREVIEW_LIMITS) {
   const files = extractBoundedZip(bytes, limits);
   const root = path.resolve(targetDirectory);
   await rm(root, { recursive: true, force: true });
@@ -269,25 +264,4 @@ export async function materializeBoundedZip(bytes, targetDirectory, limits = FAL
     await chmod(target, 0o640);
   }
   return { files: names.length };
-}
-
-async function main() {
-  const artifactId = Number(process.env.PREVIEW_ARTIFACT_ID);
-  const runId = Number(process.env.PREVIEW_RUN_ID);
-  const targetDirectory = process.env.PREVIEW_ARTIFACT_DIR || '';
-  if (!targetDirectory || path.isAbsolute(targetDirectory) || targetDirectory.includes('..')) {
-    fail('PREVIEW_ARTIFACT_DIR must be a workspace-relative directory');
-  }
-  const bytes = await downloadVerifiedArtifact({
-    token: process.env.GITHUB_TOKEN || '',
-    repository: process.env.GITHUB_REPOSITORY || '',
-    artifactId,
-    runId,
-  });
-  const { files } = await materializeBoundedZip(bytes, targetDirectory);
-  console.log(`Bound-extracted ${files} fallback files (${bytes.length} compressed bytes).`);
-}
-
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  await main();
 }
