@@ -10,24 +10,16 @@ export default definePrototype<AccordionTriggerProps, AccordionTriggerExposes>({
     const state = asAccordionTrigger().stateHandles!;
     def.feedback.style.use(
       tw(
-        'flex w-full min-w-0 items-center justify-between gap-4 p-4 text-start text-base font-bold leading-relaxed whitespace-normal break-words cursor-pointer select-none outline-none'
+        'flex w-full min-w-0 items-center justify-between gap-4 p-4 text-start text-base font-heading font-bold bg-main text-main-foreground border-border leading-relaxed whitespace-normal break-words cursor-pointer select-none outline-none'
       )
     );
     def.rule({
-      when: (w) => w.state(state.hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-secondary')),
-    });
-    def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('outline-2 outline-offset-2 outline-ring')),
-    });
-    def.rule({
-      when: (w) => w.state(state.pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+      intent: (i) => i.feedback.style.use(tw('ring-3 ring-ring')),
     });
     def.rule({
       when: (w) => w.state(state.expanded).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-secondary')),
+      intent: (i) => i.feedback.style.use(tw('border-b-2')),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
@@ -48,19 +40,23 @@ export default definePrototype<AccordionTriggerProps, AccordionTriggerExposes>({
     });
     return (r) => [
       r.slot(),
-      r.svg.root(
-        {
-          viewBox: '0 0 24 24',
-          width: '16',
-          height: '16',
-          'aria-hidden': 'true',
-          fill: 'none',
-          stroke: 'currentColor',
-          strokeWidth: 2,
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-        },
-        r.svg.path({ d: state.expanded.get() ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6' })
+      r.el(
+        'span',
+        { style: tw('pointer-events-none flex shrink-0 items-center') },
+        r.svg.root(
+          {
+            viewBox: '0 0 24 24',
+            width: '20',
+            height: '20',
+            'aria-hidden': 'true',
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeWidth: 2,
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+          },
+          r.svg.path({ d: state.expanded.get() ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6' })
+        )
       ),
     ];
   },

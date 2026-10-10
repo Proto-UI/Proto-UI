@@ -32,6 +32,7 @@ dependsOn:
 verifies:
   tests:
     - T-BASE-ACCORDION-0001
+    - T-ACCORDION-RECIPES-0001
 sources:
   - path: packages/prototypes/bootstrap-2-3-2/src/accordion/trigger.proto.ts
   - path: packages/prototypes/bootstrap-2-3-2/src/accordion/index.ts

@@ -48,19 +48,23 @@ export default definePrototype<AccordionTriggerProps, AccordionTriggerExposes>({
     });
     return (r) => [
       r.slot(),
-      r.svg.root(
-        {
-          viewBox: '0 0 24 24',
-          width: '16',
-          height: '16',
-          'aria-hidden': 'true',
-          fill: 'none',
-          stroke: 'currentColor',
-          strokeWidth: 2,
-          strokeLinecap: 'round',
-          strokeLinejoin: 'round',
-        },
-        r.svg.path({ d: state.expanded.get() ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6' })
+      r.el(
+        'span',
+        { style: tw('pointer-events-none flex shrink-0 items-center') },
+        r.svg.root(
+          {
+            viewBox: '0 0 24 24',
+            width: '16',
+            height: '16',
+            'aria-hidden': 'true',
+            fill: 'none',
+            stroke: 'currentColor',
+            strokeWidth: 2,
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+          },
+          r.svg.path({ d: state.expanded.get() ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6' })
+        )
       ),
     ];
   },

@@ -9,7 +9,7 @@ export default definePrototype<AccordionContentProps, AccordionContentExposes>({
   setup(def) {
     asAccordionContent();
     def.feedback.style.use(
-      tw('block min-w-0 pb-4 text-sm leading-relaxed break-words overflow-x-auto')
+      tw('block min-w-0 pb-2.5 text-sm leading-relaxed break-words overflow-x-auto')
     );
   },
 });

@@ -384,6 +384,22 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           runtime: 'react',
           state: 'long-label-320-text200',
         });
+        if (family !== 'base') {
+          const chevron = await button.locator('svg').evaluate((el) => {
+            const bounds = el.getBoundingClientRect();
+            const frame = el.parentElement!;
+            return {
+              width: bounds.width,
+              height: bounds.height,
+              shrink: getComputedStyle(frame).flexShrink,
+              pointerEvents: getComputedStyle(frame).pointerEvents,
+            };
+          });
+          expect(chevron.width).toBeCloseTo(family === 'brutalist' ? 20 : 16, 1);
+          expect(chevron.height).toBeCloseTo(family === 'brutalist' ? 20 : 16, 1);
+          expect(chevron.shrink).toBe('0');
+          expect(chevron.pointerEvents).toBe('none');
+        }
         expect(await button.evaluate((el) => el.scrollHeight <= el.clientHeight + 1)).toBe(true);
         const layout = await observeLayout(page);
         expect(layout.pageOverflow, JSON.stringify(layout.overflowing)).toBeLessThanOrEqual(1);

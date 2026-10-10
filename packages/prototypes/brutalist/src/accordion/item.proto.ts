@@ -10,7 +10,7 @@ export default definePrototype<AccordionItemProps, AccordionItemExposes>({
     asAccordionItem();
     def.feedback.style.use(
       tw(
-        'block min-w-0 border-2 border-border bg-background shadow-[4px_4px_0_0_var(--pui-foreground)]'
+        'block min-w-0 rounded-base overflow-hidden border-2 border-border bg-background shadow-[4px_4px_0_0_#000]'
       )
     );
   },
