@@ -50,3 +50,18 @@ it('documents the six public examples using original prototypes without painted 
     'Source-derived geometry and state assertions, not a same-state upstream pixel diff.'
   );
 });
+
+it('adds page error context without weakening native failure checks or input pacing', () => {
+  expect(source).toContain('appendSliderPageError(errors, pageErrorDetails, error,');
+  expect(source).toContain('url: page.url()');
+  expect(source).toContain("interaction('runtime-switch', runtime)");
+  expect(source).toContain(
+    "interaction('corner-pointer-down', 'horizontal-thumb', JSON.stringify(point))"
+  );
+  expect(source).toContain('pageErrorDetails,');
+  expect(source).toContain('expect(errors).toEqual([])');
+  expect(source).toContain("expect((await geometry(thumb)).outlineStyle).toBe('none')");
+  expect(source).toContain("expect.poll(() => thumb.getAttribute('data-hovered')).not.toBeNull()");
+  expect(source).toContain("expect.poll(() => thumb.getAttribute('data-pressed')).not.toBeNull()");
+  expect(source).not.toContain('waitForTimeout(');
+});
