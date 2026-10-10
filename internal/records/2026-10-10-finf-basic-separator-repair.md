@@ -1,6 +1,10 @@
 # Finf Brutalist Separator contentless repair
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot
+
+ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+
+This role declaration is not authenticated model identity, permission, independent review, or acceptance.
 
 ## Scope and authority
 

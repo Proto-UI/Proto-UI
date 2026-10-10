@@ -125,8 +125,9 @@ describe('prototypes/brutalist: checkbox', () => {
       'checkboxGroupItem',
       'checkboxGroupRoot',
     ]);
+    const packageValues = new Map(Object.entries(BrutalistPackage));
     for (const [name, value] of Object.entries({ ...CheckboxEntry, ...CheckboxGroupEntry })) {
-      expect(BrutalistPackage[name as keyof typeof BrutalistPackage]).toBe(value);
+      expect(packageValues.get(name)).toBe(value);
     }
     expectTypeOf<HasUnsupportedRootApi>().toEqualTypeOf<false>();
   });

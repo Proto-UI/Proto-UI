@@ -1,6 +1,10 @@
 # Finf Brutalist Checkbox export-test reconciliation
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot
+
+ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+
+This role declaration is not authenticated model identity, permission, independent review, or acceptance.
 
 ## Diagnosis
 
@@ -20,3 +24,7 @@ Node 24.19.0, pnpm 10.32.1, Vitest 2.1.9, one worker, 2026-10-10 10:02 UTC:
 - Corrected test: 7 passed, including all three unexpected-export controls.
 - Actual package-entry mutation: 6 passed / 1 failed for the unexpected alias.
 - Source-entry runtime tests do not establish packed-package, trusted CI, full delivery or public publication success. No visual implementation changed in this slice.
+
+## Type-check follow-up
+
+A workspace check found TS7053 in the new namespace-key assertion: type-only exports also appear in `keyof typeof` and are not runtime keys. The identity assertion now uses `new Map(Object.entries(BrutalistPackage)).get(name)`, preserving the same exact runtime check without a type assertion. After linking the already-installed declared Floating UI dependency and generating this worktree's website style artifacts, `check:types:workspace` completed successfully. No dependency manifest or lockfile changed.
