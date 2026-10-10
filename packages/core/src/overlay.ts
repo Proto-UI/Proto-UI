@@ -126,6 +126,8 @@ export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
 
   registerTrigger(target: unknown): void;
   registerAnchor(target: unknown): void;
+  /** Position only; existing anatomy still owns dismissal and focus restoration. */
+  registerInputAnchor(anchor: import('./context-menu-input').InputOriginAnchor | null): void;
   registerAnchorPart(part: AnatomyPartView): void;
   registerContent(target: unknown): void;
   getPositionSnapshot(): AnchoredPositionSnapshot | null;

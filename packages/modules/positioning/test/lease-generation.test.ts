@@ -1,3 +1,4 @@
+import { createWebInputOriginAnchor } from '../src/web/input-origin-anchor';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AnchoredPositionConfig } from '@proto.ui/core';
 import { createFloatingUiAnchoredPositionHost } from '../src';
@@ -119,4 +120,31 @@ describe('Positioning lease generation', () => {
     lease.dispose();
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
+});
+
+it('revoked input anchors cancel observation and cannot publish delayed geometry or size', async () => {
+  const element = document.createElement('button'),
+    floating = document.createElement('div');
+  document.body.append(element, floating);
+  const anchor = createWebInputOriginAnchor(element, { x: 20, y: 30 });
+  const resolved = vi.fn();
+  const lease = createFloatingUiAnchoredPositionHost().attach({
+    anchor: anchor.anchor,
+    floating,
+    config,
+    onResolved: resolved,
+  });
+  anchor.dispose();
+  expect(cleanup).toHaveBeenCalledOnce();
+  pending[0].applySize();
+  pending[0].finish(40);
+  await Promise.resolve();
+  expect(floating.style.left).toBe('');
+  expect(floating.style.getPropertyValue('--proto-ui-anchor-width')).toBe('');
+  expect(resolved).not.toHaveBeenCalled();
+  lease.requestUpdate();
+  expect(pending).toHaveLength(1);
+  lease.dispose();
+  element.remove();
+  floating.remove();
 });

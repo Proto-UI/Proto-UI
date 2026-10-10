@@ -143,6 +143,7 @@ export class OverlayModuleImpl extends ModuleBase {
   private reconcilingView = false;
   private reconcileViewAgain = false;
   private anchorPart: AnatomyPartView | null = null;
+  private inputAnchor: import('@proto.ui/core').InputOriginAnchor | null = null;
   private layerLease: HostResourceLease | null = null;
   private modalLease: HostResourceLease | null = null;
   private readonly boundaryDisposers: Record<
@@ -721,7 +722,7 @@ export class OverlayModuleImpl extends ModuleBase {
       this.anchoredPosition.disconnect();
       return;
     }
-    const anchor = this.resolveAnchorTarget();
+    const anchor = this.inputAnchor ?? this.resolveAnchorTarget();
     if (!current()) return;
     const floating = availableTarget;
     if (!anchor || !floating) {
@@ -756,6 +757,12 @@ export class OverlayModuleImpl extends ModuleBase {
     if (this.viewActive) this.reconcileViewResourcesAfterCallback();
   }
 
+  registerInputAnchor(anchor: import('@proto.ui/core').InputOriginAnchor | null): void {
+    if (this.inputAnchor === anchor) return;
+    this.inputAnchor = anchor;
+    if (this.viewActive) this.reconcileViewResourcesAfterCallback();
+  }
+
   registerAnchorPart(part: AnatomyPartView): void {
     this.anchorPart = part;
     this.syncAnchorPartRegistration();
@@ -779,6 +786,7 @@ export class OverlayModuleImpl extends ModuleBase {
     updatePosition: (patch: OverlayPositionPatch) => this.updatePosition(patch),
     registerTrigger: (target: unknown) => this.registerTrigger(target),
     registerAnchor: (target: unknown) => this.registerAnchor(target),
+    registerInputAnchor: (anchor) => this.registerInputAnchor(anchor),
     registerAnchorPart: (part: AnatomyPartView) => this.registerAnchorPart(part),
     registerContent: (target: unknown) => this.registerContent(target),
     getPositionSnapshot: () => this.getPositionSnapshot(),

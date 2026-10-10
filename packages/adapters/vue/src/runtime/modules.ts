@@ -84,6 +84,9 @@ import {
   type OverlayLayerScheduler,
 } from '@proto.ui/module-overlay';
 import {
+  CONTEXT_MENU_INPUT_HOST_CAP,
+  CONTEXT_MENU_INPUT_RUN_IN_CALLBACK_CAP,
+  createWebContextMenuInputHost,
   AVAILABLE_SPACE_HOST_CAP,
   createWebAvailableSpaceHost,
   ANCHORED_POSITION_HOST_CAP,
@@ -505,6 +508,8 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     ])
     .use('positioning', [
       [ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()],
+      [CONTEXT_MENU_INPUT_HOST_CAP, createWebContextMenuInputHost()],
+      [CONTEXT_MENU_INPUT_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
       [AVAILABLE_SPACE_HOST_CAP, createWebAvailableSpaceHost()],
     ])
     .use('axis-input', [

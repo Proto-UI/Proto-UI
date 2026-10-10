@@ -18,3 +18,5 @@ export * from './collection/use-collection-item';
 
 export { asControlLabel } from './as-control-label';
 export * from './as-axis-input';
+
+export * from './as-context-menu-input';

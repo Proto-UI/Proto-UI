@@ -1,3 +1,4 @@
+import { createWebInputOriginAnchor } from '../src/web/input-origin-anchor';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { AnchoredPositionConfig } from '@proto.ui/core';
 import { createFloatingUiAnchoredPositionHost } from '../src';
@@ -246,4 +247,31 @@ it('updates a same-size anchor when only root space changes and releases that ob
     if (oldWidth) Object.defineProperty(root, 'clientWidth', oldWidth);
     else Reflect.deleteProperty(root, 'clientWidth');
   }
+});
+
+it('positions an opaque pointer origin and switches back to element geometry without changing Portal policy', async () => {
+  const trigger = document.createElement('button'),
+    floating = document.createElement('div');
+  document.body.append(trigger, floating);
+  setRect(trigger, rect(100, 100, 50, 20));
+  setRect(floating, rect(0, 0, 40, 10));
+  const point = createWebInputOriginAnchor(trigger, { x: 170, y: 210 });
+  const lease = createFloatingUiAnchoredPositionHost().attach({
+    anchor: point.anchor,
+    floating,
+    config: baseConfig,
+  });
+  await flush();
+  expect(floating.style.left).toBe('170px');
+  expect(floating.style.top).toBe('214px');
+  expect(floating.style.getPropertyValue('--proto-ui-anchor-width')).toBe('0px');
+  expect(floating.style.transform).toBe('');
+  point.dispose();
+  const keyboard = createWebInputOriginAnchor(trigger);
+  lease.update({ anchor: keyboard.anchor, floating, config: baseConfig });
+  await flush();
+  expect(floating.style.left).toBe('100px');
+  expect(floating.style.top).toBe('124px');
+  lease.dispose();
+  keyboard.dispose();
 });

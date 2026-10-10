@@ -29,3 +29,24 @@ export interface AvailableSpaceHost {
 export const AVAILABLE_SPACE_HOST_CAP = cap<AvailableSpaceHost>(
   '@proto.ui/positioning/availableSpaceHost'
 );
+
+export type ContextMenuInputHostBinding = Readonly<{
+  target: unknown;
+  disabled: boolean;
+  onIntent(intent: import('@proto.ui/core').ContextMenuInputIntent): boolean;
+  /** Runtime-owned cancellable delay; the host must cancel on every terminal path. */
+  scheduleDelay(durationMs: number, callback: () => void): import('@proto.ui/core').DelayTask;
+}>;
+export interface ContextMenuInputHostLease {
+  update(config: Readonly<{ disabled: boolean }>): void;
+  dispose(): void;
+}
+export interface ContextMenuInputHost {
+  attach(binding: ContextMenuInputHostBinding): ContextMenuInputHostLease;
+}
+export const CONTEXT_MENU_INPUT_HOST_CAP = cap<ContextMenuInputHost>(
+  '@proto.ui/positioning/contextMenuInputHost'
+);
+export const CONTEXT_MENU_INPUT_RUN_IN_CALLBACK_CAP = cap<(callback: () => void) => void>(
+  '@proto.ui/positioning/contextMenuInputCallback'
+);
