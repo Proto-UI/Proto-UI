@@ -53,3 +53,13 @@ ModelTrace: not measured. dot's model trace exemption is owner-authorized; sourc
 Focused combined run: 177 tests, 171 passed and 6 failed. Five failures are the unchanged old state-selector assertions described above; the sixth is the baseline Dropdown recipe closure missing Group/Label/Shortcut/Separator. The new runtime helper (8), controlled projection gates (4), real adapter shell and switching (40, including 16 new projected and 4 generic switching cases), complete four-family CSS (4), and physical mapping controls (2) all passed. The pre/post comparison file adds 3 passing bounded checks, including the explicit environment characterization. Scoped UI/family/test TypeScript check passed. Logs were kept with the task evidence; no full CI/native result claimed.
 
 Shared registration replay must compare the destination's actual head before applying: primary was observed at 342955e238e6a632dbc010b70aa59d1a373ce440 after this worktree diverged. Global generators, navigation and admission stay with the release owner.
+
+## Independent review follow-up: composition-owned focus
+
+The exact reviewed head `6d2d983f` had **179 tests: 173 passing, 6 failing**. Five failures asserted the previous selected-state selector representation; one pre-existing Dropdown demo closure failure belongs to the frozen source's missing Group/Label/Shortcut/Separator registry. Neither is a historical allowance for new defects.
+
+The materializer still searched for a combobox after Runtime became real Tabs. It now holds a private focus lease for each exact materialized composition and calls its existing `restoreFocus` protocol. Owner identity, exact active generation, lock/inert, candidate disposal, origin ownership and newer focus before the animation frame all remain guards. Teardown revokes the lease before asynchronous cleanup. No Focus, Runtime, session or Delay core was changed.
+
+Evidence: 7 materializer tests and 8 added real-framework keyboard/interruption tests pass (WC/React/Vue/Vue2). Arrow/Home/End in manual mode only move focus; Enter and Space each request one real runtime switch and restore the newly selected Trigger. External focus, newer-focus-before-frame, locked/staging/changed-owner hosts, stale DOM callbacks, rapid requests and destruction suppress inappropriate restoration.
+
+**Release blocker:** all three committed preset generators were stale at review. The integration owner must run the proper generators and test a real packed consumer **before further integration/push**. Source-collected CSS tests do not satisfy this gate. The following source/test work remains WIP until that resource proof, exact-commit official native screenshots and independent review exist.
