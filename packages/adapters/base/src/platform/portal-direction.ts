@@ -7,7 +7,8 @@ export function retainWebPortalDirection(
   target: HTMLElement,
   getOrigin: () => Node | null
 ): () => void {
-  const Mutation = target.ownerDocument.defaultView?.MutationObserver;
+  const view = target.ownerDocument.defaultView;
+  const Mutation = view?.MutationObserver;
   let released = false;
   let authored = target.getAttribute('dir');
   let projected: string | null = null;
@@ -73,11 +74,16 @@ export function retainWebPortalDirection(
   }
 
   observeAuthor();
+  // Viewport media queries can change computed direction without any observed
+  // DOM mutation. This event-driven lease does not observe arbitrary CSSOM,
+  // non-viewport media/preference or container-query invalidation.
+  view?.addEventListener('resize', sync);
   sync();
   return () => {
     if (released) return;
     drainAuthor();
     released = true;
+    view?.removeEventListener('resize', sync);
     authorObserver?.disconnect();
     sourceObserver?.disconnect();
     if (projected !== null && target.getAttribute('dir') === projected) {

@@ -12,6 +12,7 @@ beforeAll(() => {
 
 const settle = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 afterEach(() => {
+  vi.restoreAllMocks();
   document.body.replaceChildren();
   document.body.removeAttribute('dir');
 });
@@ -28,6 +29,94 @@ function fixture() {
 }
 
 describe('Web portal direction projection lease', () => {
+  // happy-dom does not invalidate its computed-style cache on viewport changes.
+  // Control only that host read here; native @media assertions live in
+  // overlay-portal-direction.browser.test.ts and require a real browser run.
+  function responsiveFixture() {
+    const { origin, target } = fixture();
+    let direction = 'ltr';
+    const computed = window.getComputedStyle.bind(window);
+    const read = vi
+      .spyOn(window, 'getComputedStyle')
+      .mockImplementation((element) =>
+        element === origin ? ({ direction } as CSSStyleDeclaration) : computed(element)
+      );
+    return {
+      origin,
+      target,
+      read,
+      resize(next: string) {
+        direction = next;
+        window.dispatchEvent(new Event('resize'));
+      },
+    };
+  }
+
+  it('refreshes on viewport resize without ancestor mutations and avoids duplicate writes', async () => {
+    const { origin, target, resize } = responsiveFixture();
+    const write = vi.spyOn(target, 'setAttribute');
+    const release = retainWebPortalDirection(target, () => origin);
+    try {
+      await settle();
+      expect(target.dir).toBe('ltr');
+      resize('rtl');
+      expect(target.dir).toBe('rtl');
+      resize('rtl');
+      expect(write).toHaveBeenCalledTimes(2);
+      resize('ltr');
+      expect(target.dir).toBe('ltr');
+      expect(write).toHaveBeenCalledTimes(3);
+    } finally {
+      release();
+    }
+  });
+
+  it.each(['ltr', 'rtl', 'auto'])('keeps author %s through viewport changes', (dir) => {
+    const { origin, target, resize } = responsiveFixture();
+    target.setAttribute('dir', dir);
+    const release = retainWebPortalDirection(target, () => origin);
+    try {
+      resize('rtl');
+      resize('ltr');
+      expect(target.getAttribute('dir')).toBe(dir);
+    } finally {
+      release();
+    }
+    expect(target.getAttribute('dir')).toBe(dir);
+  });
+
+  it('drains pending author ownership before resize and preserves it on release', () => {
+    const { origin, target, resize } = responsiveFixture();
+    const release = retainWebPortalDirection(target, () => origin);
+    try {
+      target.dir = 'ltr'; // Same-valued author write before observer delivery.
+      resize('rtl');
+      expect(target.dir).toBe('ltr');
+    } finally {
+      release();
+    }
+    expect(target.dir).toBe('ltr');
+  });
+
+  it('removes the viewport listener and cannot write after release', () => {
+    const { origin, target, resize, read } = responsiveFixture();
+    target.setAttribute('dir', '');
+    const add = vi.spyOn(window, 'addEventListener');
+    const remove = vi.spyOn(window, 'removeEventListener');
+    const release = retainWebPortalDirection(target, () => origin);
+    const listener = add.mock.calls.find(([type]) => type === 'resize')?.[1];
+    release();
+    release();
+    expect(listener).toEqual(expect.any(Function));
+    expect(remove).toHaveBeenCalledWith('resize', listener);
+    expect(target.getAttribute('dir')).toBe('');
+    read.mockClear();
+    resize('rtl');
+    (listener as EventListener)(new Event('resize'));
+    expect(read).not.toHaveBeenCalled();
+    expect(target.getAttribute('dir')).toBe('');
+  });
+
   it('inherits actual author ancestry, updates both ways and releases only owned dir', async () => {
     const { owner, origin, target } = fixture();
     const release = retainWebPortalDirection(target, () => origin);

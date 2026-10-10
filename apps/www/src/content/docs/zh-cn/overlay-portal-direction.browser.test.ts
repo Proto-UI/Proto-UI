@@ -122,6 +122,37 @@ for (const runtime of RUNTIMES) {
           `${runtime}-${bodyDirection}-matching-control`
         );
         const opposite = bodyDirection === 'ltr' ? 'rtl' : 'ltr';
+        const responsiveStyle = await page.addStyleTag({
+          content: `
+            [data-home-settings] { direction: ${bodyDirection}; }
+            @media (max-width: 1100px) {
+              [data-home-settings] { direction: ${opposite}; }
+            }
+          `,
+        });
+        // The test injects only viewport changes between these samples, never
+        // class, style or dir mutations on the observed author ancestry.
+        await page.setViewportSize({ width: 1000, height: 1000 });
+        const responsive = await sample(
+          page,
+          anchor,
+          popup,
+          `${runtime}-${bodyDirection}-responsive-narrow`
+        );
+        expect(responsive.authorDirection).toBe(opposite);
+        expect(responsive.popupDirection).toBe(opposite);
+        expect(responsive.popupDirAttribute).toBe(opposite);
+        await page.setViewportSize({ width: 1440, height: 1000 });
+        const responsiveRestored = await sample(
+          page,
+          anchor,
+          popup,
+          `${runtime}-${bodyDirection}-responsive-wide`
+        );
+        expect(responsiveRestored.authorDirection).toBe(bodyDirection);
+        expect(responsiveRestored.popupDirection).toBe(bodyDirection);
+        expect(responsiveRestored.popupDirAttribute).toBe(bodyDirection);
+        await responsiveStyle.evaluate((element) => element.remove());
         await author.evaluate(
           (element, direction) => element.setAttribute('dir', direction),
           opposite
