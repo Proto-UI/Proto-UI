@@ -32,7 +32,14 @@ function setup(def: DefHandle<SliderPartProps>) {
       const focus = run.anatomy.partsOf(SLIDER_FAMILY, 'thumb')[0]?.getExpose('focusSelf');
       if (typeof focus === 'function') focus();
     }
-    sliderMethod(run, 'requestValue', c.min + sample.position * (c.max - c.min));
+    const span = c.max - c.min;
+    // Normalized endpoints are finite and ordered; AxisInput positions are in [0, 1].
+    // An overflowing span therefore has opposite-sign endpoints, so this convex
+    // combination keeps each product finite and cannot overflow their sum.
+    const next = Number.isFinite(span)
+      ? c.min + sample.position * span
+      : c.min * (1 - sample.position) + c.max * sample.position;
+    sliderMethod(run, 'requestValue', next);
     if (sample.phase === 'end') sliderMethod(run, 'commitValue');
   });
   return render;
