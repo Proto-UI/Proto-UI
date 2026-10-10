@@ -36,6 +36,10 @@ export type FormFieldExposes = FieldRootExposes & {
   __formField: ExposeMethod<() => FormFieldSnapshot>;
   __formReset: ExposeMethod<() => boolean>;
 };
+/** FormField adds registration, while FieldRoot remains the captured validity owner. */
+export type FormFieldAsHookContract = {
+  asHooks: { 'as-field-root': ReturnType<typeof import('../field').asFieldRoot> };
+};
 export interface FormActionProps {
   disabled?: boolean;
 }

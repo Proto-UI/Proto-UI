@@ -492,7 +492,53 @@ async function formJourney({ page, previewer, family, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="form"]', 1);
   const form = previewer.locator('[data-demo-ref="form"]');
   const editor = form.locator('input').first();
-  await capture('rest', { editor: await paint(editor) }, previewer);
+  const label = form.getByText('displayName', { exact: true });
+  const field = label.locator('..');
+  const submit = form.getByRole('button', { name: /Validate and submit/ });
+  const rest = { editor: await paint(editor), label: await paint(label) };
+  await capture('rest', rest, previewer);
+  // Real user submission supplies invalidity. No Prop/state injection or direct expose call.
+  await submit.click();
+  await expect.poll(() => editor.getAttribute('aria-invalid')).toBe('true');
+  await expect.poll(() => hasFocus(editor)).toBe(true);
+  const errorId = await editor.getAttribute('aria-errormessage');
+  expect(errorId).toBeTruthy();
+  const error = form.locator(`[id=${JSON.stringify(errorId)}]`);
+  expect(await error.isVisible()).toBe(true);
+  expect(await error.textContent()).toMatch(/required/i);
+  expect(await editor.getAttribute('aria-labelledby')).toBe(await label.getAttribute('id'));
+  expect(await previewer.locator('[data-demo-ref="status"]').textContent()).not.toContain(
+    '"displayName"'
+  );
+  const invalid = {
+    field: await paint(field),
+    label: await paint(label),
+    editor: await paint(editor),
+    error: await paint(error),
+    errorText: await error.textContent(),
+    errorId,
+    firstEditorFocused: await hasFocus(editor),
+  };
+  await capture('invalid-submit-first-focus', invalid, previewer);
+  if (family === 'shadcn' || family === 'brutalist') {
+    expect(invalid.label.color).toBe(invalid.field.color);
+    expect(invalid.label.color).toBe(invalid.error.color);
+    expect(invalid.label.color).not.toBe(rest.label.color);
+    expect(invalid.editor.color).toBe(rest.editor.color);
+  }
+  await editor.fill('Finf sample');
+  await submit.click();
+  await expect.poll(() => editor.getAttribute('aria-invalid')).not.toBe('true');
+  await expect.poll(() => editor.getAttribute('aria-errormessage')).toBe(null);
+  await expect
+    .poll(() => previewer.locator('[data-demo-ref="status"]').textContent())
+    .toContain('"displayName":"Finf sample"');
+  expect((await paint(label)).color).toBe(rest.label.color);
+  await capture(
+    'corrected-submit',
+    { editor: await paint(editor), label: await paint(label), value: await editor.inputValue() },
+    previewer
+  );
   await editor.fill('Finf sample');
   expect(await editor.inputValue()).toBe('Finf sample');
   await form.getByRole('button', { name: /Reset values/ }).click();

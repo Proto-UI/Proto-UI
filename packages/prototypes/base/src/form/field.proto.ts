@@ -3,7 +3,7 @@ import { asFieldRoot } from '../field/root.proto';
 import { FIELD_FAMILY, copyFieldValue } from '../field/shared';
 import type { FieldControlSnapshot } from '../field/shared';
 import { FORM_FAMILY, FORM_CONTEXT, formMethod } from './shared';
-import type { FormFieldProps, FormFieldExposes } from './types';
+import type { FormFieldProps, FormFieldExposes, FormFieldAsHookContract } from './types';
 function setup(def: DefHandle<FormFieldProps, FormFieldExposes>) {
   const inherited = asFieldRoot();
   def.anatomy.claim(FORM_FAMILY, { role: 'field' });
@@ -54,7 +54,7 @@ function setup(def: DefHandle<FormFieldProps, FormFieldExposes>) {
   });
   return inherited.render;
 }
-export const asFormField = defineAsHook<FormFieldProps, FormFieldExposes>({
+export const asFormField = defineAsHook<FormFieldProps, FormFieldExposes, FormFieldAsHookContract>({
   name: 'as-form-field',
   setup,
 });
