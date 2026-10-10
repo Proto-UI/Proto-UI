@@ -920,6 +920,28 @@ const BOOTSTRAP_232_MANIFEST = {
       recipePrototypeIds: ['bootstrap-2-3-2-text-root'],
       parts: { root: { basePrototypeId: 'P-BASE-TEXT', prototypeId: 'bootstrap-2-3-2-text-root' } },
     },
+    tabs: {
+      baseFamilyId: 'P-BASE-TABS',
+      recipeId: 'demo-bootstrap-2-3-2-tabs',
+      recipePrototypeIds: [
+        'bootstrap-2-3-2-tabs-root',
+        'bootstrap-2-3-2-tabs-list',
+        'bootstrap-2-3-2-tabs-trigger',
+        'bootstrap-2-3-2-tabs-content',
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-TABS', prototypeId: 'bootstrap-2-3-2-tabs-root' },
+        list: { basePrototypeId: 'P-BASE-TABS-LIST', prototypeId: 'bootstrap-2-3-2-tabs-list' },
+        trigger: {
+          basePrototypeId: 'P-BASE-TABS-TRIGGER',
+          prototypeId: 'bootstrap-2-3-2-tabs-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-TABS-CONTENT',
+          prototypeId: 'bootstrap-2-3-2-tabs-content',
+        },
+      },
+    },
     select: {
       baseFamilyId: 'P-BASE-SELECT',
       recipeId: 'demo-bootstrap-2-3-2-select',
@@ -1157,6 +1179,28 @@ const LIQUID_GLASS_MANIFEST = {
       recipeId: 'demo-liquid-glass-text',
       recipePrototypeIds: ['liquid-glass-text-root'],
       parts: { root: { basePrototypeId: 'P-BASE-TEXT', prototypeId: 'liquid-glass-text-root' } },
+    },
+    tabs: {
+      baseFamilyId: 'P-BASE-TABS',
+      recipeId: 'demo-liquid-glass-tabs',
+      recipePrototypeIds: [
+        'liquid-glass-tabs-root',
+        'liquid-glass-tabs-list',
+        'liquid-glass-tabs-trigger',
+        'liquid-glass-tabs-content',
+      ],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-TABS', prototypeId: 'liquid-glass-tabs-root' },
+        list: { basePrototypeId: 'P-BASE-TABS-LIST', prototypeId: 'liquid-glass-tabs-list' },
+        trigger: {
+          basePrototypeId: 'P-BASE-TABS-TRIGGER',
+          prototypeId: 'liquid-glass-tabs-trigger',
+        },
+        content: {
+          basePrototypeId: 'P-BASE-TABS-CONTENT',
+          prototypeId: 'liquid-glass-tabs-content',
+        },
+      },
     },
     select: {
       baseFamilyId: 'P-BASE-SELECT',

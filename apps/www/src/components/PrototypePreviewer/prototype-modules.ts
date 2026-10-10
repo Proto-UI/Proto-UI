@@ -33,6 +33,38 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/text');
     registerPrototype('bootstrap-2-3-2-text-root', mod.textRoot);
   },
+  'bootstrap-2-3-2-tabs-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-root', mod.tabsRoot);
+  },
+  'bootstrap-2-3-2-tabs-list': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-list', mod.tabsList);
+  },
+  'bootstrap-2-3-2-tabs-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-trigger', mod.tabsTrigger);
+  },
+  'bootstrap-2-3-2-tabs-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-content', mod.tabsContent);
+  },
+  'liquid-glass-tabs-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-root', mod.tabsRoot);
+  },
+  'liquid-glass-tabs-list': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-list', mod.tabsList);
+  },
+  'liquid-glass-tabs-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-trigger', mod.tabsTrigger);
+  },
+  'liquid-glass-tabs-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-content', mod.tabsContent);
+  },
   'bootstrap-2-3-2-select-root': async () => {
     const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
     registerPrototype('bootstrap-2-3-2-select-root', mod.selectRoot);

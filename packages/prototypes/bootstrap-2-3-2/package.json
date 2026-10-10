@@ -189,6 +189,10 @@
     "./dropdown": {
       "types": "./src/dropdown/index.ts",
       "default": "./src/dropdown/index.ts"
+    },
+    "./tabs": {
+      "types": "./src/tabs/index.ts",
+      "default": "./src/tabs/index.ts"
     }
   },
   "dependencies": {

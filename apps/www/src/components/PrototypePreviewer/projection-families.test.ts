@@ -872,6 +872,7 @@ describe('partial new projection families', () => {
         family === 'bootstrap-2-3-2'
           ? [
               'text',
+              'tabs',
               'select',
               'field',
               'accordion',
@@ -885,13 +886,13 @@ describe('partial new projection families', () => {
               'textarea',
               'separator',
             ]
-          : ['text', 'select', 'field', 'accordion', 'collapsible', 'label', 'button']
+          : ['text', 'tabs', 'select', 'field', 'accordion', 'collapsible', 'label', 'button']
       );
       expect(() => validateProjectionFamilyManifest(manifest)).not.toThrow();
       expect(resolveProjectionPart(family, 'button', 'root').prototypeId).toBe(`${family}-button`);
       for (const kind of family === 'bootstrap-2-3-2'
-        ? ['dialog', 'tabs', 'radio-group', 'tooltip']
-        : ['switch', 'dialog', 'tabs', 'checkbox']) {
+        ? ['dialog', 'radio-group', 'tooltip']
+        : ['switch', 'dialog', 'checkbox']) {
         expect(() => resolveProjectionPart(family, kind, 'root')).toThrow(
           /no family.*fallback is forbidden/
         );

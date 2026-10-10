@@ -1272,6 +1272,72 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
     ),
   },
 
+  'bootstrap-2-3-2-tabs': {
+    ...defineCompound(
+      'bootstrap-2-3-2-tabs',
+      'Bootstrap232 Tabs',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      '@proto.ui/prototypes-bootstrap-2-3-2/tabs',
+      [
+        {
+          prototypeImport: 'tabsRoot',
+          exportBaseName: 'Bootstrap232TabsRoot',
+          elementName: 'proto-ui-bootstrap-2-3-2-tabs-root',
+        },
+        {
+          prototypeImport: 'tabsList',
+          exportBaseName: 'Bootstrap232TabsList',
+          elementName: 'proto-ui-bootstrap-2-3-2-tabs-list',
+        },
+        {
+          prototypeImport: 'tabsTrigger',
+          exportBaseName: 'Bootstrap232TabsTrigger',
+          elementName: 'proto-ui-bootstrap-2-3-2-tabs-trigger',
+        },
+        {
+          prototypeImport: 'tabsContent',
+          exportBaseName: 'Bootstrap232TabsContent',
+          elementName: 'proto-ui-bootstrap-2-3-2-tabs-content',
+        },
+      ],
+      { stylePreset: 'bootstrap-2-3-2' }
+    ),
+    sourceOnly: true,
+  },
+
+  'liquid-glass-tabs': {
+    ...defineCompound(
+      'liquid-glass-tabs',
+      'LiquidGlass Tabs',
+      '@proto.ui/prototypes-liquid-glass',
+      '@proto.ui/prototypes-liquid-glass/tabs',
+      [
+        {
+          prototypeImport: 'tabsRoot',
+          exportBaseName: 'LiquidGlassTabsRoot',
+          elementName: 'proto-ui-liquid-glass-tabs-root',
+        },
+        {
+          prototypeImport: 'tabsList',
+          exportBaseName: 'LiquidGlassTabsList',
+          elementName: 'proto-ui-liquid-glass-tabs-list',
+        },
+        {
+          prototypeImport: 'tabsTrigger',
+          exportBaseName: 'LiquidGlassTabsTrigger',
+          elementName: 'proto-ui-liquid-glass-tabs-trigger',
+        },
+        {
+          prototypeImport: 'tabsContent',
+          exportBaseName: 'LiquidGlassTabsContent',
+          elementName: 'proto-ui-liquid-glass-tabs-content',
+        },
+      ],
+      { stylePreset: 'liquid-glass' }
+    ),
+    sourceOnly: true,
+  },
+
   'bootstrap-2-3-2-select': {
     ...defineCompound(
       'bootstrap-2-3-2-select',
