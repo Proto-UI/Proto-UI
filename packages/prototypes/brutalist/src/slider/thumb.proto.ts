@@ -6,7 +6,7 @@ export default definePrototype({
     const inherited = asSliderThumb();
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-5 -translate-x-1/2 -translate-y-1/2 rounded-none border-2 border-primary bg-background shadow-[2px_2px_0_0_var(--color-border)] outline-none'
+        'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 block size-5 -translate-x-1/2 -translate-y-1/2 rounded-none border-2 border-primary bg-background shadow-[2px_2px_0_0_var(--pui-border)] outline-none'
       )
     );
     def.rule({

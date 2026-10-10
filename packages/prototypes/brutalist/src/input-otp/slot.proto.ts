@@ -6,7 +6,7 @@ export default definePrototype({
     const inherited = asInputOtpSlot();
     def.feedback.style.use(
       tw(
-        'inline-flex size-10 items-center justify-center rounded-none border-2 border border-border bg-background shadow-[2px_2px_0_0_var(--color-border)] text-lg font-bold tabular-nums text-foreground'
+        'inline-flex size-10 items-center justify-center rounded-none border-2 border border-border bg-background shadow-[2px_2px_0_0_var(--pui-border)] text-lg font-bold tabular-nums text-foreground'
       )
     );
     def.rule({

@@ -6,7 +6,7 @@ export default definePrototype({
     const inherited = asNumberFieldIncrement();
     def.feedback.style.use(
       tw(
-        'inline-flex min-h-10 min-w-10 items-center justify-center rounded-none border-2 border border-border bg-background shadow-[2px_2px_0_0_var(--color-border)] p-2 text-foreground outline-none'
+        'inline-flex min-h-10 min-w-10 items-center justify-center rounded-none border-2 border border-border bg-background shadow-[2px_2px_0_0_var(--pui-border)] p-2 text-foreground outline-none'
       )
     );
     def.rule({
