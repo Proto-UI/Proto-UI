@@ -581,3 +581,19 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 });
+
+describe('normalized continuous layout projection', () => {
+  it('lowers static exposed-state flex basis and vertical slider positions', () => {
+    const tokens = [
+      'basis-2',
+      'basis-[calc(var(--pui-size)*1%)]',
+      'bottom-[calc(var(--pui-percentage)*1%)]',
+    ];
+    for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('flex-basis: 0.5rem;');
+      expect(css).toContain('flex-basis: calc(var(--pui-size)*1%);');
+      expect(css).toContain('bottom: calc(var(--pui-percentage)*1%);');
+    }
+  });
+});

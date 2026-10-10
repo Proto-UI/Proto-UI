@@ -1062,7 +1062,7 @@ function renderUtility(utility: string): string[] | null {
 
 function renderSpacingUtility(utility: string): string[] | null {
   const spacingMatch = utility.match(
-    /^(gap|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|pt|pb|mt|mb|ml|mr|top|left|right)-(.+)$/
+    /^(gap|basis|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|pt|pb|mt|mb|ml|mr|top|bottom|left|right)-(.+)$/
   );
   if (!spacingMatch) return null;
   const [, kind, rawValue] = spacingMatch;
@@ -1070,6 +1070,7 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (!value) return null;
 
   if (kind === 'gap') return [`gap: ${value};`];
+  if (kind === 'basis') return [`flex-basis: ${value};`];
   if (kind === 'h') return [`height: ${value};`];
   if (kind === 'w') return [`width: ${value};`];
   if (kind === 'min-h') return [`min-height: ${value};`];
@@ -1089,6 +1090,7 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (kind === 'ml') return [`margin-left: ${value};`];
   if (kind === 'mr') return [`margin-right: ${value};`];
   if (kind === 'top') return [`top: ${value};`];
+  if (kind === 'bottom') return [`bottom: ${value};`];
   if (kind === 'right') return [`right: ${value};`];
   if (kind === 'left') return [`left: ${value};`];
   return null;
