@@ -7,9 +7,11 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
 Calendar 是单日期公历控件。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
 
+默认按 canonical month 与 weekStartsOn 显示覆盖全月的最少 4、5 或 6 周；`fixedWeeks=true` 才显式固定六周。Root 公开 `weekCount`。应用可以保留 `index` 0–5 的六个 Row、`offset` 0–41 的 Day 作为容量；多余 Row/Day 公开 `hidden`，投影隐藏语义，多余 Day 禁用且不进入焦点或选择。未给 index 的 Row 与显式 date 仍由应用排布。
+
 ## 组合与时钟所有权
 
-十个原子为 Root、Caption、Heading、Previous、Next、Grid、Weekdays、Weekday、Row、Day。在 Weekdays 中放置 offset 为 0–6 的七个 Weekday，再通过 offset 为 0–41 的 Day 组成六行。星期标签与日期顺序随 Root 的 `weekStartsOn`（0 为周日）和 `locale` 同步；日期格使用完整本地化民用日期作为无障碍名称。`direction="rtl"` 镜像左右键，保留上下键和周边界语义。导航原子支持 `a11yLabel`，为纯图标提供名称。
+十个原子为 Root、Caption、Heading、Previous、Next、Grid、Weekdays、Weekday、Row、Day。在 Weekdays 中放置 offset 为 0–6 的七个 Weekday，再通过 offset 为 0–41 的 Day 组成最多六个带 index 的容量行，实际显示周数按上述规则同步。星期标签与日期顺序随 Root 的 `weekStartsOn`（0 为周日）和 `locale` 同步；日期格使用完整本地化民用日期作为无障碍名称。`direction="rtl"` 镜像左右键，保留上下键和周边界语义。导航原子支持 `a11yLabel`，为纯图标提供名称。
 
 host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时钟或时区；未传 today 就不标记今天。today 与 selected 独立，包括不可用日期；today 映射 `aria-current="date"`。初始月份优先级为显式 `month`、显式 `defaultMonth`、选中的 `value`/`defaultValue`、传入的 `today`，最后是确定性回退 1970-01。时钟后续变化不会自动翻月。`unavailable` 为字符串数组；非法输入保留上一个有效值或默认值。Root disabled 与各 Day/Previous/Next 的局部 disabled 合并；readOnly 禁止选择但允许浏览。
 
@@ -28,3 +30,5 @@ Shadcn 对照上游 base-nova 的单日期配方：28px 日期与导航、p2 留
   initialRuntime="wc"
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
+
+Shadcn 示例年份恢复为当前年减 100 至当前年的 101 项；其他家族的 ±10 年仅是应用样例范围。月份 caption 默认使用宿主 Intl 短月份格式，`createCalendarDemo(family, {captionLocale})` 可独立于星期语言选择，因此可复现中文月份与英语星期。焦点环依据实际 focused，与 selected 独立叠加，覆盖 pointer focus；28px 源配方不按截图缩放随意放大。本例使用本族 Select，上游弹层为原生 select，不声称两者原生弹层像素一致。101 项的实际 Happy DOM 打开成本仍偏高，未截断范围隐瞒该缺口。

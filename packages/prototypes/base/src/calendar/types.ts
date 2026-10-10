@@ -18,6 +18,8 @@ export interface CalendarRootProps {
   disabled?: boolean;
   readOnly?: boolean;
   weekStartsOn?: number;
+  /** Reserve six weeks; otherwise use the minimum complete weeks covering the month. */
+  fixedWeeks?: boolean;
   a11yLabel?: string;
   /** Civil date supplied by the host clock; omitted means no today marker. */
   today?: string;
@@ -27,6 +29,7 @@ export interface CalendarRootProps {
 export type CalendarRootExposes = CollectionExposes & {
   value: ExposeState<string>;
   month: ExposeState<string>;
+  weekCount: ExposeState<number>;
   disabled: ExposeState<boolean>;
   direction: ExposeState<string>;
   valueChange: ExposeEvent<{ value: string }>;
@@ -44,6 +47,7 @@ export type CalendarDayExposes = CollectionItemExposes & {
   selected: ExposeState<boolean>;
   disabled: ExposeState<boolean>;
   outside: ExposeState<boolean>;
+  hidden: ExposeState<boolean>;
   today: ExposeState<boolean>;
   hovered: ExposeState<boolean>;
   pressed: ExposeState<boolean>;
@@ -61,6 +65,7 @@ export type CalendarDayContract = {
     selected: State<boolean>;
     disabled: State<boolean>;
     outside: State<boolean>;
+    hidden: State<boolean>;
     today: State<boolean>;
     hovered: State<boolean>;
     pressed: State<boolean>;
@@ -76,6 +81,7 @@ export type CalendarRootAsHookContract = {
     collectionCount: State<number>;
     value: State<string>;
     month: State<string>;
+    weekCount: State<number>;
     a11yLabel: State<string>;
     disabled: State<boolean>;
     direction: State<string>;
@@ -83,8 +89,9 @@ export type CalendarRootAsHookContract = {
 };
 export type CalendarGridProps = Record<string, never>;
 export type CalendarGridExposes = {};
-export type CalendarRowProps = Record<string, never>;
-export type CalendarRowExposes = {};
+export type CalendarRowProps = { index?: number };
+export type CalendarRowExposes = { hidden: ExposeState<boolean> };
+export type CalendarRowAsHookContract = { state: { hidden: State<boolean> } };
 export type CalendarHeadingProps = Record<string, never>;
 export type CalendarHeadingExposes = {
   month: ExposeState<string>;

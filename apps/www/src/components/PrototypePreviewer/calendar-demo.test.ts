@@ -17,7 +17,7 @@ import {
   createCalendarDemo,
   setupCalendarCaptionDemo,
 } from '../../content/docs/zh-cn/calendar-demo.shared';
-import type { DemoRuntimeApi } from './demo-types';
+import type { DemoNode, DemoRuntimeApi } from './demo-types';
 import { renderDemo } from './demo-renderer';
 import { registerPrototype } from './registry';
 
@@ -83,6 +83,73 @@ afterEach(async () => {
 const civilDate = (date: Date) =>
   `${String(date.getFullYear()).padStart(4, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 
+const visibleGridCells = (host: HTMLElement) =>
+  Array.from(host.querySelectorAll<HTMLElement>('[role="gridcell"]')).filter(
+    (cell) => !cell.closest('[hidden], [aria-hidden="true"]')
+  );
+const visibleWeekRows = (host: HTMLElement) =>
+  Array.from(host.querySelectorAll<HTMLElement>('[role="row"]')).filter(
+    (row) =>
+      row.querySelector('[role="gridcell"]') && !row.closest('[hidden], [aria-hidden="true"]')
+  );
+const monthCellCount = (year: number, month: number) =>
+  Math.ceil((new Date(year, month, 1).getDay() + new Date(year, month + 1, 0).getDate()) / 7) * 7;
+const protoNodes = (node: DemoNode): Extract<DemoNode, { kind: 'proto' }>[] => [
+  ...(node.kind === 'proto' ? [node] : []),
+  ...('children' in node
+    ? (node.children ?? []).flatMap((child) => (typeof child === 'string' ? [] : protoNodes(child)))
+    : []),
+];
+
+it('formats caption month options with explicit or default host Intl locale independently of weekdays', () => {
+  for (const captionLocale of ['zh-CN', 'en-US', undefined]) {
+    const demo = createCalendarDemo('shadcn', { captionLocale });
+    const nodes = protoNodes(demo.root);
+    const month = nodes.find((node) => node.ref === 'month-select')!;
+    const items = protoNodes(month).filter((node) => node.prototypeId === 'shadcn-select-item');
+    const expected = Array.from({ length: 12 }, (_, index) =>
+      new Date(Date.UTC(2000, index, 1)).toLocaleString(captionLocale, {
+        month: 'short',
+        timeZone: 'UTC',
+      })
+    );
+    expect(items.map((item) => item.children?.[0])).toEqual(expected);
+    expect(items.map((item) => item.props?.textValue)).toEqual(expected);
+    expect(items.map((item) => item.props?.value)).toEqual(
+      Array.from({ length: 12 }, (_, index) => String(index + 1))
+    );
+    expect(nodes.find((node) => node.ref === 'calendar')?.props).toMatchObject({
+      locale: 'en-US',
+      fixedWeeks: false,
+    });
+    expect(
+      nodes
+        .filter((node) => node.prototypeId === 'shadcn-calendar-row')
+        .map((node) => node.props?.index)
+    ).toEqual([0, 1, 2, 3, 4, 5]);
+  }
+});
+
+it('preserves the full Shadcn reference year range and identifies the other families as app-defined samples', () => {
+  const year = new Date().getFullYear();
+  for (const family of [
+    'base',
+    'shadcn',
+    'brutalist',
+    'bootstrap-2-3-2',
+    'liquid-glass',
+  ] as const) {
+    const demo = createCalendarDemo(family);
+    const yearSelect = protoNodes(demo.root).find((node) => node.ref === 'year-select')!;
+    const values = protoNodes(yearSelect)
+      .filter((node) => node.prototypeId === `${family}-select-item`)
+      .map((node) => node.props?.value);
+    expect(values).toHaveLength(family === 'shadcn' ? 101 : 21);
+    expect(values[0]).toBe(String(year - (family === 'shadcn' ? 100 : 10)));
+    expect(values.at(-1)).toBe(String(year + (family === 'shadcn' ? 0 : 10)));
+  }
+});
+
 describe('Real family Calendar caption demos', () => {
   for (const family of [
     'base',
@@ -118,7 +185,10 @@ describe('Real family Calendar caption demos', () => {
           expect(read('year-select')).toBe(today.slice(0, 4));
         });
         expect(host.querySelectorAll('[role="columnheader"]')).toHaveLength(7);
-        expect(host.querySelectorAll('[role="gridcell"]')).toHaveLength(42);
+        const current = new Date();
+        const expectedCells = monthCellCount(current.getFullYear(), current.getMonth());
+        expect(visibleGridCells(host)).toHaveLength(expectedCells);
+        expect(visibleWeekRows(host)).toHaveLength(expectedCells / 7);
         expect(host.querySelector('[aria-label="Previous month"]')).not.toBeNull();
         expect(host.querySelector('[aria-label="Next month"]')).not.toBeNull();
         await vi.waitFor(() => {
@@ -132,6 +202,27 @@ describe('Real family Calendar caption demos', () => {
         // Content is a naming input, not proof of the real browser's computed
         // combobox name. That accessibility-tree check remains a separate gate.
         expect(host.querySelectorAll('select')).toHaveLength(0);
+
+        // The semantic hidden contract removes unused capacity from both the
+        // grid and tab order; it is not a CSS-only last-row concealment.
+        for (const [month, count] of [
+          ['2026-10', 35],
+          ['2026-11', 35],
+          ['2026-02', 28],
+          ['2026-08', 42],
+        ] as const) {
+          api.call('calendar', 'requestMonth', month);
+          await vi.waitFor(() => {
+            expect(read('calendar', 'month')).toBe(month);
+            expect(visibleGridCells(host)).toHaveLength(count);
+            expect(visibleWeekRows(host)).toHaveLength(count / 7);
+            for (const cell of host.querySelectorAll<HTMLElement>('[role="gridcell"]')) {
+              if (cell.closest('[hidden], [aria-hidden="true"]')) expect(cell.tabIndex).toBe(-1);
+            }
+          });
+        }
+        api.call('calendar', 'requestMonth', today.slice(0, 7));
+        await vi.waitFor(() => expect(read('calendar', 'month')).toBe(today.slice(0, 7)));
 
         const nextMonth = today.slice(5, 7) === '03' ? '4' : '3';
         api.call('month-select', 'requestValue', {
@@ -230,6 +321,7 @@ it('supplies local today at setup, refreshes at midnight, preserves controlled r
     month: '2033-04',
     value: '2033-04-05',
     locale: 'en-US',
+    fixedWeeks: false,
   });
   expect(records.get('calendar')?.onValueChange).toEqual(expect.any(Function));
   expect(records.get('calendar')?.onMonthChange).toEqual(expect.any(Function));
@@ -266,10 +358,11 @@ it('supplies local today at setup, refreshes at midnight, preserves controlled r
   expect(api.call).not.toHaveBeenCalled();
 });
 
-it('opens the actual Shadcn year menu from the keyboard, selects a year and restores trigger focus', async () => {
+it('mounts all 101 Shadcn year options, opens from the keyboard, selects a year and restores trigger focus', async () => {
   const host = document.createElement('div');
   document.body.append(host);
-  const demo = createCalendarDemo('shadcn');
+  const demo = createCalendarDemo('shadcn', { captionLocale: 'zh-CN' });
+  const started = performance.now();
   let api!: DemoRuntimeApi;
   const view = await renderDemo({
     runtime: 'wc',
@@ -284,10 +377,28 @@ it('opens the actual Shadcn year menu from the keyboard, selects a year and rest
   });
   cleanup.push(() => view.destroy());
   const year = String(new Date().getFullYear());
-  const nextYear = String(Number(year) + 1);
+  const previousYear = String(Number(year) - 1);
   const readMonth = () => (api.getExposes('calendar')?.month as { get(): string }).get();
   await vi.waitFor(() => expect(readMonth().slice(0, 4)).toBe(year));
+  const mountMs = performance.now() - started;
+  const yearOptions = Array.from(
+    host.querySelectorAll<HTMLElement>('[data-demo-ref="year-select"] [role="option"]')
+  );
+  expect(yearOptions).toHaveLength(101);
+  expect(yearOptions[0].textContent?.trim()).toBe(String(Number(year) - 100));
+  expect(yearOptions.at(-1)?.textContent?.trim()).toBe(year);
+  if (Number(year) >= 2007 && Number(year) <= 2107)
+    expect(yearOptions.some((option) => option.textContent?.trim() === '2007')).toBe(true);
+  expect(host.querySelector('[data-demo-ref="month-trigger"]')?.textContent?.trim()).toBe(
+    `Month ${new Date().getMonth() + 1}月`
+  );
+  expect(
+    Array.from(host.querySelectorAll('[role="columnheader"]')).map((node) =>
+      node.textContent?.trim()
+    )
+  ).toEqual(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']);
   const trigger = host.querySelector<HTMLElement>('[data-demo-ref="year-trigger"]')!;
+  const openStarted = performance.now();
   api.call('year-trigger', 'focusSelf', { reason: 'keyboard' });
   trigger.dispatchEvent(
     new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })
@@ -297,10 +408,12 @@ it('opens the actual Shadcn year menu from the keyboard, selects a year and rest
     expect(document.activeElement?.getAttribute('role')).toBe('option');
     expect(document.activeElement?.textContent?.trim()).toBe(year);
   });
+  const openMs = performance.now() - openStarted;
+  const selectionStarted = performance.now();
   document.activeElement!.dispatchEvent(
-    new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true })
+    new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true })
   );
-  await vi.waitFor(() => expect(document.activeElement?.textContent?.trim()).toBe(nextYear));
+  await vi.waitFor(() => expect(document.activeElement?.textContent?.trim()).toBe(previousYear));
   const option = document.activeElement!;
   option.dispatchEvent(
     new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true })
@@ -309,8 +422,18 @@ it('opens the actual Shadcn year menu from the keyboard, selects a year and rest
     new KeyboardEvent('keyup', { key: 'Enter', bubbles: true, cancelable: true })
   );
   await vi.waitFor(() => {
-    expect(readMonth().slice(0, 4)).toBe(nextYear);
+    expect(readMonth().slice(0, 4)).toBe(previousYear);
     expect(trigger.getAttribute('aria-expanded')).toBe('false');
     expect(document.activeElement).toBe(trigger);
   });
-});
+  // A measured adapter/Happy DOM probe, not a native-browser latency budget.
+  // Preserve the full collection even when these timings expose a gap.
+  console.info(
+    '[calendar-caption 101-item WC]',
+    JSON.stringify({
+      mountMs: Math.round(mountMs),
+      openMs: Math.round(openMs),
+      selectAndRestoreMs: Math.round(performance.now() - selectionStarted),
+    })
+  );
+}, 30_000);

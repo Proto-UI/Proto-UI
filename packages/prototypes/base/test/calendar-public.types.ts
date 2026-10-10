@@ -863,3 +863,58 @@ weekdayHook.stateHandles?.weekday.set('Monday');
 headingHook.stateHandles?.displayValue.set(new Date());
 // @ts-expect-error Caption is semantic grouping and does not capture a Select protocol.
 captionHook.getAsHookHandle('as-select-root');
+
+const f0CalendarFixedWeeks: f0calendarRootProps = { fixedWeeks: true };
+// @ts-expect-error fixedWeeks is boolean, not a truthy string.
+const f0CalendarInvalidFixedWeeks: f0calendarRootProps = { fixedWeeks: 'yes' };
+const f0CalendarWeekCount: number = f0calendarRoot.weekCount.get();
+const f0CalendarRowIndex: f0calendarRowProps = { index: 5 };
+// @ts-expect-error Row index is numeric.
+const f0CalendarInvalidRowIndex: f0calendarRowProps = { index: '5' };
+const f0CalendarRowHidden: boolean = f0calendarRow.hidden.get();
+const f0CalendarDayHidden: boolean = f0calendarDay.hidden.get();
+
+const f1CalendarFixedWeeks: f1calendarRootProps = { fixedWeeks: true };
+// @ts-expect-error fixedWeeks is boolean, not a truthy string.
+const f1CalendarInvalidFixedWeeks: f1calendarRootProps = { fixedWeeks: 'yes' };
+const f1CalendarWeekCount: number = f1calendarRoot.weekCount.get();
+const f1CalendarRowIndex: f1calendarRowProps = { index: 5 };
+// @ts-expect-error Row index is numeric.
+const f1CalendarInvalidRowIndex: f1calendarRowProps = { index: '5' };
+const f1CalendarRowHidden: boolean = f1calendarRow.hidden.get();
+const f1CalendarDayHidden: boolean = f1calendarDay.hidden.get();
+
+const f2CalendarFixedWeeks: f2calendarRootProps = { fixedWeeks: true };
+// @ts-expect-error fixedWeeks is boolean, not a truthy string.
+const f2CalendarInvalidFixedWeeks: f2calendarRootProps = { fixedWeeks: 'yes' };
+const f2CalendarWeekCount: number = f2calendarRoot.weekCount.get();
+const f2CalendarRowIndex: f2calendarRowProps = { index: 5 };
+// @ts-expect-error Row index is numeric.
+const f2CalendarInvalidRowIndex: f2calendarRowProps = { index: '5' };
+const f2CalendarRowHidden: boolean = f2calendarRow.hidden.get();
+const f2CalendarDayHidden: boolean = f2calendarDay.hidden.get();
+
+const f3CalendarFixedWeeks: f3calendarRootProps = { fixedWeeks: true };
+// @ts-expect-error fixedWeeks is boolean, not a truthy string.
+const f3CalendarInvalidFixedWeeks: f3calendarRootProps = { fixedWeeks: 'yes' };
+const f3CalendarWeekCount: number = f3calendarRoot.weekCount.get();
+const f3CalendarRowIndex: f3calendarRowProps = { index: 5 };
+// @ts-expect-error Row index is numeric.
+const f3CalendarInvalidRowIndex: f3calendarRowProps = { index: '5' };
+const f3CalendarRowHidden: boolean = f3calendarRow.hidden.get();
+const f3CalendarDayHidden: boolean = f3calendarDay.hidden.get();
+
+const f4CalendarFixedWeeks: f4calendarRootProps = { fixedWeeks: true };
+// @ts-expect-error fixedWeeks is boolean, not a truthy string.
+const f4CalendarInvalidFixedWeeks: f4calendarRootProps = { fixedWeeks: 'yes' };
+const f4CalendarWeekCount: number = f4calendarRoot.weekCount.get();
+const f4CalendarRowIndex: f4calendarRowProps = { index: 5 };
+// @ts-expect-error Row index is numeric.
+const f4CalendarInvalidRowIndex: f4calendarRowProps = { index: '5' };
+const f4CalendarRowHidden: boolean = f4calendarRow.hidden.get();
+const f4CalendarDayHidden: boolean = f4calendarDay.hidden.get();
+
+declare const calendarRowCapture: ReturnType<typeof f0calendar.asCalendarRow>;
+const calendarRowCapturedHidden: boolean = calendarRowCapture.stateHandles!.hidden.get();
+// @ts-expect-error Hidden is a boolean captured state.
+const invalidCalendarRowHidden: number = calendarRowCapture.stateHandles!.hidden.get();

@@ -70,7 +70,7 @@ for (const [family, atoms] of Object.entries(families)) {
         'h-7',
         'p-0',
         'data-[selected]:bg-primary',
-        'data-[focus-visible]:ring-3',
+        'data-[focused]:ring-3',
       ])
         expect(tokens(day).has(token)).toBe(true);
       for (const token of ['w-7', 'h-7']) expect(tokens(previous).has(token)).toBe(true);

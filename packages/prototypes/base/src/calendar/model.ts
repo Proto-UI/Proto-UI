@@ -22,12 +22,15 @@ export function addMonths(value: string, count: number): string {
   date.setUTCDate(Math.min(day, end.getUTCDate()));
   return dateKey(date);
 }
-export function monthDays(month: string, weekStartsOn = 0): string[] {
+export function monthDays(month: string, weekStartsOn = 0, fixedWeeks = false): string[] {
   const first = parseDate(`${month}-01`);
   if (!first) return [];
-  const start = ((Math.trunc(weekStartsOn) % 7) + 7) % 7;
+  const start = ((Math.trunc(Number.isFinite(weekStartsOn) ? weekStartsOn : 0) % 7) + 7) % 7;
   const offset = (first.getUTCDay() - start + 7) % 7;
-  return Array.from({ length: 42 }, (_, index) => addDays(dateKey(first), index - offset));
+  const end = new Date(first.getTime());
+  end.setUTCMonth(end.getUTCMonth() + 1, 0);
+  const length = fixedWeeks ? 42 : Math.ceil((offset + end.getUTCDate()) / 7) * 7;
+  return Array.from({ length }, (_, index) => addDays(dateKey(first), index - offset));
 }
 export function dateAvailable(
   date: string,

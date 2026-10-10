@@ -8,6 +8,7 @@ import {
   asCalendarCaption,
   asCalendarWeekday,
   asCalendarHeading,
+  asCalendarRow,
 } from '../src/calendar';
 import {
   asDatePickerRoot,
@@ -22,6 +23,7 @@ const hooks = {
   calendarCaption: asCalendarCaption,
   calendarWeekday: asCalendarWeekday,
   calendarHeading: asCalendarHeading,
+  calendarRow: asCalendarRow,
   datePickerRoot: asDatePickerRoot,
   datePickerDay: asDatePickerDay,
   datePickerContent: asDatePickerContent,
@@ -67,11 +69,20 @@ it('matches Calendar declared direct capture keys and nested Button handles to r
     'disabled',
     'month',
     'value',
+    'weekCount',
   ]);
   expect(rootCapture.stateHandles.collectionCount.get()).toBe(1);
   expect(rootCapture.stateHandles.value.get()).toBe('2026-10-10');
   const dayCapture = day.getExposes().readCapture();
-  for (const name of ['date', 'selected', 'disabled', 'outside', 'focused', 'focusVisible'])
+  for (const name of [
+    'date',
+    'selected',
+    'disabled',
+    'outside',
+    'hidden',
+    'focused',
+    'focusVisible',
+  ])
     expect(dayCapture.stateHandles[name]).toBeDefined();
   expect(dayCapture.stateHandles.date.get()).toBe('2026-10-10');
   const navigation = previous.getExposes().readCapture();
@@ -129,4 +140,16 @@ it('captures exactly the authored caption, weekday and localized heading facts',
   expect(Object.keys(h.stateHandles).sort()).toEqual(['displayValue', 'month']);
   expect(h.stateHandles.month.get()).toBe('2026-10');
   expect(h.stateHandles.displayValue.get()).toBe('October 2026');
+});
+
+it('captures the indexed row hidden state and numeric canonical week count', async () => {
+  const root = node('calendarRoot', { month: '2026-02' });
+  const row = node('calendarRow', { index: 4 });
+  root.append(row);
+  roots.push(root);
+  document.body.append(root);
+  await flush();
+  expect(root.getExposes().readCapture().stateHandles.weekCount.get()).toBe(4);
+  expect(Object.keys(row.getExposes().readCapture().stateHandles)).toEqual(['hidden']);
+  expect(row.getExposes().readCapture().stateHandles.hidden.get()).toBe(true);
 });

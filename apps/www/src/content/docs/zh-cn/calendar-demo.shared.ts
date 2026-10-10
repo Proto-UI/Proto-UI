@@ -10,20 +10,21 @@ import type {
 } from '../../../components/PrototypePreviewer/demo-types';
 
 type CalendarFamily = 'base' | 'shadcn' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
-const months = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
+export interface CalendarDemoOptions {
+  /** Host caption formatting only; Calendar weekday/date semantics stay en-US. */
+  captionLocale?: string | string[];
+}
+
+function captionMonthLabels(locale: CalendarDemoOptions['captionLocale']): string[] {
+  // The upstream base-nova formatter uses date.toLocaleString(locale?.code,
+  // { month: 'short' }). Undefined deliberately resolves the host Intl locale,
+  // separately from Calendar's explicit weekday/date locale below.
+  // https://ui.shadcn.com/r/styles/base-nova/calendar.json
+  const formatter = new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' });
+  return Array.from({ length: 12 }, (_, month) =>
+    formatter.format(new Date(Date.UTC(2000, month, 1)))
+  );
+}
 
 function localCivilDate(now: Date): string {
   return `${String(now.getFullYear()).padStart(4, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
@@ -55,6 +56,7 @@ export function setupCalendarCaptionDemo({ host, refs, api }: DemoSetupContext) 
     today,
     locale: 'en-US',
     weekStartsOn: 0,
+    fixedWeeks: false,
     a11yLabel: 'Choose a date',
     onMonthChange,
     onValueChange,
@@ -163,12 +165,21 @@ export function setupCalendarCaptionDemo({ host, refs, api }: DemoSetupContext) 
   };
 }
 
-export function createCalendarDemo(family: CalendarFamily): DemoSpec {
-  // A small explicit demo range avoids mounting hundreds of Select Items. The
-  // host chooses these options; Calendar itself has no such year restriction.
+export function createCalendarDemo(
+  family: CalendarFamily,
+  options: CalendarDemoOptions = {}
+): DemoSpec {
+  const months = captionMonthLabels(options.captionLocale);
+  // App-owned options, never a Base date constraint. The official Shadcn Base
+  // example inspected on 2026-10-10 has 101 years (1926–2026), including 2007
+  // visible in the user's year-menu reference. Keep that full range rather
+  // than reducing it to hide actual Select collection performance.
+  // https://ui.shadcn.com/docs/components/base/calendar
+  // The other families retain this app's explicit ±10-year sample range;
+  // that choice is not a claim about their upstream Calendar implementations.
   const year = new Date().getFullYear();
-  const firstYear = Math.max(0, year - 10);
-  const lastYear = Math.min(9999, year + 10);
+  const firstYear = Math.max(0, year - (family === 'shadcn' ? 100 : 10));
+  const lastYear = Math.min(9999, year + (family === 'shadcn' ? 0 : 10));
   const years = Array.from({ length: lastYear - firstYear + 1 }, (_, index) =>
     String(firstYear + index).padStart(4, '0')
   );
@@ -195,7 +206,8 @@ export function createCalendarDemo(family: CalendarFamily): DemoSpec {
           height: '28px',
           'min-height': '28px',
           padding: '0 4px',
-          width: field === 'month' ? '60px' : '64px',
+          'min-width': field === 'month' ? '60px' : '64px',
+          width: 'max-content',
         },
         children: [
           {
@@ -244,7 +256,7 @@ export function createCalendarDemo(family: CalendarFamily): DemoSpec {
           prototypeId: proto('select-item'),
           props: {
             value: field === 'month' ? String(index + 1) : label,
-            textValue: field === 'month' ? label.slice(0, 3) : label,
+            textValue: label,
           },
           ...(family === 'base'
             ? {
@@ -283,7 +295,12 @@ export function createCalendarDemo(family: CalendarFamily): DemoSpec {
           kind: 'proto',
           prototypeId: proto('calendar-root'),
           ref: 'calendar',
-          props: { locale: 'en-US', weekStartsOn: 0, a11yLabel: 'Choose a date' },
+          props: {
+            locale: 'en-US',
+            weekStartsOn: 0,
+            fixedWeeks: false,
+            a11yLabel: 'Choose a date',
+          },
           ...(family === 'base'
             ? { className: 'inline-grid gap-2 p-3' }
             : family === 'shadcn'
@@ -323,6 +340,7 @@ export function createCalendarDemo(family: CalendarFamily): DemoSpec {
                 ...Array.from({ length: 6 }, (_, row) => ({
                   kind: 'proto' as const,
                   prototypeId: proto('calendar-row'),
+                  props: { index: row },
                   ...(family === 'base' ? { className: 'grid grid-cols-7' } : {}),
                   children: Array.from({ length: 7 }, (_, column) => ({
                     kind: 'proto' as const,
@@ -344,7 +362,7 @@ export function createCalendarDemo(family: CalendarFamily): DemoSpec {
           kind: 'box',
           className: 'max-w-xs text-xs text-muted-foreground',
           children: [
-            `月份与年份使用同族 Select，通过 Calendar 公开 API 组合。年份选项：${firstYear}–${lastYear}；今天由本地时钟提供。`,
+            `月份与年份使用同族 Select，通过 Calendar 公开 API 组合。标题月份按宿主语言环境格式化；星期使用英语。年份选项：${firstYear}–${lastYear}（${family === 'shadcn' ? '与 Shadcn 上游示例相同的 101 年范围' : '此应用自定的前后 10 年范围'}）；今天由本地时钟提供。`,
           ],
         },
       ],

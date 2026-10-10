@@ -5,6 +5,7 @@ import {
   definePrototype,
   type DefHandle,
   type RunHandle,
+  tw,
 } from '@proto.ui/core';
 import {
   asAccessible,
@@ -42,6 +43,7 @@ import type {
   CalendarGridExposes,
   CalendarRowProps,
   CalendarRowExposes,
+  CalendarRowAsHookContract,
   CalendarHeadingProps,
   CalendarHeadingExposes,
   CalendarHeadingAsHookContract,
@@ -83,6 +85,8 @@ type CalendarContext = {
   disabled: boolean;
   readOnly: boolean;
   weekStartsOn: number;
+  fixedWeeks: boolean;
+  weekCount: number;
   today: string;
   locale: string;
   direction: 'ltr' | 'rtl';
@@ -99,6 +103,8 @@ const initial: CalendarContext = {
   disabled: false,
   readOnly: false,
   weekStartsOn: 0,
+  fixedWeeks: false,
+  weekCount: 5,
   today: '',
   locale: 'en-US',
   direction: 'ltr',
@@ -122,6 +128,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     disabled: { type: 'boolean' },
     readOnly: { type: 'boolean' },
     weekStartsOn: { type: 'number' },
+    fixedWeeks: { type: 'boolean' },
     a11yLabel: { type: 'string' },
     today: { type: 'string', validator: (value) => value === '' || !!parseDate(value) },
     locale: { type: 'string' },
@@ -135,6 +142,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     disabled: false,
     readOnly: false,
     weekStartsOn: 0,
+    fixedWeeks: false,
     a11yLabel: 'Calendar',
     today: '',
     locale: 'en-US',
@@ -144,7 +152,8 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     month = def.state.string('month', '1970-01'),
     label = def.state.string('a11yLabel', 'Calendar'),
     disabled = def.state.bool('disabled', false),
-    direction = def.state.string('direction', 'ltr');
+    direction = def.state.string('direction', 'ltr'),
+    weekCount = def.state.numberDiscrete('weekCount', 5);
   const a11y = asAccessible();
   a11y.role('group');
   a11y.name(label);
@@ -154,6 +163,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   def.expose.state('month', month);
   def.expose.state('disabled', disabled);
   def.expose.state('direction', direction);
+  def.expose.state('weekCount', weekCount);
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.event('monthChange', { payload: 'json' });
   let owner: RunHandle<CalendarRootProps> | null = null;
@@ -173,12 +183,15 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       weekStartsOn: Number.isFinite(p.weekStartsOn)
         ? ((Math.trunc(p.weekStartsOn!) % 7) + 7) % 7
         : 0,
+      fixedWeeks: !!p.fixedWeeks,
+      weekCount: monthDays(month.get(), p.weekStartsOn, !!p.fixedWeeks).length / 7,
       today: p.today ?? '',
       locale: p.locale || 'en-US',
       direction: p.direction ?? 'ltr',
       active: active ?? old.active,
       focusRequest: null,
     };
+    weekCount.set(next.weekCount, 'calendar visible week count');
     const navigation = pendingNavigation;
     const acceptedNavigation = navigation?.month === next.month && !next.disabled;
     if (acceptedNavigation) next.active = navigation!.date;
@@ -193,7 +206,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
         next.value.slice(0, 7) === next.month &&
         dateAvailable(next.value, next.min, next.max, next.unavailable)
           ? next.value
-          : (monthDays(next.month, next.weekStartsOn).find(
+          : (monthDays(next.month, next.weekStartsOn, next.fixedWeeks).find(
               (date) =>
                 date.slice(0, 7) === next.month &&
                 dateAvailable(date, next.min, next.max, next.unavailable)
@@ -297,6 +310,7 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
     selected = def.state.bool('selected', false),
     disabled = def.state.bool('disabled', false),
     outside = def.state.bool('outside', false),
+    hidden = def.state.bool('hidden', false),
     today = def.state.bool('today', false),
     hovered = def.state.bool('hovered', false),
     pressed = def.state.bool('pressed', false),
@@ -310,12 +324,18 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
   a11y.name(dateLabel);
   a11y.state('current', current);
   a11y.state('selected', selected);
+  a11y.state('hidden', hidden);
+  def.rule({
+    when: (w) => w.state(hidden).eq(true),
+    intent: (i) => i.feedback.style.use(tw('hidden')),
+  });
   a11y.state('disabled', disabled);
   for (const [name, state] of Object.entries({
     date,
     selected,
     disabled,
     outside,
+    hidden,
     today,
     hovered,
     pressed,
@@ -331,10 +351,12 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
   const sync = (run: RunHandle<CalendarDayProps>) => {
     const c = run.context.read(CALENDAR_CONTEXT),
       p = run.props.get();
-    const next = p.date || monthDays(c.month, c.weekStartsOn)[Math.trunc(p.offset ?? 0)] || '';
+    const next =
+      p.date || monthDays(c.month, c.weekStartsOn, c.fixedWeeks)[Math.trunc(p.offset ?? 0)] || '';
     const changed = next !== date.get();
     date.set(next, 'calendar day date');
-    selected.set(next === c.value, 'calendar selected date');
+    hidden.set(!next, 'calendar unused capacity');
+    selected.set(!!next && next === c.value, 'calendar selected date');
     outside.set(next.slice(0, 7) !== c.month, 'calendar outside month');
     today.set(!!next && next === c.today, 'calendar current date');
     current.set(today.get() ? 'date' : 'false', 'calendar current date semantics');
@@ -448,7 +470,29 @@ function setupGrid(def: DefHandle<CalendarGridProps, CalendarGridExposes>) {
 }
 function setupRow(def: DefHandle<CalendarRowProps, CalendarRowExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'row' });
-  asAccessible().role('row');
+  def.props.define({
+    index: { type: 'number', validator: (value) => Number.isSafeInteger(value) && value >= 0 },
+  });
+  const hidden = def.state.bool('hidden', false);
+  def.expose.state('hidden', hidden);
+  const a = asAccessible();
+  a.role('row');
+  a.state('hidden', hidden);
+  def.rule({
+    when: (w) => w.state(hidden).eq(true),
+    intent: (i) => i.feedback.style.use(tw('hidden')),
+  });
+  const sync = (run: RunHandle<CalendarRowProps>) => {
+    const index = run.props.get().index;
+    hidden.set(
+      index !== undefined && index >= run.context.read(CALENDAR_CONTEXT).weekCount,
+      'calendar unused row capacity'
+    );
+  };
+  def.context.subscribe(CALENDAR_CONTEXT, sync);
+  def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted(sync);
+  def.props.watchAll(sync);
 }
 function setupHeading(def: DefHandle<CalendarHeadingProps, CalendarHeadingExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'heading' });
@@ -479,7 +523,11 @@ function setupHeading(def: DefHandle<CalendarHeadingProps, CalendarHeadingExpose
   return () => [display.get()];
 }
 export const asCalendarGrid = defineAsHook({ name: 'as-calendar-grid', setup: setupGrid });
-export const asCalendarRow = defineAsHook({ name: 'as-calendar-row', setup: setupRow });
+export const asCalendarRow = defineAsHook<
+  CalendarRowProps,
+  CalendarRowExposes,
+  CalendarRowAsHookContract
+>({ name: 'as-calendar-row', setup: setupRow });
 export const asCalendarHeading = defineAsHook<
   CalendarHeadingProps,
   CalendarHeadingExposes,

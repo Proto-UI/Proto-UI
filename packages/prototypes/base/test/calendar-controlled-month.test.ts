@@ -70,7 +70,7 @@ it.each(['synchronous', 'asynchronous'] as const)(
   }
 );
 it('does not commit a refused outside-day target even when that date is already rendered', async () => {
-  const f = await fixture();
+  const f = await fixture({ fixedWeeks: true });
   f.key('2026-10-31', 'ArrowRight');
   await flush();
   expect(f.requests).toEqual([{ month: '2026-11' }]);

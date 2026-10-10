@@ -161,7 +161,7 @@ export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>
       intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
     });
     def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
+      when: (w) => w.state(state.focused).eq(true),
       intent: (i) =>
         i.feedback.style.use(
           tw('z-10 outline-none ring-3 ring-ring/50 forced-colors-focus-outline')

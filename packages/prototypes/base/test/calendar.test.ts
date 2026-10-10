@@ -20,7 +20,8 @@ describe('Calendar functional slice', () => {
     expect(parseDate('2025-02-29')).toBe(null);
     expect(addMonths('2024-01-31', 1)).toBe('2024-02-29');
     expect(addMonths('2024-02-29', 12)).toBe('2025-02-28');
-    expect(monthDays('2026-10', 1)).toHaveLength(42);
+    expect(monthDays('2026-10', 1)).toHaveLength(35);
+    expect(monthDays('2026-10', 1, true)).toHaveLength(42);
     expect(monthDays('2026-10', 1)[0]).toBe('2026-09-28');
     expect(dateAvailable('2026-10-10', '', '', ['2026-10-10'])).toBe(false);
   });
