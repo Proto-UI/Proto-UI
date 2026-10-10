@@ -16,7 +16,16 @@ export interface HoverCardRootProps {
   closeDelay?: number;
 }
 
+/** P-BASE-HOVER-CARD-INTERACTION-RELEASE: additive draft cooperation surface. */
+export type HoverCardInteractionPart = 'trigger' | 'content';
+export type HoverCardReleaseInteraction = (
+  part: HoverCardInteractionPart,
+  contributionId: number
+) => boolean;
+
 export type HoverCardRootExposes = {
+  // P-BASE-HOVER-CARD-INTERACTION-RELEASE: owner-bound transient withdrawal only.
+  releaseInteraction: ExposeMethod<HoverCardReleaseInteraction>;
   // P-BASE-HOVER-CARD-OPEN-EXPOSE
   open: ExposeState<boolean>;
   openHoverCard: ExposeMethod<(reason?: string) => void>;

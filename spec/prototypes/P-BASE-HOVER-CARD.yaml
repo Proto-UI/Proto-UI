@@ -66,6 +66,26 @@ criteria:
     text:
       zh-CN: 非 disabled 状态下，Trigger hover/focus 或 Content hover 任一为 true 时交互目标必须为 open；全部为 false 时目标必须为 closed，目标只能提交 request 而不能绕过 Root ownership。
       en: While not disabled, interaction must target open when Trigger hover or focus or Content hover is true and target closed when all are false; the target may only submit a request and must not bypass Root ownership.
+  - id: P-BASE-HOVER-CARD-INTERACTION-LIFETIME
+    text:
+      zh-CN: Trigger hover/focus 与 Content hover contribution 属于实际 mounted view generation。实际 repeatable unmount 或 terminal teardown 必须只撤销该 generation 的贡献；remount 不得重放旧 transient input。撤销仍经过现有 Root interaction target、delay 与 request channel，不得绕过 controlled open owner；退休已经为 false 的贡献不得重新计时现有 close delay。
+      en: Trigger hover/focus and Content hover contributions belong to an actual mounted view generation. Actual repeatable unmount or terminal teardown must withdraw only that generation's contribution; remount must not replay prior transient input. Withdrawal retains the existing Root interaction target, delay, and request channel without bypassing controlled open ownership; retiring an already-false contribution must not restart an existing close delay.
+  - id: P-BASE-HOVER-CARD-INTERACTION-RELEASE
+    text:
+      zh-CN: >-
+        Root 必须公开 typed cooperation method `releaseInteraction(part, contributionId): boolean`。part 仅为 trigger 或 content；contributionId 是正 safe integer，必须在同 Root、同 part 的整个存活期内跨 publisher instance 与 view generation 唯一且不重用；分配空间耗尽必须明确失败，不能 wrap、复用或发布冲突贡献。该方法仅退休当前 Root/part 记录的匹配贡献并返回 true；非法、过期或重复 ID 返回 false，且不得更新 Context、创建 timer 或发出 request。该兼容增量是显式可见的组件能力，不因协作用途而隐藏于 public Exposes/type 之外；它不是 open/close 替代命令。
+
+
+      en: >-
+        Root must expose the typed cooperation method `releaseInteraction(part, contributionId): boolean`. Part is exactly trigger or content; contributionId is a positive safe integer unique and never reused across publisher instances and view generations for that Root/part's entire lifetime. Exhausted allocation must fail explicitly without wrapping, reusing, or publishing a colliding contribution. The method retires only a matching contribution recorded by this Root/part and returns true; invalid, stale, or repeated identities return false without a Context update, timer, or request. This additive compatibility surface is explicitly visible in public Exposes/types despite its cooperation purpose and is not an alternative open/close command.
+
+
+  - id: P-BASE-HOVER-CARD-INTERACTION-OWNER-BINDING
+    text:
+      zh-CN: Trigger/Content 必须在同域且 attached 时通过 Root PartView 借用 releaseInteraction，清理前先退休本地借用，再调用该已绑定 owner 的操作；不得在移除后重新解析别的 Root 或取得目标 run、instance、host。Root terminal shutdown 必须先使该操作失效：host 仍允许进入该已借用方法时返回 false；host 已撤销调用面时遵循既有 stale-handle 失败规则，绝不复活 owner。后到 child cleanup 不得访问其已销毁 Context。Context 只保留纯 JSON contribution identity，不得保存 callback 或 state/host handle；旧贡献清理不能撤销较新贡献，且不改变每域至多一个 Trigger/Content 的既定 cardinality。
+      en: >-
+        Trigger/Content must borrow releaseInteraction from the same-domain Root PartView while attached, retire their local borrowed reference before cleanup invokes that owner-bound operation, and never resolve another Root after removal or obtain the target run, instance, or host. Root terminal shutdown must first invalidate the operation: an invocation still admitted by the host returns false; an already-revoked calling surface follows existing stale-handle failure rules and never revives the owner. Later child cleanup cannot access its disposed Context. Context retains only JSON contribution identity, never callbacks or state/host handles; old cleanup cannot withdraw a newer contribution and does not change the existing at-most-one Trigger/Content cardinality.
+
   - id: P-BASE-HOVER-CARD-CONTEXT
     text:
       zh-CN: Root 必须通过同域 Context 发布 open、controlled、disabled、delay、interaction 与 request facts。
@@ -82,11 +102,24 @@ sources:
     label: Radix Primitives Hover Card
 dependsOn:
   contracts:
-    [C-ANATOMY-0002, C-CONTEXT-0001, C-DELAY-0001, C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001]
+    [
+      C-ANATOMY-0002,
+      C-ANATOMY-0009,
+      C-CONTEXT-0001,
+      C-DELAY-0001,
+      C-EXPOSE-0007,
+      C-EXPOSE-STATE-0001,
+      C-EXPOSE-EVENT-0001,
+      C-LIFECYCLE-0006,
+      C-LIFECYCLE-0007,
+    ]
   decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
 verifies: { tests: [T-BASE-HOVER-CARD-0001] }
 revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged the Base Hover Card Root, delayed request ownership, and compound protocol.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Defined view-generation interaction withdrawal and the explicit typed owner-bound release cooperation surface; draft retained without full-delivery admission.
 tags: [prototype, base, hover-card, preview, compound]

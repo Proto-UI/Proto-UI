@@ -32,6 +32,10 @@ criteria:
     text:
       zh-CN: Trigger 不得 author click/press activation 或阻止 Enter navigation；资源激活仍由应用提供的 link surface 持有。
       en: Trigger must not author click or press activation or suppress Enter navigation; resource activation remains owned by the application-provided link surface.
+  - id: P-BASE-HOVER-CARD-TRIGGER-INTERACTION-LIFETIME
+    text:
+      zh-CN: Trigger 必须遵循 Root 的 view-generation contribution identity、owner-bound release 与 remount 规则，在实际 unmount/terminal teardown 撤销自身 transient intent；不得清除其他当前贡献、替代 Root open owner 或修改共享 Focus/Runtime lifetime。
+      en: Trigger must follow Root view-generation contribution identity, owner-bound release, and remount rules, withdrawing its own transient intent on actual unmount or terminal teardown without clearing another current contribution, replacing Root open ownership, or changing shared Focus/Runtime lifetime.
 sources:
   - path: packages/prototypes/base/src/hover-card/trigger.proto.ts
   - path: packages/prototypes/base/test/hover-card.test.ts
@@ -46,4 +50,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged Trigger focus, hover, disabled, and activation ownership.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Defined owner-bound withdrawal of this part's view-generation interaction contribution; draft retained.
 tags: [prototype, base, hover-card, trigger, link-preview]

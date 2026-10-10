@@ -19,6 +19,10 @@ cases:
       - P-BASE-HOVER-CARD-TRIGGER-NO-BUTTON-DEPENDENCY
       - P-BASE-HOVER-CARD-TRIGGER-NO-ACTIVATION
     expectation: hover-card-trigger-has-no-button-role-press-or-click-surface
+  - id: T-BASE-HOVER-CARD-TRIGGER-0001-CASE-LIFECYCLE
+    title: View-generation withdrawal preserves owner, replacement, and request boundaries
+    covers: [P-BASE-HOVER-CARD-TRIGGER-INTERACTION-LIFETIME]
+    expectation: With openDelay=0 and closeDelay=20, hover or focus Trigger to open then remove it without leave or blur. With no Content hover, exactly one close occurs at 20ms; with Content still hovered Root stays open. Removing a pending-open Trigger cancels its old deadline and a replacement waits its full own openDelay.
 implementations:
   - id: prototypes-base-hover-card-trigger-contract
     kind: module-test
@@ -28,6 +32,13 @@ implementations:
     consumesCases:
       - T-BASE-HOVER-CARD-TRIGGER-0001-CASE-INTERACTION
       - T-BASE-HOVER-CARD-TRIGGER-0001-CASE-INDEPENDENCE
+    exercises: [P-BASE-HOVER-CARD-TRIGGER]
+  - id: prototypes-base-hover-card-trigger-lifecycle-contract
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/hover-card-lifecycle.test.ts
+    required: true
+    consumesCases: [T-BASE-HOVER-CARD-TRIGGER-0001-CASE-LIFECYCLE]
     exercises: [P-BASE-HOVER-CARD-TRIGGER]
 verifies:
   prototypes:
@@ -42,4 +53,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added Trigger interaction and protocol-independence coverage.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added planned view-generation interaction cleanup, stale-owner, and controlled-request lifecycle evidence.
 tags: [prototype, base, hover-card, trigger, test]
