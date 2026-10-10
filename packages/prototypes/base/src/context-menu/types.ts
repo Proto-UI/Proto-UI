@@ -1,3 +1,4 @@
+import type { useOpenState } from '../tools/use-open-state';
 import type {
   BorrowedStateHandle,
   InputOriginAnchor,
@@ -39,7 +40,13 @@ export type ContextMenuRootExposes = {
 } & CollectionExposes;
 
 export type ContextMenuRootStateHandles = { open: State<boolean> };
-export type ContextMenuRootAsHookContract = { state: ContextMenuRootStateHandles };
+/** Open is owned by the authored helper child, not this Root capture frame. */
+export type ContextMenuRootAsHookContract = {
+  state: { collectionCount: State<number> };
+  asHooks: {
+    useOpenState: ReturnType<typeof useOpenState>;
+  };
+};
 
 export interface ContextMenuTriggerProps {
   disabled?: boolean;

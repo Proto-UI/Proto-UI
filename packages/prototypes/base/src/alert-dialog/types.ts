@@ -1,3 +1,4 @@
+import type { useOpenState } from '../tools/use-open-state';
 import type {
   BorrowedStateHandle,
   ExposeEvent,
@@ -32,8 +33,11 @@ export type AlertDialogRootStateHandles = {
   open: State<boolean>;
 };
 
+/** Open is owned by the authored helper child, not this Root capture frame. */
 export type AlertDialogRootAsHookContract = {
-  state: AlertDialogRootStateHandles;
+  asHooks: {
+    useOpenState: ReturnType<typeof useOpenState>;
+  };
 };
 
 export interface AlertDialogTriggerProps {
