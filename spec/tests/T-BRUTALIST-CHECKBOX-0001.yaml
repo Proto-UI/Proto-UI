@@ -71,7 +71,7 @@ implementations:
       - P-BRUTALIST-CHECKBOX
       - P-BRUTALIST-CHECKBOX-INDICATOR
     notes:
-      - Historical passing evidence predates this source-pinned presentation migration; current runtime/CSS/browser evidence must be verified separately.
+      - Eight current tests pass for exact exports, colors, 16px passive glyph, Base behavior and preserved 20px pointer target, but the new 16px external-outline criterion is deliberately not implemented. The complete migrated contract remains planned; do not treat these partial passing tests as new geometry acceptance.
   - id: cli-brutalist-checkbox-absence
     kind: workspace-check
     status: passing

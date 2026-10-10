@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import {
   BrutalistCheckboxIndicator,
   BrutalistCheckboxRoot,
@@ -23,7 +24,7 @@ type HasUnsupportedRootApi =
 type ExposingElement = HTMLElement & { getExposes(): Record<string, any> };
 
 const ROOT_SURFACE_TOKENS = [
-  'inline-flex',
+  'flex',
   'h-5',
   'w-5',
   'shrink-0',
@@ -31,19 +32,19 @@ const ROOT_SURFACE_TOKENS = [
   'justify-center',
   'rounded-none',
   'border-2',
-  'border-main-foreground',
-  'bg-main',
-  'text-main-foreground',
+  'border-border',
   'outline-none',
+  'bg-transparent',
+  'text-foreground',
   'select-none',
   'transition-none',
 ];
 const INDICATOR_SURFACE_TOKENS = [
-  'inline-flex',
-  'size-3.5',
+  'flex',
+  'size-4',
   'items-center',
   'justify-center',
-  'text-current',
+  'text-main-foreground',
   'transition-none',
 ];
 const CHECK_PATH = 'm20 6-11 11-5-5';
@@ -157,12 +158,12 @@ describe('prototypes/brutalist: checkbox', () => {
 
     setElementProps(root, { checked: true } as any);
     await settle();
-    expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:bg-foreground')).toBe(true);
-    expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:text-background')).toBe(
-      true
-    );
+    expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:bg-main')).toBe(true);
+    expect(
+      styleContains(root, 'data-[checked]:not-[data-indeterminate]:text-main-foreground')
+    ).toBe(true);
     expect(styleContains(root, 'data-[checked]:not-[data-indeterminate]:border-background')).toBe(
-      true
+      false
     );
     expect(root.getAttribute('aria-checked')).toBe('true');
     expect(glyphPaths(indicator)).toEqual([CHECK_PATH]);
@@ -170,9 +171,9 @@ describe('prototypes/brutalist: checkbox', () => {
     setElementProps(root, { checked: true, indeterminate: true } as any);
     await settle();
     expect(root.getAttribute('aria-checked')).toBe('mixed');
-    expect(styleContains(root, 'bg-main')).toBe(true);
-    expect(styleContains(root, 'text-main-foreground')).toBe(true);
-    expect(styleContains(root, 'border-main-foreground')).toBe(true);
+    expect(styleContains(root, 'data-[indeterminate]:bg-main')).toBe(true);
+    expect(styleContains(root, 'data-[indeterminate]:text-main-foreground')).toBe(true);
+    expect(styleContains(root, 'border-border')).toBe(true);
     expect(glyphPaths(indicator)).toEqual([DASH_PATH]);
   });
 
@@ -182,7 +183,7 @@ describe('prototypes/brutalist: checkbox', () => {
     root.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await settle();
     expect(root.getExposes().pressed.get()).toBe(true);
-    expect(styleContains(root, 'data-[pressed]:shadow-none')).toBe(true);
+    expect(styleContains(root, 'data-[pressed]:shadow-none')).toBe(false);
 
     root.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
@@ -242,5 +243,28 @@ describe('prototypes/brutalist: checkbox', () => {
     await settle();
     expect(indicator.getExposes().isChecked()).toBe(false);
     expect(indicator.getExposes().isIndeterminate()).toBe(false);
+  });
+
+  it('emits source-aligned colors and glyph CSS while preserving the existing 20px framed hit box', async () => {
+    // 16px source geometry remains blocked until a governed hit envelope exists.
+    const { root, indicator } = await mount({ checked: true });
+    expect(styleContains(root, 'h-5')).toBe(true);
+    expect(styleContains(root, 'w-5')).toBe(true);
+    expect(styleContains(root, 'size-4')).toBe(false);
+    for (const old of ['bg-main', 'outline-2', 'border-main-foreground']) {
+      expect(styleContains(root, old), old).toBe(false);
+    }
+    const svg = indicator.querySelector('svg');
+    expect(svg?.getAttribute('stroke-width')).toBe('2');
+    expect(svg?.getAttribute('stroke-linecap')).toBe('round');
+    expect(svg?.getAttribute('stroke-linejoin')).toBe('round');
+    expect(svg?.getAttribute('aria-hidden')).toBe('true');
+    const tokens = [root, indicator].flatMap((el) =>
+      (el.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean)
+    );
+    const css = renderProtoStyleTokenCss(tokens);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('border-width: 2px;');
+    expect(css).toContain('border-color: var(--pui-border);');
   });
 });

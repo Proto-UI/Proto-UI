@@ -98,3 +98,14 @@ revisions:
     change: revised
     summary: Reconciled this draft presentation with exact pinned Neo source; retained Base semantics and explicitly bounded remaining parity and accessibility extensions.
 tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox]
+openQuestions:
+  - id: P-BRUTALIST-CHECKBOX-Q-HIT-AND-OUTLINE
+    question:
+      en: How can the source 16px outlined visual box preserve the existing activation target and supported cross-host frame color?
+      zh-CN: 源码16px outline视觉box如何保留现有activation target及受支持的跨宿主frame颜色？
+    context:
+      en: The successor retains the existing 20px hit box and 2px internal frame while colors and the passive glyph converge. Outline paint does not enlarge pointer hit testing. Direct shrink would reduce the target, and outline-border is currently reported unsupported by the real CSS service. A movement-only hit-envelope token is not a substitute. The 16px outline criterion stays planned until the owning capability is governed and actual geometry, hit testing and long-label composition are verified.
+      zh-CN: 后继在修配色和被动glyph时保留既有20px hit box与2px内部frame；outline paint不会扩大pointer命中，直接缩小会减小目标，且实际CSS service报告outline-border不受支持。movement-only hit-envelope token不能替代。owner能力治理并验证真实几何、命中与长label组合前，16px outline准则保持planned。
+    blocks:
+      - activation:P-BRUTALIST-CHECKBOX
+      - criterion:P-BRUTALIST-CHECKBOX#P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE

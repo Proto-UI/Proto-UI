@@ -37,7 +37,7 @@ cases:
 implementations:
   - id: prototypes-brutalist-textarea-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/brutalist/test/textarea.test.ts
     required: true
     consumesCases:
@@ -49,6 +49,7 @@ implementations:
       - P-BRUTALIST-TEXTAREA
     notes:
       - Historical passing evidence predates this source-pinned presentation migration; current runtime/CSS/browser evidence must be verified separately.
+      - Three successor runtime tests verify the 80px source literal, 12/8px padding, existing value/native-state ownership and real CSS/selection output. Browser evidence remains planned.
   - id: docs-browser-brutalist-textarea-focus
     kind: adapter-test
     status: planned

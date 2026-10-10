@@ -21,8 +21,8 @@ criteria:
       en: Brutalist styling must project directly to the same contentless Base-backed native textarea without adding a wrapper control, child renderer, or second target.
   - id: P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
     text:
-      en: Root projects flex w-full min-h-20 resize-y, rounded-base 5px, border-2 border-border, bg-secondary-background text-foreground, px-3 py-2 and font-sans font-medium text-sm with no explicit leading-6 override or shadow. Native selection uses selection:bg-main selection:text-main-foreground. Existing focus-visible ring, disabled cursor/opacity and host-owned resize remain unchanged. Placeholder and invalid styling remain unimplemented differences under the existing style-syntax and Base ownership boundaries.
-      zh-CN: Root 投射 flex w-full min-h-20 resize-y、rounded-base 5px、border-2 border-border、bg-secondary-background text-foreground、px-3 py-2 与 font-sans font-medium text-sm，不加 leading-6 override 或阴影；原生选择使用 selection:bg-main selection:text-main-foreground。既有 focus-visible ring、disabled cursor/opacity 与 host-owned resize 保持不变。placeholder 与 invalid 样式仍是既有 style-syntax/Base ownership 边界下未实现的差异。
+      en: Root projects flex w-full min-h-[80px] resize-y, rounded-base 5px, border-2 border-border, bg-secondary-background text-foreground, px-3 py-2 and font-sans font-medium text-sm with no explicit leading-6 override or shadow. Native selection uses selection:bg-main selection:text-main-foreground. Existing focus-visible ring, disabled cursor/opacity and host-owned resize remain unchanged. Placeholder and invalid styling remain unimplemented differences under the existing style-syntax and Base ownership boundaries.
+      zh-CN: Root 投射 flex w-full min-h-[80px] resize-y、rounded-base 5px、border-2 border-border、bg-secondary-background text-foreground、px-3 py-2 与 font-sans font-medium text-sm，不加 leading-6 override 或阴影；原生选择使用 selection:bg-main selection:text-main-foreground。既有 focus-visible ring、disabled cursor/opacity 与 host-owned resize 保持不变。placeholder 与 invalid 样式仍是既有 style-syntax/Base ownership 边界下未实现的差异。
 
   - id: P-BRUTALIST-TEXTAREA-NO-PROTOCOL-DELTA
     text:

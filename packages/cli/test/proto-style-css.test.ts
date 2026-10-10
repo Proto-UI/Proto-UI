@@ -299,26 +299,39 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
-  it('closes and renders the surface-paired frame tokens used by Brutalist Checkbox', () => {
-    expect(BRUTALIST_STYLE_TOKENS).toContain('border-main-foreground');
-    expect(BRUTALIST_STYLE_TOKENS).toContain(
+  it('closes and renders the current paired Checkbox fills without the superseded reversed frame', () => {
+    const tokens = [
+      'border-border',
+      'data-[checked]:not-[data-indeterminate]:bg-main',
+      'data-[checked]:not-[data-indeterminate]:text-main-foreground',
+      'data-[indeterminate]:bg-main',
+      'data-[indeterminate]:text-main-foreground',
+    ];
+    for (const token of tokens) expect(BRUTALIST_STYLE_TOKENS).toContain(token);
+    expect(BRUTALIST_STYLE_TOKENS).not.toContain(
       'data-[checked]:not-[data-indeterminate]:border-background'
     );
-
-    const css = renderProtoStyleTokenCss([
+    const css = renderProtoStyleTokenCss(tokens);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('border-color: var(--pui-border);');
+    expect(css).toContain('background-color: var(--pui-main);');
+    expect(css).toContain('color: var(--pui-main-foreground);');
+    expect(css).not.toContain('border-color: var(--pui-background);');
+    // Legacy generic utilities remain supported even though this component no
+    // longer uses the old state-swapped frame recipe.
+    const legacyCss = renderProtoStyleTokenCss([
       'text-current',
       'opacity-0',
       'opacity-100',
       'border-main-foreground',
       'border-background',
     ]);
-
-    expect(css).toContain('color: currentColor;');
-    expect(css).toContain('opacity: 0;');
-    expect(css).toContain('opacity: 1;');
-    expect(css).toContain('border-color: var(--pui-main-foreground);');
-    expect(css).toContain('border-color: var(--pui-background);');
-    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(legacyCss).toContain('color: currentColor;');
+    expect(legacyCss).toContain('opacity: 0;');
+    expect(legacyCss).toContain('opacity: 1;');
+    expect(legacyCss).toContain('border-color: var(--pui-main-foreground);');
+    expect(legacyCss).toContain('border-color: var(--pui-background);');
+    expect(legacyCss).not.toContain('Unsupported Proto UI style tokens');
   });
 
   it('resets composed custom properties inside the layer, below every token rule', () => {

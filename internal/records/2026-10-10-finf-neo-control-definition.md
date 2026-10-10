@@ -24,3 +24,11 @@ Historical source, CSS and browser evidence predates this definition and is mark
 ## Independent pre-implementation review
 
 The coordinating independent reviewer checked the three Prototype and two Test deltas against both pinned TSX sources. The Root's paired text-main-foreground differs from upstream Root text-white, while the upstream Check itself uses text-main-foreground; retaining a coherent theme pair is an explicit Proto UI choice. Mixed dash and theme-aware ring remain existing accessibility extensions. The external outline, focus perimeter, 16px glyph clipping and long-label composition require actual layout/pixel verification; no happy-dom test substitutes for those pending checks.
+
+## Partial Checkbox and Textarea implementation
+
+After definition commit `1abf299a`, the negative source/runtime cases failed 4 of 11 against the old implementation. The new Checkbox colors and 16px rounded glyph preserve Base mixed precedence, passive glyph ownership, focus and disabled behavior. Root deliberately remains 20px with its existing 2px internal frame; the intended 16px external-outline geometry is not implemented. A real CSS test proved `outline-border` unsupported, so no unsupported token or compiler/CLI workaround was committed. The full migrated Checkbox T implementation stays planned even though eight current partial-scope tests pass.
+
+Textarea now uses the exact supported source literal `min-h-[80px]`, px-3/py-2, border-border, ordinary text-sm line height and static main-palette selection. An initial shorthand `min-h-20` failed real CSS closure and was replaced with the already-supported arbitrary-length syntax; no translator semantics changed. The legacy token failure is retained in the external evidence packet. Three Textarea runtime tests cover current actual CSS output and unchanged one-editor behavior.
+
+Together with Base Checkbox/Textarea, the partial Neo scope passed 4 files / 26 tests before broader combined validation. Bilingual docs disclose current recipe and remaining hit-envelope/outline gaps. Existing browser expected colors were updated for the current 20px framed partial implementation, but those browser suites were not executed. Outline paint is not a hit envelope. True glyph clipping, long labels, hit testing, native-host support and current screenshots remain pending.
