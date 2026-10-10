@@ -215,6 +215,17 @@ function loadInvocationContext(args, command) {
       recordPath: args.get('--record'),
       contextPath: args.get('--context'),
       checkoutRoot: skillRegistryRoot,
+      forbiddenPaths: [
+        args.get('--handoff'),
+        args.get('--owner-authorization'),
+        args.get('--owner-key'),
+        args.get('--input'),
+        args.get('--packet'),
+        args.get('--published-review-packet'),
+        args.get('--request'),
+        args.get('--assessment'),
+        args.get('--prior-packet'),
+      ],
     });
   }
   // Retain the launcher/operator declaration independently of task-authored

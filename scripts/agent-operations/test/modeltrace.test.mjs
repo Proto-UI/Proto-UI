@@ -660,6 +660,16 @@ test('public receipts reject retest inconsistency without a prior after digest a
   rejectsStatusReceipt(receipt, /prior receipt digest/);
 });
 
+test('retest inconsistency rejects ambiguous and failed current results', () => {
+  for (const status of ['ambiguous', 'failed']) {
+    const receipt = statusReceipt(status);
+    receipt.anomalies.push('retest-inconsistent');
+    receipt.anomalies.sort();
+    receipt.expiresAt = new Date(Date.parse(receipt.measuredAt) + 15 * 60_000).toISOString();
+    rejectsStatusReceipt(receipt, /measured candidate result/);
+  }
+});
+
 test('a conflicting retest with a linked prior remains a valid public receipt', () => {
   const prior = statusReceipt('candidate');
   const receipt = structuredClone(prior);
