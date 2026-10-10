@@ -61,6 +61,7 @@ implementations:
       ]
     exercises: &inputPrototypes [P-SHADCN-INPUT, P-BASE-INPUT]
     notes:
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Remaining style-channel limitations and absent Base invalid/className/data-slot ownership are recorded as compatibility differences, not silently implemented with an extra protocol.'
       - Six successor module tests passed for source-pinned geometry, explicit selection extension, real CSS generation, state-marker colocation, repeated disabled updates, contentless editor and unchanged public ownership. This is happy-dom and CSS-output evidence; the separate browser implementation remains planned.
   - id: prototypes-shadcn-input-browser
     kind: runtime-test
@@ -75,7 +76,7 @@ implementations:
       ]
     exercises: *inputPrototypes
     notes:
-      - Planned four-runtime rendered behavior and style evidence through Web Component, React, Vue, and Vue 2 previews; manual visual verification remains a separate human gate.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Planned four-runtime rendered behavior and style evidence through Web Component, React, Vue, and Vue 2 previews; manual visual verification remains a separate human gate.'
       - Existing historical passing evidence predates the base-nova draft migration. Current implementation and real-browser evidence must be rerun; this definition-only change does not claim a pass.
 verifies:
   prototypes: [P-SHADCN-INPUT]
