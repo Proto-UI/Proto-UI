@@ -1,6 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { isDeepStrictEqual } from 'node:util';
 
 export const MODELTRACE_POLICY = 'proto-ui.modeltrace.2026-10-04.1';
@@ -715,6 +716,14 @@ export function validateModelTraceReceipt(receipt) {
     'invalid previous receipt digest'
   );
   assert(
+    receipt.priorReceiptDigest !== null || !receipt.anomalies.includes('retest-inconsistent'),
+    'retest inconsistency requires a prior receipt digest'
+  );
+  assert(
+    receipt.result.status === 'candidate' || !receipt.anomalies.includes('retest-inconsistent'),
+    'retest inconsistency requires a measured candidate result'
+  );
+  assert(
     isDeepStrictEqual(receipt.trust, {
       signed: false,
       backendAuthenticated: false,
@@ -740,6 +749,42 @@ export function assertModelTraceFresh(
   );
   assertModelTraceScope(receipt, context, repositoryId);
   return receipt;
+}
+
+export function assertModelTraceInputsOutsideCheckout({
+  recordPath,
+  contextPath,
+  checkoutRoot,
+  forbiddenPaths = [],
+}) {
+  assert(typeof recordPath === 'string' && recordPath.length > 0, 'record path is required');
+  assert(typeof contextPath === 'string' && contextPath.length > 0, 'context path is required');
+  const checkout = fs.realpathSync(checkoutRoot);
+  const resolvedInputs = new Map();
+  for (const [label, input] of [
+    ['record', recordPath],
+    ['context', contextPath],
+  ]) {
+    const resolved = fs.realpathSync(input);
+    const relative = path.relative(checkout, resolved);
+    assert(
+      relative === '..' || relative.startsWith(`..${path.sep}`) || path.isAbsolute(relative),
+      'private ModelTrace record/context inputs must remain outside the checkout and must not alias pre-admission artifacts'
+    );
+    assert(
+      !resolvedInputs.has(resolved),
+      'private ModelTrace record/context inputs must not alias each other or pre-admission artifacts'
+    );
+    resolvedInputs.set(resolved, label);
+  }
+  for (const forbidden of forbiddenPaths) {
+    if (typeof forbidden !== 'string' || forbidden.length === 0) continue;
+    const resolved = fs.realpathSync(forbidden);
+    assert(
+      !resolvedInputs.has(resolved),
+      'private ModelTrace record/context inputs must not alias each other or pre-admission artifacts'
+    );
+  }
 }
 
 export function readModelTraceJson(path, label = 'artifact') {
