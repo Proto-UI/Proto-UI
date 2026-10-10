@@ -59,12 +59,24 @@ test(
       'select',
       'surface',
       'text',
+      'tabs',
     ];
     const specifiers = names.flatMap((name) => [
       name,
       ...entries.map((entry) => `${name}/${entry}`),
     ]);
-    const smoke = `import assert from 'node:assert/strict';\n${specifiers.map((specifier, index) => `import * as entry${index} from ${JSON.stringify(specifier)};\nassert.ok(Object.keys(entry${index}).length > 0);`).join('\n')}`;
+    const smoke = `import assert from 'node:assert/strict';\n${specifiers.map((specifier, index) => `import * as entry${index} from ${JSON.stringify(specifier)};\nassert.ok(Object.keys(entry${index}).length > 0);`).join('\n')}\n${names
+      .map((name, index) => {
+        const rootIndex = specifiers.indexOf(name);
+        const tabsIndex = specifiers.indexOf(`${name}/tabs`);
+        return ['Root', 'List', 'Trigger', 'Content']
+          .map(
+            (part) =>
+              `assert.equal(entry${tabsIndex}.tabs${part}.name, '${DRAFT_FAMILIES[index]}-tabs-${part.toLowerCase()}');\nassert.equal(entry${rootIndex}.tabs${part}, entry${tabsIndex}.tabs${part});`
+          )
+          .join('\n');
+      })
+      .join('\n')}`;
     writeFileSync(join(consumer, 'smoke.mjs'), smoke);
     run(['smoke.mjs']);
     writeFileSync(
@@ -120,6 +132,7 @@ test(
         status: 'passed',
         esmEntries: specifiers.length,
         strictNodeNextTypes: true,
+        exactTabsIdentities: 8,
         workspaceLinks: false,
       },
       consumer,
