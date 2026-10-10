@@ -662,3 +662,13 @@ it('keeps bounded Drawer grid rows at the start of the actual scrollport', () =>
     expect(css).toContain('align-content: flex-start;');
   }
 });
+
+it('lowers the complete physical Drawer handle cursor and local stacking vocabulary', () => {
+  const tokens = ['cursor-ew-resize', 'cursor-ns-resize', 'z-10'];
+  for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('cursor: ew-resize;');
+    expect(css).toContain('cursor: ns-resize;');
+    expect(css).toContain('z-index: 10;');
+  }
+});
