@@ -7,7 +7,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitWebComponentSource } from './web-component-source';
 
-const floatingUi = createRequire(fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url)))('@floating-ui/dom');
+const floatingUi = createRequire(
+  fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+)('@floating-ui/dom');
 
 interface StateProjection<T> {
   get(): T;
@@ -35,7 +37,10 @@ interface NativeElement extends HTMLElement {
 let nextTag = 0;
 const mounted: NativeElement[] = [];
 afterEach(() => {
-  for (const element of mounted.splice(0)) { element.dispose(); element.remove(); }
+  for (const element of mounted.splice(0)) {
+    element.dispose();
+    element.remove();
+  }
 });
 
 function create(source: string): NativeElement {
@@ -44,7 +49,9 @@ function create(source: string): NativeElement {
   const emitted = emitWebComponentSource(parsed.value, { shadow: true });
   if (!emitted.ok) throw new Error(JSON.stringify(emitted.diagnostics));
   // Execute the generated consumer, not authored input and not an IR interpreter.
-  const sources = new Map((emitted.value.supportingFiles ?? []).map((file) => [file.path, file.contents]));
+  const sources = new Map(
+    (emitted.value.supportingFiles ?? []).map((file) => [file.path, file.contents])
+  );
   sources.set('component.ts', emitted.value.code);
   const modules = new Map<string, Record<string, unknown>>();
   function load(file: string): Record<string, unknown> {
@@ -166,7 +173,7 @@ describe('native Web Component semantic source', () => {
     const events: number[] = [];
     exposes.count?.subscribe(({ next }) => events.push(next));
     expect(element.shadowRoot?.querySelector('slot')?.assignedNodes()).toEqual([content]);
-    element.setProps({visible: false, count: 4});
+    element.setProps({ visible: false, count: 4 });
     await Promise.resolve();
     expect(element.present).toBe(false);
     expect(getComputedStyle(element).display).toBe('none');
@@ -174,7 +181,7 @@ describe('native Web Component semantic source', () => {
     expect(element.logicalOwner).toBe(identity);
     expect(exposes.unmounts?.get()).toBe(1);
     exposes.bump?.(7);
-    element.setProps({visible: true, count: 4});
+    element.setProps({ visible: true, count: 4 });
     await Promise.resolve();
     expect(element.logicalOwner).toBe(identity);
     expect(element.viewEpoch).toBeGreaterThan(epoch);
@@ -192,13 +199,13 @@ describe('native Web Component semantic source', () => {
   it('uses full raw snapshots: invalid input retains a previous valid candidate, omission returns to defaults', async () => {
     const element = create(presenceSource);
     document.body.appendChild(element);
-    element.setProps({visible: true, count: 4});
+    element.setProps({ visible: true, count: 4 });
     await Promise.resolve();
     expect(element.shadowRoot?.querySelector('p')?.textContent).toBe('4');
-    element.setProps({visible: true, count: 'invalid'});
+    element.setProps({ visible: true, count: 'invalid' });
     await Promise.resolve();
     expect(element.getExposes().count?.get()).toBe(4);
-    element.setProps({visible: true});
+    element.setProps({ visible: true });
     await Promise.resolve();
     expect(element.getExposes().count?.get()).toBe(0);
     expect(element.shadowRoot?.querySelector('p')?.textContent).toBe('0');
@@ -222,7 +229,7 @@ describe('native Web Component semantic source', () => {
       observed.push(element.getExposes().count?.get() ?? -1);
       expect(element.shadowRoot?.textContent).toBe('0');
     });
-    element.setProps({value:9});
+    element.setProps({ value: 9 });
     expect(observed).toEqual([9]);
     await Promise.resolve();
     expect(element.shadowRoot?.textContent).toBe('9');
@@ -274,14 +281,19 @@ describe('native Web Component semantic source', () => {
       }});`);
     document.body.appendChild(element);
     const outward: string[] = [];
-    for (const type of ['click', 'input']) element.addEventListener(type, (event) => {
-      if (event instanceof CustomEvent) outward.push(event.type);
-    });
-    expect(element.dispatchEvent(new MouseEvent('click', {button: 0, detail: 1, bubbles: true, cancelable: true}))).toBe(false);
+    for (const type of ['click', 'input'])
+      element.addEventListener(type, (event) => {
+        if (event instanceof CustomEvent) outward.push(event.type);
+      });
+    expect(
+      element.dispatchEvent(
+        new MouseEvent('click', { button: 0, detail: 1, bubbles: true, cancelable: true })
+      )
+    ).toBe(false);
     expect(outward).toEqual(['click', 'input']);
     expect(element.getExposes().count?.get()).toBe(11);
     expect(element.getExposes().inputs?.get()).toBe(0);
-    element.dispatchEvent(new Event('input', {bubbles: true}));
+    element.dispatchEvent(new Event('input', { bubbles: true }));
     expect(element.getExposes().inputs?.get()).toBe(1);
     expect(element.shadowRoot?.textContent).toBe('0');
   });
@@ -308,7 +320,7 @@ describe('native Web Component semantic source', () => {
     const child = element.shadowRoot?.querySelector('output');
     const identity = element.logicalOwner;
     const facts: boolean[] = [];
-    exposes.focused?.subscribe(({next}) => facts.push(next));
+    exposes.focused?.subscribe(({ next }) => facts.push(next));
     expect(exposes.focusable?.get()).toBe(false);
     expect(element.getAttribute('tabindex')).toBe('-1');
     expect(element.getAttribute('role')).toBe('button');
@@ -321,19 +333,20 @@ describe('native Web Component semantic source', () => {
     await Promise.resolve();
     expect(element.shadowRoot?.querySelector('output')).toBe(child);
     expect(element.shadowRoot?.textContent).toBe('0');
-    element.setProps({visible:false});
+    element.setProps({ visible: false });
     await Promise.resolve();
     expect(exposes.focused?.get()).toBe(false);
     expect(facts).toEqual([true, false]);
     expect(element.getAttribute('role')).toBeNull();
-    element.dispatchEvent(new MouseEvent('click', {button: 0, detail: 1}));
+    element.dispatchEvent(new MouseEvent('click', { button: 0, detail: 1 }));
     expect(exposes.count?.get()).toBe(0);
-    element.setProps({visible:true});
+    element.setProps({ visible: true });
     await Promise.resolve();
-    element.remove();document.body.appendChild(element);
+    element.remove();
+    document.body.appendChild(element);
     await Promise.resolve();
     expect(element.logicalOwner).toBe(identity);
-    element.dispatchEvent(new MouseEvent('click', {button: 0, detail: 1}));
+    element.dispatchEvent(new MouseEvent('click', { button: 0, detail: 1 }));
     expect(exposes.count?.get()).toBe(1);
     element.remove();
     await Promise.resolve();
@@ -348,9 +361,45 @@ describe('native Web Component semantic source', () => {
       }});`);
     if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
     const rejected = emitWebComponentSource(parsed.value);
-    expect(rejected).toMatchObject({ok: false, diagnostics: [
-      {code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED', category: 'unsupported-input'},
-    ]});
+    expect(rejected).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI_NATIVE_INTERACTION_UNSUPPORTED', category: 'unsupported-input' }],
+    });
     expect(emitWebComponentSource(parsed.value)).toEqual(rejected);
+  });
+});
+
+describe('generated range accessibility facts', () => {
+  it('projects updates and removes stale range attributes on view detach', async () => {
+    const element = create(`import { definePrototype } from '@proto.ui/core';
+      import { asAccessible } from '@proto.ui/hooks';
+      export default definePrototype({ name: 'range-facts', setup(def) {
+        const min = def.state.numberDiscrete('range.min', -10);
+        const max = def.state.numberDiscrete('range.max', 10);
+        const now = def.state.numberDiscrete('range.now', 0);
+        const text = def.state.string('range.text', 'Zero');
+        const accessible = asAccessible();
+        accessible.role('slider');
+        accessible.state('valueMin', min);
+        accessible.state('valueMax', max);
+        accessible.state('valueNow', now);
+        accessible.state('valueText', text);
+        def.expose.method('bump', (value: number) => { now.set(value); text.set(''); });
+        return (renderer) => renderer.el('div', 'Range');
+      }});`);
+    document.body.append(element);
+    await Promise.resolve();
+    const target = element;
+    expect(target.getAttribute('aria-valuemin')).toBe('-10');
+    expect(target.getAttribute('aria-valuemax')).toBe('10');
+    expect(target.getAttribute('aria-valuenow')).toBe('0');
+    expect(target.getAttribute('aria-valuetext')).toBe('Zero');
+    element.getExposes().bump!(5);
+    await Promise.resolve();
+    expect(target.getAttribute('aria-valuenow')).toBe('5');
+    expect(target.hasAttribute('aria-valuetext')).toBe(false);
+    element.remove();
+    await Promise.resolve();
+    expect(target.hasAttribute('aria-valuenow')).toBe(false);
   });
 });

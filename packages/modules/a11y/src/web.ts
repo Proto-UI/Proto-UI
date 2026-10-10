@@ -28,6 +28,10 @@ const ARIA_STATE_ATTRS: Record<string, string> = {
   required: 'aria-required',
   selected: 'aria-selected',
   modal: 'aria-modal',
+  valueMin: 'aria-valuemin',
+  valueMax: 'aria-valuemax',
+  valueNow: 'aria-valuenow',
+  valueText: 'aria-valuetext',
 };
 
 const TABLE_COUNT_STATE_KEYS = new Set(['rowCount', 'columnCount']);
@@ -1047,6 +1051,10 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
 }
 
 function projectedStateAttributeValue(key: string, value: unknown): string | undefined {
+  if (key === 'valueMin' || key === 'valueMax' || key === 'valueNow') {
+    return typeof value === 'number' && Number.isFinite(value) ? String(value) : undefined;
+  }
+  if (key === 'valueText') return typeof value === 'string' && value !== '' ? value : undefined;
   if (TABLE_COUNT_STATE_KEYS.has(key)) {
     return typeof value === 'number' && Number.isSafeInteger(value) && (value === -1 || value > 0)
       ? String(value)
