@@ -1,7 +1,17 @@
+import type {
+  TreeRootProps,
+  TreeRootExposes,
+  TreeItemProps,
+  TreeItemExposes,
+  TreeGroupProps,
+  TreeGroupExposes,
+  TreeToggleProps,
+  TreeToggleExposes,
+} from '@proto.ui/prototypes-base/tree';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import { asTreeRoot, asTreeItem, asTreeGroup, asTreeToggle } from '@proto.ui/prototypes-base/tree';
 export type * from '@proto.ui/prototypes-base/tree';
-export const treeRoot = definePrototype({
+export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
   name: 'brutalist-tree-root',
   setup(def) {
     const behavior = asTreeRoot();
@@ -25,7 +35,7 @@ export const treeRoot = definePrototype({
   },
 });
 export { treeRoot as brutalistTreeRoot };
-export const treeItem = definePrototype({
+export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
   name: 'brutalist-tree-item',
   setup(def) {
     const behavior = asTreeItem();
@@ -54,7 +64,7 @@ export const treeItem = definePrototype({
   },
 });
 export { treeItem as brutalistTreeItem };
-export const treeGroup = definePrototype({
+export const treeGroup = definePrototype<TreeGroupProps, TreeGroupExposes>({
   name: 'brutalist-tree-group',
   setup(def) {
     const behavior = asTreeGroup();
@@ -74,7 +84,7 @@ export const treeGroup = definePrototype({
   },
 });
 export { treeGroup as brutalistTreeGroup };
-export const treeToggle = definePrototype({
+export const treeToggle = definePrototype<TreeToggleProps, TreeToggleExposes>({
   name: 'brutalist-tree-toggle',
   setup(def) {
     const behavior = asTreeToggle();

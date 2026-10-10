@@ -1,3 +1,11 @@
+import type {
+  MessageScrollerRootProps,
+  MessageScrollerRootExposes,
+  MessageScrollerViewportProps,
+  MessageScrollerViewportExposes,
+  MessageScrollerJumpProps,
+  MessageScrollerJumpExposes,
+} from '@proto.ui/prototypes-base/message-scroller';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asMessageScrollerRoot,
@@ -5,7 +13,10 @@ import {
   asMessageScrollerJump,
 } from '@proto.ui/prototypes-base/message-scroller';
 export type * from '@proto.ui/prototypes-base/message-scroller';
-export const messageScrollerRoot = definePrototype({
+export const messageScrollerRoot = definePrototype<
+  MessageScrollerRootProps,
+  MessageScrollerRootExposes
+>({
   name: 'brutalist-message-scroller-root',
   setup(def) {
     const behavior = asMessageScrollerRoot();
@@ -29,7 +40,10 @@ export const messageScrollerRoot = definePrototype({
   },
 });
 export { messageScrollerRoot as brutalistMessageScrollerRoot };
-export const messageScrollerViewport = definePrototype({
+export const messageScrollerViewport = definePrototype<
+  MessageScrollerViewportProps,
+  MessageScrollerViewportExposes
+>({
   name: 'brutalist-message-scroller-viewport',
   setup(def) {
     const behavior = asMessageScrollerViewport();
@@ -51,7 +65,10 @@ export const messageScrollerViewport = definePrototype({
   },
 });
 export { messageScrollerViewport as brutalistMessageScrollerViewport };
-export const messageScrollerJump = definePrototype({
+export const messageScrollerJump = definePrototype<
+  MessageScrollerJumpProps,
+  MessageScrollerJumpExposes
+>({
   name: 'brutalist-message-scroller-jump',
   setup(def) {
     const behavior = asMessageScrollerJump();

@@ -1,3 +1,15 @@
+import type {
+  MessageScrollerRootProps,
+  MessageScrollerRootExposes,
+  MessageScrollerRootAsHookContract,
+  MessageScrollerViewportProps,
+  MessageScrollerViewportExposes,
+  MessageScrollerViewportAsHookContract,
+  MessageScrollerJumpProps,
+  MessageScrollerJumpExposes,
+  MessageScrollerJumpAsHookContract,
+} from './types';
+export type * from './types';
 import {
   createAnatomyFamily,
   createContextKey,
@@ -9,10 +21,6 @@ import {
 import { asScrollSurface, asAccessible } from '@proto.ui/hooks';
 import { asScrollAreaRoot, asScrollAreaViewport } from '../scroll-area';
 import { asButton } from '../button';
-export interface MessageScrollerRootProps {
-  newContentCount?: number;
-  a11yLabel?: string;
-}
 export const MESSAGE_SCROLLER_FAMILY = createAnatomyFamily('base-message-scroller', {
   roles: {
     root: { cardinality: { min: 1, max: 1 } },
@@ -26,7 +34,7 @@ export const MESSAGE_SCROLLER_CONTEXT = createContextKey<{
   newContentCount: number;
   a11yLabel: string;
 }>('base-message-scroller');
-function setupRoot(def: DefHandle<MessageScrollerRootProps, any>) {
+function setupRoot(def: DefHandle<MessageScrollerRootProps, MessageScrollerRootExposes>) {
   asScrollAreaRoot();
   def.anatomy.claim(MESSAGE_SCROLLER_FAMILY, { role: 'root' });
   def.props.define({ newContentCount: { type: 'number' }, a11yLabel: { type: 'string' } });
@@ -53,7 +61,11 @@ function setupRoot(def: DefHandle<MessageScrollerRootProps, any>) {
   def.lifecycle.onCreated(sync);
   def.props.watchAll(sync);
 }
-export const asMessageScrollerRoot = defineAsHook({
+export const asMessageScrollerRoot = defineAsHook<
+  MessageScrollerRootProps,
+  MessageScrollerRootExposes,
+  MessageScrollerRootAsHookContract
+>({
   name: 'as-message-scroller-root',
   setup: setupRoot,
 });
@@ -61,7 +73,9 @@ export const messageScrollerRoot = definePrototype({
   name: 'base-message-scroller-root',
   setup: setupRoot,
 });
-function setupViewport(def: DefHandle<Record<string, never>, any>) {
+function setupViewport(
+  def: DefHandle<MessageScrollerViewportProps, MessageScrollerViewportExposes>
+) {
   asScrollAreaViewport();
   def.anatomy.claim(MESSAGE_SCROLLER_FAMILY, { role: 'viewport' });
   const label = def.state.string('a11yLabel', 'Messages');
@@ -98,7 +112,11 @@ function setupViewport(def: DefHandle<Record<string, never>, any>) {
   a11y.role('region');
   a11y.name(label);
 }
-export const asMessageScrollerViewport = defineAsHook({
+export const asMessageScrollerViewport = defineAsHook<
+  MessageScrollerViewportProps,
+  MessageScrollerViewportExposes,
+  MessageScrollerViewportAsHookContract
+>({
   name: 'as-message-scroller-viewport',
   setup: setupViewport,
 });
@@ -106,7 +124,7 @@ export const messageScrollerViewport = definePrototype({
   name: 'base-message-scroller-viewport',
   setup: setupViewport,
 });
-function setupJump(def: DefHandle<Record<string, never>, any>) {
+function setupJump(def: DefHandle<MessageScrollerJumpProps, MessageScrollerJumpExposes>) {
   asButton();
   def.anatomy.claim(MESSAGE_SCROLLER_FAMILY, { role: 'jump' });
   const atEnd = def.state.bool('atEnd', true),
@@ -125,7 +143,11 @@ function setupJump(def: DefHandle<Record<string, never>, any>) {
     if (typeof fn === 'function') fn();
   });
 }
-export const asMessageScrollerJump = defineAsHook({
+export const asMessageScrollerJump = defineAsHook<
+  MessageScrollerJumpProps,
+  MessageScrollerJumpExposes,
+  MessageScrollerJumpAsHookContract
+>({
   name: 'as-message-scroller-jump',
   setup: setupJump,
 });

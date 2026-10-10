@@ -1,7 +1,17 @@
+import type {
+  TreeRootProps,
+  TreeRootExposes,
+  TreeItemProps,
+  TreeItemExposes,
+  TreeGroupProps,
+  TreeGroupExposes,
+  TreeToggleProps,
+  TreeToggleExposes,
+} from '@proto.ui/prototypes-base/tree';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import { asTreeRoot, asTreeItem, asTreeGroup, asTreeToggle } from '@proto.ui/prototypes-base/tree';
 export type * from '@proto.ui/prototypes-base/tree';
-export const treeRoot = definePrototype({
+export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
   name: 'shadcn-tree-root',
   setup(def) {
     const behavior = asTreeRoot();
@@ -25,7 +35,7 @@ export const treeRoot = definePrototype({
   },
 });
 export { treeRoot as shadcnTreeRoot };
-export const treeItem = definePrototype({
+export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
   name: 'shadcn-tree-item',
   setup(def) {
     const behavior = asTreeItem();
@@ -54,7 +64,7 @@ export const treeItem = definePrototype({
   },
 });
 export { treeItem as shadcnTreeItem };
-export const treeGroup = definePrototype({
+export const treeGroup = definePrototype<TreeGroupProps, TreeGroupExposes>({
   name: 'shadcn-tree-group',
   setup(def) {
     const behavior = asTreeGroup();
@@ -74,7 +84,7 @@ export const treeGroup = definePrototype({
   },
 });
 export { treeGroup as shadcnTreeGroup };
-export const treeToggle = definePrototype({
+export const treeToggle = definePrototype<TreeToggleProps, TreeToggleExposes>({
   name: 'shadcn-tree-toggle',
   setup(def) {
     const behavior = asTreeToggle();

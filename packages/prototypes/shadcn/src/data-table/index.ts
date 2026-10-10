@@ -1,3 +1,19 @@
+import type {
+  DataTableRootProps,
+  DataTableRootExposes,
+  DataTableRowProps,
+  DataTableRowExposes,
+  DataTableCellProps,
+  DataTableCellExposes,
+  DataTableHeaderProps,
+  DataTableHeaderExposes,
+  DataTableCaptionProps,
+  DataTableCaptionExposes,
+  DataTablePreviousProps,
+  DataTablePreviousExposes,
+  DataTableNextProps,
+  DataTableNextExposes,
+} from '@proto.ui/prototypes-base/data-table';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asDataTableRoot,
@@ -9,7 +25,7 @@ import {
   asDataTableNext,
 } from '@proto.ui/prototypes-base/data-table';
 export type * from '@proto.ui/prototypes-base/data-table';
-export const dataTableRoot = definePrototype({
+export const dataTableRoot = definePrototype<DataTableRootProps, DataTableRootExposes>({
   name: 'shadcn-data-table-root',
   setup(def) {
     const behavior = asDataTableRoot();
@@ -34,7 +50,7 @@ export const dataTableRoot = definePrototype({
   },
 });
 export { dataTableRoot as shadcnDataTableRoot };
-export const dataTableRow = definePrototype({
+export const dataTableRow = definePrototype<DataTableRowProps, DataTableRowExposes>({
   name: 'shadcn-data-table-row',
   setup(def) {
     const behavior = asDataTableRow();
@@ -57,7 +73,7 @@ export const dataTableRow = definePrototype({
   },
 });
 export { dataTableRow as shadcnDataTableRow };
-export const dataTableCell = definePrototype({
+export const dataTableCell = definePrototype<DataTableCellProps, DataTableCellExposes>({
   name: 'shadcn-data-table-cell',
   setup(def) {
     const behavior = asDataTableCell();
@@ -78,7 +94,7 @@ export const dataTableCell = definePrototype({
   },
 });
 export { dataTableCell as shadcnDataTableCell };
-export const dataTableHeader = definePrototype({
+export const dataTableHeader = definePrototype<DataTableHeaderProps, DataTableHeaderExposes>({
   name: 'shadcn-data-table-header',
   setup(def) {
     const behavior = asDataTableHeader();
@@ -103,7 +119,7 @@ export const dataTableHeader = definePrototype({
   },
 });
 export { dataTableHeader as shadcnDataTableHeader };
-export const dataTableCaption = definePrototype({
+export const dataTableCaption = definePrototype<DataTableCaptionProps, DataTableCaptionExposes>({
   name: 'shadcn-data-table-caption',
   setup(def) {
     const behavior = asDataTableCaption();
@@ -126,7 +142,7 @@ export const dataTableCaption = definePrototype({
   },
 });
 export { dataTableCaption as shadcnDataTableCaption };
-export const dataTablePrevious = definePrototype({
+export const dataTablePrevious = definePrototype<DataTablePreviousProps, DataTablePreviousExposes>({
   name: 'shadcn-data-table-previous',
   setup(def) {
     const behavior = asDataTablePrevious();
@@ -151,7 +167,7 @@ export const dataTablePrevious = definePrototype({
   },
 });
 export { dataTablePrevious as shadcnDataTablePrevious };
-export const dataTableNext = definePrototype({
+export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextExposes>({
   name: 'shadcn-data-table-next',
   setup(def) {
     const behavior = asDataTableNext();

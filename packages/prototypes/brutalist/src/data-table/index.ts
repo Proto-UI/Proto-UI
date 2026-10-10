@@ -1,3 +1,19 @@
+import type {
+  DataTableRootProps,
+  DataTableRootExposes,
+  DataTableRowProps,
+  DataTableRowExposes,
+  DataTableCellProps,
+  DataTableCellExposes,
+  DataTableHeaderProps,
+  DataTableHeaderExposes,
+  DataTableCaptionProps,
+  DataTableCaptionExposes,
+  DataTablePreviousProps,
+  DataTablePreviousExposes,
+  DataTableNextProps,
+  DataTableNextExposes,
+} from '@proto.ui/prototypes-base/data-table';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asDataTableRoot,
@@ -9,7 +25,7 @@ import {
   asDataTableNext,
 } from '@proto.ui/prototypes-base/data-table';
 export type * from '@proto.ui/prototypes-base/data-table';
-export const dataTableRoot = definePrototype({
+export const dataTableRoot = definePrototype<DataTableRootProps, DataTableRootExposes>({
   name: 'brutalist-data-table-root',
   setup(def) {
     const behavior = asDataTableRoot();
@@ -34,7 +50,7 @@ export const dataTableRoot = definePrototype({
   },
 });
 export { dataTableRoot as brutalistDataTableRoot };
-export const dataTableRow = definePrototype({
+export const dataTableRow = definePrototype<DataTableRowProps, DataTableRowExposes>({
   name: 'brutalist-data-table-row',
   setup(def) {
     const behavior = asDataTableRow();
@@ -57,7 +73,7 @@ export const dataTableRow = definePrototype({
   },
 });
 export { dataTableRow as brutalistDataTableRow };
-export const dataTableCell = definePrototype({
+export const dataTableCell = definePrototype<DataTableCellProps, DataTableCellExposes>({
   name: 'brutalist-data-table-cell',
   setup(def) {
     const behavior = asDataTableCell();
@@ -78,7 +94,7 @@ export const dataTableCell = definePrototype({
   },
 });
 export { dataTableCell as brutalistDataTableCell };
-export const dataTableHeader = definePrototype({
+export const dataTableHeader = definePrototype<DataTableHeaderProps, DataTableHeaderExposes>({
   name: 'brutalist-data-table-header',
   setup(def) {
     const behavior = asDataTableHeader();
@@ -103,7 +119,7 @@ export const dataTableHeader = definePrototype({
   },
 });
 export { dataTableHeader as brutalistDataTableHeader };
-export const dataTableCaption = definePrototype({
+export const dataTableCaption = definePrototype<DataTableCaptionProps, DataTableCaptionExposes>({
   name: 'brutalist-data-table-caption',
   setup(def) {
     const behavior = asDataTableCaption();
@@ -126,7 +142,7 @@ export const dataTableCaption = definePrototype({
   },
 });
 export { dataTableCaption as brutalistDataTableCaption };
-export const dataTablePrevious = definePrototype({
+export const dataTablePrevious = definePrototype<DataTablePreviousProps, DataTablePreviousExposes>({
   name: 'brutalist-data-table-previous',
   setup(def) {
     const behavior = asDataTablePrevious();
@@ -151,7 +167,7 @@ export const dataTablePrevious = definePrototype({
   },
 });
 export { dataTablePrevious as brutalistDataTablePrevious };
-export const dataTableNext = definePrototype({
+export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextExposes>({
   name: 'brutalist-data-table-next',
   setup(def) {
     const behavior = asDataTableNext();

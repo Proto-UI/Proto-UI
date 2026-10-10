@@ -1,3 +1,27 @@
+import type {
+  DataTableRootProps,
+  DataTableRootExposes,
+  DataTableRootAsHookContract,
+  DataTableRowProps,
+  DataTableRowExposes,
+  DataTableRowAsHookContract,
+  DataTableCellProps,
+  DataTableCellExposes,
+  DataTableCellAsHookContract,
+  DataTableHeaderProps,
+  DataTableHeaderExposes,
+  DataTableHeaderAsHookContract,
+  DataTableCaptionProps,
+  DataTableCaptionExposes,
+  DataTableCaptionAsHookContract,
+  DataTablePreviousProps,
+  DataTablePreviousExposes,
+  DataTablePreviousAsHookContract,
+  DataTableNextProps,
+  DataTableNextExposes,
+  DataTableNextAsHookContract,
+} from './types';
+export type * from './types';
 import {
   createAnatomyFamily,
   createContextKey,
@@ -40,34 +64,6 @@ const tableCaptionBehavior = defineAsHook({
   name: 'as-data-table-structure-caption',
   setup: tableCaption.setup,
 });
-export interface DataTableRootProps {
-  rows?: readonly DataRecord[];
-  sortKey?: string;
-  defaultSortKey?: string;
-  sortDirection?: SortDirection;
-  defaultSortDirection?: SortDirection;
-  filter?: string;
-  page?: number;
-  defaultPage?: number;
-  pageSize?: number;
-  selectedKeys?: readonly string[];
-  defaultSelectedKeys?: readonly string[];
-  disabled?: boolean;
-  readOnly?: boolean;
-}
-export interface DataTableRowProps {
-  index?: number;
-  header?: boolean;
-}
-export interface DataTableCellProps {
-  columnKey?: string;
-  headers?: readonly string[];
-}
-export interface DataTableHeaderProps {
-  headerKey?: string;
-  headerKind?: 'column' | 'row';
-  sortable?: boolean;
-}
 export const DATA_TABLE_FAMILY = createAnatomyFamily('base-data-table', {
   roles: {
     root: { cardinality: { min: 1, max: 1 } },
@@ -89,7 +85,7 @@ export const DATA_TABLE_CONTEXT = createContextKey<{
   pageCount: number;
 }>('base-data-table');
 export const DATA_TABLE_ROW_CONTEXT = createContextKey<{ rowKey: string }>('base-data-table-row');
-function setupRoot(def: DefHandle<DataTableRootProps, any>) {
+function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
   tableRootBehavior();
   def.anatomy.claim(DATA_TABLE_FAMILY, { role: 'root' });
   asCollection().configure({ family: DATA_TABLE_FAMILY, itemRole: 'row' });
@@ -138,7 +134,7 @@ function setupRoot(def: DefHandle<DataTableRootProps, any>) {
     view = dataView([]);
   const rowCount = def.state.numberDiscrete('filteredCount', 0);
   def.expose.state('filteredCount', rowCount);
-  for (const name of ['sortChange', 'pageChange', 'selectionChange'])
+  for (const name of ['sortChange', 'pageChange', 'selectionChange'] as const)
     def.expose.event(name, { payload: 'json' });
   const publish = (run: RunHandle<DataTableRootProps>) => {
     const p = run.props.get();
@@ -229,9 +225,13 @@ function setupRoot(def: DefHandle<DataTableRootProps, any>) {
     owner = null;
   });
 }
-export const asDataTableRoot = defineAsHook({ name: 'as-data-table-root', setup: setupRoot });
+export const asDataTableRoot = defineAsHook<
+  DataTableRootProps,
+  DataTableRootExposes,
+  DataTableRootAsHookContract
+>({ name: 'as-data-table-root', setup: setupRoot });
 export const dataTableRoot = definePrototype({ name: 'base-data-table-root', setup: setupRoot });
-function setupRow(def: DefHandle<DataTableRowProps, any>) {
+function setupRow(def: DefHandle<DataTableRowProps, DataTableRowExposes>) {
   tableRowBehavior();
   asCollectionItem().configure({
     family: DATA_TABLE_FAMILY,
@@ -285,9 +285,13 @@ function setupRow(def: DefHandle<DataTableRowProps, any>) {
     if (key.get()) callOwner(run, DATA_TABLE_FAMILY, 'requestSelection', key.get());
   });
 }
-export const asDataTableRow = defineAsHook({ name: 'as-data-table-row', setup: setupRow });
+export const asDataTableRow = defineAsHook<
+  DataTableRowProps,
+  DataTableRowExposes,
+  DataTableRowAsHookContract
+>({ name: 'as-data-table-row', setup: setupRow });
 export const dataTableRow = definePrototype({ name: 'base-data-table-row', setup: setupRow });
-function setupCell(def: DefHandle<DataTableCellProps, any>) {
+function setupCell(def: DefHandle<DataTableCellProps, DataTableCellExposes>) {
   tableCellBehavior();
   def.props.define({ columnKey: { type: 'string' } });
   def.props.setDefaults({ columnKey: '' });
@@ -317,9 +321,13 @@ function setupCell(def: DefHandle<DataTableCellProps, any>) {
   });
   return () => [value.get()];
 }
-export const asDataTableCell = defineAsHook({ name: 'as-data-table-cell', setup: setupCell });
+export const asDataTableCell = defineAsHook<
+  DataTableCellProps,
+  DataTableCellExposes,
+  DataTableCellAsHookContract
+>({ name: 'as-data-table-cell', setup: setupCell });
 export const dataTableCell = definePrototype({ name: 'base-data-table-cell', setup: setupCell });
-function setupHeader(def: DefHandle<DataTableHeaderProps, any>) {
+function setupHeader(def: DefHandle<DataTableHeaderProps, DataTableHeaderExposes>) {
   tableHeaderBehavior();
   def.props.define({ sortable: { type: 'boolean' } });
   def.props.setDefaults({ sortable: true, headerKind: 'column' });
@@ -342,15 +350,23 @@ function setupHeader(def: DefHandle<DataTableHeaderProps, any>) {
       callOwner(run, DATA_TABLE_FAMILY, 'requestSort', run.props.get().headerKey);
   });
 }
-export const asDataTableHeader = defineAsHook({ name: 'as-data-table-header', setup: setupHeader });
+export const asDataTableHeader = defineAsHook<
+  DataTableHeaderProps,
+  DataTableHeaderExposes,
+  DataTableHeaderAsHookContract
+>({ name: 'as-data-table-header', setup: setupHeader });
 export const dataTableHeader = definePrototype({
   name: 'base-data-table-header',
   setup: setupHeader,
 });
-function setupCaption(_def: DefHandle<any, any>) {
+function setupCaption(_def: DefHandle<DataTableCaptionProps, DataTableCaptionExposes>) {
   tableCaptionBehavior();
 }
-export const asDataTableCaption = defineAsHook({
+export const asDataTableCaption = defineAsHook<
+  DataTableCaptionProps,
+  DataTableCaptionExposes,
+  DataTableCaptionAsHookContract
+>({
   name: 'as-data-table-caption',
   setup: setupCaption,
 });
@@ -359,7 +375,7 @@ export const dataTableCaption = definePrototype({
   setup: setupCaption,
 });
 function pageControl(delta: number) {
-  return (def: DefHandle<any, any>) => {
+  return (def: DefHandle<DataTablePreviousProps, DataTablePreviousExposes>) => {
     asButton();
     def.anatomy.claim(DATA_TABLE_FAMILY, { role: delta < 0 ? 'previous' : 'next' });
     def.context.subscribe(DATA_TABLE_CONTEXT);
@@ -369,7 +385,11 @@ function pageControl(delta: number) {
     });
   };
 }
-export const asDataTablePrevious = defineAsHook({
+export const asDataTablePrevious = defineAsHook<
+  DataTablePreviousProps,
+  DataTablePreviousExposes,
+  DataTablePreviousAsHookContract
+>({
   name: 'as-data-table-previous',
   setup: pageControl(-1),
 });
@@ -377,7 +397,11 @@ export const dataTablePrevious = definePrototype({
   name: 'base-data-table-previous',
   setup: pageControl(-1),
 });
-export const asDataTableNext = defineAsHook({ name: 'as-data-table-next', setup: pageControl(1) });
+export const asDataTableNext = defineAsHook<
+  DataTableNextProps,
+  DataTableNextExposes,
+  DataTableNextAsHookContract
+>({ name: 'as-data-table-next', setup: pageControl(1) });
 export const dataTableNext = definePrototype({
   name: 'base-data-table-next',
   setup: pageControl(1),

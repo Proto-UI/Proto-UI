@@ -1,7 +1,17 @@
+import type {
+  TreeRootProps,
+  TreeRootExposes,
+  TreeItemProps,
+  TreeItemExposes,
+  TreeGroupProps,
+  TreeGroupExposes,
+  TreeToggleProps,
+  TreeToggleExposes,
+} from '@proto.ui/prototypes-base/tree';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import { asTreeRoot, asTreeItem, asTreeGroup, asTreeToggle } from '@proto.ui/prototypes-base/tree';
 export type * from '@proto.ui/prototypes-base/tree';
-export const treeRoot = definePrototype({
+export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
   name: 'bootstrap-2-3-2-tree-root',
   setup(def) {
     const behavior = asTreeRoot();
@@ -25,7 +35,7 @@ export const treeRoot = definePrototype({
   },
 });
 export { treeRoot as bootstrap232TreeRoot };
-export const treeItem = definePrototype({
+export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
   name: 'bootstrap-2-3-2-tree-item',
   setup(def) {
     const behavior = asTreeItem();
@@ -54,7 +64,7 @@ export const treeItem = definePrototype({
   },
 });
 export { treeItem as bootstrap232TreeItem };
-export const treeGroup = definePrototype({
+export const treeGroup = definePrototype<TreeGroupProps, TreeGroupExposes>({
   name: 'bootstrap-2-3-2-tree-group',
   setup(def) {
     const behavior = asTreeGroup();
@@ -74,7 +84,7 @@ export const treeGroup = definePrototype({
   },
 });
 export { treeGroup as bootstrap232TreeGroup };
-export const treeToggle = definePrototype({
+export const treeToggle = definePrototype<TreeToggleProps, TreeToggleExposes>({
   name: 'bootstrap-2-3-2-tree-toggle',
   setup(def) {
     const behavior = asTreeToggle();

@@ -1,3 +1,19 @@
+import type {
+  DataTableRootProps,
+  DataTableRootExposes,
+  DataTableRowProps,
+  DataTableRowExposes,
+  DataTableCellProps,
+  DataTableCellExposes,
+  DataTableHeaderProps,
+  DataTableHeaderExposes,
+  DataTableCaptionProps,
+  DataTableCaptionExposes,
+  DataTablePreviousProps,
+  DataTablePreviousExposes,
+  DataTableNextProps,
+  DataTableNextExposes,
+} from '@proto.ui/prototypes-base/data-table';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asDataTableRoot,
@@ -9,7 +25,7 @@ import {
   asDataTableNext,
 } from '@proto.ui/prototypes-base/data-table';
 export type * from '@proto.ui/prototypes-base/data-table';
-export const dataTableRoot = definePrototype({
+export const dataTableRoot = definePrototype<DataTableRootProps, DataTableRootExposes>({
   name: 'bootstrap-2-3-2-data-table-root',
   setup(def) {
     const behavior = asDataTableRoot();
@@ -34,7 +50,7 @@ export const dataTableRoot = definePrototype({
   },
 });
 export { dataTableRoot as bootstrap232DataTableRoot };
-export const dataTableRow = definePrototype({
+export const dataTableRow = definePrototype<DataTableRowProps, DataTableRowExposes>({
   name: 'bootstrap-2-3-2-data-table-row',
   setup(def) {
     const behavior = asDataTableRow();
@@ -57,7 +73,7 @@ export const dataTableRow = definePrototype({
   },
 });
 export { dataTableRow as bootstrap232DataTableRow };
-export const dataTableCell = definePrototype({
+export const dataTableCell = definePrototype<DataTableCellProps, DataTableCellExposes>({
   name: 'bootstrap-2-3-2-data-table-cell',
   setup(def) {
     const behavior = asDataTableCell();
@@ -78,7 +94,7 @@ export const dataTableCell = definePrototype({
   },
 });
 export { dataTableCell as bootstrap232DataTableCell };
-export const dataTableHeader = definePrototype({
+export const dataTableHeader = definePrototype<DataTableHeaderProps, DataTableHeaderExposes>({
   name: 'bootstrap-2-3-2-data-table-header',
   setup(def) {
     const behavior = asDataTableHeader();
@@ -103,7 +119,7 @@ export const dataTableHeader = definePrototype({
   },
 });
 export { dataTableHeader as bootstrap232DataTableHeader };
-export const dataTableCaption = definePrototype({
+export const dataTableCaption = definePrototype<DataTableCaptionProps, DataTableCaptionExposes>({
   name: 'bootstrap-2-3-2-data-table-caption',
   setup(def) {
     const behavior = asDataTableCaption();
@@ -126,7 +142,7 @@ export const dataTableCaption = definePrototype({
   },
 });
 export { dataTableCaption as bootstrap232DataTableCaption };
-export const dataTablePrevious = definePrototype({
+export const dataTablePrevious = definePrototype<DataTablePreviousProps, DataTablePreviousExposes>({
   name: 'bootstrap-2-3-2-data-table-previous',
   setup(def) {
     const behavior = asDataTablePrevious();
@@ -151,7 +167,7 @@ export const dataTablePrevious = definePrototype({
   },
 });
 export { dataTablePrevious as bootstrap232DataTablePrevious };
-export const dataTableNext = definePrototype({
+export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextExposes>({
   name: 'bootstrap-2-3-2-data-table-next',
   setup(def) {
     const behavior = asDataTableNext();

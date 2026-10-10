@@ -1,7 +1,17 @@
+import type {
+  TreeRootProps,
+  TreeRootExposes,
+  TreeItemProps,
+  TreeItemExposes,
+  TreeGroupProps,
+  TreeGroupExposes,
+  TreeToggleProps,
+  TreeToggleExposes,
+} from '@proto.ui/prototypes-base/tree';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import { asTreeRoot, asTreeItem, asTreeGroup, asTreeToggle } from '@proto.ui/prototypes-base/tree';
 export type * from '@proto.ui/prototypes-base/tree';
-export const treeRoot = definePrototype({
+export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
   name: 'liquid-glass-tree-root',
   setup(def) {
     const behavior = asTreeRoot();
@@ -32,7 +42,7 @@ export const treeRoot = definePrototype({
   },
 });
 export { treeRoot as liquidGlassTreeRoot };
-export const treeItem = definePrototype({
+export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
   name: 'liquid-glass-tree-item',
   setup(def) {
     const behavior = asTreeItem();
@@ -61,7 +71,7 @@ export const treeItem = definePrototype({
   },
 });
 export { treeItem as liquidGlassTreeItem };
-export const treeGroup = definePrototype({
+export const treeGroup = definePrototype<TreeGroupProps, TreeGroupExposes>({
   name: 'liquid-glass-tree-group',
   setup(def) {
     const behavior = asTreeGroup();
@@ -81,7 +91,7 @@ export const treeGroup = definePrototype({
   },
 });
 export { treeGroup as liquidGlassTreeGroup };
-export const treeToggle = definePrototype({
+export const treeToggle = definePrototype<TreeToggleProps, TreeToggleExposes>({
   name: 'liquid-glass-tree-toggle',
   setup(def) {
     const behavior = asTreeToggle();

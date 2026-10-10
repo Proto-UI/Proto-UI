@@ -1,3 +1,15 @@
+import type {
+  VirtualListRootProps,
+  VirtualListRootExposes,
+  VirtualListRootAsHookContract,
+  VirtualListViewportProps,
+  VirtualListViewportExposes,
+  VirtualListViewportAsHookContract,
+  VirtualListContentProps,
+  VirtualListContentExposes,
+  VirtualListContentAsHookContract,
+} from './types';
+export type * from './types';
 import {
   createAnatomyFamily,
   defineAsHook,
@@ -9,12 +21,6 @@ import { asAccessible } from '@proto.ui/hooks';
 import { asScrollAreaRoot, asScrollAreaViewport } from '../scroll-area';
 import { createWindowedCollection } from './model';
 export * from './model';
-export interface VirtualListRootProps {
-  itemKeys?: readonly string[];
-  overscanItems?: number;
-  maxMaterializedItems?: number;
-  a11yLabel?: string;
-}
 export const VIRTUAL_LIST_FAMILY = createAnatomyFamily('base-virtual-list', {
   roles: {
     root: { cardinality: { min: 1, max: 1 } },
@@ -22,7 +28,7 @@ export const VIRTUAL_LIST_FAMILY = createAnatomyFamily('base-virtual-list', {
     content: { cardinality: { min: 1, max: 1 } },
   },
 });
-function setupRoot(def: DefHandle<VirtualListRootProps, any>) {
+function setupRoot(def: DefHandle<VirtualListRootProps, VirtualListRootExposes>) {
   asScrollAreaRoot();
   def.anatomy.claim(VIRTUAL_LIST_FAMILY, { role: 'root' });
   def.props.define({
@@ -60,16 +66,24 @@ function setupRoot(def: DefHandle<VirtualListRootProps, any>) {
   def.props.watchAll(sync);
   def.lifecycle.onUnmounted(() => collection.invalidate());
 }
-export const asVirtualListRoot = defineAsHook({ name: 'as-virtual-list-root', setup: setupRoot });
+export const asVirtualListRoot = defineAsHook<
+  VirtualListRootProps,
+  VirtualListRootExposes,
+  VirtualListRootAsHookContract
+>({ name: 'as-virtual-list-root', setup: setupRoot });
 export const virtualListRoot = definePrototype({
   name: 'base-virtual-list-root',
   setup: setupRoot,
 });
-function setupViewport(def: DefHandle<Record<string, never>, any>) {
+function setupViewport(def: DefHandle<VirtualListViewportProps, VirtualListViewportExposes>) {
   asScrollAreaViewport();
   def.anatomy.claim(VIRTUAL_LIST_FAMILY, { role: 'viewport' });
 }
-export const asVirtualListViewport = defineAsHook({
+export const asVirtualListViewport = defineAsHook<
+  VirtualListViewportProps,
+  VirtualListViewportExposes,
+  VirtualListViewportAsHookContract
+>({
   name: 'as-virtual-list-viewport',
   setup: setupViewport,
 });
@@ -77,11 +91,15 @@ export const virtualListViewport = definePrototype({
   name: 'base-virtual-list-viewport',
   setup: setupViewport,
 });
-function setupContent(def: DefHandle<Record<string, never>, any>) {
+function setupContent(def: DefHandle<VirtualListContentProps, VirtualListContentExposes>) {
   def.anatomy.claim(VIRTUAL_LIST_FAMILY, { role: 'content' });
   asAccessible().role('list');
 }
-export const asVirtualListContent = defineAsHook({
+export const asVirtualListContent = defineAsHook<
+  VirtualListContentProps,
+  VirtualListContentExposes,
+  VirtualListContentAsHookContract
+>({
   name: 'as-virtual-list-content',
   setup: setupContent,
 });

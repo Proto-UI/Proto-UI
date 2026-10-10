@@ -1,3 +1,11 @@
+import type {
+  VirtualListRootProps,
+  VirtualListRootExposes,
+  VirtualListViewportProps,
+  VirtualListViewportExposes,
+  VirtualListContentProps,
+  VirtualListContentExposes,
+} from '@proto.ui/prototypes-base/virtual-list';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asVirtualListRoot,
@@ -5,7 +13,7 @@ import {
   asVirtualListContent,
 } from '@proto.ui/prototypes-base/virtual-list';
 export type * from '@proto.ui/prototypes-base/virtual-list';
-export const virtualListRoot = definePrototype({
+export const virtualListRoot = definePrototype<VirtualListRootProps, VirtualListRootExposes>({
   name: 'bootstrap-2-3-2-virtual-list-root',
   setup(def) {
     const behavior = asVirtualListRoot();
@@ -30,7 +38,10 @@ export const virtualListRoot = definePrototype({
   },
 });
 export { virtualListRoot as bootstrap232VirtualListRoot };
-export const virtualListViewport = definePrototype({
+export const virtualListViewport = definePrototype<
+  VirtualListViewportProps,
+  VirtualListViewportExposes
+>({
   name: 'bootstrap-2-3-2-virtual-list-viewport',
   setup(def) {
     const behavior = asVirtualListViewport();
@@ -51,7 +62,10 @@ export const virtualListViewport = definePrototype({
   },
 });
 export { virtualListViewport as bootstrap232VirtualListViewport };
-export const virtualListContent = definePrototype({
+export const virtualListContent = definePrototype<
+  VirtualListContentProps,
+  VirtualListContentExposes
+>({
   name: 'bootstrap-2-3-2-virtual-list-content',
   setup(def) {
     const behavior = asVirtualListContent();

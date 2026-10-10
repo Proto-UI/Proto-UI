@@ -1,3 +1,11 @@
+import type {
+  MessageScrollerRootProps,
+  MessageScrollerRootExposes,
+  MessageScrollerViewportProps,
+  MessageScrollerViewportExposes,
+  MessageScrollerJumpProps,
+  MessageScrollerJumpExposes,
+} from '@proto.ui/prototypes-base/message-scroller';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asMessageScrollerRoot,
@@ -5,7 +13,10 @@ import {
   asMessageScrollerJump,
 } from '@proto.ui/prototypes-base/message-scroller';
 export type * from '@proto.ui/prototypes-base/message-scroller';
-export const messageScrollerRoot = definePrototype({
+export const messageScrollerRoot = definePrototype<
+  MessageScrollerRootProps,
+  MessageScrollerRootExposes
+>({
   name: 'liquid-glass-message-scroller-root',
   setup(def) {
     const behavior = asMessageScrollerRoot();
@@ -36,7 +47,10 @@ export const messageScrollerRoot = definePrototype({
   },
 });
 export { messageScrollerRoot as liquidGlassMessageScrollerRoot };
-export const messageScrollerViewport = definePrototype({
+export const messageScrollerViewport = definePrototype<
+  MessageScrollerViewportProps,
+  MessageScrollerViewportExposes
+>({
   name: 'liquid-glass-message-scroller-viewport',
   setup(def) {
     const behavior = asMessageScrollerViewport();
@@ -58,7 +72,10 @@ export const messageScrollerViewport = definePrototype({
   },
 });
 export { messageScrollerViewport as liquidGlassMessageScrollerViewport };
-export const messageScrollerJump = definePrototype({
+export const messageScrollerJump = definePrototype<
+  MessageScrollerJumpProps,
+  MessageScrollerJumpExposes
+>({
   name: 'liquid-glass-message-scroller-jump',
   setup(def) {
     const behavior = asMessageScrollerJump();

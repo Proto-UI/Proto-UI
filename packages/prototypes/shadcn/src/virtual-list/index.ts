@@ -1,3 +1,11 @@
+import type {
+  VirtualListRootProps,
+  VirtualListRootExposes,
+  VirtualListViewportProps,
+  VirtualListViewportExposes,
+  VirtualListContentProps,
+  VirtualListContentExposes,
+} from '@proto.ui/prototypes-base/virtual-list';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asVirtualListRoot,
@@ -5,7 +13,7 @@ import {
   asVirtualListContent,
 } from '@proto.ui/prototypes-base/virtual-list';
 export type * from '@proto.ui/prototypes-base/virtual-list';
-export const virtualListRoot = definePrototype({
+export const virtualListRoot = definePrototype<VirtualListRootProps, VirtualListRootExposes>({
   name: 'shadcn-virtual-list-root',
   setup(def) {
     const behavior = asVirtualListRoot();
@@ -30,7 +38,10 @@ export const virtualListRoot = definePrototype({
   },
 });
 export { virtualListRoot as shadcnVirtualListRoot };
-export const virtualListViewport = definePrototype({
+export const virtualListViewport = definePrototype<
+  VirtualListViewportProps,
+  VirtualListViewportExposes
+>({
   name: 'shadcn-virtual-list-viewport',
   setup(def) {
     const behavior = asVirtualListViewport();
@@ -51,7 +62,10 @@ export const virtualListViewport = definePrototype({
   },
 });
 export { virtualListViewport as shadcnVirtualListViewport };
-export const virtualListContent = definePrototype({
+export const virtualListContent = definePrototype<
+  VirtualListContentProps,
+  VirtualListContentExposes
+>({
   name: 'shadcn-virtual-list-content',
   setup(def) {
     const behavior = asVirtualListContent();

@@ -1,3 +1,18 @@
+import type {
+  TreeRootProps,
+  TreeRootExposes,
+  TreeRootAsHookContract,
+  TreeItemProps,
+  TreeItemExposes,
+  TreeGroupProps,
+  TreeGroupExposes,
+  TreeGroupAsHookContract,
+  TreeToggleProps,
+  TreeToggleExposes,
+  TreeToggleAsHookContract,
+  TreeItemContract,
+} from './types';
+export type * from './types';
 import {
   createAnatomyFamily,
   createContextKey,
@@ -18,24 +33,6 @@ import { asButton } from '../button';
 import { callOwner, readPartState } from '../collection-controls/shared';
 import { treeEntries, type TreeNode, type TreeEntry } from './model';
 export * from './model';
-export interface TreeRootProps {
-  value?: string;
-  defaultValue?: string;
-  expandedKeys?: readonly string[];
-  defaultExpandedKeys?: readonly string[];
-  disabled?: boolean;
-  readOnly?: boolean;
-  a11yLabel?: string;
-}
-export interface TreeItemProps {
-  nodeKey?: string;
-  parentKey?: string;
-  textValue?: string;
-  disabled?: boolean;
-}
-export interface TreeGroupProps {
-  nodeKey?: string;
-}
 export const TREE_FAMILY = createAnatomyFamily('base-tree', {
   roles: {
     root: { cardinality: { min: 1, max: 1 } },
@@ -67,7 +64,7 @@ function nodes(run: RunHandle<any>): TreeNode[] {
     return typeof fn === 'function' ? [fn() as TreeNode] : [];
   });
 }
-function setupRoot(def: DefHandle<TreeRootProps, any>) {
+function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
   def.anatomy.claim(TREE_FAMILY, { role: 'root' });
   asCollection().configure({ family: TREE_FAMILY, itemRole: 'item' });
   def.props.define({
@@ -185,9 +182,12 @@ function setupRoot(def: DefHandle<TreeRootProps, any>) {
     owner = null;
   });
 }
-export const asTreeRoot = defineAsHook({ name: 'as-tree-root', setup: setupRoot });
+export const asTreeRoot = defineAsHook<TreeRootProps, TreeRootExposes, TreeRootAsHookContract>({
+  name: 'as-tree-root',
+  setup: setupRoot,
+});
 export const treeRoot = definePrototype({ name: 'base-tree-root', setup: setupRoot });
-function setupItem(def: DefHandle<TreeItemProps, any>) {
+function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
   def.props.define({
     nodeKey: { type: 'string' },
     parentKey: { type: 'string' },
@@ -237,7 +237,7 @@ function setupItem(def: DefHandle<TreeItemProps, any>) {
     focused: focus.focused,
     focusVisible: focus.focusVisible,
   }))
-    def.expose.state(key, state);
+    def.expose.state(key as keyof TreeItemExposes, state);
   let owner: RunHandle<TreeItemProps> | null = null;
   def.expose.method('getNode', () => ({
     key: owner?.props.get().nodeKey ?? '',
@@ -245,7 +245,7 @@ function setupItem(def: DefHandle<TreeItemProps, any>) {
     textValue: owner?.props.get().textValue ?? '',
     disabled: !!owner?.props.get().disabled,
   }));
-  def.expose.method('focusSelf', (options: any) => {
+  def.expose.method('focusSelf', (options) => {
     if (!disabled.get() && !hidden.get()) focus.focusSelf(options);
   });
   const sync = (run: RunHandle<TreeItemProps>) => {
@@ -348,27 +348,21 @@ function setupItem(def: DefHandle<TreeItemProps, any>) {
     }
   });
 }
-export type TreeItemContract = {
-  state: {
-    selected: import('@proto.ui/core').State<boolean>;
-    expanded: import('@proto.ui/core').State<boolean>;
-    hidden: import('@proto.ui/core').State<boolean>;
-    disabled: import('@proto.ui/core').State<boolean>;
-    focusVisible: import('@proto.ui/core').State<boolean>;
-  };
-};
-export const asTreeItem = defineAsHook<TreeItemProps, any, TreeItemContract>({
+export const asTreeItem = defineAsHook<TreeItemProps, TreeItemExposes, TreeItemContract>({
   name: 'as-tree-item',
   setup: setupItem,
 });
 export const treeItem = definePrototype({ name: 'base-tree-item', setup: setupItem });
-function setupGroup(def: DefHandle<TreeGroupProps, any>) {
+function setupGroup(def: DefHandle<TreeGroupProps, TreeGroupExposes>) {
   def.anatomy.claim(TREE_FAMILY, { role: 'group' });
   asAccessible().role('group');
 }
-export const asTreeGroup = defineAsHook({ name: 'as-tree-group', setup: setupGroup });
+export const asTreeGroup = defineAsHook<TreeGroupProps, TreeGroupExposes, TreeGroupAsHookContract>({
+  name: 'as-tree-group',
+  setup: setupGroup,
+});
 export const treeGroup = definePrototype({ name: 'base-tree-group', setup: setupGroup });
-function setupToggle(def: DefHandle<TreeGroupProps, any>) {
+function setupToggle(def: DefHandle<TreeToggleProps, TreeToggleExposes>) {
   asButton();
   def.anatomy.claim(TREE_FAMILY, { role: 'toggle' });
   def.props.define({ nodeKey: { type: 'string' } });
@@ -384,5 +378,9 @@ function setupToggle(def: DefHandle<TreeGroupProps, any>) {
     );
   });
 }
-export const asTreeToggle = defineAsHook({ name: 'as-tree-toggle', setup: setupToggle });
+export const asTreeToggle = defineAsHook<
+  TreeToggleProps,
+  TreeToggleExposes,
+  TreeToggleAsHookContract
+>({ name: 'as-tree-toggle', setup: setupToggle });
 export const treeToggle = definePrototype({ name: 'base-tree-toggle', setup: setupToggle });
