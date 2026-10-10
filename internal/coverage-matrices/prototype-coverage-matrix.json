@@ -16335,9 +16335,9 @@
       {
         "id": "prior-pr.855",
         "pr": 855,
-        "complete": false,
-        "disposition": "continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up",
-        "publication": "Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate.",
+        "complete": true,
+        "disposition": "Accepted original finite padding-box/border/composed-blend repair at reviewed 8989403; broader Liquid Card and optical/native acceptance remain separate.",
+        "publication": "The independent record URL is rebound to its actual published commit before PR advancement. Only the original prior-pr.855 scope is closed.",
         "observed": {
           "number": 855,
           "title": "fix(material): align padding-box geometry and bound composed blending",
@@ -16370,6 +16370,19 @@
           "mergeableState": "blocked",
           "url": "https://github.com/Proto-UI/Proto-UI/pull/855",
           "observedAt": "2026-10-06T19:05:00Z"
+        },
+        "closeout": {
+          "mode": "merged-main",
+          "sourcePullRequest": 855,
+          "sourceHead": "60c0bdeb17e5cdc3404512d66b33d0956fb392f1",
+          "integrationRevision": "8989403a6d3668948c7394f4a370d8269ba1a6ec",
+          "evidence": "https://github.com/Proto-UI/Proto-UI/actions/runs/38035138324/job/114163902189",
+          "ci": "passed",
+          "independentReview": {
+            "verdict": "approved",
+            "revision": "8989403a6d3668948c7394f4a370d8269ba1a6ec",
+            "source": "https://github.com/Proto-UI/Proto-UI/blob/204e4a552603236dc74aee4af60b92bbc3baca80/internal/records/2026-10-10-finf-pr855-material-closeout.md"
+          }
         }
       },
       {
