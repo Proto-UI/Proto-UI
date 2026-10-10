@@ -168,7 +168,7 @@ Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/Liqu
 
 Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
-The structured ledger has 296 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+The structured ledger has 304 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
 
 ## Previous work remains equal priority
 
@@ -242,6 +242,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-COLLAPSIBLE | P-SHADCN-COLLAPSIBLE | P-BRUTALIST-COLLAPSIBLE | P-BOOTSTRAP-2-3-2-COLLAPSIBLE | P-LIQUID-GLASS-COLLAPSIBLE |
 | P-BASE-COLLAPSIBLE-CONTENT | P-SHADCN-COLLAPSIBLE-CONTENT | P-BRUTALIST-COLLAPSIBLE-CONTENT | P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT | P-LIQUID-GLASS-COLLAPSIBLE-CONTENT |
 | P-BASE-COLLAPSIBLE-TRIGGER | P-SHADCN-COLLAPSIBLE-TRIGGER | P-BRUTALIST-COLLAPSIBLE-TRIGGER | P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER | P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER |
+| P-BASE-DATA-TABLE-HEADER-ROW | P-SHADCN-DATA-TABLE-HEADER-ROW | P-BRUTALIST-DATA-TABLE-HEADER-ROW | P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW | P-LIQUID-GLASS-DATA-TABLE-HEADER-ROW |
 | P-BASE-DIALOG | P-SHADCN-DIALOG | P-BRUTALIST-DIALOG | required missing | required missing |
 | P-BASE-DIALOG-CLOSE | P-SHADCN-DIALOG-CLOSE, P-SHADCN-DIALOG-CLOSE-ICON | P-BRUTALIST-DIALOG-CLOSE, P-BRUTALIST-DIALOG-CLOSE-ICON | required missing | required missing |
 | P-BASE-DIALOG-CONTENT | P-SHADCN-DIALOG-CONTENT | P-BRUTALIST-DIALOG-CONTENT | required missing | required missing |
@@ -291,14 +292,15 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-TABLE-CELL | required missing | required missing | required missing | required missing |
 | P-BASE-TABLE-HEADER-CELL | required missing | required missing | required missing | required missing |
 | P-BASE-TABLE-ROW | required missing | required missing | required missing | required missing |
-| P-BASE-TABS | P-SHADCN-TABS | P-BRUTALIST-TABS | required missing | required missing |
-| P-BASE-TABS-CONTENT | P-SHADCN-TABS-CONTENT | P-BRUTALIST-TABS-CONTENT | required missing | required missing |
+| P-BASE-TABS | P-SHADCN-TABS | P-BRUTALIST-TABS | P-BOOTSTRAP-2-3-2-TABS | P-LIQUID-GLASS-TABS |
+| P-BASE-TABS-CONTENT | P-SHADCN-TABS-CONTENT | P-BRUTALIST-TABS-CONTENT | P-BOOTSTRAP-2-3-2-TABS-CONTENT | P-LIQUID-GLASS-TABS-CONTENT |
 | P-BASE-TABS-INDICATOR | required missing | required missing | required missing | required missing |
-| P-BASE-TABS-LIST | P-SHADCN-TABS-LIST | P-BRUTALIST-TABS-LIST | required missing | required missing |
-| P-BASE-TABS-TRIGGER | P-SHADCN-TABS-TRIGGER | P-BRUTALIST-TABS-TRIGGER | required missing | required missing |
+| P-BASE-TABS-LIST | P-SHADCN-TABS-LIST | P-BRUTALIST-TABS-LIST | P-BOOTSTRAP-2-3-2-TABS-LIST | P-LIQUID-GLASS-TABS-LIST |
+| P-BASE-TABS-TRIGGER | P-SHADCN-TABS-TRIGGER | P-BRUTALIST-TABS-TRIGGER | P-BOOTSTRAP-2-3-2-TABS-TRIGGER | P-LIQUID-GLASS-TABS-TRIGGER |
 | P-BASE-TEXT | P-SHADCN-TEXT | P-BRUTALIST-TEXT | P-BOOTSTRAP-2-3-2-TEXT | P-LIQUID-GLASS-TEXT |
 | P-BASE-TEXTAREA | P-SHADCN-TEXTAREA | P-BRUTALIST-TEXTAREA | P-BOOTSTRAP-2-3-2-TEXTAREA | required missing |
 | P-BASE-TOGGLE | P-SHADCN-TOGGLE | P-BRUTALIST-TOGGLE | P-BOOTSTRAP-2-3-2-TOGGLE | required missing |
+| P-BASE-TOGGLE-GROUP | P-SHADCN-TOGGLE-GROUP | P-BRUTALIST-TOGGLE-GROUP | P-BOOTSTRAP-2-3-2-TOGGLE-GROUP | P-LIQUID-GLASS-TOGGLE-GROUP |
 | P-BASE-TOOLTIP | P-SHADCN-TOOLTIP | P-BRUTALIST-TOOLTIP | required missing | required missing |
 | P-BASE-TOOLTIP-CONTENT | P-SHADCN-TOOLTIP-CONTENT | P-BRUTALIST-TOOLTIP-CONTENT | required missing | required missing |
 | P-BASE-TOOLTIP-GROUP | P-SHADCN-TOOLTIP-GROUP | P-BRUTALIST-TOOLTIP-GROUP | required missing | required missing |
