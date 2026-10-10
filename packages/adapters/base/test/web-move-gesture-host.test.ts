@@ -166,3 +166,141 @@ describe('adapter-base: Web Move Gesture host', () => {
     lease.dispose();
   });
 });
+
+describe('adapter-base: shared Move ownership and reentrancy', () => {
+  function target(parent: HTMLElement = document.body) {
+    const element = document.createElement('div');
+    parent.append(element);
+    installPointerCapture(element);
+    return element;
+  }
+  function binding(element: HTMLElement, phases: string[]) {
+    return {
+      target: element,
+      axis: 'horizontal' as const,
+      activation: 'immediate' as const,
+      onStart: () => phases.push('start'),
+      onMove: () => phases.push('move'),
+      onEnd: () => phases.push('end'),
+      onCancel: (reason: MoveGestureCancelReason) => phases.push(reason),
+    };
+  }
+  it('gives overlapping same-target bindings one owner and restores shared styles only after the last lease', () => {
+    const element = target();
+    element.style.touchAction = 'pan-y';
+    element.style.userSelect = 'text';
+    const first: string[] = [];
+    const second: string[] = [];
+    const a = createWebMoveGestureHost().attach(binding(element, first));
+    const b = createWebMoveGestureHost().attach(binding(element, second));
+    element.dispatchEvent(pointer('pointerdown'));
+    element.dispatchEvent(pointer('pointerdown', { pointerId: 8 }));
+    expect(first).toEqual(['start']);
+    expect(second).toEqual([]);
+    a.dispose();
+    expect(element.style.touchAction).toBe('none');
+    element.dispatchEvent(pointer('pointerdown', { pointerId: 8 }));
+    expect(second).toEqual(['start']);
+    b.dispose();
+    expect(element.style.touchAction).toBe('pan-y');
+    expect(element.style.userSelect).toBe('text');
+  });
+  it('does not steal a bubbling or concurrent contact, while distinct tracks accept distinct contacts', () => {
+    const outer = target();
+    const inner = target(outer);
+    const other = target();
+    const outerPhases: string[] = [];
+    const innerPhases: string[] = [];
+    const otherPhases: string[] = [];
+    const a = createWebMoveGestureHost().attach(binding(outer, outerPhases));
+    const b = createWebMoveGestureHost().attach(binding(inner, innerPhases));
+    const c = createWebMoveGestureHost().attach(binding(other, otherPhases));
+    inner.dispatchEvent(pointer('pointerdown'));
+    other.dispatchEvent(pointer('pointerdown'));
+    other.dispatchEvent(pointer('pointerdown', { pointerId: 8 }));
+    expect(innerPhases).toEqual(['start']);
+    expect(outerPhases).toEqual([]);
+    expect(otherPhases).toEqual(['start']);
+    inner.dispatchEvent(pointer('pointerup'));
+    other.dispatchEvent(pointer('pointerup', { pointerId: 8 }));
+    expect(innerPhases).toEqual(['start', 'end']);
+    expect(otherPhases).toEqual(['start', 'end']);
+    a.dispose();
+    b.dispose();
+    c.dispose();
+  });
+  it('does not acquire after shouldStart disposes or replaces the binding', () => {
+    const element = target();
+    const replacement = target();
+    const phases: string[] = [];
+    const a = createWebMoveGestureHost().attach({
+      ...binding(element, phases),
+      shouldStart: () => {
+        a.dispose();
+        return true;
+      },
+    });
+    element.dispatchEvent(pointer('pointerdown'));
+    expect(phases).toEqual([]);
+    expect(element.style.touchAction).toBe('');
+    const b = createWebMoveGestureHost().attach({
+      ...binding(element, phases),
+      shouldStart: () => {
+        b.update(binding(replacement, phases));
+        return true;
+      },
+    });
+    element.dispatchEvent(pointer('pointerdown'));
+    expect(phases).toEqual([]);
+    replacement.dispatchEvent(pointer('pointerdown'));
+    expect(phases).toEqual(['start']);
+    b.dispose();
+  });
+  it('does not reconnect after onCancel disposes during target replacement', () => {
+    const element = target();
+    const replacement = target();
+    const phases: string[] = [];
+    const a = createWebMoveGestureHost().attach({
+      ...binding(element, phases),
+      onCancel: (reason) => {
+        phases.push(reason);
+        a.dispose();
+      },
+    });
+    element.dispatchEvent(pointer('pointerdown'));
+    a.update(binding(replacement, phases));
+    replacement.dispatchEvent(pointer('pointerdown'));
+    expect(phases).toEqual(['start', 'target-replaced']);
+    expect(replacement.style.touchAction).toBe('');
+  });
+  it('keeps a captured stream outside the hit region without double delivery and cancels window ownership loss', () => {
+    const element = target();
+    const phases: string[] = [];
+    const lease = createWebMoveGestureHost().attach(binding(element, phases));
+    element.dispatchEvent(pointer('pointerdown'));
+    element.dispatchEvent(pointer('pointermove'));
+    document.dispatchEvent(pointer('pointermove'));
+    document.dispatchEvent(pointer('pointerup'));
+    expect(phases).toEqual(['start', 'move', 'move', 'end']);
+    element.dispatchEvent(pointer('pointerdown'));
+    window.dispatchEvent(new Event('blur'));
+    document.dispatchEvent(pointer('pointerup'));
+    expect(phases).toEqual(['start', 'move', 'move', 'end', 'start', 'lost-ownership']);
+    lease.dispose();
+  });
+  it('rejects synchronous capture loss before starting without leaking a terminal-only sample', () => {
+    const element = target();
+    const phases: string[] = [];
+    Object.assign(element, {
+      setPointerCapture() {
+        element.dispatchEvent(pointer('lostpointercapture'));
+      },
+    });
+    const lease = createWebMoveGestureHost().attach(binding(element, phases));
+    element.dispatchEvent(pointer('pointerdown'));
+    element.dispatchEvent(pointer('pointerup'));
+    expect(phases).toEqual([]);
+    lease.dispose();
+    expect(element.style.touchAction).toBe('');
+  });
+});
