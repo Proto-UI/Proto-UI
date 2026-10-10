@@ -53,15 +53,18 @@ for (const [family] of families)
       expect(f.indicator.getExposes().percentage.get()).toBe(50);
       expect(f.value.textContent).toBe('25');
       expect(f.root.getAttribute('role')).toBe('progressbar');
+      expect(f.root.getAttribute('aria-valuenow')).toBe('25');
       expect(f.root.getAttribute('aria-labelledby')).toBe(f.label.id);
       setElementProps(f.root, { value: 70, min: 0, max: 50 });
       await flush();
       expect(f.root.getExposes().value.get()).toBe(50);
+      expect(f.root.getAttribute('aria-valuenow')).toBe('50');
       expect(f.root.getExposes().status.get()).toBe('complete');
       setElementProps(f.root, { indeterminate: true });
       await flush();
       expect(f.indicator.getExposes().indeterminate.get()).toBe(true);
       expect(f.value.textContent).toBe('');
+      expect(f.root.hasAttribute('aria-valuenow')).toBe(false);
       setElementProps(f.root, { value: 0, min: 0, max: 0 });
       await flush();
       expect(f.root.getExposes().percentage.get()).toBe(0);
@@ -70,6 +73,7 @@ for (const [family] of families)
       const f = fixture('meter', { value: 90, low: 20, high: 70, optimum: 10 });
       await flush();
       expect(f.root.getAttribute('role')).toBe('meter');
+      expect(f.root.getAttribute('aria-valuenow')).toBe('90');
       expect(f.root.getExposes().status.get()).toBe('critical');
       expect(f.value.textContent).toBe('90');
       setElementProps(f.root, {
@@ -82,6 +86,7 @@ for (const [family] of families)
       await flush();
       expect(f.indicator.getExposes().status.get()).toBe('optimal');
       expect(f.value.textContent).toBe('Low pressure');
+      expect(f.root.getAttribute('aria-valuenow')).toBe('10');
       f.root.remove();
       await flush();
       document.body.append(f.root);

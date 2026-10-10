@@ -1051,6 +1051,14 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
 }
 
 function projectedStateAttributeValue(key: string, value: unknown): string | undefined {
+  // Range readouts use a string state so indeterminate can withdraw valueNow.
+  if (
+    key === 'valueNow' &&
+    typeof value === 'string' &&
+    /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) &&
+    Number.isFinite(Number(value))
+  )
+    return value;
   if (key === 'valueMin' || key === 'valueMax' || key === 'valueNow') {
     return typeof value === 'number' && Number.isFinite(value) ? String(value) : undefined;
   }

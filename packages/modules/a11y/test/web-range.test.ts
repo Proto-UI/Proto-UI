@@ -32,7 +32,7 @@ describe('portable range accessibility projection', () => {
     expect(target.hasAttribute('aria-valuemax')).toBe(false);
   });
 
-  it.each([NaN, Infinity, -Infinity, '10', true, {}, []])(
+  it.each([NaN, Infinity, -Infinity, 'ten', true, {}, []])(
     'withdraws malformed numeric range fact %j',
     (value) => {
       const target = document.createElement('div');
@@ -61,6 +61,41 @@ describe('portable range accessibility projection', () => {
     expect(first.hasAttribute('aria-valuenow')).toBe(false);
     expect(second.getAttribute('aria-valuemax')).toBe('100');
     expect(second.hasAttribute('aria-valuenow')).toBe(false);
+    project.dispose?.();
+  });
+});
+
+describe('nullable range readout string representation', () => {
+  it.each(['0', '-0', '-2.5', '1.25', '1e-7', '1E+3'])(
+    'projects finite decimal numeric text %s',
+    (value) => {
+      const target = document.createElement('div');
+      const project = createWebA11yProjector(target);
+      project(snapshot({ valueNow: value }));
+      expect(target.getAttribute('aria-valuenow')).toBe(value);
+      project.dispose?.();
+    }
+  );
+  it.each([
+    '',
+    ' ',
+    ' 0',
+    '0 ',
+    'NaN',
+    'Infinity',
+    '-Infinity',
+    '1e309',
+    '0x10',
+    '01',
+    '+1',
+    'text',
+  ])('withdraws non-decimal or indeterminate numeric text %j', (value) => {
+    const target = document.createElement('div');
+    const project = createWebA11yProjector(target);
+    const state = snapshot({ valueNow: '10' });
+    project(state);
+    project({ ...state, states: { valueNow: value } });
+    expect(target.hasAttribute('aria-valuenow')).toBe(false);
     project.dispose?.();
   });
 });

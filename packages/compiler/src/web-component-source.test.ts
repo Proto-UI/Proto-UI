@@ -403,3 +403,24 @@ describe('generated range accessibility facts', () => {
     expect(target.hasAttribute('aria-valuenow')).toBe(false);
   });
 });
+
+describe('generated nullable current range value', () => {
+  it('projects a numeric string and withdraws an indeterminate empty string', async () => {
+    const element = create(`import { definePrototype } from '@proto.ui/core';
+      import { asAccessible } from '@proto.ui/hooks';
+      export default definePrototype({ name: 'nullable-range-value', setup(def) {
+        const now = def.state.string('range.now', '-2.5');
+        const accessible = asAccessible();
+        accessible.role('progressbar');
+        accessible.state('valueNow', now);
+        def.expose.method('clear', () => { now.set(''); });
+        return (renderer) => renderer.el('span', 'Progress');
+      }});`);
+    document.body.append(element);
+    await Promise.resolve();
+    expect(element.getAttribute('aria-valuenow')).toBe('-2.5');
+    (element.getExposes() as { clear(): void }).clear();
+    await Promise.resolve();
+    expect(element.hasAttribute('aria-valuenow')).toBe(false);
+  });
+});

@@ -363,6 +363,7 @@ export function createNativeInteraction<Run>(options: {
   function read<T>(value: T | NativeState<T>): T { return typeof value === 'object' && value !== null && 'get' in value ? (value as NativeState<T>).get() : value as T; }
   function scalar(key: string, value: unknown): string | null {
     if (value === null || value === undefined || value === '') return null;
+    if (key === 'valueNow' && typeof value === 'string' && /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) && Number.isFinite(Number(value))) return value;
     if (['valueMin', 'valueMax', 'valueNow'].includes(key)) return typeof value === 'number' && Number.isFinite(value) ? String(value) : null;
     if (key === 'valueText') return typeof value === 'string' ? value : null;
     if (key === 'rowCount' || key === 'columnCount') return typeof value === 'number' && Number.isSafeInteger(value) && (value === -1 || value > 0) ? String(value) : null;
