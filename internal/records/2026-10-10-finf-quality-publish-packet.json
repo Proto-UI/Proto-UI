@@ -1,34 +1,34 @@
 {
   "status": "WIP prototype quality source; collector-selector failures retained; no new completion admission",
   "base": "5d96eb345ecc6e5e4b4831189d384f03a56d24c9",
-  "sourceCommit": "c2cbb8d6fce71e949f84f0358189184783505989",
+  "sourceCommit": "7b43b769cffe9de072ce2a6f46ad05ce3a758bdb",
   "sourceTree": "21deede869afddec39131b65af63e593460193a4",
   "orderedSourceCommits": [
-    "cbc7e262db2d001c42588b56aed9f3b7d74f7ed7",
-    "b07a91ff6274a31b3a16ccb71df0b2c99a088efb",
-    "353556bd5bdcff04ab3957d4374c549b6ad93dd8",
-    "0b4fced976562b6a00e3cf40596737195fc2a513",
-    "9b85760c3b916ea1e84afb4620a1c78ccc6537d4",
-    "04ae3e103aa92d26b3e760661e19be338c8e34e2",
-    "c1582b318387cf5ac194dfc6bdc1a88ccebb4c4b",
-    "a3f16457702f8fdb28be6d6a46f3455ccb4ff9cc",
-    "dd37830e059b725e58e0065c86d877070b3760e9",
-    "3279c544a5aa2cf0b52d2073d69d7fa2829b0b3b",
-    "3aa7f8eb7fb3658db70b3e62673f4c1a4009b605",
-    "3f48c175327ec67681c4196aff6e9789fa225290",
-    "c509f1ccbf4ce398b7c34d74f2b2ec7a7b93162c",
-    "2c9065ad49e702931834ecd67ccbaf402e585334",
-    "59c4c6ca1a25e71d2484df808657ee95dc2309dc",
-    "620fcd63211c9e31e2e3df5bb737b3660ad9191e",
-    "bb063eafa96f52786508a1a0dc6fd21220e6b027",
-    "8747c092e993bc36557d64b1a126cbe2b8064fc6",
-    "0b01d0614b1cc45b95f811a8b0eb5099f63e0731",
-    "15f4c5c918a6603d0c2b0c11ca8857eca21a8bb1",
-    "36f01f66c251df69f172d302688b866f1e5fd89c",
-    "9da8bf5750834f87c81b09a2b3668b769dac05a1",
-    "a62cf57102f5cad2c3413ac9a80b0cf43c3e8dad",
-    "7f6bd587732c6bc5c3821eb70cb1fe2727878bf6",
-    "c2cbb8d6fce71e949f84f0358189184783505989"
+    "1ed662bef122e4af942a7833e6f01e3b0c3a0a32",
+    "30ee8fe79e7eaaa47220edeef6c1e9496cee08de",
+    "7b5d19d3781fd7c3d015e403c93ddc4ba5f024ad",
+    "269938f284773b95b8c94a9074ee4389a8a267a9",
+    "c54c1a869b18eef9a6312b480f288ec42ad852d1",
+    "0f98206b8745f312490b79b80c26eaa19f10d773",
+    "9ce90ed9c873da1386bb84934b915d5aadc109eb",
+    "ae2c6a827558153931d363d02f1309c895ce4462",
+    "ae199f1c41e989028ba21f31f7ecc8b0d89bf216",
+    "b038700ec392c384bc9416dc325c477d57a51e31",
+    "c244b3b155fa3f733c40cfaf6229b5e403a2920f",
+    "199a59ffc097ab5b350df5bc444ce02b78fd57bb",
+    "d093e137611988dbadb942956c183c2110bb7d1b",
+    "d5593cef00922886d7d42acc781bd78cd25fc1cb",
+    "9dab16ccb9890fada3672bfcc2aa079f8500261b",
+    "1529f272441e56700b3ec15a63695bd4cd99be5f",
+    "df03e6bc1758ffcbe39da7ddbaa83e35f7f83168",
+    "384cfeb50ee02eaaee3abb971de5e702a30bf323",
+    "b65243b56e9b3bcddce486365679e0fcae878a31",
+    "b30c156fadb5afb5a68b338eb1fd86e29eb3b5af",
+    "cb75aea3bbbe111d9757e4fe58858861d7096142",
+    "ec363dfb023a9edf931b6c2b66b054471b2bd2a5",
+    "3f26b4c88d839aea9df75bfb970b3dc510bd2efb",
+    "c49e553f85ac7f5d53670e9e062962ad889ddf2c",
+    "7b43b769cffe9de072ce2a6f46ad05ce3a758bdb"
   ],
   "familyComponentEntries": 145,
   "namedPrototypeAtoms": 733,
@@ -75,7 +75,8 @@
     "types": {
       "workspace": "passed",
       "rangeSourceConsumer": "passed",
-      "nativeBrowserProof": "typechecked; not locally executed"
+      "nativeBrowserProof": "typechecked; not locally executed",
+      "officialAggregate": "Failed: check:types completes workspace tsc, then Astro reports five real DemoNode union errors in three existing demo helpers. The workspace-only pass never covered apps/www."
     },
     "catalogAuthoring": {
       "status": "passed",
@@ -123,7 +124,40 @@
     "historicalChecks": "The definition-rule agent-operations run passed 1632 tests on its earlier bound source. Earlier packed CLI physical-closure evidence stays tied to its recorded source; neither is relabeled as a fresh fifth-candidate full-suite or package-consumer pass.",
     "localTestedCodeRevision": "a62cf57102f5cad2c3413ac9a80b0cf43c3e8dad",
     "localFinalSourceRevision": "c2cbb8d6fce71e949f84f0358189184783505989",
-    "revisionIdentity": "The two local revision fields are immutable local test/source provenance, not current publication identities."
+    "revisionIdentity": "The two local revision fields are immutable local test/source provenance, not current publication identities.",
+    "publicPositioningBuild": {
+      "status": "failed",
+      "command": "node scripts/build/public-packages.mjs --package @proto.ui/module-positioning",
+      "diagnostic": "packages/modules/positioning/src/web/input-origin-anchor.ts(13,17): TS4058, inferred exported return type references the private inputOriginAnchorBrand and cannot be named in declarations.",
+      "scope": "Same frozen source; dependency builds completed for types/core/module-base/module-expose/module-anatomy. No full public-package build success is claimed."
+    },
+    "postFreezeVerification": {
+      "localTestedProofRevision": "60e94b0ebbf0ef94a1fa41d6f954a6c7f0bfd062",
+      "sourceUnchanged": true,
+      "record": "internal/records/2026-10-10-finf-quality-type-build-failures.md",
+      "localArtifacts": {
+        "finf-fifth-official-check-types.log": {
+          "bytes": 1747,
+          "sha256": "f82c76f7f72e5646bb5754bd403e02b0c8fb60a0c17226f738f09818051ced18"
+        },
+        "finf-fifth-official-check-types-no-telemetry.log": {
+          "bytes": 6866,
+          "sha256": "2892fd8f91517f13b520d57cc94ac7988aa90152ea8d2676ab91f7c329443c5d"
+        },
+        "finf-fifth-positioning-public-build.log": {
+          "bytes": 2509,
+          "sha256": "f99d8199fce91f4fd143362ae248b96c2359dab73606e85f5d9c002d8a64d4cf"
+        },
+        "finf-fifth-positioning-own-dist-build.log": {
+          "bytes": 2073,
+          "sha256": "5a0dbaa71fdb37154c1543e25bc8a27a02328a4621f6ee29ba62f05f4775f4aa"
+        },
+        "finf-fifth-positioning-coherent-dist-build.log": {
+          "bytes": 1203,
+          "sha256": "d8c6d172667dfa27af9b31669fd008efee07927011c56de474b68073a9b6ce05"
+        }
+      }
+    }
   },
   "styleMeasurements": "internal/records/2026-10-10-finf-quality-style-measurements.json",
   "retainedFailures": [
@@ -131,9 +165,12 @@
     "Calendar four-family capture/state-selector collection is incomplete; component-style visual completion remains blocked.",
     "The initial overlapping generator/test invocation imported one old Brutalist inventory; its real failure remains recorded, with final checks performed after generation and freeze.",
     "201-year Select initialization exceeded the observed 20-second window; the caption demo explicitly uses 21 years, while Calendar itself remains unbounded by that example.",
-    "Historical strict package-budget comparisons, earlier actual14ce Drawer Close failure, and all other recorded source/native failures remain unchanged."
+    "Historical strict package-budget comparisons, earlier actual14ce Drawer Close failure, and all other recorded source/native failures remain unchanged.",
+    "The official aggregate type-check retains five real Astro DemoNode union diagnostics; workspace-only tsc excludes the documentation application.",
+    "The normal public positioning declaration build retains TS4058 for its inferred opaque-anchor factory return type. These are source/build defects, not environment waivers."
   ],
   "remaining": [
+    "Separate post-freeze repairs and exact rechecks for the five documentation union errors and positioning public declaration TS4058; no modification of Compiler, Focus, or the opaque core brand.",
     "Official exact-head browser screenshots, real Drawer Close reachability, and actual caption combobox accessible-name queries",
     "Independent prototype-definition review and full family upstream comparison, without treating draft catalog presence as acceptance",
     "Collector owner implementation of shared capture/state interpretation; no component whitelist workaround",
@@ -163,5 +200,35 @@
       "P-BASE-DROPDOWN-MENU-TRIGGER"
     ],
     "reason": "Four genuine draft Base composition entities entered the catalog. Scope tracking only; complete=false and every acceptance gate remain unchanged."
+  },
+  "localSourceProvenance": {
+    "sourceCommit": "c2cbb8d6fce71e949f84f0358189184783505989",
+    "orderedSourceCommits": [
+      "cbc7e262db2d001c42588b56aed9f3b7d74f7ed7",
+      "b07a91ff6274a31b3a16ccb71df0b2c99a088efb",
+      "353556bd5bdcff04ab3957d4374c549b6ad93dd8",
+      "0b4fced976562b6a00e3cf40596737195fc2a513",
+      "9b85760c3b916ea1e84afb4620a1c78ccc6537d4",
+      "04ae3e103aa92d26b3e760661e19be338c8e34e2",
+      "c1582b318387cf5ac194dfc6bdc1a88ccebb4c4b",
+      "a3f16457702f8fdb28be6d6a46f3455ccb4ff9cc",
+      "dd37830e059b725e58e0065c86d877070b3760e9",
+      "3279c544a5aa2cf0b52d2073d69d7fa2829b0b3b",
+      "3aa7f8eb7fb3658db70b3e62673f4c1a4009b605",
+      "3f48c175327ec67681c4196aff6e9789fa225290",
+      "c509f1ccbf4ce398b7c34d74f2b2ec7a7b93162c",
+      "2c9065ad49e702931834ecd67ccbaf402e585334",
+      "59c4c6ca1a25e71d2484df808657ee95dc2309dc",
+      "620fcd63211c9e31e2e3df5bb737b3660ad9191e",
+      "bb063eafa96f52786508a1a0dc6fd21220e6b027",
+      "8747c092e993bc36557d64b1a126cbe2b8064fc6",
+      "0b01d0614b1cc45b95f811a8b0eb5099f63e0731",
+      "15f4c5c918a6603d0c2b0c11ca8857eca21a8bb1",
+      "36f01f66c251df69f172d302688b866f1e5fd89c",
+      "9da8bf5750834f87c81b09a2b3668b769dac05a1",
+      "a62cf57102f5cad2c3413ac9a80b0cf43c3e8dad",
+      "7f6bd587732c6bc5c3821eb70cb1fe2727878bf6",
+      "c2cbb8d6fce71e949f84f0358189184783505989"
+    ]
   }
 }
