@@ -151,6 +151,9 @@ describe('Finf source-bound representative feature screenshots', () => {
     await journey('calendar', async (page, previewer) => {
       await selectRuntime(page, previewer, 'react', '[role="gridcell"]', 42);
       expect(await previewer.getByRole('columnheader').count()).toBe(7);
+      // Query real host-computed accessible names; slot text or aria-label alone is not proof.
+      await expect.poll(() => previewer.getByRole('combobox', { name: /Month/ }).count()).toBe(1);
+      await expect.poll(() => previewer.getByRole('combobox', { name: /Year/ }).count()).toBe(1);
       const day = previewer.getByRole('gridcell', {
         name: 'Thursday, October 15, 2026',
         exact: true,
