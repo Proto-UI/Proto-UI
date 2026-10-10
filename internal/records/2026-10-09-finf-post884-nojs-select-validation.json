@@ -1,0 +1,293 @@
+{
+  "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+  "sourceTree": "9f549d60b0b668913c8fb58b9e7cde31a3fe1738",
+  "base": "884651a68b4579b0c0c5a2c5307cdd5c49d58186",
+  "scope": "bounded source repair and proof; full acceptance remains 0/68",
+  "executionBoundary": "Final-A checks ran with HEAD A and only generated proof matrix files and the new integration record dirty. Product, tests and tool sources equal A. Earlier source-check receipts ran before A was frozen; no clean-A execution is claimed for them.",
+  "functional": {
+    "files": 20,
+    "tests": 320,
+    "nativeExecuted": false
+  },
+  "checks": [
+    {
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "worktreeNote": "Only proof/record files differ; product, test and tool bytes equal frozen A",
+      "name": "functional-final-A",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/demo-narrow-reflow.test.ts",
+        "apps/www/src/components/PrototypePreviewer/demo-renderer.native-facts.test.ts",
+        "apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts",
+        "apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts",
+        "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+        "apps/www/src/content/docs/field-demo-layout.test.ts",
+        "apps/www/src/content/docs/zh-cn/field-browser-oracle.test.ts",
+        "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+        "apps/www/src/content/docs/zh-cn/select-overflow-observation.test.ts",
+        "packages/adapters/base/test/initial-paint-media-session.test.ts",
+        "packages/adapters/base/test/web-material-initial-binding.test.ts",
+        "packages/adapters/base/test/web-material-initial-paint.test.ts",
+        "packages/adapters/react/test/select-keyboard.integration.test.ts",
+        "packages/adapters/react/test/select.test.ts",
+        "packages/adapters/vue/test/select.test.ts",
+        "packages/adapters/vue2/test/select.test.ts",
+        "packages/cli/test/select-narrow-sizing.test.ts",
+        "packages/cli/test/select-projections.test.ts",
+        "packages/prototypes/liquid-glass/test/select-material.test.ts",
+        "packages/prototypes/test-utils/test/select-projections.behavior.test.ts",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/3ca1e20addac/finf-post884-union-evidence/functional-final-A-report.json"
+      ],
+      "startedAt": "2026-10-09T17:43:43.042662+00:00",
+      "finishedAt": "2026-10-09T17:44:17.114903+00:00",
+      "exitCode": 0
+    },
+    {
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "worktreeNote": "Only proof/record files differ; product, test and tool bytes equal frozen A",
+      "name": "nojs-controls-final-A",
+      "command": [
+        "node",
+        "--test",
+        "scripts/test/no-script-interaction.test.mjs",
+        "scripts/test/liquid-card-observation.test.mjs",
+        "scripts/release/test/liquid-card-candidate-workflow.test.mjs"
+      ],
+      "startedAt": "2026-10-09T17:44:17.115231+00:00",
+      "finishedAt": "2026-10-09T17:44:17.677585+00:00",
+      "exitCode": 0
+    },
+    {
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "worktreeNote": "Only proof/record files differ; product, test and tool bytes equal frozen A",
+      "name": "full-types-final-A",
+      "command": ["corepack", "pnpm@10.32.1", "check:types"],
+      "startedAt": "2026-10-09T17:45:24.303894+00:00",
+      "finishedAt": "2026-10-09T17:46:35.837029+00:00",
+      "exitCode": 0
+    },
+    {
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "worktreeNote": "Only proof/record files differ; product, test and tool bytes equal frozen A",
+      "name": "docs-build-final-A",
+      "command": ["corepack", "pnpm@10.32.1", "--filter", "apps-www", "build"],
+      "startedAt": "2026-10-09T17:46:35.837415+00:00",
+      "finishedAt": "2026-10-09T17:47:19.172437+00:00",
+      "exitCode": 0
+    },
+    {
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "worktreeNote": "Only proof/record files differ; product, test and tool bytes equal frozen A",
+      "name": "production-bundle-final-A",
+      "command": ["node", "scripts/coverage-matrices/check-website-production-bundle.mjs"],
+      "startedAt": "2026-10-09T17:47:19.172771+00:00",
+      "finishedAt": "2026-10-09T17:47:19.377595+00:00",
+      "exitCode": 0
+    },
+    {
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "worktreeNote": "Only proof/record files differ; product, test and tool bytes equal frozen A",
+      "name": "budgets-strict-final-A",
+      "command": ["node", "scripts/analysis/package-budgets.mjs", "--json"],
+      "startedAt": "2026-10-09T17:47:19.377931+00:00",
+      "finishedAt": "2026-10-09T17:47:20.272458+00:00",
+      "exitCode": 1
+    },
+    {
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "worktreeNote": "Only proof/record files differ; product, test and tool bytes equal frozen A",
+      "name": "budgets-finf-final-A",
+      "command": ["node", "scripts/analysis/package-budgets.mjs", "--json", "--finf-development"],
+      "startedAt": "2026-10-09T17:47:20.272815+00:00",
+      "finishedAt": "2026-10-09T17:47:21.178246+00:00",
+      "exitCode": 0
+    }
+  ],
+  "proofChecks": [
+    {
+      "name": "canonical-final-A",
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs", "--check"],
+      "startedAt": "2026-10-09T17:43:59.432661+00:00",
+      "finishedAt": "2026-10-09T17:44:00.570403+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "source-wall-final-A",
+      "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "startedAt": "2026-10-09T17:44:00.570696+00:00",
+      "finishedAt": "2026-10-09T17:46:28.914282+00:00",
+      "exitCode": 0
+    }
+  ],
+  "proofNegative": {
+    "command": ["node", "--test", "scripts/coverage-matrices/test/prototype-coverage.test.mjs"],
+    "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+    "exitCode": 0,
+    "tests": 113,
+    "log": "proof-negative-final.log"
+  },
+  "canonicalRefresh": {
+    "source": "dd0ce9c641f57d4b7fe6171187a7abb803a37cbd",
+    "bindingCount": 4206,
+    "changedCandidateKeys": [
+      "revision",
+      "sourceBindingsObject",
+      "sourceObjectProof",
+      "sourceBindings"
+    ],
+    "bindingsEqual": false,
+    "otherTopLevelFieldsEqual": true
+  },
+  "proofTreeCount": 121,
+  "logs": {
+    "budgets-finf-final-A.log": {
+      "bytes": 5117,
+      "sha256": "f4a2051dd80868f21b16be99b2cc3c6be89f3133af27c6fd1c0d8fcc46919e1b"
+    },
+    "budgets-finf.log": {
+      "bytes": 5117,
+      "sha256": "a226697d34b03f75791c36704c527f11920a3eb18b88bad9e380cdca76616b85"
+    },
+    "budgets-strict-final-A.log": {
+      "bytes": 4212,
+      "sha256": "9b6c64abaf7c941e02e881d7de4bcc974855cd850861bf613a0a8a05c169a45d"
+    },
+    "budgets-strict.log": {
+      "bytes": 4212,
+      "sha256": "9b6c64abaf7c941e02e881d7de4bcc974855cd850861bf613a0a8a05c169a45d"
+    },
+    "canonical-final-A.log": {
+      "bytes": 113,
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+    },
+    "canonical.log": {
+      "bytes": 113,
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+    },
+    "docs-build-final-A.log": {
+      "bytes": 316026,
+      "sha256": "05fe89f6a8798012dc0c92562873461677bf23fae934ee04f10cacf1a7964381"
+    },
+    "docs-build.log": {
+      "bytes": 316056,
+      "sha256": "04e4c0f69c05dddcf644a4d6b7ad70444c6e40442687e3f2c3d7f72004a239ca"
+    },
+    "full-types-final-A-environment-red.log": {
+      "bytes": 2710,
+      "sha256": "8ea07e63ff4116a24253bce3d929f10d4fe622271f7e294e5b9d31db283147e7"
+    },
+    "full-types-final-A.log": {
+      "bytes": 4824,
+      "sha256": "9108283d371b32281fa8fc996c64d2b68523b389b690e579b37df14c1d3c1642"
+    },
+    "full-types-restored.log": {
+      "bytes": 4824,
+      "sha256": "5b0b0c8bba005e3b2c7e755c433bbe46d0ab7b1e8a86baea5c93f51e81585666"
+    },
+    "full-types.log": {
+      "bytes": 2710,
+      "sha256": "b009c706c3ad4c0e849495e8a4c0e54ffdd655639edf2dfea476daf6b8060e80"
+    },
+    "functional-final-A.log": {
+      "bytes": 6389,
+      "sha256": "f5706fe8f6270dab36b0fbacda9839bd4eff126d14ad8bcc3043497f47772f6f"
+    },
+    "functional.log": {
+      "bytes": 6071,
+      "sha256": "05ee380c67e90c13696d27f652ea6e546854b31045e301c8d42f3aae38d09f8b"
+    },
+    "gpui-closure-final-A.log": {
+      "bytes": 124,
+      "sha256": "d892f81a09ba80e1d652efe0bb0cd69474d00c15801add1867f989cedafc8bdb"
+    },
+    "gpui-closure-restored.log": {
+      "bytes": 124,
+      "sha256": "d892f81a09ba80e1d652efe0bb0cd69474d00c15801add1867f989cedafc8bdb"
+    },
+    "gpui-closure.log": {
+      "bytes": 194,
+      "sha256": "13960d101b889683e156a9e17ed8d50192e7dd9f5621c7ceafca458c0ce5f2f2"
+    },
+    "nojs-controls-explicit-callback.log": {
+      "bytes": 4479,
+      "sha256": "ecbd441ce7ede368fabd7127774b20b050c7f02d68f6b0e22b350f418083a389"
+    },
+    "nojs-controls-final-A.log": {
+      "bytes": 4476,
+      "sha256": "7580412ced180a1da8fbf99ead07da97689219955c89cecd211f398c299db5e5"
+    },
+    "nojs-controls.log": {
+      "bytes": 4478,
+      "sha256": "8cbbab27c5c30b1ac63498b14e0a49fdd1333eaf7076eb7bcee0b30efc6724e8"
+    },
+    "preset-closure-final-A.log": {
+      "bytes": 48,
+      "sha256": "5a8c0763f9033a3f4ec5e33e1946e0685f9abd2480e45de0c06dff9385aa5841"
+    },
+    "preset-closure.log": {
+      "bytes": 48,
+      "sha256": "5a8c0763f9033a3f4ec5e33e1946e0685f9abd2480e45de0c06dff9385aa5841"
+    },
+    "production-bundle-final-A.log": {
+      "bytes": 171,
+      "sha256": "ccf37f16b0641edb78217985447c7acbc121b122941efdf3e419dc7a2c889294"
+    },
+    "production-bundle.log": {
+      "bytes": 171,
+      "sha256": "ccf37f16b0641edb78217985447c7acbc121b122941efdf3e419dc7a2c889294"
+    },
+    "proof-negative-final.log": {
+      "bytes": 10722,
+      "sha256": "364b214945b3ef44f0e0e6f22c6f3db5c08571c7be82f01df4861c2d9e2028bc"
+    },
+    "proof-negative-pre-source-red.log": {
+      "bytes": 72485,
+      "sha256": "6c3cdf6566af70326a092912dcd130b90a920df704cf809067dc6d84322dcd28"
+    },
+    "proof-negative.log": {
+      "bytes": 72485,
+      "sha256": "6c3cdf6566af70326a092912dcd130b90a920df704cf809067dc6d84322dcd28"
+    },
+    "proof-refresh.log": {
+      "bytes": 224,
+      "sha256": "4a96bba4439a00cd56350dfc3078591ee9928767e3aa58b128d371f316cc5396"
+    },
+    "select-object-import.log": {
+      "bytes": 46,
+      "sha256": "9ee8a62ee9c63e6593dea744ab16ecea0ae89d698c415ee891643aa0cc455b15"
+    },
+    "source-normal-hooks.log": {
+      "bytes": 870,
+      "sha256": "9037da26dbb74b1ccf446c5dda438e3175926c4789281ed5f597fc2f34131e5b"
+    },
+    "source-wall-corrected.log": {
+      "bytes": 36,
+      "sha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    "source-wall-final-A.log": {
+      "bytes": 36,
+      "sha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    "source-wall-initial.log": {
+      "bytes": 707,
+      "sha256": "b63310156b06c78f7c63bffc314328c64366ea313d58f5f4d2c6bd769e01de15"
+    }
+  },
+  "limitations": [
+    "12 native no-JavaScript cases not run on A",
+    "Select 320px, 200%, RTL native readability and geometry remain unverified; 128px stress/declaration-budget boundary remains unverified natively",
+    "No new screenshots; old screenshots do not represent A",
+    "Strict budget remains false: React +445, Vue +280, Web Component +72 gzip bytes; Finf advisory exit 0 does not change strict result",
+    "Four public SSR completion flags false, 258 draft identities, 0/68 full delivery; no promotion, merge or release"
+  ],
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}
