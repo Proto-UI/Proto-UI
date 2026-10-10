@@ -1,0 +1,21 @@
+---
+title: brutalist Progress
+description: A bounded numerical completion indicator with shared Base semantics.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-brutalist-progress"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+
+Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. Omitted value or indeterminate=true represents unknown progress and withholds the current accessible value.
+
+Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+
+Import progressRoot, progressLabel, progressTrack, progressIndicator and progressValue from the progress subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.
