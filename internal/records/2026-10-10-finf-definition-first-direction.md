@@ -21,3 +21,5 @@ Next: prototype owners submit bounded definition and test slices with actual beh
 ## Verification
 
 The independent definition reviewer read the two changed documents and found no blocking factual or lifecycle issue in this scoped rule change. The repository's agent-operations structure checker and contributor-skill checker both passed (42 skills, 40 lazy leaves). The Agent understanding projection check did not pass: the existing spec workspace references three absent GPUI test files (`available_space.rs`, `composition.rs`, and `tabs_t0.rs`). This rule change does not add, delete, or relabel those implementation claims. The full agent-operations test command was also started; its completion must be reported separately rather than inferred from its passing structural checks.
+
+The full agent-operations test command subsequently completed with 1,632 passes, no failures, skips, or cancellations. The Agent understanding projection retained the same three absent-GPUI-file failures; that result was not reclassified.
