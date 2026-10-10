@@ -125,6 +125,7 @@ export class OverlayModuleImpl extends ModuleBase {
   private readonly warnings: string[] = [];
   private targetIssue: string | null = null;
   private readonly boundary: BoundaryHandle<any>;
+  private openRevision = 0;
   private lastReason: OverlayReason | undefined = undefined;
   private viewReconciliationVersion = 0;
   private registration: OverlayRegistration = Object.freeze({
@@ -185,8 +186,12 @@ export class OverlayModuleImpl extends ModuleBase {
     this.prototypeName = prototypeName;
     this.boundary = boundary;
     this.refreshHostCaps();
-    this.offBoundaryOutside = this.boundary.subscribeOutside(() => {
+    this.offBoundaryOutside = this.boundary.subscribeOutside((event) => {
       if (!this.isOpen()) return;
+      if (event.observation === 'focus.move') {
+        if (this.config.closeOnFocusOutside) this.close('focus.outside');
+        return;
+      }
       if (!this.config.closeOnOutsidePress) return;
       this.close('outside.press');
     });
@@ -195,6 +200,9 @@ export class OverlayModuleImpl extends ModuleBase {
   private installDismissSampling(): void {
     if (this.config.closeOnOutsidePress) {
       this.boundaryPort.observe('pointer.press');
+    }
+    if (this.config.closeOnFocusOutside) {
+      this.boundaryPort.observe('focus.move');
     }
     if (this.config.closeOnEscape && !this.escapeSamplingInstalled) {
       this.escapeSamplingInstalled = true;
@@ -509,7 +517,9 @@ export class OverlayModuleImpl extends ModuleBase {
       this.leaveEscapeScope = null;
       this.escapeScope = null;
     }
+    const revision = ++this.openRevision;
     this.openState.set(next, reason);
+    if (revision !== this.openRevision) return;
     this.syncEscapeCandidate();
 
     if (next) {
