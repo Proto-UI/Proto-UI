@@ -13,6 +13,40 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it.each([
+    ['-mx-1', 'margin-inline: -0.25rem;'],
+    ['duration-100', 'transition-duration: 100ms;'],
+    ['ring-1', '--pui-ring-width: 1px;'],
+    ['tracking-widest', 'letter-spacing: 0.1em;'],
+    ['text-[0.6875rem]', 'font-size: 0.6875rem;'],
+    ['bg-[#f5f5f5]', 'background-color: #f5f5f5;'],
+  ])('projects the bounded physical recipe %s without component dispatch', (token, declaration) => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render([token]);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain(declaration);
+      if (token === 'duration-100') expect(css).toContain('--pui-animation-duration: 100ms;');
+      if (token === 'ring-1') expect(css).toContain('box-shadow: var(--pui-ring-offset-shadow');
+    }
+  });
+  it('keeps arbitrary color and font values outside the existing finite recipe table unsupported', () => {
+    for (const token of [
+      'text-[0.6875rem;color:red]',
+      'text-[Infinityrem]',
+      'bg-[#f5f5f5;color:red]',
+      'bg-[#f5f5f5ff]',
+      'duration-NaN',
+      'ring-Infinity',
+    ]) {
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render([token]);
+        expect(css).toContain('Unsupported Proto UI style tokens');
+        expect(css).not.toMatch(
+          /(?:^|\n)\s*(?:font-size|background-color):|(?:^|\n)\s*color:\s*red/
+        );
+      }
+    }
+  });
   it('projects explicit logical text direction in document and shadow styles', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render(['direction-ltr', 'direction-rtl']);

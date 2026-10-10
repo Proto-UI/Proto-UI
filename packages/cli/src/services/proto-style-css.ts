@@ -114,6 +114,7 @@ const colorVars = new Set([
 
 const staticUtilities: Record<string, string[]> = {
   'bg-[#ccc]': ['background-color: #ccc;'],
+  'bg-[#f5f5f5]': ['background-color: #f5f5f5;'],
   'border-[#bbb]': ['border-color: #bbb;'],
   'shadow-inner': ['--pui-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);', ...composedShadow()],
   // Bounded vocabulary authored by the source-first Finf component families.
@@ -143,6 +144,7 @@ const staticUtilities: Record<string, string[]> = {
   'break-words': ['overflow-wrap: break-word;'],
   'overflow-x-auto': ['overflow-x: auto;'],
   'm-0': ['margin: 0;'],
+  '-mx-1': ['margin-inline: -0.25rem;'],
   'outline-2': ['outline-style: solid;', 'outline-width: 2px;'],
   'outline-offset-2': ['outline-offset: 2px;'],
   'rounded-2xl': ['border-radius: 1rem;'],
@@ -274,6 +276,7 @@ const staticUtilities: Record<string, string[]> = {
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],
+  'duration-100': ['transition-duration: 100ms;', '--pui-animation-duration: 100ms;'],
   'duration-150': ['transition-duration: 150ms;', '--pui-animation-duration: 150ms;'],
   'duration-200': ['transition-duration: 200ms;', '--pui-animation-duration: 200ms;'],
   'ease-in-out': ['transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);'],
@@ -297,6 +300,7 @@ const staticUtilities: Record<string, string[]> = {
   'leading-normal': ['line-height: 1.5;'],
   'tracking-tight': ['letter-spacing: -0.025em;'],
   'tracking-normal': ['letter-spacing: 0;'],
+  'tracking-widest': ['letter-spacing: 0.1em;'],
   italic: ['font-style: italic;'],
   'not-italic': ['font-style: normal;'],
   'text-left': ['text-align: left;'],
@@ -305,6 +309,7 @@ const staticUtilities: Record<string, string[]> = {
   'text-base': ['font-size: 1rem;', 'line-height: 1.5rem;'],
   'text-lg': ['font-size: 1.125rem;', 'line-height: 1.75rem;'],
   'text-[0.8rem]': ['font-size: 0.8rem;'],
+  'text-[0.6875rem]': ['font-size: 0.6875rem;'],
   'text-xl': ['font-size: 1.25rem;', 'line-height: 1.75rem;'],
   'text-2xl': ['font-size: 1.5rem;', 'line-height: 2rem;'],
   'text-3xl': ['font-size: 1.875rem;', 'line-height: 2.25rem;'],
@@ -362,6 +367,7 @@ const staticUtilities: Record<string, string[]> = {
   'opacity-50': ['opacity: 0.5;'],
   'ring-inset': ['--pui-ring-inset: inset;'],
   'ring-0': ['--pui-ring-width: 0px;', ...ringShadow()],
+  'ring-1': ['--pui-ring-width: 1px;', ...ringShadow()],
   'ring-2': ['--pui-ring-width: 2px;', ...ringShadow()],
   'ring-3': ['--pui-ring-width: 3px;', ...ringShadow()],
   'ring-offset-0': ['--pui-ring-offset-width: 0px;'],
