@@ -73,7 +73,11 @@ function delayNextLoad() {
   return gate;
 }
 
-function startShell(runtime: RuntimeId = 'wc', style?: string) {
+function startShell(
+  runtime: RuntimeId = 'wc',
+  style?: string,
+  prepareAppearance?: Parameters<typeof createPassiveShellComposition>[0]['prepareAppearance']
+) {
   const home = document.createElement('div');
   const mount = document.createElement('div');
   const content = document.createElement('div');
@@ -95,6 +99,7 @@ function startShell(runtime: RuntimeId = 'wc', style?: string) {
     props: () => ({ ...panelSurfaceProps('canvas') }),
     layout: { display: 'block', width: '100%' },
     className: 'transaction-shell',
+    prepareAppearance,
   });
   compositions.push(shell);
   const surface = () => content.closest<HTMLElement>('.transaction-shell')!;
@@ -533,3 +538,103 @@ it('late old-shell renderer disposal cannot release the new owner display lease'
   expect(fixture.content.style.display).toBe('grid');
   expect(fixture.content.style.getPropertyPriority('display')).toBe('important');
 });
+
+for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+  it(`${runtime}: appearance publication and rollback bracket reconnect before a failed move`, async () => {
+    let visible = 'initial';
+    const order: string[] = [];
+    const fixture = startShell(runtime, 'display: grid', (appearance) => {
+      const previous = visible;
+      return {
+        publish() {
+          visible = appearance.theme['--pui-background'];
+          order.push(`publish:${visible}`);
+        },
+        rollback() {
+          visible = previous;
+          order.push(`rollback:${visible}`);
+        },
+      };
+    });
+    await fixture.shell.ready;
+    order.length = 0;
+    rejectNextPublication(fixture.content, () => {
+      order.push(`moved:${visible}`);
+      expect(visible).toBe(NEXT['--pui-background']);
+    });
+    const originalSlot = fixture.content.parentNode as HTMLElement;
+    const insert = originalSlot.insertBefore;
+    vi.spyOn(originalSlot, 'insertBefore').mockImplementationOnce((node, before) => {
+      order.push(`return:${visible}`);
+      return insert.call(originalSlot, node, before);
+    });
+    await expect(fixture.shell.update('brutalist', NEXT)).rejects.toThrow(
+      'Injected publication failure'
+    );
+    expect(order).toEqual([
+      `publish:${NEXT['--pui-background']}`,
+      `moved:${NEXT['--pui-background']}`,
+      `rollback:${INITIAL['--pui-background']}`,
+      `return:${INITIAL['--pui-background']}`,
+    ]);
+    expect(fixture.surface().dataset.projectionFamily).toBe('shadcn');
+    expectTheme(fixture.surface(), INITIAL);
+    await fixture.shell.destroy();
+    const count = order.length;
+    await fixture.shell.update('brutalist', NEXT);
+    expect(order).toHaveLength(count);
+  });
+  it(`${runtime}: callback publish/rollback failures still restore the retained shell and content`, async () => {
+    let shouldFail = false;
+    const fixture = startShell(runtime, 'display: grid', () => ({
+      publish() {
+        if (shouldFail) throw new Error('primary appearance failure');
+      },
+      rollback() {
+        if (shouldFail) throw new Error('secondary rollback failure');
+      },
+    }));
+    await fixture.shell.ready;
+    const original = fixture.surface();
+    shouldFail = true;
+    await expect(fixture.shell.update('brutalist', NEXT)).rejects.toThrow(
+      'primary appearance failure'
+    );
+    expect(fixture.surface()).toBe(original);
+    expectTheme(original, INITIAL);
+    expect(fixture.content.parentNode).not.toBe(fixture.home);
+    shouldFail = false;
+    await fixture.shell.update('brutalist', NEXT);
+    expectTheme(fixture.surface(), NEXT);
+  });
+}
+
+for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+  it(`${runtime}: teardown during appearance publication cannot reconnect borrowed content`, async () => {
+    let retire = false;
+    let destroyed: Promise<unknown> | undefined;
+    const fixture = startShell(runtime, 'display: grid', () => ({
+      publish() {
+        if (retire) destroyed = fixture.shell.destroy();
+      },
+      rollback() {},
+    }));
+    await fixture.shell.ready;
+    const originalSlot = fixture.content.parentNode;
+    const visits: Node[] = [];
+    interceptNextSetup((slot) => {
+      const insert = slot.insertBefore;
+      vi.spyOn(slot, 'insertBefore').mockImplementation((node, before) => {
+        visits.push(slot);
+        return insert.call(slot, node, before);
+      });
+    });
+    retire = true;
+    await fixture.shell.update('brutalist', NEXT);
+    await destroyed;
+    expectReturned(fixture);
+    expect(fixture.content.style.display).toBe('grid');
+    expect(visits).toEqual([]);
+    expect(fixture.content.parentNode).not.toBe(originalSlot);
+  });
+}

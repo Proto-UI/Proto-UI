@@ -28,6 +28,8 @@ export type DemoNode =
       rootTag?: 'div' | 'span';
       className?: string;
       surfaceStyle?: DemoSurfaceStyle;
+      /** Website-owned portal surface: opt in to the generic preview theme. Requires ref. */
+      previewTheme?: 'portal';
       ref?: string;
       props?: Record<string, unknown>;
       associations?: DemoAssociationKeys;
@@ -43,6 +45,8 @@ export type DemoRuntimeApi = {
   call(ref: string, path: string, ...args: unknown[]): unknown;
   getExposes(ref: string): Record<string, unknown> | undefined;
   setProps(ref: string, next: Record<string, unknown>): void;
+  /** Website composition surface channel; available in all four built-in renderers. */
+  setSurfaceStyle?(ref: string, next: Record<string, string>): void;
 };
 
 export type DemoSetupContext = {
@@ -236,17 +240,33 @@ export function assertDemoSpec(demo: DemoSpec) {
       ) {
         throw new Error(`[PrototypePreviewer] demo ref 必须是字符串：${path.join('.')}`);
       }
+      if (
+        node.previewTheme !== undefined &&
+        (node.previewTheme !== 'portal' || !node.ref?.trim())
+      ) {
+        throw new Error('[PrototypePreviewer] previewTheme requires portal and a nonempty ref.');
+      }
       if (node.surfaceStyle !== undefined) {
         assertSurfaceStyle(node.surfaceStyle, [...path, 'surfaceStyle']);
       }
       if (node.associations !== undefined) {
         const keys = node.associations;
-        if (!keys || typeof keys !== 'object' || Object.keys(keys).some(key => key !== 'controlLabel') || typeof keys.controlLabel !== 'string' || !keys.controlLabel.trim()) {
-          throw new Error('[PrototypePreviewer] associations requires one nonempty controlLabel key');
+        if (
+          !keys ||
+          typeof keys !== 'object' ||
+          Object.keys(keys).some((key) => key !== 'controlLabel') ||
+          typeof keys.controlLabel !== 'string' ||
+          !keys.controlLabel.trim()
+        ) {
+          throw new Error(
+            '[PrototypePreviewer] associations requires one nonempty controlLabel key'
+          );
         }
       }
       if (node.props && Object.hasOwn(node.props, 'instanceAssociations')) {
-        throw new Error('[PrototypePreviewer] association intent belongs in node.associations, not props');
+        throw new Error(
+          '[PrototypePreviewer] association intent belongs in node.associations, not props'
+        );
       }
       if ((node as any).props !== undefined) {
         assertJsonLike((node as any).props, [...path, 'props']);

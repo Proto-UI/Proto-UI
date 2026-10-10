@@ -253,6 +253,14 @@ async function renderDemoWc(
 
   const refs = collectDemoRefs(host);
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref];
+      const surface = el && wcSurfaceProps.get(el);
+      if (!surface) return;
+      surface.surfaceStyle = next;
+      api.setProps(ref, {});
+    },
     call(ref, path, ...args) {
       const el = refs[ref] as DemoInstance & HTMLElement;
       if (!el) return;
@@ -326,6 +334,7 @@ async function renderDemoReact(
 
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = new Map<string, Record<string, unknown>>();
+  const surfaceStyles = new Map<string, DemoSurfaceStyle>();
   // DemoBoxAttrs are native string attributes, not React boolean props. Keep
   // global presence attributes (including hidden="until-found") byte-exact in
   // the initial commit, before setup or the first animation-frame boundary.
@@ -397,8 +406,9 @@ async function renderDemoReact(
     }
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClassName = node.className;
-    if (node.surfaceStyle) {
-      mergedProps.surfaceStyle = normalizeReactSurfaceStyle(node.surfaceStyle, host.ownerDocument);
+    const surfaceStyle = (node.ref && surfaceStyles.get(node.ref)) || node.surfaceStyle;
+    if (surfaceStyle) {
+      mergedProps.surfaceStyle = normalizeReactSurfaceStyle(surfaceStyle, host.ownerDocument);
     }
     return React.createElement(Component, mergedProps as Record<string, unknown>, ...kids);
   }
@@ -446,6 +456,11 @@ async function renderDemoReact(
   const refs = collectDemoRefs(host);
 
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease) || !propsMap.has(ref)) return;
+      surfaceStyles.set(ref, next);
+      api.setProps(ref, {});
+    },
     call(ref, path, ...args) {
       const inst = componentRefs.get(ref);
       if (!inst) return;
@@ -509,6 +524,7 @@ async function renderDemoVue(
 
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = Vue.reactive<Record<string, Record<string, unknown>>>({});
+  const surfaceStyles = Vue.reactive<Record<string, DemoSurfaceStyle>>({});
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
@@ -562,7 +578,8 @@ async function renderDemoVue(
     }
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
-    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
+    const surfaceStyle = (node.ref && surfaceStyles[node.ref]) || node.surfaceStyle;
+    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
     return Vue.h(Component, mergedProps, () => kids);
   }
 
@@ -595,6 +612,10 @@ async function renderDemoVue(
   const refs = collectDemoRefs(host);
 
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease) || !propsMap[ref]) return;
+      surfaceStyles[ref] = next;
+    },
     call(ref, path, ...args) {
       const inst = componentRefs.get(ref);
       if (!inst) return;
@@ -644,6 +665,7 @@ async function renderDemoVue2(
 
   const componentRefs = new Map<string, DemoInstance>();
   const componentRefNames = new Set<string>();
+  const surfaceStyles = new Map<string, DemoSurfaceStyle>();
   const propsMap = ((Vue as any).observable ? (Vue as any).observable({}) : {}) as Record<
     string,
     Record<string, unknown>
@@ -701,7 +723,8 @@ async function renderDemoVue2(
     }
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
-    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
+    const surfaceStyle = (node.ref && surfaceStyles.get(node.ref)) || node.surfaceStyle;
+    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
 
     const data = toVue2ComponentData(mergedProps);
     if (node.ref) data.ref = node.ref;
@@ -753,6 +776,11 @@ async function renderDemoVue2(
   const refs = collectDemoRefs(host);
 
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease) || !propsMap[ref]) return;
+      surfaceStyles.set(ref, next);
+      app.$forceUpdate?.();
+    },
     call(ref, path, ...args) {
       refreshComponentRefs(app);
       const inst = componentRefs.get(ref);

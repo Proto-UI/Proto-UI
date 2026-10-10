@@ -18,10 +18,14 @@ export default {
           {
             'kind': 'proto',
             'prototypeId': 'brutalist-alert-dialog-mask',
+            'ref': 'mask',
+            'previewTheme': 'portal',
           },
           {
             'kind': 'proto',
             'prototypeId': 'brutalist-alert-dialog-content',
+            'ref': 'content',
+            'previewTheme': 'portal',
             'children': [
               {
                 'kind': 'proto',

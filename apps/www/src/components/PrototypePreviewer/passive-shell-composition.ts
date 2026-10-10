@@ -10,6 +10,23 @@ import {
 import type { DemoRenderResult, DemoSpec } from './demo-types';
 import type { RuntimeId } from './runtimes/ids';
 
+/** Website-local receipt for the exact visible shell generation and input. */
+export type PassiveShellAppearance = Readonly<{
+  generation: number;
+  family: string;
+  theme: ProjectionThemeSurfaceStyle;
+  kind: 'generation' | 'theme';
+}>;
+
+type AppearancePublication = { publish(): void; rollback(): void };
+
+function runAppearanceStep(step: (() => void) | undefined): void {
+  const result = step?.() as unknown;
+  if (result && typeof (result as { then?: unknown }).then === 'function') {
+    throw new Error('Passive shell appearance publication must be synchronous.');
+  }
+}
+
 /** Composition lease, not a host runtime: existing public renderers own each
  * shell; the original renderer exclusively owns the borrowed content subtree.
  * Return that subtree synchronously before its renderer tears down. */
@@ -24,6 +41,8 @@ export function createPassiveShellComposition(options: {
   layout: Record<string, string>;
   className: string;
   surfaceRef?: string;
+  /** Prepared without side effects; joins actual publication/rollback, not loading. */
+  prepareAppearance?(appearance: PassiveShellAppearance): AppearancePublication;
 }) {
   const { mount, content } = options;
   const home = content.parentNode!;
@@ -39,6 +58,16 @@ export function createPassiveShellComposition(options: {
   let requestedTheme = { ...options.theme };
   const slots = new Map<number, HTMLElement>();
   const surfaces = new Map<number, HTMLElement>();
+  const appearances = new Map<number, PassiveShellAppearance>();
+  let updateEpoch = 0;
+  const prepareAppearance = (appearance: PassiveShellAppearance) => {
+    if (!options.prepareAppearance) return undefined;
+    const publication = options.prepareAppearance(appearance);
+    if (typeof publication?.publish !== 'function' || typeof publication?.rollback !== 'function') {
+      throw new Error('Passive shell appearance requires synchronous publish and rollback.');
+    }
+    return publication;
+  };
   const captureDisplay = () => ({
     value: content.style.getPropertyValue('display'),
     priority: content.style.getPropertyPriority('display'),
@@ -114,6 +143,15 @@ export function createPassiveShellComposition(options: {
             surface.dataset.projectionGeneration = String(request.generation);
             slots.set(request.generation, slot);
             surfaces.set(request.generation, surface);
+            appearances.set(
+              request.generation,
+              Object.freeze({
+                generation: request.generation,
+                family: request.selection.projectionFamilyId,
+                theme,
+                kind: 'generation',
+              })
+            );
             applyProjectionThemeSurfaceStyle(surface, theme);
           },
         };
@@ -135,6 +173,7 @@ export function createPassiveShellComposition(options: {
             if (slot?.contains(content)) move(home, nextSibling);
             slots.delete(request.generation);
             surfaces.delete(request.generation);
+            appearances.delete(request.generation);
             await rendered?.destroy();
             host.remove();
           },
@@ -142,6 +181,7 @@ export function createPassiveShellComposition(options: {
       } catch (error) {
         slots.delete(request.generation);
         surfaces.delete(request.generation);
+        appearances.delete(request.generation);
         await rendered?.destroy();
         host.remove();
         throw error;
@@ -150,6 +190,9 @@ export function createPassiveShellComposition(options: {
     prepareCommit(commit) {
       const slot = slots.get(commit.generation);
       if (!slot) throw new Error('Prepared passive shell slot missing');
+      const appearance = appearances.get(commit.generation);
+      if (!appearance) throw new Error('Prepared passive shell appearance missing');
+      const appearancePublication = prepareAppearance(appearance);
       const previous = content.parentNode!;
       const before = content.nextSibling;
       let previousDisplay: ReturnType<typeof captureDisplay> | undefined;
@@ -167,13 +210,25 @@ export function createPassiveShellComposition(options: {
             original: previousLease && hasOwnedDisplay() ? previousLease.original : previousDisplay,
           };
           content.style.setProperty('display', 'contents');
+          // The controller has committed its selection. Publish dependent
+          // inputs before moving content can synchronously reenter the caller.
+          runAppearanceStep(() => appearancePublication?.publish());
+          // Publication can synchronously retire the consumer. Its content
+          // has already returned home and must not reconnect to this candidate.
+          if (!alive) throw new Error('Passive shell composition disposed');
           move(slot);
         },
         rollback() {
-          if (slot.contains(content)) move(previous, before);
-          if (displayLease?.generation !== commit.generation) return;
-          displayLease = previousLease;
-          if (previousDisplay && hasOwnedDisplay()) restoreDisplay(previousDisplay);
+          // Restore dependent inputs before reconnecting the retained content.
+          try {
+            runAppearanceStep(() => appearancePublication?.rollback());
+          } finally {
+            if (slot.contains(content)) move(previous, before);
+            if (displayLease?.generation === commit.generation) {
+              displayLease = previousLease;
+              if (previousDisplay && hasOwnedDisplay()) restoreDisplay(previousDisplay);
+            }
+          }
         },
       };
     },
@@ -183,14 +238,42 @@ export function createPassiveShellComposition(options: {
     ready,
     async update(family: string, nextTheme: ProjectionThemeSurfaceStyle) {
       if (!alive) return;
+      const epoch = ++updateEpoch;
       requestedTheme = { ...nextTheme };
       const current = controller.getSnapshot();
       // Same-family theme edits remain immediate. A replacement's theme must
       // never recolor the retained generation or another pending candidate.
       if (current.selection.projectionFamilyId === family) {
         const surface = surfaces.get(current.generation);
-        if (surface) applyProjectionThemeSurfaceStyle(surface, requestedTheme);
+        if (surface) {
+          const previous = appearances.get(current.generation)!;
+          const appearance: PassiveShellAppearance = Object.freeze({
+            generation: current.generation,
+            family,
+            theme: requestedTheme,
+            kind: 'theme',
+          });
+          const publication = prepareAppearance(appearance);
+          try {
+            applyProjectionThemeSurfaceStyle(surface, appearance.theme);
+            appearances.set(current.generation, appearance);
+            runAppearanceStep(() => publication?.publish());
+          } catch (error) {
+            // A newer nested same-generation update owns its own receipt.
+            if (appearances.get(current.generation) === appearance) {
+              appearances.set(current.generation, previous);
+              applyProjectionThemeSurfaceStyle(surface, previous.theme);
+            }
+            try {
+              runAppearanceStep(() => publication?.rollback());
+            } catch {
+              // Preserve the publication failure after restoring shell input.
+            }
+            throw error;
+          }
+        }
       }
+      if (!alive || epoch !== updateEpoch) return;
       await controller.request({ runtimeId: options.runtime, projectionFamilyId: family });
     },
     destroy() {
