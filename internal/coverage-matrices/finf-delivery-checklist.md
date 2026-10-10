@@ -186,7 +186,7 @@ The structured ledger has 280 required GPUI Base-identity × design-family cells
 
 - [ ] **prior-pr.855** [#855](https://github.com/Proto-UI/Proto-UI/issues/855): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
 
-- [ ] **prior-pr.862** [#862](https://github.com/Proto-UI/Proto-UI/issues/862): continue-current-owner; integrate normally if exact-head ready; otherwise retain code/failures/open criteria as equal-priority Finf follow-up. Preserve current authorization, provenance and topic owner; integrate only a verified frozen candidate..
+- [x] **prior-pr.862** [#862](https://github.com/Proto-UI/Proto-UI/issues/862): Accepted original bounded Template/Scroll/Focus budget transaction at reviewed 8989403; later strict-budget overages remain open.. The immutable record source is rebound to the actual published record commit during publication. This closes only prior-pr.862 and does not certify current package sizes, full Finf acceptance or merge approval..
 
 - [x] **prior-pr.867** [#867](https://github.com/Proto-UI/Proto-UI/issues/867): Accepted bounded prior-work closeout at 5dab3a9e; source, applicable official evidence and independent technical review are retained. [Closeout review](https://github.com/Proto-UI/Proto-UI/blob/9395d2deb012934976ab155b9461aa0356583247/internal/records/2026-10-10-finf-three-prior-closeouts.md). No full Finf, prototype lifecycle or merge approval is implied.
 
