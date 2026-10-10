@@ -11,22 +11,26 @@
         {
           "export": "tabsRoot",
           "name": "bootstrap-2-3-2-tabs-root",
-          "basePrototypeId": "P-BASE-TABS"
+          "basePrototypeId": "P-BASE-TABS",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS"
         },
         {
           "export": "tabsList",
           "name": "bootstrap-2-3-2-tabs-list",
-          "basePrototypeId": "P-BASE-TABS-LIST"
+          "basePrototypeId": "P-BASE-TABS-LIST",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS-LIST"
         },
         {
           "export": "tabsTrigger",
           "name": "bootstrap-2-3-2-tabs-trigger",
-          "basePrototypeId": "P-BASE-TABS-TRIGGER"
+          "basePrototypeId": "P-BASE-TABS-TRIGGER",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS-TRIGGER"
         },
         {
           "export": "tabsContent",
           "name": "bootstrap-2-3-2-tabs-content",
-          "basePrototypeId": "P-BASE-TABS-CONTENT"
+          "basePrototypeId": "P-BASE-TABS-CONTENT",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS-CONTENT"
         }
       ],
       "demoId": "demo-bootstrap-2-3-2-tabs",
@@ -43,22 +47,26 @@
         {
           "export": "tabsRoot",
           "name": "liquid-glass-tabs-root",
-          "basePrototypeId": "P-BASE-TABS"
+          "basePrototypeId": "P-BASE-TABS",
+          "prototypeId": "P-LIQUID-GLASS-TABS"
         },
         {
           "export": "tabsList",
           "name": "liquid-glass-tabs-list",
-          "basePrototypeId": "P-BASE-TABS-LIST"
+          "basePrototypeId": "P-BASE-TABS-LIST",
+          "prototypeId": "P-LIQUID-GLASS-TABS-LIST"
         },
         {
           "export": "tabsTrigger",
           "name": "liquid-glass-tabs-trigger",
-          "basePrototypeId": "P-BASE-TABS-TRIGGER"
+          "basePrototypeId": "P-BASE-TABS-TRIGGER",
+          "prototypeId": "P-LIQUID-GLASS-TABS-TRIGGER"
         },
         {
           "export": "tabsContent",
           "name": "liquid-glass-tabs-content",
-          "basePrototypeId": "P-BASE-TABS-CONTENT"
+          "basePrototypeId": "P-BASE-TABS-CONTENT",
+          "prototypeId": "P-LIQUID-GLASS-TABS-CONTENT"
         }
       ],
       "demoId": "demo-liquid-glass-tabs",
@@ -72,9 +80,30 @@
     "packages/cli/src/registry/components.ts"
   ],
   "openGates": [
-    "five unchanged state-selector assertions",
-    "new commit-bound browser screenshots",
-    "proper generated preset refresh and packed CLI consumer",
-    "independent rule resource review"
-  ]
+    "new exact-source same-state browser screenshots and native interaction/geometry",
+    "proper three-preset generation and real packed consumer before further integration/push",
+    "independent follow-up review and resource/native admission",
+    "Liquid optical-host realization separately unverified"
+  ],
+  "focusFollowupCommit": "2a8ce0c267fb1078881e620961d7642795fe3f92",
+  "definitionEvidenceCommit": "e9866a697cd0ba1cc4eb5df9793a2feb4776f865",
+  "verification": {
+    "reviewedBaseline": {
+      "commit": "6d2d983fd0fafa13d694c683e91f093f84180057",
+      "total": 179,
+      "passed": 173,
+      "failed": 6
+    },
+    "exactFollowup": {
+      "commit": "e9866a697cd0ba1cc4eb5df9793a2feb4776f865",
+      "total": 286,
+      "passed": 285,
+      "failed": 1,
+      "remainingFailure": "projection-composition.test.ts: undeclared shadcn Dropdown Group/Label/Shortcut/Separator in frozen manifest"
+    },
+    "scopedTypes": "passing",
+    "lifecycleAuthoring": "13 inputs pass after same-HEAD materialization of three pre-existing native test files; no Rust execution",
+    "newTabsCatalog": "all eight identities cataloged; 559 unrelated global findings remain, no debt baseline change",
+    "stateRepresentation": "five legacy assertions migrated only after four-family all-state roundtrip/withdrawal proof; underlying lowering tests unchanged"
+  }
 }
