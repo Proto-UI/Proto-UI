@@ -13,6 +13,8 @@ Release identity comes from the applicable `V-*` entity and immutable release ev
 | Release Cadence | `.github/workflows/release-cadence.yml` | Periodic reminder based on the latest `v*` release tag |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request intake/reconciliation lane |
 | RepoSteward Portfolio Shadow Trial | `.github/workflows/reposteward-portfolio-shadow.yml` | Manual read-only external portfolio experiment |
+| Intranet preview build | `.github/workflows/intranet-preview-build.yml` | Secret-free exact-PR-head documentation artifact build |
+| Intranet preview checks | `.github/workflows/intranet-preview-checks.yml` | Focused artifact admission, publication and static-serving checks |
 
 ## CI workflow (`ci.yml`)
 
@@ -39,19 +41,15 @@ The workflow has read-only `contents`, `issues`, and `pull-requests` permissions
 
 Ordinary Contributor Agents use the lazy skill registry under `internal/agent-operations/skills.yaml`; it is not part of the scheduled shadow workflow. `$pui-dev` routes ordinary development, while `$pui-maintain` routes the separate autonomous-maintenance protocol. Under the `pending-runtime-identity` standing authorizations, the scheduled lane remains read-only observation and reconciliation; human-assisted review or integration requires explicit current-user authorization, and any future standing activation still requires matching authorization, trusted evidence, a fresh canonical input, live credential permission, and agreement with review state and repository rules. Human decisions remain for unresolved product direction and privileged or irreversible operations.
 
-## Private contributor preview workflows (`poppy-preview-*.yml`)
+## Intranet contributor preview workflows
 
-Five workflows implement the private Poppy/Cloudflare preview boundary:
+`intranet-preview-build.yml` runs for PR changes or an exact-head manual build. It has only `contents: read`, uses a disposable hosted builder and receives no deployment secrets. It uploads an Actions identity marker before executing the contributor checkout, then uploads the canonical documentation ZIP. Both artifacts have three-day retention.
 
-| Workflow | Trigger | Permissions / external boundary |
-| --- | --- | --- |
-| `poppy-preview-build.yml` | `pull_request` and trusted `workflow_dispatch` bootstrap | `contents: read`; no repository or external deployment secrets; builds the exact PR head and uploads an untrusted artifact plus an Actions-controlled head binding. |
-| `poppy-preview-bootstrap.yml` | trusted default-branch installation/update (`push` only) | `actions: write`, `contents: write`, `pull-requests: read`; enumerates live PRs, dispatches secret-free exact-head builds, then emits `poppy_preview_build_completed` repository-dispatch events. |
-| `poppy-preview-deploy.yml` | completed build `workflow_run` or `poppy_preview_build_completed` `repository_dispatch` | platform-selected default-branch code with `actions: read`, `contents: read`, `pull-requests: write`; no manual dispatch entry; validates live PR/head/workflow/artifacts, then either uses the separately gated Cloudflare path or sends a bounded regular-file archive to the configured dcbot fallback. Both paths preserve exact lifecycle and sticky-comment failure handling without executing contributor code. |
-| `poppy-preview-close.yml` | `pull_request_target: closed` | trusted default-branch cleanup with `contents: read`, `pull-requests: write`; deletes the per-PR Cloudflare project only when mutations are enabled and always requires the selected Poppy/dcbot Closed revocation to succeed. |
-| `poppy-preview-security.yml` | preview-workflow/integration changes on PR (`pull_request` plus trusted `pull_request_target`) or `main` | secret-free `pull_request` lane runs the focused sanitizer/Worker/lifecycle/browser tests, pinned-checksum actionlint, and byte-for-byte installed/template workflow lockstep without contacting the private handler repository; the trusted `pull_request_target` lane runs from immutable default-branch workflow code, requires `DCBOT_CONTRACT_TOKEN`, checks out only the pinned `Proto-UI/dcbot@3f60a2b41832a0b02e64a0f4b8bf237355b59806` revision plus the exact-head contract JSON as inert data, verifies pinned source digests with trusted inline code, runs the real preview handler suite, and binds its check to the exact PR head; the same fail-closed pinned verification runs on `main` pushes. Inability to fetch or test the pinned revision is blocking in both trusted lanes. It is repository CI evidence but is **not currently configured as a platform-required status check**. |
+`intranet-preview-checks.yml` runs the focused native Node admission, extraction, sanitation, publication and serving suite when preview files change on a PR or `main`. Neither workflow deploys Poppy, calls Cloudflare, writes PR comments, or executes contributor code on the persistent publisher.
 
-Contributor artifacts never receive Cloudflare/Poppy secrets. Deploy/cleanup consume trusted repository code and private external control-plane APIs; exact endpoint, tuple binding, fallback receiver limits, failure convergence, access policy, and post-merge E2E requirements are documented in `integrations/proto-ui-preview/README.md`. The checked-in fallback and contract tests do not set repository variables, deploy dcbot, or establish production rollout. Merge-time green checks cannot prove default-branch `workflow_run`, bootstrap, live OAuth identities, external revision/configuration, failure convergence, or close cleanup end to end; these remain post-merge production acceptance gates.
+The sole publisher is a separately configured trusted intranet process. It downloads hostile artifacts, revalidates the live PR/head/run/attempt and supersession, and publishes ordinary non-executable files under separate generation origins. The static server has no credential or control API. An intranet audience replaces the retired per-author/reviewer OAuth access policy; polling and the five-minute catalog lease provide bounded, not instantaneous, revocation. Configuration, security limits and runtime acceptance are documented in `scripts/preview/README.md`.
+
+The old Poppy workflows, Pages provider, dcbot fallback and duplicated integration templates are removed from source. External workflow registrations, preview-only credentials, Pages resources and deployed bot/edge callbacks require live retirement evidence. Source deletion and green tests do not establish that external cleanup or the new hosted-build-to-intranet path has completed.
 
 ## Release workflow (`release-packages.yml`)
 

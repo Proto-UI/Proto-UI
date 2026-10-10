@@ -1,8 +1,5 @@
-name: Poppy preview build
-# Quote the value: in plain YAML a space followed by `#` starts a comment,
-# which would collapse every run title to the same string and break the
-# per-PR deployment concurrency key.
-run-name: 'Poppy preview build PR #${{ inputs.pr_number || github.event.pull_request.number }}'
+name: Intranet preview build
+run-name: 'Intranet preview build PR #${{ inputs.pr_number || github.event.pull_request.number }}'
 
 on:
   pull_request:
@@ -14,18 +11,17 @@ on:
         required: true
         type: number
       expected_head_sha:
-        description: Full live PR head SHA recorded by the trusted dispatcher
+        description: Full live pull request head SHA
         required: true
         type: string
 
-# This workflow deliberately has no write permission and no access to repository
-# secrets. It is safe to run the repository's build for a pull request from a
-# fork, but its artifact must still be treated as attacker-controlled input.
+# Contributor code runs only on the disposable hosted builder. The intranet
+# publisher consumes its artifact as hostile data and never executes it.
 permissions:
   contents: read
 
 concurrency:
-  group: poppy-preview-build-${{ inputs.pr_number || github.event.pull_request.number }}
+  group: intranet-preview-build-${{ inputs.pr_number || github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -33,9 +29,8 @@ jobs:
     name: Build docs preview
     runs-on: ubuntu-latest
     timeout-minutes: 30
-
     steps:
-      - name: Resolve the live pull request without trusting input metadata
+      - name: Resolve the exact live pull request
         id: pr
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
@@ -45,12 +40,8 @@ jobs:
           script: |
             const number = Number(process.env.REQUESTED_PR);
             const expectedHead = String(process.env.EXPECTED_HEAD_SHA || "").trim();
-            if (!Number.isSafeInteger(number) || number < 1) {
-              core.setFailed("A positive PR number is required");
-              return;
-            }
-            if (!/^[0-9a-f]{40}$/.test(expectedHead)) {
-              core.setFailed("A full expected PR head SHA is required");
+            if (!Number.isSafeInteger(number) || number < 1 || !/^[0-9a-f]{40}$/.test(expectedHead)) {
+              core.setFailed("A positive PR number and full expected head SHA are required");
               return;
             }
             const { data: pr } = await github.rest.pulls.get({
@@ -58,36 +49,34 @@ jobs:
               repo: context.repo.repo,
               pull_number: number,
             });
-            if (pr.state !== "open" || !pr.head.repo || !/^[0-9a-f]{40}$/.test(pr.head.sha) ||
-                pr.head.sha !== expectedHead) {
-              core.setFailed(`PR #${number} is not an open, buildable pull request`);
+            if (pr.state !== "open" || !pr.head.repo || pr.head.sha !== expectedHead) {
+              core.setFailed(`PR #${number} no longer matches the requested open head`);
               return;
             }
             core.setOutput("number", String(pr.number));
             core.setOutput("repository", pr.head.repo.full_name);
             core.setOutput("sha", pr.head.sha);
 
-      - name: Create the immutable build binding marker
+      - name: Create the pre-build identity binding
         env:
           PREVIEW_PR: ${{ steps.pr.outputs.number }}
           PREVIEW_SHA: ${{ steps.pr.outputs.sha }}
         shell: bash
         run: |
           set -euo pipefail
-          install -d -m 0700 "$RUNNER_TEMP/poppy-preview-binding"
+          install -d -m 0700 "$RUNNER_TEMP/intranet-preview-binding"
           printf '%s\n' "PR=$PREVIEW_PR" "HEAD=$PREVIEW_SHA" > \
-            "$RUNNER_TEMP/poppy-preview-binding/binding.txt"
+            "$RUNNER_TEMP/intranet-preview-binding/binding.txt"
 
-      # The failed workflow_run path trusts only this Actions-controlled name,
-      # never its contents. It is uploaded before any PR code executes, so a
-      # failed/cancelled site build can still revoke the exact current head.
-      - name: Upload the immutable build binding
+      # Upload before any contributor code runs. Admission trusts the platform's
+      # artifact identity, never bytes supplied by the contributor.
+      - name: Upload the build identity binding
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: poppy-preview-binding-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}-${{ github.run_attempt }}
-          path: ${{ runner.temp }}/poppy-preview-binding/binding.txt
+          name: intranet-preview-binding-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/intranet-preview-binding/binding.txt
           if-no-files-found: error
-          retention-days: 2
+          retention-days: 3
 
       - name: Check out the exact pull request head
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -108,28 +97,20 @@ jobs:
           set -euo pipefail
           corepack enable
           corepack prepare pnpm@10.32.1 --activate
-          pnpm --version
 
-      - name: Install dependencies
-        shell: bash
+      - name: Install locked dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build apps-www
-        shell: bash
+      - name: Build the canonical documentation site
         run: pnpm --filter apps-www build
 
-      - name: Verify the preview artifact
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -d apps/www/dist
-          test -f apps/www/dist/index.html
-          test -n "$(find apps/www/dist -type f -print -quit)"
+      - name: Verify the generated entrypoint
+        run: test -s apps/www/dist/index.html
 
       - name: Upload the untrusted static artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: poppy-preview-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}-${{ github.run_attempt }}
+          name: intranet-preview-${{ steps.pr.outputs.number }}-${{ steps.pr.outputs.sha }}-${{ github.run_attempt }}
           path: apps/www/dist/
           if-no-files-found: error
           include-hidden-files: true

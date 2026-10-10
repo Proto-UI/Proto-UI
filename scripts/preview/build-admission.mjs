@@ -1,7 +1,7 @@
-const buildWorkflow = '.github/workflows/poppy-preview-build.yml';
+const buildWorkflow = '.github/workflows/intranet-preview-build.yml';
 const shaPattern = /^[0-9a-f]{40}$/;
-const bindingPattern = /^poppy-preview-binding-([1-9][0-9]*)-([0-9a-f]{40})-([1-9][0-9]*)$/;
-const sitePattern = /^poppy-preview-([1-9][0-9]*)-([0-9a-f]{40})-([1-9][0-9]*)$/;
+const bindingPattern = /^intranet-preview-binding-([1-9][0-9]*)-([0-9a-f]{40})-([1-9][0-9]*)$/;
+const sitePattern = /^intranet-preview-([1-9][0-9]*)-([0-9a-f]{40})-([1-9][0-9]*)$/;
 const failedConclusions = new Set([
   'failure',
   'cancelled',
@@ -39,7 +39,7 @@ function verifyRun(run, repo, workflowId) {
   }
 }
 
-async function artifactsFor(github, repo, run) {
+export async function listPreviewBuildArtifacts(github, repo, run) {
   const artifacts = [];
   const seen = new Set();
   let total;
@@ -179,7 +179,7 @@ export async function resolvePreviewBuild({ github, context, runId, kind, expect
   if (run.event === 'workflow_dispatch' && !trustedManualRun(run, repository)) {
     throw new Error('Manual build did not execute from the trusted default branch');
   }
-  const artifacts = await artifactsFor(github, repo, run);
+  const artifacts = await listPreviewBuildArtifacts(github, repo, run);
   // On a manual run the default-branch definition uploads this marker before
   // PR code runs. Site names alone cannot identify the PR it actually built.
   const marker = artifactBinding(artifacts, run, bindingPattern);
@@ -198,7 +198,7 @@ export async function resolvePreviewBuild({ github, context, runId, kind, expect
   const binding = {
     pr: String(pr.number),
     head_sha: pr.head.sha,
-    project: `poppy-proto-ui-pr-${pr.number}`,
+    previewId: `pr-${pr.number}`,
     artifact_id: String(candidate.artifact.id),
     artifact_size: String(candidate.artifact.size_in_bytes),
     run_id: String(run.id),
@@ -276,7 +276,7 @@ export async function admitPreviewBuild(options) {
         relevant = false;
       } else {
         const marker = artifactBinding(
-          await artifactsFor(github, context.repo, newer),
+          await listPreviewBuildArtifacts(github, context.repo, newer),
           newer,
           bindingPattern
         );
@@ -293,7 +293,7 @@ export async function admitPreviewBuild(options) {
   if (!complete || !seen.has(run.id))
     throw new Error('Build recency lookup did not enumerate the candidate and all newer runs');
   // Reread after enumeration: a rerun can retain its run ID/number while its
-  // attempt changes. This is a sender guard, not atomic receiver ordering.
+  // attempt changes. This is an admission guard, not atomic publication ordering.
   const { data: current } = await github.rest.actions.getWorkflowRun({
     ...context.repo,
     run_id: run.id,

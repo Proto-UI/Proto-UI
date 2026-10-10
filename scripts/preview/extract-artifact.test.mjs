@@ -9,7 +9,7 @@ import {
   downloadVerifiedArtifact,
   extractBoundedZip,
   materializeBoundedZip,
-} from './extract-fallback-artifact.mjs';
+} from './extract-artifact.mjs';
 
 function buildZip(entries) {
   const locals = [];
@@ -75,7 +75,7 @@ test('extracts stored and deflated regular files within the envelope', () => {
 });
 
 test('materializes files under the target root with safe permissions', async (t) => {
-  const root = await mkdtemp(path.join(tmpdir(), 'poppy-extract-'));
+  const root = await mkdtemp(path.join(tmpdir(), 'preview-extract-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const zip = buildZip([
     { name: 'nested/deep/file.txt', content: Buffer.from('bounded') },
@@ -88,7 +88,7 @@ test('materializes files under the target root with safe permissions', async (t)
 });
 
 test('preserves zero-byte stored and deflated regular assets within the same bounds', async (t) => {
-  const root = await mkdtemp(path.join(tmpdir(), 'poppy-empty-assets-'));
+  const root = await mkdtemp(path.join(tmpdir(), 'preview-empty-assets-'));
   t.after(() => rm(root, { recursive: true, force: true }));
   const zip = buildZip([
     { name: 'empty.txt', content: Buffer.alloc(0) },
@@ -316,7 +316,7 @@ for (const [name, entries, extraLimits, message] of [
   ],
 ]) {
   test(`rejects excessive ${name} before changing the extraction tree`, async (t) => {
-    const root = await mkdtemp(path.join(tmpdir(), 'poppy-path-budget-'));
+    const root = await mkdtemp(path.join(tmpdir(), 'preview-path-budget-'));
     t.after(() => rm(root, { recursive: true, force: true }));
     const marker = path.join(root, 'keep.txt');
     const { writeFile } = await import('node:fs/promises');
