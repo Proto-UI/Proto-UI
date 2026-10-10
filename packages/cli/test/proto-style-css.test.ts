@@ -14,6 +14,36 @@ import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens'
 
 describe('proto style css renderer', () => {
   it.each([
+    ['w-72', 'width: 18rem;'],
+    ['text-[1.3125rem]', 'font-size: 1.3125rem;'],
+    ['border-[#e5e5e5]', 'border-color: #e5e5e5;'],
+    ['outline-border', 'outline-color: var(--pui-border);'],
+  ])(
+    'renders the existing physical vocabulary %s in document and Shadow output',
+    (token, declaration) => {
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render([token]);
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+        expect(css).toContain(declaration);
+      }
+    }
+  );
+  it('keeps malformed physical values outside the bounded resource vocabulary', () => {
+    for (const token of [
+      'w-NaN',
+      'w-Infinity',
+      'text-[1.3125rem;color:red]',
+      'border-[#e5e5e5;color:red]',
+      'outline-[url(javascript:bad)]',
+    ]) {
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render([token]);
+        expect(css).toContain('Unsupported Proto UI style tokens');
+        expect(css).not.toMatch(/(?:^|\n)\s*(?:font-size|border-color|outline-color|width):/);
+      }
+    }
+  });
+  it.each([
     ['-mx-1', 'margin-inline: -0.25rem;'],
     ['duration-100', 'transition-duration: 100ms;'],
     ['ring-1', '--pui-ring-width: 1px;'],
