@@ -3,6 +3,9 @@ type: test
 title: Dropdown passive composition and single action-owner checks
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 被动组成的有限host语义与完整CSS收集证据已建立；隔离基线仍有共享lowering失败，完整四Web宿主、原生输入与视觉、打包消费者和独立验收未完成，保持draft，不将局部通过晋级为稳定保证。
+  en: Bounded host semantics and whole-directory CSS collection evidence exist; the isolated baseline retains shared lowering failures, while complete four-Web-host, native input/visual, packed-consumer and independent acceptance remain unfinished. Keep draft without promoting local passes to stable guarantees.
 summary: Checks live group naming, passive separators and shortcut hints, collection isolation and lifecycle without adding an input owner.
 cases:
   - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-GROUP
