@@ -8,6 +8,7 @@ import { loadGeneratedModule } from './button-ssr-fixture';
 type Kind = 'input' | 'textarea' | 'img' | 'host';
 type Mode = 'light' | 'shadow';
 interface Carrier {
+  mode: Mode;
   control: {
     tag: string;
     properties: Record<string, string | number | boolean | null>;
@@ -21,6 +22,8 @@ interface GeneratedHost extends HTMLElement {
   hydrationStatus: string;
   logicalOwner: symbol | null;
   connectedCallback(): void;
+  disconnectedCallback(): void;
+  hydrate(carrier: Carrier): void;
   setProps(props: Record<string, unknown>): void;
   dispose(): void;
 }
@@ -293,28 +296,177 @@ describe('experimental physical Root SSR attribute ownership', () => {
     port.dispose();
   });
 
-  // Shadow reconnect is a separately preserved failing mode-retention regression.
-  it.each(matrix.filter(({ mode }) => mode === 'light'))(
+  it.each(matrix)(
     'releases the old $kind owner before a fresh $mode reconnect',
     async ({ kind, mode }) => {
       const { host, control } = prepare(kind, mode, { role: 'host-role' });
       host.connectedCallback();
-      const owner = host.logicalOwner;
-      host.remove();
-      await Promise.resolve();
-      expect(host.logicalOwner).toBeNull();
-      expect(control.getAttribute('role')).toBeNull();
-      expect(control.getAttribute('data-pui-style')).toBeNull();
-      document.body.append(host);
-      const fresh = (host.shadowRoot ?? host).querySelector(kind)!;
-      expect(fresh).not.toBe(control);
-      expect(host.logicalOwner).not.toBe(owner);
-      expect(host.hydrationStatus).toBe('client');
-      expect(fresh.getAttribute('role')).toBe('group');
-      expect(fresh.getAttribute('data-pui-style')).toBe('p-2');
-      expect(host.getAttribute('role')).toBe('host-role');
+      let previous = control;
+      for (let cycle = 0; cycle < 3; cycle++) {
+        const owner = host.logicalOwner;
+        host.remove();
+        await Promise.resolve();
+        expect(host.logicalOwner).toBeNull();
+        expect(previous.getAttribute('role')).toBeNull();
+        expect(previous.getAttribute('data-pui-style')).toBeNull();
+        document.body.append(host);
+        const root = mode === 'shadow' ? host.shadowRoot! : host;
+        const fresh = root.querySelector(kind)!;
+        expect(fresh).not.toBeNull();
+        expect(fresh).not.toBe(previous);
+        expect(root.querySelectorAll(kind)).toHaveLength(1);
+        if (mode === 'shadow') expect(host.querySelector(kind)).toBeNull();
+        expect(host.logicalOwner).not.toBe(owner);
+        expect(host.hydrationStatus).toBe('client');
+        expect(fresh.getAttribute('role')).toBe('group');
+        expect(fresh.getAttribute('data-pui-style')).toBe('p-2');
+        expect(host.getAttribute('role')).toBe('host-role');
+        previous = fresh;
+      }
     }
   );
+
+  it.each(['mismatch', 'accept-throws'] as const)(
+    'does not retain shadow mode after %s and a consumer reset to client-only',
+    (failure) => {
+      const { host, script, control } = prepare('input', 'shadow');
+      const remove = script.remove.bind(script);
+      const sentinel = new Error('injected accept failure');
+      if (failure === 'accept-throws')
+        script.remove = () => {
+          throw sentinel;
+        };
+      else control.setAttribute('role', 'mismatched');
+      if (failure === 'accept-throws') expect(() => host.connectedCallback()).toThrow(sentinel);
+      else expect(() => host.connectedCallback()).toThrow(/physical control attribute differs/);
+      expect(host.logicalOwner).toBeNull();
+      // Consumer explicitly discards the failed transport and old frame. The remaining
+      // shadowRoot alone must not be treated as an accepted mode/ownership receipt.
+      script.remove = remove;
+      remove();
+      host.shadowRoot!.replaceChildren();
+      for (const name of ['data-pui-ssr', 'data-pui-instance', 'data-pui-props'])
+        host.removeAttribute(name);
+      host.connectedCallback();
+      expect(host.hydrationStatus).toBe('client');
+      expect(host.querySelector('input')).not.toBeNull();
+      expect(host.shadowRoot!.querySelector('input')).toBeNull();
+    }
+  );
+
+  it('does not record accepted shadow mode when accept reentrantly disposes the element', async () => {
+    const { host, script } = prepare('input', 'shadow');
+    const remove = script.remove.bind(script);
+    script.remove = () => {
+      remove();
+      host.dispose();
+    };
+    expect(() => host.connectedCallback()).not.toThrow();
+    expect(host.logicalOwner).toBeNull();
+    // Narrow white-box guard probe: the public terminal behavior below must also hold.
+    expect(Reflect.get(host, 'acceptedMode') ?? null).toBeNull();
+    host.remove();
+    await Promise.resolve();
+    document.body.append(host);
+    expect(host.logicalOwner).toBeNull();
+    expect(host.shadowRoot!.querySelector('input')).toBeNull();
+    expect(host.querySelector('input')).toBeNull();
+    expect(() => host.setProps({ role: 'note' })).toThrow(/disposed/);
+  });
+
+  it('keeps the current owner during an accept-time synchronous move and retains its mode later', async () => {
+    const { host, script } = prepare('input', 'shadow');
+    const remove = script.remove.bind(script);
+    let during: symbol | null = null;
+    script.remove = () => {
+      remove();
+      during = host.logicalOwner;
+      host.remove();
+      document.body.append(host);
+    };
+    host.connectedCallback();
+    await Promise.resolve();
+    expect(host.hydrationStatus).toBe('adopted');
+    expect(host.logicalOwner).toBe(during);
+    expect(host.shadowRoot!.querySelectorAll('input')).toHaveLength(1);
+    host.remove();
+    await Promise.resolve();
+    document.body.append(host);
+    expect(host.logicalOwner).not.toBe(during);
+    expect(host.shadowRoot!.querySelectorAll('input')).toHaveLength(1);
+    expect(host.querySelector('input')).toBeNull();
+  });
+
+  it.each(['light', 'shadow'] as const)(
+    'keeps terminal disposal terminal after %s acceptance',
+    async (mode) => {
+      const { host } = prepare('input', mode);
+      host.connectedCallback();
+      host.dispose();
+      host.remove();
+      await Promise.resolve();
+      document.body.append(host);
+      expect(host.logicalOwner).toBeNull();
+      expect((host.shadowRoot ?? host).querySelector('input')).toBeNull();
+      expect(() => host.setProps({ role: 'note' })).toThrow(/disposed/);
+    }
+  );
+
+  it.each(['open', 'closed'] as const)(
+    'does not claim an arbitrary user-owned %s shadow root on client initialization',
+    (mode) => {
+      const host = document.createElement('pui-physical-ssr-input') as GeneratedHost;
+      const shadow = host.attachShadow({ mode });
+      const sentinel = document.createElement('span');
+      sentinel.textContent = 'User-owned content';
+      shadow.append(sentinel);
+      mounted.push(host);
+      document.body.append(host);
+      expect(host.hydrationStatus).toBe('client');
+      expect(host.querySelector('input')).not.toBeNull();
+      expect(shadow.querySelector('input')).toBeNull();
+      expect(shadow.firstChild).toBe(sentinel);
+      host.dispose();
+      expect(shadow.firstChild).toBe(sentinel);
+    }
+  );
+
+  it('rejects an inaccessible closed shadow root for explicit shadow SSR without claiming it', () => {
+    const { host, rendered } = prepare('input', 'shadow');
+    const template = host.querySelector('template') as HTMLTemplateElement;
+    const shadow = host.attachShadow({ mode: 'closed' });
+    shadow.append(template.content);
+    template.remove();
+    const original = shadow.firstChild;
+    expect(() => host.hydrate(rendered.carrier)).toThrow(/declarative Shadow Root is absent/);
+    expect(host.logicalOwner).toBeNull();
+    expect(shadow.firstChild).toBe(original);
+  });
+
+  it.each(['light', 'shadow'] as const)(
+    'honors an explicit %s carrier before reading the embedded carrier',
+    (mode) => {
+      const { host, script, rendered, control } = prepare('input', mode);
+      const embedded = JSON.parse(script.textContent!);
+      embedded.mode = mode === 'light' ? 'shadow' : 'light';
+      script.textContent = JSON.stringify(embedded);
+      expect(() => host.hydrate(rendered.carrier)).not.toThrow();
+      expect(host.hydrationStatus).toBe('adopted');
+      expect((mode === 'shadow' ? host.shadowRoot! : host).querySelector('input')).toBe(control);
+    }
+  );
+
+  it('keeps explicit light-carrier conflict checks for an existing open shadow root', () => {
+    const { host, rendered } = prepare('input', 'light');
+    const shadow = host.attachShadow({ mode: 'open' });
+    const sentinel = document.createElement('span');
+    shadow.append(sentinel);
+    expect(() => host.hydrate(rendered.carrier)).toThrow(
+      /light carrier has a physical Shadow Root/
+    );
+    expect(host.logicalOwner).toBeNull();
+    expect(shadow.firstChild).toBe(sentinel);
+  });
 
   it.each(['light', 'shadow'] as const)(
     'keeps host-only %s adoption and host baselines',

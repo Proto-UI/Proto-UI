@@ -40,6 +40,7 @@ export class ${className} extends HTMLElement {
   private disconnectVersion = 0;
   private recovering = false;
   private initializedCarrier = false;
+  private acceptedMode: 'light' | 'shadow' | null = null;
   private failedCarrier: Carrier | null = null;
   hydrationStatus: 'pending' | 'adopted' | 'recovered' | 'client' | 'mismatch' = 'pending';
   hydrationDiagnostic: HydrationMismatch | null = null;
@@ -68,7 +69,7 @@ export class ${className} extends HTMLElement {
         checkStylesheet(this, hydrationArtifacts.css, hydrationCssText);
         checkStylesheet(this, hydrationArtifacts.environment, hydrationEnvironmentCssText, 'consumer environment');
       }
-      let mode = carrier?.mode ?? 'light';
+      let mode = carrier?.mode ?? this.acceptedMode ?? 'light';
       if (this.recovering) mode = carrier?.mode === 'shadow' || this.shadowRoot || this.querySelector(':scope > template[shadowrootmode="open"]') ? 'shadow' : 'light';
       const port = createBrowserPort(this, mode, carrier && !this.recovering ? carrier : null, this.recovering);
       this.port = port;
@@ -81,6 +82,7 @@ export class ${className} extends HTMLElement {
       catch (error) { this.owner = null; try { owner.dispose(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'Hydration and cleanup failed'); } throw error; }
       port.accept();
       if (this.closed || this.owner !== owner) return;
+      this.acceptedMode = mode;
       this.initializedCarrier = true;
       this.carrier = null;
       this.failedCarrier = null;
