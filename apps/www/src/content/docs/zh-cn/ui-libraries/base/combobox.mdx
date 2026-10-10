@@ -1,0 +1,23 @@
+---
+title: 'Combobox'
+description: '可编辑搜索与独立选项值。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+可编辑搜索与独立选项值。
+
+<PrototypePreviewer
+  demoId="demo-base-combobox"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root.value 为选项标识，inputValue 为独立编辑文本。不匹配的输入不会自动成为已选择选项。
+
+宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+
+组成: Root, Input, Content, Item, Empty, Trigger.
+
+草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。
