@@ -1,0 +1,67 @@
+name: Finf representative feature screenshots
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/finf-representative-features-evidence.yml'
+      - 'packages/**'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+      - 'apps/www/src/content/docs/**'
+      - 'apps/www/src/styles/**'
+      - 'apps/www/astro.config.mjs'
+      - 'scripts/styles/**'
+      - 'scripts/test/server-readiness.mjs'
+      - 'pnpm-lock.yaml'
+      - 'vitest.config.ts'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  representative-features:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and retain source identity
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/finf-feature-evidence"
+          git rev-parse HEAD > "$RUNNER_TEMP/finf-feature-evidence/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/finf-feature-evidence/source-tree.txt"
+          "$CHROME" --version > "$RUNNER_TEMP/finf-feature-evidence/browser.txt"
+      - name: Check the actual preset generation boundary
+        run: corepack pnpm@10.32.1 check:styles:preset
+      - name: Use the existing real documentation surface
+        run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Capture Form Calendar and Drawer
+        env:
+          PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-feature-evidence
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" \
+            2>&1 | tee "$PUI_FINF_FEATURE_EVIDENCE_DIR/browser.log"
+      - name: Retain actual source-bound images and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finf-features-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/finf-feature-evidence
+          if-no-files-found: warn
+          retention-days: 30
