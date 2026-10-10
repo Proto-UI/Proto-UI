@@ -363,7 +363,8 @@ export function finishServer(port: ServerPort, props: Record<string, unknown>, o
     if (!/^[A-Za-z_:][A-Za-z0-9_.:-]*$/.test(name) || typeof value !== 'string') throw new TypeError('Invalid serialized Root attribute: ' + name);
   }
   if (!port.present) attributes.style = (attributes.style ? attributes.style + ';' : '') + 'display:none!important';
-  const carrier: Carrier = {instanceId, artifacts: {...artifacts}, version: 1, profile: 'web-component-ssr-v1', binding, tagName, mode, raw: encodeRaw(props), presentation: JSON.parse(JSON.stringify(port.presentation)), control: port.control, attributes, interactionAttributes: {...port.interactionAttributes}, baselines: {...options.rootAttributes}, present: port.present};
+  const control = port.control ? {...port.control, properties: {...port.control.properties}, attributes: {...port.control.attributes}} : null;
+  const carrier: Carrier = {instanceId, artifacts: {...artifacts}, version: 1, profile: 'web-component-ssr-v1', binding, tagName, mode, raw: encodeRaw(props), presentation: JSON.parse(JSON.stringify(port.presentation)), control, attributes, interactionAttributes: {...port.interactionAttributes}, baselines: {...options.rootAttributes}, present: port.present};
   const tokens = Object.entries(attributes).map(([name, value]) => ' ' + name + '="' + escapeAttribute(value) + '"').join('');
   const slotHtml = typeof options.slotHtml === 'function' ? options.slotHtml(port.parent) : options.slotHtml ?? '';
   if (typeof slotHtml !== 'string') throw new TypeError('Native server slot must serialize to HTML');
@@ -476,6 +477,14 @@ export function pendingProviderDefinition(host: HTMLElement): Promise<CustomElem
 export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', carrier: Carrier | null, recovery: boolean): BrowserPort {
   const doc = host.ownerDocument;
   const initialAttributes = Array.from(host.attributes, attribute => [attribute.name, attribute.value] as const);
+  const projectedAttributes = carrier?.control?.attributes ?? carrier?.attributes;
+  // rootAttributes belong to the host; physical baselines come only from its serialized properties.
+  const projectionBaselines: Readonly<Record<string, string>> | undefined = carrier?.control
+    ? Object.fromEntries(Object.entries(carrier.control.properties)
+      .filter(([name, value]) => value !== null && value !== false && !(carrier.control!.tag === 'textarea' && name === 'value'))
+      .map(([name, value]) => [name.toLowerCase(), value === true ? '' : String(value)]))
+    : carrier?.baselines;
+  let initialControlAttributes: readonly (readonly [string, string])[] | null = null;
   if (carrier) {
     checkCarrierHost(host, carrier);
     if (Array.from(doc.querySelectorAll('[data-pui-instance]')).filter(node => node.getAttribute('data-pui-instance') === carrier.instanceId).length > 1) throw new HydrationMismatch('duplicate instance identity');
@@ -551,12 +560,17 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
     }
     if (carrier && (!rootStart || !rootEnd)) throw new HydrationMismatch('light Root ownership markers are absent');
   }
+  function matchControl(): HTMLElement {
+    const candidate = mode === 'light' ? rootStart!.nextSibling : root.firstChild;
+    if (candidate?.nodeType !== 1 || (candidate as Element).localName !== carrier!.control!.tag || candidate.nextSibling !== (mode === 'light' ? rootEnd : null) || control && candidate !== control) throw new HydrationMismatch('physical control Root differs');
+    for (const [name, value] of Object.entries(carrier!.control!.attributes)) if ((candidate as Element).getAttribute(name) !== value) throw new HydrationMismatch('physical control attribute differs: ' + name);
+    return candidate as HTMLElement;
+  }
   locateRange();
   if (carrier) {
     if (carrier.control && carrier.present) {
-      const candidate = mode === 'light' ? rootStart!.nextSibling : root.firstChild;
-      if (candidate?.nodeType !== 1 || (candidate as Element).localName !== carrier.control.tag || candidate.nextSibling !== (mode === 'light' ? rootEnd : null)) throw new HydrationMismatch('physical control Root differs');
-      control = candidate as HTMLElement; owned.add(control);
+      control = matchControl(); owned.add(control);
+      initialControlAttributes = Array.from(control.attributes, attribute => [attribute.name, attribute.value] as const);
     } else matchList(root, mode === 'light' ? rootStart!.nextSibling : root.firstChild, mode === 'light' ? rootEnd : null, carrier.presentation, 'Root', true);
     expected = carrier.presentation;
   }
@@ -622,10 +636,10 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
     validateInitial(snapshot) {
       if (!carrier) return;
       if (snapshot.present !== carrier.present) throw new HydrationMismatch('initial presence differs');
-      for (const [name, value] of Object.entries(snapshot.attributes)) if ((carrier.attributes[name] ?? null) !== value) throw new HydrationMismatch('fresh client attribute differs: ' + name);
+      for (const [name, value] of Object.entries(snapshot.attributes)) if ((projectedAttributes?.[name] ?? null) !== value) throw new HydrationMismatch('fresh client attribute differs: ' + name);
     },
     hydrationAttributes: carrier?.interactionAttributes,
-    hydrationBaselines: carrier?.baselines,
+    hydrationBaselines: projectionBaselines,
     createInteraction: createNativeInteraction,
     projectRoot(tag, properties, portal) {
       if (tag && !['input','textarea','img'].includes(tag)) throw new Error('Unsupported physical Root tag');
@@ -650,8 +664,8 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       const target = control ?? host;
       const current = target.getAttribute(name);
       if (!entry) {
-        const projectedByServer = carrier && Object.hasOwn(carrier.attributes, name) && current === carrier.attributes[name];
-        entry = {baseline: projectedByServer ? carrier.baselines[name] ?? null : current, projected: current}; attributes.set(name, entry);
+        const projectedByServer = projectedAttributes && Object.hasOwn(projectedAttributes, name) && current === projectedAttributes[name];
+        entry = {baseline: projectedByServer ? projectionBaselines?.[name] ?? null : current, projected: current}; attributes.set(name, entry);
       }
       else if (current !== entry.projected) entry.baseline = current;
       if (current !== value) { if (value === null) target.removeAttribute(name); else target.setAttribute(name, value); }
@@ -662,7 +676,8 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       if (hydrating) {
         if (JSON.stringify(children) !== JSON.stringify(expected)) throw new HydrationMismatch('fresh client presentation differs from server projection');
         // Validate a second time immediately before semantic commit; never clear on matching adoption.
-        if (!control) matchList(root, mode === 'light' ? rootStart!.nextSibling : root.firstChild, mode === 'light' ? rootEnd : null, children, 'Root', false);
+        if (control) matchControl();
+        else matchList(root, mode === 'light' ? rootStart!.nextSibling : root.firstChild, mode === 'light' ? rootEnd : null, children, 'Root', false);
         hydrating = false; projectNewChildren(); observe(); return;
       }
       if (control) {
@@ -729,6 +744,10 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       if (carrier && !accepted) {
         for (const attribute of Array.from(host.attributes)) host.removeAttribute(attribute.name);
         for (const [name, value] of initialAttributes) host.setAttribute(name, value);
+        if (control && initialControlAttributes) {
+          for (const attribute of Array.from(control.attributes)) control.removeAttribute(attribute.name);
+          for (const [name, value] of initialControlAttributes) control.setAttribute(name, value);
+        }
       }
     },
   };
