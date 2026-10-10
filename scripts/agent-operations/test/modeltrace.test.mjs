@@ -663,6 +663,7 @@ test('public receipts reject retest inconsistency without a prior after digest a
 test('retest inconsistency rejects ambiguous and failed current results', () => {
   for (const status of ['ambiguous', 'failed']) {
     const receipt = statusReceipt(status);
+    receipt.priorReceiptDigest = computeModelTraceReceiptDigest(statusReceipt('candidate'));
     receipt.anomalies.push('retest-inconsistent');
     receipt.anomalies.sort();
     receipt.expiresAt = new Date(Date.parse(receipt.measuredAt) + 15 * 60_000).toISOString();

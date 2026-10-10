@@ -463,6 +463,26 @@
     },
     {
       "if": {
+        "required": ["anomalies"],
+        "properties": {
+          "anomalies": {
+            "contains": { "const": "retest-inconsistent" }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "result": {
+            "required": ["status"],
+            "properties": {
+              "status": { "const": "candidate" }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
         "properties": {
           "result": {
             "properties": {

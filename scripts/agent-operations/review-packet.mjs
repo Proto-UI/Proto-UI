@@ -224,6 +224,7 @@ function loadInvocationContext(args, command) {
         args.get('--published-review-packet'),
         args.get('--request'),
         args.get('--assessment'),
+        args.get('--prior-handoff'),
         args.get('--prior-packet'),
       ],
     });
