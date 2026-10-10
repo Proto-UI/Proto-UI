@@ -1,0 +1,92 @@
+{
+  "kind": "bounded-slider-and-runtime-harness-source-record",
+  "baseCommit": "f090be10f48bf360600d53becd837f91b44c6aaf",
+  "actualSourceCommit": "55a0de014170ee92cbfbcfd01deb4b52446f062b",
+  "sourceTree": "691f9470afcd4d68a8a26669dba271d31a936e65",
+  "localEvidence": {
+    "executionHead": "f090be10f48bf360600d53becd837f91b44c6aaf",
+    "stagedSourceTree": "691f9470afcd4d68a8a26669dba271d31a936e65",
+    "combinedFocused": {
+      "files": 16,
+      "passed": 281,
+      "failed": 0
+    },
+    "scopedRuntimeHarnessTypesExit": 0,
+    "normalStagedPrecommitExit": 0,
+    "bothCommitMessageHookExits": 0,
+    "noNewLocalCommit": true
+  },
+  "changes": [
+    "Keep ordinary Slider interpolation unchanged; use finite convex interpolation only for overflowed finite range spans.",
+    "Test harness selects committed, uniquely owned runtime surfaces in generic and fixed-family previews; all 34 native scenarios and component assertions remain."
+  ],
+  "retainedLimits": [
+    "Focused source/HappyDOM/synthetic-pointer tests are not native browser acceptance. Exact published-head official CI is still required.",
+    "Earlier broad Base run retained eight pre-existing Form recipe assertion failures; prototype catalog debt was not repaired.",
+    "Correction to the narrower wording in the Slider source record: its workspace TypeScript log includes unresolved dependencies, missing generated files and other diagnostics; this was not an environment-only pass or waiver.",
+    "The 14-package build was checked in author logs, not rerun by the independent Slider reviewer. No all-package or packed claim.",
+    "The existing matrix remains a historical snapshot bound to its own source; this small record does not refresh its inventory or promote any acceptance status."
+  ],
+  "acceptance": {
+    "done": 5,
+    "inProgress": 63,
+    "notStarted": 0,
+    "newAcceptance": false
+  },
+  "disclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "validationLogs": [
+    {
+      "name": "combined-tests.json",
+      "sha256": "bebe2e43134962ab48741333f3851beadccf75253ddf2b0f200ff2468034d712",
+      "bytes": 94004
+    },
+    {
+      "name": "combined-tests.log",
+      "sha256": "81122bb03598dd837ca84b0e64683d82da4530915604b15c1a7f9f98cb374b64",
+      "bytes": 52211
+    },
+    {
+      "name": "scoped-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "name": "normal-precommit.log",
+      "sha256": "7df28eba29d11ed911ccd797765537f950b60c2893f0b0b265838cc5cea7821a",
+      "bytes": 650
+    },
+    {
+      "name": "slider-disclosure-dot.log",
+      "sha256": "f2aad5d17864ab649d68121efa025909149b18ab7b4258a67fe23ab5f709c017",
+      "bytes": 107
+    },
+    {
+      "name": "harness-disclosure-dot.log",
+      "sha256": "f2aad5d17864ab649d68121efa025909149b18ab7b4258a67fe23ab5f709c017",
+      "bytes": 107
+    },
+    {
+      "name": "combined-tests-corepack-enoent.log",
+      "sha256": "3178da4311be9e43e14e025d2986d05e67f407551097b10e0fb8136806a79198",
+      "bytes": 1208
+    },
+    {
+      "name": "slider-disclosure.log",
+      "sha256": "25234682275158b15ddb66fb874e16ddb74412b767e920297aa7c4b3387f45bf",
+      "bytes": 78
+    },
+    {
+      "name": "harness-disclosure.log",
+      "sha256": "25234682275158b15ddb66fb874e16ddb74412b767e920297aa7c4b3387f45bf",
+      "bytes": 78
+    }
+  ],
+  "actualSourceCommits": [
+    "1fc1352838cf7c4d5ba7050ca1205bbe815bdc6e",
+    "55a0de014170ee92cbfbcfd01deb4b52446f062b"
+  ]
+}
