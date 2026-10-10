@@ -17,6 +17,8 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
       )
     );
     const state = inherited.stateHandles!;
+    const binding = inherited.getAsHookHandle?.('as-field-control');
+    if (!binding) throw new Error('[field-control] Base Field binding handle required.');
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
@@ -28,7 +30,7 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
         i.feedback.style.use(tw('pointer-events-none opacity-50 cursor-not-allowed bg-input/50')),
     });
     def.rule({
-      when: (w) => w.state(state.invalid).eq(true),
+      when: (w) => w.state(binding.state.invalid).eq(true),
       intent: (i) => i.feedback.style.use(tw('border-destructive ring-3 ring-destructive/20')),
     });
     def.rule({
@@ -40,7 +42,7 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
       intent: (i) => i.feedback.style.use(tw('bg-input/80')),
     });
     def.rule({
-      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.state(state.invalid).eq(true)),
+      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.state(binding.state.invalid).eq(true)),
       intent: (i) => i.feedback.style.use(tw('border-destructive/50 ring-destructive/40')),
     });
     return inherited.render;

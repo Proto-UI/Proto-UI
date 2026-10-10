@@ -131,9 +131,7 @@ export type FieldControlStates = {
   focused: State<boolean>;
   focusVisible: State<boolean>;
   composing: State<boolean>;
-  invalid: State<boolean>;
-  pending: State<boolean>;
-  required: State<boolean>;
+  inputAriaLabel: State<string>;
 };
 export type FieldControlExposes = {
   value: ExposeState<string>;
@@ -155,7 +153,11 @@ export type FieldControlExposes = {
   compositionUpdate: ExposeEvent<FieldControlCompositionDetail>;
   compositionEnd: ExposeEvent<FieldControlCompositionDetail>;
 };
-export type FieldControlAsHookContract = { state: FieldControlStates };
+/** Authored child states are deliberately not flattened into the text-control handle. */
+export type FieldControlAsHookContract = {
+  state: FieldControlStates;
+  asHooks: { 'as-field-control': FieldControlBindingHandles };
+};
 export interface FieldLabelProps {
   activation?: boolean;
 }

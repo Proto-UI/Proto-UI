@@ -15,6 +15,8 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
       )
     );
     const state = inherited.stateHandles!;
+    const binding = inherited.getAsHookHandle?.('as-field-control');
+    if (!binding) throw new Error('[field-control] Base Field binding handle required.');
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
@@ -27,7 +29,7 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
       intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
     });
     def.rule({
-      when: (w) => w.state(state.invalid).eq(true),
+      when: (w) => w.state(binding.state.invalid).eq(true),
       intent: (i) => i.feedback.style.use(tw('border-2 border-foreground')),
     });
     return inherited.render;

@@ -144,11 +144,16 @@ for (const family of ['shadcn', 'brutalist']) {
       expect(tokens(error)).not.toContain('border-l-2');
     }
     expect(input().getAttribute('aria-invalid')).toBe('true');
+    expect(input().hasAttribute('data-invalid')).toBe(true);
     expect(input().value).toBe('Ada');
     expect(error.getAttribute('role')).not.toBe('alert');
     if (family === 'shadcn')
       expect(tokens(input())).toEqual(
-        expect.arrayContaining(['border-destructive', 'ring-3', 'ring-destructive/20'])
+        expect.arrayContaining([
+          'data-[invalid]:border-destructive',
+          'data-[invalid]:ring-3',
+          'data-[invalid]:ring-destructive/20',
+        ])
       );
     setElementProps(root, { disabled: true });
     await flush();
@@ -159,5 +164,6 @@ for (const family of ['shadcn', 'brutalist']) {
     expect(input().value).toBe('Ada');
     expect(input().disabled).toBe(false);
     expect(root.hasAttribute('data-invalid')).toBe(false);
+    expect(input().hasAttribute('data-invalid')).toBe(false);
   });
 }
