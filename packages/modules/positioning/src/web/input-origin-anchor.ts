@@ -10,7 +10,10 @@ export type WebInputOriginReference = Readonly<{
 const references = new WeakMap<object, WebInputOriginReference>();
 
 /** Privileged host-only registry. The portable association has no inspectable geometry. */
-export function createWebInputOriginAnchor(element: HTMLElement, point?: { x: number; y: number }) {
+export function createWebInputOriginAnchor(
+  element: HTMLElement,
+  point?: { x: number; y: number }
+): { anchor: InputOriginAnchor; dispose(): void } {
   const anchor = Object.freeze(Object.create(null)) as InputOriginAnchor;
   let live = true;
   const listeners = new Set<() => void>();
