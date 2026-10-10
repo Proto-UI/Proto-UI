@@ -656,10 +656,10 @@ const datePickerDay: string | undefined = hDatePickerDay
 hDatePickerContent
   .getAsHookHandle?.('as-popover-content')
   ?.asTransition.configure({ enterDuration: 25 });
+const datePickerTransition =
+  hDatePickerContent.getAsHookHandle?.('as-popover-content')?.asTransition;
 // @ts-expect-error Nested transition configuration retains its numeric domain.
-hDatePickerContent
-  .getAsHookHandle?.('as-popover-content')
-  ?.asTransition.configure({ enterDuration: '25' });
+datePickerTransition?.configure({ enterDuration: '25' });
 const datePickerDisplay: string | undefined = hDatePickerValue.stateHandles?.displayValue.get();
 // @ts-expect-error Date Picker does not flatten child Calendar state handles.
 hDatePickerRoot.stateHandles?.value.get();
