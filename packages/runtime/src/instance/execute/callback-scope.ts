@@ -41,7 +41,8 @@ export class CallbackScope<P extends PropsBaseType> {
 
   private dispatchPropsTasks(ctx: RunHandle<P>) {
     const propsPort = this.moduleHub.getPort<PropsPort<P>>('props');
-    const tasks = propsPort?.consumeTasks?.() ?? [];
+    const tasks = propsPort?.consumeTasks?.();
+    if (tasks == null) return;
     for (const t of tasks as PropsWatchTask<P>[]) {
       // ctx is run; module-props does not know what ctx is.
       t.cb(ctx as any, t.next as any, t.prev as any, t.info as any);
@@ -52,7 +53,25 @@ export class CallbackScope<P extends PropsBaseType> {
    * Run a callback block in "callback" phase with ctx set.
    * This guarantees cleanup even if callback throws.
    */
-  run<T>(ctx: RunHandle<P>, fn: () => T): T {
+  run<T>(ctx: RunHandle<P>, fn: () => T, onPreparationError?: (error: unknown) => void): T {
+    return this.runInScope(ctx, fn, true, onPreparationError);
+  }
+
+  /**
+   * A light variant: do NOT sync from host.
+   * Useful for applyRawProps-style flows where props were already applied
+   * and we only want to dispatch watch tasks.
+   */
+  runNoSync<T>(ctx: RunHandle<P>, fn: () => T): T {
+    return this.runInScope(ctx, fn, false);
+  }
+
+  private runInScope<T>(
+    ctx: RunHandle<P>,
+    fn: () => T,
+    syncFromHost: boolean,
+    onPreparationError?: (error: unknown) => void
+  ): T {
     const prevPhase = this.getPhase();
     const prevCtx = (this.moduleHub as any).__getCallbackCtx?.();
 
@@ -64,34 +83,15 @@ export class CallbackScope<P extends PropsBaseType> {
     if (this.delayContext) enterActiveRuntimeDelayContext(this.delayContext);
 
     try {
-      this.syncPropsFromHost();
-      this.dispatchPropsTasks(ctx);
-      return fn();
-    } finally {
-      if (this.delayContext) exitActiveRuntimeDelayContext();
-      (this.moduleHub as any).__setCallbackCtx?.(prevCtx);
-      this.setPhase(prevPhase);
-      this.depth -= 1;
-      if (this.depth === 0) (this.moduleHub as any).__flushAfterCallbackTasks?.();
-    }
-  }
-
-  /**
-   * A light variant: do NOT sync from host.
-   * Useful for applyRawProps-style flows where props were already applied
-   * and we only want to dispatch watch tasks.
-   */
-  runNoSync<T>(ctx: RunHandle<P>, fn: () => T): T {
-    const prevPhase = this.getPhase();
-    const prevCtx = (this.moduleHub as any).__getCallbackCtx?.();
-
-    this.setPhase('callback');
-    this.depth += 1;
-    (this.moduleHub as any).__setCallbackCtx?.(ctx);
-    if (this.delayContext) enterActiveRuntimeDelayContext(this.delayContext);
-
-    try {
-      this.dispatchPropsTasks(ctx);
+      try {
+        if (syncFromHost) this.syncPropsFromHost();
+        this.dispatchPropsTasks(ctx);
+      } catch (error) {
+        // Failed creation must still release its acquired resources. All other
+        // callback entries retain their existing fail-fast preparation.
+        if (!onPreparationError) throw error;
+        onPreparationError(error);
+      }
       return fn();
     } finally {
       if (this.delayContext) exitActiveRuntimeDelayContext();

@@ -36,7 +36,6 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
       class Impl extends ModuleBase {
         private recorder = new FeedbackStyleRecorder();
         private dirty = false;
-        private flushRequested = false;
         private disposed = false;
         private viewEpoch = 0;
         private visualRevision = 0;
@@ -97,6 +96,13 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           try {
             this.flushIfPossible();
           } catch (error) {
+            if (this.mountPhase === 'mounting') {
+              // The disposer cannot reach Rule while activation throws. Release
+              // that contribution before the host rolls back this view epoch.
+              next?.();
+              this.markDirty();
+              throw error;
+            }
             // Rule's semantic replacement is complete even if the host fails.
             // Return its disposer so subsequent evaluations can remove it, and
             // let later semantic observers run. Projection remains retryable.
@@ -181,7 +187,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             // A fresh view epoch owns a fresh EffectsPort. Replay the retained
             // instance style before the host commit so the first materialized
             // frame already carries its baseline tokens.
-            this.replayStyleForViewEpoch();
+            this.afterRenderCommit();
           }
         }
 
@@ -245,7 +251,6 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             } else {
               const effects = this.caps.get(EFFECTS_CAP);
               effects.queueStyle(handle);
-              this.flushRequested = true;
               effects.requestFlush();
             }
             if (revision === this.visualRevision) this.pendingProjection = null;
@@ -295,13 +300,6 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         afterRenderCommit(): void {
           if (!this.canProject()) return;
           // A structural commit may replace the current materialized root.
-          if (!this.hasOutput()) return;
-          const merged = this.recorder.exportRootEffect();
-          this.projectFinalStyle(merged);
-        }
-
-        private replayStyleForViewEpoch(): void {
-          if (!this.canProject()) return;
           // Runtime ProtoPhase intentionally remains `setup` until the first
           // commit completes. Mounting is nevertheless after prototype setup,
           // so replay must not use flushIfPossible's setup-phase guard.
@@ -311,7 +309,6 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         /** optional: runtime/adapter can call this after flush tick */
         onEffectsFlushed(): void {
-          this.flushRequested = false;
           if (!this.canProject()) return;
           if (this.dirty && this.caps.has(FINAL_STYLE_SINK_CAP)) {
             this.flushIfPossible();
@@ -319,7 +316,6 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           }
           if (this.dirty && this.caps.has(EFFECTS_CAP)) {
             this.caps.get(EFFECTS_CAP).requestFlush();
-            this.flushRequested = true;
           }
         }
 
@@ -335,7 +331,6 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
               this.recorder = new FeedbackStyleRecorder();
               this.dirty = false;
               this.pendingProjection = null;
-              this.flushRequested = false;
               // Discard deferred view work while its entry guards are terminal.
               this.flushPending();
             }

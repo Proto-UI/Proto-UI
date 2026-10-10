@@ -51,6 +51,16 @@ cases:
       - C-LIFECYCLE-0006-B
       - C-LIFECYCLE-0006-D
     expectation: setup-created-once-mounted-unmounted-per-epoch
+  - id: T-LIFECYCLE-0001-CASE-FAILED-CREATED-TERMINAL-CLEANUP
+    title: Failed created preserves its initiating value and invalidates acquired instance resources despite throwing cleanup
+    covers:
+      - C-LIFECYCLE-0002-G
+      - C-LIFECYCLE-0002-I
+    expectation: failed-created-primary-preserved-acquired-resources-terminally-released
+    notes:
+      - Existing resource-owner cases observe cleared exposed state, invalid retained handles, and the identical created failure when beforeDispose also throws.
+      - Existing Delay cases observe that failed-created queued work never runs, including after a throwing beforeDispose callback.
+      - Does not certify arbitrary pre-return factory failures or general lifecycle callback recovery.
 implementations:
   - id: lifecycle-callback-order-fixture
     kind: fixture
@@ -114,6 +124,20 @@ implementations:
       - T-LIFECYCLE-0001-CASE-MOUNTED-CANCELLED-AFTER-UNMOUNT
       - T-LIFECYCLE-0001-CASE-UNMOUNT-DISPOSAL-BOUNDARY
       - T-LIFECYCLE-0001-CASE-REPEATED-MOUNT-EPOCHS
+  - id: runtime-failed-created-resource-cleanup
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.module-resources.v1.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0001-CASE-FAILED-CREATED-TERMINAL-CLEANUP
+  - id: runtime-failed-created-delay-cancellation
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/delay.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0001-CASE-FAILED-CREATED-TERMINAL-CLEANUP
 verifies:
   contracts:
     - id: C-LIFECYCLE-0002
@@ -126,6 +150,7 @@ verifies:
         - C-LIFECYCLE-0002-F
         - C-LIFECYCLE-0002-G
         - C-LIFECYCLE-0002-H
+        - C-LIFECYCLE-0002-I
 exercises:
   contracts:
     - id: C-LIFECYCLE-0001
@@ -143,6 +168,9 @@ revisions:
   - version: 0.1.0
     change: revised
     summary: Moved lifecycle API surface coverage to `T-LIFECYCLE-0004` while keeping callback invocation flow coverage here.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Mapped acquired failed-created primary-error preservation, terminal handle invalidation and queued Delay cancellation to existing executable resource and Delay cases; retained draft lifecycle.
 tags:
   - lifecycle
   - contract-test

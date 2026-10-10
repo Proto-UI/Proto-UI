@@ -78,7 +78,14 @@ it.each(['apply', 'disable', 'blur', 'empty'] as const)(
     let outer: any;
     let inner: any;
     let fallback: any;
-    const during: Array<{ active: boolean; focused: boolean }> = [];
+    let ordinary: HTMLElement;
+    const during: Array<{
+      active: boolean;
+      focused: boolean;
+      fallbackActive: boolean;
+      ownerVisible: boolean;
+      targetConnected: boolean;
+    }> = [];
     const outerProto = definePrototype({
       name: `wc-entry-requester-${completion}`,
       setup(def) {
@@ -95,6 +102,8 @@ it.each(['apply', 'disable', 'blur', 'empty'] as const)(
       name: `wc-entry-owner-${completion}`,
       setup(def) {
         const target = asFocusable();
+        // The native child, not this owner shell, is the sequential candidate.
+        target.setDisabled(true);
         def.expose.state('focused', target.focused);
         def.lifecycle.onCreated((value) => {
           run = value;
@@ -107,10 +116,16 @@ it.each(['apply', 'disable', 'blur', 'empty'] as const)(
           if (!request) return;
           request = false;
           outer.getExposes().enter();
-          during.push({ active: document.activeElement === inner, focused: target.focused.get() });
+          during.push({
+            active: document.activeElement === ordinary,
+            focused: target.focused.get(),
+            fallbackActive: document.activeElement === fallback,
+            ownerVisible: getComputedStyle(inner).display !== 'none',
+            targetConnected: ordinary.isConnected,
+          });
           if (completion === 'disable' || completion === 'blur') outer.getExposes()[completion]();
         });
-        return () => 'Retained ordinary owner';
+        return (r) => r.el('button', 'Retained ordinary target');
       },
     });
     const fallbackProto = definePrototype({
@@ -127,22 +142,44 @@ it.each(['apply', 'disable', 'blur', 'empty'] as const)(
     outer = document.createElement(outerProto.name);
     inner = document.createElement(innerProto.name);
     fallback = document.createElement(fallbackProto.name);
+    // Consumer CSS keeps the physical child eligible while its owning view's
+    // observation gate closes. Without it, entry immediately skips this hidden
+    // owner and acquires the ready fallback before cancellation can occur.
+    inner.style.setProperty('display', 'block', 'important');
     outer.append(inner);
     if (completion !== 'empty') outer.append(fallback);
     document.body.append(outer);
     try {
       await flush();
+      ordinary = inner.querySelector('button');
       request = true;
       inner.getExposes().view.hide();
       await flush();
-      expect(during).toEqual([{ active: false, focused: false }]);
+      expect(during).toEqual([
+        {
+          active: false,
+          focused: false,
+          fallbackActive: false,
+          ownerVisible: true,
+          targetConnected: true,
+        },
+      ]);
+      expect(ordinary.isConnected).toBe(false);
+      // A newer explicit no-target request ends retained entry; readiness replay
+      // alone must retain it across a temporarily absent replacement target.
+      if (completion === 'empty') outer.getExposes().enter();
       inner.getExposes().view.show();
       await flush();
+      expect(inner.querySelector('button')?.isConnected).toBe(true);
       // A later empty policy result ends entry intent. Reopening that view does
       // not resurrect it; a ready sibling instead consumes the invalidation.
-      const expected = completion === 'empty' ? inner : fallback;
+      const expected = completion === 'empty' ? inner.querySelector('button') : fallback;
       expect(document.activeElement === expected).toBe(completion === 'apply');
-      expect(expected.getExposes().focused.get()).toBe(completion === 'apply');
+      expect(
+        completion === 'empty'
+          ? inner.getExposes().focused.get()
+          : fallback.getExposes().focused.get()
+      ).toBe(completion === 'apply');
     } finally {
       outer.remove();
       await flush();

@@ -83,7 +83,9 @@ export async function observeIntentBudget(runtime: Runtime, kind: Kind) {
     setup(def) {
       if (kind === 'entry') {
         const entry = asFocusEntry();
-        entry.configure({ strategy: 'descendant-first', fallback: 'none' });
+        // Self policy resolves before the UA rejects hidden focus. A hidden
+        // descendant is correctly excluded by entry policy and creates no retry.
+        entry.configure({ strategy: 'self', fallback: 'self' });
         def.expose.method('request', (reused: boolean) =>
           entry.focus(reused ? reusedOptions : undefined)
         );
@@ -102,7 +104,7 @@ export async function observeIntentBudget(runtime: Runtime, kind: Kind) {
   const mounted = await mount(runtime, proto);
   try {
     await frames(3);
-    const target = kind === 'entry' ? mounted.root.querySelector('button')! : mounted.root;
+    const target = mounted.root;
     let trustedFocusEvents = 0;
     target.addEventListener('focus', (event) => {
       if (event.isTrusted) trustedFocusEvents++;
@@ -216,7 +218,7 @@ export async function observeSameViewCommitBudget(runtime: Runtime, kind: Kind) 
       def.expose.method('update', () => run.update());
       if (kind === 'entry') {
         const entry = asFocusEntry();
-        entry.configure({ strategy: 'descendant-first', fallback: 'none' });
+        entry.configure({ strategy: 'self', fallback: 'self' });
         def.expose.method('request', () => entry.focus());
       } else {
         const target = asFocusable();
@@ -230,7 +232,7 @@ export async function observeSameViewCommitBudget(runtime: Runtime, kind: Kind) 
   });
   const mounted = await mount(runtime, proto);
   const initialRoot = mounted.root;
-  const target = () => (kind === 'entry' ? mounted.root.querySelector('button')! : mounted.root);
+  const target = () => mounted.root;
   const rejectionStyle = document.createElement('style');
   rejectionStyle.textContent = 'body[data-focus-intent-reject] { display: none !important; }';
   document.head.append(rejectionStyle);
@@ -242,7 +244,7 @@ export async function observeSameViewCommitBudget(runtime: Runtime, kind: Kind) 
   try {
     await frames(3);
     // The fixture owns this body attribute. Framework commits cannot erase the
-    // CSS rejection, even when a raw descendant is replaced during an update.
+    // CSS rejection, including when an Adapter replaces its physical Root.
     document.body.setAttribute('data-focus-intent-reject', '');
     await mounted.act(() => mounted.getExposes().request());
     const rejected = document.activeElement !== target();
@@ -409,7 +411,7 @@ export async function observeRetainedViewBudget(runtime: Runtime, kind: Kind) {
       });
       if (kind === 'entry') {
         const entry = asFocusEntry();
-        entry.configure({ strategy: 'descendant-first', fallback: 'none' });
+        entry.configure({ strategy: 'self', fallback: 'self' });
         def.expose.method('request', () => entry.focus());
       } else {
         const target = asFocusable();
@@ -422,7 +424,7 @@ export async function observeRetainedViewBudget(runtime: Runtime, kind: Kind) {
     },
   });
   const mounted = await mount(runtime, proto);
-  const target = () => (kind === 'entry' ? mounted.root.querySelector('button')! : mounted.root);
+  const target = () => mounted.root;
   const rejectionStyle = document.createElement('style');
   rejectionStyle.textContent = 'body[data-focus-intent-reject] { display: none !important; }';
   document.head.append(rejectionStyle);
@@ -434,7 +436,7 @@ export async function observeRetainedViewBudget(runtime: Runtime, kind: Kind) {
   try {
     await frames(3);
     // The fixture owns this body attribute. Framework commits cannot erase the
-    // CSS rejection, even when a raw descendant is replaced during an update.
+    // CSS rejection, including when an Adapter replaces its physical Root.
     document.body.setAttribute('data-focus-intent-reject', '');
     await mounted.act(() => mounted.getExposes().request());
     const rejected = document.activeElement !== target();

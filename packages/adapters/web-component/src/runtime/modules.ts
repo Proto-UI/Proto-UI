@@ -2,6 +2,7 @@ import {
   cancelWebEventDefaultAction,
   createCapsWiring,
   createWebMoveGestureHost,
+  isWebFocusTargetActive,
   orderFocusTargetsByDocument,
   resolveWebFocusEntryTarget,
   type HostSurfaceProjection,
@@ -9,6 +10,7 @@ import {
 } from '@proto.ui/adapter-base';
 import {
   HOST_ELEMENT_CAP,
+  type CapEntries,
   type EffectsPort,
   type FocusEntryConfig,
   type FocusRequestOptions,
@@ -58,6 +60,7 @@ import {
 } from '@proto.ui/module-expose-state-web';
 import {
   FOCUS_BLUR_CAP,
+  FOCUS_RELEASE_PENDING_CAP,
   FOCUS_INSTANCE_TOKEN_CAP,
   FOCUS_IS_NATIVELY_FOCUSABLE_CAP,
   FOCUS_ORDER_CAP,
@@ -70,6 +73,7 @@ import {
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
   FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
+  type FocusRequestKind,
 } from '@proto.ui/module-focus';
 import {
   createWebHitParticipationHostBridge,
@@ -117,7 +121,6 @@ import {
 } from '../portal-mount';
 import {
   composedParentElement,
-  deepestActiveElement,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../focus-scope-targets';
@@ -131,11 +134,12 @@ import {
   releaseTriggerSurface,
   mergeLogicalTriggerGroup,
   subscribeLogicalTriggerSurface,
+  isNativeFocusTargetReady,
+  subscribeFocusSurfaceReady,
 } from '../platform/instance-tree';
 
 const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
-const WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
-const WEB_COMPONENT_IMAGE_VIEW_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
+const WEB_COMPONENT_CONTROL_HOST_OPTIONS = Object.freeze({ stopPropagation: true });
 
 // attachShadow() produces no MutationObserver record, so an open root that an
 // already-upgraded descendant attaches after observation started is invisible
@@ -327,6 +331,15 @@ function listenToEntryEvents(
   };
 }
 
+function propertyAffectsEntryEligibility(property: string): boolean {
+  return (
+    property === 'visibility' ||
+    property === 'display' ||
+    property === 'content-visibility' ||
+    property.startsWith('--')
+  );
+}
+
 function animationAffectsEntryEligibility(animation: Animation): boolean {
   const effect = animation.effect;
   if (!effect || typeof (effect as KeyframeEffect).getKeyframes !== 'function') return true;
@@ -336,11 +349,7 @@ function animationAffectsEntryEligibility(animation: Animation): boolean {
       .some((keyframe) =>
         Object.keys(keyframe).some(
           (property) =>
-            property === 'visibility' ||
-            property === 'display' ||
-            property === 'contentVisibility' ||
-            property === 'content-visibility' ||
-            property.startsWith('--')
+            property === 'contentVisibility' || propertyAffectsEntryEligibility(property)
         )
       );
   } catch {
@@ -373,36 +382,45 @@ function matchingSelectorParen(selector: string, open: number): number {
   return -1;
 }
 
+// These scans ignore the same escaped, quoted and attribute-selector input.
+// Return its final index without allocating tokens or substring copies.
+function skipSelectorLiteral(selector: string, index: number, character: string): number | null {
+  if (character === '\\') return index + 1;
+  if (character === '"' || character === "'") {
+    for (let end = index + 1; end < selector.length; end += 1) {
+      if (selector[end] === '\\') end += 1;
+      else if (selector[end] === character) return end;
+    }
+    return selector.length;
+  }
+  if (character === ']') return index;
+  if (character !== '[') return null;
+  let depth = 1;
+  let quote = '';
+  for (let end = index + 1; end < selector.length; end += 1) {
+    const next = selector[end]!;
+    if (next === '\\') end += 1;
+    else if (quote) {
+      if (next === quote) quote = '';
+    } else if (next === '"' || next === "'") quote = next;
+    else if (next === '[') depth += 1;
+    else if (next === ']' && --depth === 0) return end;
+  }
+  return selector.length;
+}
+
 function containsDocumentRootSelectorList(selector: string): boolean {
   let depth = 0;
-  let bracketDepth = 0;
-  let quote = '';
   let compoundStart = 0;
   const matchesLastCompound = (end: number) =>
     containsDocumentRootCompound(selector.slice(compoundStart, end));
   for (let index = 0; index < selector.length; index += 1) {
     const character = selector[index]!;
-    if (character === '\\') {
-      index += 1;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
       continue;
     }
-    if (quote) {
-      if (character === quote) quote = '';
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      continue;
-    }
-    if (character === '[') {
-      bracketDepth += 1;
-      continue;
-    }
-    if (character === ']') {
-      bracketDepth = Math.max(0, bracketDepth - 1);
-      continue;
-    }
-    if (bracketDepth) continue;
     if (character === '(') depth += 1;
     else if (character === ')') depth = Math.max(0, depth - 1);
     else if (!depth && character === ',') {
@@ -419,31 +437,13 @@ function containsDocumentRootSelectorList(selector: string): boolean {
 }
 
 function containsDocumentRootCompound(selector: string): boolean {
-  let bracketDepth = 0;
-  let quote = '';
   for (let index = 0; index < selector.length; index += 1) {
     const character = selector[index]!;
-    if (character === '\\') {
-      index += 1;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
       continue;
     }
-    if (quote) {
-      if (character === quote) quote = '';
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      continue;
-    }
-    if (character === '[') {
-      bracketDepth += 1;
-      continue;
-    }
-    if (character === ']') {
-      bracketDepth = Math.max(0, bracketDepth - 1);
-      continue;
-    }
-    if (bracketDepth) continue;
     if (character === ':') {
       let end = index + 1;
       while (/[\w-]/.test(selector[end] ?? '')) end += 1;
@@ -477,32 +477,14 @@ function containsDocumentRootCompound(selector: string): boolean {
 
 function hasDocumentRootRelationalSubject(selector: string): boolean {
   let depth = 0;
-  let bracketDepth = 0;
-  let quote = '';
   const compoundStarts = [0];
   for (let index = 0; index < selector.length; index += 1) {
     const character = selector[index]!;
-    if (character === '\\') {
-      index += 1;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
       continue;
     }
-    if (quote) {
-      if (character === quote) quote = '';
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      continue;
-    }
-    if (character === '[') {
-      bracketDepth += 1;
-      continue;
-    }
-    if (character === ']') {
-      bracketDepth = Math.max(0, bracketDepth - 1);
-      continue;
-    }
-    if (bracketDepth) continue;
     if (character === ':' && selector.slice(index + 1, index + 4).toLowerCase() === 'has') {
       let open = index + 4;
       while (/\s/.test(selector[open] ?? '')) open += 1;
@@ -533,35 +515,21 @@ function collectSiblingDependencySubjects(
   candidates: readonly Element[]
 ): Element[] {
   let depth = 0;
-  let bracketDepth = 0;
-  let quote = '';
   const siblingPositions: number[] = [];
   const dependencies = new Set<Element>();
   const firstCompound = (suffix: string) => {
     let innerDepth = 0;
-    let innerBracketDepth = 0;
-    let innerQuote = '';
     for (let index = 0; index < suffix.length; index += 1) {
       const character = suffix[index]!;
-      if (character === '\\') {
-        index += 1;
+      const literalEnd = skipSelectorLiteral(suffix, index, character);
+      if (literalEnd !== null) {
+        index = literalEnd;
         continue;
       }
-      if (innerQuote) {
-        if (character === innerQuote) innerQuote = '';
-        continue;
-      }
-      if (character === '"' || character === "'") {
-        innerQuote = character;
-        continue;
-      }
-      if (character === '[') innerBracketDepth += 1;
-      else if (character === ']') innerBracketDepth = Math.max(0, innerBracketDepth - 1);
-      else if (!innerBracketDepth && character === '(') innerDepth += 1;
-      else if (!innerBracketDepth && character === ')') innerDepth = Math.max(0, innerDepth - 1);
+      if (character === '(') innerDepth += 1;
+      else if (character === ')') innerDepth = Math.max(0, innerDepth - 1);
       else if (
         !innerDepth &&
-        !innerBracketDepth &&
         (character === '>' || character === '+' || character === '~' || /\s/.test(character))
       )
         return suffix.slice(0, index);
@@ -592,27 +560,11 @@ function collectSiblingDependencySubjects(
   };
   for (let index = 0; index < selector.length; index += 1) {
     const character = selector[index]!;
-    if (character === '\\') {
-      index += 1;
+    const literalEnd = skipSelectorLiteral(selector, index, character);
+    if (literalEnd !== null) {
+      index = literalEnd;
       continue;
     }
-    if (quote) {
-      if (character === quote) quote = '';
-      continue;
-    }
-    if (character === '"' || character === "'") {
-      quote = character;
-      continue;
-    }
-    if (character === '[') {
-      bracketDepth += 1;
-      continue;
-    }
-    if (character === ']') {
-      bracketDepth = Math.max(0, bracketDepth - 1);
-      continue;
-    }
-    if (bracketDepth) continue;
     if (character === '(') depth += 1;
     else if (character === ')') depth = Math.max(0, depth - 1);
     else if (!depth && (character === '+' || character === '~')) siblingPositions.push(index);
@@ -630,13 +582,7 @@ function styleRuleCanAffectEntryEligibility(rule: CSSStyleRule): boolean {
   if (!style) return false;
   for (let index = 0; index < style.length; index += 1) {
     const property = style.item(index);
-    if (
-      property === 'visibility' ||
-      property === 'display' ||
-      property === 'content-visibility' ||
-      property.startsWith('--')
-    )
-      return true;
+    if (propertyAffectsEntryEligibility(property)) return true;
   }
   return false;
 }
@@ -677,15 +623,17 @@ function collectEntryStyleDependencies(
           candidates
         ))
           siblingSubjects.add(subject);
-      if (selector.includes(':has(') && hasDocumentRootRelationalSubject(selector)) relational = 2;
-      if (!relational && selector.includes(':has(')) {
-        try {
-          const probe = selector.replace(/:has\([^)]*\)/g, ':where(*)');
-          relational = candidates.some((candidate) => candidate.matches(probe)) ? 1 : 0;
-        } catch {
-          // Unknown selector syntax is correctness-sensitive: retain a bounded
-          // external-chain fallback rather than silently missing a change.
-          relational = 1;
+      if (relational !== 2 && selector.includes(':has(')) {
+        if (hasDocumentRootRelationalSubject(selector)) relational = 2;
+        if (!relational) {
+          try {
+            const probe = selector.replace(/:has\([^)]*\)/g, ':where(*)');
+            relational = candidates.some((candidate) => candidate.matches(probe)) ? 1 : 0;
+          } catch {
+            // Unknown selector syntax is correctness-sensitive: retain a bounded
+            // external-chain fallback rather than silently missing a change.
+            relational = 1;
+          }
         }
       }
     }
@@ -707,7 +655,7 @@ function collectEntryStyleDependencies(
     for (const sheet of [...(root.styleSheets ?? []), ...(root.adoptedStyleSheets ?? [])])
       visitSheet(sheet);
   return [
-    [...queries].map((query) => view.matchMedia(query)),
+    Array.from(queries, (query) => view.matchMedia(query)),
     relational,
     siblingSubjects,
   ] as const;
@@ -923,16 +871,18 @@ function resolveWebComponentTriggerSurface(
 
   let surface = root;
   while (true) {
-    const next = Array.from(surface.querySelectorAll<HTMLElement>('[data-pui-root]')).find(
-      (candidate) => {
-        if (!(candidate as unknown as Record<symbol, unknown>)[TRIGGER_OWNER_MARK]) return false;
-        let parent = candidate.parentElement;
-        while (parent && parent !== surface && !parent.hasAttribute('data-pui-root')) {
-          parent = parent.parentElement;
-        }
-        return parent === surface;
+    let next: HTMLElement | null = null;
+    for (const candidate of surface.querySelectorAll<HTMLElement>('[data-pui-root]')) {
+      if (!(candidate as unknown as Record<symbol, unknown>)[TRIGGER_OWNER_MARK]) continue;
+      let parent = candidate.parentElement;
+      while (parent && parent !== surface && !parent.hasAttribute('data-pui-root')) {
+        parent = parent.parentElement;
       }
-    );
+      if (parent === surface) {
+        next = candidate;
+        break;
+      }
+    }
     if (!next) return surface;
     surface = next;
   }
@@ -956,6 +906,104 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   runInCallbackScope: (fn: () => void) => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
 };
+
+function createControlWiring<Props extends PropsBaseType>(
+  args: WebComponentOwnerModulesArgs<Props>,
+  rawPropsSource: RawPropsSource<Props>,
+  physicalControl: () => WebTextControl | null,
+  physicalImage: () => HTMLImageElement | null
+) {
+  return createCapsWiring()
+    .use('text-control', [
+      [
+        TEXT_CONTROL_HOST_CAP,
+        createWebTextControlHost(physicalControl, WEB_COMPONENT_CONTROL_HOST_OPTIONS),
+      ],
+      [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('image-view', [
+      [
+        IMAGE_VIEW_HOST_CAP,
+        createWebImageViewHost(physicalImage, WEB_COMPONENT_CONTROL_HOST_OPTIONS),
+      ],
+      [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]]);
+}
+
+function createExposeEventSink(el: HTMLElement) {
+  return (key: string, payload?: unknown, options?: Record<string, unknown>) => {
+    el.dispatchEvent(
+      new CustomEvent(key, {
+        detail: payload,
+        bubbles: true,
+        cancelable: true,
+        ...options,
+      })
+    );
+  };
+}
+
+function addExposeStateModule(
+  wiring: ReturnType<typeof createCapsWiring>,
+  setExposes: (record: Record<string, unknown>) => void
+) {
+  return wiring.use('expose-state', [
+    [
+      EXPOSES_RECORD_SINK_CAP,
+      (record: Record<string, unknown>) => {
+        setExposes(record ?? {});
+      },
+    ],
+  ]);
+}
+
+// Owner and view wiring share these logical capabilities. Only materialized
+// views install native Anatomy order observation; preserve that distinction.
+function addLogicalModules(
+  wiring: ReturnType<typeof createCapsWiring>,
+  instanceToken: LogicalInstanceToken,
+  getMeta: (key: string) => unknown,
+  colorSchemeSource: ColorSchemeInvalidationSource | undefined,
+  preferenceSource: PreferenceInvalidationSource | undefined,
+  styleSupportSource: StyleSupportInvalidationSource | undefined,
+  orderObserver?: typeof createDomOrderObserver
+) {
+  const anatomy: CapEntries[number][] = [
+    [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
+    [ANATOMY_PARENT_CAP, getLogicalParent],
+    [ANATOMY_GET_PROTO_CAP, getLogicalPrototype],
+    [ANATOMY_ROOT_TARGET_CAP, getLogicalRoot],
+  ];
+  if (orderObserver) anatomy.push([ANATOMY_ORDER_OBSERVER_CAP, orderObserver]);
+
+  return wiring
+    .use('context', [
+      [CONTEXT_INSTANCE_TOKEN_CAP, instanceToken],
+      [CONTEXT_PARENT_CAP, getLogicalParent],
+    ])
+    .use('anatomy', anatomy)
+    .use('as-trigger', [
+      [AS_TRIGGER_INSTANCE_CAP, instanceToken],
+      [AS_TRIGGER_PARENT_CAP, getLogicalParent],
+      [AS_TRIGGER_MERGE_GROUP_CAP, mergeLogicalTriggerGroup],
+      [AS_TRIGGER_GET_GROUP_EVENT_TARGET_CAP, getLogicalEventTarget],
+      [AS_TRIGGER_GET_PROTO_CAP, getLogicalPrototype],
+    ])
+    .use('rule-meta', [
+      [RULE_META_GET_CAP, getMeta],
+      ...(colorSchemeSource
+        ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
+        : []),
+      ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
+      ...(styleSupportSource
+        ? [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, styleSupportSource] as const]
+        : []),
+    ])
+    .use('rule-expose-state-web', [
+      [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
+    ]);
+}
 
 /** Owner/instance capabilities that remain valid without rendered children. */
 export function createWebComponentOwnerModules<Props extends PropsBaseType>(
@@ -989,22 +1037,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   const physicalControl = () => args.textControlTarget;
   const physicalImage = () => args.imageViewTarget;
 
-  return createCapsWiring()
-    .use('text-control', [
-      [
-        TEXT_CONTROL_HOST_CAP,
-        createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
-      ],
-      [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
-    ])
-    .use('image-view', [
-      [
-        IMAGE_VIEW_HOST_CAP,
-        createWebImageViewHost(physicalImage, WEB_COMPONENT_IMAGE_VIEW_HOST_OPTIONS),
-      ],
-      [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
-    ])
-    .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
+  const wiring = createControlWiring(args, rawPropsSource, physicalControl, physicalImage)
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
@@ -1013,81 +1046,28 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
         ),
       ],
     ])
-    .use('expose-event', [
-      [
-        EXPOSE_EVENT_SINK_CAP,
-        (key: string, payload?: unknown, options?: Record<string, unknown>) => {
-          el.dispatchEvent(
-            new CustomEvent(key, {
-              detail: payload,
-              bubbles: true,
-              cancelable: true,
-              ...options,
-            })
-          );
-        },
-      ],
-    ])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, createExposeEventSink(el)]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
-      [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
+      [FOCUS_PARENT_CAP, getLogicalParent],
       [FOCUS_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
-    ])
-    .use('expose-state', [
-      [
-        EXPOSES_RECORD_SINK_CAP,
-        (record: Record<string, unknown>) => {
-          setExposes(record ?? {});
-        },
-      ],
-    ])
-    .use('expose-state-web', () => [
-      [HOST_ELEMENT_CAP, el],
-      [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
-      ...(args.exposeStateWebMode
-        ? [[EXPOSE_STATE_WEB_MODE_CAP, args.exposeStateWebMode] as const]
-        : []),
-    ])
-    .use('context', [
-      [CONTEXT_INSTANCE_TOKEN_CAP, instanceToken],
-      [CONTEXT_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
-    ])
-    .use('anatomy', [
-      [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
-      [ANATOMY_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
-      [ANATOMY_GET_PROTO_CAP, (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken)],
-      [ANATOMY_ROOT_TARGET_CAP, (inst: unknown) => getLogicalRoot(inst as LogicalInstanceToken)],
-    ])
-    .use('as-trigger', [
-      [AS_TRIGGER_INSTANCE_CAP, instanceToken],
-      [AS_TRIGGER_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
-      [
-        AS_TRIGGER_MERGE_GROUP_CAP,
-        (inst: unknown, anchor: unknown) =>
-          mergeLogicalTriggerGroup(inst as LogicalInstanceToken, anchor as LogicalInstanceToken),
-      ],
-      [
-        AS_TRIGGER_GET_GROUP_EVENT_TARGET_CAP,
-        (inst: unknown) => getLogicalEventTarget(inst as LogicalInstanceToken),
-      ],
-      [
-        AS_TRIGGER_GET_PROTO_CAP,
-        (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken),
-      ],
-    ])
-    .use('rule-meta', [
-      [RULE_META_GET_CAP, getMeta],
-      ...(colorSchemeSource
-        ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
-        : []),
-      ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
-      ...(styleSupportSource
-        ? [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, styleSupportSource] as const]
-        : []),
-    ])
-    .use('rule-expose-state-web', [
-      [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
-    ])
+    ]);
+  addExposeStateModule(wiring, setExposes).use('expose-state-web', () => [
+    [HOST_ELEMENT_CAP, el],
+    [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
+    ...(args.exposeStateWebMode
+      ? [[EXPOSE_STATE_WEB_MODE_CAP, args.exposeStateWebMode] as const]
+      : []),
+  ]);
+
+  return addLogicalModules(
+    wiring,
+    instanceToken,
+    getMeta,
+    colorSchemeSource,
+    preferenceSource,
+    styleSupportSource
+  )
     .use('overlay', () => [
       ...(args.overlayLayerScheduler
         ? [[OVERLAY_LAYER_SCHEDULER_CAP, args.overlayLayerScheduler] as const]
@@ -1095,6 +1075,12 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     ])
     .build();
 }
+
+// Kept by the logical Adapter owner, across replaceable view providers.
+export type FocusIntentState = {
+  options?: FocusRequestOptions;
+  kind?: FocusRequestKind;
+};
 
 export function createWebComponentModules<Props extends PropsBaseType>(args: {
   el: HTMLElement;
@@ -1122,6 +1108,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
+  isEntryAcquisitionReady: (target: HTMLElement) => boolean;
+  onFocusAcquired?: () => void;
+  onFocusPendingReleased?: () => void;
+  focusIntentState?: FocusIntentState;
+  onFocusIntent?: () => void;
   subscribeTargetReady: (listener: () => void) => () => void;
   retryTargetReady: () => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
@@ -1142,6 +1133,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     setExposes,
   } = args;
 
+  const request = args.focusIntentState ?? {};
   const getConnectedTriggerSurface = () => {
     const target = getLogicalTriggerSurfaceRoot(instanceToken);
     const surface = resolveWebComponentTriggerSurface(el, target);
@@ -1199,7 +1191,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       history.rebind();
       listener();
     });
-    const offSurface = subscribeLogicalTriggerSurface(instanceToken, listener);
+    const offSurface = subscribeFocusSurfaceReady(instanceToken, listener);
     radioFocusHistory = history;
     return () => {
       history.dispose();
@@ -1220,22 +1212,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   // translated feedback.style tokens on a split presentation surface.
   const presentationSurface = args.textControlTarget ?? args.imageViewTarget ?? el;
 
-  return createCapsWiring()
-    .use('text-control', [
-      [
-        TEXT_CONTROL_HOST_CAP,
-        createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
-      ],
-      [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
-    ])
-    .use('image-view', [
-      [
-        IMAGE_VIEW_HOST_CAP,
-        createWebImageViewHost(physicalImage, WEB_COMPONENT_IMAGE_VIEW_HOST_OPTIONS),
-      ],
-      [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
-    ])
-    .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
+  const wiring = createControlWiring(args, rawPropsSource, physicalControl, physicalImage)
     .use('feedback', [
       [EFFECTS_CAP, effectsPort],
       ...(args.materialBindingFactory
@@ -1268,24 +1245,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [EVENT_GLOBAL_INPUT_SCOPE_CAP, () => el.ownerDocument],
       [EVENT_CANCEL_DEFAULT_ACTION_CAP, cancelWebEventDefaultAction],
     ])
-    .use('expose-event', [
-      [
-        EXPOSE_EVENT_SINK_CAP,
-        (key: string, payload?: unknown, options?: Record<string, unknown>) => {
-          const ev = new CustomEvent(key, {
-            detail: payload,
-            bubbles: true,
-            cancelable: true,
-            ...options,
-          });
-          el.dispatchEvent(ev);
-        },
-      ],
-    ])
+    .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, createExposeEventSink(el)]])
     .use('focus', [
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
-      [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
+      [FOCUS_PARENT_CAP, getLogicalParent],
       [FOCUS_TARGET_READY_CAP, subscribeFocusTarget],
+      [FOCUS_RELEASE_PENDING_CAP, () => args.onFocusPendingReleased?.()],
       [
         FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
         (container: HTMLElement, direction?: 'next' | 'prev') =>
@@ -1298,7 +1263,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           ),
       ],
       [FOCUS_ROOT_TARGET_CAP, () => physicalControl() ?? getTriggerSurface()],
-      [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, (target: HTMLElement) => isNativelyFocusable(target)],
+      [FOCUS_IS_NATIVELY_FOCUSABLE_CAP, isNativelyFocusable],
       [FOCUS_ORDER_CAP, orderFocusTargetsByDocument],
       [
         FOCUS_SET_FOCUSABLE_CAP,
@@ -1311,10 +1276,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           projectFocusable(target, enabled && (!surface || surface === target), options);
         },
       ],
-      [
-        FOCUS_RESOLVE_ENTRY_TARGET_CAP,
-        (target: HTMLElement, config: FocusEntryConfig) => resolveFocusEntryTarget(target, config),
-      ],
+      [FOCUS_RESOLVE_ENTRY_TARGET_CAP, resolveFocusEntryTarget],
       [
         FOCUS_SET_ENTRY_FOCUSABLE_CAP,
         (target: HTMLElement, config: FocusEntryConfig, enabled: boolean) => {
@@ -1356,6 +1318,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
             // outside observeTree() and is refreshed on every resample
             // instead of being captured from the first scan.
             const observedRoots = new Set<Node>();
+            const belongsToObservedEntryTree = (node: Node) => {
+              for (const root of observedRoots) {
+                if (root === node || root.contains(node)) return true;
+              }
+              return false;
+            };
             const pendingUpgrades = new Map<string, [(() => void) | null]>();
             stopEntryUpgradeWatch = () => {
               for (const subscription of pendingUpgrades.values()) subscription[0] = null;
@@ -1489,12 +1457,6 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                 }
               };
               observe(target);
-              const belongsToObservedEntryTree = (node: Node) => {
-                for (const root of observedRoots) {
-                  if (root === node || root.contains(node)) return true;
-                }
-                return false;
-              };
               entryExternalStyleObserver ??= new Observer((records) => {
                 if (!isCurrentEntryObservation()) return;
                 if (
@@ -1707,13 +1669,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
                   return;
                 if (event.type.startsWith('transition')) {
                   const propertyName = (event as TransitionEvent).propertyName;
-                  if (
-                    propertyName !== 'visibility' &&
-                    propertyName !== 'display' &&
-                    propertyName !== 'content-visibility' &&
-                    !propertyName.startsWith('--')
-                  )
-                    return;
+                  if (!propertyAffectsEntryEligibility(propertyName)) return;
                 }
                 if (event.type === 'animationstart')
                   trackEligibilityAnimation(event as AnimationEvent);
@@ -1786,12 +1742,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
               // root lands inside an already-observed root.
               stopEntryAttachShadowWatch ??= watchLateAttachShadow(
                 target.ownerDocument.defaultView,
-                (host) => {
-                  for (const root of observedRoots) {
-                    if (root === host || root.contains(host)) return true;
-                  }
-                  return false;
-                },
+                belongsToObservedEntryTree,
                 refreshTree
               );
               // Both entry resolvers consult document-level image-map bindings.
@@ -1932,17 +1883,30 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       ],
       [
         FOCUS_REQUEST_FOCUS_CAP,
-        (target: HTMLElement, options?: FocusRequestOptions) => {
+        (target: HTMLElement, options: FocusRequestOptions | undefined, kind: FocusRequestKind) => {
+          if (request.options !== options || request.kind !== kind) {
+            request.options = options;
+            request.kind = kind;
+            args.onFocusIntent?.();
+          }
+          if (
+            !target.isConnected ||
+            (kind === 'native' && !isNativeFocusTargetReady(target)) ||
+            (kind === 'entry' && !args.isEntryAcquisitionReady(target))
+          )
+            return false;
           target.focus(
             typeof options?.preventScroll === 'boolean'
               ? { preventScroll: options.preventScroll }
               : undefined
           );
-          // A focused editor inside an open ShadowRoot leaves
-          // document.activeElement on the host; only the deepest active
-          // element proves the request landed.
-          const applied = deepestActiveElement(target.ownerDocument) === target;
-          if (!applied) args.retryTargetReady();
+          // Document traversal cannot observe a target inside a closed root.
+          const applied = isWebFocusTargetActive(target);
+          // Only the still-current intent owns success or retry accounting.
+          if (request.options === options && request.kind === kind) {
+            if (applied) args.onFocusAcquired?.();
+            else args.retryTargetReady();
+          }
           return applied;
         },
       ],
@@ -1953,65 +1917,26 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
           target.blur();
         },
       ],
-    ])
-    .use('expose-state', [
-      [
-        EXPOSES_RECORD_SINK_CAP,
-        (record: Record<string, unknown>) => {
-          setExposes(record ?? {});
-        },
-      ],
-    ])
-    .use('expose-state-web', () => [
-      [HOST_ELEMENT_CAP, el],
-      [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
-      [
-        EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP,
-        () => (presentationSurface === el ? [] : [presentationSurface]),
-      ],
-      ...(exposeStateWebMode ? [[EXPOSE_STATE_WEB_MODE_CAP, exposeStateWebMode] as const] : []),
-    ])
-    .use('context', [
-      [CONTEXT_INSTANCE_TOKEN_CAP, instanceToken],
-      [CONTEXT_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
-    ])
-    .use('anatomy', [
-      [ANATOMY_INSTANCE_TOKEN_CAP, instanceToken],
-      [ANATOMY_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
-      [ANATOMY_GET_PROTO_CAP, (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken)],
-      [ANATOMY_ROOT_TARGET_CAP, (inst: unknown) => getLogicalRoot(inst as LogicalInstanceToken)],
-      [ANATOMY_ORDER_OBSERVER_CAP, createDomOrderObserver],
-    ])
-    .use('as-trigger', [
-      [AS_TRIGGER_INSTANCE_CAP, instanceToken],
-      [AS_TRIGGER_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
-      [
-        AS_TRIGGER_MERGE_GROUP_CAP,
-        (inst: unknown, anchor: unknown) =>
-          mergeLogicalTriggerGroup(inst as LogicalInstanceToken, anchor as LogicalInstanceToken),
-      ],
-      [
-        AS_TRIGGER_GET_GROUP_EVENT_TARGET_CAP,
-        (inst: unknown) => getLogicalEventTarget(inst as LogicalInstanceToken),
-      ],
-      [
-        AS_TRIGGER_GET_PROTO_CAP,
-        (inst: unknown) => getLogicalPrototype(inst as LogicalInstanceToken),
-      ],
-    ])
-    .use('rule-meta', [
-      [RULE_META_GET_CAP, getMeta],
-      ...(colorSchemeSource
-        ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
-        : []),
-      ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
-      ...(styleSupportSource
-        ? [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, styleSupportSource] as const]
-        : []),
-    ])
-    .use('rule-expose-state-web', [
-      [RULE_EXPOSE_STATE_WEB_NATIVE_VARIANT_POLICY_CAP, createExposeStateWebNativeVariantPolicy],
-    ])
+    ]);
+  addExposeStateModule(wiring, setExposes).use('expose-state-web', () => [
+    [HOST_ELEMENT_CAP, el],
+    [EXPOSE_STATE_WEB_MAP_CAP, createExposeStateWebNameMap],
+    [
+      EXPOSE_STATE_WEB_MIRROR_TARGETS_CAP,
+      () => (presentationSurface === el ? [] : [presentationSurface]),
+    ],
+    ...(exposeStateWebMode ? [[EXPOSE_STATE_WEB_MODE_CAP, exposeStateWebMode] as const] : []),
+  ]);
+
+  return addLogicalModules(
+    wiring,
+    instanceToken,
+    getMeta,
+    colorSchemeSource,
+    preferenceSource,
+    styleSupportSource,
+    createDomOrderObserver
+  )
     .use('hit-participation', [
       [HOST_ELEMENT_CAP, el],
       [HIT_PARTICIPATION_HOST_BRIDGE_CAP, createWebHitParticipationHostBridge()],
@@ -2051,19 +1976,22 @@ function isNativelyFocusable(el: HTMLElement): boolean {
   if (tag === 'area') {
     const map = el.closest('map');
     if (!el.hasAttribute('href') || !map?.name || !el.isConnected) return false;
-    return Array.from(el.ownerDocument.querySelectorAll('img[usemap]')).some(
-      (image) =>
+    for (const image of el.ownerDocument.querySelectorAll('img[usemap]')) {
+      if (
         image.getAttribute('usemap') === `#${map.name}` &&
         !image.closest('[hidden],[inert],[aria-hidden="true"]')
-    );
+      )
+        return true;
+    }
+    return false;
   }
   if (tag === 'audio' || tag === 'video') return el.hasAttribute('controls');
   if (tag === 'summary') {
     const parent = el.parentElement;
-    return (
-      parent?.tagName.toLowerCase() === 'details' &&
-      Array.from(parent.children).find((child) => child.tagName.toLowerCase() === 'summary') === el
-    );
+    if (parent?.tagName.toLowerCase() !== 'details') return false;
+    for (const child of parent.children) {
+      if (child.tagName.toLowerCase() === 'summary') return child === el;
+    }
   }
   return false;
 }

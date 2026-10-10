@@ -299,9 +299,7 @@ class FocusModuleImpl extends ModuleBase {
     this.offTargetReady = this.caps.get(FOCUS_TARGET_READY_CAP)(() => {
       this.runInCallbackScope(() => {
         const applicationVersion = this.focusApplicationVersion;
-        this.syncCenter();
-        this.syncHostFocusable();
-        this.syncHostEntry();
+        this.syncRoleProjection();
         // Center may already replay a deferred roving request during upsert.
         // Do not apply that same pending intent twice for one readiness signal.
         if (applicationVersion !== this.focusApplicationVersion) return;
@@ -528,11 +526,7 @@ class FocusModuleImpl extends ModuleBase {
           options,
           (intent) => {
             this.runInCallbackScope(() => {
-              if (behavior?.syncFacts === false) {
-                outcome = this.requestNativeFocusDirect(intent);
-                return;
-              }
-              outcome = this.requestFocusDirect(intent);
+              outcome = this.applyTargetDirect(intent, behavior?.syncFacts !== false);
             });
           },
           retainFocusRequestIntent
@@ -606,6 +600,12 @@ class FocusModuleImpl extends ModuleBase {
     const entry = this.createCenterEntry();
     if (!entry) return;
     FOCUS_CENTER.upsert(entry);
+  }
+
+  private syncRoleProjection(): void {
+    this.syncCenter();
+    this.syncHostFocusable();
+    this.syncHostEntry();
   }
 
   private syncHostFocusable() {
@@ -836,11 +836,12 @@ class FocusModuleImpl extends ModuleBase {
         next = this.scopeConfig.loop
           ? (next + targets.length) % targets.length
           : Math.max(0, Math.min(targets.length - 1, next));
-        // Native host events, not this sample, report any logical focus facts.
+        // Sampled descendants use borrowed-target admission, not Trigger's
+        // root-only native admission. Host events still own their focus facts.
         const request = this.caps.get(FOCUS_REQUEST_FOCUS_CAP);
         for (let attempts = targets.length; attempts > 0; attempts -= 1) {
           const target = targets[next]!;
-          if (request(target, { reason: 'keyboard' }, 'native') !== false) {
+          if (request(target, { reason: 'keyboard' }, 'entry') !== false) {
             this.lastScopeTarget = target;
             return;
           }
@@ -1050,10 +1051,6 @@ class FocusModuleImpl extends ModuleBase {
     return true;
   }
 
-  private requestFocusDirect(options: FocusRequestOptions): FocusRequestOutcome {
-    return this.applyTargetDirect(options, true);
-  }
-
   private applyTargetDirect(
     options: FocusRequestOptions,
     syncFacts: boolean,
@@ -1212,10 +1209,6 @@ class FocusModuleImpl extends ModuleBase {
       // the same unresolved intent recursively.
       if (!intent?.replay) this.settleDeferredReadiness(operation, applicationVersion, failed);
     }
-  }
-
-  private requestNativeFocusDirect(options: FocusRequestOptions): FocusRequestOutcome {
-    return this.applyTargetDirect(options, false);
   }
 
   private requestNativeFocus(options?: FocusRequestOptions): void {
@@ -1387,9 +1380,7 @@ class FocusModuleImpl extends ModuleBase {
   }
 
   afterRenderCommit(): void {
-    this.syncCenter();
-    this.syncHostFocusable();
-    this.syncHostEntry();
+    this.syncRoleProjection();
     const hadPendingFocus = !!this.pendingFocusRequest;
     // During the initial adapter commit host events are wired, but the runtime
     // still rejects them until mountPhase becomes `mounted`. Keep native focus
@@ -1450,6 +1441,49 @@ class FocusModuleImpl extends ModuleBase {
     return Object.freeze(this.warnings.slice());
   }
 
+  createPort(): FocusPort {
+    // Reuse the role callbacks without declaring roles during port construction.
+    const focusable = this.focusableHandle;
+    const entry = this.entryHandle;
+    const roving = this.rovingHandle;
+    const scope = this.scopeHandle;
+    return {
+      configureFocusable: focusable.configure,
+      configureEntry: entry.configure,
+      configureRoving: roving.configure,
+      configureGroup: roving.configure,
+      setRovingLoop: roving.setLoop,
+      setRovingOrientation: roving.setOrientation,
+      configureScope: scope.configure,
+      setDisabled: focusable.setDisabled,
+      setNavParticipation: focusable.setNavParticipation,
+      setRovingStatus: focusable.setRovingStatus,
+      setEntryDisabled: entry.setDisabled,
+      requestFocus: focusable.focus,
+      requestEntryFocus: entry.focus,
+      blur: focusable.blur,
+      focusFirst: roving.focusFirst,
+      focusLast: roving.focusLast,
+      focusNext: roving.focusNext,
+      focusPrev: roving.focusPrev,
+      focusSelected: roving.focusSelected,
+      restoreFocus: scope.restoreFocus,
+      activateScope: scope.activate,
+      deactivateScope: scope.deactivate,
+      isScopeActive: scope.isActive,
+      getEffectiveRovingKey: () => this.getEffectiveRovingKey(),
+      getEffectiveGroupKey: () => this.getEffectiveRovingKey(),
+      getEffectiveScopeKey: () => this.getEffectiveScopeKey(),
+      getFocusableConfig: () => this.getFocusableConfig(),
+      getEntryConfig: () => this.getEntryConfig(),
+      getRovingConfig: () => this.getRovingConfig(),
+      getGroupConfig: () => this.getRovingConfig(),
+      getScopeConfig: () => this.getScopeConfig(),
+      getFacts: () => this.getFacts(),
+      getWarnings: () => this.getWarnings(),
+    };
+  }
+
   override onInstancePhase(phase: InstancePhase): void {
     super.onInstancePhase(phase);
     if (phase === 'disposing') {
@@ -1470,9 +1504,7 @@ class FocusModuleImpl extends ModuleBase {
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
     if (phase === 'mounted') {
-      this.syncCenter();
-      this.syncHostFocusable();
-      this.syncHostEntry();
+      this.syncRoleProjection();
       this.fulfillPendingFocus();
       return;
     }
@@ -1502,41 +1534,7 @@ export function createFocusModule(ctx: ModuleFactoryArgs): FocusModule {
       const statePort = deps.requirePort<StatePort>('state');
       const stateFacade = deps.requireFacade<StateFacade>('state');
       const impl = new FocusModuleImpl(caps, init.prototypeName, eventPort, statePort, stateFacade);
-      const port: FocusPort = {
-        configureFocusable: (patch) => impl.configureFocusable(patch),
-        configureEntry: (patch) => impl.configureEntry(patch),
-        configureRoving: (patch) => impl.configureRoving(patch),
-        configureGroup: (patch) => impl.configureRoving(patch),
-        setRovingLoop: (loop) => impl.setRovingLoop(loop),
-        setRovingOrientation: (orientation) => impl.setRovingOrientation(orientation),
-        configureScope: (patch) => impl.configureScope(patch),
-        setDisabled: (disabled) => impl.setDisabled(disabled),
-        setNavParticipation: (navParticipation) => impl.setNavParticipation(navParticipation),
-        setRovingStatus: (status) => impl.setRovingStatus(status),
-        setEntryDisabled: (disabled) => impl.setEntryDisabled(disabled),
-        requestFocus: (options) => impl.requestFocus(options),
-        requestEntryFocus: (options) => impl.requestEntryFocus(options),
-        blur: () => impl.blur(),
-        focusFirst: (options) => impl.focusFirst(options),
-        focusLast: (options) => impl.focusLast(options),
-        focusNext: () => impl.focusNext(),
-        focusPrev: () => impl.focusPrev(),
-        focusSelected: (options) => impl.focusSelected(options),
-        restoreFocus: () => impl.restoreFocus(),
-        activateScope: (options) => impl.activateScope(options),
-        deactivateScope: (options) => impl.deactivateScope(options),
-        isScopeActive: () => impl.isScopeActive(),
-        getEffectiveRovingKey: () => impl.getEffectiveRovingKey(),
-        getEffectiveGroupKey: () => impl.getEffectiveRovingKey(),
-        getEffectiveScopeKey: () => impl.getEffectiveScopeKey(),
-        getFocusableConfig: () => impl.getFocusableConfig(),
-        getEntryConfig: () => impl.getEntryConfig(),
-        getRovingConfig: () => impl.getRovingConfig(),
-        getGroupConfig: () => impl.getRovingConfig(),
-        getScopeConfig: () => impl.getScopeConfig(),
-        getFacts: () => impl.getFacts(),
-        getWarnings: () => impl.getWarnings(),
-      };
+      const port = impl.createPort();
 
       return {
         facade: {
