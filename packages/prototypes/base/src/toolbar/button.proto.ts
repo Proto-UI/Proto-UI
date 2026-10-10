@@ -39,9 +39,9 @@ function setup(def: DefHandle<ToolbarButtonProps, ToolbarButtonExposes>) {
     if (!disabled.get()) focus.focusSelf(options);
   });
   def.expose.event('action', { payload: 'json' });
-  const setCurrent = (run: RunHandle<ToolbarButtonProps>) => {
+  const setCurrent = (run: RunHandle<ToolbarButtonProps>, next = id) => {
     const fn = run.anatomy.partsOf(TOOLBAR_FAMILY, 'root')[0]?.getExpose('setCurrent');
-    if (typeof fn === 'function') fn(id);
+    if (typeof fn === 'function') fn(next);
   };
   const sync = (run: RunHandle<ToolbarButtonProps>, ctx: ToolbarContext) => {
     const off = ctx.disabled || !!run.props.get().disabled;
@@ -58,7 +58,7 @@ function setup(def: DefHandle<ToolbarButtonProps, ToolbarButtonExposes>) {
   });
   def.props.watchAll((run) => {
     sync(run, run.context.read(TOOLBAR_CONTEXT));
-    setCurrent(run);
+    setCurrent(run, run.context.read(TOOLBAR_CONTEXT).current);
   });
   focus.focused.watch((run, e) => {
     if (e.type === 'next' && e.next && !disabled.get()) setCurrent(run);

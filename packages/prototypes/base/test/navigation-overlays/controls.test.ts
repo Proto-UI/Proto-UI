@@ -214,3 +214,21 @@ it('toast retains an explicit owner pause across close and reopen', async () => 
   await vi.advanceTimersByTimeAsync(101);
   expect(root.getExposes().open.get()).toBe(false);
 });
+
+it('toolbar metadata updates preserve the current tab stop unless it becomes disabled', async () => {
+  const root = element('base-toolbar-root');
+  const a = element('base-toolbar-button', { value: 'undo' });
+  const b = element('base-toolbar-button', { value: 'redo' });
+  root.append(a, b);
+  document.body.append(root);
+  await flush();
+  a.getExposes().focusSelf({ reason: 'keyboard' });
+  await flush();
+  setElementProps(b, { value: 'redo-again' });
+  await flush();
+  expect(document.activeElement).toBe(a);
+  expect([a.tabIndex, b.tabIndex]).toEqual([0, -1]);
+  setElementProps(a, { value: 'undo', disabled: true });
+  await flush();
+  expect([a.tabIndex, b.tabIndex]).toEqual([-1, 0]);
+});
